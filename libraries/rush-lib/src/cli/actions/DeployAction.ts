@@ -106,11 +106,15 @@ export class DeployAction extends BaseRushAction {
   private _getDependencyProjects(project: RushConfigurationProject): Set<RushConfigurationProject> {
     const projects: Set<RushConfigurationProject> = new Set();
     const queue: RushConfigurationProject[] = [project];
+    const visited: Set<RushConfigurationProject> = new Set();
 
     while (queue.length > 0) {
-      const _project: RushConfigurationProject = queue.shift()!;
-
+      const _project: RushConfigurationProject = queue.pop()!;
+      projects.add(_project);
       for (const dependency of _project.dependencyProjects) {
+        if (visited.has(dependency)) {
+          continue;
+        }
         queue.push(dependency);
       }
     }
@@ -165,7 +169,7 @@ export class DeployAction extends BaseRushAction {
      * Subspaces that will be involved in deploy process.
      * Each subspace may have its own configurations
      */
-    const subspaces: IExtractorSubspace[] = [];
+    const subspaces: Map<string, IExtractorSubspace> = new Map();
 
     const rushConfigurationProject: RushConfigurationProject | undefined =
       this.rushConfiguration.getProjectByName(mainProjectName);
@@ -185,10 +189,14 @@ export class DeployAction extends BaseRushAction {
           transformPackageJson: pnpmfileConfiguration.transform.bind(pnpmfileConfiguration)
         };
 
+        if (subspaces.has(subspace.subspaceName)) {
+          continue;
+        }
+
         if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
           subspace.pnpmInstallFolder = project.subspace.getSubspaceTempFolder();
         }
-        subspaces.push(subspace);
+        subspaces.set(subspace.subspaceName, subspace);
       }
     }
 
@@ -228,7 +236,7 @@ export class DeployAction extends BaseRushAction {
       dependencyConfigurations: scenarioConfiguration.json.dependencySettings,
       createArchiveFilePath,
       createArchiveOnly,
-      subspaces
+      subspaces: Array.from(subspaces.values())
     });
   }
 }

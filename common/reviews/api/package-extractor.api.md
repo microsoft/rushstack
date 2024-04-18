@@ -33,11 +33,13 @@ export interface IExtractorOptions {
     linkCreation?: 'default' | 'script' | 'none';
     mainProjectName: string;
     overwriteExisting: boolean;
+    pnpmInstallFolder?: string;
     projectConfigurations: IExtractorProjectConfiguration[];
     sourceRootFolder: string;
     subspaces?: IExtractorSubspace[];
     targetRootFolder: string;
     terminal: ITerminal;
+    transformPackageJson?: (packageJson: IPackageJson) => IPackageJson | undefined;
 }
 
 // @public

@@ -215,6 +215,14 @@ export interface IExtractorOptions {
   createArchiveOnly?: boolean;
 
   /**
+   * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
+   * transform the package.json prior to extraction.
+   * Can't be used with subspaces, if subspaces field is specified, we will use transformPackageJson configured
+   * for each subspace and ignore this.
+   */
+  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson | undefined;
+
+  /**
    * If dependencies from the "devDependencies" package.json field should be included in the extraction.
    */
   includeDevDependencies?: boolean;
@@ -225,10 +233,12 @@ export interface IExtractorOptions {
   includeNpmIgnoreFiles?: boolean;
 
   /**
-   * The subspace list to will be performed while extracting
-   *
+   * The folder where the PNPM "node_modules" folder is located. This is used to resolve packages linked
+   * to the PNPM virtual store.
+   * Can't be used with subspaces, if subspaces field is specified, we will use pnpmInstallFolder configured
+   * for each subspace and ignore this.
    */
-  subspaces?: IExtractorSubspace[];
+  pnpmInstallFolder?: string;
 
   /**
    * The link creation mode to use.
@@ -254,6 +264,12 @@ export interface IExtractorOptions {
    * Configurations for individual dependencies.
    */
   dependencyConfigurations?: IExtractorDependencyConfiguration[];
+
+  /**
+   * The subspace list that will be performed while extracting
+   *
+   */
+  subspaces?: IExtractorSubspace[];
 }
 
 /**
@@ -479,7 +495,7 @@ export class PackageExtractor {
     options: IExtractorOptions,
     state: IExtractorState
   ): Promise<void> {
-    const { terminal, subspaces } = options;
+    const { terminal, subspaces, pnpmInstallFolder, transformPackageJson } = options;
     const { projectConfigurationsByPath } = state;
 
     const packageJsonFolderPathQueue: AsyncQueue<string> = new AsyncQueue([packageJsonFolder]);
@@ -505,7 +521,9 @@ export class PackageExtractor {
 
         // Transform packageJson using the provided transformer, if requested
         const packageJson: IPackageJson =
-          targetSubspace?.transformPackageJson?.(originalPackageJson) ?? originalPackageJson;
+          targetSubspace?.transformPackageJson?.(originalPackageJson) ??
+          transformPackageJson?.(originalPackageJson) ??
+          originalPackageJson;
 
         state.packageJsonByPath.set(packageJsonRealFolderPath, packageJson);
         // Union of keys from regular dependencies, peerDependencies, optionalDependencies
@@ -575,16 +593,14 @@ export class PackageExtractor {
         // Replicate the links to the virtual store. Note that if the package has not been hoisted by
         // PNPM, the package will not be resolvable from here.
         // Only apply this logic for packages that were actually installed under the common/temp folder.
-        if (targetSubspace) {
+        const realPnpmInstallFolder: string | undefined =
+          targetSubspace?.pnpmInstallFolder ?? pnpmInstallFolder;
+        if (realPnpmInstallFolder && Path.isUnder(packageJsonFolderPath, realPnpmInstallFolder)) {
           try {
             // The PNPM virtual store links are created in this folder.  We will resolve the current package
             // from that location and collect any additional links encountered along the way.
             // TODO: This can be configured via NPMRC. We should support that.
-            const pnpmDotFolderPath: string = path.join(
-              targetSubspace.pnpmInstallFolder!,
-              'node_modules',
-              '.pnpm'
-            );
+            const pnpmDotFolderPath: string = path.join(realPnpmInstallFolder, 'node_modules', '.pnpm');
 
             // TODO: Investigate how package aliases are handled by PNPM in this case.  For example:
             //
