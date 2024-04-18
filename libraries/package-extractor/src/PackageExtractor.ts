@@ -91,7 +91,7 @@ export interface IExtractorSubspace {
    * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
    * transform the package.json prior to extraction.
    */
-  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson | undefined;
+  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson;
 }
 
 interface IExtractorState {
@@ -223,7 +223,7 @@ export interface IExtractorOptions {
    * each subspace, use the {@link IExtractorOptions.subspaces} array instead.  The two approaches
    * cannot be combined.
    */
-  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson | undefined;
+  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson;
 
   /**
    * If dependencies from the "devDependencies" package.json field should be included in the extraction.
