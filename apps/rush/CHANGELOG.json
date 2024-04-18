@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.120.6",
+      "tag": "@microsoft/rush_v5.120.6",
+      "date": "Thu, 18 Apr 2024 23:20:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush deploy\" did not correctly deploy build outputs combining multiple Rush subspaces"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.120.5",
       "tag": "@microsoft/rush_v5.120.5",
       "date": "Wed, 17 Apr 2024 21:58:17 GMT",

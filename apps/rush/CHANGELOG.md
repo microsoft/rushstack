@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 17 Apr 2024 21:58:17 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Apr 2024 23:20:02 GMT and should not be manually modified.
+
+## 5.120.6
+Thu, 18 Apr 2024 23:20:02 GMT
+
+### Updates
+
+- Fix an issue where "rush deploy" did not correctly deploy build outputs combining multiple Rush subspaces
 
 ## 5.120.5
 Wed, 17 Apr 2024 21:58:17 GMT
