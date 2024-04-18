@@ -80,7 +80,7 @@ export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 /**
  * @public
  */
-export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'ado-codespaces-auth';
+export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth';
 
 /**
  * @public
@@ -89,6 +89,7 @@ export interface IAzureAuthenticationBaseOptions {
   azureEnvironment?: AzureEnvironmentName;
   credentialUpdateCommandForLogging?: string | undefined;
   loginFlow?: LoginFlowType;
+  loginFlowFailover?: Record<LoginFlowType, LoginFlowType | undefined>;
 }
 
 /**
@@ -113,6 +114,7 @@ export abstract class AzureAuthenticationBase {
 
   protected readonly _azureEnvironment: AzureEnvironmentName;
   protected readonly _loginFlow: LoginFlowType;
+  protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined>;
 
   private __credentialCacheId: string | undefined;
   private get _credentialCacheId(): string {
@@ -133,6 +135,11 @@ export abstract class AzureAuthenticationBase {
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
     this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
     this._loginFlow = options.loginFlow || 'DeviceCode';
+    this._failoverOrder = options.loginFlowFailover || {
+      AdoCodespacesAuth: 'InteractiveBrowser',
+      InteractiveBrowser: 'DeviceCode',
+      DeviceCode: undefined
+    };
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
@@ -275,7 +282,7 @@ export abstract class AzureAuthenticationBase {
     };
 
     switch (loginFlow) {
-      case 'ado-codespaces-auth': {
+      case 'AdoCodespacesAuth': {
         tokenCredential = new AdoCodespacesAuthCredential();
         break;
       }
@@ -297,6 +304,17 @@ export abstract class AzureAuthenticationBase {
       }
     }
 
-    return await this._getCredentialFromTokenAsync(terminal, tokenCredential);
+    try {
+      return await this._getCredentialFromTokenAsync(terminal, tokenCredential);
+    } catch (error) {
+      terminal.writeVerbose(`Failed to get credentials with ${loginFlow}: ${error}`);
+      const fallbackFlow: LoginFlowType | undefined = this._failoverOrder[loginFlow];
+      if (fallbackFlow) {
+        terminal.writeVerbose(`Falling back to ${fallbackFlow} login flow`);
+        return this._getCredentialAsync(terminal, fallbackFlow);
+      } else {
+        throw error;
+      }
+    }
   }
 }
