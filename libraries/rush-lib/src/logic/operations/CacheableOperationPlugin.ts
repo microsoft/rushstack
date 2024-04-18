@@ -931,11 +931,11 @@ function logCobuildBuildPlan(
   const seen: Set<Operation> = new Set<Operation>();
   while (queue.length > 0) {
     const element: Operation = queue.shift()!;
-    if (!seen.has(element)) {
+    if (!seen.has(element) && !element.runner?.isNoOp) {
       executionPlan.push(element);
       seen.add(element);
     }
-    const consumers: Operation[] = [...element.consumers].filter((e) => !seen.has(e) && !e.runner?.isNoOp);
+    const consumers: Operation[] = [...element.consumers].filter((e) => !seen.has(e));
     queue.push(...consumers);
   }
 
@@ -1014,7 +1014,11 @@ function logCobuildBuildPlan(
           .join('\n') || '  - none'
       }`
     );
-    terminal.writeLine(`- Operations: ${[...cluster].map((e) => getName(e)).join(', ')}`);
+    terminal.writeLine(
+      `- Operations: ${[...cluster]
+        .map((e) => `${getName(e)}${e.runner?.isNoOp ? ' [SKIPPED]' : ''}`)
+        .join(', ')}`
+    );
     terminal.writeLine('--------------------------------------------------');
   }
   terminal.writeLine('##################################################');
