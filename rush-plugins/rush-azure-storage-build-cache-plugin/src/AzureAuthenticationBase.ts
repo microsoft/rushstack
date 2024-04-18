@@ -89,6 +89,20 @@ export interface IAzureAuthenticationBaseOptions {
   azureEnvironment?: AzureEnvironmentName;
   credentialUpdateCommandForLogging?: string | undefined;
   loginFlow?: LoginFlowType;
+  /**
+   * A map to define the failover order for login flows. When a login flow fails to get a credential,
+   * the next login flow in the map will be attempted. If the login flow fails and there is no next
+   * login flow, the error will be thrown.
+   *
+   * @defaultValue
+   * ```json
+   * {
+   *   "AdoCodespacesAuth": "InteractiveBrowser",
+   *   "InteractiveBrowser": "DeviceCode",
+   *   "DeviceCode": null
+   * }
+   * ```
+   */
   loginFlowFailover?: Record<LoginFlowType, LoginFlowType | undefined>;
 }
 

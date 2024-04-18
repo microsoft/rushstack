@@ -32,11 +32,19 @@ interface IDecodedJwt {
  * https://github.com/microsoft/ado-codespaces-auth
  */
 export class AdoCodespacesAuthCredential {
-  public async getToken(scopes: string | string[], options?: GetTokenOptions): Promise<AccessToken> {
-    if (Array.isArray(scopes) && scopes.length > 1) {
-      throw new Error('Only one scope is supported');
+  public async getToken(scopes: string | [string], options?: GetTokenOptions): Promise<AccessToken> {
+    let scope: string;
+    if (Array.isArray(scopes)) {
+      if (scopes.length > 1) {
+        throw new Error('Only one scope is supported');
+      } else if ((scopes as string[]).length === 0) {
+        throw new Error('A scope must be provided.');
+      } else {
+        scope = scopes[0];
+      }
+    } else {
+      scope = scopes;
     }
-    const scope: string = Array.isArray(scopes) ? scopes[0] : scopes;
     const azureAuthHelperExec: string = 'azure-auth-helper';
 
     const token: string = Executable.spawnSync(azureAuthHelperExec, ['get-access-token', scope]).stdout;
