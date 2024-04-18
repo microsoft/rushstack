@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Add support for Rush subspaces",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor"
+}

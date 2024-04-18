@@ -72,6 +72,28 @@ export interface IExtractorMetadataJson {
   links: ILinkInfo[];
 }
 
+/**
+ * The extractor subspace configurations
+ *
+ * @public
+ */
+export interface IExtractorSubspace {
+  /**
+   * The subspace name
+   */
+  subspaceName: string;
+  /**
+   * The folder where the PNPM "node_modules" folder is located. This is used to resolve packages linked
+   * to the PNPM virtual store.
+   */
+  pnpmInstallFolder?: string;
+  /**
+   * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
+   * transform the package.json prior to extraction.
+   */
+  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson;
+}
+
 interface IExtractorState {
   foldersToCopy: Set<string>;
   packageJsonByPath: Map<string, IPackageJson>;
@@ -193,10 +215,15 @@ export interface IExtractorOptions {
   createArchiveOnly?: boolean;
 
   /**
-   * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
+   * The pnpmfile configuration if using PNPM, otherwise `undefined`. The configuration will be used to
    * transform the package.json prior to extraction.
+   *
+   * @remarks
+   * When Rush subspaces are enabled, this setting applies to `default` subspace only.  To configure
+   * each subspace, use the {@link IExtractorOptions.subspaces} array instead.  The two approaches
+   * cannot be combined.
    */
-  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson | undefined;
+  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson;
 
   /**
    * If dependencies from the "devDependencies" package.json field should be included in the extraction.
@@ -211,6 +238,11 @@ export interface IExtractorOptions {
   /**
    * The folder where the PNPM "node_modules" folder is located. This is used to resolve packages linked
    * to the PNPM virtual store.
+   *
+   * @remarks
+   * When Rush subspaces are enabled, this setting applies to `default` subspace only.  To configure
+   * each subspace, use the {@link IExtractorOptions.subspaces} array instead.  The two approaches
+   * cannot be combined.
    */
   pnpmInstallFolder?: string;
 
@@ -238,6 +270,16 @@ export interface IExtractorOptions {
    * Configurations for individual dependencies.
    */
   dependencyConfigurations?: IExtractorDependencyConfiguration[];
+
+  /**
+   * When using Rush subspaces, this setting can be used to provide configuration information for each
+   * individual subspace.
+   *
+   * @remarks
+   * To avoid confusion, if this setting is used, then the {@link IExtractorOptions.transformPackageJson} and
+   * {@link IExtractorOptions.pnpmInstallFolder} settings must not be used.
+   */
+  subspaces?: IExtractorSubspace[];
 }
 
 /**
@@ -270,6 +312,7 @@ export class PackageExtractor {
    * Extract a package using the provided options
    */
   public async extractAsync(options: IExtractorOptions): Promise<void> {
+    options = PackageExtractor._normalizeOptions(options);
     const {
       terminal,
       projectConfigurations,
@@ -354,6 +397,36 @@ export class PackageExtractor {
       terminal.writeLine(`Creating archive at "${archiveFilePath}"`);
       await archiver.createArchiveAsync(archiveFilePath);
     }
+  }
+
+  private static _normalizeOptions(options: IExtractorOptions): IExtractorOptions {
+    if (options.subspaces) {
+      if (options.pnpmInstallFolder !== undefined) {
+        throw new Error(
+          'IExtractorOptions.pnpmInstallFolder cannot be combined with IExtractorOptions.subspaces'
+        );
+      }
+      if (options.transformPackageJson !== undefined) {
+        throw new Error(
+          'IExtractorOptions.transformPackageJson cannot be combined with IExtractorOptions.subspaces'
+        );
+      }
+      return options;
+    }
+
+    const normalizedOptions: IExtractorOptions = { ...options };
+    delete normalizedOptions.pnpmInstallFolder;
+    delete normalizedOptions.transformPackageJson;
+
+    normalizedOptions.subspaces = [
+      {
+        subspaceName: 'default',
+        pnpmInstallFolder: options.pnpmInstallFolder,
+        transformPackageJson: options.transformPackageJson
+      }
+    ];
+
+    return normalizedOptions;
   }
 
   private async _performExtractionAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
@@ -463,7 +536,7 @@ export class PackageExtractor {
     options: IExtractorOptions,
     state: IExtractorState
   ): Promise<void> {
-    const { terminal, pnpmInstallFolder, transformPackageJson } = options;
+    const { terminal, subspaces } = options;
     const { projectConfigurationsByPath } = state;
 
     const packageJsonFolderPathQueue: AsyncQueue<string> = new AsyncQueue([packageJsonFolder]);
@@ -483,8 +556,14 @@ export class PackageExtractor {
           path.join(packageJsonRealFolderPath, 'package.json')
         );
 
+        const targetSubspace: IExtractorSubspace | undefined = subspaces?.find(
+          (subspace) =>
+            subspace.pnpmInstallFolder && Path.isUnder(packageJsonFolderPath, subspace.pnpmInstallFolder)
+        );
+
         // Transform packageJson using the provided transformer, if requested
-        const packageJson: IPackageJson = transformPackageJson?.(originalPackageJson) ?? originalPackageJson;
+        const packageJson: IPackageJson =
+          targetSubspace?.transformPackageJson?.(originalPackageJson) ?? originalPackageJson;
 
         state.packageJsonByPath.set(packageJsonRealFolderPath, packageJson);
         // Union of keys from regular dependencies, peerDependencies, optionalDependencies
@@ -554,12 +633,13 @@ export class PackageExtractor {
         // Replicate the links to the virtual store. Note that if the package has not been hoisted by
         // PNPM, the package will not be resolvable from here.
         // Only apply this logic for packages that were actually installed under the common/temp folder.
-        if (pnpmInstallFolder && Path.isUnder(packageJsonFolderPath, pnpmInstallFolder)) {
+        const realPnpmInstallFolder: string | undefined = targetSubspace?.pnpmInstallFolder;
+        if (realPnpmInstallFolder && Path.isUnder(packageJsonFolderPath, realPnpmInstallFolder)) {
           try {
             // The PNPM virtual store links are created in this folder.  We will resolve the current package
             // from that location and collect any additional links encountered along the way.
             // TODO: This can be configured via NPMRC. We should support that.
-            const pnpmDotFolderPath: string = path.join(pnpmInstallFolder, 'node_modules', '.pnpm');
+            const pnpmDotFolderPath: string = path.join(realPnpmInstallFolder, 'node_modules', '.pnpm');
 
             // TODO: Investigate how package aliases are handled by PNPM in this case.  For example:
             //
