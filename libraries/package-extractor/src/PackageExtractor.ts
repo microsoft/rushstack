@@ -91,7 +91,7 @@ export interface IExtractorSubspace {
    * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
    * transform the package.json prior to extraction.
    */
-  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson;
+  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson | undefined;
 }
 
 interface IExtractorState {
@@ -312,6 +312,7 @@ export class PackageExtractor {
    * Extract a package using the provided options
    */
   public async extractAsync(options: IExtractorOptions): Promise<void> {
+    options = PackageExtractor._normalizeOptions(options);
     const {
       terminal,
       projectConfigurations,
@@ -396,6 +397,36 @@ export class PackageExtractor {
       terminal.writeLine(`Creating archive at "${archiveFilePath}"`);
       await archiver.createArchiveAsync(archiveFilePath);
     }
+  }
+
+  private static _normalizeOptions(options: IExtractorOptions): IExtractorOptions {
+    if (options.subspaces) {
+      if (options.pnpmInstallFolder !== undefined) {
+        throw new Error(
+          'IExtractorOptions.pnpmInstallFolder cannot be combined with IExtractorOptions.subspaces'
+        );
+      }
+      if (options.transformPackageJson !== undefined) {
+        throw new Error(
+          'IExtractorOptions.transformPackageJson cannot be combined with IExtractorOptions.subspaces'
+        );
+      }
+      return options;
+    }
+
+    const normalizedOptions: IExtractorOptions = { ...options };
+    delete normalizedOptions.pnpmInstallFolder;
+    delete normalizedOptions.transformPackageJson;
+
+    normalizedOptions.subspaces = [
+      {
+        subspaceName: 'default',
+        pnpmInstallFolder: options.pnpmInstallFolder,
+        transformPackageJson: options.transformPackageJson
+      }
+    ];
+
+    return normalizedOptions;
   }
 
   private async _performExtractionAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
@@ -505,7 +536,7 @@ export class PackageExtractor {
     options: IExtractorOptions,
     state: IExtractorState
   ): Promise<void> {
-    const { terminal, subspaces, pnpmInstallFolder, transformPackageJson } = options;
+    const { terminal, subspaces } = options;
     const { projectConfigurationsByPath } = state;
 
     const packageJsonFolderPathQueue: AsyncQueue<string> = new AsyncQueue([packageJsonFolder]);
@@ -526,14 +557,13 @@ export class PackageExtractor {
         );
 
         const targetSubspace: IExtractorSubspace | undefined = subspaces?.find(
-          (p) => p.pnpmInstallFolder && Path.isUnder(packageJsonFolderPath, p.pnpmInstallFolder)
+          (subspace) =>
+            subspace.pnpmInstallFolder && Path.isUnder(packageJsonFolderPath, subspace.pnpmInstallFolder)
         );
 
         // Transform packageJson using the provided transformer, if requested
         const packageJson: IPackageJson =
-          targetSubspace?.transformPackageJson?.(originalPackageJson) ??
-          transformPackageJson?.(originalPackageJson) ??
-          originalPackageJson;
+          targetSubspace?.transformPackageJson?.(originalPackageJson) ?? originalPackageJson;
 
         state.packageJsonByPath.set(packageJsonRealFolderPath, packageJson);
         // Union of keys from regular dependencies, peerDependencies, optionalDependencies
@@ -603,8 +633,7 @@ export class PackageExtractor {
         // Replicate the links to the virtual store. Note that if the package has not been hoisted by
         // PNPM, the package will not be resolvable from here.
         // Only apply this logic for packages that were actually installed under the common/temp folder.
-        const realPnpmInstallFolder: string | undefined =
-          targetSubspace?.pnpmInstallFolder ?? pnpmInstallFolder;
+        const realPnpmInstallFolder: string | undefined = targetSubspace?.pnpmInstallFolder;
         if (realPnpmInstallFolder && Path.isUnder(packageJsonFolderPath, realPnpmInstallFolder)) {
           try {
             // The PNPM virtual store links are created in this folder.  We will resolve the current package
