@@ -183,21 +183,25 @@
       "additionalProperties": false,
       "properties": {
         "disallowInsecureSha1": {
-          "description": "Forbid sha1 hashes in `pnpm-lock.yaml`.",
           "type": "object",
+          "description": "Forbid sha1 hashes in `pnpm-lock.yaml`.",
           "properties": {
             "enabled": {
               "type": "boolean"
             },
-            "skipCheckPackages": {
+            "exemptPackageVersions": {
               "description": "Packages that should skip checks.",
               "type": "object",
               "additionalProperties": {
-                "type": "boolean"
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "An array of version string for the package."
               }
             }
           },
-          "required": ["enabled", "skipCheckPackages"]
+          "required": ["enabled", "exemptPackageVersions"]
         }
       }
     }

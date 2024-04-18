@@ -14,6 +14,7 @@ import {
   InternalError
 } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
+import * as dp from '@pnpm/dependency-path';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -343,22 +344,24 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   private _disallowInsecureSha1(
     customTipsConfiguration: CustomTipsConfiguration,
-    skipCheckPackages: Record<string, boolean>,
+    exmeptPackageVersions: Record<string, Array<string>>,
     terminal: ITerminal
   ): boolean {
-    const { packages } = this._shrinkwrapJson;
-    if (packages) {
-      for (const [pkgName, { resolution }] of Object.entries(packages)) {
-        if (resolution?.integrity.startsWith('sha1') && !skipCheckPackages[pkgName]) {
-          terminal.writeErrorLine(
-            'Error: An integrity field with "sha1" was found in pnpm-lock.yaml;' +
-              ' this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n'
-          );
+    const exmeptPackageList: Map<string, boolean> = new Map();
+    for (const [pkgName, versions] of Object.entries(exmeptPackageVersions)) {
+      versions.forEach((version) => exmeptPackageList.set(this._getPackageId(pkgName, version), true));
+    }
 
-          customTipsConfiguration._showErrorTip(terminal, CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1);
+    for (const [pkgName, { resolution }] of this.packages) {
+      if (resolution?.integrity.startsWith('sha1') && !exmeptPackageList.has(this._parseDepPath(pkgName))) {
+        terminal.writeErrorLine(
+          'Error: An integrity field with "sha1" was found in pnpm-lock.yaml;' +
+            ' this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n'
+        );
 
-          return true; // Indicates an error was found
-        }
+        customTipsConfiguration._showErrorTip(terminal, CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1);
+
+        return true; // Indicates an error was found
       }
     }
     return false;
@@ -373,7 +376,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (pnpmLockfilePolicies?.disallowInsecureSha1?.enabled) {
       const isError: boolean = this._disallowInsecureSha1(
         rushConfiguration.customTipsConfiguration,
-        pnpmLockfilePolicies.disallowInsecureSha1.skipCheckPackages,
+        pnpmLockfilePolicies.disallowInsecureSha1.exmeptPackageVersions,
         terminal
       );
       if (isError) {
@@ -436,6 +439,20 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         }
       }
     }
+  }
+
+  private _parseDepPath(pkgPath: string): string {
+    let depPath: string = pkgPath;
+    if (this.shrinkwrapFileMajorVersion >= 6) {
+      const index: number = pkgPath.indexOf('@', pkgPath.indexOf('/@') + 2);
+      const suffixIndex: number | undefined = pkgPath.includes('(')
+        ? dp.indexOfPeersSuffix(pkgPath)
+        : undefined;
+      depPath = `${pkgPath.slice(0, index)}/${pkgPath.slice(index + 1, suffixIndex)}`;
+    }
+
+    const pkgInfo: ReturnType<typeof dp.parse> = dp.parse(depPath);
+    return this._getPackageId(pkgInfo.name as string, pkgInfo.version as string);
   }
 
   /** @override */
