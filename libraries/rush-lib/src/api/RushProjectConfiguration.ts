@@ -13,8 +13,6 @@ import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
 import schemaJson from '../schemas/rush-project.schema.json';
 import anythingSchemaJson from '../schemas/rush-project.schema.json';
 import type { Operation } from '../logic/operations/Operation';
-import { NullOperationRunner } from '../logic/operations/NullOperationRunner';
-import { OperationStatus } from '../logic/operations/OperationStatus';
 
 /**
  * Describes the file structure for the `<project root>/config/rush-project.json` config file.
@@ -312,7 +310,7 @@ export class RushProjectConfiguration {
     }
 
     // Skip no-op operations as they won't have any output/cacheable things.
-    if (operation.runner instanceof NullOperationRunner && operation.runner.result === OperationStatus.NoOp) {
+    if (operation.runner?.isNoOp) {
       return undefined;
     }
 

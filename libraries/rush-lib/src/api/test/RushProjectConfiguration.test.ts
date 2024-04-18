@@ -75,6 +75,14 @@ function validateConfiguration(rushProjectConfiguration: RushProjectConfiguratio
   }
 }
 
+const realScriptRunner = new ShellOperationRunner({
+  commandToRun: 'echo "Hello, World!"',
+  displayName: 'test',
+  rushConfiguration: {} as unknown as RushConfiguration,
+  rushProject: {} as unknown as RushConfigurationProject,
+  phase: {} as unknown as IPhase
+});
+
 describe(RushProjectConfiguration.name, () => {
   describe('operationSettingsByOperationName', () => {
     it('loads a rush-project.json config that extends another config file', async () => {
@@ -138,11 +146,6 @@ describe(RushProjectConfiguration.name, () => {
       }
 
       const operation = new Operation({});
-      operation.runner = new NullOperationRunner({
-        name: 'test',
-        result: OperationStatus.Success,
-        silent: false
-      });
 
       const reason: string | undefined = config.getCacheDisabledReason(operation, [], 'z');
       expect(reason).toMatchSnapshot();
@@ -158,11 +161,6 @@ describe(RushProjectConfiguration.name, () => {
       }
 
       const operation = new Operation({});
-      operation.runner = new NullOperationRunner({
-        name: 'test',
-        result: OperationStatus.Success,
-        silent: false
-      });
 
       const reason: string | undefined = config.getCacheDisabledReason(operation, [], '_phase:a');
       expect(reason).toMatchSnapshot();
@@ -178,11 +176,6 @@ describe(RushProjectConfiguration.name, () => {
       }
 
       const operation = new Operation({});
-      operation.runner = new NullOperationRunner({
-        name: 'test',
-        result: OperationStatus.Success,
-        silent: false
-      });
 
       const reason: string | undefined = config.getCacheDisabledReason(
         operation,
@@ -202,11 +195,6 @@ describe(RushProjectConfiguration.name, () => {
       }
 
       const operation = new Operation({});
-      operation.runner = new NullOperationRunner({
-        name: 'test',
-        result: OperationStatus.Success,
-        silent: false
-      });
 
       const reason: string | undefined = config.getCacheDisabledReason(operation, [''], '_phase:b');
       expect(reason).toBeUndefined();
@@ -232,7 +220,7 @@ describe(RushProjectConfiguration.name, () => {
       expect(reason).toBeUndefined();
     });
 
-    it('returns reason if the operation is skipped', async () => {
+    it('returns undefined if the operation is skipped', async () => {
       const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
         'test-project-c'
       );
@@ -249,7 +237,7 @@ describe(RushProjectConfiguration.name, () => {
       });
 
       const reason: string | undefined = config.getCacheDisabledReason(operation, [], '_phase:a');
-      expect(reason).toMatchSnapshot();
+      expect(reason).toBeUndefined();
     });
 
     it('returns reason if the operation is runnable', async () => {
@@ -262,13 +250,7 @@ describe(RushProjectConfiguration.name, () => {
       }
 
       const operation = new Operation({});
-      operation.runner = new ShellOperationRunner({
-        commandToRun: 'echo "Hello, World!"',
-        displayName: 'test',
-        rushConfiguration: {} as unknown as RushConfiguration,
-        rushProject: {} as unknown as RushConfigurationProject,
-        phase: {} as unknown as IPhase
-      });
+      operation.runner = realScriptRunner;
 
       const reason: string | undefined = config.getCacheDisabledReason(operation, [], '_phase:a');
       expect(reason).toMatchSnapshot();

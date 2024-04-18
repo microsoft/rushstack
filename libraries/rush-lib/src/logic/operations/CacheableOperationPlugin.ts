@@ -910,18 +910,80 @@ function logCobuildBuildPlan(
   terminal: ITerminal,
   buildCacheByOperation: Map<Operation, IOperationBuildCacheContext>
 ): void {
-  const operationToClusterMap: Map<Operation, Set<Operation>> = new Map<Operation, Set<Operation>>();
+  // This function should log the tree execution plan, which is a tree of operations that are executed in parallel.
+  // It should then log the clusters and their dependencies as well as reasons that those clusters were created.
+  // TODO: It should also output the number of operations that have the same depth in the tree.
+  const executionPlan: Operation[] = [];
+  const clusters: Set<Operation>[] = [...disjointSet.getAllSets()];
+  const operations: Operation[] = clusters.flatMap((e) => Array.from(e));
+  const rootOperations: Operation[] = operations.filter((e) => e.dependencies.size === 0);
 
-  function doesClusterDependOnOtherCluster(cluster: Set<Operation>, otherCluster: Set<Operation>): boolean {
+  const getName: (op: Operation) => string = (op: Operation) => op.runner?.name ?? 'unknown';
+
+  const operationToClusterMap: Map<Operation, Set<Operation>> = new Map<Operation, Set<Operation>>();
+  for (const cluster of clusters) {
     for (const operation of cluster) {
-      for (const dependent of operation.consumers) {
-        if (otherCluster.has(dependent)) {
-          return true;
-        }
+      operationToClusterMap.set(operation, cluster);
+    }
+  }
+
+  const operationToDepthMap: Map<Operation, number> = new Map<Operation, number>();
+  for (const rootOperation of rootOperations) {
+    const queue: [Operation, number][] = [[rootOperation, 0]];
+    while (queue.length > 0) {
+      const [operation, depth]: [Operation, number] = queue.shift()!;
+      operationToDepthMap.set(operation, depth);
+      for (const consumer of operation.consumers) {
+        queue.push([consumer, depth + 1]);
       }
     }
-    return false;
   }
+
+  const queue: Operation[] = [...rootOperations];
+  const seen: Set<Operation> = new Set<Operation>();
+  while (queue.length > 0) {
+    const element: Operation = queue.shift()!;
+    if (!seen.has(element)) {
+      executionPlan.push(element);
+      seen.add(element);
+    }
+    const consumers: Operation[] = [...element.consumers].filter((e) => !seen.has(e) && !e.runner?.isNoOp);
+    queue.push(...consumers);
+  }
+
+  const maxOperationNameLength: number = Math.max(
+    ...executionPlan.map((e) => e.runner?.name?.length ?? 0),
+    1
+  );
+  const spacingByDependencyMap: Map<Operation, number> = new Map<Operation, number>();
+  for (let index: number = 0; index < executionPlan.length; index++) {
+    const operation: Operation = executionPlan[index];
+
+    const spacing: number = Math.max(
+      ...[...operation.dependencies].map((e) => {
+        const dependencySpacing: number | undefined = spacingByDependencyMap.get(e);
+        return dependencySpacing !== undefined ? dependencySpacing + 1 : 0;
+      }),
+      0
+    );
+    spacingByDependencyMap.set(operation, spacing);
+  }
+  executionPlan.sort((a, b) => {
+    const aSpacing: number = spacingByDependencyMap.get(a) ?? 0;
+    const bSpacing: number = spacingByDependencyMap.get(b) ?? 0;
+    return aSpacing - bSpacing;
+  });
+
+  terminal.writeLine('##################################################');
+  for (const operation of executionPlan) {
+    const spacing: number = spacingByDependencyMap.get(operation) ?? 0;
+    terminal.writeLine(
+      `${getName(operation).padStart(maxOperationNameLength + 1)}: ${'-'.repeat(spacing)}(${clusters.indexOf(
+        operationToClusterMap.get(operation)!
+      )})`
+    );
+  }
+  terminal.writeLine('##################################################');
 
   function getDependenciesForCluster(
     cluster: Set<Operation>,
@@ -938,9 +1000,9 @@ function logCobuildBuildPlan(
     return dependencies;
   }
 
-  function dedupeShards(operations: Set<Operation>): string[] {
+  function dedupeShards(ops: Set<Operation>): string[] {
     const dedupedOperations: Set<string> = new Set<string>();
-    for (const operation of operations) {
+    for (const operation of ops) {
       dedupedOperations.add(
         `${operation.associatedProject?.packageName ?? ''} (${operation.associatedPhase?.name})`
       );
@@ -948,40 +1010,10 @@ function logCobuildBuildPlan(
     return [...dedupedOperations];
   }
 
-  const clusters: Set<Operation>[] = [...disjointSet.getAllSets()];
-
-  for (const cluster of clusters) {
-    for (const operation of cluster) {
-      operationToClusterMap.set(operation, cluster);
-    }
-  }
-
-  clusters.sort((a, b) => {
-    if (doesClusterDependOnOtherCluster(a, b)) {
-      return -1;
-    }
-    if (doesClusterDependOnOtherCluster(b, a)) {
-      return 1;
-    }
-    return 0;
-  });
-
-  terminal.writeLine('##################################################');
-  const spacingMap: Map<Set<Operation>, number> = new Map<Set<Operation>, number>();
   for (let clusterIndex: number = 0; clusterIndex < clusters.length; clusterIndex++) {
     const cluster: Set<Operation> = clusters[clusterIndex];
-    const previousCluster: Set<Operation> | undefined =
-      clusterIndex >= 0 ? clusters[clusterIndex - 1] : undefined;
-    let spacing: number = previousCluster
-      ? [...cluster]
-          .flatMap((e) => [...e.dependencies])
-          .reduce((acc, curr) => {
-            const dependencySpacing: number | undefined = spacingMap.get(operationToClusterMap.get(curr)!);
-            return Math.max(dependencySpacing ? dependencySpacing + 1 : 0, acc);
-          }, 0) ?? 0
-      : 0;
 
-    terminal.writeLine(`Build Graph for Cluster ${clusterIndex}`);
+    terminal.writeLine(`Cluster ${clusterIndex}:`);
     terminal.writeLine(
       `- Dependencies: ${dedupeShards(getDependenciesForCluster(cluster, false)).join(', ') || 'none'}`
     );
@@ -993,18 +1025,8 @@ function logCobuildBuildPlan(
           .join('\n') || '  - none'
       }`
     );
+    terminal.writeLine(`- Operations: ${[...cluster].map((e) => getName(e)).join(', ')}`);
     terminal.writeLine('--------------------------------------------------');
-    let previousOperation: Operation | undefined = undefined;
-    for (const operation of cluster) {
-      if (previousOperation && operation.dependencies.has(previousOperation)) {
-        spacing += 1;
-      }
-      const tabs: string = '  '.repeat(spacing);
-      terminal.writeLine(`${tabs}->${operation.name}`);
-      previousOperation = operation;
-    }
-    spacingMap.set(cluster, spacing);
-    terminal.writeLine();
   }
   terminal.writeLine('##################################################');
 }
