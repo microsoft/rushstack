@@ -966,16 +966,16 @@ function logCobuildBuildPlan(
     return aSpacing - bSpacing;
   });
 
-  terminal.writeLine('##################################################');
+  terminal.writeDebugLine('##################################################');
   for (const operation of executionPlan) {
     const spacing: number = spacingByDependencyMap.get(operation) ?? 0;
-    terminal.writeLine(
+    terminal.writeDebugLine(
       `${getName(operation).padStart(maxOperationNameLength + 1)}: ${'-'.repeat(spacing)}(${clusters.indexOf(
         operationToClusterMap.get(operation)!
       )})`
     );
   }
-  terminal.writeLine('##################################################');
+  terminal.writeDebugLine('##################################################');
 
   function getDependenciesForCluster(cluster: Set<Operation>): Set<Operation> {
     const dependencies: Set<Operation> = new Set<Operation>();
@@ -1004,9 +1004,9 @@ function logCobuildBuildPlan(
       [...allClusterDependencies].filter((e) => !cluster.has(e))
     );
 
-    terminal.writeLine(`Cluster ${clusterIndex}:`);
-    terminal.writeLine(`- Dependencies: ${dedupeShards(outOfClusterDependencies).join(', ') || 'none'}`);
-    terminal.writeLine(
+    terminal.writeDebugLine(`Cluster ${clusterIndex}:`);
+    terminal.writeDebugLine(`- Dependencies: ${dedupeShards(outOfClusterDependencies).join(', ') || 'none'}`);
+    terminal.writeDebugLine(
       `- Clustered by: \n${
         [...allClusterDependencies]
           .filter((e) => buildCacheByOperation.get(e)?.cacheDisabledReason)
@@ -1014,12 +1014,12 @@ function logCobuildBuildPlan(
           .join('\n') || '  - none'
       }`
     );
-    terminal.writeLine(
+    terminal.writeDebugLine(
       `- Operations: ${[...cluster]
         .map((e) => `${getName(e)}${e.runner?.isNoOp ? ' [SKIPPED]' : ''}`)
         .join(', ')}`
     );
-    terminal.writeLine('--------------------------------------------------');
+    terminal.writeDebugLine('--------------------------------------------------');
   }
-  terminal.writeLine('##################################################');
+  terminal.writeDebugLine('##################################################');
 }
