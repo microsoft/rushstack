@@ -82,7 +82,6 @@ export interface IAzureAuthenticationBaseOptions {
     credentialUpdateCommandForLogging?: string | undefined;
     // (undocumented)
     loginFlow?: LoginFlowType;
-    // (undocumented)
     loginFlowFailover?: Record<LoginFlowType, LoginFlowType | undefined>;
 }
 
