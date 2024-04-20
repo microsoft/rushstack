@@ -31,6 +31,8 @@ export abstract class AzureAuthenticationBase {
     protected readonly _credentialUpdateCommandForLogging: string | undefined;
     // (undocumented)
     deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
+    // (undocumented)
+    protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined>;
     protected abstract _getCacheIdParts(): string[];
     // (undocumented)
     protected abstract _getCredentialFromTokenAsync(terminal: ITerminal, tokenCredential: TokenCredential): Promise<ICredentialResult>;
@@ -80,6 +82,7 @@ export interface IAzureAuthenticationBaseOptions {
     credentialUpdateCommandForLogging?: string | undefined;
     // (undocumented)
     loginFlow?: LoginFlowType;
+    loginFlowFailover?: Record<LoginFlowType, LoginFlowType | undefined>;
 }
 
 // @public (undocumented)
@@ -127,7 +130,7 @@ export interface ITryGetCachedCredentialOptionsThrow extends ITryGetCachedCreden
 }
 
 // @public (undocumented)
-export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser';
+export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth';
 
 // @public (undocumented)
 class RushAzureStorageBuildCachePlugin implements IRushPlugin {
