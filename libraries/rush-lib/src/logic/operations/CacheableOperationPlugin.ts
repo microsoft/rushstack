@@ -901,6 +901,66 @@ async function updateAdditionalContextAsync({
   }
 }
 
+function printBuildPlanMaximumParallelism(operations: Operation[], terminal: ITerminal): number {
+  let leafOperations: Operation[] = operations.filter((e) => e.consumers.size === 0);
+  let currentLeafNodes = new Set<Operation>();
+  let remainingOperations = new Set<Operation>(operations);
+  const leafQueue = [...leafOperations];
+  let depth = 0;
+  let maxWidth = 0;
+  let numberOfNodes = [leafQueue.length];
+  const depthToOperationsMap = new Map<number, Set<Operation>>();
+  depthToOperationsMap.set(depth, new Set(leafOperations));
+  do {
+    if (leafQueue.length === 0) {
+      leafQueue.push(...currentLeafNodes);
+      const realOperations = [...currentLeafNodes].filter((e) => !e.runner?.isNoOp);
+      if (realOperations.length > 0) {
+        depth += 1;
+        depthToOperationsMap.set(depth, new Set(realOperations));
+        numberOfNodes.push(realOperations.length);
+      }
+      const currentWidth = realOperations.length;
+      if (currentWidth > maxWidth) {
+        maxWidth = currentWidth;
+      }
+      currentLeafNodes = new Set();
+    }
+    if (leafQueue.length === 0) {
+      break;
+    }
+    const leaf = leafQueue.shift()!;
+    if (remainingOperations.has(leaf)) {
+      remainingOperations.delete(leaf);
+      for (const dependent of leaf.dependencies) {
+        if (![...dependent.consumers].some((e) => remainingOperations.has(e))) {
+          currentLeafNodes.add(dependent);
+        }
+      }
+    }
+  } while (remainingOperations.size > 0);
+
+  terminal.writeDebugLine(`Build Plan Depth (deepest dependency tree): ${depth}`);
+  terminal.writeDebugLine(`Build Plan Width (maximum parallelism): ${maxWidth}`);
+  terminal.writeDebugLine(`Number of Nodes per Depth: ${numberOfNodes.join(', ')}`);
+  for (const [depth, operations] of depthToOperationsMap) {
+    let numberOfParents = 0;
+    for (let i = 0; i < depth; i++) {
+      numberOfParents += numberOfNodes[i];
+    }
+    terminal.writeDebugLine(
+      `Plan @ Depth ${depth} has ${numberOfNodes[depth]} nodes and ${numberOfParents} parents:`
+    );
+    for (const operation of operations) {
+      if (!operation.runner?.isNoOp) {
+        terminal.writeDebugLine(`- ${operation.runner?.name ?? 'unknown'}`);
+      }
+    }
+  }
+
+  return maxWidth;
+}
+
 /**
  * Log the cobuild build plan by cluster. This is intended to help debug situations where cobuilds aren't
  *  utilizing multiple agents correctly.
@@ -917,6 +977,10 @@ function logCobuildBuildPlan(
   const clusters: Set<Operation>[] = [...disjointSet.getAllSets()];
   const operations: Operation[] = clusters.flatMap((e) => Array.from(e));
   const rootOperations: Operation[] = operations.filter((e) => e.dependencies.size === 0);
+
+  printBuildPlanMaximumParallelism(operations, terminal);
+
+  // console.log('build plan maximum parallelism', getBuildPlanMaximumParallelism(rootOperations, terminal));
 
   const getName: (op: Operation) => string = (op: Operation) => op.runner?.name ?? 'unknown';
 
