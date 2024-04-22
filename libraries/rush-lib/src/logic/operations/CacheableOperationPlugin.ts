@@ -907,7 +907,7 @@ function printBuildPlanMaximumParallelism(operations: Operation[], terminal: ITe
   let remainingOperations = new Set<Operation>(operations);
   const leafQueue = [...leafOperations];
   let depth = 0;
-  let maxWidth = 0;
+  let maxWidth = leafQueue.length;
   let numberOfNodes = [leafQueue.length];
   const depthToOperationsMap = new Map<number, Set<Operation>>();
   depthToOperationsMap.set(depth, new Set(leafOperations));
@@ -940,7 +940,7 @@ function printBuildPlanMaximumParallelism(operations: Operation[], terminal: ITe
     }
   } while (remainingOperations.size > 0);
 
-  terminal.writeDebugLine(`Build Plan Depth (deepest dependency tree): ${depth}`);
+  terminal.writeDebugLine(`Build Plan Depth (deepest dependency tree): ${depth + 1}`);
   terminal.writeDebugLine(`Build Plan Width (maximum parallelism): ${maxWidth}`);
   terminal.writeDebugLine(`Number of Nodes per Depth: ${numberOfNodes.join(', ')}`);
   for (const [depth, operations] of depthToOperationsMap) {
