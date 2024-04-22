@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 18 Apr 2024 23:20:02 GMT and should not be manually modified.
+This log was last generated on Mon, 22 Apr 2024 19:11:26 GMT and should not be manually modified.
+
+## 5.121.0
+Mon, 22 Apr 2024 19:11:26 GMT
+
+### Updates
+
+- Add support for auth via microsoft/ado-codespaces-auth vscode extension in `@rushstack/rush-azure-storage-build-cache-plugin`
 
 ## 5.120.6
 Thu, 18 Apr 2024 23:20:02 GMT
