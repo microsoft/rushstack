@@ -942,14 +942,16 @@ function printBuildPlanMaximumParallelism(operations: Operation[], terminal: ITe
 
   terminal.writeDebugLine(`Build Plan Depth (deepest dependency tree): ${depth + 1}`);
   terminal.writeDebugLine(`Build Plan Width (maximum parallelism): ${maxWidth}`);
-  terminal.writeDebugLine(`Number of Nodes per Depth: ${numberOfNodes.join(', ')}`);
-  for (const [depth, operations] of depthToOperationsMap) {
+  terminal.writeDebugLine(`Number of Nodes per Depth: ${[...numberOfNodes].reverse().join(', ')}`);
+  for (const [operationDepth, operations] of depthToOperationsMap) {
     let numberOfDependents = 0;
-    for (let i = 0; i < depth; i++) {
+    for (let i = 0; i < operationDepth; i++) {
       numberOfDependents += numberOfNodes[i];
     }
     terminal.writeDebugLine(
-      `Plan @ Depth ${depth} has ${numberOfNodes[depth]} nodes and ${numberOfDependents} dependents:`
+      `Plan @ Depth ${depth - operationDepth} has ${
+        numberOfNodes[operationDepth]
+      } nodes and ${numberOfDependents} dependents:`
     );
     for (const operation of operations) {
       if (!operation.runner?.isNoOp) {
