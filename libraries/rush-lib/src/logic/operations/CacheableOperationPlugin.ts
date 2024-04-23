@@ -902,25 +902,24 @@ async function updateAdditionalContextAsync({
 }
 
 function printBuildPlanMaximumParallelism(operations: Operation[], terminal: ITerminal): number {
-  let leafOperations: Operation[] = operations.filter((e) => e.consumers.size === 0);
-  let currentLeafNodes = new Set<Operation>();
-  let remainingOperations = new Set<Operation>(operations);
-  const leafQueue = [...leafOperations];
-  let depth = 0;
-  let maxWidth = leafQueue.filter((e) => !e.runner?.isNoOp).length;
-  let numberOfNodes = [maxWidth];
-  const depthToOperationsMap = new Map<number, Set<Operation>>();
-  depthToOperationsMap.set(depth, new Set(leafOperations));
+  const leafQueue: Operation[] = operations.filter((e) => e.consumers.size === 0);
+  let currentLeafNodes: Set<Operation> = new Set<Operation>();
+  const remainingOperations: Set<Operation> = new Set<Operation>(operations);
+  let depth: number = 0;
+  let maxWidth: number = leafQueue.filter((e) => !e.runner?.isNoOp).length;
+  const numberOfNodes: number[] = [maxWidth];
+  const depthToOperationsMap: Map<number, Set<Operation>> = new Map<number, Set<Operation>>();
+  depthToOperationsMap.set(depth, new Set(leafQueue));
   do {
     if (leafQueue.length === 0) {
       leafQueue.push(...currentLeafNodes);
-      const realOperations = [...currentLeafNodes].filter((e) => !e.runner?.isNoOp);
+      const realOperations: Operation[] = [...currentLeafNodes].filter((e) => !e.runner?.isNoOp);
       if (realOperations.length > 0) {
         depth += 1;
         depthToOperationsMap.set(depth, new Set(realOperations));
         numberOfNodes.push(realOperations.length);
       }
-      const currentWidth = realOperations.length;
+      const currentWidth: number = realOperations.length;
       if (currentWidth > maxWidth) {
         maxWidth = currentWidth;
       }
@@ -929,7 +928,7 @@ function printBuildPlanMaximumParallelism(operations: Operation[], terminal: ITe
     if (leafQueue.length === 0) {
       break;
     }
-    const leaf = leafQueue.shift()!;
+    const leaf: Operation = leafQueue.shift()!;
     if (remainingOperations.has(leaf)) {
       remainingOperations.delete(leaf);
       for (const dependent of leaf.dependencies) {
@@ -943,9 +942,9 @@ function printBuildPlanMaximumParallelism(operations: Operation[], terminal: ITe
   terminal.writeDebugLine(`Build Plan Depth (deepest dependency tree): ${depth + 1}`);
   terminal.writeDebugLine(`Build Plan Width (maximum parallelism): ${maxWidth}`);
   terminal.writeDebugLine(`Number of Nodes per Depth: ${[...numberOfNodes].reverse().join(', ')}`);
-  for (const [operationDepth, operations] of depthToOperationsMap) {
-    let numberOfDependents = 0;
-    for (let i = 0; i < operationDepth; i++) {
+  for (const [operationDepth, operationsAtDepth] of depthToOperationsMap) {
+    let numberOfDependents: number = 0;
+    for (let i: number = 0; i < operationDepth; i++) {
       numberOfDependents += numberOfNodes[i];
     }
     terminal.writeDebugLine(
@@ -953,7 +952,7 @@ function printBuildPlanMaximumParallelism(operations: Operation[], terminal: ITe
         numberOfNodes[operationDepth]
       } nodes and ${numberOfDependents} dependents:`
     );
-    for (const operation of operations) {
+    for (const operation of operationsAtDepth) {
       if (!operation.runner?.isNoOp) {
         terminal.writeDebugLine(`- ${operation.runner?.name ?? 'unknown'}`);
       }
