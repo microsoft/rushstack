@@ -14,7 +14,7 @@ import {
   InternalError
 } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
-import * as dp from '@pnpm/dependency-path';
+import * as dependencyPath from '@pnpm/dependency-path';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -353,7 +353,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     for (const [pkgName, { resolution }] of this.packages) {
-      if (resolution?.integrity.startsWith('sha1') && !exmeptPackageList.has(this._parseDepPath(pkgName))) {
+      if (
+        resolution?.integrity.startsWith('sha1') &&
+        !exmeptPackageList.has(this._parseDependencyPath(pkgName))
+      ) {
         terminal.writeErrorLine(
           'Error: An integrity field with "sha1" was found in pnpm-lock.yaml;' +
             ' this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n'
@@ -441,17 +444,17 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
-  private _parseDepPath(pkgPath: string): string {
-    let depPath: string = pkgPath;
+  private _parseDependencyPath(packagePath: string): string {
+    let depPath: string = packagePath;
     if (this.shrinkwrapFileMajorVersion >= 6) {
-      const index: number = pkgPath.indexOf('@', pkgPath.indexOf('/@') + 2);
-      const suffixIndex: number | undefined = pkgPath.includes('(')
-        ? dp.indexOfPeersSuffix(pkgPath)
+      const index: number = packagePath.indexOf('@', packagePath.indexOf('/@') + 2);
+      const suffixIndex: number | undefined = packagePath.includes('(')
+        ? dependencyPath.indexOfPeersSuffix(packagePath)
         : undefined;
-      depPath = `${pkgPath.slice(0, index)}/${pkgPath.slice(index + 1, suffixIndex)}`;
+      depPath = `${packagePath.slice(0, index)}/${packagePath.slice(index + 1, suffixIndex)}`;
     }
 
-    const pkgInfo: ReturnType<typeof dp.parse> = dp.parse(depPath);
+    const pkgInfo: ReturnType<typeof dependencyPath.parse> = dependencyPath.parse(depPath);
     return this._getPackageId(pkgInfo.name as string, pkgInfo.version as string);
   }
 
