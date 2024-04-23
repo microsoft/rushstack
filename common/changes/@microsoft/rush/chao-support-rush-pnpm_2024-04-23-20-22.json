@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Support rush-pnpm for subspace feature",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
