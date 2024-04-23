@@ -344,11 +344,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   private _disallowInsecureSha1(
     customTipsConfiguration: CustomTipsConfiguration,
-    exmeptPackageVersions: Record<string, Array<string>>,
+    exemptPackageVersions: Record<string, Array<string>>,
     terminal: ITerminal
   ): boolean {
     const exmeptPackageList: Map<string, boolean> = new Map();
-    for (const [pkgName, versions] of Object.entries(exmeptPackageVersions)) {
+    for (const [pkgName, versions] of Object.entries(exemptPackageVersions)) {
       versions.forEach((version) => exmeptPackageList.set(this._getPackageId(pkgName, version), true));
     }
 
@@ -376,7 +376,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (pnpmLockfilePolicies?.disallowInsecureSha1?.enabled) {
       const isError: boolean = this._disallowInsecureSha1(
         rushConfiguration.customTipsConfiguration,
-        pnpmLockfilePolicies.disallowInsecureSha1.exmeptPackageVersions,
+        pnpmLockfilePolicies.disallowInsecureSha1.exemptPackageVersions,
         terminal
       );
       if (isError) {
