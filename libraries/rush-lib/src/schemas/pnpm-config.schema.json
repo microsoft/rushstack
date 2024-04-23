@@ -190,7 +190,7 @@
               "type": "boolean"
             },
             "exemptPackageVersions": {
-              "description": "Packages that should skip checks.",
+              "description": "A list of specific package versions to be exempted from the \"disallowInsecureSha1\" policy",
               "type": "object",
               "additionalProperties": {
                 "type": "array",
