@@ -113,7 +113,6 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
     }
 
     const newState: ILastInstallFlagJson = this._state;
-
     if (statePropertiesToIgnore) {
       for (const optionToIgnore of statePropertiesToIgnore) {
         delete newState[optionToIgnore];

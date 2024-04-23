@@ -250,20 +250,18 @@ export abstract class BaseInstallManager {
           );
         }
       }
+      // Perform any post-install work the install manager requires
+      await this.postInstallAsync(subspace);
+
       // Create the marker file to indicate a successful install
       commonTempInstallFlag.create();
     } else {
       // eslint-disable-next-line no-console
       console.log('Installation is already up-to-date.');
-    }
 
-    // Create the marker file to indicate a successful install if it's not a filtered install
-    if (!isFilteredInstall) {
-      await commonTempInstallFlag.createAsync();
+      // Perform any post-install work the install manager requires
+      await this.postInstallAsync(subspace);
     }
-
-    // Perform any post-install work the install manager requires
-    await this.postInstallAsync(subspace);
 
     // eslint-disable-next-line no-console
     console.log('');
