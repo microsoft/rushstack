@@ -349,7 +349,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   ): boolean {
     const exmeptPackageList: Map<string, boolean> = new Map();
     for (const [pkgName, versions] of Object.entries(exemptPackageVersions)) {
-      versions.forEach((version) => exmeptPackageList.set(this._getPackageId(pkgName, version), true));
+      for (const version of versions) {
+        exmeptPackageList.set(this._getPackageId(pkgName, version), true);
+      }
     }
 
     for (const [pkgName, { resolution }] of this.packages) {
