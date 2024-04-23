@@ -344,7 +344,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   private _disallowInsecureSha1(
     customTipsConfiguration: CustomTipsConfiguration,
-    exemptPackageVersions: Record<string, Array<string>>,
+    exemptPackageVersions: Record<string, string[]>,
     terminal: ITerminal
   ): boolean {
     const exmeptPackageList: Map<string, boolean> = new Map();
