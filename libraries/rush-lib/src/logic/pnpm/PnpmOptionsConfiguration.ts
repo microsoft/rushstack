@@ -42,7 +42,7 @@ export interface IPnpmLockfilePolicies {
    */
   disallowInsecureSha1?: {
     enabled: boolean;
-    exemptPackageVersions: Record<string, Array<string>>;
+    exemptPackageVersions: Record<string, string[]>;
   };
 }
 
