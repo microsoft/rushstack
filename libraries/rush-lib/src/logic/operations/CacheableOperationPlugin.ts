@@ -907,8 +907,8 @@ function printBuildPlanMaximumParallelism(operations: Operation[], terminal: ITe
   let remainingOperations = new Set<Operation>(operations);
   const leafQueue = [...leafOperations];
   let depth = 0;
-  let maxWidth = leafQueue.length;
-  let numberOfNodes = [leafQueue.length];
+  let maxWidth = leafQueue.filter((e) => !e.runner?.isNoOp).length;
+  let numberOfNodes = [maxWidth];
   const depthToOperationsMap = new Map<number, Set<Operation>>();
   depthToOperationsMap.set(depth, new Set(leafOperations));
   do {
