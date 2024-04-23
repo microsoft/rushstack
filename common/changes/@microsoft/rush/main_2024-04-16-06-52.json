@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Support skipping validation for a specific package during the check of the pnpm-lock.yaml file.",
+      "comment": "(BREAKING CHANGE) Improve the `disallowInsecureSha1` policy to support exemptions for certain package versions. This is a breaking change for the `disallowInsecureSha1` field in pnpm-config.json since Rush 5.119.0.",
       "type": "none"
     }
   ],
