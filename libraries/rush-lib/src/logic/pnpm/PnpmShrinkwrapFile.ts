@@ -446,6 +446,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
+  /**
+   * Normalize dependency paths for PNPM shrinkwrap files.
+   * Example: "/eslint-utils@3.0.0(eslint@8.23.1)" --> "/eslint-utils@3.0.0"
+   * Example: "/@typescript-eslint/experimental-utils/5.9.1_eslint@8.6.0+typescript@4.4.4" --> "/@typescript-eslint/experimental-utils/5.9.1"
+   */
   private _parseDependencyPath(packagePath: string): string {
     let depPath: string = packagePath;
     if (this.shrinkwrapFileMajorVersion >= 6) {
