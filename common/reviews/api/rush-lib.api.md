@@ -672,7 +672,7 @@ export interface IPhasedCommand extends IRushCommand {
 export interface IPnpmLockfilePolicies {
     disallowInsecureSha1?: {
         enabled: boolean;
-        exmeptPackageVersions: Record<string, Array<string>>;
+        exemptPackageVersions: Record<string, string[]>;
     };
 }
 

@@ -147,7 +147,7 @@
     /*[BEGIN "HYPOTHETICAL"]*/
     "disallowInsecureSha1": {
       "enabled": true,
-      "exmeptPackageVersions": {
+      "exemptPackageVersions": {
         "example1": ["1.0.0"],
         "example2": ["2.0.0", "2.0.1"]
       }
