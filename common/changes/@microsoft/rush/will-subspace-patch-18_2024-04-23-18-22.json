@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Store filtered install metadata in last install flag",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
