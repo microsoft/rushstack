@@ -455,6 +455,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     let depPath: string = packagePath;
     if (this.shrinkwrapFileMajorVersion >= 6) {
       const index: number = packagePath.indexOf('@', packagePath.indexOf('/@') + 2);
+      if (index < 0) {
+        throw new Error(
+          `Failed to parse the package path "${packagePath}", this issue may occur due to changes in pnpm lockfile rules.`
+        );
+      }
       const suffixIndex: number | undefined = packagePath.includes('(')
         ? dependencyPath.indexOfPeersSuffix(packagePath)
         : undefined;
