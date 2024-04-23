@@ -197,7 +197,7 @@
                 "items": {
                   "type": "string"
                 },
-                "description": "An array of version string for the package."
+                "description": "An array of exempted versions for this package."
               }
             }
           },
