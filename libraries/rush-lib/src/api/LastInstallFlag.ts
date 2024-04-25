@@ -13,7 +13,6 @@ export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
 /**
  * This represents the JSON data structure for the "last-install.flag" file.
- * @internal
  */
 export interface ILastInstallFlagJson {
   /**

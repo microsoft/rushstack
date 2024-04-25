@@ -59,20 +59,6 @@ export class ApprovedPackagesPolicy {
     readonly reviewCategories: ReadonlySet<string>;
 }
 
-// @internal
-export class _BaseFlag<T extends object = JsonObject> {
-    constructor(folderPath: string, state?: Partial<T>);
-    clear(): void;
-    create(): void;
-    protected get flagName(): string;
-    protected _isModified: boolean;
-    isValid(): boolean;
-    mergeFromObject(data: JsonObject): void;
-    readonly path: string;
-    saveIfModified(): void;
-    protected _state: T;
-}
-
 // @beta
 export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
@@ -515,21 +501,6 @@ export interface IGetChangedProjectsOptions {
 export interface IGlobalCommand extends IRushCommand {
 }
 
-// @internal
-export interface _ILastInstallFlagJson {
-    // (undocumented)
-    [key: string]: unknown;
-    ignoreScripts?: true;
-    node: string;
-    packageJson?: IPackageJson;
-    packageManager: PackageManagerName;
-    packageManagerVersion: string;
-    rushJsonFolder: string;
-    selectedProjectNames?: string[];
-    storePath?: string;
-    workspaces?: true;
-}
-
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
@@ -885,8 +856,11 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
     ignoreEngines?: boolean;
 }
 
+// Warning: (ae-forgotten-export) The symbol "BaseFlag" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ILastInstallFlagJson" needs to be exported by the entry point index.d.ts
+//
 // @internal
-export class _LastInstallFlag extends _BaseFlag<_ILastInstallFlagJson> {
+export class _LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
     checkValidAndReportStoreIssues(options: _ILockfileValidityCheckOptions & {
         rushVerb: string;
     }): boolean;

@@ -7,7 +7,6 @@ import { isMatch, merge } from '../../utilities/objectUtilities';
 
 /**
  * A base class for flag file.
- * @internal
  */
 export class BaseFlag<T extends object = JsonObject> {
   /**
