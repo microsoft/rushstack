@@ -14,6 +14,7 @@ import {
   InternalError
 } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
+import * as dependencyPath from '@pnpm/dependency-path';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -343,21 +344,29 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   private _disallowInsecureSha1(
     customTipsConfiguration: CustomTipsConfiguration,
+    exemptPackageVersions: Record<string, string[]>,
     terminal: ITerminal
   ): boolean {
-    const { packages } = this._shrinkwrapJson;
-    if (packages) {
-      for (const { resolution } of Object.values(packages)) {
-        if (resolution?.integrity.startsWith('sha1')) {
-          terminal.writeErrorLine(
-            'Error: An integrity field with "sha1" was found in pnpm-lock.yaml;' +
-              ' this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n'
-          );
+    const exmeptPackageList: Map<string, boolean> = new Map();
+    for (const [pkgName, versions] of Object.entries(exemptPackageVersions)) {
+      for (const version of versions) {
+        exmeptPackageList.set(this._getPackageId(pkgName, version), true);
+      }
+    }
 
-          customTipsConfiguration._showErrorTip(terminal, CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1);
+    for (const [pkgName, { resolution }] of this.packages) {
+      if (
+        resolution?.integrity.startsWith('sha1') &&
+        !exmeptPackageList.has(this._parseDependencyPath(pkgName))
+      ) {
+        terminal.writeErrorLine(
+          'Error: An integrity field with "sha1" was found in pnpm-lock.yaml;' +
+            ' this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n'
+        );
 
-          return true; // Indicates an error was found
-        }
+        customTipsConfiguration._showErrorTip(terminal, CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1);
+
+        return true; // Indicates an error was found
       }
     }
     return false;
@@ -365,37 +374,23 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   /** @override */
   public validateShrinkwrapAfterUpdate(rushConfiguration: RushConfiguration, terminal: ITerminal): void {
-    const pnpmLockfilePolicies: [string, boolean][] = Object.entries(
-      rushConfiguration.pnpmOptions.pnpmLockfilePolicies ?? {}
-    );
+    const { pnpmLockfilePolicies } = rushConfiguration.pnpmOptions;
 
-    if (pnpmLockfilePolicies && pnpmLockfilePolicies.length > 0) {
-      let invalidPoliciesCount: number = 0;
+    let invalidPoliciesCount: number = 0;
 
-      for (const [policy, enabled] of pnpmLockfilePolicies) {
-        if (enabled) {
-          switch (policy) {
-            case 'disallowInsecureSha1': {
-              const isError: boolean = this._disallowInsecureSha1(
-                rushConfiguration.customTipsConfiguration,
-                terminal
-              );
-              if (isError) {
-                invalidPoliciesCount += 1;
-              }
-              break;
-            }
-
-            default: {
-              throw new Error(`Unknown pnpm lockfile policy "${policy}"`);
-            }
-          }
-        }
+    if (pnpmLockfilePolicies?.disallowInsecureSha1?.enabled) {
+      const isError: boolean = this._disallowInsecureSha1(
+        rushConfiguration.customTipsConfiguration,
+        pnpmLockfilePolicies.disallowInsecureSha1.exemptPackageVersions,
+        terminal
+      );
+      if (isError) {
+        invalidPoliciesCount += 1;
       }
+    }
 
-      if (invalidPoliciesCount > 0) {
-        throw new AlreadyReportedError();
-      }
+    if (invalidPoliciesCount > 0) {
+      throw new AlreadyReportedError();
     }
   }
 
@@ -449,6 +444,31 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         }
       }
     }
+  }
+
+  /**
+   * This operation exactly mirrors the behavior of PNPM's own implementation:
+   * https://github.com/pnpm/pnpm/blob/73ebfc94e06d783449579cda0c30a40694d210e4/lockfile/lockfile-file/src/experiments/inlineSpecifiersLockfileConverters.ts#L162
+   */
+  private _convertLockfileV6DepPathToV5DepPath(newDepPath: string): string {
+    if (!newDepPath.includes('@', 2) || newDepPath.startsWith('file:')) return newDepPath;
+    const index: number = newDepPath.indexOf('@', newDepPath.indexOf('/@') + 2);
+    if (newDepPath.includes('(') && index > dependencyPath.indexOfPeersSuffix(newDepPath)) return newDepPath;
+    return `${newDepPath.substring(0, index)}/${newDepPath.substring(index + 1)}`;
+  }
+
+  /**
+   * Normalize dependency paths for PNPM shrinkwrap files.
+   * Example: "/eslint-utils@3.0.0(eslint@8.23.1)" --> "/eslint-utils@3.0.0"
+   * Example: "/@typescript-eslint/experimental-utils/5.9.1_eslint@8.6.0+typescript@4.4.4" --> "/@typescript-eslint/experimental-utils/5.9.1"
+   */
+  private _parseDependencyPath(packagePath: string): string {
+    let depPath: string = packagePath;
+    if (this.shrinkwrapFileMajorVersion >= 6) {
+      depPath = this._convertLockfileV6DepPathToV5DepPath(packagePath);
+    }
+    const pkgInfo: ReturnType<typeof dependencyPath.parse> = dependencyPath.parse(depPath);
+    return this._getPackageId(pkgInfo.name as string, pkgInfo.version as string);
   }
 
   /** @override */

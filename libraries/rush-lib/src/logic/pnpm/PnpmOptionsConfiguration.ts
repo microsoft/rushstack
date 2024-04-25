@@ -40,7 +40,10 @@ export interface IPnpmLockfilePolicies {
   /**
    * Forbid sha1 hashes in `pnpm-lock.yaml`
    */
-  disallowInsecureSha1?: boolean;
+  disallowInsecureSha1?: {
+    enabled: boolean;
+    exemptPackageVersions: Record<string, string[]>;
+  };
 }
 
 /**
