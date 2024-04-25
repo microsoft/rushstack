@@ -29,7 +29,6 @@ import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
 import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import type { RepoStateFile } from '../RepoStateFile';
-import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
@@ -46,6 +45,7 @@ import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
+import { FlagFile } from '../../api/FlagFile';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -685,7 +685,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    await LastLinkFlagFactory.getCommonTempFlag(subspace).createAsync();
+    new FlagFile(subspace.getSubspaceTempFolder(), RushConstants.lastLinkFlagFilename).create();
   }
 
   /**

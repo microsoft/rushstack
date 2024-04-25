@@ -25,7 +25,6 @@ import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
 import { type LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
-import { type LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import type { PurgeManager } from '../PurgeManager';
 import type { RushConfiguration } from '../../api/RushConfiguration';
@@ -45,6 +44,7 @@ import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
 import type { Subspace } from '../../api/Subspace';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
+import { FlagFile } from '../../api/FlagFile';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -59,7 +59,7 @@ const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit'
  * This class implements common logic between "rush install" and "rush update".
  */
 export abstract class BaseInstallManager {
-  private readonly _commonTempLinkFlag: LastLinkFlag;
+  private readonly _commonTempLinkFlag: FlagFile;
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
 
@@ -84,7 +84,10 @@ export abstract class BaseInstallManager {
     this.installRecycler = purgeManager.commonTempFolderRecycler;
     this.options = options;
 
-    this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(options.subspace);
+    this._commonTempLinkFlag = new FlagFile(
+      options.subspace.getSubspaceTempFolder(),
+      RushConstants.lastLinkFlagFilename
+    );
 
     this.subspaceInstallFlags = new Map();
     if (rushConfiguration.subspacesFeatureEnabled) {

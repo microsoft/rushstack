@@ -310,6 +310,19 @@ export class FileSystemBuildCacheProvider {
     trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<string>;
 }
 
+// @internal
+export class _FlagFile<T extends object = JsonObject> {
+    constructor(folderPath: string, flagName: string, state?: Partial<T>);
+    clear(): void;
+    create(): void;
+    protected _isModified: boolean;
+    isValid(): boolean;
+    mergeFromObject(data: JsonObject): void;
+    readonly path: string;
+    saveIfModified(): void;
+    protected _state: T;
+}
+
 // @beta
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
@@ -856,19 +869,6 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
     ignoreEngines?: boolean;
 }
 
-// Warning: (ae-forgotten-export) The symbol "BaseFlag" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "ILastInstallFlagJson" needs to be exported by the entry point index.d.ts
-//
-// @internal
-export class _LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
-    checkValidAndReportStoreIssues(options: _ILockfileValidityCheckOptions & {
-        rushVerb: string;
-    }): boolean;
-    protected get flagName(): string;
-    // @override
-    isValid(options?: _ILockfileValidityCheckOptions): boolean;
-}
-
 // @public
 export class LockStepVersionPolicy extends VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "ILockStepVersionJson" needs to be exported by the entry point index.d.ts
@@ -1318,6 +1318,7 @@ export class RushConstants {
     static readonly experimentsFilename: 'experiments.json';
     static readonly globalCommandKind: 'global';
     static readonly hashDelimiter: '|';
+    static readonly lastLinkFlagFilename: 'last-link';
     static readonly mergeQueueIgnoreFileName: '.mergequeueignore';
     static readonly nodeModulesFolderName: 'node_modules';
     static readonly nonbrowserApprovedPackagesFilename: 'nonbrowser-approved-packages.json';

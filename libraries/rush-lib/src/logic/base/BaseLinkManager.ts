@@ -16,7 +16,8 @@ import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import type { BasePackage } from './BasePackage';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import { RushConstants } from '../RushConstants';
+import { FlagFile } from '../../api/FlagFile';
 
 export enum SymlinkKind {
   File,
@@ -197,7 +198,10 @@ export abstract class BaseLinkManager {
     await this._linkProjects();
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    await LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration.defaultSubspace).createAsync();
+    new FlagFile(
+      this._rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
+      RushConstants.lastLinkFlagFilename
+    ).create();
 
     stopwatch.stop();
     // eslint-disable-next-line no-console

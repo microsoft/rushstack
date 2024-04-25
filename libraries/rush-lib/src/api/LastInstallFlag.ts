@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, type JsonObject, Path, type IPackageJson } from '@rushstack/node-core-library';
+import { JsonFile, type JsonObject, Path, type IPackageJson, FileSystem } from '@rushstack/node-core-library';
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
-import { objectsAreDeepEqual } from '../utilities/objectUtilities';
+import { isMatch, merge, objectsAreDeepEqual } from '../utilities/objectUtilities';
 import type { Subspace } from './Subspace';
 import { Selection } from '../logic/Selection';
-import { BaseFlag } from './base/BaseFlag';
+import path from 'path';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
@@ -71,13 +71,73 @@ export interface ILockfileValidityCheckOptions {
  * it can invalidate the last install.
  * @internal
  */
-export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
+export class LastInstallFlag {
   /**
-   * @override
-   * Returns true if the file exists and the contents match the current state.
+   * Flag file path
    */
-  public async isValidAsync(options?: ILockfileValidityCheckOptions): Promise<boolean> {
-    return await this._isValidAsync(false, options);
+  public readonly path: string;
+
+  /**
+   * Content of the flag
+   */
+  protected _state: ILastInstallFlagJson;
+  /**
+   * Whether the current state is modified
+   */
+  protected _isModified: boolean;
+
+  /**
+   * Creates a new flag file
+   * @param folderPath - the folder that this flag is managing
+   * @param state - optional, the state that should be managed or compared
+   */
+  public constructor(folderPath: string, state?: Partial<ILastInstallFlagJson>) {
+    this.path = path.join(folderPath, this.flagName);
+    this._state = (state || {}) as ILastInstallFlagJson;
+    this._isModified = true;
+  }
+
+  /**
+   * Writes the flag file to disk with the current state
+   */
+  public create(): void {
+    JsonFile.save(this._state, this.path, {
+      ensureFolderExists: true
+    });
+  }
+
+  /**
+   * Merge new data into current state by "merge"
+   */
+  public mergeFromObject(data: JsonObject): void {
+    if (isMatch(this._state, data)) {
+      return;
+    }
+    merge(this._state, data);
+    this._isModified = true;
+  }
+
+  /**
+   * Removes the flag file
+   */
+  public clear(): void {
+    FileSystem.deleteFile(this.path);
+  }
+
+  /**
+   * Writes the flag file to disk with the current state if modified
+   */
+  public saveIfModified(): void {
+    if (this._isModified) {
+      JsonFile.save(this._state, this.path, {
+        ensureFolderExists: true
+      });
+      this._isModified = false;
+    }
+  }
+
+  public isValid(options?: ILockfileValidityCheckOptions): boolean {
+    return this._isValid(false, options);
   }
 
   /**

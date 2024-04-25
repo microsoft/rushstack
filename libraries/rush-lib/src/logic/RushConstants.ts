@@ -320,4 +320,9 @@ export class RushConstants {
    */
   public static readonly projectImpactGraphFilename: 'project-impact-graph.yaml' =
     'project-impact-graph.yaml';
+
+  /**
+   * The filename for the last link flag
+   */
+  public static readonly lastLinkFlagFilename: 'last-link';
 }
