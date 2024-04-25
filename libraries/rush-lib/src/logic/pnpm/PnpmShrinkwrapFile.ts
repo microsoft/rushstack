@@ -447,6 +447,17 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /**
+   * This operation exactly mirrors the behavior of PNPM's own implementation:
+   * https://github.com/pnpm/pnpm/blob/73ebfc94e06d783449579cda0c30a40694d210e4/lockfile/lockfile-file/src/experiments/inlineSpecifiersLockfileConverters.ts#L162
+   */
+  private _convertLockfileV6DepPathToV5DepPath(newDepPath: string): string {
+    if (!newDepPath.includes('@', 2) || newDepPath.startsWith('file:')) return newDepPath;
+    const index: number = newDepPath.indexOf('@', newDepPath.indexOf('/@') + 2);
+    if (newDepPath.includes('(') && index > dependencyPath.indexOfPeersSuffix(newDepPath)) return newDepPath;
+    return `${newDepPath.substring(0, index)}/${newDepPath.substring(index + 1)}`;
+  }
+
+  /**
    * Normalize dependency paths for PNPM shrinkwrap files.
    * Example: "/eslint-utils@3.0.0(eslint@8.23.1)" --> "/eslint-utils@3.0.0"
    * Example: "/@typescript-eslint/experimental-utils/5.9.1_eslint@8.6.0+typescript@4.4.4" --> "/@typescript-eslint/experimental-utils/5.9.1"
@@ -454,18 +465,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _parseDependencyPath(packagePath: string): string {
     let depPath: string = packagePath;
     if (this.shrinkwrapFileMajorVersion >= 6) {
-      const index: number = packagePath.indexOf('@', packagePath.indexOf('/@') + 2);
-      if (index < 0) {
-        throw new Error(
-          `Failed to parse the package path "${packagePath}", this issue may occur due to changes in pnpm lockfile rules.`
-        );
-      }
-      const suffixIndex: number | undefined = packagePath.includes('(')
-        ? dependencyPath.indexOfPeersSuffix(packagePath)
-        : undefined;
-      depPath = `${packagePath.slice(0, index)}/${packagePath.slice(index + 1, suffixIndex)}`;
+      depPath = this._convertLockfileV6DepPathToV5DepPath(packagePath);
     }
-
     const pkgInfo: ReturnType<typeof dependencyPath.parse> = dependencyPath.parse(depPath);
     return this._getPackageId(pkgInfo.name as string, pkgInfo.version as string);
   }
