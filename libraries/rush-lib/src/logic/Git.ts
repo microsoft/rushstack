@@ -595,4 +595,23 @@ export class Git {
       throw e;
     }
   }
+  /**
+   *
+   * @param ref Given a ref which can be branch name, commit hash, tag name, etc, check if it is a commit hash
+   */
+  public isRefACommit(ref: string): boolean {
+    const gitPath: string = this.getGitPathOrThrow();
+    try {
+      const output: string = this._executeGitCommandAndCaptureOutput(gitPath, ['rev-parse', '--verify', ref]);
+      const result: string = output.trim();
+
+      if (result === ref) {
+        return true;
+      }
+    } catch (e) {
+      // assume not a commit
+      return false;
+    }
+    return false;
+  }
 }

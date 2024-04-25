@@ -61,12 +61,18 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
   const localizationPlugin: LocalizationPlugin = new LocalizationPlugin(options);
 
   const compiler: Compiler = webpack({
+    devtool: 'hidden-source-map',
     entry: {
       main: '/a/entry.js'
     },
     output: {
       path: '/release',
-      filename: '[name]-[locale]-[contenthash].js'
+      filename: '[name]-[locale]-[contenthash].js',
+      devtoolModuleFilenameTemplate: (info: { resourcePath: string }) => {
+        // On Windows the path contains backslashes because webpack doesn't normalize to platform agnostic paths.
+        // Also strangely we get `/` instead of `./` at the start of the path.
+        return `source:///${info.resourcePath?.replace(/\\/g, '/').replace(/^\//, './')}`;
+      }
     },
     module: {
       rules: [

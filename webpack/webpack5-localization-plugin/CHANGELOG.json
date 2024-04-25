@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.10.0",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.10.0",
+      "date": "Tue, 16 Apr 2024 22:49:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Perform localization before devtool runs instead of after. This is more expensive but ensures source maps are correct."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.15",
       "tag": "@rushstack/webpack5-localization-plugin_v0.9.15",
       "date": "Wed, 10 Apr 2024 15:10:09 GMT",

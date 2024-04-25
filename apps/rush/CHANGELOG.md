@@ -1,6 +1,34 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 16 Apr 2024 02:59:48 GMT and should not be manually modified.
+This log was last generated on Mon, 22 Apr 2024 19:11:26 GMT and should not be manually modified.
+
+## 5.121.0
+Mon, 22 Apr 2024 19:11:26 GMT
+
+### Updates
+
+- Add support for auth via microsoft/ado-codespaces-auth vscode extension in `@rushstack/rush-azure-storage-build-cache-plugin`
+
+## 5.120.6
+Thu, 18 Apr 2024 23:20:02 GMT
+
+### Updates
+
+- Fix an issue where "rush deploy" did not correctly deploy build outputs combining multiple Rush subspaces
+
+## 5.120.5
+Wed, 17 Apr 2024 21:58:17 GMT
+
+### Updates
+
+- Fix an issue where rush add affects all packages in a subspace
+
+## 5.120.4
+Tue, 16 Apr 2024 20:04:25 GMT
+
+### Updates
+
+- Fix an issue where `rush deploy` sometimes used an incorrect temp folder when the experimental subspaces feature is enabled
 
 ## 5.120.3
 Tue, 16 Apr 2024 02:59:48 GMT

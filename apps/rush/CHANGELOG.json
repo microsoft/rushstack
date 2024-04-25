@@ -2,6 +2,54 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.121.0",
+      "tag": "@microsoft/rush_v5.121.0",
+      "date": "Mon, 22 Apr 2024 19:11:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for auth via microsoft/ado-codespaces-auth vscode extension in `@rushstack/rush-azure-storage-build-cache-plugin`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.120.6",
+      "tag": "@microsoft/rush_v5.120.6",
+      "date": "Thu, 18 Apr 2024 23:20:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush deploy\" did not correctly deploy build outputs combining multiple Rush subspaces"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.120.5",
+      "tag": "@microsoft/rush_v5.120.5",
+      "date": "Wed, 17 Apr 2024 21:58:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush add affects all packages in a subspace"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.120.4",
+      "tag": "@microsoft/rush_v5.120.4",
+      "date": "Tue, 16 Apr 2024 20:04:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush deploy` sometimes used an incorrect temp folder when the experimental subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.120.3",
       "tag": "@microsoft/rush_v5.120.3",
       "date": "Tue, 16 Apr 2024 02:59:48 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@rushstack/package-extractor_v0.7.0",
+      "date": "Thu, 18 Apr 2024 23:19:43 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for Rush subspaces"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.43",
       "tag": "@rushstack/package-extractor_v0.6.43",
       "date": "Wed, 10 Apr 2024 15:10:09 GMT",

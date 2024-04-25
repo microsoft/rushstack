@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Wed, 10 Apr 2024 15:10:09 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Apr 2024 23:19:43 GMT and should not be manually modified.
+
+## 0.7.0
+Thu, 18 Apr 2024 23:19:43 GMT
+
+### Minor changes
+
+- Add support for Rush subspaces
 
 ## 0.6.43
 Wed, 10 Apr 2024 15:10:09 GMT

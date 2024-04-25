@@ -342,10 +342,12 @@ export class PackageJsonUpdater {
     dependencyAnalyzer: DependencyAnalyzer,
     options: IPackageJsonUpdaterRushAddOptions
   ): Promise<IUpdateProjectOptions[]> {
-    const { packagesToUpdate, devDependency, peerDependency, updateOtherPackages } = options;
+    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages } = options;
 
     // Get projects for this subspace
-    const projects: RushConfigurationProject[] = subspace.getProjects();
+    const subspaceProjects: RushConfigurationProject[] = projects.filter(
+      (project) => project.subspace === subspace
+    );
 
     const {
       allVersionsByPackageName,
@@ -363,7 +365,7 @@ export class PackageJsonUpdater {
         commonVersionsConfiguration.preferredVersions.get(packageName);
 
       const version: string = await this._getNormalizedVersionSpec(
-        projects,
+        subspaceProjects,
         packageName,
         initialVersion,
         implicitlyPreferredVersion,
@@ -400,7 +402,7 @@ export class PackageJsonUpdater {
 
     const allPackageUpdates: IUpdateProjectOptions[] = [];
 
-    for (const project of projects) {
+    for (const project of subspaceProjects) {
       const currentProjectUpdate: IUpdateProjectOptions = {
         project: new VersionMismatchFinderProject(project),
         dependenciesToAddOrUpdateOrRemove: dependenciesToAddOrUpdate,
