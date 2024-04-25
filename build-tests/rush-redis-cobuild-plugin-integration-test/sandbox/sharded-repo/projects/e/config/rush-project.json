@@ -3,7 +3,9 @@
     {
       "operationName": "_phase:build",
       "outputFolderNames": ["dist"],
-      "shards": 100
+      "sharding": {
+        "count": 75
+      }
     },
     {
       "operationName": "cobuild",

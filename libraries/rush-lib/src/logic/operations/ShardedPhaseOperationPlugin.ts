@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal } from '@rushstack/terminal';
-import { IPhase } from '../../api/CommandLineConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import {
+import type { ITerminal } from '@rushstack/terminal';
+import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import { Operation } from './Operation';
-import { IRushPhaseSharding, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { type IRushPhaseSharding, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 
 export const PLUGIN_NAME: 'ShardedPhasedOperationPlugin' = 'ShardedPhasedOperationPlugin';
 
@@ -29,7 +29,7 @@ async function spliceShards(
 ): Promise<Set<Operation>> {
   const { terminal } = context;
 
-  const shardableOperations = new Set<Operation>();
+  const shardableOperations: Set<Operation> = new Set<Operation>();
 
   for (const operation of existingOperations) {
     const { associatedPhase: phase, associatedProject: project } = operation;
@@ -45,8 +45,8 @@ async function spliceShards(
     if (phase && project && shardConfig && shardConfig.count > 1) {
       const shards: number = shardConfig.count;
       existingOperations.delete(operation);
-      for (const shard of Array.from({ length: shards }, (_, index) => index + 1)) {
-        let shardOperation = new Operation({
+      for (const shard of Array.from({ length: shards }, (element, index) => index + 1)) {
+        const shardOperation: Operation = new Operation({
           project,
           phase,
           shard: {

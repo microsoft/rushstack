@@ -9,7 +9,9 @@
     {
       "operationName": "_phase:test",
       "outputFolderNames": ["coverage", "temp/coverage"],
-      "shards": 6
+      "sharding": {
+        "count": 6
+      }
     }
   ]
 }
