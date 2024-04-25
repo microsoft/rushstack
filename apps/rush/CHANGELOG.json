@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.122.0",
+      "tag": "@microsoft/rush_v5.122.0",
+      "date": "Thu, 25 Apr 2024 07:33:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Support rush-pnpm for subspace feature"
+          },
+          {
+            "comment": "Skip determining merge base if given git hash"
+          },
+          {
+            "comment": "(BREAKING CHANGE) Improve the `disallowInsecureSha1` policy to support exemptions for certain package versions. This is a breaking change for the `disallowInsecureSha1` field in pnpm-config.json since Rush 5.119.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.121.0",
       "tag": "@microsoft/rush_v5.121.0",
       "date": "Mon, 22 Apr 2024 19:11:26 GMT",

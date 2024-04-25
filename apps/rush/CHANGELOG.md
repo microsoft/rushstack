@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 22 Apr 2024 19:11:26 GMT and should not be manually modified.
+This log was last generated on Thu, 25 Apr 2024 07:33:18 GMT and should not be manually modified.
+
+## 5.122.0
+Thu, 25 Apr 2024 07:33:18 GMT
+
+### Updates
+
+- Support rush-pnpm for subspace feature
+- Skip determining merge base if given git hash
+- (BREAKING CHANGE) Improve the `disallowInsecureSha1` policy to support exemptions for certain package versions. This is a breaking change for the `disallowInsecureSha1` field in pnpm-config.json since Rush 5.119.0.
 
 ## 5.121.0
 Mon, 22 Apr 2024 19:11:26 GMT
