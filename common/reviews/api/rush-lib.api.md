@@ -622,8 +622,10 @@ export interface IOperationSettings {
     disableBuildCacheForOperation?: boolean;
     operationName: string;
     outputFolderNames?: string[];
+    // Warning: (ae-forgotten-export) The symbol "IRushPhaseSharding" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    shards?: number;
+    sharding?: IRushPhaseSharding;
 }
 
 // @internal (undocumented)

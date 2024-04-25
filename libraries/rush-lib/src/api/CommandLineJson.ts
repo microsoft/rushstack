@@ -107,7 +107,10 @@ export interface IPhaseJson {
    */
   allowWarningsOnSuccess?: boolean;
 
-  shards?: number;
+  sharding?: {
+    count: number;
+    shardArgumentFormat: string;
+  };
 }
 
 /**

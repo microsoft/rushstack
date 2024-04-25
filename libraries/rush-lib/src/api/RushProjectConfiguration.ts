@@ -42,6 +42,12 @@ export interface IRushProjectJson {
   operationSettings?: IOperationSettings[];
 }
 
+export interface IRushPhaseSharding {
+  count: number;
+  parameterTemplate?: string;
+  outputDirectoryTemplate?: string;
+}
+
 /**
  * @alpha
  */
@@ -93,7 +99,7 @@ export interface IOperationSettings {
    */
   dependsOnAdditionalFiles?: string[];
 
-  shards?: number;
+  sharding?: IRushPhaseSharding;
 }
 
 interface IOldRushProjectJson {
@@ -431,7 +437,6 @@ export class RushProjectConfiguration {
         rigConfig
       );
     } catch (e1) {
-      console.log(e1);
       // Detect if the project is using the old rush-project.json schema
       let oldRushProjectJson: IOldRushProjectJson | undefined;
       try {
