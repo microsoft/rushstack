@@ -140,13 +140,22 @@
      * instead adopted a cryptographically strong SHA512 hash.  Nonetheless, SHA1 hashes can
      * occasionally reappear during "rush update", for example due to missing metadata fallbacks
      * (https://github.com/orgs/pnpm/discussions/6194) or an incompletely migrated private registry.
-     * Enable `disallowInsecureSha1` to avoid security/compliance alerts about this issue.
-     *
-     * The default value is false.
+     * The `disallowInsecureSha1` policy prevents this, avoiding potential security/compliance alerts.
      */
     /*[BEGIN "HYPOTHETICAL"]*/
     "disallowInsecureSha1": {
+      /**
+       * Enables the "disallowInsecureSha1" policy.  The default value is false.
+       */
       "enabled": true,
+
+      /**
+       * In rare cases, a private NPM registry may continue to serve SHA1 hashes for very old
+       * package versions, perhaps due to a caching issue or database migration glitch.  To avoid
+       * having to disable the "disallowInsecureSha1" policy for the entire monorepo, the problematic
+       * package versions can be individually ignored.  The "exemptPackageVersions" key is the
+       * package name, and the array value lists exact version numbers to be ignored.
+       */
       "exemptPackageVersions": {
         "example1": ["1.0.0"],
         "example2": ["2.0.0", "2.0.1"]
