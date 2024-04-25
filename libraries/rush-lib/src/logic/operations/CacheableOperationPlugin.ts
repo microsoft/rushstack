@@ -1001,14 +1001,15 @@ function logCobuildBuildPlan(
       seen.add(element);
     }
     const consumers: Operation[] = [...element.consumers].filter((e) => !seen.has(e));
-    queue.push(...consumers);
+    consumers.forEach((consumer) => queue.push(consumer));
   }
 
   // Get the maximum name length for left padding.
-  const maxOperationNameLength: number = Math.max(
-    ...executionPlan.map((e) => e.runner?.name?.length ?? 0),
-    1
-  );
+  let max = 1;
+  for (const operation of executionPlan) {
+    const name = getName(operation);
+    max = Math.max(max, name.length);
+  }
 
   // This is a lazy way of getting the waterfall chart, basically check for the latest
   //  dependency and put this operation after that finishes.
@@ -1080,8 +1081,10 @@ function logCobuildBuildPlan(
       }`
     );
     terminal.writeDebugLine(
-      `- Operations: ${Array.from(cluster, (e) => `${getName(e)}${e.runner?.isNoOp ? ' [SKIPPED]' : ''}`)
-        .join(', ')}`
+      `- Operations: ${Array.from(
+        cluster,
+        (e) => `${getName(e)}${e.runner?.isNoOp ? ' [SKIPPED]' : ''}`
+      ).join(', ')}`
     );
     terminal.writeDebugLine('--------------------------------------------------');
   }
