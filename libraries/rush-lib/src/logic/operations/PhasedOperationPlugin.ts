@@ -12,8 +12,6 @@ import type {
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import { ITerminal } from '@rushstack/terminal';
 
 const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
 
@@ -23,29 +21,28 @@ const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
  */
 export class PhasedOperationPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.createOperations.tapPromise(PLUGIN_NAME, createOperations);
+    hooks.createOperations.tap(PLUGIN_NAME, createOperations);
   }
 }
 
-async function createOperations(
+function createOperations(
   existingOperations: Set<Operation>,
   context: ICreateOperationsContext
-): Promise<Set<Operation>> {
+): Set<Operation> {
   const {
     projectsInUnknownState: changedProjects,
     phaseOriginal,
     phaseSelection,
-    projectSelection,
-    terminal
+    projectSelection
   } = context;
   const operationsWithWork: Set<Operation> = new Set();
 
-  const allOperations: Map<string, Operation[]> = new Map();
+  const operations: Map<string, Operation> = new Map();
 
   // Create tasks for selected phases and projects
   for (const phase of phaseOriginal) {
     for (const project of projectSelection) {
-      await getOrCreateOperations(phase, project);
+      getOrCreateOperation(phase, project);
     }
   }
 
@@ -56,125 +53,65 @@ async function createOperations(
     }
   }
 
-  for (const [key, operations] of allOperations) {
-    for (const operation of operations) {
-      if (!operationsWithWork.has(operation)) {
-        // This operation is in scope, but did not change since it was last executed by the current command.
-        // However, we have no state tracking across executions, so treat as unknown.
-        operation.runner = new NullOperationRunner({
-          name: key,
-          result: OperationStatus.Skipped,
-          silent: true
-        });
-      }
+  for (const [key, operation] of operations) {
+    if (!operationsWithWork.has(operation)) {
+      // This operation is in scope, but did not change since it was last executed by the current command.
+      // However, we have no state tracking across executions, so treat as unknown.
+      operation.runner = new NullOperationRunner({
+        name: key,
+        result: OperationStatus.Skipped,
+        silent: true
+      });
     }
   }
 
   return existingOperations;
 
   // Binds phaseSelection, projectSelection, operations via closure
-  async function getOrCreateOperations(
-    phase: IPhase,
-    project: RushConfigurationProject
-  ): Promise<Operation[]> {
+  function getOrCreateOperation(phase: IPhase, project: RushConfigurationProject): Operation {
     const key: string = getOperationKey(phase, project);
-    let operations: Operation[] | undefined = allOperations.get(key);
+    let operation: Operation | undefined = operations.get(key);
+    if (!operation) {
+      operation = new Operation({
+        project,
+        phase
+      });
 
-    if (!operations) {
-      operations = [];
-      const shards = await getShards(phase, project, terminal!);
-      if (shards && shards > 1) {
-        const {
-          dependencies: { self, upstream }
-        } = phase;
-
-        for (const shard of Array.from({ length: shards }, (_, index) => index + 1)) {
-          let shardOperation = new Operation({
-            project,
-            phase,
-            shard: {
-              current: shard,
-              total: shards
-            }
-          });
-
-          for (const depPhase of self) {
-            (await getOrCreateOperations(depPhase, project)).forEach((operation) =>
-              shardOperation.addDependency(operation)
-            );
-          }
-          if (upstream.size) {
-            const { dependencyProjects } = project;
-            if (dependencyProjects.size) {
-              for (const depPhase of upstream) {
-                for (const dependencyProject of dependencyProjects) {
-                  (await getOrCreateOperations(depPhase, dependencyProject)).forEach((dependency) =>
-                    shardOperation.addDependency(dependency)
-                  );
-                }
-              }
-            }
-          }
-          operationsWithWork.add(shardOperation);
-          existingOperations.add(shardOperation);
-          operations.push(shardOperation);
-        }
-        allOperations.set(key, operations);
-      } else {
-        const operation = new Operation({
-          project,
-          phase
+      if (!phaseSelection.has(phase) || !projectSelection.has(project)) {
+        // Not in scope. Mark skipped because state is unknown.
+        operation.runner = new NullOperationRunner({
+          name: key,
+          result: OperationStatus.Skipped,
+          silent: true
         });
+      } else if (changedProjects.has(project)) {
+        operationsWithWork.add(operation);
+      }
 
-        if (!phaseSelection.has(phase) || !projectSelection.has(project)) {
-          // Not in scope. Mark skipped because state is unknown.
-          operation.runner = new NullOperationRunner({
-            name: key,
-            result: OperationStatus.Skipped,
-            silent: true
-          });
-        } else if (changedProjects.has(project)) {
-          operationsWithWork.add(operation);
-        }
+      operations.set(key, operation);
+      existingOperations.add(operation);
 
-        allOperations.set(key, [operation]);
-        existingOperations.add(operation);
+      const {
+        dependencies: { self, upstream }
+      } = phase;
 
-        const {
-          dependencies: { self, upstream }
-        } = phase;
+      for (const depPhase of self) {
+        operation.addDependency(getOrCreateOperation(depPhase, project));
+      }
 
-        for (const depPhase of self) {
-          (await getOrCreateOperations(depPhase, project)).forEach((op) => operation.addDependency(op));
-        }
-
-        if (upstream.size) {
-          const { dependencyProjects } = project;
-          if (dependencyProjects.size) {
-            for (const depPhase of upstream) {
-              for (const dependencyProject of dependencyProjects) {
-                (await getOrCreateOperations(depPhase, dependencyProject)).forEach((op) =>
-                  operation.addDependency(op)
-                );
-              }
+      if (upstream.size) {
+        const { dependencyProjects } = project;
+        if (dependencyProjects.size) {
+          for (const depPhase of upstream) {
+            for (const dependencyProject of dependencyProjects) {
+              operation.addDependency(getOrCreateOperation(depPhase, dependencyProject));
             }
           }
         }
       }
     }
 
-    return operations;
-  }
-}
-
-async function getShards(
-  phase: IPhase,
-  project: RushConfigurationProject,
-  terminal: ITerminal
-): Promise<number | undefined> {
-  const rushProjectConfiguration = await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
-  if (rushProjectConfiguration) {
-    return rushProjectConfiguration.operationSettingsByOperationName.get(phase.name)?.shards;
+    return operation;
   }
 }
 

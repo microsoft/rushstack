@@ -25,7 +25,7 @@ import type { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
 import type { ITelemetryData } from '../logic/Telemetry';
 import type { OperationStatus } from '../logic/operations/OperationStatus';
-import { ITerminal } from '@rushstack/terminal';
+import type { ITerminal } from '@rushstack/terminal';
 
 /**
  * A plugin that interacts with a phased commands.

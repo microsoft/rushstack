@@ -44,6 +44,7 @@ import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
 import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
 import type { ProjectWatcher } from '../../logic/ProjectWatcher';
+import { ShardedPhasedOperationPlugin } from '../../logic/operations/ShardedPhaseOperationPlugin';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -154,6 +155,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     // Generates the default operation graph
     new PhasedOperationPlugin().apply(this.hooks);
+    // Splices in sharded phases to the operation graph.
+    new ShardedPhasedOperationPlugin().apply(this.hooks);
     // Applies the Shell Operation Runner to selected operations
     new ShellOperationRunnerPlugin().apply(this.hooks);
     new ValidateOperationsPlugin(terminal).apply(this.hooks);
