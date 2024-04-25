@@ -30,7 +30,7 @@ export class FlagFile<T extends object = JsonObject> {
    * @param state - optional, the state that should be managed or compared
    */
   public constructor(folderPath: string, flagName: string, state?: Partial<T>) {
-    this.path = path.join(folderPath, flagName, '.flag');
+    this.path = path.join(folderPath, `${flagName}.flag`);
     this._state = (state || {}) as T;
     this._isModified = true;
   }
