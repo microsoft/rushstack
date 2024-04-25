@@ -1017,7 +1017,7 @@ function logCobuildBuildPlan(
     const operation: Operation = executionPlan[index];
 
     const spacing: number = Math.max(
-      ...[...operation.dependencies].map((e) => {
+      ...Array.from(operation.dependencies, (e) => {
         const dependencySpacing: number | undefined = spacingByDependencyMap.get(e);
         return dependencySpacing !== undefined ? dependencySpacing + 1 : 0;
       }),
@@ -1080,8 +1080,7 @@ function logCobuildBuildPlan(
       }`
     );
     terminal.writeDebugLine(
-      `- Operations: ${[...cluster]
-        .map((e) => `${getName(e)}${e.runner?.isNoOp ? ' [SKIPPED]' : ''}`)
+      `- Operations: ${Array.from(cluster, (e) => `${getName(e)}${e.runner?.isNoOp ? ' [SKIPPED]' : ''}`)
         .join(', ')}`
     );
     terminal.writeDebugLine('--------------------------------------------------');
