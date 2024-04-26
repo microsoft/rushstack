@@ -20,7 +20,7 @@ export const init = (options: {
   debugMode: boolean;
   subspaceName: string;
 }): IAppState => {
-  const { lockfileExplorerProjectRoot, appVersion, debugMode } = options;
+  const { lockfileExplorerProjectRoot, appVersion, debugMode, subspaceName } = options;
   const currDir = process.cwd();
 
   let appState: IAppState | undefined;
