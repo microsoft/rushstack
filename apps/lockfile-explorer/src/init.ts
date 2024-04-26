@@ -4,11 +4,8 @@
 // This function will read the current directory and try to figure out if it's a rush project or regular pnpm workspace
 // Currently it will throw error if neither can be determined
 
-import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
-import {
-  type IRushConfigurationJson,
-  RushConfiguration
-} from '@microsoft/rush-lib/lib/api/RushConfiguration';
+import { FileSystem, Path } from '@rushstack/node-core-library';
+import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
 import path from 'path';
 
@@ -56,8 +53,7 @@ export const init = (options: {
         rush: {
           rushJsonPath,
           projectsByProjectFolder
-        },
-        subspaceName
+        }
       };
       break;
     } else if (FileSystem.exists(pnpmLockPath)) {

@@ -102,7 +102,7 @@ function startApp(debugMode: boolean): void {
     const doc = yaml.load(pnpmLockfileText);
     res.send({
       doc,
-      subspaceName: appState.subspaceName
+      subspaceName
     });
   });
 
