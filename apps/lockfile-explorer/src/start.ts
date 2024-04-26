@@ -42,7 +42,19 @@ function startApp(debugMode: boolean): void {
   // Must not have a trailing slash
   const SERVICE_URL: string = `http://localhost:${PORT}`;
 
-  const appState: IAppState = init({ lockfileExplorerProjectRoot, appVersion, debugMode });
+  let subspaceName: string = 'default';
+
+  if (process.argv.indexOf('--subspace') >= 0) {
+    if (process.argv[2] !== '--subspace') {
+      throw new Error(
+        'If you want to specify a subspace, you should place "--subspace <subspace_name>" immediately after the "lockfile-explorer" command'
+      );
+    }
+
+    subspaceName = process.argv[3];
+  }
+
+  const appState: IAppState = init({ lockfileExplorerProjectRoot, appVersion, debugMode, subspaceName });
 
   // Important: This must happen after init() reads the current working directory
   process.chdir(appState.lockfileExplorerProjectRoot);

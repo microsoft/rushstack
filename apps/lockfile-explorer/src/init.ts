@@ -18,21 +18,10 @@ export const init = (options: {
   lockfileExplorerProjectRoot: string;
   appVersion: string;
   debugMode: boolean;
+  subspaceName: string;
 }): IAppState => {
   const { lockfileExplorerProjectRoot, appVersion, debugMode } = options;
   const currDir = process.cwd();
-
-  let subspaceName: string = 'default';
-
-  if (process.argv.indexOf('--subspace') >= 0) {
-    if (process.argv[2] !== '--subspace') {
-      throw new Error(
-        'If you want to specify a subspace, you should place "--subspace <subspace_name>" immediately after the "lockfile-explorer" command'
-      );
-    }
-
-    subspaceName = process.argv[3];
-  }
 
   let appState: IAppState | undefined;
   let currExploredDir = Path.convertToSlashes(currDir);
