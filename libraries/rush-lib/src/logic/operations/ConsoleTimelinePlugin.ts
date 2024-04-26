@@ -89,6 +89,13 @@ const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
   [OperationStatus.NoOp]: '%'
 };
 
+const COBUILD_REPORTABLE_STATUSES: Set<OperationStatus> = new Set([
+  OperationStatus.Success,
+  OperationStatus.SuccessWithWarning,
+  OperationStatus.Failure,
+  OperationStatus.Blocked
+]);
+
 /**
  * Timeline - colorizer for each operation status
  */
@@ -234,7 +241,9 @@ export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrin
     const { isExecuteByOtherCobuildRunner, status } = record;
     if (isExecuteByOtherCobuildRunner) {
       hasCobuildSymbol = true;
-      return 'C';
+      if (COBUILD_REPORTABLE_STATUSES.has(status)) {
+        return 'C';
+      }
     }
     return TIMELINE_CHART_SYMBOLS[status];
   }
