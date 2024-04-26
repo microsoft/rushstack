@@ -398,8 +398,6 @@ export interface ICreateOperationsContext {
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
     readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
     readonly rushConfiguration: RushConfiguration;
-    // (undocumented)
-    readonly terminal?: ITerminal;
 }
 
 // @beta (undocumented)
@@ -577,8 +575,6 @@ export interface _IOperationMetadataManagerOptions {
 
 // @alpha
 export interface IOperationOptions {
-    // (undocumented)
-    outputFolderNames?: string[];
     phase?: IPhase | undefined;
     project?: RushConfigurationProject | undefined;
     runner?: IOperationRunner | undefined;
@@ -591,6 +587,8 @@ export interface IOperationRunner {
     getConfigHash(): string;
     readonly isNoOp?: boolean;
     readonly name: string;
+    // Warning: (ae-incompatible-release-tags) The symbol "operationSettings" is marked as @beta, but its signature references "IOperationSettings" which is marked as @alpha
+    operationSettings?: IOperationSettings;
     reportTiming: boolean;
     silent: boolean;
     warningsAreAllowed: boolean;
@@ -620,8 +618,6 @@ export interface IOperationSettings {
     operationName: string;
     outputFolderNames?: string[];
     // Warning: (ae-forgotten-export) The symbol "IRushPhaseSharding" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     sharding?: IRushPhaseSharding;
 }
 
@@ -879,8 +875,6 @@ export class Operation {
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
     get name(): string | undefined;
-    // (undocumented)
-    outputFolderNames: string[] | undefined;
     runner: IOperationRunner | undefined;
     weight: number;
 }

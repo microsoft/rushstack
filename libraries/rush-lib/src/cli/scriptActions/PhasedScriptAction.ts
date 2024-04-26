@@ -435,8 +435,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         projectChangeAnalyzer,
         projectSelection,
         projectConfigurations,
-        projectsInUnknownState: projectSelection,
-        terminal
+        projectsInUnknownState: projectSelection
       };
 
       const executionManagerOptions: IOperationExecutionManagerOptions = {

@@ -9,7 +9,7 @@ import type {
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import { Operation } from './Operation';
-import type { IRushPhaseSharding, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { ShellOperationRunner } from './ShellOperationRunner';
 import {
   getCustomParameterValuesByPhase,
@@ -37,8 +37,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
   for (const operation of existingOperations) {
     const { associatedPhase: phase, associatedProject: project } = operation;
-    const shardConfig: IRushPhaseSharding | undefined = getShardConfig(phase, project);
-    if (shardConfig) {
+    const operationSettings: IOperationSettings | undefined = getOperationSettings(phase, project);
+    if (operationSettings?.sharding) {
       shardableOperations.add(operation);
     }
   }
@@ -47,8 +47,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
   for (const operation of shardableOperations) {
     const { associatedPhase: phase, associatedProject: project } = operation;
-    const shardConfig: IRushPhaseSharding | undefined = getShardConfig(phase, project);
-    if (phase && project && shardConfig && shardConfig.count > 1) {
+    const operationSettings: IOperationSettings | undefined = getOperationSettings(phase, project);
+    if (phase && project && operationSettings?.sharding && operationSettings.sharding.count > 1) {
       existingOperations.delete(operation);
 
       const collatorNode: Operation = new Operation({
@@ -58,13 +58,15 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       existingOperations.add(collatorNode);
       const collatorDisplayName: string = `${getDisplayName(phase, project)} - collate`;
       const rawScript: string | undefined = project.packageJson.scripts?.[`${phase.name}:collate`];
+
       if (rawScript) {
         const collatorRunner: ShellOperationRunner = new ShellOperationRunner({
           commandToRun: rawScript,
           displayName: collatorDisplayName,
           phase,
           rushConfiguration,
-          rushProject: project
+          rushProject: project,
+          operationSettings
         });
         collatorNode.runner = collatorRunner;
       } else {
@@ -79,13 +81,13 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         dependent.deleteDependency(operation);
       }
 
-      const shards: number = shardConfig.count;
+      const shards: number = operationSettings.sharding.count;
       for (const shard of Array.from({ length: shards }, (element, index) => index + 1)) {
         let customParameters: readonly string[] = getCustomParameterValuesForPhase(phase);
 
         // Add the shard argument to the custom parameters, replacing any templated values.
         const shardArgumentFormat: string =
-          shardConfig.shardArgumentFormat ?? '--shard={shardIndex}/{shardCount}';
+          operationSettings.sharding.shardArgumentFormat ?? '--shard={shardIndex}/{shardCount}';
         const outputDirectory: string = `.rush/shard/${shard}`;
         const shardArgument: string = shardArgumentFormat
           .replace('{shardIndex}', shard.toString())
@@ -107,8 +109,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
         const shardOperation: Operation = new Operation({
           project,
-          phase,
-          outputFolderNames: [outputDirectory]
+          phase
         });
         const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}`;
         if (commandToRun) {
@@ -117,7 +118,11 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
             displayName: shardDisplayName,
             phase,
             rushConfiguration,
-            rushProject: project
+            rushProject: project,
+            operationSettings: {
+              ...operationSettings,
+              outputFolderNames: [outputDirectory]
+            }
           });
           shardOperation.runner = shardedShellOperationRunner;
         } else {
@@ -140,16 +145,16 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
   return existingOperations;
 
-  function getShardConfig(
+  function getOperationSettings(
     phase: IPhase | undefined,
     project: RushConfigurationProject | undefined
-  ): IRushPhaseSharding | undefined {
+  ): IOperationSettings | undefined {
     if (!phase || !project) {
       return undefined;
     }
     const rushProjectConfiguration: RushProjectConfiguration | undefined = projectConfigurations.get(project);
     if (rushProjectConfiguration) {
-      return rushProjectConfiguration.operationSettingsByOperationName.get(phase.name)?.sharding;
+      return rushProjectConfiguration.operationSettingsByOperationName.get(phase.name);
     }
   }
 }

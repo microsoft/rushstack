@@ -23,8 +23,6 @@ export interface IOperationOptions {
    * running the operation.
    */
   runner?: IOperationRunner | undefined;
-
-  outputFolderNames?: string[];
 }
 
 /**
@@ -63,8 +61,6 @@ export class Operation {
    */
   public runner: IOperationRunner | undefined = undefined;
 
-  public outputFolderNames: string[] | undefined;
-
   /**
    * The weight for this operation. This scalar is the contribution of this operation to the
    * `criticalPathLength` calculation above. Modify to indicate the following:
@@ -82,7 +78,6 @@ export class Operation {
     this.associatedPhase = options?.phase;
     this.associatedProject = options?.project;
     this.runner = options?.runner;
-    this.outputFolderNames = options?.outputFolderNames;
   }
 
   /**

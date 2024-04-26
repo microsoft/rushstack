@@ -98,6 +98,12 @@ export interface IOperationSettings {
    */
   dependsOnAdditionalFiles?: string[];
 
+  /**
+   * An optional config object for sharding the operation. If specified, the operation will be sharded
+   * into multiple invocations. The `count` property specifies the number of shards to create. The
+   * `shardArgumentFormat` property specifies the format of the argument to pass to the command to
+   * indicate the shard index and count. The default value is `--shard={shardIndex}/{shardCount}`.
+   */
   sharding?: IRushPhaseSharding;
 }
 

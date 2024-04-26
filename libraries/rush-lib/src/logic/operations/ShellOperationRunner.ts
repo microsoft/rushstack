@@ -14,6 +14,7 @@ import { Utilities } from '../../utilities/Utilities';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
+import type { IOperationSettings } from '../../api/RushProjectConfiguration';
 
 export interface IOperationRunnerOptions {
   rushProject: RushConfigurationProject;
@@ -21,6 +22,7 @@ export interface IOperationRunnerOptions {
   commandToRun: string;
   displayName: string;
   phase: IPhase;
+  operationSettings?: IOperationSettings;
 }
 
 /**
@@ -35,6 +37,7 @@ export class ShellOperationRunner implements IOperationRunner {
   public readonly silent: boolean = false;
   public readonly cacheable: boolean = true;
   public readonly warningsAreAllowed: boolean;
+  public readonly operationSettings: IOperationSettings | undefined;
 
   private readonly _commandToRun: string;
 
@@ -42,7 +45,7 @@ export class ShellOperationRunner implements IOperationRunner {
   private readonly _rushConfiguration: RushConfiguration;
 
   public constructor(options: IOperationRunnerOptions) {
-    const { phase } = options;
+    const { phase, operationSettings } = options;
 
     this.name = options.displayName;
     this.warningsAreAllowed =
@@ -50,6 +53,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
     this._commandToRun = options.commandToRun;
+    this.operationSettings = operationSettings;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {

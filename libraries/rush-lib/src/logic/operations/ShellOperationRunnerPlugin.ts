@@ -13,6 +13,7 @@ import type {
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { Operation } from './Operation';
+import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 
 export const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 
@@ -29,11 +30,10 @@ function createShellOperations(
   operations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const { rushConfiguration } = context;
+  const { rushConfiguration, projectConfigurations } = context;
 
   const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
     getCustomParameterValuesByPhase();
-
   for (const operation of operations) {
     const { associatedPhase: phase, associatedProject: project } = operation;
 
@@ -55,6 +55,10 @@ function createShellOperations(
         );
       }
 
+      const projectConfiguration: RushProjectConfiguration | undefined = projectConfigurations.get(project);
+      const operationSettings: IOperationSettings | undefined =
+        projectConfiguration?.operationSettingsByOperationName.get(phase.name);
+
       const displayName: string = getDisplayName(phase, project);
 
       if (commandToRun) {
@@ -63,7 +67,8 @@ function createShellOperations(
           displayName,
           phase,
           rushConfiguration,
-          rushProject: project
+          rushProject: project,
+          operationSettings
         });
         operation.runner = shellOperationRunner;
       } else {

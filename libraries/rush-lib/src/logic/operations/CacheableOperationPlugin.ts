@@ -124,6 +124,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             }
 
             const operationSettings: IOperationSettings | undefined =
+              operation.runner?.operationSettings ??
               projectConfiguration?.operationSettingsByOperationName.get(phaseName);
             const cacheDisabledReason: string | undefined = projectConfiguration
               ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName)

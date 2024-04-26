@@ -11,7 +11,7 @@ const outputDirectory = args.findIndex((e) => e.includes('--output-directory'));
 const outputDir = outputDirectory >= 0 ? args[outputDirectory].replace('--output-directory=', '') : undefined;
 
 setTimeout(() => {
-  const outputFolder = shard ? path.resolve(process.cwd(), outputDir) : path.resolve(process.cwd(), 'dist');
+  const outputFolder = shard ? path.resolve(outputDir) : path.resolve('dist');
   const outputFile = path.resolve(outputFolder, 'output.txt');
   FileSystem.ensureFolder(outputFolder);
   FileSystem.writeFile(outputFile, `Hello world! ${args.join(' ')}`);

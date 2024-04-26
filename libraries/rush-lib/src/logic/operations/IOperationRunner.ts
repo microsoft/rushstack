@@ -7,6 +7,7 @@ import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { OperationStatus } from './OperationStatus';
 import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
+import type { IOperationSettings } from '../../api/RushProjectConfiguration';
 
 /**
  * Information passed to the executing `IOperationRunner`
@@ -103,6 +104,12 @@ export interface IOperationRunner {
    * analysis purposes.
    */
   readonly isNoOp?: boolean;
+
+  /**
+   * Get the operation settings for this operation, defaults to the values defined in
+   *  the project configuration.
+   */
+  operationSettings?: IOperationSettings;
 
   /**
    * Method to be executed for the operation.
