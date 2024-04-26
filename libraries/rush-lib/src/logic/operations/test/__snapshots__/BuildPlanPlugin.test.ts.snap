@@ -1,0 +1,736 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BuildPlanPlugin build plan debugging should generate a build plan 1`] = `
+"Build Plan Depth (deepest dependency tree): 5
+Build Plan Width (maximum parallelism): 40
+Number of Nodes per Depth: 1, 4, 11, 40, 34
+Plan @ Depth 4 has 34 nodes and 0 dependents:
+- i (upstream-1-self-upstream)
+- j (upstream-1-self-upstream)
+- d (upstream-self)
+- e (upstream-self)
+- f (upstream-self)
+- g (upstream-self)
+- i (upstream-self)
+- j (upstream-self)
+- i (upstream-1-self)
+- j (upstream-1-self)
+- i (upstream-2-self)
+- j (upstream-2-self)
+- a (complex)
+- i (complex)
+- j (complex)
+- b (complex)
+- f (complex)
+- g (complex)
+- h (complex)
+- f (upstream-1-self)
+- g (upstream-1-self)
+- d (upstream-1-self)
+- e (upstream-1-self)
+- f (upstream-2-self)
+- g (upstream-2-self)
+- f (upstream-1-self-upstream)
+- g (upstream-1-self-upstream)
+- d (upstream-2-self)
+- d (upstream-1-self-upstream)
+- e (upstream-2-self)
+- e (upstream-1-self-upstream)
+- c (complex)
+- d (complex)
+- e (complex)
+Plan @ Depth 3 has 40 nodes and 34 dependents:
+- d (no-deps)
+- e (no-deps)
+- c (upstream-self)
+- f (no-deps)
+- h (upstream-self)
+- g (no-deps)
+- i (no-deps)
+- j (no-deps)
+- i (upstream-1)
+- j (upstream-1)
+- i (upstream-2)
+- j (upstream-2)
+- a (upstream-3)
+- i (upstream-3)
+- j (upstream-3)
+- b (upstream-3)
+- f (upstream-3)
+- h (upstream-1-self-upstream)
+- h (upstream-2-self)
+- g (upstream-3)
+- h (upstream-3)
+- a (upstream-1-self-upstream)
+- a (upstream-2-self)
+- f (upstream-1)
+- g (upstream-1)
+- d (upstream-1)
+- e (upstream-1)
+- f (upstream-2)
+- g (upstream-2)
+- h (upstream-1-self)
+- d (upstream-2)
+- e (upstream-2)
+- c (upstream-1-self)
+- c (upstream-3)
+- d (upstream-3)
+- b (upstream-1-self-upstream)
+- b (upstream-2-self)
+- e (upstream-3)
+- c (upstream-1-self-upstream)
+- c (upstream-2-self)
+Plan @ Depth 2 has 11 nodes and 74 dependents:
+- b (upstream-self)
+- h (upstream-2)
+- a (upstream-2)
+- h (no-deps)
+- c (no-deps)
+- h (upstream-1)
+- c (upstream-1)
+- a (upstream-1-self)
+- b (upstream-2)
+- b (upstream-1-self)
+- c (upstream-2)
+Plan @ Depth 1 has 4 nodes and 85 dependents:
+- a (upstream-self)
+- b (no-deps)
+- a (upstream-1)
+- b (upstream-1)
+Plan @ Depth 0 has 1 nodes and 89 dependents:
+- a (no-deps)
+##################################################
+                  a (no-deps): (0)
+                  b (no-deps): (1)
+                  c (no-deps): (2)
+                  d (no-deps): (3)
+                  e (no-deps): (4)
+                  f (no-deps): (5)
+                  g (no-deps): (6)
+                  h (no-deps): (7)
+                  i (no-deps): (8)
+                  j (no-deps): (9)
+               a (upstream-1): (20)
+               i (upstream-1): (28)
+               j (upstream-1): (29)
+               a (upstream-2): (30)
+               i (upstream-2): (38)
+               j (upstream-2): (39)
+               a (upstream-3): (40)
+               i (upstream-3): (48)
+               j (upstream-3): (49)
+ a (upstream-1-self-upstream): (70)
+ i (upstream-1-self-upstream): (78)
+ j (upstream-1-self-upstream): (79)
+            a (upstream-self): -(10)
+               b (upstream-1): -(21)
+               f (upstream-1): -(25)
+               g (upstream-1): -(26)
+               h (upstream-1): -(27)
+               c (upstream-1): -(22)
+               d (upstream-1): -(23)
+               e (upstream-1): -(24)
+            i (upstream-self): -(18)
+            j (upstream-self): -(19)
+               b (upstream-2): -(31)
+               g (upstream-2): -(36)
+               h (upstream-2): -(37)
+          a (upstream-1-self): -(50)
+          i (upstream-1-self): -(58)
+          j (upstream-1-self): -(59)
+               b (upstream-3): -(41)
+               g (upstream-3): -(46)
+               h (upstream-3): -(47)
+          a (upstream-2-self): -(60)
+          i (upstream-2-self): -(68)
+          j (upstream-2-self): -(69)
+                  a (complex): -(80)
+                  i (complex): -(88)
+                  j (complex): -(89)
+            b (upstream-self): --(11)
+            f (upstream-self): --(15)
+            g (upstream-self): --(17)
+            h (upstream-self): --(16)
+               f (upstream-2): --(35)
+               f (upstream-3): --(45)
+                  b (complex): --(81)
+                  g (complex): --(86)
+                  h (complex): --(87)
+               c (upstream-2): --(32)
+               d (upstream-2): --(33)
+          b (upstream-1-self): --(51)
+          f (upstream-1-self): --(55)
+          g (upstream-1-self): --(56)
+          h (upstream-1-self): --(57)
+               e (upstream-2): --(34)
+          c (upstream-1-self): --(52)
+          d (upstream-1-self): --(53)
+          e (upstream-1-self): --(54)
+               c (upstream-3): --(42)
+               d (upstream-3): --(43)
+          b (upstream-2-self): --(61)
+          g (upstream-2-self): --(66)
+          h (upstream-2-self): --(67)
+ b (upstream-1-self-upstream): --(71)
+ g (upstream-1-self-upstream): --(76)
+ h (upstream-1-self-upstream): --(77)
+            c (upstream-self): ---(12)
+            d (upstream-self): ---(13)
+                  f (complex): ---(85)
+          f (upstream-2-self): ---(65)
+ f (upstream-1-self-upstream): ---(75)
+               e (upstream-3): ---(44)
+          c (upstream-2-self): ---(62)
+          d (upstream-2-self): ---(63)
+ c (upstream-1-self-upstream): ---(72)
+ d (upstream-1-self-upstream): ---(73)
+          e (upstream-2-self): ---(64)
+ e (upstream-1-self-upstream): ---(74)
+                  c (complex): ---(82)
+                  d (complex): ---(83)
+            e (upstream-self): ----(14)
+                  e (complex): ----(84)
+##################################################
+Cluster 0:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: a (no-deps)
+--------------------------------------------------
+Cluster 1:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: b (no-deps)
+--------------------------------------------------
+Cluster 2:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: c (no-deps)
+--------------------------------------------------
+Cluster 3:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: d (no-deps)
+--------------------------------------------------
+Cluster 4:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: e (no-deps)
+--------------------------------------------------
+Cluster 5:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: f (no-deps)
+--------------------------------------------------
+Cluster 6:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: g (no-deps)
+--------------------------------------------------
+Cluster 7:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: h (no-deps)
+--------------------------------------------------
+Cluster 8:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: i (no-deps)
+--------------------------------------------------
+Cluster 9:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: j (no-deps)
+--------------------------------------------------
+Cluster 10:
+- Dependencies: a (_phase:no-deps)
+- Clustered by: 
+  - none
+- Operations: a (upstream-self)
+--------------------------------------------------
+Cluster 11:
+- Dependencies: b (_phase:no-deps), a (_phase:upstream-self)
+- Clustered by: 
+  - none
+- Operations: b (upstream-self)
+--------------------------------------------------
+Cluster 12:
+- Dependencies: c (_phase:no-deps), b (_phase:upstream-self)
+- Clustered by: 
+  - none
+- Operations: c (upstream-self)
+--------------------------------------------------
+Cluster 13:
+- Dependencies: d (_phase:no-deps), b (_phase:upstream-self)
+- Clustered by: 
+  - none
+- Operations: d (upstream-self)
+--------------------------------------------------
+Cluster 14:
+- Dependencies: e (_phase:no-deps), c (_phase:upstream-self)
+- Clustered by: 
+  - none
+- Operations: e (upstream-self)
+--------------------------------------------------
+Cluster 15:
+- Dependencies: f (_phase:no-deps), a (_phase:upstream-self), h (_phase:upstream-self)
+- Clustered by: 
+  - none
+- Operations: f (upstream-self)
+--------------------------------------------------
+Cluster 16:
+- Dependencies: h (_phase:no-deps), a (_phase:upstream-self)
+- Clustered by: 
+  - none
+- Operations: h (upstream-self)
+--------------------------------------------------
+Cluster 17:
+- Dependencies: g (_phase:no-deps), a (_phase:upstream-self)
+- Clustered by: 
+  - none
+- Operations: g (upstream-self)
+--------------------------------------------------
+Cluster 18:
+- Dependencies: i (_phase:no-deps)
+- Clustered by: 
+  - none
+- Operations: i (upstream-self)
+--------------------------------------------------
+Cluster 19:
+- Dependencies: j (_phase:no-deps)
+- Clustered by: 
+  - none
+- Operations: j (upstream-self)
+--------------------------------------------------
+Cluster 20:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: a (upstream-1)
+--------------------------------------------------
+Cluster 21:
+- Dependencies: a (_phase:no-deps)
+- Clustered by: 
+  - none
+- Operations: b (upstream-1)
+--------------------------------------------------
+Cluster 22:
+- Dependencies: b (_phase:no-deps)
+- Clustered by: 
+  - none
+- Operations: c (upstream-1)
+--------------------------------------------------
+Cluster 23:
+- Dependencies: b (_phase:no-deps)
+- Clustered by: 
+  - none
+- Operations: d (upstream-1)
+--------------------------------------------------
+Cluster 24:
+- Dependencies: c (_phase:no-deps)
+- Clustered by: 
+  - none
+- Operations: e (upstream-1)
+--------------------------------------------------
+Cluster 25:
+- Dependencies: a (_phase:no-deps), h (_phase:no-deps)
+- Clustered by: 
+  - none
+- Operations: f (upstream-1)
+--------------------------------------------------
+Cluster 26:
+- Dependencies: a (_phase:no-deps)
+- Clustered by: 
+  - none
+- Operations: g (upstream-1)
+--------------------------------------------------
+Cluster 27:
+- Dependencies: a (_phase:no-deps)
+- Clustered by: 
+  - none
+- Operations: h (upstream-1)
+--------------------------------------------------
+Cluster 28:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: i (upstream-1)
+--------------------------------------------------
+Cluster 29:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: j (upstream-1)
+--------------------------------------------------
+Cluster 30:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: a (upstream-2)
+--------------------------------------------------
+Cluster 31:
+- Dependencies: a (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: b (upstream-2)
+--------------------------------------------------
+Cluster 32:
+- Dependencies: b (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: c (upstream-2)
+--------------------------------------------------
+Cluster 33:
+- Dependencies: b (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: d (upstream-2)
+--------------------------------------------------
+Cluster 34:
+- Dependencies: c (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: e (upstream-2)
+--------------------------------------------------
+Cluster 35:
+- Dependencies: a (_phase:upstream-1), h (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: f (upstream-2)
+--------------------------------------------------
+Cluster 36:
+- Dependencies: a (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: g (upstream-2)
+--------------------------------------------------
+Cluster 37:
+- Dependencies: a (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: h (upstream-2)
+--------------------------------------------------
+Cluster 38:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: i (upstream-2)
+--------------------------------------------------
+Cluster 39:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: j (upstream-2)
+--------------------------------------------------
+Cluster 40:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: a (upstream-3)
+--------------------------------------------------
+Cluster 41:
+- Dependencies: a (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: b (upstream-3)
+--------------------------------------------------
+Cluster 42:
+- Dependencies: b (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: c (upstream-3)
+--------------------------------------------------
+Cluster 43:
+- Dependencies: b (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: d (upstream-3)
+--------------------------------------------------
+Cluster 44:
+- Dependencies: c (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: e (upstream-3)
+--------------------------------------------------
+Cluster 45:
+- Dependencies: a (_phase:upstream-2), h (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: f (upstream-3)
+--------------------------------------------------
+Cluster 46:
+- Dependencies: a (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: g (upstream-3)
+--------------------------------------------------
+Cluster 47:
+- Dependencies: a (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: h (upstream-3)
+--------------------------------------------------
+Cluster 48:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: i (upstream-3)
+--------------------------------------------------
+Cluster 49:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: j (upstream-3)
+--------------------------------------------------
+Cluster 50:
+- Dependencies: a (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: a (upstream-1-self)
+--------------------------------------------------
+Cluster 51:
+- Dependencies: b (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: b (upstream-1-self)
+--------------------------------------------------
+Cluster 52:
+- Dependencies: c (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: c (upstream-1-self)
+--------------------------------------------------
+Cluster 53:
+- Dependencies: d (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: d (upstream-1-self)
+--------------------------------------------------
+Cluster 54:
+- Dependencies: e (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: e (upstream-1-self)
+--------------------------------------------------
+Cluster 55:
+- Dependencies: f (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: f (upstream-1-self)
+--------------------------------------------------
+Cluster 56:
+- Dependencies: g (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: g (upstream-1-self)
+--------------------------------------------------
+Cluster 57:
+- Dependencies: h (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: h (upstream-1-self)
+--------------------------------------------------
+Cluster 58:
+- Dependencies: i (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: i (upstream-1-self)
+--------------------------------------------------
+Cluster 59:
+- Dependencies: j (_phase:upstream-1)
+- Clustered by: 
+  - none
+- Operations: j (upstream-1-self)
+--------------------------------------------------
+Cluster 60:
+- Dependencies: a (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: a (upstream-2-self)
+--------------------------------------------------
+Cluster 61:
+- Dependencies: b (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: b (upstream-2-self)
+--------------------------------------------------
+Cluster 62:
+- Dependencies: c (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: c (upstream-2-self)
+--------------------------------------------------
+Cluster 63:
+- Dependencies: d (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: d (upstream-2-self)
+--------------------------------------------------
+Cluster 64:
+- Dependencies: e (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: e (upstream-2-self)
+--------------------------------------------------
+Cluster 65:
+- Dependencies: f (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: f (upstream-2-self)
+--------------------------------------------------
+Cluster 66:
+- Dependencies: g (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: g (upstream-2-self)
+--------------------------------------------------
+Cluster 67:
+- Dependencies: h (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: h (upstream-2-self)
+--------------------------------------------------
+Cluster 68:
+- Dependencies: i (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: i (upstream-2-self)
+--------------------------------------------------
+Cluster 69:
+- Dependencies: j (_phase:upstream-2)
+- Clustered by: 
+  - none
+- Operations: j (upstream-2-self)
+--------------------------------------------------
+Cluster 70:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: a (upstream-1-self-upstream)
+--------------------------------------------------
+Cluster 71:
+- Dependencies: a (_phase:upstream-1-self)
+- Clustered by: 
+  - none
+- Operations: b (upstream-1-self-upstream)
+--------------------------------------------------
+Cluster 72:
+- Dependencies: b (_phase:upstream-1-self)
+- Clustered by: 
+  - none
+- Operations: c (upstream-1-self-upstream)
+--------------------------------------------------
+Cluster 73:
+- Dependencies: b (_phase:upstream-1-self)
+- Clustered by: 
+  - none
+- Operations: d (upstream-1-self-upstream)
+--------------------------------------------------
+Cluster 74:
+- Dependencies: c (_phase:upstream-1-self)
+- Clustered by: 
+  - none
+- Operations: e (upstream-1-self-upstream)
+--------------------------------------------------
+Cluster 75:
+- Dependencies: a (_phase:upstream-1-self), h (_phase:upstream-1-self)
+- Clustered by: 
+  - none
+- Operations: f (upstream-1-self-upstream)
+--------------------------------------------------
+Cluster 76:
+- Dependencies: a (_phase:upstream-1-self)
+- Clustered by: 
+  - none
+- Operations: g (upstream-1-self-upstream)
+--------------------------------------------------
+Cluster 77:
+- Dependencies: a (_phase:upstream-1-self)
+- Clustered by: 
+  - none
+- Operations: h (upstream-1-self-upstream)
+--------------------------------------------------
+Cluster 78:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: i (upstream-1-self-upstream)
+--------------------------------------------------
+Cluster 79:
+- Dependencies: none
+- Clustered by: 
+  - none
+- Operations: j (upstream-1-self-upstream)
+--------------------------------------------------
+Cluster 80:
+- Dependencies: a (_phase:upstream-3)
+- Clustered by: 
+  - none
+- Operations: a (complex)
+--------------------------------------------------
+Cluster 81:
+- Dependencies: b (_phase:upstream-3), a (_phase:upstream-1-self-upstream), a (_phase:upstream-2-self)
+- Clustered by: 
+  - none
+- Operations: b (complex)
+--------------------------------------------------
+Cluster 82:
+- Dependencies: c (_phase:upstream-3), b (_phase:upstream-1-self-upstream), b (_phase:upstream-2-self)
+- Clustered by: 
+  - none
+- Operations: c (complex)
+--------------------------------------------------
+Cluster 83:
+- Dependencies: d (_phase:upstream-3), b (_phase:upstream-1-self-upstream), b (_phase:upstream-2-self)
+- Clustered by: 
+  - none
+- Operations: d (complex)
+--------------------------------------------------
+Cluster 84:
+- Dependencies: e (_phase:upstream-3), c (_phase:upstream-1-self-upstream), c (_phase:upstream-2-self)
+- Clustered by: 
+  - none
+- Operations: e (complex)
+--------------------------------------------------
+Cluster 85:
+- Dependencies: f (_phase:upstream-3), a (_phase:upstream-1-self-upstream), h (_phase:upstream-1-self-upstream), a (_phase:upstream-2-self), h (_phase:upstream-2-self)
+- Clustered by: 
+  - none
+- Operations: f (complex)
+--------------------------------------------------
+Cluster 86:
+- Dependencies: g (_phase:upstream-3), a (_phase:upstream-1-self-upstream), a (_phase:upstream-2-self)
+- Clustered by: 
+  - none
+- Operations: g (complex)
+--------------------------------------------------
+Cluster 87:
+- Dependencies: h (_phase:upstream-3), a (_phase:upstream-1-self-upstream), a (_phase:upstream-2-self)
+- Clustered by: 
+  - none
+- Operations: h (complex)
+--------------------------------------------------
+Cluster 88:
+- Dependencies: i (_phase:upstream-3)
+- Clustered by: 
+  - none
+- Operations: i (complex)
+--------------------------------------------------
+Cluster 89:
+- Dependencies: j (_phase:upstream-3)
+- Clustered by: 
+  - none
+- Operations: j (complex)
+--------------------------------------------------
+##################################################
+"
+`;

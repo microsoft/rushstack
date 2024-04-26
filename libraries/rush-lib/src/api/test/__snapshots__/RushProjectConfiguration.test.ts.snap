@@ -12,8 +12,6 @@ exports[`RushProjectConfiguration getCacheDisabledReason returns reason if the o
 
 exports[`RushProjectConfiguration getCacheDisabledReason returns reason if the operation is runnable 1`] = `"Caching has been disabled for this project's \\"_phase:a\\" command."`;
 
-exports[`RushProjectConfiguration getCacheDisabledReason returns reason if the operation is skipped 1`] = `"Caching has been disabled for this project's \\"_phase:a\\" command."`;
-
 exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders 1`] = `
 Map {
   "_phase:a" => Object {

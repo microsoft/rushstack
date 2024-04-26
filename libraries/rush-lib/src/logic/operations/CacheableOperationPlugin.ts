@@ -160,29 +160,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         );
 
         if (disjointSet) {
-          // If disjoint set exists, connect build cache disabled project with its consumers
-          for (const [operation, { cacheDisabledReason }] of this._buildCacheContextByOperation) {
-            const { associatedProject: project, associatedPhase: phase } = operation;
-            if (project && phase) {
-              if (cacheDisabledReason) {
-                /**
-                 * Group the project build cache disabled with its consumers. This won't affect too much in
-                 * a monorepo with high build cache coverage.
-                 *
-                 * The mental model is that if X disables the cache, and Y depends on X, then:
-                 *   1. Y must be built by the same VM that build X;
-                 *   2. OR, Y must be rebuilt on each VM that needs it.
-                 * Approach 1 is probably the better choice.
-                 */
-                for (const consumer of operation.consumers) {
-                  disjointSet?.union(operation, consumer);
-                }
-              }
-            }
-          }
-
-          logCobuildBuildPlan(disjointSet, terminal, this._buildCacheContextByOperation);
-
+          clusterOperations(disjointSet, this._buildCacheContextByOperation);
           for (const operationSet of disjointSet.getAllSets()) {
             if (cobuildConfiguration?.cobuildFeatureEnabled && cobuildConfiguration.cobuildContextId) {
               // Get a deterministic ordered array of operations, which is important to get a deterministic cluster id.
@@ -901,192 +879,28 @@ async function updateAdditionalContextAsync({
   }
 }
 
-function printBuildPlanMaximumParallelism(operations: Operation[], terminal: ITerminal): number {
-  const leafQueue: Operation[] = operations.filter((e) => e.consumers.size === 0);
-  let currentLeafNodes: Set<Operation> = new Set<Operation>();
-  const remainingOperations: Set<Operation> = new Set<Operation>(operations);
-  let depth: number = 0;
-  let maxWidth: number = leafQueue.filter((e) => !e.runner?.isNoOp).length;
-  const numberOfNodes: number[] = [maxWidth];
-  const depthToOperationsMap: Map<number, Set<Operation>> = new Map<number, Set<Operation>>();
-  depthToOperationsMap.set(depth, new Set(leafQueue));
-  do {
-    if (leafQueue.length === 0) {
-      leafQueue.push(...currentLeafNodes);
-      const realOperations: Operation[] = [...currentLeafNodes].filter((e) => !e.runner?.isNoOp);
-      if (realOperations.length > 0) {
-        depth += 1;
-        depthToOperationsMap.set(depth, new Set(realOperations));
-        numberOfNodes.push(realOperations.length);
-      }
-      const currentWidth: number = realOperations.length;
-      if (currentWidth > maxWidth) {
-        maxWidth = currentWidth;
-      }
-      currentLeafNodes = new Set();
-    }
-    if (leafQueue.length === 0) {
-      break;
-    }
-    const leaf: Operation = leafQueue.shift()!;
-    if (remainingOperations.has(leaf)) {
-      remainingOperations.delete(leaf);
-      for (const dependent of leaf.dependencies) {
-        if (![...dependent.consumers].some((e) => remainingOperations.has(e))) {
-          currentLeafNodes.add(dependent);
+export function clusterOperations(
+  initialClusters: DisjointSet<Operation>,
+  operationBuildCacheMap: Map<Operation, { cacheDisabledReason: string | undefined }>
+): void {
+  // If disjoint set exists, connect build cache disabled project with its consumers
+  for (const [operation, { cacheDisabledReason }] of operationBuildCacheMap) {
+    const { associatedProject: project, associatedPhase: phase } = operation;
+    if (project && phase) {
+      if (cacheDisabledReason) {
+        /**
+         * Group the project build cache disabled with its consumers. This won't affect too much in
+         * a monorepo with high build cache coverage.
+         *
+         * The mental model is that if X disables the cache, and Y depends on X, then:
+         *   1. Y must be built by the same VM that build X;
+         *   2. OR, Y must be rebuilt on each VM that needs it.
+         * Approach 1 is probably the better choice.
+         */
+        for (const consumer of operation.consumers) {
+          initialClusters?.union(operation, consumer);
         }
       }
     }
-  } while (remainingOperations.size > 0);
-
-  terminal.writeDebugLine(`Build Plan Depth (deepest dependency tree): ${depth + 1}`);
-  terminal.writeDebugLine(`Build Plan Width (maximum parallelism): ${maxWidth}`);
-  terminal.writeDebugLine(`Number of Nodes per Depth: ${[...numberOfNodes].reverse().join(', ')}`);
-  for (const [operationDepth, operationsAtDepth] of depthToOperationsMap) {
-    let numberOfDependents: number = 0;
-    for (let i: number = 0; i < operationDepth; i++) {
-      numberOfDependents += numberOfNodes[i];
-    }
-    terminal.writeDebugLine(
-      `Plan @ Depth ${depth - operationDepth} has ${
-        numberOfNodes[operationDepth]
-      } nodes and ${numberOfDependents} dependents:`
-    );
-    for (const operation of operationsAtDepth) {
-      if (!operation.runner?.isNoOp) {
-        terminal.writeDebugLine(`- ${operation.runner?.name ?? 'unknown'}`);
-      }
-    }
   }
-
-  return maxWidth;
-}
-
-/**
- * Log the cobuild build plan by cluster. This is intended to help debug situations where cobuilds aren't
- *  utilizing multiple agents correctly.
- */
-function logCobuildBuildPlan(
-  disjointSet: DisjointSet<Operation>,
-  terminal: ITerminal,
-  buildCacheByOperation: Map<Operation, IOperationBuildCacheContext>
-): void {
-  // This function should log the tree execution plan, which is a tree of operations that are executed in parallel.
-  // It should then log the clusters and their dependencies as well as reasons that those clusters were created.
-  // TODO: It should also output the number of operations that have the same depth in the tree.
-  const executionPlan: Operation[] = [];
-  const clusters: Set<Operation>[] = [...disjointSet.getAllSets()];
-  const operations: Operation[] = clusters.flatMap((e) => Array.from(e));
-  const rootOperations: Operation[] = operations.filter((e) => e.dependencies.size === 0);
-
-  printBuildPlanMaximumParallelism(operations, terminal);
-
-  // console.log('build plan maximum parallelism', getBuildPlanMaximumParallelism(rootOperations, terminal));
-
-  const getName: (op: Operation) => string = (op: Operation) => op.runner?.name ?? 'unknown';
-
-  const operationToClusterMap: Map<Operation, Set<Operation>> = new Map<Operation, Set<Operation>>();
-  for (const cluster of clusters) {
-    for (const operation of cluster) {
-      operationToClusterMap.set(operation, cluster);
-    }
-  }
-
-  const queue: Operation[] = [...rootOperations];
-  const seen: Set<Operation> = new Set<Operation>();
-  while (queue.length > 0) {
-    const element: Operation = queue.shift()!;
-    if (!seen.has(element) && !element.runner?.isNoOp) {
-      executionPlan.push(element);
-      seen.add(element);
-    }
-    const consumers: Operation[] = [...element.consumers].filter((e) => !seen.has(e));
-    consumers.forEach((consumer) => queue.push(consumer));
-  }
-
-  // Get the maximum name length for left padding.
-  let max = 1;
-  for (const operation of executionPlan) {
-    const name = getName(operation);
-    max = Math.max(max, name.length);
-  }
-
-  // This is a lazy way of getting the waterfall chart, basically check for the latest
-  //  dependency and put this operation after that finishes.
-  const spacingByDependencyMap: Map<Operation, number> = new Map<Operation, number>();
-  for (let index: number = 0; index < executionPlan.length; index++) {
-    const operation: Operation = executionPlan[index];
-
-    const spacing: number = Math.max(
-      ...Array.from(operation.dependencies, (e) => {
-        const dependencySpacing: number | undefined = spacingByDependencyMap.get(e);
-        return dependencySpacing !== undefined ? dependencySpacing + 1 : 0;
-      }),
-      0
-    );
-    spacingByDependencyMap.set(operation, spacing);
-  }
-  executionPlan.sort((a, b) => {
-    const aSpacing: number = spacingByDependencyMap.get(a) ?? 0;
-    const bSpacing: number = spacingByDependencyMap.get(b) ?? 0;
-    return aSpacing - bSpacing;
-  });
-
-  terminal.writeDebugLine('##################################################');
-  for (const operation of executionPlan) {
-    const spacing: number = spacingByDependencyMap.get(operation) ?? 0;
-    terminal.writeDebugLine(
-      `${getName(operation).padStart(maxOperationNameLength + 1)}: ${'-'.repeat(spacing)}(${clusters.indexOf(
-        operationToClusterMap.get(operation)!
-      )})`
-    );
-  }
-  terminal.writeDebugLine('##################################################');
-
-  function getDependenciesForCluster(cluster: Set<Operation>): Set<Operation> {
-    const dependencies: Set<Operation> = new Set<Operation>();
-    for (const operation of cluster) {
-      for (const dependent of operation.dependencies) {
-        dependencies.add(dependent);
-      }
-    }
-    return dependencies;
-  }
-
-  function dedupeShards(ops: Set<Operation>): string[] {
-    const dedupedOperations: Set<string> = new Set<string>();
-    for (const operation of ops) {
-      dedupedOperations.add(
-        `${operation.associatedProject?.packageName ?? ''} (${operation.associatedPhase?.name})`
-      );
-    }
-    return [...dedupedOperations];
-  }
-
-  for (let clusterIndex: number = 0; clusterIndex < clusters.length; clusterIndex++) {
-    const cluster: Set<Operation> = clusters[clusterIndex];
-    const allClusterDependencies: Set<Operation> = getDependenciesForCluster(cluster);
-    const outOfClusterDependencies: Set<Operation> = new Set(
-      [...allClusterDependencies].filter((e) => !cluster.has(e))
-    );
-
-    terminal.writeDebugLine(`Cluster ${clusterIndex}:`);
-    terminal.writeDebugLine(`- Dependencies: ${dedupeShards(outOfClusterDependencies).join(', ') || 'none'}`);
-    terminal.writeDebugLine(
-      `- Clustered by: \n${
-        [...allClusterDependencies]
-          .filter((e) => buildCacheByOperation.get(e)?.cacheDisabledReason)
-          .map((e) => `  - (${e.runner?.name}) "${buildCacheByOperation.get(e)?.cacheDisabledReason ?? ''}"`)
-          .join('\n') || '  - none'
-      }`
-    );
-    terminal.writeDebugLine(
-      `- Operations: ${Array.from(
-        cluster,
-        (e) => `${getName(e)}${e.runner?.isNoOp ? ' [SKIPPED]' : ''}`
-      ).join(', ')}`
-    );
-    terminal.writeDebugLine('--------------------------------------------------');
-  }
-  terminal.writeDebugLine('##################################################');
 }
