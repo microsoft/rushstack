@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Adds support for sharding to the heft configuration.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file"
+}
