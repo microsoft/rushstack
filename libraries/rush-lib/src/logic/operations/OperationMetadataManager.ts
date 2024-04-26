@@ -52,19 +52,15 @@ export class OperationMetadataManager {
 
     const identifier: string = phase.logFilenameIdentifier;
 
-    const operationPath: string | undefined = operation.shard
-      ? `${operation.name}_${operation.shard.current}`
-      : operation.name;
-    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/${operationPath}/${identifier}`;
+    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/${operation.name}/${identifier}`;
 
     this.stateFile = new OperationStateFile({
       projectFolder: projectFolder,
       metadataFolder: this._metadataFolder
     });
 
-    const operationName: string = `${operation.name}${operation.shard ? `_${operation.shard.current}` : ''}`;
-    this._relativeLogPath = `${this._metadataFolder}/${operationName}/all.log`;
-    this._relativeErrorLogPath = `${this._metadataFolder}/${operationName}/error.log`;
+    this._relativeLogPath = `${this._metadataFolder}/${operation.name}/all.log`;
+    this._relativeErrorLogPath = `${this._metadataFolder}/${operation.name}/error.log`;
     this._logPath = `${projectFolder}/${this._relativeLogPath}`;
     this._errorLogPath = `${projectFolder}/${this._relativeErrorLogPath}`;
   }

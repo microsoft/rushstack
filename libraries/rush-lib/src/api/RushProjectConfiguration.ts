@@ -44,8 +44,7 @@ export interface IRushProjectJson {
 
 export interface IRushPhaseSharding {
   count: number;
-  parameterTemplate?: string;
-  outputDirectoryTemplate?: string;
+  shardArgumentFormat?: string;
 }
 
 /**

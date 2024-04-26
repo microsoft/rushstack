@@ -24,10 +24,7 @@ export interface IOperationOptions {
    */
   runner?: IOperationRunner | undefined;
 
-  shard?: {
-    current: number;
-    total: number;
-  };
+  outputFolderNames?: string[];
 }
 
 /**
@@ -50,13 +47,6 @@ export class Operation {
    */
   public readonly associatedProject: RushConfigurationProject | undefined;
 
-  public readonly shard:
-    | {
-        current: number;
-        total: number;
-      }
-    | undefined;
-
   /**
    * A set of all operations which depend on this operation.
    */
@@ -72,6 +62,8 @@ export class Operation {
    * running the operation.
    */
   public runner: IOperationRunner | undefined = undefined;
+
+  public outputFolderNames: string[] | undefined;
 
   /**
    * The weight for this operation. This scalar is the contribution of this operation to the
@@ -90,7 +82,7 @@ export class Operation {
     this.associatedPhase = options?.phase;
     this.associatedProject = options?.project;
     this.runner = options?.runner;
-    this.shard = options?.shard;
+    this.outputFolderNames = options?.outputFolderNames;
   }
 
   /**

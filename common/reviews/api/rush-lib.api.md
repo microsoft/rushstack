@@ -577,14 +577,11 @@ export interface _IOperationMetadataManagerOptions {
 
 // @alpha
 export interface IOperationOptions {
+    // (undocumented)
+    outputFolderNames?: string[];
     phase?: IPhase | undefined;
     project?: RushConfigurationProject | undefined;
     runner?: IOperationRunner | undefined;
-    // (undocumented)
-    shard?: {
-        current: number;
-        total: number;
-    };
 }
 
 // @beta
@@ -882,12 +879,9 @@ export class Operation {
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
     get name(): string | undefined;
-    runner: IOperationRunner | undefined;
     // (undocumented)
-    readonly shard: {
-        current: number;
-        total: number;
-    } | undefined;
+    outputFolderNames: string[] | undefined;
+    runner: IOperationRunner | undefined;
     weight: number;
 }
 

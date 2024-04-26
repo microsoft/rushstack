@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminal } from '@rushstack/terminal';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type {
@@ -10,76 +9,147 @@ import type {
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import { Operation } from './Operation';
-import { type IRushPhaseSharding, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import type { IRushPhaseSharding, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { ShellOperationRunner } from './ShellOperationRunner';
+import {
+  getCustomParameterValuesByPhase,
+  getDisplayName,
+  getScriptToRun
+} from './ShellOperationRunnerPlugin';
+import { NullOperationRunner } from './NullOperationRunner';
+import { OperationStatus } from './OperationStatus';
 
 export const PLUGIN_NAME: 'ShardedPhasedOperationPlugin' = 'ShardedPhasedOperationPlugin';
 
 /**
- * Phased command that
+ * Phased command that shards a phase into multiple operations.
  */
 export class ShardedPhasedOperationPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.createOperations.tapPromise(PLUGIN_NAME, spliceShards);
+    hooks.createOperations.tap(PLUGIN_NAME, spliceShards);
   }
 }
 
-async function spliceShards(
-  existingOperations: Set<Operation>,
-  context: ICreateOperationsContext
-): Promise<Set<Operation>> {
-  const { terminal } = context;
+function spliceShards(existingOperations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
+  const { projectConfigurations, rushConfiguration } = context;
 
   const shardableOperations: Set<Operation> = new Set<Operation>();
 
   for (const operation of existingOperations) {
     const { associatedPhase: phase, associatedProject: project } = operation;
-    const shardConfig: IRushPhaseSharding | undefined = await getShardConfig(phase!, project!, terminal!);
+    const shardConfig: IRushPhaseSharding | undefined = getShardConfig(phase, project);
     if (shardConfig) {
       shardableOperations.add(operation);
     }
   }
+  const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
+    getCustomParameterValuesByPhase();
 
   for (const operation of shardableOperations) {
     const { associatedPhase: phase, associatedProject: project } = operation;
-    const shardConfig: IRushPhaseSharding | undefined = await getShardConfig(phase!, project!, terminal!);
+    const shardConfig: IRushPhaseSharding | undefined = getShardConfig(phase, project);
     if (phase && project && shardConfig && shardConfig.count > 1) {
-      const shards: number = shardConfig.count;
       existingOperations.delete(operation);
+
+      const collatorNode: Operation = new Operation({
+        phase,
+        project
+      });
+      existingOperations.add(collatorNode);
+      const collatorDisplayName: string = `${getDisplayName(phase, project)} - collate`;
+      const rawScript: string | undefined = project.packageJson.scripts?.[`${phase.name}:collate`];
+      if (rawScript) {
+        const collatorRunner: ShellOperationRunner = new ShellOperationRunner({
+          commandToRun: rawScript,
+          displayName: collatorDisplayName,
+          phase,
+          rushConfiguration,
+          rushProject: project
+        });
+        collatorNode.runner = collatorRunner;
+      } else {
+        collatorNode.runner = new NullOperationRunner({
+          name: collatorDisplayName,
+          result: OperationStatus.NoOp,
+          silent: phase.missingScriptBehavior === 'silent'
+        });
+      }
+      for (const dependent of operation.consumers) {
+        dependent.addDependency(collatorNode);
+        dependent.deleteDependency(operation);
+      }
+
+      const shards: number = shardConfig.count;
       for (const shard of Array.from({ length: shards }, (element, index) => index + 1)) {
+        let customParameters: readonly string[] = getCustomParameterValuesForPhase(phase);
+
+        // Add the shard argument to the custom parameters, replacing any templated values.
+        const shardArgumentFormat: string =
+          shardConfig.shardArgumentFormat ?? '--shard={shardIndex}/{shardCount}';
+        const outputDirectory: string = `.rush/shard/${shard}`;
+        const shardArgument: string = shardArgumentFormat
+          .replace('{shardIndex}', shard.toString())
+          .replace('{shardCount}', shards.toString());
+        const outputDirectoryArgument: string = `--output-directory="${outputDirectory}"`;
+        customParameters = [...customParameters, shardArgument, outputDirectoryArgument];
+
+        const commandToRun: string | undefined = getScriptToRun(
+          project,
+          phase.name,
+          customParameters,
+          phase.shellCommand
+        );
+        if (commandToRun === undefined && phase.missingScriptBehavior === 'error') {
+          throw new Error(
+            `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
+          );
+        }
+
         const shardOperation: Operation = new Operation({
           project,
           phase,
-          shard: {
-            current: shard,
-            total: shards
-          },
-          runner: operation.runner
+          outputFolderNames: [outputDirectory]
         });
+        const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}`;
+        if (commandToRun) {
+          const shardedShellOperationRunner: ShellOperationRunner = new ShellOperationRunner({
+            commandToRun,
+            displayName: shardDisplayName,
+            phase,
+            rushConfiguration,
+            rushProject: project
+          });
+          shardOperation.runner = shardedShellOperationRunner;
+        } else {
+          shardOperation.runner = new NullOperationRunner({
+            name: shardDisplayName,
+            result: OperationStatus.NoOp,
+            silent: phase.missingScriptBehavior === 'silent'
+          });
+        }
 
         for (const dependency of operation.dependencies) {
           shardOperation.addDependency(dependency);
           operation.deleteDependency(dependency);
         }
-        for (const dependent of operation.consumers) {
-          dependent.addDependency(shardOperation);
-          dependent.deleteDependency(operation);
-        }
+        collatorNode.addDependency(shardOperation);
         existingOperations.add(shardOperation);
       }
     }
   }
 
   return existingOperations;
-}
 
-async function getShardConfig(
-  phase: IPhase,
-  project: RushConfigurationProject,
-  terminal: ITerminal
-): Promise<IRushPhaseSharding | undefined> {
-  const rushProjectConfiguration: RushProjectConfiguration | undefined =
-    await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
-  if (rushProjectConfiguration) {
-    return rushProjectConfiguration.operationSettingsByOperationName.get(phase.name)?.sharding;
+  function getShardConfig(
+    phase: IPhase | undefined,
+    project: RushConfigurationProject | undefined
+  ): IRushPhaseSharding | undefined {
+    if (!phase || !project) {
+      return undefined;
+    }
+    const rushProjectConfiguration: RushProjectConfiguration | undefined = projectConfigurations.get(project);
+    if (rushProjectConfiguration) {
+      return rushProjectConfiguration.operationSettingsByOperationName.get(phase.name)?.sharding;
+    }
   }
 }
