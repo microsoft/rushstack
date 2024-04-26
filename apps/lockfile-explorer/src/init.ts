@@ -31,19 +31,18 @@ export const init = (options: {
     const pnpmLockPath: string = path.resolve(currExploredDir, 'pnpm-lock.yaml');
     if (FileSystem.exists(rushJsonPath)) {
       console.log('Found a Rush workspace: ', rushJsonPath);
-      // Load the rush projects
-      const rushJson: IRushConfigurationJson = JsonFile.load(rushJsonPath);
+
+      const rushConfiguration: RushConfiguration = RushConfiguration.tryLoadFromDefaultLocation()!;
+      const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
+      const workspaceFolder: string = subspace.getSubspaceTempFolder();
+
       const projectsByProjectFolder: Map<string, IRushProjectDetails> = new Map();
-      for (const project of rushJson.projects) {
+      for (const project of rushConfiguration.projects) {
         projectsByProjectFolder.set(project.projectFolder, {
           projectName: project.packageName,
           projectFolder: project.projectFolder
         });
       }
-
-      const rushConfiguration: RushConfiguration = RushConfiguration.tryLoadFromDefaultLocation()!;
-      const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
-      const workspaceFolder: string = subspace.getSubspaceTempFolder();
 
       appState = {
         currDir,
