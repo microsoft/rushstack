@@ -78,6 +78,7 @@
             "type": "object",
             "description": "If specified, the operation will be a 'sharded' operation. This means that the operation will be run multiple times in parallel.",
             "additionalProperties": false,
+            "required": ["count"],
             "properties": {
               "count": {
                 "type": "integer",
@@ -85,7 +86,7 @@
               },
               "shardArgumentFormat": {
                 "type": "string",
-                "description": "A template string that specifies the command-line argument to pass to the operation for each shard. The string may contain the following placeholders: {shardIndex} {shardCount}. Defaults to --shard \"{shardIndex}/{shardCount}\""
+                "description": "A template string that specifies the command-line argument to pass to the operation for each shard. The string may contain the following placeholders: {shardIndex} {shardCount}. Defaults to --shard=\"{shardIndex}/{shardCount}\""
               }
             }
           }

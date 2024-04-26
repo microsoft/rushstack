@@ -107,6 +107,7 @@ export interface IJestPluginOptions {
   updateSnapshots?: boolean;
   logHeapUsage?: boolean;
   shard?: string;
+  coverageDirectory?: string;
 }
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
@@ -199,6 +200,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const testPathPatternParameter: CommandLineStringParameter =
       parameters.getStringParameter('--test-path-pattern');
     const shard: CommandLineStringParameter = parameters.getStringParameter('--shard');
+    const shardOutputDirectory: CommandLineStringParameter =
+      parameters.getStringParameter('--shard-output-directory');
 
     // String lists
     const findRelatedTestsParameter: CommandLineStringListParameter =
@@ -230,16 +233,18 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       enableNodeEnvManagement: pluginOptions?.enableNodeEnvManagement ?? true
     };
 
-    const additionalOptions: Record<string, string> = {};
     if (shard.value) {
-      additionalOptions.shard = shard.value;
+      if (!shardOutputDirectory.value) {
+        throw new Error(
+          'The --shard-output-directory parameter must be provided when using the --shard parameter.'
+        );
+      }
+      options.shard = shard.value;
+      options.coverageDirectory = shardOutputDirectory.value;
     }
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runJestAsync(taskSession, heftConfiguration, {
-        ...options,
-        ...additionalOptions
-      });
+      await this._runJestAsync(taskSession, heftConfiguration, options);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
@@ -677,10 +682,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
     if (options.disableCodeCoverage) {
       jestConfig.collectCoverage = false;
-    }
-
-    if (jestConfig.collectCoverage && shard) {
-      jestConfig.coverageDirectory = path.join('<rootDir>', '.shards', `shard-${shard.split('/')[0]}`);
     }
 
     // Stringify the config and pass it into Jest directly

@@ -88,11 +88,11 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         // Add the shard argument to the custom parameters, replacing any templated values.
         const shardArgumentFormat: string =
           operationSettings.sharding.shardArgumentFormat ?? '--shard={shardIndex}/{shardCount}';
-        const outputDirectory: string = `.rush/shard/${shard}`;
+        const outputDirectory: string = `.rush/shards/${shard}`;
         const shardArgument: string = shardArgumentFormat
           .replace('{shardIndex}', shard.toString())
           .replace('{shardCount}', shards.toString());
-        const outputDirectoryArgument: string = `--output-directory="${outputDirectory}"`;
+        const outputDirectoryArgument: string = `--shard-output-directory="${outputDirectory}"`;
         customParameters = [...customParameters, shardArgument, outputDirectoryArgument];
 
         const commandToRun: string | undefined = getScriptToRun(
@@ -135,10 +135,12 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
         for (const dependency of operation.dependencies) {
           shardOperation.addDependency(dependency);
-          operation.deleteDependency(dependency);
         }
         collatorNode.addDependency(shardOperation);
         existingOperations.add(shardOperation);
+      }
+      for (const dependency of operation.dependencies) {
+        operation.deleteDependency(dependency);
       }
     }
   }
