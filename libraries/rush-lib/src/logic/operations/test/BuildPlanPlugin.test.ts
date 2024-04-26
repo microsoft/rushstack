@@ -12,26 +12,28 @@ jest.mock('@rushstack/terminal', () => {
 });
 import { MockWritable, Terminal } from '@rushstack/terminal';
 import { BuildPlanPlugin } from '../BuildPlanPlugin';
-import { ICreateOperationsContext, PhasedCommandHooks } from '../../../pluginFramework/PhasedCommandHooks';
+import {
+  type ICreateOperationsContext,
+  PhasedCommandHooks
+} from '../../../pluginFramework/PhasedCommandHooks';
 import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
 import { CollatedTerminal, StreamCollator } from '@rushstack/stream-collator';
-import { Operation } from '../Operation';
+import type { Operation } from '../Operation';
 import path from 'path';
 import { RushConfiguration } from '../../../api/RushConfiguration';
 import {
   CommandLineConfiguration,
-  IPhase,
-  IPhasedCommandConfig
+  type IPhase,
+  type IPhasedCommandConfig
 } from '../../../api/CommandLineConfiguration';
-import { ICommandLineJson } from '../../../api/CommandLineJson';
+import type { ICommandLineJson } from '../../../api/CommandLineJson';
 import { JsonFile } from '@rushstack/node-core-library';
 import { OperationExecutionRecord } from '../OperationExecutionRecord';
-import { NullOperationRunner } from '../NullOperationRunner';
-import { OperationStatus } from '../OperationStatus';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
-import { RushConfigurationProject } from '../../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import { MockOperationRunner } from './MockOperationRunner';
+import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 
 const mockWritable: MockWritable = new MockWritable();
 const mockTerminal: Terminal = new Terminal(new CollatedTerminalProvider(new CollatedTerminal(mockWritable)));
@@ -107,7 +109,11 @@ describe('BuildPlanPlugin', () => {
 
       new BuildPlanPlugin(mockTerminal).apply(hooks);
       const context: Pick<ICreateOperationsContext, 'projectChangeAnalyzer' | 'projectConfigurations'> = {
-        projectChangeAnalyzer: {} as any,
+        projectChangeAnalyzer: {
+          [ProjectChangeAnalyzer.prototype._tryGetProjectDependenciesAsync.name]: async () => {
+            return new Map();
+          }
+        } as unknown as ProjectChangeAnalyzer,
         projectConfigurations: new Map()
       };
       const buildCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(

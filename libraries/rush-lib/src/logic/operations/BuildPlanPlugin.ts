@@ -69,7 +69,7 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
           buildCacheByOperation.set(operation, { cacheDisabledReason });
         }
       }
-      const buildPlan = createCobuildPlan(disjointSet, terminal, buildCacheByOperation);
+      const buildPlan: ICobuildPlan = createCobuildPlan(disjointSet, terminal, buildCacheByOperation);
       logCobuildBuildPlan(buildPlan, terminal);
     }
   }
