@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "[BaseInstallManager] canSkipInstall need to consider pnpm-config.json file also",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
