@@ -42,15 +42,6 @@ function startApp(debugMode: boolean): void {
   // Must not have a trailing slash
   const SERVICE_URL: string = `http://localhost:${PORT}`;
 
-  // TODO: Later if we introduce more CLI parameters, switch to a proper CLI parser
-  const args: string[] = process.argv.slice(2);
-  if (args.length > 0 && args[0] !== '--debug') {
-    console.log('Usage: lockfile-explorer [--debug]\n');
-    console.log('The "lfx" command is a shorthand alias for "lockfile-explorer".');
-    console.log('See the project website for documentation and support.\n');
-    throw new AlreadyReportedError();
-  }
-
   const appState: IAppState = init({ lockfileExplorerProjectRoot, appVersion, debugMode });
 
   // Important: This must happen after init() reads the current working directory

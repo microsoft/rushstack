@@ -90,7 +90,10 @@ function getImporterValue(
  *
  * @returns A list of all the LockfileEntries in the lockfile.
  */
-export function generateLockfileGraph(lockfile: ILockfilePackageType, subspaceName: string): LockfileEntry[] {
+export function generateLockfileGraph(
+  lockfile: ILockfilePackageType,
+  subspaceName?: string
+): LockfileEntry[] {
   let pnpmLockfileVersion: PnpmLockfileVersion = PnpmLockfileVersion.V5;
   if (`${lockfile.lockfileVersion}`.startsWith('6')) {
     pnpmLockfileVersion = PnpmLockfileVersion.V6;

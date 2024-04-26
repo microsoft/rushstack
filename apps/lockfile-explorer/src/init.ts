@@ -38,8 +38,8 @@ export const init = (options: {
   let currExploredDir = Path.convertToSlashes(currDir);
   while (currExploredDir.includes('/')) {
     // Look for a rush.json [rush project] or pnpm-lock.yaml file [regular pnpm workspace]
-    const rushJsonPath: string = path.join(currExploredDir, 'rush.json');
-    const pnpmLockPath: string = path.join(currExploredDir, 'pnpm-lock.yaml');
+    const rushJsonPath: string = path.resolve(currExploredDir, 'rush.json');
+    const pnpmLockPath: string = path.resolve(currExploredDir, 'pnpm-lock.yaml');
     if (FileSystem.exists(rushJsonPath)) {
       console.log('Found a Rush workspace: ', rushJsonPath);
       // Load the rush projects
