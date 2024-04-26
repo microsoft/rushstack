@@ -123,8 +123,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     if (operation.associatedPhase && operation.associatedProject) {
       this._operationMetadataManager = new OperationMetadataManager({
         phase: operation.associatedPhase,
-        rushProject: operation.associatedProject,
-        operation
+        rushProject: operation.associatedProject
       });
     }
     this._context = context;
