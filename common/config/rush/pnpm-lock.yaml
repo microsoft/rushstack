@@ -918,10 +918,10 @@ importers:
         version: file:../../apps/heft
       '@rushstack/heft-lint-plugin':
         specifier: workspace:*
-        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.66.0)
+        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.6)
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
-        version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.66.0)
+        version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.6)
       eslint:
         specifier: ~8.7.0
         version: 8.7.0(supports-color@8.1.1)
@@ -1532,39 +1532,6 @@ importers:
         specifier: ~5.3.3
         version: 5.3.3
 
-  ../../build-tests/heft-jest-shards-test:
-    devDependencies:
-      '@jest/types':
-        specifier: 29.5.0
-        version: 29.5.0
-      '@rushstack/heft':
-        specifier: workspace:*
-        version: link:../../apps/heft
-      '@rushstack/heft-jest-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-jest-plugin
-      '@rushstack/heft-lint-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-lint-plugin
-      '@rushstack/heft-typescript-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-typescript-plugin
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      eslint:
-        specifier: ~8.7.0
-        version: 8.7.0(supports-color@8.1.1)
-      local-eslint-config:
-        specifier: workspace:*
-        version: link:../../eslint/local-eslint-config
-      typescript:
-        specifier: ~5.3.3
-        version: 5.3.3
-
   ../../build-tests/heft-minimal-rig-test:
     dependencies:
       '@microsoft/api-extractor':
@@ -1979,7 +1946,7 @@ importers:
         version: 29.5.12
       '@types/node':
         specifier: ts4.9
-        version: 20.12.7
+        version: 20.11.22
       eslint:
         specifier: ~8.7.0
         version: 8.7.0(supports-color@8.1.1)
@@ -11964,8 +11931,8 @@ packages:
   /@types/node@18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node@20.12.7:
-    resolution: {integrity: sha512-wq0cICSkRLVaf3UGLMGItu/PtdY7oaXaI/RVU+xliKVOtRna3PRY57ZDfztpDL0n11vfymMUnXv8QwYCO7L1wg==}
+  /@types/node@20.11.22:
+    resolution: {integrity: sha512-/G+IxWxma6V3E+pqK1tSl2Fo1kl41pK1yeCyDsgkF9WlVAme4j5ISYM2zR11bgLFJGLN5sVK40T4RJNuiZbEjA==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -13512,17 +13479,7 @@ packages:
       '@aws-cdk/asset-awscli-v1': 2.2.202
       '@aws-cdk/asset-kubectl-v20': 2.1.2
       '@aws-cdk/asset-node-proxy-agent-v5': 2.0.166
-      '@balena/dockerignore': 1.0.2
-      case: 1.6.3
       constructs: 10.0.130
-      fs-extra: 11.2.0
-      ignore: 5.3.1
-      jsonschema: 1.4.1
-      minimatch: 3.1.2
-      punycode: 2.3.1
-      semver: 7.5.4
-      table: 6.8.1
-      yaml: 1.10.2
     dev: true
     bundledDependencies:
       - '@balena/dockerignore'
@@ -17600,15 +17557,6 @@ packages:
   /fs-extra@10.1.0:
     resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
     engines: {node: '>=12'}
-    dependencies:
-      graceful-fs: 4.2.11
-      jsonfile: 6.1.0
-      universalify: 2.0.1
-    dev: true
-
-  /fs-extra@11.2.0:
-    resolution: {integrity: sha512-PmDi3uwK5nFuXh7XDTlVnS17xJS7vW36is2+w3xcv8SVxiB4NyATf4ctkVY5bkSjX0Y4nbvZCq1/EjtEyr9ktw==}
-    engines: {node: '>=14.14'}
     dependencies:
       graceful-fs: 4.2.11
       jsonfile: 6.1.0
@@ -27103,7 +27051,7 @@ packages:
       - supports-color
     dev: true
 
-  file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.66.0):
+  file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.6):
     resolution: {directory: ../../heft-plugins/heft-lint-plugin, type: directory}
     id: file:../../heft-plugins/heft-lint-plugin
     name: '@rushstack/heft-lint-plugin'
@@ -27115,7 +27063,7 @@ packages:
       semver: 7.5.4
     dev: true
 
-  file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.66.0):
+  file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.6):
     resolution: {directory: ../../heft-plugins/heft-typescript-plugin, type: directory}
     id: file:../../heft-plugins/heft-typescript-plugin
     name: '@rushstack/heft-typescript-plugin'
