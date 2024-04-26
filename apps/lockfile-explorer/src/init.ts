@@ -5,7 +5,12 @@
 // Currently it will throw error if neither can be determined
 
 import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
-import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushConfiguration';
+import {
+  type IRushConfigurationJson,
+  RushConfiguration
+} from '@microsoft/rush-lib/lib/api/RushConfiguration';
+import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
+import path from 'path';
 
 import { type IAppState, type IRushProjectDetails, ProjectType } from './state';
 
@@ -17,12 +22,24 @@ export const init = (options: {
   const { lockfileExplorerProjectRoot, appVersion, debugMode } = options;
   const currDir = process.cwd();
 
+  let subspaceName: string = 'default';
+
+  if (process.argv.indexOf('--subspace') >= 0) {
+    if (process.argv[2] !== '--subspace') {
+      throw new Error(
+        'If you want to specify a subspace, you should place "--subspace <subspace_name>" immediately after the "lockfile-explorer" command'
+      );
+    }
+
+    subspaceName = process.argv[3];
+  }
+
   let appState: IAppState | undefined;
   let currExploredDir = Path.convertToSlashes(currDir);
   while (currExploredDir.includes('/')) {
     // Look for a rush.json [rush project] or pnpm-lock.yaml file [regular pnpm workspace]
-    const rushJsonPath: string = `${currExploredDir}/rush.json`;
-    const pnpmLockPath: string = `${currExploredDir}/pnpm-lock.yaml`;
+    const rushJsonPath: string = path.join(currExploredDir, 'rush.json');
+    const pnpmLockPath: string = path.join(currExploredDir, 'pnpm-lock.yaml');
     if (FileSystem.exists(rushJsonPath)) {
       console.log('Found a Rush workspace: ', rushJsonPath);
       // Load the rush projects
@@ -35,19 +52,24 @@ export const init = (options: {
         });
       }
 
+      const rushConfiguration: RushConfiguration = RushConfiguration.tryLoadFromDefaultLocation()!;
+      const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
+      const workspaceFolder: string = subspace.getSubspaceTempFolder();
+
       appState = {
         currDir,
         appVersion,
         debugMode,
         lockfileExplorerProjectRoot,
         projectType: ProjectType.RUSH_PROJECT,
-        pnpmLockfileLocation: `${currExploredDir}/common/config/rush/pnpm-lock.yaml`,
-        pnpmfileLocation: `${currExploredDir}/common/config/rush/.pnpmfile.cjs`,
+        pnpmLockfileLocation: path.resolve(workspaceFolder, 'pnpm-lock.yaml'),
+        pnpmfileLocation: path.resolve(workspaceFolder, '.pnpmfile.cjs'),
         projectRoot: currExploredDir,
         rush: {
           rushJsonPath,
           projectsByProjectFolder
-        }
+        },
+        subspaceName
       };
       break;
     } else if (FileSystem.exists(pnpmLockPath)) {
@@ -57,8 +79,8 @@ export const init = (options: {
         debugMode,
         lockfileExplorerProjectRoot,
         projectType: ProjectType.PNPM_WORKSPACE,
-        pnpmLockfileLocation: `${currExploredDir}/pnpm-lock.yaml`,
-        pnpmfileLocation: `${currExploredDir}/.pnpmfile.cjs`,
+        pnpmLockfileLocation: path.resolve(currExploredDir, 'pnpm-lock.yaml'),
+        pnpmfileLocation: path.resolve(currExploredDir, '.pnpmfile.cjs'),
         projectRoot: currExploredDir
       };
 

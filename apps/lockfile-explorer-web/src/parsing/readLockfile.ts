@@ -90,7 +90,7 @@ function getImporterValue(
  *
  * @returns A list of all the LockfileEntries in the lockfile.
  */
-export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileEntry[] {
+export function generateLockfileGraph(lockfile: ILockfilePackageType, subspaceName: string): LockfileEntry[] {
   let pnpmLockfileVersion: PnpmLockfileVersion = PnpmLockfileVersion.V5;
   if (`${lockfile.lockfileVersion}`.startsWith('6')) {
     pnpmLockfileVersion = PnpmLockfileVersion.V6;
@@ -122,7 +122,8 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
         rawEntryId: importerKey,
         kind: LockfileEntryFilter.Project,
         rawYamlData: getImporterValue(importerValue, pnpmLockfileVersion),
-        duplicates
+        duplicates,
+        subspaceName
       });
       allImporters.push(importer);
       allEntries.push(importer);
@@ -179,7 +180,7 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
 
 export async function readLockfileAsync(): Promise<LockfileEntry[]> {
   const response = await fetch(`${serviceUrl}/api/lockfile`);
-  const lockfile: ILockfilePackageType = await response.json();
+  const lockfile: { doc: ILockfilePackageType; subspaceName: string } = await response.json();
 
-  return generateLockfileGraph(lockfile);
+  return generateLockfileGraph(lockfile.doc, lockfile.subspaceName);
 }

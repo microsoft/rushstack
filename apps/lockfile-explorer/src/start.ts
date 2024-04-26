@@ -97,7 +97,10 @@ function startApp(debugMode: boolean): void {
   app.get('/api/lockfile', async (req: express.Request, res: express.Response) => {
     const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
     const doc = yaml.load(pnpmLockfileText);
-    res.send(doc);
+    res.send({
+      doc,
+      subspaceName: appState.subspaceName
+    });
   });
 
   app.get('/api/health', (req: express.Request, res: express.Response) => {

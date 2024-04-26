@@ -20,6 +20,7 @@ export interface IAppStateBase {
   pnpmfileLocation: string;
   appVersion: string;
   debugMode: boolean;
+  subspaceName?: string;
 }
 
 export interface IRushAppState extends IAppStateBase {
