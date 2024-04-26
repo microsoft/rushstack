@@ -612,6 +612,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
     const jestArgv: Config.Argv = {
       shard,
+      coverageDirectory: options.coverageDirectory,
 
       // In debug mode, avoid forking separate processes that are difficult to debug
       runInBand: taskSession.parameters.debug,

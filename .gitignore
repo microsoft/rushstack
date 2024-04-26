@@ -75,7 +75,7 @@ jspm_packages
 common/deploy/
 common/temp/
 common/autoinstallers/*/.npmrc
-**/.rush/temp/
+**/.rush
 *.lock
 
 # Heft temporary files
