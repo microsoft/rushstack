@@ -324,5 +324,5 @@ export class RushConstants {
   /**
    * The filename for the last link flag
    */
-  public static readonly lastLinkFlagFilename: 'last-link';
+  public static readonly lastLinkFlagFilename: 'last-link' = 'last-link';
 }
