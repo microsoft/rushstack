@@ -92,8 +92,6 @@ export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';
 
-export { ILockfileValidityCheckOptions as _ILockfileValidityCheckOptions } from './api/LastInstallFlag';
-
 export { FlagFile as _FlagFile } from './api/FlagFile';
 
 export {

@@ -19,10 +19,6 @@ export class FlagFile<T extends object = JsonObject> {
    * Content of the flag
    */
   protected _state: T;
-  /**
-   * Whether the current state is modified
-   */
-  protected _isModified: boolean;
 
   /**
    * Creates a new flag file
@@ -32,7 +28,6 @@ export class FlagFile<T extends object = JsonObject> {
   public constructor(folderPath: string, flagName: string, state?: Partial<T>) {
     this.path = path.join(folderPath, `${flagName}.flag`);
     this._state = (state || {}) as T;
-    this._isModified = true;
   }
 
   /**
@@ -59,29 +54,6 @@ export class FlagFile<T extends object = JsonObject> {
     JsonFile.save(this._state, this.path, {
       ensureFolderExists: true
     });
-  }
-
-  /**
-   * Merge new data into current state by "merge"
-   */
-  public mergeFromObject(data: JsonObject): void {
-    if (isMatch(this._state, data)) {
-      return;
-    }
-    merge(this._state, data);
-    this._isModified = true;
-  }
-
-  /**
-   * Writes the flag file to disk with the current state if modified
-   */
-  public saveIfModified(): void {
-    if (this._isModified) {
-      JsonFile.save(this._state, this.path, {
-        ensureFolderExists: true
-      });
-      this._isModified = false;
-    }
   }
 
   /**

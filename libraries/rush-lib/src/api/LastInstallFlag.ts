@@ -56,10 +56,7 @@ export interface ILastInstallFlagJson {
   [key: string]: unknown;
 }
 
-/**
- * @internal
- */
-export interface ILockfileValidityCheckOptions {
+interface ILockfileValidityCheckOptions {
   statePropertiesToIgnore?: string[];
   rushVerb?: string;
 }
@@ -69,11 +66,10 @@ export interface ILockfileValidityCheckOptions {
  * indicate that something installed in the folder was successfully completed.
  * It also compares state, so that if something like the Node.js version has changed,
  * it can invalidate the last install.
- * @internal
  */
 export class LastInstallFlag {
   /**
-   * Flag file path
+   * Returns the full path to the flag file
    */
   public readonly path: string;
 
@@ -81,59 +77,15 @@ export class LastInstallFlag {
    * Content of the flag
    */
   protected _state: ILastInstallFlagJson;
-  /**
-   * Whether the current state is modified
-   */
-  protected _isModified: boolean;
 
   /**
-   * Creates a new flag file
+   * Creates a new LastInstall flag
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
    */
   public constructor(folderPath: string, state?: Partial<ILastInstallFlagJson>) {
     this.path = path.join(folderPath, this.flagName);
     this._state = (state || {}) as ILastInstallFlagJson;
-    this._isModified = true;
-  }
-
-  /**
-   * Writes the flag file to disk with the current state
-   */
-  public create(): void {
-    JsonFile.save(this._state, this.path, {
-      ensureFolderExists: true
-    });
-  }
-
-  /**
-   * Merge new data into current state by "merge"
-   */
-  public mergeFromObject(data: JsonObject): void {
-    if (isMatch(this._state, data)) {
-      return;
-    }
-    merge(this._state, data);
-    this._isModified = true;
-  }
-
-  /**
-   * Removes the flag file
-   */
-  public clear(): void {
-    FileSystem.deleteFile(this.path);
-  }
-
-  /**
-   * Writes the flag file to disk with the current state if modified
-   */
-  public saveIfModified(): void {
-    if (this._isModified) {
-      JsonFile.save(this._state, this.path, {
-        ensureFolderExists: true
-      });
-      this._isModified = false;
-    }
   }
 
   public isValid(options?: ILockfileValidityCheckOptions): boolean {
@@ -171,7 +123,7 @@ export class LastInstallFlag {
       return false;
     }
 
-    const newState: ILastInstallFlagJson = this._state;
+    const newState: ILastInstallFlagJson = { ...this._state };
     if (statePropertiesToIgnore) {
       for (const optionToIgnore of statePropertiesToIgnore) {
         delete newState[optionToIgnore];
@@ -224,6 +176,32 @@ export class LastInstallFlag {
     }
 
     return true;
+  }
+
+  /**
+   * Writes the flag file to disk with the current state
+   */
+  public create(): void {
+    JsonFile.save(this._state, this.path, {
+      ensureFolderExists: true
+    });
+  }
+
+  /**
+   * Merge new data into current state by "merge"
+   */
+  public mergeFromObject(data: JsonObject): void {
+    if (isMatch(this._state, data)) {
+      return;
+    }
+    merge(this._state, data);
+  }
+
+  /**
+   * Removes the flag file
+   */
+  public clear(): void {
+    FileSystem.deleteFile(this.path);
   }
 
   /**
