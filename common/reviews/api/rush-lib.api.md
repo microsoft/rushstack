@@ -315,11 +315,8 @@ export class _FlagFile<T extends object = JsonObject> {
     constructor(folderPath: string, flagName: string, state?: Partial<T>);
     clear(): void;
     create(): void;
-    protected _isModified: boolean;
     isValid(): boolean;
-    mergeFromObject(data: JsonObject): void;
     readonly path: string;
-    saveIfModified(): void;
     protected _state: T;
 }
 
@@ -521,14 +518,6 @@ export interface ILaunchOptions {
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
     terminalProvider?: ITerminalProvider;
-}
-
-// @internal (undocumented)
-export interface _ILockfileValidityCheckOptions {
-    // (undocumented)
-    rushVerb?: string;
-    // (undocumented)
-    statePropertiesToIgnore?: string[];
 }
 
 // @beta (undocumented)

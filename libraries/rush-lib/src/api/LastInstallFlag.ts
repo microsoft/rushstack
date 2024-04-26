@@ -68,15 +68,12 @@ interface ILockfileValidityCheckOptions {
  * it can invalidate the last install.
  */
 export class LastInstallFlag {
+  private _state: ILastInstallFlagJson;
+
   /**
    * Returns the full path to the flag file
    */
   public readonly path: string;
-
-  /**
-   * Content of the flag
-   */
-  protected _state: ILastInstallFlagJson;
 
   /**
    * Creates a new LastInstall flag
@@ -88,6 +85,9 @@ export class LastInstallFlag {
     this._state = (state || {}) as ILastInstallFlagJson;
   }
 
+  /**
+   * Returns true if the file exists and the contents match the current state.
+   */
   public isValid(options?: ILockfileValidityCheckOptions): boolean {
     return this._isValid(false, options);
   }

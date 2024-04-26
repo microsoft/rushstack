@@ -253,18 +253,15 @@ export abstract class BaseInstallManager {
           );
         }
       }
-      // Perform any post-install work the install manager requires
-      await this.postInstallAsync(subspace);
-
-      // Create the marker file to indicate a successful install
-      commonTempInstallFlag.create();
     } else {
       // eslint-disable-next-line no-console
       console.log('Installation is already up-to-date.');
-
-      // Perform any post-install work the install manager requires
-      await this.postInstallAsync(subspace);
     }
+
+    // Perform any post-install work the install manager requires
+    await this.postInstallAsync(subspace);
+    // Create the marker file to indicate a successful install
+    commonTempInstallFlag.create();
 
     // eslint-disable-next-line no-console
     console.log('');
@@ -488,7 +485,6 @@ export abstract class BaseInstallManager {
         this.prepareCommonTempAsync(subspace, shrinkwrapFile),
         projectImpactGraphGenerator?.validateAsync()
       ]);
-
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
     this._syncTempShrinkwrap(subspace, shrinkwrapFile);

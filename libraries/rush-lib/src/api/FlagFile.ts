@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
-import { isMatch, merge, objectsAreDeepEqual } from '../utilities/objectUtilities';
+import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
 /**
  * A base class for flag file.
