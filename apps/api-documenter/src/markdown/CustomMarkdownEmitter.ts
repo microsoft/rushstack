@@ -89,8 +89,6 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
         // whereas VS Code's renderer is totally fine with it.
         writer.ensureSkippedLine();
 
-        context.insideTable = true;
-
         // Markdown table rows can have inconsistent cell counts.  Size the table based on the longest row.
         let columnCount: number = 0;
         if (docTable.header) {
@@ -102,39 +100,43 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
           }
         }
 
-        // write the table header (which is required by Markdown)
-        writer.write('| ');
-        for (let i: number = 0; i < columnCount; ++i) {
-          writer.write(' ');
-          if (docTable.header) {
+        writer.write('<table>');
+        if (docTable.header) {
+          writer.write('<thead><tr>');
+          for (let i: number = 0; i < columnCount; ++i) {
+            writer.write('<th>');
+            writer.ensureNewLine();
+            writer.writeLine();
             const cell: DocTableCell | undefined = docTable.header.cells[i];
             if (cell) {
               this.writeNode(cell.content, context, false);
             }
+            writer.ensureNewLine();
+            writer.writeLine();
+            writer.write('</th>');
           }
-          writer.write(' |');
+          writer.write('</tr></thead>');
         }
         writer.writeLine();
 
-        // write the divider
-        writer.write('| ');
-        for (let i: number = 0; i < columnCount; ++i) {
-          writer.write(' --- |');
-        }
-        writer.writeLine();
-
+        writer.write('<tbody>');
         for (const row of docTable.rows) {
-          writer.write('| ');
+          writer.write('<tr>');
           for (const cell of row.cells) {
-            writer.write(' ');
+            writer.write('<td>');
+            writer.ensureNewLine();
+            writer.writeLine();
             this.writeNode(cell.content, context, false);
-            writer.write(' |');
+            writer.ensureNewLine();
+            writer.writeLine();
+            writer.write('</td>');
           }
+          writer.write('</tr>');
           writer.writeLine();
         }
+        writer.write('</tbody>');
+        writer.write('</table>');
         writer.writeLine();
-
-        context.insideTable = false;
 
         break;
       }

@@ -15,6 +15,6 @@
     "@types/node": "18.17.15",
     "@typescript-eslint/parser": "~6.19.0",
     "eslint": "7.11.0",
-    "typescript": "~5.3.3"
+    "typescript": "~5.4.2"
   }
 }

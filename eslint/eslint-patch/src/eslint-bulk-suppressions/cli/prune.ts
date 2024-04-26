@@ -1,12 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ExecException, exec } from 'child_process';
-import { getEslintCli } from './utils/get-eslint-cli';
-import { printPruneHelp } from './utils/print-help';
+import fs from 'fs';
 
-export function prune() {
-  const args = process.argv.slice(3);
+import { printPruneHelp } from './utils/print-help';
+import { runEslintAsync } from './runEslint';
+import { ESLINT_BULK_PRUNE_ENV_VAR_NAME } from '../constants';
+import {
+  deleteBulkSuppressionsFileInEslintrcFolder,
+  getSuppressionsConfigForEslintrcFolderPath
+} from '../bulk-suppressions-file';
+
+export async function pruneAsync(): Promise<void> {
+  const args: string[] = process.argv.slice(3);
 
   if (args.includes('--help') || args.includes('-h')) {
     printPruneHelp();
@@ -17,30 +23,46 @@ export function prune() {
     throw new Error(`@rushstack/eslint-bulk: Unknown arguments: ${args.join(' ')}`);
   }
 
-  const eslintCLI = getEslintCli(process.cwd());
+  const normalizedCwd: string = process.cwd().replace(/\\/g, '/');
+  const allFiles: string[] = await getAllFilesWithExistingSuppressionsForCwdAsync(normalizedCwd);
+  if (allFiles.length > 0) {
+    process.env[ESLINT_BULK_PRUNE_ENV_VAR_NAME] = '1';
+    console.log(`Pruning suppressions for ${allFiles.length} files...`);
+    await runEslintAsync(allFiles, 'prune');
+  } else {
+    console.log('No files with existing suppressions found.');
+    deleteBulkSuppressionsFileInEslintrcFolder(normalizedCwd);
+  }
+}
 
-  const env: NodeJS.ProcessEnv = { ...process.env, ESLINT_BULK_PRUNE: 'true' };
+async function getAllFilesWithExistingSuppressionsForCwdAsync(normalizedCwd: string): Promise<string[]> {
+  const { jsonObject: bulkSuppressionsConfigJson } =
+    getSuppressionsConfigForEslintrcFolderPath(normalizedCwd);
+  const allFiles: Set<string> = new Set();
+  for (const { file: filePath } of bulkSuppressionsConfigJson.suppressions) {
+    allFiles.add(filePath);
+  }
 
-  exec(
-    `${eslintCLI} . --format=json`,
-    { env },
-    (error: ExecException | null, stdout: string, stderr: string) => {
-      // if errorCount != 0, ESLint will process.exit(1) giving the false impression
-      // that the exec failed, even though linting errors are to be expected
-      const eslintOutputWithErrorRegex = /"errorCount":(?!0)\d+/;
-      const isEslintError = error !== null && error.code === 1 && eslintOutputWithErrorRegex.test(stdout);
+  const allFilesArray: string[] = Array.from(allFiles);
 
-      if (error && !isEslintError) {
-        throw new Error(`@rushstack/eslint-bulk execution error: ${error.message}`);
+  const allExistingFiles: string[] = [];
+  // TODO: limit parallelism here with something similar to `Async.forEachAsync` from `node-core-library`.
+  await Promise.all(
+    allFilesArray.map(async (filePath: string) => {
+      try {
+        await fs.promises.access(filePath, fs.constants.F_OK);
+        allExistingFiles.push(filePath);
+      } catch {
+        // Doesn't exist - ignore
       }
-
-      if (stderr) {
-        throw new Error(`@rushstack/eslint-bulk ESLint errors: ${stderr}`);
-      }
-
-      console.log(
-        `@rushstack/eslint-bulk: Successfully pruned unused suppressions in all .eslint-bulk-suppressions.json files under directory ${process.cwd()}`
-      );
-    }
+    })
   );
+
+  console.log(`Found ${allExistingFiles.length} files with existing suppressions.`);
+  const deletedCount: number = allFilesArray.length - allExistingFiles.length;
+  if (deletedCount > 0) {
+    console.log(`${deletedCount} files with suppressions were deleted.`);
+  }
+
+  return allExistingFiles;
 }

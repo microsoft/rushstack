@@ -2,9 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import type { IPackageJson } from '@rushstack/node-core-library';
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
-import type { PackageExtractor, IExtractorProjectConfiguration } from '@rushstack/package-extractor';
+import type {
+  PackageExtractor,
+  IExtractorProjectConfiguration,
+  IExtractorSubspace
+} from '@rushstack/package-extractor';
 
 import { BaseRushAction } from './BaseRushAction';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
@@ -14,6 +17,7 @@ import type {
   DeployScenarioConfiguration,
   IDeployScenarioProjectJson
 } from '../../logic/deploy/DeployScenarioConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export class DeployAction extends BaseRushAction {
   private readonly _logger: ILogger;
@@ -99,6 +103,25 @@ export class DeployAction extends BaseRushAction {
     });
   }
 
+  private _getDependencyProjects(project: RushConfigurationProject): Set<RushConfigurationProject> {
+    const projects: Set<RushConfigurationProject> = new Set();
+    const queue: RushConfigurationProject[] = [project];
+    const visited: Set<RushConfigurationProject> = new Set();
+
+    while (queue.length > 0) {
+      const _project: RushConfigurationProject = queue.pop()!;
+      projects.add(_project);
+      for (const dependency of _project.dependencyProjects) {
+        if (visited.has(dependency)) {
+          continue;
+        }
+        queue.push(dependency);
+      }
+    }
+
+    return projects;
+  }
+
   protected async runAsync(): Promise<void> {
     const scenarioName: string | undefined = this._scenario.value;
     const { DeployScenarioConfiguration } = await import('../../logic/deploy/DeployScenarioConfiguration');
@@ -142,22 +165,44 @@ export class DeployAction extends BaseRushAction {
 
     const createArchiveOnly: boolean = this._createArchiveOnly.value;
 
-    let transformPackageJson: ((packageJson: IPackageJson) => IPackageJson) | undefined;
-    let pnpmInstallFolder: string | undefined;
+    /**
+     * Subspaces that will be involved in deploy process.
+     * Each subspace may have its own configurations
+     */
+    const subspaces: Map<string, IExtractorSubspace> = new Map();
+
+    const rushConfigurationProject: RushConfigurationProject | undefined =
+      this.rushConfiguration.getProjectByName(mainProjectName);
+    if (!rushConfigurationProject) {
+      throw new Error(`The specified deployment project "${mainProjectName}" was not found in rush.json`);
+    }
+
+    const projects: Set<RushConfigurationProject> = this._getDependencyProjects(rushConfigurationProject);
     if (this.rushConfiguration.packageManager === 'pnpm') {
-      const pnpmfileConfiguration: PnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
-        this.rushConfiguration,
-        this.rushConfiguration.defaultSubspace
-      );
-      transformPackageJson = pnpmfileConfiguration.transform.bind(pnpmfileConfiguration);
-      if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
-        pnpmInstallFolder = this.rushConfiguration.commonTempFolder;
+      for (const project of projects) {
+        const pnpmfileConfiguration: PnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
+          this.rushConfiguration,
+          project.subspace
+        );
+        const subspace: IExtractorSubspace = {
+          subspaceName: project.subspace.subspaceName,
+          transformPackageJson: pnpmfileConfiguration.transform.bind(pnpmfileConfiguration)
+        };
+
+        if (subspaces.has(subspace.subspaceName)) {
+          continue;
+        }
+
+        if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
+          subspace.pnpmInstallFolder = project.subspace.getSubspaceTempFolder();
+        }
+        subspaces.set(subspace.subspaceName, subspace);
       }
     }
 
     // Construct the project list for the deployer
     const projectConfigurations: IExtractorProjectConfiguration[] = [];
-    for (const project of this.rushConfiguration.projects) {
+    for (const project of projects) {
       const scenarioProjectJson: IDeployScenarioProjectJson | undefined =
         scenarioConfiguration.projectJsonsByName.get(project.packageName);
       projectConfigurations.push({
@@ -191,8 +236,7 @@ export class DeployAction extends BaseRushAction {
       dependencyConfigurations: scenarioConfiguration.json.dependencySettings,
       createArchiveFilePath,
       createArchiveOnly,
-      pnpmInstallFolder,
-      transformPackageJson
+      subspaces: Array.from(subspaces.values())
     });
   }
 }

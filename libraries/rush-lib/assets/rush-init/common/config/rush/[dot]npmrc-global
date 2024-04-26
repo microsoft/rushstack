@@ -1,0 +1,2 @@
+# This file is only used when the subspaces feature is enabled.
+# Rush uses this file to configure global monorepo-level npmrc configurations that are inherited by subspaces.

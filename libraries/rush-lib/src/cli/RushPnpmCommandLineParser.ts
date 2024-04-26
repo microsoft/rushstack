@@ -30,6 +30,7 @@ import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 import { Utilities } from '../utilities/Utilities';
+import type { Subspace } from '../api/Subspace';
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -63,6 +64,7 @@ export class RushPnpmCommandLineParser {
   private readonly _pnpmArgs: string[];
   private _commandName: string | undefined;
   private readonly _debugEnabled: boolean;
+  private _subspace: Subspace;
 
   private constructor(
     options: IRushPnpmCommandLineParserOptions,
@@ -105,7 +107,35 @@ export class RushPnpmCommandLineParser {
       );
     }
 
-    const workspaceFolder: string = rushConfiguration.commonTempFolder;
+    let pnpmArgs: string[] = [];
+    let subspaceName: string = 'default';
+
+    if (process.argv.indexOf('--subspace') >= 0) {
+      if (process.argv[2] !== '--subspace') {
+        throw new Error(
+          'If you want to specify a subspace, you should place "--subspace <subspace_name>" immediately after the "rush-pnpm" command'
+        );
+      }
+
+      subspaceName = process.argv[3];
+
+      // 0 = node.exe
+      // 1 = rush-pnpm
+      // 2 = --subspace
+      // 3 = <subspace_name>
+      pnpmArgs = process.argv.slice(4);
+    } else {
+      // 0 = node.exe
+      // 1 = rush-pnpm
+      pnpmArgs = process.argv.slice(2);
+    }
+
+    this._pnpmArgs = pnpmArgs;
+
+    const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
+    this._subspace = subspace;
+
+    const workspaceFolder: string = subspace.getSubspaceTempFolder();
     const workspaceFilePath: string = path.join(workspaceFolder, 'pnpm-workspace.yaml');
 
     if (!FileSystem.exists(workspaceFilePath)) {
@@ -120,12 +150,6 @@ export class RushPnpmCommandLineParser {
       this._terminal.writeLine('\n' + Colorize.cyan(`Do you need to run "rush install" or "rush update"?`));
       throw new AlreadyReportedError();
     }
-
-    // 0 = node.exe
-    // 1 = rush-pnpm
-    const pnpmArgs: string[] = process.argv.slice(2);
-
-    this._pnpmArgs = pnpmArgs;
   }
 
   public static async initializeAsync(
@@ -350,7 +374,7 @@ export class RushPnpmCommandLineParser {
 
   private async _executeAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration = this._rushConfiguration;
-    const workspaceFolder: string = rushConfiguration.commonTempFolder;
+    const workspaceFolder: string = this._subspace.getSubspaceTempFolder();
     const pnpmEnvironmentMap: EnvironmentMap = new EnvironmentMap(process.env);
     pnpmEnvironmentMap.set('NPM_CONFIG_WORKSPACE_DIR', workspaceFolder);
 
@@ -412,10 +436,12 @@ export class RushPnpmCommandLineParser {
       return;
     }
 
+    const subspaceTempFolder: string = this._subspace.getSubspaceTempFolder();
+
     switch (commandName) {
       case 'patch-commit': {
         // Example: "C:\MyRepo\common\temp\package.json"
-        const commonPackageJsonFilename: string = `${this._rushConfiguration.commonTempFolder}/${FileConstants.PackageJson}`;
+        const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
         const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
         const newGlobalPatchedDependencies: Record<string, string> | undefined =
           commonPackageJson?.pnpm?.patchedDependencies;
@@ -423,7 +449,7 @@ export class RushPnpmCommandLineParser {
           this._rushConfiguration.pnpmOptions.globalPatchedDependencies;
 
         if (!objectsAreDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
-          const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
+          const commonTempPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
           const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
           // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
           if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
@@ -487,7 +513,8 @@ export class RushPnpmCommandLineParser {
       pnpmFilterArguments: [],
       checkOnly: false,
       // TODO: Support subspaces
-      subspace: this._rushConfiguration.defaultSubspace
+      subspace: this._rushConfiguration.defaultSubspace,
+      terminal: this._terminal
     };
 
     const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = await import(

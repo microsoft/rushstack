@@ -17,13 +17,7 @@ import {
   type FolderItem,
   Async
 } from '@rushstack/node-core-library';
-import {
-  PrintUtilities,
-  ConsoleTerminalProvider,
-  Terminal,
-  type ITerminalProvider,
-  Colorize
-} from '@rushstack/terminal';
+import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
@@ -50,7 +44,6 @@ import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
 import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
 import type { Subspace } from '../../api/Subspace';
-import { SubspacesConfiguration } from '../../api/SubspacesConfiguration';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 
 /**
@@ -70,8 +63,7 @@ export abstract class BaseInstallManager {
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
 
-  private readonly _terminalProvider: ITerminalProvider;
-  protected readonly _terminal: Terminal;
+  protected readonly _terminal: ITerminal;
 
   protected readonly rushConfiguration: RushConfiguration;
   protected readonly rushGlobalFolder: RushGlobalFolder;
@@ -86,6 +78,7 @@ export abstract class BaseInstallManager {
     purgeManager: PurgeManager,
     options: IInstallManagerOptions
   ) {
+    this._terminal = options.terminal;
     this.rushConfiguration = rushConfiguration;
     this.rushGlobalFolder = rushGlobalFolder;
     this.installRecycler = purgeManager.commonTempFolderRecycler;
@@ -102,9 +95,6 @@ export abstract class BaseInstallManager {
         );
       }
     }
-
-    this._terminalProvider = new ConsoleTerminalProvider();
-    this._terminal = new Terminal(this._terminalProvider);
   }
 
   public async doInstallAsync(): Promise<void> {
@@ -228,8 +218,15 @@ export abstract class BaseInstallManager {
       ]);
 
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
+        const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilename();
+        const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
+          this.rushConfiguration.packageManager,
+          this.rushConfiguration.packageManagerOptions,
+          committedShrinkwrapFileName
+        );
+        shrinkwrapFile?.validateShrinkwrapAfterUpdate(this.rushConfiguration, this._terminal);
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
-        Utilities.syncFile(subspace.getTempShrinkwrapFilename(), subspace.getCommittedShrinkwrapFilename());
+        Utilities.syncFile(subspace.getTempShrinkwrapFilename(), committedShrinkwrapFileName);
       } else {
         // TODO: Validate whether the package manager updated it in a nontrivial way
       }
@@ -372,11 +369,6 @@ export abstract class BaseInstallManager {
 
     const extraNpmrcLines: string[] = [];
     if (this.rushConfiguration.subspacesFeatureEnabled) {
-      const subspaceEnvironmentVariable: string = SubspacesConfiguration._convertNameToEnvironmentVariable(
-        subspace.subspaceName,
-        this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility ?? false
-      );
-
       // Look for a global .npmrc-global file
       const globalNpmrcPath: string = `${this.rushConfiguration.commonRushConfigFolder}/.npmrc-global`;
       if (FileSystem.exists(globalNpmrcPath)) {
@@ -384,23 +376,20 @@ export abstract class BaseInstallManager {
         extraNpmrcLines.push(...globalNpmrcFileLines);
       }
 
-      // _RUSH_SUBSPACE_TEMP_FOLDER is used in .npmrc for subspaces.
-      process.env[subspaceEnvironmentVariable] = subspace.getSubspaceTempFolder();
       extraNpmrcLines.push(
-        `global-pnpmfile=\${${subspaceEnvironmentVariable}}/${RushConstants.pnpmfileGlobalFilename}`
+        `global-pnpmfile=${subspace.getSubspaceTempFolder()}/${RushConstants.pnpmfileGlobalFilename}`
       );
     }
 
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
-    const npmrcText: string | undefined = Utilities.syncNpmrc(
-      subspace.getSubspaceConfigFolder(),
-      subspace.getSubspaceTempFolder(),
-      undefined,
-      undefined,
-      extraNpmrcLines
-    );
+    const npmrcText: string | undefined = Utilities.syncNpmrc({
+      sourceNpmrcFolder: subspace.getSubspaceConfigFolder(),
+      targetNpmrcFolder: subspace.getSubspaceTempFolder(),
+      linesToPrepend: extraNpmrcLines,
+      createIfMissing: this.rushConfiguration.subspacesFeatureEnabled
+    });
     this._syncNpmrcAlreadyCalled = true;
 
     const npmrcHash: string | undefined = npmrcText

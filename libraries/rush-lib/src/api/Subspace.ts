@@ -11,6 +11,7 @@ import { RushConstants } from '../logic/RushConstants';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
+import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
 
 /**
  * @internal
@@ -42,6 +43,10 @@ export class Subspace {
 
   private _detail: ISubspaceDetail | undefined;
 
+  private _cachedPnpmOptions: PnpmOptionsConfiguration | undefined = undefined;
+  // If true, then _cachedPnpmOptions has been initialized.
+  private _cachedPnpmOptionsInitialized: boolean = false;
+
   public constructor(options: ISubspaceOptions) {
     this.subspaceName = options.subspaceName;
     this._rushConfiguration = options.rushConfiguration;
@@ -54,6 +59,30 @@ export class Subspace {
    */
   public getProjects(): RushConfigurationProject[] {
     return this._projects;
+  }
+
+  /**
+   * Returns the parsed contents of the pnpm-config.json config file.
+   * @beta
+   */
+  public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
+    if (!this._cachedPnpmOptionsInitialized) {
+      try {
+        this._cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          `${this.getSubspaceConfigFolder()}/${RushConstants.pnpmConfigFilename}`,
+          this.getSubspaceTempFolder()
+        );
+        this._cachedPnpmOptionsInitialized = true;
+      } catch (e) {
+        if (FileSystem.isNotExistError(e as Error)) {
+          this._cachedPnpmOptions = undefined;
+          this._cachedPnpmOptionsInitialized = true;
+        } else {
+          throw new Error(`The subspace has an invalid pnpm-config.json file: ${this.subspaceName}`);
+        }
+      }
+    }
+    return this._cachedPnpmOptions;
   }
 
   private _ensureDetail(): ISubspaceDetail {
@@ -87,6 +116,18 @@ export class Subspace {
           const project: RushConfigurationProject = this._projects[0];
 
           subspaceConfigFolder = `${project.projectFolder}/subspace/${this.subspaceName}`;
+
+          // Ensure that this project does not have it's own pnpmfile.cjs or .npmrc file
+          if (FileSystem.exists(`${project.projectFolder}/.npmrc`)) {
+            throw new Error(
+              `The project level configuration file ${project.projectFolder}/.npmrc is no longer valid. Please use a ${subspaceConfigFolder}/.npmrc file instead.`
+            );
+          }
+          if (FileSystem.exists(`${project.projectFolder}/.pnpmfile.cjs`)) {
+            throw new Error(
+              `The project level configuration file ${project.projectFolder}/.pnpmfile.cjs is no longer valid. Please use a ${subspaceConfigFolder}/.pnpmfile-subspace.cjs file instead.`
+            );
+          }
         }
 
         if (!FileSystem.exists(subspaceConfigFolder)) {
@@ -241,10 +282,14 @@ export class Subspace {
   public getPnpmfilePath(): string {
     const subspaceConfigFolderPath: string = this.getSubspaceConfigFolder();
 
-    return path.join(
-      subspaceConfigFolderPath,
-      (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
-    );
+    let pnpmFilename: string = (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager)
+      .pnpmfileFilename;
+    if (this._rushConfiguration.subspacesFeatureEnabled) {
+      pnpmFilename = (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager)
+        .subspacePnpmfileFilename;
+    }
+
+    return path.join(subspaceConfigFolderPath, pnpmFilename);
   }
 
   /**

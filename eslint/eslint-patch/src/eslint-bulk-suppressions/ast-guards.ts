@@ -122,18 +122,18 @@ export function isStringLiteral(node: TSESTree.Node): node is TSESTree.StringLit
 }
 
 // Custom compound types
-export interface ClassExpressionWithName extends TSESTree.ClassExpression {
+export interface IClassExpressionWithName extends TSESTree.ClassExpression {
   id: TSESTree.Identifier;
 }
 
-export function isClassExpressionWithName(node: TSESTree.Node): node is ClassExpressionWithName {
+export function isClassExpressionWithName(node: TSESTree.Node): node is IClassExpressionWithName {
   return isClassExpression(node) && node.id !== null;
 }
-export interface FunctionExpressionWithName extends TSESTree.FunctionExpression {
+export interface IFunctionExpressionWithName extends TSESTree.FunctionExpression {
   id: TSESTree.Identifier;
 }
 
-export function isFunctionExpressionWithName(node: TSESTree.Node): node is FunctionExpressionWithName {
+export function isFunctionExpressionWithName(node: TSESTree.Node): node is IFunctionExpressionWithName {
   return isFunctionExpression(node) && node.id !== null;
 }
 
@@ -144,7 +144,7 @@ export type NormalAnonymousExpression =
   | TSESTree.ObjectExpression;
 
 export function isNormalAnonymousExpression(node: TSESTree.Node): node is NormalAnonymousExpression {
-  const ANONYMOUS_EXPRESSION_GUARDS = [
+  const ANONYMOUS_EXPRESSION_GUARDS: ((node: TSESTree.Node) => boolean)[] = [
     isArrowFunctionExpression,
     isClassExpression,
     isFunctionExpression,
@@ -153,20 +153,20 @@ export function isNormalAnonymousExpression(node: TSESTree.Node): node is Normal
   return ANONYMOUS_EXPRESSION_GUARDS.some((guard) => guard(node));
 }
 
-export interface NormalAssignmentPattern extends TSESTree.AssignmentPattern {
+export interface INormalAssignmentPattern extends TSESTree.AssignmentPattern {
   left: TSESTree.Identifier;
 }
 
-export function isNormalAssignmentPattern(node: TSESTree.Node): node is NormalAssignmentPattern {
+export function isNormalAssignmentPattern(node: TSESTree.Node): node is INormalAssignmentPattern {
   return isAssignmentPattern(node) && isIdentifier(node.left);
 }
 
-export interface NormalClassPropertyDefinition extends TSESTree.PropertyDefinitionNonComputedName {
+export interface INormalClassPropertyDefinition extends TSESTree.PropertyDefinitionNonComputedName {
   key: TSESTree.PrivateIdentifier | TSESTree.Identifier;
   value: TSESTree.Expression;
 }
 
-export function isNormalClassPropertyDefinition(node: TSESTree.Node): node is NormalClassPropertyDefinition {
+export function isNormalClassPropertyDefinition(node: TSESTree.Node): node is INormalClassPropertyDefinition {
   return (
     isPropertyDefinition(node) &&
     (isIdentifier(node.key) || isPrivateIdentifier(node.key)) &&
@@ -174,82 +174,82 @@ export function isNormalClassPropertyDefinition(node: TSESTree.Node): node is No
   );
 }
 
-export interface NormalMethodDefinition extends TSESTree.MethodDefinitionNonComputedName {
+export interface INormalMethodDefinition extends TSESTree.MethodDefinitionNonComputedName {
   key: TSESTree.PrivateIdentifier | TSESTree.Identifier;
 }
 
-export function isNormalMethodDefinition(node: TSESTree.Node): node is NormalMethodDefinition {
+export function isNormalMethodDefinition(node: TSESTree.Node): node is INormalMethodDefinition {
   return isMethodDefinition(node) && (isIdentifier(node.key) || isPrivateIdentifier(node.key));
 }
 
-export interface NormalObjectProperty extends TSESTree.PropertyNonComputedName {
+export interface INormalObjectProperty extends TSESTree.PropertyNonComputedName {
   key: TSESTree.Identifier;
 }
 
-export function isNormalObjectProperty(node: TSESTree.Node): node is NormalObjectProperty {
+export function isNormalObjectProperty(node: TSESTree.Node): node is INormalObjectProperty {
   return isProperty(node) && (isIdentifier(node.key) || isPrivateIdentifier(node.key));
 }
 
-export interface NormalVariableDeclarator extends TSESTree.VariableDeclarator {
+export interface INormalVariableDeclarator extends TSESTree.VariableDeclarator {
   id: TSESTree.Identifier;
   init: TSESTree.Expression;
 }
 
-export function isNormalVariableDeclarator(node: TSESTree.Node): node is NormalVariableDeclarator {
+export function isNormalVariableDeclarator(node: TSESTree.Node): node is INormalVariableDeclarator {
   return isVariableDeclarator(node) && isIdentifier(node.id) && node.init !== null;
 }
 
-export interface NormalAssignmentPatternWithAnonymousExpressionAssigned extends NormalAssignmentPattern {
+export interface INormalAssignmentPatternWithAnonymousExpressionAssigned extends INormalAssignmentPattern {
   right: NormalAnonymousExpression;
 }
 
 export function isNormalAssignmentPatternWithAnonymousExpressionAssigned(
   node: TSESTree.Node
-): node is NormalAssignmentPatternWithAnonymousExpressionAssigned {
+): node is INormalAssignmentPatternWithAnonymousExpressionAssigned {
   return isNormalAssignmentPattern(node) && isNormalAnonymousExpression(node.right);
 }
 
-export interface NormalVariableDeclaratorWithAnonymousExpressionAssigned extends NormalVariableDeclarator {
+export interface INormalVariableDeclaratorWithAnonymousExpressionAssigned extends INormalVariableDeclarator {
   init: NormalAnonymousExpression;
 }
 
 export function isNormalVariableDeclaratorWithAnonymousExpressionAssigned(
   node: TSESTree.Node
-): node is NormalVariableDeclaratorWithAnonymousExpressionAssigned {
+): node is INormalVariableDeclaratorWithAnonymousExpressionAssigned {
   return isNormalVariableDeclarator(node) && isNormalAnonymousExpression(node.init);
 }
 
-export interface NormalObjectPropertyWithAnonymousExpressionAssigned extends NormalObjectProperty {
+export interface INormalObjectPropertyWithAnonymousExpressionAssigned extends INormalObjectProperty {
   value: NormalAnonymousExpression;
 }
 
 export function isNormalObjectPropertyWithAnonymousExpressionAssigned(
   node: TSESTree.Node
-): node is NormalObjectPropertyWithAnonymousExpressionAssigned {
+): node is INormalObjectPropertyWithAnonymousExpressionAssigned {
   return isNormalObjectProperty(node) && isNormalAnonymousExpression(node.value);
 }
 
-export interface NormalClassPropertyDefinitionWithAnonymousExpressionAssigned
-  extends NormalClassPropertyDefinition {
+export interface INormalClassPropertyDefinitionWithAnonymousExpressionAssigned
+  extends INormalClassPropertyDefinition {
   value: NormalAnonymousExpression;
 }
 
 export function isNormalClassPropertyDefinitionWithAnonymousExpressionAssigned(
   node: TSESTree.Node
-): node is NormalClassPropertyDefinitionWithAnonymousExpressionAssigned {
+): node is INormalClassPropertyDefinitionWithAnonymousExpressionAssigned {
   return isNormalClassPropertyDefinition(node) && isNormalAnonymousExpression(node.value);
 }
 
 export type NodeWithName =
   | TSESTree.ClassDeclarationWithName
   | TSESTree.FunctionDeclarationWithName
-  | ClassExpressionWithName
-  | FunctionExpressionWithName
-  | NormalVariableDeclaratorWithAnonymousExpressionAssigned
-  | NormalObjectPropertyWithAnonymousExpressionAssigned
-  | NormalClassPropertyDefinitionWithAnonymousExpressionAssigned
-  | NormalAssignmentPatternWithAnonymousExpressionAssigned
-  | NormalMethodDefinition
+  | IClassExpressionWithName
+  | IFunctionExpressionWithName
+  | INormalVariableDeclaratorWithAnonymousExpressionAssigned
+  | INormalObjectPropertyWithAnonymousExpressionAssigned
+  | INormalClassPropertyDefinitionWithAnonymousExpressionAssigned
+  | INormalAssignmentPatternWithAnonymousExpressionAssigned
+  | INormalMethodDefinition
   | TSESTree.TSEnumDeclaration
   | TSESTree.TSInterfaceDeclaration
   | TSESTree.TSTypeAliasDeclaration;

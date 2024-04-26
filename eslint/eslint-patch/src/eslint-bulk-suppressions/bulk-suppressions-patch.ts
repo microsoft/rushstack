@@ -1,224 +1,136 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TSESTree } from '@typescript-eslint/types';
-import { spawnSync } from 'child_process';
+import type { TSESTree } from '@typescript-eslint/types';
 import fs from 'fs';
-import path from 'path';
+
 import * as Guards from './ast-guards';
 
 import { eslintFolder } from '../_patch-base';
+import {
+  ESLINT_BULK_ENABLE_ENV_VAR_NAME,
+  ESLINT_BULK_PRUNE_ENV_VAR_NAME,
+  ESLINT_BULK_SUPPRESS_ENV_VAR_NAME
+} from './constants';
+import {
+  getSuppressionsConfigForEslintrcFolderPath,
+  serializeSuppression,
+  type IBulkSuppressionsConfig,
+  type ISuppression,
+  writeSuppressionsJsonToFile,
+  getAllBulkSuppressionsConfigsByEslintrcFolderPath
+} from './bulk-suppressions-file';
 
-interface Suppression {
-  file: string;
-  scopeId: string;
-  rule: string;
+const ESLINTRC_FILENAMES: string[] = [
+  '.eslintrc.js',
+  '.eslintrc.cjs'
+  // Several other filenames are allowed, but this patch requires that it be loaded via a JS config file,
+  // so we only need to check for the JS-based filenames
+];
+const SUPPRESSION_SYMBOL: unique symbol = Symbol('suppression');
+const ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE: string | undefined = process.env[ESLINT_BULK_SUPPRESS_ENV_VAR_NAME];
+const SUPPRESS_ALL_RULES: boolean = ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE === '*';
+const RULES_TO_SUPPRESS: Set<string> | undefined = ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE
+  ? new Set(ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE.split(','))
+  : undefined;
+
+interface IProblem {
+  [SUPPRESSION_SYMBOL]?: {
+    config: IBulkSuppressionsConfig;
+    suppression: ISuppression;
+    serializedSuppression: string;
+  };
 }
 
-interface BulkSuppressionsJson {
-  suppressions: Suppression[];
+function getNodeName(node: TSESTree.Node): string | undefined {
+  if (Guards.isClassDeclarationWithName(node)) {
+    return node.id.name;
+  } else if (Guards.isFunctionDeclarationWithName(node)) {
+    return node.id.name;
+  } else if (Guards.isClassExpressionWithName(node)) {
+    return node.id.name;
+  } else if (Guards.isFunctionExpressionWithName(node)) {
+    return node.id.name;
+  } else if (Guards.isNormalVariableDeclaratorWithAnonymousExpressionAssigned(node)) {
+    return node.id.name;
+  } else if (Guards.isNormalObjectPropertyWithAnonymousExpressionAssigned(node)) {
+    return node.key.name;
+  } else if (Guards.isNormalClassPropertyDefinitionWithAnonymousExpressionAssigned(node)) {
+    return node.key.name;
+  } else if (Guards.isNormalAssignmentPatternWithAnonymousExpressionAssigned(node)) {
+    return node.left.name;
+  } else if (Guards.isNormalMethodDefinition(node)) {
+    return node.key.name;
+  } else if (Guards.isTSEnumDeclaration(node)) {
+    return node.id.name;
+  } else if (Guards.isTSInterfaceDeclaration(node)) {
+    return node.id.name;
+  } else if (Guards.isTSTypeAliasDeclaration(node)) {
+    return node.id.name;
+  }
 }
 
-function getNodeName(node: TSESTree.Node): string | null {
-  if (!Guards.isNodeWithName(node)) return null;
+type NodeWithParent = TSESTree.Node & { parent?: TSESTree.Node };
 
-  if (Guards.isClassDeclarationWithName(node)) return node.id.name;
-
-  if (Guards.isFunctionDeclarationWithName(node)) return node.id.name;
-
-  if (Guards.isClassExpressionWithName(node)) return node.id.name;
-
-  if (Guards.isFunctionExpressionWithName(node)) return node.id.name;
-
-  if (Guards.isNormalVariableDeclaratorWithAnonymousExpressionAssigned(node)) return node.id.name;
-
-  if (Guards.isNormalObjectPropertyWithAnonymousExpressionAssigned(node)) return node.key.name;
-
-  if (Guards.isNormalClassPropertyDefinitionWithAnonymousExpressionAssigned(node)) return node.key.name;
-
-  if (Guards.isNormalAssignmentPatternWithAnonymousExpressionAssigned(node)) return node.left.name;
-
-  if (Guards.isNormalMethodDefinition(node)) return node.key.name;
-
-  if (Guards.isTSEnumDeclaration(node)) return node.id.name;
-
-  if (Guards.isTSInterfaceDeclaration(node)) return node.id.name;
-
-  if (Guards.isTSTypeAliasDeclaration(node)) return node.id.name;
-
-  return null;
-}
-
-function calculateScopeId(node: any | (TSESTree.Node & { parent?: TSESTree.Node }) | undefined): string {
+function calculateScopeId(node: NodeWithParent | undefined): string {
   const scopeIds: string[] = [];
-  for (let current = node; current; current = current.parent) {
-    const scopeIdForASTNode = getNodeName(current);
-    if (scopeIdForASTNode !== null) scopeIds.unshift(scopeIdForASTNode);
-  }
-
-  if (scopeIds.length === 0) return '.';
-
-  return '.' + scopeIds.join('.');
-}
-
-/**
- * @throws Throws an error if the command to retrieve the root path fails.
- * @returns The root path of the monorepo.
- */
-export function getGitRootPath(): string {
-  const result = spawnSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf-8' });
-  if (result.status !== 0) throw new Error(`get root path failed`);
-  return result.stdout.toString().trim();
-}
-
-export const GitRootPath = getGitRootPath();
-
-function findEslintrcDirectory(fileAbsolutePath: string): string {
-  for (
-    let currentDir = fileAbsolutePath;
-    currentDir.startsWith(GitRootPath);
-    currentDir = path.dirname(currentDir)
-  )
-    if (['.eslintrc.js', '.eslintrc.cjs'].some((eslintrc) => fs.existsSync(path.join(currentDir, eslintrc))))
-      return currentDir;
-  throw new Error('Cannot locate eslintrc');
-}
-
-function validateSuppressionsJson(json: BulkSuppressionsJson): json is BulkSuppressionsJson {
-  if (typeof json !== 'object') throw new Error(`Invalid JSON object: ${JSON.stringify(json, null, 2)}`);
-  if (json === null) throw new Error('JSON object is null.');
-  if (!json.hasOwnProperty('suppressions')) throw new Error('Missing "suppressions" property.');
-  if (!Array.isArray(json.suppressions)) throw new Error('"suppressions" property is not an array.');
-
-  if (
-    !json.suppressions.every((suppression) => {
-      if (typeof suppression !== 'object')
-        throw new Error(`Invalid suppression: ${JSON.stringify(suppression, null, 2)}`);
-      if (suppression === null)
-        throw new Error(`Suppression is null: ${JSON.stringify(suppression, null, 2)}`);
-      if (!suppression.hasOwnProperty('file'))
-        throw new Error(`Missing "file" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
-      if (typeof suppression.file !== 'string')
-        throw new Error(
-          `"file" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
-        );
-      if (!suppression.hasOwnProperty('scopeId'))
-        throw new Error(`Missing "scopeId" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
-      if (typeof suppression.scopeId !== 'string')
-        throw new Error(
-          `"scopeId" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
-        );
-      if (!suppression.hasOwnProperty('rule'))
-        throw new Error(`Missing "rule" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
-      if (typeof suppression.rule !== 'string')
-        throw new Error(
-          `"rule" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
-        );
-      return true;
-    })
-  ) {
-    throw new Error(
-      `Invalid suppression in "suppressions" array: ${JSON.stringify(json.suppressions, null, 2)}`
-    );
-  }
-  return true;
-}
-
-function readSuppressionsJson(fileAbsolutePath: string): BulkSuppressionsJson {
-  const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
-  const suppressionsPath = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
-  let suppressionsJson = { suppressions: [] };
-  try {
-    const fileContent = fs.readFileSync(suppressionsPath, 'utf-8');
-    suppressionsJson = JSON.parse(fileContent);
-
-    if (!validateSuppressionsJson(suppressionsJson)) {
-      console.warn(
-        `Unexpected file content in .eslint-bulk-suppressions.json. JSON expected to be in the following format:
-{
-  suppressions: {
-      file: string;
-      scopeId: string;
-      rule: string;
-  }[];
-}
-Please check file content, or delete file if suppressions are no longer needed.
-`
-      );
-      suppressionsJson = { suppressions: [] };
+  for (let current: NodeWithParent | undefined = node; current; current = current.parent) {
+    const scopeIdForASTNode: string | undefined = getNodeName(current);
+    if (scopeIdForASTNode !== undefined) {
+      scopeIds.unshift(scopeIdForASTNode);
     }
-  } catch {
-    // Do nothing and let JSON.parse() log the error. suppressionsJson will stay as the initialized value.
   }
-  return suppressionsJson;
+
+  if (scopeIds.length === 0) {
+    return '.';
+  } else {
+    return '.' + scopeIds.join('.');
+  }
 }
 
-function shouldWriteSuppression(fileAbsolutePath: string, suppression: Suppression): boolean {
-  if (process.env.ESLINT_BULK_SUPPRESS === undefined) return false;
+const eslintrcPathByFileOrFolderPath: Map<string, string> = new Map();
 
-  if (isSuppressed(fileAbsolutePath, suppression)) return false;
-
-  const rulesToSuppress = process.env.ESLINT_BULK_SUPPRESS.split(',');
-
-  if (rulesToSuppress.length === 1 && rulesToSuppress[0] === '*') return true;
-
-  return rulesToSuppress.includes(suppression.rule);
-}
-
-function isSuppressed(fileAbsolutePath: string, suppression: Suppression): boolean {
-  const suppressionsJson = readSuppressionsJson(fileAbsolutePath);
-  return (
-    suppressionsJson.suppressions.find(
-      (element) =>
-        element.file === suppression.file &&
-        element.scopeId === suppression.scopeId &&
-        element.rule === suppression.rule
-    ) !== undefined
+function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath: string): string {
+  const cachedFolderPathForFilePath: string | undefined =
+    eslintrcPathByFileOrFolderPath.get(normalizedFilePath);
+  if (cachedFolderPathForFilePath) {
+    return cachedFolderPathForFilePath;
+  }
+  const normalizedFileFolderPath: string = normalizedFilePath.substring(
+    0,
+    normalizedFilePath.lastIndexOf('/')
   );
-}
 
-function insort<T>(array: T[], item: T, compareFunction: (a: T, b: T) => number): void {
-  const index = array.findIndex((element) => compareFunction(element, item) > 0);
-  if (index === -1) array.push(item);
-  else array.splice(index, 0, item);
-}
+  const pathsToCache: string[] = [normalizedFilePath];
+  let eslintrcFolderPath: string | undefined;
+  findEslintrcFileLoop: for (
+    let currentFolder: string = normalizedFileFolderPath;
+    currentFolder; // 'something'.substring(0, -1) is ''
+    currentFolder = currentFolder.substring(0, currentFolder.lastIndexOf('/'))
+  ) {
+    const cachedEslintrcFolderPath: string | undefined = eslintrcPathByFileOrFolderPath.get(currentFolder);
+    if (cachedEslintrcFolderPath) {
+      return cachedEslintrcFolderPath;
+    }
 
-function compareSuppressions(a: Suppression, b: Suppression): -1 | 0 | 1 {
-  if (a.file < b.file) return -1;
-  if (a.file > b.file) return 1;
-  if (a.scopeId < b.scopeId) return -1;
-  if (a.scopeId > b.scopeId) return 1;
-  if (a.rule < b.rule) return -1;
-  if (a.rule > b.rule) return 1;
-  return 0;
-}
-
-function writeSuppressionToFile(
-  fileAbsolutePath: string,
-  suppression: {
-    file: string;
-    scopeId: string;
-    rule: string;
+    pathsToCache.push(currentFolder);
+    for (const eslintrcFilename of ESLINTRC_FILENAMES) {
+      if (fs.existsSync(`${currentFolder}/${eslintrcFilename}`)) {
+        eslintrcFolderPath = currentFolder;
+        break findEslintrcFileLoop;
+      }
+    }
   }
-): void {
-  const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
-  const suppressionsJson = readSuppressionsJson(fileAbsolutePath);
 
-  insort(suppressionsJson.suppressions, suppression, compareSuppressions);
+  if (eslintrcFolderPath) {
+    for (const checkedFolder of pathsToCache) {
+      eslintrcPathByFileOrFolderPath.set(checkedFolder, eslintrcFolderPath);
+    }
 
-  const suppressionsPath = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
-  fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsJson, null, 2));
-}
-
-const usedSuppressions = new Set<string>();
-
-function serializeSuppression(fileAbsolutePath: string, suppression: Suppression): string {
-  return `${fileAbsolutePath}|${suppression.file}|${suppression.scopeId}|${suppression.rule}`;
-}
-
-function deserializeSuppression(serializedSuppression: string): Suppression {
-  const [file, scopeId, rule] = serializedSuppression.split('|');
-  return { file, scopeId, rule };
+    return eslintrcFolderPath;
+  } else {
+    throw new Error(`Cannot locate an ESLint configuration file for ${normalizedFilePath}`);
+  }
 }
 
 // One-line insert into the ruleContext report method to prematurely exit if the ESLint problem has been suppressed
@@ -226,74 +138,127 @@ export function shouldBulkSuppress(params: {
   filename: string;
   currentNode: TSESTree.Node;
   ruleId: string;
+  problem: IProblem;
 }): boolean {
   // Use this ENV variable to turn off eslint-bulk-suppressions functionality, default behavior is on
-  if (process.env.ESLINT_BULK_ENABLE === 'false') return false;
-
-  const { filename: fileAbsolutePath, currentNode, ruleId: rule } = params;
-  const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
-  const fileRelativePath = path.relative(eslintrcDirectory, fileAbsolutePath);
-  const scopeId = calculateScopeId(currentNode);
-  const suppression = { file: fileRelativePath, scopeId, rule };
-
-  if (shouldWriteSuppression(fileAbsolutePath, suppression)) {
-    writeSuppressionToFile(fileAbsolutePath, suppression);
+  if (process.env[ESLINT_BULK_ENABLE_ENV_VAR_NAME] === 'false') {
+    return false;
   }
 
-  const shouldBulkSuppress = isSuppressed(fileAbsolutePath, suppression);
+  const { filename: fileAbsolutePath, currentNode, ruleId: rule, problem } = params;
+  const normalizedFileAbsolutePath: string = fileAbsolutePath.replace(/\\/g, '/');
+  const eslintrcDirectory: string =
+    findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFileAbsolutePath);
+  const fileRelativePath: string = normalizedFileAbsolutePath.substring(eslintrcDirectory.length + 1);
+  const scopeId: string = calculateScopeId(currentNode);
+  const suppression: ISuppression = { file: fileRelativePath, scopeId, rule };
 
-  if (shouldBulkSuppress) {
-    usedSuppressions.add(serializeSuppression(fileAbsolutePath, suppression));
+  const config: IBulkSuppressionsConfig = getSuppressionsConfigForEslintrcFolderPath(eslintrcDirectory);
+  const serializedSuppression: string = serializeSuppression(suppression);
+  const currentNodeIsSuppressed: boolean = config.serializedSuppressions.has(serializedSuppression);
+
+  if (currentNodeIsSuppressed || SUPPRESS_ALL_RULES || RULES_TO_SUPPRESS?.has(suppression.rule)) {
+    problem[SUPPRESSION_SYMBOL] = {
+      suppression,
+      serializedSuppression,
+      config
+    };
   }
 
-  return shouldBulkSuppress;
+  return process.env[ESLINT_BULK_PRUNE_ENV_VAR_NAME] !== '1' && currentNodeIsSuppressed;
 }
 
-export function onFinish(params: { filename: string }): void {
-  if (process.env.ESLINT_BULK_PRUNE === 'true') {
-    BulkSuppressionsPrune(params);
+export function prune(): void {
+  for (const [
+    eslintrcFolderPath,
+    suppressionsConfig
+  ] of getAllBulkSuppressionsConfigsByEslintrcFolderPath()) {
+    if (suppressionsConfig) {
+      const { newSerializedSuppressions, newJsonObject } = suppressionsConfig;
+      const newSuppressionsConfig: IBulkSuppressionsConfig = {
+        serializedSuppressions: newSerializedSuppressions,
+        jsonObject: newJsonObject,
+        newSerializedSuppressions: new Set(),
+        newJsonObject: { suppressions: [] }
+      };
+
+      writeSuppressionsJsonToFile(eslintrcFolderPath, newSuppressionsConfig);
+    }
   }
 }
 
-export function BulkSuppressionsPrune(params: { filename: string }): void {
-  const { filename: fileAbsolutePath } = params;
-  const suppressionsJson = readSuppressionsJson(fileAbsolutePath);
-  const newSuppressionsJson = {
-    suppressions: suppressionsJson.suppressions.filter((suppression) => {
-      return usedSuppressions.has(serializeSuppression(fileAbsolutePath, suppression));
-    })
-  };
-  const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
-  const suppressionsPath = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
-  fs.writeFileSync(suppressionsPath, JSON.stringify(newSuppressionsJson, null, 2));
+export function write(): void {
+  for (const [
+    eslintrcFolderPath,
+    suppressionsConfig
+  ] of getAllBulkSuppressionsConfigsByEslintrcFolderPath()) {
+    if (suppressionsConfig) {
+      writeSuppressionsJsonToFile(eslintrcFolderPath, suppressionsConfig);
+    }
+  }
 }
 
 // utility function for linter-patch.js to make require statements that use relative paths in linter.js work in linter-patch.js
-export function requireFromPathToLinterJS(importPath: string): any {
+export function requireFromPathToLinterJS(importPath: string): import('eslint').Linter {
   if (!eslintFolder) {
     return require(importPath);
   }
-  const pathToLinterFolder = path.join(eslintFolder, 'lib', 'linter');
-  const moduleAbsolutePath = require.resolve(importPath, { paths: [pathToLinterFolder] });
+
+  const pathToLinterFolder: string = `${eslintFolder}/lib/linter`;
+  const moduleAbsolutePath: string = require.resolve(importPath, { paths: [pathToLinterFolder] });
   return require(moduleAbsolutePath);
 }
 
 export function patchClass<T, U extends T>(originalClass: new () => T, patchedClass: new () => U): void {
   // Get all the property names of the patched class prototype
-  let patchedProperties = Object.getOwnPropertyNames(patchedClass.prototype);
+  const patchedProperties: string[] = Object.getOwnPropertyNames(patchedClass.prototype);
 
   // Loop through all the properties
-  for (let prop of patchedProperties) {
+  for (const prop of patchedProperties) {
     // Override the property in the original class
     originalClass.prototype[prop] = patchedClass.prototype[prop];
   }
 
   // Handle getters and setters
-  let descriptors = Object.getOwnPropertyDescriptors(patchedClass.prototype);
-  for (let prop in descriptors) {
-    let descriptor = descriptors[prop];
+  for (const [prop, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(patchedClass.prototype))) {
     if (descriptor.get || descriptor.set) {
       Object.defineProperty(originalClass.prototype, prop, descriptor);
     }
   }
+}
+
+/**
+ * This returns a wrapped version of the "verify" function from ESLint's Linter class
+ * that postprocesses rule violations that weren't suppressed by comments. This postprocessing
+ * records suppressions that weren't otherwise suppressed by comments to be used
+ * by the "suppress" and "prune" commands.
+ */
+export function extendVerifyFunction(
+  originalFn: (this: unknown, ...args: unknown[]) => IProblem[] | undefined
+): (this: unknown, ...args: unknown[]) => IProblem[] | undefined {
+  return function (this: unknown, ...args: unknown[]): IProblem[] | undefined {
+    const problems: IProblem[] | undefined = originalFn.apply(this, args);
+    if (problems) {
+      for (const problem of problems) {
+        if (problem[SUPPRESSION_SYMBOL]) {
+          const {
+            serializedSuppression,
+            suppression,
+            config: {
+              newSerializedSuppressions,
+              jsonObject: { suppressions },
+              newJsonObject: { suppressions: newSuppressions }
+            }
+          } = problem[SUPPRESSION_SYMBOL];
+          if (!newSerializedSuppressions.has(serializedSuppression)) {
+            newSerializedSuppressions.add(serializedSuppression);
+            newSuppressions.push(suppression);
+            suppressions.push(suppression);
+          }
+        }
+      }
+    }
+
+    return problems;
+  };
 }

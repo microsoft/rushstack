@@ -91,7 +91,10 @@ export class PnpmfileConfiguration {
       const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions();
       const preferredVersions: Map<string, string> = new Map();
       MapExtensions.mergeFromMap(preferredVersions, commonVersionsConfiguration.getAllPreferredVersions());
-      MapExtensions.mergeFromMap(preferredVersions, rushConfiguration.getImplicitlyPreferredVersions());
+      MapExtensions.mergeFromMap(
+        preferredVersions,
+        rushConfiguration.getImplicitlyPreferredVersions(subspace)
+      );
       allPreferredVersions = MapExtensions.toObject(preferredVersions);
       allowedAlternativeVersions = MapExtensions.toObject(
         commonVersionsConfiguration.allowedAlternativeVersions

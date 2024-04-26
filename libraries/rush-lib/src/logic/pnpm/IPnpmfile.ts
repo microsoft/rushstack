@@ -24,6 +24,7 @@ export interface IPnpmfileShimSettings {
 export interface IWorkspaceProjectInfo
   extends Pick<RushConfigurationProject, 'packageName' | 'projectRelativeFolder'> {
   packageVersion: RushConfigurationProject['packageJson']['version'];
+  injectedDependencies: Array<string>;
 }
 
 /**

@@ -15,9 +15,84 @@ export interface IExtendsMultipleInterfaces extends IInterface1, IInterface2
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [secondProp](./api-documenter-scenarios.iextendsmultipleinterfaces.secondprop.md) |  | boolean | A second prop. Overrides <code>IInterface1.someProp</code>. |
-|  [someProp](./api-documenter-scenarios.iinterface1.someprop.md) |  | number | <p>Some prop.</p><p>(Inherited from [IInterface1](./api-documenter-scenarios.iinterface1.md)<!-- -->)</p> |
-|  [thirdProp](./api-documenter-scenarios.iextendsmultipleinterfaces.thirdprop.md) |  | string | A third prop. |
+<table><thead><tr><th>
 
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[secondProp](./api-documenter-scenarios.iextendsmultipleinterfaces.secondprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+A second prop. Overrides `IInterface1.someProp`<!-- -->.
+
+
+</td></tr>
+<tr><td>
+
+[someProp](./api-documenter-scenarios.iinterface1.someprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+Some prop.
+
+(Inherited from [IInterface1](./api-documenter-scenarios.iinterface1.md)<!-- -->)
+
+
+</td></tr>
+<tr><td>
+
+[thirdProp](./api-documenter-scenarios.iextendsmultipleinterfaces.thirdprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+A third prop.
+
+
+</td></tr>
+</tbody></table>

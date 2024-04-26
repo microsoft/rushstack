@@ -9,7 +9,7 @@
 //
 
 import {
-  ConfigArrayFactory,
+  configArrayFactory,
   ModuleResolver,
   isModuleResolutionError,
   ESLINT_MAJOR_VERSION
@@ -19,19 +19,20 @@ import {
 const isInvalidImporterPath: (ex: unknown) => boolean = (ex) =>
   (ex as { code: unknown } | undefined)?.code === 'ERR_INVALID_ARG_VALUE';
 
-if (!ConfigArrayFactory.__loadPluginPatched) {
-  ConfigArrayFactory.__loadPluginPatched = true;
-  const originalLoadPlugin = ConfigArrayFactory.prototype._loadPlugin;
+if (!configArrayFactory.__loadPluginPatched) {
+  configArrayFactory.__loadPluginPatched = true;
+  // eslint-disable-next-line @typescript-eslint/typedef
+  const originalLoadPlugin = configArrayFactory.prototype._loadPlugin;
 
   if (ESLINT_MAJOR_VERSION === 6) {
     // ESLint 6.x
     // https://github.com/eslint/eslint/blob/9738f8cc864d769988ccf42bb70f524444df1349/lib/cli-engine/config-array-factory.js#L915
-    ConfigArrayFactory.prototype._loadPlugin = function (
+    configArrayFactory.prototype._loadPlugin = function (
       name: string,
       importerPath: string,
       importerName: string
     ) {
-      const originalResolve = ModuleResolver.resolve;
+      const originalResolve: (moduleName: string, relativeToPath: string) => string = ModuleResolver.resolve;
       try {
         ModuleResolver.resolve = function (moduleName: string, relativeToPath: string) {
           try {
@@ -52,8 +53,9 @@ if (!ConfigArrayFactory.__loadPluginPatched) {
   } else {
     // ESLint 7.x || 8.x
     // https://github.com/eslint/eslintrc/blob/242d569020dfe4f561e4503787b99ec016337457/lib/config-array-factory.js#L1023
-    ConfigArrayFactory.prototype._loadPlugin = function (name: string, ctx: Record<string, unknown>) {
-      const originalResolve = ModuleResolver.resolve;
+    configArrayFactory.prototype._loadPlugin = function (name: string, ctx: Record<string, unknown>) {
+      const originalResolve: (moduleName: string, relativeToPath: string | unknown) => string =
+        ModuleResolver.resolve;
       try {
         ModuleResolver.resolve = function (moduleName: string, relativeToPath: string) {
           try {

@@ -1,6 +1,50 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Thu, 25 Jan 2024 23:03:57 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Apr 2024 21:59:39 GMT and should not be manually modified.
+
+## 1.10.2
+Wed, 10 Apr 2024 21:59:39 GMT
+
+### Patches
+
+- Bump maximum supported ESLint version for the bulk-suppressions tool to `8.57.0`.
+
+## 1.10.1
+Fri, 29 Mar 2024 05:46:41 GMT
+
+### Patches
+
+- Fix an issue where the `eslint-bulk prune` command would crash if a bulk suppressions file exists that speicifies no suppressions.
+- Exit with success under normal conditions.
+
+## 1.10.0
+Thu, 28 Mar 2024 18:11:12 GMT
+
+### Minor changes
+
+- Delete the `.eslint-bulk-suppressions.json` file during pruning if all suppressions have been eliminated.
+
+### Patches
+
+- Fix an issue with running `eslint-bulk prune` in a project with suppressions that refer to deleted files.
+
+## 1.9.0
+Wed, 27 Mar 2024 19:47:21 GMT
+
+### Minor changes
+
+- Fix an issue where `eslint-bulk prune` does not work if there are no files to lint in the project root.
+
+## 1.8.0
+Wed, 20 Mar 2024 02:09:14 GMT
+
+### Minor changes
+
+- Refactor the bulk-suppressions feature to fix some performance issues.
+
+### Patches
+
+- Fix an issue where linting issues that were already suppressed via suppression comments were recorded in the bulk suppressions list.
 
 ## 1.7.2
 Thu, 25 Jan 2024 23:03:57 GMT

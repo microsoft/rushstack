@@ -67,19 +67,19 @@ export declare function someFunction6(): typeof SomeClass1.staticProp;
  * Global symbol reference.
  * @public
  */
-export declare function someFunction7({ then }: Promise<void>): typeof Date.prototype.getDate;
+export declare function someFunction7({ then: then2 }: Promise<void>): typeof Date.prototype.getDate;
 
 /**
  * External symbol reference.
  * @public
  */
-export declare function someFunction8({ prop }: Lib2Class): void;
+export declare function someFunction8({ prop: prop2 }: Lib2Class): void;
 
 /**
  * Interface member reference.
  * @public
  */
-export declare function someFunction9({ prop }: SomeInterface1): void;
+export declare function someFunction9({ prop: prop2 }: SomeInterface1): void;
 
 /** @public */
 export declare interface SomeInterface1 {

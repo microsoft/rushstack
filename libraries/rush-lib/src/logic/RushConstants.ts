@@ -92,6 +92,11 @@ export class RushConstants {
   public static readonly pnpmfileV6Filename: '.pnpmfile.cjs' = '.pnpmfile.cjs';
 
   /**
+   * The filename (".modules.yaml") used by pnpm to specify configurations in the node_modules directory
+   */
+  public static readonly pnpmModulesFilename: '.modules.yaml' = '.modules.yaml';
+
+  /**
    * The filename ("global-pnpmfile.cjs") used to add custom configuration to subspaces
    */
   public static readonly pnpmfileGlobalFilename: 'global-pnpmfile.cjs' = 'global-pnpmfile.cjs';

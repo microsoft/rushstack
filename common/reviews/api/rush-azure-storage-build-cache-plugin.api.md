@@ -5,19 +5,22 @@
 ```ts
 
 import { AzureAuthorityHosts } from '@azure/identity';
-import { DeviceCodeCredential } from '@azure/identity';
 import { DeviceCodeCredentialOptions } from '@azure/identity';
 import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
+import { InteractiveBrowserCredentialNodeOptions } from '@azure/identity';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import type { ITerminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { RushSession } from '@rushstack/rush-sdk';
+import { TokenCredential } from '@azure/identity';
 
 // @public (undocumented)
 export abstract class AzureAuthenticationBase {
     constructor(options: IAzureAuthenticationBaseOptions);
     // (undocumented)
     protected readonly _additionalDeviceCodeCredentialOptions: DeviceCodeCredentialOptions | undefined;
+    // (undocumented)
+    protected readonly _additionalInteractiveCredentialOptions: InteractiveBrowserCredentialNodeOptions | undefined;
     // (undocumented)
     protected readonly _azureEnvironment: AzureEnvironmentName;
     // (undocumented)
@@ -28,9 +31,13 @@ export abstract class AzureAuthenticationBase {
     protected readonly _credentialUpdateCommandForLogging: string | undefined;
     // (undocumented)
     deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
+    // (undocumented)
+    protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined>;
     protected abstract _getCacheIdParts(): string[];
     // (undocumented)
-    protected abstract _getCredentialFromDeviceCodeAsync(terminal: ITerminal, deviceCodeCredential: DeviceCodeCredential): Promise<ICredentialResult>;
+    protected abstract _getCredentialFromTokenAsync(terminal: ITerminal, tokenCredential: TokenCredential): Promise<ICredentialResult>;
+    // (undocumented)
+    protected readonly _loginFlow: LoginFlowType;
     // (undocumented)
     tryGetCachedCredentialAsync(options?: ITryGetCachedCredentialOptionsThrow | ITryGetCachedCredentialOptionsIgnore): Promise<ICredentialCacheEntry | undefined>;
     // (undocumented)
@@ -53,7 +60,7 @@ export class AzureStorageAuthentication extends AzureAuthenticationBase {
     // (undocumented)
     protected _getCacheIdParts(): string[];
     // (undocumented)
-    protected _getCredentialFromDeviceCodeAsync(terminal: ITerminal, deviceCodeCredential: DeviceCodeCredential): Promise<ICredentialResult>;
+    protected _getCredentialFromTokenAsync(terminal: ITerminal, tokenCredential: TokenCredential): Promise<ICredentialResult>;
     // (undocumented)
     protected readonly _isCacheWriteAllowedByConfiguration: boolean;
     // (undocumented)
@@ -73,6 +80,9 @@ export interface IAzureAuthenticationBaseOptions {
     azureEnvironment?: AzureEnvironmentName;
     // (undocumented)
     credentialUpdateCommandForLogging?: string | undefined;
+    // (undocumented)
+    loginFlow?: LoginFlowType;
+    loginFlowFailover?: Record<LoginFlowType, LoginFlowType | undefined>;
 }
 
 // @public (undocumented)
@@ -118,6 +128,9 @@ export interface ITryGetCachedCredentialOptionsLogWarning extends ITryGetCachedC
 export interface ITryGetCachedCredentialOptionsThrow extends ITryGetCachedCredentialOptionsBase {
     expiredCredentialBehavior: 'throwError';
 }
+
+// @public (undocumented)
+export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth';
 
 // @public (undocumented)
 class RushAzureStorageBuildCachePlugin implements IRushPlugin {

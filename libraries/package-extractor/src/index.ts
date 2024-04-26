@@ -7,7 +7,8 @@ export {
   type IExtractorProjectConfiguration,
   type IExtractorDependencyConfiguration,
   type IExtractorMetadataJson,
-  type IProjectInfoJson
+  type IProjectInfoJson,
+  type IExtractorSubspace
 } from './PackageExtractor';
 
 export type { ILinkInfo } from './SymlinkAnalyzer';

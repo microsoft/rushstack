@@ -153,28 +153,4 @@ export class SubspacesConfiguration {
     const subspaceJsonLocation: string = `${commonRushConfigFolder}/${RushConstants.subspacesConfigFilename}`;
     return SubspacesConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
   }
-
-  /**
-   * Returns a name of the form `_RUSH_SUBSPACE_XYZ_TEMP_FOLDER` where `XYZ` is
-   * derived from the subspace name.
-   *
-   * @internal
-   */
-  public static _convertNameToEnvironmentVariable(
-    subspaceName: string,
-    splitWorkspaceCompatibility: boolean
-  ): string {
-    let formattedSubspaceName: string;
-    if (splitWorkspaceCompatibility) {
-      // Convert all special characters according to utf-8character map
-      formattedSubspaceName = subspaceName.replace(/_/g, '_x45');
-      formattedSubspaceName = formattedSubspaceName.replace(/\+/g, '_x43');
-      formattedSubspaceName = formattedSubspaceName.replace(/-/g, '_x95');
-      formattedSubspaceName = formattedSubspaceName.toUpperCase();
-    } else {
-      formattedSubspaceName = subspaceName.replace(/-/g, '_').toUpperCase();
-    }
-
-    return `_RUSH_SUBSPACE_${formattedSubspaceName}_TEMP_FOLDER`;
-  }
 }

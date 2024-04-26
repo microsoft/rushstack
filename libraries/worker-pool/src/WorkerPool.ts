@@ -206,7 +206,7 @@ export class WorkerPool {
       this._destroyWorker(worker);
     });
 
-    worker.on('exit', (exitCode) => {
+    worker.once('exit', (exitCode) => {
       if (exitCode !== 0) {
         this._onError(new Error(`Worker ${id} exited with code ${exitCode}`));
       }

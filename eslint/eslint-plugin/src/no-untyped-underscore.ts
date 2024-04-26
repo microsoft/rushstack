@@ -47,7 +47,7 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
             return; // no match
           }
           if (memberObject.type === 'Identifier') {
-            if (memberObject.name === 'this' || memberObject.name == 'that') {
+            if (memberObject.name === 'this' || memberObject.name === 'that') {
               return; // no match
             }
           }
