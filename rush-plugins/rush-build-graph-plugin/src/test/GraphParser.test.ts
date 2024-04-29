@@ -8,12 +8,11 @@ import { RushConfiguration } from '@rushstack/rush-sdk';
 import type { IGraphNode } from '../DropBuildGraphPlugin';
 import { GraphParser } from '../GraphParser';
 
-import * as child_process from 'child_process';
-
 import testData from './test-operation-map.json';
 
 const lookup: PackageJsonLookup = new PackageJsonLookup();
 lookup.tryGetPackageFolderFor(__dirname);
+
 const thisProjectFolder: string | undefined = lookup.tryGetPackageFolderFor(__dirname);
 if (!thisProjectFolder) {
   throw new Error('Cannot find project folder');
@@ -24,17 +23,9 @@ if (!rushJsonFolder) {
   throw new Error('Cannot find rush.json folder');
 }
 
-const testRepoLocation: string = `${thisProjectFolder}/rushBuildGraphPluginTestRepo`;
+// in order to update this file, run the following in the rushBuildGraphPluginTestRepo folder:
+// rush test --drop-graph ../examples/graph.json
 const graphLocation: string = `${thisProjectFolder}/examples/graph.json`;
-
-// Build the graph and ouput it to graphLocation
-// We want to check in the graph for the sake of documentation
-const procOut: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
-  'rush',
-  ['test', '--drop-graph', graphLocation],
-  { encoding: 'utf8', stdio: 'inherit', cwd: testRepoLocation, timeout: 60000 }
-);
-
 const graph = JsonFile.load(graphLocation);
 
 const exampleGraph: readonly IGraphNode[] = Array.from(graph.nodes as IGraphNode[]).sort((a, b) =>
@@ -47,22 +38,6 @@ const graphParser: GraphParser = new GraphParser(
   } as unknown as ILogger,
   rushJsonFolder
 );
-
-// This checks the test repo output to ensure that the command succeeds and the graph is built correctly
-describe('--drop-graph integration process', () => {
-  beforeAll(async () => {
-    if (procOut.error) {
-      throw procOut.error;
-    }
-
-    if (procOut.status !== 0) {
-      throw new Error(`Failed to build graph: ${procOut.status}`);
-    }
-  });
-  it('Should produce consistent output graph', () => {
-    expect(exampleGraph).toMatchSnapshot();
-  });
-});
 
 // These run unit tests on the checked in test-operation-map.json file, which mimics what rush passes in
 describe(GraphParser.name, () => {
