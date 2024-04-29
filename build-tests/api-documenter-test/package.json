@@ -6,15 +6,16 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "build": "node build.js",
-    "_phase:build": "node build.js"
+    "build": "heft build --clean",
+    "test": "heft test",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
     "@microsoft/api-documenter": "workspace:*",
     "@microsoft/api-extractor": "workspace:*",
-    "@types/jest": "29.2.5",
-    "@types/node": "18.17.15",
-    "fs-extra": "~7.0.1",
-    "typescript": "~5.3.3"
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "local-node-rig": "workspace:*"
   }
 }

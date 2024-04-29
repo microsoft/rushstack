@@ -77,8 +77,9 @@ function rewriteRushProjectVersions(
     throw new Error(`splitWorkspaceGlobalPnpmfileShimSettings not initialized`);
   }
 
-  const subspaceProject: IWorkspaceProjectInfo | undefined = settings.subspaceProjects[packageName];
-  if (!subspaceProject) {
+  const workspaceProject: IWorkspaceProjectInfo | undefined =
+    settings.subspaceProjects[packageName] || settings.workspaceProjects[packageName];
+  if (!workspaceProject) {
     return;
   }
 
@@ -90,10 +91,18 @@ function rewriteRushProjectVersions(
         settings.workspaceProjects[dependencyName];
       if (workspaceProjectInfo) {
         // Case 1. "<package_name>": "workspace:*"
-        const relativePath: string = path.normalize(
-          path.relative(subspaceProject.projectRelativeFolder, workspaceProjectInfo.projectRelativeFolder)
+        let workspaceVersionProtocol: string = 'link:';
+
+        const injectedDependenciesSet: ReadonlySet<string> = new Set(workspaceProject.injectedDependencies);
+        if (injectedDependenciesSet.has(dependencyName)) {
+          workspaceVersionProtocol = 'file:';
+        }
+        let relativePath: string = path.normalize(
+          path.relative(workspaceProject.projectRelativeFolder, workspaceProjectInfo.projectRelativeFolder)
         );
-        const newVersion: string = 'link:' + relativePath;
+        // convert path in posix style, otherwise pnpm install will fail in subspace case
+        relativePath = relativePath.split(path.sep).join(path.posix.sep);
+        const newVersion: string = workspaceVersionProtocol + relativePath;
         dependencies[dependencyName] = newVersion;
       } else {
         // Case 2. "<alias>": "workspace:<aliased_package_name>@<version>"
@@ -107,7 +116,7 @@ function rewriteRushProjectVersions(
         if (aliasedWorkspaceProjectInfo) {
           const relativePath: string = path.normalize(
             path.relative(
-              subspaceProject.projectRelativeFolder,
+              workspaceProject.projectRelativeFolder,
               aliasedWorkspaceProjectInfo.projectRelativeFolder
             )
           );
@@ -127,7 +136,7 @@ function rewriteRushProjectVersions(
       if (aliasedWorkspaceProjectInfo) {
         const relativePath: string = path.normalize(
           path.relative(
-            subspaceProject.projectRelativeFolder,
+            workspaceProject.projectRelativeFolder,
             aliasedWorkspaceProjectInfo.projectRelativeFolder
           )
         );

@@ -8,18 +8,19 @@
 //
 //    require("@rushstack/eslint-patch/custom-config-package-names");
 //
-import { ConfigArrayFactory, ModuleResolver, Naming } from './_patch-base';
+import { configArrayFactory, ModuleResolver, Naming } from './_patch-base';
 
-if (!ConfigArrayFactory.__loadExtendedShareableConfigPatched) {
-  ConfigArrayFactory.__loadExtendedShareableConfigPatched = true;
-  const originalLoadExtendedShareableConfig = ConfigArrayFactory.prototype._loadExtendedShareableConfig;
+if (!configArrayFactory.__loadExtendedShareableConfigPatched) {
+  configArrayFactory.__loadExtendedShareableConfigPatched = true;
+  // eslint-disable-next-line @typescript-eslint/typedef
+  const originalLoadExtendedShareableConfig = configArrayFactory.prototype._loadExtendedShareableConfig;
 
   // Common between ESLint versions
   // https://github.com/eslint/eslintrc/blob/242d569020dfe4f561e4503787b99ec016337457/lib/config-array-factory.js#L910
-  ConfigArrayFactory.prototype._loadExtendedShareableConfig = function (extendName: string) {
-    const originalResolve = ModuleResolver.resolve;
+  configArrayFactory.prototype._loadExtendedShareableConfig = function (extendName: string): unknown {
+    const originalResolve: (moduleName: string, relativeToPath: string) => string = ModuleResolver.resolve;
     try {
-      ModuleResolver.resolve = function (moduleName: string, relativeToPath: string) {
+      ModuleResolver.resolve = function (moduleName: string, relativeToPath: string): string {
         try {
           return originalResolve.call(this, moduleName, relativeToPath);
         } catch (e) {

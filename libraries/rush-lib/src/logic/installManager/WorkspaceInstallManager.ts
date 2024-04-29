@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
+import yaml from 'js-yaml';
 import {
   FileSystem,
   FileConstants,
@@ -35,9 +36,20 @@ import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
-import { type ILockfile, pnpmSyncPrepareAsync } from 'pnpm-sync-lib';
+import {
+  type ILockfile,
+  pnpmSyncPrepareAsync,
+  type ILogMessageCallbackOptions,
+  type ILockfilePackage
+} from 'pnpm-sync-lib';
 import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
+import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
+import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
+
+export interface IPnpmModules {
+  hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
+}
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -147,12 +159,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       path.join(subspace.getSubspaceTempFolder(), 'pnpm-workspace.yaml')
     );
 
-    // For pnpm pacakge manager, we need to handle dependenciesMeta changes in package.json. See more: https://pnpm.io/package_json#dependenciesmeta
+    // For pnpm package manager, we need to handle dependenciesMeta changes in package.json. See more: https://pnpm.io/package_json#dependenciesmeta
     // If dependenciesMeta settings is different between package.json and pnpm-lock.yaml, then shrinkwrapIsUpToDate return false.
-    // Build a object for dependenciesMeta settings in projects' package.jsons
+    // Build a object for dependenciesMeta settings in projects' package.json
     // key is the package path, value is the dependenciesMeta info for that package
     const expectedDependenciesMetaByProjectRelativePath: Record<string, IDependenciesMetaTable> = {};
-    const commonTempFolder: string = this.rushConfiguration.commonTempFolder;
+    const commonTempFolder: string = subspace.getSubspaceTempFolder();
     const rushJsonFolder: string = this.rushConfiguration.rushJsonFolder;
     // get the relative path from common temp folder to repo root folder
     const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);
@@ -221,7 +233,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             console.log(
               Colorize.red(
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists within ` +
-                  'the workspace. Run "rush update" to update workspace references for this package.'
+                  'the workspace. Run "rush update" to update workspace references for this package. ' +
+                  `If package "${name}" is intentionally expected to be installed from an external package feed, ` +
+                  `list package "${name}" in the "decoupledLocalDependencies" field in the ` +
+                  `"${rushProject.packageName}" entry in rush.json to suppress this error.`
               )
             );
             throw new AlreadyReportedError();
@@ -338,10 +353,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // files
     // Example: [ "C:\MyRepo\projects\projectA\node_modules", "C:\MyRepo\projects\projectA\package.json" ]
     potentiallyChangedFiles.push(
-      ...this.rushConfiguration.projects.map((project) => {
+      ...subspace.getProjects().map((project) => {
         return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
       }),
-      ...this.rushConfiguration.projects.map((project) => {
+      ...subspace.getProjects().map((project) => {
         return path.join(project.projectFolder, FileConstants.PackageJson);
       })
     );
@@ -506,10 +521,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // the pnpm-sync will generate the pnpm-sync.json based on lockfile
     if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
       const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
-      const pnpmStorePath: string = `${this.rushConfiguration.commonTempFolder}/node_modules/.pnpm`;
+      const dotPnpmFolder: string = `${subspace.getSubspaceTempFolder()}/node_modules/.pnpm`;
       await pnpmSyncPrepareAsync({
         lockfilePath: pnpmLockfilePath,
-        storePath: pnpmStorePath,
+        dotPnpmFolder,
+        ensureFolder: FileSystem.ensureFolderAsync,
         readPnpmLockfile: async (lockfilePath: string) => {
           const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFile(
             lockfilePath,
@@ -519,12 +535,29 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           if (!wantedPnpmLockfile) {
             return undefined;
           } else {
+            const lockfilePackages: Record<string, ILockfilePackage> = Object.create(null);
+            for (const versionPath of wantedPnpmLockfile.packages.keys()) {
+              lockfilePackages[versionPath] = {
+                dependencies: wantedPnpmLockfile.packages.get(versionPath)?.dependencies as Record<
+                  string,
+                  string
+                >,
+                optionalDependencies: wantedPnpmLockfile.packages.get(versionPath)
+                  ?.optionalDependencies as Record<string, string>
+              };
+            }
+
             const result: ILockfile = {
-              importers: Object.fromEntries(wantedPnpmLockfile.importers.entries())
+              lockfileVersion: wantedPnpmLockfile.shrinkwrapFileMajorVersion,
+              importers: Object.fromEntries(wantedPnpmLockfile.importers.entries()),
+              packages: lockfilePackages
             };
+
             return result;
           }
-        }
+        },
+        logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
+          PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
       });
     }
 
@@ -588,6 +621,69 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
+    // If the splitWorkspaceCompatibility is enabled for subspaces, create symlinks to mimic the behaviour
+    // of having the node_modules folder created directly in the project folder. This requires symlinking two categories:
+    // 1) Symlink any packages that are declared to be publicly hoisted, such as by using public-hoist-pattern in .npmrc.
+    //    This creates a symlink from <project_folder>/node_modules/<dependency> -> temp/<subspace_name>/node_modules/<dependency>
+    // 2) Symlink any workspace packages that are declared in the temp folder, as some packages may expect these packages to exist
+    //    in the node_modules folder.
+    //    This creates a symlink from temp/<subspace_name>/node_modules/<workspace_dependency_name> -> <workspace_dependency_folder>
+    if (
+      this.rushConfiguration.subspacesFeatureEnabled &&
+      this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility
+    ) {
+      const tempNodeModulesPath: string = `${subspace.getSubspaceTempFolder()}/node_modules`;
+      const modulesFilePath: string = `${tempNodeModulesPath}/${RushConstants.pnpmModulesFilename}`;
+      if (
+        subspace.subspaceName.startsWith('split_') &&
+        subspace.getProjects().length === 1 &&
+        (await FileSystem.existsAsync(modulesFilePath))
+      ) {
+        // Find the .modules.yaml file in the subspace temp/node_modules folder
+        const modulesContent: string = await FileSystem.readFileAsync(modulesFilePath);
+        const yamlContent: IPnpmModules = yaml.load(modulesContent, { filename: modulesFilePath });
+        const { hoistedDependencies } = yamlContent;
+        const subspaceProject: RushConfigurationProject = subspace.getProjects()[0];
+        const projectNodeModulesPath: string = `${subspaceProject.projectFolder}/node_modules`;
+        for (const value of Object.values(hoistedDependencies)) {
+          for (const [filePath, type] of Object.entries(value)) {
+            if (type === 'public') {
+              if (Utilities.existsOrIsSymlink(`${projectNodeModulesPath}/${filePath}`)) {
+                await FileSystem.deleteFolderAsync(`${projectNodeModulesPath}/${filePath}`);
+              }
+              // If we don't already have a symlink for this package, create one
+              const parentDir: string = Utilities.trimAfterLastSlash(`${projectNodeModulesPath}/${filePath}`);
+              await FileSystem.ensureFolderAsync(parentDir);
+              BaseLinkManager._createSymlink({
+                linkTargetPath: `${tempNodeModulesPath}/${filePath}`,
+                newLinkPath: `${projectNodeModulesPath}/${filePath}`,
+                symlinkKind: SymlinkKind.Directory
+              });
+            }
+          }
+        }
+      }
+
+      // Look for any workspace linked packages anywhere in this subspace, symlink them from the temp node_modules folder.
+      const subspaceDependencyProjects: Set<RushConfigurationProject> = new Set();
+      for (const subspaceProject of subspace.getProjects()) {
+        for (const dependencyProject of subspaceProject.dependencyProjects) {
+          subspaceDependencyProjects.add(dependencyProject);
+        }
+      }
+      for (const dependencyProject of subspaceDependencyProjects) {
+        const symlinkToCreate: string = `${tempNodeModulesPath}/${dependencyProject.packageName}`;
+        if (!Utilities.existsOrIsSymlink(symlinkToCreate)) {
+          const parentFolder: string = Utilities.trimAfterLastSlash(symlinkToCreate);
+          await FileSystem.ensureFolderAsync(parentFolder);
+          BaseLinkManager._createSymlink({
+            linkTargetPath: dependencyProject.projectFolder,
+            newLinkPath: symlinkToCreate,
+            symlinkKind: SymlinkKind.Directory
+          });
+        }
+      }
+    }
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     LastLinkFlagFactory.getCommonTempFlag(subspace).create();
   }

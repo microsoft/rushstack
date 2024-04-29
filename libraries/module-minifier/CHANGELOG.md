@@ -1,6 +1,35 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Tue, 05 Mar 2024 01:19:24 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Apr 2024 15:10:09 GMT and should not be manually modified.
+
+## 0.5.1
+Wed, 10 Apr 2024 15:10:09 GMT
+
+_Version update only_
+
+## 0.5.0
+Thu, 28 Mar 2024 22:42:23 GMT
+
+### Minor changes
+
+- Gracefully exit minifier worker instead of using `process.exit(0)`.
+
+## 0.4.40
+Tue, 19 Mar 2024 15:10:18 GMT
+
+_Version update only_
+
+## 0.4.39
+Sat, 16 Mar 2024 00:11:37 GMT
+
+### Patches
+
+- Fix an issue where the assets listed in sourcemaps were incomplete or missing.
+
+## 0.4.38
+Fri, 15 Mar 2024 00:12:40 GMT
+
+_Version update only_
 
 ## 0.4.37
 Tue, 05 Mar 2024 01:19:24 GMT

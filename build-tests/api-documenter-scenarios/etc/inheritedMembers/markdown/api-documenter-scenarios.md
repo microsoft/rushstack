@@ -6,39 +6,213 @@
 
 ## Classes
 
-|  Class | Description |
-|  --- | --- |
-|  [Class1](./api-documenter-scenarios.class1.md) |  |
-|  [Class2](./api-documenter-scenarios.class2.md) |  |
-|  [ExtendsAnonymousClass](./api-documenter-scenarios.extendsanonymousclass.md) | Some class that extends an anonymous class. |
-|  [ExtendsClassFromAnotherPackage](./api-documenter-scenarios.extendsclassfromanotherpackage.md) | Some class that extends a class from another package. This base class is not in any API doc model. |
-|  [ExtendsClassLikeVariable](./api-documenter-scenarios.extendsclasslikevariable.md) | Some class that extends a class-like variable. |
-|  [ExtendsUnexportedClass](./api-documenter-scenarios.extendsunexportedclass.md) | Some class that extends an unexported class. |
+<table><thead><tr><th>
+
+Class
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[Class1](./api-documenter-scenarios.class1.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+<tr><td>
+
+[Class2](./api-documenter-scenarios.class2.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+<tr><td>
+
+[ExtendsAnonymousClass](./api-documenter-scenarios.extendsanonymousclass.md)
+
+
+</td><td>
+
+Some class that extends an anonymous class.
+
+
+</td></tr>
+<tr><td>
+
+[ExtendsClassFromAnotherPackage](./api-documenter-scenarios.extendsclassfromanotherpackage.md)
+
+
+</td><td>
+
+Some class that extends a class from another package. This base class is not in any API doc model.
+
+
+</td></tr>
+<tr><td>
+
+[ExtendsClassLikeVariable](./api-documenter-scenarios.extendsclasslikevariable.md)
+
+
+</td><td>
+
+Some class that extends a class-like variable.
+
+
+</td></tr>
+<tr><td>
+
+[ExtendsUnexportedClass](./api-documenter-scenarios.extendsunexportedclass.md)
+
+
+</td><td>
+
+Some class that extends an unexported class.
+
+
+</td></tr>
+</tbody></table>
 
 ## Interfaces
 
-|  Interface | Description |
-|  --- | --- |
-|  [IExtendsInterfaceLikeTypeAlias](./api-documenter-scenarios.iextendsinterfaceliketypealias.md) | Some interface that extends an interface-like type alias as well as another interface. |
-|  [IExtendsMultipleInterfaces](./api-documenter-scenarios.iextendsmultipleinterfaces.md) | Some interface that extends multiple interfaces. |
-|  [IInterface1](./api-documenter-scenarios.iinterface1.md) |  |
-|  [IInterface2](./api-documenter-scenarios.iinterface2.md) |  |
+<table><thead><tr><th>
+
+Interface
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[IExtendsInterfaceLikeTypeAlias](./api-documenter-scenarios.iextendsinterfaceliketypealias.md)
+
+
+</td><td>
+
+Some interface that extends an interface-like type alias as well as another interface.
+
+
+</td></tr>
+<tr><td>
+
+[IExtendsMultipleInterfaces](./api-documenter-scenarios.iextendsmultipleinterfaces.md)
+
+
+</td><td>
+
+Some interface that extends multiple interfaces.
+
+
+</td></tr>
+<tr><td>
+
+[IInterface1](./api-documenter-scenarios.iinterface1.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+<tr><td>
+
+[IInterface2](./api-documenter-scenarios.iinterface2.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+</tbody></table>
 
 ## Namespaces
 
-|  Namespace | Description |
-|  --- | --- |
-|  [Namespace1](./api-documenter-scenarios.namespace1.md) |  |
+<table><thead><tr><th>
+
+Namespace
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[Namespace1](./api-documenter-scenarios.namespace1.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+</tbody></table>
 
 ## Variables
 
-|  Variable | Description |
-|  --- | --- |
-|  [ClassLikeVariable](./api-documenter-scenarios.classlikevariable.md) | Some class-like variable. |
+<table><thead><tr><th>
+
+Variable
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[ClassLikeVariable](./api-documenter-scenarios.classlikevariable.md)
+
+
+</td><td>
+
+Some class-like variable.
+
+
+</td></tr>
+</tbody></table>
 
 ## Type Aliases
 
-|  Type Alias | Description |
-|  --- | --- |
-|  [IInterfaceLikeTypeAlias](./api-documenter-scenarios.iinterfaceliketypealias.md) | Some interface-like type alias. |
+<table><thead><tr><th>
 
+Type Alias
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[IInterfaceLikeTypeAlias](./api-documenter-scenarios.iinterfaceliketypealias.md)
+
+
+</td><td>
+
+Some interface-like type alias.
+
+
+</td></tr>
+</tbody></table>

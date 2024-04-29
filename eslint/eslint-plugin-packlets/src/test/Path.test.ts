@@ -11,7 +11,7 @@ function toNativePath(value: string): string {
   return value.replace(/[\\\/]/g, path.sep);
 }
 
-function relativeCaseInsensitive(from: string, to: string) {
+function relativeCaseInsensitive(from: string, to: string): string {
   return toPosixPath(Path['_relativeCaseInsensitive'](toNativePath(from), toNativePath(to)));
 }
 

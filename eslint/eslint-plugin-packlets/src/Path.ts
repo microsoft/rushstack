@@ -6,6 +6,8 @@ import * as fs from 'fs';
 
 export type ParsedPath = path.ParsedPath;
 
+const RELATIVE_PATH_REGEXP: RegExp = /^[.\/\\]+$/;
+
 export class Path {
   /**
    * Whether the filesystem is assumed to be case sensitive for Path operations.
@@ -126,8 +128,6 @@ export class Path {
   // --------------------------------------------------------------------------------------------------------
   // The operations below are borrowed from @rushstack/node-core-library
 
-  private static _relativePathRegex: RegExp = /^[.\/\\]+$/;
-
   /**
    * Returns true if "childPath" is located inside the "parentFolderPath" folder
    * or one of its child folders.  Note that "parentFolderPath" is not considered to be
@@ -140,7 +140,7 @@ export class Path {
    */
   public static isUnder(childPath: string, parentFolderPath: string): boolean {
     const relativePath: string = Path.relative(childPath, parentFolderPath);
-    return Path._relativePathRegex.test(relativePath);
+    return RELATIVE_PATH_REGEXP.test(relativePath);
   }
 
   /**

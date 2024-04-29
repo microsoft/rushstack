@@ -14,17 +14,150 @@ export declare class Class2<T> extends Namespace1.Class3
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [secondProp](./api-documenter-scenarios.class2.secondprop.md) |  | boolean \| string | A second prop. |
-|  [someProp](./api-documenter-scenarios.namespace1.class3.someprop.md) |  | number | <p>Some prop.</p><p>(Inherited from [Class3](./api-documenter-scenarios.namespace1.class3.md)<!-- -->)</p> |
-|  [thirdProp](./api-documenter-scenarios.class2.thirdprop.md) |  | T | A third prop. |
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[secondProp](./api-documenter-scenarios.class2.secondprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean \| string
+
+
+</td><td>
+
+A second prop.
+
+
+</td></tr>
+<tr><td>
+
+[someProp](./api-documenter-scenarios.namespace1.class3.someprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+Some prop.
+
+(Inherited from [Class3](./api-documenter-scenarios.namespace1.class3.md)<!-- -->)
+
+
+</td></tr>
+<tr><td>
+
+[thirdProp](./api-documenter-scenarios.class2.thirdprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+T
+
+
+</td><td>
+
+A third prop.
+
+
+</td></tr>
+</tbody></table>
 
 ## Methods
 
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [someMethod(x)](./api-documenter-scenarios.class2.somemethod.md) |  | Some method. Overrides <code>Class3.someMethod</code>. |
-|  [someOverload(x)](./api-documenter-scenarios.namespace1.class3.someoverload.md) |  | <p>Some overload.</p><p>(Inherited from [Class3](./api-documenter-scenarios.namespace1.class3.md)<!-- -->)</p> |
-|  [someOverload(x)](./api-documenter-scenarios.namespace1.class3.someoverload_1.md) |  | <p>Some overload.</p><p>(Inherited from [Class3](./api-documenter-scenarios.namespace1.class3.md)<!-- -->)</p> |
+<table><thead><tr><th>
 
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[someMethod(x)](./api-documenter-scenarios.class2.somemethod.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Some method. Overrides `Class3.someMethod`<!-- -->.
+
+
+</td></tr>
+<tr><td>
+
+[someOverload(x)](./api-documenter-scenarios.namespace1.class3.someoverload.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Some overload.
+
+(Inherited from [Class3](./api-documenter-scenarios.namespace1.class3.md)<!-- -->)
+
+
+</td></tr>
+<tr><td>
+
+[someOverload(x)](./api-documenter-scenarios.namespace1.class3.someoverload_1.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Some overload.
+
+(Inherited from [Class3](./api-documenter-scenarios.namespace1.class3.md)<!-- -->)
+
+
+</td></tr>
+</tbody></table>

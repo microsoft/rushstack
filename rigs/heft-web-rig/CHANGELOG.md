@@ -1,6 +1,55 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Tue, 05 Mar 2024 01:19:24 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Apr 2024 21:59:39 GMT and should not be manually modified.
+
+## 0.24.0
+Wed, 10 Apr 2024 21:59:39 GMT
+
+### Minor changes
+
+- Bump ESLint to ~8.57.0.
+
+## 0.23.6
+Wed, 10 Apr 2024 15:10:09 GMT
+
+_Version update only_
+
+## 0.23.5
+Fri, 29 Mar 2024 05:46:41 GMT
+
+_Version update only_
+
+## 0.23.4
+Thu, 28 Mar 2024 22:42:23 GMT
+
+_Version update only_
+
+## 0.23.3
+Thu, 28 Mar 2024 18:11:12 GMT
+
+_Version update only_
+
+## 0.23.2
+Wed, 27 Mar 2024 19:47:21 GMT
+
+_Version update only_
+
+## 0.23.1
+Wed, 20 Mar 2024 02:09:14 GMT
+
+_Version update only_
+
+## 0.23.0
+Tue, 19 Mar 2024 15:10:18 GMT
+
+### Minor changes
+
+- Upgrade to TypeScript 5.4
+
+## 0.22.9
+Fri, 15 Mar 2024 00:12:40 GMT
+
+_Version update only_
 
 ## 0.22.8
 Tue, 05 Mar 2024 01:19:24 GMT

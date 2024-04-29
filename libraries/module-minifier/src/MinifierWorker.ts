@@ -12,12 +12,19 @@ const terserOptions: MinifyOptions = workerData;
 // Set to non-zero to help debug unexpected graceful exit
 process.exitCode = 2;
 
-parentPort!.on('message', async (message: IModuleMinificationRequest) => {
+async function handler(message: IModuleMinificationRequest): Promise<void> {
   if (!message) {
-    process.exit(0);
+    parentPort!.off('postMessage', handler);
+    parentPort!.close();
+    return;
   }
 
   const result: IModuleMinificationResult = await minifySingleFileAsync(message, terserOptions);
 
   parentPort!.postMessage(result);
+}
+
+parentPort!.once('close', () => {
+  process.exitCode = 0;
 });
+parentPort!.on('message', handler);

@@ -1,0 +1,4707 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`api-documenter YAML: itemContents 1`] = `
+Object {
+  "/api-documenter-test.yml": "### YamlMime:TSPackage
+uid: api-documenter-test!
+name: api-documenter-test
+type: package
+summary: |-
+  api-extractor-test-05
+
+  This project tests various documentation generation scenarios and doc comment syntaxes.
+classes:
+  - 'api-documenter-test!AbstractClass:class'
+  - 'api-documenter-test!DecoratorExample:class'
+  - 'api-documenter-test!DocBaseClass:class'
+  - 'api-documenter-test!DocClass1:class'
+  - 'api-documenter-test!DocClassInterfaceMerge:class'
+  - 'api-documenter-test!Generic:class'
+  - 'api-documenter-test!SystemEvent:class'
+interfaces:
+  - 'api-documenter-test!Constraint:interface'
+  - 'api-documenter-test!DefaultType:interface'
+  - 'api-documenter-test!DocClassInterfaceMerge:interface'
+  - 'api-documenter-test!IDocInterface1:interface'
+  - 'api-documenter-test!IDocInterface2:interface'
+  - 'api-documenter-test!IDocInterface3:interface'
+  - 'api-documenter-test!IDocInterface4:interface'
+  - 'api-documenter-test!IDocInterface5:interface'
+  - 'api-documenter-test!IDocInterface6:interface'
+  - 'api-documenter-test!IDocInterface7:interface'
+enums:
+  - 'api-documenter-test!DocEnum:enum'
+  - 'api-documenter-test!DocEnumNamespaceMerge:enum'
+typeAliases:
+  - 'api-documenter-test!ExampleDuplicateTypeAlias:type'
+  - 'api-documenter-test!ExampleTypeAlias:type'
+  - 'api-documenter-test!ExampleUnionTypeAlias:type'
+  - 'api-documenter-test!GenericTypeAlias:type'
+  - 'api-documenter-test!TypeAlias:type'
+functions:
+  - name: 'exampleFunction(x, y)'
+    uid: 'api-documenter-test!exampleFunction:function(1)'
+    package: api-documenter-test!
+    summary: An exported function with hyperlinked parameters and return value.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'export declare function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1;'
+      parameters:
+        - id: x
+          description: an API item that should get hyperlinked
+          type: '<xref uid=\\"api-documenter-test!ExampleTypeAlias:type\\" />'
+        - id: 'y'
+          description: a system type that should NOT get hyperlinked
+          type: number
+      return:
+        type: '<xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />'
+        description: an interface that should get hyperlinked
+  - name: yamlReferenceUniquenessTest()
+    uid: 'api-documenter-test!yamlReferenceUniquenessTest:function(1)'
+    package: api-documenter-test!
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'export declare function yamlReferenceUniquenessTest(): IDocInterface1;'
+      return:
+        type: '<xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />'
+        description: ''
+",
+  "/api-documenter-test/abstractclass.yml": "### YamlMime:TSType
+name: AbstractClass
+uid: 'api-documenter-test!AbstractClass:class'
+package: api-documenter-test!
+fullName: AbstractClass
+summary: Some abstract class with abstract members.
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: class
+properties:
+  - name: property
+    uid: 'api-documenter-test!AbstractClass#property:member'
+    package: api-documenter-test!
+    fullName: property
+    summary: Some abstract property.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'protected abstract property: number;'
+      return:
+        type: number
+methods:
+  - name: method()
+    uid: 'api-documenter-test!AbstractClass#method:member(1)'
+    package: api-documenter-test!
+    fullName: method()
+    summary: Some abstract method.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'abstract method(): void;'
+      return:
+        type: void
+        description: ''
+",
+  "/api-documenter-test/constraint.yml": "### YamlMime:TSType
+name: Constraint
+uid: 'api-documenter-test!Constraint:interface'
+package: api-documenter-test!
+fullName: Constraint
+summary: Type parameter constraint used by test case below.
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: interface
+",
+  "/api-documenter-test/decoratorexample.yml": "### YamlMime:TSType
+name: DecoratorExample
+uid: 'api-documenter-test!DecoratorExample:class'
+package: api-documenter-test!
+fullName: DecoratorExample
+summary: ''
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: class
+properties:
+  - name: creationDate
+    uid: 'api-documenter-test!DecoratorExample#creationDate:member'
+    package: api-documenter-test!
+    fullName: creationDate
+    summary: The date when the record was created.
+    remarks: Here is a longer description of the property.
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'creationDate: Date;'
+      return:
+        type: Date
+",
+  "/api-documenter-test/defaulttype.yml": "### YamlMime:TSType
+name: DefaultType
+uid: 'api-documenter-test!DefaultType:interface'
+package: api-documenter-test!
+fullName: DefaultType
+summary: Type parameter default type used by test case below.
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: interface
+",
+  "/api-documenter-test/docbaseclass.yml": "### YamlMime:TSType
+name: DocBaseClass
+uid: 'api-documenter-test!DocBaseClass:class'
+package: api-documenter-test!
+fullName: DocBaseClass
+summary: Example base class
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: class
+constructors:
+  - name: (constructor)()
+    uid: 'api-documenter-test!DocBaseClass:constructor(1)'
+    package: api-documenter-test!
+    fullName: (constructor)()
+    summary: The simple constructor for \`DocBaseClass\`
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: constructor();
+  - name: (constructor)(x)
+    uid: 'api-documenter-test!DocBaseClass:constructor(2)'
+    package: api-documenter-test!
+    fullName: (constructor)(x)
+    summary: The overloaded constructor for \`DocBaseClass\`
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'constructor(x: number);'
+      parameters:
+        - id: x
+          description: ''
+          type: number
+",
+  "/api-documenter-test/docclass1.yml": "### YamlMime:TSType
+name: DocClass1
+uid: 'api-documenter-test!DocClass1:class'
+package: api-documenter-test!
+fullName: DocClass1
+summary: This is an example class.
+remarks: >-
+  [Link to overload 1](xref:api-documenter-test!DocClass1%23exampleFunction:member(1))
+
+
+  [Link to overload 2](xref:api-documenter-test!DocClass1%23exampleFunction:member(2))
+
+
+
+  The constructor for this class is marked as internal. Third-party code should not call the constructor directly or
+  create subclasses that extend the \`DocClass1\` class.
+example: []
+isPreview: false
+isDeprecated: false
+type: class
+properties:
+  - name: multipleModifiersProperty
+    uid: 'api-documenter-test!DocClass1.multipleModifiersProperty:member'
+    package: api-documenter-test!
+    fullName: multipleModifiersProperty
+    summary: Some property with multiple modifiers.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'protected static readonly multipleModifiersProperty: boolean;'
+      return:
+        type: boolean
+  - name: protectedProperty
+    uid: 'api-documenter-test!DocClass1#protectedProperty:member'
+    package: api-documenter-test!
+    fullName: protectedProperty
+    summary: Some protected property.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'protected protectedProperty: string;'
+      return:
+        type: string
+  - name: readonlyProperty
+    uid: 'api-documenter-test!DocClass1#readonlyProperty:member'
+    package: api-documenter-test!
+    fullName: readonlyProperty
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'get readonlyProperty(): string;'
+      return:
+        type: string
+  - name: regularProperty
+    uid: 'api-documenter-test!DocClass1#regularProperty:member'
+    package: api-documenter-test!
+    fullName: regularProperty
+    summary: This is a regular property that happens to use the SystemEvent type.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'regularProperty: SystemEvent;'
+      return:
+        type: '<xref uid=\\"api-documenter-test!SystemEvent:class\\" />'
+  - name: writeableProperty
+    uid: 'api-documenter-test!DocClass1#writeableProperty:member'
+    package: api-documenter-test!
+    fullName: writeableProperty
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: |-
+        get writeableProperty(): string;
+
+        set writeableProperty(value: string);
+      return:
+        type: string
+  - name: writeonlyProperty
+    uid: 'api-documenter-test!DocClass1#writeonlyProperty:member'
+    package: api-documenter-test!
+    fullName: writeonlyProperty
+    summary: API Extractor will surface an \`ae-missing-getter\` finding for this property.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'set writeonlyProperty(value: string);'
+      return:
+        type: string
+methods:
+  - name: deprecatedExample()
+    uid: 'api-documenter-test!DocClass1#deprecatedExample:member(1)'
+    package: api-documenter-test!
+    fullName: deprecatedExample()
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: true
+    customDeprecatedMessage: Use \`otherThing()\` instead.
+    syntax:
+      content: 'deprecatedExample(): void;'
+      return:
+        type: void
+        description: ''
+  - name: 'exampleFunction(a, b)'
+    uid: 'api-documenter-test!DocClass1#exampleFunction:member(1)'
+    package: api-documenter-test!
+    fullName: 'exampleFunction(a, b)'
+    summary: This is an overloaded function.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'exampleFunction(a: string, b: string): string;'
+      parameters:
+        - id: a
+          description: the first string
+          type: string
+        - id: b
+          description: the second string
+          type: string
+      return:
+        type: string
+        description: ''
+  - name: exampleFunction(x)
+    uid: 'api-documenter-test!DocClass1#exampleFunction:member(2)'
+    package: api-documenter-test!
+    fullName: exampleFunction(x)
+    summary: This is also an overloaded function.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'exampleFunction(x: number): number;'
+      parameters:
+        - id: x
+          description: the number
+          type: number
+      return:
+        type: number
+        description: ''
+  - name: genericWithConstraintAndDefault(x)
+    uid: 'api-documenter-test!DocClass1#genericWithConstraintAndDefault:member(1)'
+    package: api-documenter-test!
+    fullName: genericWithConstraintAndDefault(x)
+    summary: This is a method with a complex type parameter.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'genericWithConstraintAndDefault<T extends Constraint = DefaultType>(x: T): void;'
+      parameters:
+        - id: x
+          description: some generic parameter.
+          type: T
+      return:
+        type: void
+        description: ''
+  - name: interestingEdgeCases()
+    uid: 'api-documenter-test!DocClass1#interestingEdgeCases:member(1)'
+    package: api-documenter-test!
+    fullName: interestingEdgeCases()
+    summary: |-
+      Example: \\"<!-- -->{ \\\\\\\\<!-- -->\\"maxItemsToShow<!-- -->\\\\\\\\<!-- -->\\": 123 }<!-- -->\\"
+
+      The regular expression used to validate the constraints is /^\\\\[a-zA-Z0-9<!-- -->\\\\\\\\<!-- -->-\\\\_\\\\]+$/
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'interestingEdgeCases(): void;'
+      return:
+        type: void
+        description: ''
+  - name: optionalParamFunction(x)
+    uid: 'api-documenter-test!DocClass1#optionalParamFunction:member(1)'
+    package: api-documenter-test!
+    fullName: optionalParamFunction(x)
+    summary: This is a function with an optional parameter.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'optionalParamFunction(x?: number): void;'
+      parameters:
+        - id: x
+          description: the number
+          type: number
+      return:
+        type: void
+        description: ''
+  - name: 'sumWithExample(x, y)'
+    uid: 'api-documenter-test!DocClass1.sumWithExample:member(1)'
+    package: api-documenter-test!
+    fullName: 'sumWithExample(x, y)'
+    summary: Returns the sum of two numbers.
+    remarks: This illustrates usage of the \`@example\` block tag.
+    example:
+      - |-
+        Here's a simple example:
+
+        \`\`\`
+        // Prints \\"2\\":
+        console.log(DocClass1.sumWithExample(1,1));
+        \`\`\`
+      - |-
+        Here's an example with negative numbers:
+
+        \`\`\`
+        // Prints \\"0\\":
+        console.log(DocClass1.sumWithExample(1,-1));
+        \`\`\`
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'static sumWithExample(x: number, y: number): number;'
+      parameters:
+        - id: x
+          description: the first number to add
+          type: number
+        - id: 'y'
+          description: the second number to add
+          type: number
+      return:
+        type: number
+        description: the sum of the two numbers
+  - name: tableExample()
+    uid: 'api-documenter-test!DocClass1#tableExample:member(1)'
+    package: api-documenter-test!
+    fullName: tableExample()
+    summary: 'An example with tables:'
+    remarks: <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'tableExample(): void;'
+      return:
+        type: void
+        description: ''
+events:
+  - name: malformedEvent
+    uid: 'api-documenter-test!DocClass1#malformedEvent:member'
+    package: api-documenter-test!
+    fullName: malformedEvent
+    summary: This event should have been marked as readonly.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'malformedEvent: SystemEvent;'
+      return:
+        type: '<xref uid=\\"api-documenter-test!SystemEvent:class\\" />'
+  - name: modifiedEvent
+    uid: 'api-documenter-test!DocClass1#modifiedEvent:member'
+    package: api-documenter-test!
+    fullName: modifiedEvent
+    summary: This event is fired whenever the object is modified.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'readonly modifiedEvent: SystemEvent;'
+      return:
+        type: '<xref uid=\\"api-documenter-test!SystemEvent:class\\" />'
+extends: '<xref uid=\\"api-documenter-test!DocBaseClass:class\\" />'
+",
+  "/api-documenter-test/docclassinterfacemerge-class.yml": "### YamlMime:TSType
+name: DocClassInterfaceMerge
+uid: 'api-documenter-test!DocClassInterfaceMerge:class'
+package: api-documenter-test!
+fullName: DocClassInterfaceMerge
+summary: Class that merges with interface
+remarks: |-
+  [Link to class](xref:api-documenter-test!DocClassInterfaceMerge:class)
+
+  [Link to interface](xref:api-documenter-test!DocClassInterfaceMerge:interface)
+example: []
+isPreview: false
+isDeprecated: false
+type: class
+",
+  "/api-documenter-test/docclassinterfacemerge-interface.yml": "### YamlMime:TSType
+name: DocClassInterfaceMerge
+uid: 'api-documenter-test!DocClassInterfaceMerge:interface'
+package: api-documenter-test!
+fullName: DocClassInterfaceMerge
+summary: Interface that merges with class
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: interface
+",
+  "/api-documenter-test/docenum.yml": "### YamlMime:TSEnum
+name: DocEnum
+uid: 'api-documenter-test!DocEnum:enum'
+package: api-documenter-test!
+fullName: DocEnum
+summary: Docs for DocEnum
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+fields:
+  - name: One
+    uid: 'api-documenter-test!DocEnum.One:member'
+    package: api-documenter-test!
+    summary: These are some docs for One
+    value: '1'
+  - name: Two
+    uid: 'api-documenter-test!DocEnum.Two:member'
+    package: api-documenter-test!
+    summary: |-
+      These are some docs for Two.
+
+      [DocEnum.One](xref:api-documenter-test!DocEnum.One:member) is a direct link to another enum member.
+    value: '2'
+  - name: Zero
+    uid: 'api-documenter-test!DocEnum.Zero:member'
+    package: api-documenter-test!
+    summary: These are some docs for Zero
+    value: '0'
+",
+  "/api-documenter-test/docenumnamespacemerge-enum.yml": "### YamlMime:TSEnum
+name: DocEnumNamespaceMerge
+uid: 'api-documenter-test!DocEnumNamespaceMerge:enum'
+package: api-documenter-test!
+fullName: DocEnumNamespaceMerge
+summary: Enum that merges with namespace
+remarks: |-
+  [Link to enum](xref:api-documenter-test!DocEnumNamespaceMerge:enum)
+
+  [Link to namespace](xref:api-documenter-test!DocEnumNamespaceMerge:namespace)
+
+  [Link to function inside namespace](xref:api-documenter-test!DocEnumNamespaceMerge.exampleFunction:function(1))
+example: []
+isPreview: false
+isDeprecated: false
+fields:
+  - name: Left
+    uid: 'api-documenter-test!DocEnumNamespaceMerge.Left:member'
+    package: api-documenter-test!
+    summary: These are some docs for Left
+    value: '0'
+  - name: Right
+    uid: 'api-documenter-test!DocEnumNamespaceMerge.Right:member'
+    package: api-documenter-test!
+    summary: These are some docs for Right
+    value: '1'
+",
+  "/api-documenter-test/docenumnamespacemerge-namespace.yml": "### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!DocEnumNamespaceMerge:namespace'
+    summary: Namespace that merges with enum
+    name: DocEnumNamespaceMerge
+    fullName: DocEnumNamespaceMerge
+    langs:
+      - typeScript
+    type: namespace
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!DocEnumNamespaceMerge.exampleFunction:function(1)'
+  - uid: 'api-documenter-test!DocEnumNamespaceMerge.exampleFunction:function(1)'
+    summary: This is a function inside of a namespace that merges with an enum.
+    name: exampleFunction()
+    fullName: DocEnumNamespaceMerge.exampleFunction()
+    langs:
+      - typeScript
+    namespace: 'api-documenter-test!DocEnumNamespaceMerge:namespace'
+    type: function
+    syntax:
+      content: 'function exampleFunction(): void;'
+      return:
+        type:
+          - void
+        description: ''
+",
+  "/api-documenter-test/ecmasmbols.yml": "### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!EcmaSmbols:namespace'
+    summary: A namespace containing an ECMAScript symbol
+    name: EcmaSmbols
+    fullName: EcmaSmbols
+    langs:
+      - typeScript
+    type: namespace
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!EcmaSmbols.example:var'
+  - uid: 'api-documenter-test!EcmaSmbols.example:var'
+    summary: An ECMAScript symbol
+    name: example
+    fullName: EcmaSmbols.example
+    langs:
+      - typeScript
+    namespace: 'api-documenter-test!EcmaSmbols:namespace'
+    type: variable
+    syntax:
+      content: 'example: unique symbol'
+      return:
+        type:
+          - unique symbol
+",
+  "/api-documenter-test/exampleduplicatetypealias.yml": "### YamlMime:TSTypeAlias
+name: ExampleDuplicateTypeAlias
+uid: 'api-documenter-test!ExampleDuplicateTypeAlias:type'
+package: api-documenter-test!
+fullName: ExampleDuplicateTypeAlias
+summary: A type alias that has duplicate references.
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+syntax: export type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
+",
+  "/api-documenter-test/exampletypealias.yml": "### YamlMime:TSTypeAlias
+name: ExampleTypeAlias
+uid: 'api-documenter-test!ExampleTypeAlias:type'
+package: api-documenter-test!
+fullName: ExampleTypeAlias
+summary: A type alias
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+syntax: export type ExampleTypeAlias = Promise<boolean>;
+",
+  "/api-documenter-test/exampleuniontypealias.yml": "### YamlMime:TSTypeAlias
+name: ExampleUnionTypeAlias
+uid: 'api-documenter-test!ExampleUnionTypeAlias:type'
+package: api-documenter-test!
+fullName: ExampleUnionTypeAlias
+summary: A type alias that references multiple other types.
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+syntax: export type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
+",
+  "/api-documenter-test/generic.yml": "### YamlMime:TSType
+name: Generic
+uid: 'api-documenter-test!Generic:class'
+package: api-documenter-test!
+fullName: Generic
+summary: Generic class.
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: class
+",
+  "/api-documenter-test/generictypealias.yml": "### YamlMime:TSTypeAlias
+name: GenericTypeAlias
+uid: 'api-documenter-test!GenericTypeAlias:type'
+package: api-documenter-test!
+fullName: GenericTypeAlias
+summary: ''
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+syntax: 'export type GenericTypeAlias<T> = T[];'
+",
+  "/api-documenter-test/idocinterface1.yml": "### YamlMime:TSType
+name: IDocInterface1
+uid: 'api-documenter-test!IDocInterface1:interface'
+package: api-documenter-test!
+fullName: IDocInterface1
+summary: ''
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: interface
+properties:
+  - name: regularProperty
+    uid: 'api-documenter-test!IDocInterface1#regularProperty:member'
+    package: api-documenter-test!
+    fullName: regularProperty
+    summary: Does something
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'regularProperty: SystemEvent;'
+      return:
+        type: '<xref uid=\\"api-documenter-test!SystemEvent:class\\" />'
+",
+  "/api-documenter-test/idocinterface2.yml": "### YamlMime:TSType
+name: IDocInterface2
+uid: 'api-documenter-test!IDocInterface2:interface'
+package: api-documenter-test!
+fullName: IDocInterface2
+summary: ''
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: interface
+methods:
+  - name: deprecatedExample()
+    uid: 'api-documenter-test!IDocInterface2#deprecatedExample:member(1)'
+    package: api-documenter-test!
+    fullName: deprecatedExample()
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: true
+    customDeprecatedMessage: Use \`otherThing()\` instead.
+    syntax:
+      content: 'deprecatedExample(): void;'
+      return:
+        type: void
+        description: ''
+extends: '<xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />'
+",
+  "/api-documenter-test/idocinterface3.yml": "### YamlMime:TSType
+name: IDocInterface3
+uid: 'api-documenter-test!IDocInterface3:interface'
+package: api-documenter-test!
+fullName: IDocInterface3
+summary: Some less common TypeScript declaration kinds.
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: interface
+properties:
+  - name: '\\"[not.a.symbol]\\"'
+    uid: 'api-documenter-test!IDocInterface3#\\"[not.a.symbol]\\":member'
+    package: api-documenter-test!
+    fullName: '\\"[not.a.symbol]\\"'
+    summary: An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: '\\"[not.a.symbol]\\": string;'
+      return:
+        type: string
+  - name: '[EcmaSmbols.example]'
+    uid: 'api-documenter-test!IDocInterface3#[EcmaSmbols.example]:member'
+    package: api-documenter-test!
+    fullName: '[EcmaSmbols.example]'
+    summary: ECMAScript symbol
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: '[EcmaSmbols.example]: string;'
+      return:
+        type: string
+  - name: redundantQuotes
+    uid: 'api-documenter-test!IDocInterface3#redundantQuotes:member'
+    package: api-documenter-test!
+    fullName: redundantQuotes
+    summary: A quoted identifier with redundant quotes.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: '\\"redundantQuotes\\": string;'
+      return:
+        type: string
+",
+  "/api-documenter-test/idocinterface4.yml": "### YamlMime:TSType
+name: IDocInterface4
+uid: 'api-documenter-test!IDocInterface4:interface'
+package: api-documenter-test!
+fullName: IDocInterface4
+summary: Type union in an interface.
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: interface
+properties:
+  - name: Context
+    uid: 'api-documenter-test!IDocInterface4#Context:member'
+    package: api-documenter-test!
+    fullName: Context
+    summary: Test newline rendering when code blocks are used in tables
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: |-
+        Context: ({ children }: {
+                children: string;
+            }) => boolean;
+      return:
+        type: |-
+          ({ children }: {
+                  children: string;
+              }) =&gt; boolean
+  - name: generic
+    uid: 'api-documenter-test!IDocInterface4#generic:member'
+    package: api-documenter-test!
+    fullName: generic
+    summary: make sure html entities are escaped in tables.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'generic: Generic<number>;'
+      return:
+        type: '<xref uid=\\"api-documenter-test!Generic:class\\" />&lt;number&gt;'
+  - name: numberOrFunction
+    uid: 'api-documenter-test!IDocInterface4#numberOrFunction:member'
+    package: api-documenter-test!
+    fullName: numberOrFunction
+    summary: a union type with a function
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'numberOrFunction: number | (() => number);'
+      return:
+        type: number | (() =&gt; number)
+  - name: stringOrNumber
+    uid: 'api-documenter-test!IDocInterface4#stringOrNumber:member'
+    package: api-documenter-test!
+    fullName: stringOrNumber
+    summary: a union type
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'stringOrNumber: string | number;'
+      return:
+        type: string | number
+",
+  "/api-documenter-test/idocinterface5.yml": "### YamlMime:TSType
+name: IDocInterface5
+uid: 'api-documenter-test!IDocInterface5:interface'
+package: api-documenter-test!
+fullName: IDocInterface5
+summary: Interface without inline tag to test custom TOC
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: interface
+properties:
+  - name: regularProperty
+    uid: 'api-documenter-test!IDocInterface5#regularProperty:member'
+    package: api-documenter-test!
+    fullName: regularProperty
+    summary: Property of type string that does something
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'regularProperty: string;'
+      return:
+        type: string
+",
+  "/api-documenter-test/idocinterface6.yml": "### YamlMime:TSType
+name: IDocInterface6
+uid: 'api-documenter-test!IDocInterface6:interface'
+package: api-documenter-test!
+fullName: IDocInterface6
+summary: Interface without inline tag to test custom TOC with injection
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: interface
+properties:
+  - name: arrayProperty
+    uid: 'api-documenter-test!IDocInterface6#arrayProperty:member'
+    package: api-documenter-test!
+    fullName: arrayProperty
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'arrayProperty: IDocInterface1[];'
+      return:
+        type: '<xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />[]'
+  - name: intersectionProperty
+    uid: 'api-documenter-test!IDocInterface6#intersectionProperty:member'
+    package: api-documenter-test!
+    fullName: intersectionProperty
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'intersectionProperty: IDocInterface1 & IDocInterface2;'
+      return:
+        type: >-
+          <xref uid=\\"api-documenter-test!IDocInterface1:interface\\" /> & <xref
+          uid=\\"api-documenter-test!IDocInterface2:interface\\" />
+  - name: regularProperty
+    uid: 'api-documenter-test!IDocInterface6#regularProperty:member'
+    package: api-documenter-test!
+    fullName: regularProperty
+    summary: Property of type number that does something
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'regularProperty: number;'
+      return:
+        type: number
+  - name: tupleProperty
+    uid: 'api-documenter-test!IDocInterface6#tupleProperty:member'
+    package: api-documenter-test!
+    fullName: tupleProperty
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'tupleProperty: [IDocInterface1, IDocInterface2];'
+      return:
+        type: >-
+          [<xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />, <xref
+          uid=\\"api-documenter-test!IDocInterface2:interface\\" />]
+  - name: typeReferenceProperty
+    uid: 'api-documenter-test!IDocInterface6#typeReferenceProperty:member'
+    package: api-documenter-test!
+    fullName: typeReferenceProperty
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'typeReferenceProperty: Generic<IDocInterface1>;'
+      return:
+        type: >-
+          <xref uid=\\"api-documenter-test!Generic:class\\" />&lt;<xref uid=\\"api-documenter-test!IDocInterface1:interface\\"
+          />&gt;
+  - name: unionProperty
+    uid: 'api-documenter-test!IDocInterface6#unionProperty:member'
+    package: api-documenter-test!
+    fullName: unionProperty
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'unionProperty: IDocInterface1 | IDocInterface2;'
+      return:
+        type: >-
+          <xref uid=\\"api-documenter-test!IDocInterface1:interface\\" /> | <xref
+          uid=\\"api-documenter-test!IDocInterface2:interface\\" />
+methods:
+  - name: genericReferenceMethod(x)
+    uid: 'api-documenter-test!IDocInterface6#genericReferenceMethod:member(1)'
+    package: api-documenter-test!
+    fullName: genericReferenceMethod(x)
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'genericReferenceMethod<T>(x: T): T;'
+      parameters:
+        - id: x
+          description: ''
+          type: T
+      return:
+        type: T
+        description: ''
+",
+  "/api-documenter-test/idocinterface7.yml": "### YamlMime:TSType
+name: IDocInterface7
+uid: 'api-documenter-test!IDocInterface7:interface'
+package: api-documenter-test!
+fullName: IDocInterface7
+summary: Interface for testing optional properties
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: interface
+properties:
+  - name: optionalField
+    uid: 'api-documenter-test!IDocInterface7#optionalField:member'
+    package: api-documenter-test!
+    fullName: optionalField
+    summary: Description of optionalField
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'optionalField?: boolean;'
+      return:
+        type: boolean
+  - name: optionalReadonlyField
+    uid: 'api-documenter-test!IDocInterface7#optionalReadonlyField:member'
+    package: api-documenter-test!
+    fullName: optionalReadonlyField
+    summary: Description of optionalReadonlyField
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'readonly optionalReadonlyField?: boolean;'
+      return:
+        type: boolean
+  - name: optionalUndocumentedField
+    uid: 'api-documenter-test!IDocInterface7#optionalUndocumentedField:member'
+    package: api-documenter-test!
+    fullName: optionalUndocumentedField
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'optionalUndocumentedField?: boolean;'
+      return:
+        type: boolean
+methods:
+  - name: optionalMember()
+    uid: 'api-documenter-test!IDocInterface7#optionalMember:member(1)'
+    package: api-documenter-test!
+    fullName: optionalMember()
+    summary: Description of optionalMember
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'optionalMember?(): any;'
+      return:
+        type: any
+        description: ''
+",
+  "/api-documenter-test/outernamespace.innernamespace.yml": "### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
+    summary: A nested namespace
+    name: OuterNamespace.InnerNamespace
+    fullName: OuterNamespace.InnerNamespace
+    langs:
+      - typeScript
+    type: namespace
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
+  - uid: 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
+    summary: A function inside a namespace
+    name: nestedFunction(x)
+    fullName: OuterNamespace.InnerNamespace.nestedFunction(x)
+    langs:
+      - typeScript
+    namespace: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
+    type: function
+    syntax:
+      content: 'function nestedFunction(x: number): number;'
+      return:
+        type:
+          - number
+        description: ''
+      parameters:
+        - id: x
+          description: ''
+          type:
+            - number
+          optional: false
+",
+  "/api-documenter-test/outernamespace.yml": "### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!OuterNamespace:namespace'
+    summary: A top-level namespace
+    name: OuterNamespace
+    fullName: OuterNamespace
+    langs:
+      - typeScript
+    type: namespace
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!OuterNamespace.nestedVariable:var'
+  - uid: 'api-documenter-test!OuterNamespace.nestedVariable:var'
+    summary: A variable exported from within a namespace.
+    name: nestedVariable
+    fullName: OuterNamespace.nestedVariable
+    langs:
+      - typeScript
+    namespace: 'api-documenter-test!OuterNamespace:namespace'
+    type: variable
+    syntax:
+      content: 'nestedVariable: boolean'
+      return:
+        type:
+          - boolean
+",
+  "/api-documenter-test/systemevent.yml": "### YamlMime:TSType
+name: SystemEvent
+uid: 'api-documenter-test!SystemEvent:class'
+package: api-documenter-test!
+fullName: SystemEvent
+summary: A class used to exposed events.
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: class
+methods:
+  - name: addHandler(handler)
+    uid: 'api-documenter-test!SystemEvent#addHandler:member(1)'
+    package: api-documenter-test!
+    fullName: addHandler(handler)
+    summary: Adds an handler for the event.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'addHandler(handler: () => void): void;'
+      parameters:
+        - id: handler
+          description: ''
+          type: () =&gt; void
+      return:
+        type: void
+        description: ''
+",
+  "/api-documenter-test/typealias.yml": "### YamlMime:TSTypeAlias
+name: TypeAlias
+uid: 'api-documenter-test!TypeAlias:type'
+package: api-documenter-test!
+fullName: TypeAlias
+summary: ''
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+syntax: export type TypeAlias = number;
+",
+  "/toc.yml": "items:
+  - name: Test api-documenter
+    href: ~/homepage/homepage.md
+  - name: Test Sample for AD
+    href: api-documenter-test
+    extended: true
+    items:
+      - name: Classes
+        items:
+          - name: DocBaseClass
+            items:
+              - name: DocBaseClass
+                uid: 'api-documenter-test!DocBaseClass:class'
+              - name: IDocInterface1
+                uid: 'api-documenter-test!IDocInterface1:interface'
+              - name: IDocInterface2
+                uid: 'api-documenter-test!IDocInterface2:interface'
+          - name: DocClass1
+            items:
+              - name: DocClass1
+                uid: 'api-documenter-test!DocClass1:class'
+              - name: IDocInterface3
+                uid: 'api-documenter-test!IDocInterface3:interface'
+              - name: IDocInterface4
+                uid: 'api-documenter-test!IDocInterface4:interface'
+      - name: Interfaces
+        items:
+          - name: Interface5
+            items:
+              - name: IDocInterface5
+                uid: 'api-documenter-test!IDocInterface5:interface'
+          - name: Interface6
+            items:
+              - name: InjectedCustomInterface
+                uid: customUid
+              - name: IDocInterface6
+                uid: 'api-documenter-test!IDocInterface6:interface'
+      - name: References
+        items:
+          - name: InjectedCustomItem
+            uid: customUrl
+          - name: AbstractClass
+            uid: 'api-documenter-test!AbstractClass:class'
+          - name: Constraint
+            uid: 'api-documenter-test!Constraint:interface'
+          - name: DecoratorExample
+            uid: 'api-documenter-test!DecoratorExample:class'
+          - name: DefaultType
+            uid: 'api-documenter-test!DefaultType:interface'
+          - name: DocClassInterfaceMerge (Class)
+            uid: 'api-documenter-test!DocClassInterfaceMerge:class'
+          - name: DocClassInterfaceMerge (Interface)
+            uid: 'api-documenter-test!DocClassInterfaceMerge:interface'
+          - name: DocEnum
+            uid: 'api-documenter-test!DocEnum:enum'
+          - name: DocEnumNamespaceMerge (Enum)
+            uid: 'api-documenter-test!DocEnumNamespaceMerge:enum'
+          - name: DocEnumNamespaceMerge (Namespace)
+            uid: 'api-documenter-test!DocEnumNamespaceMerge:namespace'
+          - name: EcmaSmbols
+            uid: 'api-documenter-test!EcmaSmbols:namespace'
+          - name: ExampleDuplicateTypeAlias
+            uid: 'api-documenter-test!ExampleDuplicateTypeAlias:type'
+          - name: ExampleTypeAlias
+            uid: 'api-documenter-test!ExampleTypeAlias:type'
+          - name: ExampleUnionTypeAlias
+            uid: 'api-documenter-test!ExampleUnionTypeAlias:type'
+          - name: Generic
+            uid: 'api-documenter-test!Generic:class'
+          - name: GenericTypeAlias
+            uid: 'api-documenter-test!GenericTypeAlias:type'
+          - name: IDocInterface7
+            uid: 'api-documenter-test!IDocInterface7:interface'
+          - name: OuterNamespace
+            uid: 'api-documenter-test!OuterNamespace:namespace'
+          - name: OuterNamespace.InnerNamespace
+            uid: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
+          - name: SystemEvent
+            uid: 'api-documenter-test!SystemEvent:class'
+          - name: TypeAlias
+            uid: 'api-documenter-test!TypeAlias:type'
+",
+}
+`;
+
+exports[`api-documenter markdown: itemContents 1`] = `
+Object {
+  "/api-documenter-test.abstractclass.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [AbstractClass](./api-documenter-test.abstractclass.md)
+
+## AbstractClass class
+
+Some abstract class with abstract members.
+
+**Signature:**
+
+\`\`\`typescript
+export declare abstract class AbstractClass 
+\`\`\`
+
+## Properties
+
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[property](./api-documenter-test.abstractclass.property.md)
+
+
+</td><td>
+
+\`protected\`
+
+\`abstract\`
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+Some abstract property.
+
+
+</td></tr>
+</tbody></table>
+
+## Methods
+
+<table><thead><tr><th>
+
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[method()](./api-documenter-test.abstractclass.method.md)
+
+
+</td><td>
+
+\`abstract\`
+
+
+</td><td>
+
+Some abstract method.
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.abstractclass.method.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [AbstractClass](./api-documenter-test.abstractclass.md) &gt; [method](./api-documenter-test.abstractclass.method.md)
+
+## AbstractClass.method() method
+
+Some abstract method.
+
+**Signature:**
+
+\`\`\`typescript
+abstract method(): void;
+\`\`\`
+**Returns:**
+
+void
+
+",
+  "/api-documenter-test.abstractclass.property.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [AbstractClass](./api-documenter-test.abstractclass.md) &gt; [property](./api-documenter-test.abstractclass.property.md)
+
+## AbstractClass.property property
+
+Some abstract property.
+
+**Signature:**
+
+\`\`\`typescript
+protected abstract property: number;
+\`\`\`
+",
+  "/api-documenter-test.constraint.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [Constraint](./api-documenter-test.constraint.md)
+
+## Constraint interface
+
+Type parameter constraint used by test case below.
+
+**Signature:**
+
+\`\`\`typescript
+export interface Constraint 
+\`\`\`
+",
+  "/api-documenter-test.constvariable.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [constVariable](./api-documenter-test.constvariable.md)
+
+## constVariable variable
+
+An exported variable declaration.
+
+**Signature:**
+
+\`\`\`typescript
+constVariable: number
+\`\`\`
+",
+  "/api-documenter-test.decoratorexample.creationdate.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DecoratorExample](./api-documenter-test.decoratorexample.md) &gt; [creationDate](./api-documenter-test.decoratorexample.creationdate.md)
+
+## DecoratorExample.creationDate property
+
+The date when the record was created.
+
+**Signature:**
+
+\`\`\`typescript
+creationDate: Date;
+\`\`\`
+**Decorators:**
+
+\`@jsonSerialized\`
+
+\`@jsonFormat('mm/dd/yy')\`
+
+## Remarks
+
+Here is a longer description of the property.
+
+",
+  "/api-documenter-test.decoratorexample.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DecoratorExample](./api-documenter-test.decoratorexample.md)
+
+## DecoratorExample class
+
+
+**Signature:**
+
+\`\`\`typescript
+export declare class DecoratorExample 
+\`\`\`
+
+## Properties
+
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[creationDate](./api-documenter-test.decoratorexample.creationdate.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Date
+
+
+</td><td>
+
+The date when the record was created.
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.defaulttype.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DefaultType](./api-documenter-test.defaulttype.md)
+
+## DefaultType interface
+
+Type parameter default type used by test case below.
+
+**Signature:**
+
+\`\`\`typescript
+export interface DefaultType 
+\`\`\`
+",
+  "/api-documenter-test.docbaseclass._constructor_.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocBaseClass](./api-documenter-test.docbaseclass.md) &gt; [(constructor)](./api-documenter-test.docbaseclass._constructor_.md)
+
+## DocBaseClass.(constructor)
+
+The simple constructor for \`DocBaseClass\`
+
+**Signature:**
+
+\`\`\`typescript
+constructor();
+\`\`\`
+",
+  "/api-documenter-test.docbaseclass._constructor__1.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocBaseClass](./api-documenter-test.docbaseclass.md) &gt; [(constructor)](./api-documenter-test.docbaseclass._constructor__1.md)
+
+## DocBaseClass.(constructor)
+
+The overloaded constructor for \`DocBaseClass\`
+
+**Signature:**
+
+\`\`\`typescript
+constructor(x: number);
+\`\`\`
+
+## Parameters
+
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+x
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.docbaseclass.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocBaseClass](./api-documenter-test.docbaseclass.md)
+
+## DocBaseClass class
+
+Example base class
+
+
+**Signature:**
+
+\`\`\`typescript
+export declare class DocBaseClass 
+\`\`\`
+
+## Constructors
+
+<table><thead><tr><th>
+
+Constructor
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[(constructor)()](./api-documenter-test.docbaseclass._constructor_.md)
+
+
+</td><td>
+
+
+</td><td>
+
+The simple constructor for \`DocBaseClass\`
+
+
+</td></tr>
+<tr><td>
+
+[(constructor)(x)](./api-documenter-test.docbaseclass._constructor__1.md)
+
+
+</td><td>
+
+
+</td><td>
+
+The overloaded constructor for \`DocBaseClass\`
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.docclass1.deprecatedexample.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [deprecatedExample](./api-documenter-test.docclass1.deprecatedexample.md)
+
+## DocClass1.deprecatedExample() method
+
+> Warning: This API is now obsolete.
+> 
+> Use \`otherThing()\` instead.
+> 
+
+**Signature:**
+
+\`\`\`typescript
+deprecatedExample(): void;
+\`\`\`
+**Returns:**
+
+void
+
+",
+  "/api-documenter-test.docclass1.examplefunction.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [exampleFunction](./api-documenter-test.docclass1.examplefunction.md)
+
+## DocClass1.exampleFunction() method
+
+This is an overloaded function.
+
+**Signature:**
+
+\`\`\`typescript
+exampleFunction(a: string, b: string): string;
+\`\`\`
+
+## Parameters
+
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+a
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+the first string
+
+
+</td></tr>
+<tr><td>
+
+b
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+the second string
+
+
+</td></tr>
+</tbody></table>
+**Returns:**
+
+string
+
+## Exceptions
+
+\`Error\` The first throws line
+
+The second throws line
+
+",
+  "/api-documenter-test.docclass1.examplefunction_1.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [exampleFunction](./api-documenter-test.docclass1.examplefunction_1.md)
+
+## DocClass1.exampleFunction() method
+
+This is also an overloaded function.
+
+**Signature:**
+
+\`\`\`typescript
+exampleFunction(x: number): number;
+\`\`\`
+
+## Parameters
+
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+x
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+the number
+
+
+</td></tr>
+</tbody></table>
+**Returns:**
+
+number
+
+",
+  "/api-documenter-test.docclass1.genericwithconstraintanddefault.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [genericWithConstraintAndDefault](./api-documenter-test.docclass1.genericwithconstraintanddefault.md)
+
+## DocClass1.genericWithConstraintAndDefault() method
+
+This is a method with a complex type parameter.
+
+**Signature:**
+
+\`\`\`typescript
+genericWithConstraintAndDefault<T extends Constraint = DefaultType>(x: T): void;
+\`\`\`
+
+## Parameters
+
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+x
+
+
+</td><td>
+
+T
+
+
+</td><td>
+
+some generic parameter.
+
+
+</td></tr>
+</tbody></table>
+**Returns:**
+
+void
+
+",
+  "/api-documenter-test.docclass1.interestingedgecases.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [interestingEdgeCases](./api-documenter-test.docclass1.interestingedgecases.md)
+
+## DocClass1.interestingEdgeCases() method
+
+Example: \\"<!-- -->{ \\\\\\\\<!-- -->\\"maxItemsToShow<!-- -->\\\\\\\\<!-- -->\\": 123 }<!-- -->\\"
+
+The regular expression used to validate the constraints is /^\\\\[a-zA-Z0-9<!-- -->\\\\\\\\<!-- -->-\\\\_\\\\]+$/
+
+**Signature:**
+
+\`\`\`typescript
+interestingEdgeCases(): void;
+\`\`\`
+**Returns:**
+
+void
+
+",
+  "/api-documenter-test.docclass1.malformedevent.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [malformedEvent](./api-documenter-test.docclass1.malformedevent.md)
+
+## DocClass1.malformedEvent property
+
+This event should have been marked as readonly.
+
+**Signature:**
+
+\`\`\`typescript
+malformedEvent: SystemEvent;
+\`\`\`
+",
+  "/api-documenter-test.docclass1.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md)
+
+## DocClass1 class
+
+This is an example class.
+
+**Signature:**
+
+\`\`\`typescript
+export declare class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 
+\`\`\`
+**Extends:** [DocBaseClass](./api-documenter-test.docbaseclass.md)
+
+**Implements:** [IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->, [IDocInterface2](./api-documenter-test.idocinterface2.md)
+
+## Remarks
+
+[Link to overload 1](./api-documenter-test.docclass1.examplefunction.md)
+
+[Link to overload 2](./api-documenter-test.docclass1.examplefunction_1.md)
+
+
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the \`DocClass1\` class.
+
+## Events
+
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[malformedEvent](./api-documenter-test.docclass1.malformedevent.md)
+
+
+</td><td>
+
+
+</td><td>
+
+[SystemEvent](./api-documenter-test.systemevent.md)
+
+
+</td><td>
+
+This event should have been marked as readonly.
+
+
+</td></tr>
+<tr><td>
+
+[modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md)
+
+
+</td><td>
+
+\`readonly\`
+
+
+</td><td>
+
+[SystemEvent](./api-documenter-test.systemevent.md)
+
+
+</td><td>
+
+This event is fired whenever the object is modified.
+
+
+</td></tr>
+</tbody></table>
+
+## Properties
+
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[multipleModifiersProperty](./api-documenter-test.docclass1.multiplemodifiersproperty.md)
+
+
+</td><td>
+
+\`protected\`
+
+\`static\`
+
+\`readonly\`
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+Some property with multiple modifiers.
+
+
+</td></tr>
+<tr><td>
+
+[protectedProperty](./api-documenter-test.docclass1.protectedproperty.md)
+
+
+</td><td>
+
+\`protected\`
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+Some protected property.
+
+
+</td></tr>
+<tr><td>
+
+[readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md)
+
+
+</td><td>
+
+\`readonly\`
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[regularProperty](./api-documenter-test.docclass1.regularproperty.md)
+
+
+</td><td>
+
+
+</td><td>
+
+[SystemEvent](./api-documenter-test.systemevent.md)
+
+
+</td><td>
+
+This is a regular property that happens to use the SystemEvent type.
+
+
+</td></tr>
+<tr><td>
+
+[writeableProperty](./api-documenter-test.docclass1.writeableproperty.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[writeonlyProperty](./api-documenter-test.docclass1.writeonlyproperty.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+API Extractor will surface an \`ae-missing-getter\` finding for this property.
+
+
+</td></tr>
+</tbody></table>
+
+## Methods
+
+<table><thead><tr><th>
+
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[deprecatedExample()](./api-documenter-test.docclass1.deprecatedexample.md)
+
+
+</td><td>
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[exampleFunction(a, b)](./api-documenter-test.docclass1.examplefunction.md)
+
+
+</td><td>
+
+
+</td><td>
+
+This is an overloaded function.
+
+
+</td></tr>
+<tr><td>
+
+[exampleFunction(x)](./api-documenter-test.docclass1.examplefunction_1.md)
+
+
+</td><td>
+
+
+</td><td>
+
+This is also an overloaded function.
+
+
+</td></tr>
+<tr><td>
+
+[genericWithConstraintAndDefault(x)](./api-documenter-test.docclass1.genericwithconstraintanddefault.md)
+
+
+</td><td>
+
+
+</td><td>
+
+This is a method with a complex type parameter.
+
+
+</td></tr>
+<tr><td>
+
+[interestingEdgeCases()](./api-documenter-test.docclass1.interestingedgecases.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Example: \\"<!-- -->{ \\\\\\\\<!-- -->\\"maxItemsToShow<!-- -->\\\\\\\\<!-- -->\\": 123 }<!-- -->\\"
+
+The regular expression used to validate the constraints is /^\\\\[a-zA-Z0-9<!-- -->\\\\\\\\<!-- -->-\\\\_\\\\]+$/
+
+
+</td></tr>
+<tr><td>
+
+[optionalParamFunction(x)](./api-documenter-test.docclass1.optionalparamfunction.md)
+
+
+</td><td>
+
+
+</td><td>
+
+This is a function with an optional parameter.
+
+
+</td></tr>
+<tr><td>
+
+[sumWithExample(x, y)](./api-documenter-test.docclass1.sumwithexample.md)
+
+
+</td><td>
+
+\`static\`
+
+
+</td><td>
+
+Returns the sum of two numbers.
+
+
+</td></tr>
+<tr><td>
+
+[tableExample()](./api-documenter-test.docclass1.tableexample.md)
+
+
+</td><td>
+
+
+</td><td>
+
+An example with tables:
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.docclass1.modifiedevent.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md)
+
+## DocClass1.modifiedEvent property
+
+This event is fired whenever the object is modified.
+
+**Signature:**
+
+\`\`\`typescript
+readonly modifiedEvent: SystemEvent;
+\`\`\`
+",
+  "/api-documenter-test.docclass1.multiplemodifiersproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [multipleModifiersProperty](./api-documenter-test.docclass1.multiplemodifiersproperty.md)
+
+## DocClass1.multipleModifiersProperty property
+
+Some property with multiple modifiers.
+
+**Signature:**
+
+\`\`\`typescript
+protected static readonly multipleModifiersProperty: boolean;
+\`\`\`
+",
+  "/api-documenter-test.docclass1.optionalparamfunction.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [optionalParamFunction](./api-documenter-test.docclass1.optionalparamfunction.md)
+
+## DocClass1.optionalParamFunction() method
+
+This is a function with an optional parameter.
+
+**Signature:**
+
+\`\`\`typescript
+optionalParamFunction(x?: number): void;
+\`\`\`
+
+## Parameters
+
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+x
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+_(Optional)_ the number
+
+
+</td></tr>
+</tbody></table>
+**Returns:**
+
+void
+
+",
+  "/api-documenter-test.docclass1.protectedproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [protectedProperty](./api-documenter-test.docclass1.protectedproperty.md)
+
+## DocClass1.protectedProperty property
+
+Some protected property.
+
+**Signature:**
+
+\`\`\`typescript
+protected protectedProperty: string;
+\`\`\`
+",
+  "/api-documenter-test.docclass1.readonlyproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md)
+
+## DocClass1.readonlyProperty property
+
+**Signature:**
+
+\`\`\`typescript
+get readonlyProperty(): string;
+\`\`\`
+",
+  "/api-documenter-test.docclass1.regularproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [regularProperty](./api-documenter-test.docclass1.regularproperty.md)
+
+## DocClass1.regularProperty property
+
+This is a regular property that happens to use the SystemEvent type.
+
+**Signature:**
+
+\`\`\`typescript
+regularProperty: SystemEvent;
+\`\`\`
+",
+  "/api-documenter-test.docclass1.sumwithexample.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [sumWithExample](./api-documenter-test.docclass1.sumwithexample.md)
+
+## DocClass1.sumWithExample() method
+
+Returns the sum of two numbers.
+
+**Signature:**
+
+\`\`\`typescript
+static sumWithExample(x: number, y: number): number;
+\`\`\`
+
+## Parameters
+
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+x
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+the first number to add
+
+
+</td></tr>
+<tr><td>
+
+y
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+the second number to add
+
+
+</td></tr>
+</tbody></table>
+**Returns:**
+
+number
+
+the sum of the two numbers
+
+## Remarks
+
+This illustrates usage of the \`@example\` block tag.
+
+## Example 1
+
+Here's a simple example:
+
+\`\`\`
+// Prints \\"2\\":
+console.log(DocClass1.sumWithExample(1,1));
+\`\`\`
+
+## Example 2
+
+Here's an example with negative numbers:
+
+\`\`\`
+// Prints \\"0\\":
+console.log(DocClass1.sumWithExample(1,-1));
+\`\`\`
+
+",
+  "/api-documenter-test.docclass1.tableexample.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [tableExample](./api-documenter-test.docclass1.tableexample.md)
+
+## DocClass1.tableExample() method
+
+An example with tables:
+
+**Signature:**
+
+\`\`\`typescript
+tableExample(): void;
+\`\`\`
+**Returns:**
+
+void
+
+## Remarks
+
+<table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
+
+",
+  "/api-documenter-test.docclass1.writeableproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [writeableProperty](./api-documenter-test.docclass1.writeableproperty.md)
+
+## DocClass1.writeableProperty property
+
+**Signature:**
+
+\`\`\`typescript
+get writeableProperty(): string;
+
+set writeableProperty(value: string);
+\`\`\`
+",
+  "/api-documenter-test.docclass1.writeonlyproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [writeonlyProperty](./api-documenter-test.docclass1.writeonlyproperty.md)
+
+## DocClass1.writeonlyProperty property
+
+API Extractor will surface an \`ae-missing-getter\` finding for this property.
+
+**Signature:**
+
+\`\`\`typescript
+set writeonlyProperty(value: string);
+\`\`\`
+",
+  "/api-documenter-test.docclassinterfacemerge.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClassInterfaceMerge](./api-documenter-test.docclassinterfacemerge.md)
+
+## DocClassInterfaceMerge interface
+
+Interface that merges with class
+
+**Signature:**
+
+\`\`\`typescript
+export interface DocClassInterfaceMerge 
+\`\`\`
+",
+  "/api-documenter-test.docenum.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocEnum](./api-documenter-test.docenum.md)
+
+## DocEnum enum
+
+Docs for DocEnum
+
+
+**Signature:**
+
+\`\`\`typescript
+export declare enum DocEnum 
+\`\`\`
+
+## Enumeration Members
+
+<table><thead><tr><th>
+
+Member
+
+
+</th><th>
+
+Value
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+One
+
+
+</td><td>
+
+\`1\`
+
+
+</td><td>
+
+These are some docs for One
+
+
+</td></tr>
+<tr><td>
+
+Two
+
+
+</td><td>
+
+\`2\`
+
+
+</td><td>
+
+These are some docs for Two.
+
+[DocEnum.One](./api-documenter-test.docenum.md) is a direct link to another enum member.
+
+
+</td></tr>
+<tr><td>
+
+Zero
+
+
+</td><td>
+
+\`0\`
+
+
+</td><td>
+
+These are some docs for Zero
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.docenumnamespacemerge.examplefunction.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocEnumNamespaceMerge](./api-documenter-test.docenumnamespacemerge.md) &gt; [exampleFunction](./api-documenter-test.docenumnamespacemerge.examplefunction.md)
+
+## DocEnumNamespaceMerge.exampleFunction() function
+
+This is a function inside of a namespace that merges with an enum.
+
+**Signature:**
+
+\`\`\`typescript
+function exampleFunction(): void;
+\`\`\`
+**Returns:**
+
+void
+
+",
+  "/api-documenter-test.docenumnamespacemerge.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocEnumNamespaceMerge](./api-documenter-test.docenumnamespacemerge.md)
+
+## DocEnumNamespaceMerge namespace
+
+Namespace that merges with enum
+
+**Signature:**
+
+\`\`\`typescript
+export declare namespace DocEnumNamespaceMerge 
+\`\`\`
+
+## Functions
+
+<table><thead><tr><th>
+
+Function
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[exampleFunction()](./api-documenter-test.docenumnamespacemerge.examplefunction.md)
+
+
+</td><td>
+
+This is a function inside of a namespace that merges with an enum.
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.ecmasmbols.example.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [EcmaSmbols](./api-documenter-test.ecmasmbols.md) &gt; [example](./api-documenter-test.ecmasmbols.example.md)
+
+## EcmaSmbols.example variable
+
+An ECMAScript symbol
+
+**Signature:**
+
+\`\`\`typescript
+example: unique symbol
+\`\`\`
+",
+  "/api-documenter-test.ecmasmbols.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [EcmaSmbols](./api-documenter-test.ecmasmbols.md)
+
+## EcmaSmbols namespace
+
+A namespace containing an ECMAScript symbol
+
+**Signature:**
+
+\`\`\`typescript
+export declare namespace EcmaSmbols 
+\`\`\`
+
+## Variables
+
+<table><thead><tr><th>
+
+Variable
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[example](./api-documenter-test.ecmasmbols.example.md)
+
+
+</td><td>
+
+An ECMAScript symbol
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.exampleduplicatetypealias.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [ExampleDuplicateTypeAlias](./api-documenter-test.exampleduplicatetypealias.md)
+
+## ExampleDuplicateTypeAlias type
+
+A type alias that has duplicate references.
+
+**Signature:**
+
+\`\`\`typescript
+export type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
+\`\`\`
+**References:** [SystemEvent](./api-documenter-test.systemevent.md)
+
+",
+  "/api-documenter-test.examplefunction.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [exampleFunction](./api-documenter-test.examplefunction.md)
+
+## exampleFunction() function
+
+An exported function with hyperlinked parameters and return value.
+
+**Signature:**
+
+\`\`\`typescript
+export declare function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1;
+\`\`\`
+
+## Parameters
+
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+x
+
+
+</td><td>
+
+[ExampleTypeAlias](./api-documenter-test.exampletypealias.md)
+
+
+</td><td>
+
+an API item that should get hyperlinked
+
+
+</td></tr>
+<tr><td>
+
+y
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+a system type that should NOT get hyperlinked
+
+
+</td></tr>
+</tbody></table>
+**Returns:**
+
+[IDocInterface1](./api-documenter-test.idocinterface1.md)
+
+an interface that should get hyperlinked
+
+",
+  "/api-documenter-test.exampletypealias.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [ExampleTypeAlias](./api-documenter-test.exampletypealias.md)
+
+## ExampleTypeAlias type
+
+A type alias
+
+**Signature:**
+
+\`\`\`typescript
+export type ExampleTypeAlias = Promise<boolean>;
+\`\`\`
+",
+  "/api-documenter-test.exampleuniontypealias.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [ExampleUnionTypeAlias](./api-documenter-test.exampleuniontypealias.md)
+
+## ExampleUnionTypeAlias type
+
+A type alias that references multiple other types.
+
+**Signature:**
+
+\`\`\`typescript
+export type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
+\`\`\`
+**References:** [IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->, [IDocInterface3](./api-documenter-test.idocinterface3.md)
+
+",
+  "/api-documenter-test.generic.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [Generic](./api-documenter-test.generic.md)
+
+## Generic class
+
+Generic class.
+
+**Signature:**
+
+\`\`\`typescript
+export declare class Generic<T> 
+\`\`\`
+",
+  "/api-documenter-test.generictypealias.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [GenericTypeAlias](./api-documenter-test.generictypealias.md)
+
+## GenericTypeAlias type
+
+
+**Signature:**
+
+\`\`\`typescript
+export type GenericTypeAlias<T> = T[];
+\`\`\`
+",
+  "/api-documenter-test.idocinterface1.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface1](./api-documenter-test.idocinterface1.md)
+
+## IDocInterface1 interface
+
+
+**Signature:**
+
+\`\`\`typescript
+export interface IDocInterface1 
+\`\`\`
+
+## Properties
+
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[regularProperty](./api-documenter-test.idocinterface1.regularproperty.md)
+
+
+</td><td>
+
+
+</td><td>
+
+[SystemEvent](./api-documenter-test.systemevent.md)
+
+
+</td><td>
+
+Does something
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.idocinterface1.regularproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface1](./api-documenter-test.idocinterface1.md) &gt; [regularProperty](./api-documenter-test.idocinterface1.regularproperty.md)
+
+## IDocInterface1.regularProperty property
+
+Does something
+
+**Signature:**
+
+\`\`\`typescript
+regularProperty: SystemEvent;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface2.deprecatedexample.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface2](./api-documenter-test.idocinterface2.md) &gt; [deprecatedExample](./api-documenter-test.idocinterface2.deprecatedexample.md)
+
+## IDocInterface2.deprecatedExample() method
+
+> Warning: This API is now obsolete.
+> 
+> Use \`otherThing()\` instead.
+> 
+
+**Signature:**
+
+\`\`\`typescript
+deprecatedExample(): void;
+\`\`\`
+**Returns:**
+
+void
+
+",
+  "/api-documenter-test.idocinterface2.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface2](./api-documenter-test.idocinterface2.md)
+
+## IDocInterface2 interface
+
+
+**Signature:**
+
+\`\`\`typescript
+export interface IDocInterface2 extends IDocInterface1 
+\`\`\`
+**Extends:** [IDocInterface1](./api-documenter-test.idocinterface1.md)
+
+## Methods
+
+<table><thead><tr><th>
+
+Method
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[deprecatedExample()](./api-documenter-test.idocinterface2.deprecatedexample.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.idocinterface3.__not.a.symbol__.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface3](./api-documenter-test.idocinterface3.md) &gt; [\\"\\\\[not.a.symbol\\\\]\\"](./api-documenter-test.idocinterface3.__not.a.symbol__.md)
+
+## IDocInterface3.\\"\\\\[not.a.symbol\\\\]\\" property
+
+An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol.
+
+**Signature:**
+
+\`\`\`typescript
+\\"[not.a.symbol]\\": string;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface3._ecmasmbols.example_.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface3](./api-documenter-test.idocinterface3.md) &gt; [\\\\[EcmaSmbols.example\\\\]](./api-documenter-test.idocinterface3._ecmasmbols.example_.md)
+
+## IDocInterface3.\\\\[EcmaSmbols.example\\\\] property
+
+ECMAScript symbol
+
+**Signature:**
+
+\`\`\`typescript
+[EcmaSmbols.example]: string;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface3._new_.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface3](./api-documenter-test.idocinterface3.md) &gt; [(new)](./api-documenter-test.idocinterface3._new_.md)
+
+## IDocInterface3.(new)
+
+Construct signature
+
+**Signature:**
+
+\`\`\`typescript
+new (): IDocInterface1;
+\`\`\`
+**Returns:**
+
+[IDocInterface1](./api-documenter-test.idocinterface1.md)
+
+",
+  "/api-documenter-test.idocinterface3.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface3](./api-documenter-test.idocinterface3.md)
+
+## IDocInterface3 interface
+
+Some less common TypeScript declaration kinds.
+
+
+**Signature:**
+
+\`\`\`typescript
+export interface IDocInterface3 
+\`\`\`
+
+## Properties
+
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[\\"\\\\[not.a.symbol\\\\]\\"](./api-documenter-test.idocinterface3.__not.a.symbol__.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol.
+
+
+</td></tr>
+<tr><td>
+
+[\\\\[EcmaSmbols.example\\\\]](./api-documenter-test.idocinterface3._ecmasmbols.example_.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+ECMAScript symbol
+
+
+</td></tr>
+<tr><td>
+
+[redundantQuotes](./api-documenter-test.idocinterface3.redundantquotes.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+A quoted identifier with redundant quotes.
+
+
+</td></tr>
+</tbody></table>
+
+## Methods
+
+<table><thead><tr><th>
+
+Method
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[(new)()](./api-documenter-test.idocinterface3._new_.md)
+
+
+</td><td>
+
+Construct signature
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.idocinterface3.redundantquotes.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface3](./api-documenter-test.idocinterface3.md) &gt; [redundantQuotes](./api-documenter-test.idocinterface3.redundantquotes.md)
+
+## IDocInterface3.redundantQuotes property
+
+A quoted identifier with redundant quotes.
+
+**Signature:**
+
+\`\`\`typescript
+\\"redundantQuotes\\": string;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface4.context.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface4](./api-documenter-test.idocinterface4.md) &gt; [Context](./api-documenter-test.idocinterface4.context.md)
+
+## IDocInterface4.Context property
+
+Test newline rendering when code blocks are used in tables
+
+**Signature:**
+
+\`\`\`typescript
+Context: ({ children }: {
+        children: string;
+    }) => boolean;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface4.generic.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface4](./api-documenter-test.idocinterface4.md) &gt; [generic](./api-documenter-test.idocinterface4.generic.md)
+
+## IDocInterface4.generic property
+
+make sure html entities are escaped in tables.
+
+**Signature:**
+
+\`\`\`typescript
+generic: Generic<number>;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface4.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface4](./api-documenter-test.idocinterface4.md)
+
+## IDocInterface4 interface
+
+Type union in an interface.
+
+
+**Signature:**
+
+\`\`\`typescript
+export interface IDocInterface4 
+\`\`\`
+
+## Properties
+
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[Context](./api-documenter-test.idocinterface4.context.md)
+
+
+</td><td>
+
+
+</td><td>
+
+({ children }: { children: string; }) =&gt; boolean
+
+
+</td><td>
+
+Test newline rendering when code blocks are used in tables
+
+
+</td></tr>
+<tr><td>
+
+[generic](./api-documenter-test.idocinterface4.generic.md)
+
+
+</td><td>
+
+
+</td><td>
+
+[Generic](./api-documenter-test.generic.md)<!-- -->&lt;number&gt;
+
+
+</td><td>
+
+make sure html entities are escaped in tables.
+
+
+</td></tr>
+<tr><td>
+
+[numberOrFunction](./api-documenter-test.idocinterface4.numberorfunction.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number \\\\| (() =&gt; number)
+
+
+</td><td>
+
+a union type with a function
+
+
+</td></tr>
+<tr><td>
+
+[stringOrNumber](./api-documenter-test.idocinterface4.stringornumber.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string \\\\| number
+
+
+</td><td>
+
+a union type
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.idocinterface4.numberorfunction.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface4](./api-documenter-test.idocinterface4.md) &gt; [numberOrFunction](./api-documenter-test.idocinterface4.numberorfunction.md)
+
+## IDocInterface4.numberOrFunction property
+
+a union type with a function
+
+**Signature:**
+
+\`\`\`typescript
+numberOrFunction: number | (() => number);
+\`\`\`
+",
+  "/api-documenter-test.idocinterface4.stringornumber.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface4](./api-documenter-test.idocinterface4.md) &gt; [stringOrNumber](./api-documenter-test.idocinterface4.stringornumber.md)
+
+## IDocInterface4.stringOrNumber property
+
+a union type
+
+**Signature:**
+
+\`\`\`typescript
+stringOrNumber: string | number;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface5.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface5](./api-documenter-test.idocinterface5.md)
+
+## IDocInterface5 interface
+
+Interface without inline tag to test custom TOC
+
+**Signature:**
+
+\`\`\`typescript
+export interface IDocInterface5 
+\`\`\`
+
+## Properties
+
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[regularProperty](./api-documenter-test.idocinterface5.regularproperty.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+Property of type string that does something
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.idocinterface5.regularproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface5](./api-documenter-test.idocinterface5.md) &gt; [regularProperty](./api-documenter-test.idocinterface5.regularproperty.md)
+
+## IDocInterface5.regularProperty property
+
+Property of type string that does something
+
+**Signature:**
+
+\`\`\`typescript
+regularProperty: string;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface6.arrayproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface6](./api-documenter-test.idocinterface6.md) &gt; [arrayProperty](./api-documenter-test.idocinterface6.arrayproperty.md)
+
+## IDocInterface6.arrayProperty property
+
+**Signature:**
+
+\`\`\`typescript
+arrayProperty: IDocInterface1[];
+\`\`\`
+",
+  "/api-documenter-test.idocinterface6.genericreferencemethod.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface6](./api-documenter-test.idocinterface6.md) &gt; [genericReferenceMethod](./api-documenter-test.idocinterface6.genericreferencemethod.md)
+
+## IDocInterface6.genericReferenceMethod() method
+
+**Signature:**
+
+\`\`\`typescript
+genericReferenceMethod<T>(x: T): T;
+\`\`\`
+
+## Parameters
+
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+x
+
+
+</td><td>
+
+T
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
+**Returns:**
+
+T
+
+",
+  "/api-documenter-test.idocinterface6.intersectionproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface6](./api-documenter-test.idocinterface6.md) &gt; [intersectionProperty](./api-documenter-test.idocinterface6.intersectionproperty.md)
+
+## IDocInterface6.intersectionProperty property
+
+**Signature:**
+
+\`\`\`typescript
+intersectionProperty: IDocInterface1 & IDocInterface2;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface6.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface6](./api-documenter-test.idocinterface6.md)
+
+## IDocInterface6 interface
+
+Interface without inline tag to test custom TOC with injection
+
+**Signature:**
+
+\`\`\`typescript
+export interface IDocInterface6 
+\`\`\`
+
+## Properties
+
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[arrayProperty](./api-documenter-test.idocinterface6.arrayproperty.md)
+
+
+</td><td>
+
+
+</td><td>
+
+[IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->\\\\[\\\\]
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[intersectionProperty](./api-documenter-test.idocinterface6.intersectionproperty.md)
+
+
+</td><td>
+
+
+</td><td>
+
+[IDocInterface1](./api-documenter-test.idocinterface1.md) &amp; [IDocInterface2](./api-documenter-test.idocinterface2.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[regularProperty](./api-documenter-test.idocinterface6.regularproperty.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+Property of type number that does something
+
+
+</td></tr>
+<tr><td>
+
+[tupleProperty](./api-documenter-test.idocinterface6.tupleproperty.md)
+
+
+</td><td>
+
+
+</td><td>
+
+\\\\[[IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->, [IDocInterface2](./api-documenter-test.idocinterface2.md)<!-- -->\\\\]
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[typeReferenceProperty](./api-documenter-test.idocinterface6.typereferenceproperty.md)
+
+
+</td><td>
+
+
+</td><td>
+
+[Generic](./api-documenter-test.generic.md)<!-- -->&lt;[IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->&gt;
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[unionProperty](./api-documenter-test.idocinterface6.unionproperty.md)
+
+
+</td><td>
+
+
+</td><td>
+
+[IDocInterface1](./api-documenter-test.idocinterface1.md) \\\\| [IDocInterface2](./api-documenter-test.idocinterface2.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
+
+## Methods
+
+<table><thead><tr><th>
+
+Method
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[genericReferenceMethod(x)](./api-documenter-test.idocinterface6.genericreferencemethod.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.idocinterface6.regularproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface6](./api-documenter-test.idocinterface6.md) &gt; [regularProperty](./api-documenter-test.idocinterface6.regularproperty.md)
+
+## IDocInterface6.regularProperty property
+
+Property of type number that does something
+
+**Signature:**
+
+\`\`\`typescript
+regularProperty: number;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface6.tupleproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface6](./api-documenter-test.idocinterface6.md) &gt; [tupleProperty](./api-documenter-test.idocinterface6.tupleproperty.md)
+
+## IDocInterface6.tupleProperty property
+
+**Signature:**
+
+\`\`\`typescript
+tupleProperty: [IDocInterface1, IDocInterface2];
+\`\`\`
+",
+  "/api-documenter-test.idocinterface6.typereferenceproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface6](./api-documenter-test.idocinterface6.md) &gt; [typeReferenceProperty](./api-documenter-test.idocinterface6.typereferenceproperty.md)
+
+## IDocInterface6.typeReferenceProperty property
+
+**Signature:**
+
+\`\`\`typescript
+typeReferenceProperty: Generic<IDocInterface1>;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface6.unionproperty.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface6](./api-documenter-test.idocinterface6.md) &gt; [unionProperty](./api-documenter-test.idocinterface6.unionproperty.md)
+
+## IDocInterface6.unionProperty property
+
+**Signature:**
+
+\`\`\`typescript
+unionProperty: IDocInterface1 | IDocInterface2;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface7.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface7](./api-documenter-test.idocinterface7.md)
+
+## IDocInterface7 interface
+
+Interface for testing optional properties
+
+**Signature:**
+
+\`\`\`typescript
+export interface IDocInterface7 
+\`\`\`
+
+## Properties
+
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[optionalField?](./api-documenter-test.idocinterface7.optionalfield.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Description of optionalField
+
+
+</td></tr>
+<tr><td>
+
+[optionalReadonlyField?](./api-documenter-test.idocinterface7.optionalreadonlyfield.md)
+
+
+</td><td>
+
+\`readonly\`
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Description of optionalReadonlyField
+
+
+</td></tr>
+<tr><td>
+
+[optionalUndocumentedField?](./api-documenter-test.idocinterface7.optionalundocumentedfield.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_
+
+
+</td></tr>
+</tbody></table>
+
+## Methods
+
+<table><thead><tr><th>
+
+Method
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[optionalMember()?](./api-documenter-test.idocinterface7.optionalmember.md)
+
+
+</td><td>
+
+_(Optional)_ Description of optionalMember
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.idocinterface7.optionalfield.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface7](./api-documenter-test.idocinterface7.md) &gt; [optionalField](./api-documenter-test.idocinterface7.optionalfield.md)
+
+## IDocInterface7.optionalField property
+
+Description of optionalField
+
+**Signature:**
+
+\`\`\`typescript
+optionalField?: boolean;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface7.optionalmember.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface7](./api-documenter-test.idocinterface7.md) &gt; [optionalMember](./api-documenter-test.idocinterface7.optionalmember.md)
+
+## IDocInterface7.optionalMember() method
+
+Description of optionalMember
+
+**Signature:**
+
+\`\`\`typescript
+optionalMember?(): any;
+\`\`\`
+**Returns:**
+
+any
+
+",
+  "/api-documenter-test.idocinterface7.optionalreadonlyfield.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface7](./api-documenter-test.idocinterface7.md) &gt; [optionalReadonlyField](./api-documenter-test.idocinterface7.optionalreadonlyfield.md)
+
+## IDocInterface7.optionalReadonlyField property
+
+Description of optionalReadonlyField
+
+**Signature:**
+
+\`\`\`typescript
+readonly optionalReadonlyField?: boolean;
+\`\`\`
+",
+  "/api-documenter-test.idocinterface7.optionalundocumentedfield.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface7](./api-documenter-test.idocinterface7.md) &gt; [optionalUndocumentedField](./api-documenter-test.idocinterface7.optionalundocumentedfield.md)
+
+## IDocInterface7.optionalUndocumentedField property
+
+**Signature:**
+
+\`\`\`typescript
+optionalUndocumentedField?: boolean;
+\`\`\`
+",
+  "/api-documenter-test.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md)
+
+## api-documenter-test package
+
+api-extractor-test-05
+
+This project tests various documentation generation scenarios and doc comment syntaxes.
+
+## Classes
+
+<table><thead><tr><th>
+
+Class
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[DecoratorExample](./api-documenter-test.decoratorexample.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+<tr><td>
+
+[DocBaseClass](./api-documenter-test.docbaseclass.md)
+
+
+</td><td>
+
+Example base class
+
+
+
+</td></tr>
+<tr><td>
+
+[DocClass1](./api-documenter-test.docclass1.md)
+
+
+</td><td>
+
+This is an example class.
+
+
+</td></tr>
+<tr><td>
+
+[DocClassInterfaceMerge](./api-documenter-test.docclassinterfacemerge.md)
+
+
+</td><td>
+
+Class that merges with interface
+
+
+</td></tr>
+<tr><td>
+
+[Generic](./api-documenter-test.generic.md)
+
+
+</td><td>
+
+Generic class.
+
+
+</td></tr>
+<tr><td>
+
+[SystemEvent](./api-documenter-test.systemevent.md)
+
+
+</td><td>
+
+A class used to exposed events.
+
+
+
+</td></tr>
+</tbody></table>
+
+## Abstract Classes
+
+<table><thead><tr><th>
+
+Abstract Class
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[AbstractClass](./api-documenter-test.abstractclass.md)
+
+
+</td><td>
+
+Some abstract class with abstract members.
+
+
+</td></tr>
+</tbody></table>
+
+## Enumerations
+
+<table><thead><tr><th>
+
+Enumeration
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[DocEnum](./api-documenter-test.docenum.md)
+
+
+</td><td>
+
+Docs for DocEnum
+
+
+
+</td></tr>
+<tr><td>
+
+[DocEnumNamespaceMerge](./api-documenter-test.docenumnamespacemerge.md)
+
+
+</td><td>
+
+Enum that merges with namespace
+
+
+</td></tr>
+</tbody></table>
+
+## Functions
+
+<table><thead><tr><th>
+
+Function
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[exampleFunction(x, y)](./api-documenter-test.examplefunction.md)
+
+
+</td><td>
+
+An exported function with hyperlinked parameters and return value.
+
+
+</td></tr>
+<tr><td>
+
+[yamlReferenceUniquenessTest()](./api-documenter-test.yamlreferenceuniquenesstest.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+</tbody></table>
+
+## Interfaces
+
+<table><thead><tr><th>
+
+Interface
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[Constraint](./api-documenter-test.constraint.md)
+
+
+</td><td>
+
+Type parameter constraint used by test case below.
+
+
+</td></tr>
+<tr><td>
+
+[DefaultType](./api-documenter-test.defaulttype.md)
+
+
+</td><td>
+
+Type parameter default type used by test case below.
+
+
+</td></tr>
+<tr><td>
+
+[DocClassInterfaceMerge](./api-documenter-test.docclassinterfacemerge.md)
+
+
+</td><td>
+
+Interface that merges with class
+
+
+</td></tr>
+<tr><td>
+
+[IDocInterface1](./api-documenter-test.idocinterface1.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+<tr><td>
+
+[IDocInterface2](./api-documenter-test.idocinterface2.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+<tr><td>
+
+[IDocInterface3](./api-documenter-test.idocinterface3.md)
+
+
+</td><td>
+
+Some less common TypeScript declaration kinds.
+
+
+
+</td></tr>
+<tr><td>
+
+[IDocInterface4](./api-documenter-test.idocinterface4.md)
+
+
+</td><td>
+
+Type union in an interface.
+
+
+
+</td></tr>
+<tr><td>
+
+[IDocInterface5](./api-documenter-test.idocinterface5.md)
+
+
+</td><td>
+
+Interface without inline tag to test custom TOC
+
+
+</td></tr>
+<tr><td>
+
+[IDocInterface6](./api-documenter-test.idocinterface6.md)
+
+
+</td><td>
+
+Interface without inline tag to test custom TOC with injection
+
+
+</td></tr>
+<tr><td>
+
+[IDocInterface7](./api-documenter-test.idocinterface7.md)
+
+
+</td><td>
+
+Interface for testing optional properties
+
+
+</td></tr>
+</tbody></table>
+
+## Namespaces
+
+<table><thead><tr><th>
+
+Namespace
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[DocEnumNamespaceMerge](./api-documenter-test.docenumnamespacemerge.md)
+
+
+</td><td>
+
+Namespace that merges with enum
+
+
+</td></tr>
+<tr><td>
+
+[EcmaSmbols](./api-documenter-test.ecmasmbols.md)
+
+
+</td><td>
+
+A namespace containing an ECMAScript symbol
+
+
+</td></tr>
+<tr><td>
+
+[OuterNamespace](./api-documenter-test.outernamespace.md)
+
+
+</td><td>
+
+A top-level namespace
+
+
+</td></tr>
+</tbody></table>
+
+## Variables
+
+<table><thead><tr><th>
+
+Variable
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[constVariable](./api-documenter-test.constvariable.md)
+
+
+</td><td>
+
+An exported variable declaration.
+
+
+</td></tr>
+</tbody></table>
+
+## Type Aliases
+
+<table><thead><tr><th>
+
+Type Alias
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[ExampleDuplicateTypeAlias](./api-documenter-test.exampleduplicatetypealias.md)
+
+
+</td><td>
+
+A type alias that has duplicate references.
+
+
+</td></tr>
+<tr><td>
+
+[ExampleTypeAlias](./api-documenter-test.exampletypealias.md)
+
+
+</td><td>
+
+A type alias
+
+
+</td></tr>
+<tr><td>
+
+[ExampleUnionTypeAlias](./api-documenter-test.exampleuniontypealias.md)
+
+
+</td><td>
+
+A type alias that references multiple other types.
+
+
+</td></tr>
+<tr><td>
+
+[GenericTypeAlias](./api-documenter-test.generictypealias.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+<tr><td>
+
+[TypeAlias](./api-documenter-test.typealias.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.outernamespace.innernamespace.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [OuterNamespace](./api-documenter-test.outernamespace.md) &gt; [InnerNamespace](./api-documenter-test.outernamespace.innernamespace.md)
+
+## OuterNamespace.InnerNamespace namespace
+
+A nested namespace
+
+**Signature:**
+
+\`\`\`typescript
+namespace InnerNamespace 
+\`\`\`
+
+## Functions
+
+<table><thead><tr><th>
+
+Function
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[nestedFunction(x)](./api-documenter-test.outernamespace.innernamespace.nestedfunction.md)
+
+
+</td><td>
+
+A function inside a namespace
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.outernamespace.innernamespace.nestedfunction.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [OuterNamespace](./api-documenter-test.outernamespace.md) &gt; [InnerNamespace](./api-documenter-test.outernamespace.innernamespace.md) &gt; [nestedFunction](./api-documenter-test.outernamespace.innernamespace.nestedfunction.md)
+
+## OuterNamespace.InnerNamespace.nestedFunction() function
+
+A function inside a namespace
+
+**Signature:**
+
+\`\`\`typescript
+function nestedFunction(x: number): number;
+\`\`\`
+
+## Parameters
+
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+x
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
+**Returns:**
+
+number
+
+",
+  "/api-documenter-test.outernamespace.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [OuterNamespace](./api-documenter-test.outernamespace.md)
+
+## OuterNamespace namespace
+
+A top-level namespace
+
+**Signature:**
+
+\`\`\`typescript
+export declare namespace OuterNamespace 
+\`\`\`
+
+## Namespaces
+
+<table><thead><tr><th>
+
+Namespace
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[InnerNamespace](./api-documenter-test.outernamespace.innernamespace.md)
+
+
+</td><td>
+
+A nested namespace
+
+
+</td></tr>
+</tbody></table>
+
+## Variables
+
+<table><thead><tr><th>
+
+Variable
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[nestedVariable](./api-documenter-test.outernamespace.nestedvariable.md)
+
+
+</td><td>
+
+A variable exported from within a namespace.
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.outernamespace.nestedvariable.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [OuterNamespace](./api-documenter-test.outernamespace.md) &gt; [nestedVariable](./api-documenter-test.outernamespace.nestedvariable.md)
+
+## OuterNamespace.nestedVariable variable
+
+A variable exported from within a namespace.
+
+**Signature:**
+
+\`\`\`typescript
+nestedVariable: boolean
+\`\`\`
+",
+  "/api-documenter-test.systemevent.addhandler.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [SystemEvent](./api-documenter-test.systemevent.md) &gt; [addHandler](./api-documenter-test.systemevent.addhandler.md)
+
+## SystemEvent.addHandler() method
+
+Adds an handler for the event.
+
+**Signature:**
+
+\`\`\`typescript
+addHandler(handler: () => void): void;
+\`\`\`
+
+## Parameters
+
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+handler
+
+
+</td><td>
+
+() =&gt; void
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
+**Returns:**
+
+void
+
+",
+  "/api-documenter-test.systemevent.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [SystemEvent](./api-documenter-test.systemevent.md)
+
+## SystemEvent class
+
+A class used to exposed events.
+
+
+**Signature:**
+
+\`\`\`typescript
+export declare class SystemEvent 
+\`\`\`
+
+## Methods
+
+<table><thead><tr><th>
+
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[addHandler(handler)](./api-documenter-test.systemevent.addhandler.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Adds an handler for the event.
+
+
+</td></tr>
+</tbody></table>
+",
+  "/api-documenter-test.typealias.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [TypeAlias](./api-documenter-test.typealias.md)
+
+## TypeAlias type
+
+
+**Signature:**
+
+\`\`\`typescript
+export type TypeAlias = number;
+\`\`\`
+",
+  "/api-documenter-test.yamlreferenceuniquenesstest.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [yamlReferenceUniquenessTest](./api-documenter-test.yamlreferenceuniquenesstest.md)
+
+## yamlReferenceUniquenessTest() function
+
+
+**Signature:**
+
+\`\`\`typescript
+export declare function yamlReferenceUniquenessTest(): IDocInterface1;
+\`\`\`
+**Returns:**
+
+[IDocInterface1](./api-documenter-test.idocinterface1.md)
+
+",
+  "/index.md": "<!-- Do not edit this file. It is automatically generated by API Documenter. -->
+
+[Home](./index.md)
+
+## API Reference
+
+## Packages
+
+<table><thead><tr><th>
+
+Package
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[api-documenter-test](./api-documenter-test.md)
+
+
+</td><td>
+
+api-extractor-test-05
+
+This project tests various documentation generation scenarios and doc comment syntaxes.
+
+
+</td></tr>
+</tbody></table>
+",
+}
+`;

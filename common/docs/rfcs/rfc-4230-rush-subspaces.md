@@ -143,6 +143,8 @@ common/config/subspaces/<subspace-name>/.npmrc
 common/config/subspaces/<subspace-name>/common-versions.json
 ```
 
+Subspaces will also allow for a global configuration file for npmrc settings to apply for all subspaces. This global configuration file will be located in the common rush directory: `common/config/rush/.npmrc-global`
+
 As noted in the [PR #3481 discussion](https://github.com/microsoft/rushstack/pull/3481#discussion_r901277915), Rush's current strategy of installing directly into `common/temp` makes it difficult to introduce additional PNPM installations without phantom dependency folders. To address this problem, when `useSubspaces=true`, the top-level `common/temp/node_modules` folder will not be created at all. Instead, lockfiles will get installed to subfolders with the naming pattern `common/temp/subspaces/<subspace-name>/`.
 
 Rush projects will be mapped to a subspace using a new project-specific field in rush.json:

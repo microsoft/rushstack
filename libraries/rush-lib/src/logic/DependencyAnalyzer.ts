@@ -6,6 +6,7 @@ import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfigura
 import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { Subspace } from '../api/Subspace';
 
 export interface IDependencyAnalysis {
   /**
@@ -53,9 +54,12 @@ export class DependencyAnalyzer {
     return analyzer;
   }
 
-  public getAnalysis(): IDependencyAnalysis {
+  public getAnalysis(subspace?: Subspace, addAction?: boolean): IDependencyAnalysis {
     if (!this._analysis) {
-      this._analysis = this._getAnalysisInternal();
+      this._analysis = this._getAnalysisInternal(
+        subspace || this._rushConfiguration.defaultSubspace,
+        addAction
+      );
     }
 
     return this._analysis;
@@ -67,16 +71,20 @@ export class DependencyAnalyzer {
    * @remarks
    * The result of this function is not cached.
    */
-  private _getAnalysisInternal(): IDependencyAnalysis {
-    const commonVersionsConfiguration: CommonVersionsConfiguration =
-      this._rushConfiguration.getCommonVersions();
+  private _getAnalysisInternal(subspace: Subspace, addAction?: boolean): IDependencyAnalysis {
+    const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions();
     const allVersionsByPackageName: Map<string, Set<string>> = new Map();
     const allowedAlternativeVersions: Map<
       string,
       ReadonlyArray<string>
     > = commonVersionsConfiguration.allowedAlternativeVersions;
 
-    for (const project of this._rushConfiguration.projects) {
+    let projectsToProcess: RushConfigurationProject[] = this._rushConfiguration.projects;
+    if (addAction && this._rushConfiguration.subspacesFeatureEnabled) {
+      projectsToProcess = subspace.getProjects();
+    }
+
+    for (const project of projectsToProcess) {
       const dependencies: PackageJsonDependency[] = [
         ...project.packageJsonEditor.dependencyList,
         ...project.packageJsonEditor.devDependencyList

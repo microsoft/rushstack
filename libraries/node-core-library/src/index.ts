@@ -95,6 +95,7 @@ export {
   IFileSystemReadFileOptions,
   IFileSystemReadFolderOptions,
   IFileSystemUpdateTimeParameters,
+  IFileSystemWriteBinaryFileOptions,
   IFileSystemWriteFileOptions
 } from './FileSystem';
 export { FileWriter, IFileWriterFlags } from './FileWriter';

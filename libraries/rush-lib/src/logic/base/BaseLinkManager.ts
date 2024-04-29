@@ -34,7 +34,7 @@ export abstract class BaseLinkManager {
     this._rushConfiguration = rushConfiguration;
   }
 
-  protected static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
+  public static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
     const newLinkFolder: string = path.dirname(options.newLinkPath);
     FileSystem.ensureFolder(newLinkFolder);
 

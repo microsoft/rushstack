@@ -13,7 +13,44 @@ export interface IInterface2
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [someProp](./api-documenter-scenarios.iinterface2.someprop.md) |  | number | Some prop. |
+<table><thead><tr><th>
 
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[someProp](./api-documenter-scenarios.iinterface2.someprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+Some prop.
+
+
+</td></tr>
+</tbody></table>

@@ -24,7 +24,7 @@ import type { Operation } from './Operation';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type {
-  ICreateOperationsContext,
+  IExecuteOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
@@ -90,7 +90,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       PLUGIN_NAME,
       async (
         recordByOperation: Map<Operation, IOperationExecutionResult>,
-        context: ICreateOperationsContext
+        context: IExecuteOperationsContext
       ): Promise<void> => {
         const { isIncrementalBuildAllowed, projectChangeAnalyzer, projectConfigurations, isInitial } =
           context;
@@ -471,8 +471,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           if (cobuildLock && isCacheWriteAllowed) {
             const { cacheId, contextId } = cobuildLock.cobuildContext;
 
-            const finalCacheId: string =
-              status === OperationStatus.Failure ? `${cacheId}-${contextId}-failed` : cacheId;
+            let finalCacheId: string = cacheId;
+            if (status === OperationStatus.Failure) {
+              finalCacheId = `${cacheId}-${contextId}-failed`;
+            } else if (status === OperationStatus.SuccessWithWarning && !record.runner.warningsAreAllowed) {
+              finalCacheId = `${cacheId}-${contextId}-warnings`;
+            }
             switch (status) {
               case OperationStatus.SuccessWithWarning:
               case OperationStatus.Success:

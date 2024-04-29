@@ -292,7 +292,8 @@ export class PackageJsonUpdater {
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArguments: [],
       checkOnly: false,
-      subspace: subspace
+      subspace: subspace,
+      terminal: this._terminal
     };
 
     const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
@@ -314,7 +315,7 @@ export class PackageJsonUpdater {
   private async _doRushAddAsync(
     options: IPackageJsonUpdaterRushAddOptions
   ): Promise<IUpdateProjectOptions[]> {
-    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages } = options;
+    const { projects } = options;
 
     const { DependencyAnalyzer } = await import(
       /* webpackChunkName: 'DependencyAnalyzer' */
@@ -323,11 +324,36 @@ export class PackageJsonUpdater {
     const dependencyAnalyzer: DependencyAnalyzer = DependencyAnalyzer.forRushConfiguration(
       this._rushConfiguration
     );
+
+    const allPackageUpdates: IUpdateProjectOptions[] = [];
+    const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
+      new Set(projects)
+    );
+    for (const subspace of subspaceSet) {
+      // Projects for this subspace
+      allPackageUpdates.push(...(await this._updateProjects(subspace, dependencyAnalyzer, options)));
+    }
+
+    return allPackageUpdates;
+  }
+
+  private async _updateProjects(
+    subspace: Subspace,
+    dependencyAnalyzer: DependencyAnalyzer,
+    options: IPackageJsonUpdaterRushAddOptions
+  ): Promise<IUpdateProjectOptions[]> {
+    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages } = options;
+
+    // Get projects for this subspace
+    const subspaceProjects: RushConfigurationProject[] = projects.filter(
+      (project) => project.subspace === subspace
+    );
+
     const {
       allVersionsByPackageName,
       implicitlyPreferredVersionByPackageName,
       commonVersionsConfiguration
-    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis();
+    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(subspace, options.actionName === 'add');
 
     this._terminal.writeLine();
     const dependenciesToAddOrUpdate: Record<string, string> = {};
@@ -339,7 +365,7 @@ export class PackageJsonUpdater {
         commonVersionsConfiguration.preferredVersions.get(packageName);
 
       const version: string = await this._getNormalizedVersionSpec(
-        projects,
+        subspaceProjects,
         packageName,
         initialVersion,
         implicitlyPreferredVersion,
@@ -349,7 +375,7 @@ export class PackageJsonUpdater {
 
       dependenciesToAddOrUpdate[packageName] = version;
       this._terminal.writeLine(
-        Colorize.green('Updating projects to use'),
+        Colorize.green('Updating projects to use '),
         `${packageName}@`,
         Colorize.cyan(version)
       );
@@ -376,7 +402,7 @@ export class PackageJsonUpdater {
 
     const allPackageUpdates: IUpdateProjectOptions[] = [];
 
-    for (const project of projects) {
+    for (const project of subspaceProjects) {
       const currentProjectUpdate: IUpdateProjectOptions = {
         project: new VersionMismatchFinderProject(project),
         dependenciesToAddOrUpdateOrRemove: dependenciesToAddOrUpdate,

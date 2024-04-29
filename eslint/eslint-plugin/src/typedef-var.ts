@@ -44,7 +44,7 @@ const typedefVar: TSESLint.RuleModule<MessageIds, Options> = {
     }
 
     return {
-      VariableDeclarator(node): void {
+      VariableDeclarator(node: TSESTree.VariableDeclarator): void {
         if (node.id.typeAnnotation) {
           // An explicit type declaration was provided
           return;
@@ -104,16 +104,19 @@ const typedefVar: TSESLint.RuleModule<MessageIds, Options> = {
             //     const NODE = 123;
             //   }
             // }
+            // eslint-disable-next-line no-fallthrough
             case AST_NODE_TYPES.MethodDefinition:
 
             // let f = function() {
             //   const NODE = 123;
             // }
+            // eslint-disable-next-line no-fallthrough
             case AST_NODE_TYPES.FunctionExpression:
 
             // let f = () => {
             //   const NODE = 123;
             // }
+            // eslint-disable-next-line no-fallthrough
             case AST_NODE_TYPES.ArrowFunctionExpression:
               // Stop traversing and don't report an error
               return;

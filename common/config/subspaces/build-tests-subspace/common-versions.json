@@ -1,0 +1,118 @@
+/**
+ * This configuration file specifies NPM dependency version selections that affect all projects
+ * in a Rush repo.  More documentation is available on the Rush website: https://rushjs.io
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/common-versions.schema.json",
+
+  /**
+   * A table that specifies a "preferred version" for a given NPM package.  This feature is typically used
+   * to hold back an indirect dependency to a specific older version, or to reduce duplication of indirect dependencies.
+   *
+   * The "preferredVersions" value can be any SemVer range specifier (e.g. "~1.2.3").  Rush injects these values into
+   * the "dependencies" field of the top-level common/temp/package.json, which influences how the package manager
+   * will calculate versions.  The specific effect depends on your package manager.  Generally it will have no
+   * effect on an incompatible or already constrained SemVer range.  If you are using PNPM, similar effects can be
+   * achieved using the pnpmfile.js hook.  See the Rush documentation for more details.
+   *
+   * After modifying this field, it's recommended to run "rush update --full" so that the package manager
+   * will recalculate all version selections.
+   */
+  "preferredVersions": {
+    /**
+     * When someone asks for "^1.0.0" make sure they get "1.2.3" when working in this repo,
+     * instead of the latest version.
+     */
+    // "some-library": "1.2.3"
+
+    // This should be the TypeScript version that's used to build most of the projects in the repo.
+    // Preferring it avoids errors for indirect dependencies that request it as a peer dependency.
+    // It's also the newest supported compiler, used by most build tests and used as the bundled compiler
+    // engine for API Extractor.
+    "typescript": "~5.4.2",
+
+    // Workaround for https://github.com/microsoft/rushstack/issues/1466
+    "eslint": "~8.57.0"
+  },
+
+  /**
+   * When set to true, for all projects in the repo, all dependencies will be automatically added as preferredVersions,
+   * except in cases where different projects specify different version ranges for a given dependency.  For older
+   * package managers, this tended to reduce duplication of indirect dependencies.  However, it can sometimes cause
+   * trouble for indirect dependencies with incompatible peerDependencies ranges.
+   *
+   * The default value is true.  If you're encountering installation errors related to peer dependencies,
+   * it's recommended to set this to false.
+   *
+   * After modifying this field, it's recommended to run "rush update --full" so that the package manager
+   * will recalculate all version selections.
+   */
+  // "implicitlyPreferredVersions": false,
+
+  /**
+   * The "rush check" command can be used to enforce that every project in the repo must specify
+   * the same SemVer range for a given dependency.  However, sometimes exceptions are needed.
+   * The allowedAlternativeVersions table allows you to list other SemVer ranges that will be
+   * accepted by "rush check" for a given dependency.
+   *
+   * IMPORTANT: THIS TABLE IS FOR *ADDITIONAL* VERSION RANGES THAT ARE ALTERNATIVES TO THE
+   * USUAL VERSION (WHICH IS INFERRED BY LOOKING AT ALL PROJECTS IN THE REPO).
+   * This design avoids unnecessary churn in this file.
+   */
+  "allowedAlternativeVersions": {
+    "eslint": [
+      "7.7.0", // Used by build-tests/eslint-7-7-test
+      "7.11.0", // Used by build-tests/eslint-7-11-test
+      "~7.30.0", // Used by build-tests/eslint-7-test
+      "8.6.0", // Used by build-tests/eslint-bulk-suppressions-test
+      "~8.23.1" // Used by build-tests/eslint-bulk-suppressions-test
+    ],
+    /**
+     * For example, allow some projects to use an older TypeScript compiler
+     * (in addition to whatever "usual" version is being used by other projects in the repo):
+     */
+    "typescript": [
+      // "~5.0.4" is the (inferred, not alternative) range used by most projects in this repo
+
+      // The oldest supported compiler, used by build-tests/api-extractor-lib1-test
+      "~2.9.2",
+      // For testing Heft with TS V3
+      "~3.9.10",
+      // For testing Heft with TS V4
+      "~4.9.5",
+
+      // API Extractor bundles a specific TypeScript version because it calls internal APIs
+      "5.4.2"
+    ],
+    "source-map": [
+      "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
+    ],
+    "tapable": [
+      "2.2.1",
+      "1.1.3" // heft plugin is using an older version of tapable
+    ],
+    // --- For Webpack 4 projects ----
+    "css-loader": ["~5.2.7"],
+    "html-webpack-plugin": ["~4.5.2"],
+    "postcss-loader": ["~4.1.0"],
+    "sass-loader": ["~10.0.0"],
+    "sass": ["~1.3.0"],
+    "source-map-loader": ["~1.1.3"],
+    "style-loader": ["~2.0.0"],
+    "terser-webpack-plugin": ["~3.0.8"],
+    "terser": ["~4.8.0"],
+    "webpack": ["~4.47.0"],
+    "@types/node": [
+      // These versions are used by testing projects
+      "ts2.9",
+      "ts3.9",
+      "ts4.9"
+    ],
+    "@types/jest": [
+      // These versions are used by testing projects
+      "ts2.9",
+      "ts3.9",
+      "ts4.9"
+    ]
+  }
+}

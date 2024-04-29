@@ -2,6 +2,66 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "3.6.9",
+      "tag": "@rushstack/eslint-config_v3.6.9",
+      "date": "Wed, 10 Apr 2024 21:59:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.10.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.8",
+      "tag": "@rushstack/eslint-config_v3.6.8",
+      "date": "Fri, 29 Mar 2024 05:46:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.10.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.7",
+      "tag": "@rushstack/eslint-config_v3.6.7",
+      "date": "Thu, 28 Mar 2024 18:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.10.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.6",
+      "tag": "@rushstack/eslint-config_v3.6.6",
+      "date": "Wed, 27 Mar 2024 19:47:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.9.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.5",
+      "tag": "@rushstack/eslint-config_v3.6.5",
+      "date": "Wed, 20 Mar 2024 02:09:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.8.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.6.4",
       "tag": "@rushstack/eslint-config_v3.6.4",
       "date": "Sat, 17 Feb 2024 06:24:35 GMT",

@@ -6,7 +6,24 @@
 
 ## Packages
 
-|  Package | Description |
-|  --- | --- |
-|  [api-documenter-scenarios](./api-documenter-scenarios.md) |  |
+<table><thead><tr><th>
 
+Package
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[api-documenter-scenarios](./api-documenter-scenarios.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>

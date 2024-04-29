@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 21 Feb 2024 21:45:28 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Apr 2024 15:10:08 GMT and should not be manually modified.
+
+## 4.1.0
+Wed, 10 Apr 2024 15:10:08 GMT
+
+### Minor changes
+
+- Add `writeBuffersToFile` and `writeBuffersToFileAsync` methods to `FileSystem` for efficient writing of concatenated files.
 
 ## 4.0.2
 Wed, 21 Feb 2024 21:45:28 GMT

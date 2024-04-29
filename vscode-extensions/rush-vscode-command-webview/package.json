@@ -37,7 +37,7 @@
     "@types/react-redux": "~7.1.22",
     "@types/react": "17.0.74",
     "@types/vscode": "^1.63.0",
-    "eslint": "~8.7.0",
+    "eslint": "~8.57.0",
     "html-webpack-plugin": "~5.5.0",
     "webpack-bundle-analyzer": "~4.5.0",
     "webpack": "~5.82.1"

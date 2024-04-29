@@ -1,6 +1,193 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 05 Mar 2024 01:19:42 GMT and should not be manually modified.
+This log was last generated on Thu, 25 Apr 2024 07:33:18 GMT and should not be manually modified.
+
+## 5.122.0
+Thu, 25 Apr 2024 07:33:18 GMT
+
+### Updates
+
+- Support rush-pnpm for subspace feature
+- Skip determining merge base if given git hash
+- (BREAKING CHANGE) Improve the `disallowInsecureSha1` policy to support exemptions for certain package versions. This is a breaking change for the `disallowInsecureSha1` field in pnpm-config.json since Rush 5.119.0.
+
+## 5.121.0
+Mon, 22 Apr 2024 19:11:26 GMT
+
+### Updates
+
+- Add support for auth via microsoft/ado-codespaces-auth vscode extension in `@rushstack/rush-azure-storage-build-cache-plugin`
+
+## 5.120.6
+Thu, 18 Apr 2024 23:20:02 GMT
+
+### Updates
+
+- Fix an issue where "rush deploy" did not correctly deploy build outputs combining multiple Rush subspaces
+
+## 5.120.5
+Wed, 17 Apr 2024 21:58:17 GMT
+
+### Updates
+
+- Fix an issue where rush add affects all packages in a subspace
+
+## 5.120.4
+Tue, 16 Apr 2024 20:04:25 GMT
+
+### Updates
+
+- Fix an issue where `rush deploy` sometimes used an incorrect temp folder when the experimental subspaces feature is enabled
+
+## 5.120.3
+Tue, 16 Apr 2024 02:59:48 GMT
+
+### Updates
+
+- Fix an issue where `pnpm-sync copy` was skipped when a build is restored from build cache.
+- Upgrade `tar` dependency to 6.2.1
+
+## 5.120.2
+Mon, 15 Apr 2024 00:25:04 GMT
+
+### Updates
+
+- Fixes an issue where rush install fails in monorepos with subspaces enabled
+
+## 5.120.1
+Sat, 13 Apr 2024 18:31:00 GMT
+
+### Updates
+
+- Fix an issue where install-run-rush.js sometimes incorrectly invoked .cmd files on Windows OS due to a recent Node.js behavior change.
+- Fix an issue with the skip install logic when the experimental subspaces feature is enabled
+
+## 5.120.0
+Wed, 10 Apr 2024 21:59:57 GMT
+
+### Updates
+
+- Bump express.
+- Add support for `optionalDependencies` in transitive injected install in the Subspaces feature.
+- Update dependency: pnpm-sync-lib@0.2.2
+- Remove a restriction where the repo root would not be found if the CWD is >10 directory levels deep.
+- Improve the error message that is printed in a repo using PNPM workspaces when a non-`workspace:` version is used for a project inside the repo.
+- Include a missing space in a logging message printed when running `rush add`.
+- Clarify the copyright notice emitted in common/scripts/*.js
+- Fix an issue with loading of implicitly preferred versions when the experimental subspaces feature is enabled
+
+## 5.119.0
+Sat, 30 Mar 2024 04:32:31 GMT
+
+### Updates
+
+- Add a policy to forbid sha1 hashes in pnpm-lock.yaml.
+- (BREAKING API CHANGE) Refactor phased action execution to analyze the repo after the initial operations are created. This removes the `projectChangeAnalyzer` property from the context parameter passed to the `createOperations` hook.
+
+## 5.118.7
+Thu, 28 Mar 2024 19:55:27 GMT
+
+### Updates
+
+- Fix an issue where in the previous release, built-in plugins were not included.
+
+## 5.118.6
+Wed, 27 Mar 2024 05:31:17 GMT
+
+### Updates
+
+- Symlinks are now generated for workspace projects in the temp folder when subspaces and splitWorkspaceCompatibility is enabled.
+
+## 5.118.5
+Tue, 26 Mar 2024 19:58:40 GMT
+
+### Updates
+
+- Use pnpm-sync-lib logging APIs to customize the log message for pnpm-sync operations
+
+## 5.118.4
+Tue, 26 Mar 2024 02:39:06 GMT
+
+### Updates
+
+- Added warnings if there are .npmrc or .pnpmfile.cjs files in project folders after migrating to subspaces
+
+## 5.118.3
+Sat, 23 Mar 2024 01:41:10 GMT
+
+### Updates
+
+- Fix an edge case for computing the PNPM store path when the experimental subspaces feature is enabled
+
+## 5.118.2
+Fri, 22 Mar 2024 17:30:47 GMT
+
+### Updates
+
+- Fix bugs related to path operation in Windows OS for subspace feature
+
+## 5.118.1
+Thu, 21 Mar 2024 16:39:32 GMT
+
+### Updates
+
+- Support PNPM injected installation in Rush subspace feature
+
+## 5.118.0
+Wed, 20 Mar 2024 20:45:18 GMT
+
+### Updates
+
+- (BREAKING API CHANGE) Rename `AzureAuthenticationBase._getCredentialFromDeviceCodeAsync` to `AzureAuthenticationBase._getCredentialFromTokenAsync` in `@rushstack/rush-azure-storage-build-cache-plugin`. Adding support for InteractiveBrowserCredential.
+
+## 5.117.10
+Wed, 20 Mar 2024 04:57:57 GMT
+
+### Updates
+
+- Improve the "splitWorkspaceCompatibility" setting to simulate hoisted dependencies when the experimental Rush subspaces feature is enabled
+
+## 5.117.9
+Tue, 12 Mar 2024 19:15:07 GMT
+
+### Updates
+
+- Add functionality to disable filtered installs for specific subspaces
+
+## 5.117.8
+Sat, 09 Mar 2024 01:11:16 GMT
+
+### Updates
+
+- Fixes a bug where the syncNpmrc function incorrectly uses the folder instead of the path
+
+## 5.117.7
+Fri, 08 Mar 2024 23:45:24 GMT
+
+### Updates
+
+- Fix an issue where, when the experimental subspace feature is enabled, the subspace's ".npmrc" file did not take precedence over ".npmrc-global".
+
+## 5.117.6
+Thu, 07 Mar 2024 19:35:20 GMT
+
+### Updates
+
+- Fixes an issue where cobuilds would write success with warnings as successful cache entries.
+
+## 5.117.5
+Wed, 06 Mar 2024 23:03:27 GMT
+
+### Updates
+
+- Add filtered installs for subspaces
+
+## 5.117.4
+Tue, 05 Mar 2024 21:15:26 GMT
+
+### Updates
+
+- Add support for subspace level scoped pnpm-config.json e.g. `common/config/subspaces/default/pnpm-config.json`
 
 ## 5.117.3
 Tue, 05 Mar 2024 01:19:42 GMT

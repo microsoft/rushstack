@@ -529,7 +529,10 @@ export class Utilities {
     JsonFile.save(npmPackageJson, path.join(directory, FileConstants.PackageJson));
 
     if (options.commonRushConfigFolder) {
-      Utilities.syncNpmrc(options.commonRushConfigFolder, directory);
+      Utilities.syncNpmrc({
+        sourceNpmrcFolder: options.commonRushConfigFolder,
+        targetNpmrcFolder: directory
+      });
     }
 
     // eslint-disable-next-line no-console
@@ -583,6 +586,27 @@ export class Utilities {
       await doActionAsync(disposable);
     } finally {
       disposable?.dispose();
+    }
+  }
+
+  public static trimAfterLastSlash(filePath: string): string {
+    const indexOfLastSlash: number = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
+    if (indexOfLastSlash < 0) {
+      return filePath;
+    }
+    return filePath.substring(0, indexOfLastSlash);
+  }
+
+  /**
+   * If the path refers to a symlink, `FileSystem.exists()` would normally test whether the symlink
+   * points to a target that exists. By contrast, `existsOrIsBrokenSymlink()` will return true even if
+   * the symlink exists but its target does not. */
+  public static existsOrIsSymlink(linkPath: string): boolean {
+    try {
+      FileSystem.getLinkStatistics(linkPath);
+      return true;
+    } catch (err) {
+      return false;
     }
   }
 

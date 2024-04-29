@@ -8,7 +8,7 @@ import { readme } from './readme';
 
 interface IPlugin {
   rules: { [ruleName: string]: TSESLint.RuleModule<string, unknown[]> };
-  configs: { [ruleName: string]: any };
+  configs: { [ruleName: string]: unknown };
 }
 
 const plugin: IPlugin = {

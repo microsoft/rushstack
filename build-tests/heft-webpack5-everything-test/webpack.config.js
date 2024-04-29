@@ -12,6 +12,11 @@ module.exports = {
       {
         test: /\.png$/i,
         type: 'asset/resource'
+      },
+      {
+        test: /\.js$/,
+        enforce: 'pre',
+        use: ['source-map-loader']
       }
     ]
   },

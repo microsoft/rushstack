@@ -57,7 +57,7 @@ const readme: TSESLint.RuleModule<MessageIds, Options> = {
     // Example: /path/to/my-project/tsconfig.json
     const tsconfigFilePath: string | undefined = ESLintUtils.getParserServices(
       context
-    ).program.getCompilerOptions()['configFilePath'] as string;
+    ).program.getCompilerOptions().configFilePath as string;
 
     const packletAnalyzer: PackletAnalyzer = PackletAnalyzer.analyzeInputFile(
       inputFilePath,
