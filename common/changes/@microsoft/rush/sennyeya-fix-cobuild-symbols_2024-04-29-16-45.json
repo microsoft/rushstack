@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Timeline view will now only show terminal build statuses as cobuilt, all other statuses will reflect their original icons.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
