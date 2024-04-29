@@ -29,6 +29,10 @@ export interface IRunWithRetriesOptions<TResult> {
   retryDelayMs?: number;
 }
 
+export interface WeightedOperation {
+  weight: number;
+}
+
 /**
  * Utilities for parallel asynchronous operations, for use with the system `Promise` APIs.
  *
@@ -71,6 +75,55 @@ export class Async {
     );
 
     return result;
+  }
+
+  public static async forEachWeightedAsync<TEntry extends WeightedOperation>(
+    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
+    callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
+    options?: IAsyncParallelismOptions | undefined
+  ): Promise<void> {
+    const concurrency: number =
+      options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
+
+    const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
+      (iterable as Iterable<TEntry>)[Symbol.iterator] ||
+      (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
+    ).call(iterable);
+
+    let arrayIndex: number = 0;
+    let usedCapacity: number = 0;
+
+    const pending: Set<Promise<void>> = new Set();
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
+      if (currentIteratorResult.done) {
+        break;
+      }
+
+      const { value } = currentIteratorResult;
+      const weight: number = value.weight ?? 1;
+      if (weight < 0) {
+        throw new Error(`Invalid weight ${weight}. Weights must be greater than or equal to 0.`);
+      }
+
+      usedCapacity += weight;
+      const promise: Promise<void> = Promise.resolve(callback(value, arrayIndex++)).then(() => {
+        usedCapacity -= weight;
+        pending.delete(promise);
+      });
+      pending.add(promise);
+
+      // eslint-disable-next-line no-unmodified-loop-condition
+      while (usedCapacity >= concurrency && pending.size > 0) {
+        await Promise.race(Array.from(pending));
+      }
+    }
+
+    if (pending.size > 0) {
+      await Promise.all(Array.from(pending));
+    }
   }
 
   /**
