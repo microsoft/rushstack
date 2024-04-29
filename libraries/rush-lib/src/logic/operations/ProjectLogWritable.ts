@@ -8,6 +8,7 @@ import type { CollatedTerminal } from '@rushstack/stream-collator';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { RushConstants } from '../RushConstants';
+import { LogChunksWritable } from './LogChunksWritable';
 
 export class ProjectLogWritable extends TerminalWritable {
   private readonly _terminal: CollatedTerminal;
@@ -68,9 +69,11 @@ export class ProjectLogWritable extends TerminalWritable {
     isLegacyLog?: boolean;
   }): {
     logPath: string;
+    logChunksPath: string;
     errorLogPath: string;
     relativeLogPath: string;
     relativeErrorLogPath: string;
+    relativeLogChunksPath: string;
   } {
     const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
     const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
@@ -93,9 +96,16 @@ export class ProjectLogWritable extends TerminalWritable {
     const logPath: string = `${projectFolder}/${relativeLogPath}`;
     const errorLogPath: string = `${projectFolder}/${relativeErrorLogPath}`;
 
+    const { logChunksPath, relativeLogChunksPath } = LogChunksWritable.getLogFilePaths({
+      project,
+      logFilenameIdentifier
+    });
+
     return {
       logPath,
       errorLogPath,
+      logChunksPath,
+      relativeLogChunksPath,
       relativeLogPath,
       relativeErrorLogPath
     };

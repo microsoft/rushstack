@@ -24,6 +24,7 @@ import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { ProjectLogWritable } from './ProjectLogWritable';
+import { LogChunksWritable } from './LogChunksWritable';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -199,6 +200,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
             `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`
           )
         : undefined;
+    const logChunksWritable: LogChunksWritable | undefined =
+      associatedPhase && associatedProject
+        ? new LogChunksWritable(associatedProject, `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`)
+        : undefined;
+
+    const fileWritables: TerminalWritable[] = [projectLogWritable, logChunksWritable].filter(
+      (writable): writable is ProjectLogWritable | LogChunksWritable => writable !== undefined
+    );
 
     try {
       //#region OPERATION LOGGING
@@ -209,18 +218,22 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
       //                                                        |
       //                                                        +--> stdioSummarizer
-      const destination: TerminalWritable = projectLogWritable
-        ? new SplitterTransform({
-            destinations: [
-              new TextRewriterTransform({
-                destination: projectLogWritable,
-                removeColors: true,
-                normalizeNewlines: NewlineKind.OsDefault
-              }),
-              stdioSummarizer
-            ]
-          })
-        : stdioSummarizer;
+      const destination: TerminalWritable =
+        fileWritables.length > 0
+          ? new SplitterTransform({
+              destinations: [
+                ...fileWritables.map(
+                  (writeable) =>
+                    new TextRewriterTransform({
+                      destination: writeable,
+                      removeColors: true,
+                      normalizeNewlines: NewlineKind.OsDefault
+                    })
+                ),
+                stdioSummarizer
+              ]
+            })
+          : stdioSummarizer;
 
       const stderrLineTransform: StderrLineTransform = new StderrLineTransform({
         destination,

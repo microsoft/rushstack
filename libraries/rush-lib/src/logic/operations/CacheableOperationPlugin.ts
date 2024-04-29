@@ -322,7 +322,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           //     has changed happens inside the hashing logic.
           //
 
-          const { logPath, errorLogPath } = ProjectLogWritable.getLogFilePaths({
+          const { logPath, errorLogPath, logChunksPath } = ProjectLogWritable.getLogFilePaths({
             project,
             logFilenameIdentifier: phase.logFilenameIdentifier
           });
@@ -341,12 +341,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             if (restoreFromCacheSuccess) {
               buildCacheContext.cacheRestored = true;
               await runnerContext.runWithTerminalAsync(
-                async (taskTerminal) => {
+                async (taskTerminal, terminalProvider) => {
                   // Restore the original state of the operation without cache
                   await operationMetadataManager?.tryRestoreAsync({
-                    terminal: taskTerminal,
+                    terminalProvider,
+                    terminal: buildCacheTerminal,
                     logPath,
-                    errorLogPath
+                    errorLogPath,
+                    logChunksPath
                   });
                 },
                 { createLogFile: false }
@@ -453,7 +455,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             // Save the metadata to disk
             const { logFilenameIdentifier } = phase;
             const { duration: durationInSeconds } = stopwatch;
-            const { logPath, errorLogPath } = ProjectLogWritable.getLogFilePaths({
+            const { logPath, errorLogPath, logChunksPath } = ProjectLogWritable.getLogFilePaths({
               project,
               logFilenameIdentifier
             });
@@ -463,7 +465,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               cobuildRunnerId: cobuildLock?.cobuildConfiguration.cobuildRunnerId,
               logPath,
               errorLogPath,
-              status: record.status
+              logChunksPath
             });
           }
 

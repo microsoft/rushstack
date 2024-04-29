@@ -2,8 +2,20 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
-import { Async, FileSystem, type IFileSystemCopyFileOptions } from '@rushstack/node-core-library';
-import type { ITerminal } from '@rushstack/terminal';
+import {
+  Async,
+  FileSystem,
+  JsonFile,
+  JsonSchema,
+  type IFileSystemCopyFileOptions
+} from '@rushstack/node-core-library';
+import {
+  ITerminalChunk,
+  TerminalChunkKind,
+  TerminalProviderSeverity,
+  type ITerminal,
+  type ITerminalProvider
+} from '@rushstack/terminal';
 
 import { OperationStateFile } from './OperationStateFile';
 import { RushConstants } from '../RushConstants';
@@ -11,7 +23,7 @@ import { RushConstants } from '../RushConstants';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
-import { OperationStatus } from './OperationStatus';
+import schema from './schemas/log-chunk.schema.json';
 
 /**
  * @internal
@@ -28,15 +40,14 @@ export interface IOperationMetaData {
   durationInSeconds: number;
   logPath: string;
   errorLogPath: string;
+  logChunksPath: string;
   cobuildContextId: string | undefined;
   cobuildRunnerId: string | undefined;
-  status: OperationStatus;
 }
 
-const RESTORE_FROM_ERROR_STATUSES: Set<OperationStatus> = new Set([
-  OperationStatus.SuccessWithWarning,
-  OperationStatus.Failure
-]);
+export interface ILogChunkStorage {
+  chunks: ITerminalChunk[];
+}
 
 /**
  * A helper class for managing the meta files of a operation.
@@ -44,11 +55,15 @@ const RESTORE_FROM_ERROR_STATUSES: Set<OperationStatus> = new Set([
  * @internal
  */
 export class OperationMetadataManager {
+  private static _logChunkJsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schema);
+
   public readonly stateFile: OperationStateFile;
   private _metadataFolder: string;
   private _logPath: string;
   private _errorLogPath: string;
+  private _logChunksPath: string;
   private _relativeLogPath: string;
+  private _relativeLogChunksPath: string;
   private _relativeErrorLogPath: string;
 
   public constructor(options: IOperationMetadataManagerOptions) {
@@ -65,8 +80,10 @@ export class OperationMetadataManager {
 
     this._relativeLogPath = `${this._metadataFolder}/all.log`;
     this._relativeErrorLogPath = `${this._metadataFolder}/error.log`;
+    this._relativeLogChunksPath = `${this._metadataFolder}/log-chunks.json`;
     this._logPath = `${projectFolder}/${this._relativeLogPath}`;
     this._errorLogPath = `${projectFolder}/${this._relativeErrorLogPath}`;
+    this._logChunksPath = `${projectFolder}/${this._relativeLogChunksPath}`;
   }
 
   /**
@@ -86,13 +103,12 @@ export class OperationMetadataManager {
     cobuildRunnerId,
     logPath,
     errorLogPath,
-    status
+    logChunksPath
   }: IOperationMetaData): Promise<void> {
     const state: IOperationStateJson = {
       nonCachedDurationMs: durationInSeconds * 1000,
       cobuildContextId,
-      cobuildRunnerId,
-      status
+      cobuildRunnerId
     };
     await this.stateFile.writeAsync(state);
 
@@ -104,6 +120,10 @@ export class OperationMetadataManager {
       {
         sourcePath: errorLogPath,
         destinationPath: this._errorLogPath
+      },
+      {
+        sourcePath: logChunksPath,
+        destinationPath: this._logChunksPath
       }
     ];
 
@@ -121,33 +141,46 @@ export class OperationMetadataManager {
 
   public async tryRestoreAsync({
     terminal,
-    logPath,
-    errorLogPath
+    terminalProvider,
+    errorLogPath,
+    logChunksPath
   }: {
+    terminalProvider: ITerminalProvider;
     terminal: ITerminal;
     logPath: string;
     errorLogPath: string;
+    logChunksPath: string;
   }): Promise<void> {
     await this.stateFile.tryRestoreAsync();
 
-    const operationSucceeded: boolean = !(
-      this.stateFile.state?.status && RESTORE_FROM_ERROR_STATUSES.has(this.stateFile.state?.status)
-    );
-
     let logReadStream: fs.ReadStream | undefined;
     try {
-      logReadStream = fs.createReadStream(operationSucceeded ? this._logPath : this._errorLogPath, {
-        encoding: 'utf-8'
-      });
-      for await (const data of logReadStream) {
-        terminal.write(data);
+      if (await FileSystem.existsAsync(logChunksPath)) {
+        const logChunks: ILogChunkStorage = (await JsonFile.loadAndValidateAsync(
+          logChunksPath,
+          OperationMetadataManager._logChunkJsonSchema
+        )) as ILogChunkStorage;
+        for (const chunk of logChunks.chunks) {
+          const { text, kind } = chunk;
+          if (kind === TerminalChunkKind.Stderr) {
+            terminalProvider.write(text, TerminalProviderSeverity.error);
+          } else {
+            terminalProvider.write(text, TerminalProviderSeverity.log);
+          }
+        }
+      } else {
+        logReadStream = fs.createReadStream(this._logPath, {
+          encoding: 'utf-8'
+        });
+        for await (const data of logReadStream) {
+          terminal.write(data);
+        }
       }
     } catch (e) {
       if (!FileSystem.isNotExistError(e)) {
         throw e;
       }
     } finally {
-      // Clean up the read steam
       logReadStream?.close();
     }
 
