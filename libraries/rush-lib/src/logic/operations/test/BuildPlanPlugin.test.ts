@@ -14,6 +14,7 @@ import { MockWritable, Terminal } from '@rushstack/terminal';
 import { BuildPlanPlugin } from '../BuildPlanPlugin';
 import {
   type ICreateOperationsContext,
+  IExecuteOperationsContext,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
 import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
@@ -108,7 +109,7 @@ describe('BuildPlanPlugin', () => {
       const hooks: PhasedCommandHooks = new PhasedCommandHooks();
 
       new BuildPlanPlugin(mockTerminal).apply(hooks);
-      const context: Pick<ICreateOperationsContext, 'projectChangeAnalyzer' | 'projectConfigurations'> = {
+      const context: Pick<IExecuteOperationsContext, 'projectChangeAnalyzer' | 'projectConfigurations'> = {
         projectChangeAnalyzer: {
           [ProjectChangeAnalyzer.prototype._tryGetProjectDependenciesAsync.name]: async () => {
             return new Map();
@@ -134,7 +135,7 @@ describe('BuildPlanPlugin', () => {
         );
       });
 
-      await hooks.beforeExecuteOperations.promise(operationMap, context as ICreateOperationsContext);
+      await hooks.beforeExecuteOperations.promise(operationMap, context as IExecuteOperationsContext);
 
       const allOutput: string = mockWritable.getAllOutput();
       expect(allOutput).toMatchSnapshot();

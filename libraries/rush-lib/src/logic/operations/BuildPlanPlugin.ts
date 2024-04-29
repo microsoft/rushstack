@@ -4,6 +4,7 @@
 import type { ITerminal } from '@rushstack/terminal';
 import type {
   ICreateOperationsContext,
+  IExecuteOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
@@ -43,7 +44,7 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
 
     async function createBuildPlan(
       recordByOperation: Map<Operation, IOperationExecutionResult>,
-      context: ICreateOperationsContext
+      context: IExecuteOperationsContext
     ): Promise<void> {
       const { projectConfigurations, projectChangeAnalyzer } = context;
       const disjointSet: DisjointSet<Operation> = new DisjointSet<Operation>();
