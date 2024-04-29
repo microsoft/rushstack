@@ -127,15 +127,13 @@ export class OperationMetadataManager {
   }): Promise<void> {
     await this.stateFile.tryRestoreAsync();
 
-    let path: string = this._logPath;
-    if (this.stateFile.state?.status) {
-      path = RESTORE_FROM_ERROR_STATUSES.has(this.stateFile.state?.status)
-        ? this._errorLogPath
-        : this._logPath;
-    }
+    const operationSucceeded = !(
+      this.stateFile.state?.status && RESTORE_FROM_ERROR_STATUSES.has(this.stateFile.state?.status)
+    );
+
     let logReadStream: fs.ReadStream | undefined;
     try {
-      logReadStream = fs.createReadStream(path, {
+      logReadStream = fs.createReadStream(operationSucceeded ? this._logPath : this._errorLogPath, {
         encoding: 'utf-8'
       });
       for await (const data of logReadStream) {
