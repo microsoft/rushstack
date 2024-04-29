@@ -15,7 +15,7 @@ import { MockWritable, Terminal } from '@rushstack/terminal';
 import { BuildPlanPlugin } from '../BuildPlanPlugin';
 import {
   type ICreateOperationsContext,
-  IExecuteOperationsContext,
+  type IExecuteOperationsContext,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
 import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';

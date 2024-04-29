@@ -3,7 +3,6 @@
 
 import type { ITerminal } from '@rushstack/terminal';
 import type {
-  ICreateOperationsContext,
   IExecuteOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
