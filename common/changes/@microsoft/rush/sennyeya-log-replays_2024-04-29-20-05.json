@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Warnings and errors are now shown in the build summary for all cobuild agents",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
