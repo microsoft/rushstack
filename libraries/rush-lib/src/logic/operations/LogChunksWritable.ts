@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, FileWriter, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { TerminalWritable, type ITerminalChunk } from '@rushstack/terminal';
-import type { CollatedTerminal } from '@rushstack/stream-collator';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
@@ -13,7 +12,7 @@ export class LogChunksWritable extends TerminalWritable {
   public readonly logChunksPath: string;
   public readonly relativeLogChunksPath: string;
 
-  private readonly chunks: ITerminalChunk[] = [];
+  private readonly _chunks: ITerminalChunk[] = [];
 
   public constructor(project: RushConfigurationProject, logFilenameIdentifier: string) {
     super();
@@ -63,8 +62,8 @@ export class LogChunksWritable extends TerminalWritable {
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
-    this.chunks.push(chunk);
-    JsonFile.save({ chunks: this.chunks }, this.logChunksPath, {
+    this._chunks.push(chunk);
+    JsonFile.save({ chunks: this._chunks }, this.logChunksPath, {
       ensureFolderExists: true,
       updateExistingFile: true
     });

@@ -10,7 +10,7 @@ import {
   type IFileSystemCopyFileOptions
 } from '@rushstack/node-core-library';
 import {
-  ITerminalChunk,
+  type ITerminalChunk,
   TerminalChunkKind,
   TerminalProviderSeverity,
   type ITerminal,

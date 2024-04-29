@@ -918,9 +918,9 @@ export class _OperationMetadataManager {
     // (undocumented)
     readonly stateFile: _OperationStateFile;
     // (undocumented)
-    tryRestoreAsync({ terminalProvider, errorLogPath, logChunksPath }: {
+    tryRestoreAsync({ terminal, terminalProvider, errorLogPath, logChunksPath }: {
         terminalProvider: ITerminalProvider;
-        buildCacheTerminal: ITerminal;
+        terminal: ITerminal;
         logPath: string;
         errorLogPath: string;
         logChunksPath: string;
