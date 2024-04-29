@@ -332,6 +332,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             projectBuildCacheForRestore: ProjectBuildCache | undefined,
             specifiedCacheId?: string
           ): Promise<boolean> => {
+            console.log(record.operation.name, record.status, buildCacheContext.isCacheReadAllowed);
             buildCacheContext.isCacheReadAttempted = true;
             const restoreFromCacheSuccess: boolean | undefined =
               await projectBuildCacheForRestore?.tryRestoreFromCacheAsync(
@@ -340,12 +341,17 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               );
             if (restoreFromCacheSuccess) {
               buildCacheContext.cacheRestored = true;
-              // Restore the original state of the operation without cache
-              await operationMetadataManager?.tryRestoreAsync({
-                terminal: buildCacheTerminal,
-                logPath,
-                errorLogPath
-              });
+              await runnerContext.runWithTerminalAsync(
+                async (terminal) => {
+                  // Restore the original state of the operation without cache
+                  await operationMetadataManager?.tryRestoreAsync({
+                    terminal,
+                    logPath,
+                    errorLogPath
+                  });
+                },
+                { createLogFile: false }
+              );
             }
             return !!restoreFromCacheSuccess;
           };
@@ -457,7 +463,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               cobuildContextId: cobuildLock?.cobuildConfiguration.cobuildContextId,
               cobuildRunnerId: cobuildLock?.cobuildConfiguration.cobuildRunnerId,
               logPath,
-              errorLogPath
+              errorLogPath,
+              status: record.status
             });
           }
 

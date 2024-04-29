@@ -568,6 +568,8 @@ export interface _IOperationMetadata {
     errorLogPath: string;
     // (undocumented)
     logPath: string;
+    // (undocumented)
+    status: OperationStatus;
 }
 
 // @internal (undocumented)
@@ -639,6 +641,8 @@ export interface _IOperationStateJson {
     cobuildRunnerId: string | undefined;
     // (undocumented)
     nonCachedDurationMs: number;
+    // (undocumented)
+    status: OperationStatus;
 }
 
 // @public
@@ -912,7 +916,7 @@ export class _OperationMetadataManager {
     constructor(options: _IOperationMetadataManagerOptions);
     get relativeFilepaths(): string[];
     // (undocumented)
-    saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath }: _IOperationMetadata): Promise<void>;
+    saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath, status }: _IOperationMetadata): Promise<void>;
     // (undocumented)
     readonly stateFile: _OperationStateFile;
     // (undocumented)

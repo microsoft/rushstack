@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, InternalError, JsonFile } from '@rushstack/node-core-library';
+import { OperationStatus } from './OperationStatus';
 
 /**
  * @internal
@@ -18,6 +19,7 @@ export interface IOperationStateJson {
   nonCachedDurationMs: number;
   cobuildContextId: string | undefined;
   cobuildRunnerId: string | undefined;
+  status: OperationStatus;
 }
 
 /**

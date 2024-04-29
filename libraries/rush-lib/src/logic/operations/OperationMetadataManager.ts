@@ -11,6 +11,7 @@ import { RushConstants } from '../RushConstants';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
+import { OperationStatus } from './OperationStatus';
 
 /**
  * @internal
@@ -29,7 +30,10 @@ export interface IOperationMetaData {
   errorLogPath: string;
   cobuildContextId: string | undefined;
   cobuildRunnerId: string | undefined;
+  status: OperationStatus;
 }
+
+const RESTORE_FROM_ERROR_STATUSES = new Set([OperationStatus.SuccessWithWarning, OperationStatus.Failure]);
 
 /**
  * A helper class for managing the meta files of a operation.
@@ -78,12 +82,14 @@ export class OperationMetadataManager {
     cobuildContextId,
     cobuildRunnerId,
     logPath,
-    errorLogPath
+    errorLogPath,
+    status
   }: IOperationMetaData): Promise<void> {
     const state: IOperationStateJson = {
       nonCachedDurationMs: durationInSeconds * 1000,
       cobuildContextId,
-      cobuildRunnerId
+      cobuildRunnerId,
+      status
     };
     await this.stateFile.writeAsync(state);
 
@@ -121,11 +127,15 @@ export class OperationMetadataManager {
   }): Promise<void> {
     await this.stateFile.tryRestoreAsync();
 
-    // Append cached log into current log file
-    terminal.writeLine(`Restoring cached log file at ${this._logPath}`);
+    let path: string = this._logPath;
+    if (this.stateFile.state?.status) {
+      path = RESTORE_FROM_ERROR_STATUSES.has(this.stateFile.state?.status)
+        ? this._errorLogPath
+        : this._logPath;
+    }
     let logReadStream: fs.ReadStream | undefined;
     try {
-      logReadStream = fs.createReadStream(this._logPath, {
+      logReadStream = fs.createReadStream(path, {
         encoding: 'utf-8'
       });
       for await (const data of logReadStream) {
