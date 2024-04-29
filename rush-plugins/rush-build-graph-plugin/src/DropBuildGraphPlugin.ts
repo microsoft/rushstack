@@ -18,8 +18,17 @@ const PLUGIN_NAME: 'RushDropBuildGraphPlugin' = 'RushDropBuildGraphPlugin';
  * @beta
  */
 export interface IRushGraph {
+  /**
+   * The nodes in the graph representing the commands to run
+   */
   nodes: IGraphNode[];
+  /**
+   * Configuration settings universal to all packages
+   */
   repoSettings: {
+    /**
+     * The common temp folder for the repo
+     */
     commonTempFolder: string;
   };
 }
@@ -29,11 +38,29 @@ export interface IRushGraph {
  * @beta
  */
 export interface IGraphNode {
+  /**
+   * The unique identifier for this node
+   */
   id: string;
-  command: string;
-  workingDirectory: string;
+  /**
+   * The package name for this node
+   */
   package: string;
+  /**
+   * The task to be run for the package
+   */
   task: string;
+  /**
+   * The command to run for the given package and task, usually defined in the package.json
+   */
+  command: string;
+  /**
+   * The working directory where the command should be run
+   */
+  workingDirectory: string;
+  /**
+   * The dependencies for this node, as an array of other node ids
+   */
   dependencies: string[];
 }
 

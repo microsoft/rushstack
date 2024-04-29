@@ -17,9 +17,7 @@ export default DropBuildGraphPlugin;
 
 // @beta
 export interface IBuildXLRushGraph {
-    // (undocumented)
     nodes: IGraphNode[];
-    // (undocumented)
     repoSettings: {
         commonTempFolder: string;
     };
@@ -27,17 +25,11 @@ export interface IBuildXLRushGraph {
 
 // @beta
 export interface IGraphNode {
-    // (undocumented)
     command: string;
-    // (undocumented)
     dependencies: string[];
-    // (undocumented)
     id: string;
-    // (undocumented)
     package: string;
-    // (undocumented)
     task: string;
-    // (undocumented)
     workingDirectory: string;
 }
 
