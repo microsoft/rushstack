@@ -332,7 +332,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             projectBuildCacheForRestore: ProjectBuildCache | undefined,
             specifiedCacheId?: string
           ): Promise<boolean> => {
-            console.log(record.operation.name, record.status, buildCacheContext.isCacheReadAllowed);
             buildCacheContext.isCacheReadAttempted = true;
             const restoreFromCacheSuccess: boolean | undefined =
               await projectBuildCacheForRestore?.tryRestoreFromCacheAsync(
