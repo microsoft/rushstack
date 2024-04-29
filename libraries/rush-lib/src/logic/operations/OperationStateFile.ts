@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, InternalError, JsonFile } from '@rushstack/node-core-library';
-import { OperationStatus } from './OperationStatus';
+import type { OperationStatus } from './OperationStatus';
 
 /**
  * @internal

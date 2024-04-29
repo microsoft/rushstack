@@ -33,7 +33,10 @@ export interface IOperationMetaData {
   status: OperationStatus;
 }
 
-const RESTORE_FROM_ERROR_STATUSES = new Set([OperationStatus.SuccessWithWarning, OperationStatus.Failure]);
+const RESTORE_FROM_ERROR_STATUSES: Set<OperationStatus> = new Set([
+  OperationStatus.SuccessWithWarning,
+  OperationStatus.Failure
+]);
 
 /**
  * A helper class for managing the meta files of a operation.
@@ -127,7 +130,7 @@ export class OperationMetadataManager {
   }): Promise<void> {
     await this.stateFile.tryRestoreAsync();
 
-    const operationSucceeded = !(
+    const operationSucceeded: boolean = !(
       this.stateFile.state?.status && RESTORE_FROM_ERROR_STATUSES.has(this.stateFile.state?.status)
     );
 

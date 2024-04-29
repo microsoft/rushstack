@@ -341,10 +341,10 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             if (restoreFromCacheSuccess) {
               buildCacheContext.cacheRestored = true;
               await runnerContext.runWithTerminalAsync(
-                async (terminal) => {
+                async (taskTerminal) => {
                   // Restore the original state of the operation without cache
                   await operationMetadataManager?.tryRestoreAsync({
-                    terminal,
+                    terminal: taskTerminal,
                     logPath,
                     errorLogPath
                   });
