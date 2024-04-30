@@ -602,9 +602,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         return;
       }
 
-      const projectOutputFolderNames: ReadonlyArray<string> = [
-        ...(operationSettings.outputFolderNames || [])
-      ];
+      const projectOutputFolderNames: ReadonlyArray<string> = operationSettings.outputFolderNames || [];
       const additionalProjectOutputFilePaths: ReadonlyArray<string> =
         operationMetadataManager?.relativeFilepaths || [];
       const additionalContext: Record<string, string> = {};
