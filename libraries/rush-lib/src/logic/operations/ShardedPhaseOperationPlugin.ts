@@ -86,7 +86,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
       if (collatorRawScript) {
         const collatorRunner: ShellOperationRunner = new ShellOperationRunner({
-          commandToRun: formatCommand(collatorRawScript, getCustomParameterValuesForPhase(phase)),
+          commandToRun: collatorRawScript,
           displayName: collatorDisplayName,
           phase,
           rushConfiguration,
