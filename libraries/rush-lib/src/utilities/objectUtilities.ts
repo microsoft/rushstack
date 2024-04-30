@@ -124,6 +124,10 @@ export function isMatch<TObject>(obj: TObject, source: TObject): boolean {
 }
 
 function isMatchInner<TObject>(obj: TObject, source: TObject): boolean {
+  if (obj === null || obj === undefined) {
+    return false;
+  }
+
   let sourceKeys: (string | number)[] | undefined;
   if (typeof source === 'object' && source !== null && !Array.isArray(source)) {
     sourceKeys = Object.keys(source);
@@ -135,10 +139,6 @@ function isMatchInner<TObject>(obj: TObject, source: TObject): boolean {
   }
 
   if (!sourceKeys) {
-    return false;
-  }
-
-  if (obj === null || obj === undefined) {
     return false;
   }
 

@@ -4,7 +4,7 @@
 import { JsonFile, type JsonObject, Path, type IPackageJson, FileSystem } from '@rushstack/node-core-library';
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
-import { isMatch, merge, objectsAreDeepEqual } from '../utilities/objectUtilities';
+import * as objectUtilities from '../utilities/objectUtilities';
 import type { Subspace } from './Subspace';
 import { Selection } from '../logic/Selection';
 import path from 'path';
@@ -127,7 +127,7 @@ export class LastInstallFlag {
       }
     }
 
-    if (!objectsAreDeepEqual(oldState, newState)) {
+    if (!objectUtilities.objectsAreDeepEqual(oldState, newState)) {
       if (checkValidAndReportStoreIssues) {
         const pkgManager: PackageManagerName = newState.packageManager as PackageManagerName;
         if (pkgManager === 'pnpm') {
@@ -187,10 +187,10 @@ export class LastInstallFlag {
    * Merge new data into current state by "merge"
    */
   public mergeFromObject(data: JsonObject): void {
-    if (isMatch(this._state, data)) {
+    if (objectUtilities.isMatch(this._state, data)) {
       return;
     }
-    merge(this._state, data);
+    objectUtilities.merge(this._state, data);
   }
 
   /**
