@@ -148,10 +148,13 @@ export abstract class BaseInstallAction extends BaseRushAction {
       if (installManagerOptions.selectedProjects.length) {
         // Go through each project, add it to it's subspace's pnpm filter arguments
         for (const project of installManagerOptions.selectedProjects) {
-          const subspaceSelectedProjects: RushConfigurationProject[] =
-            selectedProjectsForSubspace.get(project.subspace) || [];
+          let subspaceSelectedProjects: RushConfigurationProject[] | undefined =
+            selectedProjectsForSubspace.get(project.subspace);
+          if (!subspaceSelectedProjects) {
+            subspaceSelectedProjects = [];
+            selectedProjectsForSubspace.set(project.subspace, subspaceSelectedProjects);
+          }
           subspaceSelectedProjects.push(project);
-          selectedProjectsForSubspace.set(project.subspace, subspaceSelectedProjects);
         }
         selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(
           new Set(installManagerOptions.selectedProjects)
