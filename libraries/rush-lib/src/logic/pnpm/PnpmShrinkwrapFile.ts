@@ -373,8 +373,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public validateShrinkwrapAfterUpdate(rushConfiguration: RushConfiguration, terminal: ITerminal): void {
-    const { pnpmLockfilePolicies } = rushConfiguration.pnpmOptions;
+  public validateShrinkwrapAfterUpdate(
+    rushConfiguration: RushConfiguration,
+    subspace: Subspace,
+    terminal: ITerminal
+  ): void {
+    const pnpmOptions: PnpmOptionsConfiguration = subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
+    const { pnpmLockfilePolicies } = pnpmOptions;
 
     let invalidPoliciesCount: number = 0;
 
