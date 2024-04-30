@@ -44,6 +44,10 @@ export interface ILastInstallFlagJson {
    */
   workspaces?: boolean;
   /**
+   * True when user explicitly specify "--ignore-scripts" CLI parameter or deferredInstallationScripts
+   */
+  ignoreScripts?: boolean;
+  /**
    * When specified, it is a list of selected projects during partial install
    * It is undefined when full install
    */
