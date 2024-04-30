@@ -619,6 +619,7 @@ export interface IOperationSettings {
     disableBuildCacheForOperation?: boolean;
     operationName: string;
     outputFolderNames?: string[];
+    weight?: number;
 }
 
 // @internal (undocumented)

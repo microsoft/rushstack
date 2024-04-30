@@ -314,6 +314,86 @@ describe(Async.name, () => {
     });
   });
 
+  describe(Async.forEachWeightedAsync.name, () => {
+    interface INumberWithWeight {
+      n: number;
+      weight: number;
+    }
+
+    it('handles an empty array correctly', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: INumberWithWeight[] = [];
+
+      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(0);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachWeightedAsync(array, fn, { concurrency: 3 });
+      expect(fn).toHaveBeenCalledTimes(0);
+      expect(maxRunning).toEqual(0);
+    });
+
+    it('if concurrency is set, ensures no more than N operations occur in parallel', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: INumberWithWeight[] = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ weight: 1, n }));
+
+      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(0);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachWeightedAsync(array, fn, { concurrency: 3 });
+      expect(fn).toHaveBeenCalledTimes(8);
+      expect(maxRunning).toEqual(3);
+    });
+
+    it.each([
+      {
+        concurrency: 2,
+        weight: 0.5,
+        expectedConcurrency: 4
+      },
+      {
+        concurrency: 1,
+        weight: 0.4,
+        expectedConcurrency: 3
+      },
+      {
+        concurrency: 1,
+        weight: 0.17,
+        expectedConcurrency: 6
+      }
+    ])(
+      'if concurrency is set to $concurrency with operation weight $weight, ensures no more than $expectedConcurrency operations occur in parallel',
+      async ({ concurrency, weight, expectedConcurrency }) => {
+        let running: number = 0;
+        let maxRunning: number = 0;
+
+        const array: INumberWithWeight[] = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ n, weight }));
+
+        const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+          running++;
+          await Async.sleep(0);
+          maxRunning = Math.max(maxRunning, running);
+          running--;
+        });
+
+        await Async.forEachWeightedAsync(array, fn, { concurrency });
+        expect(fn).toHaveBeenCalledTimes(8);
+        expect(maxRunning).toEqual(expectedConcurrency);
+      }
+    );
+  });
+
   describe(Async.runWithRetriesAsync.name, () => {
     it('Correctly handles a sync function that succeeds the first time', async () => {
       const expectedResult: string = 'RESULT';
