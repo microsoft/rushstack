@@ -60,7 +60,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
     const { associatedPhase: phase, associatedProject: project } = operation;
     const operationSettings: IOperationSettings | undefined = getOperationSettings(phase, project);
     if (phase && project && operationSettings?.sharding && !operation.runner) {
-      const { count: shards, collatorConfiguration } = operationSettings.sharding;
+      const { count: shards, shardScriptConfiguration } = operationSettings.sharding;
 
       existingOperations.delete(operation);
 
@@ -86,17 +86,11 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       );
 
       const collatorDisplayName: string = `${getDisplayName(phase, project)} - collate`;
-      const collatorRawScript: string | undefined = getScriptToRun(
-        project,
-        `${phase.name}:collate`,
-        undefined
-      );
+      const collatorRawScript: string | undefined = getScriptToRun(project, phase.name, undefined);
 
-      const collatorMisingScriptBehavior = collatorConfiguration?.missingScriptBehavior ?? 'error';
-
-      if (collatorRawScript === undefined && collatorMisingScriptBehavior === 'error') {
+      if (collatorRawScript === undefined && phase.missingScriptBehavior === 'error') {
         throw new Error(
-          `The project '${project.packageName}' does not define a '${phase.name}:collate' command in the 'scripts' section of its package.json`
+          `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
         );
       }
 
@@ -119,7 +113,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         collatorNode.runner = new NullOperationRunner({
           name: collatorDisplayName,
           result: OperationStatus.NoOp,
-          silent: collatorMisingScriptBehavior === 'silent'
+          silent: phase.missingScriptBehavior === 'silent'
         });
       }
       for (const dependent of operation.consumers) {
@@ -128,10 +122,17 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       }
 
       const customParameters: readonly string[] = getCustomParameterValuesForPhase(phase);
-      const baseCommand: string | undefined = getScriptToRun(project, phase.name, phase.shellCommand);
-      if (baseCommand === undefined && phase.missingScriptBehavior === 'error') {
+      const baseCommand: string | undefined = getScriptToRun(
+        project,
+        `${phase.name}:shard`,
+        phase.shellCommand
+      );
+
+      const collatorMissingScriptBehavior: string =
+        shardScriptConfiguration?.missingScriptBehavior ?? 'error';
+      if (baseCommand === undefined && collatorMissingScriptBehavior === 'error') {
         throw new Error(
-          `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
+          `The project '${project.packageName}' does not define a '${phase.name}:shard' command in the 'scripts' section of its package.json`
         );
       }
 

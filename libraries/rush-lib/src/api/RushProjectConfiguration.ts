@@ -75,7 +75,7 @@ export interface IRushPhaseSharding {
   /**
    * Configuration for the collator operation that combines the shards.
    */
-  collatorConfiguration?: {
+  shardScriptConfiguration?: {
     /**
      * What should happen if the script is not defined in a project's package.json scripts field. Default is "error".
      */

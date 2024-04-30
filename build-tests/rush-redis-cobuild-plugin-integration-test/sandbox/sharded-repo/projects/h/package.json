@@ -4,7 +4,8 @@
   "scripts": {
     "cobuild": "",
     "build": "",
-    "_phase:build": ""
+    "_phase:build": "",
+    "_phase:build:shard": ""
   },
   "dependencies": {
     "a": "workspace:*"

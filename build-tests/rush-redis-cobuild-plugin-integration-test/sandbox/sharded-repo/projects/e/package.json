@@ -4,7 +4,8 @@
   "scripts": {
     "cobuild": "node ../build.js",
     "build": "node ../build.js",
-    "_phase:build": "node ../build.js"
+    "_phase:build:shard": "node ../build.js e",
+    "_phase:build": "node ../collate.js"
   },
   "dependencies": {
     "b": "workspace:*",

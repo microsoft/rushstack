@@ -9,7 +9,7 @@
         "outputFolderArgument": {
           "argumentFlag": "--output-directory"
         },
-        "collatorConfiguration": {
+        "shardScriptConfiguration": {
           "missingScriptBehavior": "silent"
         }
       }

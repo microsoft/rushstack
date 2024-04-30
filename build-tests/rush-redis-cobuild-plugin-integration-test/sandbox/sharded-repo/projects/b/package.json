@@ -4,7 +4,7 @@
   "scripts": {
     "cobuild": "node ../build.js",
     "build": "node ../build.js",
-    "_phase:build": "node ../build.js b",
-    "_phase:build:collate": "node ../collate.js"
+    "_phase:build": "node ../collate.js",
+    "_phase:build:shard": "node ../build.js b"
   }
 }

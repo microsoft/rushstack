@@ -102,7 +102,7 @@
                   }
                 }
               },
-              "collatorConfiguration": {
+              "shardScriptConfiguration": {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
