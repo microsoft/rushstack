@@ -104,7 +104,6 @@ async function getCommandLineParserInstanceAsync(
 
   // Bulk tasks are hard-coded to expect install to have been completed. So, ensure the last-link.flag
   // file exists and is valid
-  // TODO: Support subspaces
   new FlagFile(
     parser.rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
     RushConstants.lastLinkFlagFilename

@@ -721,6 +721,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       for (const arg of this.options.pnpmFilterArguments) {
+        args.push('--filter');
         args.push(arg);
       }
     }

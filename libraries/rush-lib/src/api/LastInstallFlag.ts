@@ -42,11 +42,7 @@ export interface ILastInstallFlagJson {
   /**
    * True when "useWorkspaces" is true in rush.json
    */
-  workspaces?: true;
-  /**
-   * True when user explicitly specify "--ignore-scripts" CLI parameter or deferredInstallationScripts
-   */
-  ignoreScripts?: true;
+  workspaces?: boolean;
   /**
    * When specified, it is a list of selected projects during partial install
    * It is undefined when full install

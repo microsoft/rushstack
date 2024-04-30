@@ -153,7 +153,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
           // Go through each project, add it to it's subspace's pnpm filter arguments
           for (const project of selectedProjects) {
             const subspaceFilterArguments: string[] = filterArgumentsForSubspace.get(project.subspace) || [];
-            subspaceFilterArguments.push('--filter', project.packageName);
+            subspaceFilterArguments.push(project.packageName);
             filterArgumentsForSubspace.set(project.subspace, subspaceFilterArguments);
           }
           selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(selectedProjects);

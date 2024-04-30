@@ -165,11 +165,8 @@ export abstract class BaseInstallManager {
     );
     if (isFilteredInstall) {
       // Get the projects involved in this filtered install
-      const selectedProjectNames: string[] = this.options.pnpmFilterArguments.filter(
-        (filterArg) => filterArg !== '--filter'
-      );
       commonTempInstallFlag.mergeFromObject({
-        selectedProjectNames: selectedProjectNames
+        selectedProjectNames: this.options.pnpmFilterArguments
       });
     }
     const optionsToIgnore: string[] | undefined = !this.rushConfiguration.experimentsConfiguration
