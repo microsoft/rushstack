@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Make disallowInsecureSha1 policy to be subspace level configuration",
+      "comment": "Make `disallowInsecureSha1` policy a subspace-level configuration.",
       "type": "none"
     }
   ],
