@@ -239,11 +239,9 @@ export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrin
 
   function getChartSymbol(record: ITimelineRecord): string {
     const { isExecuteByOtherCobuildRunner, status } = record;
-    if (isExecuteByOtherCobuildRunner) {
+    if (isExecuteByOtherCobuildRunner && COBUILD_REPORTABLE_STATUSES.has(status)) {
       hasCobuildSymbol = true;
-      if (COBUILD_REPORTABLE_STATUSES.has(status)) {
-        return 'C';
-      }
+      return 'C';
     }
     return TIMELINE_CHART_SYMBOLS[status];
   }
