@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/lockfile-explorer",
-      "comment": "Support lockfile-explore for subspace future",
-      "type": "patch"
+      "comment": "Add `--subspace` command-line parameter to support Rush subspaces",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/lockfile-explorer"
