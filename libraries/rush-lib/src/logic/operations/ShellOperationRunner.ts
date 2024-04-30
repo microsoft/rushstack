@@ -10,7 +10,7 @@ import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { Utilities } from '../../utilities/Utilities';
+import { type IEnvironment, Utilities } from '../../utilities/Utilities';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
@@ -23,6 +23,7 @@ export interface IOperationRunnerOptions {
   displayName: string;
   phase: IPhase;
   operationSettings?: IOperationSettings;
+  environment?: IEnvironment;
 }
 
 /**
@@ -44,6 +45,8 @@ export class ShellOperationRunner implements IOperationRunner {
   private readonly _rushProject: RushConfigurationProject;
   private readonly _rushConfiguration: RushConfiguration;
 
+  private readonly _environment?: IEnvironment;
+
   public constructor(options: IOperationRunnerOptions) {
     const { phase, operationSettings } = options;
 
@@ -54,6 +57,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this._rushConfiguration = options.rushConfiguration;
     this._commandToRun = options.commandToRun;
     this.operationSettings = operationSettings;
+    this._environment = options.environment;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
@@ -86,7 +90,8 @@ export class ShellOperationRunner implements IOperationRunner {
             handleOutput: true,
             environmentPathOptions: {
               includeProjectBin: true
-            }
+            },
+            initialEnvironment: this._environment
           }
         );
 

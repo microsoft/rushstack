@@ -43,8 +43,34 @@ export interface IRushProjectJson {
 }
 
 export interface IRushPhaseSharding {
+  /**
+   * The number of shards to create.
+   */
   count: number;
+
+  /**
+   * The format of the argument to pass to the command to indicate the shard index and count.
+   * The default value is `--shard={shardIndex}/{shardCount}`.
+   */
   shardArgumentFormat?: string;
+
+  /**
+   * An optional argument to pass to the command to indicate the output folder for the shard.
+   * The default argument is `--shard-output-folder=.rush/operations/{phaseName}/shards/{shardIndex}`.
+   */
+  outputFolderArgument?: {
+    /**
+     * The format of the parent folder name to output shards to. Child folders will be created for each
+     *  shard index, ie `{parentFolder}/1`, `{parentFolder}/2`. The default value is `.rush/operations/{phaseName}/shards`.
+     */
+    parentFolderNameFormat?: string;
+
+    /**
+     * The name of the argument to pass to the command to indicate the output folder for the shard.
+     * The default value is `--shard-output-folder`. Does not accept templating.
+     */
+    argumentFlag: string;
+  };
 }
 
 /**

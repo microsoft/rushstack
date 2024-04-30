@@ -4,14 +4,21 @@ const { FileSystem } = require('@rushstack/node-core-library');
 
 const args = process.argv.slice(2);
 
-const shardIndex = args.findIndex((e) => e.includes('--shard'));
-const shard = shardIndex >= 0 ? args[shardIndex].replace('--shard=', '') : undefined;
+const getArgument = (argumentName) => {
+  const index = args.findIndex((e) => e.includes(argumentName));
+  return index >= 0 ? args[index].replace(`${argumentName}=`, '') : undefined;
+};
 
-const outputDirectory = args.findIndex((e) => e.includes('--output-directory'));
-const outputDir = outputDirectory >= 0 ? args[outputDirectory].replace('--output-directory=', '') : undefined;
+const shard = getArgument('--shard');
+
+const outputDir = getArgument('--output-directory');
+
+const shardOutputDir = getArgument('--shard-output-directory');
+
+const outputDirectory = shard ? shardOutputDir ?? outputDir : undefined;
 
 setTimeout(() => {
-  const outputFolder = shard ? path.resolve(outputDir) : path.resolve('dist');
+  const outputFolder = shard ? path.resolve(outputDirectory) : path.resolve('dist');
   const outputFile = path.resolve(outputFolder, 'output.txt');
   FileSystem.ensureFolder(outputFolder);
   FileSystem.writeFile(outputFile, `Hello world! ${args.join(' ')}`);

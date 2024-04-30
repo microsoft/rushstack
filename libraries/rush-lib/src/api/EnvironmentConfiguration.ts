@@ -208,7 +208,19 @@ export const EnvironmentVariableNames = {
    * Other lifecycle scripts should not make assumptions about Rush's command line syntax
    * if Rush did not explicitly pass along command-line parameters to their process.
    */
-  RUSH_INVOKED_ARGS: 'RUSH_INVOKED_ARGS'
+  RUSH_INVOKED_ARGS: 'RUSH_INVOKED_ARGS',
+
+  /**
+   * Passed to a shard collating script to indicate the number of shards that were executed. This can be combined
+   *  with `RUSH_SHARD_PARENT_FOLDER` to determine the location of the individual shard output.
+   */
+  RUSH_SHARD_COUNT: 'RUSH_SHARD_COUNT',
+
+  /**
+   * Passed to a shard collating script to indicate the parent folder where shard output is stored.
+   * This can be combined with `RUSH_SHARD_COUNT` to determine the location of the individual shard output.
+   */
+  RUSH_SHARD_PARENT_FOLDER: 'RUSH_SHARD_PARENT_FOLDER'
 } as const;
 
 /**

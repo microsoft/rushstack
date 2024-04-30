@@ -12,14 +12,24 @@ import { Operation } from './Operation';
 import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { ShellOperationRunner } from './ShellOperationRunner';
 import {
+  formatCommand,
   getCustomParameterValuesByPhase,
   getDisplayName,
   getScriptToRun
 } from './ShellOperationRunnerPlugin';
 import { NullOperationRunner } from './NullOperationRunner';
 import { OperationStatus } from './OperationStatus';
+import * as path from 'path';
+import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 
 export const PLUGIN_NAME: 'ShardedPhasedOperationPlugin' = 'ShardedPhasedOperationPlugin';
+
+// eslint-disable-next-line @typescript-eslint/typedef
+const TemplateStrings = {
+  SHARD_INDEX: '{shardIndex}',
+  SHARD_COUNT: '{shardCount}',
+  PHASE_NAME: '{phaseName}'
+} as const;
 
 /**
  * Phased command that shards a phase into multiple operations.
@@ -45,10 +55,12 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
   const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
     getCustomParameterValuesByPhase();
 
-  for (const operation of shardableOperations) {
+  for (const operation of existingOperations) {
     const { associatedPhase: phase, associatedProject: project } = operation;
     const operationSettings: IOperationSettings | undefined = getOperationSettings(phase, project);
-    if (phase && project && operationSettings?.sharding && operationSettings.sharding.count > 1) {
+    if (phase && project && operationSettings?.sharding && !operation.runner) {
+      const shards: number = operationSettings.sharding.count;
+
       existingOperations.delete(operation);
 
       const collatorNode: Operation = new Operation({
@@ -56,17 +68,35 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         project
       });
       existingOperations.add(collatorNode);
-      const collatorDisplayName: string = `${getDisplayName(phase, project)} - collate`;
-      const rawScript: string | undefined = project.packageJson.scripts?.[`${phase.name}:collate`];
 
-      if (rawScript) {
+      const parentFolderFormat: string =
+        operationSettings.sharding.outputFolderArgument?.parentFolderNameFormat ??
+        `.rush/operations/${TemplateStrings.PHASE_NAME}/shards`;
+      const parentFolder: string = parentFolderFormat.replace(
+        TemplateStrings.PHASE_NAME,
+        phase.logFilenameIdentifier
+      );
+
+      const collatorDisplayName: string = `${getDisplayName(phase, project)} - collate`;
+      const collatorRawScript: string | undefined = getScriptToRun(
+        project,
+        `${phase.name}:collate`,
+        undefined
+      );
+
+      if (collatorRawScript) {
         const collatorRunner: ShellOperationRunner = new ShellOperationRunner({
-          commandToRun: rawScript,
+          commandToRun: formatCommand(collatorRawScript, getCustomParameterValuesForPhase(phase)),
           displayName: collatorDisplayName,
           phase,
           rushConfiguration,
           rushProject: project,
-          operationSettings
+          operationSettings,
+          environment: {
+            ...process.env,
+            [EnvironmentVariableNames.RUSH_SHARD_PARENT_FOLDER]: parentFolder,
+            [EnvironmentVariableNames.RUSH_SHARD_COUNT]: shards.toString()
+          }
         });
         collatorNode.runner = collatorRunner;
       } else {
@@ -81,40 +111,43 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         dependent.deleteDependency(operation);
       }
 
-      const shards: number = operationSettings.sharding.count;
-      for (const shard of Array.from({ length: shards }, (element, index) => index + 1)) {
-        let customParameters: readonly string[] = getCustomParameterValuesForPhase(phase);
-
-        // Add the shard argument to the custom parameters, replacing any templated values.
-        const shardArgumentFormat: string =
-          operationSettings.sharding.shardArgumentFormat ?? '--shard={shardIndex}/{shardCount}';
-        const outputDirectory: string = `.rush/shards/${shard}`;
-        const shardArgument: string = shardArgumentFormat
-          .replace('{shardIndex}', shard.toString())
-          .replace('{shardCount}', shards.toString());
-        const outputDirectoryArgument: string = `--shard-output-directory="${outputDirectory}"`;
-        customParameters = [...customParameters, shardArgument, outputDirectoryArgument];
-
-        const commandToRun: string | undefined = getScriptToRun(
-          project,
-          phase.name,
-          customParameters,
-          phase.shellCommand
+      const customParameters: readonly string[] = getCustomParameterValuesForPhase(phase);
+      const baseCommand: string | undefined = getScriptToRun(project, phase.name, phase.shellCommand);
+      if (baseCommand === undefined && phase.missingScriptBehavior === 'error') {
+        throw new Error(
+          `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
         );
-        if (commandToRun === undefined && phase.missingScriptBehavior === 'error') {
-          throw new Error(
-            `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
-          );
-        }
+      }
 
+      for (let shard: number = 1; shard <= shards; shard++) {
         const shardOperation: Operation = new Operation({
           project,
           phase
         });
-        const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}`;
-        if (commandToRun) {
+
+        // Add the shard argument to the custom parameters, replacing any templated values.
+        const shardArgumentFormat: string =
+          operationSettings.sharding.shardArgumentFormat ??
+          `--shard=${TemplateStrings.SHARD_INDEX}/${TemplateStrings.SHARD_COUNT}`;
+
+        const shardArgument: string = shardArgumentFormat
+          .replace(TemplateStrings.SHARD_INDEX, shard.toString())
+          .replace(TemplateStrings.SHARD_COUNT, shards.toString());
+
+        const outputFolderArgumentFlag: string =
+          operationSettings.sharding.outputFolderArgument?.argumentFlag ?? '--shard-output-directory';
+        const outputDirectory: string = path.join(parentFolder, shard.toString());
+        const outputDirectoryArgument: string = `${outputFolderArgumentFlag}="${outputDirectory}"`;
+        const shardedParameters: string[] = [...customParameters, shardArgument, outputDirectoryArgument];
+
+        const shardedCommandToRun: string | undefined = baseCommand
+          ? formatCommand(baseCommand, shardedParameters)
+          : undefined;
+
+        const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}/${shards}`;
+        if (shardedCommandToRun) {
           const shardedShellOperationRunner: ShellOperationRunner = new ShellOperationRunner({
-            commandToRun,
+            commandToRun: shardedCommandToRun,
             displayName: shardDisplayName,
             phase,
             rushConfiguration,

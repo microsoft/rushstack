@@ -4,7 +4,10 @@
       "operationName": "_phase:build",
       "outputFolderNames": ["dist"],
       "sharding": {
-        "count": 15
+        "count": 15,
+        "outputFolderArgument": {
+          "argumentFlag": "--output-directory"
+        }
       }
     },
     {
