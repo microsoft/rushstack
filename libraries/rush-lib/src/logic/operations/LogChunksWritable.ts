@@ -8,6 +8,11 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { RushConstants } from '../RushConstants';
 
+/**
+ * A new terminal stream that writes all log chunks to a JSON format so they can be faithfully reconstructed
+ *  during build cache restores. This is used for adding warning + error messages in cobuilds where the original
+ *  logs cannot be completely restored from the existing `all.log` and `error.log` files.
+ */
 export class LogChunksWritable extends TerminalWritable {
   public readonly logChunksPath: string;
   public readonly relativeLogChunksPath: string;
