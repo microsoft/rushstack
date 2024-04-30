@@ -7,7 +7,7 @@ export const TEST_LOCKFILE = {
     '.': {
       specifiers: {}
     },
-    '../../apps/testApp1': {
+    '../../../apps/testApp1': {
       specifiers: {
         '@testPackage/core': '1.7.1',
         '@testPackage2/core': '1.7.1'

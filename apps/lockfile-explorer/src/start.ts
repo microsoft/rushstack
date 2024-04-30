@@ -14,6 +14,7 @@ import { Colorize } from '@rushstack/terminal';
 
 import { init } from './init';
 import type { IAppState } from './state';
+import { type ICommandLine, parseCommandLine } from './commandLine';
 
 function startApp(debugMode: boolean): void {
   const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
@@ -42,16 +43,22 @@ function startApp(debugMode: boolean): void {
   // Must not have a trailing slash
   const SERVICE_URL: string = `http://localhost:${PORT}`;
 
-  // TODO: Later if we introduce more CLI parameters, switch to a proper CLI parser
-  const args: string[] = process.argv.slice(2);
-  if (args.length > 0 && args[0] !== '--debug') {
-    console.log('Usage: lockfile-explorer [--debug]\n');
-    console.log('The "lfx" command is a shorthand alias for "lockfile-explorer".');
-    console.log('See the project website for documentation and support.\n');
-    throw new AlreadyReportedError();
+  const result: ICommandLine = parseCommandLine(process.argv.slice(2));
+  if (result.showedHelp) {
+    console.error('\nFor help, use:  ' + Colorize.yellow('lockfile-explorer --help'));
+    process.exitCode = 1;
+    return;
   }
 
-  const appState: IAppState = init({ lockfileExplorerProjectRoot, appVersion, debugMode });
+  if (result.error) {
+    console.error('\n' + Colorize.red('ERROR: ' + result.error));
+    process.exitCode = 1;
+    return;
+  }
+
+  const subspaceName: string = result.subspace ?? 'default';
+
+  const appState: IAppState = init({ lockfileExplorerProjectRoot, appVersion, debugMode, subspaceName });
 
   // Important: This must happen after init() reads the current working directory
   process.chdir(appState.lockfileExplorerProjectRoot);
@@ -97,7 +104,10 @@ function startApp(debugMode: boolean): void {
   app.get('/api/lockfile', async (req: express.Request, res: express.Response) => {
     const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
     const doc = yaml.load(pnpmLockfileText);
-    res.send(doc);
+    res.send({
+      doc,
+      subspaceName
+    });
   });
 
   app.get('/api/health', (req: express.Request, res: express.Response) => {
