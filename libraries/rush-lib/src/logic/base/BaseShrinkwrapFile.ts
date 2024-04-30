@@ -34,7 +34,11 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public validateShrinkwrapAfterUpdate(rushConfiguration: RushConfiguration, terminal: ITerminal): void {}
+  public validateShrinkwrapAfterUpdate(
+    rushConfiguration: RushConfiguration,
+    subspace: Subspace,
+    terminal: ITerminal
+  ): void {}
 
   /**
    * Validate the shrinkwrap using the provided policy options.
