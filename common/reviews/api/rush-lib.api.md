@@ -1439,6 +1439,8 @@ export class Subspace {
     // @beta
     getCommonVersionsFilePath(): string;
     // @beta
+    getPnpmConfigFilePath(): string;
+    // @beta
     getPnpmfilePath(): string;
     // @beta
     getPnpmOptions(): PnpmOptionsConfiguration | undefined;
