@@ -60,7 +60,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
     const { associatedPhase: phase, associatedProject: project } = operation;
     const operationSettings: IOperationSettings | undefined = getOperationSettings(phase, project);
     if (phase && project && operationSettings?.sharding && !operation.runner) {
-      const shards: number = operationSettings.sharding.count;
+      const { count: shards, collatorConfiguration } = operationSettings.sharding;
 
       existingOperations.delete(operation);
 
@@ -92,6 +92,14 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         undefined
       );
 
+      const collatorMisingScriptBehavior = collatorConfiguration?.missingScriptBehavior ?? 'error';
+
+      if (collatorRawScript === undefined && collatorMisingScriptBehavior === 'error') {
+        throw new Error(
+          `The project '${project.packageName}' does not define a '${phase.name}:collate' command in the 'scripts' section of its package.json`
+        );
+      }
+
       if (collatorRawScript) {
         const collatorRunner: ShellOperationRunner = new ShellOperationRunner({
           commandToRun: collatorRawScript,
@@ -111,7 +119,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         collatorNode.runner = new NullOperationRunner({
           name: collatorDisplayName,
           result: OperationStatus.NoOp,
-          silent: phase.missingScriptBehavior === 'silent'
+          silent: collatorMisingScriptBehavior === 'silent'
         });
       }
       for (const dependent of operation.consumers) {

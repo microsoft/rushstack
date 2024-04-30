@@ -11,7 +11,7 @@ import { RushConstants } from '../RushConstants';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
-import { Operation } from './Operation';
+import type { Operation } from './Operation';
 
 /**
  * @internal

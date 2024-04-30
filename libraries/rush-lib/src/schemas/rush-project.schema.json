@@ -101,6 +101,18 @@
                     "description": "The command-line argument to pass to the operation to specify the output folder. Does not accept placeholders. Defaults to \"--shard-output-folder\""
                   }
                 }
+              },
+              "collatorConfiguration": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "missingScriptBehavior": {
+                    "title": "Missing Script Behavior",
+                    "description": "What should happen if a project's package.json does not have a \"scripts\" entry matching `{phaseName}:collate`, or it is an empty string. Defaults to \"error\".",
+                    "type": "string",
+                    "enum": ["silent", "log", "error"]
+                  }
+                }
               }
             }
           }

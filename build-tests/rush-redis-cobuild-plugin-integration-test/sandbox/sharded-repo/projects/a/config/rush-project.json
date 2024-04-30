@@ -8,6 +8,9 @@
         "count": 3,
         "outputFolderArgument": {
           "argumentFlag": "--output-directory"
+        },
+        "collatorConfiguration": {
+          "missingScriptBehavior": "silent"
         }
       }
     },
