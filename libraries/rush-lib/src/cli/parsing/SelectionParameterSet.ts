@@ -273,7 +273,7 @@ export class SelectionParameterSet {
 
     // Include exactly these projects (--only)
     for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal)) {
-      args.push(project.packageName);
+      args.push('--filter', project.packageName);
     }
 
     // Include all projects that depend on these projects, and all dependencies thereof
@@ -289,19 +289,19 @@ export class SelectionParameterSet {
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     )) {
-      args.push(`${project.packageName}...`);
+      args.push('--filter', `${project.packageName}...`);
     }
 
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
     for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal)) {
-      args.push(`${project.packageName}^...`);
+      args.push('--filter', `${project.packageName}^...`);
     }
 
     // --impacted-by
     // The project and all projects directly or indirectly declare it as a dependency
     for (const project of await this._evaluateProjectParameterAsync(this._impactedByProject, terminal)) {
-      args.push(`...${project.packageName}`);
+      args.push('--filter', `...${project.packageName}`);
     }
 
     // --impacted-by-except
@@ -310,7 +310,7 @@ export class SelectionParameterSet {
       this._impactedByExceptProject,
       terminal
     )) {
-      args.push(`...^${project.packageName}`);
+      args.push('--filter', `...^${project.packageName}`);
     }
 
     return args;
