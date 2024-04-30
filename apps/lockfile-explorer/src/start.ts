@@ -14,6 +14,7 @@ import { Colorize } from '@rushstack/terminal';
 
 import { init } from './init';
 import type { IAppState } from './state';
+import { type ICommandLine, parseCommandLine } from './commandLine';
 
 function startApp(debugMode: boolean): void {
   const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
@@ -42,17 +43,20 @@ function startApp(debugMode: boolean): void {
   // Must not have a trailing slash
   const SERVICE_URL: string = `http://localhost:${PORT}`;
 
-  let subspaceName: string = 'default';
-
-  if (process.argv.indexOf('--subspace') >= 0) {
-    if (process.argv[2] !== '--subspace') {
-      throw new Error(
-        'If you want to specify a subspace, you should place "--subspace <subspace_name>" immediately after the "lockfile-explorer" command'
-      );
-    }
-
-    subspaceName = process.argv[3];
+  const result: ICommandLine = parseCommandLine(process.argv.slice(2));
+  if (result.showedHelp) {
+    console.error('\nFor help, use:  ' + Colorize.yellow('lockfile-explorer --help'));
+    process.exitCode = 1;
+    return;
   }
+
+  if (result.error) {
+    console.error('\n' + Colorize.red('ERROR: ' + result.error));
+    process.exitCode = 1;
+    return;
+  }
+
+  const subspaceName: string = result.subspace ?? 'default';
 
   const appState: IAppState = init({ lockfileExplorerProjectRoot, appVersion, debugMode, subspaceName });
 
