@@ -21,6 +21,7 @@ import { NullOperationRunner } from './NullOperationRunner';
 import { OperationStatus } from './OperationStatus';
 import * as path from 'path';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import { OperationMetadataManager } from './OperationMetadataManager';
 
 export const PLUGIN_NAME: 'ShardedPhasedOperationPlugin' = 'ShardedPhasedOperationPlugin';
 
@@ -72,9 +73,16 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       const parentFolderFormat: string =
         operationSettings.sharding.outputFolderArgument?.parentFolderNameFormat ??
         `.rush/operations/${TemplateStrings.PHASE_NAME}/shards`;
+
+      // Create a new one to avoid moving this into `beforeCreateOperation`.
+      const operationMetadataManager: OperationMetadataManager = new OperationMetadataManager({
+        phase,
+        rushProject: project,
+        operation
+      });
       const parentFolder: string = parentFolderFormat.replace(
         TemplateStrings.PHASE_NAME,
-        phase.logFilenameIdentifier
+        operationMetadataManager.logFilenameIdentifier
       );
 
       const collatorDisplayName: string = `${getDisplayName(phase, project)} - collate`;

@@ -11,6 +11,7 @@ import { RushConstants } from '../RushConstants';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
+import { Operation } from './Operation';
 
 /**
  * @internal
@@ -18,6 +19,7 @@ import type { IOperationStateJson } from './OperationStateFile';
 export interface IOperationMetadataManagerOptions {
   rushProject: RushConfigurationProject;
   phase: IPhase;
+  operation: Operation;
 }
 
 /**
@@ -38,6 +40,7 @@ export interface IOperationMetaData {
  */
 export class OperationMetadataManager {
   public readonly stateFile: OperationStateFile;
+  public readonly logFilenameIdentifier: string;
   private _metadataFolder: string;
   private _logPath: string;
   private _errorLogPath: string;
@@ -45,11 +48,14 @@ export class OperationMetadataManager {
   private _relativeErrorLogPath: string;
 
   public constructor(options: IOperationMetadataManagerOptions) {
-    const { rushProject, phase } = options;
+    const { rushProject, operation, phase } = options;
     const { projectFolder } = rushProject;
 
-    const identifier: string = phase.logFilenameIdentifier;
-    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${identifier}`;
+    this.logFilenameIdentifier = operation.name
+      ? this._normalizeForFileSystem(operation.name)
+      : phase.logFilenameIdentifier;
+
+    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${this.logFilenameIdentifier}`;
 
     this.stateFile = new OperationStateFile({
       projectFolder: projectFolder,
@@ -60,6 +66,10 @@ export class OperationMetadataManager {
     this._relativeErrorLogPath = `${this._metadataFolder}/error.log`;
     this._logPath = `${projectFolder}/${this._relativeLogPath}`;
     this._errorLogPath = `${projectFolder}/${this._relativeErrorLogPath}`;
+  }
+
+  private _normalizeForFileSystem(name: string): string {
+    return name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '_');
   }
 
   /**

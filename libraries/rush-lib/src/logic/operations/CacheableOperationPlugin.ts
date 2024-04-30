@@ -239,7 +239,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           _operationMetadataManager: operationMetadataManager
         } = record;
 
-        if (!project || !phase || !runner?.cacheable) {
+        if (
+          !project ||
+          !phase ||
+          !runner?.cacheable ||
+          // this check is just to make the types happy, it will always be defined if project + phase are defined.
+          !operationMetadataManager
+        ) {
           return;
         }
 
@@ -249,7 +255,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             buildCacheContext,
             buildCacheEnabled: buildCacheConfiguration?.buildCacheEnabled,
             rushProject: project,
-            logFilenameIdentifier: phase.logFilenameIdentifier,
+            logFilenameIdentifier: operationMetadataManager.logFilenameIdentifier,
             quietMode: record.quietMode,
             debugMode: record.debugMode
           });
@@ -325,7 +331,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
           const { logPath, errorLogPath } = ProjectLogWritable.getLogFilePaths({
             project,
-            logFilenameIdentifier: phase.logFilenameIdentifier
+            logFilenameIdentifier: operationMetadataManager.logFilenameIdentifier
           });
           const restoreCacheAsync = async (
             // TODO: Investigate if `projectBuildCacheForRestore` is always the same instance as `projectBuildCache`
@@ -419,7 +425,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
         const { associatedProject: project, associatedPhase: phase, runner } = operation;
 
-        if (!project || !phase || !runner?.cacheable) {
+        if (!project || !phase || !runner?.cacheable || !operationMetadataManager) {
           return;
         }
 
@@ -447,13 +453,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         try {
           if (!cacheRestored) {
             // Save the metadata to disk
-            const { logFilenameIdentifier } = phase;
+            const { logFilenameIdentifier } = operationMetadataManager;
             const { duration: durationInSeconds } = stopwatch;
             const { logPath, errorLogPath } = ProjectLogWritable.getLogFilePaths({
               project,
               logFilenameIdentifier
             });
-            await operationMetadataManager?.saveAsync({
+            await operationMetadataManager.saveAsync({
               durationInSeconds,
               cobuildContextId: cobuildLock?.cobuildConfiguration.cobuildContextId,
               cobuildRunnerId: cobuildLock?.cobuildConfiguration.cobuildRunnerId,

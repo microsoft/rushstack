@@ -574,6 +574,8 @@ export interface _IOperationMetadata {
 // @internal (undocumented)
 export interface _IOperationMetadataManagerOptions {
     // (undocumented)
+    operation: Operation;
+    // (undocumented)
     phase: IPhase;
     // (undocumented)
     rushProject: RushConfigurationProject;
@@ -926,6 +928,8 @@ export class Operation {
 // @internal
 export class _OperationMetadataManager {
     constructor(options: _IOperationMetadataManagerOptions);
+    // (undocumented)
+    readonly logFilenameIdentifier: string;
     get relativeFilepaths(): string[];
     // (undocumented)
     saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath }: _IOperationMetadata): Promise<void>;

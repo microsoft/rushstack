@@ -123,7 +123,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     if (operation.associatedPhase && operation.associatedProject) {
       this._operationMetadataManager = new OperationMetadataManager({
         phase: operation.associatedPhase,
-        rushProject: operation.associatedProject
+        rushProject: operation.associatedProject,
+        operation
       });
     }
     this._context = context;
@@ -187,14 +188,16 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       logFileSuffix: string;
     }
   ): Promise<T> {
-    const { associatedPhase, associatedProject, stdioSummarizer } = this;
+    const { associatedPhase, associatedProject, stdioSummarizer, runner } = this;
     const { createLogFile, logFileSuffix = '' } = options;
     const projectLogWritable: ProjectLogWritable | undefined =
       createLogFile && associatedProject && associatedPhase
         ? new ProjectLogWritable(
             associatedProject,
             this.collatedWriter.terminal,
-            `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`
+            `${
+              this._operationMetadataManager?.logFilenameIdentifier ?? associatedPhase.logFilenameIdentifier
+            }${logFileSuffix}`
           )
         : undefined;
 
