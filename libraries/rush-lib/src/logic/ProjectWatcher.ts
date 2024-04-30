@@ -16,6 +16,10 @@ import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export interface IProjectWatcherOptions {
   debounceMs?: number;
+  /**
+   * If true, will refresh the terminal prompt every 60 seconds to prevent a Codespace session from timing out.
+   */
+  keepCodespaceAlive?: boolean;
   rushConfiguration: RushConfiguration;
   projectsToWatch: ReadonlySet<RushConfigurationProject>;
   terminal: ITerminal;
@@ -53,6 +57,7 @@ interface IPathWatchOptions {
  */
 export class ProjectWatcher {
   private readonly _debounceMs: number;
+  private readonly _keepCodespaceAlive: boolean;
   private readonly _repoRoot: string;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _projectsToWatch: ReadonlySet<RushConfigurationProject>;
@@ -64,14 +69,24 @@ export class ProjectWatcher {
   private _resolveIfChanged: undefined | (() => Promise<void>);
   private _getPromptLines: undefined | IPromptGeneratorFunction;
 
+  private _keepAliveTimer: NodeJS.Timeout | undefined;
   private _renderedStatusLines: number;
+  private _status: string;
 
   public isPaused: boolean = false;
 
   public constructor(options: IProjectWatcherOptions) {
-    const { debounceMs = 1000, rushConfiguration, projectsToWatch, terminal, initialState } = options;
+    const {
+      debounceMs = 1000,
+      keepCodespaceAlive,
+      rushConfiguration,
+      projectsToWatch,
+      terminal,
+      initialState
+    } = options;
 
     this._debounceMs = debounceMs;
+    this._keepCodespaceAlive = !!keepCodespaceAlive;
     this._rushConfiguration = rushConfiguration;
     this._projectsToWatch = projectsToWatch;
     this._terminal = terminal;
@@ -82,12 +97,15 @@ export class ProjectWatcher {
     this._initialState = initialState;
     this._previousState = initialState;
 
+    this._keepAliveTimer = undefined;
     this._renderedStatusLines = 0;
+    this._status = '';
     this._getPromptLines = undefined;
   }
 
   public pause(): void {
     this.isPaused = true;
+    this._clearKeepAliveTimer();
     this._setStatus('Project watcher paused.');
   }
 
@@ -244,11 +262,13 @@ export class ProjectWatcher {
               this._forceChangedProjects.clear();
 
               if (result.changedProjects.size) {
+                this._clearKeepAliveTimer();
                 terminated = true;
                 terminal.writeLine();
                 resolve(result);
               } else {
                 this._setStatus(`No changes detected to tracked files.`);
+                this._setKeepAliveTimer();
               }
             });
           } catch (err) {
@@ -268,6 +288,7 @@ export class ProjectWatcher {
         }
 
         this._setStatus(`Waiting for changes...`);
+        this._setKeepAliveTimer();
 
         function onError(err: Error): void {
           if (terminated) {
@@ -373,6 +394,7 @@ export class ProjectWatcher {
   }
 
   private _setStatus(status: string): void {
+    this._status = status;
     const statusLines: string[] = [
       `[${this.isPaused ? 'PAUSED' : 'WATCHING'}] Watch Status: ${status}`,
       ...(this._getPromptLines?.(this.isPaused) ?? [])
@@ -386,6 +408,21 @@ export class ProjectWatcher {
     this._renderedStatusLines = statusLines.length;
 
     this._terminal.writeLine(Colorize.bold(Colorize.cyan(statusLines.join('\n'))));
+  }
+
+  private _setKeepAliveTimer(): void {
+    if (this._keepCodespaceAlive && !this.isPaused && !this._keepAliveTimer) {
+      this._keepAliveTimer = setInterval(() => {
+        this._setStatus(this._status);
+      }, 60000);
+    }
+  }
+
+  private _clearKeepAliveTimer(): void {
+    if (this._keepAliveTimer) {
+      clearInterval(this._keepAliveTimer);
+      this._keepAliveTimer = undefined;
+    }
   }
 
   /**

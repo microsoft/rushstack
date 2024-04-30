@@ -93,5 +93,11 @@
    * of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist
    * across invocations.
    */
-  // "useIPCScriptsInWatchMode": true
+  // "useIPCScriptsInWatchMode": true,
+
+  /**
+   * If set to true, when running a command in watch mode, Rush will periodically refresh the terminal prompt to keep a
+   * GitHub Codespaces session from timing out from inactivity.
+   */
+  // "keepCodespacesSessionAliveInWatchMode": true
 }

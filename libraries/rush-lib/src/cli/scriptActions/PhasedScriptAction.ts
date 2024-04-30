@@ -620,6 +620,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const projectWatcher: ProjectWatcher = new ProjectWatcher({
       debounceMs: this._watchDebounceMs,
+      keepCodespaceAlive:
+        this.rushConfiguration.experimentsConfiguration.configuration.keepCodespacesSessionAliveInWatchMode,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,
       terminal,

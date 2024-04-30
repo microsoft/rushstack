@@ -65,6 +65,10 @@
     "useIPCScriptsInWatchMode": {
       "description": "If true, when running in watch mode, Rush will check for phase scripts named `_phase:<name>:ipc` and run them instead of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist across invocations.",
       "type": "boolean"
+    },
+    "keepCodespacesSessionAliveInWatchMode": {
+      "description": "If set to true, when running a command in watch mode, Rush will periodically refresh the terminal prompt to keep a GitHub Codespaces session from timing out from inactivity.",
+      "type": "boolean"
     }
   },
   "additionalProperties": false

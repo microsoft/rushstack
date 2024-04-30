@@ -461,6 +461,7 @@ export interface IExperimentsJson {
     cleanInstallAfterNpmrcChanges?: boolean;
     forbidPhantomResolvableNodeModulesFolders?: boolean;
     generateProjectImpactGraphDuringRushUpdate?: boolean;
+    keepCodespacesSessionAliveInWatchMode?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;

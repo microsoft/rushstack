@@ -101,6 +101,12 @@ export interface IExperimentsJson {
    * across invocations.
    */
   useIPCScriptsInWatchMode?: boolean;
+
+  /**
+   * If set to true, when running a command in watch mode, Rush will periodically refresh the terminal prompt to keep a
+   * GitHub Codespaces session from timing out from inactivity.
+   */
+  keepCodespacesSessionAliveInWatchMode?: boolean;
 }
 
 /**

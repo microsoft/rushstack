@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add an experiment \"keepCodespacesSessionAliveInWatchMode\" that, in watch mode commands, periodically refreshes the watch status prompt to reset the GitHub Codespaces inactivity timer.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
