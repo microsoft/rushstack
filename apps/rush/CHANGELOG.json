@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.122.1",
+      "tag": "@microsoft/rush_v5.122.1",
+      "date": "Tue, 30 Apr 2024 23:36:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make `disallowInsecureSha1` policy a subspace-level configuration."
+          },
+          {
+            "comment": "Fix an issue where `rush update` sometimes did not detect changes to pnpm-config.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.122.0",
       "tag": "@microsoft/rush_v5.122.0",
       "date": "Thu, 25 Apr 2024 07:33:18 GMT",

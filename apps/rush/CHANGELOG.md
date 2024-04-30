@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 25 Apr 2024 07:33:18 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Apr 2024 23:36:50 GMT and should not be manually modified.
+
+## 5.122.1
+Tue, 30 Apr 2024 23:36:50 GMT
+
+### Updates
+
+- Make `disallowInsecureSha1` policy a subspace-level configuration.
+- Fix an issue where `rush update` sometimes did not detect changes to pnpm-config.json
 
 ## 5.122.0
 Thu, 25 Apr 2024 07:33:18 GMT
