@@ -102,7 +102,7 @@ export abstract class BaseInstallManager {
 
   public async doInstallAsync(): Promise<void> {
     const { allowShrinkwrapUpdates } = this.options;
-    const isFilteredInstall: boolean = this.options.selectedProjects.length > 0;
+    const isFilteredInstall: boolean = this.options.filteredProjects.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
     // Prevent filtered installs when workspaces is disabled
@@ -166,7 +166,7 @@ export abstract class BaseInstallManager {
     if (isFilteredInstall) {
       // Get the projects involved in this filtered install
       commonTempInstallFlag.mergeFromObject({
-        selectedProjectNames: this.options.selectedProjects.map((project) => project.packageName)
+        selectedProjectNames: this.options.filteredProjects.map((project) => project.packageName)
       });
     }
     const optionsToIgnore: string[] | undefined = !this.rushConfiguration.experimentsConfiguration
@@ -709,7 +709,7 @@ ${gitLfsHookHandling}
         args.push('--frozen-lockfile');
 
         if (
-          options.selectedProjects.length > 0 &&
+          options.filteredProjects.length > 0 &&
           Number.parseInt(this.rushConfiguration.packageManagerToolVersion, 10) >= 8 // PNPM Major version 8+
         ) {
           // On pnpm@8, disable the "dedupe-peer-dependents" feature when doing a filtered CI install so that filters take effect.

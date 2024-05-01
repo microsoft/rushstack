@@ -143,21 +143,21 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
     let selectedSubspaces: ReadonlySet<Subspace> | undefined;
-    const selectedProjectsForSubspace: Map<Subspace, RushConfigurationProject[]> = new Map();
+    const filteredProjectsForSubspace: Map<Subspace, RushConfigurationProject[]> = new Map();
     if (this.rushConfiguration.subspacesFeatureEnabled) {
-      if (installManagerOptions.selectedProjects.length) {
+      if (installManagerOptions.filteredProjects.length) {
         // Go through each project, add it to it's subspace's pnpm filter arguments
-        for (const project of installManagerOptions.selectedProjects) {
-          let subspaceSelectedProjects: RushConfigurationProject[] | undefined =
-            selectedProjectsForSubspace.get(project.subspace);
-          if (!subspaceSelectedProjects) {
-            subspaceSelectedProjects = [];
-            selectedProjectsForSubspace.set(project.subspace, subspaceSelectedProjects);
+        for (const project of installManagerOptions.filteredProjects) {
+          let subspaceFilteredProjects: RushConfigurationProject[] | undefined =
+            filteredProjectsForSubspace.get(project.subspace);
+          if (!subspaceFilteredProjects) {
+            subspaceFilteredProjects = [];
+            filteredProjectsForSubspace.set(project.subspace, subspaceFilteredProjects);
           }
-          subspaceSelectedProjects.push(project);
+          subspaceFilteredProjects.push(project);
         }
         selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(
-          new Set(installManagerOptions.selectedProjects)
+          new Set(installManagerOptions.filteredProjects)
         );
       } else if (this._subspaceParameter.value) {
         // Selecting a single subspace
@@ -244,9 +244,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
         for (const selectedSubspace of selectedSubspaces) {
           installManagerOptions.subspace = selectedSubspace;
           if (selectedSubspace.getPnpmOptions()?.alwaysFullInstall) {
-            installManagerOptions.selectedProjects = [];
+            installManagerOptions.filteredProjects = [];
           } else {
-            installManagerOptions.selectedProjects = selectedProjectsForSubspace.get(selectedSubspace) || [];
+            installManagerOptions.filteredProjects = filteredProjectsForSubspace.get(selectedSubspace) || [];
           }
           // eslint-disable-next-line no-console
           console.log(Colorize.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));

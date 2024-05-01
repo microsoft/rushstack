@@ -90,7 +90,7 @@ export class UpdateAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      selectedProjects: Array.from(
+      filteredProjects: Array.from(
         (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) || []
       ),
       checkOnly: false,

@@ -236,6 +236,7 @@ export class LastInstallFlagFactory {
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
       rushJsonFolder: rushConfiguration.rushJsonFolder,
+      ignoreScripts: false,
       ...extraState
     };
 

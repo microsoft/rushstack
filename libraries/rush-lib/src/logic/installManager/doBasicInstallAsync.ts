@@ -40,7 +40,7 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
       recheckShrinkwrap: false,
       offline: false,
       collectLogFile: false,
-      selectedProjects: [],
+      filteredProjects: [],
       maxInstallAttempts: 1,
       networkConcurrency: undefined,
       subspace: rushConfiguration.defaultSubspace,
