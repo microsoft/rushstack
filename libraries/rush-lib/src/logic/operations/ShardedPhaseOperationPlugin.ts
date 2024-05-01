@@ -27,6 +27,12 @@ const TemplateStrings = {
   SHARD_COUNT: '{shardCount}'
 } as const;
 
+// eslint-disable-next-line @typescript-eslint/typedef
+const TemplateStringRegex = {
+  SHARD_INDEX: new RegExp(TemplateStrings.SHARD_INDEX, 'g'),
+  SHARD_COUNT: new RegExp(TemplateStrings.SHARD_COUNT, 'g')
+} as const;
+
 /**
  * Phased command that shards a phase into multiple operations.
  */
@@ -126,8 +132,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         });
 
         const shardArgument: string = shardArgumentFormat
-          .replace(TemplateStrings.SHARD_INDEX, shard.toString())
-          .replace(TemplateStrings.SHARD_COUNT, shards.toString());
+          .replace(TemplateStringRegex.SHARD_INDEX, shard.toString())
+          .replace(TemplateStringRegex.SHARD_COUNT, shards.toString());
 
         const outputDirectoryArgument: string = `${outputFolderArgumentFlag}="${outputDirectory}"`;
         const shardedParameters: string[] = [...customParameters, shardArgument, outputDirectoryArgument];
