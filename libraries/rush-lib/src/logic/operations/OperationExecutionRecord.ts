@@ -191,13 +191,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     const { associatedPhase, associatedProject, stdioSummarizer } = this;
     const { createLogFile, logFileSuffix = '' } = options;
     const projectLogWritable: ProjectLogWritable | undefined =
-      createLogFile && associatedProject && associatedPhase
+      createLogFile && associatedProject && associatedPhase && this._operationMetadataManager
         ? new ProjectLogWritable(
             associatedProject,
             this.collatedWriter.terminal,
-            `${
-              this._operationMetadataManager?.logFilenameIdentifier ?? associatedPhase.logFilenameIdentifier
-            }${logFileSuffix}`
+            `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`
           )
         : undefined;
 

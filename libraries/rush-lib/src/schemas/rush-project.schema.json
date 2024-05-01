@@ -92,7 +92,7 @@
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
-                  "parentFolderNameFormat": {
+                  "parentFolderName": {
                     "type": "string",
                     "description": "The name of the parent folder that contains the output folders for each shard. Does not accept placeholders. Defaults to \".rush/operation/{phaseName}/shards/\""
                   },

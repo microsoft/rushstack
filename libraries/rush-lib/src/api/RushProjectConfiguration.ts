@@ -63,7 +63,7 @@ export interface IRushPhaseSharding {
      * The format of the parent folder name to output shards to. Child folders will be created for each
      *  shard index, ie `{parentFolder}/1`, `{parentFolder}/2`. The default value is `.rush/operations/{phaseName}/shards`.
      */
-    parentFolderNameFormat?: string;
+    parentFolderName?: string;
 
     /**
      * The name of the argument to pass to the command to indicate the output folder for the shard.
