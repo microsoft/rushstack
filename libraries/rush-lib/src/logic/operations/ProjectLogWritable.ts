@@ -75,23 +75,11 @@ export class ProjectLogWritable extends TerminalWritable {
     relativeErrorLogPath: string;
     relativeLogChunksPath: string;
   } {
-    const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
-    const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
-    const logFilename: string = `${logFileBaseName}.log`;
-    const errorLogFilename: string = `${logFileBaseName}.error.log`;
+    const logFileBaseName: string = getRelativeLogFilePathBase(project, logFilenameIdentifier, isLegacyLog);
 
     const { projectFolder } = project;
-
-    // If the phased commands experiment is enabled, put logs under `rush-logs`
-    let logFolder: string | undefined;
-    if (!isLegacyLog && project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
-      const logPathPrefix: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
-      FileSystem.ensureFolder(logPathPrefix);
-      logFolder = RushConstants.rushLogsFolderName;
-    }
-
-    const relativeLogPath: string = logFolder ? `${logFolder}/${logFilename}` : logFilename;
-    const relativeErrorLogPath: string = logFolder ? `${logFolder}/${errorLogFilename}` : errorLogFilename;
+    const relativeLogPath: string = `${logFileBaseName}.log`;
+    const relativeErrorLogPath: string = `${logFileBaseName}.error.log`;
 
     const logPath: string = `${projectFolder}/${relativeLogPath}`;
     const errorLogPath: string = `${projectFolder}/${relativeErrorLogPath}`;
@@ -155,4 +143,25 @@ export class ProjectLogWritable extends TerminalWritable {
       this._errorLogWriter = undefined;
     }
   }
+}
+
+export function getRelativeLogFilePathBase(
+  project: RushConfigurationProject,
+  logFilenameIdentifier: string,
+  isLegacyLog: boolean
+) {
+  const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
+  const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
+
+  const { projectFolder } = project;
+
+  // If the phased commands experiment is enabled, put logs under `rush-logs`
+  let logFolder: string | undefined;
+  if (!isLegacyLog && project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
+    const logPathPrefix: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
+    FileSystem.ensureFolder(logPathPrefix);
+    logFolder = RushConstants.rushLogsFolderName;
+  }
+
+  return logFolder ? `${logFolder}/${logFileBaseName}` : logFileBaseName;
 }

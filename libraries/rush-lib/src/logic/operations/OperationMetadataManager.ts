@@ -23,7 +23,6 @@ import { RushConstants } from '../RushConstants';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
-import schema from './schemas/log-chunk.schema.json';
 
 /**
  * @internal
@@ -55,8 +54,6 @@ export interface ILogChunkStorage {
  * @internal
  */
 export class OperationMetadataManager {
-  private static _logChunkJsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schema);
-
   public readonly stateFile: OperationStateFile;
   private _metadataFolder: string;
   private _logPath: string;
@@ -156,10 +153,7 @@ export class OperationMetadataManager {
     let logReadStream: fs.ReadStream | undefined;
     try {
       if (await FileSystem.existsAsync(logChunksPath)) {
-        const logChunks: ILogChunkStorage = (await JsonFile.loadAndValidateAsync(
-          logChunksPath,
-          OperationMetadataManager._logChunkJsonSchema
-        )) as ILogChunkStorage;
+        const logChunks: ILogChunkStorage = (await JsonFile.loadAsync(logChunksPath)) as ILogChunkStorage;
         for (const chunk of logChunks.chunks) {
           const { text, kind } = chunk;
           if (kind === TerminalChunkKind.Stderr) {
@@ -181,6 +175,7 @@ export class OperationMetadataManager {
         throw e;
       }
     } finally {
+      // Close the read stream
       logReadStream?.close();
     }
 

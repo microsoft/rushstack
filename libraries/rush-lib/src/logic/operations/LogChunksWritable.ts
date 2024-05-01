@@ -7,6 +7,7 @@ import { TerminalWritable, type ITerminalChunk } from '@rushstack/terminal';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { RushConstants } from '../RushConstants';
+import { getRelativeLogFilePathBase } from './ProjectLogWritable';
 
 /**
  * A new terminal stream that writes all log chunks to a JSON format so they can be faithfully reconstructed
@@ -19,7 +20,13 @@ export class LogChunksWritable extends TerminalWritable {
 
   private readonly _chunks: ITerminalChunk[] = [];
 
-  public constructor(project: RushConfigurationProject, logFilenameIdentifier: string) {
+  public constructor(
+    project: RushConfigurationProject,
+    /**
+     * A unique identifier for the log file. This is used to generate the prefix for the log file name.
+     */
+    logFilenameIdentifier: string
+  ) {
     super();
 
     const { logChunksPath, relativeLogChunksPath } = LogChunksWritable.getLogFilePaths({
@@ -42,22 +49,10 @@ export class LogChunksWritable extends TerminalWritable {
     logChunksPath: string;
     relativeLogChunksPath: string;
   } {
-    const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
-    const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
-    const logChunksFilename: string = `${logFileBaseName}.chunks.json`;
-
     const { projectFolder } = project;
 
-    // If the phased commands experiment is enabled, put logs under `rush-logs`
-    let logFolder: string | undefined;
-    if (!isLegacyLog && project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
-      const logPathPrefix: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
-      FileSystem.ensureFolder(logPathPrefix);
-      logFolder = RushConstants.rushLogsFolderName;
-    }
-
-    const relativeLogChunksPath: string = logFolder ? `${logFolder}/${logChunksFilename}` : logChunksFilename;
-
+    const logFileBaseName: string = getRelativeLogFilePathBase(project, logFilenameIdentifier, isLegacyLog);
+    const relativeLogChunksPath: string = `${logFileBaseName}.chunks.json`;
     const logChunksPath: string = `${projectFolder}/${relativeLogChunksPath}`;
 
     return {
