@@ -69,7 +69,7 @@ export interface IRushPhaseSharding {
      * The name of the argument to pass to the command to indicate the output folder for the shard.
      * The default value is `--shard-output-folder`. Does not accept templating.
      */
-    argumentFlag: string;
+    parameterLongName: string;
   };
 
   /**

@@ -94,9 +94,9 @@
                 "properties": {
                   "parentFolderNameFormat": {
                     "type": "string",
-                    "description": "The name of the parent folder that contains the output folders for each shard. The string may contain the following placeholders: {phaseName}. Defaults to \".rush/operation/{phaseName}/shards/{shardIndex}\""
+                    "description": "The name of the parent folder that contains the output folders for each shard. Does not accept placeholders. Defaults to \".rush/operation/{phaseName}/shards/\""
                   },
-                  "argumentFlag": {
+                  "parameterLongName": {
                     "type": "string",
                     "description": "The command-line argument to pass to the operation to specify the output folder. Does not accept placeholders. Defaults to \"--shard-output-folder\""
                   }
