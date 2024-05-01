@@ -4,5 +4,4 @@ common/temp/
 common/autoinstallers/*/.npmrc
 projects/*/dist/
 *.log
-.rush
 node_modules/
