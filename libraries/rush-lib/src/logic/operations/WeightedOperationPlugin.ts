@@ -8,27 +8,33 @@ import type {
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { IOperationExecutionResult } from './IOperationExecutionResult';
+import { OperationExecutionRecord } from './OperationExecutionRecord';
 
 const PLUGIN_NAME: 'WeightedOperationPlugin' = 'WeightedOperationPlugin';
 
 /**
  * Add weights to operations based on the operation settings in rush-project.json.
  *
- * This also sets the weight of no-op operations to 0.01.
+ * This also sets the weight of no-op operations to 0.
  */
 export class WeightedOperationPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.createOperations.tap(PLUGIN_NAME, weightOperations);
+    hooks.beforeExecuteOperations.tap(PLUGIN_NAME, weightOperations);
   }
 }
 
-function weightOperations(operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
+function weightOperations(
+  operations: Map<Operation, IOperationExecutionResult>,
+  context: ICreateOperationsContext
+): Map<Operation, IOperationExecutionResult> {
   const { projectConfigurations } = context;
 
-  for (const operation of operations) {
+  for (const [operation, record] of operations) {
+    const { runner } = record as OperationExecutionRecord;
     const { associatedProject: project, associatedPhase: phase } = operation;
-    if (operation.runner?.isNoOp) {
-      operation.weight = 0.01;
+    if (runner!.isNoOp) {
+      operation.weight = 0;
     } else if (project && phase) {
       const projectConfiguration: RushProjectConfiguration | undefined = projectConfigurations.get(project);
       const operationSettings: IOperationSettings | undefined =
@@ -36,6 +42,11 @@ function weightOperations(operations: Set<Operation>, context: ICreateOperations
       if (operationSettings?.weight) {
         operation.weight = operationSettings.weight;
       }
+    }
+    if (operation.weight < 0) {
+      throw new Error(`The weight of the operation '${operation.name}' cannot be negative.`);
+    } else if (operation.weight % 1 !== 0) {
+      throw new Error(`The weight of the operation '${operation.name}' cannot be a decimal.`);
     }
   }
   return operations;
