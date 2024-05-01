@@ -77,7 +77,6 @@ common/temp/
 common/autoinstallers/*/.npmrc
 **/.rush/temp/
 *.lock
-rush-logs/
 
 # Heft temporary files
 .cache
