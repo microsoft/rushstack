@@ -2,14 +2,18 @@
 // See LICENSE in the project root for license information.
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
+import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
+import { NullOperationRunner } from './NullOperationRunner';
 import { Operation } from './Operation';
-import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { OperationMetadataManager } from './OperationMetadataManager';
+import { OperationStatus } from './OperationStatus';
 import { ShellOperationRunner } from './ShellOperationRunner';
 import {
   formatCommand,
@@ -17,11 +21,6 @@ import {
   getDisplayName,
   getScriptToRun
 } from './ShellOperationRunnerPlugin';
-import { NullOperationRunner } from './NullOperationRunner';
-import { OperationStatus } from './OperationStatus';
-import * as path from 'path';
-import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { OperationMetadataManager } from './OperationMetadataManager';
 
 export const PLUGIN_NAME: 'ShardedPhasedOperationPlugin' = 'ShardedPhasedOperationPlugin';
 
@@ -113,14 +112,9 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       }
 
       const customParameters: readonly string[] = getCustomParameterValuesForPhase(phase);
-      const baseCommand: string | undefined = getScriptToRun(
-        project,
-        `${phase.name}:shard`,
-        undefined
-      );
+      const baseCommand: string | undefined = getScriptToRun(project, `${phase.name}:shard`, undefined);
 
-      const shardMissingScriptBehavior: string =
-        shardScriptConfiguration?.missingScriptBehavior ?? 'error';
+      const shardMissingScriptBehavior: string = shardScriptConfiguration?.missingScriptBehavior ?? 'error';
       if (baseCommand === undefined && collatorMissingScriptBehavior === 'error') {
         throw new Error(
           `The project '${project.packageName}' does not define a '${phase.name}:shard' command in the 'scripts' section of its package.json`
