@@ -2,13 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
-import {
-  Async,
-  FileSystem,
-  JsonFile,
-  JsonSchema,
-  type IFileSystemCopyFileOptions
-} from '@rushstack/node-core-library';
+import { Async, FileSystem, JsonFile, type IFileSystemCopyFileOptions } from '@rushstack/node-core-library';
 import {
   type ITerminalChunk,
   TerminalChunkKind,
@@ -91,7 +85,12 @@ export class OperationMetadataManager {
    * Example: `.rush/temp/operation/_phase_build/error.log`
    */
   public get relativeFilepaths(): string[] {
-    return [this.stateFile.relativeFilepath, this._relativeLogPath, this._relativeErrorLogPath];
+    return [
+      this.stateFile.relativeFilepath,
+      this._relativeLogPath,
+      this._relativeErrorLogPath,
+      this._relativeLogChunksPath
+    ];
   }
 
   public async saveAsync({
@@ -139,21 +138,20 @@ export class OperationMetadataManager {
   public async tryRestoreAsync({
     terminal,
     terminalProvider,
-    errorLogPath,
-    logChunksPath
+    errorLogPath
   }: {
     terminalProvider: ITerminalProvider;
     terminal: ITerminal;
-    logPath: string;
     errorLogPath: string;
-    logChunksPath: string;
   }): Promise<void> {
     await this.stateFile.tryRestoreAsync();
 
     let logReadStream: fs.ReadStream | undefined;
     try {
-      if (await FileSystem.existsAsync(logChunksPath)) {
-        const logChunks: ILogChunkStorage = (await JsonFile.loadAsync(logChunksPath)) as ILogChunkStorage;
+      if (await FileSystem.existsAsync(this._logChunksPath)) {
+        const logChunks: ILogChunkStorage = (await JsonFile.loadAsync(
+          this._logChunksPath
+        )) as ILogChunkStorage;
         for (const chunk of logChunks.chunks) {
           const { text, kind } = chunk;
           if (kind === TerminalChunkKind.Stderr) {

@@ -322,7 +322,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           //     has changed happens inside the hashing logic.
           //
 
-          const { logPath, errorLogPath, logChunksPath } = ProjectLogWritable.getLogFilePaths({
+          const { errorLogPath } = ProjectLogWritable.getLogFilePaths({
             project,
             logFilenameIdentifier: phase.logFilenameIdentifier
           });
@@ -346,9 +346,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                   await operationMetadataManager?.tryRestoreAsync({
                     terminalProvider,
                     terminal: buildCacheTerminal,
-                    logPath,
-                    errorLogPath,
-                    logChunksPath
+                    errorLogPath
                   });
                 },
                 { createLogFile: false }

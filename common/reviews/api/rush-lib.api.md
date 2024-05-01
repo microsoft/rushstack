@@ -918,12 +918,10 @@ export class _OperationMetadataManager {
     // (undocumented)
     readonly stateFile: _OperationStateFile;
     // (undocumented)
-    tryRestoreAsync({ terminal, terminalProvider, errorLogPath, logChunksPath }: {
+    tryRestoreAsync({ terminal, terminalProvider, errorLogPath }: {
         terminalProvider: ITerminalProvider;
         terminal: ITerminal;
-        logPath: string;
         errorLogPath: string;
-        logChunksPath: string;
     }): Promise<void>;
 }
 

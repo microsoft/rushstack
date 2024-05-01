@@ -75,7 +75,12 @@ export class ProjectLogWritable extends TerminalWritable {
     relativeErrorLogPath: string;
     relativeLogChunksPath: string;
   } {
-    const logFileBaseName: string = getRelativeLogFilePathBase(project, logFilenameIdentifier, isLegacyLog);
+    const logFileBaseName: string = getRelativeLogFilePathBase(
+      project,
+      logFilenameIdentifier,
+      isLegacyLog,
+      RushConstants.rushLogsFolderName
+    );
 
     const { projectFolder } = project;
     const relativeLogPath: string = `${logFileBaseName}.log`;
@@ -148,8 +153,9 @@ export class ProjectLogWritable extends TerminalWritable {
 export function getRelativeLogFilePathBase(
   project: RushConfigurationProject,
   logFilenameIdentifier: string,
-  isLegacyLog: boolean
-) {
+  isLegacyLog: boolean,
+  phasedCommandsLogFolder?: string
+): string {
   const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
   const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
 
@@ -158,9 +164,9 @@ export function getRelativeLogFilePathBase(
   // If the phased commands experiment is enabled, put logs under `rush-logs`
   let logFolder: string | undefined;
   if (!isLegacyLog && project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
-    const logPathPrefix: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
+    const logPathPrefix: string = `${projectFolder}/${phasedCommandsLogFolder}`;
     FileSystem.ensureFolder(logPathPrefix);
-    logFolder = RushConstants.rushLogsFolderName;
+    logFolder = phasedCommandsLogFolder;
   }
 
   return logFolder ? `${logFolder}/${logFileBaseName}` : logFileBaseName;

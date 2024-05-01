@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 import { TerminalWritable, type ITerminalChunk } from '@rushstack/terminal';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { RushConstants } from '../RushConstants';
 import { getRelativeLogFilePathBase } from './ProjectLogWritable';
 
@@ -51,7 +50,12 @@ export class LogChunksWritable extends TerminalWritable {
   } {
     const { projectFolder } = project;
 
-    const logFileBaseName: string = getRelativeLogFilePathBase(project, logFilenameIdentifier, isLegacyLog);
+    const logFileBaseName: string = getRelativeLogFilePathBase(
+      project,
+      logFilenameIdentifier,
+      isLegacyLog,
+      `.rush/${RushConstants.rushTempFolderName}/operations`
+    );
     const relativeLogChunksPath: string = `${logFileBaseName}.chunks.json`;
     const logChunksPath: string = `${projectFolder}/${relativeLogChunksPath}`;
 
