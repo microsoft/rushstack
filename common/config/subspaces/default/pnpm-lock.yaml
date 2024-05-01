@@ -1426,40 +1426,6 @@ importers:
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
-
-  ../../../build-tests/heft-jest-shards-test:
-    devDependencies:
-      '@jest/types':
-        specifier: 29.5.0
-        version: 29.5.0
-      '@rushstack/heft':
-        specifier: workspace:*
-        version: link:../../apps/heft
-      '@rushstack/heft-jest-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-jest-plugin
-      '@rushstack/heft-lint-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-lint-plugin
-      '@rushstack/heft-typescript-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-typescript-plugin
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
-      local-eslint-config:
-        specifier: workspace:*
-        version: link:../../eslint/local-eslint-config
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
-
   ../../../build-tests/heft-minimal-rig-test:
     dependencies:
       '@microsoft/api-extractor':
