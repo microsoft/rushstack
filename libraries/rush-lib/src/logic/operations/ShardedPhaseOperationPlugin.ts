@@ -44,15 +44,6 @@ export class ShardedPhasedOperationPlugin implements IPhasedCommandPlugin {
 function spliceShards(existingOperations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
   const { projectConfigurations, rushConfiguration } = context;
 
-  const shardableOperations: Set<Operation> = new Set<Operation>();
-
-  for (const operation of existingOperations) {
-    const { associatedPhase: phase, associatedProject: project } = operation;
-    const operationSettings: IOperationSettings | undefined = getOperationSettings(phase, project);
-    if (operationSettings?.sharding) {
-      shardableOperations.add(operation);
-    }
-  }
   const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
     getCustomParameterValuesByPhase();
 
@@ -96,7 +87,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
       if (collatorRawScript) {
         const collatorRunner: ShellOperationRunner = new ShellOperationRunner({
-          commandToRun: collatorRawScript,
+          commandToRun: formatCommand(collatorRawScript, customParameters),
           displayName: collatorDisplayName,
           phase,
           rushConfiguration,
@@ -116,7 +107,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           silent: phase.missingScriptBehavior === 'silent'
         });
       }
-      for (const dependent of operation.consumers) {
+      for (const consumer of operation.consumers) {
         dependent.addDependency(collatorNode);
         dependent.deleteDependency(operation);
       }
@@ -125,10 +116,10 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       const baseCommand: string | undefined = getScriptToRun(
         project,
         `${phase.name}:shard`,
-        phase.shellCommand
+        undefined
       );
 
-      const collatorMissingScriptBehavior: string =
+      const shardMissingScriptBehavior: string =
         shardScriptConfiguration?.missingScriptBehavior ?? 'error';
       if (baseCommand === undefined && collatorMissingScriptBehavior === 'error') {
         throw new Error(
@@ -153,7 +144,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
         const outputFolderArgumentFlag: string =
           operationSettings.sharding.outputFolderArgument?.argumentFlag ?? '--shard-output-directory';
-        const outputDirectory: string = path.join(parentFolder, shard.toString());
+        const outputDirectory: string = `${parentFolder}/${shard}`;
         const outputDirectoryArgument: string = `${outputFolderArgumentFlag}="${outputDirectory}"`;
         const shardedParameters: string[] = [...customParameters, shardArgument, outputDirectoryArgument];
 

@@ -77,7 +77,7 @@ export interface IRushPhaseSharding {
    */
   shardScriptConfiguration?: {
     /**
-     * What should happen if the script is not defined in a project's package.json scripts field. Default is "error".
+     * What should happen if the "_phase:<name>:shard" script is not defined in a project's package.json scripts field. Default is "error".
      */
     missingScriptBehavior?: 'silent' | 'log' | 'error';
   };
