@@ -106,8 +106,6 @@ export interface IJestPluginOptions {
   testTimeout?: number;
   updateSnapshots?: boolean;
   logHeapUsage?: boolean;
-  shard?: string;
-  coverageDirectory?: string;
 }
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
@@ -199,9 +197,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     );
     const testPathPatternParameter: CommandLineStringParameter =
       parameters.getStringParameter('--test-path-pattern');
-    const shard: CommandLineStringParameter = parameters.getStringParameter('--shard');
-    const shardOutputDirectory: CommandLineStringParameter =
-      parameters.getStringParameter('--shard-output-directory');
 
     // String lists
     const findRelatedTestsParameter: CommandLineStringListParameter =
@@ -232,16 +227,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots,
       enableNodeEnvManagement: pluginOptions?.enableNodeEnvManagement ?? true
     };
-
-    if (shard.value) {
-      if (!shardOutputDirectory.value) {
-        throw new Error(
-          'The --shard-output-directory parameter must be provided when using the --shard parameter.'
-        );
-      }
-      options.shard = shard.value;
-      options.coverageDirectory = path.resolve(shardOutputDirectory.value, options.coverageDirectory ?? '');
-    }
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       await this._runJestAsync(taskSession, heftConfiguration, options);
@@ -609,9 +594,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     }
 
     const jestArgv: Config.Argv = {
-      shard: options.shard,
-      coverageDirectory: options.coverageDirectory,
-
       // In debug mode, avoid forking separate processes that are difficult to debug
       runInBand: taskSession.parameters.debug,
       debug: taskSession.parameters.debug,
