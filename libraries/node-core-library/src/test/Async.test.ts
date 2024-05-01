@@ -456,6 +456,28 @@ describe(Async.name, () => {
       expect(fn).toHaveBeenCalledTimes(8);
       expect(maxRunning).toEqual(2);
     });
+
+    it('allows operations with a weight of 0 and schedules them accordingly', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: INumberWithWeight[] = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ n, weight: 0 }));
+
+      array.unshift({ n: 9, weight: 3 });
+
+      array.push({ n: 10, weight: 3 });
+
+      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(0);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachWeightedAsync(array, fn, { concurrency: 3 });
+      expect(fn).toHaveBeenCalledTimes(10);
+      expect(maxRunning).toEqual(9);
+    });
   });
 
   describe(Async.runWithRetriesAsync.name, () => {
