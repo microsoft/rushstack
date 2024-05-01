@@ -102,7 +102,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         await Async.forEachAsync(
           recordByOperation.keys(),
           async (operation: Operation) => {
-            const { associatedProject, associatedPhase, runner } = operation;
+            const { associatedProject, associatedPhase, runner, settings: operationSettings } = operation;
             if (!associatedProject || !associatedPhase || !runner) {
               return;
             }
@@ -123,9 +123,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               );
             }
 
-            const operationSettings: IOperationSettings | undefined =
-              operation.runner?.operationSettings ??
-              projectConfiguration?.operationSettingsByOperationName.get(phaseName);
             const cacheDisabledReason: string | undefined = projectConfiguration
               ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName)
               : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +

@@ -586,6 +586,7 @@ export interface IOperationOptions {
     phase?: IPhase | undefined;
     project?: RushConfigurationProject | undefined;
     runner?: IOperationRunner | undefined;
+    settings?: IOperationSettings | undefined;
 }
 
 // @beta
@@ -595,8 +596,6 @@ export interface IOperationRunner {
     getConfigHash(): string;
     readonly isNoOp?: boolean;
     readonly name: string;
-    // Warning: (ae-incompatible-release-tags) The symbol "operationSettings" is marked as @beta, but its signature references "IOperationSettings" which is marked as @alpha
-    operationSettings?: IOperationSettings;
     reportTiming: boolean;
     silent: boolean;
     warningsAreAllowed: boolean;
@@ -922,6 +921,7 @@ export class Operation {
     readonly dependencies: ReadonlySet<Operation>;
     get name(): string | undefined;
     runner: IOperationRunner | undefined;
+    settings: IOperationSettings | undefined;
     weight: number;
 }
 

@@ -52,7 +52,7 @@ export class OperationMetadataManager {
     const { projectFolder } = rushProject;
 
     this.logFilenameIdentifier = operation.name
-      ? this._normalizeForFileSystem(operation.name)
+      ? normalizeNameForLogFilenameIdentifiers(operation.name)
       : phase.logFilenameIdentifier;
 
     this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${this.logFilenameIdentifier}`;
@@ -66,10 +66,6 @@ export class OperationMetadataManager {
     this._relativeErrorLogPath = `${this._metadataFolder}/error.log`;
     this._logPath = `${projectFolder}/${this._relativeLogPath}`;
     this._errorLogPath = `${projectFolder}/${this._relativeErrorLogPath}`;
-  }
-
-  private _normalizeForFileSystem(name: string): string {
-    return name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '_');
   }
 
   /**
@@ -162,4 +158,8 @@ export class OperationMetadataManager {
       }
     }
   }
+}
+
+export function normalizeNameForLogFilenameIdentifiers(name: string): string {
+  return name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '_');
 }

@@ -3,8 +3,6 @@
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
@@ -12,7 +10,6 @@ import type {
 } from '../../pluginFramework/PhasedCommandHooks';
 import { NullOperationRunner } from './NullOperationRunner';
 import { Operation } from './Operation';
-import { OperationMetadataManager } from './OperationMetadataManager';
 import { OperationStatus } from './OperationStatus';
 import { ShellOperationRunner } from './ShellOperationRunner';
 import {
@@ -40,14 +37,13 @@ export class ShardedPhasedOperationPlugin implements IPhasedCommandPlugin {
 }
 
 function spliceShards(existingOperations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
-  const { projectConfigurations, rushConfiguration } = context;
+  const { rushConfiguration } = context;
 
   const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
     getCustomParameterValuesByPhase();
 
   for (const operation of existingOperations) {
-    const { associatedPhase: phase, associatedProject: project } = operation;
-    const operationSettings: IOperationSettings | undefined = getOperationSettings(phase, project);
+    const { associatedPhase: phase, associatedProject: project, settings: operationSettings } = operation;
     if (phase && project && operationSettings?.sharding && !operation.runner) {
       const { count: shards, shardScriptConfiguration } = operationSettings.sharding;
 
@@ -55,16 +51,11 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
       const collatorNode: Operation = new Operation({
         phase,
-        project
+        project,
+        settings: operationSettings
       });
       existingOperations.add(collatorNode);
 
-      // Create a new one to avoid moving this into `beforeCreateOperation`.
-      const operationMetadataManager: OperationMetadataManager = new OperationMetadataManager({
-        phase,
-        rushProject: project,
-        operation
-      });
       const parentFolderFormat: string =
         operationSettings.sharding.outputFolderArgument?.parentFolderName ??
         `.rush/operations/${phase.logFilenameIdentifier}/shards`;
@@ -88,7 +79,6 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           phase,
           rushConfiguration,
           rushProject: project,
-          operationSettings,
           environment: {
             ...process.env,
             [EnvironmentVariableNames.RUSH_SHARD_PARENT_FOLDER]: parentFolder,
@@ -124,16 +114,21 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         operationSettings.sharding.outputFolderArgument?.parameterLongName ?? '--shard-output-directory';
 
       for (let shard: number = 1; shard <= shards; shard++) {
+        const outputDirectory: string = `${parentFolder}/${shard}`;
+
         const shardOperation: Operation = new Operation({
           project,
-          phase
+          phase,
+          settings: {
+            ...operationSettings,
+            outputFolderNames: [outputDirectory]
+          }
         });
 
         const shardArgument: string = shardArgumentFormat
           .replace(TemplateStrings.SHARD_INDEX, shard.toString())
           .replace(TemplateStrings.SHARD_COUNT, shards.toString());
 
-        const outputDirectory: string = `${parentFolder}/${shard}`;
         const outputDirectoryArgument: string = `${outputFolderArgumentFlag}="${outputDirectory}"`;
         const shardedParameters: string[] = [...customParameters, shardArgument, outputDirectoryArgument];
 
@@ -148,11 +143,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
             displayName: shardDisplayName,
             phase,
             rushConfiguration,
-            rushProject: project,
-            operationSettings: {
-              ...operationSettings,
-              outputFolderNames: [outputDirectory]
-            }
+            rushProject: project
           });
           shardOperation.runner = shardedShellOperationRunner;
         } else {
@@ -176,17 +167,4 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
   }
 
   return existingOperations;
-
-  function getOperationSettings(
-    phase: IPhase | undefined,
-    project: RushConfigurationProject | undefined
-  ): IOperationSettings | undefined {
-    if (!phase || !project) {
-      return undefined;
-    }
-    const rushProjectConfiguration: RushProjectConfiguration | undefined = projectConfigurations.get(project);
-    if (rushProjectConfiguration) {
-      return rushProjectConfiguration.operationSettingsByOperationName.get(phase.name);
-    }
-  }
 }

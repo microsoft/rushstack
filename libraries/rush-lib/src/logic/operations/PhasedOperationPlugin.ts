@@ -12,6 +12,7 @@ import type {
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
+import type { IOperationSettings } from '../../api/RushProjectConfiguration';
 
 const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
 
@@ -33,7 +34,8 @@ function createOperations(
     projectsInUnknownState: changedProjects,
     phaseOriginal,
     phaseSelection,
-    projectSelection
+    projectSelection,
+    projectConfigurations
   } = context;
   const operationsWithWork: Set<Operation> = new Set();
 
@@ -71,10 +73,14 @@ function createOperations(
   function getOrCreateOperation(phase: IPhase, project: RushConfigurationProject): Operation {
     const key: string = getOperationKey(phase, project);
     let operation: Operation | undefined = operations.get(key);
+    const operationSettings: IOperationSettings | undefined = projectConfigurations
+      .get(project)
+      ?.operationSettingsByOperationName.get(phase.name);
     if (!operation) {
       operation = new Operation({
         project,
-        phase
+        phase,
+        settings: operationSettings
       });
 
       if (!phaseSelection.has(phase) || !projectSelection.has(project)) {

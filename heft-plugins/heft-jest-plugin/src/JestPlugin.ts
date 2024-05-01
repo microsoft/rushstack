@@ -240,7 +240,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         );
       }
       options.shard = shard.value;
-      options.coverageDirectory = shardOutputDirectory.value;
+      options.coverageDirectory = path.resolve(shardOutputDirectory.value, options.coverageDirectory ?? '');
     }
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
@@ -596,7 +596,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       jestConfig.displayName = heftConfiguration.projectPackageJson.name;
     }
 
-    let shard: string | undefined;
     let silent: boolean | undefined;
     if (taskSession.parameters.verbose || taskSession.parameters.debug) {
       // If Heft's "--verbose" or "--debug" parameters were used, then we're debugging Jest problems,
@@ -607,11 +606,10 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     } else {
       // If "silent" is specified via IJestPluginOptions, that takes precedence over jest.config.json
       silent = options.silent ?? jestConfig.silent ?? false;
-      shard = options.shard;
     }
 
     const jestArgv: Config.Argv = {
-      shard,
+      shard: options.shard,
       coverageDirectory: options.coverageDirectory,
 
       // In debug mode, avoid forking separate processes that are difficult to debug
