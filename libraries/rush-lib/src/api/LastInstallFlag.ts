@@ -40,6 +40,10 @@ export interface ILastInstallFlagJson {
    */
   storePath?: string;
   /**
+   * An experimental flag used by cleanInstallAfterNpmrcChanges
+   */
+  npmrcHash?: string;
+  /**
    * True when "useWorkspaces" is true in rush.json
    */
   workspaces?: boolean;
@@ -52,12 +56,10 @@ export interface ILastInstallFlagJson {
    * It is undefined when full install
    */
   selectedProjectNames?: string[];
-
-  [key: string]: unknown;
 }
 
 interface ILockfileValidityCheckOptions {
-  statePropertiesToIgnore?: string[];
+  statePropertiesToIgnore?: (keyof ILastInstallFlagJson)[];
   rushVerb?: string;
 }
 

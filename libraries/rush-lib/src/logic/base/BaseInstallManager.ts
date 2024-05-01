@@ -24,7 +24,11 @@ import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
 import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
-import { type LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
+import {
+  type LastInstallFlag,
+  LastInstallFlagFactory,
+  type ILastInstallFlagJson
+} from '../../api/LastInstallFlag';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import type { PurgeManager } from '../PurgeManager';
 import type { RushConfiguration } from '../../api/RushConfiguration';
@@ -169,8 +173,8 @@ export abstract class BaseInstallManager {
         selectedProjectNames: this.options.filteredProjects.map((project) => project.packageName)
       });
     }
-    const optionsToIgnore: string[] | undefined = !this.rushConfiguration.experimentsConfiguration
-      .configuration.cleanInstallAfterNpmrcChanges
+    const optionsToIgnore: (keyof ILastInstallFlagJson)[] | undefined = !this.rushConfiguration
+      .experimentsConfiguration.configuration.cleanInstallAfterNpmrcChanges
       ? ['npmrcHash'] // If the "cleanInstallAfterNpmrcChanges" experiment is disabled, ignore the npmrcHash
       : undefined;
     const cleanInstall: boolean =

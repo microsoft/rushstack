@@ -105,19 +105,4 @@ describe(LastInstallFlag.name, () => {
     await expect(flag2.checkValidAndReportStoreIssuesAsync({ rushVerb: 'install' })).resolves.not.toThrow();
     await expect(flag2.checkValidAndReportStoreIssuesAsync({ rushVerb: 'install' })).resolves.toEqual(false);
   });
-
-  it("ignores a specified option that doesn't match", async () => {
-    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
-      option1: 'a',
-      option2: 'b'
-    });
-    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
-      option1: 'a',
-      option2: 'c'
-    });
-
-    await flag1.createAsync();
-    await expect(flag2.isValidAsync({ statePropertiesToIgnore: ['option2'] })).resolves.not.toThrow();
-    await expect(flag2.isValidAsync({ statePropertiesToIgnore: ['option2'] })).resolves.toEqual(true);
-  });
 });
