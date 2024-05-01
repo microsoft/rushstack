@@ -83,6 +83,31 @@ export class Async {
     return result;
   }
 
+  /**
+   * Given an input array and a `callback` function, invoke the callback to start a
+   * promise for each element in the array.
+   *
+   * @remarks
+   * This API is similar to the system `Array#forEachAsync`, except that each item can have
+   * a weight that determines how many concurrent operations are allowed. `Array#forEachAsync`
+   * is a special case of this method where weight = 1 for all items.
+   *
+   * The maximum number of concurrent operations can still be throttled using
+   * {@link IAsyncParallelismOptions.concurrency}, however it no longer determines the
+   * maximum number of operations that can be in progress at once. Instead, it determines the
+   * number of concurrency units that can be in progress at once. The weight of each operation
+   * determines how many concurrency units it takes up. For example, if the concurrency is 2
+   * and the first operation has a weight of 2, then only one more operation can be in progress.
+   *
+   * If `callback` throws a synchronous exception, or if it returns a promise that rejects,
+   * then the loop stops immediately.  Any remaining array items will be skipped, and
+   * overall operation will reject with the first error that was encountered.
+   *
+   * @param iterable - the array of inputs for the callback function
+   * @param callback - a function that starts an asynchronous promise for an element
+   *   from the array
+   * @param options - options for customizing the control flow
+   */
   public static async forEachWeightedAsync<TEntry extends IWeightedIterable>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
@@ -117,7 +142,7 @@ export class Async {
 
           if (!iteratorIsComplete) {
             // Typescript refuses to narrow the typing here even though gets narrowed with `!currentIteratorResult.done` in the if.
-            const weight: number = (currentIteratorResult.value as TEntry).weight;
+            const weight: number = (currentIteratorResult.value as TEntry).weight ?? 1;
             // If it's a weighted operation then add the rest of the weight, removing concurrent units if weight < 1.
             concurrentUnitsInProgress += weight - 1;
             Promise.resolve(callback(currentIteratorResult.value, arrayIndex++))
