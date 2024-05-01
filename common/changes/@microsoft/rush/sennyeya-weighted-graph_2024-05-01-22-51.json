@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Adds weighted parallelism to operations. Operations can now define an integer weight for how much parallelism they want to take up.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
