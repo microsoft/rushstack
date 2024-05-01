@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Warnings and errors are now shown in the build summary for all cobuild agents",
+      "comment": "Fix an issue where warnings and errors were not shown in the build summary for all cobuild agents.",
       "type": "none"
     }
   ],
