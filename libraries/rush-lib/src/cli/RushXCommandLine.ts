@@ -236,7 +236,7 @@ export class RushXCommandLine {
           );
           await pnpmSyncCopyAsync({
             pnpmSyncJsonPath,
-            ensureFolder: FileSystem.ensureFolderAsync,
+            ensureFolderAsync: FileSystem.ensureFolderAsync,
             forEachAsyncWithConcurrency: Async.forEachAsync,
             getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
             logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
