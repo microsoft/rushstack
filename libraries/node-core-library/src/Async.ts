@@ -36,6 +36,10 @@ export interface IRunWithRetriesOptions<TResult> {
  * @public
  */
 export interface IWeightedIterable {
+  /**
+   * The weight of the element, used to determine the concurrency units that it will take up.
+   *  Must be a whole number >= 0.
+   */
   weight: number;
 }
 
@@ -111,31 +115,6 @@ export class Async {
     return result;
   }
 
-  /**
-   * Given an input array and a `callback` function, invoke the callback to start a
-   * promise for each element in the array.
-   *
-   * @remarks
-   * This API is similar to the system `Array#forEachAsync`, except that each item can have
-   * a weight that determines how many concurrent operations are allowed. `Array#forEachAsync`
-   * is a special case of this method where weight = 1 for all items.
-   *
-   * The maximum number of concurrent operations can still be throttled using
-   * {@link IAsyncParallelismOptions.concurrency}, however it no longer determines the
-   * maximum number of operations that can be in progress at once. Instead, it determines the
-   * number of concurrency units that can be in progress at once. The weight of each operation
-   * determines how many concurrency units it takes up. For example, if the concurrency is 2
-   * and the first operation has a weight of 2, then only one more operation can be in progress.
-   *
-   * If `callback` throws a synchronous exception, or if it returns a promise that rejects,
-   * then the loop stops immediately.  Any remaining array items will be skipped, and
-   * overall operation will reject with the first error that was encountered.
-   *
-   * @param iterable - the array of inputs for the callback function
-   * @param callback - a function that starts an asynchronous promise for an element
-   *   from the array
-   * @param options - options for customizing the control flow
-   */
   private static async _forEachWeightedAsync<TReturn, TEntry extends { weight?: number; element: TReturn }>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TReturn, arrayIndex: number) => Promise<void>,
@@ -234,6 +213,32 @@ export class Async {
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions
   ): Promise<void>;
+
+  /**
+   * Given an input array and a `callback` function, invoke the callback to start a
+   * promise for each element in the array.
+   *
+   * @remarks
+   * This API is similar to the other `Array#forEachAsync`, except that each item can have
+   * a weight that determines how many concurrent operations are allowed. The unweighted
+   * `Array#forEachAsync` is a special case of this method where weight = 1 for all items.
+   *
+   * The maximum number of concurrent operations can still be throttled using
+   * {@link IAsyncParallelismOptions.concurrency}, however it no longer determines the
+   * maximum number of operations that can be in progress at once. Instead, it determines the
+   * number of concurrency units that can be in progress at once. The weight of each operation
+   * determines how many concurrency units it takes up. For example, if the concurrency is 2
+   * and the first operation has a weight of 2, then only one more operation can be in progress.
+   *
+   * If `callback` throws a synchronous exception, or if it returns a promise that rejects,
+   * then the loop stops immediately.  Any remaining array items will be skipped, and
+   * overall operation will reject with the first error that was encountered.
+   *
+   * @param iterable - the array of inputs for the callback function
+   * @param callback - a function that starts an asynchronous promise for an element
+   *   from the array
+   * @param options - options for customizing the control flow
+   */
   public static async forEachAsync<TEntry extends IWeightedIterable>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
