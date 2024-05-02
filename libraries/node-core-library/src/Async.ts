@@ -36,7 +36,7 @@ export interface IRunWithRetriesOptions<TResult> {
  * @public
  */
 export interface IWeightedIterable {
-  weight?: number;
+  weight: number;
 }
 
 function getWeight<T>(element: T): number | undefined {
