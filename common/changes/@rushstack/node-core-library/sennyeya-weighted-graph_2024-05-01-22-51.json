@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "A new `Async.forEachWeightedAsync` method allows weighted parallelism where operations can have more or less than a single parallelism unit.",
+      "comment": "Add a new `Async.forEachWeightedAsync` method that allows each element to specify how much of the allowed parallelism the callback uses.",
       "type": "minor"
     }
   ],
