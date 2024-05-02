@@ -253,7 +253,7 @@ export class OperationExecutionManager {
       return await this._beforeExecuteOperation?.(record);
     };
 
-    await Async.forEachWeightedAsync(
+    await Async.forEachAsync(
       this._executionQueue,
       async (operation: IOperationIteratorResult) => {
         let record: OperationExecutionRecord | undefined;
@@ -281,7 +281,8 @@ export class OperationExecutionManager {
         }
       },
       {
-        concurrency: maxParallelism
+        concurrency: maxParallelism,
+        weighted: true
       }
     );
 

@@ -312,9 +312,7 @@ describe(Async.name, () => {
         Async.forEachAsync(syncIterable, async (item) => await Async.sleep(0))
       ).rejects.toThrow(expectedError);
     });
-  });
 
-  describe(Async.forEachWeightedAsync.name, () => {
     interface INumberWithWeight {
       n: number;
       weight: number;
@@ -333,7 +331,7 @@ describe(Async.name, () => {
         running--;
       });
 
-      await Async.forEachWeightedAsync(array, fn, { concurrency: 3 });
+      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
       expect(fn).toHaveBeenCalledTimes(0);
       expect(maxRunning).toEqual(0);
     });
@@ -351,7 +349,7 @@ describe(Async.name, () => {
         running--;
       });
 
-      await Async.forEachWeightedAsync(array, fn, { concurrency: 3 });
+      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
       expect(fn).toHaveBeenCalledTimes(8);
       expect(maxRunning).toEqual(3);
     });
@@ -397,7 +395,7 @@ describe(Async.name, () => {
           running--;
         });
 
-        await Async.forEachWeightedAsync(array, fn, { concurrency });
+        await Async.forEachAsync(array, fn, { concurrency, weighted: true });
         expect(fn).toHaveBeenCalledTimes(8);
         expect(maxRunning).toEqual(expectedConcurrency);
       }
@@ -425,7 +423,7 @@ describe(Async.name, () => {
         running--;
       });
 
-      await Async.forEachWeightedAsync(array, fn, { concurrency: 3 });
+      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
       expect(fn).toHaveBeenCalledTimes(8);
       expect(maxRunning).toEqual(3);
     });
@@ -452,7 +450,7 @@ describe(Async.name, () => {
         running--;
       });
 
-      await Async.forEachWeightedAsync(array, fn, { concurrency: 3 });
+      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
       expect(fn).toHaveBeenCalledTimes(8);
       expect(maxRunning).toEqual(2);
     });
@@ -474,7 +472,7 @@ describe(Async.name, () => {
         running--;
       });
 
-      await Async.forEachWeightedAsync(array, fn, { concurrency: 3 });
+      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
       expect(fn).toHaveBeenCalledTimes(10);
       expect(maxRunning).toEqual(9);
     });
