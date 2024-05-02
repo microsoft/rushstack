@@ -38,7 +38,7 @@ export interface IRunWithRetriesOptions<TResult> {
 export interface IWeightedIterable {
   /**
    * The weight of the element, used to determine the concurrency units that it will take up.
-   *  Must be a whole number >= 0.
+   *  Must be a whole number greater than or equal to 0.
    */
   weight: number;
 }

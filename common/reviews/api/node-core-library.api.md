@@ -26,7 +26,6 @@ export class AlreadyReportedError extends Error {
 // @public
 export class Async {
     static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions): Promise<void>;
-    // (undocumented)
     static forEachAsync<TEntry extends IWeightedIterable>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options: IAsyncParallelismOptions & {
         weighted: true;
     }): Promise<void>;
@@ -608,7 +607,6 @@ export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
 
 // @public (undocumented)
 export interface IWeightedIterable {
-    // (undocumented)
     weight: number;
 }
 
