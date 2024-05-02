@@ -242,6 +242,13 @@
       }
     },
 
+    "@serverless-stack/core": {
+      "dependencies": {
+        // A type was changed after this release, which breaks the build
+        "@trpc/server": "9.16.0"
+      }
+    },
+
     "@serverless-stack/resources": {
       "dependencies": {
         "esbuild": "*"
