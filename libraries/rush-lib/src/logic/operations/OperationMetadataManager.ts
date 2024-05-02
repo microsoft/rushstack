@@ -10,6 +10,7 @@ import {
   type ITerminal,
   type ITerminalProvider
 } from '@rushstack/terminal';
+import { pipeline } from 'node:stream/promises';
 
 import { OperationStateFile } from './OperationStateFile';
 import { RushConstants } from '../RushConstants';
@@ -75,7 +76,7 @@ export class OperationMetadataManager {
 
     this._relativeLogPath = `${this._metadataFolder}/all.log`;
     this._relativeErrorLogPath = `${this._metadataFolder}/error.log`;
-    this._relativeLogChunksPath = `${this._metadataFolder}/log-chunks.json`;
+    this._relativeLogChunksPath = `${this._metadataFolder}/log-chunks.jsonl`;
     this._logPath = `${projectFolder}/${this._relativeLogPath}`;
     this._errorLogPath = `${projectFolder}/${this._relativeErrorLogPath}`;
     this._logChunksPath = `${projectFolder}/${this._relativeLogChunksPath}`;
@@ -153,24 +154,22 @@ export class OperationMetadataManager {
     let logReadStream: fs.ReadStream | undefined;
     try {
       if (await FileSystem.existsAsync(this._logChunksPath)) {
-        await new Promise((resolve, reject) => {
-          logReadStream = fs.createReadStream(this._logChunksPath, {
-            encoding: 'utf-8'
-          });
-          const pipeline: Chain = chain([
-            parser(),
-            function process({ text, kind }: ITerminalChunk) {
-              if (kind === TerminalChunkKind.Stderr) {
-                terminalProvider.write(text, TerminalProviderSeverity.error);
-              } else {
-                terminalProvider.write(text, TerminalProviderSeverity.log);
-              }
-            }
-          ]);
-          const fileReadPipeline: Chain = logReadStream.pipe(pipeline);
-          fileReadPipeline.on('end', resolve);
-          fileReadPipeline.on('error', reject);
+        logReadStream = fs.createReadStream(this._logChunksPath, {
+          encoding: 'utf-8'
         });
+        const processing: Chain = chain([
+          logReadStream,
+          parser(),
+          function process({ value: chunk }: { value: ITerminalChunk }) {
+            const { kind, text } = chunk;
+            if (kind === TerminalChunkKind.Stderr) {
+              terminalProvider.write(text, TerminalProviderSeverity.error);
+            } else {
+              terminalProvider.write(text, TerminalProviderSeverity.log);
+            }
+          }
+        ]);
+        await pipeline(logReadStream, processing);
       } else {
         logReadStream = fs.createReadStream(this._logPath, {
           encoding: 'utf-8'
