@@ -8,8 +8,8 @@ import type {
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import { IOperationExecutionResult } from './IOperationExecutionResult';
-import { OperationExecutionRecord } from './OperationExecutionRecord';
+import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { OperationExecutionRecord } from './OperationExecutionRecord';
 
 const PLUGIN_NAME: 'WeightedOperationPlugin' = 'WeightedOperationPlugin';
 
