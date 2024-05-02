@@ -354,6 +354,24 @@ describe(Async.name, () => {
       expect(maxRunning).toEqual(3);
     });
 
+    it('if concurrency is set but weighted is not, ensures no more than N operations occur in parallel and ignores operation weight', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: INumberWithWeight[] = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ weight: 2, n }));
+
+      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(0);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachAsync(array, fn, { concurrency: 3 });
+      expect(fn).toHaveBeenCalledTimes(8);
+      expect(maxRunning).toEqual(3);
+    });
+
     it.each([
       {
         concurrency: 4,
