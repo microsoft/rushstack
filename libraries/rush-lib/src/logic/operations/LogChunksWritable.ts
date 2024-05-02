@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile } from '@rushstack/node-core-library';
 import { TerminalWritable, type ITerminalChunk } from '@rushstack/terminal';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
 import { getRelativeLogFilePathBase } from './ProjectLogWritable';
+
+import Stringer from 'stream-json/jsonl/Stringer';
+import { chain } from 'stream-chain';
+import type Chain from 'stream-chain';
+import * as fs from 'fs';
 
 /**
  * A new terminal stream that writes all log chunks to a JSON format so they can be faithfully reconstructed
@@ -17,7 +21,10 @@ export class LogChunksWritable extends TerminalWritable {
   public readonly logChunksPath: string;
   public readonly relativeLogChunksPath: string;
 
+  private readonly _writeChain: Chain;
+
   private readonly _chunks: ITerminalChunk[] = [];
+  private readonly _chunkFileStream: fs.WriteStream;
 
   public constructor(
     project: RushConfigurationProject,
@@ -34,6 +41,10 @@ export class LogChunksWritable extends TerminalWritable {
     });
     this.logChunksPath = logChunksPath;
     this.relativeLogChunksPath = relativeLogChunksPath;
+
+    this._chunkFileStream = fs.createWriteStream(logChunksPath);
+
+    this._writeChain = chain([new Stringer(), this._chunkFileStream]);
   }
 
   public static getLogFilePaths({
@@ -56,7 +67,7 @@ export class LogChunksWritable extends TerminalWritable {
       isLegacyLog,
       `.rush/${RushConstants.rushTempFolderName}/operations`
     );
-    const relativeLogChunksPath: string = `${logFileBaseName}.chunks.json`;
+    const relativeLogChunksPath: string = `${logFileBaseName}.chunks.jsonl`;
     const logChunksPath: string = `${projectFolder}/${relativeLogChunksPath}`;
 
     return {
@@ -66,10 +77,11 @@ export class LogChunksWritable extends TerminalWritable {
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
-    this._chunks.push(chunk);
-    JsonFile.save({ chunks: this._chunks }, this.logChunksPath, {
-      ensureFolderExists: true,
-      updateExistingFile: true
-    });
+    this._writeChain.write(chunk);
+  }
+
+  protected onClose(): void {
+    this._writeChain.end();
+    this._chunkFileStream.close();
   }
 }

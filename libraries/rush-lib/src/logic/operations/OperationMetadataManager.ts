@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
-import { Async, FileSystem, JsonFile, type IFileSystemCopyFileOptions } from '@rushstack/node-core-library';
+import { Async, FileSystem, type IFileSystemCopyFileOptions } from '@rushstack/node-core-library';
 import {
   type ITerminalChunk,
   TerminalChunkKind,
@@ -17,6 +17,10 @@ import { RushConstants } from '../RushConstants';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
+
+import { parser } from 'stream-json/jsonl/Parser';
+import { chain } from 'stream-chain';
+import type Chain from 'stream-chain';
 
 /**
  * @internal
@@ -149,17 +153,24 @@ export class OperationMetadataManager {
     let logReadStream: fs.ReadStream | undefined;
     try {
       if (await FileSystem.existsAsync(this._logChunksPath)) {
-        const logChunks: ILogChunkStorage = (await JsonFile.loadAsync(
-          this._logChunksPath
-        )) as ILogChunkStorage;
-        for (const chunk of logChunks.chunks) {
-          const { text, kind } = chunk;
-          if (kind === TerminalChunkKind.Stderr) {
-            terminalProvider.write(text, TerminalProviderSeverity.error);
-          } else {
-            terminalProvider.write(text, TerminalProviderSeverity.log);
-          }
-        }
+        await new Promise((resolve, reject) => {
+          logReadStream = fs.createReadStream(this._logChunksPath, {
+            encoding: 'utf-8'
+          });
+          const pipeline: Chain = chain([
+            parser(),
+            function process({ text, kind }: ITerminalChunk) {
+              if (kind === TerminalChunkKind.Stderr) {
+                terminalProvider.write(text, TerminalProviderSeverity.error);
+              } else {
+                terminalProvider.write(text, TerminalProviderSeverity.log);
+              }
+            }
+          ]);
+          const fileReadPipeline: Chain = logReadStream.pipe(pipeline);
+          fileReadPipeline.on('end', resolve);
+          fileReadPipeline.on('error', reject);
+        });
       } else {
         logReadStream = fs.createReadStream(this._logPath, {
           encoding: 'utf-8'

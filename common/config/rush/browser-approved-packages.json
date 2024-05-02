@@ -99,6 +99,14 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
+      "name": "stream-chain",
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "stream-json",
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
       "name": "tslib",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     }
