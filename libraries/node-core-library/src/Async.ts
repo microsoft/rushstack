@@ -227,18 +227,12 @@ export class Async {
    * @param callback - a function that starts an asynchronous promise for an element
    *   from the array
    * @param options - options for customizing the control flow
-   *
-   *  {@label UNWEIGHTED}
    */
   public static async forEachAsync<TEntry>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions
   ): Promise<void>;
-
-  /**
-   *  {@label WEIGHTED}
-   */
   public static async forEachAsync<TEntry extends IWeightedIterable>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
