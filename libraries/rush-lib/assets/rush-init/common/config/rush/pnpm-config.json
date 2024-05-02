@@ -122,6 +122,17 @@
   /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": true,
 
   /**
+   * If true, then `rush update` will do injected install for all cross-subspace
+   * workspace dependencies, to avoid subspace doppelganger issue.
+   *
+   * Here, the injected install refers to PNPM's PNPM's "injected dependencies"
+   * feature. Learn more: https://pnpm.io/package_json#dependenciesmeta
+   *
+   * The default value is false.
+   */
+   "autoInjectedInstallForCrossSubspaceWorkspaceDependency": false,
+
+  /**
    * Defines the policies to be checked for the `pnpm-lock.yaml` file.
    */
    "pnpmLockfilePolicies": {

@@ -11,6 +11,7 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { RushConstants } from '../RushConstants';
 import type { Subspace } from '../../api/Subspace';
+import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,
@@ -115,11 +116,13 @@ export class SubspacePnpmfileConfiguration {
     const processTransitiveInjectedInstallQueue: Array<RushConfigurationProject> = [];
 
     for (const subspaceProject of subspaceProjectsMap.values()) {
+      const injectedDependencySet: Set<string> = new Set();
       const dependenciesMeta: IDependenciesMetaTable | undefined =
         subspaceProject.packageJson.dependenciesMeta;
       if (dependenciesMeta) {
         for (const [dependencyName, { injected }] of Object.entries(dependenciesMeta)) {
           if (injected) {
+            injectedDependencySet.add(dependencyName);
             projectNameToInjectedDependenciesMap.get(subspaceProject.packageName)?.add(dependencyName);
 
             //if this dependency is in the same subspace, leave as it is, PNPM will handle it
@@ -128,6 +131,24 @@ export class SubspacePnpmfileConfiguration {
             if (!subspaceProjectsMap.has(dependencyName)) {
               processTransitiveInjectedInstallQueue.push(workspaceProjectsMap.get(dependencyName)!);
             }
+          }
+        }
+      }
+
+      // if autoInjectedInstallForCrossSubspaceWorkspaceDependency policy is true in pnpm-config.json
+      // and the dependency is not injected yet
+      // and the dependency is in another subspace
+      // then, make this dependency as injected dependency
+      const pnpmOptions: PnpmOptionsConfiguration | undefined =
+        subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
+      if (pnpmOptions && pnpmOptions.autoInjectedInstallForCrossSubspaceWorkspaceDependency) {
+        const dependencyProjects: ReadonlySet<RushConfigurationProject> = subspaceProject.dependencyProjects;
+        for (const dependencyProject of dependencyProjects) {
+          const dependencyName: string = dependencyProject.packageName;
+          if (!injectedDependencySet.has(dependencyName) && !subspaceProjectsMap.has(dependencyName)) {
+            projectNameToInjectedDependenciesMap.get(subspaceProject.packageName)?.add(dependencyName);
+            // process transitive injected installation
+            processTransitiveInjectedInstallQueue.push(workspaceProjectsMap.get(dependencyName)!);
           }
         }
       }
