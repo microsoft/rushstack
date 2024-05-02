@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a config to pnpm-config.json about injected install behaviour for cross subspace workspace dependencies ",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
