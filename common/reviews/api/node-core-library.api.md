@@ -609,7 +609,7 @@ export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
 // @public (undocumented)
 export interface IWeightedIterable {
     // (undocumented)
-    weight?: number;
+    weight: number;
 }
 
 // @public
