@@ -44,10 +44,7 @@ export interface IWeightedIterable {
 }
 
 function getWeight<T>(element: T): number | undefined {
-  if (typeof element === 'object' && element !== null) {
-    return 'weight' in element ? (element.weight as number) : undefined;
-  }
-  return undefined;
+  return (element as unknown as IWeightedIterable)?.weight;
 }
 
 function toWeightedIterator<TEntry>(
@@ -63,7 +60,7 @@ function toWeightedIterator<TEntry>(
       next: async () => {
         const { value, done } = await Promise.resolve(iterator.next());
         return {
-          value: { element: value, weight: useWeights ? getWeight(value) : 1 },
+          value: { element: value, weight: useWeights ? (value as unknown as IWeightedIterator).weight : 1 },
           done
         };
       }
@@ -249,13 +246,9 @@ export class Async {
   public static async forEachAsync<TEntry>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
-    options?: IAsyncParallelismOptions & { weighted?: true }
+    options?: IAsyncParallelismOptions
   ): Promise<void> {
-    if (options?.weighted) {
-      return Async._forEachWeightedAsync(toWeightedIterator(iterable, true), callback, options);
-    }
-
-    return Async._forEachWeightedAsync(toWeightedIterator(iterable), callback, options);
+    await Async._forEachWeightedAsync(toWeightedIterator(iterable, options?.weighted), callback, options);
   }
 
   /**
