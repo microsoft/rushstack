@@ -245,6 +245,11 @@ export class RushConfigurationProject {
       if (FileSystem.isNotExistError(error as Error)) {
         throw new Error(`Could not find package.json for ${packageName} at ${packageJsonFilename}`);
       }
+
+      // Encountered an error while loading the package.json file. Please append the error message with the corresponding file location.
+      if ((error as Error).name === 'SyntaxError') {
+        error.message = `${error.message}\nFilename: ${packageJsonFilename}`;
+      }
       throw error;
     }
 
