@@ -25,23 +25,19 @@ export class AlreadyReportedError extends Error {
 
 // @public
 export class Async {
-    static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: {
-        concurrency: number;
+    static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: (IAsyncParallelismOptions & {
         weighted?: false;
-    } | undefined): Promise<void>;
-    static forEachAsync<TEntry extends IWeighted>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options: {
-        concurrency: number;
+    }) | undefined): Promise<void>;
+    static forEachAsync<TEntry extends IWeighted>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options: IAsyncParallelismOptions & {
         weighted: true;
     }): Promise<void>;
     static getSignal(): [Promise<void>, () => void, (err: Error) => void];
-    static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: {
-        concurrency: number;
+    static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: (IAsyncParallelismOptions & {
         weighted?: false;
-    } | undefined): Promise<TRetVal[]>;
-    static mapAsync<TEntry extends IWeighted, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options: {
-        concurrency: number;
+    }) | undefined): Promise<TRetVal[]>;
+    static mapAsync<TEntry extends IWeighted, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options: IAsyncParallelismOptions & {
         weighted: true;
-    } | undefined): Promise<TRetVal[]>;
+    }): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
     // (undocumented)
