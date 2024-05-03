@@ -5,14 +5,16 @@
  * Options for controlling the parallelism of asynchronous operations.
  *
  * @remarks
- * Used with {@link Async.mapAsync} and {@link (Async:class).(forEachAsync:2)}.
+ * Used with {@link (Async:class).(mapAsync:1)}, {@link (Async:class).(mapAsync:2)} and
+ * {@link (Async:class).(forEachAsync:1)}, and {@link (Async:class).(forEachAsync:2)}.
  *
  * @public
  */
 export interface IAsyncParallelismOptions {
   /**
-   * Optionally used with the  {@link Async.mapAsync}, {@link (Async:class).(forEachAsync:1)}, and
-   * {@link (Async:class).(forEachAsync:2)} to limit the maximum number of concurrent promises to the specified number.
+   * Optionally used with the  {@link (Async:class).(mapAsync:1)}, {@link (Async:class).(mapAsync:2)} and
+   * {@link (Async:class).(forEachAsync:1)}, and {@link (Async:class).(forEachAsync:2)} to limit the maximum
+   * number of concurrent promises to the specified number.
    */
   concurrency?: number;
 
@@ -41,7 +43,7 @@ export interface IRunWithRetriesOptions<TResult> {
  *
  * @public
  */
-export interface IWeightedIterable {
+export interface IWeighted {
   /**
    * The weight of the element, used to determine the concurrency units that it will take up.
    *  Must be a whole number greater than or equal to 0.
@@ -100,10 +102,43 @@ export class Async {
   public static async mapAsync<TEntry, TRetVal>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>,
+    options?: (IAsyncParallelismOptions & { weighted?: false }) | undefined
+  ): Promise<TRetVal[]>;
+
+  /**
+   * Given an input array and a `callback` function, invoke the callback to start a
+   * promise for each element in the array.  Returns an array containing the results.
+   *
+   * @remarks
+   * This API is similar to the system `Array#map`, except that the loop is asynchronous,
+   * and the maximum number of concurrent units can be throttled
+   * using {@link IAsyncParallelismOptions.concurrency}. Using the {@link IAsyncParallelismOptions.weighted}
+   * option, the weight of each operation can be specified, which determines how many concurrent units it takes up.
+   *
+   * If `callback` throws a synchronous exception, or if it returns a promise that rejects,
+   * then the loop stops immediately.  Any remaining array items will be skipped, and
+   * overall operation will reject with the first error that was encountered.
+   *
+   * @param iterable - the array of inputs for the callback function
+   * @param callback - a function that starts an asynchronous promise for an element
+   *   from the array
+   * @param options - options for customizing the control flow
+   * @returns an array containing the result for each callback, in the same order
+   *   as the original input `array`
+   */
+  public static async mapAsync<TEntry extends IWeighted, TRetVal>(
+    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
+    callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>,
+    options: IAsyncParallelismOptions & { weighted: true }
+  ): Promise<TRetVal[]>;
+  public static async mapAsync<TEntry, TRetVal>(
+    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
+    callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>,
     options?: IAsyncParallelismOptions | undefined
   ): Promise<TRetVal[]> {
     const result: TRetVal[] = [];
 
+    // @ts-expect-error https://github.com/microsoft/TypeScript/issues/22609, it succeeds against the implementation but fails against the overloads
     await Async.forEachAsync(
       iterable,
       async (item: TEntry, arrayIndex: number): Promise<void> => {
@@ -214,7 +249,7 @@ export class Async {
   public static async forEachAsync<TEntry>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
-    options?: IAsyncParallelismOptions
+    options?: (IAsyncParallelismOptions & { weighted?: false }) | undefined
   ): Promise<void>;
 
   /**
@@ -242,7 +277,7 @@ export class Async {
    *   from the array
    * @param options - options for customizing the control flow
    */
-  public static async forEachAsync<TEntry extends IWeightedIterable>(
+  public static async forEachAsync<TEntry extends IWeighted>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
     options: IAsyncParallelismOptions & { weighted: true }
@@ -287,7 +322,7 @@ export class Async {
     }
   }
 
-  public static validateWeightedIterable(operation: IWeightedIterable): void {
+  public static validateWeightedIterable(operation: IWeighted): void {
     if (operation.weight < 0) {
       throw new Error('Weight must be a whole number greater than or equal to 0');
     }

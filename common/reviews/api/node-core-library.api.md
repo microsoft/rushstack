@@ -25,16 +25,27 @@ export class AlreadyReportedError extends Error {
 
 // @public
 export class Async {
-    static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions): Promise<void>;
-    static forEachAsync<TEntry extends IWeightedIterable>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options: IAsyncParallelismOptions & {
+    static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: {
+        concurrency: number;
+        weighted?: false;
+    } | undefined): Promise<void>;
+    static forEachAsync<TEntry extends IWeighted>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options: {
+        concurrency: number;
         weighted: true;
     }): Promise<void>;
     static getSignal(): [Promise<void>, () => void, (err: Error) => void];
-    static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
+    static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: {
+        concurrency: number;
+        weighted?: false;
+    } | undefined): Promise<TRetVal[]>;
+    static mapAsync<TEntry extends IWeighted, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options: {
+        concurrency: number;
+        weighted: true;
+    } | undefined): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
     // (undocumented)
-    static validateWeightedIterable(operation: IWeightedIterable): void;
+    static validateWeightedIterable(operation: IWeighted): void;
 }
 
 // @public
@@ -609,7 +620,7 @@ export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
 }
 
 // @public (undocumented)
-export interface IWeightedIterable {
+export interface IWeighted {
     weight: number;
 }
 
