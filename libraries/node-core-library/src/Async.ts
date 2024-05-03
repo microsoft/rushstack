@@ -16,6 +16,10 @@ export interface IAsyncParallelismOptions {
    */
   concurrency?: number;
 
+  /**
+   * Optionally used with the {@link (Async:class).(forEachAsync:2)} to enable weighted operations where an operation can
+   * take up more or less than one concurrency unit.
+   */
   weighted?: boolean;
 }
 
