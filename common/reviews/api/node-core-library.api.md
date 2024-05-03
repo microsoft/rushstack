@@ -230,7 +230,6 @@ export type FolderItem = fs.Dirent;
 // @public
 export interface IAsyncParallelismOptions {
     concurrency?: number;
-    // (undocumented)
     weighted?: boolean;
 }
 
