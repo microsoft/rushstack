@@ -33,6 +33,8 @@ export class Async {
     static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
+    // (undocumented)
+    static validateWeightedIterable(operation: IWeightedIterable): void;
 }
 
 // @public
@@ -228,6 +230,8 @@ export type FolderItem = fs.Dirent;
 // @public
 export interface IAsyncParallelismOptions {
     concurrency?: number;
+    // (undocumented)
+    weighted?: boolean;
 }
 
 // @public

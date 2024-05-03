@@ -10,6 +10,7 @@ import type {
 import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
+import { Async } from '@rushstack/node-core-library';
 
 const PLUGIN_NAME: 'WeightedOperationPlugin' = 'WeightedOperationPlugin';
 
@@ -43,11 +44,7 @@ function weightOperations(
         operation.weight = operationSettings.weight;
       }
     }
-    if (operation.weight < 0) {
-      throw new Error(`The weight of the operation '${operation.name}' cannot be negative.`);
-    } else if (operation.weight % 1 !== 0) {
-      throw new Error(`The weight of the operation '${operation.name}' cannot be a decimal.`);
-    }
+    Async.validateWeightedIterable(operation);
   }
   return operations;
 }

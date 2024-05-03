@@ -15,6 +15,8 @@ export interface IAsyncParallelismOptions {
    * {@link (Async:class).(forEachAsync:2)} to limit the maximum number of concurrent promises to the specified number.
    */
   concurrency?: number;
+
+  weighted?: boolean;
 }
 
 /**
@@ -43,25 +45,22 @@ export interface IWeightedIterable {
   weight: number;
 }
 
-function getWeight<T>(element: T): number | undefined {
-  return (element as unknown as IWeightedIterable)?.weight;
-}
-
 function toWeightedIterator<TEntry>(
   iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
-  useWeights: boolean = false
-): AsyncIterable<{ element: TEntry; weighted?: number }> {
-  const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
+  useWeights?: boolean
+): AsyncIterable<{ element: TEntry; weight: number }> {
+  const iterator: Iterator<TEntry> | AsyncIterator<TEntry, TEntry> = (
     (iterable as Iterable<TEntry>)[Symbol.iterator] ||
     (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
   ).call(iterable);
   return {
     [Symbol.asyncIterator]: () => ({
       next: async () => {
-        const { value, done } = await Promise.resolve(iterator.next());
+        // The await is necessary here, but TS will complain - it's a false positive.
+        const { value, done } = await iterator.next();
         return {
-          value: { element: value, weight: useWeights ? (value as unknown as IWeightedIterator).weight : 1 },
-          done
+          value: { element: value, weight: useWeights ? value?.weight : 1 },
+          done: !!done
         };
       }
     })
@@ -112,7 +111,7 @@ export class Async {
     return result;
   }
 
-  private static async _forEachWeightedAsync<TReturn, TEntry extends { weight?: number; element: TReturn }>(
+  private static async _forEachWeightedAsync<TReturn, TEntry extends { weight: number; element: TReturn }>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TReturn, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions | undefined
@@ -146,7 +145,8 @@ export class Async {
 
           if (!iteratorIsComplete) {
             const currentIteratorValue: TEntry = currentIteratorResult.value;
-            const weight: number = Math.min(currentIteratorValue.weight ?? 1, concurrency);
+            Async.validateWeightedIterable(currentIteratorValue);
+            const weight: number = Math.min(currentIteratorValue.weight, concurrency);
             // If it's a weighted operation then add the rest of the weight, removing concurrent units if weight < 1.
             // Cap it to the concurrency limit, otherwise higher weights can cause issues in the case where 0 weighted
             // operations are present.
@@ -280,6 +280,15 @@ export class Async {
           await Async.sleep(retryDelayMs);
         }
       }
+    }
+  }
+
+  public static validateWeightedIterable(operation: IWeightedIterable): void {
+    if (operation.weight < 0) {
+      throw new Error('Weight must be a whole number greater than or equal to 0');
+    }
+    if (operation.weight % 1 !== 0) {
+      throw new Error('Weight must be a whole number greater than or equal to 0');
     }
   }
 
