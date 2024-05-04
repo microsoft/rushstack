@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Provide the filename of the error package.json file",
+      "comment": "Provide the file path if there is an error parsing a `package.json` file.",
       "type": "none"
     }
   ],
