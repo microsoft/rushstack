@@ -40,7 +40,6 @@ export class Async {
     }): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
-    // (undocumented)
     static validateWeightedIterable(operation: IWeighted): void;
 }
 

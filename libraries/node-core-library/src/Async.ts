@@ -39,7 +39,7 @@ export interface IRunWithRetriesOptions<TResult> {
 
 /**
  * @remarks
- * Used with {@link (Async:class).(forEachAsync:2)}.
+ * Used with {@link (Async:class).(forEachAsync:2)} and {@link (Async:class).(mapAsync:2)}.
  *
  * @public
  */
@@ -322,6 +322,10 @@ export class Async {
     }
   }
 
+  /**
+   * Ensures that the argument is a valid {@link IWeighted}, with a `weight` argument that
+   * is a positive integer or 0.
+   */
   public static validateWeightedIterable(operation: IWeighted): void {
     if (operation.weight < 0) {
       throw new Error('Weight must be a whole number greater than or equal to 0');
