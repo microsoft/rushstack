@@ -247,7 +247,7 @@ export class RushConfigurationProject {
       }
 
       // Encountered an error while loading the package.json file. Please append the error message with the corresponding file location.
-      if ((error as Error).name === 'SyntaxError') {
+      if (error instanceof SyntaxError) {
         error.message = `${error.message}\nFilename: ${packageJsonFilename}`;
       }
       throw error;
