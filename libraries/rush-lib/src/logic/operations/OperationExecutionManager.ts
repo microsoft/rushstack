@@ -262,7 +262,7 @@ export class OperationExecutionManager {
          * This happens when some operations run remotely. So, we should try to get a remote executing operation
          * from the queue manually here.
          */
-        if (operation === UNASSIGNED_OPERATION) {
+        if (operation.status === UNASSIGNED_OPERATION) {
           // Pause for a few time
           await Async.sleep(5000);
           record = this._executionQueue.tryGetRemoteExecutingOperation();
@@ -281,7 +281,8 @@ export class OperationExecutionManager {
         }
       },
       {
-        concurrency: maxParallelism
+        concurrency: maxParallelism,
+        weighted: true
       }
     );
 

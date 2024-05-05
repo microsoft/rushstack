@@ -5,16 +5,24 @@
  * Options for controlling the parallelism of asynchronous operations.
  *
  * @remarks
- * Used with {@link Async.mapAsync} and {@link Async.forEachAsync}.
+ * Used with {@link (Async:class).(mapAsync:1)}, {@link (Async:class).(mapAsync:2)} and
+ * {@link (Async:class).(forEachAsync:1)}, and {@link (Async:class).(forEachAsync:2)}.
  *
  * @public
  */
 export interface IAsyncParallelismOptions {
   /**
-   * Optionally used with the  {@link Async.mapAsync} and {@link Async.forEachAsync}
-   * to limit the maximum number of concurrent promises to the specified number.
+   * Optionally used with the  {@link (Async:class).(mapAsync:1)}, {@link (Async:class).(mapAsync:2)} and
+   * {@link (Async:class).(forEachAsync:1)}, and {@link (Async:class).(forEachAsync:2)} to limit the maximum
+   * number of concurrent promises to the specified number.
    */
   concurrency?: number;
+
+  /**
+   * Optionally used with the {@link (Async:class).(forEachAsync:2)} to enable weighted operations where an operation can
+   * take up more or less than one concurrency unit.
+   */
+  weighted?: boolean;
 }
 
 /**
@@ -27,6 +35,42 @@ export interface IRunWithRetriesOptions<TResult> {
   action: () => Promise<TResult> | TResult;
   maxRetries: number;
   retryDelayMs?: number;
+}
+
+/**
+ * @remarks
+ * Used with {@link (Async:class).(forEachAsync:2)} and {@link (Async:class).(mapAsync:2)}.
+ *
+ * @public
+ */
+export interface IWeighted {
+  /**
+   * The weight of the element, used to determine the concurrency units that it will take up.
+   *  Must be a whole number greater than or equal to 0.
+   */
+  weight: number;
+}
+
+function toWeightedIterator<TEntry>(
+  iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
+  useWeights?: boolean
+): AsyncIterable<{ element: TEntry; weight: number }> {
+  const iterator: Iterator<TEntry> | AsyncIterator<TEntry, TEntry> = (
+    (iterable as Iterable<TEntry>)[Symbol.iterator] ||
+    (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
+  ).call(iterable);
+  return {
+    [Symbol.asyncIterator]: () => ({
+      next: async () => {
+        // The await is necessary here, but TS will complain - it's a false positive.
+        const { value, done } = await iterator.next();
+        return {
+          value: { element: value, weight: useWeights ? value?.weight : 1 },
+          done: !!done
+        };
+      }
+    })
+  };
 }
 
 /**
@@ -58,10 +102,43 @@ export class Async {
   public static async mapAsync<TEntry, TRetVal>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>,
+    options?: (IAsyncParallelismOptions & { weighted?: false }) | undefined
+  ): Promise<TRetVal[]>;
+
+  /**
+   * Given an input array and a `callback` function, invoke the callback to start a
+   * promise for each element in the array.  Returns an array containing the results.
+   *
+   * @remarks
+   * This API is similar to the system `Array#map`, except that the loop is asynchronous,
+   * and the maximum number of concurrent units can be throttled
+   * using {@link IAsyncParallelismOptions.concurrency}. Using the {@link IAsyncParallelismOptions.weighted}
+   * option, the weight of each operation can be specified, which determines how many concurrent units it takes up.
+   *
+   * If `callback` throws a synchronous exception, or if it returns a promise that rejects,
+   * then the loop stops immediately.  Any remaining array items will be skipped, and
+   * overall operation will reject with the first error that was encountered.
+   *
+   * @param iterable - the array of inputs for the callback function
+   * @param callback - a function that starts an asynchronous promise for an element
+   *   from the array
+   * @param options - options for customizing the control flow
+   * @returns an array containing the result for each callback, in the same order
+   *   as the original input `array`
+   */
+  public static async mapAsync<TEntry extends IWeighted, TRetVal>(
+    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
+    callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>,
+    options: IAsyncParallelismOptions & { weighted: true }
+  ): Promise<TRetVal[]>;
+  public static async mapAsync<TEntry, TRetVal>(
+    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
+    callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>,
     options?: IAsyncParallelismOptions | undefined
   ): Promise<TRetVal[]> {
     const result: TRetVal[] = [];
 
+    // @ts-expect-error https://github.com/microsoft/TypeScript/issues/22609, it succeeds against the implementation but fails against the overloads
     await Async.forEachAsync(
       iterable,
       async (item: TEntry, arrayIndex: number): Promise<void> => {
@@ -71,6 +148,84 @@ export class Async {
     );
 
     return result;
+  }
+
+  private static async _forEachWeightedAsync<TReturn, TEntry extends { weight: number; element: TReturn }>(
+    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
+    callback: (entry: TReturn, arrayIndex: number) => Promise<void>,
+    options?: IAsyncParallelismOptions | undefined
+  ): Promise<void> {
+    await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
+      const concurrency: number =
+        options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
+      let concurrentUnitsInProgress: number = 0;
+
+      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
+        (iterable as Iterable<TEntry>)[Symbol.iterator] ||
+        (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
+      ).call(iterable);
+
+      let arrayIndex: number = 0;
+      let iteratorIsComplete: boolean = false;
+      let promiseHasResolvedOrRejected: boolean = false;
+
+      async function queueOperationsAsync(): Promise<void> {
+        while (
+          concurrentUnitsInProgress < concurrency &&
+          !iteratorIsComplete &&
+          !promiseHasResolvedOrRejected
+        ) {
+          // Increment the concurrency while waiting for the iterator.
+          // This function is reentrant, so this ensures that at most `concurrency` executions are waiting
+          concurrentUnitsInProgress++;
+          const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
+          // eslint-disable-next-line require-atomic-updates
+          iteratorIsComplete = !!currentIteratorResult.done;
+
+          if (!iteratorIsComplete) {
+            const currentIteratorValue: TEntry = currentIteratorResult.value;
+            Async.validateWeightedIterable(currentIteratorValue);
+            const weight: number = Math.min(currentIteratorValue.weight, concurrency);
+            // If it's a weighted operation then add the rest of the weight, removing concurrent units if weight < 1.
+            // Cap it to the concurrency limit, otherwise higher weights can cause issues in the case where 0 weighted
+            // operations are present.
+            concurrentUnitsInProgress += weight - 1;
+            Promise.resolve(callback(currentIteratorValue.element, arrayIndex++))
+              .then(async () => {
+                concurrentUnitsInProgress -= weight;
+                await onOperationCompletionAsync();
+              })
+              .catch((error) => {
+                promiseHasResolvedOrRejected = true;
+                reject(error);
+              });
+          } else {
+            // The iterator is complete and there wasn't a value, so untrack the waiting state.
+            concurrentUnitsInProgress--;
+          }
+        }
+
+        if (iteratorIsComplete) {
+          await onOperationCompletionAsync();
+        }
+      }
+
+      async function onOperationCompletionAsync(): Promise<void> {
+        if (!promiseHasResolvedOrRejected) {
+          if (concurrentUnitsInProgress === 0 && iteratorIsComplete) {
+            promiseHasResolvedOrRejected = true;
+            resolve();
+          } else if (!iteratorIsComplete) {
+            await queueOperationsAsync();
+          }
+        }
+      }
+
+      queueOperationsAsync().catch((error) => {
+        promiseHasResolvedOrRejected = true;
+        reject(error);
+      });
+    });
   }
 
   /**
@@ -94,68 +249,45 @@ export class Async {
   public static async forEachAsync<TEntry>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
-    options?: IAsyncParallelismOptions | undefined
+    options?: (IAsyncParallelismOptions & { weighted?: false }) | undefined
+  ): Promise<void>;
+
+  /**
+   * Given an input array and a `callback` function, invoke the callback to start a
+   * promise for each element in the array.
+   *
+   * @remarks
+   * This API is similar to the other `Array#forEachAsync`, except that each item can have
+   * a weight that determines how many concurrent operations are allowed. The unweighted
+   * `Array#forEachAsync` is a special case of this method where weight = 1 for all items.
+   *
+   * The maximum number of concurrent operations can still be throttled using
+   * {@link IAsyncParallelismOptions.concurrency}, however it no longer determines the
+   * maximum number of operations that can be in progress at once. Instead, it determines the
+   * number of concurrency units that can be in progress at once. The weight of each operation
+   * determines how many concurrency units it takes up. For example, if the concurrency is 2
+   * and the first operation has a weight of 2, then only one more operation can be in progress.
+   *
+   * If `callback` throws a synchronous exception, or if it returns a promise that rejects,
+   * then the loop stops immediately.  Any remaining array items will be skipped, and
+   * overall operation will reject with the first error that was encountered.
+   *
+   * @param iterable - the array of inputs for the callback function
+   * @param callback - a function that starts an asynchronous promise for an element
+   *   from the array
+   * @param options - options for customizing the control flow
+   */
+  public static async forEachAsync<TEntry extends IWeighted>(
+    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
+    callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
+    options: IAsyncParallelismOptions & { weighted: true }
+  ): Promise<void>;
+  public static async forEachAsync<TEntry>(
+    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
+    callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
+    options?: IAsyncParallelismOptions
   ): Promise<void> {
-    await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
-      const concurrency: number =
-        options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
-      let operationsInProgress: number = 0;
-
-      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
-        (iterable as Iterable<TEntry>)[Symbol.iterator] ||
-        (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
-      ).call(iterable);
-
-      let arrayIndex: number = 0;
-      let iteratorIsComplete: boolean = false;
-      let promiseHasResolvedOrRejected: boolean = false;
-
-      async function queueOperationsAsync(): Promise<void> {
-        while (operationsInProgress < concurrency && !iteratorIsComplete && !promiseHasResolvedOrRejected) {
-          // Increment the concurrency while waiting for the iterator.
-          // This function is reentrant, so this ensures that at most `concurrency` executions are waiting
-          operationsInProgress++;
-          const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
-          // eslint-disable-next-line require-atomic-updates
-          iteratorIsComplete = !!currentIteratorResult.done;
-
-          if (!iteratorIsComplete) {
-            Promise.resolve(callback(currentIteratorResult.value, arrayIndex++))
-              .then(async () => {
-                operationsInProgress--;
-                await onOperationCompletionAsync();
-              })
-              .catch((error) => {
-                promiseHasResolvedOrRejected = true;
-                reject(error);
-              });
-          } else {
-            // The iterator is complete and there wasn't a value, so untrack the waiting state.
-            operationsInProgress--;
-          }
-        }
-
-        if (iteratorIsComplete) {
-          await onOperationCompletionAsync();
-        }
-      }
-
-      async function onOperationCompletionAsync(): Promise<void> {
-        if (!promiseHasResolvedOrRejected) {
-          if (operationsInProgress === 0 && iteratorIsComplete) {
-            promiseHasResolvedOrRejected = true;
-            resolve();
-          } else if (!iteratorIsComplete) {
-            await queueOperationsAsync();
-          }
-        }
-      }
-
-      queueOperationsAsync().catch((error) => {
-        promiseHasResolvedOrRejected = true;
-        reject(error);
-      });
-    });
+    await Async._forEachWeightedAsync(toWeightedIterator(iterable, options?.weighted), callback, options);
   }
 
   /**
@@ -187,6 +319,19 @@ export class Async {
           await Async.sleep(retryDelayMs);
         }
       }
+    }
+  }
+
+  /**
+   * Ensures that the argument is a valid {@link IWeighted}, with a `weight` argument that
+   * is a positive integer or 0.
+   */
+  public static validateWeightedIterable(operation: IWeighted): void {
+    if (operation.weight < 0) {
+      throw new Error('Weight must be a whole number greater than or equal to 0');
+    }
+    if (operation.weight % 1 !== 0) {
+      throw new Error('Weight must be a whole number greater than or equal to 0');
     }
   }
 

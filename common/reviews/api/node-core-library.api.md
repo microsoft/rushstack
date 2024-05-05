@@ -25,11 +25,22 @@ export class AlreadyReportedError extends Error {
 
 // @public
 export class Async {
-    static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
+    static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: (IAsyncParallelismOptions & {
+        weighted?: false;
+    }) | undefined): Promise<void>;
+    static forEachAsync<TEntry extends IWeighted>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options: IAsyncParallelismOptions & {
+        weighted: true;
+    }): Promise<void>;
     static getSignal(): [Promise<void>, () => void, (err: Error) => void];
-    static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
+    static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: (IAsyncParallelismOptions & {
+        weighted?: false;
+    }) | undefined): Promise<TRetVal[]>;
+    static mapAsync<TEntry extends IWeighted, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options: IAsyncParallelismOptions & {
+        weighted: true;
+    }): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
+    static validateWeightedIterable(operation: IWeighted): void;
 }
 
 // @public
@@ -225,6 +236,7 @@ export type FolderItem = fs.Dirent;
 // @public
 export interface IAsyncParallelismOptions {
     concurrency?: number;
+    weighted?: boolean;
 }
 
 // @public
@@ -600,6 +612,11 @@ export interface IWaitForExitWithBufferOptions extends IWaitForExitOptions {
 // @public
 export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
     encoding: BufferEncoding;
+}
+
+// @public (undocumented)
+export interface IWeighted {
+    weight: number;
 }
 
 // @public

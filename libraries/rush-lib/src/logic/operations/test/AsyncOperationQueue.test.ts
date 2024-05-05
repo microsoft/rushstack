@@ -47,7 +47,7 @@ describe(AsyncOperationQueue.name, () => {
     const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, nullSort);
     for await (const operation of queue) {
       actualOrder.push(operation);
-      if (operation === UNASSIGNED_OPERATION) {
+      if (operation.status === UNASSIGNED_OPERATION) {
         hasUnassignedOperation = true;
         continue;
       }
@@ -76,7 +76,7 @@ describe(AsyncOperationQueue.name, () => {
     const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, customSort);
     for await (const operation of queue) {
       actualOrder.push(operation);
-      if (operation === UNASSIGNED_OPERATION) {
+      if (operation.status === UNASSIGNED_OPERATION) {
         hasUnassignedOperation = true;
         continue;
       }
@@ -135,7 +135,7 @@ describe(AsyncOperationQueue.name, () => {
     await Promise.all(
       Array.from({ length: 3 }, async () => {
         for await (const operation of queue) {
-          if (operation === UNASSIGNED_OPERATION) {
+          if (operation.status === UNASSIGNED_OPERATION) {
             hasUnassignedOperation = true;
             continue;
           }
@@ -184,7 +184,7 @@ describe(AsyncOperationQueue.name, () => {
     let remoteExecuted: boolean = false;
     for await (const operation of queue) {
       let record: OperationExecutionRecord | undefined;
-      if (operation === UNASSIGNED_OPERATION) {
+      if (operation.status === UNASSIGNED_OPERATION) {
         await Async.sleep(100);
         record = queue.tryGetRemoteExecutingOperation();
       } else {
