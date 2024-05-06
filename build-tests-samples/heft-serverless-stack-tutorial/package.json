@@ -13,21 +13,23 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "local-eslint-config": "workspace:*",
+    "@aws-sdk/client-sso-oidc": "^3.567.0",
+    "@aws-sdk/client-sts": "^3.567.0",
+    "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-serverless-stack-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@rushstack/heft": "workspace:*",
     "@serverless-stack/aws-lambda-ric": "^2.0.12",
-    "@serverless-stack/cli": "0.67.0",
-    "@serverless-stack/resources": "0.67.0",
+    "@serverless-stack/cli": "1.18.4",
+    "@serverless-stack/resources": "1.18.4",
     "@types/aws-lambda": "8.10.93",
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
     "aws-cdk-lib": "2.80.0",
     "constructs": "~10.0.98",
     "eslint": "~8.57.0",
+    "local-eslint-config": "workspace:*",
     "typescript": "~5.4.2"
   }
 }

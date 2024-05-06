@@ -3,6 +3,14 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
+      "name": "@aws-sdk/client-sso-oidc",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@aws-sdk/client-sts",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@azure/identity",
       "allowedCategories": [ "libraries" ]
     },
