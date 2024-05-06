@@ -177,11 +177,10 @@ export abstract class BaseInstallManager {
       .experimentsConfiguration.configuration.cleanInstallAfterNpmrcChanges
       ? ['npmrcHash'] // If the "cleanInstallAfterNpmrcChanges" experiment is disabled, ignore the npmrcHash
       : undefined;
-    const cleanInstall: boolean =
-      !(await commonTempInstallFlag.checkValidAndReportStoreIssuesAsync({
-        rushVerb: allowShrinkwrapUpdates ? 'update' : 'install',
-        statePropertiesToIgnore: optionsToIgnore
-      }));
+    const cleanInstall: boolean = !(await commonTempInstallFlag.checkValidAndReportStoreIssuesAsync({
+      rushVerb: allowShrinkwrapUpdates ? 'update' : 'install',
+      statePropertiesToIgnore: optionsToIgnore
+    }));
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
@@ -262,7 +261,7 @@ export abstract class BaseInstallManager {
     // Perform any post-install work the install manager requires
     await this.postInstallAsync(subspace);
     // Create the marker file to indicate a successful install
-    commonTempInstallFlag.create();
+    await commonTempInstallFlag.createAsync();
 
     // eslint-disable-next-line no-console
     console.log('');

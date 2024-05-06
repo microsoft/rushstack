@@ -90,8 +90,8 @@ export class LastInstallFlag {
   /**
    * Returns true if the file exists and the contents match the current state.
    */
-  public isValid(options?: ILockfileValidityCheckOptions): boolean {
-    return this._isValid(false, options);
+  public async isValidAsync(options?: ILockfileValidityCheckOptions): Promise<boolean> {
+    return await this._isValidAsync(false, options);
   }
 
   /**
@@ -183,8 +183,8 @@ export class LastInstallFlag {
   /**
    * Writes the flag file to disk with the current state
    */
-  public create(): void {
-    JsonFile.save(this._state, this.path, {
+  public async createAsync(): Promise<void> {
+    await JsonFile.saveAsync(this._state, this.path, {
       ensureFolderExists: true
     });
   }
@@ -202,8 +202,8 @@ export class LastInstallFlag {
   /**
    * Removes the flag file
    */
-  public clear(): void {
-    FileSystem.deleteFile(this.path);
+  public async clearAsync(): Promise<void> {
+    await FileSystem.deleteFileAsync(this.path);
   }
 
   /**
