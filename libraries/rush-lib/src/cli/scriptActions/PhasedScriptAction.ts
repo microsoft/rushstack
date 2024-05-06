@@ -676,7 +676,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         `  Press <${quitKey}> to gracefully exit.`,
         `  Press <${toggleWatcherKey}> to ${isPaused ? 'resume' : 'pause'}.`,
         `  Press <${invalidateKey}> to invalidate all projects.`,
-        `  Press <${changedProjectsOnlyKey}> to ${this._changedProjectsOnly ? 'disable' : 'enable'} changed-projects-only mode (${this._changedProjectsOnly ? 'ENABLED' : 'DISABLED'}).`
+        `  Press <${changedProjectsOnlyKey}> to ${
+          this._changedProjectsOnly ? 'disable' : 'enable'
+        } changed-projects-only mode (${this._changedProjectsOnly ? 'ENABLED' : 'DISABLED'}).`
       ];
       if (isPaused) {
         promptLines.push(`  Press <${buildOnceKey}> to build once.`);
@@ -820,8 +822,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     // eslint-disable-next-line no-constant-condition
     while (!abortSignal.aborted) {
       // On the initial invocation, this promise will return immediately with the full set of projects
-      const { changedProjects, inputsSnapshot: state } =
-        await projectWatcher.waitForChangeAsync(onWaitingForChanges);
+      const { changedProjects, inputsSnapshot: state } = await projectWatcher.waitForChangeAsync(
+        onWaitingForChanges
+      );
 
       if (abortSignal.aborted) {
         return;

@@ -590,6 +590,7 @@ export interface IOperationExecutionResult {
     getStateHashComponents(): ReadonlyArray<string>;
     readonly logFilePaths: ILogFilePaths | undefined;
     readonly metadataFolderPath: string | undefined;
+    readonly executedOnThisAgent: boolean;
     readonly nonCachedDurationMs: number | undefined;
     readonly operation: Operation;
     readonly silent: boolean;

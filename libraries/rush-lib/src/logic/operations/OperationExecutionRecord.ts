@@ -24,11 +24,6 @@ import { OperationMetadataManager } from './OperationMetadataManager';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import {
-  getProjectLogFilePaths,
-  type ILogFilePaths,
-  initializeProjectLogFilesAsync
-} from './ProjectLogWritable';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import { RushConstants } from '../RushConstants';
@@ -40,6 +35,7 @@ export interface IOperationExecutionRecordContext {
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
   inputsSnapshot: IInputsSnapshot | undefined;
 
+  cobuildConfiguration?: CobuildConfiguration;
   debugMode: boolean;
   quietMode: boolean;
 }
@@ -192,6 +188,13 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public get isTerminal(): boolean {
     return TERMINAL_STATUSES.has(this.status);
+  }
+
+  public get executedOnThisAgent(): boolean {
+    return (
+      !!this._context.cobuildConfiguration &&
+      this._context.cobuildConfiguration?.cobuildRunnerId !== this.cobuildRunnerId
+    );
   }
 
   /**
@@ -381,8 +384,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         this.status = this.operation.enabled
           ? await this.runner.executeAsync(this)
           : this.runner.isNoOp
-            ? OperationStatus.NoOp
-            : OperationStatus.Skipped;
+          ? OperationStatus.NoOp
+          : OperationStatus.Skipped;
       }
       // Delegate global state reporting
       await onResult(this);
@@ -396,6 +399,15 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         this._collatedWriter?.close();
         this.stdioSummarizer.close();
         this.stopwatch.stop();
+        if (!this.executedOnThisAgent && this.nonCachedDurationMs) {
+          const { startTime } = this.stopwatch;
+          if (startTime) {
+            this.stopwatch = Stopwatch.fromState({
+              startTime,
+              endTime: startTime + this.nonCachedDurationMs
+            });
+          }
+        }
       }
     }
   }
