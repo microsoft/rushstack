@@ -25,9 +25,9 @@ export class FlagFile<T extends object = JsonObject> {
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
    */
-  public constructor(folderPath: string, flagName: string, state?: Partial<T>) {
-    this.path = path.join(folderPath, `${flagName}.flag`);
-    this._state = (state || {}) as T;
+  public constructor(folderPath: string, flagName: string, initialState?: Partial<T> = {}) {
+    this.path = `${folderPath}/${flagName}.flag`;
+    this._state = initialState;
   }
 
   /**
