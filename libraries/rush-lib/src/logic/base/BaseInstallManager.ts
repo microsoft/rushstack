@@ -166,7 +166,7 @@ export abstract class BaseInstallManager {
       : undefined;
     const cleanInstall: boolean =
       isFilteredInstall ||
-      !commonTempInstallFlag.checkValidAndReportStoreIssues({
+      !commonTempInstallFlag.checkValidAndReportStoreIssuesAsync({
         rushVerb: allowShrinkwrapUpdates ? 'update' : 'install',
         statePropertiesToIgnore: optionsToIgnore
       });
@@ -199,11 +199,11 @@ export abstract class BaseInstallManager {
       }
 
       // Delete the successful install file to indicate the install transaction has started
-      commonTempInstallFlag.clear();
+      await commonTempInstallFlag.clearAsync();
 
       // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
       // this ensures that a full "rush link" is required next time
-      this._commonTempLinkFlag.clear();
+      await this._commonTempLinkFlag.clearAsync();
 
       // Give plugins an opportunity to act before invoking the installation process
       if (this.options.beforeInstallAsync !== undefined) {
@@ -249,7 +249,7 @@ export abstract class BaseInstallManager {
 
     // Create the marker file to indicate a successful install if it's not a filtered install
     if (!isFilteredInstall) {
-      commonTempInstallFlag.create();
+      await commonTempInstallFlag.createAsync();
     }
 
     // Perform any post-install work the install manager requires

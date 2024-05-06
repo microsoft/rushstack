@@ -34,7 +34,8 @@ export class RushVersionSelector {
       node: process.versions.node
     });
 
-    if (!installMarker.isValid()) {
+    let installIsValid: boolean = await installMarker.isValidAsync();
+    if (!installIsValid) {
       // Need to install Rush
       console.log(`Rush version ${version} is not currently installed. Installing...`);
 
@@ -43,7 +44,8 @@ export class RushVersionSelector {
       console.log(`Trying to acquire lock for ${resourceName}`);
 
       const lock: LockFile = await LockFile.acquire(expectedRushPath, resourceName);
-      if (installMarker.isValid()) {
+      installIsValid = await installMarker.isValidAsync();
+      if (installIsValid) {
         console.log('Another process performed the installation.');
       } else {
         Utilities.installPackageInDirectory({
@@ -65,7 +67,7 @@ export class RushVersionSelector {
         console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}.`);
 
         // If we've made it here without exception, write the flag file
-        installMarker.create();
+        await installMarker.createAsync();
 
         lock.release();
       }

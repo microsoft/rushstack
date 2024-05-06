@@ -294,7 +294,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         this.rushConfiguration.defaultSubspace
       );
       // Only check for a valid link flag when subspaces is not enabled
-      if (!lastLinkFlag.isValid() && !this.rushConfiguration.subspacesFeatureEnabled) {
+      if (!lastLinkFlag.isValidAsync() && !this.rushConfiguration.subspacesFeatureEnabled) {
         const useWorkspaces: boolean =
           this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
         if (useWorkspaces) {
