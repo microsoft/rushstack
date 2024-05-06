@@ -287,7 +287,7 @@ export class Git {
     const gitPath: string = this.getGitPathOrThrow();
     const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
       'diff',
-      `${targetBranch}...`,
+      targetBranch,
       '--name-only',
       '--no-renames',
       '--diff-filter=A'

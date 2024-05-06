@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Change getChangedFiles to pass ref only in git diff. This is to avoid git determining merge base of given ref and current head",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
