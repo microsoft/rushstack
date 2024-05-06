@@ -26,7 +26,7 @@ export class UnlinkManager {
    *
    * Returns true if anything was deleted.
    */
-  public unlink(force: boolean = false): boolean {
+  public async unlinkAsync(force: boolean = false): Promise<boolean> {
     const useWorkspaces: boolean =
       this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
     if (!force && useWorkspaces) {
@@ -40,7 +40,7 @@ export class UnlinkManager {
       throw new AlreadyReportedError();
     }
 
-    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration.defaultSubspace).clear();
+    await LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration.defaultSubspace).clearAsync();
     return this._deleteProjectFiles();
   }
 

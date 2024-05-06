@@ -171,7 +171,7 @@ export class InstallHelpers {
 
     logIfConsoleOutputIsNotRestricted(`Acquired lock for ${packageManagerAndVersion}`);
 
-    if (!packageManagerMarker.isValid() || lock.dirtyWhenAcquired) {
+    if (!packageManagerMarker.isValidAsync() || lock.dirtyWhenAcquired) {
       logIfConsoleOutputIsNotRestricted(
         Colorize.bold(`Installing ${packageManager} version ${packageManagerVersion}\n`)
       );
@@ -201,7 +201,7 @@ export class InstallHelpers {
       );
     }
 
-    packageManagerMarker.create();
+    await packageManagerMarker.createAsync();
 
     // Example: "C:\MyRepo\common\temp"
     FileSystem.ensureFolder(rushConfiguration.commonTempFolder);

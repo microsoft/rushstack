@@ -859,13 +859,13 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 // @internal
 export class _LastInstallFlag {
     constructor(folderPath: string, state?: JsonObject);
-    checkValidAndReportStoreIssues(options: _ILockfileValidityCheckOptions & {
+    checkValidAndReportStoreIssuesAsync(options: _ILockfileValidityCheckOptions & {
         rushVerb: string;
-    }): boolean;
-    clear(): void;
-    create(): void;
+    }): Promise<boolean>;
+    clearAsync(): Promise<void>;
+    createAsync(): Promise<void>;
     protected get flagName(): string;
-    isValid(options?: _ILockfileValidityCheckOptions): boolean;
+    isValidAsync(options?: _ILockfileValidityCheckOptions): Promise<boolean>;
     readonly path: string;
 }
 

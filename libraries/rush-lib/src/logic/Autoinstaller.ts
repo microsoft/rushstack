@@ -125,7 +125,7 @@ export class Autoinstaller {
       // Example: ../common/autoinstallers/my-task/node_modules
       const nodeModulesFolder: string = `${autoinstallerFullPath}/${RushConstants.nodeModulesFolderName}`;
       const flagPath: string = `${nodeModulesFolder}/rush-autoinstaller.flag`;
-      const isLastInstallFlagDirty: boolean = !lastInstallFlag.isValid() || !FileSystem.exists(flagPath);
+      const isLastInstallFlagDirty: boolean = !lastInstallFlag.isValidAsync() || !FileSystem.exists(flagPath);
 
       if (isLastInstallFlagDirty || lock.dirtyWhenAcquired) {
         if (FileSystem.exists(nodeModulesFolder)) {
@@ -151,7 +151,7 @@ export class Autoinstaller {
         });
 
         // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
-        lastInstallFlag.create();
+        await lastInstallFlag.createAsync();
 
         FileSystem.writeFile(
           flagPath,

@@ -16,10 +16,10 @@ export class LastLinkFlag extends LastInstallFlag {
   /**
    * @override
    */
-  public isValid(): boolean {
+  public async isValidAsync(): Promise<boolean> {
     let oldState: JsonObject | undefined;
     try {
-      oldState = JsonFile.load(this.path);
+      oldState = await JsonFile.loadAsync(this.path);
     } catch (err) {
       // Swallow error
     }
@@ -29,7 +29,7 @@ export class LastLinkFlag extends LastInstallFlag {
   /**
    * @override
    */
-  public checkValidAndReportStoreIssues(): boolean {
+  public checkValidAndReportStoreIssuesAsync(): never {
     throw new InternalError('Not implemented');
   }
 
