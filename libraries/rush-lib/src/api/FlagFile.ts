@@ -56,7 +56,7 @@ export class FlagFile<T extends object = JsonObject> {
   /**
    * Removes the flag file
    */
-  public clear(): void {
-    FileSystem.deleteFile(this.path);
+  public async clearAsync(): Promise<void> {
+    await FileSystem.deleteFileAsync(this.path);
   }
 }
