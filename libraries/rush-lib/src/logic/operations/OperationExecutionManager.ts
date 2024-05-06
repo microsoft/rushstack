@@ -25,6 +25,7 @@ export interface IOperationExecutionManagerOptions {
   parallelism: number;
   changedProjectsOnly: boolean;
   destination?: TerminalWritable;
+  cobuildConfiguration?: CobuildConfiguration;
 
   beforeExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
   afterExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<void>;
@@ -98,6 +99,7 @@ export class OperationExecutionManager {
     this._hasAnyNonAllowedWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
+    this._cobuildConfiguration = cobuildConfiguration;
 
     this._beforeExecuteOperation = beforeExecuteOperation;
     this._afterExecuteOperation = afterExecuteOperation;
@@ -132,7 +134,8 @@ export class OperationExecutionManager {
       onOperationStatusChanged: this._onOperationStatusChanged,
       createEnvironment: this._createEnvironmentForOperation,
       debugMode,
-      quietMode
+      quietMode,
+      cobuildConfiguration: this._cobuildConfiguration
     };
 
     let totalOperations: number = 0;
@@ -273,8 +276,8 @@ export class OperationExecutionManager {
     const status: OperationStatus = this._hasAnyFailures
       ? OperationStatus.Failure
       : this._hasAnyNonAllowedWarnings
-        ? OperationStatus.SuccessWithWarning
-        : OperationStatus.Success;
+      ? OperationStatus.SuccessWithWarning
+      : OperationStatus.Success;
 
     return {
       operationResults: this._executionRecords,
