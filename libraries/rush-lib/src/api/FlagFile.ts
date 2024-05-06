@@ -33,18 +33,15 @@ export class FlagFile<T extends object = JsonObject> {
   /**
    * Returns true if the file exists and the contents match the current state.
    */
-  public isValid(): boolean {
+  public async isValidAsync(): Promise<boolean> {
     let oldState: JsonObject | undefined;
     try {
-      oldState = JsonFile.load(this.path);
+      oldState = await JsonFile.loadAsync(this.path);
       const newState: T = this._state;
-      if (!objectsAreDeepEqual(oldState, newState)) {
-        return false;
-      }
+      return objectsAreDeepEqual(oldState, newState);
     } catch (err) {
       return false;
     }
-    return true;
   }
 
   /**
