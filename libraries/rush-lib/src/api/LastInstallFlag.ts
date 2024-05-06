@@ -70,7 +70,7 @@ interface ILockfileValidityCheckOptions {
  * it can invalidate the last install.
  */
 export class LastInstallFlag {
-  private _state: ILastInstallFlagJson;
+  private _state: Partial<ILastInstallFlagJson>;
 
   /**
    * Returns the full path to the flag file
