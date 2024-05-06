@@ -47,8 +47,8 @@ export class FlagFile<T extends object = JsonObject> {
   /**
    * Writes the flag file to disk with the current state
    */
-  public create(): void {
-    JsonFile.save(this._state, this.path, {
+  public async createAsync(): Promise<void> {
+    await JsonFile.saveAsync(this._state, this.path, {
       ensureFolderExists: true
     });
   }
