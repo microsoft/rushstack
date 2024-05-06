@@ -18,11 +18,11 @@ export interface ILastInstallFlagJson {
   /**
    * Current node version
    */
-  node: string;
+  node?: string;
   /**
    * Current package manager name
    */
-  packageManager: PackageManagerName;
+  packageManager?: PackageManagerName;
   /**
    * Current package manager version
    */
@@ -70,7 +70,7 @@ interface ILockfileValidityCheckOptions {
  * it can invalidate the last install.
  */
 export class LastInstallFlag {
-  private _state: Partial<ILastInstallFlagJson>;
+  private _state: ILastInstallFlagJson;
 
   /**
    * Returns the full path to the flag file

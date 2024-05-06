@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
@@ -18,14 +17,14 @@ export class FlagFile<T extends object = JsonObject> {
   /**
    * Content of the flag
    */
-  protected _state: T;
+  protected _state: Partial<T>;
 
   /**
    * Creates a new flag file
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
    */
-  public constructor(folderPath: string, flagName: string, initialState?: Partial<T> = {}) {
+  public constructor(folderPath: string, flagName: string, initialState: Partial<T> = {}) {
     this.path = `${folderPath}/${flagName}.flag`;
     this._state = initialState;
   }
@@ -37,7 +36,7 @@ export class FlagFile<T extends object = JsonObject> {
     let oldState: JsonObject | undefined;
     try {
       oldState = await JsonFile.loadAsync(this.path);
-      const newState: T = this._state;
+      const newState: Partial<T> = this._state;
       return objectsAreDeepEqual(oldState, newState);
     } catch (err) {
       return false;
