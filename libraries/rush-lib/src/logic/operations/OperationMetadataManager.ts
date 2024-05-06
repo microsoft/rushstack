@@ -54,13 +54,13 @@ export interface ILogChunkStorage {
  */
 export class OperationMetadataManager {
   public readonly stateFile: OperationStateFile;
-  private _metadataFolder: string;
-  private _logPath: string;
-  private _errorLogPath: string;
-  private _logChunksPath: string;
-  private _relativeLogPath: string;
-  private _relativeLogChunksPath: string;
-  private _relativeErrorLogPath: string;
+  private readonly _metadataFolder: string;
+  private readonly _logPath: string;
+  private readonly _errorLogPath: string;
+  private readonly _logChunksPath: string;
+  private readonly _relativeLogPath: string;
+  private readonly _relativeLogChunksPath: string;
+  private readonly _relativeErrorLogPath: string;
 
   public constructor(options: IOperationMetadataManagerOptions) {
     const { rushProject, phase } = options;
@@ -160,7 +160,7 @@ export class OperationMetadataManager {
         const processing: Chain = chain([
           logReadStream,
           parser(),
-          function process({ value: chunk }: { value: ITerminalChunk }) {
+          ({ value: chunk }: { value: ITerminalChunk }) => {
             const { kind, text } = chunk;
             if (kind === TerminalChunkKind.Stderr) {
               terminalProvider.write(text, TerminalProviderSeverity.error);
