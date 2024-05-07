@@ -17,7 +17,7 @@ export class FlagFile<T extends object = JsonObject> {
   /**
    * Content of the flag
    */
-  protected _state: T | undefined;
+  protected _state: T | {};
 
   /**
    * Creates a new flag file
@@ -26,17 +26,17 @@ export class FlagFile<T extends object = JsonObject> {
    */
   public constructor(folderPath: string, flagName: string, initialState?: T) {
     this.path = `${folderPath}/${flagName}.flag`;
-    this._state = initialState;
+    this._state = initialState || {};
   }
 
   /**
    * Returns true if the file exists and the contents match the current state.
    */
   public async isValidAsync(): Promise<boolean> {
-    let oldState: JsonObject | undefined;
+    let oldState: T | undefined;
     try {
       oldState = await JsonFile.loadAsync(this.path);
-      const newState: T | undefined = this._state;
+      const newState: T | {} = this._state;
       return objectsAreDeepEqual(oldState, newState);
     } catch (err) {
       return false;

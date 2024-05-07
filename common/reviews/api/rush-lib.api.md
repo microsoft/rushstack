@@ -317,7 +317,7 @@ export class _FlagFile<T extends object = JsonObject> {
     createAsync(): Promise<void>;
     isValidAsync(): Promise<boolean>;
     readonly path: string;
-    protected _state: T | undefined;
+    protected _state: T | {};
 }
 
 // @beta
