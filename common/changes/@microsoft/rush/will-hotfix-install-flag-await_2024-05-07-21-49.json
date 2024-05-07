@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "This fixes some missing await calls on some async functions",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
