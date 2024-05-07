@@ -128,21 +128,7 @@ function isMatchInner<TObject>(obj: TObject, source: TObject): boolean {
     return false;
   }
 
-  let sourceKeys: (string | number)[] | undefined;
-  if (typeof source === 'object' && source !== null && !Array.isArray(source)) {
-    sourceKeys = Object.keys(source);
-  } else if (Array.isArray(source)) {
-    sourceKeys = new Array(source.length);
-    for (let i: number = 0; i < source.length; i++) {
-      sourceKeys[i] = i;
-    }
-  }
-
-  if (!sourceKeys) {
-    return false;
-  }
-
-  for (const k of sourceKeys) {
+  for (const k of Object.keys(source as object)) {
     const key: keyof TObject = k as keyof TObject;
     const sourceValue: unknown = source[key];
     if (isStrictComparable(sourceValue)) {
