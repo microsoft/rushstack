@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a recent regression where \"rush install\" would sometimes incorrectly determine whether to skip the install",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
