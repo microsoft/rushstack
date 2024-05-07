@@ -17,14 +17,14 @@ export class FlagFile<T extends object = JsonObject> {
   /**
    * Content of the flag
    */
-  protected _state: Partial<T>;
+  protected _state: T | undefined;
 
   /**
    * Creates a new flag file
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
    */
-  public constructor(folderPath: string, flagName: string, initialState: Partial<T> = {}) {
+  public constructor(folderPath: string, flagName: string, initialState?: T) {
     this.path = `${folderPath}/${flagName}.flag`;
     this._state = initialState;
   }
@@ -36,7 +36,7 @@ export class FlagFile<T extends object = JsonObject> {
     let oldState: JsonObject | undefined;
     try {
       oldState = await JsonFile.loadAsync(this.path);
-      const newState: Partial<T> = this._state;
+      const newState: T | undefined = this._state;
       return objectsAreDeepEqual(oldState, newState);
     } catch (err) {
       return false;
