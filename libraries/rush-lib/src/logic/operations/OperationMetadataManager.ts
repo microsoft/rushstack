@@ -10,7 +10,6 @@ import {
   type ITerminal,
   type ITerminalProvider
 } from '@rushstack/terminal';
-import { pipeline } from 'node:stream/promises';
 
 import { OperationStateFile } from './OperationStateFile';
 import { RushConstants } from '../RushConstants';
@@ -18,10 +17,6 @@ import { RushConstants } from '../RushConstants';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
-
-import { parser } from 'stream-json/jsonl/Parser';
-import { chain } from 'stream-chain';
-import type Chain from 'stream-chain';
 
 /**
  * @internal
@@ -154,22 +149,18 @@ export class OperationMetadataManager {
     let logReadStream: fs.ReadStream | undefined;
     try {
       if (await FileSystem.existsAsync(this._logChunksPath)) {
-        logReadStream = fs.createReadStream(this._logChunksPath, {
-          encoding: 'utf-8'
-        });
-        const processing: Chain = chain([
-          logReadStream,
-          parser(),
-          ({ value: chunk }: { value: ITerminalChunk }) => {
-            const { kind, text } = chunk;
-            if (kind === TerminalChunkKind.Stderr) {
-              terminalProvider.write(text, TerminalProviderSeverity.error);
-            } else {
-              terminalProvider.write(text, TerminalProviderSeverity.log);
-            }
+        const chunks: ITerminalChunk[] = (await FileSystem.readFileAsync(this._logChunksPath))
+          .split('\n')
+          // Split by newline and remove the last empty string
+          .slice(0, -1)
+          .map((e) => JSON.parse(e));
+        for (const { kind, text } of chunks) {
+          if (kind === TerminalChunkKind.Stderr) {
+            terminalProvider.write(text, TerminalProviderSeverity.error);
+          } else {
+            terminalProvider.write(text, TerminalProviderSeverity.log);
           }
-        ]);
-        await pipeline(logReadStream, processing);
+        }
       } else {
         logReadStream = fs.createReadStream(this._logPath, {
           encoding: 'utf-8'

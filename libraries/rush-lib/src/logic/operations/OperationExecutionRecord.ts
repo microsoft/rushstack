@@ -202,7 +202,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
         : undefined;
     const logChunksWritable: LogChunksWritable | undefined =
       associatedPhase && associatedProject
-        ? new LogChunksWritable(associatedProject, `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`)
+        ? new LogChunksWritable(
+            associatedProject,
+            this.collatedWriter.terminal,
+            `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`
+          )
         : undefined;
 
     const fileWritables: TerminalWritable[] = [projectLogWritable, logChunksWritable].filter(
@@ -215,8 +219,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       //
       //                             +--> quietModeTransform? --> collatedWriter
       //                             |
-      // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
-      //                                                        |
+      // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> fileWritablesSplitter -> projectLogWritable (optional)
+      //                                                        |               |                                    -> logChunksWritable (optional)
       //                                                        +--> stdioSummarizer
       const destination: TerminalWritable =
         fileWritables.length > 0

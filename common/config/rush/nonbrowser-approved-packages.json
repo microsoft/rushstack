@@ -795,14 +795,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "stream-chain",
-      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
-    },
-    {
-      "name": "stream-json",
-      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
-    },
-    {
       "name": "strict-uri-encode",
       "allowedCategories": [ "libraries" ]
     },
