@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 30 Apr 2024 23:36:50 GMT and should not be manually modified.
+This log was last generated on Tue, 07 May 2024 18:32:36 GMT and should not be manually modified.
+
+## 5.123.0
+Tue, 07 May 2024 18:32:36 GMT
+
+### Updates
+
+- Provide the file path if there is an error parsing a `package.json` file.
+- Timeline view will now only show terminal build statuses as cobuilt, all other statuses will reflect their original icons.
+- Add a `"weight"` property to the `"operation"` object in the project `config/rush-project.json` file that defines an integer weight for how much of the allowed parallelism the operation uses.
+- Optimize skipping of unnecessary installs when using filters such as "rush install --to x"
 
 ## 5.122.1
 Tue, 30 Apr 2024 23:36:50 GMT
