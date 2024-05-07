@@ -3,7 +3,7 @@
 
 import { TerminalWritable, type ITerminalChunk } from '@rushstack/terminal';
 import { FileWriter } from '@rushstack/node-core-library';
-import { CollatedTerminal } from '@rushstack/stream-collator';
+import type { CollatedTerminal } from '@rushstack/stream-collator';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
@@ -94,7 +94,6 @@ export class LogChunksWritable extends TerminalWritable {
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
-    this._terminal.writeStderrLine('writing chunk');
     this._chunkWriter.write(JSON.stringify(chunk) + '\n');
   }
 
