@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 07 May 2024 18:32:36 GMT and should not be manually modified.
+This log was last generated on Tue, 07 May 2024 22:38:00 GMT and should not be manually modified.
+
+## 5.123.1
+Tue, 07 May 2024 22:38:00 GMT
+
+### Updates
+
+- Fix a recent regression where "rush install" would sometimes incorrectly determine whether to skip the install
 
 ## 5.123.0
 Tue, 07 May 2024 18:32:36 GMT
