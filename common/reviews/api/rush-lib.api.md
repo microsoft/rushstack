@@ -310,6 +310,16 @@ export class FileSystemBuildCacheProvider {
     trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<string>;
 }
 
+// @internal
+export class _FlagFile<T extends object = JsonObject> {
+    constructor(folderPath: string, flagName: string, initialState?: T);
+    clearAsync(): Promise<void>;
+    createAsync(): Promise<void>;
+    isValidAsync(): Promise<boolean>;
+    readonly path: string;
+    protected _state: T | {};
+}
+
 // @beta
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
@@ -508,14 +518,6 @@ export interface ILaunchOptions {
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
     terminalProvider?: ITerminalProvider;
-}
-
-// @internal (undocumented)
-export interface _ILockfileValidityCheckOptions {
-    // (undocumented)
-    rushVerb?: string;
-    // (undocumented)
-    statePropertiesToIgnore?: string[];
 }
 
 // @beta (undocumented)
@@ -854,19 +856,6 @@ export interface ITryFindRushJsonLocationOptions {
 // @internal
 export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
     ignoreEngines?: boolean;
-}
-
-// @internal
-export class _LastInstallFlag {
-    constructor(folderPath: string, state?: JsonObject);
-    checkValidAndReportStoreIssuesAsync(options: _ILockfileValidityCheckOptions & {
-        rushVerb: string;
-    }): Promise<boolean>;
-    clearAsync(): Promise<void>;
-    createAsync(): Promise<void>;
-    protected get flagName(): string;
-    isValidAsync(options?: _ILockfileValidityCheckOptions): Promise<boolean>;
-    readonly path: string;
 }
 
 // @public
@@ -1318,6 +1307,7 @@ export class RushConstants {
     static readonly experimentsFilename: 'experiments.json';
     static readonly globalCommandKind: 'global';
     static readonly hashDelimiter: '|';
+    static readonly lastLinkFlagFilename: 'last-link';
     static readonly mergeQueueIgnoreFileName: '.mergequeueignore';
     static readonly nodeModulesFolderName: 'node_modules';
     static readonly nonbrowserApprovedPackagesFilename: 'nonbrowser-approved-packages.json';

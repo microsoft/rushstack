@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Optimize skipping of unnecessary installs when using filters such as \"rush install --to x\"",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

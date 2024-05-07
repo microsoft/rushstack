@@ -6,7 +6,7 @@ import * as semver from 'semver';
 
 import { LockFile } from '@rushstack/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
-import { _LastInstallFlag, _RushGlobalFolder, type ILaunchOptions } from '@microsoft/rush-lib';
+import { _FlagFile, _RushGlobalFolder, type ILaunchOptions } from '@microsoft/rush-lib';
 
 import { RushCommandSelector } from './RushCommandSelector';
 import type { MinimalRushConfiguration } from './MinimalRushConfiguration';
@@ -30,7 +30,7 @@ export class RushVersionSelector {
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
     const expectedRushPath: string = path.join(this._rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
 
-    const installMarker: _LastInstallFlag = new _LastInstallFlag(expectedRushPath, {
+    const installMarker: _FlagFile = new _FlagFile(expectedRushPath, 'last-install', {
       node: process.versions.node
     });
 

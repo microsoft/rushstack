@@ -26,7 +26,6 @@ import {
 } from '../../logic/operations/OperationExecutionManager';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { type LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
@@ -48,6 +47,7 @@ import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
 import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
 import type { ProjectWatcher } from '../../logic/ProjectWatcher';
+import { FlagFile } from '../../api/FlagFile';
 import { WeightedOperationPlugin } from '../../logic/operations/WeightedOperationPlugin';
 
 /**
@@ -290,11 +290,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     if (!this._runsBeforeInstall) {
       // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are removed
-      const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(
-        this.rushConfiguration.defaultSubspace
+      const lastLinkFlag: FlagFile = new FlagFile(
+        this.rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
+        RushConstants.lastLinkFlagFilename
       );
       // Only check for a valid link flag when subspaces is not enabled
-      if (!lastLinkFlag.isValidAsync() && !this.rushConfiguration.subspacesFeatureEnabled) {
+      if (!(await lastLinkFlag.isValidAsync()) && !this.rushConfiguration.subspacesFeatureEnabled) {
         const useWorkspaces: boolean =
           this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
         if (useWorkspaces) {

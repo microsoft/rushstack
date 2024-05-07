@@ -20,9 +20,10 @@ import './mockRushCommandLineParser';
 import * as path from 'path';
 import { FileSystem, JsonFile, Path, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
-import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
+import { RushConstants } from '../../logic/RushConstants';
+import { FlagFile } from '../../api/FlagFile';
 
 /**
  * See `__mocks__/child_process.js`.
@@ -103,8 +104,10 @@ async function getCommandLineParserInstanceAsync(
 
   // Bulk tasks are hard-coded to expect install to have been completed. So, ensure the last-link.flag
   // file exists and is valid
-  // TODO: Support subspaces
-  await LastLinkFlagFactory.getCommonTempFlag(parser.rushConfiguration.defaultSubspace).createAsync();
+  await new FlagFile(
+    parser.rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
+    RushConstants.lastLinkFlagFilename
+  ).createAsync();
 
   // Mock the command
   process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', taskName];

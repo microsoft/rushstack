@@ -24,8 +24,11 @@ import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
 import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
-import { type LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
-import { type LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import {
+  type LastInstallFlag,
+  LastInstallFlagFactory,
+  type ILastInstallFlagJson
+} from '../../api/LastInstallFlag';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import type { PurgeManager } from '../PurgeManager';
 import type { RushConfiguration } from '../../api/RushConfiguration';
@@ -45,6 +48,7 @@ import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
 import type { Subspace } from '../../api/Subspace';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
+import { FlagFile } from '../../api/FlagFile';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -59,7 +63,7 @@ const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit'
  * This class implements common logic between "rush install" and "rush update".
  */
 export abstract class BaseInstallManager {
-  private readonly _commonTempLinkFlag: LastLinkFlag;
+  private readonly _commonTempLinkFlag: FlagFile;
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
 
@@ -84,7 +88,10 @@ export abstract class BaseInstallManager {
     this.installRecycler = purgeManager.commonTempFolderRecycler;
     this.options = options;
 
-    this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(options.subspace);
+    this._commonTempLinkFlag = new FlagFile(
+      options.subspace.getSubspaceTempFolder(),
+      RushConstants.lastLinkFlagFilename
+    );
 
     this.subspaceInstallFlags = new Map();
     if (rushConfiguration.subspacesFeatureEnabled) {
@@ -99,7 +106,7 @@ export abstract class BaseInstallManager {
 
   public async doInstallAsync(): Promise<void> {
     const { allowShrinkwrapUpdates } = this.options;
-    const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
+    const isFilteredInstall: boolean = this.options.filteredProjects.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
     // Prevent filtered installs when workspaces is disabled
@@ -160,16 +167,20 @@ export abstract class BaseInstallManager {
       subspace,
       { npmrcHash: npmrcHash || '<NO NPMRC>' }
     );
-    const optionsToIgnore: string[] | undefined = !this.rushConfiguration.experimentsConfiguration
-      .configuration.cleanInstallAfterNpmrcChanges
+    if (isFilteredInstall) {
+      // Get the projects involved in this filtered install
+      commonTempInstallFlag.mergeFromObject({
+        selectedProjectNames: this.options.filteredProjects.map((project) => project.packageName)
+      });
+    }
+    const optionsToIgnore: (keyof ILastInstallFlagJson)[] | undefined = !this.rushConfiguration
+      .experimentsConfiguration.configuration.cleanInstallAfterNpmrcChanges
       ? ['npmrcHash'] // If the "cleanInstallAfterNpmrcChanges" experiment is disabled, ignore the npmrcHash
       : undefined;
-    const cleanInstall: boolean =
-      isFilteredInstall ||
-      !commonTempInstallFlag.checkValidAndReportStoreIssuesAsync({
-        rushVerb: allowShrinkwrapUpdates ? 'update' : 'install',
-        statePropertiesToIgnore: optionsToIgnore
-      });
+    const cleanInstall: boolean = !(await commonTempInstallFlag.checkValidAndReportStoreIssuesAsync({
+      rushVerb: allowShrinkwrapUpdates ? 'update' : 'install',
+      statePropertiesToIgnore: optionsToIgnore
+    }));
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
@@ -247,13 +258,10 @@ export abstract class BaseInstallManager {
       console.log('Installation is already up-to-date.');
     }
 
-    // Create the marker file to indicate a successful install if it's not a filtered install
-    if (!isFilteredInstall) {
-      await commonTempInstallFlag.createAsync();
-    }
-
     // Perform any post-install work the install manager requires
     await this.postInstallAsync(subspace);
+    // Create the marker file to indicate a successful install
+    await commonTempInstallFlag.createAsync();
 
     // eslint-disable-next-line no-console
     console.log('');
@@ -704,7 +712,7 @@ ${gitLfsHookHandling}
         args.push('--frozen-lockfile');
 
         if (
-          options.pnpmFilterArguments.length > 0 &&
+          options.filteredProjects.length > 0 &&
           Number.parseInt(this.rushConfiguration.packageManagerToolVersion, 10) >= 8 // PNPM Major version 8+
         ) {
           // On pnpm@8, disable the "dedupe-peer-dependents" feature when doing a filtered CI install so that filters take effect.

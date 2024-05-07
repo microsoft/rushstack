@@ -8,7 +8,8 @@ import { Colorize } from '@rushstack/terminal';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
-import { LastLinkFlagFactory } from '../api/LastLinkFlag';
+import { FlagFile } from '../api/FlagFile';
+import { RushConstants } from './RushConstants';
 
 /**
  * This class implements the logic for "rush unlink"
@@ -40,7 +41,10 @@ export class UnlinkManager {
       throw new AlreadyReportedError();
     }
 
-    await LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration.defaultSubspace).clearAsync();
+    await new FlagFile(
+      this._rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
+      RushConstants.lastLinkFlagFilename
+    ).clearAsync();
     return this._deleteProjectFiles();
   }
 
