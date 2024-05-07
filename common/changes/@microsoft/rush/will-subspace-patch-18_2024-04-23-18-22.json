@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Store filtered install metadata in last install flag",
+      "comment": "Optimize skipping of unnecessary installs when using filters such as \"rush install --to x\"",
       "type": "none"
     }
   ],
