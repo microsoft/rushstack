@@ -132,9 +132,9 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   autoInstallPeers?: boolean;
   /**
-   * {@inheritDoc PnpmOptionsConfiguration.autoInjectedInstallForCrossSubspaceWorkspaceDependency}
+   * {@inheritDoc PnpmOptionsConfiguration.alwaysInjectDependenciesFromOtherSubspaces}
    */
-  autoInjectedInstallForCrossSubspaceWorkspaceDependency?: boolean;
+  alwaysInjectDependenciesFromOtherSubspaces?: boolean;
   /**
    * {@inheritDoc PnpmOptionsConfiguration.alwaysFullInstall}
    */
@@ -263,7 +263,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * @remarks
    * The default value is false.
    */
-  public readonly autoInjectedInstallForCrossSubspaceWorkspaceDependency: boolean | undefined;
+  public readonly alwaysInjectDependenciesFromOtherSubspaces: boolean | undefined;
 
   /**
    * The "globalOverrides" setting provides a simple mechanism for overriding version selections
@@ -405,8 +405,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this._globalPatchedDependencies = json.globalPatchedDependencies;
     this.resolutionMode = json.resolutionMode;
     this.autoInstallPeers = json.autoInstallPeers;
-    this.autoInjectedInstallForCrossSubspaceWorkspaceDependency =
-      json.autoInjectedInstallForCrossSubspaceWorkspaceDependency;
+    this.alwaysInjectDependenciesFromOtherSubspaces = json.alwaysInjectDependenciesFromOtherSubspaces;
     this.alwaysFullInstall = json.alwaysFullInstall;
     this.pnpmLockfilePolicies = json.pnpmLockfilePolicies;
   }

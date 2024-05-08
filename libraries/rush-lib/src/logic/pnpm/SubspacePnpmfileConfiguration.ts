@@ -135,13 +135,13 @@ export class SubspacePnpmfileConfiguration {
         }
       }
 
-      // if autoInjectedInstallForCrossSubspaceWorkspaceDependency policy is true in pnpm-config.json
+      // if alwaysInjectDependenciesFromOtherSubspaces policy is true in pnpm-config.json
       // and the dependency is not injected yet
       // and the dependency is in another subspace
       // then, make this dependency as injected dependency
       const pnpmOptions: PnpmOptionsConfiguration | undefined =
         subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
-      if (pnpmOptions && pnpmOptions.autoInjectedInstallForCrossSubspaceWorkspaceDependency) {
+      if (pnpmOptions && pnpmOptions.alwaysInjectDependenciesFromOtherSubspaces) {
         const dependencyProjects: ReadonlySet<RushConfigurationProject> = subspaceProject.dependencyProjects;
         for (const dependencyProject of dependencyProjects) {
           const dependencyName: string = dependencyProject.packageName;
