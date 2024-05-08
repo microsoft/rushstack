@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 07 May 2024 22:38:00 GMT and should not be manually modified.
+This log was last generated on Wed, 08 May 2024 22:24:08 GMT and should not be manually modified.
+
+## 5.124.0
+Wed, 08 May 2024 22:24:08 GMT
+
+### Updates
+
+- Add a new setting `alwaysInjectDependenciesFromOtherSubspaces` in pnpm-config.json
+- Fix a issue where rush install/update can not detect pnpm-sync.json is out of date
+- Improve the error message when the pnpm-sync version is outdated
+- Fixes a bug where cobuilds would cause a GC error when waiting for long periods of time.
+- Fix an issue where tab competions did not suggest parameter values.
 
 ## 5.123.1
 Tue, 07 May 2024 22:38:00 GMT
