@@ -138,6 +138,7 @@ export class AsyncOperationQueue
         // This task is ready to process, hand it to the iterator.
         // Needs to have queue semantics, otherwise tools that iterate it get confused
         record.status = OperationStatus.Queued;
+        console.log('queueing', record.weight, record.name);
         waitingIterators.shift()!({
           value: record,
           done: false

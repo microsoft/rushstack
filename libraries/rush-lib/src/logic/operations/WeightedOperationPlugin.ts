@@ -44,6 +44,7 @@ function weightOperations(
         operation.weight = operationSettings.weight;
       }
     }
+    console.log('Operation weight:', operation.name, operation.weight);
     Async.validateWeightedIterable(operation);
   }
   return operations;
