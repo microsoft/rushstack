@@ -179,7 +179,7 @@ export class Async {
   }
 
   private static async _forEachWeightedAsync<TReturn, TEntry extends { weight: number; element: TReturn }>(
-    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
+    iterable: AsyncIterable<TEntry>,
     callback: (entry: TReturn, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions | undefined
   ): Promise<void> {
@@ -187,10 +187,9 @@ export class Async {
       options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
     let concurrentUnitsInProgress: number = 0;
 
-    const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
-      (iterable as Iterable<TEntry>)[Symbol.iterator] ||
-      (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
-    ).call(iterable);
+    const iterator: AsyncIterator<TEntry> = (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator].call(
+      iterable
+    );
 
     let arrayIndex: number = 0;
 
@@ -199,13 +198,6 @@ export class Async {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
-      console.log(
-        'iterator result',
-        currentIteratorResult.done,
-        currentIteratorResult.value.element?.name,
-        currentIteratorResult.value.element?.weight,
-        concurrency
-      );
       if (currentIteratorResult.done) {
         break;
       }
@@ -214,7 +206,6 @@ export class Async {
 
       concurrentUnitsInProgress += weight;
       const promise: Promise<void> = Promise.resolve(callback(element, arrayIndex++)).then(() => {
-        console.log('resolved', (element as any).name);
         concurrentUnitsInProgress -= weight;
         pending.delete(promise);
       });
