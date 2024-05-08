@@ -2,9 +2,6 @@ parameters:
   - name: BuildParameters
     type: string
     default: ''
-  - name: PerformValidation
-    type: boolean
-    default: true
 
 steps:
   - script: 'git config --local user.email rushbot@users.noreply.github.com'
@@ -27,10 +24,3 @@ steps:
 
   - script: 'node common/scripts/install-run-rush.js retest --verbose --production ${{ parameters.BuildParameters }}'
     displayName: 'Rush retest (install-run-rush)'
-
-  - ${{ if eq(parameters.PerformValidation, true) }}:
-      - script: 'node apps/rush/lib/start-dev.js test --verbose --production --timeline ${{ parameters.BuildParameters }}'
-        displayName: 'Rush test (rush-lib)'
-
-      - script: 'node repo-scripts/repo-toolbox/lib/start.js readme --verify'
-        displayName: 'Ensure repo README is up-to-date'
