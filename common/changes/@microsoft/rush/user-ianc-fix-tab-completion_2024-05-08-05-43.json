@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where tab competions did not suggest parameter values.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
