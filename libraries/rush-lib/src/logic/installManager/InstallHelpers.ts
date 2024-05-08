@@ -171,7 +171,7 @@ export class InstallHelpers {
 
     logIfConsoleOutputIsNotRestricted(`Acquired lock for ${packageManagerAndVersion}`);
 
-    if (!packageManagerMarker.isValidAsync() || lock.dirtyWhenAcquired) {
+    if (!(await packageManagerMarker.isValidAsync()) || lock.dirtyWhenAcquired) {
       logIfConsoleOutputIsNotRestricted(
         Colorize.bold(`Installing ${packageManager} version ${packageManagerVersion}\n`)
       );

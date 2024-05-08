@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.123.1",
+      "tag": "@microsoft/rush_v5.123.1",
+      "date": "Tue, 07 May 2024 22:38:00 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent regression where \"rush install\" would sometimes incorrectly determine whether to skip the install"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.123.0",
       "tag": "@microsoft/rush_v5.123.0",
       "date": "Tue, 07 May 2024 18:32:36 GMT",
