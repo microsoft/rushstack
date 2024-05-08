@@ -256,7 +256,12 @@ Array [
 
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
-  "build",
+  "--from",
+  "--parallelism",
+  "--to",
+  "-f",
+  "-p",
+  "-t",
 ]
 `);
   });
@@ -287,7 +292,9 @@ Array [
 
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
-  "-t",
+  "abc",
+  "def",
+  "hij",
 ]
 `);
   });
@@ -326,7 +333,10 @@ Array [
 
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
-  "--bump-type",
+  "major",
+  "minor",
+  "none",
+  "patch",
 ]
 `);
   });
@@ -340,6 +350,15 @@ Array [
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
   "--bulk",
+  "--bump-type",
+  "--email",
+  "--message",
+  "--no-fetch",
+  "--overwrite",
+  "--target-branch",
+  "--verify",
+  "-b",
+  "-v",
 ]
 `);
   });
@@ -364,11 +383,7 @@ Array [
       tc.getCompletions(commandLine, commandLine.length)
     );
 
-    expect(actual.sort()).toMatchInlineSnapshot(`
-Array [
-  "--message",
-]
-`);
+    expect(actual.sort()).toMatchInlineSnapshot(`Array []`);
   });
 
   it(`gets completion(s) for rush change --message "my change log message" --bump-type <tab>`, async () => {
@@ -379,7 +394,10 @@ Array [
 
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
-  "--bump-type",
+  "major",
+  "minor",
+  "none",
+  "patch",
 ]
 `);
   });
