@@ -56,7 +56,7 @@ jobs:
         run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
 
       - name: Rush update (rush-lib)
-        run: node apps/rush/lib/start-dev.js update --recheck
+        run: node apps/rush/lib/start-dev.js install
 
       - name: Rush test (rush-lib)
         run: node apps/rush/lib/start-dev.js test --verbose --production --timeline
