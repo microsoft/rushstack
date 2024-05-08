@@ -494,6 +494,49 @@ describe(Async.name, () => {
       expect(fn).toHaveBeenCalledTimes(10);
       expect(maxRunning).toEqual(9);
     });
+
+    it('does not exceed the maxiumum concurrency for an async iterator when weighted', async () => {
+      let waitingIterators: number = 0;
+
+      let resolve2!: (value: { done: true; value: undefined }) => void;
+      const signal2: Promise<{ done: true; value: undefined }> = new Promise((resolve, reject) => {
+        resolve2 = resolve;
+      });
+
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<{ element: number; weight: number }> = {
+        next: () => {
+          iteratorIndex++;
+          if (iteratorIndex < 20) {
+            return Promise.resolve({ done: false, value: { element: iteratorIndex, weight: 2 } });
+          } else {
+            ++waitingIterators;
+            return signal2;
+          }
+        }
+      };
+      const asyncIterable: AsyncIterable<{ element: number; weight: number }> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      const expectedConcurrency: 4 = 4;
+      const finalPromise: Promise<void> = Async.forEachAsync(
+        asyncIterable,
+        async (item) => {
+          // Do nothing
+        },
+        {
+          concurrency: expectedConcurrency,
+          weighted: true
+        }
+      );
+
+      // Wait for all the instant resolutions to be done
+      await Async.sleep(0);
+      expect(waitingIterators).toEqual(expectedConcurrency);
+      resolve2({ done: true, value: undefined });
+      await finalPromise;
+    });
   });
 
   describe(Async.runWithRetriesAsync.name, () => {
