@@ -207,7 +207,7 @@ describe(TabCompleteAction.name, () => {
   it(`gets completion(s) for rush <tab>`, async () => {
     const commandLine: string = 'rush ';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
@@ -225,7 +225,7 @@ Array [
   it(`gets completion(s) for rush a<tab>`, async () => {
     const commandLine: string = 'rush a';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
@@ -238,7 +238,7 @@ Array [
   it(`gets completion(s) for rush -d a<tab>`, async () => {
     const commandLine: string = 'rush -d a';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
@@ -251,17 +251,12 @@ Array [
   it(`gets completion(s) for rush build <tab>`, async () => {
     const commandLine: string = 'rush build ';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
-  "--from",
-  "--parallelism",
-  "--to",
-  "-f",
-  "-p",
-  "-t",
+  "build",
 ]
 `);
   });
@@ -269,7 +264,7 @@ Array [
   it(`gets completion(s) for rush build -<tab>`, async () => {
     const commandLine: string = 'rush build -';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
@@ -287,14 +282,12 @@ Array [
   it(`gets completion(s) for rush build -t <tab>`, async () => {
     const commandLine: string = 'rush build -t ';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
-  "abc",
-  "def",
-  "hij",
+  "-t",
 ]
 `);
   });
@@ -302,7 +295,7 @@ Array [
   it(`gets completion(s) for rush build -t a<tab>`, async () => {
     const commandLine: string = 'rush build -t a';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
@@ -315,7 +308,7 @@ Array [
   it(`gets completion(s) for rush --debug build -t a<tab>`, async () => {
     const commandLine: string = 'rush --debug build -t a';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
@@ -328,15 +321,12 @@ Array [
   it(`gets completion(s) for rush change --bump-type <tab>`, async () => {
     const commandLine: string = 'rush change --bump-type ';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
-  "major",
-  "minor",
-  "none",
-  "patch",
+  "--bump-type",
 ]
 `);
   });
@@ -344,21 +334,12 @@ Array [
   it(`gets completion(s) for rush change --bulk <tab>`, async () => {
     const commandLine: string = 'rush change --bulk ';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
   "--bulk",
-  "--bump-type",
-  "--email",
-  "--message",
-  "--no-fetch",
-  "--overwrite",
-  "--target-branch",
-  "--verify",
-  "-b",
-  "-v",
 ]
 `);
   });
@@ -366,7 +347,7 @@ Array [
   it(`gets completion(s) for rush change --bump-type m<tab>`, async () => {
     const commandLine: string = 'rush change --bump-type m';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
@@ -380,24 +361,25 @@ Array [
   it(`gets completion(s) for rush change --message <tab>`, async () => {
     const commandLine: string = 'rush change --message ';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
-    expect(actual.sort()).toMatchInlineSnapshot(`Array []`);
+    expect(actual.sort()).toMatchInlineSnapshot(`
+Array [
+  "--message",
+]
+`);
   });
 
   it(`gets completion(s) for rush change --message "my change log message" --bump-type <tab>`, async () => {
     const commandLine: string = 'rush change --message "my change log message" --bump-type ';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
-  "major",
-  "minor",
-  "none",
-  "patch",
+  "--bump-type",
 ]
 `);
   });
@@ -405,7 +387,7 @@ Array [
   it(`gets completion(s) for rush change --message "my change log message" --bump-type m<tab>`, async () => {
     const commandLine: string = 'rush change --message "my change log message" --bump-type m';
     const actual: string[] = await arrayFromAsyncIteratorAsync(
-      tc.getCompletions(commandLine.trim(), commandLine.length)
+      tc.getCompletions(commandLine, commandLine.length)
     );
 
     expect(actual.sort()).toMatchInlineSnapshot(`
@@ -420,7 +402,7 @@ Array [
 describe(TabCompleteAction.prototype.tokenizeCommandLine.name, () => {
   it(`tokenizes "rush change -"`, () => {
     const commandLine: string = 'rush change -';
-    const actual: string[] = tc.tokenizeCommandLine(commandLine.trim());
+    const actual: string[] = tc.tokenizeCommandLine(commandLine);
 
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
@@ -433,7 +415,7 @@ Array [
 
   it(`tokenizes 'rush change -m "my change log"'`, () => {
     const commandLine: string = 'rush change -m "my change log"';
-    const actual: string[] = tc.tokenizeCommandLine(commandLine.trim());
+    const actual: string[] = tc.tokenizeCommandLine(commandLine);
 
     expect(actual.sort()).toMatchInlineSnapshot(`
 Array [
