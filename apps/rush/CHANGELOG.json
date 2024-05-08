@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.124.0",
+      "tag": "@microsoft/rush_v5.124.0",
+      "date": "Wed, 08 May 2024 22:24:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new setting `alwaysInjectDependenciesFromOtherSubspaces` in pnpm-config.json"
+          },
+          {
+            "comment": "Fix a issue where rush install/update can not detect pnpm-sync.json is out of date"
+          },
+          {
+            "comment": "Improve the error message when the pnpm-sync version is outdated"
+          },
+          {
+            "comment": "Fixes a bug where cobuilds would cause a GC error when waiting for long periods of time."
+          },
+          {
+            "comment": "Fix an issue where tab competions did not suggest parameter values."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.123.1",
       "tag": "@microsoft/rush_v5.123.1",
       "date": "Tue, 07 May 2024 22:38:00 GMT",
