@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { JsonFile, type JsonObject, Path, type IPackageJson, FileSystem } from '@rushstack/node-core-library';
+import { pnpmSyncGetJsonVersion } from 'pnpm-sync-lib';
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
 import * as objectUtilities from '../utilities/objectUtilities';
@@ -56,6 +57,10 @@ export interface ILastInstallFlagJson {
    * It is undefined when full install
    */
   selectedProjectNames?: string[];
+  /**
+   * pnpm-sync-lib version
+   */
+  pnpmSync?: string;
 }
 
 interface ILockfileValidityCheckOptions {
@@ -239,6 +244,7 @@ export class LastInstallFlagFactory {
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
       rushJsonFolder: rushConfiguration.rushJsonFolder,
       ignoreScripts: false,
+      pnpmSync: pnpmSyncGetJsonVersion(),
       ...extraState
     };
 

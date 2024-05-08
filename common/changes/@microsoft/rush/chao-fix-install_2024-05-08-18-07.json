@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a issue where rush install/update can not detect pnpm-sync.json is out of date",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
