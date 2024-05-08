@@ -256,6 +256,7 @@ export class OperationExecutionManager {
     await Async.forEachAsync(
       this._executionQueue,
       async (operation: IOperationIteratorResult) => {
+        console.log('queueing operation' + operation.status);
         let record: OperationExecutionRecord | undefined;
         /**
          * If the operation is UNASSIGNED_OPERATION, it means that the queue is not able to assign a operation.

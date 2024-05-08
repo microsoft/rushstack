@@ -196,40 +196,33 @@ export class Async {
 
     const pending: Set<Promise<void>> = new Set();
 
-    const lock = createLock();
-    let iteratorIsDone = false;
-
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      await lock(async () => {
-        if (concurrentUnitsInProgress >= concurrency) {
-          return;
-        }
-        const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
-        console.log('iterator result', currentIteratorResult.done, currentIteratorResult.value.element?.name);
-        if (currentIteratorResult.done) {
-          iteratorIsDone = true;
-          return;
-        }
-
-        const { element, weight } = currentIteratorResult.value;
-
-        concurrentUnitsInProgress += weight;
-        const promise: Promise<void> = Promise.resolve(callback(element, arrayIndex++)).then(() => {
-          console.log('resolved', (element as any).name);
-          concurrentUnitsInProgress -= weight;
-          pending.delete(promise);
-        });
-        pending.add(promise);
-
-        // eslint-disable-next-line no-unmodified-loop-condition
-        while (concurrentUnitsInProgress >= concurrency && pending.size > 0) {
-          await Promise.race(Array.from(pending));
-        }
-      });
-
-      if (iteratorIsDone) {
+      const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
+      console.log(
+        'iterator result',
+        currentIteratorResult.done,
+        currentIteratorResult.value.element?.name,
+        currentIteratorResult.value.element?.weight,
+        concurrency
+      );
+      if (currentIteratorResult.done) {
         break;
+      }
+
+      const { element, weight } = currentIteratorResult.value;
+
+      concurrentUnitsInProgress += weight;
+      const promise: Promise<void> = Promise.resolve(callback(element, arrayIndex++)).then(() => {
+        console.log('resolved', (element as any).name);
+        concurrentUnitsInProgress -= weight;
+        pending.delete(promise);
+      });
+      pending.add(promise);
+
+      // eslint-disable-next-line no-unmodified-loop-condition
+      while (concurrentUnitsInProgress >= concurrency && pending.size > 0) {
+        await Promise.race(Array.from(pending));
       }
     }
 
