@@ -73,6 +73,34 @@ function toWeightedIterator<TEntry>(
   };
 }
 
+const createLock = <T>() => {
+  const queue: Array<() => Promise<void>> = [];
+  let active = false;
+  return (fn: () => Promise<T>) => {
+    let deferredResolve: (val: T) => void;
+    let deferredReject: () => void;
+    const deferred = new Promise((resolve, reject) => {
+      deferredResolve = resolve;
+      deferredReject = reject;
+    });
+    const exec = async () => {
+      await fn().then(deferredResolve, deferredReject);
+      if (queue.length > 0) {
+        queue.shift()?.();
+      } else {
+        active = false;
+      }
+    };
+    if (active) {
+      queue.push(exec);
+    } else {
+      active = true;
+      exec();
+    }
+    return deferred;
+  };
+};
+
 /**
  * Utilities for parallel asynchronous operations, for use with the system `Promise` APIs.
  *
@@ -155,77 +183,59 @@ export class Async {
     callback: (entry: TReturn, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions | undefined
   ): Promise<void> {
-    await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
-      const concurrency: number =
-        options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
-      let concurrentUnitsInProgress: number = 0;
+    const concurrency: number =
+      options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
+    let concurrentUnitsInProgress: number = 0;
 
-      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
-        (iterable as Iterable<TEntry>)[Symbol.iterator] ||
-        (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
-      ).call(iterable);
+    const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
+      (iterable as Iterable<TEntry>)[Symbol.iterator] ||
+      (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
+    ).call(iterable);
 
-      let arrayIndex: number = 0;
-      let iteratorIsComplete: boolean = false;
-      let promiseHasResolvedOrRejected: boolean = false;
+    let arrayIndex: number = 0;
 
-      async function queueOperationsAsync(): Promise<void> {
-        while (
-          concurrentUnitsInProgress < concurrency &&
-          !iteratorIsComplete &&
-          !promiseHasResolvedOrRejected
-        ) {
-          // Increment the concurrency while waiting for the iterator.
-          // This function is reentrant, so this ensures that at most `concurrency` executions are waiting
-          concurrentUnitsInProgress++;
-          const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
-          // eslint-disable-next-line require-atomic-updates
-          iteratorIsComplete = !!currentIteratorResult.done;
+    const pending: Set<Promise<void>> = new Set();
 
-          if (!iteratorIsComplete) {
-            const currentIteratorValue: TEntry = currentIteratorResult.value;
-            Async.validateWeightedIterable(currentIteratorValue);
-            const weight: number = Math.min(currentIteratorValue.weight, concurrency);
-            // If it's a weighted operation then add the rest of the weight, removing concurrent units if weight < 1.
-            // Cap it to the concurrency limit, otherwise higher weights can cause issues in the case where 0 weighted
-            // operations are present.
-            concurrentUnitsInProgress += weight - 1;
-            Promise.resolve(callback(currentIteratorValue.element, arrayIndex++))
-              .then(async () => {
-                concurrentUnitsInProgress -= weight;
-                await onOperationCompletionAsync();
-              })
-              .catch((error) => {
-                promiseHasResolvedOrRejected = true;
-                reject(error);
-              });
-          } else {
-            // The iterator is complete and there wasn't a value, so untrack the waiting state.
-            concurrentUnitsInProgress--;
-          }
+    const lock = createLock();
+    let iteratorIsDone = false;
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await lock(async () => {
+        if (concurrentUnitsInProgress >= concurrency) {
+          return;
+        }
+        const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
+        console.log('iterator result', currentIteratorResult.done, currentIteratorResult.value.element?.name);
+        if (currentIteratorResult.done) {
+          iteratorIsDone = true;
+          return;
         }
 
-        if (iteratorIsComplete) {
-          await onOperationCompletionAsync();
-        }
-      }
+        const { element, weight } = currentIteratorResult.value;
 
-      async function onOperationCompletionAsync(): Promise<void> {
-        if (!promiseHasResolvedOrRejected) {
-          if (concurrentUnitsInProgress === 0 && iteratorIsComplete) {
-            promiseHasResolvedOrRejected = true;
-            resolve();
-          } else if (!iteratorIsComplete) {
-            await queueOperationsAsync();
-          }
-        }
-      }
+        concurrentUnitsInProgress += weight;
+        const promise: Promise<void> = Promise.resolve(callback(element, arrayIndex++)).then(() => {
+          console.log('resolved', (element as any).name);
+          concurrentUnitsInProgress -= weight;
+          pending.delete(promise);
+        });
+        pending.add(promise);
 
-      queueOperationsAsync().catch((error) => {
-        promiseHasResolvedOrRejected = true;
-        reject(error);
+        // eslint-disable-next-line no-unmodified-loop-condition
+        while (concurrentUnitsInProgress >= concurrency && pending.size > 0) {
+          await Promise.race(Array.from(pending));
+        }
       });
-    });
+
+      if (iteratorIsDone) {
+        break;
+      }
+    }
+
+    if (pending.size > 0) {
+      await Promise.all(Array.from(pending));
+    }
   }
 
   /**
