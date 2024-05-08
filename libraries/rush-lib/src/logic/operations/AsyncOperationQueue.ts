@@ -93,6 +93,8 @@ export class AsyncOperationQueue
       }
     }
 
+    this.assignOperations();
+
     if (this._completedOperations.size === this._totalOperations) {
       this._isDone = true;
     }
