@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixes a bug in `OperationExecutionRecord` where operation weights were not correctly represented.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
