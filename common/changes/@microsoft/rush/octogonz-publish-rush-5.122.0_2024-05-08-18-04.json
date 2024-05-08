@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Improve the error message when the pnpm-sync version is outdated",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
