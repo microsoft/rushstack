@@ -73,34 +73,6 @@ function toWeightedIterator<TEntry>(
   };
 }
 
-const createLock = <T>() => {
-  const queue: Array<() => Promise<void>> = [];
-  let active = false;
-  return (fn: () => Promise<T>) => {
-    let deferredResolve: (val: T) => void;
-    let deferredReject: () => void;
-    const deferred = new Promise((resolve, reject) => {
-      deferredResolve = resolve;
-      deferredReject = reject;
-    });
-    const exec = async () => {
-      await fn().then(deferredResolve, deferredReject);
-      if (queue.length > 0) {
-        queue.shift()?.();
-      } else {
-        active = false;
-      }
-    };
-    if (active) {
-      queue.push(exec);
-    } else {
-      active = true;
-      exec();
-    }
-    return deferred;
-  };
-};
-
 /**
  * Utilities for parallel asynchronous operations, for use with the system `Promise` APIs.
  *
@@ -204,7 +176,7 @@ export class Async {
         ) {
           // Increment the concurrency while waiting for the iterator.
           // This function is reentrant, so this ensures that at most `concurrency` executions are waiting
-          const limitedConcurrency = !Number.isFinite(concurrency) ? 1 : concurrency;
+          const limitedConcurrency: number = !Number.isFinite(concurrency) ? 1 : concurrency;
           concurrentUnitsInProgress += limitedConcurrency;
           const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
           // eslint-disable-next-line require-atomic-updates
@@ -217,8 +189,8 @@ export class Async {
             // If it's a weighted operation then add the rest of the weight, removing concurrent units if weight < 1.
             // Cap it to the concurrency limit, otherwise higher weights can cause issues in the case where 0 weighted
             // operations are present.
-            concurrentUnitsInProgress -= limitedConcurrency;
             concurrentUnitsInProgress += weight;
+            concurrentUnitsInProgress -= limitedConcurrency;
             Promise.resolve(callback(currentIteratorValue.element, arrayIndex++))
               .then(async () => {
                 concurrentUnitsInProgress -= weight;
