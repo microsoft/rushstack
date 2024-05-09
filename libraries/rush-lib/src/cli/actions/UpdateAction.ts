@@ -94,7 +94,7 @@ export class UpdateAction extends BaseInstallAction {
         (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) || []
       ),
       checkOnly: false,
-      subspace: this.getTargetSubspace(),
+      subspace: this._selectionParameters?.getTargetSubspace() || this.rushConfiguration.defaultSubspace,
 
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
       terminal: this._terminal

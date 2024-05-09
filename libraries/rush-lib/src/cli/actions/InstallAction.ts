@@ -61,7 +61,7 @@ export class InstallAction extends BaseInstallAction {
       // These are derived independently of the selection for command line brevity
       filteredProjects: Array.from(await this._selectionParameters!.getSelectedProjectsAsync(this._terminal)),
       checkOnly: this._checkOnlyParameter.value,
-      subspace: this.getTargetSubspace(),
+      subspace: this._selectionParameters!.getTargetSubspace(),
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
       terminal: this._terminal
     };

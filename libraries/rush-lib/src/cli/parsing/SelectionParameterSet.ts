@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { AlreadyReportedError, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
-import type { ITerminal } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import type {
   CommandLineParameterProvider,
-  CommandLineStringListParameter
+  CommandLineStringListParameter,
+  CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
@@ -21,6 +22,7 @@ import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelect
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
 import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorParser';
 import { RushConstants } from '../../logic/RushConstants';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -37,6 +39,7 @@ export class SelectionParameterSet {
   private readonly _onlyProject: CommandLineStringListParameter;
   private readonly _toProject: CommandLineStringListParameter;
   private readonly _toExceptProject: CommandLineStringListParameter;
+  private readonly _subspaceParameter: CommandLineStringParameter;
 
   private readonly _fromVersionPolicy: CommandLineStringListParameter;
   private readonly _toVersionPolicy: CommandLineStringListParameter;
@@ -183,6 +186,13 @@ export class SelectionParameterSet {
         ' belonging to VERSION_POLICY_NAME.' +
         ' For details, refer to the website article "Selecting subsets of projects".'
     });
+
+    this._subspaceParameter = action.defineStringParameter({
+      parameterLongName: '--subspace',
+      argumentName: 'SUBSPACE_NAME',
+      description:
+        '(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the feature to be enabled in subspaces.json.'
+    });
   }
 
   /**
@@ -209,9 +219,9 @@ export class SelectionParameterSet {
     ];
 
     // Check if any of the selection parameters have a value specified on the command line
-    const isSelectionSpecified: boolean = selectors.some(
-      (param: CommandLineStringListParameter) => param.values.length > 0
-    );
+    const isSelectionSpecified: boolean =
+      selectors.some((param: CommandLineStringListParameter) => param.values.length > 0) ||
+      !!this._subspaceParameter.value;
 
     // If no selection parameters are specified, return everything
     if (!isSelectionSpecified) {
@@ -237,6 +247,14 @@ export class SelectionParameterSet {
       })
     );
 
+    const subspaceProjects: Iterable<RushConfigurationProject> = this._subspaceParameter.value
+      ? await this._selectorParserByScope.get('subspace')!.evaluateSelectorAsync({
+          unscopedSelector: this._subspaceParameter.value,
+          terminal,
+          parameterName: 'subspace'
+        })
+      : [];
+
     const selection: Set<RushConfigurationProject> = Selection.union(
       // Safe command line options
       Selection.expandAllDependencies(
@@ -244,7 +262,8 @@ export class SelectionParameterSet {
           toRaw,
           Selection.directDependenciesOf(toExceptProjects),
           // --from / --from-version-policy
-          Selection.expandAllConsumers(fromProjects)
+          Selection.expandAllConsumers(fromProjects),
+          subspaceProjects
         )
       ),
 
@@ -258,6 +277,25 @@ export class SelectionParameterSet {
     );
 
     return selection;
+  }
+
+  public getTargetSubspace(): Subspace {
+    const parameterValue: string | undefined = this._subspaceParameter.value;
+    if (parameterValue && !this._rushConfiguration.subspacesFeatureEnabled) {
+      // eslint-disable-next-line no-console
+      console.log();
+      // eslint-disable-next-line no-console
+      console.log(
+        Colorize.red(
+          `The "--subspace" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+    const selectedSubspace: Subspace | undefined = parameterValue
+      ? this._rushConfiguration.getSubspace(parameterValue)
+      : this._rushConfiguration.defaultSubspace;
+    return selectedSubspace;
   }
 
   /**
