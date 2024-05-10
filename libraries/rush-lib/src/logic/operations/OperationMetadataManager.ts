@@ -149,11 +149,13 @@ export class OperationMetadataManager {
     let logReadStream: fs.ReadStream | undefined;
     try {
       if (await FileSystem.existsAsync(this._logChunksPath)) {
-        const chunks: ITerminalChunk[] = (await FileSystem.readFileAsync(this._logChunksPath))
-          .split('\n')
-          // Split by newline and remove the last empty string
-          .slice(0, -1)
-          .map((e) => JSON.parse(e));
+        const rawLogChunks: string = await FileSystem.readFileAsync(this._logChunksPath);
+        const chunks: ITerminalChunk[] = [];
+        for (const chunk of rawLogChunks.split('\n')) {
+          if (chunk) {
+            chunks.push(JSON.parse(chunk));
+          }
+        }
         for (const { kind, text } of chunks) {
           if (kind === TerminalChunkKind.Stderr) {
             terminalProvider.write(text, TerminalProviderSeverity.error);
