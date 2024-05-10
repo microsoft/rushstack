@@ -67,10 +67,13 @@ export class Subspace {
    */
   public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
     if (!this._cachedPnpmOptionsInitialized) {
+      // Calculate these outside the try/catch block since their error messages shouldn't be annotated:
+      const subspaceConfigFolder: string = this.getSubspaceConfigFolder();
+      const subspaceTempFolder: string = this.getSubspaceTempFolder();
       try {
         this._cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-          `${this.getSubspaceConfigFolder()}/${RushConstants.pnpmConfigFilename}`,
-          this.getSubspaceTempFolder()
+          `${subspaceConfigFolder}/${RushConstants.pnpmConfigFilename}`,
+          subspaceTempFolder
         );
         this._cachedPnpmOptionsInitialized = true;
       } catch (e) {
@@ -78,7 +81,9 @@ export class Subspace {
           this._cachedPnpmOptions = undefined;
           this._cachedPnpmOptionsInitialized = true;
         } else {
-          throw new Error(`The subspace has an invalid pnpm-config.json file: ${this.subspaceName}`);
+          throw new Error(
+            `The subspace "${this.subspaceName}" has an invalid pnpm-config.json file:\n` + e.message
+          );
         }
       }
     }
@@ -91,6 +96,12 @@ export class Subspace {
       let subspaceConfigFolder: string;
 
       if (rushConfiguration.subspacesFeatureEnabled) {
+        if (!rushConfiguration.pnpmOptions.useWorkspaces) {
+          throw new Error(
+            `The Rush subspaces feature is enabled.  You must set useWorkspaces=true in pnpm-config.json.`
+          );
+        }
+
         // If this subspace doesn't have a configuration folder, check if it is in the project folder itself
         // if the splitWorkspaceCompatibility option is enabled in the subspace configuration
 
