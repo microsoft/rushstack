@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 08 May 2024 22:24:08 GMT and should not be manually modified.
+This log was last generated on Fri, 10 May 2024 05:33:51 GMT and should not be manually modified.
+
+## 5.124.1
+Fri, 10 May 2024 05:33:51 GMT
+
+### Updates
+
+- Fix an issue where the `disallowInsecureSha1` policy failed to parse certain lockfile entries
+- Fix some minor issues with the "rush init" template files
+- Report an error if subspacesFeatureEnabled=true without useWorkspaces=true
+- Fix an issue where operation weights were not respected.
 
 ## 5.124.0
 Wed, 08 May 2024 22:24:08 GMT

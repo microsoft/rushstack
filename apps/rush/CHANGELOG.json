@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.124.1",
+      "tag": "@microsoft/rush_v5.124.1",
+      "date": "Fri, 10 May 2024 05:33:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the `disallowInsecureSha1` policy failed to parse certain lockfile entries"
+          },
+          {
+            "comment": "Fix some minor issues with the \"rush init\" template files"
+          },
+          {
+            "comment": "Report an error if subspacesFeatureEnabled=true without useWorkspaces=true"
+          },
+          {
+            "comment": "Fix an issue where operation weights were not respected."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.124.0",
       "tag": "@microsoft/rush_v5.124.0",
       "date": "Wed, 08 May 2024 22:24:08 GMT",
