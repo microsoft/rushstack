@@ -8,7 +8,7 @@ import { objectsAreDeepEqual } from '../utilities/objectUtilities';
  * A base class for flag file.
  * @internal
  */
-export class FlagFile<T extends object = JsonObject> {
+export class FlagFile {
   /**
    * Flag file path
    */
@@ -17,14 +17,14 @@ export class FlagFile<T extends object = JsonObject> {
   /**
    * Content of the flag
    */
-  protected _state: T | {};
+  private _state: JsonObject;
 
   /**
    * Creates a new flag file
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
    */
-  public constructor(folderPath: string, flagName: string, initialState?: T) {
+  public constructor(folderPath: string, flagName: string, initialState?: JsonObject) {
     this.path = `${folderPath}/${flagName}.flag`;
     this._state = initialState || {};
   }
@@ -33,10 +33,10 @@ export class FlagFile<T extends object = JsonObject> {
    * Returns true if the file exists and the contents match the current state.
    */
   public async isValidAsync(): Promise<boolean> {
-    let oldState: T | undefined;
+    let oldState: JsonObject | undefined;
     try {
       oldState = await JsonFile.loadAsync(this.path);
-      const newState: T | {} = this._state;
+      const newState: JsonObject = this._state;
       return objectsAreDeepEqual(oldState, newState);
     } catch (err) {
       return false;

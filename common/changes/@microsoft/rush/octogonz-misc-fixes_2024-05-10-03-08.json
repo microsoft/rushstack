@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix some minor issues with the \"rush init\" template files",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
