@@ -339,7 +339,7 @@
        * and "nonbrowser-approved-packages.json" files.  The value must be one of the
        * strings from the "reviewCategories" defined above.
        */
-      /*[LINE "HYPOTHETICAL"]*/ "reviewCategory": "production",
+      "reviewCategory": "production",
 
       /**
        * A list of Rush project names that are to be installed from NPM
