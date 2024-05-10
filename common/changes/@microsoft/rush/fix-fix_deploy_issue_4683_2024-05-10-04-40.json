@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "fix additionalProjectsToInclude not working in rush deploy",
+      "comment": "Fix a recent regression where `rush deploy` did not correctly apply the `additionalProjectsToInclude` setting (GitHub #4683)",
       "type": "none"
     }
   ],
