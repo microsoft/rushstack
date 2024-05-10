@@ -161,8 +161,8 @@ Optional arguments:
                         ASCII chart of the start and stop times for each 
                         operation.
   --cobuild-plan        Before the build starts, log information about the 
-                        cobuild state. This will include information 
-                        aboutclusters and the projects that are part of each 
+                        cobuild state. This will include information about 
+                        clusters and the projects that are part of each 
                         cluster.
   -t PROJECT, --to PROJECT
                         Normally all projects in the monorepo will be 
@@ -418,8 +418,8 @@ Optional arguments:
                         ASCII chart of the start and stop times for each 
                         operation.
   --cobuild-plan        Before the build starts, log information about the 
-                        cobuild state. This will include information 
-                        aboutclusters and the projects that are part of each 
+                        cobuild state. This will include information about 
+                        clusters and the projects that are part of each 
                         cluster.
   -t PROJECT, --to PROJECT
                         Normally all projects in the monorepo will be 
@@ -985,8 +985,8 @@ Optional arguments:
                         ASCII chart of the start and stop times for each 
                         operation.
   --cobuild-plan        Before the build starts, log information about the 
-                        cobuild state. This will include information 
-                        aboutclusters and the projects that are part of each 
+                        cobuild state. This will include information about 
+                        clusters and the projects that are part of each 
                         cluster.
   -t PROJECT, --to PROJECT
                         Normally all projects in the monorepo will be 

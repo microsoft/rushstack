@@ -1054,7 +1054,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "Before the build starts, log information about the cobuild state. This will include information aboutclusters and the projects that are part of each cluster.",
+          "description": "Before the build starts, log information about the cobuild state. This will include information about clusters and the projects that are part of each cluster.",
           "environmentVariable": undefined,
           "kind": "Flag",
           "longName": "--cobuild-plan",
@@ -1184,7 +1184,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "Before the build starts, log information about the cobuild state. This will include information aboutclusters and the projects that are part of each cluster.",
+          "description": "Before the build starts, log information about the cobuild state. This will include information about clusters and the projects that are part of each cluster.",
           "environmentVariable": undefined,
           "kind": "Flag",
           "longName": "--cobuild-plan",
@@ -1317,7 +1317,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "Before the build starts, log information about the cobuild state. This will include information aboutclusters and the projects that are part of each cluster.",
+          "description": "Before the build starts, log information about the cobuild state. This will include information about clusters and the projects that are part of each cluster.",
           "environmentVariable": undefined,
           "kind": "Flag",
           "longName": "--cobuild-plan",
