@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 10 May 2024 05:33:51 GMT and should not be manually modified.
+This log was last generated on Fri, 10 May 2024 06:35:26 GMT and should not be manually modified.
+
+## 5.124.2
+Fri, 10 May 2024 06:35:26 GMT
+
+### Updates
+
+- Fix a recent regression where `rush deploy` did not correctly apply the `additionalProjectsToInclude` setting (GitHub #4683)
 
 ## 5.124.1
 Fri, 10 May 2024 05:33:51 GMT
