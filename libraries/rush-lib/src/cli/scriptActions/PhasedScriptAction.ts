@@ -193,7 +193,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._cobuildPlanParameter = this.defineFlagParameter({
       parameterLongName: '--cobuild-plan',
       description:
-        'Before the build starts, log information about the cobuild state. This will include information about' +
+        'Before the build starts, log information about the cobuild state. This will include information about ' +
         'clusters and the projects that are part of each cluster.'
     });
 

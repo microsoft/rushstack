@@ -34,9 +34,11 @@ interface ICobuildPlan {
 
 export class BuildPlanPlugin implements IPhasedCommandPlugin {
   private readonly _terminal: ITerminal;
+
   public constructor(terminal: ITerminal) {
     this._terminal = terminal;
   }
+
   public apply(hooks: PhasedCommandHooks): void {
     const terminal: ITerminal = this._terminal;
     hooks.beforeExecuteOperations.tapPromise(PLUGIN_NAME, createBuildPlan);
