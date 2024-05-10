@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an edge case that integrity could be none in _disallowInsecureSha1 logic",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

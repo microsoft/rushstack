@@ -1847,7 +1847,7 @@ importers:
         version: 29.5.12
       '@types/node':
         specifier: ts4.9
-        version: 20.12.8
+        version: 20.12.11
       eslint:
         specifier: ~8.57.0
         version: 8.57.0
@@ -3342,8 +3342,8 @@ importers:
         specifier: ~6.1.0
         version: 6.1.1
       pnpm-sync-lib:
-        specifier: 0.2.4
-        version: 0.2.4
+        specifier: 0.2.5
+        version: 0.2.5
       read-package-tree:
         specifier: ~5.1.5
         version: 5.1.6
@@ -12770,8 +12770,8 @@ packages:
     dependencies:
       undici-types: 5.26.5
 
-  /@types/node@20.12.8:
-    resolution: {integrity: sha512-NU0rJLJnshZWdE/097cdCBbyW1h4hEg0xpovcoAQYHl8dnEyp/NAOiE45pvc+Bd1Dt+2r94v2eGFpQJ4R7g+2w==}
+  /@types/node@20.12.11:
+    resolution: {integrity: sha512-vDg9PZ/zi+Nqp6boSOT7plNuthRugEKixDv5sFTIpkE89MmNtEArAShI4mxuX2+UrLEe9pxC1vm2cjm9YlWbJw==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -14430,7 +14430,16 @@ packages:
     peerDependencies:
       constructs: ^10.0.0
     dependencies:
+      '@balena/dockerignore': 1.0.2
+      case: 1.6.3
       constructs: 10.0.130
+      fs-extra: 9.1.0
+      ignore: 5.3.1
+      jsonschema: 1.4.1
+      minimatch: 3.1.2
+      punycode: 2.3.1
+      semver: 7.5.4
+      yaml: 1.10.2
     dev: true
     bundledDependencies:
       - '@balena/dockerignore'
@@ -22997,8 +23006,8 @@ packages:
       - typescript
     dev: true
 
-  /pnpm-sync-lib@0.2.4:
-    resolution: {integrity: sha512-dXFSOqbhXtbD4PW7c6KZoJYwaKidbIs2bGCBk/1g6/03+nEhLFIjWRbYKAnXJdq+OL5pBJFeKaVTFrtFTInWHA==}
+  /pnpm-sync-lib@0.2.5:
+    resolution: {integrity: sha512-Bf9ip5eaNBBlwtTbNXqSB0p6Ykjlr+F29q33kQorZwsbIZ1STTwt5Ppum8/5LzCnuWVKx0GPwrWUKi4EBkmaRQ==}
     dependencies:
       '@pnpm/dependency-path': 2.1.8
       yaml: 2.4.1
