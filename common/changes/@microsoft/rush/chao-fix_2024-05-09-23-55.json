@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix an edge case that integrity could be none in _disallowInsecureSha1 logic",
+      "comment": "Fix an issue where the `disallowInsecureSha1` policy failed to parse certain lockfile entries",
       "type": "none"
     }
   ],
