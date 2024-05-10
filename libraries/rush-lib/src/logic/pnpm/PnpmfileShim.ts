@@ -13,6 +13,7 @@ import type { IPackageJson } from '@rushstack/node-core-library';
 
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
 import type { IPnpmfile, IPnpmfileShimSettings, IPnpmfileContext, IPnpmfileHooks } from './IPnpmfile';
+import { Worker, isMainThread, parentPort } from "worker_threads";
 
 let settings: IPnpmfileShimSettings;
 let allPreferredVersions: Map<string, string>;
@@ -26,6 +27,33 @@ let semver: typeof TSemver | undefined;
 // once so they aren't repeatedly required in the hook functions.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function init(context: IPnpmfileContext | any): IPnpmfileContext {
+
+  if (isMainThread) {
+    const worker = new Worker(__filename);
+    worker.on("message", (message) => {
+      console.log("main: Received message from worker:", message);
+      worker.terminate().then(() => console.log("main: Terminated worker"));
+    });
+    worker.on("error", (error) => {
+      console.error("main: Worker error:", error);
+    });
+    console.log("main: Transmitting message to worker");
+    worker.postMessage({
+      packageJson: { name: "example", version: "1.0.0", dependencies: {} },
+    });
+  } else {
+    parentPort.on("message", async (data) => {
+      console.log("worker: Received message from main thread");
+      const { packageJson } = data;
+      try {
+        const pnpmFile = require("./.pnpmfile.cjs");
+        const transformed = pnpmFile.hooks.readPackage(packageJson);
+        parentPort.postMessage(transformed);
+      } catch (error) {
+        parentPort.postMessage({ error: error.message });
+      }
+    });
+  }
   // Sometimes PNPM may provide us a context arg that doesn't fit spec, ex.:
   // https://github.com/pnpm/pnpm/blob/97c64bae4d14a8c8f05803f1d94075ee29c2df2f/packages/get-context/src/index.ts#L134
   // So we need to normalize the context format before we move on
@@ -54,10 +82,6 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
         return [packageName, new Set(versions)];
       })
     );
-  }
-  // If a userPnpmfilePath is provided, we expect it to exist
-  if (!userPnpmfile && settings.userPnpmfilePath) {
-    userPnpmfile = require(settings.userPnpmfilePath);
   }
   // If a semverPath is provided, we expect it to exist
   if (!semver && settings.semverPath) {
@@ -108,7 +132,24 @@ export const hooks: IPnpmfileHooks = {
     setPreferredVersions(pkg.dependencies);
     setPreferredVersions(pkg.devDependencies);
     setPreferredVersions(pkg.optionalDependencies);
-    return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
+    if (!userPnpmfile?.hooks?.readPackage) {
+      return pkg;
+    }
+    return new Promise((resolve, reject) => {
+      const worker = new Worker('./worker.js', {  });
+      worker.on("message", (message) => {
+        console.log("main: Received message from worker:", message);
+        worker.terminate().then(() => console.log("main: Terminated worker"));
+        return resolve(message);
+      });
+      worker.on("error", (error) => {
+        console.error("main: Worker error:", error);
+      });
+      worker.postMessage({
+        packageJson: pkg,
+        context
+      });
+    })
   },
 
   // Call the original pnpmfile (if it exists)
