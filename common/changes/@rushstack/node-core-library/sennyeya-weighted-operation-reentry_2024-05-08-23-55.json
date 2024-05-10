@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Fixes a bug in `Async#forEachAsync` that caused it to not respect operation weight.",
+      "comment": "Fix a bug in `Async.forEachAsync` where weight wasn't respected.",
       "type": "patch"
     }
   ],
