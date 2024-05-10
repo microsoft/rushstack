@@ -301,16 +301,16 @@ export class RushProjectConfiguration {
    * why the project cannot enable the build cache for that phase, or undefined if it is safe to so do.
    */
   public getCacheDisabledReason(
-    operation: Operation,
     trackedFileNames: Iterable<string>,
-    phaseName: string
+    phaseName: string,
+    operation?: Operation
   ): string | undefined {
     if (this.disableBuildCacheForProject) {
       return 'Caching has been disabled for this project.';
     }
 
     // Skip no-op operations as they won't have any output/cacheable things.
-    if (operation.runner?.isNoOp) {
+    if (operation?.runner?.isNoOp) {
       return undefined;
     }
 

@@ -1376,7 +1376,7 @@ export class RushLifecycleHooks {
 // @alpha
 export class RushProjectConfiguration {
     readonly disableBuildCacheForProject: boolean;
-    getCacheDisabledReason(operation: Operation, trackedFileNames: Iterable<string>, phaseName: string): string | undefined;
+    getCacheDisabledReason(trackedFileNames: Iterable<string>, phaseName: string, operation?: Operation): string | undefined;
     readonly incrementalBuildIgnoredGlobs: ReadonlyArray<string>;
     // (undocumented)
     readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;

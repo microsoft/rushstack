@@ -65,7 +65,7 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
           const fileHashes: Map<string, string> | undefined =
             await projectChangeAnalyzer._tryGetProjectDependenciesAsync(associatedProject, terminal);
           const cacheDisabledReason: string | undefined = projectConfiguration
-            ? projectConfiguration.getCacheDisabledReason(operation, fileHashes!.keys(), associatedPhase.name)
+            ? projectConfiguration.getCacheDisabledReason(fileHashes!.keys(), associatedPhase.name, operation)
             : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
               'or one provided by a rig, so it does not support caching.';
           buildCacheByOperation.set(operation, { cacheDisabledReason });

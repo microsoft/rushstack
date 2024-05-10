@@ -125,14 +125,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const operation = new Operation({});
-      operation.runner = new NullOperationRunner({
-        name: 'test',
-        result: OperationStatus.Success,
-        silent: false
-      });
-
-      const reason: string | undefined = config.getCacheDisabledReason(operation, [], 'z');
+      const reason: string | undefined = config.getCacheDisabledReason([], 'z');
       expect(reason).toMatchSnapshot();
     });
 
@@ -145,9 +138,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const operation = new Operation({});
-
-      const reason: string | undefined = config.getCacheDisabledReason(operation, [], 'z');
+      const reason: string | undefined = config.getCacheDisabledReason([], 'z');
       expect(reason).toMatchSnapshot();
     });
 
@@ -160,9 +151,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const operation = new Operation({});
-
-      const reason: string | undefined = config.getCacheDisabledReason(operation, [], '_phase:a');
+      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a');
       expect(reason).toMatchSnapshot();
     });
 
@@ -175,10 +164,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const operation = new Operation({});
-
       const reason: string | undefined = config.getCacheDisabledReason(
-        operation,
         ['test-project-c/.cache/b/foo'],
         '_phase:b'
       );
@@ -194,9 +180,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const operation = new Operation({});
-
-      const reason: string | undefined = config.getCacheDisabledReason(operation, [''], '_phase:b');
+      const reason: string | undefined = config.getCacheDisabledReason([''], '_phase:b');
       expect(reason).toBeUndefined();
     });
 
@@ -216,7 +200,7 @@ describe(RushProjectConfiguration.name, () => {
         silent: false
       });
 
-      const reason: string | undefined = config.getCacheDisabledReason(operation, [''], '_phase:b');
+      const reason: string | undefined = config.getCacheDisabledReason([''], '_phase:b', operation);
       expect(reason).toBeUndefined();
     });
 
@@ -236,7 +220,7 @@ describe(RushProjectConfiguration.name, () => {
         silent: false
       });
 
-      const reason: string | undefined = config.getCacheDisabledReason(operation, [], '_phase:a');
+      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a', operation);
       expect(reason).toBeUndefined();
     });
 
@@ -252,7 +236,7 @@ describe(RushProjectConfiguration.name, () => {
       const operation = new Operation({});
       operation.runner = realScriptRunner;
 
-      const reason: string | undefined = config.getCacheDisabledReason(operation, [], '_phase:a');
+      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a', operation);
       expect(reason).toMatchSnapshot();
     });
 
@@ -267,7 +251,7 @@ describe(RushProjectConfiguration.name, () => {
 
       const operation = new Operation({});
 
-      const reason: string | undefined = config.getCacheDisabledReason(operation, [], '_phase:a');
+      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a', operation);
       expect(reason).toMatchSnapshot();
     });
   });
