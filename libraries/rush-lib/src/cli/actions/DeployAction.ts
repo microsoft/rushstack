@@ -103,25 +103,6 @@ export class DeployAction extends BaseRushAction {
     });
   }
 
-  private _getDependencyProjects(project: RushConfigurationProject): Set<RushConfigurationProject> {
-    const projects: Set<RushConfigurationProject> = new Set();
-    const queue: RushConfigurationProject[] = [project];
-    const visited: Set<RushConfigurationProject> = new Set();
-
-    while (queue.length > 0) {
-      const _project: RushConfigurationProject = queue.pop()!;
-      projects.add(_project);
-      for (const dependency of _project.dependencyProjects) {
-        if (visited.has(dependency)) {
-          continue;
-        }
-        queue.push(dependency);
-      }
-    }
-
-    return projects;
-  }
-
   protected async runAsync(): Promise<void> {
     const scenarioName: string | undefined = this._scenario.value;
     const { DeployScenarioConfiguration } = await import('../../logic/deploy/DeployScenarioConfiguration');
@@ -177,7 +158,7 @@ export class DeployAction extends BaseRushAction {
       throw new Error(`The specified deployment project "${mainProjectName}" was not found in rush.json`);
     }
 
-    const projects: Set<RushConfigurationProject> = this._getDependencyProjects(rushConfigurationProject);
+    const projects: RushConfigurationProject[] = this.rushConfiguration.projects;
     if (this.rushConfiguration.packageManager === 'pnpm') {
       for (const project of projects) {
         const pnpmfileConfiguration: PnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(

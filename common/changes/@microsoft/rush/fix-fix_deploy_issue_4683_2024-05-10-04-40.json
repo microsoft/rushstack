@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "fix additionalProjectsToInclude not working in rush deploy",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
