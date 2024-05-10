@@ -311,13 +311,12 @@ export class FileSystemBuildCacheProvider {
 }
 
 // @internal
-export class _FlagFile<T extends object = JsonObject> {
-    constructor(folderPath: string, flagName: string, initialState?: T);
+export class _FlagFile {
+    constructor(folderPath: string, flagName: string, initialState?: JsonObject);
     clearAsync(): Promise<void>;
     createAsync(): Promise<void>;
     isValidAsync(): Promise<boolean>;
     readonly path: string;
-    protected _state: T | {};
 }
 
 // @beta

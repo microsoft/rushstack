@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-serverless-stack-plugin
 
-This log was last generated on Wed, 08 May 2024 22:23:50 GMT and should not be manually modified.
+This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+
+## 0.3.43
+Fri, 10 May 2024 05:33:34 GMT
+
+_Version update only_
 
 ## 0.3.42
 Wed, 08 May 2024 22:23:50 GMT

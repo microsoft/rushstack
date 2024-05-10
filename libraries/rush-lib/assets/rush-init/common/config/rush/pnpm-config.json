@@ -132,7 +132,7 @@
    * When using Rush subspaces, these sorts of versioning problems are much more likely if
    * `workspace:` refers to a project from a different subspace.  This is because the symlink
    * would point to a separate `node_modules` tree installed by a different PNPM lockfile.
-   * A comprehensives solution is to enable `alwaysInjectDependenciesFromOtherSubspaces`,
+   * A comprehensive solution is to enable `alwaysInjectDependenciesFromOtherSubspaces`,
    * which automatically treats all projects from other subspaces as injected dependencies
    * without having to manually configure them.
    *
@@ -141,12 +141,12 @@
    *
    * The default value is false.
    */
-  "alwaysInjectDependenciesFromOtherSubspaces": false,
+  /*[LINE "HYPOTHETICAL"]*/ "alwaysInjectDependenciesFromOtherSubspaces": false,
 
   /**
    * Defines the policies to be checked for the `pnpm-lock.yaml` file.
    */
-   "pnpmLockfilePolicies": {
+  "pnpmLockfilePolicies": {
 
     /**
      * This policy will cause "rush update" to report an error if `pnpm-lock.yaml` contains
