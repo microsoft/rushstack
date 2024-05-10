@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-bulk",
+      "comment": "Fix an issue where the tool will not correctly execute if the installed eslint path contains a space.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-bulk"
+}
