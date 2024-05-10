@@ -410,6 +410,9 @@ export class OperationExecutionManager {
     if (record.status !== OperationStatus.RemoteExecuting) {
       // If the operation was not remote, then we can notify queue that it is complete
       this._executionQueue.complete(record);
+    } else {
+      // Attempt to requeue other operations if the operation was remote
+      this._executionQueue.assignOperations();
     }
   }
 }

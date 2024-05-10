@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where operation weights were not respected.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -151,7 +151,7 @@ export class Async {
   }
 
   private static async _forEachWeightedAsync<TReturn, TEntry extends { weight: number; element: TReturn }>(
-    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
+    iterable: AsyncIterable<TEntry>,
     callback: (entry: TReturn, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions | undefined
   ): Promise<void> {
@@ -160,10 +160,9 @@ export class Async {
         options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
       let concurrentUnitsInProgress: number = 0;
 
-      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
-        (iterable as Iterable<TEntry>)[Symbol.iterator] ||
-        (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
-      ).call(iterable);
+      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (iterable as AsyncIterable<TEntry>)[
+        Symbol.asyncIterator
+      ].call(iterable);
 
       let arrayIndex: number = 0;
       let iteratorIsComplete: boolean = false;
@@ -175,9 +174,11 @@ export class Async {
           !iteratorIsComplete &&
           !promiseHasResolvedOrRejected
         ) {
-          // Increment the concurrency while waiting for the iterator.
-          // This function is reentrant, so this ensures that at most `concurrency` executions are waiting
-          concurrentUnitsInProgress++;
+          // Increment the current concurrency units in progress by the concurrency limit before fetching the iterator weight.
+          // This function is reentrant, so this if concurrency is finite, at most 1 operation will be waiting. If it's infinite,
+          //  there will be effectively no cap on the number of operations waiting.
+          const limitedConcurrency: number = !Number.isFinite(concurrency) ? 1 : concurrency;
+          concurrentUnitsInProgress += limitedConcurrency;
           const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
           // eslint-disable-next-line require-atomic-updates
           iteratorIsComplete = !!currentIteratorResult.done;
@@ -185,13 +186,17 @@ export class Async {
           if (!iteratorIsComplete) {
             const currentIteratorValue: TEntry = currentIteratorResult.value;
             Async.validateWeightedIterable(currentIteratorValue);
+            // Cap the weight to concurrency, this allows 0 weight items to execute despite the concurrency limit.
             const weight: number = Math.min(currentIteratorValue.weight, concurrency);
-            // If it's a weighted operation then add the rest of the weight, removing concurrent units if weight < 1.
-            // Cap it to the concurrency limit, otherwise higher weights can cause issues in the case where 0 weighted
-            // operations are present.
-            concurrentUnitsInProgress += weight - 1;
+
+            // Remove the "lock" from the concurrency check and only apply the current weight.
+            //  This should allow other operations to execute.
+            concurrentUnitsInProgress += weight;
+            concurrentUnitsInProgress -= limitedConcurrency;
+
             Promise.resolve(callback(currentIteratorValue.element, arrayIndex++))
               .then(async () => {
+                // Remove the operation completely from the in progress units.
                 concurrentUnitsInProgress -= weight;
                 await onOperationCompletionAsync();
               })
@@ -201,7 +206,7 @@ export class Async {
               });
           } else {
             // The iterator is complete and there wasn't a value, so untrack the waiting state.
-            concurrentUnitsInProgress--;
+            concurrentUnitsInProgress -= limitedConcurrency;
           }
         }
 
