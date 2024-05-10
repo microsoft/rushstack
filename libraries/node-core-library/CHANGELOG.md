@@ -1,6 +1,17 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 10 Apr 2024 15:10:08 GMT and should not be manually modified.
+This log was last generated on Mon, 06 May 2024 15:11:04 GMT and should not be manually modified.
+
+## 4.2.0
+Mon, 06 May 2024 15:11:04 GMT
+
+### Minor changes
+
+- Add a new `weighted: true` option to the `Async.forEachAsync` method that allows each element to specify how much of the allowed parallelism the callback uses.
+
+### Patches
+
+- Add a new `weighted: true` option to the `Async.mapAsync` method that allows each element to specify how much of the allowed parallelism the callback uses.
 
 ## 4.1.0
 Wed, 10 Apr 2024 15:10:08 GMT

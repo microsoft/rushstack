@@ -9,7 +9,7 @@ import {
   ConsoleTerminalProvider
 } from '@rushstack/terminal';
 import { StreamCollator, type CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
-import { NewlineKind, Async, InternalError } from '@rushstack/node-core-library';
+import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import {
   AsyncOperationQueue,
@@ -262,7 +262,7 @@ export class OperationExecutionManager {
          * This happens when some operations run remotely. So, we should try to get a remote executing operation
          * from the queue manually here.
          */
-        if (operation === UNASSIGNED_OPERATION) {
+        if (operation.status === UNASSIGNED_OPERATION) {
           // Pause for a few time
           await Async.sleep(5000);
           record = this._executionQueue.tryGetRemoteExecutingOperation();
@@ -281,7 +281,8 @@ export class OperationExecutionManager {
         }
       },
       {
-        concurrency: maxParallelism
+        concurrency: maxParallelism,
+        weighted: true
       }
     );
 
@@ -312,7 +313,13 @@ export class OperationExecutionManager {
       case OperationStatus.Failure: {
         // Failed operations get reported, even if silent.
         // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
-        const message: string | undefined = record.error?.message;
+        let message: string | undefined = undefined;
+        if (record.error) {
+          if (!(record.error instanceof AlreadyReportedError)) {
+            message = record.error.message;
+          }
+        }
+
         // This creates the writer, so don't do this globally
         const { terminal } = record.collatedWriter;
         if (message) {

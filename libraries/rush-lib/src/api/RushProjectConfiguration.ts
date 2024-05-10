@@ -141,6 +141,12 @@ export interface IOperationSettings {
    * indicate the shard index and count. The default value is `--shard={shardIndex}/{shardCount}`.
    */
   sharding?: IRushPhaseSharding;
+
+  /**
+   * How many concurrency units this operation should take up during execution. The maximum concurrent units is
+   *  determined by the -p flag.
+   */
+  weight?: number;
 }
 
 interface IOldRushProjectJson {

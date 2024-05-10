@@ -1,22 +1,70 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
-import { FileSystem, JsonFile, type JsonObject, Path } from '@rushstack/node-core-library';
-
+import { JsonFile, type JsonObject, Path, type IPackageJson, FileSystem } from '@rushstack/node-core-library';
+import { pnpmSyncGetJsonVersion } from 'pnpm-sync-lib';
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
-import { objectsAreDeepEqual } from '../utilities/objectUtilities';
+import * as objectUtilities from '../utilities/objectUtilities';
 import type { Subspace } from './Subspace';
+import { Selection } from '../logic/Selection';
+import path from 'path';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
 /**
- * @internal
+ * This represents the JSON data structure for the "last-install.flag" file.
  */
-export interface ILockfileValidityCheckOptions {
-  statePropertiesToIgnore?: string[];
+export interface ILastInstallFlagJson {
+  /**
+   * Current node version
+   */
+  node?: string;
+  /**
+   * Current package manager name
+   */
+  packageManager?: PackageManagerName;
+  /**
+   * Current package manager version
+   */
+  packageManagerVersion: string;
+  /**
+   * Current rush json folder
+   */
+  rushJsonFolder: string;
+  /**
+   * The content of package.json, used in the flag file of autoinstaller
+   */
+  packageJson?: IPackageJson;
+  /**
+   * Same with pnpmOptions.pnpmStorePath in rush.json
+   */
+  storePath?: string;
+  /**
+   * An experimental flag used by cleanInstallAfterNpmrcChanges
+   */
+  npmrcHash?: string;
+  /**
+   * True when "useWorkspaces" is true in rush.json
+   */
+  workspaces?: boolean;
+  /**
+   * True when user explicitly specify "--ignore-scripts" CLI parameter or deferredInstallationScripts
+   */
+  ignoreScripts?: boolean;
+  /**
+   * When specified, it is a list of selected projects during partial install
+   * It is undefined when full install
+   */
+  selectedProjectNames?: string[];
+  /**
+   * pnpm-sync-lib version
+   */
+  pnpmSync?: string;
+}
+
+interface ILockfileValidityCheckOptions {
+  statePropertiesToIgnore?: (keyof ILastInstallFlagJson)[];
   rushVerb?: string;
 }
 
@@ -25,10 +73,9 @@ export interface ILockfileValidityCheckOptions {
  * indicate that something installed in the folder was successfully completed.
  * It also compares state, so that if something like the Node.js version has changed,
  * it can invalidate the last install.
- * @internal
  */
 export class LastInstallFlag {
-  private _state: JsonObject;
+  private _state: ILastInstallFlagJson;
 
   /**
    * Returns the full path to the flag file
@@ -40,16 +87,16 @@ export class LastInstallFlag {
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
    */
-  public constructor(folderPath: string, state: JsonObject = {}) {
+  public constructor(folderPath: string, state?: Partial<ILastInstallFlagJson>) {
     this.path = path.join(folderPath, this.flagName);
-    this._state = state;
+    this._state = (state || {}) as ILastInstallFlagJson;
   }
 
   /**
    * Returns true if the file exists and the contents match the current state.
    */
-  public isValid(options?: ILockfileValidityCheckOptions): boolean {
-    return this._isValid(false, options);
+  public async isValidAsync(options?: ILockfileValidityCheckOptions): Promise<boolean> {
+    return await this._isValidAsync(false, options);
   }
 
   /**
@@ -58,30 +105,32 @@ export class LastInstallFlag {
    *
    * @internal
    */
-  public checkValidAndReportStoreIssues(
+  public async checkValidAndReportStoreIssuesAsync(
     options: ILockfileValidityCheckOptions & { rushVerb: string }
-  ): boolean {
-    return this._isValid(true, options);
+  ): Promise<boolean> {
+    return this._isValidAsync(true, options);
   }
 
-  private _isValid(checkValidAndReportStoreIssues: false, options?: ILockfileValidityCheckOptions): boolean;
-  private _isValid(
+  private _isValidAsync(
+    checkValidAndReportStoreIssues: false,
+    options?: ILockfileValidityCheckOptions
+  ): Promise<boolean>;
+  private _isValidAsync(
     checkValidAndReportStoreIssues: true,
     options: ILockfileValidityCheckOptions & { rushVerb: string }
-  ): boolean;
-  private _isValid(
+  ): Promise<boolean>;
+  private async _isValidAsync(
     checkValidAndReportStoreIssues: boolean,
     { rushVerb = 'update', statePropertiesToIgnore }: ILockfileValidityCheckOptions = {}
-  ): boolean {
+  ): Promise<boolean> {
     let oldState: JsonObject;
     try {
-      oldState = JsonFile.load(this.path);
+      oldState = await JsonFile.loadAsync(this.path);
     } catch (err) {
       return false;
     }
 
-    const newState: JsonObject = { ...this._state };
-
+    const newState: ILastInstallFlagJson = { ...this._state };
     if (statePropertiesToIgnore) {
       for (const optionToIgnore of statePropertiesToIgnore) {
         delete newState[optionToIgnore];
@@ -89,7 +138,7 @@ export class LastInstallFlag {
       }
     }
 
-    if (!objectsAreDeepEqual(oldState, newState)) {
+    if (!objectUtilities.objectsAreDeepEqual(oldState, newState)) {
       if (checkValidAndReportStoreIssues) {
         const pkgManager: PackageManagerName = newState.packageManager as PackageManagerName;
         if (pkgManager === 'pnpm') {
@@ -115,6 +164,19 @@ export class LastInstallFlag {
               );
             }
           }
+          // check whether new selected projects are installed
+          if (newState.selectedProjectNames) {
+            if (!oldState.selectedProjectNames) {
+              // used to be a full install
+              return true;
+            } else if (
+              Selection.union(newState.selectedProjectNames, oldState.selectedProjectNames).size ===
+              oldState.selectedProjectNames.length
+            ) {
+              // current selected projects are included in old selected projects
+              return true;
+            }
+          }
         }
       }
       return false;
@@ -126,17 +188,27 @@ export class LastInstallFlag {
   /**
    * Writes the flag file to disk with the current state
    */
-  public create(): void {
-    JsonFile.save(this._state, this.path, {
+  public async createAsync(): Promise<void> {
+    await JsonFile.saveAsync(this._state, this.path, {
       ensureFolderExists: true
     });
   }
 
   /**
+   * Merge new data into current state by "merge"
+   */
+  public mergeFromObject(data: JsonObject): void {
+    if (objectUtilities.isMatch(this._state, data)) {
+      return;
+    }
+    objectUtilities.merge(this._state, data);
+  }
+
+  /**
    * Removes the flag file
    */
-  public clear(): void {
-    FileSystem.deleteFile(this.path);
+  public async clearAsync(): Promise<void> {
+    await FileSystem.deleteFileAsync(this.path);
   }
 
   /**
@@ -166,11 +238,13 @@ export class LastInstallFlagFactory {
     subspace: Subspace,
     extraState: Record<string, string> = {}
   ): LastInstallFlag {
-    const currentState: JsonObject = {
+    const currentState: ILastInstallFlagJson = {
       node: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
       rushJsonFolder: rushConfiguration.rushJsonFolder,
+      ignoreScripts: false,
+      pnpmSync: pnpmSyncGetJsonVersion(),
       ...extraState
     };
 

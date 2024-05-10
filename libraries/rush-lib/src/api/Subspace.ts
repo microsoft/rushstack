@@ -234,6 +234,16 @@ export class Subspace {
   }
 
   /**
+   * Gets the path to the pnpm-config.json config file for this subspace.
+   *
+   * Example: `C:\MyRepo\common\subspaces\my-subspace\pnpm-config.json`
+   * @beta
+   */
+  public getPnpmConfigFilePath(): string {
+    return this._ensureDetail().subspaceConfigFolder + '/' + RushConstants.pnpmConfigFilename;
+  }
+
+  /**
    * Gets the settings from the common-versions.json config file.
    * @beta
    */

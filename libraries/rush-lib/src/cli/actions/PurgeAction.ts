@@ -39,7 +39,7 @@ export class PurgeAction extends BaseRushAction {
     const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
     const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
-    unlinkManager.unlink(/*force:*/ true);
+    await unlinkManager.unlinkAsync(/*force:*/ true);
 
     if (this._unsafeParameter.value!) {
       purgeManager.purgeUnsafe();

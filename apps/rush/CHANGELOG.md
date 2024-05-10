@@ -1,6 +1,42 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 25 Apr 2024 07:33:18 GMT and should not be manually modified.
+This log was last generated on Wed, 08 May 2024 22:24:08 GMT and should not be manually modified.
+
+## 5.124.0
+Wed, 08 May 2024 22:24:08 GMT
+
+### Updates
+
+- Add a new setting `alwaysInjectDependenciesFromOtherSubspaces` in pnpm-config.json
+- Fix a issue where rush install/update can not detect pnpm-sync.json is out of date
+- Improve the error message when the pnpm-sync version is outdated
+- Fixes a bug where cobuilds would cause a GC error when waiting for long periods of time.
+- Fix an issue where tab competions did not suggest parameter values.
+
+## 5.123.1
+Tue, 07 May 2024 22:38:00 GMT
+
+### Updates
+
+- Fix a recent regression where "rush install" would sometimes incorrectly determine whether to skip the install
+
+## 5.123.0
+Tue, 07 May 2024 18:32:36 GMT
+
+### Updates
+
+- Provide the file path if there is an error parsing a `package.json` file.
+- Timeline view will now only show terminal build statuses as cobuilt, all other statuses will reflect their original icons.
+- Add a `"weight"` property to the `"operation"` object in the project `config/rush-project.json` file that defines an integer weight for how much of the allowed parallelism the operation uses.
+- Optimize skipping of unnecessary installs when using filters such as "rush install --to x"
+
+## 5.122.1
+Tue, 30 Apr 2024 23:36:50 GMT
+
+### Updates
+
+- Make `disallowInsecureSha1` policy a subspace-level configuration.
+- Fix an issue where `rush update` sometimes did not detect changes to pnpm-config.json
 
 ## 5.122.0
 Thu, 25 Apr 2024 07:33:18 GMT

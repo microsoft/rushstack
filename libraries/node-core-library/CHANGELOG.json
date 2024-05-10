@@ -2,6 +2,23 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "4.2.0",
+      "tag": "@rushstack/node-core-library_v4.2.0",
+      "date": "Mon, 06 May 2024 15:11:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new `weighted: true` option to the `Async.forEachAsync` method that allows each element to specify how much of the allowed parallelism the callback uses."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Add a new `weighted: true` option to the `Async.mapAsync` method that allows each element to specify how much of the allowed parallelism the callback uses."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.0",
       "tag": "@rushstack/node-core-library_v4.1.0",
       "date": "Wed, 10 Apr 2024 15:10:08 GMT",

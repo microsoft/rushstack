@@ -103,7 +103,8 @@ export class TabCompleteAction extends CommandLineAction {
     const lastToken: string = tokens[tokens.length - 1];
     const secondLastToken: string = tokens[tokens.length - 2];
 
-    const completePartialWord: boolean = caretPosition === commandLine.length;
+    const lastCharacterIsWhitespace: boolean = !commandLine.slice(-1).trim();
+    const completePartialWord: boolean = caretPosition === commandLine.length && !lastCharacterIsWhitespace;
 
     if (completePartialWord && tokens.length === 2 + globalParameterOffset) {
       for (const actionName of actions.keys()) {

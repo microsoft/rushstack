@@ -312,6 +312,16 @@ export class FileSystemBuildCacheProvider {
     trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<string>;
 }
 
+// @internal
+export class _FlagFile<T extends object = JsonObject> {
+    constructor(folderPath: string, flagName: string, initialState?: T);
+    clearAsync(): Promise<void>;
+    createAsync(): Promise<void>;
+    isValidAsync(): Promise<boolean>;
+    readonly path: string;
+    protected _state: T | {};
+}
+
 // @beta
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
@@ -512,14 +522,6 @@ export interface ILaunchOptions {
     terminalProvider?: ITerminalProvider;
 }
 
-// @internal (undocumented)
-export interface _ILockfileValidityCheckOptions {
-    // (undocumented)
-    rushVerb?: string;
-    // (undocumented)
-    statePropertiesToIgnore?: string[];
-}
-
 // @beta (undocumented)
 export interface ILogger {
     emitError(error: Error): void;
@@ -626,6 +628,7 @@ export interface IOperationSettings {
     outputFolderNames?: string[];
     // Warning: (ae-forgotten-export) The symbol "IRushPhaseSharding" needs to be exported by the entry point index.d.ts
     sharding?: IRushPhaseSharding;
+    weight?: number;
 }
 
 // @internal (undocumented)
@@ -686,6 +689,7 @@ export interface IPnpmLockfilePolicies {
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     alwaysFullInstall?: boolean;
+    alwaysInjectDependenciesFromOtherSubspaces?: boolean;
     autoInstallPeers?: boolean;
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalNeverBuiltDependencies?: string[];
@@ -860,19 +864,6 @@ export interface ITryFindRushJsonLocationOptions {
 // @internal
 export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
     ignoreEngines?: boolean;
-}
-
-// @internal
-export class _LastInstallFlag {
-    constructor(folderPath: string, state?: JsonObject);
-    checkValidAndReportStoreIssues(options: _ILockfileValidityCheckOptions & {
-        rushVerb: string;
-    }): boolean;
-    clear(): void;
-    create(): void;
-    protected get flagName(): string;
-    isValid(options?: _ILockfileValidityCheckOptions): boolean;
-    readonly path: string;
 }
 
 // @public
@@ -1069,6 +1060,7 @@ export class PhasedCommandHooks {
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     readonly alwaysFullInstall: boolean | undefined;
+    readonly alwaysInjectDependenciesFromOtherSubspaces: boolean | undefined;
     readonly autoInstallPeers: boolean | undefined;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
     readonly globalNeverBuiltDependencies: string[] | undefined;
@@ -1327,6 +1319,7 @@ export class RushConstants {
     static readonly experimentsFilename: 'experiments.json';
     static readonly globalCommandKind: 'global';
     static readonly hashDelimiter: '|';
+    static readonly lastLinkFlagFilename: 'last-link';
     static readonly mergeQueueIgnoreFileName: '.mergequeueignore';
     static readonly nodeModulesFolderName: 'node_modules';
     static readonly nonbrowserApprovedPackagesFilename: 'nonbrowser-approved-packages.json';
@@ -1448,6 +1441,8 @@ export class Subspace {
     getCommonVersions(): CommonVersionsConfiguration;
     // @beta
     getCommonVersionsFilePath(): string;
+    // @beta
+    getPnpmConfigFilePath(): string;
     // @beta
     getPnpmfilePath(): string;
     // @beta

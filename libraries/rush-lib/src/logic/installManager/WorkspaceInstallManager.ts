@@ -29,7 +29,6 @@ import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
 import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import type { RepoStateFile } from '../RepoStateFile';
-import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
@@ -46,6 +45,7 @@ import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
+import { FlagFile } from '../../api/FlagFile';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -525,7 +525,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       await pnpmSyncPrepareAsync({
         lockfilePath: pnpmLockfilePath,
         dotPnpmFolder,
-        ensureFolder: FileSystem.ensureFolderAsync,
+        ensureFolderAsync: FileSystem.ensureFolderAsync,
         readPnpmLockfile: async (lockfilePath: string) => {
           const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFile(
             lockfilePath,
@@ -685,7 +685,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    LastLinkFlagFactory.getCommonTempFlag(subspace).create();
+    await new FlagFile(subspace.getSubspaceTempFolder(), RushConstants.lastLinkFlagFilename).createAsync();
   }
 
   /**
@@ -720,8 +720,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         }
       }
 
-      for (const arg of this.options.pnpmFilterArguments) {
-        args.push(arg);
+      for (const arg of this.options.filteredProjects) {
+        args.push('--filter');
+        args.push(arg.packageName);
       }
     }
   }

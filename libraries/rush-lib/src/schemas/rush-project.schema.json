@@ -73,7 +73,6 @@
             "description": "Disable caching for this operation. The operation will never be restored from cache. This may be useful if this operation affects state outside of its folder.",
             "type": "boolean"
           },
-
           "sharding": {
             "type": "object",
             "description": "If specified, the operation will be a 'sharded' operation. This means that the operation will be run multiple times in parallel.",
@@ -115,6 +114,11 @@
                 }
               }
             }
+          },
+          "weight": {
+            "description": "The number of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag.",
+            "type": "integer",
+            "minimum": 0
           }
         }
       }
