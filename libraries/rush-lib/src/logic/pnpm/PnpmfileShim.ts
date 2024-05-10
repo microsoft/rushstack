@@ -14,11 +14,20 @@ import type { IPackageJson } from '@rushstack/node-core-library';
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
 import type { IPnpmfile, IPnpmfileShimSettings, IPnpmfileContext, IPnpmfileHooks } from './IPnpmfile';
 
-let settings: IPnpmfileShimSettings;
-let allPreferredVersions: Map<string, string>;
+let settings: IPnpmfileShimSettings | undefined;
+let allPreferredVersions: Map<string, string> | undefined;
 let allowedAlternativeVersions: Map<string, Set<string>> | undefined;
 let userPnpmfile: IPnpmfile | undefined;
 let semver: typeof TSemver | undefined;
+
+// Resets the internal state of the pnpmfile
+export function reset(): void {
+  settings = undefined;
+  allPreferredVersions = undefined;
+  allowedAlternativeVersions = undefined;
+  userPnpmfile = undefined;
+  semver = undefined;
+}
 
 // Initialize all external aspects of the pnpmfile shim. When using the shim, settings
 // are always expected to be available. Init must be called before running any hook that
@@ -45,10 +54,10 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
     // Reuse the already initialized settings
     context.pnpmfileShimSettings = settings;
   }
-  if (!allPreferredVersions && settings.allPreferredVersions) {
+  if (!allPreferredVersions && settings?.allPreferredVersions) {
     allPreferredVersions = new Map(Object.entries(settings.allPreferredVersions));
   }
-  if (!allowedAlternativeVersions && settings.allowedAlternativeVersions) {
+  if (!allowedAlternativeVersions && settings?.allowedAlternativeVersions) {
     allowedAlternativeVersions = new Map(
       Object.entries(settings.allowedAlternativeVersions).map(([packageName, versions]) => {
         return [packageName, new Set(versions)];
@@ -56,11 +65,11 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
     );
   }
   // If a userPnpmfilePath is provided, we expect it to exist
-  if (!userPnpmfile && settings.userPnpmfilePath) {
+  if (!userPnpmfile && settings?.userPnpmfilePath) {
     userPnpmfile = require(settings.userPnpmfilePath);
   }
   // If a semverPath is provided, we expect it to exist
-  if (!semver && settings.semverPath) {
+  if (!semver && settings?.semverPath) {
     semver = require(settings.semverPath);
   }
   // Return the normalized context

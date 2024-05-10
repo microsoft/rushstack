@@ -22,6 +22,7 @@ export class PnpmfileConfiguration {
   private _context: IPnpmfileContext | undefined;
 
   private constructor(context: IPnpmfileContext) {
+    pnpmfile.reset();
     this._context = context;
   }
 
