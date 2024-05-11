@@ -139,21 +139,17 @@ export function generateLockfileGraph(
     for (const [dependencyKey, dependencyValue] of Object.entries(lockfile.packages)) {
       // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
 
-      let packageDepKey = dependencyKey;
-      if (pnpmLockfileVersion === PnpmLockfileVersion.V6) {
-        packageDepKey = dependencyKey.replace('@', '/');
-      }
-
       const currEntry = new LockfileEntry({
         // entryId: normalizedPath,
-        rawEntryId: packageDepKey,
+        rawEntryId: dependencyKey,
         kind: LockfileEntryFilter.Package,
-        rawYamlData: dependencyValue
+        rawYamlData: dependencyValue,
+        subspaceName
       });
 
       allPackages.push(currEntry);
       allEntries.push(currEntry);
-      allEntriesById[packageDepKey] = currEntry;
+      allEntriesById[dependencyKey] = currEntry;
     }
   }
 
@@ -171,9 +167,11 @@ export function generateLockfileGraph(
         dependency.resolvedEntry = matchedEntry;
         matchedEntry.referrers.push(entry);
       } else {
-        // Local package
-        // eslint-disable-next-line no-console
-        console.error('Could not resolve dependency entryId: ', dependency.entryId, dependency);
+        if (dependency.entryId.startsWith('/')) {
+          // Local package
+          // eslint-disable-next-line no-console
+          console.error('Could not resolve dependency entryId: ', dependency.entryId, dependency);
+        }
       }
     }
   }

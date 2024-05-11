@@ -11,7 +11,9 @@ import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { FileSystem, type IPackageJson, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { IAppContext } from '@rushstack/lockfile-explorer-web/lib/AppContext';
 import { Colorize } from '@rushstack/terminal';
+import type { Lockfile } from '@pnpm/lockfile-types';
 
+import { convertLockfileV6DepPathToV5DepPath } from './utils';
 import { init } from './init';
 import type { IAppState } from './state';
 import { type ICommandLine, parseCommandLine } from './commandLine';
@@ -103,7 +105,16 @@ function startApp(debugMode: boolean): void {
 
   app.get('/api/lockfile', async (req: express.Request, res: express.Response) => {
     const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
-    const doc = yaml.load(pnpmLockfileText);
+    const doc = yaml.load(pnpmLockfileText) as Lockfile;
+    const { packages } = doc;
+    if (packages) {
+      const updatedPackages: Lockfile['packages'] = {};
+      const dependencyPaths = Object.keys(packages);
+      for (const dependencyPath of dependencyPaths) {
+        updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = packages[dependencyPath];
+      }
+      doc.packages = updatedPackages;
+    }
     res.send({
       doc,
       subspaceName
