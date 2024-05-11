@@ -110,7 +110,9 @@ function startApp(debugMode: boolean): void {
     if (packages && lockfileVersion.toString().startsWith('6.')) {
       const updatedPackages: Lockfile['packages'] = {};
       for (const dependencyPath in packages) {
-        updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = packages[dependencyPath];
+        if (Object.prototype.hasOwnProperty.call(packages, dependencyPath)) {
+          updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = packages[dependencyPath];
+        }
       }
       doc.packages = updatedPackages;
     }
