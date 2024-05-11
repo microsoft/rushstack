@@ -106,8 +106,8 @@ function startApp(debugMode: boolean): void {
   app.get('/api/lockfile', async (req: express.Request, res: express.Response) => {
     const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
     const doc = yaml.load(pnpmLockfileText) as Lockfile;
-    const { packages } = doc;
-    if (packages) {
+    const { packages, lockfileVersion } = doc;
+    if (packages && lockfileVersion.toString().startsWith('6.')) {
       const updatedPackages: Lockfile['packages'] = {};
       const dependencyPaths = Object.keys(packages);
       for (const dependencyPath of dependencyPaths) {
