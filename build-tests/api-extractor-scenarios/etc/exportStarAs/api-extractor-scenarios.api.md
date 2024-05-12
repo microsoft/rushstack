@@ -17,7 +17,6 @@ declare namespace calculator {
         calculatorVersion
     }
 }
-export { calculator }
 
 declare namespace calculator2 {
     export {
@@ -26,7 +25,6 @@ declare namespace calculator2 {
         calculatorVersion
     }
 }
-export { calculator2 }
 
 // @public
 const calculatorVersion: string;

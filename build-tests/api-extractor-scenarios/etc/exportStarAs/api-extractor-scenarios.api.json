@@ -177,7 +177,7 @@
           "canonicalReference": "api-extractor-scenarios!calculator:namespace",
           "docComment": "",
           "excerptTokens": [],
-          "fileUrlPath": "src/exportImportStarAs/index.ts",
+          "fileUrlPath": "src/exportStarAs/index.ts",
           "releaseTag": "None",
           "name": "calculator",
           "preserveMemberOrder": false,
@@ -216,7 +216,7 @@
                   "text": ";"
                 }
               ],
-              "fileUrlPath": "src/exportImportStarAs/calculator.ts",
+              "fileUrlPath": "src/exportStarAs/calculator.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -257,7 +257,7 @@
                   "text": "string"
                 }
               ],
-              "fileUrlPath": "src/exportImportStarAs/common.ts",
+              "fileUrlPath": "src/exportStarAs/common.ts",
               "isReadonly": true,
               "releaseTag": "Public",
               "name": "calculatorVersion",
@@ -300,7 +300,7 @@
                   "text": ";"
                 }
               ],
-              "fileUrlPath": "src/exportImportStarAs/calculator.ts",
+              "fileUrlPath": "src/exportStarAs/calculator.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -334,7 +334,7 @@
           "canonicalReference": "api-extractor-scenarios!calculator2:namespace",
           "docComment": "",
           "excerptTokens": [],
-          "fileUrlPath": "src/exportImportStarAs/index.ts",
+          "fileUrlPath": "src/exportStarAs/index.ts",
           "releaseTag": "None",
           "name": "calculator2",
           "preserveMemberOrder": false,
@@ -373,7 +373,7 @@
                   "text": ";"
                 }
               ],
-              "fileUrlPath": "src/exportImportStarAs/calculator2.ts",
+              "fileUrlPath": "src/exportStarAs/calculator2.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -414,7 +414,7 @@
                   "text": "string"
                 }
               ],
-              "fileUrlPath": "src/exportImportStarAs/common.ts",
+              "fileUrlPath": "src/exportStarAs/common.ts",
               "isReadonly": true,
               "releaseTag": "Public",
               "name": "calculatorVersion",
@@ -457,7 +457,7 @@
                   "text": ";"
                 }
               ],
-              "fileUrlPath": "src/exportImportStarAs/calculator2.ts",
+              "fileUrlPath": "src/exportStarAs/calculator2.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6

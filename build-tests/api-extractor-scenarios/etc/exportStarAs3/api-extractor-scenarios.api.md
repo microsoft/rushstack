@@ -11,7 +11,6 @@ declare namespace NS {
         NS_INTERNAL
     }
 }
-export { NS }
 
 // @beta (undocumented)
 const NS_BETA = "BETA";

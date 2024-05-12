@@ -177,7 +177,7 @@
           "canonicalReference": "api-extractor-scenarios!NS:namespace",
           "docComment": "",
           "excerptTokens": [],
-          "fileUrlPath": "src/exportImportStarAs3/index.ts",
+          "fileUrlPath": "src/exportStarAs3/index.ts",
           "releaseTag": "None",
           "name": "NS",
           "preserveMemberOrder": false,
@@ -196,7 +196,7 @@
                   "text": "\"BETA\""
                 }
               ],
-              "fileUrlPath": "src/exportImportStarAs3/NamespaceWithTrimming.ts",
+              "fileUrlPath": "src/exportStarAs3/NamespaceWithTrimming.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -223,7 +223,7 @@
                   "text": "\"PUBLIC\""
                 }
               ],
-              "fileUrlPath": "src/exportImportStarAs3/NamespaceWithTrimming.ts",
+              "fileUrlPath": "src/exportStarAs3/NamespaceWithTrimming.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2

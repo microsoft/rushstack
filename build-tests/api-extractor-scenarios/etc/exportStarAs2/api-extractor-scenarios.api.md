@@ -14,7 +14,6 @@ declare namespace ns {
         exportedApi
     }
 }
-export { ns }
 
 // (No @packageDocumentation comment for this package)
 
