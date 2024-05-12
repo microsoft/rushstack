@@ -1,4 +1,7 @@
-import { AstNamespaceImport, IAstNamespaceImportOptions } from './AstNamespaceImport';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import { AstNamespaceImport, type IAstNamespaceImportOptions } from './AstNamespaceImport';
 
 export interface IAstNamespaceExportOptions extends IAstNamespaceImportOptions {}
 
