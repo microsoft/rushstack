@@ -426,7 +426,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the feature to be enabled in subspaces.json.",
+          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the \\"subspacesEnabled\\" feature to be enabled in subspaces.json.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--subspace",
@@ -564,7 +564,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the feature to be enabled in subspaces.json.",
+          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the \\"subspacesEnabled\\" feature to be enabled in subspaces.json.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--subspace",
@@ -1118,7 +1118,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the feature to be enabled in subspaces.json.",
+          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the \\"subspacesEnabled\\" feature to be enabled in subspaces.json.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--subspace",
@@ -1248,7 +1248,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the feature to be enabled in subspaces.json.",
+          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the \\"subspacesEnabled\\" feature to be enabled in subspaces.json.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--subspace",
@@ -1381,7 +1381,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the feature to be enabled in subspaces.json.",
+          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the \\"subspacesEnabled\\" feature to be enabled in subspaces.json.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--subspace",

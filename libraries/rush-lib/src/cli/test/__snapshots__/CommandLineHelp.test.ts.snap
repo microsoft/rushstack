@@ -240,8 +240,8 @@ Optional arguments:
                         subsets of projects\\".
   --subspace SUBSPACE_NAME
                         (EXPERIMENTAL) Specifies a Rush subspace to be 
-                        installed. Requires the feature to be enabled in 
-                        subspaces.json.
+                        installed. Requires the \\"subspacesEnabled\\" feature to 
+                        be enabled in subspaces.json.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   -c, --changed-projects-only
@@ -497,8 +497,8 @@ Optional arguments:
                         subsets of projects\\".
   --subspace SUBSPACE_NAME
                         (EXPERIMENTAL) Specifies a Rush subspace to be 
-                        installed. Requires the feature to be enabled in 
-                        subspaces.json.
+                        installed. Requires the \\"subspacesEnabled\\" feature to 
+                        be enabled in subspaces.json.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
@@ -711,8 +711,8 @@ Optional arguments:
                         subsets of projects\\".
   --subspace SUBSPACE_NAME
                         (EXPERIMENTAL) Specifies a Rush subspace to be 
-                        installed. Requires the feature to be enabled in 
-                        subspaces.json.
+                        installed. Requires the \\"subspacesEnabled\\" feature to 
+                        be enabled in subspaces.json.
   --check-only          Only check the validity of the shrinkwrap file 
                         without performing an install.
 "
@@ -840,8 +840,8 @@ Optional arguments:
                         subsets of projects\\".
   --subspace SUBSPACE_NAME
                         (EXPERIMENTAL) Specifies a Rush subspace to be 
-                        installed. Requires the feature to be enabled in 
-                        subspaces.json.
+                        installed. Requires the \\"subspacesEnabled\\" feature to 
+                        be enabled in subspaces.json.
 "
 `;
 
@@ -1070,8 +1070,8 @@ Optional arguments:
                         subsets of projects\\".
   --subspace SUBSPACE_NAME
                         (EXPERIMENTAL) Specifies a Rush subspace to be 
-                        installed. Requires the feature to be enabled in 
-                        subspaces.json.
+                        installed. Requires the \\"subspacesEnabled\\" feature to 
+                        be enabled in subspaces.json.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
