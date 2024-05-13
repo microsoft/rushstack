@@ -69,7 +69,6 @@ export class ExportAnalyzer {
 
   private readonly _astImportsByKey: Map<string, AstImport> = new Map<string, AstImport>();
   private readonly _astNamespaceImportByModule: Map<AstModule, AstNamespaceImport> = new Map();
-  private readonly _astNamespaceExportByModule: Map<AstModule, AstNamespaceExport> = new Map();
 
   public constructor(
     program: ts.Program,
