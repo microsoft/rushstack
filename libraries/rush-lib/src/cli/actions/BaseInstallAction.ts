@@ -246,7 +246,12 @@ export abstract class BaseInstallAction extends BaseRushAction {
           if (selectedSubspace.getPnpmOptions()?.alwaysFullInstall) {
             installManagerOptions.filteredProjects = [];
           } else {
-            installManagerOptions.filteredProjects = filteredProjectsForSubspace.get(selectedSubspace) || [];
+            const filteredProjects: RushConfigurationProject[] | undefined =
+              filteredProjectsForSubspace.get(selectedSubspace);
+            installManagerOptions.filteredProjects =
+              filteredProjects?.length === this.rushConfiguration.projects.length
+                ? []
+                : filteredProjects ?? [];
           }
           // eslint-disable-next-line no-console
           console.log(Colorize.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));

@@ -7,6 +7,7 @@ import { BaseInstallAction } from './BaseInstallAction';
 import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export class UpdateAction extends BaseInstallAction {
   private readonly _fullParameter: CommandLineFlagParameter;
@@ -75,6 +76,9 @@ export class UpdateAction extends BaseInstallAction {
   }
 
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
+    const selectedProjects: Set<RushConfigurationProject> | undefined =
+      await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
+
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: true,
@@ -90,9 +94,10 @@ export class UpdateAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      filteredProjects: Array.from(
-        (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) || []
-      ),
+      filteredProjects:
+        selectedProjects?.size === this.rushConfiguration.projects.length
+          ? []
+          : Array.from(selectedProjects ?? []),
       checkOnly: false,
       subspace: this.getTargetSubspace(),
 
