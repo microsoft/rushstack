@@ -49,15 +49,15 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
     if (!context.pnpmfileShimSettings) {
       context.pnpmfileShimSettings = __non_webpack_require__('./pnpmfileSettings.json');
     }
-    settings = context.pnpmfileShimSettings!;
+    settings = context.pnpmfileShimSettings as IPnpmfileShimSettings;
   } else if (!context.pnpmfileShimSettings) {
     // Reuse the already initialized settings
     context.pnpmfileShimSettings = settings;
   }
-  if (!allPreferredVersions && settings?.allPreferredVersions) {
+  if (!allPreferredVersions && settings.allPreferredVersions) {
     allPreferredVersions = new Map(Object.entries(settings.allPreferredVersions));
   }
-  if (!allowedAlternativeVersions && settings?.allowedAlternativeVersions) {
+  if (!allowedAlternativeVersions && settings.allowedAlternativeVersions) {
     allowedAlternativeVersions = new Map(
       Object.entries(settings.allowedAlternativeVersions).map(([packageName, versions]) => {
         return [packageName, new Set(versions)];
@@ -65,11 +65,11 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
     );
   }
   // If a userPnpmfilePath is provided, we expect it to exist
-  if (!userPnpmfile && settings?.userPnpmfilePath) {
+  if (!userPnpmfile && settings.userPnpmfilePath) {
     userPnpmfile = require(settings.userPnpmfilePath);
   }
   // If a semverPath is provided, we expect it to exist
-  if (!semver && settings?.semverPath) {
+  if (!semver && settings.semverPath) {
     semver = require(settings.semverPath);
   }
   // Return the normalized context
