@@ -21,6 +21,7 @@ import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelect
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
 import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorParser';
 import { RushConstants } from '../../logic/RushConstants';
+import { Subspace } from '../../api/Subspace';
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -190,7 +191,10 @@ export class SelectionParameterSet {
    *
    * If no parameters are specified, returns all projects in the Rush config file.
    */
-  public async getSelectedProjectsAsync(terminal: ITerminal): Promise<Set<RushConfigurationProject>> {
+  public async getSelectedProjectsAsync(
+    terminal: ITerminal,
+    subspaceName?: string
+  ): Promise<Set<RushConfigurationProject>> {
     // Hack out the old version-policy parameters
     for (const value of this._fromVersionPolicy.values) {
       (this._fromProject.values as string[]).push(`version-policy:${value}`);
@@ -209,9 +213,8 @@ export class SelectionParameterSet {
     ];
 
     // Check if any of the selection parameters have a value specified on the command line
-    const isSelectionSpecified: boolean = selectors.some(
-      (param: CommandLineStringListParameter) => param.values.length > 0
-    );
+    const isSelectionSpecified: boolean =
+      selectors.some((param: CommandLineStringListParameter) => param.values.length > 0) || !!subspace;
 
     // If no selection parameters are specified, return everything
     if (!isSelectionSpecified) {
@@ -237,6 +240,14 @@ export class SelectionParameterSet {
       })
     );
 
+    const subspaceProjects: Iterable<RushConfigurationProject> = subspaceName
+      ? await this._selectorParserByScope.get('subspace')!.evaluateSelectorAsync({
+          unscopedSelector: subspaceName,
+          terminal,
+          parameterName: 'subspace'
+        })
+      : [];
+
     const selection: Set<RushConfigurationProject> = Selection.union(
       // Safe command line options
       Selection.expandAllDependencies(
@@ -244,7 +255,8 @@ export class SelectionParameterSet {
           toRaw,
           Selection.directDependenciesOf(toExceptProjects),
           // --from / --from-version-policy
-          Selection.expandAllConsumers(fromProjects)
+          Selection.expandAllConsumers(fromProjects),
+          subspaceProjects
         )
       ),
 
