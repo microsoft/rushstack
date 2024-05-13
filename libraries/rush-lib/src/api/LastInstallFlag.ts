@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, type JsonObject, Path, type IPackageJson, FileSystem } from '@rushstack/node-core-library';
+import { JsonFile, type JsonObject, Path, type IPackageJson } from '@rushstack/node-core-library';
 import { pnpmSyncGetJsonVersion } from 'pnpm-sync-lib';
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
 import * as objectUtilities from '../utilities/objectUtilities';
 import type { Subspace } from './Subspace';
 import { Selection } from '../logic/Selection';
-import path from 'path';
+import { FlagFile } from './FlagFile';
 
-export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
+const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install';
 
 /**
  * This represents the JSON data structure for the "last-install.flag" file.
@@ -74,29 +74,21 @@ interface ILockfileValidityCheckOptions {
  * It also compares state, so that if something like the Node.js version has changed,
  * it can invalidate the last install.
  */
-export class LastInstallFlag {
-  private _state: ILastInstallFlagJson;
-
-  /**
-   * Returns the full path to the flag file
-   */
-  public readonly path: string;
-
+export class LastInstallFlag extends FlagFile<Partial<ILastInstallFlagJson>> {
   /**
    * Creates a new LastInstall flag
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
    */
   public constructor(folderPath: string, state?: Partial<ILastInstallFlagJson>) {
-    this.path = path.join(folderPath, this.flagName);
-    this._state = (state || {}) as ILastInstallFlagJson;
+    super(folderPath, LAST_INSTALL_FLAG_FILE_NAME, state || {});
   }
 
   /**
    * Returns true if the file exists and the contents match the current state.
    */
-  public async isValidAsync(options?: ILockfileValidityCheckOptions): Promise<boolean> {
-    return await this._isValidAsync(false, options);
+  public async isValidAsync(): Promise<boolean> {
+    return await this._isValidAsync(false, {});
   }
 
   /**
@@ -111,14 +103,6 @@ export class LastInstallFlag {
     return this._isValidAsync(true, options);
   }
 
-  private _isValidAsync(
-    checkValidAndReportStoreIssues: false,
-    options?: ILockfileValidityCheckOptions
-  ): Promise<boolean>;
-  private _isValidAsync(
-    checkValidAndReportStoreIssues: true,
-    options: ILockfileValidityCheckOptions & { rushVerb: string }
-  ): Promise<boolean>;
   private async _isValidAsync(
     checkValidAndReportStoreIssues: boolean,
     { rushVerb = 'update', statePropertiesToIgnore }: ILockfileValidityCheckOptions = {}
@@ -130,7 +114,7 @@ export class LastInstallFlag {
       return false;
     }
 
-    const newState: ILastInstallFlagJson = { ...this._state };
+    const newState: ILastInstallFlagJson = { ...this._state } as ILastInstallFlagJson;
     if (statePropertiesToIgnore) {
       for (const optionToIgnore of statePropertiesToIgnore) {
         delete newState[optionToIgnore];
@@ -186,15 +170,6 @@ export class LastInstallFlag {
   }
 
   /**
-   * Writes the flag file to disk with the current state
-   */
-  public async createAsync(): Promise<void> {
-    await JsonFile.saveAsync(this._state, this.path, {
-      ensureFolderExists: true
-    });
-  }
-
-  /**
    * Merge new data into current state by "merge"
    */
   public mergeFromObject(data: JsonObject): void {
@@ -203,58 +178,37 @@ export class LastInstallFlag {
     }
     objectUtilities.merge(this._state, data);
   }
-
-  /**
-   * Removes the flag file
-   */
-  public async clearAsync(): Promise<void> {
-    await FileSystem.deleteFileAsync(this.path);
-  }
-
-  /**
-   * Returns the name of the flag file
-   */
-  protected get flagName(): string {
-    return LAST_INSTALL_FLAG_FILE_NAME;
-  }
 }
 
 /**
- * A helper class for LastInstallFlag
+ * Gets the LastInstall flag and sets the current state. This state is used to compare
+ * against the last-known-good state tracked by the LastInstall flag.
+ * @param rushConfiguration - the configuration of the Rush repo to get the install
+ * state from
  *
  * @internal
  */
-export class LastInstallFlagFactory {
-  /**
-   * Gets the LastInstall flag and sets the current state. This state is used to compare
-   * against the last-known-good state tracked by the LastInstall flag.
-   * @param rushConfiguration - the configuration of the Rush repo to get the install
-   * state from
-   *
-   * @internal
-   */
-  public static getCommonTempFlag(
-    rushConfiguration: RushConfiguration,
-    subspace: Subspace,
-    extraState: Record<string, string> = {}
-  ): LastInstallFlag {
-    const currentState: ILastInstallFlagJson = {
-      node: process.versions.node,
-      packageManager: rushConfiguration.packageManager,
-      packageManagerVersion: rushConfiguration.packageManagerToolVersion,
-      rushJsonFolder: rushConfiguration.rushJsonFolder,
-      ignoreScripts: false,
-      pnpmSync: pnpmSyncGetJsonVersion(),
-      ...extraState
-    };
+export function getCommonTempFlag(
+  rushConfiguration: RushConfiguration,
+  subspace: Subspace,
+  extraState: Record<string, string> = {}
+): LastInstallFlag {
+  const currentState: ILastInstallFlagJson = {
+    node: process.versions.node,
+    packageManager: rushConfiguration.packageManager,
+    packageManagerVersion: rushConfiguration.packageManagerToolVersion,
+    rushJsonFolder: rushConfiguration.rushJsonFolder,
+    ignoreScripts: false,
+    pnpmSync: pnpmSyncGetJsonVersion(),
+    ...extraState
+  };
 
-    if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
-      currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
-      if (rushConfiguration.pnpmOptions.useWorkspaces) {
-        currentState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
-      }
+  if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
+    currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
+    if (rushConfiguration.pnpmOptions.useWorkspaces) {
+      currentState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
     }
-
-    return new LastInstallFlag(subspace.getSubspaceTempFolder(), currentState);
   }
+
+  return new LastInstallFlag(subspace.getSubspaceTempFolder(), currentState);
 }
