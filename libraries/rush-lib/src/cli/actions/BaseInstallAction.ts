@@ -118,6 +118,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     let selectedSubspaces: ReadonlySet<Subspace> | undefined;
     const filteredProjectsForSubspace: Map<Subspace, RushConfigurationProject[]> = new Map();
     if (this.rushConfiguration.subspacesFeatureEnabled) {
+      const selectedSubspaceParameter: Subspace | undefined = this._selectionParameters?.getTargetSubspace();
       if (installManagerOptions.filteredProjects.length) {
         // Go through each project, add it to it's subspace's pnpm filter arguments
         for (const project of installManagerOptions.filteredProjects) {
@@ -132,10 +133,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
         selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(
           new Set(installManagerOptions.filteredProjects)
         );
-      } else if (this._selectionParameters?.getTargetSubspace()) {
+      } else if (selectedSubspaceParameter) {
         // Selecting a single subspace
-        const selectedSubspace: Subspace = this._selectionParameters?.getTargetSubspace();
-        selectedSubspaces = new Set<Subspace>([selectedSubspace]);
+        selectedSubspaces = new Set<Subspace>([selectedSubspaceParameter]);
       } else {
         // Selecting all subspaces if preventSelectingAllSubspaces is not enabled in subspaces.json
         if (!this.rushConfiguration.subspacesConfiguration?.preventSelectingAllSubspaces) {

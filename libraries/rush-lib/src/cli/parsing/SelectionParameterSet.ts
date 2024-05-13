@@ -191,7 +191,7 @@ export class SelectionParameterSet {
       parameterLongName: '--subspace',
       argumentName: 'SUBSPACE_NAME',
       description:
-        '(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the feature to be enabled in subspaces.json.'
+        '(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the "subspacesEnabled" feature to be enabled in subspaces.json.'
     });
   }
 
@@ -287,7 +287,7 @@ export class SelectionParameterSet {
       // eslint-disable-next-line no-console
       console.log(
         Colorize.red(
-          `The "--subspace" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
+          `The "${this._subspaceParameter.longName}" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
         )
       );
       throw new AlreadyReportedError();
