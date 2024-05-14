@@ -148,9 +148,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
     }
 
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
-    let selectedSubspaces: ReadonlySet<Subspace> | undefined;
+    let selectedSubspaces: Set<Subspace> | undefined;
     const selectedProjectsMetadataBySubspace: Map<Subspace, ISubspaceSelectedProjectsMetadata> = new Map();
     if (this.rushConfiguration.subspacesFeatureEnabled) {
+      selectedSubspaces = new Set();
       const { selectedProjects } = installManagerOptions;
       if (selectedProjects.size !== this.rushConfiguration.projects.length) {
         // This is a filtered install. Go through each project, add its subspace's pnpm filter arguments
@@ -159,6 +160,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
           let subspaceSelectedProjectsMetadata: ISubspaceSelectedProjectsMetadata | undefined =
             selectedProjectsMetadataBySubspace.get(projectSubspace);
           if (!subspaceSelectedProjectsMetadata) {
+            selectedSubspaces.add(projectSubspace);
             const alwaysFullInstall: boolean = projectSubspace.getPnpmOptions()?.alwaysFullInstall ?? false;
             subspaceSelectedProjectsMetadata = {
               selectedProjects: new Set(alwaysFullInstall ? projectSubspace.getProjects() : undefined),
@@ -178,8 +180,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
             pnpmFilterArguments.push('--filter', project.packageName);
           }
         }
-
-        selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(selectedProjects);
       } else if (this._subspaceParameter.value) {
         // Selecting a single subspace
         const selectedSubspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceParameter.value);
