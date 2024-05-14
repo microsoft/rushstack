@@ -190,13 +190,18 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       });
     }
 
-    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
-      // Include lockfile processing since this expands the selection, and we need to select
-      // at least the same projects selected with the same query to "rush build"
-      includeExternalDependencies: true,
-      // Enable filtering to reduce evaluation cost
-      enableFiltering: true
-    });
+    this._selectionParameters = new SelectionParameterSet(
+      this.rushConfiguration,
+      this,
+      {
+        // Include lockfile processing since this expands the selection, and we need to select
+        // at least the same projects selected with the same query to "rush build"
+        includeExternalDependencies: true,
+        // Enable filtering to reduce evaluation cost
+        enableFiltering: true
+      },
+      false
+    );
 
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
