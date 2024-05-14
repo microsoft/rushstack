@@ -88,7 +88,8 @@ export async function getCommandLineParserInstanceAsync(
   // file exists and is valid
   await new FlagFile(
     parser.rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
-    RushConstants.lastLinkFlagFilename
+    RushConstants.lastLinkFlagFilename,
+    {}
   ).createAsync();
 
   // Mock the command
