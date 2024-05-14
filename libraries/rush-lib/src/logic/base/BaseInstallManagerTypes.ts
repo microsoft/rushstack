@@ -82,21 +82,25 @@ export interface IInstallManagerOptions {
   maxInstallAttempts: number;
 
   /**
-   * If `filteredProjects` is `undefined`, then Rush's install manager will perform a regular `pnpm install`.
+   * If `filteredProjects` is `undefined`, then Rush will perform a regular `pnpm install`.
    *
-   * If `filteredProjects` is specified, then it will perform a "filtered install" by invoking PNPM like this:
+   * If `filteredProjects` is specified, then Rush will perform a "filtered install" by invoking PNPM like this,
+   * a special mode which installs or updates only a subset of the lockfile:
    *
    * `pnpm install --filter project1 --filter project5 --filter project6`
    *
    * If `filteredProjects` is specified and the set is empty, then the install manager will skip installation entirely.
    *
    * @remarks
+   * If `filteredProjects` specifies all projects in the workspace or subspace, filtering will still occur;
+   * it is the caller's responsibility to optimize that.
+   *
    * Compared to an unfiltered install, filtering brings some limitations:  For example, Rush's install skipping
    * optimization may miss some cases.  For `rush update`, PNPM may not remove deadwood from the lockfile as
    * effectively as an unfiltered install.
    *
-   * Note that PNPM will arbitrarily ignore `--filter` (producing an unfiltered install) in certain situations,
-   * for example when `config.dedupe-peer-dependents=true` with PNPM 8.  Rush tries to avoid this, under the
+   * Note that PNPM may arbitrarily ignore `--filter` (producing an unfiltered install) in certain situations,
+   * for example when `config.dedupe-peer-dependents=true` with PNPM 8.  Rush tries to circumvent this, under the
    * assumption that a user who invokes a filtered install cares more about lockfile stability than duplication.
    */
   filteredProjects: Set<RushConfigurationProject> | undefined;
