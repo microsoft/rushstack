@@ -103,8 +103,8 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstallAsync(): Promise<void> {
-    const { allowShrinkwrapUpdates, selectedProjects, pnpmFilterArguments } = this.options;
-    const isFilteredInstall: boolean = pnpmFilterArguments.length > 0;
+    const { allowShrinkwrapUpdates, selectedProjects, pnpmFilterArgumentValues } = this.options;
+    const isFilteredInstall: boolean = pnpmFilterArgumentValues.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
     // Prevent filtered installs when workspaces is disabled
@@ -660,7 +660,7 @@ ${gitLfsHookHandling}
     const {
       offline,
       collectLogFile,
-      pnpmFilterArguments,
+      pnpmFilterArgumentValues,
       onlyShrinkwrap,
       networkConcurrency,
       allowShrinkwrapUpdates
@@ -723,7 +723,7 @@ ${gitLfsHookHandling}
         args.push('--frozen-lockfile');
 
         if (
-          pnpmFilterArguments.length > 0 &&
+          pnpmFilterArgumentValues.length > 0 &&
           Number.parseInt(this.rushConfiguration.packageManagerToolVersion, 10) >= 8 // PNPM Major version 8+
         ) {
           // On pnpm@8, disable the "dedupe-peer-dependents" feature when doing a filtered CI install so that filters take effect.

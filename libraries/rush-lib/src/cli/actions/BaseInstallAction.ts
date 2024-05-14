@@ -29,7 +29,7 @@ import type { Subspace } from '../../api/Subspace';
  */
 interface ISubspaceInstallationData {
   selectedProjects: Set<RushConfigurationProject>;
-  pnpmFilterArguments: string[];
+  pnpmFilterArgumentValues: string[];
   alwaysFullInstall: boolean;
 }
 
@@ -167,20 +167,20 @@ export abstract class BaseInstallAction extends BaseRushAction {
             const alwaysFullInstall: boolean = projectSubspace.getPnpmOptions()?.alwaysFullInstall ?? false;
             subspaceInstallationData = {
               selectedProjects: new Set(alwaysFullInstall ? projectSubspace.getProjects() : undefined),
-              pnpmFilterArguments: [],
+              pnpmFilterArgumentValues: [],
               alwaysFullInstall
             };
             subspaceInstallationDataBySubspace.set(projectSubspace, subspaceInstallationData);
           }
 
           const {
-            pnpmFilterArguments,
+            pnpmFilterArgumentValues,
             selectedProjects: subspaceSelectedProjects,
             alwaysFullInstall
           } = subspaceInstallationData;
           if (!alwaysFullInstall) {
             subspaceSelectedProjects.add(project);
-            pnpmFilterArguments.push('--filter', project.packageName);
+            pnpmFilterArgumentValues.push(project.packageName);
           }
         }
       } else if (this._subspaceParameter.value) {
@@ -272,11 +272,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
           console.log(Colorize.green(`Installing for subspace: ${subspace.subspaceName}`));
           let installManagerOptionsForInstall: IInstallManagerOptions;
           if (subspaceInstallationData) {
-            const { selectedProjects, pnpmFilterArguments } = subspaceInstallationData;
+            const { selectedProjects, pnpmFilterArgumentValues } = subspaceInstallationData;
             installManagerOptionsForInstall = {
               ...installManagerOptions,
               selectedProjects,
-              pnpmFilterArguments,
+              pnpmFilterArgumentValues,
               subspace
             };
           } else {

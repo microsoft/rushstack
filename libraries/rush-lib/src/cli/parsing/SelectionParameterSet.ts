@@ -268,12 +268,12 @@ export class SelectionParameterSet {
    *
    * @see https://pnpm.js.org/en/filtering
    */
-  public async getPnpmFilterArgumentsAsync(terminal: ITerminal): Promise<string[]> {
+  public async getPnpmFilterArgumentValuesAsync(terminal: ITerminal): Promise<string[]> {
     const args: string[] = [];
 
     // Include exactly these projects (--only)
     for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal)) {
-      args.push('--filter', project.packageName);
+      args.push(project.packageName);
     }
 
     // Include all projects that depend on these projects, and all dependencies thereof
@@ -289,19 +289,19 @@ export class SelectionParameterSet {
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     )) {
-      args.push('--filter', `${project.packageName}...`);
+      args.push(`${project.packageName}...`);
     }
 
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
     for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal)) {
-      args.push('--filter', `${project.packageName}^...`);
+      args.push(`${project.packageName}^...`);
     }
 
     // --impacted-by
     // The project and all projects directly or indirectly declare it as a dependency
     for (const project of await this._evaluateProjectParameterAsync(this._impactedByProject, terminal)) {
-      args.push('--filter', `...${project.packageName}`);
+      args.push(`...${project.packageName}`);
     }
 
     // --impacted-by-except
@@ -310,7 +310,7 @@ export class SelectionParameterSet {
       this._impactedByExceptProject,
       terminal
     )) {
-      args.push('--filter', `...^${project.packageName}`);
+      args.push(`...^${project.packageName}`);
     }
 
     return args;
