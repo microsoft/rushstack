@@ -724,9 +724,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         }
       }
 
-      for (const arg of this.options.filteredProjects) {
-        args.push('--filter');
-        args.push(arg.packageName);
+      const { filteredProjects } = this.options;
+      if (filteredProjects) {
+        for (const arg of filteredProjects) {
+          args.push('--filter');
+          args.push(arg.packageName);
+        }
       }
     }
   }

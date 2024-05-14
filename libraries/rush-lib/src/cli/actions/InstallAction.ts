@@ -64,9 +64,7 @@ export class InstallAction extends BaseInstallAction {
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
       filteredProjects:
-        selectedProjects?.size === this.rushConfiguration.projects.length
-          ? []
-          : Array.from(selectedProjects ?? []),
+        selectedProjects?.size === this.rushConfiguration.projects.length ? undefined : selectedProjects,
       checkOnly: this._checkOnlyParameter.value,
       subspace: this.getTargetSubspace(),
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),

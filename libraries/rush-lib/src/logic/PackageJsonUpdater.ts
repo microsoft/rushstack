@@ -290,7 +290,7 @@ export class PackageJsonUpdater {
       offline: false,
       collectLogFile: false,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-      filteredProjects: [],
+      filteredProjects: undefined,
       checkOnly: false,
       subspace: subspace,
       terminal: this._terminal

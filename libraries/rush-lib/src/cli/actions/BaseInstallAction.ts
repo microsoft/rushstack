@@ -143,18 +143,18 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
     let selectedSubspaces: ReadonlySet<Subspace> | undefined;
-    const filteredProjectsForSubspace: Map<Subspace, RushConfigurationProject[]> = new Map();
+    const filteredProjectsForSubspace: Map<Subspace, Set<RushConfigurationProject>> = new Map();
     if (this.rushConfiguration.subspacesFeatureEnabled) {
-      if (installManagerOptions.filteredProjects.length) {
+      if (installManagerOptions.filteredProjects?.size) {
         // Go through each project, add it to it's subspace's pnpm filter arguments
         for (const project of installManagerOptions.filteredProjects) {
-          let subspaceFilteredProjects: RushConfigurationProject[] | undefined =
+          let subspaceFilteredProjects: Set<RushConfigurationProject> | undefined =
             filteredProjectsForSubspace.get(project.subspace);
           if (!subspaceFilteredProjects) {
-            subspaceFilteredProjects = [];
+            subspaceFilteredProjects = new Set();
             filteredProjectsForSubspace.set(project.subspace, subspaceFilteredProjects);
           }
-          subspaceFilteredProjects.push(project);
+          subspaceFilteredProjects.add(project);
         }
         selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(
           new Set(installManagerOptions.filteredProjects)
@@ -244,14 +244,14 @@ export abstract class BaseInstallAction extends BaseRushAction {
         for (const selectedSubspace of selectedSubspaces) {
           installManagerOptions.subspace = selectedSubspace;
           if (selectedSubspace.getPnpmOptions()?.alwaysFullInstall) {
-            installManagerOptions.filteredProjects = [];
+            installManagerOptions.filteredProjects = undefined;
           } else {
-            const filteredProjects: RushConfigurationProject[] | undefined =
+            const filteredProjects: Set<RushConfigurationProject> | undefined =
               filteredProjectsForSubspace.get(selectedSubspace);
             installManagerOptions.filteredProjects =
-              filteredProjects?.length === this.rushConfiguration.projects.length
-                ? []
-                : filteredProjects ?? [];
+              filteredProjects?.size === this.rushConfiguration.projects.length
+                ? undefined
+                : filteredProjects;
           }
           // eslint-disable-next-line no-console
           console.log(Colorize.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));

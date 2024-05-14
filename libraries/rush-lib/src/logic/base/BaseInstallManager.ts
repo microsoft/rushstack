@@ -103,8 +103,8 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstallAsync(): Promise<void> {
-    const { allowShrinkwrapUpdates } = this.options;
-    const isFilteredInstall: boolean = this.options.filteredProjects.length > 0;
+    const { allowShrinkwrapUpdates, filteredProjects } = this.options;
+    const isFilteredInstall: boolean = (filteredProjects?.size ?? 0) > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
     // Prevent filtered installs when workspaces is disabled
@@ -163,10 +163,16 @@ export abstract class BaseInstallManager {
     const commonTempInstallFlag: LastInstallFlag = getCommonTempFlag(this.rushConfiguration, subspace, {
       npmrcHash: npmrcHash || '<NO NPMRC>'
     });
-    if (isFilteredInstall) {
+    if (isFilteredInstall && filteredProjects) {
+      const selectedProjectNames: string[] = [];
+      for (const { packageName } of filteredProjects) {
+        selectedProjectNames.push(packageName);
+      }
+
+      selectedProjectNames.sort();
       // Get the projects involved in this filtered install
       commonTempInstallFlag.mergeFromObject({
-        selectedProjectNames: this.options.filteredProjects.map((project) => project.packageName)
+        selectedProjectNames
       });
     }
     const optionsToIgnore: (keyof ILastInstallFlagJson)[] | undefined = !this.rushConfiguration
@@ -708,7 +714,8 @@ ${gitLfsHookHandling}
         args.push('--frozen-lockfile');
 
         if (
-          options.filteredProjects.length > 0 &&
+          options.filteredProjects &&
+          options.filteredProjects.size > 0 &&
           Number.parseInt(this.rushConfiguration.packageManagerToolVersion, 10) >= 8 // PNPM Major version 8+
         ) {
           // On pnpm@8, disable the "dedupe-peer-dependents" feature when doing a filtered CI install so that filters take effect.

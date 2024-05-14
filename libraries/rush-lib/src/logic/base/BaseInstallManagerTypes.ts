@@ -85,7 +85,7 @@ export interface IInstallManagerOptions {
    * Filters to be passed to PNPM during installation, if applicable.
    * These restrict the scope of a workspace installation.
    */
-  filteredProjects: RushConfigurationProject[];
+  filteredProjects: Set<RushConfigurationProject> | undefined;
 
   /**
    * Callback to invoke between preparing the common/temp folder and running installation.
