@@ -24,7 +24,10 @@ import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { Subspace } from '../../api/Subspace';
 
-interface ISubspaceSelectedProjectsMetadata {
+/**
+ * Temporary data structure used by `BaseInstallAction.runAsync()`
+ */
+interface ISubspaceInstallationData {
   selectedProjects: Set<RushConfigurationProject>;
   pnpmFilterArguments: string[];
   alwaysFullInstall: boolean;
@@ -149,7 +152,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
     let selectedSubspaces: Set<Subspace> | undefined;
-    const selectedProjectsMetadataBySubspace: Map<Subspace, ISubspaceSelectedProjectsMetadata> = new Map();
+    const subspaceInstallationDataBySubspace: Map<Subspace, ISubspaceInstallationData> = new Map();
     if (this.rushConfiguration.subspacesFeatureEnabled) {
       selectedSubspaces = new Set();
       const { selectedProjects } = installManagerOptions;
@@ -157,24 +160,24 @@ export abstract class BaseInstallAction extends BaseRushAction {
         // This is a filtered install. Go through each project, add its subspace's pnpm filter arguments
         for (const project of selectedProjects) {
           const { subspace: projectSubspace } = project;
-          let subspaceSelectedProjectsMetadata: ISubspaceSelectedProjectsMetadata | undefined =
-            selectedProjectsMetadataBySubspace.get(projectSubspace);
-          if (!subspaceSelectedProjectsMetadata) {
+          let subspaceInstallationData: ISubspaceInstallationData | undefined =
+            subspaceInstallationDataBySubspace.get(projectSubspace);
+          if (!subspaceInstallationData) {
             selectedSubspaces.add(projectSubspace);
             const alwaysFullInstall: boolean = projectSubspace.getPnpmOptions()?.alwaysFullInstall ?? false;
-            subspaceSelectedProjectsMetadata = {
+            subspaceInstallationData = {
               selectedProjects: new Set(alwaysFullInstall ? projectSubspace.getProjects() : undefined),
               pnpmFilterArguments: [],
               alwaysFullInstall
             };
-            selectedProjectsMetadataBySubspace.set(projectSubspace, subspaceSelectedProjectsMetadata);
+            subspaceInstallationDataBySubspace.set(projectSubspace, subspaceInstallationData);
           }
 
           const {
             pnpmFilterArguments,
             selectedProjects: subspaceSelectedProjects,
             alwaysFullInstall
-          } = subspaceSelectedProjectsMetadata;
+          } = subspaceInstallationData;
           if (!alwaysFullInstall) {
             subspaceSelectedProjects.add(project);
             pnpmFilterArguments.push('--filter', project.packageName);
@@ -263,13 +266,13 @@ export abstract class BaseInstallAction extends BaseRushAction {
       if (selectedSubspaces) {
         // Run the install for each affected subspace
         for (const subspace of selectedSubspaces) {
-          const selectedProjectsMetadata: ISubspaceSelectedProjectsMetadata | undefined =
-            selectedProjectsMetadataBySubspace.get(subspace);
+          const subspaceInstallationData: ISubspaceInstallationData | undefined =
+            subspaceInstallationDataBySubspace.get(subspace);
           // eslint-disable-next-line no-console
           console.log(Colorize.green(`Installing for subspace: ${subspace.subspaceName}`));
           let installManagerOptionsForInstall: IInstallManagerOptions;
-          if (selectedProjectsMetadata) {
-            const { selectedProjects, pnpmFilterArguments } = selectedProjectsMetadata;
+          if (subspaceInstallationData) {
+            const { selectedProjects, pnpmFilterArguments } = subspaceInstallationData;
             installManagerOptionsForInstall = {
               ...installManagerOptions,
               selectedProjects,

@@ -82,8 +82,8 @@ export interface IInstallManagerOptions {
   maxInstallAttempts: number;
 
   /**
-   * Filters to be passed to PNPM during installation, if applicable.
-   * These restrict the scope of a workspace installation.
+   * An array of arguments to be passed to pnpm. If the array is empty, then an unfiltered install
+   * is performed. Filtered installs have some limitations such as less comprehensive version analysis.
    *
    * @remarks
    * Note that PNPM may arbitrarily ignore `--filter` (producing an unfiltered install) in certain situations,
