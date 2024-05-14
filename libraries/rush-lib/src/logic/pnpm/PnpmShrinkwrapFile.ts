@@ -273,10 +273,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // Normalize the data
     const lockfileVersion: string | number | undefined = shrinkwrapJson.lockfileVersion;
     if (typeof lockfileVersion === 'string') {
-      this.shrinkwrapFileMajorVersion = parseInt(
-        lockfileVersion.substring(0, lockfileVersion.indexOf('.')),
-        10
-      );
       const isDotIncluded: boolean = lockfileVersion.includes('.');
       this.shrinkwrapFileMajorVersion = parseInt(
         lockfileVersion.substring(0, isDotIncluded ? lockfileVersion.indexOf('.') : undefined),
