@@ -657,7 +657,16 @@ ${gitLfsHookHandling}
    * to the command-line.
    */
   protected pushConfigurationArgs(args: string[], options: IInstallManagerOptions, subspace: Subspace): void {
-    if (options.offline && this.rushConfiguration.packageManager !== 'pnpm') {
+    const {
+      offline,
+      collectLogFile,
+      pnpmFilterArguments,
+      onlyShrinkwrap,
+      networkConcurrency,
+      allowShrinkwrapUpdates
+    } = options;
+
+    if (offline && this.rushConfiguration.packageManager !== 'pnpm') {
       throw new Error('The "--offline" parameter is only supported when using the PNPM package manager.');
     }
     if (this.rushConfiguration.packageManager === 'npm') {
@@ -685,7 +694,7 @@ ${gitLfsHookHandling}
       args.push('--cache', this.rushConfiguration.npmCacheFolder);
       args.push('--tmp', this.rushConfiguration.npmTmpFolder);
 
-      if (options.collectLogFile) {
+      if (collectLogFile) {
         args.push('--verbose');
       }
     } else if (this.rushConfiguration.packageManager === 'pnpm') {
@@ -710,11 +719,11 @@ ${gitLfsHookHandling}
 
       const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
 
-      if (experiments.usePnpmFrozenLockfileForRushInstall && !options.allowShrinkwrapUpdates) {
+      if (experiments.usePnpmFrozenLockfileForRushInstall && !allowShrinkwrapUpdates) {
         args.push('--frozen-lockfile');
 
         if (
-          options.pnpmFilterArguments.length > 0 &&
+          pnpmFilterArguments.length > 0 &&
           Number.parseInt(this.rushConfiguration.packageManagerToolVersion, 10) >= 8 // PNPM Major version 8+
         ) {
           // On pnpm@8, disable the "dedupe-peer-dependents" feature when doing a filtered CI install so that filters take effect.
@@ -729,19 +738,19 @@ ${gitLfsHookHandling}
         args.push('--no-prefer-frozen-lockfile');
       }
 
-      if (options.onlyShrinkwrap) {
+      if (onlyShrinkwrap) {
         args.push(`--lockfile-only`);
       }
 
-      if (options.collectLogFile) {
+      if (collectLogFile) {
         args.push('--reporter', 'ndjson');
       }
 
-      if (options.networkConcurrency) {
-        args.push('--network-concurrency', options.networkConcurrency.toString());
+      if (networkConcurrency) {
+        args.push('--network-concurrency', networkConcurrency.toString());
       }
 
-      if (options.offline) {
+      if (offline) {
         args.push('--offline');
       }
 
@@ -834,15 +843,15 @@ ${gitLfsHookHandling}
       // (e.g. "Which command would you like to run?").
       args.push('--non-interactive');
 
-      if (options.networkConcurrency) {
-        args.push('--network-concurrency', options.networkConcurrency.toString());
+      if (networkConcurrency) {
+        args.push('--network-concurrency', networkConcurrency.toString());
       }
 
       if (this.rushConfiguration.yarnOptions.ignoreEngines) {
         args.push('--ignore-engines');
       }
 
-      if (options.collectLogFile) {
+      if (collectLogFile) {
         args.push('--verbose');
       }
     }
