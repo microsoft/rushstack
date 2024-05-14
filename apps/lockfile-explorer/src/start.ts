@@ -107,13 +107,28 @@ function startApp(debugMode: boolean): void {
     const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
     const doc = yaml.load(pnpmLockfileText) as Lockfile;
     const { packages, lockfileVersion } = doc;
-    if (packages && lockfileVersion.toString().startsWith('6.')) {
+
+    let shrinkwrapFileMajorVersion: number;
+    if (typeof lockfileVersion === 'string') {
+      shrinkwrapFileMajorVersion = parseInt(lockfileVersion.substring(0, lockfileVersion.indexOf('.')), 10);
+    } else if (typeof lockfileVersion === 'number') {
+      shrinkwrapFileMajorVersion = lockfileVersion;
+    } else {
+      shrinkwrapFileMajorVersion = 0;
+    }
+
+    if (shrinkwrapFileMajorVersion < 5 || shrinkwrapFileMajorVersion > 6) {
+      throw new Error('The current lockfile version is not supported.');
+    }
+
+    if (packages && shrinkwrapFileMajorVersion === 6) {
       const updatedPackages: Lockfile['packages'] = {};
-      for (const [dependencyPath, dependency] in Object.entries(packages)) {
+      for (const [dependencyPath, dependency] of Object.entries(packages)) {
         updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = dependency;
       }
       doc.packages = updatedPackages;
     }
+
     res.send({
       doc,
       subspaceName
