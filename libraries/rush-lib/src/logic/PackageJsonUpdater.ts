@@ -144,7 +144,7 @@ export class PackageJsonUpdater {
       const explicitlyPreferredVersion: string | undefined =
         commonVersionsConfiguration.preferredVersions.get(moduleName);
 
-      const version: string = await this._getNormalizedVersionSpec(
+      const version: string = await this._getNormalizedVersionSpecAsync(
         projects,
         moduleName,
         latestVersion,
@@ -235,10 +235,10 @@ export class PackageJsonUpdater {
           options.projects
         );
         for (const subspace of subspaceSet) {
-          await this._doUpdate(debugInstall, subspace);
+          await this._doUpdateAsync(debugInstall, subspace);
         }
       } else {
-        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace);
+        await this._doUpdateAsync(debugInstall, this._rushConfiguration.defaultSubspace);
       }
     }
   }
@@ -265,15 +265,15 @@ export class PackageJsonUpdater {
           options.projects
         );
         for (const subspace of subspaceSet) {
-          await this._doUpdate(debugInstall, subspace);
+          await this._doUpdateAsync(debugInstall, subspace);
         }
       } else {
-        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace);
+        await this._doUpdateAsync(debugInstall, this._rushConfiguration.defaultSubspace);
       }
     }
   }
 
-  private async _doUpdate(debugInstall: boolean, subspace: Subspace): Promise<void> {
+  private async _doUpdateAsync(debugInstall: boolean, subspace: Subspace): Promise<void> {
     this._terminal.writeLine();
     this._terminal.writeLine(Colorize.green('Running "rush update"'));
     this._terminal.writeLine();
@@ -330,13 +330,13 @@ export class PackageJsonUpdater {
     const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(projects);
     for (const subspace of subspaceSet) {
       // Projects for this subspace
-      allPackageUpdates.push(...(await this._updateProjects(subspace, dependencyAnalyzer, options)));
+      allPackageUpdates.push(...(await this._updateProjectsAsync(subspace, dependencyAnalyzer, options)));
     }
 
     return allPackageUpdates;
   }
 
-  private async _updateProjects(
+  private async _updateProjectsAsync(
     subspace: Subspace,
     dependencyAnalyzer: DependencyAnalyzer,
     options: IPackageJsonUpdaterRushAddOptions
@@ -363,7 +363,7 @@ export class PackageJsonUpdater {
       const explicitlyPreferredVersion: string | undefined =
         commonVersionsConfiguration.preferredVersions.get(packageName);
 
-      const version: string = await this._getNormalizedVersionSpec(
+      const version: string = await this._getNormalizedVersionSpecAsync(
         subspaceProjects,
         packageName,
         initialVersion,
@@ -545,7 +545,7 @@ export class PackageJsonUpdater {
    * @param rangeStyle - if this version is selected by querying registry, then this range specifier is prepended to
    *   the selected version.
    */
-  private async _getNormalizedVersionSpec(
+  private async _getNormalizedVersionSpecAsync(
     projects: RushConfigurationProject[],
     packageName: string,
     initialSpec: string | undefined,
@@ -607,7 +607,7 @@ export class PackageJsonUpdater {
       }
     }
 
-    await InstallHelpers.ensureLocalPackageManager(
+    await InstallHelpers.ensureLocalPackageManagerAsync(
       this._rushConfiguration,
       this._rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts

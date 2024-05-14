@@ -26,7 +26,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
     _buildParser(actionsSubParser: argparse.SubParser): void;
     readonly documentation: string;
     // @internal
-    _execute(): Promise<void>;
+    _executeAsync(): Promise<void>;
     // @internal
     _getArgumentParser(): argparse.ArgumentParser;
     protected abstract onExecute(): Promise<void>;
@@ -253,8 +253,12 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     constructor(options: ICommandLineParserOptions);
     get actions(): ReadonlyArray<CommandLineAction>;
     addAction(action: CommandLineAction): void;
+    // @deprecated (undocumented)
     execute(args?: string[]): Promise<boolean>;
+    executeAsync(args?: string[]): Promise<boolean>;
+    // @deprecated (undocumented)
     executeWithoutErrorHandling(args?: string[]): Promise<void>;
+    executeWithoutErrorHandlingAsync(args?: string[]): Promise<void>;
     getAction(actionName: string): CommandLineAction;
     // @internal
     protected _getArgumentParser(): argparse.ArgumentParser;
@@ -443,7 +447,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     // @internal (undocumented)
     protected _defineParameter(parameter: CommandLineParameter_2): void;
     // @internal
-    _execute(): Promise<void>;
+    _executeAsync(): Promise<void>;
     // @internal
     protected _getScopedCommandLineParser(): CommandLineParser;
     protected onDefineParameters(): void;

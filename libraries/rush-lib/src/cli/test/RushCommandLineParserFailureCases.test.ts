@@ -51,7 +51,7 @@ describe('RushCommandLineParserFailureCases', () => {
         jest.spyOn(Autoinstaller.prototype, 'prepareAsync').mockImplementation(async function () {});
 
         setSpawnMock({ emitError: false, returnCode: 1 });
-        await instance.parser.execute();
+        await instance.parser.executeAsync();
         await procProm;
         expect(process.exit).toHaveBeenCalledWith(1);
 

@@ -94,7 +94,7 @@ export class Rush {
       builtInPluginConfigurations: options.builtInPluginConfigurations
     });
     // eslint-disable-next-line no-console
-    parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
+    parser.executeAsync().catch(console.error); // CommandLineParser.executeAsync() should never reject the promise
   }
 
   /**
@@ -106,7 +106,7 @@ export class Rush {
     options = Rush._normalizeLaunchOptions(options);
     Rush._assignRushInvokedFolder();
     // eslint-disable-next-line no-console
-    RushXCommandLine.launchRushXAsync(launcherVersion, options).catch(console.error); // CommandLineParser.execute() should never reject the promise
+    RushXCommandLine.launchRushXAsync(launcherVersion, options).catch(console.error); // CommandLineParser.executeAsync() should never reject the promise
   }
 
   /**

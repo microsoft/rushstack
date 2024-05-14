@@ -175,7 +175,7 @@ export class TypingsGenerator<TFileContents = string> {
       });
     }
 
-    await this._reprocessFiles(relativeFilePaths!, checkFilePaths);
+    await this._reprocessFilesAsync(relativeFilePaths!, checkFilePaths);
   }
 
   public async runWatcherAsync(): Promise<void> {
@@ -197,7 +197,7 @@ export class TypingsGenerator<TFileContents = string> {
 
         const toProcess: string[] = Array.from(queue);
         queue.clear();
-        this._reprocessFiles(toProcess, false)
+        this._reprocessFilesAsync(toProcess, false)
           .then(() => {
             processing = false;
             // If the timeout was invoked again, immediately reexecute with the changed files.
@@ -282,7 +282,10 @@ export class TypingsGenerator<TFileContents = string> {
     return additionalPaths ? [...typingsFilePaths, ...additionalPaths] : Array.from(typingsFilePaths);
   }
 
-  private async _reprocessFiles(relativePaths: Iterable<string>, checkFilePaths: boolean): Promise<void> {
+  private async _reprocessFilesAsync(
+    relativePaths: Iterable<string>,
+    checkFilePaths: boolean
+  ): Promise<void> {
     // Build a queue of resolved paths
     const toProcess: Set<string> = new Set();
     for (const rawPath of relativePaths) {

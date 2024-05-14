@@ -50,7 +50,7 @@ describe(CommandLineParser.name, () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
     commandLineParser._registerDefinedParameters({ parentParameterNames: new Set() });
 
-    await commandLineParser.execute(['do:the-job', '--flag']);
+    await commandLineParser.executeAsync(['do:the-job', '--flag']);
 
     expect(commandLineParser.selectedAction).toBeDefined();
     expect(commandLineParser.selectedAction!.actionName).toEqual('do:the-job');

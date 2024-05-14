@@ -272,11 +272,15 @@ export abstract class BaseInstallAction extends BaseRushAction {
             };
           }
 
-          await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptionsForInstall);
+          await this._doInstallAsync(
+            installManagerFactoryModule,
+            purgeManager,
+            installManagerOptionsForInstall
+          );
         }
       } else {
         // Simple case when subspacesFeatureEnabled=false
-        await this._doInstall(installManagerFactoryModule, purgeManager, {
+        await this._doInstallAsync(installManagerFactoryModule, purgeManager, {
           ...installManagerOptions,
           subspace: this.rushConfiguration.defaultSubspace
         });
@@ -314,7 +318,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     );
   }
 
-  private async _doInstall(
+  private async _doInstallAsync(
     installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory'),
     purgeManager: PurgeManager,
     installManagerOptions: IInstallManagerOptions

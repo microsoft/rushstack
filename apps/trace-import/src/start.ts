@@ -13,6 +13,6 @@ console.log(Colorize.bold(`trace-import ${toolVersion}`) + ' - ' + Colorize.cyan
 console.log();
 
 const commandLine: TraceImportCommandLineParser = new TraceImportCommandLineParser();
-commandLine.execute().catch((error) => {
+commandLine.executeAsync().catch((error) => {
   console.error(error);
 });

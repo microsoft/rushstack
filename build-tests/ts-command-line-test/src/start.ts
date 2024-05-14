@@ -4,4 +4,4 @@
 import { WidgetCommandLine } from './WidgetCommandLine';
 
 const commandLine: WidgetCommandLine = new WidgetCommandLine();
-commandLine.execute();
+commandLine.executeAsync();

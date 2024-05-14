@@ -26,6 +26,6 @@ export class SetupAction extends BaseRushAction {
       isDebug: this.parser.isDebug,
       syncNpmrcAlreadyCalled: false
     });
-    await setupPackageRegistry.checkAndSetup();
+    await setupPackageRegistry.checkAndSetupAsync();
   }
 }

@@ -28,7 +28,7 @@ interface IQueueItem {
 }
 
 export class NpmLinkManager extends BaseLinkManager {
-  protected async _linkProjects(): Promise<void> {
+  protected async _linkProjectsAsync(): Promise<void> {
     const npmPackage: readPackageTree.Node = await LegacyAdapters.convertCallbackToPromise<
       readPackageTree.Node,
       Error,

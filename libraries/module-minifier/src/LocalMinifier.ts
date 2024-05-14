@@ -84,12 +84,25 @@ export class LocalMinifier implements IModuleMinifier {
       });
   }
 
-  public async connect(): Promise<IMinifierConnection> {
+  /**
+   * {@inheritdoc IModuleMinifier.connectAsync}
+   */
+  public async connectAsync(): Promise<IMinifierConnection> {
+    const disconnectAsync: IMinifierConnection['disconnectAsync'] = async () => {
+      // Do nothing.
+    };
     return {
       configHash: this._configHash,
-      disconnect: async () => {
-        // Do nothing.
-      }
+      disconnectAsync,
+      disconnect: disconnectAsync
     };
+  }
+
+  /**
+   * @deprecated Use {@link LocalMinifier.connectAsync} instead.
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public async connect(): Promise<IMinifierConnection> {
+    return await this.connectAsync();
   }
 }

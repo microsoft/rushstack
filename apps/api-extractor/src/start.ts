@@ -16,7 +16,7 @@ console.log(
 
 const parser: ApiExtractorCommandLine = new ApiExtractorCommandLine();
 
-parser.execute().catch((error) => {
+parser.executeAsync().catch((error) => {
   console.error(Colorize.red(`An unexpected error occurred: ${error}`));
   process.exit(1);
 });
