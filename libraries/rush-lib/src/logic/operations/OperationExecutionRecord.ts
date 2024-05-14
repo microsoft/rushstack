@@ -206,8 +206,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       //
       //                             +--> quietModeTransform? --> collatedWriter
       //                             |
-      // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> fileWritablesSplitter -> projectLogWritable (optional)
-      //                                                        |               |
+      // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable (optional)
+      //                                                        |
       //                                                        +--> stdioSummarizer
       const destination: TerminalWritable = projectLogWritable
         ? new SplitterTransform({
