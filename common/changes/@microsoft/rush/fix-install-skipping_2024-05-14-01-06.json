@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where skipping installs did not work if a subspace doesn't have a `pnpm-config.json` file.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

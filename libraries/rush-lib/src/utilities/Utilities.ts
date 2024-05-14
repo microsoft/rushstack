@@ -283,15 +283,29 @@ export class Utilities {
    * NOTE: The filenames can also be paths for directories, in which case the directory
    * timestamp is compared.
    */
-  public static isFileTimestampCurrent(dateToCompare: Date, inputFilenames: string[]): boolean {
+  public static async isFileTimestampCurrentAsync(
+    dateToCompare: Date,
+    inputFilenames: string[],
+    validateFileExistence: boolean
+  ): Promise<boolean> {
     for (const inputFilename of inputFilenames) {
-      if (!FileSystem.exists(inputFilename)) {
-        return false;
+      let inputStats: FileSystemStats | undefined;
+      try {
+        inputStats = await FileSystem.getStatisticsAsync(inputFilename);
+      } catch (e) {
+        if (FileSystem.isNotExistError(e)) {
+          if (validateFileExistence) {
+            return false;
+          }
+        } else {
+          throw e;
+        }
       }
 
-      const inputStats: FileSystemStats = FileSystem.getStatistics(inputFilename);
-      if (dateToCompare < inputStats.mtime) {
-        return false;
+      if (inputStats) {
+        if (dateToCompare < inputStats.mtime) {
+          return false;
+        }
       }
     }
 

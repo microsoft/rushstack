@@ -179,13 +179,18 @@ export abstract class BaseInstallManager {
     }));
 
     // Allow us to defer the file read until we need it
-    const canSkipInstall: () => boolean = () => {
+    const canSkipInstallAsync: () => Promise<boolean> = async () => {
       // Based on timestamps, can we skip this install entirely?
-      const outputStats: FileSystemStats = FileSystem.getStatistics(commonTempInstallFlag.path);
-      return this.canSkipInstall(outputStats.mtime, subspace);
+      const outputStats: FileSystemStats = await FileSystem.getStatisticsAsync(commonTempInstallFlag.path);
+      return await this.canSkipInstallAsync(outputStats.mtime, subspace);
     };
 
-    if (cleanInstall || !shrinkwrapIsUpToDate || !canSkipInstall() || !projectImpactGraphIsUpToDate) {
+    if (
+      cleanInstall ||
+      !shrinkwrapIsUpToDate ||
+      !(await canSkipInstallAsync()) ||
+      !projectImpactGraphIsUpToDate
+    ) {
       // eslint-disable-next-line no-console
       console.log();
       await this.validateNpmSetup();
@@ -272,9 +277,10 @@ export abstract class BaseInstallManager {
 
   protected abstract postInstallAsync(subspace: Subspace): Promise<void>;
 
-  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace): boolean {
+  protected async canSkipInstallAsync(lastModifiedDate: Date, subspace: Subspace): Promise<boolean> {
     // Based on timestamps, can we skip this install entirely?
     const potentiallyChangedFiles: string[] = [];
+    const potentiallyChangedFilesThatMayNotExist: string[] = [];
 
     // Consider the timestamp on the node_modules folder; if someone tampered with it
     // or deleted it entirely, then we can't skip this install
@@ -287,21 +293,26 @@ export abstract class BaseInstallManager {
     potentiallyChangedFiles.push(subspace.getCommittedShrinkwrapFilename());
 
     // Add common-versions.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(subspace.getCommonVersionsFilePath());
+    potentiallyChangedFilesThatMayNotExist.push(subspace.getCommonVersionsFilePath());
 
     // Add pnpm-config.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(subspace.getPnpmConfigFilePath());
+    potentiallyChangedFilesThatMayNotExist.push(subspace.getPnpmConfigFilePath());
 
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // If the repo is using pnpmfile.js, consider that also
       const pnpmFileFilename: string = subspace.getPnpmfilePath();
 
-      if (FileSystem.exists(pnpmFileFilename)) {
-        potentiallyChangedFiles.push(pnpmFileFilename);
-      }
+      potentiallyChangedFilesThatMayNotExist.push(pnpmFileFilename);
     }
 
-    return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
+    return (
+      (await Utilities.isFileTimestampCurrentAsync(lastModifiedDate, potentiallyChangedFiles, true)) &&
+      (await Utilities.isFileTimestampCurrentAsync(
+        lastModifiedDate,
+        potentiallyChangedFilesThatMayNotExist,
+        false
+      ))
+    );
   }
 
   protected async prepareAsync(
