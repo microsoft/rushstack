@@ -14,11 +14,20 @@ import type { IPackageJson } from '@rushstack/node-core-library';
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
 import type { IPnpmfile, IPnpmfileShimSettings, IPnpmfileContext, IPnpmfileHooks } from './IPnpmfile';
 
-let settings: IPnpmfileShimSettings;
-let allPreferredVersions: Map<string, string>;
+let settings: IPnpmfileShimSettings | undefined;
+let allPreferredVersions: Map<string, string> | undefined;
 let allowedAlternativeVersions: Map<string, Set<string>> | undefined;
 let userPnpmfile: IPnpmfile | undefined;
 let semver: typeof TSemver | undefined;
+
+// Resets the internal state of the pnpmfile
+export function reset(): void {
+  settings = undefined;
+  allPreferredVersions = undefined;
+  allowedAlternativeVersions = undefined;
+  userPnpmfile = undefined;
+  semver = undefined;
+}
 
 // Initialize all external aspects of the pnpmfile shim. When using the shim, settings
 // are always expected to be available. Init must be called before running any hook that
@@ -40,7 +49,7 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
     if (!context.pnpmfileShimSettings) {
       context.pnpmfileShimSettings = __non_webpack_require__('./pnpmfileSettings.json');
     }
-    settings = context.pnpmfileShimSettings!;
+    settings = context.pnpmfileShimSettings as IPnpmfileShimSettings;
   } else if (!context.pnpmfileShimSettings) {
     // Reuse the already initialized settings
     context.pnpmfileShimSettings = settings;

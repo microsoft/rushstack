@@ -26,7 +26,7 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
 import {
   type LastInstallFlag,
-  LastInstallFlagFactory,
+  getCommonTempFlag,
   type ILastInstallFlagJson
 } from '../../api/LastInstallFlag';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
@@ -90,16 +90,14 @@ export abstract class BaseInstallManager {
 
     this._commonTempLinkFlag = new FlagFile(
       options.subspace.getSubspaceTempFolder(),
-      RushConstants.lastLinkFlagFilename
+      RushConstants.lastLinkFlagFilename,
+      {}
     );
 
     this.subspaceInstallFlags = new Map();
     if (rushConfiguration.subspacesFeatureEnabled) {
       for (const subspace of rushConfiguration.subspaces) {
-        this.subspaceInstallFlags.set(
-          subspace.subspaceName,
-          LastInstallFlagFactory.getCommonTempFlag(rushConfiguration, subspace)
-        );
+        this.subspaceInstallFlags.set(subspace.subspaceName, getCommonTempFlag(rushConfiguration, subspace));
       }
     }
   }
@@ -162,11 +160,9 @@ export abstract class BaseInstallManager {
     // Always perform a clean install if filter flags were provided. Additionally, if
     // "--purge" was specified, or if the last install was interrupted, then we will
     // need to perform a clean install.  Otherwise, we can do an incremental install.
-    const commonTempInstallFlag: LastInstallFlag = LastInstallFlagFactory.getCommonTempFlag(
-      this.rushConfiguration,
-      subspace,
-      { npmrcHash: npmrcHash || '<NO NPMRC>' }
-    );
+    const commonTempInstallFlag: LastInstallFlag = getCommonTempFlag(this.rushConfiguration, subspace, {
+      npmrcHash: npmrcHash || '<NO NPMRC>'
+    });
     if (isFilteredInstall) {
       // Get the projects involved in this filtered install
       commonTempInstallFlag.mergeFromObject({
