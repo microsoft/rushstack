@@ -123,10 +123,17 @@ export class ProjectLogWritable extends TerminalWritable {
       RushConstants.rushLogsFolderName
     );
 
+    const chunkLogFileBaseName: string = getRelativeLogFilePathBase(
+      project,
+      logFilenameIdentifier,
+      isLegacyLog,
+      `.rush/${RushConstants.rushTempFolderName}/operations`
+    );
+
     const { projectFolder } = project;
     const relativeLogPath: string = `${logFileBaseName}.log`;
     const relativeErrorLogPath: string = `${logFileBaseName}.error.log`;
-    const relativeLogChunksPath: string = `${logFileBaseName}.chunks.jsonl`;
+    const relativeLogChunksPath: string = `${chunkLogFileBaseName}.chunks.jsonl`;
 
     const logPath: string = `${projectFolder}/${relativeLogPath}`;
     const errorLogPath: string = `${projectFolder}/${relativeErrorLogPath}`;
