@@ -45,7 +45,6 @@
     }
   },
   "devDependencies": {
-    "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/lockfile-explorer-web": "workspace:*",
     "@types/cors": "~2.8.12",
@@ -56,6 +55,7 @@
     "@pnpm/lockfile-types": "~6.0.0"
   },
   "dependencies": {
+    "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "cors": "~2.8.5",
