@@ -2,6 +2,42 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.28.16",
+      "tag": "@microsoft/api-extractor-model_v7.28.16",
+      "date": "Fri, 10 May 2024 05:33:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.28.15",
+      "tag": "@microsoft/api-extractor-model_v7.28.15",
+      "date": "Mon, 06 May 2024 15:11:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.28.14",
+      "tag": "@microsoft/api-extractor-model_v7.28.14",
+      "date": "Wed, 10 Apr 2024 15:10:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.28.13",
       "tag": "@microsoft/api-extractor-model_v7.28.13",
       "date": "Wed, 21 Feb 2024 21:45:28 GMT",

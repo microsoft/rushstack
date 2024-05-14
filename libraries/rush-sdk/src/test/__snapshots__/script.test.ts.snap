@@ -56,7 +56,7 @@ Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
   'VersionPolicyConfiguration',
   'VersionPolicyDefinitionName',
   'YarnOptionsConfiguration',
-  '_LastInstallFlag',
+  '_FlagFile',
   '_OperationMetadataManager',
   '_OperationStateFile',
   '_RushGlobalFolder',

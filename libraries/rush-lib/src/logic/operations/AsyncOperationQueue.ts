@@ -15,7 +15,9 @@ import { RushConstants } from '../RushConstants';
  */
 export const UNASSIGNED_OPERATION: 'UNASSIGNED_OPERATION' = 'UNASSIGNED_OPERATION';
 
-export type IOperationIteratorResult = OperationExecutionRecord | typeof UNASSIGNED_OPERATION;
+export type IOperationIteratorResult =
+  | OperationExecutionRecord
+  | { weight: 1; status: typeof UNASSIGNED_OPERATION };
 
 /**
  * Implementation of the async iteration protocol for a collection of IOperation objects.
@@ -91,6 +93,8 @@ export class AsyncOperationQueue
       }
     }
 
+    this.assignOperations();
+
     if (this._completedOperations.size === this._totalOperations) {
       this._isDone = true;
     }
@@ -164,7 +168,7 @@ export class AsyncOperationQueue
       // remote executing operation which is not ready to process.
       if (queue.some((operation) => operation.status === OperationStatus.RemoteExecuting)) {
         waitingIterators.shift()!({
-          value: UNASSIGNED_OPERATION,
+          value: { weight: 1, status: UNASSIGNED_OPERATION },
           done: false
         });
       }

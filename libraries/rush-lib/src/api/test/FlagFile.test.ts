@@ -4,11 +4,12 @@
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { LastLinkFlag, LAST_LINK_FLAG_FILE_NAME } from '../LastLinkFlag';
+import { FlagFile } from '../FlagFile';
+import { RushConstants } from '../../logic/RushConstants';
 
 const TEMP_DIR_PATH: string = `${__dirname}/temp`;
 
-describe(LastLinkFlag.name, () => {
+describe(FlagFile.name, () => {
   beforeEach(() => {
     FileSystem.ensureEmptyFolder(TEMP_DIR_PATH);
   });
@@ -18,7 +19,7 @@ describe(LastLinkFlag.name, () => {
   });
 
   it('can get correct path', () => {
-    const flag: LastLinkFlag = new LastLinkFlag(TEMP_DIR_PATH);
-    expect(path.basename(flag.path)).toEqual(LAST_LINK_FLAG_FILE_NAME);
+    const flag: FlagFile = new FlagFile(TEMP_DIR_PATH, RushConstants.lastLinkFlagFilename, {});
+    expect(path.basename(flag.path)).toEqual(RushConstants.lastLinkFlagFilename + '.flag');
   });
 });

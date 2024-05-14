@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Fri, 29 Mar 2024 05:46:41 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Apr 2024 21:59:39 GMT and should not be manually modified.
+
+## 1.10.2
+Wed, 10 Apr 2024 21:59:39 GMT
+
+### Patches
+
+- Bump maximum supported ESLint version for the bulk-suppressions tool to `8.57.0`.
 
 ## 1.10.1
 Fri, 29 Mar 2024 05:46:41 GMT

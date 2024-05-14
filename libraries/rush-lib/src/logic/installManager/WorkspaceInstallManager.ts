@@ -29,7 +29,6 @@ import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
 import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import type { RepoStateFile } from '../RepoStateFile';
-import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
@@ -46,6 +45,7 @@ import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
+import { FlagFile } from '../../api/FlagFile';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -233,7 +233,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             console.log(
               Colorize.red(
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists within ` +
-                  'the workspace. Run "rush update" to update workspace references for this package.'
+                  'the workspace. Run "rush update" to update workspace references for this package. ' +
+                  `If package "${name}" is intentionally expected to be installed from an external package feed, ` +
+                  `list package "${name}" in the "decoupledLocalDependencies" field in the ` +
+                  `"${rushProject.packageName}" entry in rush.json to suppress this error.`
               )
             );
             throw new AlreadyReportedError();
@@ -350,10 +353,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // files
     // Example: [ "C:\MyRepo\projects\projectA\node_modules", "C:\MyRepo\projects\projectA\package.json" ]
     potentiallyChangedFiles.push(
-      ...this.rushConfiguration.projects.map((project) => {
+      ...subspace.getProjects().map((project) => {
         return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
       }),
-      ...this.rushConfiguration.projects.map((project) => {
+      ...subspace.getProjects().map((project) => {
         return path.join(project.projectFolder, FileConstants.PackageJson);
       })
     );
@@ -522,7 +525,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       await pnpmSyncPrepareAsync({
         lockfilePath: pnpmLockfilePath,
         dotPnpmFolder,
-        ensureFolder: FileSystem.ensureFolderAsync,
+        ensureFolderAsync: FileSystem.ensureFolderAsync,
         readPnpmLockfile: async (lockfilePath: string) => {
           const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFile(
             lockfilePath,
@@ -645,18 +648,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         for (const value of Object.values(hoistedDependencies)) {
           for (const [filePath, type] of Object.entries(value)) {
             if (type === 'public') {
-              // If we don't already have a symlink for this package, create one
-              if (!FileSystem.exists(`${projectNodeModulesPath}/${filePath}`)) {
-                const parentDir: string = Utilities.trimAfterLastSlash(
-                  `${projectNodeModulesPath}/${filePath}`
-                );
-                await FileSystem.ensureFolderAsync(parentDir);
-                BaseLinkManager._createSymlink({
-                  linkTargetPath: `${tempNodeModulesPath}/${filePath}`,
-                  newLinkPath: `${projectNodeModulesPath}/${filePath}`,
-                  symlinkKind: SymlinkKind.Directory
-                });
+              if (Utilities.existsOrIsSymlink(`${projectNodeModulesPath}/${filePath}`)) {
+                await FileSystem.deleteFolderAsync(`${projectNodeModulesPath}/${filePath}`);
               }
+              // If we don't already have a symlink for this package, create one
+              const parentDir: string = Utilities.trimAfterLastSlash(`${projectNodeModulesPath}/${filePath}`);
+              await FileSystem.ensureFolderAsync(parentDir);
+              BaseLinkManager._createSymlink({
+                linkTargetPath: `${tempNodeModulesPath}/${filePath}`,
+                newLinkPath: `${projectNodeModulesPath}/${filePath}`,
+                symlinkKind: SymlinkKind.Directory
+              });
             }
           }
         }
@@ -671,19 +673,23 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
       for (const dependencyProject of subspaceDependencyProjects) {
         const symlinkToCreate: string = `${tempNodeModulesPath}/${dependencyProject.packageName}`;
-        if (!FileSystem.exists(symlinkToCreate)) {
-          const parentDir: string = Utilities.trimAfterLastSlash(symlinkToCreate);
-          await FileSystem.ensureFolderAsync(parentDir);
+        if (!Utilities.existsOrIsSymlink(symlinkToCreate)) {
+          const parentFolder: string = Utilities.trimAfterLastSlash(symlinkToCreate);
+          await FileSystem.ensureFolderAsync(parentFolder);
           BaseLinkManager._createSymlink({
             linkTargetPath: dependencyProject.projectFolder,
-            newLinkPath: `${subspace.getSubspaceTempFolder()}/node_modules/${dependencyProject.packageName}`,
+            newLinkPath: symlinkToCreate,
             symlinkKind: SymlinkKind.Directory
           });
         }
       }
     }
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    LastLinkFlagFactory.getCommonTempFlag(subspace).create();
+    await new FlagFile(
+      subspace.getSubspaceTempFolder(),
+      RushConstants.lastLinkFlagFilename,
+      {}
+    ).createAsync();
   }
 
   /**
@@ -718,8 +724,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         }
       }
 
-      for (const arg of this.options.pnpmFilterArguments) {
-        args.push(arg);
+      for (const arg of this.options.filteredProjects) {
+        args.push('--filter');
+        args.push(arg.packageName);
       }
     }
   }

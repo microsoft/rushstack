@@ -273,20 +273,21 @@ describe(Async.name, () => {
         [Symbol.asyncIterator]: () => asyncIterator
       };
 
-      const expectedConcurrency: 4 = 4;
       const finalPromise: Promise<void> = Async.forEachAsync(
         asyncIterable,
         async (item) => {
           // Do nothing
         },
         {
-          concurrency: expectedConcurrency
+          concurrency: 4
         }
       );
 
       // Wait for all the instant resolutions to be done
       await Async.sleep(0);
-      expect(waitingIterators).toEqual(expectedConcurrency);
+
+      // The final iteration cycle is locked, so only 1 iterator is waiting.
+      expect(waitingIterators).toEqual(1);
       resolve2({ done: true, value: undefined });
       await finalPromise;
     });
@@ -311,6 +312,232 @@ describe(Async.name, () => {
       await expect(() =>
         Async.forEachAsync(syncIterable, async (item) => await Async.sleep(0))
       ).rejects.toThrow(expectedError);
+    });
+
+    interface INumberWithWeight {
+      n: number;
+      weight: number;
+    }
+
+    it('handles an empty array correctly', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: INumberWithWeight[] = [];
+
+      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(0);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
+      expect(fn).toHaveBeenCalledTimes(0);
+      expect(maxRunning).toEqual(0);
+    });
+
+    it('if concurrency is set, ensures no more than N operations occur in parallel', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: INumberWithWeight[] = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ weight: 1, n }));
+
+      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(0);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
+      expect(fn).toHaveBeenCalledTimes(8);
+      expect(maxRunning).toEqual(3);
+    });
+
+    it('if concurrency is set but weighted is not, ensures no more than N operations occur in parallel and ignores operation weight', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: INumberWithWeight[] = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ weight: 2, n }));
+
+      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(0);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachAsync(array, fn, { concurrency: 3 });
+      expect(fn).toHaveBeenCalledTimes(8);
+      expect(maxRunning).toEqual(3);
+    });
+
+    it.each([
+      {
+        concurrency: 4,
+        weight: 4,
+        expectedConcurrency: 1
+      },
+      {
+        concurrency: 4,
+        weight: 1,
+        expectedConcurrency: 4
+      },
+      {
+        concurrency: 3,
+        weight: 1,
+        expectedConcurrency: 3
+      },
+      {
+        concurrency: 6,
+        weight: 2,
+        expectedConcurrency: 3
+      },
+      {
+        concurrency: 12,
+        weight: 3,
+        expectedConcurrency: 4
+      }
+    ])(
+      'if concurrency is set to $concurrency with operation weight $weight, ensures no more than $expectedConcurrency operations occur in parallel',
+      async ({ concurrency, weight, expectedConcurrency }) => {
+        let running: number = 0;
+        let maxRunning: number = 0;
+
+        const array: INumberWithWeight[] = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ n, weight }));
+
+        const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+          running++;
+          await Async.sleep(0);
+          maxRunning = Math.max(maxRunning, running);
+          running--;
+        });
+
+        await Async.forEachAsync(array, fn, { concurrency, weighted: true });
+        expect(fn).toHaveBeenCalledTimes(8);
+        expect(maxRunning).toEqual(expectedConcurrency);
+      }
+    );
+
+    it('ensures that a large operation cannot be scheduled around', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: INumberWithWeight[] = [
+        { n: 1, weight: 1 },
+        { n: 2, weight: 1 },
+        { n: 3, weight: 1 },
+        { n: 4, weight: 10 },
+        { n: 5, weight: 1 },
+        { n: 6, weight: 1 },
+        { n: 7, weight: 5 },
+        { n: 8, weight: 1 }
+      ];
+
+      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(0);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
+      expect(fn).toHaveBeenCalledTimes(8);
+      expect(maxRunning).toEqual(3);
+    });
+
+    it('waits for a large operation to finish before scheduling more', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: INumberWithWeight[] = [
+        { n: 1, weight: 1 },
+        { n: 2, weight: 10 },
+        { n: 3, weight: 1 },
+        { n: 4, weight: 10 },
+        { n: 5, weight: 1 },
+        { n: 6, weight: 10 },
+        { n: 7, weight: 1 },
+        { n: 8, weight: 10 }
+      ];
+
+      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(0);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
+      expect(fn).toHaveBeenCalledTimes(8);
+      expect(maxRunning).toEqual(2);
+    });
+
+    it('allows operations with a weight of 0 and schedules them accordingly', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: INumberWithWeight[] = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ n, weight: 0 }));
+
+      array.unshift({ n: 9, weight: 3 });
+
+      array.push({ n: 10, weight: 3 });
+
+      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(0);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
+      expect(fn).toHaveBeenCalledTimes(10);
+      expect(maxRunning).toEqual(9);
+    });
+
+    it('does not exceed the maxiumum concurrency for an async iterator when weighted', async () => {
+      let waitingIterators: number = 0;
+
+      let resolve2!: (value: { done: true; value: undefined }) => void;
+      const signal2: Promise<{ done: true; value: undefined }> = new Promise((resolve, reject) => {
+        resolve2 = resolve;
+      });
+
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<{ element: number; weight: number }> = {
+        next: () => {
+          iteratorIndex++;
+          if (iteratorIndex < 20) {
+            return Promise.resolve({ done: false, value: { element: iteratorIndex, weight: 2 } });
+          } else {
+            ++waitingIterators;
+            return signal2;
+          }
+        }
+      };
+      const asyncIterable: AsyncIterable<{ element: number; weight: number }> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      const finalPromise: Promise<void> = Async.forEachAsync(
+        asyncIterable,
+        async (item) => {
+          // Do nothing
+        },
+        {
+          concurrency: 4,
+          weighted: true
+        }
+      );
+
+      // Wait for all the instant resolutions to be done
+      await Async.sleep(0);
+
+      // The final iteration cycle is locked, so only 1 iterator is waiting.
+      expect(waitingIterators).toEqual(1);
+      resolve2({ done: true, value: undefined });
+      await finalPromise;
     });
   });
 

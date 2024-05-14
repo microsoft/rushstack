@@ -8,7 +8,8 @@ import { Colorize } from '@rushstack/terminal';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
-import { LastLinkFlagFactory } from '../api/LastLinkFlag';
+import { FlagFile } from '../api/FlagFile';
+import { RushConstants } from './RushConstants';
 
 /**
  * This class implements the logic for "rush unlink"
@@ -26,7 +27,7 @@ export class UnlinkManager {
    *
    * Returns true if anything was deleted.
    */
-  public unlink(force: boolean = false): boolean {
+  public async unlinkAsync(force: boolean = false): Promise<boolean> {
     const useWorkspaces: boolean =
       this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
     if (!force && useWorkspaces) {
@@ -40,7 +41,11 @@ export class UnlinkManager {
       throw new AlreadyReportedError();
     }
 
-    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration.defaultSubspace).clear();
+    await new FlagFile(
+      this._rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
+      RushConstants.lastLinkFlagFilename,
+      {}
+    ).clearAsync();
     return this._deleteProjectFiles();
   }
 

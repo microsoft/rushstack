@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Support creating API reports for each release level, in addition to a complete, \"untrimmed\" report",
+      "comment": "Add support for \"variants\" of API reports which include or exclude items by release tag",
       "type": "minor"
     }
   ],

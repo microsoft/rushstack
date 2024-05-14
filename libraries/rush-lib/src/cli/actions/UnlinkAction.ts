@@ -21,7 +21,7 @@ export class UnlinkAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
 
-    if (!unlinkManager.unlink()) {
+    if (!(await unlinkManager.unlinkAsync())) {
       // eslint-disable-next-line no-console
       console.log('Nothing to do.');
     } else {

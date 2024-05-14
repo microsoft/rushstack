@@ -143,23 +143,22 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
     let selectedSubspaces: ReadonlySet<Subspace> | undefined;
-    const filterArgumentsForSubspace: Map<Subspace, string[]> = new Map();
+    const filteredProjectsForSubspace: Map<Subspace, RushConfigurationProject[]> = new Map();
     if (this.rushConfiguration.subspacesFeatureEnabled) {
-      if (installManagerOptions.pnpmFilterArguments.length) {
-        // Selecting a set of subspaces
-        const selectedProjects: Set<RushConfigurationProject> | undefined =
-          await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
-        if (selectedProjects) {
-          // Go through each project, add it to it's subspace's pnpm filter arguments
-          for (const project of selectedProjects) {
-            const subspaceFilterArguments: string[] = filterArgumentsForSubspace.get(project.subspace) || [];
-            subspaceFilterArguments.push('--filter', project.packageName);
-            filterArgumentsForSubspace.set(project.subspace, subspaceFilterArguments);
+      if (installManagerOptions.filteredProjects.length) {
+        // Go through each project, add it to it's subspace's pnpm filter arguments
+        for (const project of installManagerOptions.filteredProjects) {
+          let subspaceFilteredProjects: RushConfigurationProject[] | undefined =
+            filteredProjectsForSubspace.get(project.subspace);
+          if (!subspaceFilteredProjects) {
+            subspaceFilteredProjects = [];
+            filteredProjectsForSubspace.set(project.subspace, subspaceFilteredProjects);
           }
-          selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(selectedProjects);
-        } else {
-          throw new Error('The specified filter arguments resulted in no projects being selected.');
+          subspaceFilteredProjects.push(project);
         }
+        selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(
+          new Set(installManagerOptions.filteredProjects)
+        );
       } else if (this._subspaceParameter.value) {
         // Selecting a single subspace
         const selectedSubspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceParameter.value);
@@ -245,10 +244,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
         for (const selectedSubspace of selectedSubspaces) {
           installManagerOptions.subspace = selectedSubspace;
           if (selectedSubspace.getPnpmOptions()?.alwaysFullInstall) {
-            installManagerOptions.pnpmFilterArguments = [];
+            installManagerOptions.filteredProjects = [];
           } else {
-            installManagerOptions.pnpmFilterArguments =
-              filterArgumentsForSubspace.get(selectedSubspace) || [];
+            installManagerOptions.filteredProjects = filteredProjectsForSubspace.get(selectedSubspace) || [];
           }
           // eslint-disable-next-line no-console
           console.log(Colorize.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));

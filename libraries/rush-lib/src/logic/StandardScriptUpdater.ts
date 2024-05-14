@@ -21,6 +21,9 @@ const HEADER_LINES_PREFIX: string[] = [
 const HEADER_LINES_SUFFIX: string[] = [
   '//',
   '// For more information, see: https://rushjs.io/pages/maintainer/setup_new_repo/',
+  '//',
+  '// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.',
+  "// See the @microsoft/rush package's LICENSE file for details.",
   ''
 ];
 

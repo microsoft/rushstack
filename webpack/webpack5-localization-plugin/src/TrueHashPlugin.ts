@@ -35,7 +35,7 @@ export class TrueHashPlugin implements WebpackPluginInstance {
   public apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
       const { webpack: thisWebpack } = compiler;
-      const { hashFunction, stageOverride = thisWebpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE } =
+      const { hashFunction, stageOverride = thisWebpack.Compilation.PROCESS_ASSETS_STAGE_DEV_TOOLING - 1 } =
         this._options;
       const hashFn: HashFn =
         hashFunction ??

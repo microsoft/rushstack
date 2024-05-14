@@ -42,6 +42,35 @@ export class PnpmSyncUtilities {
           terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(customMessage));
         }
         return;
+
+      case LogMessageIdentifier.PREPARE_REPLACING_FILE:
+        {
+          const customMessage: string =
+            `Expecting .pnpm-sync.json version ${details.expectedVersion}, ` +
+            `but found version ${details.actualVersion}`;
+
+          terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(message));
+          terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(customMessage));
+        }
+        return;
+
+      case LogMessageIdentifier.COPY_ERROR_INCOMPATIBLE_SYNC_FILE: {
+        terminal.writeErrorLine(
+          PnpmSyncUtilities._addLinePrefix(
+            `The workspace was installed using an incompatible version of pnpm-sync.\n` +
+              `Please run "rush install" or "rush update" again.`
+          )
+        );
+
+        terminal.writeLine(
+          PnpmSyncUtilities._addLinePrefix(
+            `Expecting .pnpm-sync.json version ${details.expectedVersion}, ` +
+              `but found version ${details.actualVersion}\n` +
+              `Affected folder: ${details.pnpmSyncJsonPath}`
+          )
+        );
+        throw new AlreadyReportedError();
+      }
     }
 
     // Default handling for other messages

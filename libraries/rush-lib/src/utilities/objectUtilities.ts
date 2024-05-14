@@ -114,3 +114,42 @@ function cloneDeepInner<TObject>(obj: TObject, seenObjects: Set<unknown>): TObje
     return obj;
   }
 }
+
+/**
+ * Performs a partial deep comparison between `obj` and `source` to
+ * determine if `obj` contains equivalent property values.
+ */
+export function isMatch<TObject>(obj: TObject, source: TObject): boolean {
+  return obj === source || (typeof obj === typeof source && isMatchInner(obj, source));
+}
+
+function isMatchInner<TObject>(obj: TObject, source: TObject): boolean {
+  if (obj === null || obj === undefined) {
+    return false;
+  }
+
+  for (const k of Object.keys(source as object)) {
+    const key: keyof TObject = k as keyof TObject;
+    const sourceValue: unknown = source[key];
+    if (isStrictComparable(sourceValue)) {
+      if (obj[key] !== sourceValue) {
+        return false;
+      }
+    } else if (!isMatchInner(obj[key], sourceValue)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Check if `value` is suitable for strict equality comparisons, i.e. `===`.
+ */
+function isStrictComparable<T>(value: T): boolean {
+  const type: string = typeof value;
+  return (
+    // eslint-disable-next-line no-self-compare
+    value === value && !(value !== null && value !== undefined && (type === 'object' || type === 'function'))
+  );
+}

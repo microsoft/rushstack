@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { LastInstallFlag, LAST_INSTALL_FLAG_FILE_NAME } from '../LastInstallFlag';
+import { LastInstallFlag } from '../LastInstallFlag';
 
 const TEMP_DIR_PATH: string = `${__dirname}/temp`;
 
@@ -19,64 +19,64 @@ describe(LastInstallFlag.name, () => {
 
   it('can get correct path', () => {
     const flag: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH);
-    expect(path.basename(flag.path)).toEqual(LAST_INSTALL_FLAG_FILE_NAME);
+    expect(path.basename(flag.path)).toMatchInlineSnapshot(`"last-install.flag"`);
   });
 
-  it('can create and remove a flag in an empty directory', () => {
+  it('can create and remove a flag in an empty directory', async () => {
     // preparation
     const flag: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH);
     FileSystem.deleteFile(flag.path);
 
     // test state, should be invalid since the file doesn't exist
-    expect(flag.isValid()).toEqual(false);
+    await expect(flag.isValidAsync()).resolves.toEqual(false);
 
     // test creation
-    flag.create();
+    await flag.createAsync();
     expect(FileSystem.exists(flag.path)).toEqual(true);
-    expect(flag.isValid()).toEqual(true);
+    await expect(flag.isValidAsync()).resolves.toEqual(true);
 
     // test deletion
-    flag.clear();
+    await flag.clearAsync();
     expect(FileSystem.exists(flag.path)).toEqual(false);
-    expect(flag.isValid()).toEqual(false);
+    await expect(flag.isValidAsync()).resolves.toEqual(false);
   });
 
-  it('can detect if the last flag was in a different state', () => {
+  it('can detect if the last flag was in a different state', async () => {
     // preparation
     const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, { node: '5.0.0' });
     const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, { node: '8.9.4' });
     FileSystem.deleteFile(flag1.path);
 
     // test state, should be invalid since the file doesn't exist
-    expect(flag1.isValid()).toEqual(false);
-    expect(flag2.isValid()).toEqual(false);
+    await expect(flag1.isValidAsync()).resolves.toEqual(false);
+    await expect(flag2.isValidAsync()).resolves.toEqual(false);
 
     // test creation
-    flag1.create();
+    await flag1.createAsync();
     expect(FileSystem.exists(flag1.path)).toEqual(true);
-    expect(flag1.isValid()).toEqual(true);
+    await expect(flag1.isValidAsync()).resolves.toEqual(true);
 
     // the second flag has different state and should be invalid
-    expect(flag2.isValid()).toEqual(false);
+    await expect(flag2.isValidAsync()).resolves.toEqual(false);
 
     // test deletion
-    flag1.clear();
+    await flag1.clearAsync();
     expect(FileSystem.exists(flag1.path)).toEqual(false);
-    expect(flag1.isValid()).toEqual(false);
-    expect(flag2.isValid()).toEqual(false);
+    await expect(flag1.isValidAsync()).resolves.toEqual(false);
+    await expect(flag2.isValidAsync()).resolves.toEqual(false);
   });
 
-  it('can detect if the last flag was in a corrupted state', () => {
+  it('can detect if the last flag was in a corrupted state', async () => {
     // preparation, write non-json into flag file
     const flag: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH);
     FileSystem.writeFile(flag.path, 'sdfjkaklfjksldajgfkld');
 
     // test state, should be invalid since the file is not JSON
-    expect(flag.isValid()).toEqual(false);
+    await expect(flag.isValidAsync()).resolves.toEqual(false);
     FileSystem.deleteFile(flag.path);
   });
 
-  it("throws an error if new storePath doesn't match the old one", () => {
+  it("throws an error if new storePath doesn't match the old one", async () => {
     const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
       packageManager: 'pnpm',
       storePath: `${TEMP_DIR_PATH}/pnpm-store`
@@ -86,13 +86,13 @@ describe(LastInstallFlag.name, () => {
       storePath: `${TEMP_DIR_PATH}/temp-store`
     });
 
-    flag1.create();
-    expect(() => {
-      flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' });
-    }).toThrowError(/PNPM store path/);
+    await flag1.createAsync();
+    await expect(async () => {
+      await flag2.checkValidAndReportStoreIssuesAsync({ rushVerb: 'install' });
+    }).rejects.toThrowError(/PNPM store path/);
   });
 
-  it("doesn't throw an error if conditions for error aren't met", () => {
+  it("doesn't throw an error if conditions for error aren't met", async () => {
     const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
       packageManager: 'pnpm',
       storePath: `${TEMP_DIR_PATH}/pnpm-store`
@@ -101,27 +101,8 @@ describe(LastInstallFlag.name, () => {
       packageManager: 'npm'
     });
 
-    flag1.create();
-    expect(() => {
-      flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' });
-    }).not.toThrow();
-    expect(flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' })).toEqual(false);
-  });
-
-  it("ignores a specified option that doesn't match", () => {
-    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
-      option1: 'a',
-      option2: 'b'
-    });
-    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
-      option1: 'a',
-      option2: 'c'
-    });
-
-    flag1.create();
-    expect(() => {
-      flag2.isValid({ statePropertiesToIgnore: ['option2'] });
-    }).not.toThrow();
-    expect(flag2.isValid({ statePropertiesToIgnore: ['option2'] })).toEqual(true);
+    await flag1.createAsync();
+    await expect(flag2.checkValidAndReportStoreIssuesAsync({ rushVerb: 'install' })).resolves.not.toThrow();
+    await expect(flag2.checkValidAndReportStoreIssuesAsync({ rushVerb: 'install' })).resolves.toEqual(false);
   });
 });

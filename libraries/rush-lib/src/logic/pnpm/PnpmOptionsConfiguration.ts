@@ -40,7 +40,10 @@ export interface IPnpmLockfilePolicies {
   /**
    * Forbid sha1 hashes in `pnpm-lock.yaml`
    */
-  disallowInsecureSha1?: boolean;
+  disallowInsecureSha1?: {
+    enabled: boolean;
+    exemptPackageVersions: Record<string, string[]>;
+  };
 }
 
 /**
@@ -128,6 +131,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * {@inheritDoc PnpmOptionsConfiguration.autoInstallPeers}
    */
   autoInstallPeers?: boolean;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.alwaysInjectDependenciesFromOtherSubspaces}
+   */
+  alwaysInjectDependenciesFromOtherSubspaces?: boolean;
   /**
    * {@inheritDoc PnpmOptionsConfiguration.alwaysFullInstall}
    */
@@ -245,6 +252,18 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * The default value is same as PNPM default value.  (In PNPM 8.x, this value is true)
    */
   public readonly autoInstallPeers: boolean | undefined;
+
+  /**
+   * If true, then `rush update` add injected install options for all cross-subspace
+   * workspace dependencies, to avoid subspace doppelganger issue.
+   *
+   * Here, the injected install refers to PNPM's PNPM's "injected dependencies"
+   * feature. Learn more: https://pnpm.io/package_json#dependenciesmeta
+   *
+   * @remarks
+   * The default value is false.
+   */
+  public readonly alwaysInjectDependenciesFromOtherSubspaces: boolean | undefined;
 
   /**
    * The "globalOverrides" setting provides a simple mechanism for overriding version selections
@@ -386,6 +405,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this._globalPatchedDependencies = json.globalPatchedDependencies;
     this.resolutionMode = json.resolutionMode;
     this.autoInstallPeers = json.autoInstallPeers;
+    this.alwaysInjectDependenciesFromOtherSubspaces = json.alwaysInjectDependenciesFromOtherSubspaces;
     this.alwaysFullInstall = json.alwaysFullInstall;
     this.pnpmLockfilePolicies = json.pnpmLockfilePolicies;
   }
