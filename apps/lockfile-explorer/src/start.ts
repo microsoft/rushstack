@@ -110,9 +110,13 @@ function startApp(debugMode: boolean): void {
 
     let shrinkwrapFileMajorVersion: number;
     if (typeof lockfileVersion === 'string') {
-      shrinkwrapFileMajorVersion = parseInt(lockfileVersion.substring(0, lockfileVersion.indexOf('.')), 10);
+      const isDotIncluded: boolean = lockfileVersion.includes('.');
+      shrinkwrapFileMajorVersion = parseInt(
+        lockfileVersion.substring(0, isDotIncluded ? lockfileVersion.indexOf('.') : undefined),
+        10
+      );
     } else if (typeof lockfileVersion === 'number') {
-      shrinkwrapFileMajorVersion = lockfileVersion;
+      shrinkwrapFileMajorVersion = Math.floor(lockfileVersion);
     } else {
       shrinkwrapFileMajorVersion = 0;
     }

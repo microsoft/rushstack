@@ -277,8 +277,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         lockfileVersion.substring(0, lockfileVersion.indexOf('.')),
         10
       );
+      const isDotIncluded: boolean = lockfileVersion.includes('.');
+      this.shrinkwrapFileMajorVersion = parseInt(
+        lockfileVersion.substring(0, isDotIncluded ? lockfileVersion.indexOf('.') : undefined),
+        10
+      );
     } else if (typeof lockfileVersion === 'number') {
-      this.shrinkwrapFileMajorVersion = lockfileVersion;
+      this.shrinkwrapFileMajorVersion = Math.floor(lockfileVersion);
     } else {
       this.shrinkwrapFileMajorVersion = 0;
     }
