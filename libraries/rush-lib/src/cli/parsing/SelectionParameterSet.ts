@@ -282,9 +282,16 @@ export class SelectionParameterSet {
     return selection;
   }
 
-  public getTargetSubspace(): Subspace {
+  /**
+   * Computes the selected subspace when the "--subspace" parameter is provided.
+   * Returns undefined if the "--subspace" parameter is not provided
+   */
+  public getTargetSubspace(): Subspace | undefined {
     const parameterValue: string | undefined = this._subspaceParameter?.value;
-    if (parameterValue && !this._rushConfiguration.subspacesFeatureEnabled) {
+    if (!parameterValue) {
+      return undefined;
+    }
+    if (!this._rushConfiguration.subspacesFeatureEnabled) {
       // eslint-disable-next-line no-console
       console.log();
       // eslint-disable-next-line no-console
@@ -295,9 +302,7 @@ export class SelectionParameterSet {
       );
       throw new AlreadyReportedError();
     }
-    const selectedSubspace: Subspace | undefined = parameterValue
-      ? this._rushConfiguration.getSubspace(parameterValue)
-      : this._rushConfiguration.defaultSubspace;
+    const selectedSubspace: Subspace = this._rushConfiguration.getSubspace(parameterValue);
     return selectedSubspace;
   }
 
