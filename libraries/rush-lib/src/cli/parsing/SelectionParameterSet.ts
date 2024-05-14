@@ -266,7 +266,7 @@ export class SelectionParameterSet {
    * @remarks
    * This is a separate from the selection to allow the filters to be represented more concisely.
    *
-   * @see https://pnpm.js.org/en/filtering
+   * @see https://pnpm.io/filtering
    */
   public async getPnpmFilterArgumentValuesAsync(terminal: ITerminal): Promise<string[]> {
     const args: string[] = [];
