@@ -9,6 +9,7 @@ import { RushCommandLineParser } from '../../RushCommandLineParser';
 import { RemoveAction } from '../RemoveAction';
 import { VersionMismatchFinderProject } from '../../../logic/versionMismatch/VersionMismatchFinderProject';
 import { DependencyType } from '../../../api/PackageJsonEditor';
+import { LockFile } from '@rushstack/node-core-library';
 
 describe(RemoveAction.name, () => {
   describe('basic "rush remove" tests', () => {
@@ -23,6 +24,10 @@ describe(RemoveAction.name, () => {
         .mockImplementation(() => {});
 
       jest.spyOn(process, 'exit').mockImplementation();
+
+      // Suppress "Another Rush command is already running" error
+      jest.spyOn(LockFile, 'tryAcquire').mockImplementation(() => ({} as LockFile));
+
       oldExitCode = process.exitCode;
       oldArgs = process.argv;
     });

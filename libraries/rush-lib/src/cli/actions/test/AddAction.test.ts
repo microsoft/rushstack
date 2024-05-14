@@ -7,6 +7,7 @@ import { PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
 import type { IPackageJsonUpdaterRushAddOptions } from '../../../logic/PackageJsonUpdaterTypes';
 import { RushCommandLineParser } from '../../RushCommandLineParser';
 import { AddAction } from '../AddAction';
+import { LockFile } from '@rushstack/node-core-library';
 
 describe(AddAction.name, () => {
   describe('basic "rush add" tests', () => {
@@ -19,6 +20,10 @@ describe(AddAction.name, () => {
         .spyOn(PackageJsonUpdater.prototype, 'doRushUpdateAsync')
         .mockImplementation(() => Promise.resolve());
       jest.spyOn(process, 'exit').mockImplementation();
+
+      // Suppress "Another Rush command is already running" error
+      jest.spyOn(LockFile, 'tryAcquire').mockImplementation(() => ({} as LockFile));
+
       oldExitCode = process.exitCode;
       oldArgs = process.argv;
     });
