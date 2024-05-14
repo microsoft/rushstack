@@ -4,7 +4,6 @@
 import type {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
-  CommandLineStringParameter,
   IRequiredCommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
@@ -43,7 +42,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected readonly _maxInstallAttempts: IRequiredCommandLineIntegerParameter;
   protected readonly _ignoreHooksParameter: CommandLineFlagParameter;
   protected readonly _offlineParameter: CommandLineFlagParameter;
-  protected readonly _subspaceParameter: CommandLineStringParameter;
   /*
    * Subclasses can initialize the _selectionParameters property in order for
    * the parameters to be written to the telemetry file
@@ -105,34 +103,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
         ` if the necessary NPM packages cannot be obtained from the local cache.` +
         ` For details, see the documentation for PNPM's "--offline" parameter.`
     });
-    this._subspaceParameter = this.defineStringParameter({
-      parameterLongName: '--subspace',
-      argumentName: 'SUBSPACE_NAME',
-      description:
-        '(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the feature to be enabled in subspaces.json.'
-    });
   }
 
   protected abstract buildInstallOptionsAsync(): Promise<IInstallManagerOptions>;
-
-  protected getTargetSubspace(): Subspace {
-    const parameterValue: string | undefined = this._subspaceParameter.value;
-    if (parameterValue && !this.rushConfiguration.subspacesFeatureEnabled) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(
-        Colorize.red(
-          `The "--subspace" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
-        )
-      );
-      throw new AlreadyReportedError();
-    }
-    const selectedSubspace: Subspace | undefined = parameterValue
-      ? this.rushConfiguration.getSubspace(parameterValue)
-      : this.rushConfiguration.defaultSubspace;
-    return selectedSubspace;
-  }
 
   protected async runAsync(): Promise<void> {
     const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
@@ -151,6 +124,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     let selectedSubspaces: Set<Subspace> | undefined;
     const selectedProjectsMetadataBySubspace: Map<Subspace, ISubspaceSelectedProjectsMetadata> = new Map();
     if (this.rushConfiguration.subspacesFeatureEnabled) {
+      const selectedSubspaceParameter: Subspace | undefined = this._selectionParameters?.getTargetSubspace();
       selectedSubspaces = new Set();
       const { selectedProjects } = installManagerOptions;
       if (selectedProjects.size !== this.rushConfiguration.projects.length) {
@@ -180,10 +154,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
             pnpmFilterArguments.push('--filter', project.packageName);
           }
         }
-      } else if (this._subspaceParameter.value) {
+      } else if (selectedSubspaceParameter) {
         // Selecting a single subspace
-        const selectedSubspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceParameter.value);
-        selectedSubspaces = new Set<Subspace>([selectedSubspace]);
+        selectedSubspaces = new Set<Subspace>([selectedSubspaceParameter]);
       } else {
         // Selecting all subspaces if preventSelectingAllSubspaces is not enabled in subspaces.json
         if (!this.rushConfiguration.subspacesConfiguration?.preventSelectingAllSubspaces) {

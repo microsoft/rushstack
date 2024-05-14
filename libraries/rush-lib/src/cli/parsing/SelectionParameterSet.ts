@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AlreadyReportedError, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
-import type { ITerminal } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import type {
   CommandLineParameterProvider,
   CommandLineStringListParameter,
@@ -22,6 +22,7 @@ import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelect
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
 import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorParser';
 import { RushConstants } from '../../logic/RushConstants';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -279,6 +280,25 @@ export class SelectionParameterSet {
     );
 
     return selection;
+  }
+
+  public getTargetSubspace(): Subspace {
+    const parameterValue: string | undefined = this._subspaceParameter?.value;
+    if (parameterValue && !this._rushConfiguration.subspacesFeatureEnabled) {
+      // eslint-disable-next-line no-console
+      console.log();
+      // eslint-disable-next-line no-console
+      console.log(
+        Colorize.red(
+          `The "${this._subspaceParameter?.longName}" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+    const selectedSubspace: Subspace | undefined = parameterValue
+      ? this._rushConfiguration.getSubspace(parameterValue)
+      : this._rushConfiguration.defaultSubspace;
+    return selectedSubspace;
   }
 
   /**

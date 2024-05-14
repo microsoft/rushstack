@@ -104,8 +104,7 @@ export class UpdateAction extends BaseInstallAction {
       pnpmFilterArguments:
         (await this._selectionParameters?.getPnpmFilterArgumentsAsync(this._terminal)) ?? [],
       checkOnly: false,
-      subspace: this.getTargetSubspace(),
-
+      subspace: this._selectionParameters?.getTargetSubspace() || this.rushConfiguration.defaultSubspace,
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
       terminal: this._terminal
     };
