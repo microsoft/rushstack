@@ -84,8 +84,18 @@ export interface IInstallManagerOptions {
   /**
    * Filters to be passed to PNPM during installation, if applicable.
    * These restrict the scope of a workspace installation.
+   *
+   * @remarks
+   * Note that PNPM may arbitrarily ignore `--filter` (producing an unfiltered install) in certain situations,
+   * for example when `config.dedupe-peer-dependents=true` with PNPM 8.  Rush tries to circumvent this, under the
+   * assumption that a user who invokes a filtered install cares more about lockfile stability than duplication.
    */
-  filteredProjects: RushConfigurationProject[];
+  pnpmFilterArguments: string[];
+
+  /**
+   * The set of projects for which installation should be performed.
+   */
+  selectedProjects: Set<RushConfigurationProject>;
 
   /**
    * Callback to invoke between preparing the common/temp folder and running installation.

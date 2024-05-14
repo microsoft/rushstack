@@ -510,7 +510,8 @@ export class RushPnpmCommandLineParser {
       offline: false,
       collectLogFile: false,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-      filteredProjects: [],
+      pnpmFilterArguments: [],
+      selectedProjects: new Set(this._rushConfiguration.projects),
       checkOnly: false,
       // TODO: Support subspaces
       subspace: this._rushConfiguration.defaultSubspace,

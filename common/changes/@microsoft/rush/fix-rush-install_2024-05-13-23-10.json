@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where `rush install` and `rush update` will fail with an `ENAMETOOLONG` error on Windows in repos with a large number of projects.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
