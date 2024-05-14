@@ -82,8 +82,22 @@ export interface IInstallManagerOptions {
   maxInstallAttempts: number;
 
   /**
-   * Filters to be passed to PNPM during installation, if applicable.
-   * These restrict the scope of a workspace installation.
+   * If `filteredProjects` is `undefined`, then Rush will perform a regular "pnpm install".
+   *
+   * If `filteredProjects` is specified, then Rush will perform a "filtered install" by invoking PNPM like this:
+   *
+   * `pnpm install --filter project1 --filter project5 --filter project6`
+   *
+   * If `filteredProjects` is specified and the set is empty, then the installation will be skipped entirely.
+   *
+   * @remarks
+   * Compared to an unfiltered install, filtering brings some limitations:  For example, Rush's install skipping
+   * optimization may miss some cases. For `rush update`, PNPM may not remove deadwood from the lockfile as
+   * effectively as an unfiltered install.
+   *
+   * Note that PNPM will arbitrarily ignore `--filter` (producing an unfiltered install) in certain situations,
+   * for example when `config.dedupe-peer-dependents=true` with PNPM 8.  Rush tries to avoid this, under the
+   * assumption that a user who invokes a filtered install cares more about lockfile stability than duplication.
    */
   filteredProjects: Set<RushConfigurationProject> | undefined;
 
