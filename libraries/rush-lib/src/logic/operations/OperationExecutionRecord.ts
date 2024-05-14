@@ -196,7 +196,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
         ? new ProjectLogWritable(
             associatedProject,
             this.collatedWriter.terminal,
-            `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`
+            `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`,
+            true
           )
         : undefined;
 

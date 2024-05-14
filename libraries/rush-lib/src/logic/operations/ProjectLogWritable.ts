@@ -49,13 +49,18 @@ export class ProjectLogWritable extends TerminalWritable {
    */
   private _chunkWriter: FileWriter | undefined = undefined;
 
+  private _enableChunkedOutput: boolean;
+
   public constructor(
     project: RushConfigurationProject,
     terminal: CollatedTerminal,
-    logFilenameIdentifier: string
+    logFilenameIdentifier: string,
+    enableChunkedOutput: boolean = false
   ) {
     super();
     this._terminal = terminal;
+
+    this._enableChunkedOutput = enableChunkedOutput;
 
     // Delete the legacy logs
     const { logPath: legacyLogPath, errorLogPath: legacyErrorLogPath } = ProjectLogWritable.getLogFilePaths({
@@ -153,10 +158,12 @@ export class ProjectLogWritable extends TerminalWritable {
     // Both stderr and stdout get written to *.<phaseName>.log
     this._logWriter.write(chunk.text);
 
-    if (!this._chunkWriter) {
-      this._chunkWriter = FileWriter.open(this.logChunksPath);
+    if (this._enableChunkedOutput) {
+      if (!this._chunkWriter) {
+        this._chunkWriter = FileWriter.open(this.logChunksPath);
+      }
+      this._chunkWriter.write(JSON.stringify(chunk) + '\n');
     }
-    this._chunkWriter.write(JSON.stringify(chunk) + '\n');
 
     if (chunk.kind === TerminalChunkKind.Stderr) {
       // Only stderr gets written to *.<phaseName>.error.log
