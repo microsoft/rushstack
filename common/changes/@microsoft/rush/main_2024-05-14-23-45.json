@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Optimize the judgment of shrinkwrap file major version.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
