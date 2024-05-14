@@ -80,7 +80,7 @@ export interface IConfigApiReport {
    *
    * The string must not contain a path separator such as `\` or `/`.
    *
-   * @defaultValue `<unscopedPackageName>.api.md`
+   * @defaultValue `<unscopedPackageName>.api.md` will be used if this argument is not specified or if it is empty.
    */
   reportFileName?: string;
 
