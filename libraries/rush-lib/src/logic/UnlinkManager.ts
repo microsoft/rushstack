@@ -43,7 +43,8 @@ export class UnlinkManager {
 
     await new FlagFile(
       this._rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
-      RushConstants.lastLinkFlagFilename
+      RushConstants.lastLinkFlagFilename,
+      {}
     ).clearAsync();
     return this._deleteProjectFiles();
   }
