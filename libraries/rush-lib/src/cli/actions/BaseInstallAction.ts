@@ -129,8 +129,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
       throw new AlreadyReportedError();
     }
     const selectedSubspace: Subspace | undefined = parameterValue
-      ? this.rushConfiguration.getSubspace(parameterValue)
-      : this.rushConfiguration.defaultSubspace;
+      ? this.rushConfiguration.defaultSubspace
+      : this.rushConfiguration.getSubspace(parameterValue);
     return selectedSubspace;
   }
 
