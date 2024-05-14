@@ -2,6 +2,51 @@
   "name": "@rushstack/heft-serverless-stack-plugin",
   "entries": [
     {
+      "version": "0.3.43",
+      "tag": "@rushstack/heft-serverless-stack-plugin_v0.3.43",
+      "date": "Fri, 10 May 2024 05:33:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.43`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.43`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.5` to `0.66.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.42",
+      "tag": "@rushstack/heft-serverless-stack-plugin_v0.3.42",
+      "date": "Wed, 08 May 2024 22:23:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.42`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.42`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.4` to `0.66.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.41",
       "tag": "@rushstack/heft-serverless-stack-plugin_v0.3.41",
       "date": "Mon, 06 May 2024 15:11:04 GMT",

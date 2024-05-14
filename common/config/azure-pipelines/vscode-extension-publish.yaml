@@ -32,7 +32,6 @@ extends:
                 parameters:
                   BuildParameters: >
                     --to rushstack
-                  PerformValidation: false
 
               - script: node $(Build.SourcesDirectory)/common/scripts/install-run-rushx.js package
                 workingDirectory: $(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension

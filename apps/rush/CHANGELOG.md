@@ -1,6 +1,34 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 07 May 2024 22:38:00 GMT and should not be manually modified.
+This log was last generated on Fri, 10 May 2024 06:35:26 GMT and should not be manually modified.
+
+## 5.124.2
+Fri, 10 May 2024 06:35:26 GMT
+
+### Updates
+
+- Fix a recent regression where `rush deploy` did not correctly apply the `additionalProjectsToInclude` setting (GitHub #4683)
+
+## 5.124.1
+Fri, 10 May 2024 05:33:51 GMT
+
+### Updates
+
+- Fix an issue where the `disallowInsecureSha1` policy failed to parse certain lockfile entries
+- Fix some minor issues with the "rush init" template files
+- Report an error if subspacesFeatureEnabled=true without useWorkspaces=true
+- Fix an issue where operation weights were not respected.
+
+## 5.124.0
+Wed, 08 May 2024 22:24:08 GMT
+
+### Updates
+
+- Add a new setting `alwaysInjectDependenciesFromOtherSubspaces` in pnpm-config.json
+- Fix a issue where rush install/update can not detect pnpm-sync.json is out of date
+- Improve the error message when the pnpm-sync version is outdated
+- Fixes a bug where cobuilds would cause a GC error when waiting for long periods of time.
+- Fix an issue where tab competions did not suggest parameter values.
 
 ## 5.123.1
 Tue, 07 May 2024 22:38:00 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "4.2.1",
+      "tag": "@rushstack/node-core-library_v4.2.1",
+      "date": "Fri, 10 May 2024 05:33:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a bug in `Async.forEachAsync` where weight wasn't respected."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.0",
       "tag": "@rushstack/node-core-library_v4.2.0",
       "date": "Mon, 06 May 2024 15:11:04 GMT",

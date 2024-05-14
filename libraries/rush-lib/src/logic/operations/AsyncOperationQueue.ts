@@ -17,7 +17,7 @@ export const UNASSIGNED_OPERATION: 'UNASSIGNED_OPERATION' = 'UNASSIGNED_OPERATIO
 
 export type IOperationIteratorResult =
   | OperationExecutionRecord
-  | { weight: 0; status: typeof UNASSIGNED_OPERATION };
+  | { weight: 1; status: typeof UNASSIGNED_OPERATION };
 
 /**
  * Implementation of the async iteration protocol for a collection of IOperation objects.
@@ -93,6 +93,8 @@ export class AsyncOperationQueue
       }
     }
 
+    this.assignOperations();
+
     if (this._completedOperations.size === this._totalOperations) {
       this._isDone = true;
     }
@@ -166,7 +168,7 @@ export class AsyncOperationQueue
       // remote executing operation which is not ready to process.
       if (queue.some((operation) => operation.status === OperationStatus.RemoteExecuting)) {
         waitingIterators.shift()!({
-          value: { weight: 0, status: UNASSIGNED_OPERATION },
+          value: { weight: 1, status: UNASSIGNED_OPERATION },
           done: false
         });
       }

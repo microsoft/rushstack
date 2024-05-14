@@ -273,20 +273,21 @@ describe(Async.name, () => {
         [Symbol.asyncIterator]: () => asyncIterator
       };
 
-      const expectedConcurrency: 4 = 4;
       const finalPromise: Promise<void> = Async.forEachAsync(
         asyncIterable,
         async (item) => {
           // Do nothing
         },
         {
-          concurrency: expectedConcurrency
+          concurrency: 4
         }
       );
 
       // Wait for all the instant resolutions to be done
       await Async.sleep(0);
-      expect(waitingIterators).toEqual(expectedConcurrency);
+
+      // The final iteration cycle is locked, so only 1 iterator is waiting.
+      expect(waitingIterators).toEqual(1);
       resolve2({ done: true, value: undefined });
       await finalPromise;
     });
@@ -493,6 +494,50 @@ describe(Async.name, () => {
       await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
       expect(fn).toHaveBeenCalledTimes(10);
       expect(maxRunning).toEqual(9);
+    });
+
+    it('does not exceed the maxiumum concurrency for an async iterator when weighted', async () => {
+      let waitingIterators: number = 0;
+
+      let resolve2!: (value: { done: true; value: undefined }) => void;
+      const signal2: Promise<{ done: true; value: undefined }> = new Promise((resolve, reject) => {
+        resolve2 = resolve;
+      });
+
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<{ element: number; weight: number }> = {
+        next: () => {
+          iteratorIndex++;
+          if (iteratorIndex < 20) {
+            return Promise.resolve({ done: false, value: { element: iteratorIndex, weight: 2 } });
+          } else {
+            ++waitingIterators;
+            return signal2;
+          }
+        }
+      };
+      const asyncIterable: AsyncIterable<{ element: number; weight: number }> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      const finalPromise: Promise<void> = Async.forEachAsync(
+        asyncIterable,
+        async (item) => {
+          // Do nothing
+        },
+        {
+          concurrency: 4,
+          weighted: true
+        }
+      );
+
+      // Wait for all the instant resolutions to be done
+      await Async.sleep(0);
+
+      // The final iteration cycle is locked, so only 1 iterator is waiting.
+      expect(waitingIterators).toEqual(1);
+      resolve2({ done: true, value: undefined });
+      await finalPromise;
     });
   });
 

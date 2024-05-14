@@ -685,7 +685,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    await new FlagFile(subspace.getSubspaceTempFolder(), RushConstants.lastLinkFlagFilename).createAsync();
+    await new FlagFile(
+      subspace.getSubspaceTempFolder(),
+      RushConstants.lastLinkFlagFilename,
+      {}
+    ).createAsync();
   }
 
   /**

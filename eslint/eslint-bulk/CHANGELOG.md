@@ -1,6 +1,23 @@
 # Change Log - @rushstack/eslint-bulk
 
-This log was last generated on Mon, 06 May 2024 15:11:04 GMT and should not be manually modified.
+This log was last generated on Sat, 11 May 2024 00:12:09 GMT and should not be manually modified.
+
+## 0.1.35
+Sat, 11 May 2024 00:12:09 GMT
+
+### Patches
+
+- Fix an issue where the tool will not correctly execute if the installed eslint path contains a space.
+
+## 0.1.34
+Fri, 10 May 2024 05:33:34 GMT
+
+_Version update only_
+
+## 0.1.33
+Wed, 08 May 2024 22:23:50 GMT
+
+_Version update only_
 
 ## 0.1.32
 Mon, 06 May 2024 15:11:04 GMT

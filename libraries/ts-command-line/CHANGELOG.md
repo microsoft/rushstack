@@ -1,6 +1,18 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Mon, 06 May 2024 15:11:05 GMT and should not be manually modified.
+This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+
+## 4.19.5
+Fri, 10 May 2024 05:33:34 GMT
+
+_Version update only_
+
+## 4.19.4
+Wed, 08 May 2024 22:23:50 GMT
+
+### Patches
+
+- Fix an issue where tab completions did not suggest parameter values.
 
 ## 4.19.3
 Mon, 06 May 2024 15:11:05 GMT

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where installing multiple subspaces consecutively can cause unexpected cross-contamination between pnpmfiles.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

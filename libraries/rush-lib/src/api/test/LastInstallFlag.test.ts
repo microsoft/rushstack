@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { LastInstallFlag, LAST_INSTALL_FLAG_FILE_NAME } from '../LastInstallFlag';
+import { LastInstallFlag } from '../LastInstallFlag';
 
 const TEMP_DIR_PATH: string = `${__dirname}/temp`;
 
@@ -19,7 +19,7 @@ describe(LastInstallFlag.name, () => {
 
   it('can get correct path', () => {
     const flag: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH);
-    expect(path.basename(flag.path)).toEqual(LAST_INSTALL_FLAG_FILE_NAME);
+    expect(path.basename(flag.path)).toMatchInlineSnapshot(`"last-install.flag"`);
   });
 
   it('can create and remove a flag in an empty directory', async () => {
