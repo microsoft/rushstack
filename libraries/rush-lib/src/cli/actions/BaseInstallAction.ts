@@ -143,16 +143,16 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
     let selectedSubspaces: ReadonlySet<Subspace> | undefined;
-    const filteredProjectsForSubspace: Map<Subspace, Set<RushConfigurationProject>> = new Map();
+    const filteredProjectsBySubspace: Map<Subspace, Set<RushConfigurationProject>> = new Map();
     if (this.rushConfiguration.subspacesFeatureEnabled) {
       if (installManagerOptions.filteredProjects?.size) {
         // Go through each project, add it to it's subspace's pnpm filter arguments
         for (const project of installManagerOptions.filteredProjects) {
           let subspaceFilteredProjects: Set<RushConfigurationProject> | undefined =
-            filteredProjectsForSubspace.get(project.subspace);
+            filteredProjectsBySubspace.get(project.subspace);
           if (!subspaceFilteredProjects) {
             subspaceFilteredProjects = new Set();
-            filteredProjectsForSubspace.set(project.subspace, subspaceFilteredProjects);
+            filteredProjectsBySubspace.set(project.subspace, subspaceFilteredProjects);
           }
           subspaceFilteredProjects.add(project);
         }
@@ -246,11 +246,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
           if (selectedSubspace.getPnpmOptions()?.alwaysFullInstall) {
             installManagerOptions.filteredProjects = undefined;
           } else {
-            const filteredProjects: Set<RushConfigurationProject> | undefined =
-              filteredProjectsForSubspace.get(selectedSubspace);
-            // If `filteredProjects` is set to `undefined`, no filtering will be done and all projects will be installed.
-            installManagerOptions.filteredProjects =
-              filteredProjects?.size === selectedSubspace.getProjects().length ? undefined : filteredProjects;
+            installManagerOptions.filteredProjects = filteredProjectsBySubspace.get(selectedSubspace);
           }
           // eslint-disable-next-line no-console
           console.log(Colorize.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));

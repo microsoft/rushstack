@@ -63,9 +63,7 @@ export class InstallAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      // If `filteredProjects` is set to `undefined`, no filtering will be done and all projects will be installed.
-      filteredProjects:
-        selectedProjects?.size === this.rushConfiguration.projects.length ? undefined : selectedProjects,
+      filteredProjects: selectedProjects,
       checkOnly: this._checkOnlyParameter.value,
       subspace: this.getTargetSubspace(),
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
