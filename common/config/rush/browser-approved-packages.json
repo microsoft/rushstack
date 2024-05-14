@@ -19,10 +19,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "@pnpm/lockfile-types",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@radix-ui/colors",
       "allowedCategories": [ "libraries" ]
     },
