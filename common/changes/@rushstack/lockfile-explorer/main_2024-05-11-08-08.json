@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/lockfile-explorer",
-      "comment": "Fix some bugs for the lockfile-explorer tool",
+      "comment": "Fix some issues when parsing certain lockfile syntaxes",
       "type": "patch"
     }
   ],
