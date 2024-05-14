@@ -249,9 +249,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
             const filteredProjects: Set<RushConfigurationProject> | undefined =
               filteredProjectsForSubspace.get(selectedSubspace);
             installManagerOptions.filteredProjects =
-              filteredProjects?.size === this.rushConfiguration.projects.length
-                ? undefined
-                : filteredProjects;
+              filteredProjects?.size === selectedSubspace.getProjects().length ? undefined : filteredProjects;
           }
           // eslint-disable-next-line no-console
           console.log(Colorize.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));
