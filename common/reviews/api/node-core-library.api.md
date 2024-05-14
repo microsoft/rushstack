@@ -25,11 +25,22 @@ export class AlreadyReportedError extends Error {
 
 // @public
 export class Async {
-    static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
+    static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: (IAsyncParallelismOptions & {
+        weighted?: false;
+    }) | undefined): Promise<void>;
+    static forEachAsync<TEntry extends IWeighted>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options: IAsyncParallelismOptions & {
+        weighted: true;
+    }): Promise<void>;
     static getSignal(): [Promise<void>, () => void, (err: Error) => void];
-    static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
+    static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: (IAsyncParallelismOptions & {
+        weighted?: false;
+    }) | undefined): Promise<TRetVal[]>;
+    static mapAsync<TEntry extends IWeighted, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options: IAsyncParallelismOptions & {
+        weighted: true;
+    }): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
+    static validateWeightedIterable(operation: IWeighted): void;
 }
 
 // @public
@@ -189,6 +200,8 @@ export class FileSystem {
     static readLinkAsync(path: string): Promise<string>;
     static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
     static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void>;
+    static writeBuffersToFile(filePath: string, contents: ReadonlyArray<Uint8Array>, options?: IFileSystemWriteBinaryFileOptions): void;
+    static writeBuffersToFileAsync(filePath: string, contents: ReadonlyArray<Uint8Array>, options?: IFileSystemWriteBinaryFileOptions): Promise<void>;
     static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
 }
@@ -223,6 +236,7 @@ export type FolderItem = fs.Dirent;
 // @public
 export interface IAsyncParallelismOptions {
     concurrency?: number;
+    weighted?: boolean;
 }
 
 // @public
@@ -336,10 +350,14 @@ export interface IFileSystemUpdateTimeParameters {
 }
 
 // @public
-export interface IFileSystemWriteFileOptions {
+export interface IFileSystemWriteBinaryFileOptions {
+    ensureFolderExists?: boolean;
+}
+
+// @public
+export interface IFileSystemWriteFileOptions extends IFileSystemWriteBinaryFileOptions {
     convertLineEndings?: NewlineKind;
     encoding?: Encoding;
-    ensureFolderExists?: boolean;
 }
 
 // @public
@@ -594,6 +612,11 @@ export interface IWaitForExitWithBufferOptions extends IWaitForExitOptions {
 // @public
 export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
     encoding: BufferEncoding;
+}
+
+// @public (undocumented)
+export interface IWeighted {
+    weight: number;
 }
 
 // @public

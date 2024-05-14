@@ -2,6 +2,252 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.124.2",
+      "tag": "@microsoft/rush_v5.124.2",
+      "date": "Fri, 10 May 2024 06:35:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent regression where `rush deploy` did not correctly apply the `additionalProjectsToInclude` setting (GitHub #4683)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.124.1",
+      "tag": "@microsoft/rush_v5.124.1",
+      "date": "Fri, 10 May 2024 05:33:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the `disallowInsecureSha1` policy failed to parse certain lockfile entries"
+          },
+          {
+            "comment": "Fix some minor issues with the \"rush init\" template files"
+          },
+          {
+            "comment": "Report an error if subspacesFeatureEnabled=true without useWorkspaces=true"
+          },
+          {
+            "comment": "Fix an issue where operation weights were not respected."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.124.0",
+      "tag": "@microsoft/rush_v5.124.0",
+      "date": "Wed, 08 May 2024 22:24:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new setting `alwaysInjectDependenciesFromOtherSubspaces` in pnpm-config.json"
+          },
+          {
+            "comment": "Fix a issue where rush install/update can not detect pnpm-sync.json is out of date"
+          },
+          {
+            "comment": "Improve the error message when the pnpm-sync version is outdated"
+          },
+          {
+            "comment": "Fixes a bug where cobuilds would cause a GC error when waiting for long periods of time."
+          },
+          {
+            "comment": "Fix an issue where tab competions did not suggest parameter values."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.123.1",
+      "tag": "@microsoft/rush_v5.123.1",
+      "date": "Tue, 07 May 2024 22:38:00 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent regression where \"rush install\" would sometimes incorrectly determine whether to skip the install"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.123.0",
+      "tag": "@microsoft/rush_v5.123.0",
+      "date": "Tue, 07 May 2024 18:32:36 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Provide the file path if there is an error parsing a `package.json` file."
+          },
+          {
+            "comment": "Timeline view will now only show terminal build statuses as cobuilt, all other statuses will reflect their original icons."
+          },
+          {
+            "comment": "Add a `\"weight\"` property to the `\"operation\"` object in the project `config/rush-project.json` file that defines an integer weight for how much of the allowed parallelism the operation uses."
+          },
+          {
+            "comment": "Optimize skipping of unnecessary installs when using filters such as \"rush install --to x\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.122.1",
+      "tag": "@microsoft/rush_v5.122.1",
+      "date": "Tue, 30 Apr 2024 23:36:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make `disallowInsecureSha1` policy a subspace-level configuration."
+          },
+          {
+            "comment": "Fix an issue where `rush update` sometimes did not detect changes to pnpm-config.json"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.122.0",
+      "tag": "@microsoft/rush_v5.122.0",
+      "date": "Thu, 25 Apr 2024 07:33:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Support rush-pnpm for subspace feature"
+          },
+          {
+            "comment": "Skip determining merge base if given git hash"
+          },
+          {
+            "comment": "(BREAKING CHANGE) Improve the `disallowInsecureSha1` policy to support exemptions for certain package versions. This is a breaking change for the `disallowInsecureSha1` field in pnpm-config.json since Rush 5.119.0."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.121.0",
+      "tag": "@microsoft/rush_v5.121.0",
+      "date": "Mon, 22 Apr 2024 19:11:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for auth via microsoft/ado-codespaces-auth vscode extension in `@rushstack/rush-azure-storage-build-cache-plugin`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.120.6",
+      "tag": "@microsoft/rush_v5.120.6",
+      "date": "Thu, 18 Apr 2024 23:20:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush deploy\" did not correctly deploy build outputs combining multiple Rush subspaces"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.120.5",
+      "tag": "@microsoft/rush_v5.120.5",
+      "date": "Wed, 17 Apr 2024 21:58:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush add affects all packages in a subspace"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.120.4",
+      "tag": "@microsoft/rush_v5.120.4",
+      "date": "Tue, 16 Apr 2024 20:04:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush deploy` sometimes used an incorrect temp folder when the experimental subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.120.3",
+      "tag": "@microsoft/rush_v5.120.3",
+      "date": "Tue, 16 Apr 2024 02:59:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `pnpm-sync copy` was skipped when a build is restored from build cache."
+          },
+          {
+            "comment": "Upgrade `tar` dependency to 6.2.1"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.120.2",
+      "tag": "@microsoft/rush_v5.120.2",
+      "date": "Mon, 15 Apr 2024 00:25:04 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixes an issue where rush install fails in monorepos with subspaces enabled"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.120.1",
+      "tag": "@microsoft/rush_v5.120.1",
+      "date": "Sat, 13 Apr 2024 18:31:00 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where install-run-rush.js sometimes incorrectly invoked .cmd files on Windows OS due to a recent Node.js behavior change."
+          },
+          {
+            "comment": "Fix an issue with the skip install logic when the experimental subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.120.0",
+      "tag": "@microsoft/rush_v5.120.0",
+      "date": "Wed, 10 Apr 2024 21:59:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump express."
+          },
+          {
+            "comment": "Add support for `optionalDependencies` in transitive injected install in the Subspaces feature."
+          },
+          {
+            "comment": "Update dependency: pnpm-sync-lib@0.2.2"
+          },
+          {
+            "comment": "Remove a restriction where the repo root would not be found if the CWD is >10 directory levels deep."
+          },
+          {
+            "comment": "Improve the error message that is printed in a repo using PNPM workspaces when a non-`workspace:` version is used for a project inside the repo."
+          },
+          {
+            "comment": "Include a missing space in a logging message printed when running `rush add`."
+          },
+          {
+            "comment": "Clarify the copyright notice emitted in common/scripts/*.js"
+          },
+          {
+            "comment": "Fix an issue with loading of implicitly preferred versions when the experimental subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.119.0",
       "tag": "@microsoft/rush_v5.119.0",
       "date": "Sat, 30 Mar 2024 04:32:31 GMT",

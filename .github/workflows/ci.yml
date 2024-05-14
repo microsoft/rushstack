@@ -55,5 +55,8 @@ jobs:
       - name: Ensure repo README is up-to-date
         run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
 
+      - name: Rush install (rush-lib)
+        run: node apps/rush/lib/start-dev.js install
+
       - name: Rush test (rush-lib)
         run: node apps/rush/lib/start-dev.js test --verbose --production --timeline

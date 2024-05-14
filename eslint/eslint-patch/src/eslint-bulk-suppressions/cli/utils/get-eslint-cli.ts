@@ -6,7 +6,15 @@ import { BULK_SUPPRESSIONS_CLI_ESLINT_PACKAGE_NAME } from '../../constants';
 
 // When this list is updated, update the `eslint-bulk-suppressions-newest-test`
 // and/or the `eslint-bulk-suppressions-newest-test` projects' eslint dependencies.
-const TESTED_VERSIONS: Set<string> = new Set(['8.6.0', '8.7.0', '8.21.0', '8.22.0', '8.23.0', '8.23.1']);
+const TESTED_VERSIONS: Set<string> = new Set([
+  '8.6.0',
+  '8.7.0',
+  '8.21.0',
+  '8.22.0',
+  '8.23.0',
+  '8.23.1',
+  '8.57.0'
+]);
 
 export function getEslintPath(packagePath: string): string {
   // Try to find a local ESLint installation, the one that should be listed as a dev dependency in package.json

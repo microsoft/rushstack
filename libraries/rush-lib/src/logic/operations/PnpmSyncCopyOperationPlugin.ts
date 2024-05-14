@@ -29,11 +29,11 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
           operation: { associatedProject: project }
         } = record;
 
-        //skip if the phase is skipped, from cache or no operation
+        //skip if the phase is skipped or no operation
         if (
           status === OperationStatus.Skipped ||
-          status === OperationStatus.FromCache ||
-          status === OperationStatus.NoOp
+          status === OperationStatus.NoOp ||
+          status === OperationStatus.Failure
         ) {
           return;
         }
@@ -47,7 +47,7 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
             );
             await pnpmSyncCopyAsync({
               pnpmSyncJsonPath,
-              ensureFolder: FileSystem.ensureFolderAsync,
+              ensureFolderAsync: FileSystem.ensureFolderAsync,
               forEachAsyncWithConcurrency: Async.forEachAsync,
               getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
               logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>

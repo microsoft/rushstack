@@ -1,6 +1,33 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Tue, 02 Apr 2024 00:09:59 GMT and should not be manually modified.
+This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+
+## 1.4.3
+Fri, 10 May 2024 05:33:34 GMT
+
+_Version update only_
+
+## 1.4.2
+Wed, 08 May 2024 22:23:51 GMT
+
+_Version update only_
+
+## 1.4.1
+Mon, 06 May 2024 15:11:04 GMT
+
+_Version update only_
+
+## 1.4.0
+Tue, 30 Apr 2024 05:42:40 GMT
+
+### Minor changes
+
+- Add `--subspace` command-line parameter to support Rush subspaces
+
+## 1.3.1
+Wed, 10 Apr 2024 15:10:09 GMT
+
+_Version update only_
 
 ## 1.3.0
 Tue, 02 Apr 2024 00:09:59 GMT

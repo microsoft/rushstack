@@ -295,7 +295,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
         {
           name: PLUGIN_NAME,
           // Generating derived assets, but explicitly want to create them *after* asset optimization
-          stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE - 1
+          stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_DEV_TOOLING - 1
         },
         async (): Promise<void> => {
           const locales: Set<string> = new Set(this._resolvedLocalizedStrings.keys());

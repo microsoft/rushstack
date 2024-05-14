@@ -1,6 +1,133 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 30 Mar 2024 04:32:31 GMT and should not be manually modified.
+This log was last generated on Fri, 10 May 2024 06:35:26 GMT and should not be manually modified.
+
+## 5.124.2
+Fri, 10 May 2024 06:35:26 GMT
+
+### Updates
+
+- Fix a recent regression where `rush deploy` did not correctly apply the `additionalProjectsToInclude` setting (GitHub #4683)
+
+## 5.124.1
+Fri, 10 May 2024 05:33:51 GMT
+
+### Updates
+
+- Fix an issue where the `disallowInsecureSha1` policy failed to parse certain lockfile entries
+- Fix some minor issues with the "rush init" template files
+- Report an error if subspacesFeatureEnabled=true without useWorkspaces=true
+- Fix an issue where operation weights were not respected.
+
+## 5.124.0
+Wed, 08 May 2024 22:24:08 GMT
+
+### Updates
+
+- Add a new setting `alwaysInjectDependenciesFromOtherSubspaces` in pnpm-config.json
+- Fix a issue where rush install/update can not detect pnpm-sync.json is out of date
+- Improve the error message when the pnpm-sync version is outdated
+- Fixes a bug where cobuilds would cause a GC error when waiting for long periods of time.
+- Fix an issue where tab competions did not suggest parameter values.
+
+## 5.123.1
+Tue, 07 May 2024 22:38:00 GMT
+
+### Updates
+
+- Fix a recent regression where "rush install" would sometimes incorrectly determine whether to skip the install
+
+## 5.123.0
+Tue, 07 May 2024 18:32:36 GMT
+
+### Updates
+
+- Provide the file path if there is an error parsing a `package.json` file.
+- Timeline view will now only show terminal build statuses as cobuilt, all other statuses will reflect their original icons.
+- Add a `"weight"` property to the `"operation"` object in the project `config/rush-project.json` file that defines an integer weight for how much of the allowed parallelism the operation uses.
+- Optimize skipping of unnecessary installs when using filters such as "rush install --to x"
+
+## 5.122.1
+Tue, 30 Apr 2024 23:36:50 GMT
+
+### Updates
+
+- Make `disallowInsecureSha1` policy a subspace-level configuration.
+- Fix an issue where `rush update` sometimes did not detect changes to pnpm-config.json
+
+## 5.122.0
+Thu, 25 Apr 2024 07:33:18 GMT
+
+### Updates
+
+- Support rush-pnpm for subspace feature
+- Skip determining merge base if given git hash
+- (BREAKING CHANGE) Improve the `disallowInsecureSha1` policy to support exemptions for certain package versions. This is a breaking change for the `disallowInsecureSha1` field in pnpm-config.json since Rush 5.119.0.
+
+## 5.121.0
+Mon, 22 Apr 2024 19:11:26 GMT
+
+### Updates
+
+- Add support for auth via microsoft/ado-codespaces-auth vscode extension in `@rushstack/rush-azure-storage-build-cache-plugin`
+
+## 5.120.6
+Thu, 18 Apr 2024 23:20:02 GMT
+
+### Updates
+
+- Fix an issue where "rush deploy" did not correctly deploy build outputs combining multiple Rush subspaces
+
+## 5.120.5
+Wed, 17 Apr 2024 21:58:17 GMT
+
+### Updates
+
+- Fix an issue where rush add affects all packages in a subspace
+
+## 5.120.4
+Tue, 16 Apr 2024 20:04:25 GMT
+
+### Updates
+
+- Fix an issue where `rush deploy` sometimes used an incorrect temp folder when the experimental subspaces feature is enabled
+
+## 5.120.3
+Tue, 16 Apr 2024 02:59:48 GMT
+
+### Updates
+
+- Fix an issue where `pnpm-sync copy` was skipped when a build is restored from build cache.
+- Upgrade `tar` dependency to 6.2.1
+
+## 5.120.2
+Mon, 15 Apr 2024 00:25:04 GMT
+
+### Updates
+
+- Fixes an issue where rush install fails in monorepos with subspaces enabled
+
+## 5.120.1
+Sat, 13 Apr 2024 18:31:00 GMT
+
+### Updates
+
+- Fix an issue where install-run-rush.js sometimes incorrectly invoked .cmd files on Windows OS due to a recent Node.js behavior change.
+- Fix an issue with the skip install logic when the experimental subspaces feature is enabled
+
+## 5.120.0
+Wed, 10 Apr 2024 21:59:57 GMT
+
+### Updates
+
+- Bump express.
+- Add support for `optionalDependencies` in transitive injected install in the Subspaces feature.
+- Update dependency: pnpm-sync-lib@0.2.2
+- Remove a restriction where the repo root would not be found if the CWD is >10 directory levels deep.
+- Improve the error message that is printed in a repo using PNPM workspaces when a non-`workspace:` version is used for a project inside the repo.
+- Include a missing space in a logging message printed when running `rush add`.
+- Clarify the copyright notice emitted in common/scripts/*.js
+- Fix an issue with loading of implicitly preferred versions when the experimental subspaces feature is enabled
 
 ## 5.119.0
 Sat, 30 Mar 2024 04:32:31 GMT

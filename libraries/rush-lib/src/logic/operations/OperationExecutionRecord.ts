@@ -96,7 +96,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public readonly stdioSummarizer: StdioSummarizer = new StdioSummarizer();
 
   public readonly runner: IOperationRunner;
-  public readonly weight: number;
   public readonly associatedPhase: IPhase | undefined;
   public readonly associatedProject: RushConfigurationProject | undefined;
   public readonly _operationMetadataManager: OperationMetadataManager | undefined;
@@ -117,7 +116,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
     this.operation = operation;
     this.runner = runner;
-    this.weight = operation.weight;
     this.associatedPhase = associatedPhase;
     this.associatedProject = associatedProject;
     if (operation.associatedPhase && operation.associatedProject) {
@@ -132,6 +130,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public get name(): string {
     return this.runner.name;
+  }
+
+  public get weight(): number {
+    return this.operation.weight;
   }
 
   public get debugMode(): boolean {

@@ -2,6 +2,54 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.19.5",
+      "tag": "@rushstack/ts-command-line_v4.19.5",
+      "date": "Fri, 10 May 2024 05:33:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.10.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.19.4",
+      "tag": "@rushstack/ts-command-line_v4.19.4",
+      "date": "Wed, 08 May 2024 22:23:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where tab completions did not suggest parameter values."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.19.3",
+      "tag": "@rushstack/ts-command-line_v4.19.3",
+      "date": "Mon, 06 May 2024 15:11:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.10.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.19.2",
+      "tag": "@rushstack/ts-command-line_v4.19.2",
+      "date": "Wed, 10 Apr 2024 15:10:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.10.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.19.1",
       "tag": "@rushstack/ts-command-line_v4.19.1",
       "date": "Sun, 03 Mar 2024 20:58:12 GMT",

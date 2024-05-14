@@ -8,7 +8,7 @@
  */
 
 export { AlreadyReportedError } from './AlreadyReportedError';
-export { Async, AsyncQueue, IAsyncParallelismOptions, IRunWithRetriesOptions } from './Async';
+export { Async, AsyncQueue, IAsyncParallelismOptions, IRunWithRetriesOptions, IWeighted } from './Async';
 export { Brand } from './PrimitiveTypes';
 export { FileConstants, FolderConstants } from './Constants';
 export { Enum } from './Enum';
@@ -95,6 +95,7 @@ export {
   IFileSystemReadFileOptions,
   IFileSystemReadFolderOptions,
   IFileSystemUpdateTimeParameters,
+  IFileSystemWriteBinaryFileOptions,
   IFileSystemWriteFileOptions
 } from './FileSystem';
 export { FileWriter, IFileWriterFlags } from './FileWriter';

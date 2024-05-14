@@ -18,6 +18,8 @@
     "noEmitOnError": false,
     "allowUnreachableCode": false,
 
+    "skipLibCheck": true, // Some of the AWS dependencies have typings issues
+
     "types": ["heft-jest", "node"],
 
     "module": "commonjs",

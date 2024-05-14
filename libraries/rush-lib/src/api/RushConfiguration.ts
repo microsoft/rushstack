@@ -1011,13 +1011,14 @@ export class RushConfiguration {
     const optionsIn: ITryFindRushJsonLocationOptions = options || {};
     const verbose: boolean = optionsIn.showVerbose || false;
     let currentFolder: string = optionsIn.startingFolder || process.cwd();
+    let parentFolder: string = path.dirname(currentFolder);
 
-    // Look upwards at parent folders until we find a folder containing rush.json
-    for (let i: number = 0; i < 10; ++i) {
+    // look upwards at parent folders until we find a folder containing rush.json,
+    // or we reach the root directory without finding a rush.json file
+    while (parentFolder && parentFolder !== currentFolder) {
       const rushJsonFilename: string = path.join(currentFolder, RushConstants.rushJsonFilename);
-
       if (FileSystem.exists(rushJsonFilename)) {
-        if (i > 0 && verbose) {
+        if (currentFolder !== optionsIn.startingFolder && verbose) {
           // eslint-disable-next-line no-console
           console.log('Found configuration in ' + rushJsonFilename);
         }
@@ -1029,15 +1030,11 @@ export class RushConfiguration {
 
         return rushJsonFilename;
       }
-
-      const parentFolder: string = path.dirname(currentFolder);
-      if (parentFolder === currentFolder) {
-        break;
-      }
-
       currentFolder = parentFolder;
+      parentFolder = path.dirname(currentFolder);
     }
 
+    // no match
     return undefined;
   }
 
@@ -1373,14 +1370,14 @@ export class RushConfiguration {
    *
    * @returns A map of dependency name --\> version specifier for implicitly preferred versions.
    */
-  public getImplicitlyPreferredVersions(): Map<string, string> {
+  public getImplicitlyPreferredVersions(subspace?: Subspace): Map<string, string> {
     // TODO: During the next major release of Rush, replace this `require` call with a dynamic import, and
     // change this function to be async.
     const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = require('../logic/DependencyAnalyzer');
     const dependencyAnalyzer: DependencyAnalyzerModuleType.DependencyAnalyzer =
       DependencyAnalyzerModule.DependencyAnalyzer.forRushConfiguration(this);
     const dependencyAnalysis: DependencyAnalyzerModuleType.IDependencyAnalysis =
-      dependencyAnalyzer.getAnalysis();
+      dependencyAnalyzer.getAnalysis(subspace);
     return dependencyAnalysis.implicitlyPreferredVersionByPackageName;
   }
 

@@ -92,6 +92,12 @@ export interface IOperationSettings {
    * calculating final hash value when reading and writing the build cache
    */
   dependsOnAdditionalFiles?: string[];
+
+  /**
+   * How many concurrency units this operation should take up during execution. The maximum concurrent units is
+   *  determined by the -p flag.
+   */
+  weight?: number;
 }
 
 interface IOldRushProjectJson {

@@ -219,6 +219,7 @@ export function updateAssetHashes({
                   const trueHash: string = hashFn(assetSource.buffer());
                   if (trueHash !== existingHash) {
                     const newJsFilename: string = jsAssetName.replace(existingHash, trueHash);
+
                     compilation.renameAsset(jsAssetName, newJsFilename);
 
                     if (locale) {
