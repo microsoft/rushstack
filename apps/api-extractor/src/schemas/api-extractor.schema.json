@@ -68,7 +68,7 @@
         },
 
         "reportFileName": {
-          "description": "The filename for the complete (\"untrimmed\") API report files.  It will be combined with \"reportFolder\" or \"reportTempFolder\" to produce a full file path. The file extension should be \".api.md\", and the string should not contain a path separator such as \"\\\" or \"/\".",
+          "description": "The base filename for the API report files.  It will be combined with \"reportFolder\" or \"reportTempFolder\" to produce a full file path. The file extension should be \".api.md\", and the string should not contain a path separator such as \"\\\" or \"/\".  The \"complete\" report variant uses this base filename directly; other variants insert a name such as \"my-report.alpha.api.md\" or \"my-report.beta.api.md\" for alpha and beta variants.",
           "type": ["string", "null"]
         },
 
