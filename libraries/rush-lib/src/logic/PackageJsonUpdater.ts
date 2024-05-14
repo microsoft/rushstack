@@ -232,7 +232,7 @@ export class PackageJsonUpdater {
     if (!skipUpdate) {
       if (this._rushConfiguration.subspacesFeatureEnabled) {
         const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
-          new Set(options.projects)
+          options.projects
         );
         for (const subspace of subspaceSet) {
           await this._doUpdate(debugInstall, subspace);
@@ -262,7 +262,7 @@ export class PackageJsonUpdater {
     if (!skipUpdate) {
       if (this._rushConfiguration.subspacesFeatureEnabled) {
         const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
-          new Set(options.projects)
+          options.projects
         );
         for (const subspace of subspaceSet) {
           await this._doUpdate(debugInstall, subspace);
@@ -290,7 +290,8 @@ export class PackageJsonUpdater {
       offline: false,
       collectLogFile: false,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-      filteredProjects: undefined,
+      pnpmFilterArguments: [],
+      selectedProjects: new Set(this._rushConfiguration.projects),
       checkOnly: false,
       subspace: subspace,
       terminal: this._terminal
@@ -326,9 +327,7 @@ export class PackageJsonUpdater {
     );
 
     const allPackageUpdates: IUpdateProjectOptions[] = [];
-    const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
-      new Set(projects)
-    );
+    const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(projects);
     for (const subspace of subspaceSet) {
       // Projects for this subspace
       allPackageUpdates.push(...(await this._updateProjects(subspace, dependencyAnalyzer, options)));

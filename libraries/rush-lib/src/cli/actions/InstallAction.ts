@@ -45,8 +45,9 @@ export class InstallAction extends BaseInstallAction {
   }
 
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
-    const selectedProjects: Set<RushConfigurationProject> | undefined =
-      await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
+    const selectedProjects: Set<RushConfigurationProject> =
+      (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) ??
+      new Set(this.rushConfiguration.projects);
 
     return {
       debug: this.parser.isDebug,
@@ -63,7 +64,9 @@ export class InstallAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      filteredProjects: selectedProjects,
+      selectedProjects,
+      pnpmFilterArguments:
+        (await this._selectionParameters?.getPnpmFilterArgumentsAsync(this._terminal)) ?? [],
       checkOnly: this._checkOnlyParameter.value,
       subspace: this.getTargetSubspace(),
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),

@@ -1170,7 +1170,7 @@ export class RushConfiguration {
     // @beta (undocumented)
     getSubspace(subspaceName: string): Subspace;
     // @beta
-    getSubspacesForProjects(projects: ReadonlySet<RushConfigurationProject>): ReadonlySet<Subspace>;
+    getSubspacesForProjects(projects: Iterable<RushConfigurationProject>): ReadonlySet<Subspace>;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitChangefilesCommitMessage: string | undefined;
     readonly gitChangeLogUpdateCommitMessage: string | undefined;

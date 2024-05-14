@@ -1295,14 +1295,16 @@ export class RushConfiguration {
    * Returns the set of subspaces that the given projects belong to
    * @beta
    */
-  public getSubspacesForProjects(projects: ReadonlySet<RushConfigurationProject>): ReadonlySet<Subspace> {
+  public getSubspacesForProjects(projects: Iterable<RushConfigurationProject>): ReadonlySet<Subspace> {
     if (!this._projects) {
       this._initializeAndValidateLocalProjects();
     }
+
     const subspaceSet: Set<Subspace> = new Set();
     for (const project of projects) {
       subspaceSet.add(project.subspace);
     }
+
     return subspaceSet;
   }
 
