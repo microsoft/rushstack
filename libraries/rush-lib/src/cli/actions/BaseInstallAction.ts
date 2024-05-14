@@ -248,6 +248,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
           } else {
             const filteredProjects: Set<RushConfigurationProject> | undefined =
               filteredProjectsForSubspace.get(selectedSubspace);
+            // If `filteredProjects` is set to `undefined`, no filtering will be done and all projects will be installed.
             installManagerOptions.filteredProjects =
               filteredProjects?.size === selectedSubspace.getProjects().length ? undefined : filteredProjects;
           }
