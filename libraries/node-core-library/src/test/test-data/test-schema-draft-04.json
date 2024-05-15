@@ -38,6 +38,10 @@
     "exampleString": {
       "type": "string"
     },
+    "exampleLink": {
+      "type": "string",
+      "format": "uri"
+    },
     "exampleArray": {
       "type": "array",
       "items": {

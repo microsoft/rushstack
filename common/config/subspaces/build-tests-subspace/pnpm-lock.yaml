@@ -1560,6 +1560,14 @@ packages:
     dependencies:
       ajv: 8.13.0
 
+  /ajv-formats@3.0.1:
+    resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
+    peerDependenciesMeta:
+      ajv:
+        optional: true
+    dependencies:
+      ajv: 8.13.0
+
   /ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
     dependencies:
@@ -1853,7 +1861,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001618
-      electron-to-chromium: 1.4.769
+      electron-to-chromium: 1.4.770
       node-releases: 2.0.14
       update-browserslist-db: 1.0.16(browserslist@4.23.0)
     dev: true
@@ -2347,8 +2355,8 @@ packages:
     dependencies:
       is-obj: 2.0.0
 
-  /electron-to-chromium@1.4.769:
-    resolution: {integrity: sha512-bZu7p623NEA2rHTc9K1vykl57ektSPQYFFqQir8BOYf6EKOB+yIsbFB9Kpm7Cgt6tsLr9sRkqfqSZUw7LP1XxQ==}
+  /electron-to-chromium@1.4.770:
+    resolution: {integrity: sha512-ONwOsDiVvV07CMsyH4+dEaZ9L79HMH/ODHnDS3GkIhgNqdDHJN2C18kFb0fBj0RXpQywsPJl6k2Pqg1IY4r1ig==}
     dev: true
 
   /emittery@0.13.1:
@@ -6340,6 +6348,7 @@ packages:
       '@types/node': 18.17.15
       ajv: 8.13.0
       ajv-draft-04: 1.0.0(ajv@8.13.0)
+      ajv-formats: 3.0.1
       fs-extra: 7.0.1
       import-lazy: 4.0.0
       jju: 1.4.0

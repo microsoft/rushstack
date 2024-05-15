@@ -1,4 +1,5 @@
 {
   "exampleString": "This is a string",
+  "exampleLink": "http://example.com",
   "exampleArray": ["apple", "banana", "coconut"]
 }

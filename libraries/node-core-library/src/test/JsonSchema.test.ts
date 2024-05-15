@@ -10,7 +10,7 @@ describe(JsonSchema.name, () => {
 
   describe('loadAndValidate', () => {
     test('successfully validates a JSON file', () => {
-      const jsonPath: string = `${__dirname}/test-data/test.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
       const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schema);
 
       expect(jsonObject).toMatchObject({
@@ -23,7 +23,7 @@ describe(JsonSchema.name, () => {
       const schemaPathDraft04: string = `${__dirname}/test-data/test-schema-draft-04.json`;
       const schemaDraft04: JsonSchema = JsonSchema.fromFile(schemaPathDraft04);
 
-      const jsonPath: string = `${__dirname}/test-data/test.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
       const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schemaDraft04);
 
       expect(jsonObject).toMatchObject({
@@ -36,7 +36,7 @@ describe(JsonSchema.name, () => {
       const schemaPathDraft07: string = `${__dirname}/test-data/test-schema-draft-07.json`;
       const schemaDraft07: JsonSchema = JsonSchema.fromFile(schemaPathDraft07);
 
-      const jsonPath: string = `${__dirname}/test-data/test.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
       const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schemaDraft07);
 
       expect(jsonObject).toMatchObject({
@@ -54,7 +54,7 @@ describe(JsonSchema.name, () => {
         dependentSchemas: [schemaChild]
       });
 
-      const jsonPath: string = `${__dirname}/test-data/test.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
       const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schemaNested);
 
       expect(jsonObject).toMatchObject({
@@ -65,8 +65,19 @@ describe(JsonSchema.name, () => {
   });
 
   describe('validateObjectWithCallback', () => {
-    test('successfully reports a compound validation error', () => {
-      const jsonPath2: string = `${__dirname}/test-data/test2.json`;
+    test('successfully reports a compound validation error schema errors', () => {
+      const jsonPath2: string = `${__dirname}/test-data/test-invalid-additional.json`;
+      const jsonObject2: JsonObject = JsonFile.load(jsonPath2);
+
+      const errorDetails: string[] = [];
+      schema.validateObjectWithCallback(jsonObject2, (errorInfo: IJsonSchemaErrorInfo) => {
+        errorDetails.push(errorInfo.details);
+      });
+
+      expect(errorDetails).toMatchSnapshot();
+    });
+    test('successfully reports a compound validation error for format errors', () => {
+      const jsonPath2: string = `${__dirname}/test-data/test-invalid-format.json`;
       const jsonObject2: JsonObject = JsonFile.load(jsonPath2);
 
       const errorDetails: string[] = [];

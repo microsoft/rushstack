@@ -9,6 +9,7 @@ import { JsonFile, type JsonObject } from './JsonFile';
 
 import Ajv, { type Options as AjvOptions, type ErrorObject, type ValidateFunction } from 'ajv';
 import AjvDraft04 from 'ajv-draft-04';
+import addFormats from 'ajv-formats';
 
 interface ISchemaWithId {
   // draft-04 uses "id"
@@ -248,6 +249,10 @@ export class JsonSchema {
       } else {
         validator = new Ajv(validatorOptions);
       }
+
+      // Enable json-schema format validation
+      // https://ajv.js.org/packages/ajv-formats.html
+      addFormats(validator);
 
       const collectedSchemas: JsonSchema[] = [];
       const seenObjects: Set<JsonSchema> = new Set<JsonSchema>();

@@ -1,6 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`JsonSchema validateObjectWithCallback successfully reports a compound validation error 1`] = `
+exports[`JsonSchema validateObjectWithCallback successfully reports a compound validation error for format errors 1`] = `
+Array [
+  "
+Error: #/exampleLink (must match format \\"uri\\")
+       must match format \\"uri\\"",
+]
+`;
+
+exports[`JsonSchema validateObjectWithCallback successfully reports a compound validation error schema errors 1`] = `
 Array [
   "
 Error: #/exampleOneOf (must have required property 'field1')
