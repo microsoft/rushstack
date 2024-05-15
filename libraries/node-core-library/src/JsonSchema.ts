@@ -171,7 +171,7 @@ export class JsonSchema {
     buffer: string
   ): string {
     for (const errorDetail of errorDetails) {
-      buffer += os.EOL + indent + `Error: ${errorDetail.schemaPath}`;
+      buffer += os.EOL + indent + `Error: #${errorDetail.instancePath}`;
 
       if (errorDetail.message) {
         const MAX_LENGTH: number = 40;
@@ -184,6 +184,9 @@ export class JsonSchema {
       }
 
       buffer += os.EOL + indent + `       ${errorDetail.message}`;
+      if (errorDetail.params?.additionalProperty) {
+        buffer += `: ${errorDetail.params?.additionalProperty}`;
+      }
     }
 
     return buffer;

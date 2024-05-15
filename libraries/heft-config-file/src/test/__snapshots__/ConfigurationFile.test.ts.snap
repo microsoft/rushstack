@@ -254,7 +254,7 @@ exports[`ConfigurationFile error cases Throws an error for a file that doesn't m
 "Resolved configuration object does not match schema: Error: JSON validation failed:
 <project root>/lib/test/errorCases/invalidType/config.json
 
-Error: #/properties/filePaths/type (must be array)
+Error: #/filePaths (must be array)
        must be array"
 `;
 
@@ -272,11 +272,11 @@ exports[`ConfigurationFile error cases Throws an error when a combined config fi
 "Resolved configuration object does not match schema: Error: JSON validation failed:
 <project root>/lib/test/errorCases/invalidCombinedFile/config1.json
 
-Error: #/oneOf/0/additionalProperties (must NOT have additional properties)
-       must NOT have additional properties
-Error: #/oneOf/1/additionalProperties (must NOT have additional properties)
-       must NOT have additional properties
-Error: #/oneOf (must match exactly one schema in oneOf)
+Error: # (must NOT have additional properties)
+       must NOT have additional properties: folderPaths
+Error: # (must NOT have additional properties)
+       must NOT have additional properties: filePaths
+Error: # (must match exactly one schema in oneOf)
        must match exactly one schema in oneOf"
 `;
 
