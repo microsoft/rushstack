@@ -10,9 +10,9 @@
   "properties": {
     "environmentVariablesToSet": {
       "type": "object",
-      "pattern": ".+",
       "additionalProperties": {
-        "type": "string"
+        "type": "string",
+        "pattern": ".+"
       }
     }
   }
