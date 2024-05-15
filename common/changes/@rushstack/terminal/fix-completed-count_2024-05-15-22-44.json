@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Allow use of 'preventAutoclose' flag in StdioSummarizer.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}
