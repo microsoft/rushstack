@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Optimize the judgment of shrinkwrap file major version.",
+      "comment": "Improve the detection of PNPM lockfile versions.",
       "type": "none"
     }
   ],
