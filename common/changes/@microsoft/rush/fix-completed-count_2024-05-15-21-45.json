@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix count of completed operations when silent operations are blocked. Add explicit message for child processes terminated by signals. Ensure that errors show up in summarized view.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

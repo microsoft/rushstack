@@ -6,7 +6,8 @@ import {
   StdioWritable,
   TextRewriterTransform,
   Colorize,
-  ConsoleTerminalProvider
+  ConsoleTerminalProvider,
+  TerminalChunkKind
 } from '@rushstack/terminal';
 import { StreamCollator, type CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
@@ -236,13 +237,9 @@ export class OperationExecutionManager {
       try {
         await this._afterExecuteOperation?.(record);
       } catch (e) {
-        // Failed operations get reported here
-        const message: string | undefined = record.error?.message;
-        if (message) {
-          this._terminal.writeStderrLine('Unhandled exception: ');
-          this._terminal.writeStderrLine(message);
-        }
-        throw e;
+        this._reportOperationErrorIfAny(record);
+        record.error = e;
+        record.status = OperationStatus.Failure;
       }
       this._onOperationComplete(record);
     };
@@ -298,6 +295,27 @@ export class OperationExecutionManager {
     };
   }
 
+  private _reportOperationErrorIfAny(record: OperationExecutionRecord): void {
+    // Failed operations get reported, even if silent.
+    // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
+    let message: string | undefined = undefined;
+    if (record.error) {
+      if (!(record.error instanceof AlreadyReportedError)) {
+        message = record.error.message;
+      }
+    }
+
+    if (message) {
+      // This creates the writer, so don't do this until needed
+      record.collatedWriter.terminal.writeStderrLine(message);
+      // Ensure that the error message, if present, shows up in the summary
+      record.stdioSummarizer.writeChunk({
+        text: `${message}\n`,
+        kind: TerminalChunkKind.Stderr
+      });
+    }
+  }
+
   /**
    * Handles the result of the operation and propagates any relevant effects.
    */
@@ -313,18 +331,10 @@ export class OperationExecutionManager {
       case OperationStatus.Failure: {
         // Failed operations get reported, even if silent.
         // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
-        let message: string | undefined = undefined;
-        if (record.error) {
-          if (!(record.error instanceof AlreadyReportedError)) {
-            message = record.error.message;
-          }
-        }
+        this._reportOperationErrorIfAny(record);
 
         // This creates the writer, so don't do this globally
         const { terminal } = record.collatedWriter;
-        if (message) {
-          terminal.writeStderrLine(message);
-        }
         terminal.writeStderrLine(Colorize.red(`"${name}" failed to build.`));
         const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
 
@@ -339,7 +349,11 @@ export class OperationExecutionManager {
             blockedRecord.status = OperationStatus.Blocked;
 
             this._executionQueue.complete(blockedRecord);
-            this._completedOperations++;
+            if (!blockedRecord.runner.silent) {
+              // Only increment the count if the operation is not silent to avoid confusing the user.
+              // The displayed total is the count of non-silent operations.
+              this._completedOperations++;
+            }
 
             for (const dependent of blockedRecord.consumers) {
               blockedQueue.add(dependent);
