@@ -116,6 +116,15 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
     this._options = options;
     this._scopingParameters = [];
+
+    // Consume the remainder of the command-line, which will later be passed the scoped parser.
+    // This will also prevent developers from calling this.defineCommandLineRemainder(...) since
+    // we will have already defined it.
+    this.defineCommandLineRemainder({
+      description:
+        'Scoped parameters.  Must be prefixed with "--", ex. "-- --scopedParameter ' +
+        'foo --scopedFlag".  For more information on available scoped parameters, use "-- --help".'
+    });
   }
 
   /**
@@ -206,6 +215,14 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
   /** @internal */
   public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
+    if (!this._scopingParameters.length) {
+      throw new Error(
+        'No scoping parameters defined. At least one scoping parameter must be defined. ' +
+          'Scoping parameters are defined by setting the parameterGroupName to ' +
+          'ScopedCommandLineAction.ScopingParameterGroupName.'
+      );
+    }
+
     super._registerDefinedParameters(state);
 
     const { parentParameterNames } = state;
@@ -225,29 +242,6 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    */
   protected onDefineParameters(): void {
     this.onDefineUnscopedParameters?.();
-
-    if (!this._scopingParameters.length) {
-      throw new Error(
-        'No scoping parameters defined. At least one scoping parameter must be defined. ' +
-          'Scoping parameters are defined by setting the parameterGroupName to ' +
-          'ScopedCommandLineAction.ScopingParameterGroupName.'
-      );
-    }
-    if (this.remainder) {
-      throw new Error(
-        'Unscoped remainder parameters are not allowed. Remainder parameters can only be defined on ' +
-          'the scoped parameter provider in onDefineScopedParameters().'
-      );
-    }
-
-    // Consume the remainder of the command-line, which will later be passed the scoped parser.
-    // This will also prevent developers from calling this.defineCommandLineRemainder(...) since
-    // we will have already defined it.
-    this.defineCommandLineRemainder({
-      description:
-        'Scoped parameters.  Must be prefixed with "--", ex. "-- --scopedParameter ' +
-        'foo --scopedFlag".  For more information on available scoped parameters, use "-- --help".'
-    });
   }
 
   /**
