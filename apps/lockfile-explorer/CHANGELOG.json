@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.4.6",
+      "tag": "@rushstack/lockfile-explorer_v1.4.6",
+      "date": "Wed, 15 May 2024 15:09:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the exit code to 0 for `lockfile-explorer --help`."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.5",
       "tag": "@rushstack/lockfile-explorer_v1.4.5",
       "date": "Wed, 15 May 2024 06:04:17 GMT",
