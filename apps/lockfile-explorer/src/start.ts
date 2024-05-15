@@ -47,13 +47,12 @@ function startApp(debugMode: boolean): void {
 
   const result: ICommandLine = parseCommandLine(process.argv.slice(2));
   if (result.showedHelp) {
-    console.error('\nFor help, use:  ' + Colorize.yellow('lockfile-explorer --help'));
-    process.exitCode = 1;
     return;
   }
 
   if (result.error) {
     console.error('\n' + Colorize.red('ERROR: ' + result.error));
+    console.error('\nFor help, use:  ' + Colorize.yellow('lockfile-explorer --help'));
     process.exitCode = 1;
     return;
   }
