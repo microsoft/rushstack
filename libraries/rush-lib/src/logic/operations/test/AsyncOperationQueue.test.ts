@@ -185,7 +185,7 @@ describe(AsyncOperationQueue.name, () => {
     for await (const operation of queue) {
       let record: OperationExecutionRecord | undefined;
       if (operation.status === UNASSIGNED_OPERATION) {
-        await Async.sleep(100);
+        await Async.sleepAsync(100);
         record = queue.tryGetRemoteExecutingOperation();
       } else {
         record = operation;

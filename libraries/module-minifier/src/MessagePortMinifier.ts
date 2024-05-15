@@ -45,7 +45,10 @@ export class MessagePortMinifier implements IModuleMinifier {
     this.port.postMessage(request);
   }
 
-  public async connect(): Promise<IMinifierConnection> {
+  /**
+   * {@inheritdoc IModuleMinifier.connectAsync}
+   */
+  public async connectAsync(): Promise<IMinifierConnection> {
     const configHashPromise: Promise<string> = once(this.port, 'message') as unknown as Promise<string>;
     this.port.postMessage('initialize');
     const configHash: string = await configHashPromise;
@@ -63,12 +66,22 @@ export class MessagePortMinifier implements IModuleMinifier {
     }
 
     this.port.on('message', handler);
+    const disconnectAsync: IMinifierConnection['disconnectAsync'] = async () => {
+      this.port.off('message', handler);
+      this.port.close();
+    };
     return {
       configHash,
-      disconnect: async () => {
-        this.port.off('message', handler);
-        this.port.close();
-      }
+      disconnectAsync,
+      disconnect: disconnectAsync
     };
+  }
+
+  /**
+   * @deprecated Use {@link MessagePortMinifier.connectAsync} instead
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public async connect(): Promise<IMinifierConnection> {
+    return await this.connectAsync();
   }
 }

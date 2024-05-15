@@ -23,7 +23,7 @@ describe(DynamicCommandLineParser.name, () => {
       description: 'The flag'
     });
 
-    await commandLineParser.execute(['do:the-job', '--flag']);
+    await commandLineParser.executeAsync(['do:the-job', '--flag']);
 
     expect(commandLineParser.selectedAction).toEqual(action);
 

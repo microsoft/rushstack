@@ -601,7 +601,7 @@ export abstract class CommandLineParameterProvider {
   protected abstract _getArgumentParser(): argparse.ArgumentParser;
 
   /**
-   * This is called internally by {@link CommandLineParser.execute}
+   * This is called internally by {@link CommandLineParser.executeAsync}
    * @internal
    */
   public _preParse(): void {
@@ -611,7 +611,7 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * This is called internally by {@link CommandLineParser.execute} before `printUsage` is called
+   * This is called internally by {@link CommandLineParser.executeAsync} before `printUsage` is called
    * @internal
    */
   public _postParse(): void {
@@ -621,7 +621,7 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * This is called internally by {@link CommandLineParser.execute}
+   * This is called internally by {@link CommandLineParser.executeAsync}
    * @internal
    */
   public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {

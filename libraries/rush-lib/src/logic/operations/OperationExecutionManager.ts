@@ -29,10 +29,10 @@ export interface IOperationExecutionManagerOptions {
   changedProjectsOnly: boolean;
   destination?: TerminalWritable;
 
-  beforeExecuteOperation?: (operation: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
-  afterExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
-  onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
-  beforeExecuteOperations?: (records: Map<Operation, OperationExecutionRecord>) => Promise<void>;
+  beforeExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
+  afterExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<void>;
+  onOperationStatusChangedAsync?: (record: OperationExecutionRecord) => void;
+  beforeExecuteOperationsAsync?: (records: Map<Operation, OperationExecutionRecord>) => Promise<void>;
 }
 
 /**
@@ -87,10 +87,10 @@ export class OperationExecutionManager {
       debugMode,
       parallelism,
       changedProjectsOnly,
-      beforeExecuteOperation,
-      afterExecuteOperation,
-      onOperationStatusChanged,
-      beforeExecuteOperations
+      beforeExecuteOperationAsync: beforeExecuteOperation,
+      afterExecuteOperationAsync: afterExecuteOperation,
+      onOperationStatusChangedAsync: onOperationStatusChanged,
+      beforeExecuteOperationsAsync: beforeExecuteOperations
     } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
@@ -264,7 +264,7 @@ export class OperationExecutionManager {
          */
         if (operation.status === UNASSIGNED_OPERATION) {
           // Pause for a few time
-          await Async.sleep(5000);
+          await Async.sleepAsync(5000);
           record = this._executionQueue.tryGetRemoteExecutingOperation();
         } else {
           record = operation;

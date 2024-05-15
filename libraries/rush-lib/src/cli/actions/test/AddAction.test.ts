@@ -51,7 +51,7 @@ describe(AddAction.name, () => {
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert'];
 
-        await expect(parser.execute()).resolves.toEqual(true);
+        await expect(parser.executeAsync()).resolves.toEqual(true);
         expect(doRushAddMock).toHaveBeenCalledTimes(1);
         const doRushAddOptions: IPackageJsonUpdaterRushAddOptions = doRushAddMock.mock.calls[0][0];
         expect(doRushAddOptions.projects).toHaveLength(1);
@@ -85,7 +85,7 @@ describe(AddAction.name, () => {
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert', '--all'];
 
-        await expect(parser.execute()).resolves.toEqual(true);
+        await expect(parser.executeAsync()).resolves.toEqual(true);
         expect(doRushAddMock).toHaveBeenCalledTimes(1);
         const doRushAddOptions: IPackageJsonUpdaterRushAddOptions = doRushAddMock.mock.calls[0][0];
         expect(doRushAddOptions.projects).toHaveLength(2);

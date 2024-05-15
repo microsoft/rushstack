@@ -55,7 +55,7 @@ describe(RemoveAction.name, () => {
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'remove', '-p', 'assert', '-s'];
 
-        await expect(parser.execute()).resolves.toEqual(true);
+        await expect(parser.executeAsync()).resolves.toEqual(true);
         expect(removeDependencyMock).toHaveBeenCalledTimes(2);
         const packageName: string = removeDependencyMock.mock.calls[0][0];
         expect(packageName).toEqual('assert');
@@ -83,7 +83,7 @@ describe(RemoveAction.name, () => {
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'remove', '-p', 'assert'];
 
-        await expect(parser.execute()).resolves.toEqual(true);
+        await expect(parser.executeAsync()).resolves.toEqual(true);
         expect(doRushRemoveMock).toHaveBeenCalledTimes(1);
         const doRushRemoveOptions: IPackageJsonUpdaterRushRemoveOptions = doRushRemoveMock.mock.calls[0][0];
         expect(doRushRemoveOptions.projects).toHaveLength(1);
@@ -126,8 +126,7 @@ describe(RemoveAction.name, () => {
           '--all'
         ];
 
-        // const a = await parser.execute();
-        await expect(parser.execute()).resolves.toEqual(true);
+        await expect(parser.executeAsync()).resolves.toEqual(true);
         expect(doRushRemoveMock).toHaveBeenCalledTimes(1);
         const doRushRemoveOptions: IPackageJsonUpdaterRushRemoveOptions = doRushRemoveMock.mock.calls[0][0];
         expect(doRushRemoveOptions.projects).toHaveLength(3);

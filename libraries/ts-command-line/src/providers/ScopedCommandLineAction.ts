@@ -162,10 +162,10 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   }
 
   /**
-   * {@inheritdoc CommandLineAction._execute}
+   * {@inheritdoc CommandLineAction._executeAsync}
    * @internal
    */
-  public async _execute(): Promise<void> {
+  public async _executeAsync(): Promise<void> {
     // override
     if (!this._unscopedParserOptions || !this._scopedCommandLineParser) {
       throw new Error('The CommandLineAction parameters must be processed before execution.');
@@ -193,12 +193,12 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     }
 
     // Call the scoped parser using only the scoped args to handle parsing
-    await this._scopedCommandLineParser.executeWithoutErrorHandling(scopedArgs);
+    await this._scopedCommandLineParser.executeWithoutErrorHandlingAsync(scopedArgs);
 
     // Only call execute if the parser reached the execute stage. This may not be true if
     // the parser exited early due to a specified '--help' parameter.
     if (this._scopedCommandLineParser.canExecute) {
-      await super._execute();
+      await super._executeAsync();
     }
 
     return;

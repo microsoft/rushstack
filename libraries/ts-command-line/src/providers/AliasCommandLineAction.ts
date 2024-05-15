@@ -186,6 +186,6 @@ export class AliasCommandLineAction extends CommandLineAction {
    * Executes the target action.
    */
   protected async onExecute(): Promise<void> {
-    await this.targetAction._execute();
+    await this.targetAction._executeAsync();
   }
 }

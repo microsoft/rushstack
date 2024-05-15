@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 import { Executable } from '@rushstack/node-core-library';
-import type { AccessToken, GetTokenOptions } from '@azure/identity';
+import type { AccessToken, GetTokenOptions, TokenCredential } from '@azure/identity';
 
 interface IDecodedJwt {
   header: {
@@ -31,7 +31,8 @@ interface IDecodedJwt {
  * tokens for AAD in Codespaces.
  * https://github.com/microsoft/ado-codespaces-auth
  */
-export class AdoCodespacesAuthCredential {
+export class AdoCodespacesAuthCredential implements TokenCredential {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public async getToken(scopes: string | [string], options?: GetTokenOptions): Promise<AccessToken> {
     let scope: string;
     if (Array.isArray(scopes)) {

@@ -419,7 +419,7 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
 
       // The optimizeChunkModules hook is the last async hook that occurs before chunk rendering
       compilation.hooks.optimizeChunkModules.tapPromise(PLUGIN_NAME, async () => {
-        minifierConnection = await minifier.connect();
+        minifierConnection = await minifier.connectAsync();
 
         submittedModules.clear();
       });
@@ -533,7 +533,7 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
         }
 
         // Handle any error from the minifier.
-        await minifierConnection?.disconnect();
+        await minifierConnection?.disconnectAsync();
 
         // All assets and modules have been minified, hand them off to be rehydrated
         await this.hooks.rehydrateAssets.promise(

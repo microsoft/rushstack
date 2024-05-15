@@ -197,14 +197,14 @@ export class RushCommandLineParser extends CommandLineParser {
     this.telemetry?.flush();
   }
 
-  public async execute(args?: string[]): Promise<boolean> {
-    // debugParameter will be correctly parsed during super.execute(), so manually parse here.
+  public async executeAsync(args?: string[]): Promise<boolean> {
+    // debugParameter will be correctly parsed during super.executeAsync(), so manually parse here.
     this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
       process.argv.indexOf('--debug') >= 0;
 
     await this.pluginManager.tryInitializeUnassociatedPluginsAsync();
 
-    return await super.execute(args);
+    return await super.executeAsync(args);
   }
 
   protected async onExecute(): Promise<void> {
@@ -459,9 +459,7 @@ export class RushCommandLineParser extends CommandLineParser {
     };
 
     if (this.telemetry && this.rushSession.hooks.flushTelemetry.isUsed()) {
-      this.telemetry.ensureFlushedAsync()
-        .then(handleExit)
-        .catch(handleExit);
+      this.telemetry.ensureFlushedAsync().then(handleExit).catch(handleExit);
     } else {
       handleExit();
     }

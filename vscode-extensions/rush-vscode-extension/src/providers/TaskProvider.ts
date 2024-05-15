@@ -45,7 +45,7 @@ export class RushTaskProvider implements vscode.TaskProvider {
     return task;
   }
 
-  public async executeTask<T extends IRushTaskDefinition>(definition: T): Promise<void> {
+  public async executeTaskAsync<T extends IRushTaskDefinition>(definition: T): Promise<void> {
     let task: vscode.Task | undefined;
     switch (definition.type) {
       case 'rush-project-script': {

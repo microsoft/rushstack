@@ -231,7 +231,7 @@ export class LockFile {
         throw new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`);
       }
 
-      await Async.sleep(interval);
+      await Async.sleepAsync(interval);
       return retryLoop();
     };
 

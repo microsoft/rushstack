@@ -526,6 +526,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         lockfilePath: pnpmLockfilePath,
         dotPnpmFolder,
         ensureFolderAsync: FileSystem.ensureFolderAsync,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         readPnpmLockfile: async (lockfilePath: string) => {
           const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFile(
             lockfilePath,

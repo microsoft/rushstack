@@ -194,11 +194,11 @@ export abstract class BaseInstallManager {
     if (cleanInstall || !shrinkwrapIsUpToDate || !canSkipInstall() || !projectImpactGraphIsUpToDate) {
       // eslint-disable-next-line no-console
       console.log();
-      await this.validateNpmSetup();
+      await this.validateNpmSetupAsync();
 
       let publishedRelease: boolean | undefined;
       try {
-        publishedRelease = await this._checkIfReleaseIsPublished();
+        publishedRelease = await this._checkIfReleaseIsPublishedAsync();
       } catch {
         // If the user is working in an environment that can't reach the registry,
         // don't bother them with errors.
@@ -343,7 +343,7 @@ export abstract class BaseInstallManager {
     }
 
     // Ensure that the package manager is installed
-    await InstallHelpers.ensureLocalPackageManager(
+    await InstallHelpers.ensureLocalPackageManagerAsync(
       this.rushConfiguration,
       this.rushGlobalFolder,
       this.options.maxInstallAttempts
@@ -857,7 +857,7 @@ ${gitLfsHookHandling}
     }
   }
 
-  private async _checkIfReleaseIsPublished(): Promise<boolean> {
+  private async _checkIfReleaseIsPublishedAsync(): Promise<boolean> {
     const lastCheckFile: string = path.join(
       this.rushGlobalFolder.nodeSpecificPath,
       'rush-' + Rush.version,
@@ -983,7 +983,7 @@ ${gitLfsHookHandling}
     }
   }
 
-  protected async validateNpmSetup(): Promise<void> {
+  protected async validateNpmSetupAsync(): Promise<void> {
     if (this._npmSetupValidated) {
       return;
     }
@@ -994,7 +994,7 @@ ${gitLfsHookHandling}
         isDebug: this.options.debug,
         syncNpmrcAlreadyCalled: this._syncNpmrcAlreadyCalled
       });
-      const valid: boolean = await setupPackageRegistry.checkOnly();
+      const valid: boolean = await setupPackageRegistry.checkOnlyAsync();
       if (!valid) {
         // eslint-disable-next-line no-console
         console.error();

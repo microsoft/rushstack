@@ -129,7 +129,7 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
   it('executes an action', async () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(TestAction);
 
-    await commandLineParser.execute([
+    await commandLineParser.executeAsync([
       'do:the-job',
       '--scope1:arg',
       'scope1value',
@@ -169,7 +169,13 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(UnscopedDuplicateArgumentTestAction);
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--arg', 'value', '--scope:arg', 'value'])
+      commandLineParser.executeWithoutErrorHandlingAsync([
+        'do:the-job',
+        '--arg',
+        'value',
+        '--scope:arg',
+        'value'
+      ])
     ).rejects.toThrowError(/The parameter "--arg" is defined multiple times with the same long name/);
   });
 
@@ -177,7 +183,13 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(ScopedDuplicateArgumentTestAction);
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--arg', 'value', '--scope:arg', 'value'])
+      commandLineParser.executeWithoutErrorHandlingAsync([
+        'do:the-job',
+        '--arg',
+        'value',
+        '--scope:arg',
+        'value'
+      ])
     ).rejects.toThrowError(/argument "\-\-scope:arg": Conflicting option string\(s\): \-\-scope:arg/);
   });
 });

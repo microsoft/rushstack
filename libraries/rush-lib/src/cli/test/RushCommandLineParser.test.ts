@@ -17,7 +17,7 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
 
 import './mockRushCommandLineParser';
 
-import { FileSystem, JsonFile, Path, } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import type { IParserTestInstance } from './TestUtils';
@@ -46,7 +46,7 @@ describe('RushCommandLineParser', () => {
           const repoName: string = 'basicAndRunBuildActionRepo';
           const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'build');
 
-          await expect(instance.parser.execute()).resolves.toEqual(true);
+          await expect(instance.parser.executeAsync()).resolves.toEqual(true);
 
           // There should be 1 build per package
           const packageCount: number = instance.spawnMock.mock.calls.length;
@@ -78,7 +78,7 @@ describe('RushCommandLineParser', () => {
           const repoName: string = 'basicAndRunRebuildActionRepo';
           const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'rebuild');
 
-          await expect(instance.parser.execute()).resolves.toEqual(true);
+          await expect(instance.parser.executeAsync()).resolves.toEqual(true);
 
           // There should be 1 build per package
           const packageCount: number = instance.spawnMock.mock.calls.length;
@@ -112,7 +112,7 @@ describe('RushCommandLineParser', () => {
           const repoName: string = 'overrideRebuildAndRunBuildActionRepo';
           const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'build');
 
-          await expect(instance.parser.execute()).resolves.toEqual(true);
+          await expect(instance.parser.executeAsync()).resolves.toEqual(true);
 
           // There should be 1 build per package
           const packageCount: number = instance.spawnMock.mock.calls.length;
@@ -144,7 +144,7 @@ describe('RushCommandLineParser', () => {
           const repoName: string = 'overrideRebuildAndRunRebuildActionRepo';
           const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'rebuild');
 
-          await expect(instance.parser.execute()).resolves.toEqual(true);
+          await expect(instance.parser.executeAsync()).resolves.toEqual(true);
 
           // There should be 1 build per package
           const packageCount: number = instance.spawnMock.mock.calls.length;
@@ -177,7 +177,7 @@ describe('RushCommandLineParser', () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'overrideAndDefaultBuildActionRepo';
           const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'build');
-          await expect(instance.parser.execute()).resolves.toEqual(true);
+          await expect(instance.parser.executeAsync()).resolves.toEqual(true);
 
           // There should be 1 build per package
           const packageCount: number = instance.spawnMock.mock.calls.length;
@@ -209,7 +209,7 @@ describe('RushCommandLineParser', () => {
           // broken
           const repoName: string = 'overrideAndDefaultRebuildActionRepo';
           const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'rebuild');
-          await expect(instance.parser.execute()).resolves.toEqual(true);
+          await expect(instance.parser.executeAsync()).resolves.toEqual(true);
 
           // There should be 1 build per package
           const packageCount: number = instance.spawnMock.mock.calls.length;
@@ -297,7 +297,7 @@ describe('RushCommandLineParser', () => {
          */
         jest.spyOn(Autoinstaller.prototype, 'prepareAsync').mockImplementation(async function () {});
 
-        await expect(instance.parser.execute()).resolves.toEqual(true);
+        await expect(instance.parser.executeAsync()).resolves.toEqual(true);
 
         expect(FileSystem.exists(telemetryFilePath)).toEqual(true);
 

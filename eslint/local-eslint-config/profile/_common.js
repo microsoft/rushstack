@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+const macros = require('@rushstack/eslint-config/profile/_macros');
+const { namingConventionRuleOptions } = require('@rushstack/eslint-config/profile/_common');
+
 function buildRules(profile) {
   let profileMixins;
   switch (profile) {
@@ -99,6 +102,36 @@ function buildRules(profile) {
               ' Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.',
               ' See LICENSE in the project root for license information.'
             ]
+          ],
+
+          // Docs: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/naming-convention.md
+          '@typescript-eslint/naming-convention': [
+            'warn',
+            ...macros.expandNamingConventionSelectors([
+              ...namingConventionRuleOptions,
+              {
+                selectors: ['method'],
+                modifiers: ['async'],
+                enforceLeadingUnderscoreWhenPrivate: true,
+
+                format: null,
+                custom: {
+                  regex: '^_?[a-zA-Z]\\w*Async$',
+                  match: true
+                },
+                leadingUnderscore: 'allow',
+
+                filter: {
+                  regex: [
+                    // Specifically allow ts-command-line's "onExecute" function.
+                    '^onExecute$'
+                  ]
+                    .map((x) => `(${x})`)
+                    .join('|'),
+                  match: false
+                }
+              }
+            ])
           ],
 
           ...profileMixins

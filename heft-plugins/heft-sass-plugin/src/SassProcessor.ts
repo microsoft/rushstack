@@ -156,6 +156,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
       getAdditionalOutputFiles: getCssPaths,
 
       // Generate typings function
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       parseAndGenerateTypings: async (fileContents: string, filePath: string, relativePath: string) => {
         if (this._isSassPartial(filePath)) {
           // Do not generate typings for Sass partials.
