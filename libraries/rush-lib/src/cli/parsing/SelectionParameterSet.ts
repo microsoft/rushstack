@@ -24,6 +24,10 @@ import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorPa
 import { RushConstants } from '../../logic/RushConstants';
 import type { Subspace } from '../../api/Subspace';
 
+interface ISelectionParameterSetOptions {
+  gitOptions: IGitSelectorParserOptions;
+  includeSubspaceSelector: boolean;
+}
 /**
  * This class is provides the set of command line parameters used to select projects
  * based on dependencies.
@@ -49,9 +53,9 @@ export class SelectionParameterSet {
   public constructor(
     rushConfiguration: RushConfiguration,
     action: CommandLineParameterProvider,
-    gitOptions: IGitSelectorParserOptions,
-    enableSubspaceSelector: boolean
+    options: ISelectionParameterSetOptions
   ) {
+    const { gitOptions, includeSubspaceSelector } = options;
     this._rushConfiguration = rushConfiguration;
 
     const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> = new Map<
@@ -188,7 +192,7 @@ export class SelectionParameterSet {
         ' For details, refer to the website article "Selecting subsets of projects".'
     });
 
-    if (enableSubspaceSelector) {
+    if (includeSubspaceSelector) {
       this._subspaceParameter = action.defineStringParameter({
         parameterLongName: '--subspace',
         argumentName: 'SUBSPACE_NAME',
