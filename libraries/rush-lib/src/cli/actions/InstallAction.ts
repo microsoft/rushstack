@@ -31,11 +31,14 @@ export class InstallAction extends BaseInstallAction {
     });
 
     this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
-      // Include lockfile processing since this expands the selection, and we need to select
-      // at least the same projects selected with the same query to "rush build"
-      includeExternalDependencies: true,
-      // Disable filtering because rush-project.json is riggable and therefore may not be available
-      enableFiltering: false
+      gitOptions: {
+        // Include lockfile processing since this expands the selection, and we need to select
+        // at least the same projects selected with the same query to "rush build"
+        includeExternalDependencies: true,
+        // Disable filtering because rush-project.json is riggable and therefore may not be available
+        enableFiltering: false
+      },
+      includeSubspaceSelector: true
     });
 
     this._checkOnlyParameter = this.defineFlagParameter({
@@ -44,7 +47,7 @@ export class InstallAction extends BaseInstallAction {
     });
   }
 
-  protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
+  protected async buildInstallOptionsAsync(): Promise<Omit<IInstallManagerOptions, 'subspace'>> {
     const selectedProjects: Set<RushConfigurationProject> =
       (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) ??
       new Set(this.rushConfiguration.projects);
@@ -68,7 +71,6 @@ export class InstallAction extends BaseInstallAction {
       pnpmFilterArgumentValues:
         (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this._terminal)) ?? [],
       checkOnly: this._checkOnlyParameter.value,
-      subspace: this.getTargetSubspace(),
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
       terminal: this._terminal
     };

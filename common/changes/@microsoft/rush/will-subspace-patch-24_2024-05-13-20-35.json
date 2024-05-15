@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the `--subspace` CLI parameter would install for all subspaces in a monorepo when passed to the install or update action",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -36,11 +36,14 @@ export class UpdateAction extends BaseInstallAction {
     if (this.rushConfiguration?.subspacesFeatureEnabled) {
       // Partial update is supported only when subspaces is enabled.
       this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
-        // Include lockfile processing since this expands the selection, and we need to select
-        // at least the same projects selected with the same query to "rush build"
-        includeExternalDependencies: true,
-        // Disable filtering because rush-project.json is riggable and therefore may not be available
-        enableFiltering: false
+        gitOptions: {
+          // Include lockfile processing since this expands the selection, and we need to select
+          // at least the same projects selected with the same query to "rush build"
+          includeExternalDependencies: true,
+          // Disable filtering because rush-project.json is riggable and therefore may not be available
+          enableFiltering: false
+        },
+        includeSubspaceSelector: true
       });
     }
 
@@ -75,7 +78,7 @@ export class UpdateAction extends BaseInstallAction {
     return super.runAsync();
   }
 
-  protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
+  protected async buildInstallOptionsAsync(): Promise<Omit<IInstallManagerOptions, 'subspace'>> {
     const selectedProjects: Set<RushConfigurationProject> =
       (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) ??
       new Set(this.rushConfiguration.projects);
@@ -99,8 +102,6 @@ export class UpdateAction extends BaseInstallAction {
       pnpmFilterArgumentValues:
         (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this._terminal)) ?? [],
       checkOnly: false,
-      subspace: this.getTargetSubspace(),
-
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
       terminal: this._terminal
     };
