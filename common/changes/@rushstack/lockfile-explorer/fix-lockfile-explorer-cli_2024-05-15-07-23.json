@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/lockfile-explorer",
-      "comment": "fix: exit with 0 for lockfile-explorer --help",
+      "comment": "Update the exit code to 0 for `lockfile-explorer --help`.",
       "type": "patch"
     }
   ],
