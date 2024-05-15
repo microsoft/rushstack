@@ -32,18 +32,16 @@ class TestAction extends CommandLineAction {
       summary: 'does the action',
       documentation: 'a longer description'
     });
+
+    this._flag = this.defineFlagParameter({
+      parameterLongName: '--flag',
+      description: 'The flag'
+    });
   }
 
   protected async onExecute(): Promise<void> {
     expect(this._flag.value).toEqual(true);
     this.done = true;
-  }
-
-  protected onDefineParameters(): void {
-    this._flag = this.defineFlagParameter({
-      parameterLongName: '--flag',
-      description: 'The flag'
-    });
   }
 }
 

@@ -217,6 +217,7 @@ export abstract class CommandLineParameterProvider {
     getParameterStringMap(): Record<string, string>;
     getStringListParameter(parameterLongName: string, parameterScope?: string): CommandLineStringListParameter;
     getStringParameter(parameterLongName: string, parameterScope?: string): CommandLineStringParameter;
+    // @deprecated (undocumented)
     protected onDefineParameters?(): void;
     get parameters(): ReadonlyArray<CommandLineParameter>;
     get parametersProcessed(): boolean;
@@ -450,6 +451,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     _executeAsync(): Promise<void>;
     // @internal
     protected _getScopedCommandLineParser(): CommandLineParser;
+    // (undocumented)
     protected onDefineParameters(): void;
     protected abstract onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void;
     protected onDefineUnscopedParameters?(): void;

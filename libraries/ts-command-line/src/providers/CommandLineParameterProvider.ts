@@ -589,8 +589,7 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * The child class should implement this hook to define its command-line parameters,
-   * e.g. by calling defineFlagParameter().
+   * @deprecated - Define parameters in the constructor
    */
   protected onDefineParameters?(): void;
 
