@@ -24,10 +24,13 @@ import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorPa
 import { RushConstants } from '../../logic/RushConstants';
 import type { Subspace } from '../../api/Subspace';
 
+export const SUBSPACE_LONG_ARG_NAME: '--subspace' = '--subspace';
+
 interface ISelectionParameterSetOptions {
   gitOptions: IGitSelectorParserOptions;
   includeSubspaceSelector: boolean;
 }
+
 /**
  * This class is provides the set of command line parameters used to select projects
  * based on dependencies.
@@ -194,7 +197,7 @@ export class SelectionParameterSet {
 
     if (includeSubspaceSelector) {
       this._subspaceParameter = action.defineStringParameter({
-        parameterLongName: '--subspace',
+        parameterLongName: SUBSPACE_LONG_ARG_NAME,
         argumentName: 'SUBSPACE_NAME',
         description:
           '(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the "subspacesEnabled" feature to be enabled in subspaces.json.'
@@ -223,7 +226,7 @@ export class SelectionParameterSet {
       this._toExceptProject,
       this._fromVersionPolicy,
       this._toVersionPolicy
-    ].some((x) => x?.values.length > 0);
+    ].some((x) => x.values.length > 0);
   }
 
   /**
@@ -287,7 +290,8 @@ export class SelectionParameterSet {
         // eslint-disable-next-line no-console
         console.log(
           Colorize.red(
-            `The "${this._subspaceParameter?.longName}" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
+            `The "${SUBSPACE_LONG_ARG_NAME}" parameter can only be passed if "subspacesEnabled" ` +
+              'is set to true in subspaces.json.'
           )
         );
         throw new AlreadyReportedError();
