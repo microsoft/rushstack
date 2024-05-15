@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixed an issue where \"rush change\" could not be run on a subspace level",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
