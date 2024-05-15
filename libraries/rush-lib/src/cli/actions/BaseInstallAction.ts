@@ -23,9 +23,12 @@ import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { Subspace } from '../../api/Subspace';
 
-interface ISubspaceSelectedProjectsMetadata {
+/**
+ * Temporary data structure used by `BaseInstallAction.runAsync()`
+ */
+interface ISubspaceInstallationData {
   selectedProjects: Set<RushConfigurationProject>;
-  pnpmFilterArguments: string[];
+  pnpmFilterArgumentValues: string[];
   alwaysFullInstall: boolean;
 }
 
@@ -122,7 +125,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
     let selectedSubspaces: Set<Subspace> | undefined;
-    const selectedProjectsMetadataBySubspace: Map<Subspace, ISubspaceSelectedProjectsMetadata> = new Map();
+    const subspaceInstallationDataBySubspace: Map<Subspace, ISubspaceInstallationData> = new Map();
     if (this.rushConfiguration.subspacesFeatureEnabled) {
       const selectedSubspaceParameter: Subspace | undefined = this._selectionParameters?.getTargetSubspace();
       selectedSubspaces = new Set();
@@ -131,27 +134,27 @@ export abstract class BaseInstallAction extends BaseRushAction {
         // This is a filtered install. Go through each project, add its subspace's pnpm filter arguments
         for (const project of selectedProjects) {
           const { subspace: projectSubspace } = project;
-          let subspaceSelectedProjectsMetadata: ISubspaceSelectedProjectsMetadata | undefined =
-            selectedProjectsMetadataBySubspace.get(projectSubspace);
-          if (!subspaceSelectedProjectsMetadata) {
+          let subspaceInstallationData: ISubspaceInstallationData | undefined =
+            subspaceInstallationDataBySubspace.get(projectSubspace);
+          if (!subspaceInstallationData) {
             selectedSubspaces.add(projectSubspace);
             const alwaysFullInstall: boolean = projectSubspace.getPnpmOptions()?.alwaysFullInstall ?? false;
-            subspaceSelectedProjectsMetadata = {
+            subspaceInstallationData = {
               selectedProjects: new Set(alwaysFullInstall ? projectSubspace.getProjects() : undefined),
-              pnpmFilterArguments: [],
+              pnpmFilterArgumentValues: [],
               alwaysFullInstall
             };
-            selectedProjectsMetadataBySubspace.set(projectSubspace, subspaceSelectedProjectsMetadata);
+            subspaceInstallationDataBySubspace.set(projectSubspace, subspaceInstallationData);
           }
 
           const {
-            pnpmFilterArguments,
+            pnpmFilterArgumentValues,
             selectedProjects: subspaceSelectedProjects,
             alwaysFullInstall
-          } = subspaceSelectedProjectsMetadata;
+          } = subspaceInstallationData;
           if (!alwaysFullInstall) {
             subspaceSelectedProjects.add(project);
-            pnpmFilterArguments.push('--filter', project.packageName);
+            pnpmFilterArgumentValues.push(project.packageName);
           }
         }
       } else if (selectedSubspaceParameter) {
@@ -236,17 +239,27 @@ export abstract class BaseInstallAction extends BaseRushAction {
       if (selectedSubspaces) {
         // Run the install for each affected subspace
         for (const subspace of selectedSubspaces) {
-          const selectedProjectsMetadata: ISubspaceSelectedProjectsMetadata | undefined =
-            selectedProjectsMetadataBySubspace.get(subspace);
+          const subspaceInstallationData: ISubspaceInstallationData | undefined =
+            subspaceInstallationDataBySubspace.get(subspace);
           // eslint-disable-next-line no-console
           console.log(Colorize.green(`Installing for subspace: ${subspace.subspaceName}`));
           let installManagerOptionsForInstall: IInstallManagerOptions;
-          if (selectedProjectsMetadata) {
-            const { selectedProjects, pnpmFilterArguments } = selectedProjectsMetadata;
+          if (subspaceInstallationData) {
+            const { selectedProjects, pnpmFilterArgumentValues } = subspaceInstallationData;
             installManagerOptionsForInstall = {
               ...installManagerOptions,
               selectedProjects,
-              pnpmFilterArguments,
+              // IMPORTANT: SelectionParameterSet.getPnpmFilterArgumentValuesAsync() already calculated
+              // installManagerOptions.pnpmFilterArgumentValues using PNPM CLI operators such as "...my-app".
+              // But with subspaces, "pnpm install" can only see the subset of projects in subspace's temp workspace,
+              // therefore an operator like "--filter ...my-app" will malfunction.  As a workaround, here we are
+              // overwriting installManagerOptions.pnpmFilterArgumentValues with a flat last of project names that
+              // were calculated by Rush.
+              //
+              // TODO: If the flat list produces too many "--filter" arguments, invoking "pnpm install" will exceed
+              // the maximum command length and fail on Windows OS.  Once this is solved, we can eliminate the
+              // redundant logic from SelectionParameterSet.getPnpmFilterArgumentValuesAsync().
+              pnpmFilterArgumentValues,
               subspace
             };
           } else {

@@ -101,8 +101,8 @@ export class UpdateAction extends BaseInstallAction {
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
       selectedProjects,
-      pnpmFilterArguments:
-        (await this._selectionParameters?.getPnpmFilterArgumentsAsync(this._terminal)) ?? [],
+      pnpmFilterArgumentValues:
+        (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this._terminal)) ?? [],
       checkOnly: false,
       subspace: this._selectionParameters?.getTargetSubspace() || this.rushConfiguration.defaultSubspace,
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),

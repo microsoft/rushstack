@@ -2,6 +2,26 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.124.3",
+      "tag": "@microsoft/rush_v5.124.3",
+      "date": "Wed, 15 May 2024 01:18:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush install` and `rush update` will fail with an `ENAMETOOLONG` error on Windows in repos with a large number of projects."
+          },
+          {
+            "comment": "Fix an issue where installing multiple subspaces consecutively can cause unexpected cross-contamination between pnpmfiles."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Ensure async telemetry tasks are flushed by error reporter"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.124.2",
       "tag": "@microsoft/rush_v5.124.2",
       "date": "Fri, 10 May 2024 06:35:26 GMT",

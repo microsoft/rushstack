@@ -40,7 +40,7 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
       recheckShrinkwrap: false,
       offline: false,
       collectLogFile: false,
-      pnpmFilterArguments: [],
+      pnpmFilterArgumentValues: [],
       selectedProjects: new Set(rushConfiguration.projects),
       maxInstallAttempts: 1,
       networkConcurrency: undefined,

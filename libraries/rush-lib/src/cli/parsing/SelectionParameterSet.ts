@@ -310,16 +310,21 @@ export class SelectionParameterSet {
    * Represents the selection as `--filter` parameters to pnpm.
    *
    * @remarks
-   * This is a separate from the selection to allow the filters to be represented more concisely.
    *
-   * @see https://pnpm.js.org/en/filtering
+   * IMPORTANT: This function produces PNPM CLI operators that select projects from PNPM's temp workspace.
+   * If Rush subspaces are enabled, PNPM cannot see the complete Rush workspace, and therefore these operators
+   * would malfunction. In the current implementation, we calculate them anyway, then `BaseInstallAction.runAsync()`
+   * will overwrite `pnpmFilterArgumentValues` with a flat list of project names.  In the future, these
+   * two code paths will be combined into a single general solution.
+   *
+   * @see https://pnpm.io/filtering
    */
-  public async getPnpmFilterArgumentsAsync(terminal: ITerminal): Promise<string[]> {
+  public async getPnpmFilterArgumentValuesAsync(terminal: ITerminal): Promise<string[]> {
     const args: string[] = [];
 
     // Include exactly these projects (--only)
     for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal)) {
-      args.push('--filter', project.packageName);
+      args.push(project.packageName);
     }
 
     // Include all projects that depend on these projects, and all dependencies thereof
@@ -335,19 +340,19 @@ export class SelectionParameterSet {
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     )) {
-      args.push('--filter', `${project.packageName}...`);
+      args.push(`${project.packageName}...`);
     }
 
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
     for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal)) {
-      args.push('--filter', `${project.packageName}^...`);
+      args.push(`${project.packageName}^...`);
     }
 
     // --impacted-by
     // The project and all projects directly or indirectly declare it as a dependency
     for (const project of await this._evaluateProjectParameterAsync(this._impactedByProject, terminal)) {
-      args.push('--filter', `...${project.packageName}`);
+      args.push(`...${project.packageName}`);
     }
 
     // --impacted-by-except
@@ -356,7 +361,7 @@ export class SelectionParameterSet {
       this._impactedByExceptProject,
       terminal
     )) {
-      args.push('--filter', `...^${project.packageName}`);
+      args.push(`...^${project.packageName}`);
     }
 
     return args;

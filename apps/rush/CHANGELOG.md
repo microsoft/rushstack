@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 10 May 2024 06:35:26 GMT and should not be manually modified.
+This log was last generated on Wed, 15 May 2024 01:18:25 GMT and should not be manually modified.
+
+## 5.124.3
+Wed, 15 May 2024 01:18:25 GMT
+
+### Patches
+
+- Ensure async telemetry tasks are flushed by error reporter
+
+### Updates
+
+- Fix an issue where `rush install` and `rush update` will fail with an `ENAMETOOLONG` error on Windows in repos with a large number of projects.
+- Fix an issue where installing multiple subspaces consecutively can cause unexpected cross-contamination between pnpmfiles.
 
 ## 5.124.2
 Fri, 10 May 2024 06:35:26 GMT
