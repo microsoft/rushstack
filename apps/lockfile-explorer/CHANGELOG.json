@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.4.4",
+      "tag": "@rushstack/lockfile-explorer_v1.4.4",
+      "date": "Wed, 15 May 2024 03:05:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix some issues when parsing certain lockfile syntaxes"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.3",
       "tag": "@rushstack/lockfile-explorer_v1.4.3",
       "date": "Fri, 10 May 2024 05:33:34 GMT",
