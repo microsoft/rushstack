@@ -53,7 +53,7 @@ export interface IJsonSchemaFromFileOptions {
    * Other schemas that this schema references, e.g. via the "$ref" directive.
    * @remarks
    * The tree of dependent schemas may reference the same schema more than once.
-   * However, if the same schema "id" is used by two different JsonSchema instances,
+   * However, if the same schema "$id" is used by two different JsonSchema instances,
    * an error will be reported.  This means you cannot load the same filename twice
    * and use them both together, and you cannot have diamond dependencies on different
    * versions of the same schema.  Although technically this would be possible to support,
@@ -133,12 +133,12 @@ export class JsonSchema {
       if (schemaId === '') {
         throw new Error(
           `This schema ${dependentSchema.shortName} cannot be referenced` +
-            ' because is missing the "id" field'
+            ' because is missing the "id" (draft-04) or "$id" field'
         );
       }
       if (seenIds.has(schemaId)) {
         throw new Error(
-          `This schema ${dependentSchema.shortName} has the same "id" as another schema in this set`
+          `This schema ${dependentSchema.shortName} has the same "id" (draft-04) or "$id" as another schema in this set`
         );
       }
 
@@ -192,7 +192,7 @@ export class JsonSchema {
   /**
    * Returns a short name for this schema, for use in error messages.
    * @remarks
-   * If the schema was loaded from a file, then the base filename is used.  Otherwise, the "id"
+   * If the schema was loaded from a file, then the base filename is used.  Otherwise, the "$id"
    * field is used if available.
    */
   public get shortName(): string {
