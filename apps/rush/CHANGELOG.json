@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.124.5",
+      "tag": "@microsoft/rush_v5.124.5",
+      "date": "Wed, 15 May 2024 23:43:15 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix count of completed operations when silent operations are blocked. Add explicit message for child processes terminated by signals. Ensure that errors show up in summarized view."
+          },
+          {
+            "comment": "Ensure that errors thrown in afterExecuteOperation show up in the summary at the end of the build."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.124.4",
       "tag": "@microsoft/rush_v5.124.4",
       "date": "Wed, 15 May 2024 03:05:57 GMT",
