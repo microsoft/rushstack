@@ -3,11 +3,11 @@
 exports[`JsonSchema validateObjectWithCallback successfully reports a compound validation error 1`] = `
 Array [
   "
-Error: #/exampleOneOf (Description for exampleOneOf - this i...)
-       Data does not match any schemas from 'oneOf'
-  Error: #/exampleOneOf (Description for type1)
-         Additional properties not allowed: field2
-  Error: #/exampleOneOf (Description for type2)
-         Missing required property: field3",
+Error: #/definitions/type1/required (must have required property 'field1')
+       must have required property 'field1'
+Error: #/definitions/type2/required (must have required property 'field3')
+       must have required property 'field3'
+Error: #/properties/exampleOneOf/oneOf (must match exactly one schema in oneOf)
+       must match exactly one schema in oneOf",
 ]
 `;

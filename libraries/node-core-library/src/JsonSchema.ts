@@ -4,14 +4,17 @@
 import * as os from 'os';
 import * as path from 'path';
 
-import { JsonFile, type JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';
+import { JsonFile, type JsonObject } from './JsonFile';
 
-import type ValidatorType from 'z-schema';
-const Validator: typeof import('z-schema') = require('z-schema/dist/ZSchema-browser-min');
+import Ajv, { type Options as AjvOptions, type ErrorObject, type ValidateFunction } from 'ajv';
+import AjvDraft04 from 'ajv-draft-04';
 
 interface ISchemaWithId {
+  // draft-04 uses "id"
   id: string | undefined;
+  // draft-06 and higher uses "$id"
+  $id: string | undefined;
 }
 
 /**
@@ -20,7 +23,7 @@ interface ISchemaWithId {
  */
 export interface IJsonSchemaErrorInfo {
   /**
-   * The z-schema error tree, formatted as an indented text string.
+   * The ajv error list, formatted as an indented text string.
    */
   details: string;
 }
@@ -34,7 +37,7 @@ export interface IJsonSchemaValidateOptions {
    * A custom header that will be used to report schema errors.
    * @remarks
    * If omitted, the default header is "JSON validation failed:".  The error message starts with
-   * the header, followed by the full input filename, followed by the z-schema error tree.
+   * the header, followed by the full input filename, followed by the ajv error list.
    * If you wish to customize all aspects of the error message, use JsonFile.loadAndValidateWithCallback()
    * or JsonSchema.validateObjectWithCallback().
    */
@@ -73,7 +76,7 @@ export interface IJsonSchemaFromFileOptions {
 export class JsonSchema {
   private _dependentSchemas: JsonSchema[] = [];
   private _filename: string = '';
-  private _validator: ValidatorType | undefined = undefined;
+  private _validator: ValidateFunction | undefined = undefined;
   private _schemaObject: JsonObject | undefined = undefined;
 
   private constructor() {}
@@ -155,7 +158,7 @@ export class JsonSchema {
   /**
    * Used to nicely format the ZSchema error tree.
    */
-  private static _formatErrorDetails(errorDetails: ValidatorType.SchemaErrorDetail[]): string {
+  private static _formatErrorDetails(errorDetails: ErrorObject[]): string {
     return JsonSchema._formatErrorDetailsHelper(errorDetails, '', '');
   }
 
@@ -163,16 +166,16 @@ export class JsonSchema {
    * Used by _formatErrorDetails.
    */
   private static _formatErrorDetailsHelper(
-    errorDetails: ValidatorType.SchemaErrorDetail[],
+    errorDetails: ErrorObject[],
     indent: string,
     buffer: string
   ): string {
     for (const errorDetail of errorDetails) {
-      buffer += os.EOL + indent + `Error: ${errorDetail.path}`;
+      buffer += os.EOL + indent + `Error: ${errorDetail.schemaPath}`;
 
-      if (errorDetail.description) {
+      if (errorDetail.message) {
         const MAX_LENGTH: number = 40;
-        let truncatedDescription: string = errorDetail.description.trim();
+        let truncatedDescription: string = errorDetail.message.trim();
         if (truncatedDescription.length > MAX_LENGTH) {
           truncatedDescription = truncatedDescription.substr(0, MAX_LENGTH - 3) + '...';
         }
@@ -181,10 +184,6 @@ export class JsonSchema {
       }
 
       buffer += os.EOL + indent + `       ${errorDetail.message}`;
-
-      if (errorDetail.inner) {
-        buffer = JsonSchema._formatErrorDetailsHelper(errorDetail.inner, indent + '  ', buffer);
-      }
     }
 
     return buffer;
@@ -202,11 +201,25 @@ export class JsonSchema {
         const schemaWithId: ISchemaWithId = this._schemaObject as ISchemaWithId;
         if (schemaWithId.id) {
           return schemaWithId.id;
+        } else if (schemaWithId.$id) {
+          return schemaWithId.$id;
         }
       }
       return '(anonymous schema)';
     } else {
       return path.basename(this._filename);
+    }
+  }
+
+  /**
+   * Helper function to determine if the targeted schema is using the draft-04 specification
+   * @returns boolean value indicating that the schema uses the draft-04 specification
+   */
+  private _isDraft04Schema(): boolean {
+    if (this._schemaObject.$schema) {
+      return this._schemaObject.$schema.startsWith('http://json-schema.org/draft-04/');
+    } else {
+      return false;
     }
   }
 
@@ -219,19 +232,18 @@ export class JsonSchema {
     this._ensureLoaded();
 
     if (!this._validator) {
-      // Don't assign this to _validator until we're sure everything was successful
-      const newValidator: ValidatorType = new Validator({
-        breakOnFirstError: false,
-        noTypeless: true,
-        noExtraKeywords: true
-      });
-
-      const anythingSchema: JsonObject = {
-        type: ['array', 'boolean', 'integer', 'number', 'object', 'string']
+      const isDraft04: boolean = this._isDraft04Schema();
+      const validatorOptions: AjvOptions = {
+        strictSchema: true
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (newValidator as any).setRemoteReference('http://json-schema.org/draft-04/schema', anythingSchema);
+      let validator: Ajv;
+      // Keep legacy support for older draft-04 schema
+      if (isDraft04) {
+        validator = new AjvDraft04(validatorOptions);
+      } else {
+        validator = new Ajv(validatorOptions);
+      }
 
       const collectedSchemas: JsonSchema[] = [];
       const seenObjects: Set<JsonSchema> = new Set<JsonSchema>();
@@ -242,16 +254,16 @@ export class JsonSchema {
       // Validate each schema in order.  We specifically do not supply them all together, because we want
       // to make sure that circular references will fail to validate.
       for (const collectedSchema of collectedSchemas) {
-        if (!newValidator.validateSchema(collectedSchema._schemaObject)) {
+        if (!validator.addSchema(collectedSchema._schemaObject)) {
           throw new Error(
             `Failed to validate schema "${collectedSchema.shortName}":` +
               os.EOL +
-              JsonSchema._formatErrorDetails(newValidator.getLastErrors())
+              JsonSchema._formatErrorDetails(validator.errors!)
           );
         }
       }
 
-      this._validator = newValidator;
+      this._validator = validator.compile(this._schemaObject);
     }
   }
 
@@ -286,8 +298,8 @@ export class JsonSchema {
   ): void {
     this.ensureCompiled();
 
-    if (!this._validator!.validate(jsonObject, this._schemaObject)) {
-      const errorDetails: string = JsonSchema._formatErrorDetails(this._validator!.getLastErrors());
+    if (this._validator && !this._validator(jsonObject)) {
+      const errorDetails: string = JsonSchema._formatErrorDetails(this._validator.errors!);
 
       const args: IJsonSchemaErrorInfo = {
         details: errorDetails
@@ -300,6 +312,6 @@ export class JsonSchema {
     if (!this._schemaObject) {
       this._schemaObject = JsonFile.load(this._filename);
     }
-    return (this._schemaObject as ISchemaWithId).id || '';
+    return (this._schemaObject as ISchemaWithId).id || (this._schemaObject as ISchemaWithId).$id || '';
   }
 }
