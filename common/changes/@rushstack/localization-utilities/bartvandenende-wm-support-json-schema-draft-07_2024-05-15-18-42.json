@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-utilities",
+      "comment": "Update schema-validation test snapshots",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/localization-utilities"
+}
