@@ -176,6 +176,14 @@ Object {
           "required": false,
           "shortName": undefined,
         },
+        Object {
+          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the \\"subspacesEnabled\\" feature to be enabled in subspaces.json.",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--subspace",
+          "required": false,
+          "shortName": undefined,
+        },
       ],
     },
     Object {
