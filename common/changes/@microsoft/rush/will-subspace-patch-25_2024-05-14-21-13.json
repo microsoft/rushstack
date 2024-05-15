@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add a \"rush check --subspace\" parameter to specify which subspace to check",
+      "comment": "Add a `rush check --subspace` parameter to specify which subspace to analyze",
       "type": "none"
     }
   ],
