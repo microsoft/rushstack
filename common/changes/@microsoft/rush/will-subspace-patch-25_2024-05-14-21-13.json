@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fixed an issue where \"rush change\" could not be run on a subspace level",
+      "comment": "Fix an issue where \"rush check\" could not be limited to a particular subspace",
       "type": "none"
     }
   ],
