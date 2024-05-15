@@ -347,7 +347,7 @@ describe(ChangelogGenerator.updateIndividualChangelog.name, () => {
 
     const emptyObjectFileInvoke = generateUpdateInvoke(`${__dirname}/exampleInvalidChangelog/emptyObject`);
     expect(emptyObjectFileInvoke).toThrow(Error);
-    expect(emptyObjectFileInvoke).toThrow(/required \(must have required property 'name'\)/);
+    expect(emptyObjectFileInvoke).toThrow(/must have required property 'name'/);
   });
 });
 
