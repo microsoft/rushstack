@@ -199,6 +199,30 @@ export class SelectionParameterSet {
   }
 
   /**
+   * Used to implement the `preventSelectingAllSubspaces` policy which checks for commands that accidentally
+   * select everything.   Return `true` if the CLI was invoked with selection parameters.
+   *
+   * @remarks
+   * It is still possible for a user to select everything, but they must do so using an explicit selection
+   * such as `rush install --from thing-that-everything-depends-on`.
+   */
+  public didUserSelectAnything(): boolean {
+    if (this._subspaceParameter?.value) {
+      return true;
+    }
+
+    return [
+      this._impactedByProject,
+      this._impactedByExceptProject,
+      this._onlyProject,
+      this._toProject,
+      this._toExceptProject,
+      this._fromVersionPolicy,
+      this._toVersionPolicy
+    ].some((x) => x?.values.length > 0);
+  }
+
+  /**
    * Computes the set of selected projects based on all parameter values.
    *
    * If no parameters are specified, returns all projects in the Rush config file.
@@ -250,13 +274,24 @@ export class SelectionParameterSet {
       })
     );
 
-    const subspaceProjects: Iterable<RushConfigurationProject> = this._subspaceParameter?.value
-      ? await this._selectorParserByScope.get('subspace')!.evaluateSelectorAsync({
-          unscopedSelector: this._subspaceParameter.value,
-          terminal,
-          parameterName: 'subspace'
-        })
-      : [];
+    let subspaceProjects: Iterable<RushConfigurationProject> = [];
+
+    if (this._subspaceParameter?.value) {
+      if (!this._rushConfiguration.subspacesFeatureEnabled) {
+        // eslint-disable-next-line no-console
+        console.log();
+        // eslint-disable-next-line no-console
+        console.log(
+          Colorize.red(
+            `The "${this._subspaceParameter?.longName}" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
+          )
+        );
+        throw new AlreadyReportedError();
+      }
+
+      const subspace: Subspace = this._rushConfiguration.getSubspace(this._subspaceParameter.value);
+      subspaceProjects = subspace.getProjects();
+    }
 
     const selection: Set<RushConfigurationProject> = Selection.union(
       // Safe command line options
@@ -280,30 +315,6 @@ export class SelectionParameterSet {
     );
 
     return selection;
-  }
-
-  /**
-   * Computes the selected subspace when the "--subspace" parameter is provided.
-   * Returns undefined if the "--subspace" parameter is not provided
-   */
-  public getTargetSubspace(): Subspace | undefined {
-    const parameterValue: string | undefined = this._subspaceParameter?.value;
-    if (!parameterValue) {
-      return undefined;
-    }
-    if (!this._rushConfiguration.subspacesFeatureEnabled) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(
-        Colorize.red(
-          `The "${this._subspaceParameter?.longName}" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
-        )
-      );
-      throw new AlreadyReportedError();
-    }
-    const selectedSubspace: Subspace = this._rushConfiguration.getSubspace(parameterValue);
-    return selectedSubspace;
   }
 
   /**

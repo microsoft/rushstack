@@ -49,7 +49,7 @@ export class InstallAction extends BaseInstallAction {
     });
   }
 
-  protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
+  protected async buildInstallOptionsAsync(): Promise<Omit<IInstallManagerOptions, 'subspace'>> {
     const selectedProjects: Set<RushConfigurationProject> =
       (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) ??
       new Set(this.rushConfiguration.projects);
@@ -73,7 +73,6 @@ export class InstallAction extends BaseInstallAction {
       pnpmFilterArgumentValues:
         (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this._terminal)) ?? [],
       checkOnly: this._checkOnlyParameter.value,
-      subspace: this._selectionParameters!.getTargetSubspace() || this.rushConfiguration.defaultSubspace,
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
       terminal: this._terminal
     };
