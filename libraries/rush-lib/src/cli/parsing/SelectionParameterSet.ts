@@ -264,7 +264,12 @@ export class SelectionParameterSet {
    * Represents the selection as `--filter` parameters to pnpm.
    *
    * @remarks
-   * This is a separate from the selection to allow the filters to be represented more concisely.
+   *
+   * IMPORTANT: This function produces PNPM CLI operators that select projects from PNPM's temp workspace.
+   * If Rush subspaces are enabled, PNPM cannot see the complete Rush workspace, and therefore these operators
+   * would malfunction. In the current implementation, we calculate them anyway, then `BaseInstallAction.runAsync()`
+   * will overwrite `pnpmFilterArgumentValues` with a flat list of project names.  In the future, these
+   * two code paths will be combined into a single general solution.
    *
    * @see https://pnpm.io/filtering
    */

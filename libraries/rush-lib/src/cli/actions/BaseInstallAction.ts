@@ -276,6 +276,16 @@ export abstract class BaseInstallAction extends BaseRushAction {
             installManagerOptionsForInstall = {
               ...installManagerOptions,
               selectedProjects,
+              // IMPORTANT: SelectionParameterSet.getPnpmFilterArgumentValuesAsync() already calculated
+              // installManagerOptions.pnpmFilterArgumentValues using PNPM CLI operators such as "...my-app".
+              // But with subspaces, "pnpm install" can only see the subset of projects in subspace's temp workspace,
+              // therefore an operator like "--filter ...my-app" will malfunction.  As a workaround, here we are
+              // overwriting installManagerOptions.pnpmFilterArgumentValues with a flat last of project names that
+              // were calculated by Rush.
+              //
+              // TODO: If the flat list produces too many "--filter" arguments, invoking "pnpm install" will exceed
+              // the maximum command length and fail on Windows OS.  Once this is solved, we can eliminate the
+              // redundant logic from SelectionParameterSet.getPnpmFilterArgumentValuesAsync().
               pnpmFilterArgumentValues,
               subspace
             };
