@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
   "entries": [
     {
+      "version": "0.11.45",
+      "tag": "@rushstack/webpack-preserve-dynamic-require-plugin_v0.11.45",
+      "date": "Wed, 15 May 2024 23:42:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.44",
       "tag": "@rushstack/webpack-preserve-dynamic-require-plugin_v0.11.44",
       "date": "Wed, 15 May 2024 06:04:17 GMT",

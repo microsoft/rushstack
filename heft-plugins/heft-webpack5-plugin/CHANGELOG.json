@@ -2,6 +2,27 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.9.45",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.9.45",
+      "date": "Wed, 15 May 2024 23:42:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.45`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.7` to `0.66.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.44",
       "tag": "@rushstack/heft-webpack5-plugin_v0.9.44",
       "date": "Wed, 15 May 2024 06:04:17 GMT",

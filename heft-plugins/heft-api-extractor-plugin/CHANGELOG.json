@@ -2,6 +2,30 @@
   "name": "@rushstack/heft-api-extractor-plugin",
   "entries": [
     {
+      "version": "0.3.28",
+      "tag": "@rushstack/heft-api-extractor-plugin_v0.3.28",
+      "date": "Wed, 15 May 2024 23:42:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.43.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.7` to `0.66.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.27",
       "tag": "@rushstack/heft-api-extractor-plugin_v0.3.27",
       "date": "Wed, 15 May 2024 06:04:17 GMT",
