@@ -189,6 +189,12 @@ importers:
 
   ../../../apps/lockfile-explorer:
     dependencies:
+      '@microsoft/rush-lib':
+        specifier: workspace:*
+        version: link:../../libraries/rush-lib
+      '@pnpm/dependency-path':
+        specifier: ~2.1.2
+        version: 2.1.8
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
@@ -211,9 +217,9 @@ importers:
         specifier: ~5.1.0
         version: 5.1.0
     devDependencies:
-      '@microsoft/rush-lib':
-        specifier: workspace:*
-        version: link:../../libraries/rush-lib
+      '@pnpm/lockfile-types':
+        specifier: ~6.0.0
+        version: 6.0.0
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
@@ -1847,7 +1853,7 @@ importers:
         version: 29.5.12
       '@types/node':
         specifier: ts4.9
-        version: 20.12.11
+        version: 20.12.12
       eslint:
         specifier: ~8.57.0
         version: 8.57.0
@@ -9249,7 +9255,7 @@ packages:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 17.0.41
+      '@types/node': 20.12.12
       '@types/yargs': 17.0.32
       chalk: 4.1.2
 
@@ -9529,6 +9535,13 @@ packages:
       ramda: 0.27.2
     dev: false
 
+  /@pnpm/lockfile-types@6.0.0:
+    resolution: {integrity: sha512-a4/ULIPLZIIq8Qmi2HEoFgRTtEouGU5RNhuGDxnSmkxu1BjlNMNjLJeEI5jzMZCGOjBoML+AirY/XOO3bcEQ/w==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/types': 10.0.0
+    dev: true
+
   /@pnpm/logger@4.0.0:
     resolution: {integrity: sha512-SIShw+k556e7S7tLZFVSIHjCdiVog1qWzcKW2RbLEHPItdisAFVNIe34kYd9fMSswTlSRLS/qRjw3ZblzWmJ9Q==}
     engines: {node: '>=12.17'}
@@ -9580,6 +9593,11 @@ packages:
       sort-keys: 4.2.0
       strip-bom: 4.0.0
     dev: false
+
+  /@pnpm/types@10.0.0:
+    resolution: {integrity: sha512-P608MRTOExt5BkIN2hsrb/ycEchwaPW/x80ujJUAqxKZSXNVAOrlEu3KJ+2+jTCunyWmo/EcE01ZdwCw8jgVrQ==}
+    engines: {node: '>=18.12'}
+    dev: true
 
   /@pnpm/types@6.4.0:
     resolution: {integrity: sha512-nco4+4sZqNHn60Y4VE/fbtlShCBqipyUO+nKRPvDHqLrecMW9pzHWMVRxk4nrMRoeowj3q0rX3GYRBa8lsHTAg==}
@@ -12770,11 +12788,10 @@ packages:
     dependencies:
       undici-types: 5.26.5
 
-  /@types/node@20.12.11:
-    resolution: {integrity: sha512-vDg9PZ/zi+Nqp6boSOT7plNuthRugEKixDv5sFTIpkE89MmNtEArAShI4mxuX2+UrLEe9pxC1vm2cjm9YlWbJw==}
+  /@types/node@20.12.12:
+    resolution: {integrity: sha512-eWLDGF/FOSPtAvEqeRAQ4C8LSA7M1I7i0ky1I8U7kD1J5ITyW3AsRhQrKVoWf5pFKZ2kILsEGJhsI9r93PYnOw==}
     dependencies:
       undici-types: 5.26.5
-    dev: true
 
   /@types/normalize-package-data@2.4.4:
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -20862,7 +20879,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 17.0.41
+      '@types/node': 20.12.12
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
