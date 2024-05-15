@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "4.3.0",
+      "tag": "@rushstack/node-core-library_v4.3.0",
+      "date": "Wed, 15 May 2024 06:04:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Rename `Async.sleep` to `Async.sleepAsync`. The old function is marked as `@deprecated`."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.1",
       "tag": "@rushstack/node-core-library_v4.2.1",
       "date": "Fri, 10 May 2024 05:33:33 GMT",

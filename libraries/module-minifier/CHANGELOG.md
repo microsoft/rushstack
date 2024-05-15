@@ -1,6 +1,13 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+This log was last generated on Wed, 15 May 2024 06:04:17 GMT and should not be manually modified.
+
+## 0.6.0
+Wed, 15 May 2024 06:04:17 GMT
+
+### Minor changes
+
+- Rename `IMinifierConnection.disconnect` to `IMinifierConnection.disconnectAsync` and `IModuleMinifier.connect` to `IModuleMinifier.connectAsync`. The old functions are marked as `@deprecated`.
 
 ## 0.5.4
 Fri, 10 May 2024 05:33:34 GMT

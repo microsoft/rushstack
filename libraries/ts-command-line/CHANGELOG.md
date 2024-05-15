@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+This log was last generated on Wed, 15 May 2024 06:04:17 GMT and should not be manually modified.
+
+## 4.20.0
+Wed, 15 May 2024 06:04:17 GMT
+
+### Minor changes
+
+- Rename `CommandLineParser.execute` to `CommandLineParser.executeAsync` and `CommandLineParser.executeWithoutErrorHandling` to `CommandLineParser.executeWithoutErrorHandlingAsync`. The old functions are marked as `@deprecated`.
 
 ## 4.19.5
 Fri, 10 May 2024 05:33:34 GMT
