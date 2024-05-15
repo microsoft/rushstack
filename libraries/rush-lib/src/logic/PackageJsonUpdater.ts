@@ -290,7 +290,7 @@ export class PackageJsonUpdater {
       offline: false,
       collectLogFile: false,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-      pnpmFilterArguments: [],
+      pnpmFilterArgumentValues: [],
       selectedProjects: new Set(this._rushConfiguration.projects),
       checkOnly: false,
       subspace: subspace,

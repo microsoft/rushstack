@@ -82,15 +82,17 @@ export interface IInstallManagerOptions {
   maxInstallAttempts: number;
 
   /**
-   * Filters to be passed to PNPM during installation, if applicable.
-   * These restrict the scope of a workspace installation.
+   * An array of `--filter` argument values. For example, if the array is ["a", "b"] then Rush would invoke
+   * `pnpm install --filter a --filter b` which restricts the install/update to dependencies of
+   * workspace projects "a" and "b". If the array is empty, then an unfiltered install
+   * is performed. Filtered installs have some limitations such as less comprehensive version analysis.
    *
    * @remarks
    * Note that PNPM may arbitrarily ignore `--filter` (producing an unfiltered install) in certain situations,
    * for example when `config.dedupe-peer-dependents=true` with PNPM 8.  Rush tries to circumvent this, under the
    * assumption that a user who invokes a filtered install cares more about lockfile stability than duplication.
    */
-  pnpmFilterArguments: string[];
+  pnpmFilterArgumentValues: string[];
 
   /**
    * The set of projects for which installation should be performed.

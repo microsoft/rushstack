@@ -28,6 +28,13 @@ jobs:
     steps:
       - name: Create ~/.rush-user/settings.json
         shell: pwsh
+        # Create a .rush-user/settings.json file that looks like this:
+        #
+        # { "buildCacheFolder": "/<runner working directory>/rush-cache" }
+        #
+        # This configures the local cache to be shared between all Rush repos. This allows us to run a build in
+        # one clone of the repo (repo-a), and restore from the cache in another clone of the repo (repo-b) to test
+        # the build cache.
         run: |
           mkdir -p $HOME/.rush-user
           @{ buildCacheFolder = Join-Path ${{ github.workspace }} rush-cache } | ConvertTo-Json > $HOME/.rush-user/settings.json
