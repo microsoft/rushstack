@@ -52,7 +52,9 @@
     "@types/js-yaml": "3.12.1",
     "@types/update-notifier": "~6.0.1",
     "local-node-rig": "workspace:*",
-    "@pnpm/lockfile-types": "~6.0.0"
+    "@pnpm/lockfile-types": "^5.1.5",
+    "@types/yargs": "~17.0.32",
+    "@types/semver": "7.5.0"
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",
@@ -63,6 +65,8 @@
     "js-yaml": "~3.13.1",
     "open": "~8.4.0",
     "update-notifier": "~5.1.0",
-    "@pnpm/dependency-path": "~2.1.2"
+    "@pnpm/dependency-path": "~2.1.2",
+    "yargs": "~17.7.2",
+    "semver": "~7.5.4"
   }
 }

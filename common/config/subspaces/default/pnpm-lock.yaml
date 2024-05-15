@@ -213,13 +213,19 @@ importers:
       open:
         specifier: ~8.4.0
         version: 8.4.2
+      semver:
+        specifier: ~7.5.4
+        version: 7.5.4
       update-notifier:
         specifier: ~5.1.0
         version: 5.1.0
+      yargs:
+        specifier: ~17.7.2
+        version: 17.7.2
     devDependencies:
       '@pnpm/lockfile-types':
-        specifier: ~6.0.0
-        version: 6.0.0
+        specifier: ^5.1.5
+        version: 5.1.5
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
@@ -235,9 +241,15 @@ importers:
       '@types/js-yaml':
         specifier: 3.12.1
         version: 3.12.1
+      '@types/semver':
+        specifier: 7.5.0
+        version: 7.5.0
       '@types/update-notifier':
         specifier: ~6.0.1
         version: 6.0.8
+      '@types/yargs':
+        specifier: ~17.0.32
+        version: 17.0.32
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -9508,11 +9520,11 @@ packages:
       ramda: 0.27.2
     dev: false
 
-  /@pnpm/lockfile-types@6.0.0:
-    resolution: {integrity: sha512-a4/ULIPLZIIq8Qmi2HEoFgRTtEouGU5RNhuGDxnSmkxu1BjlNMNjLJeEI5jzMZCGOjBoML+AirY/XOO3bcEQ/w==}
-    engines: {node: '>=18.12'}
+  /@pnpm/lockfile-types@5.1.5:
+    resolution: {integrity: sha512-02FP0HynzX+2DcuPtuMy7PH+kLIC0pevAydAOK+zug2bwdlSLErlvSkc+4+3dw60eRWgUXUqyfO2eR/Ansdbng==}
+    engines: {node: '>=16.14'}
     dependencies:
-      '@pnpm/types': 10.0.0
+      '@pnpm/types': 9.4.2
     dev: true
 
   /@pnpm/logger@4.0.0:
@@ -9567,11 +9579,6 @@ packages:
       strip-bom: 4.0.0
     dev: false
 
-  /@pnpm/types@10.0.0:
-    resolution: {integrity: sha512-P608MRTOExt5BkIN2hsrb/ycEchwaPW/x80ujJUAqxKZSXNVAOrlEu3KJ+2+jTCunyWmo/EcE01ZdwCw8jgVrQ==}
-    engines: {node: '>=18.12'}
-    dev: true
-
   /@pnpm/types@6.4.0:
     resolution: {integrity: sha512-nco4+4sZqNHn60Y4VE/fbtlShCBqipyUO+nKRPvDHqLrecMW9pzHWMVRxk4nrMRoeowj3q0rX3GYRBa8lsHTAg==}
     engines: {node: '>=10.16'}
@@ -9585,7 +9592,6 @@ packages:
   /@pnpm/types@9.4.2:
     resolution: {integrity: sha512-g1hcF8Nv4gd76POilz9gD4LITAPXOe5nX4ijgr8ixCbLQZfcpYiMfJ+C1RlMNRUDo8vhlNB4O3bUlxmT6EAQXA==}
     engines: {node: '>=16.14'}
-    dev: false
 
   /@pnpm/write-project-manifest@1.1.7:
     resolution: {integrity: sha512-OLkDZSqkA1mkoPNPvLFXyI6fb0enCuFji6Zfditi/CLAo9kmIhQFmEUDu4krSB8i908EljG8YwL5Xjxzm5wsWA==}
@@ -15314,7 +15320,6 @@ packages:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
-    dev: true
 
   /clone-deep@4.0.1:
     resolution: {integrity: sha512-neHB9xuzh/wk0dIHweyAXv2aPGZIVk3pLMe+/RNzINf17fe0OG96QroktYAUm7SM1PBnzTabaLboqqxDyMU+SQ==}
@@ -27638,7 +27643,6 @@ packages:
   /yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
     engines: {node: '>=12'}
-    dev: true
 
   /yargs-unparser@2.0.0:
     resolution: {integrity: sha512-7pRTIA9Qc1caZ0bZ6RYRGbHJthJWuakf+WmHK0rVeLkNrrGhfoabBNdue6kdINI6r4if7ocq9aD/n7xwKOdzOA==}
@@ -27704,7 +27708,6 @@ packages:
       string-width: 4.2.3
       y18n: 5.0.8
       yargs-parser: 21.1.1
-    dev: true
 
   /yauzl@2.10.0:
     resolution: {integrity: sha512-p4a9I6X6nu6IhoGmBqAcbJy1mlC4j27vEPZX9F4L4/vZT3Lyq1VkFHw/V/PUcB9Buo+DG3iHkT0x3Qya58zc3g==}

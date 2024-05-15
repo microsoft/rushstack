@@ -922,6 +922,10 @@
     {
       "name": "xmldoc",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "yargs",
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }

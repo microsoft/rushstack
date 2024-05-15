@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "Add version validation capability",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer"
+}
