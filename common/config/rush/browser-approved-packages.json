@@ -51,10 +51,6 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
-      "name": "ajv-draft-04",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "axios",
       "allowedCategories": [ "libraries" ]
     },

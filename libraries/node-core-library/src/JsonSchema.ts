@@ -234,7 +234,8 @@ export class JsonSchema {
     if (!this._validator) {
       const isDraft04: boolean = this._isDraft04Schema();
       const validatorOptions: AjvOptions = {
-        strictSchema: true
+        strictSchema: true,
+        allowUnionTypes: true
       };
 
       let validator: Ajv;

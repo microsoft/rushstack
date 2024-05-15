@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Update schema-validation test snapshots",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file"
+}

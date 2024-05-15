@@ -383,6 +383,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "ajv-draft-04",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "api-extractor-lib1-test",
       "allowedCategories": [ "tests" ]
     },
@@ -916,10 +920,6 @@
     },
     {
       "name": "xmldoc",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "z-schema",
       "allowedCategories": [ "libraries" ]
     }
   ]
