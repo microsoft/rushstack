@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 15 May 2024 01:18:25 GMT and should not be manually modified.
+This log was last generated on Wed, 15 May 2024 03:05:57 GMT and should not be manually modified.
+
+## 5.124.4
+Wed, 15 May 2024 03:05:57 GMT
+
+### Updates
+
+- Improve the detection of PNPM lockfile versions.
+- Fix an issue where the `--subspace` CLI parameter would install for all subspaces in a monorepo when passed to the install or update action
 
 ## 5.124.3
 Wed, 15 May 2024 01:18:25 GMT

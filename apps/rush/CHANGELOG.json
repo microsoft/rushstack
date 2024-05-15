@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.124.4",
+      "tag": "@microsoft/rush_v5.124.4",
+      "date": "Wed, 15 May 2024 03:05:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the detection of PNPM lockfile versions."
+          },
+          {
+            "comment": "Fix an issue where the `--subspace` CLI parameter would install for all subspaces in a monorepo when passed to the install or update action"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.124.3",
       "tag": "@microsoft/rush_v5.124.3",
       "date": "Wed, 15 May 2024 01:18:25 GMT",
