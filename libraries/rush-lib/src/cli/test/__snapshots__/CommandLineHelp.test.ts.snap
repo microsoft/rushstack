@@ -1294,7 +1294,7 @@ exports[`CommandLineHelp prints the help for each action: version 1`] = `
                     [--override-version NEW_VERSION] [--bump]
                     [--bypass-policy] [--version-policy POLICY]
                     [--override-bump BUMPTYPE] [--override-prerelease-id ID]
-                    [--ignore-git-hooks]
+                    [--ignore-git-hooks] [--subspace SUBSPACE_NAME]
                     
 
 use this \\"rush version\\" command to ensure version policies and bump versions.
@@ -1332,5 +1332,9 @@ Optional arguments:
                         \\"--ensure-version-policy\\" is provided.
   --ignore-git-hooks    Skips execution of all git hooks. Make sure you know 
                         what you are skipping.
+  --subspace SUBSPACE_NAME
+                        (EXPERIMENTAL) Specifies a Rush subspace to be 
+                        installed. Requires the \\"subspacesEnabled\\" feature to 
+                        be enabled in subspaces.json.
 "
 `;

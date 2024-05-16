@@ -31,6 +31,7 @@ export class VersionAction extends BaseRushAction {
   private readonly _overwriteBump: CommandLineStringParameter;
   private readonly _prereleaseIdentifier: CommandLineStringParameter;
   private readonly _ignoreGitHooksParameter: CommandLineFlagParameter;
+  private readonly _subspaceParameter: CommandLineStringParameter | undefined;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -92,12 +93,20 @@ export class VersionAction extends BaseRushAction {
       parameterLongName: '--ignore-git-hooks',
       description: `Skips execution of all git hooks. Make sure you know what you are skipping.`
     });
+    this._subspaceParameter = this.defineStringParameter({
+      parameterLongName: '--subspace',
+      argumentName: 'SUBSPACE_NAME',
+      description:
+        '(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the "subspacesEnabled" feature to be enabled in subspaces.json.'
+    });
   }
 
   protected async runAsync(): Promise<void> {
     await PolicyValidator.validatePolicyAsync(
       this.rushConfiguration,
-      this.rushConfiguration.defaultSubspace,
+      this._subspaceParameter?.value
+        ? this.rushConfiguration.getSubspace(this._subspaceParameter.value)
+        : this.rushConfiguration.defaultSubspace,
       {
         bypassPolicyAllowed: true,
         bypassPolicy: this._bypassPolicy.value
@@ -218,7 +227,11 @@ export class VersionAction extends BaseRushAction {
       return;
     }
 
-    const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig);
+    const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig, {
+      subspace: this._subspaceParameter?.value
+        ? this.rushConfiguration.getSubspace(this._subspaceParameter.value)
+        : undefined
+    });
     if (mismatchFinder.numberOfMismatches) {
       throw new Error(
         'Unable to finish version bump because inconsistencies were encountered. ' +
