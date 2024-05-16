@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "[eslint-patch] Allow use of ESLint v9",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}
