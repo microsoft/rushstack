@@ -52,7 +52,7 @@ export class CheckAction extends BaseRushAction {
       truncateLongPackageNameLists: !this._verboseFlag.value,
       subspace: this._subspaceParameter?.value
         ? this.rushConfiguration.getSubspace(this._subspaceParameter.value)
-        : this.rushConfiguration.defaultSubspace
+        : undefined
     });
   }
 }
