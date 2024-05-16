@@ -7,7 +7,7 @@ import { CommandLineParser } from '../providers/CommandLineParser';
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;
-  private _flag!: CommandLineFlagParameter;
+  private _flag: CommandLineFlagParameter;
 
   public constructor() {
     super({
@@ -15,18 +15,16 @@ class TestAction extends CommandLineAction {
       summary: 'does the job',
       documentation: 'a longer description'
     });
+
+    this._flag = this.defineFlagParameter({
+      parameterLongName: '--flag',
+      description: 'The flag'
+    });
   }
 
   protected async onExecute(): Promise<void> {
     expect(this._flag.value).toEqual(true);
     this.done = true;
-  }
-
-  protected onDefineParameters(): void {
-    this._flag = this.defineFlagParameter({
-      parameterLongName: '--flag',
-      description: 'The flag'
-    });
   }
 }
 
@@ -38,10 +36,6 @@ class TestCommandLine extends CommandLineParser {
     });
 
     this.addAction(new TestAction());
-  }
-
-  protected onDefineParameters(): void {
-    // no parameters
   }
 }
 
