@@ -34,7 +34,7 @@ let namingPath: string | undefined = undefined;
 let eslintFolder: string | undefined = undefined;
 
 // Probe for the ESLint >=8.0.0 layout:
-for (let currentModule: NodeModule = module; ; ) {
+for (let currentModule: NodeModule = module; ;) {
   if (!eslintrcBundlePath) {
     if (currentModule.filename.endsWith('eslintrc.cjs')) {
       // For ESLint >=8.0.0, all @eslint/eslintrc code is bundled at this path:
@@ -93,7 +93,7 @@ for (let currentModule: NodeModule = module; ; ) {
 
 if (!eslintFolder) {
   // Probe for the ESLint >=7.12.0 layout:
-  for (let currentModule: NodeModule = module; ; ) {
+  for (let currentModule: NodeModule = module; ;) {
     if (!configArrayFactoryPath) {
       // For ESLint >=7.12.0, config-array-factory.js is at this path:
       //   .../@eslint/eslintrc/lib/config-array-factory.js
@@ -154,7 +154,7 @@ if (!eslintFolder) {
 
 if (!eslintFolder) {
   // Probe for the <7.12.0 layout:
-  for (let currentModule: NodeModule = module; ; ) {
+  for (let currentModule: NodeModule = module; ;) {
     // For ESLint <7.12.0, config-array-factory.js was at this path:
     //   .../eslint/lib/cli-engine/config-array-factory.js
     if (/[\\/]eslint[\\/]lib[\\/]cli-engine[\\/]config-array-factory\.js$/i.test(currentModule.filename)) {
@@ -185,8 +185,8 @@ if (!eslintFolder) {
       // This was tested with ESLint 6.1.0 .. 7.12.1.
       throw new Error(
         'Failed to patch ESLint because the calling module was not recognized.\n' +
-          'If you are using a newer ESLint version that may be unsupported, please create a GitHub issue:\n' +
-          'https://github.com/microsoft/rushstack/issues'
+        'If you are using a newer ESLint version that may be unsupported, please create a GitHub issue:\n' +
+        'https://github.com/microsoft/rushstack/issues'
       );
     }
     currentModule = currentModule.parent;
@@ -207,9 +207,9 @@ if (isNaN(ESLINT_MAJOR_VERSION)) {
 if (!(ESLINT_MAJOR_VERSION >= 6 && ESLINT_MAJOR_VERSION <= 9)) {
   throw new Error(
     'The ESLint patch script has only been tested with ESLint version 6.x, 7.x, 8.x, and 9.x.' +
-      ` (Your version: ${eslintPackageVersion})\n` +
-      'Consider reporting a GitHub issue:\n' +
-      'https://github.com/microsoft/rushstack/issues'
+    ` (Your version: ${eslintPackageVersion})\n` +
+    'Consider reporting a GitHub issue:\n' +
+    'https://github.com/microsoft/rushstack/issues'
   );
 }
 
