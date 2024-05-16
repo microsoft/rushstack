@@ -2,6 +2,18 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.21.0",
+      "tag": "@rushstack/ts-command-line_v4.21.0",
+      "date": "Thu, 16 May 2024 15:10:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Mark `onDefineParameters` and `onDefineUnscopedParameters` as deprecated and update README accordingly because defining parameters causes issues when the compiler targets >=es2022."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.20.1",
       "tag": "@rushstack/ts-command-line_v4.20.1",
       "date": "Wed, 15 May 2024 23:42:58 GMT",
