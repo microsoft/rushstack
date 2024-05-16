@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.124.6",
+      "tag": "@microsoft/rush_v5.124.6",
+      "date": "Thu, 16 May 2024 01:12:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an edge case for pnpm-sync when the .pnpm folder is absent but still a valid installation."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.124.5",
       "tag": "@microsoft/rush_v5.124.5",
       "date": "Wed, 15 May 2024 23:43:15 GMT",
