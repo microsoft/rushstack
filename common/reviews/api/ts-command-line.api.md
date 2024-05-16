@@ -451,9 +451,8 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     _executeAsync(): Promise<void>;
     // @internal
     protected _getScopedCommandLineParser(): CommandLineParser;
-    // (undocumented)
-    protected onDefineParameters(): void;
     protected abstract onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void;
+    // @deprecated (undocumented)
     protected onDefineUnscopedParameters?(): void;
     protected abstract onExecute(): Promise<void>;
     get parameters(): ReadonlyArray<CommandLineParameter>;
