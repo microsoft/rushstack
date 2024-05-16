@@ -264,10 +264,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   }
 
   /**
-   * The child class should implement this hook to define its unscoped command-line parameters,
-   * e.g. by calling defineFlagParameter(). At least one scoping parameter must be defined.
-   * Scoping parameters are defined by setting the parameterGroupName to
-   * ScopedCommandLineAction.ScopingParameterGroupName.
+   * @deprecated - Define parameters in the constructor
    */
   protected onDefineUnscopedParameters?(): void;
 
