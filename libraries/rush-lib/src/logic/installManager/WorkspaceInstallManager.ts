@@ -525,7 +525,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // we have an edge case here
       // if a package.json has no dependencies, pnpm will still generate the pnpm-lock.yaml but not .pnpm folder
-      // so we need to make sure pnpm-lock.yaml and .pnpm exists before call pnpmSync APIs
+      // so we need to make sure pnpm-lock.yaml and .pnpm exists before calling the pnpmSync APIs
       if ((await FileSystem.existsAsync(pnpmLockfilePath)) && (await FileSystem.existsAsync(dotPnpmFolder))) {
         await pnpmSyncPrepareAsync({
           lockfilePath: pnpmLockfilePath,

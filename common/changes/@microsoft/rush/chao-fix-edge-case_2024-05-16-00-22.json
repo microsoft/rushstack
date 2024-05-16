@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix an edge case for pnpm-sync where .pnpm folder is not exist but it is still a valid pnpm install.",
+      "comment": "Fix an edge case for pnpm-sync when the .pnpm folder is absent but still a valid installation.",
       "type": "none"
     }
   ],
