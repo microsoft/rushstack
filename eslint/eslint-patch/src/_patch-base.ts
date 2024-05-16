@@ -204,9 +204,9 @@ if (isNaN(ESLINT_MAJOR_VERSION)) {
   );
 }
 
-if (!(ESLINT_MAJOR_VERSION >= 6 && ESLINT_MAJOR_VERSION <= 8)) {
+if (!(ESLINT_MAJOR_VERSION >= 6 && ESLINT_MAJOR_VERSION <= 9)) {
   throw new Error(
-    'The ESLint patch script has only been tested with ESLint version 6.x, 7.x, and 8.x.' +
+    'The ESLint patch script has only been tested with ESLint version 6.x, 7.x, 8.x, and 9.x.' +
       ` (Your version: ${eslintPackageVersion})\n` +
       'Consider reporting a GitHub issue:\n' +
       'https://github.com/microsoft/rushstack/issues'
@@ -215,7 +215,7 @@ if (!(ESLINT_MAJOR_VERSION >= 6 && ESLINT_MAJOR_VERSION <= 8)) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let configArrayFactory: any;
-if (ESLINT_MAJOR_VERSION === 8) {
+if (ESLINT_MAJOR_VERSION >= 8) {
   configArrayFactory = require(eslintrcBundlePath!).Legacy.ConfigArrayFactory;
 } else {
   configArrayFactory = require(configArrayFactoryPath!).ConfigArrayFactory;
@@ -225,7 +225,7 @@ if (ESLINT_MAJOR_VERSION === 8) {
 let ModuleResolver: { resolve: any };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let Naming: { normalizePackageName: any };
-if (ESLINT_MAJOR_VERSION === 8) {
+if (ESLINT_MAJOR_VERSION >= 8) {
   ModuleResolver = require(eslintrcBundlePath!).Legacy.ModuleResolver;
   Naming = require(eslintrcBundlePath!).Legacy.naming;
 } else {
