@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "Fix an issue where an incomplete repo state analysis was sometimes returned, especially on WSL. See https://github.com/microsoft/rushstack/pull/4711 for details.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash"
+}
