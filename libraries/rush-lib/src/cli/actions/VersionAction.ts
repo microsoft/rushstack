@@ -97,7 +97,10 @@ export class VersionAction extends BaseRushAction {
       parameterLongName: '--subspace',
       argumentName: 'SUBSPACE_NAME',
       description:
-        '(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the "subspacesEnabled" feature to be enabled in subspaces.json.'
+        '(EXPERIMENTAL) Specifies an individual Rush subspace to check, requiring versions to be ' +
+        'consistent only within that subspace (ignoring other subspaces). If this parameter is omitted, ' +
+        'then "rush version" will instead use the default subspace. ' +
+        'Requires the "subspacesEnabled" setting to be true in subspaces.json.'
     });
   }
 
