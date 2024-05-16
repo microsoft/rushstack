@@ -125,6 +125,8 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
         'Scoped parameters.  Must be prefixed with "--", ex. "-- --scopedParameter ' +
         'foo --scopedFlag".  For more information on available scoped parameters, use "-- --help".'
     });
+
+    this.onDefineUnscopedParameters?.();
   }
 
   /**
@@ -235,13 +237,6 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
       ...state,
       parentParameterNames: updatedParentParameterNames
     };
-  }
-
-  /**
-   * {@inheritdoc CommandLineParameterProvider.onDefineParameters}
-   */
-  protected onDefineParameters(): void {
-    this.onDefineUnscopedParameters?.();
   }
 
   /**
