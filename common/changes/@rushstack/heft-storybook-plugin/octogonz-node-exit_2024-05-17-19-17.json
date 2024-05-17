@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "comment": "Fix an edge case where the Storybook STDOUT might not be flushed completely when an error occurs",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin"
+}
