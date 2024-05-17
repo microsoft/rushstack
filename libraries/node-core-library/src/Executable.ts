@@ -567,7 +567,7 @@ export class Executable {
       }
     }
 
-    let errorThrown: boolean = false;
+    let errorThrown: Error | undefined = undefined;
     const exitCode: number | null = await new Promise<number | null>(
       (resolve: (result: number | null) => void, reject: (error: Error) => void) => {
         if (encoding) {
@@ -579,13 +579,12 @@ export class Executable {
           });
         }
         childProcess.on('error', (error: Error) => {
-          errorThrown = true;
-          reject(error);
+          // Wait to call reject() until any output is collected
+          errorThrown = error;
         });
-        childProcess.on('exit', (code: number | null) => {
+        childProcess.on('close', (code: number | null) => {
           if (errorThrown) {
-            // We've already rejected the promise
-            return;
+            reject(errorThrown);
           }
           if (code !== 0 && throwOnNonZeroExitCode) {
             reject(new Error(`Process exited with code ${code}`));

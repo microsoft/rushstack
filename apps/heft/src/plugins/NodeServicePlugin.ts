@@ -344,6 +344,8 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
 
       childProcess.on('exit', (code: number | null, signal: string | null) => {
         try {
+          // Under normal conditions we don't reject the promise here, because 'data' events can continue
+          // to fire as data is flushed, before finally concluding with the 'close' event.
           this._logger.terminal.writeVerboseLine(
             `The service process fired its "exit" event` + this._formatCodeOrSignal(code, signal)
           );

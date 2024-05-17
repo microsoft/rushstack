@@ -461,7 +461,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
         reject(new Error(`Storybook returned error: ${error}`));
       });
 
-      forkedProcess.on('exit', (code: number | null) => {
+      forkedProcess.on('close', (code: number | null) => {
         if (processFinished) {
           return;
         }
