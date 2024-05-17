@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the build cache analysis was incorrect in rare situations due to a race condition (GitHub #4711)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
