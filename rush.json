@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.122.0",
+  "rushVersion": "5.124.6",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -317,6 +317,13 @@
     //    * The path to the project folder, relative to the rush.json config file.
     //    */
     //   "projectFolder": "apps/my-app",
+    //
+    //   /**
+    //    * This field is only used if "subspacesEnabled" is true in subspaces.json.
+    //    * It specifies the subspace that this project belongs to.  If omitted, then the
+    //    * project belongs to the "default" subspace.
+    //    */
+    //   // "subspaceName": "my-subspace",
     //
     //   /**
     //    * An optional category for usage in the "browser-approved-packages.json"
