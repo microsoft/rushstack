@@ -983,6 +983,8 @@ export class PackageJsonEditor {
     protected constructor(filepath: string, data: IPackageJson);
     // (undocumented)
     addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
+    // (undocumented)
+    addOrUpdateDependencyMeta(packageName: string, injected: boolean): void;
     get dependencyList(): ReadonlyArray<PackageJsonDependency>;
     get dependencyMetaList(): ReadonlyArray<PackageJsonDependencyMeta>;
     get devDependencyList(): ReadonlyArray<PackageJsonDependency>;

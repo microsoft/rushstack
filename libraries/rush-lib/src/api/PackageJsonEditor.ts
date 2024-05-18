@@ -284,6 +284,14 @@ export class PackageJsonEditor {
     this._modified = true;
   }
 
+  public addOrUpdateDependencyMeta(packageName: string, injected: boolean): void {
+    this._dependenciesMeta.set(
+      packageName,
+      new PackageJsonDependencyMeta(packageName, injected, this._onChange.bind(this))
+    );
+    this._modified = true;
+  }
+
   public removeDependency(packageName: string, dependencyType: DependencyType): void {
     switch (dependencyType) {
       case DependencyType.Regular:
@@ -344,6 +352,7 @@ export class PackageJsonEditor {
     delete normalizedData.peerDependencies;
     delete normalizedData.devDependencies;
     delete normalizedData.resolutions;
+    delete normalizedData.dependenciesMeta;
 
     const keys: string[] = [...this._dependencies.keys()].sort();
 
@@ -385,6 +394,15 @@ export class PackageJsonEditor {
         normalizedData.devDependencies = {};
       }
       normalizedData.devDependencies[dependency.name] = dependency.version;
+    }
+
+    if (this._dependenciesMeta.size > 0) {
+      normalizedData.dependenciesMeta = {};
+      for (const [dependency, dependenciesMeta] of this._dependenciesMeta.entries()) {
+        normalizedData.dependenciesMeta[dependency] = {
+          injected: dependenciesMeta.injected
+        };
+      }
     }
 
     // (Do not sort this._resolutions because order may be significant; the RFC is unclear about that.)

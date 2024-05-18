@@ -46,6 +46,7 @@ import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 import { FlagFile } from '../../api/FlagFile';
+import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -169,6 +170,13 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // get the relative path from common temp folder to repo root folder
     const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);
 
+    const subspaceProjectsMap: Map<string, RushConfigurationProject> = new Map();
+    for (const rushProject of this.rushConfiguration.projects) {
+      if (subspace.contains(rushProject)) {
+        subspaceProjectsMap.set(rushProject.packageName, rushProject);
+      }
+    }
+
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
     // referenced workspace projects are valid, and check if the shrinkwrap file is already up-to-date.
     for (const rushProject of this.rushConfiguration.projects) {
@@ -257,6 +265,22 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         } else if (dependencySpecifier.specifierType === DependencySpecifierType.Workspace) {
           // Already specified as a local project. Allow the package manager to validate this
           continue;
+        }
+      }
+
+      // if alwaysInjectDependenciesFromOtherSubspaces policy is true in pnpm-config.json
+      // and the dependency is not injected yet
+      // and the dependency is in another subspace
+      // then, make this dependency as injected dependency
+      const pnpmOptions: PnpmOptionsConfiguration | undefined =
+        subspace.getPnpmOptions() || this.rushConfiguration.pnpmOptions;
+      if (pnpmOptions && pnpmOptions.alwaysInjectDependenciesFromOtherSubspaces) {
+        const dependencyProjects: ReadonlySet<RushConfigurationProject> = rushProject.dependencyProjects;
+        for (const dependencyProject of dependencyProjects) {
+          const dependencyName: string = dependencyProject.packageName;
+          if (!subspaceProjectsMap.has(dependencyName)) {
+            packageJson.addOrUpdateDependencyMeta(dependencyName, true);
+          }
         }
       }
 
