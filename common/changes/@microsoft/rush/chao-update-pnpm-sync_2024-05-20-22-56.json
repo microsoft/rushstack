@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Update pnpm-sync-lib version to 0.2.6. Change the logic of how to check if a dependency is an injected dependency. Now, if a dependency is installed with file: protocol (exclude the tarball installation), then it is an injected dependency",
+      "comment": "Improve the `usePnpmSyncForInjectedDependencies` experiment to also include any dependency whose lockfile entry has the `file:` protocol, unless it is a tarball reference",
       "type": "none"
     }
   ],
