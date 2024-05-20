@@ -31,7 +31,6 @@ export class VersionAction extends BaseRushAction {
   private readonly _overwriteBump: CommandLineStringParameter;
   private readonly _prereleaseIdentifier: CommandLineStringParameter;
   private readonly _ignoreGitHooksParameter: CommandLineFlagParameter;
-  private readonly _subspaceParameter: CommandLineStringParameter | undefined;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -93,23 +92,12 @@ export class VersionAction extends BaseRushAction {
       parameterLongName: '--ignore-git-hooks',
       description: `Skips execution of all git hooks. Make sure you know what you are skipping.`
     });
-    this._subspaceParameter = this.defineStringParameter({
-      parameterLongName: '--subspace',
-      argumentName: 'SUBSPACE_NAME',
-      description:
-        '(EXPERIMENTAL) Specifies an individual Rush subspace to check, requiring versions to be ' +
-        'consistent only within that subspace (ignoring other subspaces). If this parameter is omitted, ' +
-        'then "rush version" will instead use the default subspace. ' +
-        'Requires the "subspacesEnabled" setting to be true in subspaces.json.'
-    });
   }
 
   protected async runAsync(): Promise<void> {
     await PolicyValidator.validatePolicyAsync(
       this.rushConfiguration,
-      this._subspaceParameter?.value
-        ? this.rushConfiguration.getSubspace(this._subspaceParameter.value)
-        : this.rushConfiguration.defaultSubspace,
+      this.rushConfiguration.defaultSubspace,
       {
         bypassPolicyAllowed: true,
         bypassPolicy: this._bypassPolicy.value
@@ -230,11 +218,7 @@ export class VersionAction extends BaseRushAction {
       return;
     }
 
-    const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig, {
-      subspace: this._subspaceParameter?.value
-        ? this.rushConfiguration.getSubspace(this._subspaceParameter.value)
-        : undefined
-    });
+    const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig);
     if (mismatchFinder.numberOfMismatches) {
       throw new Error(
         'Unable to finish version bump because inconsistencies were encountered. ' +

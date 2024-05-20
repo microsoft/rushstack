@@ -50,6 +50,11 @@ export class CheckAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
+    if (this.rushConfiguration.subspacesFeatureEnabled && !this._subspaceParameter) {
+      throw new Error(
+        `The --subspace parameter must be specified with "rush check" when subspaces is enabled.`
+      );
+    }
     VersionMismatchFinder.rushCheck(this.rushConfiguration, this._terminal, {
       printAsJson: this._jsonFlag.value,
       truncateLongPackageNameLists: !this._verboseFlag.value,
