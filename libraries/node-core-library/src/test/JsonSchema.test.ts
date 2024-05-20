@@ -62,6 +62,25 @@ describe(JsonSchema.name, () => {
         exampleArray: ['apple', 'banana', 'coconut']
       });
     });
+
+    test('throws an error for an invalid nested schema', () => {
+      const schemaPathChild: string = `${__dirname}/test-data/test-schema-invalid.json`;
+      const schemaInvalidChild: JsonSchema = JsonSchema.fromFile(schemaPathChild);
+
+      const schemaPathNested: string = `${__dirname}/test-data/test-schema-nested.json`;
+      const schemaNested: JsonSchema = JsonSchema.fromFile(schemaPathNested, {
+        dependentSchemas: [schemaInvalidChild]
+      });
+
+      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
+
+      expect.assertions(1);
+      try {
+        JsonFile.loadAndValidate(jsonPath, schemaNested);
+      } catch (err) {
+        expect(err.message).toMatchSnapshot();
+      }
+    });
   });
 
   describe('validateObjectWithCallback', () => {

@@ -253,9 +253,7 @@ export class JsonSchema {
       // Validate each schema in order.  We specifically do not supply them all together, because we want
       // to make sure that circular references will fail to validate.
       for (const collectedSchema of collectedSchemas) {
-        // Adding a schema indirectly calls `validateSchema` which
-        // sets an error on the ajv instance for any validation failure.
-        validator.addSchema(collectedSchema._schemaObject);
+        validator.validateSchema(collectedSchema._schemaObject);
         if (validator.errors && validator.errors.length > 0) {
           throw new Error(
             `Failed to validate schema "${collectedSchema.shortName}":` +
@@ -263,6 +261,7 @@ export class JsonSchema {
               JsonSchema._formatErrorDetails(validator.errors)
           );
         }
+        validator.addSchema(collectedSchema._schemaObject);
       }
 
       this._validator = validator.compile(this._schemaObject);
