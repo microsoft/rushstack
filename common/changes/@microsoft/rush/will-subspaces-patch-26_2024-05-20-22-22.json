@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Rename subspace level pnpmfile from .pnpmfile-subspace.cjs to .pnpmfile",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
