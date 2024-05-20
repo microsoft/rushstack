@@ -5,7 +5,7 @@ import { CommandLineParser } from '../providers/CommandLineParser';
 import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 
 class TestCommandLine extends CommandLineParser {
-  public flag!: CommandLineFlagParameter;
+  public flag: CommandLineFlagParameter;
   public done: boolean = false;
 
   public constructor() {
@@ -13,18 +13,16 @@ class TestCommandLine extends CommandLineParser {
       toolFilename: 'example',
       toolDescription: 'An example project'
     });
+
+    this.flag = this.defineFlagParameter({
+      parameterLongName: '--flag',
+      description: 'The flag'
+    });
   }
 
   protected async onExecute(): Promise<void> {
     await super.onExecute();
     this.done = true;
-  }
-
-  protected onDefineParameters(): void {
-    this.flag = this.defineFlagParameter({
-      parameterLongName: '--flag',
-      description: 'The flag'
-    });
   }
 }
 

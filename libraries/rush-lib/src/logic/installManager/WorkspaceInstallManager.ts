@@ -522,44 +522,50 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
       const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
       const dotPnpmFolder: string = `${subspace.getSubspaceTempFolder()}/node_modules/.pnpm`;
-      await pnpmSyncPrepareAsync({
-        lockfilePath: pnpmLockfilePath,
-        dotPnpmFolder,
-        ensureFolderAsync: FileSystem.ensureFolderAsync,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        readPnpmLockfile: async (lockfilePath: string) => {
-          const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFile(
-            lockfilePath,
-            { withCaching: true }
-          );
 
-          if (!wantedPnpmLockfile) {
-            return undefined;
-          } else {
-            const lockfilePackages: Record<string, ILockfilePackage> = Object.create(null);
-            for (const versionPath of wantedPnpmLockfile.packages.keys()) {
-              lockfilePackages[versionPath] = {
-                dependencies: wantedPnpmLockfile.packages.get(versionPath)?.dependencies as Record<
-                  string,
-                  string
-                >,
-                optionalDependencies: wantedPnpmLockfile.packages.get(versionPath)
-                  ?.optionalDependencies as Record<string, string>
+      // we have an edge case here
+      // if a package.json has no dependencies, pnpm will still generate the pnpm-lock.yaml but not .pnpm folder
+      // so we need to make sure pnpm-lock.yaml and .pnpm exists before calling the pnpmSync APIs
+      if ((await FileSystem.existsAsync(pnpmLockfilePath)) && (await FileSystem.existsAsync(dotPnpmFolder))) {
+        await pnpmSyncPrepareAsync({
+          lockfilePath: pnpmLockfilePath,
+          dotPnpmFolder,
+          ensureFolderAsync: FileSystem.ensureFolderAsync,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          readPnpmLockfile: async (lockfilePath: string) => {
+            const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFile(
+              lockfilePath,
+              { withCaching: true }
+            );
+
+            if (!wantedPnpmLockfile) {
+              return undefined;
+            } else {
+              const lockfilePackages: Record<string, ILockfilePackage> = Object.create(null);
+              for (const versionPath of wantedPnpmLockfile.packages.keys()) {
+                lockfilePackages[versionPath] = {
+                  dependencies: wantedPnpmLockfile.packages.get(versionPath)?.dependencies as Record<
+                    string,
+                    string
+                  >,
+                  optionalDependencies: wantedPnpmLockfile.packages.get(versionPath)
+                    ?.optionalDependencies as Record<string, string>
+                };
+              }
+
+              const result: ILockfile = {
+                lockfileVersion: wantedPnpmLockfile.shrinkwrapFileMajorVersion,
+                importers: Object.fromEntries(wantedPnpmLockfile.importers.entries()),
+                packages: lockfilePackages
               };
+
+              return result;
             }
-
-            const result: ILockfile = {
-              lockfileVersion: wantedPnpmLockfile.shrinkwrapFileMajorVersion,
-              importers: Object.fromEntries(wantedPnpmLockfile.importers.entries()),
-              packages: lockfilePackages
-            };
-
-            return result;
-          }
-        },
-        logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
-          PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
-      });
+          },
+          logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
+            PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
+        });
+      }
     }
 
     // If all attempts fail we just terminate. No special handling needed.

@@ -12,8 +12,8 @@ import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagPara
 class TestScopedAction extends ScopedCommandLineAction {
   public done: boolean = false;
   public scopedValue: string | undefined;
-  private _verboseArg!: CommandLineFlagParameter;
-  private _scopeArg!: CommandLineStringParameter;
+  private _verboseArg: CommandLineFlagParameter;
+  private _scopeArg: CommandLineStringParameter;
   private _scopedArg: CommandLineStringParameter | undefined;
 
   public constructor() {
@@ -22,17 +22,7 @@ class TestScopedAction extends ScopedCommandLineAction {
       summary: 'does the scoped action',
       documentation: 'a longer description'
     });
-  }
 
-  protected async onExecute(): Promise<void> {
-    if (this._scopedArg) {
-      expect(this._scopedArg.longName).toBe(`--scoped-${this._scopeArg.value}`);
-      this.scopedValue = this._scopedArg.value;
-    }
-    this.done = true;
-  }
-
-  protected onDefineUnscopedParameters(): void {
     this._verboseArg = this.defineFlagParameter({
       parameterLongName: '--verbose',
       description: 'A flag parameter.'
@@ -44,6 +34,14 @@ class TestScopedAction extends ScopedCommandLineAction {
       argumentName: 'SCOPE',
       description: 'The scope'
     });
+  }
+
+  protected async onExecute(): Promise<void> {
+    if (this._scopedArg) {
+      expect(this._scopedArg.longName).toBe(`--scoped-${this._scopeArg.value}`);
+      this.scopedValue = this._scopedArg.value;
+    }
+    this.done = true;
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {

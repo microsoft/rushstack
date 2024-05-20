@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 15 May 2024 03:05:57 GMT and should not be manually modified.
+This log was last generated on Thu, 16 May 2024 01:12:22 GMT and should not be manually modified.
+
+## 5.124.6
+Thu, 16 May 2024 01:12:22 GMT
+
+### Updates
+
+- Fix an edge case for pnpm-sync when the .pnpm folder is absent but still a valid installation.
+
+## 5.124.5
+Wed, 15 May 2024 23:43:15 GMT
+
+### Updates
+
+- Fix count of completed operations when silent operations are blocked. Add explicit message for child processes terminated by signals. Ensure that errors show up in summarized view.
+- Ensure that errors thrown in afterExecuteOperation show up in the summary at the end of the build.
 
 ## 5.124.4
 Wed, 15 May 2024 03:05:57 GMT

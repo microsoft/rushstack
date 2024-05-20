@@ -19,9 +19,9 @@ class GenericCommandLine extends CommandLineParser {
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;
-  private _scope1Arg!: CommandLineStringParameter;
-  private _scope2Arg!: CommandLineStringParameter;
-  private _nonConflictingArg!: CommandLineStringParameter;
+  private _scope1Arg: CommandLineStringParameter;
+  private _scope2Arg: CommandLineStringParameter;
+  private _nonConflictingArg: CommandLineStringParameter;
 
   public constructor() {
     super({
@@ -29,16 +29,7 @@ class TestAction extends CommandLineAction {
       summary: 'does the job',
       documentation: 'a longer description'
     });
-  }
 
-  protected async onExecute(): Promise<void> {
-    expect(this._scope1Arg.value).toEqual('scope1value');
-    expect(this._scope2Arg.value).toEqual('scope2value');
-    expect(this._nonConflictingArg.value).toEqual('nonconflictingvalue');
-    this.done = true;
-  }
-
-  protected onDefineParameters(): void {
     // Used to validate that conflicting parameters with different scopes return different values
     this._scope1Arg = this.defineStringParameter({
       parameterLongName: '--arg',
@@ -62,6 +53,13 @@ class TestAction extends CommandLineAction {
       description: 'The argument'
     });
   }
+
+  protected async onExecute(): Promise<void> {
+    expect(this._scope1Arg.value).toEqual('scope1value');
+    expect(this._scope2Arg.value).toEqual('scope2value');
+    expect(this._nonConflictingArg.value).toEqual('nonconflictingvalue');
+    this.done = true;
+  }
 }
 
 class UnscopedDuplicateArgumentTestAction extends CommandLineAction {
@@ -71,19 +69,14 @@ class UnscopedDuplicateArgumentTestAction extends CommandLineAction {
       summary: 'does the job',
       documentation: 'a longer description'
     });
-  }
 
-  protected async onExecute(): Promise<void> {
-    throw new Error('This action should not be executed');
-  }
-
-  protected onDefineParameters(): void {
     // Used to validate that conflicting parameters with at least one being unscoped fails
     this.defineStringParameter({
       parameterLongName: '--arg',
       argumentName: 'ARG',
       description: 'The argument'
     });
+
     // Used to validate that conflicting parameters with at least one being unscoped fails
     this.defineStringParameter({
       parameterLongName: '--arg',
@@ -91,6 +84,10 @@ class UnscopedDuplicateArgumentTestAction extends CommandLineAction {
       argumentName: 'ARG',
       description: 'The argument'
     });
+  }
+
+  protected async onExecute(): Promise<void> {
+    throw new Error('This action should not be executed');
   }
 }
 
@@ -101,27 +98,25 @@ class ScopedDuplicateArgumentTestAction extends CommandLineAction {
       summary: 'does the job',
       documentation: 'a longer description'
     });
+
+    // Used to validate that conflicting parameters with at least one being unscoped fails
+    this.defineStringParameter({
+      parameterLongName: '--arg',
+      parameterScope: 'scope',
+      argumentName: 'ARG',
+      description: 'The argument'
+    });
+    // Used to validate that conflicting parameters with at least one being unscoped fails
+    this.defineStringParameter({
+      parameterLongName: '--arg',
+      parameterScope: 'scope',
+      argumentName: 'ARG',
+      description: 'The argument'
+    });
   }
 
   protected async onExecute(): Promise<void> {
     throw new Error('This action should not be executed');
-  }
-
-  protected onDefineParameters(): void {
-    // Used to validate that conflicting parameters with at least one being unscoped fails
-    this.defineStringParameter({
-      parameterLongName: '--arg',
-      parameterScope: 'scope',
-      argumentName: 'ARG',
-      description: 'The argument'
-    });
-    // Used to validate that conflicting parameters with at least one being unscoped fails
-    this.defineStringParameter({
-      parameterLongName: '--arg',
-      parameterScope: 'scope',
-      argumentName: 'ARG',
-      description: 'The argument'
-    });
   }
 }
 
