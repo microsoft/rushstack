@@ -177,7 +177,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the \\"subspacesEnabled\\" feature to be enabled in subspaces.json.",
+          "description": "(EXPERIMENTAL) Specifies an individual Rush subspace to check, requiring versions to be consistent only within that subspace (ignoring other subspaces). If this parameter is omitted, then \\"rush check\\" will instead require consistency across all projects in the monorepo. Requires the \\"subspacesEnabled\\" setting to be true in subspaces.json.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--subspace",
@@ -1029,14 +1029,6 @@ Object {
           "environmentVariable": undefined,
           "kind": "Flag",
           "longName": "--ignore-git-hooks",
-          "required": false,
-          "shortName": undefined,
-        },
-        Object {
-          "description": "(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the \\"subspacesEnabled\\" feature to be enabled in subspaces.json.",
-          "environmentVariable": undefined,
-          "kind": "String",
-          "longName": "--subspace",
           "required": false,
           "shortName": undefined,
         },
