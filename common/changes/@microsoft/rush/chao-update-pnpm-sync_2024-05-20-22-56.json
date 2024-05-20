@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Change the logic of how to check if a dependency is injected dependency in pnpm-sync-lib. Now, if a dependecy is installed with file: protocol (exclude the tarball installation), then it is a injected installation",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
