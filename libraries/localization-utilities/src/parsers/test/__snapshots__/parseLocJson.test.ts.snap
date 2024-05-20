@@ -39,6 +39,6 @@ exports[`parseLocJson throws on invalid file 1`] = `
 "The loc file is invalid. Error: Error: JSON validation failed:
 test.loc.json
 
-Error: #/foo (must NOT have additional properties)
+Error: #/foo
        must NOT have additional properties: baz"
 `;
