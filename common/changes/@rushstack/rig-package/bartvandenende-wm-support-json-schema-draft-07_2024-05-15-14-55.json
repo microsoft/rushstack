@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/rig-package",
-      "comment": "Update build dependencies",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@rushstack/rig-package"

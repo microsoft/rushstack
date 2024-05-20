@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Update test assertions for schema validation failures.",
+      "comment": "",
       "type": "none"
     }
   ],

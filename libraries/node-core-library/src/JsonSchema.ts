@@ -174,16 +174,6 @@ export class JsonSchema {
     for (const errorDetail of errorDetails) {
       buffer += os.EOL + indent + `Error: #${errorDetail.instancePath}`;
 
-      if (errorDetail.message) {
-        const MAX_LENGTH: number = 40;
-        let truncatedDescription: string = errorDetail.message.trim();
-        if (truncatedDescription.length > MAX_LENGTH) {
-          truncatedDescription = truncatedDescription.substr(0, MAX_LENGTH - 3) + '...';
-        }
-
-        buffer += ` (${truncatedDescription})`;
-      }
-
       buffer += os.EOL + indent + `       ${errorDetail.message}`;
       if (errorDetail.params?.additionalProperty) {
         buffer += `: ${errorDetail.params?.additionalProperty}`;
@@ -263,11 +253,14 @@ export class JsonSchema {
       // Validate each schema in order.  We specifically do not supply them all together, because we want
       // to make sure that circular references will fail to validate.
       for (const collectedSchema of collectedSchemas) {
-        if (!validator.addSchema(collectedSchema._schemaObject)) {
+        // Adding a schema indirectly calls `validateSchema` which
+        // sets an error on the ajv instance for any validation failure.
+        validator.addSchema(collectedSchema._schemaObject);
+        if (validator.errors && validator.errors.length > 0) {
           throw new Error(
             `Failed to validate schema "${collectedSchema.shortName}":` +
               os.EOL +
-              JsonSchema._formatErrorDetails(validator.errors!)
+              JsonSchema._formatErrorDetails(validator.errors)
           );
         }
       }

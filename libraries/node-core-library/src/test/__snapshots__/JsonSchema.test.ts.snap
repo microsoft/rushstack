@@ -3,7 +3,7 @@
 exports[`JsonSchema validateObjectWithCallback successfully reports a compound validation error for format errors 1`] = `
 Array [
   "
-Error: #/exampleLink (must match format \\"uri\\")
+Error: #/exampleLink
        must match format \\"uri\\"",
 ]
 `;
@@ -11,11 +11,11 @@ Error: #/exampleLink (must match format \\"uri\\")
 exports[`JsonSchema validateObjectWithCallback successfully reports a compound validation error schema errors 1`] = `
 Array [
   "
-Error: #/exampleOneOf (must have required property 'field1')
+Error: #/exampleOneOf
        must have required property 'field1'
-Error: #/exampleOneOf (must have required property 'field3')
+Error: #/exampleOneOf
        must have required property 'field3'
-Error: #/exampleOneOf (must match exactly one schema in oneOf)
+Error: #/exampleOneOf
        must match exactly one schema in oneOf",
 ]
 `;
