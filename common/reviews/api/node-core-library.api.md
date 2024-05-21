@@ -431,8 +431,15 @@ export interface IJsonSchemaErrorInfo {
 }
 
 // @public
-export interface IJsonSchemaFromFileOptions {
+export type IJsonSchemaFromFileOptions = IJsonSchemaLoadOptions;
+
+// @public
+export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
+
+// @public
+export interface IJsonSchemaLoadOptions {
     dependentSchemas?: JsonSchema[];
+    schemaVersion?: JsonSchemaVersion;
 }
 
 // @public
@@ -649,10 +656,16 @@ export type JsonObject = any;
 export class JsonSchema {
     ensureCompiled(): void;
     static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSchema;
-    static fromLoadedObject(schemaObject: JsonObject): JsonSchema;
+    static fromLoadedObject(schemaObject: JsonObject, options?: IJsonSchemaFromObjectOptions): JsonSchema;
     get shortName(): string;
     validateObject(jsonObject: JsonObject, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
     validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
+}
+
+// @public
+export enum JsonSchemaVersion {
+    draft04 = "http://json-schema.org/draft-04/schema#",
+    draft07 = "http://json-schema.org/draft-07/schema#"
 }
 
 // @public

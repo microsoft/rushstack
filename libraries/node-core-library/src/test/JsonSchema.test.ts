@@ -2,11 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { JsonFile, type JsonObject } from '../JsonFile';
-import { JsonSchema, type IJsonSchemaErrorInfo } from '../JsonSchema';
+import { JsonSchema, JsonSchemaVersion, type IJsonSchemaErrorInfo } from '../JsonSchema';
 
 describe(JsonSchema.name, () => {
   const schemaPath: string = `${__dirname}/test-data/test-schema.json`;
-  const schema: JsonSchema = JsonSchema.fromFile(schemaPath);
+  const schema: JsonSchema = JsonSchema.fromFile(schemaPath, {
+    schemaVersion: JsonSchemaVersion.draft07
+  });
 
   describe(JsonFile.loadAndValidate.name, () => {
     test('successfully validates a JSON file', () => {

@@ -19,6 +19,22 @@ interface ISchemaWithId {
 }
 
 /**
+ * Specifies the version of json-schema to be validated against.
+ * https://json-schema.org/specification
+ * @public
+ */
+export enum JsonSchemaVersion {
+  /**
+   * Json-schema specification draft-06
+   * */
+  draft04 = 'http://json-schema.org/draft-04/schema#',
+  /**
+   * Json-schema specification draft-07
+   */
+  draft07 = 'http://json-schema.org/draft-07/schema#'
+}
+
+/**
  * Callback function arguments for JsonSchema.validateObjectWithCallback();
  * @public
  */
@@ -46,10 +62,10 @@ export interface IJsonSchemaValidateOptions {
 }
 
 /**
- * Options for JsonSchema.fromFile()
+ * Options for JsonSchema.fromFile() and JsonSchema.fromLoadedObject()
  * @public
  */
-export interface IJsonSchemaFromFileOptions {
+export interface IJsonSchemaLoadOptions {
   /**
    * Other schemas that this schema references, e.g. via the "$ref" directive.
    * @remarks
@@ -63,7 +79,27 @@ export interface IJsonSchemaFromFileOptions {
    * JsonSchema also does not allow circular references between schema dependencies.
    */
   dependentSchemas?: JsonSchema[];
+
+  /**
+   * The jsonschema version to target for validation, equals the '$schema' declaration.
+   * @remarks
+   * Specify the schema version target to provide a fallback for cases where it is
+   * not possible to explicitly set a '$schema' declaration in the schema object or file.
+   */
+  schemaVersion?: JsonSchemaVersion;
 }
+
+/**
+ * Options for JsonSchema.fromFile()
+ * @public
+ */
+export type IJsonSchemaFromFileOptions = IJsonSchemaLoadOptions;
+
+/**
+ * Options for JsonSchema.fromLoadedObject()
+ * @public
+ */
+export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
 
 /**
  * Represents a JSON schema that can be used to validate JSON data files loaded by the JsonFile class.
@@ -79,6 +115,7 @@ export class JsonSchema {
   private _filename: string = '';
   private _validator: ValidateFunction | undefined = undefined;
   private _schemaObject: JsonObject | undefined = undefined;
+  private _schemaVersion: JsonSchemaVersion | undefined = undefined;
 
   private constructor() {}
 
@@ -100,20 +137,27 @@ export class JsonSchema {
 
     if (options) {
       schema._dependentSchemas = options.dependentSchemas || [];
+      schema._schemaVersion = options.schemaVersion;
     }
 
     return schema;
   }
 
   /**
-   * Registers a JsonSchema that will be loaded from a file on disk.
-   * @remarks
-   * NOTE: An error occurs if the file does not exist; however, the file itself is not loaded or validated
-   * until it the schema is actually used.
+   * Registers a JsonSchema that will be loaded from an object.
    */
-  public static fromLoadedObject(schemaObject: JsonObject): JsonSchema {
+  public static fromLoadedObject(
+    schemaObject: JsonObject,
+    options?: IJsonSchemaFromObjectOptions
+  ): JsonSchema {
     const schema: JsonSchema = new JsonSchema();
     schema._schemaObject = schemaObject;
+
+    if (options) {
+      schema._dependentSchemas = options.dependentSchemas || [];
+      schema._schemaVersion = options.schemaVersion;
+    }
+
     return schema;
   }
 
@@ -206,14 +250,13 @@ export class JsonSchema {
   }
 
   /**
-   * Helper function to determine if the targeted schema is using the draft-04 specification
-   * @returns boolean value indicating that the schema uses the draft-04 specification
+   * Helper function to determine the json-schema version to target for validation.
    */
-  private _isDraft04Schema(): boolean {
-    if (this._schemaObject.$schema) {
-      return this._schemaObject.$schema.startsWith('http://json-schema.org/draft-04/');
+  private _getJsonSchemaVersion(): JsonSchemaVersion | undefined {
+    if (this._schemaObject.$schema && Object.values(JsonSchemaVersion).includes(this._schemaObject.$schema)) {
+      return this._schemaObject.$schema;
     } else {
-      return false;
+      return this._schemaVersion;
     }
   }
 
@@ -226,7 +269,7 @@ export class JsonSchema {
     this._ensureLoaded();
 
     if (!this._validator) {
-      const isDraft04: boolean = this._isDraft04Schema();
+      const targetSchemaVersion: JsonSchemaVersion | undefined = this._getJsonSchemaVersion();
       const validatorOptions: AjvOptions = {
         strictSchema: true,
         allowUnionTypes: true
@@ -234,10 +277,14 @@ export class JsonSchema {
 
       let validator: Ajv;
       // Keep legacy support for older draft-04 schema
-      if (isDraft04) {
-        validator = new AjvDraft04(validatorOptions);
-      } else {
-        validator = new Ajv(validatorOptions);
+      switch (targetSchemaVersion) {
+        case JsonSchemaVersion.draft04:
+          validator = new AjvDraft04(validatorOptions);
+          break;
+        case JsonSchemaVersion.draft07:
+        default:
+          validator = new Ajv(validatorOptions);
+          break;
       }
 
       // Enable json-schema format validation
@@ -253,7 +300,7 @@ export class JsonSchema {
       // Validate each schema in order.  We specifically do not supply them all together, because we want
       // to make sure that circular references will fail to validate.
       for (const collectedSchema of collectedSchemas) {
-        validator.validateSchema(collectedSchema._schemaObject);
+        validator.validateSchema(collectedSchema._schemaObject) as boolean;
         if (validator.errors && validator.errors.length > 0) {
           throw new Error(
             `Failed to validate schema "${collectedSchema.shortName}":` +
