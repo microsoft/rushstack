@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Fix an issue where `@import` and `@use` rules that referenced dependency packages that are not direct dependencies of the project being built were not correctly resolved.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin"
+}
