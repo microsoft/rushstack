@@ -23,16 +23,7 @@ interface ISchemaWithId {
  * https://json-schema.org/specification
  * @public
  */
-export enum JsonSchemaVersion {
-  /**
-   * Json-schema specification draft-06
-   * */
-  draft04 = 'http://json-schema.org/draft-04/schema#',
-  /**
-   * Json-schema specification draft-07
-   */
-  draft07 = 'http://json-schema.org/draft-07/schema#'
-}
+export type JsonSchemaVersion = 'draft-04' | 'draft-07';
 
 /**
  * Callback function arguments for JsonSchema.validateObjectWithCallback();
@@ -81,10 +72,14 @@ export interface IJsonSchemaLoadOptions {
   dependentSchemas?: JsonSchema[];
 
   /**
-   * The jsonschema version to target for validation, equals the '$schema' declaration.
+   * The json-schema version to target for validation.
+   *
+   * @defaultValue draft-07
+   *
    * @remarks
-   * Specify the schema version target to provide a fallback for cases where it is
-   * not possible to explicitly set a '$schema' declaration in the schema object or file.
+   * If the a version is not explicitly set, the schema object's `$schema` property
+   * will be inspected to determine the version. If a `$schema` property is not found
+   * or does not match an expected URL, the default version will be used.
    */
   schemaVersion?: JsonSchemaVersion;
 }
@@ -100,6 +95,24 @@ export type IJsonSchemaFromFileOptions = IJsonSchemaLoadOptions;
  * @public
  */
 export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
+
+const JSON_SCHEMA_URL_PREFIX_BY_JSON_SCHEMA_VERSION: Map<JsonSchemaVersion, string> = new Map([
+  ['draft-04', 'http://json-schema.org/draft-04/schema#'],
+  ['draft-07', 'http://json-schema.org/draft-07/schema#']
+]);
+
+/**
+ * Helper function to determine the json-schema version to target for validation.
+ */
+function _inferJsonSchemaVersion({ $schema }: JsonObject): JsonSchemaVersion | undefined {
+  if ($schema) {
+    for (const [jsonSchemaVersion, urlPrefix] of JSON_SCHEMA_URL_PREFIX_BY_JSON_SCHEMA_VERSION) {
+      if ($schema.startsWith(urlPrefix)) {
+        return jsonSchemaVersion;
+      }
+    }
+  }
+}
 
 /**
  * Represents a JSON schema that can be used to validate JSON data files loaded by the JsonFile class.
@@ -250,21 +263,6 @@ export class JsonSchema {
   }
 
   /**
-   * Helper function to determine the json-schema version to target for validation.
-   */
-  private _getJsonSchemaVersion(): JsonSchemaVersion | undefined {
-    const enumValues: JsonSchemaVersion[] = Object.values(JsonSchemaVersion);
-    if (this._schemaObject.$schema) {
-      const versionMatch: JsonSchemaVersion | undefined = enumValues.find((enumValue) =>
-        enumValue.startsWith(this._schemaObject.$schema)
-      );
-      return versionMatch ?? this._schemaVersion;
-    } else {
-      return this._schemaVersion;
-    }
-  }
-
-  /**
    * If not already done, this loads the schema from disk and compiles it.
    * @remarks
    * Any dependencies will be compiled as well.
@@ -273,7 +271,8 @@ export class JsonSchema {
     this._ensureLoaded();
 
     if (!this._validator) {
-      const targetSchemaVersion: JsonSchemaVersion | undefined = this._getJsonSchemaVersion();
+      const targetSchemaVersion: JsonSchemaVersion | undefined =
+        this._schemaVersion ?? _inferJsonSchemaVersion(this._schemaObject);
       const validatorOptions: AjvOptions = {
         strictSchema: true,
         allowUnionTypes: true
@@ -282,13 +281,16 @@ export class JsonSchema {
       let validator: Ajv;
       // Keep legacy support for older draft-04 schema
       switch (targetSchemaVersion) {
-        case JsonSchemaVersion.draft04:
+        case 'draft-04': {
           validator = new AjvDraft04(validatorOptions);
           break;
-        case JsonSchemaVersion.draft07:
-        default:
+        }
+
+        case 'draft-07':
+        default: {
           validator = new Ajv(validatorOptions);
           break;
+        }
       }
 
       // Enable json-schema format validation

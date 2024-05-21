@@ -11,6 +11,8 @@ Error: #/type
        must match a schema in anyOf"
 `;
 
+exports[`JsonSchema loadAndValidate throws an error if the wrong schema version is explicitly specified for an incompatible schema object 1`] = `"no schema with key or ref \\"http://json-schema.org/draft-04/schema#\\""`;
+
 exports[`JsonSchema validateObjectWithCallback successfully reports a compound validation error for format errors 1`] = `
 Array [
   "

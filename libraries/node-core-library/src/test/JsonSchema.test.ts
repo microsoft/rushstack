@@ -2,12 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import { JsonFile, type JsonObject } from '../JsonFile';
-import { JsonSchema, JsonSchemaVersion, type IJsonSchemaErrorInfo } from '../JsonSchema';
+import { JsonSchema, type IJsonSchemaErrorInfo } from '../JsonSchema';
+
+const SCHEMA_PATH: string = `${__dirname}/test-data/test-schema.json`;
+const DRAFT_04_SCHEMA_PATH: string = `${__dirname}/test-data/test-schema-draft-04.json`;
+const DRAFT_07_SCHEMA_PATH: string = `${__dirname}/test-data/test-schema-draft-07.json`;
 
 describe(JsonSchema.name, () => {
-  const schemaPath: string = `${__dirname}/test-data/test-schema.json`;
-  const schema: JsonSchema = JsonSchema.fromFile(schemaPath, {
-    schemaVersion: JsonSchemaVersion.draft07
+  const schema: JsonSchema = JsonSchema.fromFile(SCHEMA_PATH, {
+    schemaVersion: 'draft-07'
   });
 
   describe(JsonFile.loadAndValidate.name, () => {
@@ -22,8 +25,7 @@ describe(JsonSchema.name, () => {
     });
 
     test('successfully validates a JSON file against a draft-04 schema', () => {
-      const schemaPathDraft04: string = `${__dirname}/test-data/test-schema-draft-04.json`;
-      const schemaDraft04: JsonSchema = JsonSchema.fromFile(schemaPathDraft04);
+      const schemaDraft04: JsonSchema = JsonSchema.fromFile(DRAFT_04_SCHEMA_PATH);
 
       const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
       const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schemaDraft04);
@@ -34,9 +36,17 @@ describe(JsonSchema.name, () => {
       });
     });
 
+    test('throws an error if the wrong schema version is explicitly specified for an incompatible schema object', () => {
+      const schemaDraft04: JsonSchema = JsonSchema.fromFile(DRAFT_04_SCHEMA_PATH, {
+        schemaVersion: 'draft-07'
+      });
+
+      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
+      expect(() => JsonFile.loadAndValidate(jsonPath, schemaDraft04)).toThrowErrorMatchingSnapshot();
+    });
+
     test('validates a JSON file against a draft-07 schema', () => {
-      const schemaPathDraft07: string = `${__dirname}/test-data/test-schema-draft-07.json`;
-      const schemaDraft07: JsonSchema = JsonSchema.fromFile(schemaPathDraft07);
+      const schemaDraft07: JsonSchema = JsonSchema.fromFile(DRAFT_07_SCHEMA_PATH);
 
       const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
       const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schemaDraft07);

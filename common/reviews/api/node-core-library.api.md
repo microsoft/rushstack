@@ -663,10 +663,7 @@ export class JsonSchema {
 }
 
 // @public
-export enum JsonSchemaVersion {
-    draft04 = "http://json-schema.org/draft-04/schema#",
-    draft07 = "http://json-schema.org/draft-07/schema#"
-}
+export type JsonSchemaVersion = 'draft-04' | 'draft-07';
 
 // @public
 export enum JsonSyntax {
