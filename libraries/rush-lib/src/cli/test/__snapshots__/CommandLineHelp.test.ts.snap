@@ -332,9 +332,13 @@ Optional arguments:
                         names will not be truncated. This has no effect if 
                         the --json flag is also specified.
   --subspace SUBSPACE_NAME
-                        (EXPERIMENTAL) Specifies a Rush subspace to be 
-                        installed. Requires the \\"subspacesEnabled\\" feature to 
-                        be enabled in subspaces.json.
+                        (EXPERIMENTAL) Specifies an individual Rush subspace 
+                        to check, requiring versions to be consistent only 
+                        within that subspace (ignoring other subspaces). If 
+                        this parameter is omitted, then \\"rush check\\" will 
+                        instead require consistency across all projects in 
+                        the monorepo. Requires the \\"subspacesEnabled\\" setting 
+                        to be true in subspaces.json.
 "
 `;
 
@@ -1294,7 +1298,7 @@ exports[`CommandLineHelp prints the help for each action: version 1`] = `
                     [--override-version NEW_VERSION] [--bump]
                     [--bypass-policy] [--version-policy POLICY]
                     [--override-bump BUMPTYPE] [--override-prerelease-id ID]
-                    [--ignore-git-hooks] [--subspace SUBSPACE_NAME]
+                    [--ignore-git-hooks]
                     
 
 use this \\"rush version\\" command to ensure version policies and bump versions.
@@ -1332,9 +1336,5 @@ Optional arguments:
                         \\"--ensure-version-policy\\" is provided.
   --ignore-git-hooks    Skips execution of all git hooks. Make sure you know 
                         what you are skipping.
-  --subspace SUBSPACE_NAME
-                        (EXPERIMENTAL) Specifies a Rush subspace to be 
-                        installed. Requires the \\"subspacesEnabled\\" feature to 
-                        be enabled in subspaces.json.
 "
 `;
