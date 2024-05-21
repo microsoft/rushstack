@@ -42,7 +42,6 @@ for (const runFolderPath of RUN_FOLDER_PATHS) {
     const { version: eslintVersion } = require(`${eslintPackageName}/package.json`);
 
     const startLoggingMessage = `-- Running eslint-bulk-suppressions for eslint@${eslintVersion} in ${runFolderPath} --`;
-    const endLoggingMessage = '-'.repeat(startLoggingMessage.length);
     console.log(startLoggingMessage);
     const referenceSuppressionsJsonPath = `${folderPath}/.eslint-bulk-suppressions-${eslintVersion}.json`;
     const existingSuppressions = tryLoadSuppressions(referenceSuppressionsJsonPath);
@@ -75,11 +74,14 @@ for (const runFolderPath of RUN_FOLDER_PATHS) {
       }
     );
 
-    console.log('STDOUT:');
-    console.log(executableResult.stdout.toString());
-
-    console.log('STDERR:');
-    console.log(executableResult.stderr.toString());
+    if (executableResult.status !== 0) {
+      console.error('The eslint-bulk-suppressions command failed.');
+      console.error('STDOUT:');
+      console.error(executableResult.stdout.toString());
+      console.error('STDERR:');
+      console.error(executableResult.stderr.toString());
+      process.exit(1);
+    }
 
     const newSuppressions = tryLoadSuppressions(suppressionsJsonPath);
     if (newSuppressions === existingSuppressions) {
@@ -90,9 +92,6 @@ for (const runFolderPath of RUN_FOLDER_PATHS) {
     }
 
     FileSystem.deleteFile(suppressionsJsonPath);
-
-    console.log(endLoggingMessage);
-    console.log();
   }
 }
 
