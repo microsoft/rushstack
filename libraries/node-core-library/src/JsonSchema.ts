@@ -253,8 +253,10 @@ export class JsonSchema {
    * Helper function to determine the json-schema version to target for validation.
    */
   private _getJsonSchemaVersion(): JsonSchemaVersion | undefined {
-    if (this._schemaObject.$schema && Object.values(JsonSchemaVersion).includes(this._schemaObject.$schema)) {
-      return this._schemaObject.$schema;
+    const enumValues: JsonSchemaVersion[] = Object.values(JsonSchemaVersion);
+    if (this._schemaObject.$schema) {
+      const versionMatch = enumValues.find((enumValue) => enumValue.startsWith(this._schemaObject.$schema));
+      return versionMatch ?? this._schemaVersion;
     } else {
       return this._schemaVersion;
     }
