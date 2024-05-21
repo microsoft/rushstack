@@ -1099,12 +1099,6 @@ export class RushConfiguration {
 
       // Check if there are prohibited files when subspaces is enabled
       if (subspacesFeatureEnabled) {
-        if (filename === '.npmrc') {
-          throw new Error(
-            "When subspaces is enabled, the global .npmrc file that will be used is '.npmrc-global', instead of .npmrc. " +
-              "Please remove the '.npmrc' file and add it's contents to '.npmrc-global' if you want them to be applied to all subspaces."
-          );
-        }
         if (filename === RushConstants.pnpmfileV6Filename || filename === RushConstants.pnpmfileV1Filename) {
           throw new Error(
             'When subspaces is enabled, rush will only use the pnpmfile.cjs file located in the subspace configuration. ' +
