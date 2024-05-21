@@ -97,8 +97,8 @@ export type IJsonSchemaFromFileOptions = IJsonSchemaLoadOptions;
 export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
 
 const JSON_SCHEMA_URL_PREFIX_BY_JSON_SCHEMA_VERSION: Map<JsonSchemaVersion, string> = new Map([
-  ['draft-04', 'http://json-schema.org/draft-04/schema#'],
-  ['draft-07', 'http://json-schema.org/draft-07/schema#']
+  ['draft-04', 'http://json-schema.org/draft-04/schema'],
+  ['draft-07', 'http://json-schema.org/draft-07/schema']
 ]);
 
 /**
