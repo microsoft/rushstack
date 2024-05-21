@@ -306,14 +306,6 @@ export class Async {
   }
 
   /**
-   * @deprecated Use {@link Async.sleepAsync} instead.
-   */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public static async sleep(ms: number): Promise<void> {
-    await Async.sleepAsync(ms);
-  }
-
-  /**
    * Executes an async function and optionally retries it if it fails.
    */
   public static async runWithRetriesAsync<TResult>({

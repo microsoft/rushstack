@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Remove the deprecated `Async.sleep` function.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

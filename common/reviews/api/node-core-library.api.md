@@ -39,8 +39,6 @@ export class Async {
         weighted: true;
     }): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
-    // @deprecated (undocumented)
-    static sleep(ms: number): Promise<void>;
     static sleepAsync(ms: number): Promise<void>;
     static validateWeightedIterable(operation: IWeighted): void;
 }
