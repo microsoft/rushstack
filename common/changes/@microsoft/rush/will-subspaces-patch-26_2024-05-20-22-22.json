@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Rename subspace level pnpmfile from .pnpmfile-subspace.cjs to .pnpmfile",
+      "comment": "Rename the subspace level lockfile from `.pnpmfile-subspace.cjs` to `.pnpmfile.cjs`. This is a breaking change for the experimental feature.",
       "type": "none"
     }
   ],
