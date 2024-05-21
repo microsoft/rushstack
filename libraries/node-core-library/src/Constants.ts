@@ -6,26 +6,28 @@
  *
  * @public
  */
-export enum FileConstants {
+// eslint-disable-next-line @typescript-eslint/typedef
+export const FileConstants = {
   /**
    * "package.json" - the configuration file that defines an NPM package
    */
-  PackageJson = 'package.json'
-}
+  PackageJson: 'package.json'
+} as const;
 
 /**
  * String constants for common folder names.
  *
  * @public
  */
-export enum FolderConstants {
+// eslint-disable-next-line @typescript-eslint/typedef
+export const FolderConstants = {
   /**
    * ".git" - the data storage for a Git working folder
    */
-  Git = '.git',
+  Git: '.git',
 
   /**
    * "node_modules" - the folder where package managers install their files
    */
-  NodeModules = 'node_modules'
-}
+  NodeModules: 'node_modules'
+} as const;
