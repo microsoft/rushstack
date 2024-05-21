@@ -461,6 +461,7 @@ export interface INodePackageJson {
     dependenciesMeta?: IDependenciesMetaTable;
     description?: string;
     devDependencies?: IPackageJsonDependencyTable;
+    exports?: string | string[] | Record<string, null | string | IPackageJsonExports>;
     homepage?: string;
     license?: string;
     main?: string;
@@ -496,6 +497,19 @@ export interface IPackageJson extends INodePackageJson {
 // @public
 export interface IPackageJsonDependencyTable {
     [dependencyName: string]: string;
+}
+
+// @public
+export interface IPackageJsonExports {
+    'node-addons'?: string | IPackageJsonExports;
+    browser?: string | IPackageJsonExports;
+    default?: string | IPackageJsonExports;
+    development?: string | IPackageJsonExports;
+    import?: string | IPackageJsonExports;
+    node?: string | IPackageJsonExports;
+    production?: string | IPackageJsonExports;
+    require?: string | IPackageJsonExports;
+    types?: string | IPackageJsonExports;
 }
 
 // @public

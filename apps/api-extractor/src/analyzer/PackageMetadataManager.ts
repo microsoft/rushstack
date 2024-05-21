@@ -93,8 +93,19 @@ export class PackageMetadataManager {
       // 3. If package.json contains a field such as "main": "./path1/path2/index.js", then we look for
       // the file under "./path1/path2/tsdoc-metadata.json"
       tsdocMetadataRelativePath = path.join(path.dirname(packageJson.main), tsdocMetadataFilename);
+    } else if (
+      typeof packageJson.exports === 'object' &&
+      !Array.isArray(packageJson.exports) &&
+      packageJson.exports?.['.']?.types
+    ) {
+      // 4. If package.json contains a field such as "exports": { ".": { "types": "./path1/path2/index.d.ts" } },
+      // then we look for the file under "./path1/path2/tsdoc-metadata.json"
+      tsdocMetadataRelativePath = path.join(
+        path.dirname(packageJson.exports['.'].types),
+        tsdocMetadataFilename
+      );
     } else {
-      // 4. If none of the above rules apply, then by default we look for the file under "./tsdoc-metadata.json"
+      // 5. If none of the above rules apply, then by default we look for the file under "./tsdoc-metadata.json"
       // since the default entry point is "./index.js"
       tsdocMetadataRelativePath = tsdocMetadataFilename;
     }

@@ -72,6 +72,69 @@ export interface IDependenciesMetaTable {
 }
 
 /**
+ * This interface is part of the {@link IPackageJson} file format. It is used for the values
+ * of the "exports" field.
+ *
+ * See {@link https://nodejs.org/api/packages.html#conditional-exports | Node.js documentation on Conditional Exports} and
+ * {@link https://nodejs.org/api/packages.html#community-conditions-definitions | Node.js documentation on Community Conditional Exports}.
+ *
+ * @public
+ */
+export interface IPackageJsonExports {
+  /**
+   * This export is like {@link IPackageJsonExports.node} in that it matches for any NodeJS environment.
+   * This export is specifically for native C++ addons.
+   */
+  'node-addons'?: string | IPackageJsonExports;
+
+  /**
+   * This export matches for any NodeJS environment.
+   */
+  node?: string | IPackageJsonExports;
+
+  /**
+   * This export matches when loaded via ESM syntax (i.e. - `import '...'` or `import('...')`).
+   * This is always mutually exclusive with {@link IPackageJsonExports.require}.
+   */
+  import?: string | IPackageJsonExports;
+
+  /**
+   * This export matches when loaded via `require()`.
+   * This is always mutually exclusive with {@link IPackageJsonExports.import}.
+   */
+  require?: string | IPackageJsonExports;
+
+  /**
+   * This export matches as a fallback when no other conditions match. Because exports are evaluated in
+   * the order that they are specified in the `package.json` file, this condition should always come last
+   * as no later exports will match if this one does.
+   */
+  default?: string | IPackageJsonExports;
+
+  /**
+   * This export matches when loaded by the typing system (i.e. - the TypeScript compiler).
+   */
+  types?: string | IPackageJsonExports;
+
+  /**
+   * Any web browser environment.
+   */
+  browser?: string | IPackageJsonExports;
+
+  /**
+   * This export matches in development-only environments.
+   * This is always mutually exclusive with {@link IPackageJsonExports.production}.
+   */
+  development?: string | IPackageJsonExports;
+
+  /**
+   * This export matches in production-only environments.
+   * This is always mutually exclusive with {@link IPackageJsonExports.development}.
+   */
+  production?: string | IPackageJsonExports;
+}
+
+/**
  * An interface for accessing common fields from a package.json file whose version field may be missing.
  *
  * @remarks
@@ -201,6 +264,13 @@ export interface INodePackageJson {
    * | 0000-selective-versions-resolutions.md RFC} for details.
    */
   resolutions?: Record<string, string>;
+
+  /**
+   * The "exports" field is used to specify the entry points for a package.
+   * See {@link https://nodejs.org/api/packages.html#exports | Node.js documentation}
+   */
+  // eslint-disable-next-line @rushstack/no-new-null
+  exports?: string | string[] | Record<string, null | string | IPackageJsonExports>;
 }
 
 /**
