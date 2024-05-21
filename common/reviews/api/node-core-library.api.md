@@ -39,8 +39,6 @@ export class Async {
         weighted: true;
     }): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
-    // @deprecated (undocumented)
-    static sleep(ms: number): Promise<void>;
     static sleepAsync(ms: number): Promise<void>;
     static validateWeightedIterable(operation: IWeighted): void;
 }
@@ -118,9 +116,9 @@ export type ExecutableStdioMapping = 'pipe' | 'ignore' | 'inherit' | ExecutableS
 export type ExecutableStdioStreamMapping = 'pipe' | 'ignore' | 'inherit' | NodeJS.WritableStream | NodeJS.ReadableStream | number | undefined;
 
 // @public
-export enum FileConstants {
-    PackageJson = "package.json"
-}
+export const FileConstants: {
+    readonly PackageJson: "package.json";
+};
 
 // @public
 export class FileError extends Error {
@@ -227,10 +225,10 @@ export class FileWriter {
 }
 
 // @public
-export enum FolderConstants {
-    Git = ".git",
-    NodeModules = "node_modules"
-}
+export const FolderConstants: {
+    readonly Git: ".git";
+    readonly NodeModules: "node_modules";
+};
 
 // @public
 export type FolderItem = fs.Dirent;
