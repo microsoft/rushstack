@@ -666,24 +666,24 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       // Look for any workspace linked packages anywhere in this subspace, symlink them from the temp node_modules folder.
-      const subspaceDependencyProjects: Set<RushConfigurationProject> = new Set();
-      for (const subspaceProject of subspace.getProjects()) {
-        for (const dependencyProject of subspaceProject.dependencyProjects) {
-          subspaceDependencyProjects.add(dependencyProject);
-        }
-      }
-      for (const dependencyProject of subspaceDependencyProjects) {
-        const symlinkToCreate: string = `${tempNodeModulesPath}/${dependencyProject.packageName}`;
-        if (!Utilities.existsOrIsSymlink(symlinkToCreate)) {
-          const parentFolder: string = Utilities.trimAfterLastSlash(symlinkToCreate);
-          await FileSystem.ensureFolderAsync(parentFolder);
-          BaseLinkManager._createSymlink({
-            linkTargetPath: dependencyProject.projectFolder,
-            newLinkPath: symlinkToCreate,
-            symlinkKind: SymlinkKind.Directory
-          });
-        }
-      }
+      // const subspaceDependencyProjects: Set<RushConfigurationProject> = new Set();
+      // for (const subspaceProject of subspace.getProjects()) {
+      //   for (const dependencyProject of subspaceProject.dependencyProjects) {
+      //     subspaceDependencyProjects.add(dependencyProject);
+      //   }
+      // }
+      // for (const dependencyProject of subspaceDependencyProjects) {
+      //   const symlinkToCreate: string = `${tempNodeModulesPath}/${dependencyProject.packageName}`;
+      //   if (!Utilities.existsOrIsSymlink(symlinkToCreate)) {
+      //     const parentFolder: string = Utilities.trimAfterLastSlash(symlinkToCreate);
+      //     await FileSystem.ensureFolderAsync(parentFolder);
+      //     BaseLinkManager._createSymlink({
+      //       linkTargetPath: dependencyProject.projectFolder,
+      //       newLinkPath: symlinkToCreate,
+      //       symlinkKind: SymlinkKind.Directory
+      //     });
+      //   }
+      // }
     }
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     await new FlagFile(

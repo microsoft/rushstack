@@ -19,9 +19,8 @@
 #   //registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}
 #
 #
-# * * * This file will not be used if "subspacesFeatureEnabled" is turned on!
-#
-# NOTE: If "subspacesFeatureEnabled" is enabled in rush.json, rush will use the ".npmrc-global" file,
-# which has settings that can be overriden by individual subspace .npmrc files.
+# NOTE: When the "subspacesFeatureEnabled" is enabled in rush.json, rush will use
+# this file to configure global monorepo-level npmrc configurations that can be overriden
+# by subspace level .npmrc files.
 registry=https://registry.npmjs.org/
 always-auth=false
