@@ -57,10 +57,13 @@ export {
   JsonFile
 } from './JsonFile';
 export {
-  JsonSchema,
   IJsonSchemaErrorInfo,
+  IJsonSchemaFromFileOptions,
+  IJsonSchemaFromObjectOptions,
+  IJsonSchemaLoadOptions,
   IJsonSchemaValidateOptions,
-  IJsonSchemaFromFileOptions
+  JsonSchema,
+  JsonSchemaVersion
 } from './JsonSchema';
 export { LockFile } from './LockFile';
 export { MapExtensions } from './MapExtensions';

@@ -4,15 +4,26 @@
 import * as os from 'os';
 import * as path from 'path';
 
-import { JsonFile, type JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';
+import { JsonFile, type JsonObject } from './JsonFile';
 
-import type ValidatorType from 'z-schema';
-const Validator: typeof import('z-schema') = require('z-schema/dist/ZSchema-browser-min');
+import Ajv, { type Options as AjvOptions, type ErrorObject, type ValidateFunction } from 'ajv';
+import AjvDraft04 from 'ajv-draft-04';
+import addFormats from 'ajv-formats';
 
 interface ISchemaWithId {
+  // draft-04 uses "id"
   id: string | undefined;
+  // draft-06 and higher uses "$id"
+  $id: string | undefined;
 }
+
+/**
+ * Specifies the version of json-schema to be validated against.
+ * https://json-schema.org/specification
+ * @public
+ */
+export type JsonSchemaVersion = 'draft-04' | 'draft-07';
 
 /**
  * Callback function arguments for JsonSchema.validateObjectWithCallback();
@@ -20,7 +31,7 @@ interface ISchemaWithId {
  */
 export interface IJsonSchemaErrorInfo {
   /**
-   * The z-schema error tree, formatted as an indented text string.
+   * The ajv error list, formatted as an indented text string.
    */
   details: string;
 }
@@ -34,7 +45,7 @@ export interface IJsonSchemaValidateOptions {
    * A custom header that will be used to report schema errors.
    * @remarks
    * If omitted, the default header is "JSON validation failed:".  The error message starts with
-   * the header, followed by the full input filename, followed by the z-schema error tree.
+   * the header, followed by the full input filename, followed by the ajv error list.
    * If you wish to customize all aspects of the error message, use JsonFile.loadAndValidateWithCallback()
    * or JsonSchema.validateObjectWithCallback().
    */
@@ -42,15 +53,15 @@ export interface IJsonSchemaValidateOptions {
 }
 
 /**
- * Options for JsonSchema.fromFile()
+ * Options for JsonSchema.fromFile() and JsonSchema.fromLoadedObject()
  * @public
  */
-export interface IJsonSchemaFromFileOptions {
+export interface IJsonSchemaLoadOptions {
   /**
    * Other schemas that this schema references, e.g. via the "$ref" directive.
    * @remarks
    * The tree of dependent schemas may reference the same schema more than once.
-   * However, if the same schema "id" is used by two different JsonSchema instances,
+   * However, if the same schema "$id" is used by two different JsonSchema instances,
    * an error will be reported.  This means you cannot load the same filename twice
    * and use them both together, and you cannot have diamond dependencies on different
    * versions of the same schema.  Although technically this would be possible to support,
@@ -59,6 +70,48 @@ export interface IJsonSchemaFromFileOptions {
    * JsonSchema also does not allow circular references between schema dependencies.
    */
   dependentSchemas?: JsonSchema[];
+
+  /**
+   * The json-schema version to target for validation.
+   *
+   * @defaultValue draft-07
+   *
+   * @remarks
+   * If the a version is not explicitly set, the schema object's `$schema` property
+   * will be inspected to determine the version. If a `$schema` property is not found
+   * or does not match an expected URL, the default version will be used.
+   */
+  schemaVersion?: JsonSchemaVersion;
+}
+
+/**
+ * Options for JsonSchema.fromFile()
+ * @public
+ */
+export type IJsonSchemaFromFileOptions = IJsonSchemaLoadOptions;
+
+/**
+ * Options for JsonSchema.fromLoadedObject()
+ * @public
+ */
+export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
+
+const JSON_SCHEMA_URL_PREFIX_BY_JSON_SCHEMA_VERSION: Map<JsonSchemaVersion, string> = new Map([
+  ['draft-04', 'http://json-schema.org/draft-04/schema'],
+  ['draft-07', 'http://json-schema.org/draft-07/schema']
+]);
+
+/**
+ * Helper function to determine the json-schema version to target for validation.
+ */
+function _inferJsonSchemaVersion({ $schema }: JsonObject): JsonSchemaVersion | undefined {
+  if ($schema) {
+    for (const [jsonSchemaVersion, urlPrefix] of JSON_SCHEMA_URL_PREFIX_BY_JSON_SCHEMA_VERSION) {
+      if ($schema.startsWith(urlPrefix)) {
+        return jsonSchemaVersion;
+      }
+    }
+  }
 }
 
 /**
@@ -73,8 +126,9 @@ export interface IJsonSchemaFromFileOptions {
 export class JsonSchema {
   private _dependentSchemas: JsonSchema[] = [];
   private _filename: string = '';
-  private _validator: ValidatorType | undefined = undefined;
+  private _validator: ValidateFunction | undefined = undefined;
   private _schemaObject: JsonObject | undefined = undefined;
+  private _schemaVersion: JsonSchemaVersion | undefined = undefined;
 
   private constructor() {}
 
@@ -96,20 +150,27 @@ export class JsonSchema {
 
     if (options) {
       schema._dependentSchemas = options.dependentSchemas || [];
+      schema._schemaVersion = options.schemaVersion;
     }
 
     return schema;
   }
 
   /**
-   * Registers a JsonSchema that will be loaded from a file on disk.
-   * @remarks
-   * NOTE: An error occurs if the file does not exist; however, the file itself is not loaded or validated
-   * until it the schema is actually used.
+   * Registers a JsonSchema that will be loaded from an object.
    */
-  public static fromLoadedObject(schemaObject: JsonObject): JsonSchema {
+  public static fromLoadedObject(
+    schemaObject: JsonObject,
+    options?: IJsonSchemaFromObjectOptions
+  ): JsonSchema {
     const schema: JsonSchema = new JsonSchema();
     schema._schemaObject = schemaObject;
+
+    if (options) {
+      schema._dependentSchemas = options.dependentSchemas || [];
+      schema._schemaVersion = options.schemaVersion;
+    }
+
     return schema;
   }
 
@@ -130,12 +191,12 @@ export class JsonSchema {
       if (schemaId === '') {
         throw new Error(
           `This schema ${dependentSchema.shortName} cannot be referenced` +
-            ' because is missing the "id" field'
+            ' because is missing the "id" (draft-04) or "$id" field'
         );
       }
       if (seenIds.has(schemaId)) {
         throw new Error(
-          `This schema ${dependentSchema.shortName} has the same "id" as another schema in this set`
+          `This schema ${dependentSchema.shortName} has the same "id" (draft-04) or "$id" as another schema in this set`
         );
       }
 
@@ -155,7 +216,7 @@ export class JsonSchema {
   /**
    * Used to nicely format the ZSchema error tree.
    */
-  private static _formatErrorDetails(errorDetails: ValidatorType.SchemaErrorDetail[]): string {
+  private static _formatErrorDetails(errorDetails: ErrorObject[]): string {
     return JsonSchema._formatErrorDetailsHelper(errorDetails, '', '');
   }
 
@@ -163,27 +224,16 @@ export class JsonSchema {
    * Used by _formatErrorDetails.
    */
   private static _formatErrorDetailsHelper(
-    errorDetails: ValidatorType.SchemaErrorDetail[],
+    errorDetails: ErrorObject[],
     indent: string,
     buffer: string
   ): string {
     for (const errorDetail of errorDetails) {
-      buffer += os.EOL + indent + `Error: ${errorDetail.path}`;
-
-      if (errorDetail.description) {
-        const MAX_LENGTH: number = 40;
-        let truncatedDescription: string = errorDetail.description.trim();
-        if (truncatedDescription.length > MAX_LENGTH) {
-          truncatedDescription = truncatedDescription.substr(0, MAX_LENGTH - 3) + '...';
-        }
-
-        buffer += ` (${truncatedDescription})`;
-      }
+      buffer += os.EOL + indent + `Error: #${errorDetail.instancePath}`;
 
       buffer += os.EOL + indent + `       ${errorDetail.message}`;
-
-      if (errorDetail.inner) {
-        buffer = JsonSchema._formatErrorDetailsHelper(errorDetail.inner, indent + '  ', buffer);
+      if (errorDetail.params?.additionalProperty) {
+        buffer += `: ${errorDetail.params?.additionalProperty}`;
       }
     }
 
@@ -193,7 +243,7 @@ export class JsonSchema {
   /**
    * Returns a short name for this schema, for use in error messages.
    * @remarks
-   * If the schema was loaded from a file, then the base filename is used.  Otherwise, the "id"
+   * If the schema was loaded from a file, then the base filename is used.  Otherwise, the "$id"
    * field is used if available.
    */
   public get shortName(): string {
@@ -202,6 +252,8 @@ export class JsonSchema {
         const schemaWithId: ISchemaWithId = this._schemaObject as ISchemaWithId;
         if (schemaWithId.id) {
           return schemaWithId.id;
+        } else if (schemaWithId.$id) {
+          return schemaWithId.$id;
         }
       }
       return '(anonymous schema)';
@@ -219,19 +271,31 @@ export class JsonSchema {
     this._ensureLoaded();
 
     if (!this._validator) {
-      // Don't assign this to _validator until we're sure everything was successful
-      const newValidator: ValidatorType = new Validator({
-        breakOnFirstError: false,
-        noTypeless: true,
-        noExtraKeywords: true
-      });
-
-      const anythingSchema: JsonObject = {
-        type: ['array', 'boolean', 'integer', 'number', 'object', 'string']
+      const targetSchemaVersion: JsonSchemaVersion | undefined =
+        this._schemaVersion ?? _inferJsonSchemaVersion(this._schemaObject);
+      const validatorOptions: AjvOptions = {
+        strictSchema: true,
+        allowUnionTypes: true
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (newValidator as any).setRemoteReference('http://json-schema.org/draft-04/schema', anythingSchema);
+      let validator: Ajv;
+      // Keep legacy support for older draft-04 schema
+      switch (targetSchemaVersion) {
+        case 'draft-04': {
+          validator = new AjvDraft04(validatorOptions);
+          break;
+        }
+
+        case 'draft-07':
+        default: {
+          validator = new Ajv(validatorOptions);
+          break;
+        }
+      }
+
+      // Enable json-schema format validation
+      // https://ajv.js.org/packages/ajv-formats.html
+      addFormats(validator);
 
       const collectedSchemas: JsonSchema[] = [];
       const seenObjects: Set<JsonSchema> = new Set<JsonSchema>();
@@ -242,16 +306,18 @@ export class JsonSchema {
       // Validate each schema in order.  We specifically do not supply them all together, because we want
       // to make sure that circular references will fail to validate.
       for (const collectedSchema of collectedSchemas) {
-        if (!newValidator.validateSchema(collectedSchema._schemaObject)) {
+        validator.validateSchema(collectedSchema._schemaObject) as boolean;
+        if (validator.errors && validator.errors.length > 0) {
           throw new Error(
             `Failed to validate schema "${collectedSchema.shortName}":` +
               os.EOL +
-              JsonSchema._formatErrorDetails(newValidator.getLastErrors())
+              JsonSchema._formatErrorDetails(validator.errors)
           );
         }
+        validator.addSchema(collectedSchema._schemaObject);
       }
 
-      this._validator = newValidator;
+      this._validator = validator.compile(this._schemaObject);
     }
   }
 
@@ -286,8 +352,8 @@ export class JsonSchema {
   ): void {
     this.ensureCompiled();
 
-    if (!this._validator!.validate(jsonObject, this._schemaObject)) {
-      const errorDetails: string = JsonSchema._formatErrorDetails(this._validator!.getLastErrors());
+    if (this._validator && !this._validator(jsonObject)) {
+      const errorDetails: string = JsonSchema._formatErrorDetails(this._validator.errors!);
 
       const args: IJsonSchemaErrorInfo = {
         details: errorDetails
@@ -300,6 +366,6 @@ export class JsonSchema {
     if (!this._schemaObject) {
       this._schemaObject = JsonFile.load(this._filename);
     }
-    return (this._schemaObject as ISchemaWithId).id || '';
+    return (this._schemaObject as ISchemaWithId).id || (this._schemaObject as ISchemaWithId).$id || '';
   }
 }

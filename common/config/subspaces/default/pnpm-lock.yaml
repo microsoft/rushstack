@@ -3093,6 +3093,15 @@ importers:
 
   ../../../libraries/node-core-library:
     dependencies:
+      ajv:
+        specifier: ~8.13.0
+        version: 8.13.0
+      ajv-draft-04:
+        specifier: ~1.0.0
+        version: 1.0.0(ajv@8.13.0)
+      ajv-formats:
+        specifier: ~3.0.1
+        version: 3.0.1(ajv@8.13.0)
       fs-extra:
         specifier: ~7.0.1
         version: 7.0.1
@@ -3108,9 +3117,6 @@ importers:
       semver:
         specifier: ~7.5.4
         version: 7.5.4
-      z-schema:
-        specifier: ~5.0.2
-        version: 5.0.6
     devDependencies:
       '@rushstack/heft':
         specifier: 0.66.9
@@ -3261,8 +3267,8 @@ importers:
         specifier: 1.20.2
         version: 1.20.2
       ajv:
-        specifier: ~6.12.5
-        version: 6.12.6
+        specifier: ~8.13.0
+        version: 8.13.0
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -13745,6 +13751,17 @@ packages:
       symbol.prototype.description: 1.0.6
     dev: true
 
+  /ajv-draft-04@1.0.0(ajv@8.13.0):
+    resolution: {integrity: sha512-mv00Te6nmYbRp5DCwclxtt7yV/joXJPGS7nM+97GdxvuttCOfgI3K4U25zboyeX0O+myI8ERluxQe5wljMmVIw==}
+    peerDependencies:
+      ajv: ^8.5.0
+    peerDependenciesMeta:
+      ajv:
+        optional: true
+    dependencies:
+      ajv: 8.13.0
+    dev: false
+
   /ajv-errors@1.0.1(ajv@6.12.6):
     resolution: {integrity: sha512-DCRfO/4nQ+89p/RK43i8Ezd41EqdGIU4ld7nGF8OQ14oc/we5rEntLCUa7+jrn3nn83BosfwZA0wb4pon2o8iQ==}
     peerDependencies:
@@ -13758,7 +13775,18 @@ packages:
       ajv:
         optional: true
     dependencies:
-      ajv: 8.12.0
+      ajv: 8.13.0
+
+  /ajv-formats@3.0.1(ajv@8.13.0):
+    resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
+    peerDependencies:
+      ajv: ^8.0.0
+    peerDependenciesMeta:
+      ajv:
+        optional: true
+    dependencies:
+      ajv: 8.13.0
+    dev: false
 
   /ajv-keywords@3.5.2(ajv@6.12.6):
     resolution: {integrity: sha512-5p6WTN0DdTGVQk6VjcEju19IgaHudalcfabD7yhDGeA6bcQnmL+CpveLJq/3hvfwd1aof6L386Ougkx6RfyMIQ==}
@@ -13767,12 +13795,12 @@ packages:
     dependencies:
       ajv: 6.12.6
 
-  /ajv-keywords@5.1.0(ajv@8.12.0):
+  /ajv-keywords@5.1.0(ajv@8.13.0):
     resolution: {integrity: sha512-YCS/JNFAUyr5vAuhk1DWm1CBxRHW9LbJ2ozWeemrIqpbsqKjHVxYPyi5GC0rjZIT5JxJ3virVTS8wk4i/Z+krw==}
     peerDependencies:
       ajv: ^8.8.2
     dependencies:
-      ajv: 8.12.0
+      ajv: 8.13.0
       fast-deep-equal: 3.1.3
     dev: false
 
@@ -13784,8 +13812,8 @@ packages:
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
 
-  /ajv@8.12.0:
-    resolution: {integrity: sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==}
+  /ajv@8.13.0:
+    resolution: {integrity: sha512-PRA911Blj99jR5RMeTunVbNXMF6Lp4vZXnk5GQjcnUWUTsrXtekg/pnmFFI2u/I36Y/2bITGS30GZCXei6uNkA==}
     dependencies:
       fast-deep-equal: 3.1.3
       json-schema-traverse: 1.0.0
@@ -15548,7 +15576,7 @@ packages:
     resolution: {integrity: sha512-8fLl9F04EJqjSqH+QjITQfJF8BrOVaYr1jewVgSRAEWePfxT0sku4w2hrGQ60BC/TNLGQ2pgxNlTbWQmMPFvXg==}
     engines: {node: '>=12'}
     dependencies:
-      ajv: 8.12.0
+      ajv: 8.13.0
       ajv-formats: 2.1.1
       atomically: 1.7.0
       debounce-fn: 4.0.0
@@ -21057,7 +21085,7 @@ packages:
   /light-my-request@4.12.0:
     resolution: {integrity: sha512-0y+9VIfJEsPVzK5ArSIJ8Dkxp8QMP7/aCuxCUtG/tr9a2NoOf/snATE/OUc05XUplJCEnRh6gTkH7xh9POt1DQ==}
     dependencies:
-      ajv: 8.12.0
+      ajv: 8.13.0
       cookie: 0.5.0
       process-warning: 1.0.0
       set-cookie-parser: 2.6.0
@@ -24757,9 +24785,9 @@ packages:
     engines: {node: '>= 12.13.0'}
     dependencies:
       '@types/json-schema': 7.0.15
-      ajv: 8.12.0
+      ajv: 8.13.0
       ajv-formats: 2.1.1
-      ajv-keywords: 5.1.0(ajv@8.12.0)
+      ajv-keywords: 5.1.0(ajv@8.13.0)
     dev: false
 
   /secure-json-parse@2.7.0:
@@ -25684,7 +25712,7 @@ packages:
     resolution: {integrity: sha512-Y4X9zqrCftUhMeH2EptSSERdVKt/nEdijTOacGD/97EKjhQ/Qs8RTlEGABSJNNN8lac9kheH+af7yAkEWlgneA==}
     engines: {node: '>=10.0.0'}
     dependencies:
-      ajv: 8.12.0
+      ajv: 8.13.0
       lodash.truncate: 4.4.2
       slice-ansi: 4.0.0
       string-width: 4.2.3

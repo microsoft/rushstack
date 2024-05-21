@@ -1,7 +1,5 @@
 {
-  "title": "Test Schema File",
-  "type": "object",
-
+  "$id": "http://example.com/schemas/test-schema-nested-child.json",
   "definitions": {
     "type1": {
       "description": "Description for type1",
@@ -31,28 +29,5 @@
       "additionalProperties": false,
       "required": ["field2", "field3"]
     }
-  },
-
-  "properties": {
-    "exampleString": {
-      "type": "string"
-    },
-    "exampleLink": {
-      "type": "string",
-      "format": "uri"
-    },
-    "exampleArray": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "exampleOneOf": {
-      "description": "Description for exampleOneOf - this is a very long description to show in an error message",
-      "type": "object",
-      "oneOf": [{ "$ref": "#/definitions/type1" }, { "$ref": "#/definitions/type2" }]
-    }
-  },
-  "additionalProperties": false,
-  "required": ["exampleString", "exampleArray"]
+  }
 }

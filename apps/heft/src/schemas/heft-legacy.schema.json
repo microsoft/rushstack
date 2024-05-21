@@ -169,10 +169,7 @@
                   "scriptPath": {
                     "type": "string",
                     "description": "Path to the script that will be run, relative to the project root.",
-                    "items": {
-                      "type": "string",
-                      "pattern": "[^\\\\]"
-                    }
+                    "pattern": "[^\\\\]"
                   },
 
                   "scriptOptions": {
