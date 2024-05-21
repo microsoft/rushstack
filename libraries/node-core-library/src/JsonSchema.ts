@@ -255,7 +255,9 @@ export class JsonSchema {
   private _getJsonSchemaVersion(): JsonSchemaVersion | undefined {
     const enumValues: JsonSchemaVersion[] = Object.values(JsonSchemaVersion);
     if (this._schemaObject.$schema) {
-      const versionMatch = enumValues.find((enumValue) => enumValue.startsWith(this._schemaObject.$schema));
+      const versionMatch: JsonSchemaVersion | undefined = enumValues.find((enumValue) =>
+        enumValue.startsWith(this._schemaObject.$schema)
+      );
       return versionMatch ?? this._schemaVersion;
     } else {
       return this._schemaVersion;
