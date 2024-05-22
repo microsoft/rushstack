@@ -14,7 +14,7 @@ import {
   Path
 } from '@rushstack/node-core-library';
 
-import { ExtractorConfig } from './ExtractorConfig';
+import { ExtractorConfig, type IApiReportConfig } from './ExtractorConfig';
 import { Collector } from '../collector/Collector';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
@@ -286,15 +286,14 @@ export class Extractor {
       });
     }
 
-    function writeApiReport(reportFileName: string, reportVariant: ApiReportVariant): boolean {
+    function writeApiReport(reportConfig: IApiReportConfig): boolean {
       return Extractor._writeApiReport(
         collector,
         extractorConfig,
         messageRouter,
         extractorConfig.reportDirectoryPath,
         extractorConfig.reportTempDirectoryPath,
-        reportFileName,
-        reportVariant,
+        reportConfig,
         localBuild
       );
     }
@@ -302,7 +301,7 @@ export class Extractor {
     let anyReportChanged: boolean = false;
     if (extractorConfig.apiReportEnabled) {
       for (const reportConfig of extractorConfig.reportConfigs) {
-        anyReportChanged = writeApiReport(reportConfig.fileName, reportConfig.variant) || anyReportChanged;
+        anyReportChanged = writeApiReport(reportConfig) || anyReportChanged;
       }
     }
 
@@ -372,7 +371,7 @@ export class Extractor {
    * to comparison with an existing report.
    * @param reportDirectoryPath - The path to the directory under which the existing report file is located, and to
    * which the new report will be written post-comparison.
-   * @param reportVariant - Determines which API members will be included in the report, based on their tagged release levels.
+   * @param reportConfig - API report configuration, including its file name and {@link ApiReportVariant}.
    *
    * @returns Whether or not the newly generated report differs from the existing report (if one exists).
    */
@@ -382,26 +381,25 @@ export class Extractor {
     messageRouter: MessageRouter,
     reportTempDirectoryPath: string,
     reportDirectoryPath: string,
-    reportFileName: string,
-    reportVariant: ApiReportVariant,
+    reportConfig: IApiReportConfig,
     localBuild: boolean
   ): boolean {
     let apiReportChanged: boolean = false;
 
-    const actualApiReportPath: string = path.resolve(reportTempDirectoryPath, reportFileName);
+    const actualApiReportPath: string = path.resolve(reportTempDirectoryPath, reportConfig.fileName);
     const actualApiReportShortPath: string = extractorConfig._getShortFilePath(actualApiReportPath);
 
-    const expectedApiReportPath: string = path.resolve(reportDirectoryPath, reportFileName);
+    const expectedApiReportPath: string = path.resolve(reportDirectoryPath, reportConfig.fileName);
     const expectedApiReportShortPath: string = extractorConfig._getShortFilePath(expectedApiReportPath);
 
     collector.messageRouter.logVerbose(
       ConsoleMessageId.WritingApiReport,
-      `Generating ${reportVariant} API report: ${expectedApiReportPath}`
+      `Generating ${reportConfig.variant} API report: ${expectedApiReportPath}`
     );
 
     const actualApiReportContent: string = ApiReportGenerator.generateReviewFileContent(
       collector,
-      reportVariant
+      reportConfig.variant
     );
 
     // Write the actual file
