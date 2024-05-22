@@ -79,14 +79,14 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
 }
 
 function generateCobuildPlanSummary(operations: Operation[], terminal: ITerminal): ICobuildPlan['summary'] {
-  const noOpOperations = new Set(operations.filter((e) => e.runner?.isNoOp));
+  const noOpOperations: Set<Operation> = new Set(operations.filter((e) => e.runner?.isNoOp));
   const leafQueue: Operation[] = [];
 
   for (const operation of operations) {
     if (noOpOperations.has(operation)) {
       continue;
     }
-    let numberOfConsumers = 0;
+    let numberOfConsumers: number = 0;
     for (const consumer of operation.consumers) {
       if (!noOpOperations.has(consumer)) {
         numberOfConsumers++;
