@@ -5,7 +5,7 @@
 
   "apiReport": {
     "enabled": true,
-    "reportFileName": "<unscopedPackageName>.api-report.md"
+    "reportFileName": "<unscopedPackageName>"
   },
 
   "docModel": {
