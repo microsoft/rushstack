@@ -35,6 +35,7 @@ export enum ConsoleMessageId {
     FoundTSDocMetadata = "console-found-tsdoc-metadata",
     Preamble = "console-preamble",
     UsingCustomTSDocConfig = "console-using-custom-tsdoc-config",
+    WritingApiReport = "console-writing-api-report",
     WritingDocModelFile = "console-writing-doc-model-file",
     WritingDtsRollup = "console-writing-dts-rollup"
 }
