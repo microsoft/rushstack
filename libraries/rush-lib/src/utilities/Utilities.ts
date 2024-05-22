@@ -322,7 +322,8 @@ export class Utilities {
   public static async executeCommandAndInspectOutputAsync(
     options: IExecuteCommandOptions,
     onStdoutStreamChunk?: (chunk: string) => string | void,
-    onExit?: (code: number, signal: string) => void
+    // eslint-disable-next-line @rushstack/no-new-null
+    onExit?: (exitCode: number | null, signal: NodeJS.Signals | null) => void
   ): Promise<void> {
     await Utilities._executeCommandAndInspectOutputInternalAsync(
       options.command,
@@ -773,7 +774,7 @@ export class Utilities {
     environment?: IEnvironment,
     keepEnvironment: boolean = false,
     onStdoutStreamChunk?: (chunk: string) => string | void,
-    onExit?: (code: number, signal: string) => void
+    onExit?: (exitCode: number | null, signal: NodeJS.Signals | null) => void
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const options: child_process.SpawnOptions = {
@@ -811,15 +812,17 @@ export class Utilities {
           : undefined
       });
 
-      childProcess.on('close', (code: number, signal: string) => {
-        onExit?.(code, signal);
+      childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
+        onExit?.(exitCode, signal);
 
         // TODO: Is it possible that the childProcess is closed before the receiving the last chunks?
-        if (code === 0) {
+        if (exitCode === 0) {
           resolve();
+        } else if (signal) {
+          reject(new Error(`The command was terminated by signal ${signal}`));
         } else {
           // mimic the current sync version "_executeCommandInternal" behavior.
-          reject(new Error(`The command failed with exit code ${code}`));
+          reject(new Error(`The command failed with exit code ${exitCode}`));
         }
       });
 

@@ -313,7 +313,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
         this._logger.terminal.writeError(data.toString());
       });
 
-      childProcess.on('close', (code: number, signal: string): void => {
+      childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null): void => {
         try {
           // The 'close' event is emitted after a process has ended and the stdio streams of a child process
           // have been closed. This is distinct from the 'exit' event, since multiple processes might share the
@@ -323,7 +323,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
           if (this._state === State.Running) {
             this._logger.terminal.writeWarningLine(
               `The service process #${childPid} terminated unexpectedly` +
-                this._formatCodeOrSignal(code, signal)
+                this._formatCodeOrSignal(exitCode, signal)
             );
             this._transitionToStopped();
             return;
@@ -332,7 +332,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
           if (this._state === State.Stopping || this._state === State.Killing) {
             this._logger.terminal.writeVerboseLine(
               `The service process #${childPid} terminated successfully` +
-                this._formatCodeOrSignal(code, signal)
+                this._formatCodeOrSignal(exitCode, signal)
             );
             this._transitionToStopped();
             return;
