@@ -81,7 +81,9 @@ export class BumpCyclicsAction extends CommandLineAction {
 
   private async _getLatestPublishedVersionAsync(terminal: Terminal, packageName: string): Promise<string> {
     return await new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
-      const childProcess: ChildProcess = Executable.spawn('npm', ['view', packageName, 'version']);
+      const childProcess: ChildProcess = Executable.spawn('npm', ['view', packageName, 'version'], {
+        stdio: ['ignore', 'pipe', 'pipe']
+      });
       const stdoutBuffer: string[] = [];
       childProcess.stdout!.on('data', (chunk) => stdoutBuffer.push(chunk));
       childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
