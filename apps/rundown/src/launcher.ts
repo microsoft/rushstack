@@ -106,8 +106,6 @@ class Launcher {
     moduleApi.Module.prototype.require = hookedRequire as NodeJS.Require;
     Launcher._copyProperties(hookedRequire, realRequire);
 
-    // Generally 'close' is a better event to handle for child_process cleanup, however in this case
-    // we want to send the IPC response as early as possible.
     process.on('exit', () => {
       this._sendIpcTraceBatch();
       process.send!({
