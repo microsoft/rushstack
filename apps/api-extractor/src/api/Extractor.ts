@@ -396,7 +396,7 @@ export class Extractor {
 
     collector.messageRouter.logVerbose(
       ConsoleMessageId.WritingApiReport,
-      `Generating ${reportVariant} API report : ${expectedApiReportPath}`
+      `Generating ${reportVariant} API report: ${expectedApiReportPath}`
     );
 
     const actualApiReportContent: string = ApiReportGenerator.generateReviewFileContent(

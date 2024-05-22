@@ -44,7 +44,7 @@ export enum ConsoleMessageId {
   WritingDtsRollup = 'console-writing-dts-rollup',
 
   /**
-   * "Writing package typings: ___"
+   * "Generating ___ API report: ___"
    */
   WritingApiReport = 'console-writing-api-report',
 
