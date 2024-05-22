@@ -395,7 +395,7 @@ export class Extractor {
     const expectedApiReportShortPath: string = extractorConfig._getShortFilePath(expectedApiReportPath);
 
     collector.messageRouter.logVerbose(
-      ConsoleMessageId.WritingDtsRollup,
+      ConsoleMessageId.WritingApiReport,
       `Generating ${reportVariant} API report : ${expectedApiReportPath}`
     );
 
