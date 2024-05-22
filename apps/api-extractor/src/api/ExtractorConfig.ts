@@ -898,12 +898,8 @@ export class ExtractorConfig {
         // Undefined case checked above where we assign `apiReportEnabled`
         const apiReportConfig: IConfigApiReport = configObject.apiReport!;
 
+        const reportFileNameSuffix: string = '.api.md';
         let reportFileNameBase: string;
-
-        // The config spec allows the user to optionally include an extension postfix in the report file name.
-        // We will implicitly add `.api.md` if the user does not specify an extension, but will otherwise preserve the
-        // provided extension.
-        let reportFileNameSuffix: string = '.api.md';
         if (apiReportConfig.reportFileName) {
           if (
             apiReportConfig.reportFileName.indexOf('/') >= 0 ||
@@ -914,15 +910,17 @@ export class ExtractorConfig {
             );
           }
 
-          const iSuffix: number = apiReportConfig.reportFileName.indexOf('.');
+          const iSuffix: number = apiReportConfig.reportFileName.indexOf(reportFileNameSuffix);
           if (iSuffix < 0) {
-            // No extension specified. Use provided file name as the base, and use `.api.md` as the extension suffix.
+            // `.api.md` extension was not specified. Use provided file name base as is.
             reportFileNameBase = apiReportConfig.reportFileName;
           } else {
-            // The user provided an extension suffix. We will preserve it, but prepend the appropriate variant string to
-            // each report file.
+            // The system previously asked users to specify their filenames in a form containing the `.api.md` extension.
+            // This guidance has changed, but to maintain backwards compatibility, we will temporarily support input
+            // that ends with the `.api.md` extension specially, by stripping it out.
+            // This should be removed in version 8, possibly replaced with an explicit error to help users
+            // migrate their configs.
             reportFileNameBase = apiReportConfig.reportFileName.slice(0, iSuffix);
-            reportFileNameSuffix = apiReportConfig.reportFileName.slice(iSuffix);
           }
         } else {
           // Default value

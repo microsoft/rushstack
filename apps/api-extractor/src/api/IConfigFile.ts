@@ -70,13 +70,17 @@ export interface IConfigApiReport {
   enabled: boolean;
 
   /**
-   * The filename for the "complete" API report file, which will encompass all API items, regardless of release tag.
+   * The base component of API report filenames.
    *
    * @remarks
-   * It will be combined with {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
-   * produce a full output filename.
+   * It will be combined with the specified {@link IConfigApiReport.reportVariants}, and {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
+   * produce a full output filenames in the form `<folder><reportFileName>.<variant>.api.md`.
    *
-   * The file extension is optional. If not specified, the resulting file name will end with `.api.md`.
+   * The string should not contain a file extension.
+   * Note: previous guidance noted that this should be specified in a form including the `.api.md` extension.
+   * This is no longer recommended, and support for this will be removed in a future release.
+   * For example, if you were previously specifying `Foo.api.md`, you should now specify `Foo`.
+   * The `.api.md` extension will be added automatically to the resulting filename.
    *
    * The string must not contain a path separator such as `\` or `/`.
    *
