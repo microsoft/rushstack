@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { AlreadyReportedError, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
-import type { ITerminal } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import type {
   CommandLineParameterProvider,
-  CommandLineStringListParameter
+  CommandLineStringListParameter,
+  CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
@@ -21,6 +22,14 @@ import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelect
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
 import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorParser';
 import { RushConstants } from '../../logic/RushConstants';
+import type { Subspace } from '../../api/Subspace';
+
+export const SUBSPACE_LONG_ARG_NAME: '--subspace' = '--subspace';
+
+interface ISelectionParameterSetOptions {
+  gitOptions: IGitSelectorParserOptions;
+  includeSubspaceSelector: boolean;
+}
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -37,6 +46,7 @@ export class SelectionParameterSet {
   private readonly _onlyProject: CommandLineStringListParameter;
   private readonly _toProject: CommandLineStringListParameter;
   private readonly _toExceptProject: CommandLineStringListParameter;
+  private readonly _subspaceParameter: CommandLineStringParameter | undefined;
 
   private readonly _fromVersionPolicy: CommandLineStringListParameter;
   private readonly _toVersionPolicy: CommandLineStringListParameter;
@@ -46,8 +56,9 @@ export class SelectionParameterSet {
   public constructor(
     rushConfiguration: RushConfiguration,
     action: CommandLineParameterProvider,
-    gitOptions: IGitSelectorParserOptions
+    options: ISelectionParameterSetOptions
   ) {
+    const { gitOptions, includeSubspaceSelector } = options;
     this._rushConfiguration = rushConfiguration;
 
     const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> = new Map<
@@ -183,6 +194,39 @@ export class SelectionParameterSet {
         ' belonging to VERSION_POLICY_NAME.' +
         ' For details, refer to the website article "Selecting subsets of projects".'
     });
+
+    if (includeSubspaceSelector) {
+      this._subspaceParameter = action.defineStringParameter({
+        parameterLongName: SUBSPACE_LONG_ARG_NAME,
+        argumentName: 'SUBSPACE_NAME',
+        description:
+          '(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the "subspacesEnabled" feature to be enabled in subspaces.json.'
+      });
+    }
+  }
+
+  /**
+   * Used to implement the `preventSelectingAllSubspaces` policy which checks for commands that accidentally
+   * select everything.   Return `true` if the CLI was invoked with selection parameters.
+   *
+   * @remarks
+   * It is still possible for a user to select everything, but they must do so using an explicit selection
+   * such as `rush install --from thing-that-everything-depends-on`.
+   */
+  public didUserSelectAnything(): boolean {
+    if (this._subspaceParameter?.value) {
+      return true;
+    }
+
+    return [
+      this._impactedByProject,
+      this._impactedByExceptProject,
+      this._onlyProject,
+      this._toProject,
+      this._toExceptProject,
+      this._fromVersionPolicy,
+      this._toVersionPolicy
+    ].some((x) => x.values.length > 0);
   }
 
   /**
@@ -209,9 +253,9 @@ export class SelectionParameterSet {
     ];
 
     // Check if any of the selection parameters have a value specified on the command line
-    const isSelectionSpecified: boolean = selectors.some(
-      (param: CommandLineStringListParameter) => param.values.length > 0
-    );
+    const isSelectionSpecified: boolean =
+      selectors.some((param: CommandLineStringListParameter) => param.values.length > 0) ||
+      !!this._subspaceParameter?.value;
 
     // If no selection parameters are specified, return everything
     if (!isSelectionSpecified) {
@@ -237,6 +281,26 @@ export class SelectionParameterSet {
       })
     );
 
+    let subspaceProjects: Iterable<RushConfigurationProject> = [];
+
+    if (this._subspaceParameter?.value) {
+      if (!this._rushConfiguration.subspacesFeatureEnabled) {
+        // eslint-disable-next-line no-console
+        console.log();
+        // eslint-disable-next-line no-console
+        console.log(
+          Colorize.red(
+            `The "${SUBSPACE_LONG_ARG_NAME}" parameter can only be passed if "subspacesEnabled" ` +
+              'is set to true in subspaces.json.'
+          )
+        );
+        throw new AlreadyReportedError();
+      }
+
+      const subspace: Subspace = this._rushConfiguration.getSubspace(this._subspaceParameter.value);
+      subspaceProjects = subspace.getProjects();
+    }
+
     const selection: Set<RushConfigurationProject> = Selection.union(
       // Safe command line options
       Selection.expandAllDependencies(
@@ -247,6 +311,7 @@ export class SelectionParameterSet {
           Selection.expandAllConsumers(fromProjects)
         )
       ),
+      subspaceProjects,
 
       // Unsafe command line option: --only
       onlyProjects,
@@ -264,16 +329,21 @@ export class SelectionParameterSet {
    * Represents the selection as `--filter` parameters to pnpm.
    *
    * @remarks
-   * This is a separate from the selection to allow the filters to be represented more concisely.
    *
-   * @see https://pnpm.js.org/en/filtering
+   * IMPORTANT: This function produces PNPM CLI operators that select projects from PNPM's temp workspace.
+   * If Rush subspaces are enabled, PNPM cannot see the complete Rush workspace, and therefore these operators
+   * would malfunction. In the current implementation, we calculate them anyway, then `BaseInstallAction.runAsync()`
+   * will overwrite `pnpmFilterArgumentValues` with a flat list of project names.  In the future, these
+   * two code paths will be combined into a single general solution.
+   *
+   * @see https://pnpm.io/filtering
    */
-  public async getPnpmFilterArgumentsAsync(terminal: ITerminal): Promise<string[]> {
+  public async getPnpmFilterArgumentValuesAsync(terminal: ITerminal): Promise<string[]> {
     const args: string[] = [];
 
     // Include exactly these projects (--only)
     for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal)) {
-      args.push('--filter', project.packageName);
+      args.push(project.packageName);
     }
 
     // Include all projects that depend on these projects, and all dependencies thereof
@@ -289,19 +359,19 @@ export class SelectionParameterSet {
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     )) {
-      args.push('--filter', `${project.packageName}...`);
+      args.push(`${project.packageName}...`);
     }
 
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
     for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal)) {
-      args.push('--filter', `${project.packageName}^...`);
+      args.push(`${project.packageName}^...`);
     }
 
     // --impacted-by
     // The project and all projects directly or indirectly declare it as a dependency
     for (const project of await this._evaluateProjectParameterAsync(this._impactedByProject, terminal)) {
-      args.push('--filter', `...${project.packageName}`);
+      args.push(`...${project.packageName}`);
     }
 
     // --impacted-by-except
@@ -310,7 +380,7 @@ export class SelectionParameterSet {
       this._impactedByExceptProject,
       terminal
     )) {
-      args.push('--filter', `...^${project.packageName}`);
+      args.push(`...^${project.packageName}`);
     }
 
     return args;

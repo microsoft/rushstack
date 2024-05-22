@@ -128,7 +128,7 @@ export class InstallHelpers {
    * If the "(p)npm-local" symlink hasn't been set up yet, this creates it, installing the
    * specified (P)npm version in the user's home directory if needed.
    */
-  public static async ensureLocalPackageManager(
+  public static async ensureLocalPackageManagerAsync(
     rushConfiguration: RushConfiguration,
     rushGlobalFolder: RushGlobalFolder,
     maxInstallAttempts: number,

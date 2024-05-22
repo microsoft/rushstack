@@ -82,7 +82,7 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
     maxThreads: maxCompressionThreads
   });
 
-  const minifierConnection: IMinifierConnection = await minifier.connect();
+  const minifierConnection: IMinifierConnection = await minifier.connectAsync();
 
   const webpackPool: WorkerPool = new WorkerPool({
     id: 'Webpack',
@@ -139,5 +139,5 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
 
   await webpackPool.finishAsync();
 
-  await minifierConnection.disconnect();
+  await minifierConnection.disconnectAsync();
 }

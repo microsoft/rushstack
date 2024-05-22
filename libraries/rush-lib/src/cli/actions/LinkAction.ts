@@ -40,6 +40,6 @@ export class LinkAction extends BaseRushAction {
     const linkManager: BaseLinkManager = linkManagerFactoryModule.LinkManagerFactory.getLinkManager(
       this.rushConfiguration
     );
-    await linkManager.createSymlinksForProjects(this._force.value);
+    await linkManager.createSymlinksForProjectsAsync(this._force.value);
   }
 }

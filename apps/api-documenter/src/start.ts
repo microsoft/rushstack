@@ -19,4 +19,4 @@ console.log(
 
 const parser: ApiDocumenterCommandLine = new ApiDocumenterCommandLine();
 
-parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
+parser.executeAsync().catch(console.error); // CommandLineParser.executeAsync() should never reject the promise

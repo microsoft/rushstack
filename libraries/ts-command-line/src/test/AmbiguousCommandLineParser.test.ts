@@ -258,14 +258,14 @@ describe(`Ambiguous ${CommandLineParser.name}`, () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(AmbiguousAction);
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job', '-s'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job', '-s'])
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   it('can execute the non-ambiguous scoped long names', async () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(AmbiguousAction);
 
-    await commandLineParser.execute([
+    await commandLineParser.executeAsync([
       'do:the-job',
       '--short1',
       'short1value',
@@ -292,7 +292,7 @@ describe(`Ambiguous ${CommandLineParser.name}`, () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(AmbiguousAction);
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--arg', 'test'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job', '--arg', 'test'])
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
@@ -304,7 +304,7 @@ describe(`Ambiguous ${CommandLineParser.name}`, () => {
     });
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--abbreviation-flag'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job', '--abbreviation-flag'])
     ).rejects.toThrowError(/Ambiguous option: "--abbreviation-flag"/);
   });
 
@@ -316,7 +316,7 @@ describe(`Ambiguous ${CommandLineParser.name}`, () => {
     });
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--abbreviation'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job', '--abbreviation'])
     ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
   });
 
@@ -328,7 +328,7 @@ describe(`Ambiguous ${CommandLineParser.name}`, () => {
     });
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--abbrev'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job', '--abbrev'])
     ).rejects.toThrowError(/Ambiguous option: "--abbrev" could match --abbreviation-flag, --abbreviation/);
   });
 
@@ -339,7 +339,7 @@ describe(`Ambiguous ${CommandLineParser.name}`, () => {
       description: 'A flag used to test abbreviation logic'
     });
 
-    await commandLineParser.executeWithoutErrorHandling(['do:the-job', '--abbreviation-f']);
+    await commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job', '--abbreviation-f']);
 
     expect(commandLineParser.selectedAction).toBeDefined();
     expect(commandLineParser.selectedAction!.actionName).toEqual('do:the-job');
@@ -359,7 +359,7 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
     );
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '-s'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job-alias', '-s'])
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
@@ -369,7 +369,7 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
       (commandLineParser.getAction('do:the-job-alias')! as AliasAction).targetAction
     );
 
-    await commandLineParser.execute([
+    await commandLineParser.executeAsync([
       'do:the-job-alias',
       '--short1',
       'short1value',
@@ -400,7 +400,7 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
     );
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--arg', 'test'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job-alias', '--arg', 'test'])
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
@@ -415,7 +415,7 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
     });
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--abbreviation-flag'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job-alias', '--abbreviation-flag'])
     ).rejects.toThrowError(/Ambiguous option: "--abbreviation-flag"/);
   });
 
@@ -430,7 +430,7 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
     });
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--abbreviation'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job-alias', '--abbreviation'])
     ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
   });
 
@@ -445,7 +445,7 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
     });
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--abbrev'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job-alias', '--abbrev'])
     ).rejects.toThrowError(/Ambiguous option: "--abbrev" could match --abbreviation-flag, --abbreviation/);
   });
 
@@ -459,7 +459,7 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
       description: 'A flag used to test abbreviation logic'
     });
 
-    await commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--abbreviation-f']);
+    await commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job-alias', '--abbreviation-f']);
 
     expect(commandLineParser.selectedAction).toBeDefined();
     expect(commandLineParser.selectedAction!.actionName).toEqual('do:the-job-alias');
@@ -477,7 +477,7 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(AmbiguousScopedAction);
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '-s'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['scoped-action', '--scoping', '--', '-s'])
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
@@ -485,14 +485,14 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(AmbiguousScopedAction);
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '-a'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['scoped-action', '--scoping', '--', '-a'])
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   it('can execute the non-ambiguous scoped long names on the scoping action', async () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(AmbiguousScopedAction);
 
-    await commandLineParser.execute([
+    await commandLineParser.executeAsync([
       'scoped-action',
       '--scoping',
       '--',
@@ -523,7 +523,13 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(AmbiguousScopedAction);
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--arg', 'test'])
+      commandLineParser.executeWithoutErrorHandlingAsync([
+        'scoped-action',
+        '--scoping',
+        '--',
+        '--arg',
+        'test'
+      ])
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
@@ -542,7 +548,12 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
     });
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--abbreviation'])
+      commandLineParser.executeWithoutErrorHandlingAsync([
+        'scoped-action',
+        '--scoping',
+        '--',
+        '--abbreviation'
+      ])
     ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
   });
 
@@ -557,7 +568,12 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
     );
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--abbreviation'])
+      commandLineParser.executeWithoutErrorHandlingAsync([
+        'scoped-action',
+        '--scoping',
+        '--',
+        '--abbreviation'
+      ])
     ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
   });
 
@@ -576,7 +592,7 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
     });
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--abbrev'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['scoped-action', '--scoping', '--', '--abbrev'])
     ).rejects.toThrowError(/Ambiguous option: "--abbrev" could match --abbreviation-flag, --abbreviation/);
   });
 
@@ -591,7 +607,7 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
     );
 
     await expect(
-      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--abbrev'])
+      commandLineParser.executeWithoutErrorHandlingAsync(['scoped-action', '--scoping', '--', '--abbrev'])
     ).rejects.toThrowError(/Ambiguous option: "--abbrev" could match --abbreviation-flag, --abbreviation/);
   });
 
@@ -612,7 +628,7 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
       'scoped-action'
     ) as AbbreviationScopedAction;
 
-    await commandLineParser.executeWithoutErrorHandling([
+    await commandLineParser.executeWithoutErrorHandlingAsync([
       'scoped-action',
       '--scoping',
       '--',
@@ -639,7 +655,7 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
       'scoped-action'
     ) as AbbreviationScopedAction;
 
-    await commandLineParser.executeWithoutErrorHandling([
+    await commandLineParser.executeWithoutErrorHandlingAsync([
       'scoped-action',
       '--scoping',
       '--',

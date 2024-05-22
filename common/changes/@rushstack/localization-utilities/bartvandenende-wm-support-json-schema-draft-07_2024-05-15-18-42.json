@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-utilities",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/localization-utilities"
+}

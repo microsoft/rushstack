@@ -5,10 +5,16 @@
 
 import * as path from 'path';
 import { URL, pathToFileURL, fileURLToPath } from 'url';
-import { type CompileResult, type Syntax, type Exception, compileStringAsync } from 'sass-embedded';
+import {
+  type CompileResult,
+  type Syntax,
+  type Exception,
+  compileStringAsync,
+  type CanonicalizeContext
+} from 'sass-embedded';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
-import { FileSystem, Sort } from '@rushstack/node-core-library';
+import { FileSystem, Import, Sort } from '@rushstack/node-core-library';
 import { type IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 
 /**
@@ -156,6 +162,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
       getAdditionalOutputFiles: getCssPaths,
 
       // Generate typings function
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       parseAndGenerateTypings: async (fileContents: string, filePath: string, relativePath: string) => {
         if (this._isSassPartial(filePath)) {
           // Do not generate typings for Sass partials.
@@ -234,8 +241,33 @@ export class SassProcessor extends StringValuesTypingsGenerator {
       result = await compileStringAsync(fileContents, {
         importers: [
           {
-            findFileUrl: (url: string): URL | null => {
-              return this._patchSassUrl(url, nodeModulesUrl);
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            findFileUrl: async (url: string, context: CanonicalizeContext): Promise<URL | null> => {
+              if (url[0] === '~') {
+                const packagePath: string = url.slice(1);
+                const { containingUrl } = context;
+                if (containingUrl) {
+                  let packageNameDelimiter: number = packagePath.indexOf('/');
+                  if (packagePath[0] === '@') {
+                    packageNameDelimiter = packagePath.indexOf('/', packageNameDelimiter + 1);
+                  }
+
+                  const packageName: string = packagePath.slice(0, packageNameDelimiter);
+                  const modulePath: string = packagePath.slice(packageNameDelimiter + 1);
+
+                  const baseFolderPath: string = path.dirname(fileURLToPath(containingUrl));
+                  const resolvedPackagePath: string = await Import.resolvePackageAsync({
+                    packageName,
+                    baseFolderPath
+                  });
+                  const resolvedPath: string = `${resolvedPackagePath}/${modulePath}`;
+                  return pathToFileURL(resolvedPath);
+                } else {
+                  return new URL(packagePath, nodeModulesUrl);
+                }
+              } else {
+                return null;
+              }
             }
           }
         ],
@@ -260,14 +292,6 @@ export class SassProcessor extends StringValuesTypingsGenerator {
     }
 
     return result.css.toString();
-  }
-
-  private _patchSassUrl(url: string, nodeModulesUrl: URL): URL | null {
-    if (url[0] !== '~') {
-      return null;
-    }
-
-    return new URL(url.slice(1), nodeModulesUrl);
   }
 }
 

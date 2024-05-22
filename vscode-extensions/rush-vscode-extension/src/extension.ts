@@ -15,7 +15,7 @@ import { RushCommandWebViewPanel } from './logic/RushCommandWebViewPanel';
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   context.subscriptions.push(
     vscode.commands.registerCommand('rushstack.selectWorkspace', async () => {
-      await RushWorkspace.selectWorkspace();
+      await RushWorkspace.selectWorkspaceAsync();
     })
   );
   context.subscriptions.push(

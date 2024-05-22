@@ -158,7 +158,7 @@ export interface IStdioLineTransformOptions extends ITerminalTransformOptions {
 }
 
 // @beta
-export interface IStdioSummarizerOptions {
+export interface IStdioSummarizerOptions extends ITerminalWritableOptions {
     leadingLines?: number;
     trailingLines?: number;
 }

@@ -1,6 +1,41 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 10 May 2024 06:35:26 GMT and should not be manually modified.
+This log was last generated on Thu, 16 May 2024 01:12:22 GMT and should not be manually modified.
+
+## 5.124.6
+Thu, 16 May 2024 01:12:22 GMT
+
+### Updates
+
+- Fix an edge case for pnpm-sync when the .pnpm folder is absent but still a valid installation.
+
+## 5.124.5
+Wed, 15 May 2024 23:43:15 GMT
+
+### Updates
+
+- Fix count of completed operations when silent operations are blocked. Add explicit message for child processes terminated by signals. Ensure that errors show up in summarized view.
+- Ensure that errors thrown in afterExecuteOperation show up in the summary at the end of the build.
+
+## 5.124.4
+Wed, 15 May 2024 03:05:57 GMT
+
+### Updates
+
+- Improve the detection of PNPM lockfile versions.
+- Fix an issue where the `--subspace` CLI parameter would install for all subspaces in a monorepo when passed to the install or update action
+
+## 5.124.3
+Wed, 15 May 2024 01:18:25 GMT
+
+### Patches
+
+- Ensure async telemetry tasks are flushed by error reporter
+
+### Updates
+
+- Fix an issue where `rush install` and `rush update` will fail with an `ENAMETOOLONG` error on Windows in repos with a large number of projects.
+- Fix an issue where installing multiple subspaces consecutively can cause unexpected cross-contamination between pnpmfiles.
 
 ## 5.124.2
 Fri, 10 May 2024 06:35:26 GMT

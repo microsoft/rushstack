@@ -50,12 +50,23 @@ export class MockMinifier implements IModuleMinifier {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public async connect(): Promise<IMinifierConnection> {
+    throw new Error('Not implemented.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public async connectAsync(): Promise<IMinifierConnection> {
     return {
       configHash: MockMinifier.name,
 
-      disconnect: async () => {
+      disconnectAsync: async () => {
         // Do nothing.
+      },
+      disconnect: () => {
+        throw new Error('Method not implemented.');
       }
     };
   }

@@ -29,10 +29,10 @@ describe('LocalMinifier', () => {
       }
     });
 
-    const connection1: IMinifierConnection = await minifier1.connect();
-    await connection1.disconnect();
-    const connection2: IMinifierConnection = await minifier2.connect();
-    await connection2.disconnect();
+    const connection1: IMinifierConnection = await minifier1.connectAsync();
+    await connection1.disconnectAsync();
+    const connection2: IMinifierConnection = await minifier2.connectAsync();
+    await connection2.disconnectAsync();
 
     expect(connection1.configHash).toMatchSnapshot('ecma5');
     expect(connection2.configHash).toMatchSnapshot('ecma2015');
@@ -49,10 +49,10 @@ describe('LocalMinifier', () => {
     terserVersion = '5.16.2';
     const minifier2: LocalMinifier = new LocalMinifier({});
 
-    const connection1: IMinifierConnection = await minifier1.connect();
-    await connection1.disconnect();
-    const connection2: IMinifierConnection = await minifier2.connect();
-    await connection2.disconnect();
+    const connection1: IMinifierConnection = await minifier1.connectAsync();
+    await connection1.disconnectAsync();
+    const connection2: IMinifierConnection = await minifier2.connectAsync();
+    await connection2.disconnectAsync();
 
     expect(connection1.configHash).toMatchSnapshot('terser-5.9.1');
     expect(connection2.configHash).toMatchSnapshot('terser-5.16.1');

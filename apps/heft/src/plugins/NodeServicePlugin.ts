@@ -120,7 +120,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     );
   }
 
-  private async _loadStageConfiguration(
+  private async _loadStageConfigurationAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
@@ -187,7 +187,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
-    await this._loadStageConfiguration(taskSession, heftConfiguration);
+    await this._loadStageConfigurationAsync(taskSession, heftConfiguration);
     if (!this._pluginEnabled) {
       return;
     }

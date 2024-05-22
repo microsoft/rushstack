@@ -112,7 +112,7 @@ export class AmazonS3Client {
 
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {
     this._writeDebugLine('Reading object from S3');
-    return await this._sendCacheRequestWithRetries(async () => {
+    return await this._sendCacheRequestWithRetriesAsync(async () => {
       const response: fetch.Response = await this._makeRequestAsync('GET', objectName);
       if (response.ok) {
         return {
@@ -157,7 +157,7 @@ export class AmazonS3Client {
       throw new Error('Credentials are required to upload objects to S3.');
     }
 
-    await this._sendCacheRequestWithRetries(async () => {
+    await this._sendCacheRequestWithRetriesAsync(async () => {
       const response: fetch.Response = await this._makeRequestAsync('PUT', objectName, objectBuffer);
       if (!response.ok) {
         return {
@@ -351,7 +351,7 @@ export class AmazonS3Client {
     };
   }
 
-  private async _safeReadResponseText(response: fetch.Response): Promise<string | undefined> {
+  private async _safeReadResponseTextAsync(response: fetch.Response): Promise<string | undefined> {
     try {
       return await response.text();
     } catch (err) {
@@ -361,7 +361,7 @@ export class AmazonS3Client {
   }
 
   private async _getS3ErrorAsync(response: fetch.Response): Promise<Error> {
-    const text: string | undefined = await this._safeReadResponseText(response);
+    const text: string | undefined = await this._safeReadResponseTextAsync(response);
     return new Error(
       `Amazon S3 responded with status code ${response.status} (${response.statusText})${
         text ? `\n${text}` : ''
@@ -428,7 +428,7 @@ export class AmazonS3Client {
     }
   }
 
-  private async _sendCacheRequestWithRetries<T>(
+  private async _sendCacheRequestWithRetriesAsync<T>(
     sendRequest: () => Promise<RetryableRequestResponse<T>>
   ): Promise<T> {
     const response: RetryableRequestResponse<T> = await sendRequest();
@@ -447,7 +447,7 @@ export class AmazonS3Client {
           delay = Math.min(maxRetryDelayInMs, delay);
 
           log(`Will retry request in ${delay}s...`);
-          await Async.sleep(delay);
+          await Async.sleepAsync(delay);
           const retryResponse: RetryableRequestResponse<T> = await sendRequest();
 
           if (retryResponse.hasNetworkError) {

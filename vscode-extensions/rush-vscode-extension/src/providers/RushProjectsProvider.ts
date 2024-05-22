@@ -133,7 +133,7 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
   public async runProjectScriptAsync(element: RushProjectScript): Promise<void> {
     if (element.projectFolder) {
       const { projectFolder, projectRelativeFolder, scriptName } = element;
-      await RushTaskProvider.getInstance().executeTask({
+      await RushTaskProvider.getInstance().executeTaskAsync({
         type: 'rush-project-script',
         cwd: projectFolder,
         displayName: `${scriptName} - ${projectRelativeFolder}`,

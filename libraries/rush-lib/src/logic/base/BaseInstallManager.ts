@@ -103,8 +103,8 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstallAsync(): Promise<void> {
-    const { allowShrinkwrapUpdates } = this.options;
-    const isFilteredInstall: boolean = this.options.filteredProjects.length > 0;
+    const { allowShrinkwrapUpdates, selectedProjects, pnpmFilterArgumentValues } = this.options;
+    const isFilteredInstall: boolean = pnpmFilterArgumentValues.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
     // Prevent filtered installs when workspaces is disabled
@@ -163,10 +163,16 @@ export abstract class BaseInstallManager {
     const commonTempInstallFlag: LastInstallFlag = getCommonTempFlag(this.rushConfiguration, subspace, {
       npmrcHash: npmrcHash || '<NO NPMRC>'
     });
-    if (isFilteredInstall) {
+    if (isFilteredInstall && selectedProjects) {
+      const selectedProjectNames: string[] = [];
+      for (const { packageName } of selectedProjects) {
+        selectedProjectNames.push(packageName);
+      }
+
+      selectedProjectNames.sort();
       // Get the projects involved in this filtered install
       commonTempInstallFlag.mergeFromObject({
-        selectedProjectNames: this.options.filteredProjects.map((project) => project.packageName)
+        selectedProjectNames
       });
     }
     const optionsToIgnore: (keyof ILastInstallFlagJson)[] | undefined = !this.rushConfiguration
@@ -188,11 +194,11 @@ export abstract class BaseInstallManager {
     if (cleanInstall || !shrinkwrapIsUpToDate || !canSkipInstall() || !projectImpactGraphIsUpToDate) {
       // eslint-disable-next-line no-console
       console.log();
-      await this.validateNpmSetup();
+      await this.validateNpmSetupAsync();
 
       let publishedRelease: boolean | undefined;
       try {
-        publishedRelease = await this._checkIfReleaseIsPublished();
+        publishedRelease = await this._checkIfReleaseIsPublishedAsync();
       } catch {
         // If the user is working in an environment that can't reach the registry,
         // don't bother them with errors.
@@ -337,7 +343,7 @@ export abstract class BaseInstallManager {
     }
 
     // Ensure that the package manager is installed
-    await InstallHelpers.ensureLocalPackageManager(
+    await InstallHelpers.ensureLocalPackageManagerAsync(
       this.rushConfiguration,
       this.rushGlobalFolder,
       this.options.maxInstallAttempts
@@ -651,7 +657,16 @@ ${gitLfsHookHandling}
    * to the command-line.
    */
   protected pushConfigurationArgs(args: string[], options: IInstallManagerOptions, subspace: Subspace): void {
-    if (options.offline && this.rushConfiguration.packageManager !== 'pnpm') {
+    const {
+      offline,
+      collectLogFile,
+      pnpmFilterArgumentValues,
+      onlyShrinkwrap,
+      networkConcurrency,
+      allowShrinkwrapUpdates
+    } = options;
+
+    if (offline && this.rushConfiguration.packageManager !== 'pnpm') {
       throw new Error('The "--offline" parameter is only supported when using the PNPM package manager.');
     }
     if (this.rushConfiguration.packageManager === 'npm') {
@@ -679,7 +694,7 @@ ${gitLfsHookHandling}
       args.push('--cache', this.rushConfiguration.npmCacheFolder);
       args.push('--tmp', this.rushConfiguration.npmTmpFolder);
 
-      if (options.collectLogFile) {
+      if (collectLogFile) {
         args.push('--verbose');
       }
     } else if (this.rushConfiguration.packageManager === 'pnpm') {
@@ -704,11 +719,11 @@ ${gitLfsHookHandling}
 
       const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
 
-      if (experiments.usePnpmFrozenLockfileForRushInstall && !options.allowShrinkwrapUpdates) {
+      if (experiments.usePnpmFrozenLockfileForRushInstall && !allowShrinkwrapUpdates) {
         args.push('--frozen-lockfile');
 
         if (
-          options.filteredProjects.length > 0 &&
+          pnpmFilterArgumentValues.length > 0 &&
           Number.parseInt(this.rushConfiguration.packageManagerToolVersion, 10) >= 8 // PNPM Major version 8+
         ) {
           // On pnpm@8, disable the "dedupe-peer-dependents" feature when doing a filtered CI install so that filters take effect.
@@ -723,19 +738,19 @@ ${gitLfsHookHandling}
         args.push('--no-prefer-frozen-lockfile');
       }
 
-      if (options.onlyShrinkwrap) {
+      if (onlyShrinkwrap) {
         args.push(`--lockfile-only`);
       }
 
-      if (options.collectLogFile) {
+      if (collectLogFile) {
         args.push('--reporter', 'ndjson');
       }
 
-      if (options.networkConcurrency) {
-        args.push('--network-concurrency', options.networkConcurrency.toString());
+      if (networkConcurrency) {
+        args.push('--network-concurrency', networkConcurrency.toString());
       }
 
-      if (options.offline) {
+      if (offline) {
         args.push('--offline');
       }
 
@@ -828,21 +843,21 @@ ${gitLfsHookHandling}
       // (e.g. "Which command would you like to run?").
       args.push('--non-interactive');
 
-      if (options.networkConcurrency) {
-        args.push('--network-concurrency', options.networkConcurrency.toString());
+      if (networkConcurrency) {
+        args.push('--network-concurrency', networkConcurrency.toString());
       }
 
       if (this.rushConfiguration.yarnOptions.ignoreEngines) {
         args.push('--ignore-engines');
       }
 
-      if (options.collectLogFile) {
+      if (collectLogFile) {
         args.push('--verbose');
       }
     }
   }
 
-  private async _checkIfReleaseIsPublished(): Promise<boolean> {
+  private async _checkIfReleaseIsPublishedAsync(): Promise<boolean> {
     const lastCheckFile: string = path.join(
       this.rushGlobalFolder.nodeSpecificPath,
       'rush-' + Rush.version,
@@ -968,7 +983,7 @@ ${gitLfsHookHandling}
     }
   }
 
-  protected async validateNpmSetup(): Promise<void> {
+  protected async validateNpmSetupAsync(): Promise<void> {
     if (this._npmSetupValidated) {
       return;
     }
@@ -979,7 +994,7 @@ ${gitLfsHookHandling}
         isDebug: this.options.debug,
         syncNpmrcAlreadyCalled: this._syncNpmrcAlreadyCalled
       });
-      const valid: boolean = await setupPackageRegistry.checkOnly();
+      const valid: boolean = await setupPackageRegistry.checkOnlyAsync();
       if (!valid) {
         // eslint-disable-next-line no-console
         console.error();

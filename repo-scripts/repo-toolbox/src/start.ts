@@ -8,4 +8,4 @@ console.log('repo-toolbox\n');
 
 const commandLine: ToolboxCommandLine = new ToolboxCommandLine();
 // eslint-disable-next-line no-console
-commandLine.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
+commandLine.executeAsync().catch(console.error); // CommandLineParser.executeAsync() should never reject the promise

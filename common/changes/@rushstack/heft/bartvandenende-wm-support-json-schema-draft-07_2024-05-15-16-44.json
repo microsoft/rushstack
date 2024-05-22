@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Update schema definitions to conform to strict schema-type validation.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

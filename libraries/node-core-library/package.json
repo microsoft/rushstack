@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/node-core-library",
-  "version": "4.2.1",
+  "version": "4.3.0",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/node-core-library.d.ts",
@@ -21,12 +21,14 @@
     "jju": "~1.4.0",
     "resolve": "~1.22.1",
     "semver": "~7.5.4",
-    "z-schema": "~5.0.2"
+    "ajv": "~8.13.0",
+    "ajv-draft-04": "~1.0.0",
+    "ajv-formats": "~3.0.1"
   },
   "devDependencies": {
     "local-eslint-config": "workspace:*",
-    "@rushstack/heft": "0.65.5",
-    "@rushstack/heft-node-rig": "2.4.18",
+    "@rushstack/heft": "0.66.9",
+    "@rushstack/heft-node-rig": "2.6.7",
     "@types/fs-extra": "7.0.0",
     "@types/heft-jest": "1.0.1",
     "@types/jju": "1.4.1",

@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
-import { TerminalWritable } from './TerminalWritable';
+import { type ITerminalWritableOptions, TerminalWritable } from './TerminalWritable';
 
 /**
  * Constructor options for {@link StdioSummarizer}.
  * @beta
  */
-export interface IStdioSummarizerOptions {
+export interface IStdioSummarizerOptions extends ITerminalWritableOptions {
   /**
    * Specifies the maximum number of leading lines to include in the summary.
    * @defaultValue `10`
@@ -62,7 +62,7 @@ export class StdioSummarizer extends TerminalWritable {
   private _abridgedStderr: boolean;
 
   public constructor(options?: IStdioSummarizerOptions) {
-    super();
+    super(options);
 
     if (!options) {
       options = {};

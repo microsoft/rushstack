@@ -109,7 +109,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * Invoked by CommandLineParser.onExecute().
    * @internal
    */
-  public _execute(): Promise<void> {
+  public _executeAsync(): Promise<void> {
     return this.onExecute();
   }
 
@@ -129,6 +129,9 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
 
   /**
    * Your subclass should implement this hook to perform the operation.
+   *
+   * @remarks
+   * In a future release, this function will be renamed to onExecuteAsync
    */
   protected abstract onExecute(): Promise<void>;
 }

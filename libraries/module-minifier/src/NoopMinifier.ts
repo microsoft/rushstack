@@ -40,13 +40,26 @@ export class NoopMinifier implements IModuleMinifier {
     });
   }
 
-  public async connect(): Promise<IMinifierConnection> {
+  /**
+   * {@inheritdoc IModuleMinifier.connectAsync}
+   */
+  public async connectAsync(): Promise<IMinifierConnection> {
+    const disconnectAsync: IMinifierConnection['disconnectAsync'] = async () => {
+      // Do nothing.
+    };
+
     return {
       configHash: NoopMinifier.name,
-
-      disconnect: async () => {
-        // Do nothing.
-      }
+      disconnectAsync,
+      disconnect: disconnectAsync
     };
+  }
+
+  /**
+   * @deprecated Use {@link NoopMinifier.connectAsync} instead
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public async connect(): Promise<IMinifierConnection> {
+    return await this.connectAsync();
   }
 }

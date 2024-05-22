@@ -44,6 +44,7 @@ export default class HeftJestReporter implements Reporter {
     this._debugMode = options.debugMode;
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public async onTestStart(test: Test): Promise<void> {
     this._terminal.writeLine(
       Colorize.whiteBackground(Colorize.black('START')),
@@ -51,6 +52,7 @@ export default class HeftJestReporter implements Reporter {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public async onTestResult(
     test: Test,
     testResult: TestResult,
@@ -174,6 +176,7 @@ export default class HeftJestReporter implements Reporter {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public async onRunStart(
     aggregatedResult: AggregatedResult,
     options: ReporterOnStartOptions
@@ -186,6 +189,7 @@ export default class HeftJestReporter implements Reporter {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public async onRunComplete(contexts: Set<TestContext>, results: AggregatedResult): Promise<void> {
     const { numPassedTests, numFailedTests, numTotalTests, numRuntimeErrorTestSuites } = results;
 
