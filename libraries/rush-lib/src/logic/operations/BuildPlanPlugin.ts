@@ -8,7 +8,7 @@ import type {
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { Operation } from './Operation';
-import type { IOperationBuildCacheContext } from './CacheableOperationPlugin';
+import { clusterOperations, type IOperationBuildCacheContext } from './CacheableOperationPlugin';
 import { DisjointSet } from '../cobuild/DisjointSet';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import { RushConstants } from '../RushConstants';
@@ -71,6 +71,7 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
           buildCacheByOperation.set(operation, { cacheDisabledReason });
         }
       }
+      clusterOperations(disjointSet, buildCacheByOperation);
       const buildPlan: ICobuildPlan = createCobuildPlan(disjointSet, terminal, buildCacheByOperation);
       logCobuildBuildPlan(buildPlan, terminal);
     }
@@ -78,7 +79,23 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
 }
 
 function generateCobuildPlanSummary(operations: Operation[], terminal: ITerminal): ICobuildPlan['summary'] {
-  const leafQueue: Operation[] = operations.filter((e) => e.consumers.size === 0);
+  const noOpOperations = new Set(operations.filter((e) => e.runner?.isNoOp));
+  const leafQueue: Operation[] = [];
+
+  for (const operation of operations) {
+    if (noOpOperations.has(operation)) {
+      continue;
+    }
+    let numberOfConsumers = 0;
+    for (const consumer of operation.consumers) {
+      if (!noOpOperations.has(consumer)) {
+        numberOfConsumers++;
+      }
+    }
+    if (numberOfConsumers === 0) {
+      leafQueue.push(operation);
+    }
+  }
   let currentLeafNodes: Set<Operation> = new Set<Operation>();
   const remainingOperations: Set<Operation> = new Set<Operation>(operations);
   let depth: number = 0;
@@ -89,7 +106,7 @@ function generateCobuildPlanSummary(operations: Operation[], terminal: ITerminal
   do {
     if (leafQueue.length === 0) {
       leafQueue.push(...currentLeafNodes);
-      const realOperations: Operation[] = [...currentLeafNodes].filter((e) => !e.runner?.isNoOp);
+      const realOperations: Operation[] = leafQueue.filter((e) => !e.runner?.isNoOp);
       if (realOperations.length > 0) {
         depth += 1;
         depthToOperationsMap.set(depth, new Set(realOperations));
