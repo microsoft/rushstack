@@ -92,6 +92,7 @@ export class DependencySpecifier {
     if (versionSpecifier.startsWith('workspace:')) {
       this.specifierType = DependencySpecifierType.Workspace;
       this.versionSpecifier = versionSpecifier.slice(this.specifierType.length + 1).trim();
+      // "workspace:some-package@^1.2.3" should be resolved as alias
       this.aliasTarget = undefined;
       return;
     }
