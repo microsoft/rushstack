@@ -1,6 +1,30 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Wed, 08 May 2024 22:23:50 GMT and should not be manually modified.
+This log was last generated on Thu, 16 May 2024 15:10:22 GMT and should not be manually modified.
+
+## 4.21.0
+Thu, 16 May 2024 15:10:22 GMT
+
+### Minor changes
+
+- Mark `onDefineParameters` and `onDefineUnscopedParameters` as deprecated and update README accordingly because defining parameters causes issues when the compiler targets >=es2022.
+
+## 4.20.1
+Wed, 15 May 2024 23:42:58 GMT
+
+_Version update only_
+
+## 4.20.0
+Wed, 15 May 2024 06:04:17 GMT
+
+### Minor changes
+
+- Rename `CommandLineParser.execute` to `CommandLineParser.executeAsync` and `CommandLineParser.executeWithoutErrorHandling` to `CommandLineParser.executeWithoutErrorHandlingAsync`. The old functions are marked as `@deprecated`.
+
+## 4.19.5
+Fri, 10 May 2024 05:33:34 GMT
+
+_Version update only_
 
 ## 4.19.4
 Wed, 08 May 2024 22:23:50 GMT

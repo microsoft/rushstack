@@ -116,6 +116,17 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
     this._options = options;
     this._scopingParameters = [];
+
+    // Consume the remainder of the command-line, which will later be passed the scoped parser.
+    // This will also prevent developers from calling this.defineCommandLineRemainder(...) since
+    // we will have already defined it.
+    this.defineCommandLineRemainder({
+      description:
+        'Scoped parameters.  Must be prefixed with "--", ex. "-- --scopedParameter ' +
+        'foo --scopedFlag".  For more information on available scoped parameters, use "-- --help".'
+    });
+
+    this.onDefineUnscopedParameters?.();
   }
 
   /**
@@ -162,10 +173,10 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   }
 
   /**
-   * {@inheritdoc CommandLineAction._execute}
+   * {@inheritdoc CommandLineAction._executeAsync}
    * @internal
    */
-  public async _execute(): Promise<void> {
+  public async _executeAsync(): Promise<void> {
     // override
     if (!this._unscopedParserOptions || !this._scopedCommandLineParser) {
       throw new Error('The CommandLineAction parameters must be processed before execution.');
@@ -193,12 +204,12 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     }
 
     // Call the scoped parser using only the scoped args to handle parsing
-    await this._scopedCommandLineParser.executeWithoutErrorHandling(scopedArgs);
+    await this._scopedCommandLineParser.executeWithoutErrorHandlingAsync(scopedArgs);
 
     // Only call execute if the parser reached the execute stage. This may not be true if
     // the parser exited early due to a specified '--help' parameter.
     if (this._scopedCommandLineParser.canExecute) {
-      await super._execute();
+      await super._executeAsync();
     }
 
     return;
@@ -206,6 +217,14 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
   /** @internal */
   public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
+    if (!this._scopingParameters.length) {
+      throw new Error(
+        'No scoping parameters defined. At least one scoping parameter must be defined. ' +
+          'Scoping parameters are defined by setting the parameterGroupName to ' +
+          'ScopedCommandLineAction.ScopingParameterGroupName.'
+      );
+    }
+
     super._registerDefinedParameters(state);
 
     const { parentParameterNames } = state;
@@ -218,36 +237,6 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
       ...state,
       parentParameterNames: updatedParentParameterNames
     };
-  }
-
-  /**
-   * {@inheritdoc CommandLineParameterProvider.onDefineParameters}
-   */
-  protected onDefineParameters(): void {
-    this.onDefineUnscopedParameters?.();
-
-    if (!this._scopingParameters.length) {
-      throw new Error(
-        'No scoping parameters defined. At least one scoping parameter must be defined. ' +
-          'Scoping parameters are defined by setting the parameterGroupName to ' +
-          'ScopedCommandLineAction.ScopingParameterGroupName.'
-      );
-    }
-    if (this.remainder) {
-      throw new Error(
-        'Unscoped remainder parameters are not allowed. Remainder parameters can only be defined on ' +
-          'the scoped parameter provider in onDefineScopedParameters().'
-      );
-    }
-
-    // Consume the remainder of the command-line, which will later be passed the scoped parser.
-    // This will also prevent developers from calling this.defineCommandLineRemainder(...) since
-    // we will have already defined it.
-    this.defineCommandLineRemainder({
-      description:
-        'Scoped parameters.  Must be prefixed with "--", ex. "-- --scopedParameter ' +
-        'foo --scopedFlag".  For more information on available scoped parameters, use "-- --help".'
-    });
   }
 
   /**
@@ -270,10 +259,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   }
 
   /**
-   * The child class should implement this hook to define its unscoped command-line parameters,
-   * e.g. by calling defineFlagParameter(). At least one scoping parameter must be defined.
-   * Scoping parameters are defined by setting the parameterGroupName to
-   * ScopedCommandLineAction.ScopingParameterGroupName.
+   * @deprecated - Define parameters in the constructor
    */
   protected onDefineUnscopedParameters?(): void;
 

@@ -19,7 +19,7 @@ describe(FlagFile.name, () => {
   });
 
   it('can get correct path', () => {
-    const flag: FlagFile = new FlagFile(TEMP_DIR_PATH, RushConstants.lastLinkFlagFilename);
+    const flag: FlagFile = new FlagFile(TEMP_DIR_PATH, RushConstants.lastLinkFlagFilename, {});
     expect(path.basename(flag.path)).toEqual(RushConstants.lastLinkFlagFilename + '.flag');
   });
 });

@@ -42,7 +42,7 @@ describe(Async.name, () => {
 
       const fn: (item: number) => Promise<string> = async (item) => {
         running++;
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
         return `result ${item}`;
@@ -137,7 +137,7 @@ describe(Async.name, () => {
 
       const fn: (item: number) => Promise<void> = jest.fn(async (item) => {
         running++;
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
       });
@@ -155,7 +155,7 @@ describe(Async.name, () => {
 
       const fn: (item: number) => Promise<void> = jest.fn(async (item) => {
         running++;
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
       });
@@ -171,14 +171,14 @@ describe(Async.name, () => {
         array.push(i);
       }
 
-      await Async.forEachAsync(array, async () => await Async.sleep(0), { concurrency: 3 });
+      await Async.forEachAsync(array, async () => await Async.sleepAsync(0), { concurrency: 3 });
     });
 
     it('rejects if any operation rejects', async () => {
       const array: number[] = [1, 2, 3];
 
       const fn: (item: number) => Promise<void> = jest.fn(async (item) => {
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         if (item === 3) throw new Error('Something broke');
       });
 
@@ -223,7 +223,7 @@ describe(Async.name, () => {
       };
 
       await expect(() =>
-        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(0))
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleepAsync(0))
       ).rejects.toThrow(expectedError);
     });
 
@@ -245,7 +245,7 @@ describe(Async.name, () => {
       };
 
       await expect(() =>
-        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(0))
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleepAsync(0))
       ).rejects.toThrow(expectedError);
     });
 
@@ -273,20 +273,21 @@ describe(Async.name, () => {
         [Symbol.asyncIterator]: () => asyncIterator
       };
 
-      const expectedConcurrency: 4 = 4;
       const finalPromise: Promise<void> = Async.forEachAsync(
         asyncIterable,
         async (item) => {
           // Do nothing
         },
         {
-          concurrency: expectedConcurrency
+          concurrency: 4
         }
       );
 
       // Wait for all the instant resolutions to be done
-      await Async.sleep(0);
-      expect(waitingIterators).toEqual(expectedConcurrency);
+      await Async.sleepAsync(0);
+
+      // The final iteration cycle is locked, so only 1 iterator is waiting.
+      expect(waitingIterators).toEqual(1);
       resolve2({ done: true, value: undefined });
       await finalPromise;
     });
@@ -309,7 +310,7 @@ describe(Async.name, () => {
       };
 
       await expect(() =>
-        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(0))
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleepAsync(0))
       ).rejects.toThrow(expectedError);
     });
 
@@ -326,7 +327,7 @@ describe(Async.name, () => {
 
       const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
         running++;
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
       });
@@ -344,7 +345,7 @@ describe(Async.name, () => {
 
       const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
         running++;
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
       });
@@ -362,7 +363,7 @@ describe(Async.name, () => {
 
       const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
         running++;
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
       });
@@ -408,7 +409,7 @@ describe(Async.name, () => {
 
         const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
           running++;
-          await Async.sleep(0);
+          await Async.sleepAsync(0);
           maxRunning = Math.max(maxRunning, running);
           running--;
         });
@@ -436,7 +437,7 @@ describe(Async.name, () => {
 
       const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
         running++;
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
       });
@@ -463,7 +464,7 @@ describe(Async.name, () => {
 
       const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
         running++;
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
       });
@@ -485,7 +486,7 @@ describe(Async.name, () => {
 
       const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
         running++;
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
       });
@@ -493,6 +494,50 @@ describe(Async.name, () => {
       await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
       expect(fn).toHaveBeenCalledTimes(10);
       expect(maxRunning).toEqual(9);
+    });
+
+    it('does not exceed the maxiumum concurrency for an async iterator when weighted', async () => {
+      let waitingIterators: number = 0;
+
+      let resolve2!: (value: { done: true; value: undefined }) => void;
+      const signal2: Promise<{ done: true; value: undefined }> = new Promise((resolve, reject) => {
+        resolve2 = resolve;
+      });
+
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<{ element: number; weight: number }> = {
+        next: () => {
+          iteratorIndex++;
+          if (iteratorIndex < 20) {
+            return Promise.resolve({ done: false, value: { element: iteratorIndex, weight: 2 } });
+          } else {
+            ++waitingIterators;
+            return signal2;
+          }
+        }
+      };
+      const asyncIterable: AsyncIterable<{ element: number; weight: number }> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      const finalPromise: Promise<void> = Async.forEachAsync(
+        asyncIterable,
+        async (item) => {
+          // Do nothing
+        },
+        {
+          concurrency: 4,
+          weighted: true
+        }
+      );
+
+      // Wait for all the instant resolutions to be done
+      await Async.sleepAsync(0);
+
+      // The final iteration cycle is locked, so only 1 iterator is waiting.
+      expect(waitingIterators).toEqual(1);
+      resolve2({ done: true, value: undefined });
+      await finalPromise;
     });
   });
 
@@ -506,6 +551,7 @@ describe(Async.name, () => {
     it('Correctly handles an async function that succeeds the first time', async () => {
       const expectedResult: string = 'RESULT';
       const result: string = await Async.runWithRetriesAsync({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         action: async () => expectedResult,
         maxRetries: 0
       });
@@ -528,6 +574,7 @@ describe(Async.name, () => {
       await expect(
         async () =>
           await Async.runWithRetriesAsync({
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             action: async () => {
               throw new Error('error');
             },
@@ -552,6 +599,7 @@ describe(Async.name, () => {
       await expect(
         async () =>
           await Async.runWithRetriesAsync({
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             action: async () => {
               throw new Error('error');
             },
@@ -596,7 +644,7 @@ describe(Async.name, () => {
       const expectedResult: string = 'RESULT';
       let callCount: number = 0;
       const sleepSpy: jest.SpyInstance = jest
-        .spyOn(Async, 'sleep')
+        .spyOn(Async, 'sleepAsync')
         .mockImplementation(() => Promise.resolve());
 
       const resultPromise: Promise<string> = Async.runWithRetriesAsync({
@@ -620,10 +668,11 @@ describe(Async.name, () => {
       const expectedResult: string = 'RESULT';
       let callCount: number = 0;
       const sleepSpy: jest.SpyInstance = jest
-        .spyOn(Async, 'sleep')
+        .spyOn(Async, 'sleepAsync')
         .mockImplementation(() => Promise.resolve());
 
       const resultPromise: Promise<string> = Async.runWithRetriesAsync({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         action: async () => {
           if (callCount++ === 0) {
             throw new Error('error');
@@ -698,7 +747,7 @@ describe(AsyncQueue.name, () => {
       queue,
       async ([item, callback]) => {
         // Add an async tick to ensure that the queue is actually running concurrently
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         seenItems++;
         expect(expectedItems.has(item)).toBe(true);
         expectedItems.delete(item);
@@ -725,7 +774,7 @@ describe(AsyncQueue.name, () => {
       queue,
       async ([item, callback]) => {
         // Add an async tick to ensure that the queue is actually running concurrently
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         seenItems++;
         if (item < 4) {
           expect(expectedItems.has(item)).toBe(true);
@@ -759,7 +808,7 @@ describe(AsyncQueue.name, () => {
       queue,
       async ([item, callback]) => {
         // Add an async tick to ensure that the queue is actually running concurrently
-        await Async.sleep(0);
+        await Async.sleepAsync(0);
         seenItems++;
         if (item < 4) {
           expect(expectedItems.has(item)).toBe(true);

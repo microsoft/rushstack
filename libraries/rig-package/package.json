@@ -21,12 +21,12 @@
   },
   "devDependencies": {
     "local-eslint-config": "workspace:*",
-    "@rushstack/heft-node-rig": "2.4.18",
-    "@rushstack/heft": "0.65.5",
+    "@rushstack/heft-node-rig": "2.6.7",
+    "@rushstack/heft": "0.66.9",
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
     "@types/resolve": "1.20.2",
-    "ajv": "~6.12.5",
+    "ajv": "~8.13.0",
     "resolve": "~1.22.1"
   }
 }

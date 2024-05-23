@@ -26,14 +26,29 @@ jobs:
     name: Node.js v${{ matrix.NodeVersionDisplayName }} (${{ matrix.OS }})
     runs-on: ${{ matrix.OS }}
     steps:
+      - name: Create ~/.rush-user/settings.json
+        shell: pwsh
+        # Create a .rush-user/settings.json file that looks like this:
+        #
+        # { "buildCacheFolder": "/<runner working directory>/rush-cache" }
+        #
+        # This configures the local cache to be shared between all Rush repos. This allows us to run a build in
+        # one clone of the repo (repo-a), and restore from the cache in another clone of the repo (repo-b) to test
+        # the build cache.
+        run: |
+          mkdir -p $HOME/.rush-user
+          @{ buildCacheFolder = Join-Path ${{ github.workspace }} rush-cache } | ConvertTo-Json > $HOME/.rush-user/settings.json
+
       - uses: actions/checkout@v3
         with:
           fetch-depth: 2
+          path: repo-a
 
       - name: Git config user
         run: |
           git config --local user.name "Rushbot"
           git config --local user.email "rushbot@users.noreply.github.com"
+        working-directory: repo-a
 
       - uses: actions/setup-node@v3
         with:
@@ -41,22 +56,41 @@ jobs:
 
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
+        working-directory: repo-a
 
       - name: Rush Install
         run: node common/scripts/install-run-rush.js install
+        working-directory: repo-a
 
       # - if: runner.os == 'Linux'
       #   name: Start xvfb
       #   run: /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+      #   working-directory: repo-a
 
       - name: Rush retest (install-run-rush)
         run: node common/scripts/install-run-rush.js retest --verbose --production
+        working-directory: repo-a
 
       - name: Ensure repo README is up-to-date
         run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
+        working-directory: repo-a
+
+      - name: Clone another copy of the repo to test the build cache
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          path: repo-b
+
+      - name: Git config user
+        run: |
+          git config --local user.name "Rushbot"
+          git config --local user.email "rushbot@users.noreply.github.com"
+        working-directory: repo-b
 
       - name: Rush install (rush-lib)
-        run: node apps/rush/lib/start-dev.js install
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js install
+        working-directory: repo-b
 
       - name: Rush test (rush-lib)
-        run: node apps/rush/lib/start-dev.js test --verbose --production --timeline
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
+        working-directory: repo-b

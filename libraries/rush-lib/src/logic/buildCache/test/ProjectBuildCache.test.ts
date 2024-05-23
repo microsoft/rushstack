@@ -26,7 +26,7 @@ describe(ProjectBuildCache.name, () => {
       }
     } as unknown as ProjectChangeAnalyzer;
 
-    const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
+    const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCacheAsync({
       buildCacheConfiguration: {
         buildCacheEnabled: options.hasOwnProperty('enabled') ? options.enabled : true,
         getCacheEntryId: (opts: IGenerateCacheEntryIdOptions) =>
@@ -51,7 +51,7 @@ describe(ProjectBuildCache.name, () => {
     return subject;
   }
 
-  describe(ProjectBuildCache.tryGetProjectBuildCache.name, () => {
+  describe(ProjectBuildCache.tryGetProjectBuildCacheAsync.name, () => {
     it('returns a ProjectBuildCache with a calculated cacheId value', async () => {
       const subject: ProjectBuildCache = (await prepareSubject({}))!;
       expect(subject['_cacheId']).toMatchInlineSnapshot(

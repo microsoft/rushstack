@@ -1,6 +1,33 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Wed, 08 May 2024 22:23:51 GMT and should not be manually modified.
+This log was last generated on Fri, 17 May 2024 00:10:40 GMT and should not be manually modified.
+
+## 4.1.48
+Fri, 17 May 2024 00:10:40 GMT
+
+### Patches
+
+- Fix an issue where an incomplete repo state analysis was sometimes returned, especially on WSL. See https://github.com/microsoft/rushstack/pull/4711 for details.
+
+## 4.1.47
+Thu, 16 May 2024 15:10:22 GMT
+
+_Version update only_
+
+## 4.1.46
+Wed, 15 May 2024 23:42:58 GMT
+
+_Version update only_
+
+## 4.1.45
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
+
+## 4.1.44
+Fri, 10 May 2024 05:33:34 GMT
+
+_Version update only_
 
 ## 4.1.43
 Wed, 08 May 2024 22:23:51 GMT

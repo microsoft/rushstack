@@ -1,6 +1,20 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 06 May 2024 15:11:04 GMT and should not be manually modified.
+This log was last generated on Wed, 15 May 2024 06:04:17 GMT and should not be manually modified.
+
+## 4.3.0
+Wed, 15 May 2024 06:04:17 GMT
+
+### Minor changes
+
+- Rename `Async.sleep` to `Async.sleepAsync`. The old function is marked as `@deprecated`.
+
+## 4.2.1
+Fri, 10 May 2024 05:33:33 GMT
+
+### Patches
+
+- Fix a bug in `Async.forEachAsync` where weight wasn't respected.
 
 ## 4.2.0
 Mon, 06 May 2024 15:11:04 GMT

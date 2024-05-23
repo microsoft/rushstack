@@ -128,7 +128,7 @@ describe(WorkQueue.name, () => {
 
     const fn: () => Promise<OperationStatus> = jest.fn(async () => {
       running++;
-      await Async.sleep(0);
+      await Async.sleepAsync(0);
       maxRunning = Math.max(maxRunning, running);
       running--;
       return OperationStatus.Success;

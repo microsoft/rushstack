@@ -86,7 +86,7 @@ export class Autoinstaller {
       );
     }
 
-    await InstallHelpers.ensureLocalPackageManager(
+    await InstallHelpers.ensureLocalPackageManagerAsync(
       this._rushConfiguration,
       this._rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts,
@@ -170,7 +170,7 @@ export class Autoinstaller {
   }
 
   public async updateAsync(): Promise<void> {
-    await InstallHelpers.ensureLocalPackageManager(
+    await InstallHelpers.ensureLocalPackageManagerAsync(
       this._rushConfiguration,
       this._rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts,

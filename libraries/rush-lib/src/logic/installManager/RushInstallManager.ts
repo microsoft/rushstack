@@ -649,7 +649,7 @@ export class RushInstallManager extends BaseInstallManager {
   protected async postInstallAsync(subspace: Subspace): Promise<void> {
     if (!this.options.noLink) {
       const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
-      await linkManager.createSymlinksForProjects(false);
+      await linkManager.createSymlinksForProjectsAsync(false);
     } else {
       // eslint-disable-next-line no-console
       console.log(

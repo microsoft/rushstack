@@ -93,10 +93,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public readonly consumers: Set<OperationExecutionRecord> = new Set();
 
   public readonly stopwatch: Stopwatch = new Stopwatch();
-  public readonly stdioSummarizer: StdioSummarizer = new StdioSummarizer();
+  public readonly stdioSummarizer: StdioSummarizer = new StdioSummarizer({
+    // Allow writing to this object after transforms have been closed. We clean it up manually in a finally block.
+    preventAutoclose: true
+  });
 
   public readonly runner: IOperationRunner;
-  public readonly weight: number;
   public readonly associatedPhase: IPhase | undefined;
   public readonly associatedProject: RushConfigurationProject | undefined;
   public readonly _operationMetadataManager: OperationMetadataManager | undefined;
@@ -117,7 +119,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
     this.operation = operation;
     this.runner = runner;
-    this.weight = operation.weight;
     this.associatedPhase = associatedPhase;
     this.associatedProject = associatedProject;
     if (operation.associatedPhase && operation.associatedProject) {
@@ -133,6 +134,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public get name(): string {
     return this.runner.name;
+  }
+
+  public get weight(): number {
+    return this.operation.weight;
   }
 
   public get debugMode(): boolean {

@@ -573,10 +573,11 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
                     [--max-install-attempts NUMBER] [--ignore-hooks]
-                    [--offline] [--subspace SUBSPACE_NAME] [-t PROJECT]
-                    [-T PROJECT] [-f PROJECT] [-o PROJECT] [-i PROJECT]
-                    [-I PROJECT] [--to-version-policy VERSION_POLICY_NAME]
-                    [--from-version-policy VERSION_POLICY_NAME] [--check-only]
+                    [--offline] [-t PROJECT] [-T PROJECT] [-f PROJECT]
+                    [-o PROJECT] [-i PROJECT] [-I PROJECT]
+                    [--to-version-policy VERSION_POLICY_NAME]
+                    [--from-version-policy VERSION_POLICY_NAME]
+                    [--subspace SUBSPACE_NAME] [--check-only]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -622,10 +623,6 @@ Optional arguments:
                         necessary NPM packages cannot be obtained from the 
                         local cache. For details, see the documentation for 
                         PNPM's \\"--offline\\" parameter.
-  --subspace SUBSPACE_NAME
-                        (EXPERIMENTAL) Specifies a Rush subspace to be 
-                        installed. Requires the feature to be enabled in 
-                        subspaces.json.
   -t PROJECT, --to PROJECT
                         Normally all projects in the monorepo will be 
                         processed; adding this parameter will instead select 
@@ -703,6 +700,10 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
+  --subspace SUBSPACE_NAME
+                        (EXPERIMENTAL) Specifies a Rush subspace to be 
+                        installed. Requires the \\"subspacesEnabled\\" feature to 
+                        be enabled in subspaces.json.
   --check-only          Only check the validity of the shrinkwrap file 
                         without performing an install.
 "
@@ -1148,7 +1149,7 @@ exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
                    [--max-install-attempts NUMBER] [--ignore-hooks]
-                   [--offline] [--subspace SUBSPACE_NAME] [--full] [--recheck]
+                   [--offline] [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -1193,10 +1194,6 @@ Optional arguments:
                         necessary NPM packages cannot be obtained from the 
                         local cache. For details, see the documentation for 
                         PNPM's \\"--offline\\" parameter.
-  --subspace SUBSPACE_NAME
-                        (EXPERIMENTAL) Specifies a Rush subspace to be 
-                        installed. Requires the feature to be enabled in 
-                        subspaces.json.
   --full                Normally \\"rush update\\" tries to preserve your 
                         existing installed versions and only makes the 
                         minimum updates needed to satisfy the package.json 

@@ -1,6 +1,16 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Mon, 06 May 2024 15:11:05 GMT and should not be manually modified.
+This log was last generated on Wed, 15 May 2024 06:04:17 GMT and should not be manually modified.
+
+## 7.28.17
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
+
+## 7.28.16
+Fri, 10 May 2024 05:33:34 GMT
+
+_Version update only_
 
 ## 7.28.15
 Mon, 06 May 2024 15:11:05 GMT

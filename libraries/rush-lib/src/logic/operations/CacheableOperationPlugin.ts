@@ -619,7 +619,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       });
 
       // eslint-disable-next-line require-atomic-updates -- This is guaranteed to not be concurrent
-      buildCacheContext.projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
+      buildCacheContext.projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCacheAsync({
         project: rushProject,
         projectOutputFolderNames,
         additionalProjectOutputFilePaths,
@@ -682,17 +682,18 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       });
     }
 
-    const projectBuildCache: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
-      project: rushProject,
-      projectOutputFolderNames,
-      additionalProjectOutputFilePaths,
-      additionalContext,
-      buildCacheConfiguration,
-      terminal,
-      configHash,
-      projectChangeAnalyzer,
-      phaseName: phase.name
-    });
+    const projectBuildCache: ProjectBuildCache | undefined =
+      await ProjectBuildCache.tryGetProjectBuildCacheAsync({
+        project: rushProject,
+        projectOutputFolderNames,
+        additionalProjectOutputFilePaths,
+        additionalContext,
+        buildCacheConfiguration,
+        terminal,
+        configHash,
+        projectChangeAnalyzer,
+        phaseName: phase.name
+      });
 
     // eslint-disable-next-line require-atomic-updates -- This is guaranteed to not be concurrent
     buildCacheContext.projectBuildCache = projectBuildCache;

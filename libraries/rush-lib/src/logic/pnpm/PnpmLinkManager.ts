@@ -39,7 +39,7 @@ export class PnpmLinkManager extends BaseLinkManager {
   /**
    * @override
    */
-  public async createSymlinksForProjects(force: boolean): Promise<void> {
+  public async createSymlinksForProjectsAsync(force: boolean): Promise<void> {
     const useWorkspaces: boolean =
       this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
     if (useWorkspaces) {
@@ -53,10 +53,10 @@ export class PnpmLinkManager extends BaseLinkManager {
       throw new AlreadyReportedError();
     }
 
-    await super.createSymlinksForProjects(force);
+    await super.createSymlinksForProjectsAsync(force);
   }
 
-  protected async _linkProjects(): Promise<void> {
+  protected async _linkProjectsAsync(): Promise<void> {
     if (this._rushConfiguration.projects.length > 0) {
       // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
       // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
@@ -71,7 +71,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       }
 
       for (const rushProject of this._rushConfiguration.projects) {
-        await this._linkProject(rushProject, pnpmShrinkwrapFile);
+        await this._linkProjectAsync(rushProject, pnpmShrinkwrapFile);
       }
     } else {
       // eslint-disable-next-line no-console
@@ -89,7 +89,7 @@ export class PnpmLinkManager extends BaseLinkManager {
    * @param project             The local project that we will create symlinks for
    * @param rushLinkJson        The common/temp/rush-link.json output file
    */
-  private async _linkProject(
+  private async _linkProjectAsync(
     project: RushConfigurationProject,
     pnpmShrinkwrapFile: PnpmShrinkwrapFile
   ): Promise<void> {

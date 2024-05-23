@@ -83,10 +83,10 @@ export class ProjectBuildCache {
     return this._cacheId;
   }
 
-  public static async tryGetProjectBuildCache(
+  public static async tryGetProjectBuildCacheAsync(
     options: IProjectBuildCacheOptions
   ): Promise<ProjectBuildCache | undefined> {
-    const cacheId: string | undefined = await ProjectBuildCache._getCacheId(options);
+    const cacheId: string | undefined = await ProjectBuildCache._getCacheIdAsync(options);
     return new ProjectBuildCache(cacheId, options);
   }
 
@@ -375,7 +375,7 @@ export class ProjectBuildCache {
     return path.join(this._project.projectRushTempFolder, `${this._cacheId}.${mode}.log`);
   }
 
-  private static async _getCacheId({
+  private static async _getCacheIdAsync({
     projectChangeAnalyzer,
     project,
     terminal,

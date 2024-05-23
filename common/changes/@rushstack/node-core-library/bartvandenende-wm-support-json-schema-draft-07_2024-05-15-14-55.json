@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Replace z-schema with ajv for schema validation and add support for json-schema draft-07.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

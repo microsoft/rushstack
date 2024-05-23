@@ -86,7 +86,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string
   ): Promise<Buffer | undefined> {
     try {
-      const result: boolean | Buffer = await this._http({
+      const result: boolean | Buffer = await this._makeHttpRequestAsync({
         terminal: terminal,
         relUrl: `${this._cacheKeyPrefix}${cacheId}`,
         method: 'GET',
@@ -116,7 +116,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     terminal.writeDebugLine('Uploading object with cacheId: ', cacheId);
 
     try {
-      const result: boolean | Buffer = await this._http({
+      const result: boolean | Buffer = await this._makeHttpRequestAsync({
         terminal: terminal,
         relUrl: `${this._cacheKeyPrefix}${cacheId}`,
         method: this._uploadMethod,
@@ -207,7 +207,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     return this.__credentialCacheId;
   }
 
-  private async _http(options: {
+  private async _makeHttpRequestAsync(options: {
     terminal: ITerminal;
     relUrl: string;
     method: string;
@@ -219,7 +219,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   }): Promise<Buffer | boolean> {
     const { terminal, relUrl, method, body, warningText, readBody, credentialOptions } = options;
     const safeCredentialOptions: CredentialsOptions = credentialOptions ?? CredentialsOptions.Optional;
-    const credentials: string | undefined = await this._tryGetCredentials(safeCredentialOptions);
+    const credentials: string | undefined = await this._tryGetCredentialsAsync(safeCredentialOptions);
     const url: string = new URL(relUrl, this._url).href;
 
     const headers: Record<string, string> = {};
@@ -257,7 +257,10 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         // required. Re-attempt the request, requiring credentials this time.
         //
         // This counts as part of the "first attempt", so it is not included in the max attempts
-        return await this._http({ ...options, credentialOptions: CredentialsOptions.Required });
+        return await this._makeHttpRequestAsync({
+          ...options,
+          credentialOptions: CredentialsOptions.Required
+        });
       }
 
       if (options.maxAttempts > 1) {
@@ -267,9 +270,9 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         const factor: number = 1.0 + Math.random(); // A random number between 1.0 and 2.0
         const retryDelay: number = Math.floor(factor * this._minHttpRetryDelayMs);
 
-        await Async.sleep(retryDelay);
+        await Async.sleepAsync(retryDelay);
 
-        return await this._http({ ...options, maxAttempts: options.maxAttempts - 1 });
+        return await this._makeHttpRequestAsync({ ...options, maxAttempts: options.maxAttempts - 1 });
       }
 
       this._reportFailure(terminal, method, response, false, warningText);
@@ -287,11 +290,11 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     return result;
   }
 
-  private async _tryGetCredentials(options: CredentialsOptions.Required): Promise<string>;
-  private async _tryGetCredentials(options: CredentialsOptions.Optional): Promise<string | undefined>;
-  private async _tryGetCredentials(options: CredentialsOptions.Omit): Promise<undefined>;
-  private async _tryGetCredentials(options: CredentialsOptions): Promise<string | undefined>;
-  private async _tryGetCredentials(options: CredentialsOptions): Promise<string | undefined> {
+  private async _tryGetCredentialsAsync(options: CredentialsOptions.Required): Promise<string>;
+  private async _tryGetCredentialsAsync(options: CredentialsOptions.Optional): Promise<string | undefined>;
+  private async _tryGetCredentialsAsync(options: CredentialsOptions.Omit): Promise<undefined>;
+  private async _tryGetCredentialsAsync(options: CredentialsOptions): Promise<string | undefined>;
+  private async _tryGetCredentialsAsync(options: CredentialsOptions): Promise<string | undefined> {
     if (options === CredentialsOptions.Omit) {
       return;
     }
@@ -299,7 +302,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     let credentials: string | undefined = this._environmentCredential;
 
     if (credentials === undefined) {
-      credentials = await this._tryGetCredentialsFromCache();
+      credentials = await this._tryGetCredentialsFromCacheAsync();
     }
 
     if (typeof credentials !== 'string' && options === CredentialsOptions.Required) {
@@ -319,7 +322,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     return credentials;
   }
 
-  private async _tryGetCredentialsFromCache(): Promise<string | undefined> {
+  private async _tryGetCredentialsFromCacheAsync(): Promise<string | undefined> {
     let cacheEntry: ICredentialCacheEntry | undefined;
 
     await CredentialCache.usingAsync(

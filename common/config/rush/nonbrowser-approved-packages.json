@@ -95,6 +95,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/lockfile-types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@pnpm/logger",
       "allowedCategories": [ "libraries" ]
     },
@@ -376,6 +380,14 @@
     },
     {
       "name": "ajv",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "ajv-draft-04",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "ajv-formats",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -912,10 +924,6 @@
     },
     {
       "name": "xmldoc",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "z-schema",
       "allowedCategories": [ "libraries" ]
     }
   ]

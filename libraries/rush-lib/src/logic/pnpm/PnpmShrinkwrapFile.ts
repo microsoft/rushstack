@@ -273,12 +273,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // Normalize the data
     const lockfileVersion: string | number | undefined = shrinkwrapJson.lockfileVersion;
     if (typeof lockfileVersion === 'string') {
+      const isDotIncluded: boolean = lockfileVersion.includes('.');
       this.shrinkwrapFileMajorVersion = parseInt(
-        lockfileVersion.substring(0, lockfileVersion.indexOf('.')),
+        lockfileVersion.substring(0, isDotIncluded ? lockfileVersion.indexOf('.') : undefined),
         10
       );
     } else if (typeof lockfileVersion === 'number') {
-      this.shrinkwrapFileMajorVersion = lockfileVersion;
+      this.shrinkwrapFileMajorVersion = Math.floor(lockfileVersion);
     } else {
       this.shrinkwrapFileMajorVersion = 0;
     }
@@ -347,17 +348,17 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     exemptPackageVersions: Record<string, string[]>,
     terminal: ITerminal
   ): boolean {
-    const exmeptPackageList: Map<string, boolean> = new Map();
+    const exemptPackageList: Map<string, boolean> = new Map();
     for (const [pkgName, versions] of Object.entries(exemptPackageVersions)) {
       for (const version of versions) {
-        exmeptPackageList.set(this._getPackageId(pkgName, version), true);
+        exemptPackageList.set(this._getPackageId(pkgName, version), true);
       }
     }
 
     for (const [pkgName, { resolution }] of this.packages) {
       if (
-        resolution?.integrity.startsWith('sha1') &&
-        !exmeptPackageList.has(this._parseDependencyPath(pkgName))
+        resolution?.integrity?.startsWith('sha1') &&
+        !exemptPackageList.has(this._parseDependencyPath(pkgName))
       ) {
         terminal.writeErrorLine(
           'Error: An integrity field with "sha1" was found in pnpm-lock.yaml;' +

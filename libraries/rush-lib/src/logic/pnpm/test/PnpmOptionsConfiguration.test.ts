@@ -22,7 +22,7 @@ describe(PnpmOptionsConfiguration.name, () => {
         `${__dirname}/jsonFiles/pnpm-config-unknown.json`,
         fakeCommonTempFolder
       )
-    ).toThrow(/Additional properties not allowed: unknownProperty/);
+    ).toThrow(/must NOT have additional properties/);
   });
 
   it('loads overrides', () => {

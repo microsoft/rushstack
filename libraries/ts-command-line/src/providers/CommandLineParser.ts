@@ -141,24 +141,24 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * want to be involved with the command-line logic, and will discard the promise without
    * a then() or catch() block.
    *
-   * If your caller wants to trap and handle errors, use {@link CommandLineParser.executeWithoutErrorHandling}
+   * If your caller wants to trap and handle errors, use {@link CommandLineParser.executeWithoutErrorHandlingAsync}
    * instead.
    *
    * @param args - the command-line arguments to be parsed; if omitted, then
    *               the process.argv will be used
    */
-  public async execute(args?: string[]): Promise<boolean> {
+  public async executeAsync(args?: string[]): Promise<boolean> {
     if (this._options.enableTabCompletionAction && !this._tabCompleteActionWasAdded) {
       this.addAction(new TabCompleteAction(this.actions, this.parameters));
       this._tabCompleteActionWasAdded = true;
     }
 
     try {
-      await this.executeWithoutErrorHandling(args);
+      await this.executeWithoutErrorHandlingAsync(args);
       return true;
     } catch (err) {
       if (err instanceof CommandLineParserExitError) {
-        // executeWithoutErrorHandling() handles the successful cases,
+        // executeWithoutErrorHandlingAsync() handles the successful cases,
         // so here we can assume err has a nonzero exit code
         if (err.message) {
           // eslint-disable-next-line no-console
@@ -190,16 +190,24 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   }
 
   /**
-   * This is similar to {@link CommandLineParser.execute}, except that execution errors
+   * @deprecated Use {@link CommandLineParser.executeAsync} instead.
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public async execute(args?: string[]): Promise<boolean> {
+    return await this.executeAsync(args);
+  }
+
+  /**
+   * This is similar to {@link CommandLineParser.executeAsync}, except that execution errors
    * simply cause the promise to reject.  It is the caller's responsibility to trap
    */
-  public async executeWithoutErrorHandling(args?: string[]): Promise<void> {
+  public async executeWithoutErrorHandlingAsync(args?: string[]): Promise<void> {
     try {
       if (this._executed) {
         // In the future we could allow the same parser to be invoked multiple times
         // with different arguments.  We'll do that work as soon as someone encounters
         // a real world need for it.
-        throw new Error('execute() was already called for this parser instance');
+        throw new Error('executeAsync() was already called for this parser instance');
       }
       this._executed = true;
 
@@ -291,6 +299,14 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     }
   }
 
+  /**
+   * @deprecated Use {@link CommandLineParser.executeWithoutErrorHandlingAsync} instead.
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public async executeWithoutErrorHandling(args?: string[]): Promise<void> {
+    await this.executeWithoutErrorHandlingAsync(args);
+  }
+
   /** @internal */
   public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
     super._registerDefinedParameters(state);
@@ -332,7 +348,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    */
   protected async onExecute(): Promise<void> {
     if (this.selectedAction) {
-      await this.selectedAction._execute();
+      await this.selectedAction._executeAsync();
     }
   }
 }

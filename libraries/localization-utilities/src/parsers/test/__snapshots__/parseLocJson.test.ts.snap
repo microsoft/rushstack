@@ -40,5 +40,5 @@ exports[`parseLocJson throws on invalid file 1`] = `
 test.loc.json
 
 Error: #/foo
-       Additional properties not allowed: baz"
+       must NOT have additional properties: baz"
 `;
