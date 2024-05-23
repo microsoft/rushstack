@@ -10,7 +10,7 @@ import type { RushConfigurationProject } from '../../../api/RushConfigurationPro
 import { OperationMetadataManager } from '../OperationMetadataManager';
 import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
 import { CollatedTerminal } from '@rushstack/stream-collator';
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import * as fs from 'fs';
 import { Readable } from 'stream';
 
