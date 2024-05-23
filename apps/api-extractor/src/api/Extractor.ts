@@ -89,6 +89,15 @@ export interface IExtractorInvokeOptions {
    * the STDERR/STDOUT console.
    */
   messageCallback?: (message: ExtractorMessage) => void;
+
+  /**
+   * An optional callback function that will be called before writing and comparing an API report file.
+   * The callback can be used to customize the report file contents.
+   *
+   * @remarks
+   * If a `preWriteContentCallback` callback is not provided, the default content will be written to the file.
+   */
+  preWriteContentCallback?: (content: string) => string;
 }
 
 /**
@@ -298,8 +307,12 @@ export class Extractor {
         extractorConfig.reportFilePath
       );
 
-      const actualApiReportContent: string = ApiReportGenerator.generateReviewFileContent(collector);
+      let actualApiReportContent: string = ApiReportGenerator.generateReviewFileContent(collector);
 
+      // Allow the caller to customize the content
+      if (options.preWriteContentCallback) {
+        actualApiReportContent = options.preWriteContentCallback(actualApiReportContent);
+      }
       // Write the actual file
       FileSystem.writeFile(actualApiReportPath, actualApiReportContent, {
         ensureFolderExists: true,
