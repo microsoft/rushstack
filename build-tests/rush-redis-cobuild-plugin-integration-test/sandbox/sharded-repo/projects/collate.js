@@ -13,7 +13,7 @@ const parentFolder = getArgument('--shard-parent-folder');
 const shards = +getArgument('--shard-count');
 
 async function runAsync() {
-  await Async.sleep(500);
+  await Async.sleepAsync(500);
 
   let output = '';
   for (let i = 1; i <= shards; i++) {
