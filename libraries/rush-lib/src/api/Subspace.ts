@@ -134,6 +134,11 @@ export class Subspace {
               `The project level configuration file ${project.projectFolder}/.npmrc is no longer valid. Please use a ${subspaceConfigFolder}/.npmrc file instead.`
             );
           }
+          if (FileSystem.exists(`${project.projectFolder}/.pnpmfile.cjs`)) {
+            throw new Error(
+              `The project level configuration file ${project.projectFolder}/.pnpmfile.cjs is no longer valid. Please use a ${subspaceConfigFolder}/.pnpmfile.cjs file instead.`
+            );
+          }
         }
 
         if (!FileSystem.exists(subspaceConfigFolder)) {
