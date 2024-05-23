@@ -911,8 +911,8 @@ export class ExtractorConfig {
       const apiReportEnabled: boolean = configObject.apiReport?.enabled ?? false;
       const apiReportIncludeForgottenExports: boolean =
         configObject.apiReport?.includeForgottenExports ?? false;
-      let reportDirectoryPath: string = tokenContext.projectFolder;
-      let reportTempDirectoryPath: string = tokenContext.projectFolder;
+      let reportFolder: string = tokenContext.projectFolder;
+      let reportTempFolder: string = tokenContext.projectFolder;
       const reportConfigs: IExtractorConfigApiReport[] = [];
       if (apiReportEnabled) {
         // Undefined case checked above where we assign `apiReportEnabled`
@@ -967,7 +967,7 @@ export class ExtractorConfig {
         }
 
         if (apiReportConfig.reportFolder) {
-          reportDirectoryPath = ExtractorConfig._resolvePathWithTokens(
+          reportFolder = ExtractorConfig._resolvePathWithTokens(
             'reportFolder',
             apiReportConfig.reportFolder,
             tokenContext
@@ -975,7 +975,7 @@ export class ExtractorConfig {
         }
 
         if (apiReportConfig.reportTempFolder) {
-          reportTempDirectoryPath = ExtractorConfig._resolvePathWithTokens(
+          reportTempFolder = ExtractorConfig._resolvePathWithTokens(
             'reportTempFolder',
             apiReportConfig.reportTempFolder,
             tokenContext
@@ -1098,8 +1098,8 @@ export class ExtractorConfig {
         skipLibCheck: !!configObject.compiler.skipLibCheck,
         apiReportEnabled,
         reportConfigs,
-        reportFolder: reportDirectoryPath,
-        reportTempFolder: reportTempDirectoryPath,
+        reportFolder,
+        reportTempFolder,
         apiReportIncludeForgottenExports,
         docModelEnabled,
         apiJsonFilePath,
