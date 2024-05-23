@@ -35,4 +35,6 @@ export type ExportedAlias = AlphaClass;
 
 export { IPublicComplexInterface } from './IPublicComplexInterface';
 
+export { variableFromArbitraryExtensionModule } from './arbitraryExtensionModule.xyz';
+
 export { Lib1Interface } from 'api-extractor-lib1-test';

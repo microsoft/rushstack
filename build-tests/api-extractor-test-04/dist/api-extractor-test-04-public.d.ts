@@ -55,4 +55,9 @@ export declare class PublicClass {
 
 /* Excluded from this release type: variableDeclaration */
 
+/**
+ * @public
+ */
+export declare const variableFromArbitraryExtensionModule: string;
+
 export { }

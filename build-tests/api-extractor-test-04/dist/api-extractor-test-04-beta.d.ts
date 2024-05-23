@@ -130,4 +130,9 @@ export declare enum RegularEnum {
  */
 export declare const variableDeclaration: string;
 
+/**
+ * @public
+ */
+export declare const variableFromArbitraryExtensionModule: string;
+
 export { }
