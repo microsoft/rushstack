@@ -1101,8 +1101,8 @@ export class RushConfiguration {
       if (subspacesFeatureEnabled) {
         if (filename === RushConstants.pnpmfileV6Filename || filename === RushConstants.pnpmfileV1Filename) {
           throw new Error(
-            'When subspaces is enabled, rush will only use the pnpmfile.cjs file located in the subspace configuration. ' +
-              `The ${commonRushConfigFolder}/${filename} will no longer be used.`
+            'When the subspaces feature is enabled, a separate lockfile is stored in each subspace folder. ' +
+              `To avoid confusion, remove this file: ${commonRushConfigFolder}/${filename}`
           );
         }
       }
