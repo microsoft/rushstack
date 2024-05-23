@@ -383,10 +383,10 @@ export abstract class BaseInstallManager {
     const extraNpmrcLines: string[] = [];
     if (this.rushConfiguration.subspacesFeatureEnabled) {
       // Look for a monorepo level .npmrc file
-      const globalNpmrcPath: string = `${this.rushConfiguration.commonRushConfigFolder}/.npmrc`;
-      if (FileSystem.exists(globalNpmrcPath)) {
-        const globalNpmrcFileLines: string[] = FileSystem.readFile(globalNpmrcPath).toString().split('\n');
-        extraNpmrcLines.push(...globalNpmrcFileLines);
+      const commonNpmrcPath: string = `${this.rushConfiguration.commonRushConfigFolder}/.npmrc`;
+      if (FileSystem.exists(commonNpmrcPath)) {
+        const commonNpmrcFileLines: string[] = FileSystem.readFile(commonNpmrcPath).toString().split('\n');
+        extraNpmrcLines.push(...commonNpmrcFileLines);
       }
 
       extraNpmrcLines.push(
