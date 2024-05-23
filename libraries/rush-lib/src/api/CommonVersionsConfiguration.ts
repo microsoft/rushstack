@@ -132,7 +132,7 @@ export class CommonVersionsConfiguration {
       onSet: this._onSetAllowedAlternativeVersions.bind(this)
     });
     this.allowedAlternativeVersions = this._allowedAlternativeVersions.protectedView;
-    this.ensureConsistentVersions = !!commonVersionsJson?.ensureConsistentVersions;
+    this.ensureConsistentVersions = commonVersionsJson?.ensureConsistentVersions;
 
     if (commonVersionsJson) {
       try {

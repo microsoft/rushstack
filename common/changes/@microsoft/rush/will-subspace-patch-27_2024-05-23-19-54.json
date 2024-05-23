@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Move the ensureConsistentVersions setting to the common-versions.json file",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

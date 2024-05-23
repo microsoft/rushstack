@@ -120,6 +120,7 @@ export type CobuildLockProviderFactory = (cobuildJson: ICobuildJson) => ICobuild
 // @public
 export class CommonVersionsConfiguration {
     readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
+    readonly ensureConsistentVersions: boolean | undefined;
     readonly filePath: string;
     getAllPreferredVersions(): Map<string, string>;
     getPreferredVersionsHash(): string;
@@ -1452,6 +1453,8 @@ export class Subspace {
     _addProject(project: RushConfigurationProject): void;
     // @beta
     contains(project: RushConfigurationProject): boolean;
+    // (undocumented)
+    get ensureConsistentVersions(): boolean;
     // @beta
     getCommittedShrinkwrapFilename(): string;
     // @beta

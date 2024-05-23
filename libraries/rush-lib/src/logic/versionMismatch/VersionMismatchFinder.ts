@@ -134,7 +134,7 @@ export class VersionMismatchFinder {
       truncateLongPackageNameLists?: boolean | undefined;
     }
   ): void {
-    if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
+    if (options.subspace?.ensureConsistentVersions || options.isRushCheckCommand) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
         rushConfiguration,
         options

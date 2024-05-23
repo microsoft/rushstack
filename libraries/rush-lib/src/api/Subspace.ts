@@ -263,16 +263,23 @@ export class Subspace {
     if (!this._commonVersionsConfiguration) {
       this._commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
     }
+    return this._commonVersionsConfiguration;
+  }
+
+  public get ensureConsistentVersions(): boolean {
     if (
-      this._commonVersionsConfiguration.ensureConsistentVersions !== undefined &&
+      this.getCommonVersions().ensureConsistentVersions !== undefined &&
       this._rushConfiguration.ensureConsistentVersions
     ) {
       throw new Error(
         'Because the new ensureConsistentVersions config is being defined in the common-versions.json file, ' +
           `you must remove the old setting "ensureConsistentVersions" from ${RushConstants.rushJsonFilename}`
       );
+    } else if (this.getCommonVersions().ensureConsistentVersions === undefined) {
+      // If the individual subspaces do not have ensureConsistentVersions set, fallback to the setting defined in rush.json
+      return this._rushConfiguration.ensureConsistentVersions;
     }
-    return this._commonVersionsConfiguration;
+    return this.getCommonVersions().ensureConsistentVersions as boolean;
   }
 
   /**
