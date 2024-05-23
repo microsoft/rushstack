@@ -50,7 +50,8 @@ export interface IRushPhaseSharding {
 
   /**
    * The format of the argument to pass to the command to indicate the shard index and count.
-   * The default value is `--shard={shardIndex}/{shardCount}`.
+   *
+   * @defaultValue `--shard={shardIndex}/{shardCount}`
    */
   shardArgumentFormat?: string;
 
@@ -61,7 +62,9 @@ export interface IRushPhaseSharding {
   outputFolderArgument?: {
     /**
      * The format of the parent folder name to output shards to. Child folders will be created for each
-     *  shard index, ie `{parentFolder}/1`, `{parentFolder}/2`. The default value is `.rush/operations/{phaseName}/shards`.
+     *  shard index, ie `{parentFolder}/1`, `{parentFolder}/2`. 
+     *
+     * @defaultValue `.rush/operations/{phaseName}/shards`
      */
     parentFolderName?: string;
 

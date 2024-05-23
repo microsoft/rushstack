@@ -28,7 +28,7 @@ const TemplateStrings = {
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/typedef
-const TemplateStringRegex = {
+const TemplateStringRegexes = {
   SHARD_INDEX: new RegExp(TemplateStrings.SHARD_INDEX, 'g'),
   SHARD_COUNT: new RegExp(TemplateStrings.SHARD_COUNT, 'g')
 } as const;

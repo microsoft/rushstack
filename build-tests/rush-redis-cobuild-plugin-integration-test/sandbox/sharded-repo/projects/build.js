@@ -1,6 +1,6 @@
 /* eslint-env es6 */
 const path = require('path');
-const { FileSystem } = require('@rushstack/node-core-library');
+const { FileSystem, Async } = require('@rushstack/node-core-library');
 
 const args = process.argv.slice(2);
 
@@ -17,9 +17,11 @@ const shardOutputDir = getArgument('--shard-output-directory');
 
 const outputDirectory = shard ? shardOutputDir ?? outputDir : undefined;
 
-setTimeout(() => {
+async function runAsync() {
+  await Async.sleepAsync(500);
   const outputFolder = shard ? path.resolve(outputDirectory) : path.resolve('dist');
   const outputFile = path.resolve(outputFolder, 'output.txt');
-  FileSystem.ensureFolder(outputFolder);
-  FileSystem.writeFile(outputFile, `Hello world! ${args.join(' ')}`);
-}, 500);
+  FileSystem.writeFile(outputFile, `Hello world! ${args.join(' ')}`, { ensureFolderExists: true });
+} 
+
+void runAsync().catch(() => process.exit(1));

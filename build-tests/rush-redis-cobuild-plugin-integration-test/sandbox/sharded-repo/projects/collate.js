@@ -1,6 +1,6 @@
 /* eslint-env es6 */
 const path = require('path');
-const { FileSystem } = require('@rushstack/node-core-library');
+const { FileSystem, Async } = require('@rushstack/node-core-library');
 
 if (!process.env.RUSH_SHARD_PARENT_FOLDER) {
   console.error('no RUSH_SHARD_PARENT_FOLDER');
@@ -12,7 +12,9 @@ if (!process.env.RUSH_SHARD_COUNT) {
   process.exit(1);
 }
 
-setTimeout(() => {
+async function runAsync() {
+  await Async.sleepAsync(500);
+
   const parentFolder = process.env.RUSH_SHARD_PARENT_FOLDER;
   const shards = +process.env.RUSH_SHARD_COUNT;
   let output = '';
@@ -25,6 +27,7 @@ setTimeout(() => {
   }
   const finalOutputFolder = path.resolve('coverage');
   const outputFile = path.resolve(finalOutputFolder, 'output.txt');
-  FileSystem.ensureFolder(finalOutputFolder);
-  FileSystem.writeFile(outputFile, output);
-}, 500);
+  FileSystem.writeFile(outputFile, output, { ensureFolderExists: true });
+}
+
+void runAsync().catch(() => process.exit(1));
