@@ -146,38 +146,28 @@ export class OperationMetadataManager {
   }): Promise<void> {
     await this.stateFile.tryRestoreAsync();
 
-    let logReadStream: fs.ReadStream | undefined;
     try {
-      if (await FileSystem.existsAsync(this._logChunksPath)) {
-        const rawLogChunks: string = await FileSystem.readFileAsync(this._logChunksPath);
-        const chunks: ITerminalChunk[] = [];
-        for (const chunk of rawLogChunks.split('\n')) {
-          if (chunk) {
-            chunks.push(JSON.parse(chunk));
-          }
+      const rawLogChunks: string = await FileSystem.readFileAsync(this._logChunksPath);
+      const chunks: ITerminalChunk[] = [];
+      for (const chunk of rawLogChunks.split('\n')) {
+        if (chunk) {
+          chunks.push(JSON.parse(chunk));
         }
-        for (const { kind, text } of chunks) {
-          if (kind === TerminalChunkKind.Stderr) {
-            terminalProvider.write(text, TerminalProviderSeverity.error);
-          } else {
-            terminalProvider.write(text, TerminalProviderSeverity.log);
-          }
-        }
-      } else {
-        logReadStream = fs.createReadStream(this._logPath, {
-          encoding: 'utf-8'
-        });
-        for await (const data of logReadStream) {
-          terminal.write(data);
+      }
+      for (const { kind, text } of chunks) {
+        if (kind === TerminalChunkKind.Stderr) {
+          terminalProvider.write(text, TerminalProviderSeverity.error);
+        } else {
+          terminalProvider.write(text, TerminalProviderSeverity.log);
         }
       }
     } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e)) {
+        // Log chunks file doesn't exist, try to restore log file
+        await restoreFromLogFile(terminal, this._logPath);
+      } else {
         throw e;
       }
-    } finally {
-      // Close the read stream
-      logReadStream?.close();
     }
 
     // Try to restore cached error log as error log file
@@ -191,5 +181,25 @@ export class OperationMetadataManager {
         throw e;
       }
     }
+  }
+}
+
+async function restoreFromLogFile(terminal: ITerminal, path: string): Promise<void> {
+  let logReadStream: fs.ReadStream | undefined;
+
+  try {
+    logReadStream = fs.createReadStream(path, {
+      encoding: 'utf-8'
+    });
+    for await (const data of logReadStream) {
+      terminal.write(data);
+    }
+  } catch (logReadStreamError) {
+    if (!FileSystem.isNotExistError(logReadStreamError)) {
+      throw logReadStreamError;
+    }
+  } finally {
+    // Close the read stream
+    logReadStream?.close();
   }
 }

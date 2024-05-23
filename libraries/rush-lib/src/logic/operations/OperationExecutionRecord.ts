@@ -197,7 +197,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
             associatedProject,
             this.collatedWriter.terminal,
             `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`,
-            true
+            { enableChunkedOutput: true }
           )
         : undefined;
 

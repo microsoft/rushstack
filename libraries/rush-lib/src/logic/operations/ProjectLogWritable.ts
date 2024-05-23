@@ -47,7 +47,7 @@ export class ProjectLogWritable extends TerminalWritable {
    * {"kind":"O","text":"-------------------- Finished (6.858s) --------------------\n"}
    * ```
    */
-  private _chunkWriter: FileWriter | undefined = undefined;
+  private _chunkWriter: FileWriter | undefined;
 
   private _enableChunkedOutput: boolean;
 
@@ -55,9 +55,12 @@ export class ProjectLogWritable extends TerminalWritable {
     project: RushConfigurationProject,
     terminal: CollatedTerminal,
     logFilenameIdentifier: string,
-    enableChunkedOutput: boolean = false
+    options: {
+      enableChunkedOutput?: boolean;
+    } = {}
   ) {
     super();
+    const { enableChunkedOutput = false } = options;
     this._terminal = terminal;
 
     this._enableChunkedOutput = enableChunkedOutput;
@@ -98,6 +101,7 @@ export class ProjectLogWritable extends TerminalWritable {
     }
 
     this._logWriter = FileWriter.open(this.logPath);
+    this._chunkWriter = FileWriter.open(this.logChunksPath);
   }
 
   public static getLogFilePaths({
@@ -167,7 +171,7 @@ export class ProjectLogWritable extends TerminalWritable {
 
     if (this._enableChunkedOutput) {
       if (!this._chunkWriter) {
-        this._chunkWriter = FileWriter.open(this.logChunksPath);
+        throw new InternalError('Chunked output file was closed');
       }
       this._chunkWriter.write(JSON.stringify(chunk) + '\n');
     }
