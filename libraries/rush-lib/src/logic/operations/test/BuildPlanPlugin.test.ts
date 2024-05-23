@@ -1,16 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-jest.mock('@rushstack/terminal', () => {
-  const originalModule = jest.requireActual('@rushstack/terminal');
-  return {
-    ...originalModule,
-    ConsoleTerminalProvider: {
-      ...originalModule.ConsoleTerminalProvider,
-      supportsColor: true
-    }
-  };
-});
 import { MockWritable, Terminal } from '@rushstack/terminal';
 import { BuildPlanPlugin } from '../BuildPlanPlugin';
 import {
@@ -59,6 +49,7 @@ describe(BuildPlanPlugin.name, () => {
     const commandLineJson: ICommandLineJson = JsonFile.load(commandLineJsonFile);
 
     commandLineConfiguration = new CommandLineConfiguration(commandLineJson);
+    mockWritable.reset();
   });
 
   function createMockRunner(operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
