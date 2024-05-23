@@ -626,7 +626,7 @@ export interface IOperationSettings {
     disableBuildCacheForOperation?: boolean;
     operationName: string;
     outputFolderNames?: string[];
-    // Warning: (ae-forgotten-export) The symbol "IRushPhaseSharding" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-incompatible-release-tags) The symbol "sharding" is marked as @alpha, but its signature references "IRushPhaseSharding" which is marked as @internal
     sharding?: IRushPhaseSharding;
     weight?: number;
 }
@@ -781,6 +781,18 @@ export interface IRushCommandLineParameter {
 export interface IRushCommandLineSpec {
     // (undocumented)
     actions: IRushCommandLineAction[];
+}
+
+// Warning: (ae-internal-missing-underscore) The name "IRushPhaseSharding" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
+export interface IRushPhaseSharding {
+    count: number;
+    outputFolderArgument?: {
+        parentFolderName?: string;
+        parameterLongName: string;
+    };
+    shardArgumentFormat?: string;
 }
 
 // @beta (undocumented)

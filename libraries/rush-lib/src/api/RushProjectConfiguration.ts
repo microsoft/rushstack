@@ -42,6 +42,7 @@ export interface IRushProjectJson {
   operationSettings?: IOperationSettings[];
 }
 
+/** @internal */
 export interface IRushPhaseSharding {
   /**
    * The number of shards to create.

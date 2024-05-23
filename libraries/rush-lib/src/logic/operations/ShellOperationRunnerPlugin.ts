@@ -13,7 +13,8 @@ import type {
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { Operation } from './Operation';
-import { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import { IOperationRunner } from './IOperationRunner';
 
 export const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 
@@ -44,12 +45,17 @@ function createShellOperations(
 
       const displayName: string = getDisplayName(phase, project);
 
-      initializeShellOperationRunner({
+      const rawCommandToRun: string | undefined = getScriptToRun(project, phase.name, phase.shellCommand);
+
+      const commandToRun: string | undefined = rawCommandToRun
+        ? formatCommand(rawCommandToRun, customParameterValues)
+        : undefined;
+
+      operation.runner = initializeShellOperationRunner({
         phase,
         project,
-        operation,
         displayName,
-        customParameterValues,
+        commandToRun,
         rushConfiguration
       });
     }
@@ -61,26 +67,20 @@ function createShellOperations(
 export function initializeShellOperationRunner(options: {
   phase: IPhase;
   project: RushConfigurationProject;
-  operation: Operation;
   displayName: string;
   rushConfiguration: RushConfiguration;
-  customParameterValues: ReadonlyArray<string>;
-}): void {
-  const { phase, project, operation, rushConfiguration, customParameterValues, displayName } = options;
-  const rawCommandToRun: string | undefined = getScriptToRun(project, phase.name, phase.shellCommand);
+  commandToRun: string | undefined;
+}): IOperationRunner {
+  const { phase, project, rushConfiguration, commandToRun, displayName } = options;
 
-  const commandToRun: string | undefined = rawCommandToRun
-    ? formatCommand(rawCommandToRun, customParameterValues)
-    : undefined;
-
-  if (rawCommandToRun === undefined && phase.missingScriptBehavior === 'error') {
+  if (commandToRun === undefined && phase.missingScriptBehavior === 'error') {
     throw new Error(
       `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
     );
   }
 
   if (commandToRun) {
-    operation.runner = new ShellOperationRunner({
+    return new ShellOperationRunner({
       commandToRun: commandToRun || '',
       displayName,
       phase,
@@ -89,7 +89,7 @@ export function initializeShellOperationRunner(options: {
     });
   } else {
     // Empty build script indicates a no-op, so use a no-op runner
-    operation.runner = new NullOperationRunner({
+    return new NullOperationRunner({
       name: displayName,
       result: OperationStatus.NoOp,
       silent: phase.missingScriptBehavior === 'silent'

@@ -7,10 +7,7 @@
       "sharding": {
         "count": 3,
         "outputFolderArgument": {
-          "argumentFlag": "--output-directory"
-        },
-        "shardScriptConfiguration": {
-          "missingScriptBehavior": "silent"
+          "parameterLongName": "--output-directory"
         }
       }
     }

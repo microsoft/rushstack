@@ -6,7 +6,7 @@
       "sharding": {
         "count": 15,
         "outputFolderArgument": {
-          "argumentFlag": "--output-directory"
+          "parameterLongName": "--output-directory"
         }
       }
     }

@@ -10,7 +10,6 @@ import type {
 import { NullOperationRunner } from './NullOperationRunner';
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
-import { ShellOperationRunner } from './ShellOperationRunner';
 import {
   formatCommand,
   getCustomParameterValuesByPhase,
@@ -48,20 +47,31 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
   const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
     getCustomParameterValuesByPhase();
 
+  let index = 0;
   for (const operation of existingOperations) {
+    console.log(
+      `Splicing ${index++} ${operation.name} ${!!operation.associatedPhase} ${
+        operation.associatedPhase?.name
+      } ${operation.consumers.size} ${operation.dependencies.size} ${!!operation.associatedProject} ${
+        operation.associatedProject?.packageName
+      }`
+    );
     const { associatedPhase: phase, associatedProject: project, settings: operationSettings } = operation;
     if (phase && project && operationSettings?.sharding && !operation.runner) {
       const { count: shards } = operationSettings.sharding;
 
       /**
        * A single operation to reduce the number of edges in the graph when creating shards.
+       * ```
        * depA -\          /- shard 1 -\
        * depB -- > noop < -- shard 2 -- > collator (reused operation)
        * depC -/          \- shard 3 -/
+       * ```
        */
-      const preShardOperation = new Operation({
+      const preShardOperation: Operation = new Operation({
         phase,
         project,
+        settings: operationSettings,
         runner: new NullOperationRunner({
           name: `${getDisplayName(phase, project)} - pre-shard`,
           result: OperationStatus.NoOp,
@@ -69,10 +79,13 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         })
       });
 
+      existingOperations.add(preShardOperation);
+
       for (const dependency of operation.dependencies) {
         preShardOperation.addDependency(dependency);
         operation.deleteDependency(dependency);
       }
+      console.log(`Finishing moving dependencies to pre-shard`);
 
       const parentFolderFormat: string =
         operationSettings.sharding.outputFolderArgument?.parentFolderName ??
@@ -84,19 +97,27 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
       const customParameters: readonly string[] = getCustomParameterValuesForPhase(phase);
 
-      const collatorParameters = [
+      const collatorParameters: string[] = [
         ...customParameters,
         `--shard-parent-folder=${parentFolder}`,
         `--shard-count=${shards}`
       ];
-      initializeShellOperationRunner({
+
+      const rawCommandToRun: string | undefined = getScriptToRun(project, phase.name, phase.shellCommand);
+
+      const commandToRun: string | undefined = rawCommandToRun
+        ? formatCommand(rawCommandToRun, collatorParameters)
+        : undefined;
+
+      operation.runner = initializeShellOperationRunner({
         phase,
         project,
-        operation,
         displayName: collatorDisplayName,
         rushConfiguration,
-        customParameterValues: collatorParameters
+        commandToRun: commandToRun
       });
+
+      console.log(`Setting runner to ${!!operation.runner}`);
 
       const baseCommand: string | undefined = getScriptToRun(project, `${phase.name}:shard`, undefined);
       if (baseCommand === undefined) {
@@ -141,41 +162,22 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         const shardedParameters: string[] = [...customParameters, shardArgument, outputDirectoryArgument];
 
         const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}/${shards}`;
-        initializeShellOperationRunner({
-          phase,
-          project,
-          operation,
-          displayName: shardDisplayName,
-          rushConfiguration,
-          customParameterValues: shardedParameters
-        });
 
         const shardedCommandToRun: string | undefined = baseCommand
           ? formatCommand(baseCommand, shardedParameters)
           : undefined;
 
-        if (shardedCommandToRun) {
-          const shardedShellOperationRunner: ShellOperationRunner = new ShellOperationRunner({
-            commandToRun: shardedCommandToRun,
-            displayName: shardDisplayName,
-            phase,
-            rushConfiguration,
-            rushProject: project
-          });
-          shardOperation.runner = shardedShellOperationRunner;
-        } else {
-          shardOperation.runner = new NullOperationRunner({
-            name: shardDisplayName,
-            result: OperationStatus.NoOp,
-            silent: phase.missingScriptBehavior === 'silent'
-          });
-        }
+        shardOperation.runner = initializeShellOperationRunner({
+          phase,
+          project,
+          commandToRun: shardedCommandToRun,
+          displayName: shardDisplayName,
+          rushConfiguration
+        });
 
         shardOperation.addDependency(preShardOperation);
+        operation.addDependency(shardOperation);
         existingOperations.add(shardOperation);
-      }
-      for (const dependency of operation.dependencies) {
-        operation.deleteDependency(dependency);
       }
     }
   }

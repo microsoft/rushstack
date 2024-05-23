@@ -4,10 +4,7 @@
       "operationName": "_phase:build",
       "outputFolderNames": ["dist"],
       "sharding": {
-        "count": 75,
-        "shardScriptConfiguration": {
-          "missingScriptBehavior": "error"
-        }
+        "count": 75
       }
     }
   ]

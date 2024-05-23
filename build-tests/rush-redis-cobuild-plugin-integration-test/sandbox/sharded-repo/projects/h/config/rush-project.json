@@ -1,4 +1,6 @@
 {
+  "$schema": "../../../../../../../libraries/rush-lib/src/schemas/rush-project.schema.json",
+
   "operationSettings": [
     {
       "operationName": "_phase:build",
