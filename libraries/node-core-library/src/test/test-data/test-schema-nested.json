@@ -24,6 +24,11 @@
         { "$ref": "test-schema-nested-child.json#/definitions/type1" },
         { "$ref": "test-schema-nested-child.json#/definitions/type2" }
       ]
+    },
+    "exampleUniqueObjectArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "test-schema-nested-child.json#/definitions/type2" }
     }
   },
   "additionalProperties": false,
