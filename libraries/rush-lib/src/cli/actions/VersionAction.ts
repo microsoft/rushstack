@@ -214,7 +214,7 @@ export class VersionAction extends BaseRushAction {
     );
 
     // Respect the `ensureConsistentVersions` field in rush.json
-    if (!rushConfig.ensureConsistentVersions) {
+    if (!rushConfig.defaultSubspace.getCommonVersions().ensureConsistentVersions) {
       return;
     }
 

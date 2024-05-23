@@ -263,6 +263,15 @@ export class Subspace {
     if (!this._commonVersionsConfiguration) {
       this._commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
     }
+    if (
+      this._commonVersionsConfiguration.ensureConsistentVersions !== undefined &&
+      this._rushConfiguration.ensureConsistentVersions
+    ) {
+      throw new Error(
+        'Because the new ensureConsistentVersions config is being defined in the common-versions.json file, ' +
+          `you must remove the old setting "ensureConsistentVersions" from ${RushConstants.rushJsonFilename}`
+      );
+    }
     return this._commonVersionsConfiguration;
   }
 
