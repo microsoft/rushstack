@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
-import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
@@ -16,7 +15,8 @@ import {
   formatCommand,
   getCustomParameterValuesByPhase,
   getDisplayName,
-  getScriptToRun
+  getScriptToRun,
+  initializeShellOperationRunner
 } from './ShellOperationRunnerPlugin';
 
 export const PLUGIN_NAME: 'ShardedPhasedOperationPlugin' = 'ShardedPhasedOperationPlugin';
@@ -51,16 +51,28 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
   for (const operation of existingOperations) {
     const { associatedPhase: phase, associatedProject: project, settings: operationSettings } = operation;
     if (phase && project && operationSettings?.sharding && !operation.runner) {
-      const { count: shards, shardScriptConfiguration } = operationSettings.sharding;
+      const { count: shards } = operationSettings.sharding;
 
-      existingOperations.delete(operation);
-
-      const collatorNode: Operation = new Operation({
+      /**
+       * A single operation to reduce the number of edges in the graph when creating shards.
+       * depA -\          /- shard 1 -\
+       * depB -- > noop < -- shard 2 -- > collator (reused operation)
+       * depC -/          \- shard 3 -/
+       */
+      const preShardOperation = new Operation({
         phase,
         project,
-        settings: operationSettings
+        runner: new NullOperationRunner({
+          name: `${getDisplayName(phase, project)} - pre-shard`,
+          result: OperationStatus.NoOp,
+          silent: true
+        })
       });
-      existingOperations.add(collatorNode);
+
+      for (const dependency of operation.dependencies) {
+        preShardOperation.addDependency(dependency);
+        operation.deleteDependency(dependency);
+      }
 
       const parentFolderFormat: string =
         operationSettings.sharding.outputFolderArgument?.parentFolderName ??
@@ -69,45 +81,25 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       const parentFolder: string = parentFolderFormat;
 
       const collatorDisplayName: string = `${getDisplayName(phase, project)} - collate`;
-      const collatorRawScript: string | undefined = getScriptToRun(project, phase.name, undefined);
-
-      if (collatorRawScript === undefined && phase.missingScriptBehavior === 'error') {
-        throw new Error(
-          `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
-        );
-      }
 
       const customParameters: readonly string[] = getCustomParameterValuesForPhase(phase);
-      if (collatorRawScript) {
-        const collatorRunner: ShellOperationRunner = new ShellOperationRunner({
-          commandToRun: formatCommand(collatorRawScript, customParameters),
-          displayName: collatorDisplayName,
-          phase,
-          rushConfiguration,
-          rushProject: project,
-          environment: {
-            ...process.env,
-            [EnvironmentVariableNames.RUSH_SHARD_PARENT_FOLDER]: parentFolder,
-            [EnvironmentVariableNames.RUSH_SHARD_COUNT]: shards.toString()
-          }
-        });
-        collatorNode.runner = collatorRunner;
-      } else {
-        collatorNode.runner = new NullOperationRunner({
-          name: collatorDisplayName,
-          result: OperationStatus.NoOp,
-          silent: phase.missingScriptBehavior === 'silent'
-        });
-      }
-      for (const consumer of operation.consumers) {
-        consumer.addDependency(collatorNode);
-        consumer.deleteDependency(operation);
-      }
+
+      const collatorParameters = [
+        ...customParameters,
+        `--shard-parent-folder=${parentFolder}`,
+        `--shard-count=${shards}`
+      ];
+      initializeShellOperationRunner({
+        phase,
+        project,
+        operation,
+        displayName: collatorDisplayName,
+        rushConfiguration,
+        customParameterValues: collatorParameters
+      });
 
       const baseCommand: string | undefined = getScriptToRun(project, `${phase.name}:shard`, undefined);
-
-      const shardMissingScriptBehavior: string = shardScriptConfiguration?.missingScriptBehavior ?? 'error';
-      if (baseCommand === undefined && shardMissingScriptBehavior === 'error') {
+      if (baseCommand === undefined) {
         throw new Error(
           `The project '${project.packageName}' does not define a '${phase.name}:shard' command in the 'scripts' section of its package.json`
         );
@@ -118,6 +110,16 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         `--shard=${TemplateStrings.SHARD_INDEX}/${TemplateStrings.SHARD_COUNT}`;
       const outputFolderArgumentFlag: string =
         operationSettings.sharding.outputFolderArgument?.parameterLongName ?? '--shard-output-directory';
+
+      if (
+        operationSettings.sharding.shardArgumentFormat &&
+        !shardArgumentFormat.includes(TemplateStrings.SHARD_INDEX) &&
+        !shardArgumentFormat.includes(TemplateStrings.SHARD_COUNT)
+      ) {
+        throw new Error(
+          `'shardArgumentFormat' must contain both ${TemplateStrings.SHARD_INDEX} and ${TemplateStrings.SHARD_COUNT} to be used for sharding.`
+        );
+      }
 
       for (let shard: number = 1; shard <= shards; shard++) {
         const outputDirectory: string = `${parentFolder}/${shard}`;
@@ -132,17 +134,26 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         });
 
         const shardArgument: string = shardArgumentFormat
-          .replace(TemplateStringRegex.SHARD_INDEX, shard.toString())
-          .replace(TemplateStringRegex.SHARD_COUNT, shards.toString());
+          .replace(TemplateStringRegexes.SHARD_INDEX, shard.toString())
+          .replace(TemplateStringRegexes.SHARD_COUNT, shards.toString());
 
         const outputDirectoryArgument: string = `${outputFolderArgumentFlag}="${outputDirectory}"`;
         const shardedParameters: string[] = [...customParameters, shardArgument, outputDirectoryArgument];
+
+        const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}/${shards}`;
+        initializeShellOperationRunner({
+          phase,
+          project,
+          operation,
+          displayName: shardDisplayName,
+          rushConfiguration,
+          customParameterValues: shardedParameters
+        });
 
         const shardedCommandToRun: string | undefined = baseCommand
           ? formatCommand(baseCommand, shardedParameters)
           : undefined;
 
-        const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}/${shards}`;
         if (shardedCommandToRun) {
           const shardedShellOperationRunner: ShellOperationRunner = new ShellOperationRunner({
             commandToRun: shardedCommandToRun,
@@ -160,10 +171,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           });
         }
 
-        for (const dependency of operation.dependencies) {
-          shardOperation.addDependency(dependency);
-        }
-        collatorNode.addDependency(shardOperation);
+        shardOperation.addDependency(preShardOperation);
         existingOperations.add(shardOperation);
       }
       for (const dependency of operation.dependencies) {

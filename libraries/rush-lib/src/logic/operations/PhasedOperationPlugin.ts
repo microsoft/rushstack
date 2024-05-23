@@ -73,10 +73,11 @@ function createOperations(
   function getOrCreateOperation(phase: IPhase, project: RushConfigurationProject): Operation {
     const key: string = getOperationKey(phase, project);
     let operation: Operation | undefined = operations.get(key);
-    const operationSettings: IOperationSettings | undefined = projectConfigurations
-      .get(project)
-      ?.operationSettingsByOperationName.get(phase.name);
+
     if (!operation) {
+      const operationSettings: IOperationSettings | undefined = projectConfigurations
+        .get(project)
+        ?.operationSettingsByOperationName.get(phase.name);
       operation = new Operation({
         project,
         phase,
