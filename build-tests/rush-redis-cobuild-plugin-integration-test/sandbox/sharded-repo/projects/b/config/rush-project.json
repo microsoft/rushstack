@@ -9,10 +9,6 @@
           "argumentFlag": "--output-directory"
         }
       }
-    },
-    {
-      "operationName": "cobuild",
-      "outputFolderNames": ["dist"]
     }
   ]
 }

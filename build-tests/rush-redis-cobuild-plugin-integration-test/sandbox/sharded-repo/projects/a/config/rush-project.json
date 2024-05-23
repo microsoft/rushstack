@@ -13,10 +13,6 @@
           "missingScriptBehavior": "silent"
         }
       }
-    },
-    {
-      "operationName": "cobuild",
-      "outputFolderNames": ["dist"]
     }
   ]
 }

@@ -6,10 +6,6 @@
       "sharding": {
         "count": 50
       }
-    },
-    {
-      "operationName": "cobuild",
-      "outputFolderNames": ["dist"]
     }
   ]
 }
