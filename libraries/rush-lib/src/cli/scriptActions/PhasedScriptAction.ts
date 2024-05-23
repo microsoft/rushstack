@@ -191,9 +191,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       });
     }
     this._cobuildPlanParameter = this.defineFlagParameter({
-      parameterLongName: '--cobuild-plan',
+      parameterLongName: '--log-cobuild-plan',
       description:
-        'Before the build starts, log information about the cobuild state. This will include information about ' +
+        '(EXPERIMENTAL) Before the build starts, log information about the cobuild state. This will include information about ' +
         'clusters and the projects that are part of each cluster.'
     });
 
@@ -423,7 +423,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         terminal.writeVerboseLine(`Incremental strategy: none (full rebuild)`);
       }
 
-      const showBuildPlan: boolean = this._cobuildPlanParameter ? this._cobuildPlanParameter.value : false;
+      const showBuildPlan: boolean = this._cobuildPlanParameter?.value ?? false;
 
       if (showBuildPlan) {
         if (!buildCacheConfiguration?.buildCacheEnabled) {

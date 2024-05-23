@@ -45,7 +45,7 @@ const streamCollator = new StreamCollator({
   destination: mockStreamWritable
 });
 
-describe('BuildPlanPlugin', () => {
+describe(BuildPlanPlugin.name, () => {
   const rushJsonFile: string = path.resolve(__dirname, `../../test/workspaceRepo/rush.json`);
   const commandLineJsonFile: string = path.resolve(
     __dirname,
