@@ -100,6 +100,17 @@
                     "description": "The command-line argument to pass to the operation to specify the output folder. Does not accept placeholders. Defaults to \"--shard-output-folder\""
                   }
                 }
+              },
+              "shardOperationSettings": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "weight": {
+                    "description": "The number of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag.",
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
               }
             }
           },

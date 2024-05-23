@@ -791,6 +791,9 @@ export interface IRushPhaseSharding {
         parameterLongName: string;
     };
     shardArgumentFormat?: string;
+    shardOperationSettings?: {
+        weight?: number;
+    };
 }
 
 // @beta (undocumented)

@@ -50,7 +50,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
   for (const operation of existingOperations) {
     const { associatedPhase: phase, associatedProject: project, settings: operationSettings } = operation;
     if (phase && project && operationSettings?.sharding && !operation.runner) {
-      const { count: shards } = operationSettings.sharding;
+      const { count: shards, shardOperationSettings } = operationSettings.sharding;
 
       /**
        * A single operation to reduce the number of edges in the graph when creating shards.
@@ -108,7 +108,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         commandToRun: commandToRun
       });
 
-      const baseCommand: string | undefined = getScriptToRun(project, `${phase.name}:shard`, undefined);
+      const shardOperationName: string = `${phase.name}:shard`;
+      const baseCommand: string | undefined = getScriptToRun(project, shardOperationName, undefined);
       if (baseCommand === undefined) {
         throw new Error(
           `The project '${project.packageName}' does not define a '${phase.name}:shard' command in the 'scripts' section of its package.json`
@@ -138,7 +139,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           project,
           phase,
           settings: {
-            ...operationSettings,
+            ...shardOperationSettings,
+            operationName: shardOperationName,
             outputFolderNames: [outputDirectory]
           }
         });

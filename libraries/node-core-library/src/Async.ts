@@ -186,6 +186,7 @@ export class Async {
             const currentIteratorValue: TEntry = currentIteratorResult.value;
             Async.validateWeightedIterable(currentIteratorValue);
             const weight: number = Math.min(currentIteratorValue.weight, concurrency);
+            console.log(`Element has weight ${weight}`);
             // If it's a weighted operation then add the rest of the weight, removing concurrent units if weight < 1.
             // Cap it to the concurrency limit, otherwise higher weights can cause issues in the case where 0 weighted
             // operations are present.

@@ -18,7 +18,7 @@ const shardOutputDir = getArgument('--shard-output-directory');
 const outputDirectory = shard ? (shardOutputDir ? shardOutputDir : outputDir) : undefined;
 
 async function runAsync() {
-  await Async.sleep(500);
+  await Async.sleep(2000);
   const outputFolder = shard ? path.resolve(outputDirectory) : path.resolve('dist');
   const outputFile = path.resolve(outputFolder, 'output.txt');
   FileSystem.writeFile(outputFile, `Hello world! ${args.join(' ')}`, { ensureFolderExists: true });

@@ -39,9 +39,10 @@ function weightOperations(
     } else if (project && phase) {
       const projectConfiguration: RushProjectConfiguration | undefined = projectConfigurations.get(project);
       const operationSettings: IOperationSettings | undefined =
-        projectConfiguration?.operationSettingsByOperationName.get(phase.name);
+        operation.settings ?? projectConfiguration?.operationSettingsByOperationName.get(phase.name);
       if (operationSettings?.weight) {
         operation.weight = operationSettings.weight;
+        console.log(`Operation ${operation.name} has weight ${operation.weight}`);
       }
     }
     Async.validateWeightedIterable(operation);

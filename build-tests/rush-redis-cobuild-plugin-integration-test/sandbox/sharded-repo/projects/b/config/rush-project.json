@@ -7,6 +7,9 @@
         "count": 15,
         "outputFolderArgument": {
           "parameterLongName": "--output-directory"
+        },
+        "shardOperationSettings": {
+          "weight": 10
         }
       }
     }
