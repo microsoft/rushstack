@@ -133,7 +133,9 @@ export class Rundown {
 
     await new Promise<void>((resolve, reject) => {
       childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null): void => {
-        if (exitCode !== 0 && !ignoreExitCode) {
+        if (signal) {
+          reject(new Error('Child process terminated by ' + signal));
+        } else if (exitCode !== 0 && !ignoreExitCode) {
           reject(new Error('Child process terminated with exit code ' + exitCode));
         } else if (!completedNormally) {
           reject(new Error('Child process terminated without completing IPC handshake'));

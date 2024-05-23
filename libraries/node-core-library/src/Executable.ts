@@ -586,10 +586,10 @@ export class Executable {
           if (errorThrown) {
             reject(errorThrown);
           }
-          if (exitCode !== 0 && throwOnNonZeroExitCode) {
-            reject(new Error(`Process exited with code ${exitCode}`));
-          } else if (signal) {
+          if (signal) {
             reject(new Error(`Process terminated by ${signal}`));
+          } else if (exitCode !== 0 && throwOnNonZeroExitCode) {
+            reject(new Error(`Process exited with code ${exitCode}`));
           } else {
             resolve(exitCode);
           }

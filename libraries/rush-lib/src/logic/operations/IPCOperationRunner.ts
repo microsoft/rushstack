@@ -145,12 +145,12 @@ export class IPCOperationRunner implements IOperationRunner {
 
           function onExit(exitCode: number | null, signal: NodeJS.Signals | null): void {
             try {
-              if (exitCode !== 0) {
+              if (signal) {
+                context.error = new OperationError('error', `Terminated by signal: ${signal}`);
+                resolve(OperationStatus.Failure);
+              } else if (exitCode !== 0) {
                 // Do NOT reject here immediately, give a chance for other logic to suppress the error
                 context.error = new OperationError('error', `Returned error code: ${exitCode}`);
-                resolve(OperationStatus.Failure);
-              } else if (signal) {
-                context.error = new OperationError('error', `Terminated by signal: ${signal}`);
                 resolve(OperationStatus.Failure);
               } else if (hasWarningOrError) {
                 resolve(OperationStatus.SuccessWithWarning);
