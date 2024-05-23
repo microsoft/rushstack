@@ -48,7 +48,7 @@ export class Extractor {
     static get version(): string;
 }
 
-// @public
+// @public @sealed
 export class ExtractorConfig {
     readonly alphaTrimmedFilePath: string;
     readonly apiJsonFilePath: string;

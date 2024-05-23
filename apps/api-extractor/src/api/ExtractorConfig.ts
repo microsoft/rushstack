@@ -208,6 +208,7 @@ interface IExtractorConfigParameters {
 
 /**
  * The `ExtractorConfig` class loads, validates, interprets, and represents the api-extractor.json config file.
+ * @sealed
  * @public
  */
 export class ExtractorConfig {
