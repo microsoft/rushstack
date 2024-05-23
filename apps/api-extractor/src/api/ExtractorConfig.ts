@@ -281,6 +281,26 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigApiReport.reportTempFolder} */
   public readonly reportTempFolder: string;
 
+  /**
+   * Gets the file path for the "complete" (default) report configuration, if one was specified.
+   * Otherwise, returns an empty string.
+   * @deprecated Use {@link ExtractorConfig.reportConfigs} to access all report configurations.
+   */
+  public get reportFilePath(): string {
+    const completeConfig: IExtractorConfigApiReport | undefined = this._getCompleteReportConfig();
+    return completeConfig === undefined ? '' : path.join(this.reportFolder, completeConfig.fileName);
+  }
+
+  /**
+   * Gets the temp file path for the "complete" (default) report configuration, if one was specified.
+   * Otherwise, returns an empty string.
+   * @deprecated Use {@link ExtractorConfig.reportConfigs} to access all report configurations.
+   */
+  public get reportTempFilePath(): string {
+    const completeConfig: IExtractorConfigApiReport | undefined = this._getCompleteReportConfig();
+    return completeConfig === undefined ? '' : path.join(this.reportTempFolder, completeConfig.fileName);
+  }
+
   /** {@inheritDoc IConfigApiReport.includeForgottenExports} */
   public readonly apiReportIncludeForgottenExports: boolean;
 
@@ -1134,6 +1154,13 @@ export class ExtractorConfig {
     }
 
     return new ExtractorConfig({ ...extractorConfigParameters, tsdocConfigFile, tsdocConfiguration });
+  }
+
+  /**
+   * Gets the report configuration for the "complete" (default) report configuration, if one was specified.
+   */
+  private _getCompleteReportConfig(): IExtractorConfigApiReport | undefined {
+    return this.reportConfigs.find((x) => x.variant === 'complete');
   }
 
   private static _resolvePathWithTokens(

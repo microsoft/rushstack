@@ -79,8 +79,12 @@ export class ExtractorConfig {
     readonly projectFolderUrl: string | undefined;
     readonly publicTrimmedFilePath: string;
     readonly reportConfigs: readonly IApiReportConfig[];
-    readonly reportDirectoryPath: string;
-    readonly reportTempDirectoryPath: string;
+    // @deprecated
+    get reportFilePath(): string;
+    readonly reportFolder: string;
+    // @deprecated
+    get reportTempFilePath(): string;
+    readonly reportTempFolder: string;
     readonly rollupEnabled: boolean;
     readonly skipLibCheck: boolean;
     readonly testMode: boolean;
