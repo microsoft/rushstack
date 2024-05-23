@@ -347,11 +347,13 @@ export class GitUtilities {
       childProcess.stderr!.on('data', (chunk: Buffer) => {
         errorMessage += chunk.toString();
       });
-      childProcess.on('close', (exitCode: number) => {
-        if (exitCode !== 0) {
+      childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
+        if (exitCode) {
           reject(
             new Error(`git exited with error code ${exitCode}${errorMessage ? `: ${errorMessage}` : ''}`)
           );
+        } else if (signal) {
+          reject(new Error(`git terminated by signal ${signal}`));
         }
         let remainder: string = '';
         for (let chunk of stdoutBuffer) {

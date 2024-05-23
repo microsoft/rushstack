@@ -292,7 +292,7 @@ async function spawnGitAsync(
 
   const [status] = await once(proc, 'close');
   if (status !== 0) {
-    throw new Error(`git ${args[0]} exited with code ${status}: ${stderr}`);
+    throw new Error(`git ${args[0]} exited with code ${status}:\n${stderr}`);
   }
 
   return stdout;

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rundown",
+      "comment": "Eliminate an arbitrary 500ms delay during process shutdown",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rundown"
+}

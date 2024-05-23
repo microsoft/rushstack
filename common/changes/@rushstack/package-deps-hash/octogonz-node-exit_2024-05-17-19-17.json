@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "Add a newline to an error message",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash"
+}
