@@ -83,10 +83,10 @@ export class SubspacePnpmfileConfiguration {
       semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
     };
 
-    // common/config/subspaces/<subspace_name>/.pnpmfile-subspace.cjs
+    // common/config/subspaces/<subspace_name>/.pnpmfile.cjs
     const userPnpmfilePath: string = path.join(
       subspace.getSubspaceConfigFolder(),
-      (rushConfiguration.packageManagerWrapper as PnpmPackageManager).subspacePnpmfileFilename
+      (rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
     );
     if (FileSystem.exists(userPnpmfilePath)) {
       settings.userPnpmfilePath = userPnpmfilePath;
