@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor"
+}

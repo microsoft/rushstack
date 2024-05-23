@@ -165,8 +165,8 @@ export class PublishUtilities {
           change.changeType! >= ChangeType.patch
             ? semver.inc(packageJson.version, PublishUtilities._getReleaseType(change.changeType!))!
             : change.changeType === ChangeType.hotfix
-            ? change.newVersion
-            : packageJson.version;
+              ? change.newVersion
+              : packageJson.version;
       }
 
       if (deps) {

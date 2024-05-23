@@ -168,8 +168,8 @@ export class OperationExecutionManager {
             const finishedLoggingWord: string = groupRecord.hasFailures
               ? 'encountered an error'
               : groupRecord.hasCancellations
-              ? 'cancelled'
-              : 'finished';
+                ? 'cancelled'
+                : 'finished';
             terminal.writeLine(
               ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
             );
@@ -199,10 +199,10 @@ export class OperationExecutionManager {
       this._trackedOperationCount === 0
         ? OperationStatus.NoOp
         : abortSignal.aborted
-        ? OperationStatus.Aborted
-        : hasReportedFailures
-        ? OperationStatus.Failure
-        : OperationStatus.Success;
+          ? OperationStatus.Aborted
+          : hasReportedFailures
+            ? OperationStatus.Failure
+            : OperationStatus.Success;
 
     return finalStatus;
   }

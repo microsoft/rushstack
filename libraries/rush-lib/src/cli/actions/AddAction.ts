@@ -143,8 +143,8 @@ export class AddAction extends BaseAddAndRemoveAction {
         rangeStyle = this._caretFlag.value
           ? SemVerStyle.Caret
           : this._exactFlag.value
-          ? SemVerStyle.Exact
-          : SemVerStyle.Tilde;
+            ? SemVerStyle.Exact
+            : SemVerStyle.Tilde;
       }
 
       packagesToAdd.push({ packageName, version, rangeStyle });

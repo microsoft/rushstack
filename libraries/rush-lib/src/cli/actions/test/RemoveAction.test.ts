@@ -26,7 +26,7 @@ describe(RemoveAction.name, () => {
       jest.spyOn(process, 'exit').mockImplementation();
 
       // Suppress "Another Rush command is already running" error
-      jest.spyOn(LockFile, 'tryAcquire').mockImplementation(() => ({} as LockFile));
+      jest.spyOn(LockFile, 'tryAcquire').mockImplementation(() => ({}) as LockFile);
 
       oldExitCode = process.exitCode;
       oldArgs = process.argv;

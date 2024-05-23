@@ -33,8 +33,8 @@ export class RushStartupBanner {
     const nodeReleaseLabel: string = NodeJsCompatibility.isOddNumberedVersion
       ? 'unstable'
       : NodeJsCompatibility.isLtsVersion
-      ? 'LTS'
-      : 'pre-LTS';
+        ? 'LTS'
+        : 'pre-LTS';
     return `${nodeVersion} (${nodeReleaseLabel})`;
   }
 

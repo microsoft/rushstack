@@ -188,9 +188,8 @@ export class GitUtilities {
     let currentPath: string = normalizedWorkingDirectory;
     while (currentPath.length >= gitRepoRootPath.length) {
       const gitIgnoreFilePath: string = `${currentPath}/.gitignore`;
-      const gitIgnorePatterns: string[] | undefined = await this._tryReadGitIgnoreFileAsync(
-        gitIgnoreFilePath
-      );
+      const gitIgnorePatterns: string[] | undefined =
+        await this._tryReadGitIgnoreFileAsync(gitIgnoreFilePath);
       if (gitIgnorePatterns) {
         rawIgnorePatternsByGitignoreFolder.set(currentPath, gitIgnorePatterns);
       }
@@ -201,9 +200,8 @@ export class GitUtilities {
     const gitignoreRelativeFilePaths: string[] = await this._findUnignoredFilesAsync('*.gitignore');
     for (const gitignoreRelativeFilePath of gitignoreRelativeFilePaths) {
       const gitignoreFilePath: string = `${normalizedWorkingDirectory}/${gitignoreRelativeFilePath}`;
-      const gitIgnorePatterns: string[] | undefined = await this._tryReadGitIgnoreFileAsync(
-        gitignoreFilePath
-      );
+      const gitIgnorePatterns: string[] | undefined =
+        await this._tryReadGitIgnoreFileAsync(gitignoreFilePath);
       if (gitIgnorePatterns) {
         const parentPath: string = gitignoreFilePath.slice(0, gitignoreFilePath.lastIndexOf('/'));
         rawIgnorePatternsByGitignoreFolder.set(parentPath, gitIgnorePatterns);

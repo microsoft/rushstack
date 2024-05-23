@@ -426,9 +426,8 @@ export abstract class BaseInstallManager {
 
       if (rushPnpmPatches) {
         await FileSystem.ensureFolderAsync(commonTempPnpmPatchesFolder);
-        const existingPatches: FolderItem[] = await FileSystem.readFolderItemsAsync(
-          commonTempPnpmPatchesFolder
-        );
+        const existingPatches: FolderItem[] =
+          await FileSystem.readFolderItemsAsync(commonTempPnpmPatchesFolder);
         const copiedPatchNames: Set<string> = new Set();
         await Async.forEachAsync(
           rushPnpmPatches,
