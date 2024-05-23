@@ -14,7 +14,7 @@ import {
   Path
 } from '@rushstack/node-core-library';
 
-import { ExtractorConfig, type IApiReportConfig } from './ExtractorConfig';
+import { ExtractorConfig, type IExtractorConfigApiReport } from './ExtractorConfig';
 import { Collector } from '../collector/Collector';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
@@ -285,7 +285,7 @@ export class Extractor {
       });
     }
 
-    function writeApiReport(reportConfig: IApiReportConfig): boolean {
+    function writeApiReport(reportConfig: IExtractorConfigApiReport): boolean {
       return Extractor._writeApiReport(
         collector,
         extractorConfig,
@@ -380,7 +380,7 @@ export class Extractor {
     messageRouter: MessageRouter,
     reportTempDirectoryPath: string,
     reportDirectoryPath: string,
-    reportConfig: IApiReportConfig,
+    reportConfig: IExtractorConfigApiReport,
     localBuild: boolean
   ): boolean {
     let apiReportChanged: boolean = false;

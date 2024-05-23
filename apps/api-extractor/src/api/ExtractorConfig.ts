@@ -154,11 +154,11 @@ export interface IExtractorConfigPrepareOptions {
 }
 
 /**
- * Configuration for a single API report, including its {@link IApiReportConfig.variant}.
+ * Configuration for a single API report, including its {@link IExtractorConfigApiReport.variant}.
  *
  * @public
  */
-export interface IApiReportConfig {
+export interface IExtractorConfigApiReport {
   /**
    * Report variant.
    * Determines which API items will be included in the report output, based on their tagged release levels.
@@ -182,7 +182,7 @@ interface IExtractorConfigParameters {
   overrideTsconfig: {} | undefined;
   skipLibCheck: boolean;
   apiReportEnabled: boolean;
-  reportConfigs: readonly IApiReportConfig[];
+  reportConfigs: readonly IExtractorConfigApiReport[];
   reportFolder: string;
   reportTempFolder: string;
   apiReportIncludeForgottenExports: boolean;
@@ -275,7 +275,7 @@ export class ExtractorConfig {
    * List of configurations for report files to be generated.
    * @remarks Derived from {@link IConfigApiReport.reportFileName} and {@link IConfigApiReport.reportVariants}.
    */
-  public readonly reportConfigs: readonly IApiReportConfig[];
+  public readonly reportConfigs: readonly IExtractorConfigApiReport[];
   /** {@inheritDoc IConfigApiReport.reportFolder} */
   public readonly reportFolder: string;
   /** {@inheritDoc IConfigApiReport.reportTempFolder} */
@@ -893,7 +893,7 @@ export class ExtractorConfig {
         configObject.apiReport?.includeForgottenExports ?? false;
       let reportDirectoryPath: string = tokenContext.projectFolder;
       let reportTempDirectoryPath: string = tokenContext.projectFolder;
-      const reportConfigs: IApiReportConfig[] = [];
+      const reportConfigs: IExtractorConfigApiReport[] = [];
       if (apiReportEnabled) {
         // Undefined case checked above where we assign `apiReportEnabled`
         const apiReportConfig: IConfigApiReport = configObject.apiReport!;

@@ -16,7 +16,7 @@ export { CompilerState, ICompilerStateCreateOptions } from './api/CompilerState'
 export { Extractor, IExtractorInvokeOptions, ExtractorResult } from './api/Extractor';
 
 export {
-  IApiReportConfig,
+  IExtractorConfigApiReport as IApiReportConfig,
   IExtractorConfigPrepareOptions,
   IExtractorConfigLoadForFolderOptions,
   ExtractorConfig
