@@ -78,7 +78,7 @@ export class ExtractorConfig {
     readonly projectFolder: string;
     readonly projectFolderUrl: string | undefined;
     readonly publicTrimmedFilePath: string;
-    readonly reportConfigs: readonly IApiReportConfig[];
+    readonly reportConfigs: readonly IExtractorConfigApiReport[];
     // @deprecated
     get reportFilePath(): string;
     readonly reportFolder: string;
@@ -173,12 +173,6 @@ export class ExtractorResult {
 }
 
 // @public
-export interface IApiReportConfig {
-    fileName: string;
-    variant: ApiReportVariant;
-}
-
-// @public
 export interface ICompilerStateCreateOptions {
     additionalEntryPoints?: string[];
     typescriptCompilerFolder?: string;
@@ -253,6 +247,12 @@ export interface IConfigMessageReportingTable {
 export interface IConfigTsdocMetadata {
     enabled: boolean;
     tsdocMetadataFilePath?: string;
+}
+
+// @public
+export interface IExtractorConfigApiReport {
+    fileName: string;
+    variant: ApiReportVariant;
 }
 
 // @public
