@@ -126,7 +126,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             const operationSettings: IOperationSettings | undefined =
               projectConfiguration?.operationSettingsByOperationName.get(phaseName);
             const cacheDisabledReason: string | undefined = projectConfiguration
-              ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, operation)
+              ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, operation.isNoOp)
               : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
                 'or one provided by a rig, so it does not support caching.';
 

@@ -65,7 +65,11 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
           const fileHashes: Map<string, string> | undefined =
             await projectChangeAnalyzer._tryGetProjectDependenciesAsync(associatedProject, terminal);
           const cacheDisabledReason: string | undefined = projectConfiguration
-            ? projectConfiguration.getCacheDisabledReason(fileHashes!.keys(), associatedPhase.name, operation)
+            ? projectConfiguration.getCacheDisabledReason(
+                fileHashes!.keys(),
+                associatedPhase.name,
+                operation.isNoOp
+              )
             : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
               'or one provided by a rig, so it does not support caching.';
           buildCacheByOperation.set(operation, { cacheDisabledReason });
@@ -79,19 +83,40 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
 }
 
 function generateCobuildPlanSummary(operations: Operation[], terminal: ITerminal): ICobuildPlan['summary'] {
-  const noOpOperations: Set<Operation> = new Set(operations.filter((e) => e.runner?.isNoOp));
   const leafQueue: Operation[] = [];
+  const numberOfConsumersMap: Map<Operation, number> = new Map<Operation, number>();
 
-  for (const operation of operations) {
-    if (noOpOperations.has(operation)) {
-      continue;
-    }
-    let numberOfConsumers: number = 0;
-    for (const consumer of operation.consumers) {
-      if (!noOpOperations.has(consumer)) {
-        numberOfConsumers++;
+  const queue: Operation[] = operations.filter((e) => e.consumers.size === 0);
+  const seen: Set<Operation> = new Set<Operation>(queue);
+  for (const operation of queue) {
+    numberOfConsumersMap.set(operation, 0);
+  }
+
+  while (queue.length > 0) {
+    const operation: Operation = queue.shift()!;
+    const increment: number = operation.isNoOp ? 0 : 1;
+    for (const dependent of operation.dependencies) {
+      const numberOfConsumers: number = (numberOfConsumersMap.get(operation) ?? 0) + increment;
+      numberOfConsumersMap.set(dependent, numberOfConsumers);
+      if (!seen.has(dependent)) {
+        queue.push(dependent);
+        seen.add(dependent);
       }
     }
+  }
+  console.log(
+    'numberOfConsumersMap',
+    [...numberOfConsumersMap.entries()].map(
+      ([operation, value]) => `${operation.name} ${value} ${operation.isNoOp}`
+    )
+  );
+
+  for (const operation of operations) {
+    if (operation.isNoOp) {
+      continue;
+    }
+
+    const numberOfConsumers: number = numberOfConsumersMap.get(operation) ?? 0;
     if (numberOfConsumers === 0) {
       leafQueue.push(operation);
     }
@@ -99,14 +124,20 @@ function generateCobuildPlanSummary(operations: Operation[], terminal: ITerminal
   let currentLeafNodes: Set<Operation> = new Set<Operation>();
   const remainingOperations: Set<Operation> = new Set<Operation>(operations);
   let depth: number = 0;
-  let maxWidth: number = leafQueue.filter((e) => !e.runner?.isNoOp).length;
+  let maxWidth: number = leafQueue.length;
   const numberOfNodes: number[] = [maxWidth];
   const depthToOperationsMap: Map<number, Set<Operation>> = new Map<number, Set<Operation>>();
   depthToOperationsMap.set(depth, new Set(leafQueue));
+
+  /**
+   * Determine the depth and width of the build plan. We start with a set of leaf nodes and gradually peel back
+   *  the layers of the tree/graph until we have no more nodes to process. At each layer, we determine the
+   *  number of executable operations.
+   */
   do {
     if (leafQueue.length === 0) {
       leafQueue.push(...currentLeafNodes);
-      const realOperations: Operation[] = leafQueue.filter((e) => !e.runner?.isNoOp);
+      const realOperations: Operation[] = leafQueue.filter((e) => !e.isNoOp);
       if (realOperations.length > 0) {
         depth += 1;
         depthToOperationsMap.set(depth, new Set(realOperations));
@@ -122,8 +153,7 @@ function generateCobuildPlanSummary(operations: Operation[], terminal: ITerminal
       break;
     }
     const leaf: Operation = leafQueue.shift()!;
-    if (remainingOperations.has(leaf)) {
-      remainingOperations.delete(leaf);
+    if (remainingOperations.delete(leaf)) {
       for (const dependent of leaf.dependencies) {
         if (![...dependent.consumers].some((e) => remainingOperations.has(e))) {
           currentLeafNodes.add(dependent);

@@ -902,6 +902,7 @@ export class Operation {
     readonly consumers: ReadonlySet<Operation>;
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
+    get isNoOp(): boolean;
     get name(): string | undefined;
     runner: IOperationRunner | undefined;
     weight: number;
@@ -1376,7 +1377,7 @@ export class RushLifecycleHooks {
 // @alpha
 export class RushProjectConfiguration {
     readonly disableBuildCacheForProject: boolean;
-    getCacheDisabledReason(trackedFileNames: Iterable<string>, phaseName: string, operation?: Operation): string | undefined;
+    getCacheDisabledReason(trackedFileNames: Iterable<string>, phaseName: string, isNoOp: boolean): string | undefined;
     readonly incrementalBuildIgnoredGlobs: ReadonlyArray<string>;
     // (undocumented)
     readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;

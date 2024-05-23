@@ -6,11 +6,6 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import type { IPhase } from '../CommandLineConfiguration';
 import type { RushConfigurationProject } from '../RushConfigurationProject';
 import { RushProjectConfiguration } from '../RushProjectConfiguration';
-import { Operation } from '../../logic/operations/Operation';
-import { NullOperationRunner } from '../../logic/operations/NullOperationRunner';
-import { OperationStatus } from '../../logic/operations/OperationStatus';
-import { ShellOperationRunner } from '../../logic/operations/ShellOperationRunner';
-import type { RushConfiguration } from '../RushConfiguration';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function stripSymbolsFromObject(obj: any | undefined): void {
@@ -75,14 +70,6 @@ function validateConfiguration(rushProjectConfiguration: RushProjectConfiguratio
   }
 }
 
-const realScriptRunner = new ShellOperationRunner({
-  commandToRun: 'echo "Hello, World!"',
-  displayName: 'test',
-  rushConfiguration: {} as unknown as RushConfiguration,
-  rushProject: {} as unknown as RushConfigurationProject,
-  phase: {} as unknown as IPhase
-});
-
 describe(RushProjectConfiguration.name, () => {
   describe('operationSettingsByOperationName', () => {
     it('loads a rush-project.json config that extends another config file', async () => {
@@ -125,7 +112,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const reason: string | undefined = config.getCacheDisabledReason([], 'z');
+      const reason: string | undefined = config.getCacheDisabledReason([], 'z', false);
       expect(reason).toMatchSnapshot();
     });
 
@@ -138,7 +125,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const reason: string | undefined = config.getCacheDisabledReason([], 'z');
+      const reason: string | undefined = config.getCacheDisabledReason([], 'z', false);
       expect(reason).toMatchSnapshot();
     });
 
@@ -151,7 +138,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a');
+      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a', false);
       expect(reason).toMatchSnapshot();
     });
 
@@ -166,7 +153,8 @@ describe(RushProjectConfiguration.name, () => {
 
       const reason: string | undefined = config.getCacheDisabledReason(
         ['test-project-c/.cache/b/foo'],
-        '_phase:b'
+        '_phase:b',
+        false
       );
       expect(reason).toMatchSnapshot();
     });
@@ -180,7 +168,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const reason: string | undefined = config.getCacheDisabledReason([''], '_phase:b');
+      const reason: string | undefined = config.getCacheDisabledReason([''], '_phase:b', false);
       expect(reason).toBeUndefined();
     });
 
@@ -193,34 +181,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const operation = new Operation({});
-      operation.runner = new NullOperationRunner({
-        name: 'test',
-        result: OperationStatus.NoOp,
-        silent: false
-      });
-
-      const reason: string | undefined = config.getCacheDisabledReason([''], '_phase:b', operation);
-      expect(reason).toBeUndefined();
-    });
-
-    it('returns undefined if the operation is skipped', async () => {
-      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
-        'test-project-c'
-      );
-
-      if (!config) {
-        throw new Error('Failed to load config');
-      }
-
-      const operation = new Operation({});
-      operation.runner = new NullOperationRunner({
-        name: 'test',
-        result: OperationStatus.Skipped,
-        silent: false
-      });
-
-      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a', operation);
+      const reason: string | undefined = config.getCacheDisabledReason([''], '_phase:b', true);
       expect(reason).toBeUndefined();
     });
 
@@ -233,25 +194,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const operation = new Operation({});
-      operation.runner = realScriptRunner;
-
-      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a', operation);
-      expect(reason).toMatchSnapshot();
-    });
-
-    it('returns reason if the operation has no runner', async () => {
-      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
-        'test-project-c'
-      );
-
-      if (!config) {
-        throw new Error('Failed to load config');
-      }
-
-      const operation = new Operation({});
-
-      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a', operation);
+      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a', false);
       expect(reason).toMatchSnapshot();
     });
   });

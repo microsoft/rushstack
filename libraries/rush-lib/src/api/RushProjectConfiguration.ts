@@ -12,7 +12,6 @@ import type { IPhase } from './CommandLineConfiguration';
 import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
 import schemaJson from '../schemas/rush-project.schema.json';
 import anythingSchemaJson from '../schemas/rush-project.schema.json';
-import type { Operation } from '../logic/operations/Operation';
 
 /**
  * Describes the file structure for the `<project root>/config/rush-project.json` config file.
@@ -303,15 +302,14 @@ export class RushProjectConfiguration {
   public getCacheDisabledReason(
     trackedFileNames: Iterable<string>,
     phaseName: string,
-    operation?: Operation
+    isNoOp: boolean
   ): string | undefined {
+    // Skip no-op operations as they won't have any output/cacheable things.
+    if (isNoOp) {
+      return undefined;
+    }
     if (this.disableBuildCacheForProject) {
       return 'Caching has been disabled for this project.';
-    }
-
-    // Skip no-op operations as they won't have any output/cacheable things.
-    if (operation?.runner?.isNoOp) {
-      return undefined;
     }
 
     const operationSettings: IOperationSettings | undefined =
