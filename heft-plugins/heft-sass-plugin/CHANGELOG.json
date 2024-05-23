@@ -2,6 +2,41 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.14.0",
+      "tag": "@rushstack/heft-sass-plugin_v0.14.0",
+      "date": "Thu, 23 May 2024 02:26:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump `sass-embedded` to 1.77."
+          },
+          {
+            "comment": "Fix an issue where `@import` and `@use` rules that referenced dependency packages that are not direct dependencies of the project being built were not correctly resolved."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.12.47`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.43.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.9` to `0.66.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.32",
       "tag": "@rushstack/heft-sass-plugin_v0.13.32",
       "date": "Thu, 16 May 2024 15:10:22 GMT",

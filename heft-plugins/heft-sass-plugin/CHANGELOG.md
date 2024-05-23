@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Thu, 16 May 2024 15:10:22 GMT and should not be manually modified.
+This log was last generated on Thu, 23 May 2024 02:26:56 GMT and should not be manually modified.
+
+## 0.14.0
+Thu, 23 May 2024 02:26:56 GMT
+
+### Minor changes
+
+- Bump `sass-embedded` to 1.77.
+- Fix an issue where `@import` and `@use` rules that referenced dependency packages that are not direct dependencies of the project being built were not correctly resolved.
 
 ## 0.13.32
 Thu, 16 May 2024 15:10:22 GMT
