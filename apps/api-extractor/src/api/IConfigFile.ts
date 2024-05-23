@@ -49,6 +49,13 @@ export interface IConfigCompiler {
 }
 
 /**
+ * The allowed variations of API reports.
+ *
+ * @public
+ */
+export type ApiReportVariant = 'public' | 'beta' | 'alpha' | 'complete';
+
+/**
  * Configures how the API report files (*.api.md) will be generated.
  *
  * @remarks
@@ -63,13 +70,40 @@ export interface IConfigApiReport {
   enabled: boolean;
 
   /**
-   * The filename for the API report files.  It will be combined with `reportFolder` or `reportTempFolder` to produce
-   * a full output filename.
+   * The base component of API report filenames.
    *
    * @remarks
-   * The file extension should be ".api.md", and the string should not contain a path separator such as `\` or `/`.
+   * It will be combined with the specified {@link IConfigApiReport.reportVariants}, and {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
+   * produce a full output filenames in the form `<folder><reportFileName>.<variant>.api.md`.
+   *
+   * The string should not contain a file extension.
+   * Note: previous guidance noted that this should be specified in a form including the `.api.md` extension.
+   * This is no longer recommended, and support for this will be removed in a future release.
+   * For example, if you were previously specifying `Foo.api.md`, you should now specify `Foo`.
+   * The `.api.md` extension will be added automatically to the resulting filename.
+   *
+   * The string must not contain a path separator such as `\` or `/`.
+   *
+   * @defaultValue `<unscopedPackageName>.api.md` will be used if this argument is not specified or if it is empty.
    */
   reportFileName?: string;
+
+  /**
+   * The set of report variants to generate.
+   *
+   * @remarks
+   * Each variant corresponds to a minimal release level, denoted by release tag in the TSDoc comment for each API item.
+   * E.g., the `beta` report variant will include all API items tagged `@beta` or higher (i.e. `@beta` and `@public`).
+   *
+   * The resulting API report file names will be derived from the {@link IConfigApiReport.reportFileName}.
+   * E.g., `foo.beta.api.md`.
+   * The only exception to this is the `complete` variant.
+   * This variant name will not be contained in the corresponding file name.
+   * I.e., `foo.api.md`.
+   *
+   * @defaultValue `['complete']`
+   */
+  reportVariants?: ApiReportVariant[];
 
   /**
    * Specifies the folder where the API report file is written.  The file name portion is determined by
