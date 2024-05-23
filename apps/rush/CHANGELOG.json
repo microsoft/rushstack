@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.124.7",
+      "tag": "@microsoft/rush_v5.124.7",
+      "date": "Thu, 23 May 2024 02:27:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the `usePnpmSyncForInjectedDependencies` experiment to also include any dependency whose lockfile entry has the `file:` protocol, unless it is a tarball reference"
+          },
+          {
+            "comment": "Fix an issue where the build cache analysis was incorrect in rare situations due to a race condition (GitHub #4711)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.124.6",
       "tag": "@microsoft/rush_v5.124.6",
       "date": "Thu, 16 May 2024 01:12:22 GMT",
