@@ -47,15 +47,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
   const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
     getCustomParameterValuesByPhase();
 
-  let index = 0;
   for (const operation of existingOperations) {
-    console.log(
-      `Splicing ${index++} ${operation.name} ${!!operation.associatedPhase} ${
-        operation.associatedPhase?.name
-      } ${operation.consumers.size} ${operation.dependencies.size} ${!!operation.associatedProject} ${
-        operation.associatedProject?.packageName
-      }`
-    );
     const { associatedPhase: phase, associatedProject: project, settings: operationSettings } = operation;
     if (phase && project && operationSettings?.sharding && !operation.runner) {
       const { count: shards } = operationSettings.sharding;
@@ -85,7 +77,6 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         preShardOperation.addDependency(dependency);
         operation.deleteDependency(dependency);
       }
-      console.log(`Finishing moving dependencies to pre-shard`);
 
       const parentFolderFormat: string =
         operationSettings.sharding.outputFolderArgument?.parentFolderName ??
@@ -116,8 +107,6 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         rushConfiguration,
         commandToRun: commandToRun
       });
-
-      console.log(`Setting runner to ${!!operation.runner}`);
 
       const baseCommand: string | undefined = getScriptToRun(project, `${phase.name}:shard`, undefined);
       if (baseCommand === undefined) {

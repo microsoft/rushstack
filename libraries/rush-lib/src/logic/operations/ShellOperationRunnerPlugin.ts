@@ -14,7 +14,7 @@ import type {
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { Operation } from './Operation';
 import type { RushConfiguration } from '../../api/RushConfiguration';
-import { IOperationRunner } from './IOperationRunner';
+import type { IOperationRunner } from './IOperationRunner';
 
 export const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 
