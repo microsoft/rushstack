@@ -43,9 +43,8 @@ export class CheckAction extends BaseRushAction {
       argumentName: 'SUBSPACE_NAME',
       description:
         '(EXPERIMENTAL) Specifies an individual Rush subspace to check, requiring versions to be ' +
-        'consistent only within that subspace (ignoring other subspaces). If this parameter is omitted, ' +
-        'then "rush check" will instead require consistency across all projects in the monorepo. ' +
-        'Requires the "subspacesEnabled" setting to be true in subspaces.json.'
+        'consistent only within that subspace (ignoring other subspaces). This parameter is required when ' +
+        'the "subspacesEnabled" setting is set to true in subspaces.json.'
     });
   }
 
