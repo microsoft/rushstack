@@ -127,6 +127,12 @@ function generateCobuildPlanSummary(operations: Operation[], terminal: ITerminal
     numberOfDependenciesByOperation.set(operation, 0);
   }
 
+  /**
+   * Traverse the build plan to determine the number of dependencies for each operation. This is done by starting
+   *  at the base of the build plan and traversing the graph in a breadth-first manner. We use the parent operation
+   *  to determine the number of dependencies for each child operation. This allows us to detect cases where no-op
+   *  operations are strung together, and correctly mark the first real operation as being a root operation.
+   */
   while (queue.length > 0) {
     const operation: Operation = queue.shift()!;
     const increment: number = operation.isNoOp ? 0 : 1;
@@ -161,8 +167,8 @@ function generateCobuildPlanSummary(operations: Operation[], terminal: ITerminal
   depthToOperationsMap.set(depth, new Set(layerQueue));
 
   /**
-   * Determine the depth and width of the build plan. We start with a set of leaf nodes and gradually peel back
-   *  the layers of the tree/graph until we have no more nodes to process. At each layer, we determine the
+   * Determine the depth and width of the build plan. We start with the inner layer and gradually traverse layer by
+   *  layer up the tree/graph until we have no more nodes to process. At each layer, we determine the
    *  number of executable operations.
    */
   do {
