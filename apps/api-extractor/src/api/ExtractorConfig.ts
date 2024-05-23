@@ -183,8 +183,8 @@ interface IExtractorConfigParameters {
   skipLibCheck: boolean;
   apiReportEnabled: boolean;
   reportConfigs: readonly IApiReportConfig[];
-  reportDirectoryPath: string;
-  reportTempDirectoryPath: string;
+  reportFolder: string;
+  reportTempFolder: string;
   apiReportIncludeForgottenExports: boolean;
   docModelEnabled: boolean;
   apiJsonFilePath: string;
@@ -277,9 +277,9 @@ export class ExtractorConfig {
    */
   public readonly reportConfigs: readonly IApiReportConfig[];
   /** {@inheritDoc IConfigApiReport.reportFolder} */
-  public readonly reportDirectoryPath: string;
+  public readonly reportFolder: string;
   /** {@inheritDoc IConfigApiReport.reportTempFolder} */
-  public readonly reportTempDirectoryPath: string;
+  public readonly reportTempFolder: string;
 
   /** {@inheritDoc IConfigApiReport.includeForgottenExports} */
   public readonly apiReportIncludeForgottenExports: boolean;
@@ -348,8 +348,8 @@ export class ExtractorConfig {
     this.apiReportEnabled = parameters.apiReportEnabled;
     this.apiReportIncludeForgottenExports = parameters.apiReportIncludeForgottenExports;
     this.reportConfigs = parameters.reportConfigs;
-    this.reportDirectoryPath = parameters.reportDirectoryPath;
-    this.reportTempDirectoryPath = parameters.reportTempDirectoryPath;
+    this.reportFolder = parameters.reportFolder;
+    this.reportTempFolder = parameters.reportTempFolder;
     this.docModelEnabled = parameters.docModelEnabled;
     this.apiJsonFilePath = parameters.apiJsonFilePath;
     this.docModelIncludeForgottenExports = parameters.docModelIncludeForgottenExports;
@@ -1078,8 +1078,8 @@ export class ExtractorConfig {
         skipLibCheck: !!configObject.compiler.skipLibCheck,
         apiReportEnabled,
         reportConfigs,
-        reportDirectoryPath,
-        reportTempDirectoryPath,
+        reportFolder: reportDirectoryPath,
+        reportTempFolder: reportTempDirectoryPath,
         apiReportIncludeForgottenExports,
         docModelEnabled,
         apiJsonFilePath,

@@ -290,8 +290,8 @@ export class Extractor {
         collector,
         extractorConfig,
         messageRouter,
-        extractorConfig.reportDirectoryPath,
-        extractorConfig.reportTempDirectoryPath,
+        extractorConfig.reportFolder,
+        extractorConfig.reportTempFolder,
         reportConfig,
         localBuild
       );
