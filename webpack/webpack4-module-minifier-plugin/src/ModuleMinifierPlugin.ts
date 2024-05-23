@@ -220,8 +220,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
       typeof this._sourceMap === 'boolean'
         ? this._sourceMap
         : typeof devtool === 'string'
-        ? devtool.endsWith('source-map')
-        : mode === 'production' && devtool !== false;
+          ? devtool.endsWith('source-map')
+          : mode === 'production' && devtool !== false;
 
     this._optionsForHash.sourceMap = useSourceMaps;
     const binaryConfig: Uint8Array = Buffer.from(JSON.stringify(this._optionsForHash), 'utf-8');

@@ -125,9 +125,8 @@ export class ProjectImpactGraphGenerator {
             dependentProjects: dependentList.sort()
           };
 
-          const projectExcludedGlobs: string[] | undefined = await this._tryLoadProjectExcludedGlobsAsync(
-            projectRelativeFolder
-          );
+          const projectExcludedGlobs: string[] | undefined =
+            await this._tryLoadProjectExcludedGlobsAsync(projectRelativeFolder);
           if (projectExcludedGlobs) {
             projectImpactGraphProjectConfiguration.excludedGlobs = projectExcludedGlobs;
           }

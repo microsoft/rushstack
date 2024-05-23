@@ -1094,9 +1094,8 @@ export class PackageExtractor {
         );
 
         if (linkedBinPackageNames.length && state.archiver) {
-          const binFolderItems: string[] = await FileSystem.readFolderItemNamesAsync(
-            extractedProjectBinFolder
-          );
+          const binFolderItems: string[] =
+            await FileSystem.readFolderItemNamesAsync(extractedProjectBinFolder);
           for (const binFolderItem of binFolderItems) {
             const binFilePath: string = path.join(extractedProjectBinFolder, binFolderItem);
             await state.archiver.addToArchiveAsync({

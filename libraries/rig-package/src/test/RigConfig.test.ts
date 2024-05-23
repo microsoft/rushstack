@@ -177,9 +177,8 @@ describe(RigConfig.name, () => {
 
       expect(rigConfig.rigFound).toBe(true);
 
-      const resolvedPath: string | undefined = await rigConfig.tryResolveConfigFilePathAsync(
-        'example-config.json'
-      );
+      const resolvedPath: string | undefined =
+        await rigConfig.tryResolveConfigFilePathAsync('example-config.json');
 
       expect(resolvedPath).toBeDefined();
       expectEqualPaths(
