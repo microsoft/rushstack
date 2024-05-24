@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix missing selection when declaring dependency using `workspace:alias@1.2.3`",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
