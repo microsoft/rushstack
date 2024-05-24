@@ -266,6 +266,11 @@ export class Subspace {
     return this._commonVersionsConfiguration;
   }
 
+  /**
+   * Gets the ensureConsistentVersions property from the common-versions.json config file,
+   * or from the rush.json file if it isn't defined in common-versions.json
+   * @beta
+   */
   public get ensureConsistentVersions(): boolean {
     if (
       this.getCommonVersions().ensureConsistentVersions !== undefined &&
