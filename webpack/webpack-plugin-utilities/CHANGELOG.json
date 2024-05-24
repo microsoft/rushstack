@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-plugin-utilities",
   "entries": [
     {
+      "version": "0.4.32",
+      "tag": "@rushstack/webpack-plugin-utilities_v0.4.32",
+      "date": "Fri, 24 May 2024 00:15:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.31",
       "tag": "@rushstack/webpack-plugin-utilities_v0.4.31",
       "date": "Thu, 23 May 2024 02:26:56 GMT",

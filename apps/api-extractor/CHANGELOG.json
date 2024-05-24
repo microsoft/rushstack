@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.44.0",
+      "tag": "@microsoft/api-extractor_v7.44.0",
+      "date": "Fri, 24 May 2024 00:15:08 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for \"variants\" of API reports which include or exclude items by release tag"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.43.8",
       "tag": "@microsoft/api-extractor_v7.43.8",
       "date": "Thu, 23 May 2024 02:26:56 GMT",
