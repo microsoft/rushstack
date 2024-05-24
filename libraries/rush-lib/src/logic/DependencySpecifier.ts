@@ -4,6 +4,33 @@
 import npmPackageArg from 'npm-package-arg';
 import { InternalError } from '@rushstack/node-core-library';
 
+const WORKSPACE_PREF_REGEX = /^workspace:((?<alias>[^._/][^@]*)@)?(?<version>.*)$/;
+
+/**
+ * resolve workspace protocol(from `@pnpm/workspace.spec-parser`).
+ * used by pnpm. see [pkgs-graph](https://github.com/pnpm/pnpm/blob/27c33f0319f86c45c1645d064cd9c28aada80780/workspace/pkgs-graph/src/index.ts#L49)
+ */
+class WorkspaceSpec {
+  alias?: string;
+  version: string;
+
+  constructor(version: string, alias?: string) {
+    this.version = version;
+    this.alias = alias;
+  }
+
+  static parse(pref: string): WorkspaceSpec | null {
+    const parts = WORKSPACE_PREF_REGEX.exec(pref);
+    if (!parts?.groups) return null;
+    return new WorkspaceSpec(parts.groups.version, parts.groups.alias);
+  }
+
+  toString(): `workspace:${string}` {
+    const { alias, version } = this;
+    return alias ? `workspace:${alias}@${version}` : `workspace:${version}`;
+  }
+}
+
 /**
  * The parsed format of a provided version specifier.
  */
@@ -92,8 +119,14 @@ export class DependencySpecifier {
     if (versionSpecifier.startsWith('workspace:')) {
       this.specifierType = DependencySpecifierType.Workspace;
       this.versionSpecifier = versionSpecifier.slice(this.specifierType.length + 1).trim();
-      // "workspace:some-package@^1.2.3" should be resolved as alias
-      this.aliasTarget = undefined;
+
+      const workspaceSpecResult = WorkspaceSpec.parse(versionSpecifier);
+      if (workspaceSpecResult?.alias) {
+        // "workspace:some-package@^1.2.3" should be resolved as alias
+        this.aliasTarget = new DependencySpecifier(workspaceSpecResult.alias, workspaceSpecResult.version);
+      } else {
+        this.aliasTarget = undefined;
+      }
       return;
     }
 
