@@ -1453,7 +1453,7 @@ export class Subspace {
     _addProject(project: RushConfigurationProject): void;
     // @beta
     contains(project: RushConfigurationProject): boolean;
-    // (undocumented)
+    // @beta
     get ensureConsistentVersions(): boolean;
     // @beta
     getCommittedShrinkwrapFilename(): string;
