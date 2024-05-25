@@ -943,12 +943,12 @@ export class YamlDocumenter {
           spec.fullName = apiItem
             ? apiItem.getScopedNameWithinPackage()
             : token.canonicalReference
-            ? token.canonicalReference
-                .withSource(undefined)
-                .withMeaning(undefined)
-                .withOverloadIndex(undefined)
-                .toString()
-            : token.text;
+              ? token.canonicalReference
+                  .withSource(undefined)
+                  .withMeaning(undefined)
+                  .withOverloadIndex(undefined)
+                  .toString()
+              : token.text;
           specs.push(spec);
         } else {
           specs.push({

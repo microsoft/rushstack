@@ -176,6 +176,14 @@ Object {
           "required": false,
           "shortName": undefined,
         },
+        Object {
+          "description": "(EXPERIMENTAL) Specifies an individual Rush subspace to check, requiring versions to be consistent only within that subspace (ignoring other subspaces). This parameter is required when the \\"subspacesEnabled\\" setting is set to true in subspaces.json.",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--subspace",
+          "required": false,
+          "shortName": undefined,
+        },
       ],
     },
     Object {

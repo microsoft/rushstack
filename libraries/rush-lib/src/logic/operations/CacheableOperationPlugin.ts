@@ -882,9 +882,8 @@ async function updateAdditionalContextAsync({
   }
 
   if (operationSettings.dependsOnAdditionalFiles) {
-    const repoState: IRawRepoState | undefined = await projectChangeAnalyzer._ensureInitializedAsync(
-      terminal
-    );
+    const repoState: IRawRepoState | undefined =
+      await projectChangeAnalyzer._ensureInitializedAsync(terminal);
 
     const additionalFiles: Map<string, string> = await getHashesForGlobsAsync(
       operationSettings.dependsOnAdditionalFiles,

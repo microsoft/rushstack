@@ -38,7 +38,9 @@ input {
 }
 .TabsTrigger[data-state='active'] {
   color: colors.$primary-active;
-  box-shadow: inset 0 -1px 0 0 currentColor, 0 1px 0 0 currentColor;
+  box-shadow:
+    inset 0 -1px 0 0 currentColor,
+    0 1px 0 0 currentColor;
 }
 .TabsTrigger:focus {
   position: relative;

@@ -68,8 +68,17 @@
         },
 
         "reportFileName": {
-          "description": "The filename for the API report files.  It will be combined with \"reportFolder\" or \"reportTempFolder\" to produce a full file path. The file extension should be \".api.md\", and the string should not contain a path separator such as \"\\\" or \"/\".",
-          "type": "string"
+          "description": "The base filename for the API report files.  It will be combined with \"reportFolder\" or \"reportTempFolder\" to produce a full file path.  It should not contain a file extension, nor a path separator such as \"\\\" or \"/\".  The resulting file with have the extension \"api.md\".  The \"complete\" report variant uses this base filename directly; other variants insert a name such as \"my-report.alpha.api.md\" or \"my-report.beta.api.md\" for alpha and beta variants.",
+          "type": ["string"]
+        },
+
+        "reportVariants": {
+          "description": "To support different approval requirements for different API levels, multiple variants of the API report can be generated.  The \"reportVariants\" setting specifies a list of variants to be generated.  If omitted, by default only the \"complete\" variant will be generated, which includes all @alpha, @beta, and @public items. Other possible variants are \"alpha\" (@alpha + @beta + @public), \"beta\" (@beta + @public), and \"public\" (@public only). If you are leveraging API-Extractor's trimmed roll-ups feature, these reports will match the contents of each corresponding roll-up.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["public", "beta", "alpha", "complete"]
+          }
         },
 
         "reportFolder": {

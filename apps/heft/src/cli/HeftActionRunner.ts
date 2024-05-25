@@ -497,9 +497,8 @@ async function _startLifecycleAsync(this: void, internalHeftSession: InternalHef
 
     // Delete all temp folders for tasks by default
     for (const pluginDefinition of lifecycle.pluginDefinitions) {
-      const lifecycleSession: IHeftLifecycleSession = await lifecycle.getSessionForPluginDefinitionAsync(
-        pluginDefinition
-      );
+      const lifecycleSession: IHeftLifecycleSession =
+        await lifecycle.getSessionForPluginDefinitionAsync(pluginDefinition);
       deleteOperations.push({ sourcePath: lifecycleSession.tempFolderPath });
     }
 

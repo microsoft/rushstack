@@ -382,11 +382,11 @@ export abstract class BaseInstallManager {
 
     const extraNpmrcLines: string[] = [];
     if (this.rushConfiguration.subspacesFeatureEnabled) {
-      // Look for a global .npmrc-global file
-      const globalNpmrcPath: string = `${this.rushConfiguration.commonRushConfigFolder}/.npmrc-global`;
-      if (FileSystem.exists(globalNpmrcPath)) {
-        const globalNpmrcFileLines: string[] = FileSystem.readFile(globalNpmrcPath).toString().split('\n');
-        extraNpmrcLines.push(...globalNpmrcFileLines);
+      // Look for a monorepo level .npmrc file
+      const commonNpmrcPath: string = `${this.rushConfiguration.commonRushConfigFolder}/.npmrc`;
+      if (FileSystem.exists(commonNpmrcPath)) {
+        const commonNpmrcFileLines: string[] = FileSystem.readFile(commonNpmrcPath).toString().split('\n');
+        extraNpmrcLines.push(...commonNpmrcFileLines);
       }
 
       extraNpmrcLines.push(
@@ -426,9 +426,8 @@ export abstract class BaseInstallManager {
 
       if (rushPnpmPatches) {
         await FileSystem.ensureFolderAsync(commonTempPnpmPatchesFolder);
-        const existingPatches: FolderItem[] = await FileSystem.readFolderItemsAsync(
-          commonTempPnpmPatchesFolder
-        );
+        const existingPatches: FolderItem[] =
+          await FileSystem.readFolderItemsAsync(commonTempPnpmPatchesFolder);
         const copiedPatchNames: Set<string> = new Set();
         await Async.forEachAsync(
           rushPnpmPatches,

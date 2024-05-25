@@ -104,14 +104,14 @@ export class ShellOperationRunner implements IOperationRunner {
 
         const status: OperationStatus = await new Promise(
           (resolve: (status: OperationStatus) => void, reject: (error: OperationError) => void) => {
-            subProcess.on('close', (code: number, signal?: string) => {
+            subProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
               try {
                 // Do NOT reject here immediately, give a chance for other logic to suppress the error
                 if (signal) {
                   context.error = new OperationError('error', `Terminated by signal: ${signal}`);
                   resolve(OperationStatus.Failure);
-                } else if (code !== 0) {
-                  context.error = new OperationError('error', `Returned error code: ${code}`);
+                } else if (exitCode !== 0) {
+                  context.error = new OperationError('error', `Returned error code: ${exitCode}`);
                   resolve(OperationStatus.Failure);
                 } else if (hasWarningOrError) {
                   resolve(OperationStatus.SuccessWithWarning);

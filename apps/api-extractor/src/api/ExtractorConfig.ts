@@ -18,7 +18,12 @@ import {
 } from '@rushstack/node-core-library';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
-import type { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
+import type {
+  ApiReportVariant,
+  IConfigApiReport,
+  IConfigFile,
+  IExtractorMessagesConfig
+} from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
 import { EnumMemberOrder } from '@microsoft/api-extractor-model';
@@ -148,6 +153,25 @@ export interface IExtractorConfigPrepareOptions {
   ignoreMissingEntryPoint?: boolean;
 }
 
+/**
+ * Configuration for a single API report, including its {@link IExtractorConfigApiReport.variant}.
+ *
+ * @public
+ */
+export interface IExtractorConfigApiReport {
+  /**
+   * Report variant.
+   * Determines which API items will be included in the report output, based on their tagged release levels.
+   */
+  variant: ApiReportVariant;
+
+  /**
+   * Name of the output report file.
+   * @remarks Relative to the configured report directory path.
+   */
+  fileName: string;
+}
+
 interface IExtractorConfigParameters {
   projectFolder: string;
   packageJson: INodePackageJson | undefined;
@@ -158,8 +182,9 @@ interface IExtractorConfigParameters {
   overrideTsconfig: {} | undefined;
   skipLibCheck: boolean;
   apiReportEnabled: boolean;
-  reportFilePath: string;
-  reportTempFilePath: string;
+  reportConfigs: readonly IExtractorConfigApiReport[];
+  reportFolder: string;
+  reportTempFolder: string;
   apiReportIncludeForgottenExports: boolean;
   docModelEnabled: boolean;
   apiJsonFilePath: string;
@@ -183,6 +208,7 @@ interface IExtractorConfigParameters {
 
 /**
  * The `ExtractorConfig` class loads, validates, interprets, and represents the api-extractor.json config file.
+ * @sealed
  * @public
  */
 export class ExtractorConfig {
@@ -246,10 +272,36 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigApiReport.enabled} */
   public readonly apiReportEnabled: boolean;
 
-  /** The `reportFolder` path combined with the `reportFileName`. */
-  public readonly reportFilePath: string;
-  /** The `reportTempFolder` path combined with the `reportFileName`. */
-  public readonly reportTempFilePath: string;
+  /**
+   * List of configurations for report files to be generated.
+   * @remarks Derived from {@link IConfigApiReport.reportFileName} and {@link IConfigApiReport.reportVariants}.
+   */
+  public readonly reportConfigs: readonly IExtractorConfigApiReport[];
+  /** {@inheritDoc IConfigApiReport.reportFolder} */
+  public readonly reportFolder: string;
+  /** {@inheritDoc IConfigApiReport.reportTempFolder} */
+  public readonly reportTempFolder: string;
+
+  /**
+   * Gets the file path for the "complete" (default) report configuration, if one was specified.
+   * Otherwise, returns an empty string.
+   * @deprecated Use {@link ExtractorConfig.reportConfigs} to access all report configurations.
+   */
+  public get reportFilePath(): string {
+    const completeConfig: IExtractorConfigApiReport | undefined = this._getCompleteReportConfig();
+    return completeConfig === undefined ? '' : path.join(this.reportFolder, completeConfig.fileName);
+  }
+
+  /**
+   * Gets the temp file path for the "complete" (default) report configuration, if one was specified.
+   * Otherwise, returns an empty string.
+   * @deprecated Use {@link ExtractorConfig.reportConfigs} to access all report configurations.
+   */
+  public get reportTempFilePath(): string {
+    const completeConfig: IExtractorConfigApiReport | undefined = this._getCompleteReportConfig();
+    return completeConfig === undefined ? '' : path.join(this.reportTempFolder, completeConfig.fileName);
+  }
+
   /** {@inheritDoc IConfigApiReport.includeForgottenExports} */
   public readonly apiReportIncludeForgottenExports: boolean;
 
@@ -315,9 +367,10 @@ export class ExtractorConfig {
     this.overrideTsconfig = parameters.overrideTsconfig;
     this.skipLibCheck = parameters.skipLibCheck;
     this.apiReportEnabled = parameters.apiReportEnabled;
-    this.reportFilePath = parameters.reportFilePath;
-    this.reportTempFilePath = parameters.reportTempFilePath;
     this.apiReportIncludeForgottenExports = parameters.apiReportIncludeForgottenExports;
+    this.reportConfigs = parameters.reportConfigs;
+    this.reportFolder = parameters.reportFolder;
+    this.reportTempFolder = parameters.reportTempFolder;
     this.docModelEnabled = parameters.docModelEnabled;
     this.apiJsonFilePath = parameters.apiJsonFilePath;
     this.docModelIncludeForgottenExports = parameters.docModelIncludeForgottenExports;
@@ -856,42 +909,79 @@ export class ExtractorConfig {
         }
       }
 
-      let apiReportEnabled: boolean = false;
-      let reportFilePath: string = '';
-      let reportTempFilePath: string = '';
-      let apiReportIncludeForgottenExports: boolean = false;
-      if (configObject.apiReport) {
-        apiReportEnabled = !!configObject.apiReport.enabled;
+      const apiReportEnabled: boolean = configObject.apiReport?.enabled ?? false;
+      const apiReportIncludeForgottenExports: boolean =
+        configObject.apiReport?.includeForgottenExports ?? false;
+      let reportFolder: string = tokenContext.projectFolder;
+      let reportTempFolder: string = tokenContext.projectFolder;
+      const reportConfigs: IExtractorConfigApiReport[] = [];
+      if (apiReportEnabled) {
+        // Undefined case checked above where we assign `apiReportEnabled`
+        const apiReportConfig: IConfigApiReport = configObject.apiReport!;
 
-        const reportFilename: string = ExtractorConfig._expandStringWithTokens(
-          'reportFileName',
-          configObject.apiReport.reportFileName || '',
-          tokenContext
-        );
+        const reportFileNameSuffix: string = '.api.md';
+        let reportFileNameBase: string;
+        if (apiReportConfig.reportFileName) {
+          if (
+            apiReportConfig.reportFileName.indexOf('/') >= 0 ||
+            apiReportConfig.reportFileName.indexOf('\\') >= 0
+          ) {
+            throw new Error(
+              `The "reportFileName" setting contains invalid characters: "${apiReportConfig.reportFileName}"`
+            );
+          }
 
-        if (!reportFilename) {
-          // A merged configuration should have this
-          throw new Error('The "reportFilename" setting is missing');
+          const suffixIndex: number = apiReportConfig.reportFileName.indexOf(reportFileNameSuffix);
+          if (suffixIndex < 0) {
+            // `.api.md` extension was not specified. Use provided file name base as is.
+            reportFileNameBase = apiReportConfig.reportFileName;
+          } else {
+            // The system previously asked users to specify their filenames in a form containing the `.api.md` extension.
+            // This guidance has changed, but to maintain backwards compatibility, we will temporarily support input
+            // that ends with the `.api.md` extension specially, by stripping it out.
+            // This should be removed in version 8, possibly replaced with an explicit error to help users
+            // migrate their configs.
+            reportFileNameBase = apiReportConfig.reportFileName.slice(0, suffixIndex);
+          }
+        } else {
+          // Default value
+          reportFileNameBase = '<unscopedPackageName>';
         }
-        if (reportFilename.indexOf('/') >= 0 || reportFilename.indexOf('\\') >= 0) {
-          // A merged configuration should have this
-          throw new Error(`The "reportFilename" setting contains invalid characters: "${reportFilename}"`);
+
+        const reportVariantKinds: ApiReportVariant[] = apiReportConfig.reportVariants ?? ['complete'];
+
+        for (const reportVariantKind of reportVariantKinds) {
+          // Omit the variant kind from the "complete" report file name for simplicity and for backwards compatibility.
+          const fileNameWithTokens: string = `${reportFileNameBase}${
+            reportVariantKind === 'complete' ? '' : `.${reportVariantKind}`
+          }${reportFileNameSuffix}`;
+          const normalizedFileName: string = ExtractorConfig._expandStringWithTokens(
+            'reportFileName',
+            fileNameWithTokens,
+            tokenContext
+          );
+
+          reportConfigs.push({
+            fileName: normalizedFileName,
+            variant: reportVariantKind
+          });
         }
 
-        const reportFolder: string = ExtractorConfig._resolvePathWithTokens(
-          'reportFolder',
-          configObject.apiReport.reportFolder,
-          tokenContext
-        );
-        const reportTempFolder: string = ExtractorConfig._resolvePathWithTokens(
-          'reportTempFolder',
-          configObject.apiReport.reportTempFolder,
-          tokenContext
-        );
+        if (apiReportConfig.reportFolder) {
+          reportFolder = ExtractorConfig._resolvePathWithTokens(
+            'reportFolder',
+            apiReportConfig.reportFolder,
+            tokenContext
+          );
+        }
 
-        reportFilePath = path.join(reportFolder, reportFilename);
-        reportTempFilePath = path.join(reportTempFolder, reportFilename);
-        apiReportIncludeForgottenExports = !!configObject.apiReport.includeForgottenExports;
+        if (apiReportConfig.reportTempFolder) {
+          reportTempFolder = ExtractorConfig._resolvePathWithTokens(
+            'reportTempFolder',
+            apiReportConfig.reportTempFolder,
+            tokenContext
+          );
+        }
       }
 
       let docModelEnabled: boolean = false;
@@ -1008,8 +1098,9 @@ export class ExtractorConfig {
         overrideTsconfig: configObject.compiler.overrideTsconfig,
         skipLibCheck: !!configObject.compiler.skipLibCheck,
         apiReportEnabled,
-        reportFilePath,
-        reportTempFilePath,
+        reportConfigs,
+        reportFolder,
+        reportTempFolder,
         apiReportIncludeForgottenExports,
         docModelEnabled,
         apiJsonFilePath,
@@ -1064,6 +1155,13 @@ export class ExtractorConfig {
     }
 
     return new ExtractorConfig({ ...extractorConfigParameters, tsdocConfigFile, tsdocConfiguration });
+  }
+
+  /**
+   * Gets the report configuration for the "complete" (default) report configuration, if one was specified.
+   */
+  private _getCompleteReportConfig(): IExtractorConfigApiReport | undefined {
+    return this.reportConfigs.find((x) => x.variant === 'complete');
   }
 
   private static _resolvePathWithTokens(

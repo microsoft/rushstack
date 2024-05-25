@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 16 May 2024 01:12:22 GMT and should not be manually modified.
+This log was last generated on Thu, 23 May 2024 02:27:13 GMT and should not be manually modified.
+
+## 5.124.7
+Thu, 23 May 2024 02:27:13 GMT
+
+### Updates
+
+- Improve the `usePnpmSyncForInjectedDependencies` experiment to also include any dependency whose lockfile entry has the `file:` protocol, unless it is a tarball reference
+- Fix an issue where the build cache analysis was incorrect in rare situations due to a race condition (GitHub #4711)
 
 ## 5.124.6
 Thu, 16 May 2024 01:12:22 GMT

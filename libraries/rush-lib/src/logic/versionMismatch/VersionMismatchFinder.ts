@@ -23,6 +23,7 @@ export interface IVersionMismatchFinderOptions {
 export interface IVersionMismatchFinderRushCheckOptions extends IVersionMismatchFinderOptions {
   printAsJson?: boolean | undefined;
   truncateLongPackageNameLists?: boolean | undefined;
+  subspace?: Subspace | undefined;
 }
 
 export interface IVersionMismatchFinderEnsureConsistentVersionsOptions

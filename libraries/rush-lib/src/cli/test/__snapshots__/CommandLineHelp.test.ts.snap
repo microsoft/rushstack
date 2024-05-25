@@ -319,17 +319,24 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: check 1`] = `
-"usage: rush check [-h] [--json] [--verbose]
+"usage: rush check [-h] [--json] [--verbose] [--subspace SUBSPACE_NAME]
 
 Checks each project's package.json files and ensures that all dependencies 
 are of the same version throughout the repository.
 
 Optional arguments:
-  -h, --help  Show this help message and exit.
-  --json      If this flag is specified, output will be in JSON format.
-  --verbose   If this flag is specified, long lists of package names will not 
-              be truncated. This has no effect if the --json flag is also 
-              specified.
+  -h, --help            Show this help message and exit.
+  --json                If this flag is specified, output will be in JSON 
+                        format.
+  --verbose             If this flag is specified, long lists of package 
+                        names will not be truncated. This has no effect if 
+                        the --json flag is also specified.
+  --subspace SUBSPACE_NAME
+                        (EXPERIMENTAL) Specifies an individual Rush subspace 
+                        to check, requiring versions to be consistent only 
+                        within that subspace (ignoring other subspaces). This 
+                        parameter is required when the \\"subspacesEnabled\\" 
+                        setting is set to true in subspaces.json.
 "
 `;
 

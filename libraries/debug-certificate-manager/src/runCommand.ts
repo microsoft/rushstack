@@ -7,7 +7,10 @@ import type * as child_process from 'child_process';
 export interface IRunResult {
   stdout: string[];
   stderr: string[];
-  code: number;
+  /**
+   * The exit code, or -1 if the child process was terminated by a signal
+   */
+  exitCode: number;
 }
 
 export interface ISudoOptions {
@@ -42,8 +45,9 @@ async function _handleChildProcess(childProcess: child_process.ChildProcess): Pr
       stdout.push(data.toString());
     });
 
-    childProcess.on('close', (code: number) => {
-      resolve({ code, stdout, stderr });
+    childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
+      const normalizedExitCode: number = typeof exitCode === 'number' ? exitCode : signal ? -1 : 0;
+      resolve({ exitCode: normalizedExitCode, stdout, stderr });
     });
   });
 }
