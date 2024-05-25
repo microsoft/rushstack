@@ -42,7 +42,7 @@ export interface IRushProjectJson {
   operationSettings?: IOperationSettings[];
 }
 
-/** @internal */
+/** @alpha */
 export interface IRushPhaseSharding {
   /**
    * The number of shards to create.
@@ -58,7 +58,7 @@ export interface IRushPhaseSharding {
 
   /**
    * An optional argument to pass to the command to indicate the output folder for the shard.
-   * A subfolder for each shard will be created with {shardIndex} as the value. This is not
+   * A subfolder for each shard will be created with the shard's index as the value. This is not
    *   configurable.
    *
    * @defaultValue `--shard-output-folder=.rush/operations/{phaseName}/shards`.
