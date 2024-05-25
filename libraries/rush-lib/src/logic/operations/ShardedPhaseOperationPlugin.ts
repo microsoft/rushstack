@@ -84,7 +84,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
       const outputFolderArgumentFormat: string =
         operationSettings.sharding.outputFolderArgumentFormat ??
-        `--shard-output-directory="${RushConstants.projectRushFolderName}/operations/${TemplateStrings.PHASE_NAME}/shards/${TemplateStrings.SHARD_INDEX}"`;
+        `--shard-output-directory=${RushConstants.projectRushFolderName}/operations/${TemplateStrings.PHASE_NAME}/shards/${TemplateStrings.SHARD_INDEX}`;
 
       if (!outputFolderArgumentFormat.includes('=')) {
         throw new Error(
@@ -92,39 +92,25 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         );
       }
 
-      const trimmedOutputFolderArgumentFormat: string = outputFolderArgumentFormat.substring(
-        0,
-        trim(
-          outputFolderArgumentFormat,
-          outputFolderArgumentFormat.indexOf(TemplateStrings.SHARD_INDEX) +
-            TemplateStrings.SHARD_INDEX.length,
-          ['"', "'"],
-          -1
-        ) + 1
-      );
-
-      if (!trimmedOutputFolderArgumentFormat.endsWith(TemplateStrings.SHARD_INDEX)) {
-        throw new Error(`sharding.outputFolderArgumentFormat must end with ${TemplateStrings.SHARD_INDEX}`);
+      if (!outputFolderArgumentFormat.endsWith(TemplateStrings.SHARD_INDEX)) {
+        throw new Error(
+          `sharding.outputFolderArgumentFormat must end with ${TemplateStrings.SHARD_INDEX}, "${outputFolderArgumentFormat}"`
+        );
       }
 
       // Replace the phase name only to begin with.
-      const outputDirectoryArgument: string = trimmedOutputFolderArgumentFormat.replace(
+      const outputDirectoryArgument: string = outputFolderArgumentFormat.replace(
         TemplateStringRegexes.PHASE_NAME,
         normalizeNameForLogFilenameIdentifiers(phase.name)
       );
 
       const outputFolderWithTemplate: string = outputDirectoryArgument.substring(
-        trim(outputDirectoryArgument, outputDirectoryArgument.indexOf('=') + 1, ["'", '"'])
+        outputDirectoryArgument.indexOf('=') + 1
       );
 
       const parentFolder: string = outputFolderWithTemplate.substring(
         0,
-        trim(
-          outputFolderWithTemplate,
-          outputFolderWithTemplate.indexOf(TemplateStrings.SHARD_INDEX),
-          ["'", '"'],
-          -1
-        ) + 1
+        outputFolderWithTemplate.indexOf(TemplateStrings.SHARD_INDEX)
       );
 
       const collatorDisplayName: string = `${getDisplayName(phase, project)} - collate`;
@@ -178,7 +164,6 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           TemplateStringRegexes.SHARD_INDEX,
           shard.toString()
         );
-        console.log(outputFolderWithTemplate, outputDirectory);
 
         const shardOperation: Operation = new Operation({
           project,
@@ -227,28 +212,4 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
   }
 
   return existingOperations;
-}
-
-/**
- * Helper method to trim characters from a string. Returns a new index to use with str.substring().
- * @param str String to trim characters from, will no be changed.
- * @param indexToTrimFrom Index to start from.
- * @param charactersToTrim Actual characters to trim.
- * @returns
- */
-function trim(
-  str: string,
-  indexToTrimFrom: number,
-  charactersToTrim: string[],
-  increment: number = 1
-): number {
-  let newIndex: number = indexToTrimFrom;
-  while (
-    str.length >= newIndex &&
-    newIndex >= 0 &&
-    charactersToTrim.includes(str.substring(newIndex, newIndex + 1))
-  ) {
-    newIndex += increment;
-  }
-  return newIndex;
 }
