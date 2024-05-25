@@ -8,26 +8,30 @@ import {
   type IExecuteOperationsContext,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
-import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
-import { CollatedTerminal, StreamCollator } from '@rushstack/stream-collator';
+import { StreamCollator } from '@rushstack/stream-collator';
 import type { Operation } from '../Operation';
-import path from 'path';
 import { RushConfiguration } from '../../../api/RushConfiguration';
 import {
   CommandLineConfiguration,
   type IPhase,
   type IPhasedCommandConfig
 } from '../../../api/CommandLineConfiguration';
-import type { ICommandLineJson } from '../../../api/CommandLineJson';
-import { JsonFile } from '@rushstack/node-core-library';
 import { OperationExecutionRecord } from '../OperationExecutionRecord';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import { MockOperationRunner } from './MockOperationRunner';
 import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
+import path from 'path';
+import type { ICommandLineJson } from '../../../api/CommandLineJson';
+import { JsonFile } from '@rushstack/node-core-library';
 
 describe(BuildPlanPlugin.name, () => {
+  const rushJsonFile: string = path.resolve(__dirname, `../../test/workspaceRepo/rush.json`);
+  const commandLineJsonFile: string = path.resolve(
+    __dirname,
+    `../../test/workspaceRepo/common/config/rush/command-line.json`
+  );
   let rushConfiguration!: RushConfiguration;
   let commandLineConfiguration!: CommandLineConfiguration;
   let stringBufferTerminalProvider!: StringBufferTerminalProvider;
@@ -40,6 +44,10 @@ describe(BuildPlanPlugin.name, () => {
     stringBufferTerminalProvider = new StringBufferTerminalProvider();
     terminal = new Terminal(stringBufferTerminalProvider);
     mockStreamWritable.reset();
+    rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+    const commandLineJson: ICommandLineJson = JsonFile.load(commandLineJsonFile);
+
+    commandLineConfiguration = new CommandLineConfiguration(commandLineJson);
   });
 
   function createMockRunner(operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
@@ -51,7 +59,7 @@ describe(BuildPlanPlugin.name, () => {
           RushConstants.phaseNamePrefix.length
         )})`;
 
-        operation.runner = new MockOperationRunner(name);
+        operation.runner = new MockOperationRunner(name, undefined, undefined, false);
       }
     }
 

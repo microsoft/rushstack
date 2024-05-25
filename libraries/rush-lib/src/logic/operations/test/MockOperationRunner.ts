@@ -13,12 +13,15 @@ export class MockOperationRunner implements IOperationRunner {
   public readonly silent: boolean = false;
   public readonly cacheable: boolean = false;
   public readonly warningsAreAllowed: boolean;
+  public readonly isNoOp?: boolean | undefined;
 
   public constructor(
     name: string,
     action?: (terminal: CollatedTerminal) => Promise<OperationStatus>,
-    warningsAreAllowed: boolean = false
+    warningsAreAllowed: boolean = false,
+    isNoOp: boolean | undefined = undefined
   ) {
+    this.isNoOp = isNoOp;
     this.name = name;
     this._action = action;
     this.warningsAreAllowed = warningsAreAllowed;
