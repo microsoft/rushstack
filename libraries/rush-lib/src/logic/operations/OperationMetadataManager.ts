@@ -52,6 +52,7 @@ export interface ILogChunkStorage {
 export class OperationMetadataManager {
   public readonly stateFile: OperationStateFile;
   public readonly logFilenameIdentifier: string;
+  private readonly _metadataFolder: string;
   private readonly _logPath: string;
   private readonly _errorLogPath: string;
   private readonly _logChunksPath: string;
