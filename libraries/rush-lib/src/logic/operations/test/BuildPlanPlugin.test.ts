@@ -127,7 +127,7 @@ describe(BuildPlanPlugin.name, () => {
 
       await hooks.beforeExecuteOperations.promise(operationMap, context as IExecuteOperationsContext);
 
-      expect(stringBufferTerminalProvider.getOutput()).toMatchSnapshot();
+      expect(stringBufferTerminalProvider.getOutput({ normalizeSpecialCharacters: false })).toMatchSnapshot();
     });
   });
 });
