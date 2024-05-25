@@ -2,6 +2,39 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.44.0",
+      "tag": "@microsoft/api-extractor_v7.44.0",
+      "date": "Fri, 24 May 2024 00:15:08 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for \"variants\" of API reports which include or exclude items by release tag"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.43.8",
+      "tag": "@microsoft/api-extractor_v7.43.8",
+      "date": "Thu, 23 May 2024 02:26:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.11.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.21.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.43.7",
       "tag": "@microsoft/api-extractor_v7.43.7",
       "date": "Thu, 16 May 2024 15:10:22 GMT",

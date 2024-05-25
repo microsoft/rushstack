@@ -322,7 +322,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           //     has changed happens inside the hashing logic.
           //
 
-          const { logPath, errorLogPath } = ProjectLogWritable.getLogFilePaths({
+          const { errorLogPath } = ProjectLogWritable.getLogFilePaths({
             project,
             logFilenameIdentifier: phase.logFilenameIdentifier
           });
@@ -340,12 +340,17 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               );
             if (restoreFromCacheSuccess) {
               buildCacheContext.cacheRestored = true;
-              // Restore the original state of the operation without cache
-              await operationMetadataManager?.tryRestoreAsync({
-                terminal: buildCacheTerminal,
-                logPath,
-                errorLogPath
-              });
+              await runnerContext.runWithTerminalAsync(
+                async (taskTerminal, terminalProvider) => {
+                  // Restore the original state of the operation without cache
+                  await operationMetadataManager?.tryRestoreAsync({
+                    terminalProvider,
+                    terminal: buildCacheTerminal,
+                    errorLogPath
+                  });
+                },
+                { createLogFile: false }
+              );
             }
             return !!restoreFromCacheSuccess;
           };
@@ -448,7 +453,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             // Save the metadata to disk
             const { logFilenameIdentifier } = phase;
             const { duration: durationInSeconds } = stopwatch;
-            const { logPath, errorLogPath } = ProjectLogWritable.getLogFilePaths({
+            const { logPath, errorLogPath, logChunksPath } = ProjectLogWritable.getLogFilePaths({
               project,
               logFilenameIdentifier
             });
@@ -457,7 +462,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               cobuildContextId: cobuildLock?.cobuildConfiguration.cobuildContextId,
               cobuildRunnerId: cobuildLock?.cobuildConfiguration.cobuildRunnerId,
               logPath,
-              errorLogPath
+              errorLogPath,
+              logChunksPath
             });
           }
 
@@ -878,9 +884,8 @@ async function updateAdditionalContextAsync({
   }
 
   if (operationSettings.dependsOnAdditionalFiles) {
-    const repoState: IRawRepoState | undefined = await projectChangeAnalyzer._ensureInitializedAsync(
-      terminal
-    );
+    const repoState: IRawRepoState | undefined =
+      await projectChangeAnalyzer._ensureInitializedAsync(terminal);
 
     const additionalFiles: Map<string, string> = await getHashesForGlobsAsync(
       operationSettings.dependsOnAdditionalFiles,

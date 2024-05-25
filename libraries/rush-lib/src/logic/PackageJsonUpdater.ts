@@ -508,8 +508,8 @@ export class PackageJsonUpdater {
       const oldDependencyType: DependencyType | undefined = oldDevDependency
         ? oldDevDependency.dependencyType
         : oldDependency
-        ? oldDependency.dependencyType
-        : undefined;
+          ? oldDependency.dependencyType
+          : undefined;
 
       dependencyType = dependencyType || oldDependencyType || DependencyType.Regular;
 

@@ -4,7 +4,8 @@
   "mainEntryPointFilePath": "<projectFolder>/lib/index.d.ts",
 
   "apiReport": {
-    "enabled": true
+    "enabled": true,
+    "reportFileName": "<unscopedPackageName>"
   },
 
   "docModel": {

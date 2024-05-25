@@ -26,6 +26,6 @@ export class MockWritable extends TerminalWritable {
   }
 
   public getFormattedChunks(): ITerminalChunk[] {
-    return this.chunks.map((x) => ({ ...x, text: AnsiEscape.formatForTests(x.text) } as ITerminalChunk));
+    return this.chunks.map((x) => ({ ...x, text: AnsiEscape.formatForTests(x.text) }) as ITerminalChunk);
   }
 }

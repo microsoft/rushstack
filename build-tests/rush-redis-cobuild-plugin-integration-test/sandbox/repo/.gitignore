@@ -5,3 +5,4 @@ common/autoinstallers/*/.npmrc
 projects/*/dist/
 *.log
 node_modules/
+

@@ -57,7 +57,7 @@ function validateConfiguration(rushProjectConfiguration: RushProjectConfiguratio
     try {
       rushProjectConfiguration.validatePhaseConfiguration(
         Array.from(rushProjectConfiguration.operationSettingsByOperationName.keys()).map(
-          (phaseName) => ({ name: phaseName } as IPhase)
+          (phaseName) => ({ name: phaseName }) as IPhase
         ),
         terminal
       );
@@ -104,9 +104,8 @@ describe(RushProjectConfiguration.name, () => {
 
   describe(RushProjectConfiguration.prototype.getCacheDisabledReason.name, () => {
     it('Indicates if the build cache is completely disabled', async () => {
-      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
-        'test-project-a'
-      );
+      const config: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-a');
 
       if (!config) {
         throw new Error('Failed to load config');
@@ -117,9 +116,8 @@ describe(RushProjectConfiguration.name, () => {
     });
 
     it('Indicates if the phase behavior is not defined', async () => {
-      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
-        'test-project-c'
-      );
+      const config: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-c');
 
       if (!config) {
         throw new Error('Failed to load config');
@@ -130,9 +128,8 @@ describe(RushProjectConfiguration.name, () => {
     });
 
     it('Indicates if the phase has disabled the cache', async () => {
-      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
-        'test-project-c'
-      );
+      const config: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-c');
 
       if (!config) {
         throw new Error('Failed to load config');
@@ -143,9 +140,8 @@ describe(RushProjectConfiguration.name, () => {
     });
 
     it('Indicates if tracked files are outputs of the phase', async () => {
-      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
-        'test-project-c'
-      );
+      const config: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-c');
 
       if (!config) {
         throw new Error('Failed to load config');
@@ -159,9 +155,8 @@ describe(RushProjectConfiguration.name, () => {
     });
 
     it('returns undefined if the config is safe', async () => {
-      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
-        'test-project-c'
-      );
+      const config: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-c');
 
       if (!config) {
         throw new Error('Failed to load config');

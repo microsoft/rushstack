@@ -88,7 +88,7 @@ export class SubprocessTerminator {
       return;
     }
 
-    subprocess.on('close', (code: number, signal: string): void => {
+    subprocess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null): void => {
       if (SubprocessTerminator._subprocessesByPid.delete(pid)) {
         SubprocessTerminator._logDebug(`untracking #${pid}`);
       }

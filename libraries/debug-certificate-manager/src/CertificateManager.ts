@@ -273,7 +273,7 @@ export class CertificateManager {
           CA_SERIAL_NUMBER
         ]);
 
-        if (winUntrustResult.code !== 0) {
+        if (winUntrustResult.exitCode !== 0) {
           terminal.writeErrorLine(`Error: ${winUntrustResult.stderr.join(' ')}`);
           return false;
         } else {
@@ -292,7 +292,7 @@ export class CertificateManager {
           '-Z',
           MAC_KEYCHAIN
         ]);
-        if (macFindCertificateResult.code !== 0) {
+        if (macFindCertificateResult.exitCode !== 0) {
           terminal.writeErrorLine(
             `Error finding the development certificate: ${macFindCertificateResult.stderr.join(' ')}`
           );
@@ -317,7 +317,7 @@ export class CertificateManager {
           MAC_KEYCHAIN
         ]);
 
-        if (macUntrustResult.code === 0) {
+        if (macUntrustResult.exitCode === 0) {
           terminal.writeVerboseLine('Successfully untrusted development certificate.');
           return true;
         } else {
@@ -530,7 +530,7 @@ export class CertificateManager {
           certificatePath
         ]);
 
-        if (winTrustResult.code !== 0) {
+        if (winTrustResult.exitCode !== 0) {
           terminal.writeErrorLine(`Error: ${winTrustResult.stdout.toString()}`);
 
           const errorLines: string[] = winTrustResult.stdout
@@ -540,7 +540,7 @@ export class CertificateManager {
 
           // Not sure if this is always the status code for "cancelled" - should confirm.
           if (
-            winTrustResult.code === 2147943623 ||
+            winTrustResult.exitCode === 2147943623 ||
             errorLines[errorLines.length - 1].indexOf('The operation was canceled by the user.') > 0
           ) {
             terminal.writeLine('Certificate trust cancelled.');
@@ -573,7 +573,7 @@ export class CertificateManager {
           certificatePath
         ]);
 
-        if (result.code === 0) {
+        if (result.exitCode === 0) {
           terminal.writeVerboseLine('Successfully trusted development certificate.');
           return true;
         } else {
@@ -586,7 +586,7 @@ export class CertificateManager {
             return false;
           } else {
             terminal.writeErrorLine(
-              `Certificate trust failed with an unknown error. Exit code: ${result.code}. ` +
+              `Certificate trust failed with an unknown error. Exit code: ${result.exitCode}. ` +
                 `Error: ${result.stderr.join(' ')}`
             );
             return false;
@@ -614,7 +614,7 @@ export class CertificateManager {
           CA_SERIAL_NUMBER
         ]);
 
-        if (winVerifyStoreResult.code !== 0) {
+        if (winVerifyStoreResult.exitCode !== 0) {
           terminal.writeVerboseLine(
             'The development certificate was not found in the store. CertUtil error: ',
             winVerifyStoreResult.stderr.join(' ')
@@ -640,7 +640,7 @@ export class CertificateManager {
           MAC_KEYCHAIN
         ]);
 
-        if (macFindCertificateResult.code !== 0) {
+        if (macFindCertificateResult.exitCode !== 0) {
           terminal.writeVerboseLine(
             'The development certificate was not found in keychain. Find certificate error: ',
             macFindCertificateResult.stderr.join(' ')
@@ -700,7 +700,7 @@ export class CertificateManager {
         friendlyNamePath
       ]);
 
-      if (repairStoreResult.code !== 0) {
+      if (repairStoreResult.exitCode !== 0) {
         terminal.writeVerboseLine(`CertUtil Error: ${repairStoreResult.stderr.join('')}`);
         terminal.writeVerboseLine(`CertUtil: ${repairStoreResult.stdout.join('')}`);
         return false;

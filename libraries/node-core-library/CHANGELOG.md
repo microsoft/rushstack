@@ -1,6 +1,19 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 15 May 2024 06:04:17 GMT and should not be manually modified.
+This log was last generated on Thu, 23 May 2024 02:26:56 GMT and should not be manually modified.
+
+## 5.0.0
+Thu, 23 May 2024 02:26:56 GMT
+
+### Breaking changes
+
+- Replace z-schema with ajv for schema validation and add support for json-schema draft-07.
+- Remove the deprecated `Async.sleep` function.
+- Convert `FileConstants` and `FolderConstants` from enums to const objects.
+
+### Patches
+
+- Fix an issue where waitForExitAsync() might reject before all output was collected
 
 ## 4.3.0
 Wed, 15 May 2024 06:04:17 GMT

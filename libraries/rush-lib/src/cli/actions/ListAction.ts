@@ -122,9 +122,8 @@ export class ListAction extends BaseRushAction {
 
   protected async runAsync(): Promise<void> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
-    const selection: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
-      terminal
-    );
+    const selection: Set<RushConfigurationProject> =
+      await this._selectionParameters.getSelectedProjectsAsync(terminal);
     Sort.sortSetBy(selection, (x: RushConfigurationProject) => x.packageName);
     if (this._jsonFlag.value && this._detailedFlag.value) {
       throw new Error(`The parameters "--json" and "--detailed" cannot be used together.`);

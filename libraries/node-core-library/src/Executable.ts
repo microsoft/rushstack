@@ -567,8 +567,8 @@ export class Executable {
       }
     }
 
-    let errorThrown: boolean = false;
-    const exitCode: number | null = await new Promise<number | null>(
+    let errorThrown: Error | undefined = undefined;
+    const promiseExitCode: number | null = await new Promise<number | null>(
       (resolve: (result: number | null) => void, reject: (error: Error) => void) => {
         if (encoding) {
           childProcess.stdout!.on('data', (chunk: Buffer | string) => {
@@ -579,25 +579,26 @@ export class Executable {
           });
         }
         childProcess.on('error', (error: Error) => {
-          errorThrown = true;
-          reject(error);
+          // Wait to call reject() until any output is collected
+          errorThrown = error;
         });
-        childProcess.on('exit', (code: number | null) => {
+        childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
           if (errorThrown) {
-            // We've already rejected the promise
-            return;
+            reject(errorThrown);
           }
-          if (code !== 0 && throwOnNonZeroExitCode) {
-            reject(new Error(`Process exited with code ${code}`));
+          if (signal) {
+            reject(new Error(`Process terminated by ${signal}`));
+          } else if (exitCode !== 0 && throwOnNonZeroExitCode) {
+            reject(new Error(`Process exited with code ${exitCode}`));
           } else {
-            resolve(code);
+            resolve(exitCode);
           }
         });
       }
     );
 
     const result: IWaitForExitResult<T> = {
-      exitCode
+      exitCode: promiseExitCode
     } as IWaitForExitResult<T>;
 
     if (encoding === 'buffer') {

@@ -50,13 +50,6 @@ class Launcher {
     }
   }
 
-  /**
-   * Synchronously delay for the specified time interval.
-   */
-  private static _delayMs(milliseconds: number): void {
-    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
-  }
-
   public installHook(): void {
     const realRequire: NodeJS.Require = moduleApi.Module.prototype.require;
 
@@ -118,12 +111,6 @@ class Launcher {
       process.send!({
         id: 'done'
       } as IIpcDone);
-
-      // The Node.js "exit" event is synchronous, and the process will terminate as soon as this function returns.
-      // To avoid a race condition, allow some time for IPC messages to be transmitted to the parent process.
-      // TODO: There should be a way to eliminate this delay by intercepting earlier in the shutdown sequence,
-      // but it needs to consider every way that Node.js can exit.
-      Launcher._delayMs(500);
     });
   }
 }

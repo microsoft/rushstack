@@ -27,13 +27,11 @@ export class InteractiveUpgrader {
   public async upgradeAsync(): Promise<IUpgradeInteractiveDeps> {
     const rushProject: RushConfigurationProject = await this._getUserSelectedProjectForUpgradeAsync();
 
-    const dependenciesState: NpmCheck.INpmCheckPackage[] = await this._getPackageDependenciesStatusAsync(
-      rushProject
-    );
+    const dependenciesState: NpmCheck.INpmCheckPackage[] =
+      await this._getPackageDependenciesStatusAsync(rushProject);
 
-    const depsToUpgrade: IDepsToUpgradeAnswers = await this._getUserSelectedDependenciesToUpgradeAsync(
-      dependenciesState
-    );
+    const depsToUpgrade: IDepsToUpgradeAnswers =
+      await this._getUserSelectedDependenciesToUpgradeAsync(dependenciesState);
     return { projects: [rushProject], depsToUpgrade };
   }
 

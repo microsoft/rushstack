@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a `rush check --subspace` parameter to specify which subspace to analyze",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

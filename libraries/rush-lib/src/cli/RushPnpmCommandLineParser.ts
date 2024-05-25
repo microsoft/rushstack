@@ -421,8 +421,13 @@ export class RushPnpmCommandLineParser {
           keepEnvironment: true
         },
         onStdoutStreamChunk,
-        (exitCode: number, signal: string) => {
-          process.exitCode = exitCode;
+        (exitCode: number | null, signal: NodeJS.Signals | null) => {
+          if (typeof exitCode === 'number') {
+            process.exitCode = exitCode;
+          } else {
+            // Terminated by a signal
+            process.exitCode = 1;
+          }
         }
       );
     } catch (e) {

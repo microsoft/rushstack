@@ -26,6 +26,40 @@ exports[`JsonFile allows undefined values when asked 2`] = `
 "
 `;
 
+exports[`JsonFile supports parsing keys that map to \`Object\` properties: JSON String 1`] = `
+"{
+  \\"__defineGetter__\\": 1,
+  \\"__defineSetter__\\": 1,
+  \\"__lookupGetter__\\": 1,
+  \\"__lookupSetter__\\": 1,
+  \\"__proto__\\": 1,
+  \\"constructor\\": 1,
+  \\"hasOwnProperty\\": 1,
+  \\"isPrototypeOf\\": 1,
+  \\"propertyIsEnumerable\\": 1,
+  \\"toLocaleString\\": 1,
+  \\"toString\\": 1,
+  \\"valueOf\\": 1
+}"
+`;
+
+exports[`JsonFile supports parsing keys that map to \`Object\` properties: Parsed JSON Object 1`] = `
+Object {
+  "__defineGetter__": 1,
+  "__defineSetter__": 1,
+  "__lookupGetter__": 1,
+  "__lookupSetter__": 1,
+  "__proto__": 1,
+  "constructor": 1,
+  "hasOwnProperty": 1,
+  "isPrototypeOf": 1,
+  "propertyIsEnumerable": 1,
+  "toLocaleString": 1,
+  "toString": 1,
+  "valueOf": 1,
+}
+`;
+
 exports[`JsonFile supports updating a simple file 1`] = `
 "{\\"a\\": 1,\\"b\\": 2}
 "
