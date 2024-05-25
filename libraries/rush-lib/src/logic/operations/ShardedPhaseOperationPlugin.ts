@@ -10,6 +10,7 @@ import type {
 import { RushConstants } from '../RushConstants';
 import { NullOperationRunner } from './NullOperationRunner';
 import { Operation } from './Operation';
+import { normalizeNameForLogFilenameIdentifiers } from './OperationMetadataManager';
 import { OperationStatus } from './OperationStatus';
 import {
   formatCommand,
@@ -83,7 +84,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
       const outputFolderArgumentFormat: string =
         operationSettings.sharding.outputFolderArgumentFormat ??
-        `--shard-output-directory="${RushConstants.projectRushFolderName}/operations/${TemplateStrings.PHASE_NAME}/shards"`;
+        `--shard-output-directory="${RushConstants.projectRushFolderName}/operations/${TemplateStrings.PHASE_NAME}/shards/${TemplateStrings.SHARD_INDEX}"`;
 
       if (!outputFolderArgumentFormat.includes('=')) {
         throw new Error(
@@ -91,11 +92,24 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         );
       }
 
-      const outputDirectoryArgument: string = outputFolderArgumentFormat
-        .replace(TemplateStringRegexes.PHASE_NAME, phase.name)
-        .replace(TemplateStringRegexes.SHARD_COUNT, shards.toString());
+      if (!outputFolderArgumentFormat.endsWith(TemplateStrings.SHARD_INDEX)) {
+        throw new Error(`sharding.outputFolderArgumentFormat must end with ${TemplateStrings.SHARD_INDEX}`);
+      }
 
-      const parentFolder: string = outputDirectoryArgument.substring(outputDirectoryArgument.indexOf('='));
+      // Replace the phase name only to begin with.
+      const outputDirectoryArgument: string = outputFolderArgumentFormat.replace(
+        TemplateStringRegexes.PHASE_NAME,
+        normalizeNameForLogFilenameIdentifiers(phase.name)
+      );
+
+      const outputFolderWithTemplate: string = outputDirectoryArgument.substring(
+        outputDirectoryArgument.indexOf('=') + 1
+      );
+
+      const parentFolder: string = outputFolderWithTemplate.substring(
+        0,
+        outputFolderWithTemplate.indexOf(TemplateStrings.SHARD_INDEX)
+      );
 
       const collatorDisplayName: string = `${getDisplayName(phase, project)} - collate`;
 
@@ -144,7 +158,10 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       }
 
       for (let shard: number = 1; shard <= shards; shard++) {
-        const outputDirectory: string = `${parentFolder}/${shard}`;
+        const outputDirectory: string = outputFolderWithTemplate.replace(
+          TemplateStringRegexes.SHARD_INDEX,
+          shard.toString()
+        );
 
         const shardOperation: Operation = new Operation({
           project,
@@ -160,7 +177,16 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           .replace(TemplateStringRegexes.SHARD_INDEX, shard.toString())
           .replace(TemplateStringRegexes.SHARD_COUNT, shards.toString());
 
-        const shardedParameters: string[] = [...customParameters, shardArgument, outputDirectoryArgument];
+        const outputDirectoryArgumentWithShard: string = outputDirectoryArgument.replace(
+          TemplateStringRegexes.SHARD_INDEX,
+          shard.toString()
+        );
+
+        const shardedParameters: string[] = [
+          ...customParameters,
+          shardArgument,
+          outputDirectoryArgumentWithShard
+        ];
 
         const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}/${shards}`;
 

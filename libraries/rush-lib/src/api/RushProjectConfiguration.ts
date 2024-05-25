@@ -58,10 +58,9 @@ export interface IRushPhaseSharding {
 
   /**
    * An optional argument to pass to the command to indicate the output folder for the shard.
-   * A subfolder for each shard will be created with the shard's index as the value. This is not
-   *   configurable.
+   *  It must end with `{shardIndex}`.
    *
-   * @defaultValue `--shard-output-folder=.rush/operations/{phaseName}/shards`.
+   * @defaultValue `--shard-output-folder=.rush/operations/{phaseName}/shards/{shardIndex}`.
    */
   outputFolderArgumentFormat?: string;
 

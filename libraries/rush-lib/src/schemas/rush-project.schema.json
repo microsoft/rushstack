@@ -87,9 +87,9 @@
                 "type": "string",
                 "description": "A template string that specifies the command-line argument to pass to the operation for each shard. The string may contain the following placeholders: {shardIndex} {shardCount}. Defaults to --shard=\"{shardIndex}/{shardCount}\""
               },
-              "outputFolderArgument": {
+              "outputFolderArgumentFormat": {
                 "type": "string",
-                "description": "The command-line argument to pass to the operation to specify the output folder. The string may contain the following placeholders: {phaseName} {shardCount}. Defaults to --shard-output-folder=\".rush/operations/{phaseName}/shards\""
+                "description": "The command-line argument to pass to the operation to specify the output folder. The string may contain the following placeholders: {phaseName} {shardIndex}. Must end with {shardIndex}. Defaults to --shard-output-folder=\".rush/operations/{phaseName}/shards/{shardIndex}\""
               },
               "shardOperationSettings": {
                 "type": "object",
