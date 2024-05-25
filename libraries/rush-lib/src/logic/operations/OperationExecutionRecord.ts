@@ -200,7 +200,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
         ? new ProjectLogWritable(
             associatedProject,
             this.collatedWriter.terminal,
-            `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`
+            `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`,
+            { enableChunkedOutput: true }
           )
         : undefined;
 
