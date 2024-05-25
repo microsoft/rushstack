@@ -100,7 +100,7 @@ describe(BuildPlanPlugin.name, () => {
     it('should generate a build plan', async () => {
       const hooks: PhasedCommandHooks = new PhasedCommandHooks();
 
-      new BuildPlanPlugin(mockTerminal).apply(hooks);
+      new BuildPlanPlugin(terminal).apply(hooks);
       const context: Pick<IExecuteOperationsContext, 'projectChangeAnalyzer' | 'projectConfigurations'> = {
         projectChangeAnalyzer: {
           [ProjectChangeAnalyzer.prototype._tryGetProjectDependenciesAsync.name]: async () => {
@@ -129,8 +129,7 @@ describe(BuildPlanPlugin.name, () => {
 
       await hooks.beforeExecuteOperations.promise(operationMap, context as IExecuteOperationsContext);
 
-      const allOutput: string = mockWritable.getAllOutput();
-      expect(allOutput).toMatchSnapshot();
+      expect(stringBufferTerminalProvider.getOutput()).toMatchSnapshot();
     });
   });
 });
