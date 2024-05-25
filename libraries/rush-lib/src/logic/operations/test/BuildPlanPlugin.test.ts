@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { MockWritable, Terminal } from '@rushstack/terminal';
+import { MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { BuildPlanPlugin } from '../BuildPlanPlugin';
 import {
   type ICreateOperationsContext,
@@ -27,15 +27,7 @@ import { RushConstants } from '../../RushConstants';
 import { MockOperationRunner } from './MockOperationRunner';
 import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 
-const mockWritable: MockWritable = new MockWritable();
-const mockTerminal: Terminal = new Terminal(new CollatedTerminalProvider(new CollatedTerminal(mockWritable)));
-
-const mockStreamWritable: MockWritable = new MockWritable();
-const streamCollator = new StreamCollator({
-  destination: mockStreamWritable
-});
-
-describe(BuildPlanPlugin.name, () => {
+describe('BuildPlanPlugin', () => {
   const rushJsonFile: string = path.resolve(__dirname, `../../test/workspaceRepo/rush.json`);
   const commandLineJsonFile: string = path.resolve(
     __dirname,
@@ -43,13 +35,16 @@ describe(BuildPlanPlugin.name, () => {
   );
   let rushConfiguration!: RushConfiguration;
   let commandLineConfiguration!: CommandLineConfiguration;
-
-  beforeAll(() => {
-    rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
-    const commandLineJson: ICommandLineJson = JsonFile.load(commandLineJsonFile);
-
-    commandLineConfiguration = new CommandLineConfiguration(commandLineJson);
-    mockWritable.reset();
+  let stringBufferTerminalProvider!: StringBufferTerminalProvider;
+  let terminal!: Terminal;
+  const mockStreamWritable: MockWritable = new MockWritable();
+  const streamCollator = new StreamCollator({
+    destination: mockStreamWritable
+  });
+  beforeEach(() => {
+    stringBufferTerminalProvider = new StringBufferTerminalProvider();
+    terminal = new Terminal(stringBufferTerminalProvider);
+    mockStreamWritable.reset();
   });
 
   function createMockRunner(operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
