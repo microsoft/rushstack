@@ -28,11 +28,6 @@ import { MockOperationRunner } from './MockOperationRunner';
 import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 
 describe('BuildPlanPlugin', () => {
-  const rushJsonFile: string = path.resolve(__dirname, `../../test/workspaceRepo/rush.json`);
-  const commandLineJsonFile: string = path.resolve(
-    __dirname,
-    `../../test/workspaceRepo/common/config/rush/command-line.json`
-  );
   let rushConfiguration!: RushConfiguration;
   let commandLineConfiguration!: CommandLineConfiguration;
   let stringBufferTerminalProvider!: StringBufferTerminalProvider;
