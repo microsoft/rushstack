@@ -83,7 +83,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
       const outputFolderArgumentFormat: string =
         operationSettings.sharding.outputFolderArgumentFormat ??
-        `--shard-output-directory="${RushConstants.projectRushFolderName}/operations/{phaseName}/shards"`;
+        `--shard-output-directory="${RushConstants.projectRushFolderName}/operations/${TemplateStrings.PHASE_NAME}/shards"`;
 
       if (!outputFolderArgumentFormat.includes('=')) {
         throw new Error(
