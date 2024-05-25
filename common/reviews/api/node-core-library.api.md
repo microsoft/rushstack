@@ -476,6 +476,7 @@ export interface INodePackageJson {
     // @beta
     tsdocMetadata?: string;
     types?: string;
+    typesVersions?: Record<string, Record<string, [string, ...string[]]>>;
     typings?: string;
     version?: string;
 }

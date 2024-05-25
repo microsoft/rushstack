@@ -266,6 +266,43 @@ export interface INodePackageJson {
   resolutions?: Record<string, string>;
 
   /**
+   * A table of TypeScript *.d.ts file paths that are compatible with specific TypeScript version
+   * selectors. This data take a form similar to that of the {@link INodePackageJson.exports} field,
+   * with fallbacks listed in order in the value array for example:
+   *
+   * ```JSON
+   * "typesVersions": {
+   *   ">=3.1": {
+   *     "*": ["./types-3.1/*", "./types-3.1-fallback/*"]
+   *   },
+   *   ">=3.0": {
+   *     "*": ["./types-legacy/*"]
+   *   }
+   * }
+   * ```
+   *
+   * or
+   *
+   * ```JSON
+   * "typesVersions": {
+   *   ">=3.1": {
+   *     "app/*": ["./app/types-3.1/*"],
+   *     "lib/*": ["./lib/types-3.1/*"]
+   *   },
+   *   ">=3.0": {
+   *     "app/*": ["./app/types-legacy/*"],
+   *     "lib/*": ["./lib/types-legacy/*"]
+   *   }
+   * }
+   * ```
+   *
+   * See the
+   * {@link https://www.typescriptlang.org/docs/handbook/declaration-files/publishing.html#version-selection-with-typesversions
+   * | TypeScript documentation} for details.
+   */
+  typesVersions?: Record<string, Record<string, [string, ...string[]]>>;
+
+  /**
    * The "exports" field is used to specify the entry points for a package.
    * See {@link https://nodejs.org/api/packages.html#exports | Node.js documentation}
    */
