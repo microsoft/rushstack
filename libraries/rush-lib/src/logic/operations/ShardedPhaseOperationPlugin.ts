@@ -7,6 +7,7 @@ import type {
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
+import { RushConstants } from '../RushConstants';
 import { NullOperationRunner } from './NullOperationRunner';
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
@@ -23,13 +24,15 @@ export const PLUGIN_NAME: 'ShardedPhasedOperationPlugin' = 'ShardedPhasedOperati
 // eslint-disable-next-line @typescript-eslint/typedef
 const TemplateStrings = {
   SHARD_INDEX: '{shardIndex}',
-  SHARD_COUNT: '{shardCount}'
+  SHARD_COUNT: '{shardCount}',
+  PHASE_NAME: '{phaseName}'
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/typedef
 const TemplateStringRegexes = {
   SHARD_INDEX: new RegExp(TemplateStrings.SHARD_INDEX, 'g'),
-  SHARD_COUNT: new RegExp(TemplateStrings.SHARD_COUNT, 'g')
+  SHARD_COUNT: new RegExp(TemplateStrings.SHARD_COUNT, 'g'),
+  PHASE_NAME: new RegExp(TemplateStrings.PHASE_NAME, 'g')
 } as const;
 
 /**
@@ -78,11 +81,21 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         operation.deleteDependency(dependency);
       }
 
-      const parentFolderFormat: string =
-        operationSettings.sharding.outputFolderArgument?.parentFolderName ??
-        `.rush/operations/${phase.logFilenameIdentifier}/shards`;
+      const outputFolderArgumentFormat: string =
+        operationSettings.sharding.outputFolderArgumentFormat ??
+        `--shard-output-directory="${RushConstants.projectRushFolderName}/operations/{phaseName}/shards"`;
 
-      const parentFolder: string = parentFolderFormat;
+      if (!outputFolderArgumentFormat.includes('=')) {
+        throw new Error(
+          'sharding.outputFolderArgumentFormat must contain an "=" sign to differentiate between the key and the value'
+        );
+      }
+
+      const outputDirectoryArgument: string = outputFolderArgumentFormat
+        .replace(TemplateStringRegexes.PHASE_NAME, phase.name)
+        .replace(TemplateStringRegexes.SHARD_COUNT, shards.toString());
+
+      const parentFolder: string = outputDirectoryArgument.substring(outputDirectoryArgument.indexOf('='));
 
       const collatorDisplayName: string = `${getDisplayName(phase, project)} - collate`;
 
@@ -119,8 +132,6 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       const shardArgumentFormat: string =
         operationSettings.sharding.shardArgumentFormat ??
         `--shard=${TemplateStrings.SHARD_INDEX}/${TemplateStrings.SHARD_COUNT}`;
-      const outputFolderArgumentFlag: string =
-        operationSettings.sharding.outputFolderArgument?.parameterLongName ?? '--shard-output-directory';
 
       if (
         operationSettings.sharding.shardArgumentFormat &&
@@ -149,7 +160,6 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           .replace(TemplateStringRegexes.SHARD_INDEX, shard.toString())
           .replace(TemplateStringRegexes.SHARD_COUNT, shards.toString());
 
-        const outputDirectoryArgument: string = `${outputFolderArgumentFlag}="${outputDirectory}"`;
         const shardedParameters: string[] = [...customParameters, shardArgument, outputDirectoryArgument];
 
         const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}/${shards}`;

@@ -58,25 +58,12 @@ export interface IRushPhaseSharding {
 
   /**
    * An optional argument to pass to the command to indicate the output folder for the shard.
-   * The default argument is `--shard-output-folder=.rush/operations/{phaseName}/shards/{shardIndex}`.
+   * A subfolder for each shard will be created with {shardIndex} as the value. This is not
+   *   configurable.
+   *
+   * @defaultValue `--shard-output-folder=.rush/operations/{phaseName}/shards`.
    */
-  outputFolderArgument?: {
-    /**
-     * The format of the parent folder name to output shards to. Child folders will be created for each
-     *  shard index, ie `{parentFolder}/1`, `{parentFolder}/2`.
-     *
-     * @defaultValue `.rush/operations/{phaseName}/shards`
-     */
-    parentFolderName?: string;
-
-    /**
-     * The name of the argument to pass to the command to indicate the output folder for the shard, relative to
-     *  project root directory. It does not accept templating.
-     *
-     * * @defaultValue `--shard-output-folder=.rush/operations/{phaseName}/shards/{shardIndex}`
-     */
-    parameterLongName: string;
-  };
+  outputFolderArgumentFormat?: string;
 
   /**
    * Configuration for the shard operation. All other configuration applies to the collator operation.
