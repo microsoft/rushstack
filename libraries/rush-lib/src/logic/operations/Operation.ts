@@ -101,6 +101,13 @@ export class Operation {
   }
 
   /**
+   * If set to true, this operation is considered a no-op and can be considered always skipped for analysis purposes.
+   */
+  public get isNoOp(): boolean {
+    return !!this.runner?.isNoOp;
+  }
+
+  /**
    * Adds the specified operation as a dependency and updates the consumer list.
    */
   public addDependency(dependency: Operation): void {

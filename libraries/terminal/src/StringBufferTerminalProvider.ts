@@ -75,7 +75,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
    * {@inheritDoc ITerminalProvider.eolCharacter}
    */
   public get eolCharacter(): string {
-    return '[n]';
+    return '\n';
   }
 
   /**

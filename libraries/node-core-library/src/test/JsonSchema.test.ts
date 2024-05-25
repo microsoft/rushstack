@@ -95,7 +95,7 @@ describe(JsonSchema.name, () => {
     });
   });
 
-  describe('validateObjectWithCallback', () => {
+  describe(JsonSchema.prototype.validateObjectWithCallback.name, () => {
     test('successfully reports a compound validation error schema errors', () => {
       const jsonPath: string = `${__dirname}/test-data/test-invalid-additional.json`;
       const jsonObject: JsonObject = JsonFile.load(jsonPath);

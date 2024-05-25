@@ -8,6 +8,8 @@ exports[`RushProjectConfiguration getCacheDisabledReason Indicates if the phase 
 
 exports[`RushProjectConfiguration getCacheDisabledReason Indicates if tracked files are outputs of the phase 1`] = `"The following files are used to calculate project state and are considered project output: test-project-c/.cache/b/foo"`;
 
+exports[`RushProjectConfiguration getCacheDisabledReason returns reason if the operation is runnable 1`] = `"Caching has been disabled for this project's \\"_phase:a\\" command."`;
+
 exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders 1`] = `
 Map {
   "_phase:a" => Object {

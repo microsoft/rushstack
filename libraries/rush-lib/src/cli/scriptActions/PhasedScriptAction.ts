@@ -141,6 +141,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _ignoreHooksParameter: CommandLineFlagParameter;
   private readonly _watchParameter: CommandLineFlagParameter | undefined;
   private readonly _timelineParameter: CommandLineFlagParameter | undefined;
+  private readonly _cobuildPlanParameter: CommandLineFlagParameter | undefined;
   private readonly _installParameter: CommandLineFlagParameter | undefined;
   private readonly _noIPCParameter: CommandLineFlagParameter | undefined;
 
@@ -192,6 +193,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           ' including an ASCII chart of the start and stop times for each operation.'
       });
     }
+    this._cobuildPlanParameter = this.defineFlagParameter({
+      parameterLongName: '--log-cobuild-plan',
+      description:
+        '(EXPERIMENTAL) Before the build starts, log information about the cobuild state. This will include information about ' +
+        'clusters and the projects that are part of each cluster.'
+    });
 
     this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
       gitOptions: {
@@ -333,6 +340,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
       new ConsoleTimelinePlugin(terminal).apply(this.hooks);
     }
+
     // Enable the standard summary
     new OperationResultSummarizerPlugin(terminal).apply(this.hooks);
 
@@ -420,6 +428,16 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }).apply(this.hooks);
       } else {
         terminal.writeVerboseLine(`Incremental strategy: none (full rebuild)`);
+      }
+
+      const showBuildPlan: boolean = this._cobuildPlanParameter?.value ?? false;
+
+      if (showBuildPlan) {
+        if (!buildCacheConfiguration?.buildCacheEnabled) {
+          throw new Error('You must have build cache enabled to use this option.');
+        }
+        const { BuildPlanPlugin } = await import('../../logic/operations/BuildPlanPlugin');
+        new BuildPlanPlugin(terminal).apply(this.hooks);
       }
 
       const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
