@@ -16,7 +16,7 @@ import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/terminal';
-import type { ITerminalProvider } from '@rushstack/terminal';
+import { ITerminalProvider } from '@rushstack/terminal';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { StdioSummarizer } from '@rushstack/terminal';
@@ -568,6 +568,8 @@ export interface _IOperationMetadata {
     // (undocumented)
     errorLogPath: string;
     // (undocumented)
+    logChunksPath: string;
+    // (undocumented)
     logPath: string;
 }
 
@@ -913,13 +915,13 @@ export class _OperationMetadataManager {
     constructor(options: _IOperationMetadataManagerOptions);
     get relativeFilepaths(): string[];
     // (undocumented)
-    saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath }: _IOperationMetadata): Promise<void>;
+    saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath, logChunksPath }: _IOperationMetadata): Promise<void>;
     // (undocumented)
     readonly stateFile: _OperationStateFile;
     // (undocumented)
-    tryRestoreAsync({ terminal, logPath, errorLogPath }: {
+    tryRestoreAsync({ terminal, terminalProvider, errorLogPath }: {
+        terminalProvider: ITerminalProvider;
         terminal: ITerminal;
-        logPath: string;
         errorLogPath: string;
     }): Promise<void>;
 }
