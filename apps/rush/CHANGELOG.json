@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.125.0",
+      "tag": "@microsoft/rush_v5.125.0",
+      "date": "Sat, 25 May 2024 05:12:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixes a bug where no-op operations were treated as having build cache disabled."
+          },
+          {
+            "comment": "Adds support for sharding operations during task execution."
+          },
+          {
+            "comment": "Fix an issue where warnings and errors were not shown in the build summary for all cobuild agents."
+          },
+          {
+            "comment": "Add a `rush check --subspace` parameter to specify which subspace to analyze"
+          },
+          {
+            "comment": "Rename the subspace level lockfile from `.pnpmfile-subspace.cjs` to `.pnpmfile.cjs`. This is a breaking change for the experimental feature."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.124.7",
       "tag": "@microsoft/rush_v5.124.7",
       "date": "Thu, 23 May 2024 02:27:13 GMT",

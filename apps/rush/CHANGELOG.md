@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 23 May 2024 02:27:13 GMT and should not be manually modified.
+This log was last generated on Sat, 25 May 2024 05:12:20 GMT and should not be manually modified.
+
+## 5.125.0
+Sat, 25 May 2024 05:12:20 GMT
+
+### Updates
+
+- Fixes a bug where no-op operations were treated as having build cache disabled.
+- Adds support for sharding operations during task execution.
+- Fix an issue where warnings and errors were not shown in the build summary for all cobuild agents.
+- Add a `rush check --subspace` parameter to specify which subspace to analyze
+- Rename the subspace level lockfile from `.pnpmfile-subspace.cjs` to `.pnpmfile.cjs`. This is a breaking change for the experimental feature.
 
 ## 5.124.7
 Thu, 23 May 2024 02:27:13 GMT
