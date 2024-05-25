@@ -576,6 +576,8 @@ export interface _IOperationMetadata {
 // @internal (undocumented)
 export interface _IOperationMetadataManagerOptions {
     // (undocumented)
+    operation: Operation;
+    // (undocumented)
     phase: IPhase;
     // (undocumented)
     rushProject: RushConfigurationProject;
@@ -586,6 +588,7 @@ export interface IOperationOptions {
     phase?: IPhase | undefined;
     project?: RushConfigurationProject | undefined;
     runner?: IOperationRunner | undefined;
+    settings?: IOperationSettings | undefined;
 }
 
 // @beta
@@ -623,6 +626,7 @@ export interface IOperationSettings {
     disableBuildCacheForOperation?: boolean;
     operationName: string;
     outputFolderNames?: string[];
+    sharding?: IRushPhaseSharding;
     weight?: number;
 }
 
@@ -778,6 +782,16 @@ export interface IRushCommandLineSpec {
     actions: IRushCommandLineAction[];
 }
 
+// @alpha (undocumented)
+export interface IRushPhaseSharding {
+    count: number;
+    outputFolderArgumentFormat?: string;
+    shardArgumentFormat?: string;
+    shardOperationSettings?: {
+        weight?: number;
+    };
+}
+
 // @beta (undocumented)
 export interface IRushPlugin {
     // (undocumented)
@@ -908,12 +922,15 @@ export class Operation {
     get isNoOp(): boolean;
     get name(): string | undefined;
     runner: IOperationRunner | undefined;
+    settings: IOperationSettings | undefined;
     weight: number;
 }
 
 // @internal
 export class _OperationMetadataManager {
     constructor(options: _IOperationMetadataManagerOptions);
+    // (undocumented)
+    readonly logFilenameIdentifier: string;
     get relativeFilepaths(): string[];
     // (undocumented)
     saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath, logChunksPath }: _IOperationMetadata): Promise<void>;

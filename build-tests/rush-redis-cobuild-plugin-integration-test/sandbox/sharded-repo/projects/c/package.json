@@ -1,0 +1,10 @@
+{
+  "name": "c",
+  "version": "1.0.0",
+  "scripts": {
+    "_phase:build": "node ../build.js"
+  },
+  "dependencies": {
+    "b": "workspace:*"
+  }
+}

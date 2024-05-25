@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Adds support for sharding operations during task execution.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

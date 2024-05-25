@@ -1,0 +1,11 @@
+{
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": ["dist"],
+      "sharding": {
+        "count": 75
+      }
+    }
+  ]
+}

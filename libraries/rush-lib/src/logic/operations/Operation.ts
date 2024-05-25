@@ -4,6 +4,7 @@
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { IOperationRunner } from './IOperationRunner';
+import type { IOperationSettings } from '../../api/RushProjectConfiguration';
 
 /**
  * Options for constructing a new Operation.
@@ -23,6 +24,11 @@ export interface IOperationOptions {
    * running the operation.
    */
   runner?: IOperationRunner | undefined;
+
+  /**
+   * Settings defined in the project configuration for this operation, can be overriden.
+   */
+  settings?: IOperationSettings | undefined;
 }
 
 /**
@@ -74,10 +80,17 @@ export class Operation {
    */
   public weight: number = 1;
 
+  /**
+   * Get the operation settings for this operation, defaults to the values defined in
+   *  the project configuration.
+   */
+  public settings: IOperationSettings | undefined = undefined;
+
   public constructor(options?: IOperationOptions) {
     this.associatedPhase = options?.phase;
     this.associatedProject = options?.project;
     this.runner = options?.runner;
+    this.settings = options?.settings;
   }
 
   /**

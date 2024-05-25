@@ -67,7 +67,8 @@ export { RushConfigurationProject } from './api/RushConfigurationProject';
 export {
   IRushProjectJson as _IRushProjectJson,
   IOperationSettings,
-  RushProjectConfiguration
+  RushProjectConfiguration,
+  IRushPhaseSharding
 } from './api/RushProjectConfiguration';
 
 export { RushUserConfiguration } from './api/RushUserConfiguration';

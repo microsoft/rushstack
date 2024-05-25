@@ -17,6 +17,7 @@ import { RushConstants } from '../RushConstants';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
+import type { Operation } from './Operation';
 
 /**
  * @internal
@@ -24,6 +25,7 @@ import type { IOperationStateJson } from './OperationStateFile';
 export interface IOperationMetadataManagerOptions {
   rushProject: RushConfigurationProject;
   phase: IPhase;
+  operation: Operation;
 }
 
 /**
@@ -49,6 +51,7 @@ export interface ILogChunkStorage {
  */
 export class OperationMetadataManager {
   public readonly stateFile: OperationStateFile;
+  public readonly logFilenameIdentifier: string;
   private readonly _metadataFolder: string;
   private readonly _logPath: string;
   private readonly _errorLogPath: string;
@@ -58,11 +61,14 @@ export class OperationMetadataManager {
   private readonly _relativeErrorLogPath: string;
 
   public constructor(options: IOperationMetadataManagerOptions) {
-    const { rushProject, phase } = options;
+    const { rushProject, operation, phase } = options;
     const { projectFolder } = rushProject;
 
-    const identifier: string = phase.logFilenameIdentifier;
-    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${identifier}`;
+    this.logFilenameIdentifier = operation.name
+      ? normalizeNameForLogFilenameIdentifiers(operation.name)
+      : phase.logFilenameIdentifier;
+
+    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${this.logFilenameIdentifier}`;
 
     this.stateFile = new OperationStateFile({
       projectFolder: projectFolder,
@@ -182,6 +188,10 @@ export class OperationMetadataManager {
       }
     }
   }
+}
+
+export function normalizeNameForLogFilenameIdentifiers(name: string): string {
+  return name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '_');
 }
 
 async function restoreFromLogFile(terminal: ITerminal, path: string): Promise<void> {

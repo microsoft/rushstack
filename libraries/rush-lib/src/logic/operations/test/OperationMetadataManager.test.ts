@@ -13,9 +13,22 @@ import { CollatedTerminal } from '@rushstack/stream-collator';
 import { FileSystem } from '@rushstack/node-core-library';
 import * as fs from 'fs';
 import { Readable } from 'stream';
+import { Operation } from '../Operation';
 
 const mockWritable: MockWritable = new MockWritable();
 const mockTerminal: Terminal = new Terminal(new CollatedTerminalProvider(new CollatedTerminal(mockWritable)));
+
+const operation = new Operation();
+
+const manager: OperationMetadataManager = new OperationMetadataManager({
+  rushProject: {
+    projectFolder: '/path/to/project'
+  } as unknown as RushConfigurationProject,
+  phase: {
+    logFilenameIdentifier: 'identifier'
+  } as unknown as IPhase,
+  operation
+});
 
 describe(OperationMetadataManager.name, () => {
   let mockTerminalProvider: StringBufferTerminalProvider;
@@ -29,15 +42,6 @@ describe(OperationMetadataManager.name, () => {
   }
 
   it('should restore chunked stdout', async () => {
-    const manager: OperationMetadataManager = new OperationMetadataManager({
-      rushProject: {
-        projectFolder: '/path/to/project'
-      } as unknown as RushConfigurationProject,
-      phase: {
-        logFilenameIdentifier: 'identifier'
-      } as unknown as IPhase
-    });
-
     const data = [
       {
         text: 'chunk1\n',
@@ -62,15 +66,6 @@ describe(OperationMetadataManager.name, () => {
   });
 
   it('should restore chunked stderr', async () => {
-    const manager: OperationMetadataManager = new OperationMetadataManager({
-      rushProject: {
-        projectFolder: '/path/to/project'
-      } as unknown as RushConfigurationProject,
-      phase: {
-        logFilenameIdentifier: 'identifier'
-      } as unknown as IPhase
-    });
-
     const data = [
       {
         text: 'chunk1\n',
@@ -95,15 +90,6 @@ describe(OperationMetadataManager.name, () => {
   });
 
   it('should restore mixed chunked output', async () => {
-    const manager: OperationMetadataManager = new OperationMetadataManager({
-      rushProject: {
-        projectFolder: '/path/to/project'
-      } as unknown as RushConfigurationProject,
-      phase: {
-        logFilenameIdentifier: 'identifier'
-      } as unknown as IPhase
-    });
-
     const data = [
       {
         text: 'logged to stdout\n',
@@ -130,14 +116,6 @@ describe(OperationMetadataManager.name, () => {
   });
 
   it("should fallback to the log file when chunked output isn't available", async () => {
-    const manager: OperationMetadataManager = new OperationMetadataManager({
-      rushProject: {
-        projectFolder: '/path/to/project'
-      } as unknown as RushConfigurationProject,
-      phase: {
-        logFilenameIdentifier: 'identifier'
-      } as unknown as IPhase
-    });
     // Normalize newlines to make the error message consistent across platforms
     const normalizedRawLogFile: string = `stdout log file`;
     jest
