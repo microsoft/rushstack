@@ -2,6 +2,23 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.1.0",
+      "tag": "@rushstack/node-core-library_v5.1.0",
+      "date": "Sat, 25 May 2024 04:54:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update `JsonFile` to support loading JSON files that include object keys that are members of `Object.prototype`."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue with `JsonSchema` where `\"uniqueItems\": true` would throw an error if the `\"item\"` type in the schema has `\"type\": \"object\"`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.0",
       "tag": "@rushstack/node-core-library_v5.0.0",
       "date": "Thu, 23 May 2024 02:26:56 GMT",

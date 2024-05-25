@@ -2,6 +2,24 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.1.49",
+      "tag": "@rushstack/rundown_v1.1.49",
+      "date": "Sat, 25 May 2024 04:54:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.21.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.48",
       "tag": "@rushstack/rundown_v1.1.48",
       "date": "Fri, 24 May 2024 00:15:09 GMT",

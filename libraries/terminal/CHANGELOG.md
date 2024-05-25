@@ -1,6 +1,13 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Thu, 23 May 2024 02:26:56 GMT and should not be manually modified.
+This log was last generated on Sat, 25 May 2024 04:54:07 GMT and should not be manually modified.
+
+## 0.12.0
+Sat, 25 May 2024 04:54:07 GMT
+
+### Minor changes
+
+- Change the `eolCharacter` property value of `StringBufferTerminalProvider` to `\n` from `[n]`. This does not change the default `getOutput()` result, but removes the `[n]` characters from the `getOutput({ normalizeSpecialCharacters: false })` result.
 
 ## 0.11.1
 Thu, 23 May 2024 02:26:56 GMT
