@@ -113,7 +113,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! fs */ 657147);
 /* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(fs__WEBPACK_IMPORTED_MODULE_1__);
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See the @microsoft/rush package's LICENSE file for license information.
+// See LICENSE in the project root for license information.
+/* eslint-disable no-console */
 
 
 const { installAndRun, findRushJsonFolder, RUSH_JSON_FILENAME, runWithErrorAndStatusCode } = require('./install-run');
@@ -136,8 +137,8 @@ function _getRushVersion(logger) {
         return rushJsonMatches[1];
     }
     catch (e) {
-        throw new Error(`Unable to determine the required version of Rush from rush.json (${rushJsonFolder}). ` +
-            "The 'rushVersion' field is either not assigned in rush.json or was specified " +
+        throw new Error(`Unable to determine the required version of Rush from ${RUSH_JSON_FILENAME} (${rushJsonFolder}). ` +
+            `The 'rushVersion' field is either not assigned in ${RUSH_JSON_FILENAME} or was specified ` +
             'using an unexpected syntax.');
     }
 }
@@ -196,7 +197,7 @@ function _run() {
     }
     runWithErrorAndStatusCode(logger, () => {
         const version = _getRushVersion(logger);
-        logger.info(`The rush.json configuration requests Rush version ${version}`);
+        logger.info(`The ${RUSH_JSON_FILENAME} configuration requests Rush version ${version}`);
         const lockFilePath = process.env[INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE];
         if (lockFilePath) {
             logger.info(`Found ${INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE}="${lockFilePath}", installing with lockfile.`);

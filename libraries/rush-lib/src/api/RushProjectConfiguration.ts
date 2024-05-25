@@ -299,12 +299,18 @@ export class RushProjectConfiguration {
    * Examines the list of source files for the project and the target phase and returns a reason
    * why the project cannot enable the build cache for that phase, or undefined if it is safe to so do.
    */
-  public getCacheDisabledReason(trackedFileNames: Iterable<string>, phaseName: string): string | undefined {
+  public getCacheDisabledReason(
+    trackedFileNames: Iterable<string>,
+    phaseName: string,
+    isNoOp: boolean
+  ): string | undefined {
+    // Skip no-op operations as they won't have any output/cacheable things.
+    if (isNoOp) {
+      return undefined;
+    }
     if (this.disableBuildCacheForProject) {
       return 'Caching has been disabled for this project.';
     }
-
-    const normalizedProjectRelativeFolder: string = Path.convertToSlashes(this.project.projectRelativeFolder);
 
     const operationSettings: IOperationSettings | undefined =
       this.operationSettingsByOperationName.get(phaseName);
@@ -320,6 +326,7 @@ export class RushProjectConfiguration {
     if (!outputFolderNames) {
       return;
     }
+    const normalizedProjectRelativeFolder: string = Path.convertToSlashes(this.project.projectRelativeFolder);
 
     const normalizedOutputFolders: string[] = outputFolderNames.map(
       (outputFolderName) => `${normalizedProjectRelativeFolder}/${outputFolderName}/`

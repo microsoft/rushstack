@@ -126,7 +126,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             const operationSettings: IOperationSettings | undefined =
               projectConfiguration?.operationSettingsByOperationName.get(phaseName);
             const cacheDisabledReason: string | undefined = projectConfiguration
-              ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName)
+              ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, operation.isNoOp)
               : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
                 'or one provided by a rig, so it does not support caching.';
 
@@ -160,27 +160,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         );
 
         if (disjointSet) {
-          // If disjoint set exists, connect build cache disabled project with its consumers
-          for (const [operation, { cacheDisabledReason }] of this._buildCacheContextByOperation) {
-            const { associatedProject: project, associatedPhase: phase } = operation;
-            if (project && phase) {
-              if (cacheDisabledReason) {
-                /**
-                 * Group the project build cache disabled with its consumers. This won't affect too much in
-                 * a monorepo with high build cache coverage.
-                 *
-                 * The mental model is that if X disables the cache, and Y depends on X, then:
-                 *   1. Y must be built by the same VM that build X;
-                 *   2. OR, Y must be rebuilt on each VM that needs it.
-                 * Approach 1 is probably the better choice.
-                 */
-                for (const consumer of operation.consumers) {
-                  disjointSet?.union(operation, consumer);
-                }
-              }
-            }
-          }
-
+          clusterOperations(disjointSet, this._buildCacheContextByOperation);
           for (const operationSet of disjointSet.getAllSets()) {
             if (cobuildConfiguration?.cobuildFeatureEnabled && cobuildConfiguration.cobuildContextId) {
               // Get a deterministic ordered array of operations, which is important to get a deterministic cluster id.
@@ -901,6 +881,32 @@ async function updateAdditionalContextAsync({
 
     for (const [filePath, fileHash] of additionalFiles) {
       additionalContext['file://' + filePath] = fileHash;
+    }
+  }
+}
+
+export function clusterOperations(
+  initialClusters: DisjointSet<Operation>,
+  operationBuildCacheMap: Map<Operation, { cacheDisabledReason: string | undefined }>
+): void {
+  // If disjoint set exists, connect build cache disabled project with its consumers
+  for (const [operation, { cacheDisabledReason }] of operationBuildCacheMap) {
+    const { associatedProject: project, associatedPhase: phase } = operation;
+    if (project && phase) {
+      if (cacheDisabledReason) {
+        /**
+         * Group the project build cache disabled with its consumers. This won't affect too much in
+         * a monorepo with high build cache coverage.
+         *
+         * The mental model is that if X disables the cache, and Y depends on X, then:
+         *   1. Y must be built by the same VM that build X;
+         *   2. OR, Y must be rebuilt on each VM that needs it.
+         * Approach 1 is probably the better choice.
+         */
+        for (const consumer of operation.consumers) {
+          initialClusters?.union(operation, consumer);
+        }
+      }
     }
   }
 }

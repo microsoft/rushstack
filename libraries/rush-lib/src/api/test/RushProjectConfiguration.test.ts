@@ -111,7 +111,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const reason: string | undefined = config.getCacheDisabledReason([], 'z');
+      const reason: string | undefined = config.getCacheDisabledReason([], 'z', false);
       expect(reason).toMatchSnapshot();
     });
 
@@ -123,7 +123,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const reason: string | undefined = config.getCacheDisabledReason([], 'z');
+      const reason: string | undefined = config.getCacheDisabledReason([], 'z', false);
       expect(reason).toMatchSnapshot();
     });
 
@@ -135,7 +135,7 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a');
+      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a', false);
       expect(reason).toMatchSnapshot();
     });
 
@@ -149,7 +149,8 @@ describe(RushProjectConfiguration.name, () => {
 
       const reason: string | undefined = config.getCacheDisabledReason(
         ['test-project-c/.cache/b/foo'],
-        '_phase:b'
+        '_phase:b',
+        false
       );
       expect(reason).toMatchSnapshot();
     });
@@ -162,8 +163,34 @@ describe(RushProjectConfiguration.name, () => {
         throw new Error('Failed to load config');
       }
 
-      const reason: string | undefined = config.getCacheDisabledReason([''], '_phase:b');
+      const reason: string | undefined = config.getCacheDisabledReason([''], '_phase:b', false);
       expect(reason).toBeUndefined();
+    });
+
+    it('returns undefined if the operation is a no-op', async () => {
+      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
+        'test-project-c'
+      );
+
+      if (!config) {
+        throw new Error('Failed to load config');
+      }
+
+      const reason: string | undefined = config.getCacheDisabledReason([''], '_phase:b', true);
+      expect(reason).toBeUndefined();
+    });
+
+    it('returns reason if the operation is runnable', async () => {
+      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
+        'test-project-c'
+      );
+
+      if (!config) {
+        throw new Error('Failed to load config');
+      }
+
+      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a', false);
+      expect(reason).toMatchSnapshot();
     });
   });
 });
