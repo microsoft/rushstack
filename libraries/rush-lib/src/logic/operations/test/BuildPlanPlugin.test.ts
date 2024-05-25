@@ -27,7 +27,7 @@ import { RushConstants } from '../../RushConstants';
 import { MockOperationRunner } from './MockOperationRunner';
 import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 
-describe('BuildPlanPlugin', () => {
+describe(BuildPlanPlugin.name, () => {
   let rushConfiguration!: RushConfiguration;
   let commandLineConfiguration!: CommandLineConfiguration;
   let stringBufferTerminalProvider!: StringBufferTerminalProvider;
