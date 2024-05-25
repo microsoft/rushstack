@@ -136,7 +136,7 @@ export class Subspace {
           }
           if (FileSystem.exists(`${project.projectFolder}/.pnpmfile.cjs`)) {
             throw new Error(
-              `The project level configuration file ${project.projectFolder}/.pnpmfile.cjs is no longer valid. Please use a ${subspaceConfigFolder}/.pnpmfile-subspace.cjs file instead.`
+              `The project level configuration file ${project.projectFolder}/.pnpmfile.cjs is no longer valid. Please use a ${subspaceConfigFolder}/.pnpmfile.cjs file instead.`
             );
           }
         }
@@ -303,12 +303,8 @@ export class Subspace {
   public getPnpmfilePath(): string {
     const subspaceConfigFolderPath: string = this.getSubspaceConfigFolder();
 
-    let pnpmFilename: string = (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager)
+    const pnpmFilename: string = (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager)
       .pnpmfileFilename;
-    if (this._rushConfiguration.subspacesFeatureEnabled) {
-      pnpmFilename = (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager)
-        .subspacePnpmfileFilename;
-    }
 
     return path.join(subspaceConfigFolderPath, pnpmFilename);
   }

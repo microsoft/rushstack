@@ -1,13 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`JsonSchema validateObjectWithCallback successfully reports a compound validation error 1`] = `
+exports[`JsonSchema loadAndValidate throws an error for an invalid nested schema 1`] = `
+"Failed to validate schema \\"test-schema-invalid.json\\":
+
+Error: #/type
+       must be equal to one of the allowed values
+Error: #/type
+       must be array
+Error: #/type
+       must match a schema in anyOf"
+`;
+
+exports[`JsonSchema loadAndValidate throws an error if the wrong schema version is explicitly specified for an incompatible schema object 1`] = `"no schema with key or ref \\"http://json-schema.org/draft-04/schema#\\""`;
+
+exports[`JsonSchema validateObjectWithCallback successfully reports a compound validation error for format errors 1`] = `
 Array [
   "
-Error: #/exampleOneOf (Description for exampleOneOf - this i...)
-       Data does not match any schemas from 'oneOf'
-  Error: #/exampleOneOf (Description for type1)
-         Additional properties not allowed: field2
-  Error: #/exampleOneOf (Description for type2)
-         Missing required property: field3",
+Error: #/exampleLink
+       must match format \\"uri\\"",
+]
+`;
+
+exports[`JsonSchema validateObjectWithCallback successfully reports a compound validation error schema errors 1`] = `
+Array [
+  "
+Error: #/exampleOneOf
+       must have required property 'field1'
+Error: #/exampleOneOf
+       must have required property 'field3'
+Error: #/exampleOneOf
+       must match exactly one schema in oneOf",
 ]
 `;

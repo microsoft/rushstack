@@ -1,6 +1,23 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+This log was last generated on Thu, 23 May 2024 02:26:56 GMT and should not be manually modified.
+
+## 0.11.1
+Thu, 23 May 2024 02:26:56 GMT
+
+_Version update only_
+
+## 0.11.0
+Wed, 15 May 2024 23:42:58 GMT
+
+### Minor changes
+
+- Allow use of 'preventAutoclose' flag in StdioSummarizer.
+
+## 0.10.4
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
 
 ## 0.10.3
 Fri, 10 May 2024 05:33:34 GMT

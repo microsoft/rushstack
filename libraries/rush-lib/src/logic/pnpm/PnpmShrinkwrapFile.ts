@@ -273,12 +273,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // Normalize the data
     const lockfileVersion: string | number | undefined = shrinkwrapJson.lockfileVersion;
     if (typeof lockfileVersion === 'string') {
+      const isDotIncluded: boolean = lockfileVersion.includes('.');
       this.shrinkwrapFileMajorVersion = parseInt(
-        lockfileVersion.substring(0, lockfileVersion.indexOf('.')),
+        lockfileVersion.substring(0, isDotIncluded ? lockfileVersion.indexOf('.') : undefined),
         10
       );
     } else if (typeof lockfileVersion === 'number') {
-      this.shrinkwrapFileMajorVersion = lockfileVersion;
+      this.shrinkwrapFileMajorVersion = Math.floor(lockfileVersion);
     } else {
       this.shrinkwrapFileMajorVersion = 0;
     }

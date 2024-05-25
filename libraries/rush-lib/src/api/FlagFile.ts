@@ -8,7 +8,7 @@ import { objectsAreDeepEqual } from '../utilities/objectUtilities';
  * A base class for flag file.
  * @internal
  */
-export class FlagFile {
+export class FlagFile<TState extends JsonObject = JsonObject> {
   /**
    * Flag file path
    */
@@ -17,16 +17,16 @@ export class FlagFile {
   /**
    * Content of the flag
    */
-  private _state: JsonObject;
+  protected _state: TState;
 
   /**
    * Creates a new flag file
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
    */
-  public constructor(folderPath: string, flagName: string, initialState?: JsonObject) {
+  public constructor(folderPath: string, flagName: string, initialState: TState) {
     this.path = `${folderPath}/${flagName}.flag`;
-    this._state = initialState || {};
+    this._state = initialState;
   }
 
   /**

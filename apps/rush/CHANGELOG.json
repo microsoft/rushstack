@@ -2,6 +2,83 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.124.7",
+      "tag": "@microsoft/rush_v5.124.7",
+      "date": "Thu, 23 May 2024 02:27:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the `usePnpmSyncForInjectedDependencies` experiment to also include any dependency whose lockfile entry has the `file:` protocol, unless it is a tarball reference"
+          },
+          {
+            "comment": "Fix an issue where the build cache analysis was incorrect in rare situations due to a race condition (GitHub #4711)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.124.6",
+      "tag": "@microsoft/rush_v5.124.6",
+      "date": "Thu, 16 May 2024 01:12:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an edge case for pnpm-sync when the .pnpm folder is absent but still a valid installation."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.124.5",
+      "tag": "@microsoft/rush_v5.124.5",
+      "date": "Wed, 15 May 2024 23:43:15 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix count of completed operations when silent operations are blocked. Add explicit message for child processes terminated by signals. Ensure that errors show up in summarized view."
+          },
+          {
+            "comment": "Ensure that errors thrown in afterExecuteOperation show up in the summary at the end of the build."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.124.4",
+      "tag": "@microsoft/rush_v5.124.4",
+      "date": "Wed, 15 May 2024 03:05:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the detection of PNPM lockfile versions."
+          },
+          {
+            "comment": "Fix an issue where the `--subspace` CLI parameter would install for all subspaces in a monorepo when passed to the install or update action"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.124.3",
+      "tag": "@microsoft/rush_v5.124.3",
+      "date": "Wed, 15 May 2024 01:18:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush install` and `rush update` will fail with an `ENAMETOOLONG` error on Windows in repos with a large number of projects."
+          },
+          {
+            "comment": "Fix an issue where installing multiple subspaces consecutively can cause unexpected cross-contamination between pnpmfiles."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Ensure async telemetry tasks are flushed by error reporter"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.124.2",
       "tag": "@microsoft/rush_v5.124.2",
       "date": "Fri, 10 May 2024 06:35:26 GMT",

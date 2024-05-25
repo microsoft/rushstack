@@ -109,19 +109,21 @@ export class ListAction extends BaseRushAction {
     });
 
     this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
-      // Include lockfile processing since this expands the selection, and we need to select
-      // at least the same projects selected with the same query to "rush build"
-      includeExternalDependencies: true,
-      // Disable filtering because rush-project.json is riggable and therefore may not be available
-      enableFiltering: false
+      gitOptions: {
+        // Include lockfile processing since this expands the selection, and we need to select
+        // at least the same projects selected with the same query to "rush build"
+        includeExternalDependencies: true,
+        // Disable filtering because rush-project.json is riggable and therefore may not be available
+        enableFiltering: false
+      },
+      includeSubspaceSelector: false
     });
   }
 
   protected async runAsync(): Promise<void> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
-    const selection: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
-      terminal
-    );
+    const selection: Set<RushConfigurationProject> =
+      await this._selectionParameters.getSelectedProjectsAsync(terminal);
     Sort.sortSetBy(selection, (x: RushConfigurationProject) => x.packageName);
     if (this._jsonFlag.value && this._detailedFlag.value) {
       throw new Error(`The parameters "--json" and "--detailed" cannot be used together.`);

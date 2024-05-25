@@ -1,6 +1,33 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 10 May 2024 05:33:33 GMT and should not be manually modified.
+This log was last generated on Fri, 24 May 2024 00:15:08 GMT and should not be manually modified.
+
+## 7.44.0
+Fri, 24 May 2024 00:15:08 GMT
+
+### Minor changes
+
+- Add support for "variants" of API reports which include or exclude items by release tag
+
+## 7.43.8
+Thu, 23 May 2024 02:26:56 GMT
+
+_Version update only_
+
+## 7.43.7
+Thu, 16 May 2024 15:10:22 GMT
+
+_Version update only_
+
+## 7.43.6
+Wed, 15 May 2024 23:42:58 GMT
+
+_Version update only_
+
+## 7.43.5
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
 
 ## 7.43.4
 Fri, 10 May 2024 05:33:33 GMT

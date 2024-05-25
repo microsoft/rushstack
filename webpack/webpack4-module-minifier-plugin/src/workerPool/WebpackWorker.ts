@@ -39,8 +39,8 @@ async function processTaskAsync(index: number): Promise<void> {
       typeof sourceMap === 'boolean'
         ? sourceMap
         : typeof devtool === 'string'
-        ? devtool.endsWith('source-map') && !devtool.includes('eval')
-        : devtool !== false && mode === 'production';
+          ? devtool.endsWith('source-map') && !devtool.includes('eval')
+          : devtool !== false && mode === 'production';
 
     optimization.minimizer = [
       new ModuleMinifierPlugin({

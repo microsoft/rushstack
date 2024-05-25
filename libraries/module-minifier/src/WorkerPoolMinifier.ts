@@ -152,31 +152,45 @@ export class WorkerPoolMinifier implements IModuleMinifier {
       });
   }
 
-  public async connect(): Promise<IMinifierConnection> {
+  /**
+   * {@inheritdoc IModuleMinifier.connectAsync}
+   */
+  public async connectAsync(): Promise<IMinifierConnection> {
     if (++this._refCount === 1) {
       this._pool.reset();
     }
 
+    const disconnectAsync: IMinifierConnection['disconnectAsync'] = async () => {
+      if (--this._refCount === 0) {
+        if (this._verbose) {
+          // eslint-disable-next-line no-console
+          console.log(`Shutting down minifier worker pool`);
+        }
+        await this._pool.finishAsync();
+        this._resultCache.clear();
+        this._activeRequests.clear();
+        if (this._verbose) {
+          // eslint-disable-next-line no-console
+          console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
+        }
+      }
+      this._deduped = 0;
+      this._minified = 0;
+    };
+
     return {
       configHash: this._configHash,
 
-      disconnect: async () => {
-        if (--this._refCount === 0) {
-          if (this._verbose) {
-            // eslint-disable-next-line no-console
-            console.log(`Shutting down minifier worker pool`);
-          }
-          await this._pool.finishAsync();
-          this._resultCache.clear();
-          this._activeRequests.clear();
-          if (this._verbose) {
-            // eslint-disable-next-line no-console
-            console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
-          }
-        }
-        this._deduped = 0;
-        this._minified = 0;
-      }
+      disconnectAsync,
+      disconnect: disconnectAsync
     };
+  }
+
+  /**
+   * @deprecated Use {@link WorkerPoolMinifier.connectAsync} instead
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public async connect(): Promise<IMinifierConnection> {
+    return await this.connectAsync();
   }
 }

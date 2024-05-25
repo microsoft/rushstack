@@ -38,5 +38,4 @@ export class SubclassWithImport extends RenamedReexportedClass3 implements ISimp
     test(): void;
 }
 
-
 ```

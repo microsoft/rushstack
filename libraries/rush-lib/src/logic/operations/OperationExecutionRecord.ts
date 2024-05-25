@@ -93,7 +93,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public readonly consumers: Set<OperationExecutionRecord> = new Set();
 
   public readonly stopwatch: Stopwatch = new Stopwatch();
-  public readonly stdioSummarizer: StdioSummarizer = new StdioSummarizer();
+  public readonly stdioSummarizer: StdioSummarizer = new StdioSummarizer({
+    // Allow writing to this object after transforms have been closed. We clean it up manually in a finally block.
+    preventAutoclose: true
+  });
 
   public readonly runner: IOperationRunner;
   public readonly associatedPhase: IPhase | undefined;
@@ -196,7 +199,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
         ? new ProjectLogWritable(
             associatedProject,
             this.collatedWriter.terminal,
-            `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`
+            `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`,
+            { enableChunkedOutput: true }
           )
         : undefined;
 

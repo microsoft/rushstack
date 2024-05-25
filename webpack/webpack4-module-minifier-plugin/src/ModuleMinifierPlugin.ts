@@ -220,8 +220,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
       typeof this._sourceMap === 'boolean'
         ? this._sourceMap
         : typeof devtool === 'string'
-        ? devtool.endsWith('source-map')
-        : mode === 'production' && devtool !== false;
+          ? devtool.endsWith('source-map')
+          : mode === 'production' && devtool !== false;
 
     this._optionsForHash.sourceMap = useSourceMaps;
     const binaryConfig: Uint8Array = Buffer.from(JSON.stringify(this._optionsForHash), 'utf-8');
@@ -421,7 +421,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
 
         // The optimizeTree hook is the last async hook that occurs before chunk rendering
         compilation.hooks.optimizeTree.tapPromise(PLUGIN_NAME, async () => {
-          minifierConnection = await minifier.connect();
+          minifierConnection = await minifier.connectAsync();
 
           submittedModules.clear();
 
@@ -583,7 +583,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
             }
 
             // Handle any error from the minifier.
-            await minifierConnection?.disconnect();
+            await minifierConnection?.disconnectAsync();
 
             // All assets and modules have been minified, hand them off to be rehydrated
             await this.hooks.rehydrateAssets.promise(

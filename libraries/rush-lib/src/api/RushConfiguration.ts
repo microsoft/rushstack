@@ -708,7 +708,8 @@ export class RushConfiguration {
     RushConfiguration._validateCommonRushConfigFolder(
       this.commonRushConfigFolder,
       this.packageManagerWrapper,
-      this.experimentsConfiguration
+      this.experimentsConfiguration,
+      this.subspacesFeatureEnabled
     );
 
     this.projectFolderMinDepth =
@@ -1073,7 +1074,8 @@ export class RushConfiguration {
   private static _validateCommonRushConfigFolder(
     commonRushConfigFolder: string,
     packageManagerWrapper: PackageManager,
-    experiments: ExperimentsConfiguration
+    experiments: ExperimentsConfiguration,
+    subspacesFeatureEnabled: boolean
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
       // eslint-disable-next-line no-console
@@ -1095,6 +1097,16 @@ export class RushConfiguration {
         continue;
       }
 
+      // Check if there are prohibited files when subspaces is enabled
+      if (subspacesFeatureEnabled) {
+        if (filename === RushConstants.pnpmfileV6Filename || filename === RushConstants.pnpmfileV1Filename) {
+          throw new Error(
+            'When the subspaces feature is enabled, a separate lockfile is stored in each subspace folder. ' +
+              `To avoid confusion, remove this file: ${commonRushConfigFolder}/${filename}`
+          );
+        }
+      }
+
       // Ignore hidden files such as ".DS_Store"
       if (filename.startsWith('.')) {
         continue;
@@ -1114,7 +1126,6 @@ export class RushConfiguration {
       if (packageManagerWrapper.packageManager === 'pnpm') {
         const pnpmPackageManager: PnpmPackageManager = packageManagerWrapper as PnpmPackageManager;
         knownSet.add(pnpmPackageManager.pnpmfileFilename.toUpperCase());
-        knownSet.add(pnpmPackageManager.subspacePnpmfileFilename.toUpperCase());
       }
 
       // Is the filename something we know?  If not, report an error.
@@ -1295,14 +1306,16 @@ export class RushConfiguration {
    * Returns the set of subspaces that the given projects belong to
    * @beta
    */
-  public getSubspacesForProjects(projects: ReadonlySet<RushConfigurationProject>): ReadonlySet<Subspace> {
+  public getSubspacesForProjects(projects: Iterable<RushConfigurationProject>): ReadonlySet<Subspace> {
     if (!this._projects) {
       this._initializeAndValidateLocalProjects();
     }
+
     const subspaceSet: Set<Subspace> = new Set();
     for (const project of projects) {
       subspaceSet.add(project.subspace);
     }
+
     return subspaceSet;
   }
 

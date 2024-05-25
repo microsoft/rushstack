@@ -22,7 +22,9 @@ export interface ILocalMinifierOptions {
 // @public
 export interface IMinifierConnection {
     configHash: string;
+    // @deprecated (undocumented)
     disconnect(): Promise<void>;
+    disconnectAsync(): Promise<void>;
 }
 
 // @public
@@ -60,7 +62,9 @@ export interface IModuleMinificationSuccessResult {
 
 // @public
 export interface IModuleMinifier {
+    // @deprecated (undocumented)
     connect(): Promise<IMinifierConnection>;
+    connectAsync(): Promise<IMinifierConnection>;
     minify: IModuleMinifierFunction;
 }
 
@@ -80,16 +84,18 @@ export interface IWorkerPoolMinifierOptions {
 // @public
 export class LocalMinifier implements IModuleMinifier {
     constructor(options: ILocalMinifierOptions);
-    // (undocumented)
+    // @deprecated (undocumented)
     connect(): Promise<IMinifierConnection>;
+    connectAsync(): Promise<IMinifierConnection>;
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
 }
 
 // @public
 export class MessagePortMinifier implements IModuleMinifier {
     constructor(port: MessagePort_2);
-    // (undocumented)
+    // @deprecated (undocumented)
     connect(): Promise<IMinifierConnection>;
+    connectAsync(): Promise<IMinifierConnection>;
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
     // (undocumented)
     readonly port: MessagePort_2;
@@ -102,16 +108,18 @@ export function _minifySingleFileAsync(request: IModuleMinificationRequest, ters
 
 // @public
 export class NoopMinifier implements IModuleMinifier {
-    // (undocumented)
+    // @deprecated (undocumented)
     connect(): Promise<IMinifierConnection>;
+    connectAsync(): Promise<IMinifierConnection>;
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
 }
 
 // @public
 export class WorkerPoolMinifier implements IModuleMinifier {
     constructor(options: IWorkerPoolMinifierOptions);
-    // (undocumented)
+    // @deprecated (undocumented)
     connect(): Promise<IMinifierConnection>;
+    connectAsync(): Promise<IMinifierConnection>;
     // (undocumented)
     get maxThreads(): number;
     set maxThreads(threads: number);

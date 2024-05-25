@@ -61,6 +61,7 @@ function toWeightedIterator<TEntry>(
   ).call(iterable);
   return {
     [Symbol.asyncIterator]: () => ({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       next: async () => {
         // The await is necessary here, but TS will complain - it's a false positive.
         const { value, done } = await iterator.next();
@@ -298,7 +299,7 @@ export class Async {
   /**
    * Return a promise that resolves after the specified number of milliseconds.
    */
-  public static async sleep(ms: number): Promise<void> {
+  public static async sleepAsync(ms: number): Promise<void> {
     await new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
@@ -321,7 +322,7 @@ export class Async {
         if (++retryCounter > maxRetries) {
           throw e;
         } else if (retryDelayMs > 0) {
-          await Async.sleep(retryDelayMs);
+          await Async.sleepAsync(retryDelayMs);
         }
       }
     }

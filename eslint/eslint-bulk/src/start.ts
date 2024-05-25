@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { execSync } from 'child_process';
+import {
+  type ExecSyncOptionsWithBufferEncoding,
+  type SpawnSyncOptionsWithBufferEncoding,
+  execSync,
+  spawnSync
+} from 'child_process';
 import * as process from 'process';
 import * as fs from 'fs';
 
@@ -48,9 +53,9 @@ function findPatchPath(): string {
   if (eslintPackageJsonPath) {
     eslintPackageJsonPath = eslintPackageJsonPath.replace(/\\/g, '/');
     const packagePath: string = eslintPackageJsonPath.substring(0, eslintPackageJsonPath.lastIndexOf('/'));
-    const {
-      bin: { eslint: relativeEslintBinPath } = {}
-    }: { bin?: Record<string, string> } = require(eslintPackageJsonPath);
+    const { bin: { eslint: relativeEslintBinPath } = {} }: { bin?: Record<string, string> } = require(
+      eslintPackageJsonPath
+    );
     if (relativeEslintBinPath) {
       eslintBinPath = `${packagePath}/${relativeEslintBinPath}`;
     } else {
@@ -66,20 +71,24 @@ function findPatchPath(): string {
     );
   }
 
-  let eslintBinCommand: string;
+  const eslintArgs: string[] = ['--stdin', '--config'];
+  const spawnOrExecOptions: SpawnSyncOptionsWithBufferEncoding & ExecSyncOptionsWithBufferEncoding = {
+    env,
+    input: '',
+    stdio: 'pipe'
+  };
+  let runEslintFn: () => Buffer;
   if (eslintBinPath) {
-    eslintBinCommand = `${process.argv0} ${eslintBinPath}`;
+    runEslintFn = () =>
+      spawnSync(process.argv0, [eslintBinPath, ...eslintArgs, eslintrcPath], spawnOrExecOptions).stdout;
   } else {
-    eslintBinCommand = 'eslint'; // Try to use a globally-installed eslint if a local package was not found
+    // Try to use a globally-installed eslint if a local package was not found
+    runEslintFn = () => execSync(`eslint ${eslintArgs.join(' ')} "${eslintrcPath}"`, spawnOrExecOptions);
   }
 
   let stdout: Buffer;
   try {
-    stdout = execSync(`${eslintBinCommand} --stdin --config ${eslintrcPath}`, {
-      env,
-      input: '',
-      stdio: 'pipe'
-    });
+    stdout = runEslintFn();
   } catch (e) {
     console.error('@rushstack/eslint-bulk: Error finding patch path: ' + e.message);
     process.exit(1);

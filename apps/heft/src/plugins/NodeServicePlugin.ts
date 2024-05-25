@@ -120,7 +120,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     );
   }
 
-  private async _loadStageConfiguration(
+  private async _loadStageConfigurationAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
@@ -187,7 +187,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
-    await this._loadStageConfiguration(taskSession, heftConfiguration);
+    await this._loadStageConfigurationAsync(taskSession, heftConfiguration);
     if (!this._pluginEnabled) {
       return;
     }
@@ -313,7 +313,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
         this._logger.terminal.writeError(data.toString());
       });
 
-      childProcess.on('close', (code: number, signal: string): void => {
+      childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null): void => {
         try {
           // The 'close' event is emitted after a process has ended and the stdio streams of a child process
           // have been closed. This is distinct from the 'exit' event, since multiple processes might share the
@@ -323,7 +323,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
           if (this._state === State.Running) {
             this._logger.terminal.writeWarningLine(
               `The service process #${childPid} terminated unexpectedly` +
-                this._formatCodeOrSignal(code, signal)
+                this._formatCodeOrSignal(exitCode, signal)
             );
             this._transitionToStopped();
             return;
@@ -332,7 +332,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
           if (this._state === State.Stopping || this._state === State.Killing) {
             this._logger.terminal.writeVerboseLine(
               `The service process #${childPid} terminated successfully` +
-                this._formatCodeOrSignal(code, signal)
+                this._formatCodeOrSignal(exitCode, signal)
             );
             this._transitionToStopped();
             return;
@@ -344,6 +344,8 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
 
       childProcess.on('exit', (code: number | null, signal: string | null) => {
         try {
+          // Under normal conditions we don't reject the promise here, because 'data' events can continue
+          // to fire as data is flushed, before finally concluding with the 'close' event.
           this._logger.terminal.writeVerboseLine(
             `The service process fired its "exit" event` + this._formatCodeOrSignal(code, signal)
           );

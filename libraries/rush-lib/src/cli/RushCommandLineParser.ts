@@ -197,14 +197,14 @@ export class RushCommandLineParser extends CommandLineParser {
     this.telemetry?.flush();
   }
 
-  public async execute(args?: string[]): Promise<boolean> {
-    // debugParameter will be correctly parsed during super.execute(), so manually parse here.
+  public async executeAsync(args?: string[]): Promise<boolean> {
+    // debugParameter will be correctly parsed during super.executeAsync(), so manually parse here.
     this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
       process.argv.indexOf('--debug') >= 0;
 
     await this.pluginManager.tryInitializeUnassociatedPluginsAsync();
 
-    return await super.execute(args);
+    return await super.executeAsync(args);
   }
 
   protected async onExecute(): Promise<void> {
@@ -227,6 +227,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this._reportErrorAndSetExitCode(error as Error);
     }
 
+    // This only gets hit if the wrapped execution completes successfully
     await this.telemetry?.ensureFlushedAsync();
   }
 
@@ -243,9 +244,12 @@ export class RushCommandLineParser extends CommandLineParser {
       this.telemetry = new Telemetry(this.rushConfiguration, this.rushSession);
     }
 
-    await super.onExecute();
-    if (this.telemetry) {
-      this.flushTelemetry();
+    try {
+      await super.onExecute();
+    } finally {
+      if (this.telemetry) {
+        this.flushTelemetry();
+      }
     }
   }
 
@@ -440,16 +444,24 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this.flushTelemetry();
 
-    // Ideally we want to eliminate all calls to process.exit() from our code, and replace them
-    // with normal control flow that properly cleans up its data structures.
-    // For this particular call, we have a problem that the RushCommandLineParser constructor
-    // performs nontrivial work that can throw an exception.  Either the Rush class would need
-    // to handle reporting for those exceptions, or else _populateActions() should be moved
-    // to a RushCommandLineParser lifecycle stage that can handle it.
-    if (process.exitCode !== undefined) {
-      process.exit(process.exitCode);
+    const handleExit = (): never => {
+      // Ideally we want to eliminate all calls to process.exit() from our code, and replace them
+      // with normal control flow that properly cleans up its data structures.
+      // For this particular call, we have a problem that the RushCommandLineParser constructor
+      // performs nontrivial work that can throw an exception.  Either the Rush class would need
+      // to handle reporting for those exceptions, or else _populateActions() should be moved
+      // to a RushCommandLineParser lifecycle stage that can handle it.
+      if (process.exitCode !== undefined) {
+        process.exit(process.exitCode);
+      } else {
+        process.exit(1);
+      }
+    };
+
+    if (this.telemetry && this.rushSession.hooks.flushTelemetry.isUsed()) {
+      this.telemetry.ensureFlushedAsync().then(handleExit).catch(handleExit);
     } else {
-      process.exit(1);
+      handleExit();
     }
   }
 }

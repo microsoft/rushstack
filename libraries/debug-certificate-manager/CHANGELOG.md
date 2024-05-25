@@ -1,6 +1,33 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+This log was last generated on Fri, 24 May 2024 00:15:08 GMT and should not be manually modified.
+
+## 1.3.48
+Fri, 24 May 2024 00:15:08 GMT
+
+_Version update only_
+
+## 1.3.47
+Thu, 23 May 2024 02:26:56 GMT
+
+### Patches
+
+- Fix an issue where the task could report success if the subprocess was terminated by a signal
+
+## 1.3.46
+Thu, 16 May 2024 15:10:22 GMT
+
+_Version update only_
+
+## 1.3.45
+Wed, 15 May 2024 23:42:58 GMT
+
+_Version update only_
+
+## 1.3.44
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
 
 ## 1.3.43
 Fri, 10 May 2024 05:33:33 GMT

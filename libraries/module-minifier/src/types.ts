@@ -103,10 +103,16 @@ export interface IMinifierConnection {
    * Hash of the configuration of this minifier, for cache busting.
    */
   configHash: string;
+
+  /**
+   * @deprecated Use {@link IMinifierConnection.disconnectAsync} instead.
+   */
+  disconnect(): Promise<void>;
+
   /**
    * Callback to be invoked when done with the minifier
    */
-  disconnect(): Promise<void>;
+  disconnectAsync(): Promise<void>;
 }
 
 /**
@@ -120,9 +126,14 @@ export interface IModuleMinifier {
   minify: IModuleMinifierFunction;
 
   /**
+   * @deprecated Use {@link IModuleMinifier.connectAsync} instead.
+   */
+  connect(): Promise<IMinifierConnection>;
+
+  /**
    * Prevents the minifier from shutting down until the returned `disconnect()` callback is invoked.
    * The callback may be used to surface errors encountered by the minifier that may not be relevant to a specific file.
    * It should be called to allow the minifier to cleanup
    */
-  connect(): Promise<IMinifierConnection>;
+  connectAsync(): Promise<IMinifierConnection>;
 }

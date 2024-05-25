@@ -204,7 +204,7 @@ class PasswordKeyboardLoop extends KeyboardLoop {
 }
 
 export class TerminalInput {
-  private static async _readLine(): Promise<string> {
+  private static async _readLineAsync(): Promise<string> {
     const readlineInterface: readline.Interface = readline.createInterface({ input: process.stdin });
     try {
       return await new Promise((resolve, reject) => {
@@ -217,21 +217,21 @@ export class TerminalInput {
     }
   }
 
-  public static async promptYesNo(options: IPromptYesNoOptions): Promise<boolean> {
+  public static async promptYesNoAsync(options: IPromptYesNoOptions): Promise<boolean> {
     const keyboardLoop: YesNoKeyboardLoop = new YesNoKeyboardLoop(options);
     await keyboardLoop.startAsync();
     return keyboardLoop.result!;
   }
 
-  public static async promptLine(options: IPromptLineOptions): Promise<string> {
+  public static async promptLineAsync(options: IPromptLineOptions): Promise<string> {
     const stderr: NodeJS.WriteStream = process.stderr;
     stderr.write(Colorize.green('==>') + ' ');
     stderr.write(Colorize.bold(options.message));
     stderr.write(' ');
-    return await TerminalInput._readLine();
+    return await TerminalInput._readLineAsync();
   }
 
-  public static async promptPasswordLine(options: IPromptLineOptions): Promise<string> {
+  public static async promptPasswordLineAsync(options: IPromptLineOptions): Promise<string> {
     const keyboardLoop: PasswordKeyboardLoop = new PasswordKeyboardLoop(options);
     await keyboardLoop.startAsync();
     return keyboardLoop.result;

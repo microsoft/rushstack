@@ -2,6 +2,41 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.0.0",
+      "tag": "@rushstack/node-core-library_v5.0.0",
+      "date": "Thu, 23 May 2024 02:26:56 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Replace z-schema with ajv for schema validation and add support for json-schema draft-07."
+          },
+          {
+            "comment": "Remove the deprecated `Async.sleep` function."
+          },
+          {
+            "comment": "Convert `FileConstants` and `FolderConstants` from enums to const objects."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue where waitForExitAsync() might reject before all output was collected"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.0",
+      "tag": "@rushstack/node-core-library_v4.3.0",
+      "date": "Wed, 15 May 2024 06:04:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Rename `Async.sleep` to `Async.sleepAsync`. The old function is marked as `@deprecated`."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.1",
       "tag": "@rushstack/node-core-library_v4.2.1",
       "date": "Fri, 10 May 2024 05:33:33 GMT",

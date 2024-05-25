@@ -16,7 +16,7 @@ import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/terminal';
-import type { ITerminalProvider } from '@rushstack/terminal';
+import { ITerminalProvider } from '@rushstack/terminal';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { StdioSummarizer } from '@rushstack/terminal';
@@ -311,12 +311,13 @@ export class FileSystemBuildCacheProvider {
 }
 
 // @internal
-export class _FlagFile {
-    constructor(folderPath: string, flagName: string, initialState?: JsonObject);
+export class _FlagFile<TState extends JsonObject = JsonObject> {
+    constructor(folderPath: string, flagName: string, initialState: TState);
     clearAsync(): Promise<void>;
     createAsync(): Promise<void>;
     isValidAsync(): Promise<boolean>;
     readonly path: string;
+    protected _state: TState;
 }
 
 // @beta
@@ -566,6 +567,8 @@ export interface _IOperationMetadata {
     durationInSeconds: number;
     // (undocumented)
     errorLogPath: string;
+    // (undocumented)
+    logChunksPath: string;
     // (undocumented)
     logPath: string;
 }
@@ -913,13 +916,13 @@ export class _OperationMetadataManager {
     constructor(options: _IOperationMetadataManagerOptions);
     get relativeFilepaths(): string[];
     // (undocumented)
-    saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath }: _IOperationMetadata): Promise<void>;
+    saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath, logChunksPath }: _IOperationMetadata): Promise<void>;
     // (undocumented)
     readonly stateFile: _OperationStateFile;
     // (undocumented)
-    tryRestoreAsync({ terminal, logPath, errorLogPath }: {
+    tryRestoreAsync({ terminal, terminalProvider, errorLogPath }: {
+        terminalProvider: ITerminalProvider;
         terminal: ITerminal;
-        logPath: string;
         errorLogPath: string;
     }): Promise<void>;
 }
@@ -1170,7 +1173,7 @@ export class RushConfiguration {
     // @beta (undocumented)
     getSubspace(subspaceName: string): Subspace;
     // @beta
-    getSubspacesForProjects(projects: ReadonlySet<RushConfigurationProject>): ReadonlySet<Subspace>;
+    getSubspacesForProjects(projects: Iterable<RushConfigurationProject>): ReadonlySet<Subspace>;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitChangefilesCommitMessage: string | undefined;
     readonly gitChangeLogUpdateCommitMessage: string | undefined;

@@ -9,6 +9,7 @@ import { RushCommandLineParser } from '../../RushCommandLineParser';
 import { RemoveAction } from '../RemoveAction';
 import { VersionMismatchFinderProject } from '../../../logic/versionMismatch/VersionMismatchFinderProject';
 import { DependencyType } from '../../../api/PackageJsonEditor';
+import { LockFile } from '@rushstack/node-core-library';
 
 describe(RemoveAction.name, () => {
   describe('basic "rush remove" tests', () => {
@@ -23,6 +24,10 @@ describe(RemoveAction.name, () => {
         .mockImplementation(() => {});
 
       jest.spyOn(process, 'exit').mockImplementation();
+
+      // Suppress "Another Rush command is already running" error
+      jest.spyOn(LockFile, 'tryAcquire').mockImplementation(() => ({}) as LockFile);
+
       oldExitCode = process.exitCode;
       oldArgs = process.argv;
     });
@@ -50,7 +55,7 @@ describe(RemoveAction.name, () => {
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'remove', '-p', 'assert', '-s'];
 
-        await expect(parser.execute()).resolves.toEqual(true);
+        await expect(parser.executeAsync()).resolves.toEqual(true);
         expect(removeDependencyMock).toHaveBeenCalledTimes(2);
         const packageName: string = removeDependencyMock.mock.calls[0][0];
         expect(packageName).toEqual('assert');
@@ -78,7 +83,7 @@ describe(RemoveAction.name, () => {
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'remove', '-p', 'assert'];
 
-        await expect(parser.execute()).resolves.toEqual(true);
+        await expect(parser.executeAsync()).resolves.toEqual(true);
         expect(doRushRemoveMock).toHaveBeenCalledTimes(1);
         const doRushRemoveOptions: IPackageJsonUpdaterRushRemoveOptions = doRushRemoveMock.mock.calls[0][0];
         expect(doRushRemoveOptions.projects).toHaveLength(1);
@@ -121,8 +126,7 @@ describe(RemoveAction.name, () => {
           '--all'
         ];
 
-        // const a = await parser.execute();
-        await expect(parser.execute()).resolves.toEqual(true);
+        await expect(parser.executeAsync()).resolves.toEqual(true);
         expect(doRushRemoveMock).toHaveBeenCalledTimes(1);
         const doRushRemoveOptions: IPackageJsonUpdaterRushRemoveOptions = doRushRemoveMock.mock.calls[0][0];
         expect(doRushRemoveOptions.projects).toHaveLength(3);

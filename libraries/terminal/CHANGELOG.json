@@ -2,6 +2,42 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.11.1",
+      "tag": "@rushstack/terminal_v0.11.1",
+      "date": "Thu, 23 May 2024 02:26:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.0",
+      "tag": "@rushstack/terminal_v0.11.0",
+      "date": "Wed, 15 May 2024 23:42:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow use of 'preventAutoclose' flag in StdioSummarizer."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.4",
+      "tag": "@rushstack/terminal_v0.10.4",
+      "date": "Wed, 15 May 2024 06:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.3",
       "tag": "@rushstack/terminal_v0.10.3",
       "date": "Fri, 10 May 2024 05:33:34 GMT",

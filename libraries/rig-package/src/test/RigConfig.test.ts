@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import Ajv, { type ValidateFunction } from 'ajv';
 import * as fs from 'fs';
-import Ajv from 'ajv';
+import * as path from 'path';
 import stripJsonComments from 'strip-json-comments';
 
 import { RigConfig } from '../RigConfig';
@@ -177,9 +177,8 @@ describe(RigConfig.name, () => {
 
       expect(rigConfig.rigFound).toBe(true);
 
-      const resolvedPath: string | undefined = await rigConfig.tryResolveConfigFilePathAsync(
-        'example-config.json'
-      );
+      const resolvedPath: string | undefined =
+        await rigConfig.tryResolveConfigFilePathAsync('example-config.json');
 
       expect(resolvedPath).toBeDefined();
       expectEqualPaths(
@@ -192,8 +191,7 @@ describe(RigConfig.name, () => {
     const rigConfigFilePath: string = path.join(testProjectFolder, 'config', 'rig.json');
 
     const ajv = new Ajv({
-      verbose: true,
-      strictKeywords: true
+      verbose: true
     });
 
     // Delete our older "draft-04/schema" and use AJV's built-in schema
@@ -201,7 +199,7 @@ describe(RigConfig.name, () => {
     delete (RigConfig.jsonSchemaObject as any)['$schema'];
 
     // Compile our schema
-    const validateRigFile: Ajv.ValidateFunction = ajv.compile(RigConfig.jsonSchemaObject);
+    const validateRigFile: ValidateFunction = ajv.compile(RigConfig.jsonSchemaObject);
 
     // Load the rig.json file
     const rigConfigFileContent: string = fs.readFileSync(rigConfigFilePath).toString();
