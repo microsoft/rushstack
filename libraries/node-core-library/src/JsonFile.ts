@@ -571,7 +571,10 @@ export class JsonFile {
   }
 
   private static _buildJjuParseOptions(options: IJsonFileParseOptions = {}): jju.ParseOptions {
-    const parseOptions: jju.ParseOptions = {};
+    const parseOptions: jju.ParseOptions = {
+      reserved_keys: 'replace'
+    };
+
     switch (options.jsonSyntax) {
       case JsonSyntax.Strict:
         parseOptions.mode = 'json';
