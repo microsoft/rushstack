@@ -2,13 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import { MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import { JsonFile } from '@rushstack/node-core-library';
+import { StreamCollator } from '@rushstack/stream-collator';
 import { BuildPlanPlugin } from '../BuildPlanPlugin';
 import {
   type ICreateOperationsContext,
   type IExecuteOperationsContext,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
-import { StreamCollator } from '@rushstack/stream-collator';
 import type { Operation } from '../Operation';
 import { RushConfiguration } from '../../../api/RushConfiguration';
 import {
@@ -24,7 +25,6 @@ import { MockOperationRunner } from './MockOperationRunner';
 import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 import path from 'path';
 import type { ICommandLineJson } from '../../../api/CommandLineJson';
-import { JsonFile } from '@rushstack/node-core-library';
 
 describe(BuildPlanPlugin.name, () => {
   const rushJsonFile: string = path.resolve(__dirname, `../../test/workspaceRepo/rush.json`);

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Change the `eolCharacter` property value of `StringBufferTerminalProvider` to `\\n` from `[n]`. This does not change the default `getOutput()` result, but removes the `[n]` characters from the `getOutput({ normalizeSpecialCharacters: false })` result.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}
