@@ -105,7 +105,29 @@ describe(PackageMetadataManager.name, () => {
         );
       });
 
-      describe('given a package.json where the field "exports" is defined and "tsdocMetadata" is not defined', () => {
+      describe('given a package.json where the field "exports" is defined', () => {
+        describe('with a string value', () => {
+          testForPackageJson(
+            {
+              name: 'package-inferred-from-exports',
+              version: '1.0.0',
+              exports: 'path/to/exports/exports.js'
+            },
+            { expectedPathInsidePackage: 'path/to/exports' }
+          );
+        });
+
+        describe('with an array value', () => {
+          testForPackageJson(
+            {
+              name: 'package-inferred-from-exports',
+              version: '1.0.0',
+              exports: ['path/to/exports/exports.js', 'path/to/exports2/exports.js']
+            },
+            { expectedPathInsidePackage: 'path/to/exports' }
+          );
+        });
+
         describe.each(['.', '*'])('with an exports field that contains a "%s" key', (exportsKey) => {
           describe('with a string value', () => {
             it(
@@ -204,7 +226,7 @@ describe(PackageMetadataManager.name, () => {
         });
       });
 
-      describe('given a package.json where the field "typesVersions" is defined and "exports" and "tsdocMetadata" are not defined', () => {
+      describe('given a package.json where the field "typesVersions" is defined', () => {
         describe('with an exports field that contains a "%s" key', () => {
           describe('with no selectors', () => {
             it(itValue ?? 'outputs the tsdoc metadata file "tsdoc-metadata.json" in the package root', () => {
@@ -270,7 +292,7 @@ describe(PackageMetadataManager.name, () => {
         });
       });
 
-      describe('given a package.json where the field "types" is defined and "typings", "exports", "typesVersions", and "tsdocMetadata" is not defined', () => {
+      describe('given a package.json where the field "types" is defined', () => {
         it(
           itValue ??
             'outputs the tsdoc metadata file "tsdoc-metadata.json" in the same folder as the path of "types"',
@@ -288,7 +310,7 @@ describe(PackageMetadataManager.name, () => {
         );
       });
 
-      describe('given a package.json where the field "types" and "typing " are defined "exports", "typesVersions", and "tsdocMetadata" is not defined', () => {
+      describe('given a package.json where the field "types" and "typings" are defined', () => {
         it(
           itValue ??
             'outputs the tsdoc metadata file "tsdoc-metadata.json" in the same folder as the path of "types"',
@@ -307,7 +329,7 @@ describe(PackageMetadataManager.name, () => {
         );
       });
 
-      describe('given a package.json where the field "typings" is defined and "types", "exports", "typesVersions", and "tsdocMetadata" is not defined', () => {
+      describe('given a package.json where the field "typings" is defined and "types" is not defined', () => {
         it(
           itValue ??
             'outputs the tsdoc metadata file "tsdoc-metadata.json" in the same folder as the path of "typings"',
@@ -325,7 +347,7 @@ describe(PackageMetadataManager.name, () => {
         );
       });
 
-      describe('given a package.json where the field "main" is defined but not and "types", "typings", "exports", "typesVersions", and "tsdocMetadata" is not defined', () => {
+      describe('given a package.json where the field "main" is defined', () => {
         it(
           itValue ??
             'outputs the tsdoc metadata file "tsdoc-metadata.json" in the same folder as the path of "main"',
@@ -360,6 +382,62 @@ describe(PackageMetadataManager.name, () => {
             }
           );
         }
+      );
+    });
+
+    it('correctly resolves the tsdoc-metadata with the right precedence', () => {
+      const packageJson: INodePackageJson = {
+        name: 'package-inferred-tsdoc-metadata',
+        tsdocMetadata: 'path/to/tsdoc-metadata/tsdoc-metadata.json',
+        exports: {
+          '.': 'path/to/exports-dot/exports.js',
+          '*': 'path/to/exports-star/*.js'
+        },
+        typesVersions: {
+          '>=3.0': {
+            '.': ['path/to/typesVersions-dot/exports.d.ts'],
+            '*': ['path/to/typesVersions-star/*.d.ts']
+          }
+        },
+        types: 'path/to/types/types.d.ts',
+        typings: 'path/to/typings/typings.d.ts',
+        main: 'path/to/main/main.js'
+      };
+
+      expect(PackageMetadataManager.resolveTsdocMetadataPath(PACKAGE_FOLDER, packageJson)).toBe(
+        `${PACKAGE_FOLDER}/path/to/tsdoc-metadata/tsdoc-metadata.json`
+      );
+      delete packageJson.tsdocMetadata;
+      expect(PackageMetadataManager.resolveTsdocMetadataPath(PACKAGE_FOLDER, packageJson)).toBe(
+        `${PACKAGE_FOLDER}/path/to/exports-dot/tsdoc-metadata.json`
+      );
+      delete (packageJson.exports as { '.': unknown })!['.'];
+      expect(PackageMetadataManager.resolveTsdocMetadataPath(PACKAGE_FOLDER, packageJson)).toBe(
+        `${PACKAGE_FOLDER}/path/to/exports-star/tsdoc-metadata.json`
+      );
+      delete packageJson.exports;
+      expect(PackageMetadataManager.resolveTsdocMetadataPath(PACKAGE_FOLDER, packageJson)).toBe(
+        `${PACKAGE_FOLDER}/path/to/typesVersions-dot/tsdoc-metadata.json`
+      );
+      delete packageJson.typesVersions!['>=3.0']!['.'];
+      expect(PackageMetadataManager.resolveTsdocMetadataPath(PACKAGE_FOLDER, packageJson)).toBe(
+        `${PACKAGE_FOLDER}/path/to/typesVersions-star/tsdoc-metadata.json`
+      );
+      delete packageJson.typesVersions;
+      expect(PackageMetadataManager.resolveTsdocMetadataPath(PACKAGE_FOLDER, packageJson)).toBe(
+        `${PACKAGE_FOLDER}/path/to/types/tsdoc-metadata.json`
+      );
+      delete packageJson.types;
+      expect(PackageMetadataManager.resolveTsdocMetadataPath(PACKAGE_FOLDER, packageJson)).toBe(
+        `${PACKAGE_FOLDER}/path/to/typings/tsdoc-metadata.json`
+      );
+      delete packageJson.typings;
+      expect(PackageMetadataManager.resolveTsdocMetadataPath(PACKAGE_FOLDER, packageJson)).toBe(
+        `${PACKAGE_FOLDER}/path/to/main/tsdoc-metadata.json`
+      );
+      delete packageJson.main;
+      expect(PackageMetadataManager.resolveTsdocMetadataPath(PACKAGE_FOLDER, packageJson)).toBe(
+        `${PACKAGE_FOLDER}/tsdoc-metadata.json`
       );
     });
   });
