@@ -308,6 +308,13 @@ export interface INodePackageJson {
    */
   // eslint-disable-next-line @rushstack/no-new-null
   exports?: string | string[] | Record<string, null | string | IPackageJsonExports>;
+
+  /**
+   * The "files" field is an array of file globs that should be included in the package during publishing.
+   *
+   * See the {@link https://docs.npmjs.com/cli/v6/configuring-npm/package-json#files | NPM documentation}.
+   */
+  files?: string[];
 }
 
 /**
