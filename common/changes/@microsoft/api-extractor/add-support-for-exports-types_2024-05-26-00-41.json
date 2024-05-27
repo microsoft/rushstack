@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Improve support for resolving the `tsdoc-metadata.json` to include the folder referenced by a `types` field in an `\"exports\"` field and an `\"typesVersions\"` field in addition to `\"types\"`, `\"typings\"`, and `\"tsdocMetadata\"` fields.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
