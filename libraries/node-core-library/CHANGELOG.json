@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.3.0",
+      "tag": "@rushstack/node-core-library_v5.3.0",
+      "date": "Tue, 28 May 2024 15:10:09 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include typings for the the `\"files\"` field in `IPackageJson`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.0",
       "tag": "@rushstack/node-core-library_v5.2.0",
       "date": "Tue, 28 May 2024 00:09:47 GMT",

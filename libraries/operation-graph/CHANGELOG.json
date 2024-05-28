@@ -2,6 +2,21 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.2.23",
+      "tag": "@rushstack/operation-graph_v0.2.23",
+      "date": "Tue, 28 May 2024 15:10:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.22",
       "tag": "@rushstack/operation-graph_v0.2.22",
       "date": "Tue, 28 May 2024 00:09:47 GMT",
