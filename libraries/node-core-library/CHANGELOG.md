@@ -7,7 +7,7 @@ Tue, 28 May 2024 00:09:47 GMT
 
 ### Minor changes
 
-- "Include typings for the `"exports"` and `"typesVersions"` fields in `IPackageJson`."
+- Include typings for the `"exports"` and `"typesVersions"` fields in `IPackageJson`.
 
 ## 5.1.0
 Sat, 25 May 2024 04:54:07 GMT

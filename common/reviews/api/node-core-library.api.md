@@ -462,6 +462,7 @@ export interface INodePackageJson {
     description?: string;
     devDependencies?: IPackageJsonDependencyTable;
     exports?: string | string[] | Record<string, null | string | IPackageJsonExports>;
+    files?: string[];
     homepage?: string;
     license?: string;
     main?: string;
