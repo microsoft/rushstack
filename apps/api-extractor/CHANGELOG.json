@@ -2,6 +2,32 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.45.0",
+      "tag": "@microsoft/api-extractor_v7.45.0",
+      "date": "Tue, 28 May 2024 00:09:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Improve support for resolving the `tsdoc-metadata.json` to include the folder referenced by a `types` field in an `\"exports\"` field and an `\"typesVersions\"` field in addition to `\"types\"`, `\"typings\"`, and `\"tsdocMetadata\"` fields."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.21.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.44.1",
       "tag": "@microsoft/api-extractor_v7.44.1",
       "date": "Sat, 25 May 2024 04:54:07 GMT",

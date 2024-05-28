@@ -2,6 +2,24 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "2.1.50",
+      "tag": "@microsoft/loader-load-themed-styles_v2.1.50",
+      "date": "Tue, 28 May 2024 00:09:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.0.126`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.0.125` to `2.0.126`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.49",
       "tag": "@microsoft/loader-load-themed-styles_v2.1.49",
       "date": "Sat, 25 May 2024 04:54:07 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 25 May 2024 04:54:07 GMT and should not be manually modified.
+This log was last generated on Tue, 28 May 2024 00:09:47 GMT and should not be manually modified.
+
+## 5.2.0
+Tue, 28 May 2024 00:09:47 GMT
+
+### Minor changes
+
+- "Include typings for the `"exports"` and `"typesVersions"` fields in `IPackageJson`."
 
 ## 5.1.0
 Sat, 25 May 2024 04:54:07 GMT

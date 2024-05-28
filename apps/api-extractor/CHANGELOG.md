@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 25 May 2024 04:54:07 GMT and should not be manually modified.
+This log was last generated on Tue, 28 May 2024 00:09:47 GMT and should not be manually modified.
+
+## 7.45.0
+Tue, 28 May 2024 00:09:47 GMT
+
+### Minor changes
+
+- Improve support for resolving the `tsdoc-metadata.json` to include the folder referenced by a `types` field in an `"exports"` field and an `"typesVersions"` field in addition to `"types"`, `"typings"`, and `"tsdocMetadata"` fields.
 
 ## 7.44.1
 Sat, 25 May 2024 04:54:07 GMT
