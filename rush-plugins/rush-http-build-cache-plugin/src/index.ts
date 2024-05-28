@@ -4,4 +4,4 @@
 import { RushHttpBuildCachePlugin } from './RushHttpBuildCachePlugin';
 
 export default RushHttpBuildCachePlugin;
-export { IHttpBuildCacheProviderOptions } from './HttpBuildCacheProvider';
+export type { IHttpBuildCacheProviderOptions } from './HttpBuildCacheProvider';
