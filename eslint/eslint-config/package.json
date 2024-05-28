@@ -37,7 +37,7 @@
     "@typescript-eslint/typescript-estree": "~6.19.0",
     "eslint-plugin-promise": "~6.1.1",
     "eslint-plugin-react": "~7.33.2",
-    "eslint-plugin-tsdoc": "~0.2.16"
+    "eslint-plugin-tsdoc": "~0.3.0"
   },
   "devDependencies": {
     "eslint": "~8.57.0",
