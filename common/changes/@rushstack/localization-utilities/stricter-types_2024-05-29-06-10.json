@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-utilities",
+      "comment": "Include missing `type` modifiers on type-only exports.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/localization-utilities"
+}

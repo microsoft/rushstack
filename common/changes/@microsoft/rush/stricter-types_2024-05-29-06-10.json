@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Include missing `type` modifiers on type-only exports.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

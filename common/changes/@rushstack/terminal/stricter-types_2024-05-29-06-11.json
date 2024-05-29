@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Eliminate a const enum from the public API.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}
