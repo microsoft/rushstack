@@ -197,12 +197,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     const { createLogFile, logFileSuffix = '' } = options;
     const projectLogWritable: ProjectLogWritable | undefined =
       createLogFile && associatedProject && associatedPhase && this._operationMetadataManager
-        ? new ProjectLogWritable(
-            associatedProject,
-            this.collatedWriter.terminal,
-            `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`,
-            { enableChunkedOutput: true }
-          )
+        ? await ProjectLogWritable.initializeAsync({
+            project: associatedProject,
+            terminal: this.collatedWriter.terminal,
+            logFilenameIdentifier: `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`,
+            enableChunkedOutput: true
+          })
         : undefined;
 
     try {
