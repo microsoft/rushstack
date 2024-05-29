@@ -359,7 +359,7 @@ export class Terminal implements ITerminal {
 }
 
 // @public
-export const enum TerminalChunkKind {
+export enum TerminalChunkKind {
     Stderr = "E",
     Stdout = "O"
 }

@@ -6,7 +6,7 @@ import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 /**
  * The type of SemVer range specifier that is prepended to the version
  */
-export const enum SemVerStyle {
+export enum SemVerStyle {
   Exact = 'exact',
   Caret = 'caret',
   Tilde = 'tilde',

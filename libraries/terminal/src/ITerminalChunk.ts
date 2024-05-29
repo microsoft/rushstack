@@ -5,7 +5,7 @@
  * Specifies the kind of data represented by a {@link ITerminalChunk} object.
  * @public
  */
-export const enum TerminalChunkKind {
+export enum TerminalChunkKind {
   /**
    * Indicates a `ITerminalChunk` object representing `stdout` console output.
    */
