@@ -9,6 +9,32 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { RushConstants } from '../RushConstants';
 
+export interface IProjectLogWritableOptions {
+  project: RushConfigurationProject;
+  terminal: CollatedTerminal;
+  logFilenameIdentifier: string;
+  enableChunkedOutput?: boolean;
+}
+
+export interface ILogFilePaths {
+  logFolderPath: string;
+  logChunksFolderPath: string;
+
+  logPath: string;
+  logChunksPath: string;
+  errorLogPath: string;
+  relativeLogPath: string;
+  relativeErrorLogPath: string;
+  relativeLogChunksPath: string;
+}
+
+export interface IGetLogFilePathsOptions {
+  project: RushConfigurationProject;
+  logFilenameIdentifier: string;
+}
+
+const LOG_CHUNKS_FOLDER_RELATIVE_PATH: string = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/chunked-rush-logs`;
+
 export class ProjectLogWritable extends TerminalWritable {
   private readonly _terminal: CollatedTerminal;
 
@@ -51,40 +77,22 @@ export class ProjectLogWritable extends TerminalWritable {
 
   private _enableChunkedOutput: boolean;
 
-  public constructor(
-    project: RushConfigurationProject,
+  private constructor(
     terminal: CollatedTerminal,
-    logFilenameIdentifier: string,
-    options: {
-      enableChunkedOutput?: boolean;
-    } = {}
-  ) {
-    super();
-    const { enableChunkedOutput = false } = options;
-    this._terminal = terminal;
-
-    this._enableChunkedOutput = enableChunkedOutput;
-
-    // Delete the legacy logs
-    const { logPath: legacyLogPath, errorLogPath: legacyErrorLogPath } = ProjectLogWritable.getLogFilePaths({
-      project,
-      logFilenameIdentifier: 'build',
-      isLegacyLog: true
-    });
-    FileSystem.deleteFile(legacyLogPath);
-    FileSystem.deleteFile(legacyErrorLogPath);
-
-    const {
+    enableChunkedOutput: boolean,
+    {
       logPath,
       errorLogPath,
       logChunksPath,
       relativeLogPath,
       relativeErrorLogPath,
       relativeLogChunksPath
-    } = ProjectLogWritable.getLogFilePaths({
-      project,
-      logFilenameIdentifier
-    });
+    }: ILogFilePaths
+  ) {
+    super();
+    this._terminal = terminal;
+    this._enableChunkedOutput = enableChunkedOutput;
+
     this.logPath = logPath;
     this.errorLogPath = errorLogPath;
     this.logChunksPath = logChunksPath;
@@ -92,61 +100,62 @@ export class ProjectLogWritable extends TerminalWritable {
     this.relativeErrorLogPath = relativeErrorLogPath;
     this.relativeLogChunksPath = relativeLogChunksPath;
 
-    if (legacyLogPath !== this.logPath) {
-      FileSystem.deleteFile(this.logPath);
-    }
+    this._logWriter = FileWriter.open(logPath);
+    this._chunkWriter = FileWriter.open(logChunksPath);
+  }
 
-    if (legacyErrorLogPath !== this.errorLogPath) {
-      FileSystem.deleteFile(this.errorLogPath);
-    }
+  public static async initializeAsync({
+    project,
+    terminal,
+    logFilenameIdentifier,
+    enableChunkedOutput = false
+  }: IProjectLogWritableOptions): Promise<ProjectLogWritable> {
+    const logFilePaths: ILogFilePaths = ProjectLogWritable.getLogFilePaths({
+      project,
+      logFilenameIdentifier
+    });
 
-    this._logWriter = FileWriter.open(this.logPath);
-    this._chunkWriter = FileWriter.open(this.logChunksPath);
+    const { logFolderPath, logChunksFolderPath, logPath, errorLogPath, logChunksPath } = logFilePaths;
+    await Promise.all([
+      FileSystem.ensureFolderAsync(logFolderPath),
+      FileSystem.ensureFolderAsync(logChunksFolderPath),
+      FileSystem.deleteFileAsync(logPath),
+      FileSystem.deleteFileAsync(errorLogPath),
+      FileSystem.deleteFileAsync(logChunksPath)
+    ]);
+
+    return new ProjectLogWritable(terminal, enableChunkedOutput, logFilePaths);
   }
 
   public static getLogFilePaths({
-    project,
-    logFilenameIdentifier,
-    isLegacyLog = false
-  }: {
-    project: RushConfigurationProject;
-    logFilenameIdentifier: string;
-    isLegacyLog?: boolean;
-  }): {
-    logPath: string;
-    logChunksPath: string;
-    errorLogPath: string;
-    relativeLogPath: string;
-    relativeErrorLogPath: string;
-    relativeLogChunksPath: string;
-  } {
-    const logFileBaseName: string = getRelativeLogFilePathBase(
-      project,
-      logFilenameIdentifier,
-      isLegacyLog,
-      RushConstants.rushLogsFolderName
-    );
+    project: { projectFolder, packageName },
+    logFilenameIdentifier
+  }: IGetLogFilePathsOptions): ILogFilePaths {
+    const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(packageName);
+    const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
 
-    const chunkLogFileBaseName: string = getRelativeLogFilePathBase(
-      project,
-      logFilenameIdentifier,
-      isLegacyLog,
-      `.rush/${RushConstants.rushTempFolderName}/operations`
-    );
+    const logFolderPath: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
+    const logChunksFolderPath: string = `${projectFolder}/${LOG_CHUNKS_FOLDER_RELATIVE_PATH}`;
 
-    const { projectFolder } = project;
-    const relativeLogPath: string = `${logFileBaseName}.log`;
-    const relativeErrorLogPath: string = `${logFileBaseName}.error.log`;
-    const relativeLogChunksPath: string = `${chunkLogFileBaseName}.chunks.jsonl`;
+    const logFileBasePath: string = `${RushConstants.rushLogsFolderName}/${logFileBaseName}`;
+    const chunkLogFileBasePath: string = `${LOG_CHUNKS_FOLDER_RELATIVE_PATH}/${logFileBaseName}`;
+
+    const relativeLogPath: string = `${logFileBasePath}.log`;
+    const relativeErrorLogPath: string = `${logFileBasePath}.error.log`;
+    const relativeLogChunksPath: string = `${chunkLogFileBasePath}.chunks.jsonl`;
 
     const logPath: string = `${projectFolder}/${relativeLogPath}`;
     const errorLogPath: string = `${projectFolder}/${relativeErrorLogPath}`;
     const logChunksPath: string = `${projectFolder}/${relativeLogChunksPath}`;
 
     return {
+      logFolderPath,
+      logChunksFolderPath,
+
       logPath,
       errorLogPath,
       logChunksPath,
+
       relativeLogChunksPath,
       relativeLogPath,
       relativeErrorLogPath
@@ -213,26 +222,4 @@ export class ProjectLogWritable extends TerminalWritable {
       this._chunkWriter = undefined;
     }
   }
-}
-
-function getRelativeLogFilePathBase(
-  project: RushConfigurationProject,
-  logFilenameIdentifier: string,
-  isLegacyLog: boolean,
-  phasedCommandsLogFolder?: string
-): string {
-  const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
-  const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
-
-  const { projectFolder } = project;
-
-  // If the phased commands experiment is enabled, put logs under `rush-logs`
-  let logFolder: string | undefined;
-  if (!isLegacyLog && project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
-    const logPathPrefix: string = `${projectFolder}/${phasedCommandsLogFolder}`;
-    FileSystem.ensureFolder(logPathPrefix);
-    logFolder = phasedCommandsLogFolder;
-  }
-
-  return logFolder ? `${logFolder}/${logFileBaseName}` : logFileBaseName;
 }
