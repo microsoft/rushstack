@@ -47,9 +47,8 @@ function createShellOperations(
 
       const rawCommandToRun: string | undefined = getScriptToRun(project, phase.name, phase.shellCommand);
 
-      const commandToRun: string | undefined = rawCommandToRun
-        ? formatCommand(rawCommandToRun, customParameterValues)
-        : undefined;
+      const commandToRun: string | undefined =
+        rawCommandToRun !== undefined ? formatCommand(rawCommandToRun, customParameterValues) : undefined;
 
       operation.runner = initializeShellOperationRunner({
         phase,
