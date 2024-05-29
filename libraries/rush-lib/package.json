@@ -57,7 +57,8 @@
     "tar": "~6.2.1",
     "true-case-path": "~2.2.1",
     "uuid": "~8.3.2",
-    "pnpm-sync-lib": "0.2.6"
+    "pnpm-sync-lib": "0.2.6",
+    "node-object-hash": "~3.0.0"
   },
   "devDependencies": {
     "@pnpm/logger": "4.0.0",

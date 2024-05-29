@@ -3323,6 +3323,9 @@ importers:
       node-fetch:
         specifier: 2.6.7
         version: 2.6.7
+      node-object-hash:
+        specifier: ~3.0.0
+        version: 3.0.0
       npm-check:
         specifier: ~6.0.1
         version: 6.0.1
@@ -21984,6 +21987,11 @@ packages:
       url: 0.11.3
       util: 0.11.1
       vm-browserify: 1.1.2
+
+  /node-object-hash@3.0.0:
+    resolution: {integrity: sha512-jLF6tlyletktvSAawuPmH1SReP0YfZQ+tBrDiTCK+Ai7eXPMS9odi5xW/iKC7ZhrWJJ0Z5xYcW/x+1fVMn1Qvw==}
+    engines: {node: '>=16', pnpm: '>=8'}
+    dev: false
 
   /node-releases@2.0.14:
     resolution: {integrity: sha512-y10wOWt8yZpqXmOgRo77WaHEmhYQYGNA6y421PKsKYWEK8aW+cqAphborZDhqfyKrbZEN92CN1X2KbafY2s7Yw==}
