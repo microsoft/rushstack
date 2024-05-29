@@ -12,7 +12,7 @@ import { OperationStatus } from './OperationStatus';
 import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { RushConstants } from '../RushConstants';
-import { type IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
@@ -92,7 +92,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         recordByOperation: Map<Operation, IOperationExecutionResult>,
         context: IExecuteOperationsContext
       ): Promise<void> => {
-        const { isIncrementalBuildAllowed, projectChangeAnalyzer, isInitial } = context;
+        const { isIncrementalBuildAllowed, projectChangeAnalyzer, projectConfigurations, isInitial } =
+          context;
 
         const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildFeatureEnabled
           ? new DisjointSet()
@@ -106,6 +107,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               return;
             }
 
+            const { name: phaseName } = associatedPhase;
+
+            const projectConfiguration: RushProjectConfiguration | undefined =
+              projectConfigurations.get(associatedProject);
+
             // This value can *currently* be cached per-project, but in the future the list of files will vary
             // depending on the selected phase.
             const fileHashes: Map<string, string> | undefined =
@@ -118,11 +124,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             }
 
             const cacheDisabledReason: string | undefined =
-              await RushProjectConfiguration.getCacheDisabledReasonForProjectAsync(associatedProject, {
-                terminal,
-                trackedFileNames: fileHashes.keys(),
-                phaseName: associatedPhase.name,
-                isNoOp: operation.isNoOp
+              RushProjectConfiguration.getCacheDisabledReasonForProject({
+                config: projectConfiguration,
+                phaseName: phaseName,
+                isNoOp: operation.isNoOp,
+                trackedFileNames: fileHashes.keys()
               });
 
             disjointSet?.add(operation);
@@ -164,14 +170,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 return operation.name;
               });
 
-              // Generates cluster id, cluster id comes from the project folder and operation name of all operations in the same cluster.
+              // Generates cluster id, cluster id comes from the project folder and phase name of all operations in the same cluster.
               const hash: crypto.Hash = crypto.createHash('sha1');
               for (const operation of groupedOperations) {
-                const { associatedProject: project } = operation;
-                if (project && operation.name) {
+                const { associatedPhase: phase, associatedProject: project } = operation;
+                if (project && phase) {
                   hash.update(project.projectRelativeFolder);
                   hash.update(RushConstants.hashDelimiter);
-                  hash.update(operation.name);
+                  hash.update(phase.name);
                   hash.update(RushConstants.hashDelimiter);
                 }
               }

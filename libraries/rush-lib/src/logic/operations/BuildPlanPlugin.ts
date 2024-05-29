@@ -11,6 +11,7 @@ import type { Operation } from './Operation';
 import { clusterOperations, type IOperationBuildCacheContext } from './CacheableOperationPlugin';
 import { DisjointSet } from '../cobuild/DisjointSet';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import { RushConstants } from '../RushConstants';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 
 const PLUGIN_NAME: 'BuildPlanPlugin' = 'BuildPlanPlugin';
@@ -46,7 +47,7 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
       recordByOperation: Map<Operation, IOperationExecutionResult>,
       context: IExecuteOperationsContext
     ): Promise<void> {
-      const { projectChangeAnalyzer } = context;
+      const { projectConfigurations, projectChangeAnalyzer } = context;
       const disjointSet: DisjointSet<Operation> = new DisjointSet<Operation>();
       const operations: Operation[] = [...recordByOperation.keys()];
       for (const operation of operations) {
@@ -59,18 +60,19 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
       for (const operation of operations) {
         const { associatedProject, associatedPhase } = operation;
         if (associatedProject && associatedPhase) {
+          const projectConfiguration: RushProjectConfiguration | undefined =
+            projectConfigurations.get(associatedProject);
           const fileHashes: Map<string, string> | undefined =
             await projectChangeAnalyzer._tryGetProjectDependenciesAsync(associatedProject, terminal);
           if (!fileHashes) {
-            // CacheableOperationPlugin will throw if fileHashes aren't set, let's just skip it here.
             continue;
           }
           const cacheDisabledReason: string | undefined =
-            await RushProjectConfiguration.getCacheDisabledReasonForProjectAsync(associatedProject, {
-              terminal,
+            RushProjectConfiguration.getCacheDisabledReasonForProject({
+              config: projectConfiguration,
               trackedFileNames: fileHashes.keys(),
-              phaseName: associatedPhase.name,
-              isNoOp: operation.isNoOp
+              isNoOp: operation.isNoOp,
+              phaseName: associatedPhase.name
             });
           buildCacheByOperation.set(operation, { cacheDisabledReason });
         }

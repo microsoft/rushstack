@@ -396,22 +396,16 @@ export class RushProjectConfiguration {
    * As some operations may not have a rush-project.json file defined at all, but may be no-op operations
    *  we'll want to ignore those completely.
    */
-  public static async getCacheDisabledReasonForProjectAsync(
-    project: RushConfigurationProject,
-    options: {
-      terminal: ITerminal;
-      trackedFileNames: Iterable<string>;
-      phaseName: string;
-      isNoOp: boolean;
-    }
-  ): Promise<string | undefined> {
-    const { terminal, trackedFileNames, phaseName, isNoOp } = options;
+  public static getCacheDisabledReasonForProject(options: {
+    config: RushProjectConfiguration | undefined;
+    trackedFileNames: Iterable<string>;
+    phaseName: string;
+    isNoOp: boolean;
+  }): string | undefined {
+    const { config, trackedFileNames, phaseName, isNoOp } = options;
     if (isNoOp) {
       return undefined;
     }
-
-    const config: RushProjectConfiguration | undefined =
-      await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
 
     if (!config) {
       return (
