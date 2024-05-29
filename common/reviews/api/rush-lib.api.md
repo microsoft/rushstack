@@ -1398,7 +1398,6 @@ export class RushLifecycleHooks {
 export class RushProjectConfiguration {
     readonly disableBuildCacheForProject: boolean;
     getCacheDisabledReason(trackedFileNames: Iterable<string>, phaseName: string, isNoOp: boolean): string | undefined;
-    // (undocumented)
     static getCacheDisabledReasonForProjectAsync(project: RushConfigurationProject, options: {
         terminal: ITerminal;
         trackedFileNames: Iterable<string>;

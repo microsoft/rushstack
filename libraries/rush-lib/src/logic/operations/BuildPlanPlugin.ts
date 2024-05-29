@@ -46,7 +46,7 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
       recordByOperation: Map<Operation, IOperationExecutionResult>,
       context: IExecuteOperationsContext
     ): Promise<void> {
-      const { projectConfigurations, projectChangeAnalyzer } = context;
+      const { projectChangeAnalyzer } = context;
       const disjointSet: DisjointSet<Operation> = new DisjointSet<Operation>();
       const operations: Operation[] = [...recordByOperation.keys()];
       for (const operation of operations) {

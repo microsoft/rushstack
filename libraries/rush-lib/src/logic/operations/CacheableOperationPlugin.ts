@@ -92,8 +92,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         recordByOperation: Map<Operation, IOperationExecutionResult>,
         context: IExecuteOperationsContext
       ): Promise<void> => {
-        const { isIncrementalBuildAllowed, projectChangeAnalyzer, projectConfigurations, isInitial } =
-          context;
+        const { isIncrementalBuildAllowed, projectChangeAnalyzer, isInitial } = context;
 
         const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildFeatureEnabled
           ? new DisjointSet()
@@ -165,14 +164,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 return operation.name;
               });
 
-              // Generates cluster id, cluster id comes from the project folder and phase name of all operations in the same cluster.
+              // Generates cluster id, cluster id comes from the project folder and operation name of all operations in the same cluster.
               const hash: crypto.Hash = crypto.createHash('sha1');
               for (const operation of groupedOperations) {
-                const { associatedPhase: phase, associatedProject: project } = operation;
-                if (project && phase) {
+                const { associatedProject: project } = operation;
+                if (project && operation.name) {
                   hash.update(project.projectRelativeFolder);
                   hash.update(RushConstants.hashDelimiter);
-                  hash.update(phase.name);
+                  hash.update(operation.name);
                   hash.update(RushConstants.hashDelimiter);
                 }
               }
