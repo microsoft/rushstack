@@ -14,7 +14,8 @@ import type { Subspace } from '../api/Subspace';
  * Example:
  *  {
  *    "pnpmShrinkwrapHash": "...",
- *    "preferredVersionsHash": "..."
+ *    "preferredVersionsHash": "...",
+ *    "packageJsonInjectedDependenciesHash": "..."
  *  }
  */
 interface IRepoStateJson {
@@ -26,6 +27,10 @@ interface IRepoStateJson {
    * A hash of the CommonVersionsConfiguration.preferredVersions field
    */
   preferredVersionsHash?: string;
+  /**
+   * A hash of the injected dependencies in related package.json
+   */
+  packageJsonInjectedDependenciesHash?: string;
 }
 
 /**
@@ -39,6 +44,7 @@ export class RepoStateFile {
 
   private _pnpmShrinkwrapHash: string | undefined;
   private _preferredVersionsHash: string | undefined;
+  private _packageJsonInjectedDependenciesHash: string | undefined;
   private _isValid: boolean;
   private _modified: boolean = false;
 
@@ -54,6 +60,7 @@ export class RepoStateFile {
     if (repoStateJson) {
       this._pnpmShrinkwrapHash = repoStateJson.pnpmShrinkwrapHash;
       this._preferredVersionsHash = repoStateJson.preferredVersionsHash;
+      this._packageJsonInjectedDependenciesHash = repoStateJson.packageJsonInjectedDependenciesHash;
     }
   }
 
@@ -69,6 +76,13 @@ export class RepoStateFile {
    */
   public get preferredVersionsHash(): string | undefined {
     return this._preferredVersionsHash;
+  }
+
+  /**
+   * The hash of all preferred versions at the end of the last update.
+   */
+  public get packageJsonInjectedDependenciesHash(): string | undefined {
+    return this._packageJsonInjectedDependenciesHash;
   }
 
   /**
@@ -182,6 +196,21 @@ export class RepoStateFile {
       this._modified = true;
     }
 
+    if (rushConfiguration.packageManager === 'pnpm' && rushConfiguration.subspacesFeatureEnabled) {
+      const packageJsonInjectedDependenciesHash: string | undefined =
+        subspace.getPackageJsonInjectedDependenciesHash();
+
+      // packageJsonInjectedDependenciesHash is undefined, means there is no injected dependencies for that subspace
+      // so we don't need to track the hash value for that subspace
+      if (
+        packageJsonInjectedDependenciesHash &&
+        packageJsonInjectedDependenciesHash !== this._packageJsonInjectedDependenciesHash
+      ) {
+        this._packageJsonInjectedDependenciesHash = packageJsonInjectedDependenciesHash;
+        this._modified = true;
+      }
+    }
+
     // Now that the file has been refreshed, we know its contents are valid
     this._isValid = true;
 
@@ -212,6 +241,9 @@ export class RepoStateFile {
     }
     if (this._preferredVersionsHash) {
       repoStateJson.preferredVersionsHash = this._preferredVersionsHash;
+    }
+    if (this._packageJsonInjectedDependenciesHash) {
+      repoStateJson.packageJsonInjectedDependenciesHash = this._packageJsonInjectedDependenciesHash;
     }
 
     return JsonFile.stringify(repoStateJson, { newlineConversion: NewlineKind.Lf });

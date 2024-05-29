@@ -4,6 +4,7 @@
 import * as path from 'path';
 
 import { FileSystem } from '@rushstack/node-core-library';
+import { hasher as objectHasher } from 'node-object-hash';
 import type { RushConfiguration } from './RushConfiguration';
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
@@ -12,6 +13,10 @@ import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import type { IPackageJson } from '@rushstack/node-core-library';
+import { SubspacePnpmfileConfiguration } from '../logic/pnpm/SubspacePnpmfileConfiguration';
+import type { PackageJsonEditor } from './PackageJsonEditor';
+import type { ISubspacePnpmfileShimSettings } from '../logic/pnpm/IPnpmfile';
 
 /**
  * @internal
@@ -320,5 +325,67 @@ export class Subspace {
   /** @internal */
   public _addProject(project: RushConfigurationProject): void {
     this._projects.push(project);
+  }
+
+  /**
+   * Returns hash value of injected dependencies in related package.json.
+   * @beta
+   */
+  public getPackageJsonInjectedDependenciesHash(): string | undefined {
+    const allPackageJson: IPackageJson[] = [];
+
+    const relatedProjects: RushConfigurationProject[] = [];
+    const subspacePnpmfileShimSettings: ISubspacePnpmfileShimSettings =
+      SubspacePnpmfileConfiguration.getSubspacePnpmfileShimSettings(this._rushConfiguration, this);
+
+    for (const rushProject of this.getProjects()) {
+      const injectedDependencies: Array<string> =
+        subspacePnpmfileShimSettings?.subspaceProjects[rushProject.packageName]?.injectedDependencies || [];
+      if (injectedDependencies.length === 0) {
+        continue;
+      }
+
+      const injectedDependencySet: Set<string> = new Set(injectedDependencies);
+
+      for (const dependencyProject of rushProject.dependencyProjects) {
+        if (injectedDependencySet.has(dependencyProject.packageName)) {
+          relatedProjects.push(dependencyProject);
+        }
+      }
+    }
+
+    // this means there is no injected dependencies for current subspace
+    if (relatedProjects.length === 0) {
+      return undefined;
+    }
+
+    // recursive to get all related package.json
+    while (relatedProjects.length > 0) {
+      const rushProject: RushConfigurationProject = relatedProjects.pop()!;
+      allPackageJson.push(this._getImportantFieldsInPackageJson(rushProject.packageJsonEditor));
+      relatedProjects.push(...rushProject.dependencyProjects);
+    }
+
+    return objectHasher({ sort: true }).hash(allPackageJson);
+  }
+
+  private _getImportantFieldsInPackageJson(packageJsonEditor: PackageJsonEditor): IPackageJson {
+    const packageJson: IPackageJson = packageJsonEditor.saveToObject();
+
+    // these fields in the package.json even it is modified
+    // it has nothing to do with the pnpm-lock.yaml
+    delete packageJson.bin;
+    delete packageJson.description;
+    delete packageJson.homepage;
+    delete packageJson.license;
+    delete packageJson.main;
+    delete packageJson.private;
+    delete packageJson.repository;
+    delete packageJson.scripts;
+    delete packageJson.tsdocMetadata;
+    delete packageJson.types;
+    delete packageJson.typings;
+
+    return packageJson;
   }
 }

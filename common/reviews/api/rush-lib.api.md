@@ -1123,6 +1123,7 @@ export class RepoStateFile {
     readonly filePath: string;
     get isValid(): boolean;
     static loadFromFile(jsonFilename: string): RepoStateFile;
+    get packageJsonInjectedDependenciesHash(): string | undefined;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
     refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined): boolean;
@@ -1451,6 +1452,8 @@ export class Subspace {
     getCommonVersions(): CommonVersionsConfiguration;
     // @beta
     getCommonVersionsFilePath(): string;
+    // @beta
+    getPackageJsonInjectedDependenciesHash(): string | undefined;
     // @beta
     getPnpmConfigFilePath(): string;
     // @beta

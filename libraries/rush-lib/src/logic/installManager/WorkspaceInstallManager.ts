@@ -152,6 +152,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         );
         shrinkwrapIsUpToDate = false;
       }
+
+      const packageJsonInjectedDependenciesHash: string | undefined =
+        subspace.getPackageJsonInjectedDependenciesHash();
+
+      if (
+        packageJsonInjectedDependenciesHash &&
+        packageJsonInjectedDependenciesHash !== repoState.packageJsonInjectedDependenciesHash
+      ) {
+        shrinkwrapWarnings.push(`Some injected dependencies's package.json might have been modified.`);
+        shrinkwrapIsUpToDate = false;
+      }
     }
 
     // To generate the workspace file, we will add each project to the file as we loop through and validate
