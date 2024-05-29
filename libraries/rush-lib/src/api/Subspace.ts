@@ -15,7 +15,6 @@ import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
 import type { IPackageJson } from '@rushstack/node-core-library';
 import { SubspacePnpmfileConfiguration } from '../logic/pnpm/SubspacePnpmfileConfiguration';
-import type { PackageJsonEditor } from './PackageJsonEditor';
 import type { ISubspacePnpmfileShimSettings } from '../logic/pnpm/IPnpmfile';
 
 /**
@@ -362,30 +361,27 @@ export class Subspace {
     // recursive to get all related package.json
     while (relatedProjects.length > 0) {
       const rushProject: RushConfigurationProject = relatedProjects.pop()!;
-      allPackageJson.push(this._getImportantFieldsInPackageJson(rushProject.packageJsonEditor));
+      allPackageJson.push(this._getImportantFieldsInPackageJson(rushProject.packageJson));
       relatedProjects.push(...rushProject.dependencyProjects);
     }
 
     return objectHasher({ sort: true }).hash(allPackageJson);
   }
 
-  private _getImportantFieldsInPackageJson(packageJsonEditor: PackageJsonEditor): IPackageJson {
-    const packageJson: IPackageJson = packageJsonEditor.saveToObject();
-
-    // these fields in the package.json even it is modified
-    // it has nothing to do with the pnpm-lock.yaml
-    delete packageJson.bin;
-    delete packageJson.description;
-    delete packageJson.homepage;
-    delete packageJson.license;
-    delete packageJson.main;
-    delete packageJson.private;
-    delete packageJson.repository;
-    delete packageJson.scripts;
-    delete packageJson.tsdocMetadata;
-    delete packageJson.types;
-    delete packageJson.typings;
-
-    return packageJson;
+  private _getImportantFieldsInPackageJson(packageJson: IPackageJson): IPackageJson {
+    // Collect fields that could update the `pnpm-lock.yaml`
+    const packageJsonWithImportantFields: IPackageJson = {
+      name: packageJson.name,
+      version: packageJson.version,
+      bin: packageJson?.bin,
+      dependencies: packageJson?.dependencies,
+      devDependencies: packageJson?.devDependencies,
+      peerDependencies: packageJson?.peerDependencies,
+      optionalDependencies: packageJson?.optionalDependencies,
+      dependenciesMeta: packageJson?.dependenciesMeta,
+      peerDependenciesMeta: packageJson.peerDependenciesMeta,
+      resolutions: packageJson?.resolutions
+    };
+    return packageJsonWithImportantFields;
   }
 }

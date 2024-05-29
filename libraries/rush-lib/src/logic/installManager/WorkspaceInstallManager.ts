@@ -160,7 +160,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         packageJsonInjectedDependenciesHash &&
         packageJsonInjectedDependenciesHash !== repoState.packageJsonInjectedDependenciesHash
       ) {
-        shrinkwrapWarnings.push(`Some injected dependencies's package.json might have been modified.`);
+        shrinkwrapWarnings.push(`Some injected dependencies' package.json might have been modified.`);
         shrinkwrapIsUpToDate = false;
       }
     }
