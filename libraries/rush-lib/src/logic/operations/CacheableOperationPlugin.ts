@@ -12,7 +12,7 @@ import { OperationStatus } from './OperationStatus';
 import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { RushConstants } from '../RushConstants';
-import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { type IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
@@ -107,11 +107,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               return;
             }
 
-            const { name: phaseName } = associatedPhase;
-
-            const projectConfiguration: RushProjectConfiguration | undefined =
-              projectConfigurations.get(associatedProject);
-
             // This value can *currently* be cached per-project, but in the future the list of files will vary
             // depending on the selected phase.
             const fileHashes: Map<string, string> | undefined =
@@ -123,10 +118,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               );
             }
 
-            const cacheDisabledReason: string | undefined = projectConfiguration
-              ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, operation.isNoOp)
-              : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-                'or one provided by a rig, so it does not support caching.';
+            const cacheDisabledReason: string | undefined =
+              await RushProjectConfiguration.getCacheDisabledReasonForProjectAsync(associatedProject, {
+                terminal,
+                trackedFileNames: fileHashes.keys(),
+                phaseName: associatedPhase.name,
+                isNoOp: operation.isNoOp
+              });
 
             disjointSet?.add(operation);
 

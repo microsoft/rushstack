@@ -392,6 +392,38 @@ export class RushProjectConfiguration {
   }
 
   /**
+   * Source of truth for whether a project is unable to use the build cache for a given phase.
+   * As some operations may not have a rush-project.json file defined at all, but may be no-op operations
+   *  we'll want to ignore those completely.
+   */
+  public static async getCacheDisabledReasonForProjectAsync(
+    project: RushConfigurationProject,
+    options: {
+      terminal: ITerminal;
+      trackedFileNames: Iterable<string>;
+      phaseName: string;
+      isNoOp: boolean;
+    }
+  ): Promise<string | undefined> {
+    const { terminal, trackedFileNames, phaseName, isNoOp } = options;
+    const config: RushProjectConfiguration | undefined =
+      await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
+
+    if (isNoOp) {
+      return undefined;
+    }
+
+    if (!config) {
+      return (
+        `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
+        'or one provided by a rig, so it does not support caching.'
+      );
+    }
+
+    return config.getCacheDisabledReason(trackedFileNames, phaseName, isNoOp);
+  }
+
+  /**
    * Loads the rush-project.json data for the specified project.
    */
   public static async tryLoadForProjectAsync(

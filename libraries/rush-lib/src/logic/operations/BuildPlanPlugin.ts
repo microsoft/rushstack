@@ -11,8 +11,7 @@ import type { Operation } from './Operation';
 import { clusterOperations, type IOperationBuildCacheContext } from './CacheableOperationPlugin';
 import { DisjointSet } from '../cobuild/DisjointSet';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import { RushConstants } from '../RushConstants';
-import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 
 const PLUGIN_NAME: 'BuildPlanPlugin' = 'BuildPlanPlugin';
 
@@ -60,18 +59,19 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
       for (const operation of operations) {
         const { associatedProject, associatedPhase } = operation;
         if (associatedProject && associatedPhase) {
-          const projectConfiguration: RushProjectConfiguration | undefined =
-            projectConfigurations.get(associatedProject);
           const fileHashes: Map<string, string> | undefined =
             await projectChangeAnalyzer._tryGetProjectDependenciesAsync(associatedProject, terminal);
-          const cacheDisabledReason: string | undefined = projectConfiguration
-            ? projectConfiguration.getCacheDisabledReason(
-                fileHashes!.keys(),
-                associatedPhase.name,
-                operation.isNoOp
-              )
-            : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-              'or one provided by a rig, so it does not support caching.';
+          if (!fileHashes) {
+            // CacheableOperationPlugin will throw if fileHashes aren't set, let's just skip it here.
+            continue;
+          }
+          const cacheDisabledReason: string | undefined =
+            await RushProjectConfiguration.getCacheDisabledReasonForProjectAsync(associatedProject, {
+              terminal,
+              trackedFileNames: fileHashes.keys(),
+              phaseName: associatedPhase.name,
+              isNoOp: operation.isNoOp
+            });
           buildCacheByOperation.set(operation, { cacheDisabledReason });
         }
       }
