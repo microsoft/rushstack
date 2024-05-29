@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "3.7.0",
+      "tag": "@rushstack/eslint-config_v3.7.0",
+      "date": "Wed, 29 May 2024 00:10:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `eslint-plugin-tsdoc` plugin."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.6.10",
       "tag": "@rushstack/eslint-config_v3.6.10",
       "date": "Fri, 17 May 2024 00:10:40 GMT",

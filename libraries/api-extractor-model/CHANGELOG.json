@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.29.0",
+      "tag": "@microsoft/api-extractor-model_v7.29.0",
+      "date": "Wed, 29 May 2024 00:10:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump TSDoc dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.28.21",
       "tag": "@microsoft/api-extractor-model_v7.28.21",
       "date": "Tue, 28 May 2024 15:10:09 GMT",

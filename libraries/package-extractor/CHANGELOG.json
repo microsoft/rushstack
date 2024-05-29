@@ -2,6 +2,24 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.7.12",
+      "tag": "@rushstack/package-extractor_v0.7.12",
+      "date": "Wed, 29 May 2024 00:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.52`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.52`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.11",
       "tag": "@rushstack/package-extractor_v0.7.11",
       "date": "Tue, 28 May 2024 15:10:09 GMT",
