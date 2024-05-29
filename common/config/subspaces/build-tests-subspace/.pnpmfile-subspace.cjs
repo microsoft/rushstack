@@ -48,13 +48,6 @@ function readPackage(packageJson, context) {
       delete packageJson.dependencies['lerna'];
       break;
     }
-
-    case 'tslint-microsoft-contrib': {
-      // The `tslint-microsoft-contrib` repo is archived so it can't be updated to TS 4.4+.
-      // unmet peer typescript@"^2.1.0 || ^3.0.0": found 4.5.5
-      packageJson.peerDependencies['typescript'] = '*';
-      break;
-    }
   }
 
   return packageJson;
