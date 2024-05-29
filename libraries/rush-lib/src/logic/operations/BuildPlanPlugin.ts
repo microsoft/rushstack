@@ -69,7 +69,7 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
           }
           const cacheDisabledReason: string | undefined =
             RushProjectConfiguration.getCacheDisabledReasonForProject({
-              config: projectConfiguration,
+              projectConfiguration,
               trackedFileNames: fileHashes.keys(),
               isNoOp: operation.isNoOp,
               phaseName: associatedPhase.name

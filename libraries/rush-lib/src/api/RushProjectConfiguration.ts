@@ -397,24 +397,24 @@ export class RushProjectConfiguration {
    *  we'll want to ignore those completely.
    */
   public static getCacheDisabledReasonForProject(options: {
-    config: RushProjectConfiguration | undefined;
+    projectConfiguration: RushProjectConfiguration | undefined;
     trackedFileNames: Iterable<string>;
     phaseName: string;
     isNoOp: boolean;
   }): string | undefined {
-    const { config, trackedFileNames, phaseName, isNoOp } = options;
+    const { projectConfiguration, trackedFileNames, phaseName, isNoOp } = options;
     if (isNoOp) {
       return undefined;
     }
 
-    if (!config) {
+    if (!projectConfiguration) {
       return (
         `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
         'or one provided by a rig, so it does not support caching.'
       );
     }
 
-    return config.getCacheDisabledReason(trackedFileNames, phaseName, isNoOp);
+    return projectConfiguration.getCacheDisabledReason(trackedFileNames, phaseName, isNoOp);
   }
 
   /**

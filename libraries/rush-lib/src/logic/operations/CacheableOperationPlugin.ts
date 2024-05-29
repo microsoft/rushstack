@@ -125,7 +125,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
             const cacheDisabledReason: string | undefined =
               RushProjectConfiguration.getCacheDisabledReasonForProject({
-                config: projectConfiguration,
+                projectConfiguration,
                 phaseName: phaseName,
                 isNoOp: operation.isNoOp,
                 trackedFileNames: fileHashes.keys()
