@@ -406,12 +406,12 @@ export class RushProjectConfiguration {
     }
   ): Promise<string | undefined> {
     const { terminal, trackedFileNames, phaseName, isNoOp } = options;
-    const config: RushProjectConfiguration | undefined =
-      await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
-
     if (isNoOp) {
       return undefined;
     }
+
+    const config: RushProjectConfiguration | undefined =
+      await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
 
     if (!config) {
       return (
