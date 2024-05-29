@@ -1,6 +1,11 @@
 # Change Log - @rushstack/webpack4-localization-plugin
 
-This log was last generated on Wed, 29 May 2024 00:10:52 GMT and should not be manually modified.
+This log was last generated on Wed, 29 May 2024 02:03:51 GMT and should not be manually modified.
+
+## 0.18.53
+Wed, 29 May 2024 02:03:51 GMT
+
+_Version update only_
 
 ## 0.18.52
 Wed, 29 May 2024 00:10:52 GMT

@@ -1,6 +1,14 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 28 May 2024 15:10:09 GMT and should not be manually modified.
+This log was last generated on Wed, 29 May 2024 02:03:50 GMT and should not be manually modified.
+
+## 5.4.0
+Wed, 29 May 2024 02:03:50 GMT
+
+### Minor changes
+
+- Add a `throwOnSignal` option to the `Executable.waitForExitAsync` to control if that function should throw if the process is terminated with a signal.
+- Add a `signal` property to the result of `Executable.waitForExitAsync` that includes a signal if the process was termianted by a signal.
 
 ## 5.3.0
 Tue, 28 May 2024 15:10:09 GMT
