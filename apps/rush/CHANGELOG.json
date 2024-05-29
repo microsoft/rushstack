@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.125.1",
+      "tag": "@microsoft/rush_v5.125.1",
+      "date": "Wed, 29 May 2024 05:39:54 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where if `missingScriptBehavior` is set to `\"error\"` and a script is present and empty, an error would be thrown."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.125.0",
       "tag": "@microsoft/rush_v5.125.0",
       "date": "Sat, 25 May 2024 05:12:20 GMT",

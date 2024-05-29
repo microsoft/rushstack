@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 25 May 2024 05:12:20 GMT and should not be manually modified.
+This log was last generated on Wed, 29 May 2024 05:39:54 GMT and should not be manually modified.
+
+## 5.125.1
+Wed, 29 May 2024 05:39:54 GMT
+
+### Updates
+
+- Fix an issue where if `missingScriptBehavior` is set to `"error"` and a script is present and empty, an error would be thrown.
 
 ## 5.125.0
 Sat, 25 May 2024 05:12:20 GMT
