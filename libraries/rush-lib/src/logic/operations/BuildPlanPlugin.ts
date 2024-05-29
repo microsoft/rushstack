@@ -11,7 +11,6 @@ import type { Operation } from './Operation';
 import { clusterOperations, type IOperationBuildCacheContext } from './CacheableOperationPlugin';
 import { DisjointSet } from '../cobuild/DisjointSet';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import { RushConstants } from '../RushConstants';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 
 const PLUGIN_NAME: 'BuildPlanPlugin' = 'BuildPlanPlugin';

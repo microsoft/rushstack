@@ -1398,12 +1398,12 @@ export class RushLifecycleHooks {
 export class RushProjectConfiguration {
     readonly disableBuildCacheForProject: boolean;
     getCacheDisabledReason(trackedFileNames: Iterable<string>, phaseName: string, isNoOp: boolean): string | undefined;
-    static getCacheDisabledReasonForProjectAsync(project: RushConfigurationProject, options: {
-        terminal: ITerminal;
+    static getCacheDisabledReasonForProject(options: {
+        projectConfiguration: RushProjectConfiguration | undefined;
         trackedFileNames: Iterable<string>;
         phaseName: string;
         isNoOp: boolean;
-    }): Promise<string | undefined>;
+    }): string | undefined;
     readonly incrementalBuildIgnoredGlobs: ReadonlyArray<string>;
     // (undocumented)
     readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;

@@ -12,7 +12,7 @@ import { OperationStatus } from './OperationStatus';
 import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { RushConstants } from '../RushConstants';
-import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { type IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
