@@ -20,7 +20,6 @@
     "@types/jest": "ts2.9",
     "@types/node": "ts2.9",
     "tslint": "~5.20.1",
-    "tslint-microsoft-contrib": "~6.2.0",
     "typescript": "~2.9.2"
   }
 }

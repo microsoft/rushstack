@@ -862,10 +862,7 @@
       "name": "tslint",
       "allowedCategories": [ "libraries", "tests" ]
     },
-    {
-      "name": "tslint-microsoft-contrib",
-      "allowedCategories": [ "tests" ]
-    },
+
     {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]

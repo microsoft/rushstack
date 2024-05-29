@@ -4,4 +4,4 @@
 /**
  * @public
  */
-export class TestClass {} // tslint:disable-line:export-name
+export class TestClass {}
