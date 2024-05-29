@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update the `.gitignore` in the `rush init` template to include some common toolchain output files and folders.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
