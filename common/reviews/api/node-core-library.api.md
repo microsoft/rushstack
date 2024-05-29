@@ -618,11 +618,13 @@ export interface ISubprocessOptions {
 export interface IWaitForExitOptions {
     encoding?: BufferEncoding | 'buffer';
     throwOnNonZeroExitCode?: boolean;
+    throwOnSignal?: boolean;
 }
 
 // @public
 export interface IWaitForExitResult<T extends Buffer | string | never = never> {
     exitCode: number | null;
+    signal: string | null;
     stderr: T;
     stdout: T;
 }

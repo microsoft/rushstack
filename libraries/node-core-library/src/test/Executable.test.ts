@@ -4,6 +4,7 @@
 import * as os from 'os';
 import * as path from 'path';
 import type * as child_process from 'child_process';
+import { once } from 'events';
 
 import {
   Executable,
@@ -76,15 +77,7 @@ describe('Executable process tests', () => {
         PosixModeBits.AllRead | PosixModeBits.AllWrite | PosixModeBits.AllExecute
       );
       FileSystem.changePosixModeBits(
-        path.join(executableFolder, 'success', 'bash-script.sh'),
-        PosixModeBits.AllRead | PosixModeBits.AllWrite | PosixModeBits.AllExecute
-      );
-      FileSystem.changePosixModeBits(
         path.join(executableFolder, 'fail', 'npm-binary-wrapper'),
-        PosixModeBits.AllRead | PosixModeBits.AllWrite | PosixModeBits.AllExecute
-      );
-      FileSystem.changePosixModeBits(
-        path.join(executableFolder, 'fail', 'bash-script.sh'),
         PosixModeBits.AllRead | PosixModeBits.AllWrite | PosixModeBits.AllExecute
       );
     }
@@ -98,15 +91,7 @@ describe('Executable process tests', () => {
         PosixModeBits.AllRead | PosixModeBits.AllWrite
       );
       FileSystem.changePosixModeBits(
-        path.join(executableFolder, 'success', 'bash-script.sh'),
-        PosixModeBits.AllRead | PosixModeBits.AllWrite
-      );
-      FileSystem.changePosixModeBits(
         path.join(executableFolder, 'fail', 'npm-binary-wrapper'),
-        PosixModeBits.AllRead | PosixModeBits.AllWrite
-      );
-      FileSystem.changePosixModeBits(
-        path.join(executableFolder, 'fail', 'bash-script.sh'),
         PosixModeBits.AllRead | PosixModeBits.AllWrite
       );
     }
@@ -253,6 +238,7 @@ describe('Executable process tests', () => {
     });
     const result: IWaitForExitResult = await Executable.waitForExitAsync(childProcess);
     expect(result.exitCode).toEqual(0);
+    expect(result.signal).toBeNull();
     expect(result.stderr).toBeUndefined();
     expect(result.stderr).toBeUndefined();
   });
@@ -267,11 +253,10 @@ describe('Executable process tests', () => {
       encoding: 'buffer'
     });
     expect(result.exitCode).toEqual(0);
+    expect(result.signal).toBeNull();
     expect(Buffer.isBuffer(result.stdout)).toEqual(true);
     expect(Buffer.isBuffer(result.stderr)).toEqual(true);
-    expect(
-      result.stdout.toString('utf8').indexOf('Executing javascript-file.js with args:')
-    ).toBeGreaterThanOrEqual(0);
+    expect(result.stdout.toString('utf8').includes('Executing javascript-file.js with args:')).toBe(true);
     expect(result.stderr.toString('utf8')).toEqual('');
   });
 
@@ -285,6 +270,7 @@ describe('Executable process tests', () => {
       encoding: 'utf8'
     });
     expect(result.exitCode).toEqual(0);
+    expect(result.signal).toBeNull();
     expect(typeof result.stdout).toEqual('string');
     expect(typeof result.stderr).toEqual('string');
     expect(result.stdout.indexOf('Executing javascript-file.js with args:')).toBeGreaterThanOrEqual(0);
@@ -298,17 +284,46 @@ describe('Executable process tests', () => {
       currentWorkingDirectory: executableFolder
     });
     const result: IWaitForExitResult<string> = await Executable.waitForExitAsync(childProcess, {
-      encoding: 'utf8',
-      throwOnNonZeroExitCode: false
+      encoding: 'utf8'
     });
     expect(result.exitCode).toEqual(1);
+    expect(result.signal).toBeNull();
     expect(typeof result.stdout).toEqual('string');
     expect(typeof result.stderr).toEqual('string');
-    expect(result.stdout.indexOf('Executing javascript-file.js with args:')).toEqual(-1);
+    expect(result.stdout).toMatch(/^Executing npm-binary-wrapper(\.cmd)? with args:/);
     expect(result.stderr.endsWith('This is a failure'));
   });
 
-  test('Executable.runToCompletion(Executable.spawn("npm-binary-wrapper")) failure with throw', async () => {
+  test('Executable.runToCompletion(Executable.spawn("no-terminate")) killed', async () => {
+    const executablePath: string = path.join(executableFolder, 'no-terminate', 'javascript-file.js');
+    const childProcess: child_process.ChildProcess = Executable.spawn(
+      process.argv0,
+      [executablePath, '1', '2', '3'],
+      {
+        environment,
+        currentWorkingDirectory: executableFolder
+      }
+    );
+
+    // Wait for the process to print the error line
+    expect(childProcess.stderr).toBeDefined();
+    const [stderrPre] = await once(childProcess.stderr!, 'data');
+
+    const killResult: boolean = childProcess.kill('SIGTERM');
+    const result: IWaitForExitResult<string> = await Executable.waitForExitAsync(childProcess, {
+      encoding: 'utf8'
+    });
+
+    expect(killResult).toBe(true);
+    expect(result.signal).toBe('SIGTERM');
+    expect(result.exitCode).toBeNull();
+    expect(typeof result.stdout).toEqual('string');
+    expect(typeof result.stderr).toEqual('string');
+    expect(result.stdout).toMatch(/^Executing no-terminate with args:/);
+    expect((stderrPre.toString('utf8') + result.stderr).includes('This process never terminates')).toBe(true);
+  });
+
+  test('Executable.runToCompletion(Executable.spawn("npm-binary-wrapper")) failure with throw on non-zero exit code', async () => {
     const executablePath: string = path.join(executableFolder, 'fail', 'npm-binary-wrapper');
     const childProcess: child_process.ChildProcess = Executable.spawn(executablePath, ['1', '2', '3'], {
       environment,
@@ -317,6 +332,22 @@ describe('Executable process tests', () => {
     await expect(
       Executable.waitForExitAsync(childProcess, { encoding: 'utf8', throwOnNonZeroExitCode: true })
     ).rejects.toThrowError(/exited with code 1/);
+  });
+
+  test('Executable.runToCompletion(Executable.spawn("no-terminate")) failure with throw on signal', async () => {
+    const executablePath: string = path.join(executableFolder, 'no-terminate', 'javascript-file.js');
+    const childProcess: child_process.ChildProcess = Executable.spawn(
+      process.argv0,
+      [executablePath, '1', '2', '3'],
+      {
+        environment,
+        currentWorkingDirectory: executableFolder
+      }
+    );
+    childProcess.kill('SIGTERM');
+    await expect(
+      Executable.waitForExitAsync(childProcess, { encoding: 'utf8', throwOnSignal: true })
+    ).rejects.toThrowError(/Process terminated by SIGTERM/);
   });
 });
 
