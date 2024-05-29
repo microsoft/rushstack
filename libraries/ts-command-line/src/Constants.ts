@@ -6,7 +6,7 @@
  *
  * @public
  */
-export const enum CommandLineConstants {
+export enum CommandLineConstants {
   /**
    * The name of the built-in action that serves suggestions for tab-completion
    */

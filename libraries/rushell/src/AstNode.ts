@@ -4,7 +4,7 @@
 import type { Token } from './Tokenizer';
 import { TextRange } from './TextRange';
 
-export const enum AstKind {
+export enum AstKind {
   None = 'None',
   Script = 'Script',
   AndIf = 'AndIf',

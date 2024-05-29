@@ -85,7 +85,7 @@ function buildRules(profile) {
           radix: 'error',
 
           // Rationale: Including the `type` annotation in the import statement for imports
-          // only used as types prevents the import from being omitted in the compiled output.
+          // only used as types prevents the import from being emitted in the compiled output.
           '@typescript-eslint/consistent-type-imports': [
             'warn',
             { prefer: 'type-imports', disallowTypeAnnotations: false, fixStyle: 'inline-type-imports' }
