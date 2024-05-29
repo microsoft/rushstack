@@ -473,6 +473,10 @@ export class RushConfiguration {
   /**
    * If true, then consistent version specifiers for dependencies will be enforced.
    * I.e. "rush check" is run before some commands.
+   *
+   * @deprecated
+   * This setting was moved from `rush.json` to `common-versions.json`.
+   * Read it using {@link CommonVersionsConfiguration.ensureConsistentVersions} instead.
    */
   public readonly ensureConsistentVersions: boolean;
 

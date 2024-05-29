@@ -1166,6 +1166,7 @@ export class RushConfiguration {
     readonly customTipsConfigurationFilePath: string;
     // @beta (undocumented)
     get defaultSubspace(): Subspace;
+    // @deprecated
     readonly ensureConsistentVersions: boolean;
     // @beta
     readonly eventHooks: EventHooks;
@@ -1454,8 +1455,6 @@ export class Subspace {
     // @beta
     contains(project: RushConfigurationProject): boolean;
     // @beta
-    get ensureConsistentVersions(): boolean;
-    // @beta
     getCommittedShrinkwrapFilename(): string;
     // @beta
     getCommonVersions(): CommonVersionsConfiguration;
@@ -1481,6 +1480,8 @@ export class Subspace {
     getTempShrinkwrapFilename(): string;
     // @beta
     getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string;
+    // @beta
+    get shouldEnsureConsistentVersions(): boolean;
     // (undocumented)
     readonly subspaceName: string;
 }

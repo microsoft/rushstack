@@ -271,7 +271,7 @@ export class Subspace {
    * or from the rush.json file if it isn't defined in common-versions.json
    * @beta
    */
-  public get ensureConsistentVersions(): boolean {
+  public get shouldEnsureConsistentVersions(): boolean {
     if (
       this.getCommonVersions().ensureConsistentVersions !== undefined &&
       this._rushConfiguration.ensureConsistentVersions

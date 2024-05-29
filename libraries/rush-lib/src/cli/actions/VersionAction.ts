@@ -214,7 +214,7 @@ export class VersionAction extends BaseRushAction {
     // Validate result of all subspaces
     for (const subspace of rushConfig.subspaces) {
       // Respect the `ensureConsistentVersions` field in rush.json
-      if (!subspace.ensureConsistentVersions) {
+      if (!subspace.shouldEnsureConsistentVersions) {
         return;
       }
 
