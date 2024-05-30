@@ -2,6 +2,28 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@rushstack/terminal_v0.13.0",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing `type` modifiers on type-only exports."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Eliminate a const enum from the public API."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.3",
       "tag": "@rushstack/terminal_v0.12.3",
       "date": "Wed, 29 May 2024 02:03:51 GMT",

@@ -2,6 +2,29 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.3.54",
+      "tag": "@rushstack/debug-certificate-manager_v1.3.54",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing `type` modifiers on type-only exports."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.17`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.53",
       "tag": "@rushstack/debug-certificate-manager_v1.3.53",
       "date": "Wed, 29 May 2024 02:03:50 GMT",

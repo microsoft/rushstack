@@ -1,6 +1,17 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Wed, 29 May 2024 02:03:51 GMT and should not be manually modified.
+This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+
+## 0.13.0
+Thu, 30 May 2024 00:13:05 GMT
+
+### Minor changes
+
+- Eliminate a const enum from the public API.
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
 
 ## 0.12.3
 Wed, 29 May 2024 02:03:51 GMT

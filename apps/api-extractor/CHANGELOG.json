@@ -2,6 +2,32 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.46.2",
+      "tag": "@microsoft/api-extractor_v7.46.2",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing `type` modifiers on type-only exports."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.29.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.46.1",
       "tag": "@microsoft/api-extractor_v7.46.1",
       "date": "Wed, 29 May 2024 02:03:50 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 29 May 2024 02:03:50 GMT and should not be manually modified.
+This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+
+## 7.46.2
+Thu, 30 May 2024 00:13:05 GMT
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
 
 ## 7.46.1
 Wed, 29 May 2024 02:03:50 GMT
