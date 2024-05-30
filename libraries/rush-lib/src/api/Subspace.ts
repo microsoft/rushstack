@@ -353,12 +353,12 @@ export class Subspace {
       }
     }
 
-    // this means there is no injected dependencies for current subspace
+    // this means no injected dependencies found for current subspace
     if (relatedProjects.length === 0) {
       return undefined;
     }
 
-    // recursive to get all related package.json
+    // get all related package.json
     while (relatedProjects.length > 0) {
       const rushProject: RushConfigurationProject = relatedProjects.pop()!;
       allPackageJson.push(this._getImportantFieldsInPackageJson(rushProject.packageJson));
@@ -369,7 +369,7 @@ export class Subspace {
   }
 
   private _getImportantFieldsInPackageJson(packageJson: IPackageJson): IPackageJson {
-    // Collect fields that could update the `pnpm-lock.yaml`
+    // collect fields that could update the `pnpm-lock.yaml`
     const packageJsonWithImportantFields: IPackageJson = {
       name: packageJson.name,
       version: packageJson.version,
@@ -379,7 +379,7 @@ export class Subspace {
       peerDependencies: packageJson?.peerDependencies,
       optionalDependencies: packageJson?.optionalDependencies,
       dependenciesMeta: packageJson?.dependenciesMeta,
-      peerDependenciesMeta: packageJson.peerDependenciesMeta,
+      peerDependenciesMeta: packageJson?.peerDependenciesMeta,
       resolutions: packageJson?.resolutions
     };
     return packageJsonWithImportantFields;
