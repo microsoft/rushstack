@@ -755,7 +755,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       executionManagerOptions
     );
 
-    const { isInitial, isWatch } = options.executeOperationsContext;
+    const { isInitial, isWatch, cobuildConfiguration } = options.executeOperationsContext;
 
     let success: boolean = false;
     let result: IExecutionResult | undefined;
@@ -845,10 +845,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           }
 
           const { startTime, endTime } = operationResult.stopwatch;
+
           operationResults[operation.name!] = {
             startTimestampMs: startTime,
             endTimestampMs: endTime,
             nonCachedDurationMs: operationResult.nonCachedDurationMs,
+            wasExecutedOnThisMachine:
+              !operationResult.cobuildRunnerId ||
+              operationResult.cobuildRunnerId === cobuildConfiguration?.cobuildRunnerId,
             result: operationResult.status,
             dependencies: Array.from(getNonSilentDependencies(operation)).sort()
           };

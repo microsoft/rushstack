@@ -4,6 +4,7 @@
   "pnpmOptions": {
     "useWorkspaces": true
   },
+  "telemetryEnabled": true,
   "projects": [
     {
       "packageName": "a",

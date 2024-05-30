@@ -69,8 +69,16 @@ export interface ITelemetryOperationResult {
 
   /**
    * Duration in milliseconds when the operation does not hit cache
+   *
+   * @deprecated Use `wasBuiltOnThisMachine`, `startTimestampMs`, and `endTimestampMs` to calculate duration instead.
    */
   nonCachedDurationMs?: number;
+
+  /**
+   * Was this operation built on this machine? If so, the duration can be calculated from `startTimestampMs` and `endTimestampMs`.
+   *  If not, you should use the metrics from the machine that built it.
+   */
+  wasExecutedOnThisMachine?: boolean;
 }
 
 /**

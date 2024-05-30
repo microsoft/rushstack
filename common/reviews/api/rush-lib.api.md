@@ -859,9 +859,11 @@ export interface ITelemetryMachineInfo {
 export interface ITelemetryOperationResult {
     dependencies: string[];
     endTimestampMs?: number;
+    // @deprecated
     nonCachedDurationMs?: number;
     result: string;
     startTimestampMs?: number;
+    wasExecutedOnThisMachine?: boolean;
 }
 
 // @public
