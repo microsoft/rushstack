@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Display to the user subspace name where the error occurred",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
