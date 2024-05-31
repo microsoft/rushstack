@@ -147,7 +147,7 @@ export interface IConfigApiReport {
    *
    * @defaultValue `true`
    */
-  apiReportIncludeImports?: boolean;
+  includeImports?: boolean;
 }
 
 /**

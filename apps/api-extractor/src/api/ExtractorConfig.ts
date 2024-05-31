@@ -1107,7 +1107,7 @@ export class ExtractorConfig {
         reportFolder,
         reportTempFolder,
         apiReportIncludeForgottenExports,
-        apiReportIncludeImports: configObject.apiReport?.apiReportIncludeImports ?? true, // default: true
+        apiReportIncludeImports: configObject.apiReport?.includeImports ?? true, // default: true
         docModelEnabled,
         apiJsonFilePath,
         docModelIncludeForgottenExports,
