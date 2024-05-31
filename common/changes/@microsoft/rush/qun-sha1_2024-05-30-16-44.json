@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Display to the user subspace name where the error occurred",
+      "comment": "Display the name of the subspace when an error is emitted because a dependency hash uses the SHA1 algorithm and the \"disallowInsecureSha1\" option is enabled.",
       "type": "none"
     }
   ],
