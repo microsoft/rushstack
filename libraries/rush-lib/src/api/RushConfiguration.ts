@@ -476,7 +476,7 @@ export class RushConfiguration {
    *
    * @deprecated
    * This setting was moved from `rush.json` to `common-versions.json`.
-   * Read it using {@link CommonVersionsConfiguration.ensureConsistentVersions} instead.
+   * Read it using {@link Subspace.shouldEnsureConsistentVersions} instead.
    */
   public readonly ensureConsistentVersions: boolean;
 
