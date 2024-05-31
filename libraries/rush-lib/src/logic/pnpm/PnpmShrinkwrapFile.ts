@@ -362,9 +362,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         !exemptPackageList.has(this._parseDependencyPath(pkgName))
       ) {
         terminal.writeErrorLine(
-          'Error: An integrity field with "sha1" was detected in the pnpm-lock.yaml file located in ' +
-            subspaceName +
-            ' subspace; this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n'
+          'Error: An integrity field with "sha1" was detected in the pnpm-lock.yaml file located in subspace' +
+            `${subspaceName}; this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n`
         );
 
         customTipsConfiguration._showErrorTip(terminal, CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1);
