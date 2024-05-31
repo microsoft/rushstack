@@ -141,6 +141,13 @@ export interface IConfigApiReport {
    * @defaultValue `false`
    */
   includeForgottenExports?: boolean;
+
+  /**
+   * Whether import statements should be included in the API report file.
+   *
+   * @defaultValue `true`
+   */
+  apiReportIncludeImports?: boolean;
 }
 
 /**

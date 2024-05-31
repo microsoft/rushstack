@@ -186,6 +186,7 @@ interface IExtractorConfigParameters {
   reportFolder: string;
   reportTempFolder: string;
   apiReportIncludeForgottenExports: boolean;
+  apiReportIncludeImports: boolean;
   docModelEnabled: boolean;
   apiJsonFilePath: string;
   docModelIncludeForgottenExports: boolean;
@@ -305,6 +306,9 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigApiReport.includeForgottenExports} */
   public readonly apiReportIncludeForgottenExports: boolean;
 
+  /** {@inheritDoc IConfigApiReport.apiReportIncludeImports} */
+  public readonly apiReportIncludeImports: boolean;
+
   /** {@inheritDoc IConfigDocModel.enabled} */
   public readonly docModelEnabled: boolean;
   /** {@inheritDoc IConfigDocModel.apiJsonFilePath} */
@@ -368,6 +372,7 @@ export class ExtractorConfig {
     this.skipLibCheck = parameters.skipLibCheck;
     this.apiReportEnabled = parameters.apiReportEnabled;
     this.apiReportIncludeForgottenExports = parameters.apiReportIncludeForgottenExports;
+    this.apiReportIncludeImports = parameters.apiReportIncludeImports;
     this.reportConfigs = parameters.reportConfigs;
     this.reportFolder = parameters.reportFolder;
     this.reportTempFolder = parameters.reportTempFolder;
@@ -1102,6 +1107,7 @@ export class ExtractorConfig {
         reportFolder,
         reportTempFolder,
         apiReportIncludeForgottenExports,
+        apiReportIncludeImports: configObject.apiReport?.apiReportIncludeImports ?? true, // default: true
         docModelEnabled,
         apiJsonFilePath,
         docModelIncludeForgottenExports,

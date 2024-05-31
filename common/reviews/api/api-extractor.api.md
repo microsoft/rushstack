@@ -54,6 +54,7 @@ export class ExtractorConfig {
     readonly apiJsonFilePath: string;
     readonly apiReportEnabled: boolean;
     readonly apiReportIncludeForgottenExports: boolean;
+    readonly apiReportIncludeImports: boolean;
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
@@ -180,6 +181,7 @@ export interface ICompilerStateCreateOptions {
 
 // @public
 export interface IConfigApiReport {
+    apiReportIncludeImports?: boolean;
     enabled: boolean;
     includeForgottenExports?: boolean;
     reportFileName?: string;
