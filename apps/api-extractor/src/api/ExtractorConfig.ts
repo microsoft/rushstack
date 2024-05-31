@@ -306,7 +306,7 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigApiReport.includeForgottenExports} */
   public readonly apiReportIncludeForgottenExports: boolean;
 
-  /** {@inheritDoc IConfigApiReport.apiReportIncludeImports} */
+  /** {@inheritDoc IConfigApiReport.includeImports} */
   public readonly apiReportIncludeImports: boolean;
 
   /** {@inheritDoc IConfigDocModel.enabled} */

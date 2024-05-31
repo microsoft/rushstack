@@ -181,9 +181,9 @@ export interface ICompilerStateCreateOptions {
 
 // @public
 export interface IConfigApiReport {
-    apiReportIncludeImports?: boolean;
     enabled: boolean;
     includeForgottenExports?: boolean;
+    includeImports?: boolean;
     reportFileName?: string;
     reportFolder?: string;
     reportTempFolder?: string;
