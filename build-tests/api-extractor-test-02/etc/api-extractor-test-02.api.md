@@ -4,10 +4,6 @@
 
 ```ts
 
-import { ISimpleInterface } from 'api-extractor-test-01';
-import { ReexportedClass as RenamedReexportedClass3 } from 'api-extractor-test-01';
-import * as semver1 from 'semver';
-
 // @public
 export interface GenericInterface<T> {
     // (undocumented)
