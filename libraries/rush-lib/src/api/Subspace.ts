@@ -272,11 +272,15 @@ export class Subspace {
    * @beta
    */
   public get shouldEnsureConsistentVersions(): boolean {
-    if (this.getCommonVersions().ensureConsistentVersions === undefined) {
-      // If the individual subspaces do not have ensureConsistentVersions set, fallback to the setting defined in rush.json
-      return this._rushConfiguration.ensureConsistentVersions;
+    if (
+      this._rushConfiguration.subspacesFeatureEnabled ||
+      this.getCommonVersions().ensureConsistentVersions !== undefined
+    ) {
+      return this.getCommonVersions().ensureConsistentVersions as boolean;
     }
-    return this.getCommonVersions().ensureConsistentVersions as boolean;
+    // Fallback to ensureConsistentVersions in rush.json if subspaces is not enabled,
+    // or if the setting is not defined in the common-versions.json file
+    return this._rushConfiguration.ensureConsistentVersions;
   }
 
   /**
