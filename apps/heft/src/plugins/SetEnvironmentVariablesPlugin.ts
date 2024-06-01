@@ -16,7 +16,25 @@ export interface ISetEnvironmentVariablesPluginOptions {
 export default class SetEnvironmentVariablesPlugin
   implements IHeftTaskPlugin<ISetEnvironmentVariablesPluginOptions>
 {
-  public async apply(
+  public apply(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
+    { environmentVariablesToSet }: ISetEnvironmentVariablesPluginOptions
+  ): void {
+    taskSession.hooks.run.tap(
+      {
+        name: PLUGIN_NAME,
+        stage: Number.MIN_SAFE_INTEGER
+      },
+      () => {
+        for (const [key, value] of Object.entries(environmentVariablesToSet)) {
+          taskSession.logger.terminal.writeLine(`Setting environment variable ${key}=${value}`);
+          process.env[key] = value;
+        }
+      }
+    );
+  }
+  public async applyAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     { environmentVariablesToSet }: ISetEnvironmentVariablesPluginOptions
