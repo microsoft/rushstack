@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Implements a solution to ensure that the environment variable settings are scoped only to the phase where the plugin is declared, resolving the issue of unintended impacts and ensuring better isolation of environment variable settings within Heft processes",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
