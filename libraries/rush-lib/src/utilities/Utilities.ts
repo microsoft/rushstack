@@ -34,7 +34,7 @@ export interface IEnvironment {
 }
 
 /**
- * Options for Utilities.executeCommand().
+ * Options for {@link Utilities.executeCommandAsync}.
  */
 export interface IExecuteCommandOptions {
   command: string;
@@ -43,10 +43,14 @@ export interface IExecuteCommandOptions {
   environment?: IEnvironment;
   suppressOutput?: boolean;
   keepEnvironment?: boolean;
+  /**
+   * Note that this takes precedence over {@link IExecuteCommandOptions.suppressOutput}
+   */
+  onStdoutStreamChunk?: (chunk: string) => string | void;
 }
 
 /**
- * Options for Utilities.installPackageInDirectory().
+ * Options for {@link Utilities.installPackageInDirectoryAsync}.
  */
 export interface IInstallPackageInDirectoryOptions {
   directory: string;
@@ -308,34 +312,22 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static async executeCommandAsync(options: IExecuteCommandOptions): Promise<void> {
+  public static async executeCommandAsync({
+    command,
+    args,
+    workingDirectory,
+    suppressOutput,
+    onStdoutStreamChunk,
+    environment,
+    keepEnvironment
+  }: IExecuteCommandOptions): Promise<void> {
     await Utilities._executeCommandInternalAsync(
-      options.command,
-      options.args,
-      options.workingDirectory,
-      options.suppressOutput ? undefined : [0, 1, 2],
-      options.environment,
-      options.keepEnvironment
-    );
-  }
-
-  /**
-   * Executes the command with the specified command-line parameters, and waits for it to complete, with an
-   * option to process the output of the command.
-   *
-   * The current directory will be set to the specified workingDirectory.
-   */
-  public static async executeCommandAndInspectOutputAsync(
-    options: IExecuteCommandOptions,
-    onStdoutStreamChunk?: (chunk: string) => string | void
-  ): Promise<void> {
-    await Utilities._executeCommandAndInspectOutputInternalAsync(
-      options.command,
-      options.args,
-      options.workingDirectory,
-      options.suppressOutput ? undefined : onStdoutStreamChunk ? ['inherit', 'pipe', 'inherit'] : [0, 1, 2],
-      options.environment,
-      options.keepEnvironment,
+      command,
+      args,
+      workingDirectory,
+      onStdoutStreamChunk ? ['inherit', 'pipe', 'inherit'] : suppressOutput ? undefined : [0, 1, 2],
+      environment,
+      keepEnvironment,
       onStdoutStreamChunk
     );
   }
@@ -386,55 +378,6 @@ export class Utilities {
         const { command, args } = options;
         // eslint-disable-next-line no-console
         console.log(` ${command} ` + args.join(' '));
-        // eslint-disable-next-line no-console
-        console.log(`ERROR: ${(error as Error).toString()}`);
-
-        if (attemptNumber < maxAttempts) {
-          ++attemptNumber;
-          // eslint-disable-next-line no-console
-          console.log(`Trying again (attempt #${attemptNumber})...\n`);
-          if (retryCallback) {
-            retryCallback();
-          }
-
-          continue;
-        } else {
-          // eslint-disable-next-line no-console
-          console.error(`Giving up after ${attemptNumber} attempts\n`);
-          throw error;
-        }
-      }
-
-      break;
-    }
-  }
-
-  /**
-   * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
-   * Using `onStdoutStreamChunk` to process the output of the command.
-   *
-   * Note: This is similar to {@link executeCommandWithRetryAsync} except that it provides a callback to process the output.
-   */
-  public static async executeCommandAndProcessOutputWithRetryAsync(
-    options: IExecuteCommandOptions,
-    maxAttempts: number,
-    onStdoutStreamChunk?: (chunk: string) => string | void,
-    retryCallback?: () => void
-  ): Promise<void> {
-    if (maxAttempts < 1) {
-      throw new Error('The maxAttempts parameter cannot be less than 1');
-    }
-
-    let attemptNumber: number = 1;
-
-    for (;;) {
-      try {
-        await Utilities.executeCommandAndInspectOutputAsync(options, onStdoutStreamChunk);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log('\nThe command failed:');
-        // eslint-disable-next-line no-console
-        console.log(` ${options.command} ` + options.args.join(' '));
         // eslint-disable-next-line no-console
         console.log(`ERROR: ${(error as Error).toString()}`);
 
@@ -517,10 +460,16 @@ export class Utilities {
   /**
    * Installs a package by name and version in the specified directory.
    */
-  public static async installPackageInDirectoryAsync(
-    options: IInstallPackageInDirectoryOptions
-  ): Promise<void> {
-    const directory: string = path.resolve(options.directory);
+  public static async installPackageInDirectoryAsync({
+    packageName,
+    version,
+    tempPackageTitle,
+    commonRushConfigFolder,
+    maxInstallAttempts,
+    suppressOutput,
+    directory
+  }: IInstallPackageInDirectoryOptions): Promise<void> {
+    directory = path.resolve(directory);
     if (FileSystem.exists(directory)) {
       // eslint-disable-next-line no-console
       console.log('Deleting old files from ' + directory);
@@ -530,18 +479,18 @@ export class Utilities {
 
     const npmPackageJson: IPackageJson = {
       dependencies: {
-        [options.packageName]: options.version
+        [packageName]: version
       },
       description: 'Temporary file generated by the Rush tool',
-      name: options.tempPackageTitle,
+      name: tempPackageTitle,
       private: true,
       version: '0.0.0'
     };
     JsonFile.save(npmPackageJson, path.join(directory, FileConstants.PackageJson));
 
-    if (options.commonRushConfigFolder) {
+    if (commonRushConfigFolder) {
       Utilities.syncNpmrc({
-        sourceNpmrcFolder: options.commonRushConfigFolder,
+        sourceNpmrcFolder: commonRushConfigFolder,
         targetNpmrcFolder: directory
       });
     }
@@ -556,9 +505,9 @@ export class Utilities {
         args: ['install'],
         workingDirectory: directory,
         environment: Utilities._createEnvironmentForRushCommand({}),
-        suppressOutput: options.suppressOutput
+        suppressOutput
       },
-      options.maxInstallAttempts
+      maxInstallAttempts
     );
   }
 
@@ -773,64 +722,6 @@ export class Utilities {
   /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
-   *
-   * It's the same as _executeCommandInternal except that it returns a promise.
-   */
-  private static async _executeCommandAndInspectOutputInternalAsync(
-    command: string,
-    args: string[],
-    workingDirectory: string,
-    stdio: child_process.SpawnSyncOptions['stdio'],
-    environment?: IEnvironment,
-    keepEnvironment: boolean = false,
-    onStdoutStreamChunk?: (chunk: string) => string | void
-  ): Promise<void> {
-    const options: child_process.SpawnOptions = {
-      cwd: workingDirectory,
-      shell: true,
-      stdio: stdio,
-      env: keepEnvironment
-        ? environment
-        : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment })
-    };
-
-    // Only escape the command if it actually contains spaces:
-    const escapedCommand: string =
-      command.indexOf(' ') < 0 ? command : Utilities.escapeShellParameter(command);
-
-    const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
-
-    const childProcess: child_process.ChildProcess = child_process.spawn(
-      escapedCommand,
-      escapedArgs,
-      options
-    );
-
-    const inspectStream: Transform = new Transform({
-      transform: onStdoutStreamChunk
-        ? (
-            chunk: string | Buffer,
-            encoding: BufferEncoding,
-            callback: (error?: Error, data?: string | Buffer) => void
-          ) => {
-            const chunkString: string = chunk.toString();
-            const updatedChunk: string | void = onStdoutStreamChunk(chunkString);
-            callback(undefined, updatedChunk ?? chunk);
-          }
-        : undefined
-    });
-
-    childProcess.stdout?.pipe(inspectStream).pipe(process.stdout);
-
-    await Executable.waitForExitAsync(childProcess, {
-      throwOnNonZeroExitCode: true,
-      throwOnSignal: true
-    });
-  }
-
-  /**
-   * Executes the command with the specified command-line parameters, and waits for it to complete.
-   * The current directory will be set to the specified workingDirectory.
    */
   private static async _executeCommandInternalAsync(
     command: string,
@@ -838,7 +729,8 @@ export class Utilities {
     workingDirectory: string,
     stdio: child_process.SpawnSyncOptions['stdio'],
     environment?: IEnvironment,
-    keepEnvironment: boolean = false
+    keepEnvironment: boolean = false,
+    onStdoutStreamChunk?: (chunk: string) => string | void
   ): Promise<IExecuteCommandResult> {
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
@@ -868,8 +760,31 @@ export class Utilities {
 
     const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
 
-    const process: child_process.ChildProcess = child_process.spawn(escapedCommand, escapedArgs, options);
-    const { stdout, stderr } = await Executable.waitForExitAsync(process, {
+    const childProcess: child_process.ChildProcess = child_process.spawn(
+      escapedCommand,
+      escapedArgs,
+      options
+    );
+
+    if (onStdoutStreamChunk) {
+      const inspectStream: Transform = new Transform({
+        transform: onStdoutStreamChunk
+          ? (
+              chunk: string | Buffer,
+              encoding: BufferEncoding,
+              callback: (error?: Error, data?: string | Buffer) => void
+            ) => {
+              const chunkString: string = chunk.toString();
+              const updatedChunk: string | void = onStdoutStreamChunk(chunkString);
+              callback(undefined, updatedChunk ?? chunk);
+            }
+          : undefined
+      });
+
+      childProcess.stdout?.pipe(inspectStream).pipe(process.stdout);
+    }
+
+    const { stdout, stderr } = await Executable.waitForExitAsync(childProcess, {
       encoding: stdio ? 'utf8' : undefined,
       throwOnNonZeroExitCode: true,
       throwOnSignal: true

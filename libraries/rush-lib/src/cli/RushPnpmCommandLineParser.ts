@@ -412,16 +412,14 @@ export class RushPnpmCommandLineParser {
     }
 
     try {
-      await Utilities.executeCommandAndInspectOutputAsync(
-        {
-          command: rushConfiguration.packageManagerToolFilename,
-          args: this._pnpmArgs,
-          workingDirectory: process.cwd(),
-          environment: pnpmEnvironmentMap.toObject(),
-          keepEnvironment: true
-        },
+      await Utilities.executeCommandAsync({
+        command: rushConfiguration.packageManagerToolFilename,
+        args: this._pnpmArgs,
+        workingDirectory: process.cwd(),
+        environment: pnpmEnvironmentMap.toObject(),
+        keepEnvironment: true,
         onStdoutStreamChunk
-      );
+      });
     } catch (e) {
       this._terminal.writeDebugLine(`Error: ${e}`);
     }
