@@ -321,15 +321,16 @@ export class Utilities {
     environment,
     keepEnvironment
   }: IExecuteCommandOptions): Promise<void> {
-    await Utilities._executeCommandInternalAsync(
+    await Utilities._executeCommandInternalAsync({
       command,
       args,
       workingDirectory,
-      onStdoutStreamChunk ? ['inherit', 'pipe', 'inherit'] : suppressOutput ? undefined : [0, 1, 2],
+      stdio: onStdoutStreamChunk ? ['inherit', 'pipe', 'inherit'] : suppressOutput ? undefined : [0, 1, 2],
       environment,
       keepEnvironment,
-      onStdoutStreamChunk
-    );
+      onStdoutStreamChunk,
+      captureOutput: false
+    });
   }
 
   /**
@@ -343,14 +344,15 @@ export class Utilities {
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): Promise<string> {
-    const { stdout } = await Utilities._executeCommandInternalAsync(
+    const { stdout } = await Utilities._executeCommandInternalAsync({
       command,
       args,
       workingDirectory,
-      ['pipe', 'pipe', 'pipe'],
+      stdio: ['pipe', 'pipe', 'pipe'],
       environment,
-      keepEnvironment
-    );
+      keepEnvironment,
+      captureOutput: true
+    });
 
     return stdout;
   }
@@ -724,15 +726,19 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  private static async _executeCommandInternalAsync(
-    command: string,
-    args: string[],
-    workingDirectory: string,
-    stdio: child_process.SpawnSyncOptions['stdio'],
-    environment?: IEnvironment,
-    keepEnvironment: boolean = false,
-    onStdoutStreamChunk?: (chunk: string) => string | void
-  ): Promise<IExecuteCommandResult> {
+  private static async _executeCommandInternalAsync({
+    command,
+    args,
+    workingDirectory,
+    stdio,
+    environment,
+    keepEnvironment,
+    onStdoutStreamChunk,
+    captureOutput
+  }: Omit<IExecuteCommandOptions, 'suppressOutput'> & {
+    stdio: child_process.SpawnSyncOptions['stdio'];
+    captureOutput: boolean;
+  }): Promise<IExecuteCommandResult> {
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,
@@ -786,7 +792,7 @@ export class Utilities {
     }
 
     const { stdout, stderr } = await Executable.waitForExitAsync(childProcess, {
-      encoding: stdio ? 'utf8' : undefined,
+      encoding: captureOutput ? 'utf8' : undefined,
       throwOnNonZeroExitCode: true,
       throwOnSignal: true
     });
