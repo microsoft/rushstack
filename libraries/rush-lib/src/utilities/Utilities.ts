@@ -470,12 +470,13 @@ export class Utilities {
     directory
   }: IInstallPackageInDirectoryOptions): Promise<void> {
     directory = path.resolve(directory);
-    if (FileSystem.exists(directory)) {
+    const directoryExists: boolean = await FileSystem.existsAsync(directory);
+    if (directoryExists) {
       // eslint-disable-next-line no-console
       console.log('Deleting old files from ' + directory);
     }
 
-    FileSystem.ensureEmptyFolder(directory);
+    await FileSystem.ensureEmptyFolderAsync(directory);
 
     const npmPackageJson: IPackageJson = {
       dependencies: {
@@ -486,7 +487,7 @@ export class Utilities {
       private: true,
       version: '0.0.0'
     };
-    JsonFile.save(npmPackageJson, path.join(directory, FileConstants.PackageJson));
+    await JsonFile.saveAsync(npmPackageJson, path.join(directory, FileConstants.PackageJson));
 
     if (commonRushConfigFolder) {
       Utilities.syncNpmrc({
