@@ -325,7 +325,18 @@ export class Utilities {
       command,
       args,
       workingDirectory,
-      stdio: onStdoutStreamChunk ? ['inherit', 'pipe', 'inherit'] : suppressOutput ? undefined : [0, 1, 2],
+      stdio: onStdoutStreamChunk
+        ? // Inherit the stdin and stderr streams, but pipe the stdout stream, which will then be piped
+          // to the process's stdout after being intercepted by the onStdoutStreamChunk callback.
+          ['inherit', 'pipe', 'inherit']
+        : suppressOutput
+          ? // If the output is being suppressed, create pipes for all streams to prevent the child process
+            // from printing to the parent process's (this process's) stdout/stderr, but allow the stdout and
+            // stderr to be inspected if an error occurs.
+            // TODO: Consider ignoring stdout and stdin and only piping stderr for inspection on error.
+            ['pipe', 'pipe', 'pipe']
+          : // If the output is not being suppressed or intercepted, inherit all streams from the parent process.
+            ['inherit', 'inherit', 'inherit'],
       environment,
       keepEnvironment,
       onStdoutStreamChunk,
