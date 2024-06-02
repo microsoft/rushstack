@@ -36,7 +36,7 @@ export async function validateAsync(
 
   let userEmail: string | undefined = await git.tryGetGitEmailAsync();
   // If there isn't a Git policy, then we don't care whether the person configured
-  // a Git email address at all.  This helps people who don't
+  // a Git email address at all.
   if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
     if (userEmail === undefined) {
       return;
