@@ -12,9 +12,9 @@ import {
   FileSystem,
   FileConstants,
   type FileSystemStats,
-  SubprocessTerminator
+  SubprocessTerminator,
+  Executable
 } from '@rushstack/node-core-library';
-import { once } from 'events';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
@@ -320,16 +320,14 @@ export class Utilities {
   }
 
   /**
-   * Executes the command with the specified command-line parameters, and waits for it to complete.
-   * The current directory will be set to the specified workingDirectory.
+   * Executes the command with the specified command-line parameters, and waits for it to complete, with an
+   * option to process the output of the command.
    *
-   * It's basically the same as executeCommand() except that it returns a Promise.
+   * The current directory will be set to the specified workingDirectory.
    */
   public static async executeCommandAndInspectOutputAsync(
     options: IExecuteCommandOptions,
-    onStdoutStreamChunk?: (chunk: string) => string | void,
-    // eslint-disable-next-line @rushstack/no-new-null
-    onExit?: (exitCode: number | null, signal: NodeJS.Signals | null) => void
+    onStdoutStreamChunk?: (chunk: string) => string | void
   ): Promise<void> {
     await Utilities._executeCommandAndInspectOutputInternalAsync(
       options.command,
@@ -338,8 +336,7 @@ export class Utilities {
       options.suppressOutput ? undefined : onStdoutStreamChunk ? ['inherit', 'pipe', 'inherit'] : [0, 1, 2],
       options.environment,
       options.keepEnvironment,
-      onStdoutStreamChunk,
-      onExit
+      onStdoutStreamChunk
     );
   }
 
@@ -416,7 +413,7 @@ export class Utilities {
    * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
    * Using `onStdoutStreamChunk` to process the output of the command.
    *
-   * Note: This is similar to {@link executeCommandWithRetryAsync} except that it returns a Promise and provides a callback to process the output.
+   * Note: This is similar to {@link executeCommandWithRetryAsync} except that it provides a callback to process the output.
    */
   public static async executeCommandAndProcessOutputWithRetryAsync(
     options: IExecuteCommandOptions,
@@ -786,60 +783,48 @@ export class Utilities {
     stdio: child_process.SpawnSyncOptions['stdio'],
     environment?: IEnvironment,
     keepEnvironment: boolean = false,
-    onStdoutStreamChunk?: (chunk: string) => string | void,
-    onExit?: (exitCode: number | null, signal: NodeJS.Signals | null) => void
+    onStdoutStreamChunk?: (chunk: string) => string | void
   ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const options: child_process.SpawnOptions = {
-        cwd: workingDirectory,
-        shell: true,
-        stdio: stdio,
-        env: keepEnvironment
-          ? environment
-          : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment })
-      };
+    const options: child_process.SpawnOptions = {
+      cwd: workingDirectory,
+      shell: true,
+      stdio: stdio,
+      env: keepEnvironment
+        ? environment
+        : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment })
+    };
 
-      // Only escape the command if it actually contains spaces:
-      const escapedCommand: string =
-        command.indexOf(' ') < 0 ? command : Utilities.escapeShellParameter(command);
+    // Only escape the command if it actually contains spaces:
+    const escapedCommand: string =
+      command.indexOf(' ') < 0 ? command : Utilities.escapeShellParameter(command);
 
-      const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
+    const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
 
-      const childProcess: child_process.ChildProcess = child_process.spawn(
-        escapedCommand,
-        escapedArgs,
-        options
-      );
+    const childProcess: child_process.ChildProcess = child_process.spawn(
+      escapedCommand,
+      escapedArgs,
+      options
+    );
 
-      const inspectStream: Transform = new Transform({
-        transform: onStdoutStreamChunk
-          ? (
-              chunk: string | Buffer,
-              encoding: BufferEncoding,
-              callback: (error?: Error, data?: string | Buffer) => void
-            ) => {
-              const chunkString: string = chunk.toString();
-              const updatedChunk: string | void = onStdoutStreamChunk(chunkString);
-              callback(undefined, updatedChunk ?? chunk);
-            }
-          : undefined
-      });
+    const inspectStream: Transform = new Transform({
+      transform: onStdoutStreamChunk
+        ? (
+            chunk: string | Buffer,
+            encoding: BufferEncoding,
+            callback: (error?: Error, data?: string | Buffer) => void
+          ) => {
+            const chunkString: string = chunk.toString();
+            const updatedChunk: string | void = onStdoutStreamChunk(chunkString);
+            callback(undefined, updatedChunk ?? chunk);
+          }
+        : undefined
+    });
 
-      childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
-        onExit?.(exitCode, signal);
+    childProcess.stdout?.pipe(inspectStream).pipe(process.stdout);
 
-        // TODO: Is it possible that the childProcess is closed before the receiving the last chunks?
-        if (exitCode === 0) {
-          resolve();
-        } else if (signal) {
-          reject(new Error(`The command was terminated by signal ${signal}`));
-        } else {
-          // mimic the current sync version "_executeCommandInternal" behavior.
-          reject(new Error(`The command failed with exit code ${exitCode}`));
-        }
-      });
-
-      childProcess.stdout?.pipe(inspectStream).pipe(process.stdout);
+    await Executable.waitForExitAsync(childProcess, {
+      throwOnNonZeroExitCode: true,
+      throwOnSignal: true
     });
   }
 
@@ -884,28 +869,11 @@ export class Utilities {
     const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
 
     const process: child_process.ChildProcess = child_process.spawn(escapedCommand, escapedArgs, options);
-
-    const stdoutBuffers: string[] = [];
-    process.stdout?.on('data', (chunk) => {
-      stdoutBuffers.push(chunk.toString());
+    const { stdout, stderr } = await Executable.waitForExitAsync(process, {
+      encoding: stdio ? 'utf8' : undefined,
+      throwOnNonZeroExitCode: true,
+      throwOnSignal: true
     });
-
-    const stderrBuffers: string[] = [];
-    process.stderr?.on('data', (chunk) => {
-      stderrBuffers.push(chunk.toString());
-    });
-
-    let error: Error | undefined;
-    try {
-      await once(process, 'close');
-    } catch (e) {
-      error = e;
-    }
-
-    const stderr: string = stderrBuffers.join('');
-    const stdout: string = stdoutBuffers.join('');
-
-    this._processResult({ error, stderr, status: process.exitCode });
 
     return {
       stdout,

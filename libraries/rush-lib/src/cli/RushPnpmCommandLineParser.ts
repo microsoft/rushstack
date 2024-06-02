@@ -420,15 +420,7 @@ export class RushPnpmCommandLineParser {
           environment: pnpmEnvironmentMap.toObject(),
           keepEnvironment: true
         },
-        onStdoutStreamChunk,
-        (exitCode: number | null, signal: NodeJS.Signals | null) => {
-          if (typeof exitCode === 'number') {
-            process.exitCode = exitCode;
-          } else {
-            // Terminated by a signal
-            process.exitCode = 1;
-          }
-        }
+        onStdoutStreamChunk
       );
     } catch (e) {
       this._terminal.writeDebugLine(`Error: ${e}`);
