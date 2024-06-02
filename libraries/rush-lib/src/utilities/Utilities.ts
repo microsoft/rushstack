@@ -814,6 +814,10 @@ export class Utilities {
   }): void {
     if (error) {
       error.message += `\n${stderr}`;
+      if (status) {
+        error.message += `\nExited with status ${status}`;
+      }
+
       throw error;
     }
 
