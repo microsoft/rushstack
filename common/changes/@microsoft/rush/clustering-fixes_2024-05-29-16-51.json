@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixes build cache no-op and sharded operation clustering.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

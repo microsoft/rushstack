@@ -12,7 +12,7 @@ import { OperationStatus } from './OperationStatus';
 import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { RushConstants } from '../RushConstants';
-import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { type IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
@@ -123,10 +123,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               );
             }
 
-            const cacheDisabledReason: string | undefined = projectConfiguration
-              ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, operation.isNoOp)
-              : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-                'or one provided by a rig, so it does not support caching.';
+            const cacheDisabledReason: string | undefined =
+              RushProjectConfiguration.getCacheDisabledReasonForProject({
+                projectConfiguration,
+                phaseName: phaseName,
+                isNoOp: operation.isNoOp,
+                trackedFileNames: fileHashes.keys()
+              });
 
             disjointSet?.add(operation);
 
