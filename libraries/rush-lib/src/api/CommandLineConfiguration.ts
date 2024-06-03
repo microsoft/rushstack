@@ -20,6 +20,7 @@ import type {
   IPhasedCommandWithoutPhasesJson
 } from './CommandLineJson';
 import schemaJson from '../schemas/command-line.schema.json';
+import { normalizeNameForLogFilenameIdentifiers } from '../logic/operations/OperationMetadataManager';
 
 export interface IShellCommandTokenContext {
   packageFolder: string;
@@ -256,7 +257,7 @@ export class CommandLineConfiguration {
         const processedPhase: IPhase = {
           name: phase.name,
           isSynthetic: false,
-          logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(phase.name),
+          logFilenameIdentifier: normalizeNameForLogFilenameIdentifiers(phase.name),
           associatedParameters: new Set(),
           dependencies: {
             self: new Set(),
@@ -672,22 +673,12 @@ export class CommandLineConfiguration {
     (this.additionalPathFolders as string[]).unshift(pathFolder);
   }
 
-  /**
-   * This function replaces colons (":") with underscores ("_").
-   *
-   * ts-command-line restricts command names to lowercase letters, numbers, underscores, and colons.
-   * Replacing colons with underscores produces a filesystem-safe name.
-   */
-  private _normalizeNameForLogFilenameIdentifiers(name: string): string {
-    return name.replace(/:/g, '_'); // Replace colons with underscores to be filesystem-safe
-  }
-
   private _translateBulkCommandToPhasedCommand(command: IBulkCommandJson): IPhasedCommandConfig {
     const phaseName: string = command.name;
     const phase: IPhase = {
       name: phaseName,
       isSynthetic: true,
-      logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(command.name),
+      logFilenameIdentifier: normalizeNameForLogFilenameIdentifiers(command.name),
       associatedParameters: new Set(),
       dependencies: {
         self: new Set(),

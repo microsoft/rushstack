@@ -1,6 +1,63 @@
 # Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+
+## 5.1.38
+Thu, 30 May 2024 00:13:05 GMT
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
+
+## 5.1.37
+Wed, 29 May 2024 02:03:51 GMT
+
+_Version update only_
+
+## 5.1.36
+Wed, 29 May 2024 00:10:52 GMT
+
+_Version update only_
+
+## 5.1.35
+Tue, 28 May 2024 15:10:09 GMT
+
+_Version update only_
+
+## 5.1.34
+Tue, 28 May 2024 00:09:47 GMT
+
+_Version update only_
+
+## 5.1.33
+Sat, 25 May 2024 04:54:08 GMT
+
+_Version update only_
+
+## 5.1.32
+Fri, 24 May 2024 00:15:09 GMT
+
+_Version update only_
+
+## 5.1.31
+Thu, 23 May 2024 02:26:56 GMT
+
+_Version update only_
+
+## 5.1.30
+Thu, 16 May 2024 15:10:22 GMT
+
+_Version update only_
+
+## 5.1.29
+Wed, 15 May 2024 23:42:58 GMT
+
+_Version update only_
+
+## 5.1.28
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
 
 ## 5.1.27
 Fri, 10 May 2024 05:33:34 GMT

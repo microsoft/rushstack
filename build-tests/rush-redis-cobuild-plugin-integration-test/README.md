@@ -38,7 +38,14 @@ cd sandbox/repo
 node ../../lib/runRush.js update
 ```
 
-#### Case 1: Normal build, Cobuild is disabled because of missing RUSH_COBUILD_CONTEXT_ID 
+You can also test sharded operations with cobuilds using the **build-tests/rush-redis-cobuild-plugin-integration-test/sandbox/sharded-repo**
+```sh
+cd sandbox/sharded-repo
+node ../../lib/runRush.js update
+```
+You should expect to see multiple shards for operations `a` (15 shards), `b` (75) and `h` (50) and `e` (75).
+
+#### Case 1: Normal build, Cobuild is disabled because of missing RUSH_COBUILD_CONTEXT_ID
 
 1. Write to build cache
 

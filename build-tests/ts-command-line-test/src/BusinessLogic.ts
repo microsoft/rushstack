@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 export class BusinessLogic {
-  public static async doTheWork(force: boolean, protocol: string): Promise<void> {
+  public static async doTheWorkAsync(force: boolean, protocol: string): Promise<void> {
     console.log(`Received parameters: force=${force}, protocol="${protocol}"`);
     console.log(`Business logic did the work.`);
   }

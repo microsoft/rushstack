@@ -73,7 +73,37 @@
             "description": "Disable caching for this operation. The operation will never be restored from cache. This may be useful if this operation affects state outside of its folder.",
             "type": "boolean"
           },
-
+          "sharding": {
+            "type": "object",
+            "description": "If specified, the operation will be a 'sharded' operation. This means that the operation will be run multiple times in parallel.",
+            "additionalProperties": false,
+            "required": ["count"],
+            "properties": {
+              "count": {
+                "type": "integer",
+                "description": "The number of shards to run. This must be a positive integer."
+              },
+              "shardArgumentFormat": {
+                "type": "string",
+                "description": "A template string that specifies the command-line argument to pass to the operation for each shard. The string may contain the following placeholders: {shardIndex} {shardCount}. Defaults to --shard=\"{shardIndex}/{shardCount}\""
+              },
+              "outputFolderArgumentFormat": {
+                "type": "string",
+                "description": "The command-line argument to pass to the operation to specify the output folder. The string may contain the following placeholders: {phaseName} {shardIndex}. Must end with {shardIndex}. Defaults to --shard-output-folder=\".rush/operations/{phaseName}/shards/{shardIndex}\""
+              },
+              "shardOperationSettings": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "weight": {
+                    "description": "The number of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag.",
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          },
           "weight": {
             "description": "The number of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag.",
             "type": "integer",

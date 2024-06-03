@@ -1,0 +1,11 @@
+{
+  "name": "g",
+  "version": "1.0.0",
+  "scripts": {
+    "_phase:pre-build": "node ../pre-build.js",
+    "_phase:build": "node ../validate-pre-build.js && node ../build.js g"
+  },
+  "dependencies": {
+    "b": "workspace:*"
+  }
+}

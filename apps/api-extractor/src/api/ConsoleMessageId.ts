@@ -44,6 +44,11 @@ export enum ConsoleMessageId {
   WritingDtsRollup = 'console-writing-dts-rollup',
 
   /**
+   * "Generating ___ API report: ___"
+   */
+  WritingApiReport = 'console-writing-api-report',
+
+  /**
    * "You have changed the public API signature for this project.
    * Please copy the file ___ to ___, or perform a local build (which does this automatically).
    * See the Git repo documentation for more info."

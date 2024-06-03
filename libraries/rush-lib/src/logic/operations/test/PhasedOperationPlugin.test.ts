@@ -71,12 +71,17 @@ describe(PhasedOperationPlugin.name, () => {
 
     const context: Pick<
       ICreateOperationsContext,
-      'phaseOriginal' | 'phaseSelection' | 'projectSelection' | 'projectsInUnknownState'
+      | 'phaseOriginal'
+      | 'phaseSelection'
+      | 'projectSelection'
+      | 'projectsInUnknownState'
+      | 'projectConfigurations'
     > = {
       phaseOriginal: phaseSelection,
       phaseSelection,
       projectSelection,
-      projectsInUnknownState: changedProjects
+      projectsInUnknownState: changedProjects,
+      projectConfigurations: new Map()
     };
     const operations: Set<Operation> = await hooks.createOperations.promise(
       new Set(),

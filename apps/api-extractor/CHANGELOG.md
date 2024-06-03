@@ -1,6 +1,69 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 10 May 2024 05:33:33 GMT and should not be manually modified.
+This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+
+## 7.46.2
+Thu, 30 May 2024 00:13:05 GMT
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
+
+## 7.46.1
+Wed, 29 May 2024 02:03:50 GMT
+
+_Version update only_
+
+## 7.46.0
+Wed, 29 May 2024 00:10:52 GMT
+
+### Minor changes
+
+- Bump TSDoc dependencies.
+
+## 7.45.1
+Tue, 28 May 2024 15:10:09 GMT
+
+_Version update only_
+
+## 7.45.0
+Tue, 28 May 2024 00:09:47 GMT
+
+### Minor changes
+
+- Improve support for resolving the `tsdoc-metadata.json` to include the folder referenced by a `types` field in an `"exports"` field and an `"typesVersions"` field in addition to `"types"`, `"typings"`, and `"tsdocMetadata"` fields.
+
+## 7.44.1
+Sat, 25 May 2024 04:54:07 GMT
+
+_Version update only_
+
+## 7.44.0
+Fri, 24 May 2024 00:15:08 GMT
+
+### Minor changes
+
+- Add support for "variants" of API reports which include or exclude items by release tag
+
+## 7.43.8
+Thu, 23 May 2024 02:26:56 GMT
+
+_Version update only_
+
+## 7.43.7
+Thu, 16 May 2024 15:10:22 GMT
+
+_Version update only_
+
+## 7.43.6
+Wed, 15 May 2024 23:42:58 GMT
+
+_Version update only_
+
+## 7.43.5
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
 
 ## 7.43.4
 Fri, 10 May 2024 05:33:33 GMT

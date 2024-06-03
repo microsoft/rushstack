@@ -95,7 +95,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     this._metricsCollector = new MetricsCollector();
   }
 
-  public async execute(args?: string[]): Promise<boolean> {
+  public async executeAsync(args?: string[]): Promise<boolean> {
     // Defensively set the exit code to 1 so if the tool crashes for whatever reason,
     // we'll have a nonzero exit code.
     process.exitCode = 1;
@@ -166,9 +166,9 @@ export class HeftCommandLineParser extends CommandLineParser {
         this.addAction(aliasAction);
       }
 
-      return await super.execute(args);
+      return await super.executeAsync(args);
     } catch (e) {
-      await this._reportErrorAndSetExitCode(e as Error);
+      await this._reportErrorAndSetExitCodeAsync(e as Error);
       return false;
     }
   }
@@ -195,7 +195,7 @@ export class HeftCommandLineParser extends CommandLineParser {
       };
       await super.onExecute();
     } catch (e) {
-      await this._reportErrorAndSetExitCode(e as Error);
+      await this._reportErrorAndSetExitCodeAsync(e as Error);
     }
 
     // If we make it here, things are fine and reset the exit code back to 0
@@ -235,7 +235,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     };
   }
 
-  private async _reportErrorAndSetExitCode(error: Error): Promise<void> {
+  private async _reportErrorAndSetExitCodeAsync(error: Error): Promise<void> {
     if (!(error instanceof AlreadyReportedError)) {
       this.globalTerminal.writeErrorLine(error.toString());
     }

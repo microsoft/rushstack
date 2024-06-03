@@ -1,0 +1,8 @@
+{
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": ["dist"]
+    }
+  ]
+}

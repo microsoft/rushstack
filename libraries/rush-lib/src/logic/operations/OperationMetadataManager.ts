@@ -3,7 +3,13 @@
 
 import * as fs from 'fs';
 import { Async, FileSystem, type IFileSystemCopyFileOptions } from '@rushstack/node-core-library';
-import type { ITerminal } from '@rushstack/terminal';
+import {
+  type ITerminalChunk,
+  TerminalChunkKind,
+  TerminalProviderSeverity,
+  type ITerminal,
+  type ITerminalProvider
+} from '@rushstack/terminal';
 
 import { OperationStateFile } from './OperationStateFile';
 import { RushConstants } from '../RushConstants';
@@ -11,6 +17,7 @@ import { RushConstants } from '../RushConstants';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
+import type { Operation } from './Operation';
 
 /**
  * @internal
@@ -18,6 +25,7 @@ import type { IOperationStateJson } from './OperationStateFile';
 export interface IOperationMetadataManagerOptions {
   rushProject: RushConfigurationProject;
   phase: IPhase;
+  operation: Operation;
 }
 
 /**
@@ -27,8 +35,13 @@ export interface IOperationMetaData {
   durationInSeconds: number;
   logPath: string;
   errorLogPath: string;
+  logChunksPath: string;
   cobuildContextId: string | undefined;
   cobuildRunnerId: string | undefined;
+}
+
+export interface ILogChunkStorage {
+  chunks: ITerminalChunk[];
 }
 
 /**
@@ -38,18 +51,24 @@ export interface IOperationMetaData {
  */
 export class OperationMetadataManager {
   public readonly stateFile: OperationStateFile;
-  private _metadataFolder: string;
-  private _logPath: string;
-  private _errorLogPath: string;
-  private _relativeLogPath: string;
-  private _relativeErrorLogPath: string;
+  public readonly logFilenameIdentifier: string;
+  private readonly _metadataFolder: string;
+  private readonly _logPath: string;
+  private readonly _errorLogPath: string;
+  private readonly _logChunksPath: string;
+  private readonly _relativeLogPath: string;
+  private readonly _relativeLogChunksPath: string;
+  private readonly _relativeErrorLogPath: string;
 
   public constructor(options: IOperationMetadataManagerOptions) {
-    const { rushProject, phase } = options;
+    const { rushProject, operation, phase } = options;
     const { projectFolder } = rushProject;
 
-    const identifier: string = phase.logFilenameIdentifier;
-    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${identifier}`;
+    this.logFilenameIdentifier = operation.name
+      ? normalizeNameForLogFilenameIdentifiers(operation.name)
+      : phase.logFilenameIdentifier;
+
+    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${this.logFilenameIdentifier}`;
 
     this.stateFile = new OperationStateFile({
       projectFolder: projectFolder,
@@ -58,8 +77,10 @@ export class OperationMetadataManager {
 
     this._relativeLogPath = `${this._metadataFolder}/all.log`;
     this._relativeErrorLogPath = `${this._metadataFolder}/error.log`;
+    this._relativeLogChunksPath = `${this._metadataFolder}/log-chunks.jsonl`;
     this._logPath = `${projectFolder}/${this._relativeLogPath}`;
     this._errorLogPath = `${projectFolder}/${this._relativeErrorLogPath}`;
+    this._logChunksPath = `${projectFolder}/${this._relativeLogChunksPath}`;
   }
 
   /**
@@ -70,7 +91,12 @@ export class OperationMetadataManager {
    * Example: `.rush/temp/operation/_phase_build/error.log`
    */
   public get relativeFilepaths(): string[] {
-    return [this.stateFile.relativeFilepath, this._relativeLogPath, this._relativeErrorLogPath];
+    return [
+      this.stateFile.relativeFilepath,
+      this._relativeLogPath,
+      this._relativeErrorLogPath,
+      this._relativeLogChunksPath
+    ];
   }
 
   public async saveAsync({
@@ -78,7 +104,8 @@ export class OperationMetadataManager {
     cobuildContextId,
     cobuildRunnerId,
     logPath,
-    errorLogPath
+    errorLogPath,
+    logChunksPath
   }: IOperationMetaData): Promise<void> {
     const state: IOperationStateJson = {
       nonCachedDurationMs: durationInSeconds * 1000,
@@ -95,6 +122,10 @@ export class OperationMetadataManager {
       {
         sourcePath: errorLogPath,
         destinationPath: this._errorLogPath
+      },
+      {
+        sourcePath: logChunksPath,
+        destinationPath: this._logChunksPath
       }
     ];
 
@@ -112,32 +143,37 @@ export class OperationMetadataManager {
 
   public async tryRestoreAsync({
     terminal,
-    logPath,
+    terminalProvider,
     errorLogPath
   }: {
+    terminalProvider: ITerminalProvider;
     terminal: ITerminal;
-    logPath: string;
     errorLogPath: string;
   }): Promise<void> {
     await this.stateFile.tryRestoreAsync();
 
-    // Append cached log into current log file
-    terminal.writeLine(`Restoring cached log file at ${this._logPath}`);
-    let logReadStream: fs.ReadStream | undefined;
     try {
-      logReadStream = fs.createReadStream(this._logPath, {
-        encoding: 'utf-8'
-      });
-      for await (const data of logReadStream) {
-        terminal.write(data);
+      const rawLogChunks: string = await FileSystem.readFileAsync(this._logChunksPath);
+      const chunks: ITerminalChunk[] = [];
+      for (const chunk of rawLogChunks.split('\n')) {
+        if (chunk) {
+          chunks.push(JSON.parse(chunk));
+        }
+      }
+      for (const { kind, text } of chunks) {
+        if (kind === TerminalChunkKind.Stderr) {
+          terminalProvider.write(text, TerminalProviderSeverity.error);
+        } else {
+          terminalProvider.write(text, TerminalProviderSeverity.log);
+        }
       }
     } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e)) {
+        // Log chunks file doesn't exist, try to restore log file
+        await restoreFromLogFile(terminal, this._logPath);
+      } else {
         throw e;
       }
-    } finally {
-      // Clean up the read steam
-      logReadStream?.close();
     }
 
     // Try to restore cached error log as error log file
@@ -151,5 +187,29 @@ export class OperationMetadataManager {
         throw e;
       }
     }
+  }
+}
+
+export function normalizeNameForLogFilenameIdentifiers(name: string): string {
+  return name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+async function restoreFromLogFile(terminal: ITerminal, path: string): Promise<void> {
+  let logReadStream: fs.ReadStream | undefined;
+
+  try {
+    logReadStream = fs.createReadStream(path, {
+      encoding: 'utf-8'
+    });
+    for await (const data of logReadStream) {
+      terminal.write(data);
+    }
+  } catch (logReadStreamError) {
+    if (!FileSystem.isNotExistError(logReadStreamError)) {
+      throw logReadStreamError;
+    }
+  } finally {
+    // Close the read stream
+    logReadStream?.close();
   }
 }

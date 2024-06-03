@@ -346,6 +346,7 @@ export class PackageJsonLookup {
         packageJson.dependencies = loadedPackageJson.dependencies;
         packageJson.description = loadedPackageJson.description;
         packageJson.devDependencies = loadedPackageJson.devDependencies;
+        packageJson.exports = loadedPackageJson.exports;
         packageJson.homepage = loadedPackageJson.homepage;
         packageJson.license = loadedPackageJson.license;
         packageJson.main = loadedPackageJson.main;
@@ -354,8 +355,8 @@ export class PackageJsonLookup {
         packageJson.peerDependencies = loadedPackageJson.peerDependencies;
         packageJson.private = loadedPackageJson.private;
         packageJson.scripts = loadedPackageJson.scripts;
-        packageJson.typings = loadedPackageJson.typings || loadedPackageJson.types;
         packageJson.tsdocMetadata = loadedPackageJson.tsdocMetadata;
+        packageJson.typings = loadedPackageJson.typings || loadedPackageJson.types;
         packageJson.version = loadedPackageJson.version;
       }
 

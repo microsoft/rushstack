@@ -1,6 +1,65 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+
+## 1.3.54
+Thu, 30 May 2024 00:13:05 GMT
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
+
+## 1.3.53
+Wed, 29 May 2024 02:03:50 GMT
+
+_Version update only_
+
+## 1.3.52
+Wed, 29 May 2024 00:10:52 GMT
+
+_Version update only_
+
+## 1.3.51
+Tue, 28 May 2024 15:10:09 GMT
+
+_Version update only_
+
+## 1.3.50
+Tue, 28 May 2024 00:09:47 GMT
+
+_Version update only_
+
+## 1.3.49
+Sat, 25 May 2024 04:54:07 GMT
+
+_Version update only_
+
+## 1.3.48
+Fri, 24 May 2024 00:15:08 GMT
+
+_Version update only_
+
+## 1.3.47
+Thu, 23 May 2024 02:26:56 GMT
+
+### Patches
+
+- Fix an issue where the task could report success if the subprocess was terminated by a signal
+
+## 1.3.46
+Thu, 16 May 2024 15:10:22 GMT
+
+_Version update only_
+
+## 1.3.45
+Wed, 15 May 2024 23:42:58 GMT
+
+_Version update only_
+
+## 1.3.44
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
 
 ## 1.3.43
 Fri, 10 May 2024 05:33:33 GMT

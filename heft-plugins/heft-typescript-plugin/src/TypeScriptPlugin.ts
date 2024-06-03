@@ -248,7 +248,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         // all source files to this set of static assets. This would allow us to avoid
         // having to copy the static assets multiple times, increasing build times and
         // package size.
-        for (const copyOperation of await this._getStaticAssetCopyOperations(
+        for (const copyOperation of await this._getStaticAssetCopyOperationsAsync(
           taskSession,
           heftConfiguration
         )) {
@@ -285,7 +285,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     );
   }
 
-  private async _getStaticAssetCopyOperations(
+  private async _getStaticAssetCopyOperationsAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<ICopyOperation[]> {

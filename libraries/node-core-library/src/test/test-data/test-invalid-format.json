@@ -1,0 +1,5 @@
+{
+  "exampleString": "This is a string",
+  "exampleLink": "//example",
+  "exampleArray": ["apple", "banana", "coconut"]
+}

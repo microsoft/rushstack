@@ -10,7 +10,10 @@ import { Git } from '../Git';
 import { RushConstants } from '../RushConstants';
 import type { IPolicyValidatorOptions } from './PolicyValidator';
 
-export function validate(rushConfiguration: RushConfiguration, options: IPolicyValidatorOptions): void {
+export async function validateAsync(
+  rushConfiguration: RushConfiguration,
+  options: IPolicyValidatorOptions
+): Promise<void> {
   const git: Git = new Git(rushConfiguration);
 
   if (!git.isGitPresent()) {
@@ -31,10 +34,11 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
     return;
   }
 
+  let userEmail: string | undefined = await git.tryGetGitEmailAsync();
   // If there isn't a Git policy, then we don't care whether the person configured
-  // a Git email address at all.  This helps people who don't
+  // a Git email address at all.
   if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
-    if (git.tryGetGitEmail() === undefined) {
+    if (userEmail === undefined) {
       return;
     }
 
@@ -42,9 +46,8 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
     // sanity checks (e.g. no spaces in the address).
   }
 
-  let userEmail: string;
   try {
-    userEmail = git.getGitEmail();
+    userEmail = git.validateGitEmail(userEmail);
 
     // sanity check; a valid email should not contain any whitespace
     // if this fails, then we have another issue to report
@@ -97,10 +100,8 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
   // Ex. "Example Name <name@example.com>"
   let fancyEmail: string = Colorize.cyan(userEmail);
   try {
-    const userName: string = Utilities.executeCommandAndCaptureOutput(
-      git.gitPath!,
-      ['config', 'user.name'],
-      '.'
+    const userName: string = (
+      await Utilities.executeCommandAndCaptureOutputAsync(git.gitPath!, ['config', 'user.name'], '.')
     ).trim();
     if (userName) {
       fancyEmail = `${userName} <${fancyEmail}>`;

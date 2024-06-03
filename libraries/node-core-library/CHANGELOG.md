@@ -1,6 +1,66 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 10 May 2024 05:33:33 GMT and should not be manually modified.
+This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+
+## 5.4.1
+Thu, 30 May 2024 00:13:05 GMT
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
+
+## 5.4.0
+Wed, 29 May 2024 02:03:50 GMT
+
+### Minor changes
+
+- Add a `throwOnSignal` option to the `Executable.waitForExitAsync` to control if that function should throw if the process is terminated with a signal.
+- Add a `signal` property to the result of `Executable.waitForExitAsync` that includes a signal if the process was termianted by a signal.
+
+## 5.3.0
+Tue, 28 May 2024 15:10:09 GMT
+
+### Minor changes
+
+- Include typings for the the `"files"` field in `IPackageJson`.
+
+## 5.2.0
+Tue, 28 May 2024 00:09:47 GMT
+
+### Minor changes
+
+- Include typings for the `"exports"` and `"typesVersions"` fields in `IPackageJson`.
+
+## 5.1.0
+Sat, 25 May 2024 04:54:07 GMT
+
+### Minor changes
+
+- Update `JsonFile` to support loading JSON files that include object keys that are members of `Object.prototype`.
+
+### Patches
+
+- Fix an issue with `JsonSchema` where `"uniqueItems": true` would throw an error if the `"item"` type in the schema has `"type": "object"`.
+
+## 5.0.0
+Thu, 23 May 2024 02:26:56 GMT
+
+### Breaking changes
+
+- Replace z-schema with ajv for schema validation and add support for json-schema draft-07.
+- Remove the deprecated `Async.sleep` function.
+- Convert `FileConstants` and `FolderConstants` from enums to const objects.
+
+### Patches
+
+- Fix an issue where waitForExitAsync() might reject before all output was collected
+
+## 4.3.0
+Wed, 15 May 2024 06:04:17 GMT
+
+### Minor changes
+
+- Rename `Async.sleep` to `Async.sleepAsync`. The old function is marked as `@deprecated`.
 
 ## 4.2.1
 Fri, 10 May 2024 05:33:33 GMT

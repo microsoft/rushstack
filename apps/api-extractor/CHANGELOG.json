@@ -2,6 +2,219 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.46.2",
+      "tag": "@microsoft/api-extractor_v7.46.2",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing `type` modifiers on type-only exports."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.29.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.46.1",
+      "tag": "@microsoft/api-extractor_v7.46.1",
+      "date": "Wed, 29 May 2024 02:03:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.29.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.21.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.46.0",
+      "tag": "@microsoft/api-extractor_v7.46.0",
+      "date": "Wed, 29 May 2024 00:10:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump TSDoc dependencies."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.29.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.45.1",
+      "tag": "@microsoft/api-extractor_v7.45.1",
+      "date": "Tue, 28 May 2024 15:10:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.21.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.45.0",
+      "tag": "@microsoft/api-extractor_v7.45.0",
+      "date": "Tue, 28 May 2024 00:09:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Improve support for resolving the `tsdoc-metadata.json` to include the folder referenced by a `types` field in an `\"exports\"` field and an `\"typesVersions\"` field in addition to `\"types\"`, `\"typings\"`, and `\"tsdocMetadata\"` fields."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.21.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.44.1",
+      "tag": "@microsoft/api-extractor_v7.44.1",
+      "date": "Sat, 25 May 2024 04:54:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.21.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.44.0",
+      "tag": "@microsoft/api-extractor_v7.44.0",
+      "date": "Fri, 24 May 2024 00:15:08 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for \"variants\" of API reports which include or exclude items by release tag"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.43.8",
+      "tag": "@microsoft/api-extractor_v7.43.8",
+      "date": "Thu, 23 May 2024 02:26:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.11.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.21.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.43.7",
+      "tag": "@microsoft/api-extractor_v7.43.7",
+      "date": "Thu, 16 May 2024 15:10:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.21.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.43.6",
+      "tag": "@microsoft/api-extractor_v7.43.6",
+      "date": "Wed, 15 May 2024 23:42:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.20.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.43.5",
+      "tag": "@microsoft/api-extractor_v7.43.5",
+      "date": "Wed, 15 May 2024 06:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.10.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.20.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.43.4",
       "tag": "@microsoft/api-extractor_v7.43.4",
       "date": "Fri, 10 May 2024 05:33:33 GMT",

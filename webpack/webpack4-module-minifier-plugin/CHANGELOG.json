@@ -2,6 +2,204 @@
   "name": "@rushstack/webpack4-module-minifier-plugin",
   "entries": [
     {
+      "version": "0.13.56",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.56",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.6.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.55`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.55",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.55",
+      "date": "Wed, 29 May 2024 02:03:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.6.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.54`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.54",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.54",
+      "date": "Wed, 29 May 2024 00:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.6.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.53`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.53",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.53",
+      "date": "Tue, 28 May 2024 15:10:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.6.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.52`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.52",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.52",
+      "date": "Tue, 28 May 2024 00:09:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.6.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.51`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.51",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.51",
+      "date": "Sat, 25 May 2024 04:54:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.6.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.50`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.50",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.50",
+      "date": "Fri, 24 May 2024 00:15:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.6.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.49`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.49",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.49",
+      "date": "Thu, 23 May 2024 02:26:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.6.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.48`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.48",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.48",
+      "date": "Thu, 16 May 2024 15:10:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.6.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.47`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.47",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.47",
+      "date": "Wed, 15 May 2024 23:42:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.46`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.46",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.46",
+      "date": "Wed, 15 May 2024 06:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.45`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.45",
       "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.45",
       "date": "Fri, 10 May 2024 05:33:34 GMT",

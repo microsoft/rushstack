@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.10.3",
+      "tag": "@rushstack/eslint-patch_v1.10.3",
+      "date": "Fri, 17 May 2024 00:10:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "[eslint-patch] Allow use of ESLint v9"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.2",
       "tag": "@rushstack/eslint-patch_v1.10.2",
       "date": "Wed, 10 Apr 2024 21:59:39 GMT",

@@ -2,6 +2,124 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.22.0",
+      "tag": "@rushstack/ts-command-line_v4.22.0",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Eliminate a const enum from the public API."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.21.5",
+      "tag": "@rushstack/ts-command-line_v4.21.5",
+      "date": "Wed, 29 May 2024 02:03:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.21.4",
+      "tag": "@rushstack/ts-command-line_v4.21.4",
+      "date": "Tue, 28 May 2024 15:10:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.21.3",
+      "tag": "@rushstack/ts-command-line_v4.21.3",
+      "date": "Tue, 28 May 2024 00:09:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.21.2",
+      "tag": "@rushstack/ts-command-line_v4.21.2",
+      "date": "Sat, 25 May 2024 04:54:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.21.1",
+      "tag": "@rushstack/ts-command-line_v4.21.1",
+      "date": "Thu, 23 May 2024 02:26:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.11.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.21.0",
+      "tag": "@rushstack/ts-command-line_v4.21.0",
+      "date": "Thu, 16 May 2024 15:10:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Mark `onDefineParameters` and `onDefineUnscopedParameters` as deprecated and update README accordingly because defining parameters causes issues when the compiler targets >=es2022."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.20.1",
+      "tag": "@rushstack/ts-command-line_v4.20.1",
+      "date": "Wed, 15 May 2024 23:42:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.11.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.20.0",
+      "tag": "@rushstack/ts-command-line_v4.20.0",
+      "date": "Wed, 15 May 2024 06:04:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Rename `CommandLineParser.execute` to `CommandLineParser.executeAsync` and `CommandLineParser.executeWithoutErrorHandling` to `CommandLineParser.executeWithoutErrorHandlingAsync`. The old functions are marked as `@deprecated`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.10.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.19.5",
       "tag": "@rushstack/ts-command-line_v4.19.5",
       "date": "Fri, 10 May 2024 05:33:34 GMT",

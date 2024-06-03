@@ -1,6 +1,18 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Wed, 10 Apr 2024 21:59:39 GMT and should not be manually modified.
+This log was last generated on Wed, 29 May 2024 00:10:52 GMT and should not be manually modified.
+
+## 3.7.0
+Wed, 29 May 2024 00:10:52 GMT
+
+### Minor changes
+
+- Bump the `eslint-plugin-tsdoc` plugin.
+
+## 3.6.10
+Fri, 17 May 2024 00:10:40 GMT
+
+_Version update only_
 
 ## 3.6.9
 Wed, 10 Apr 2024 21:59:39 GMT

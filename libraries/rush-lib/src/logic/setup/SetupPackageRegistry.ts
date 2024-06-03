@@ -94,7 +94,7 @@ export class SetupPackageRegistry {
    *
    * @returns - `true` if valid, `false` if not valid
    */
-  public async checkOnly(): Promise<boolean> {
+  public async checkOnlyAsync(): Promise<boolean> {
     const packageRegistry: IArtifactoryPackageRegistryJson =
       this._artifactoryConfiguration.configuration.packageRegistry;
     if (!packageRegistry.enabled) {
@@ -198,8 +198,8 @@ export class SetupPackageRegistry {
   /**
    * Test whether the NPM token is valid.  If not, prompt to update it.
    */
-  public async checkAndSetup(): Promise<void> {
-    if (await this.checkOnly()) {
+  public async checkAndSetupAsync(): Promise<void> {
+    if (await this.checkOnlyAsync()) {
       return;
     }
 
@@ -209,7 +209,7 @@ export class SetupPackageRegistry {
     const packageRegistry: IArtifactoryPackageRegistryJson =
       this._artifactoryConfiguration.configuration.packageRegistry;
 
-    const fixThisProblem: boolean = await TerminalInput.promptYesNo({
+    const fixThisProblem: boolean = await TerminalInput.promptYesNoAsync({
       message: 'Fix this problem now?',
       defaultValue: false
     });
@@ -220,7 +220,7 @@ export class SetupPackageRegistry {
 
     this._writeInstructionBlock(this._messages.introduction);
 
-    const hasArtifactoryAccount: boolean = await TerminalInput.promptYesNo({
+    const hasArtifactoryAccount: boolean = await TerminalInput.promptYesNoAsync({
       message: 'Do you already have an Artifactory user account?'
     });
     this._terminal.writeLine();
@@ -244,7 +244,7 @@ export class SetupPackageRegistry {
 
     this._writeInstructionBlock(this._messages.locateUserName);
 
-    let artifactoryUser: string = await TerminalInput.promptLine({
+    let artifactoryUser: string = await TerminalInput.promptLineAsync({
       message: this._messages.userNamePrompt
     });
     this._terminal.writeLine();
@@ -258,7 +258,7 @@ export class SetupPackageRegistry {
 
     this._writeInstructionBlock(this._messages.locateApiKey);
 
-    let artifactoryKey: string = await TerminalInput.promptPasswordLine({
+    let artifactoryKey: string = await TerminalInput.promptPasswordLineAsync({
       message: this._messages.apiKeyPrompt
     });
     this._terminal.writeLine();
@@ -270,14 +270,14 @@ export class SetupPackageRegistry {
       throw new AlreadyReportedError();
     }
 
-    await this._fetchTokenAndUpdateNpmrc(artifactoryUser, artifactoryKey, packageRegistry);
+    await this._fetchTokenAndUpdateNpmrcAsync(artifactoryUser, artifactoryKey, packageRegistry);
   }
 
   /**
    * Fetch a valid NPM token from the Artifactory service and add it to the `~/.npmrc` file,
    * preserving other settings in that file.
    */
-  private async _fetchTokenAndUpdateNpmrc(
+  private async _fetchTokenAndUpdateNpmrcAsync(
     artifactoryUser: string,
     artifactoryKey: string,
     packageRegistry: IArtifactoryPackageRegistryJson

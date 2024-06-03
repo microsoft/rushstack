@@ -1,6 +1,50 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+
+## 7.29.2
+Thu, 30 May 2024 00:13:05 GMT
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
+
+## 7.29.1
+Wed, 29 May 2024 02:03:51 GMT
+
+_Version update only_
+
+## 7.29.0
+Wed, 29 May 2024 00:10:52 GMT
+
+### Minor changes
+
+- Bump TSDoc dependencies.
+
+## 7.28.21
+Tue, 28 May 2024 15:10:09 GMT
+
+_Version update only_
+
+## 7.28.20
+Tue, 28 May 2024 00:09:47 GMT
+
+_Version update only_
+
+## 7.28.19
+Sat, 25 May 2024 04:54:08 GMT
+
+_Version update only_
+
+## 7.28.18
+Thu, 23 May 2024 02:26:56 GMT
+
+_Version update only_
+
+## 7.28.17
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
 
 ## 7.28.16
 Fri, 10 May 2024 05:33:34 GMT

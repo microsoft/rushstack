@@ -73,13 +73,13 @@ export class TabCompleteAction extends CommandLineAction {
     const commandLine: string = this._wordToCompleteParameter.value;
     const caretPosition: number = this._positionParameter.value || commandLine.length;
 
-    for await (const value of this.getCompletions(commandLine, caretPosition)) {
+    for await (const value of this.getCompletionsAsync(commandLine, caretPosition)) {
       // eslint-disable-next-line no-console
       console.log(value);
     }
   }
 
-  public async *getCompletions(
+  public async *getCompletionsAsync(
     commandLine: string,
     caretPosition: number = commandLine.length
   ): AsyncIterable<string> {
@@ -122,7 +122,7 @@ export class TabCompleteAction extends CommandLineAction {
           if (completePartialWord) {
             for (const parameterName of parameterNames) {
               if (parameterName === secondLastToken) {
-                const values: ReadonlyArray<string> = await this._getParameterValueCompletions(
+                const values: ReadonlyArray<string> = await this._getParameterValueCompletionsAsync(
                   parameterNameMap.get(parameterName)!
                 );
                 if (values.length > 0) {
@@ -135,7 +135,7 @@ export class TabCompleteAction extends CommandLineAction {
           } else {
             for (const parameterName of parameterNames) {
               if (parameterName === lastToken) {
-                const values: ReadonlyArray<string> = await this._getParameterValueCompletions(
+                const values: ReadonlyArray<string> = await this._getParameterValueCompletionsAsync(
                   parameterNameMap.get(parameterName)!
                 );
                 if (values.length > 0) {
@@ -172,7 +172,7 @@ export class TabCompleteAction extends CommandLineAction {
     return stringArgv(commandLine);
   }
 
-  private async _getParameterValueCompletions(
+  private async _getParameterValueCompletionsAsync(
     parameter: CommandLineParameter
   ): Promise<ReadonlyArray<string>> {
     let choiceParameterValues: ReadonlyArray<string> = [];

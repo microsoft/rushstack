@@ -42,6 +42,40 @@ export interface IRushProjectJson {
   operationSettings?: IOperationSettings[];
 }
 
+/** @alpha */
+export interface IRushPhaseSharding {
+  /**
+   * The number of shards to create.
+   */
+  count: number;
+
+  /**
+   * The format of the argument to pass to the command to indicate the shard index and count.
+   *
+   * @defaultValue `--shard={shardIndex}/{shardCount}`
+   */
+  shardArgumentFormat?: string;
+
+  /**
+   * An optional argument to pass to the command to indicate the output folder for the shard.
+   *  It must end with `{shardIndex}`.
+   *
+   * @defaultValue `--shard-output-folder=.rush/operations/{phaseName}/shards/{shardIndex}`.
+   */
+  outputFolderArgumentFormat?: string;
+
+  /**
+   * Configuration for the shard operation. All other configuration applies to the collator operation.
+   */
+  shardOperationSettings?: {
+    /**
+     * How many concurrency units this operation should take up during execution. The maximum concurrent units is
+     *  determined by the -p flag.
+     */
+    weight?: number;
+  };
+}
+
 /**
  * @alpha
  */
@@ -92,6 +126,14 @@ export interface IOperationSettings {
    * calculating final hash value when reading and writing the build cache
    */
   dependsOnAdditionalFiles?: string[];
+
+  /**
+   * An optional config object for sharding the operation. If specified, the operation will be sharded
+   * into multiple invocations. The `count` property specifies the number of shards to create. The
+   * `shardArgumentFormat` property specifies the format of the argument to pass to the command to
+   * indicate the shard index and count. The default value is `--shard={shardIndex}/{shardCount}`.
+   */
+  sharding?: IRushPhaseSharding;
 
   /**
    * How many concurrency units this operation should take up during execution. The maximum concurrent units is
@@ -299,12 +341,18 @@ export class RushProjectConfiguration {
    * Examines the list of source files for the project and the target phase and returns a reason
    * why the project cannot enable the build cache for that phase, or undefined if it is safe to so do.
    */
-  public getCacheDisabledReason(trackedFileNames: Iterable<string>, phaseName: string): string | undefined {
+  public getCacheDisabledReason(
+    trackedFileNames: Iterable<string>,
+    phaseName: string,
+    isNoOp: boolean
+  ): string | undefined {
+    // Skip no-op operations as they won't have any output/cacheable things.
+    if (isNoOp) {
+      return undefined;
+    }
     if (this.disableBuildCacheForProject) {
       return 'Caching has been disabled for this project.';
     }
-
-    const normalizedProjectRelativeFolder: string = Path.convertToSlashes(this.project.projectRelativeFolder);
 
     const operationSettings: IOperationSettings | undefined =
       this.operationSettingsByOperationName.get(phaseName);
@@ -320,6 +368,7 @@ export class RushProjectConfiguration {
     if (!outputFolderNames) {
       return;
     }
+    const normalizedProjectRelativeFolder: string = Path.convertToSlashes(this.project.projectRelativeFolder);
 
     const normalizedOutputFolders: string[] = outputFolderNames.map(
       (outputFolderName) => `${normalizedProjectRelativeFolder}/${outputFolderName}/`

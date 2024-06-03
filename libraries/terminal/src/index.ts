@@ -11,36 +11,39 @@
  * @packageDocumentation
  */
 
-export { ICallbackWritableOptions, CallbackWritable } from './CallbackWritable';
-export { IDiscardStdoutTransformOptions, DiscardStdoutTransform } from './DiscardStdoutTransform';
-export { TerminalChunkKind, ITerminalChunk } from './ITerminalChunk';
+export { type ICallbackWritableOptions, CallbackWritable } from './CallbackWritable';
+export { type IDiscardStdoutTransformOptions, DiscardStdoutTransform } from './DiscardStdoutTransform';
+export { TerminalChunkKind, type ITerminalChunk } from './ITerminalChunk';
 export { MockWritable } from './MockWritable';
 export {
-  INormalizeNewlinesTextRewriterOptions,
+  type INormalizeNewlinesTextRewriterOptions,
   NormalizeNewlinesTextRewriter
 } from './NormalizeNewlinesTextRewriter';
 export { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from './PrintUtilities';
 export { RemoveColorsTextRewriter } from './RemoveColorsTextRewriter';
-export { ISplitterTransformOptions, SplitterTransform } from './SplitterTransform';
-export { IStdioLineTransformOptions, StderrLineTransform } from './StdioLineTransform';
-export { IStdioSummarizerOptions, StdioSummarizer } from './StdioSummarizer';
+export { type ISplitterTransformOptions, SplitterTransform } from './SplitterTransform';
+export { type IStdioLineTransformOptions, StderrLineTransform } from './StdioLineTransform';
+export { type IStdioSummarizerOptions, StdioSummarizer } from './StdioSummarizer';
 export { StdioWritable } from './StdioWritable';
-export { ITerminalTransformOptions, TerminalTransform } from './TerminalTransform';
-export { ITerminalWritableOptions, TerminalWritable } from './TerminalWritable';
-export { TextRewriterState, TextRewriter } from './TextRewriter';
-export { ITextRewriterTransformOptions, TextRewriterTransform } from './TextRewriterTransform';
-export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './AnsiEscape';
-export { ITerminal, TerminalWriteParameters, ITerminalWriteOptions } from './ITerminal';
+export { type ITerminalTransformOptions, TerminalTransform } from './TerminalTransform';
+export { type ITerminalWritableOptions, TerminalWritable } from './TerminalWritable';
+export { type TextRewriterState, TextRewriter } from './TextRewriter';
+export { type ITextRewriterTransformOptions, TextRewriterTransform } from './TextRewriterTransform';
+export { AnsiEscape, type IAnsiEscapeConvertForTestsOptions } from './AnsiEscape';
+export type { ITerminal, TerminalWriteParameters, ITerminalWriteOptions } from './ITerminal';
 export { Terminal } from './Terminal';
 export { Colorize } from './Colorize';
-export { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
-export { ConsoleTerminalProvider, IConsoleTerminalProviderOptions } from './ConsoleTerminalProvider';
-export { StringBufferTerminalProvider, IStringBufferOutputOptions } from './StringBufferTerminalProvider';
+export { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
+export { ConsoleTerminalProvider, type IConsoleTerminalProviderOptions } from './ConsoleTerminalProvider';
+export {
+  StringBufferTerminalProvider,
+  type IStringBufferOutputOptions
+} from './StringBufferTerminalProvider';
 export {
   PrefixProxyTerminalProvider,
-  IPrefixProxyTerminalProviderOptions,
-  IDynamicPrefixProxyTerminalProviderOptions,
-  IPrefixProxyTerminalProviderOptionsBase,
-  IStaticPrefixProxyTerminalProviderOptions
+  type IPrefixProxyTerminalProviderOptions,
+  type IDynamicPrefixProxyTerminalProviderOptions,
+  type IPrefixProxyTerminalProviderOptionsBase,
+  type IStaticPrefixProxyTerminalProviderOptions
 } from './PrefixProxyTerminalProvider';
-export { TerminalStreamWritable, ITerminalStreamWritableOptions } from './TerminalStreamWritable';
+export { TerminalStreamWritable, type ITerminalStreamWritableOptions } from './TerminalStreamWritable';

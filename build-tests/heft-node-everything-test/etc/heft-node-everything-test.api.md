@@ -8,7 +8,6 @@
 export class TestClass {
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

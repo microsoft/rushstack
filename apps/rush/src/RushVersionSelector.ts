@@ -48,7 +48,7 @@ export class RushVersionSelector {
       if (installIsValid) {
         console.log('Another process performed the installation.');
       } else {
-        Utilities.installPackageInDirectory({
+        await Utilities.installPackageInDirectoryAsync({
           directory: expectedRushPath,
           packageName: isLegacyRushVersion ? '@microsoft/rush' : '@microsoft/rush-lib',
           version: version,
@@ -85,14 +85,9 @@ export class RushVersionSelector {
       require(path.join(expectedRushPath, 'node_modules', '@microsoft', 'rush', 'lib', 'start'));
     } else {
       // For newer rush-lib, RushCommandSelector can test whether "rushx" is supported or not
-      const rushCliEntrypoint: {} = require(path.join(
-        expectedRushPath,
-        'node_modules',
-        '@microsoft',
-        'rush-lib',
-        'lib',
-        'index'
-      ));
+      const rushCliEntrypoint: {} = require(
+        path.join(expectedRushPath, 'node_modules', '@microsoft', 'rush-lib', 'lib', 'index')
+      );
       RushCommandSelector.execute(this._currentPackageVersion, rushCliEntrypoint, executeOptions);
     }
   }

@@ -32,7 +32,7 @@ describe(CredentialCache.name, () => {
           if (maxWaitMs === undefined) {
             await existingLock;
           } else {
-            await Promise.race([existingLock, Async.sleep(maxWaitMs)]);
+            await Promise.race([existingLock, Async.sleepAsync(maxWaitMs)]);
           }
         }
 

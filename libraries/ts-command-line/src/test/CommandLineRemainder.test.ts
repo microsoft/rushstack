@@ -60,7 +60,7 @@ describe(CommandLineRemainder.name, () => {
     const action: CommandLineAction = commandLineParser.getAction('run');
     const args: string[] = ['run', '--title', 'The title', 'the', 'remaining', 'args'];
 
-    await commandLineParser.execute(args);
+    await commandLineParser.executeAsync(args);
 
     expect(commandLineParser.selectedAction).toBe(action);
 
@@ -81,7 +81,7 @@ describe(CommandLineRemainder.name, () => {
     const action: CommandLineAction = commandLineParser.getAction('run');
     const args: string[] = ['run', '--title', 'The title', '--', '--the', 'remaining', '--args'];
 
-    await commandLineParser.execute(args);
+    await commandLineParser.executeAsync(args);
 
     expect(commandLineParser.selectedAction).toBe(action);
 

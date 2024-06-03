@@ -1,6 +1,56 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+
+## 0.13.0
+Thu, 30 May 2024 00:13:05 GMT
+
+### Minor changes
+
+- Eliminate a const enum from the public API.
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
+
+## 0.12.3
+Wed, 29 May 2024 02:03:51 GMT
+
+_Version update only_
+
+## 0.12.2
+Tue, 28 May 2024 15:10:09 GMT
+
+_Version update only_
+
+## 0.12.1
+Tue, 28 May 2024 00:09:47 GMT
+
+_Version update only_
+
+## 0.12.0
+Sat, 25 May 2024 04:54:07 GMT
+
+### Minor changes
+
+- Change the `eolCharacter` property value of `StringBufferTerminalProvider` to `\n` from `[n]`. This does not change the default `getOutput()` result, but removes the `[n]` characters from the `getOutput({ normalizeSpecialCharacters: false })` result.
+
+## 0.11.1
+Thu, 23 May 2024 02:26:56 GMT
+
+_Version update only_
+
+## 0.11.0
+Wed, 15 May 2024 23:42:58 GMT
+
+### Minor changes
+
+- Allow use of 'preventAutoclose' flag in StdioSummarizer.
+
+## 0.10.4
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
 
 ## 0.10.3
 Fri, 10 May 2024 05:33:34 GMT

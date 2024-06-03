@@ -25,7 +25,6 @@
     "heft-example-plugin-01": "workspace:*",
     "heft-example-plugin-02": "workspace:*",
     "tslint": "~5.20.1",
-    "tslint-microsoft-contrib": "~6.2.0",
     "typescript": "~5.4.2"
   }
 }

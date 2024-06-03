@@ -2,6 +2,109 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.4.1",
+      "tag": "@rushstack/node-core-library_v5.4.1",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing `type` modifiers on type-only exports."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.0",
+      "tag": "@rushstack/node-core-library_v5.4.0",
+      "date": "Wed, 29 May 2024 02:03:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `throwOnSignal` option to the `Executable.waitForExitAsync` to control if that function should throw if the process is terminated with a signal."
+          },
+          {
+            "comment": "Add a `signal` property to the result of `Executable.waitForExitAsync` that includes a signal if the process was termianted by a signal."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.0",
+      "tag": "@rushstack/node-core-library_v5.3.0",
+      "date": "Tue, 28 May 2024 15:10:09 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include typings for the the `\"files\"` field in `IPackageJson`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.0",
+      "tag": "@rushstack/node-core-library_v5.2.0",
+      "date": "Tue, 28 May 2024 00:09:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include typings for the `\"exports\"` and `\"typesVersions\"` fields in `IPackageJson`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.1.0",
+      "tag": "@rushstack/node-core-library_v5.1.0",
+      "date": "Sat, 25 May 2024 04:54:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update `JsonFile` to support loading JSON files that include object keys that are members of `Object.prototype`."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue with `JsonSchema` where `\"uniqueItems\": true` would throw an error if the `\"item\"` type in the schema has `\"type\": \"object\"`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.0",
+      "tag": "@rushstack/node-core-library_v5.0.0",
+      "date": "Thu, 23 May 2024 02:26:56 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Replace z-schema with ajv for schema validation and add support for json-schema draft-07."
+          },
+          {
+            "comment": "Remove the deprecated `Async.sleep` function."
+          },
+          {
+            "comment": "Convert `FileConstants` and `FolderConstants` from enums to const objects."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue where waitForExitAsync() might reject before all output was collected"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.0",
+      "tag": "@rushstack/node-core-library_v4.3.0",
+      "date": "Wed, 15 May 2024 06:04:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Rename `Async.sleep` to `Async.sleepAsync`. The old function is marked as `@deprecated`."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.1",
       "tag": "@rushstack/node-core-library_v4.2.1",
       "date": "Fri, 10 May 2024 05:33:33 GMT",

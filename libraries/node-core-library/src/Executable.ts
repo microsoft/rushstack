@@ -117,8 +117,17 @@ export interface IExecutableSpawnOptions extends IExecutableResolveOptions {
 export interface IWaitForExitOptions {
   /**
    * Whether or not to throw when the process completes with a non-zero exit code. Defaults to false.
+   *
+   * @defaultValue false
    */
   throwOnNonZeroExitCode?: boolean;
+
+  /**
+   * Whether or not to throw when the process is terminated by a signal. Defaults to false.
+   *
+   * @defaultValue false
+   */
+  throwOnSignal?: boolean;
 
   /**
    * The encoding of the output. If not provided, the output will not be collected.
@@ -171,6 +180,12 @@ export interface IWaitForExitResult<T extends Buffer | string | never = never> {
    */
   // eslint-disable-next-line @rushstack/no-new-null
   exitCode: number | null;
+
+  /**
+   * The process signal that terminated the process. If the process exited normally, this will be null.
+   */
+  // eslint-disable-next-line @rushstack/no-new-null
+  signal: string | null;
 }
 
 // Common environmental state used by Executable members
@@ -548,7 +563,7 @@ export class Executable {
     childProcess: child_process.ChildProcess,
     options: IWaitForExitOptions = {}
   ): Promise<IWaitForExitResult<T>> {
-    const { throwOnNonZeroExitCode = false, encoding } = options;
+    const { throwOnNonZeroExitCode, throwOnSignal, encoding } = options;
     if (encoding && (!childProcess.stdout || !childProcess.stderr)) {
       throw new Error(
         'An encoding was specified, but stdout and/or stderr on the child process are not defined'
@@ -567,9 +582,11 @@ export class Executable {
       }
     }
 
-    let errorThrown: boolean = false;
-    const exitCode: number | null = await new Promise<number | null>(
-      (resolve: (result: number | null) => void, reject: (error: Error) => void) => {
+    type ISignalAndExitCode = Pick<IWaitForExitResult<T>, 'exitCode' | 'signal'>;
+
+    let errorThrown: Error | undefined = undefined;
+    const { exitCode, signal } = await new Promise<ISignalAndExitCode>(
+      (resolve: (result: ISignalAndExitCode) => void, reject: (error: Error) => void) => {
         if (encoding) {
           childProcess.stdout!.on('data', (chunk: Buffer | string) => {
             collectedStdout.push(normalizeChunk(chunk));
@@ -579,34 +596,40 @@ export class Executable {
           });
         }
         childProcess.on('error', (error: Error) => {
-          errorThrown = true;
-          reject(error);
+          // Wait to call reject() until any output is collected
+          errorThrown = error;
         });
-        childProcess.on('exit', (code: number | null) => {
+        childProcess.on('close', (closeExitCode: number | null, closeSignal: NodeJS.Signals | null) => {
           if (errorThrown) {
-            // We've already rejected the promise
-            return;
+            reject(errorThrown);
           }
-          if (code !== 0 && throwOnNonZeroExitCode) {
-            reject(new Error(`Process exited with code ${code}`));
+          if (closeSignal && throwOnSignal) {
+            reject(new Error(`Process terminated by ${closeSignal}`));
+          } else if (closeExitCode !== 0 && throwOnNonZeroExitCode) {
+            reject(new Error(`Process exited with code ${closeExitCode}`));
           } else {
-            resolve(code);
+            resolve({ exitCode: closeExitCode, signal: closeSignal });
           }
         });
       }
     );
 
-    const result: IWaitForExitResult<T> = {
-      exitCode
-    } as IWaitForExitResult<T>;
-
+    let stdout: T | undefined;
+    let stderr: T | undefined;
     if (encoding === 'buffer') {
-      result.stdout = Buffer.concat(collectedStdout as Buffer[]) as T;
-      result.stderr = Buffer.concat(collectedStderr as Buffer[]) as T;
-    } else if (encoding) {
-      result.stdout = collectedStdout.join('') as T;
-      result.stderr = collectedStderr.join('') as T;
+      stdout = Buffer.concat(collectedStdout as Buffer[]) as T;
+      stderr = Buffer.concat(collectedStderr as Buffer[]) as T;
+    } else if (encoding !== undefined) {
+      stdout = collectedStdout.join('') as T;
+      stderr = collectedStderr.join('') as T;
     }
+
+    const result: IWaitForExitResult<T> = {
+      stdout: stdout as T,
+      stderr: stderr as T,
+      exitCode,
+      signal
+    };
 
     return result;
   }
@@ -630,7 +653,7 @@ export class Executable {
     const [processInfoByIdMap] = await Promise.all([
       parseProcessListOutputAsync(process.stdout),
       // Don't collect output in the result since we process it directly
-      Executable.waitForExitAsync(process, { throwOnNonZeroExitCode: true })
+      Executable.waitForExitAsync(process, { throwOnNonZeroExitCode: true, throwOnSignal: true })
     ]);
     return processInfoByIdMap;
   }

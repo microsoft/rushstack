@@ -24,26 +24,24 @@ export class InteractiveUpgrader {
     this._rushConfiguration = rushConfiguration;
   }
 
-  public async upgrade(): Promise<IUpgradeInteractiveDeps> {
-    const rushProject: RushConfigurationProject = await this._getUserSelectedProjectForUpgrade();
+  public async upgradeAsync(): Promise<IUpgradeInteractiveDeps> {
+    const rushProject: RushConfigurationProject = await this._getUserSelectedProjectForUpgradeAsync();
 
-    const dependenciesState: NpmCheck.INpmCheckPackage[] = await this._getPackageDependenciesStatus(
-      rushProject
-    );
+    const dependenciesState: NpmCheck.INpmCheckPackage[] =
+      await this._getPackageDependenciesStatusAsync(rushProject);
 
-    const depsToUpgrade: IDepsToUpgradeAnswers = await this._getUserSelectedDependenciesToUpgrade(
-      dependenciesState
-    );
+    const depsToUpgrade: IDepsToUpgradeAnswers =
+      await this._getUserSelectedDependenciesToUpgradeAsync(dependenciesState);
     return { projects: [rushProject], depsToUpgrade };
   }
 
-  private async _getUserSelectedDependenciesToUpgrade(
+  private async _getUserSelectedDependenciesToUpgradeAsync(
     packages: NpmCheck.INpmCheckPackage[]
   ): Promise<IDepsToUpgradeAnswers> {
     return upgradeInteractive(packages);
   }
 
-  private async _getUserSelectedProjectForUpgrade(): Promise<RushConfigurationProject> {
+  private async _getUserSelectedProjectForUpgradeAsync(): Promise<RushConfigurationProject> {
     const projects: RushConfigurationProject[] | undefined = this._rushConfiguration.projects;
     const ui: Prompt = new Prompt({
       list: SearchListPrompt
@@ -67,7 +65,7 @@ export class InteractiveUpgrader {
     return selectProject;
   }
 
-  private async _getPackageDependenciesStatus(
+  private async _getPackageDependenciesStatusAsync(
     rushProject: RushConfigurationProject
   ): Promise<NpmCheck.INpmCheckPackage[]> {
     const { projectFolder } = rushProject;

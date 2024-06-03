@@ -120,7 +120,7 @@ export class RushWorkspace {
     return undefined;
   }
 
-  public static async selectWorkspace(): Promise<RushWorkspace | undefined> {
+  public static async selectWorkspaceAsync(): Promise<RushWorkspace | undefined> {
     const Uris: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
       canSelectFolders: true,
       canSelectFiles: false,

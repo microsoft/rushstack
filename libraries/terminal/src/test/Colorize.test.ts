@@ -19,7 +19,7 @@ describe(Colorize.name, () => {
 
   it('generates codes as expected', () => {
     type ColorsFunctionNames = {
-      [K in keyof typeof Colorize]: typeof Colorize[K] extends (str: string) => string ? K : never;
+      [K in keyof typeof Colorize]: (typeof Colorize)[K] extends (str: string) => string ? K : never;
     }[keyof typeof Colorize];
     function testColorFunction(functionName: ColorsFunctionNames): void {
       expect(Colorize[functionName]('x')).toMatchSnapshot(functionName);

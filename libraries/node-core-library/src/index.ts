@@ -8,98 +8,113 @@
  */
 
 export { AlreadyReportedError } from './AlreadyReportedError';
-export { Async, AsyncQueue, IAsyncParallelismOptions, IRunWithRetriesOptions, IWeighted } from './Async';
-export { Brand } from './PrimitiveTypes';
+export {
+  Async,
+  AsyncQueue,
+  type IAsyncParallelismOptions,
+  type IRunWithRetriesOptions,
+  type IWeighted
+} from './Async';
+export type { Brand } from './PrimitiveTypes';
 export { FileConstants, FolderConstants } from './Constants';
 export { Enum } from './Enum';
-export { EnvironmentMap, IEnvironmentEntry } from './EnvironmentMap';
+export { EnvironmentMap, type IEnvironmentEntry } from './EnvironmentMap';
 export {
-  ExecutableStdioStreamMapping,
-  ExecutableStdioMapping,
-  IExecutableResolveOptions,
-  IExecutableSpawnSyncOptions,
-  IExecutableSpawnOptions,
-  IWaitForExitOptions,
-  IWaitForExitWithBufferOptions,
-  IWaitForExitWithStringOptions,
-  IWaitForExitResult,
-  IProcessInfo,
+  type ExecutableStdioStreamMapping,
+  type ExecutableStdioMapping,
+  type IExecutableResolveOptions,
+  type IExecutableSpawnSyncOptions,
+  type IExecutableSpawnOptions,
+  type IWaitForExitOptions,
+  type IWaitForExitWithBufferOptions,
+  type IWaitForExitWithStringOptions,
+  type IWaitForExitResult,
+  type IProcessInfo,
   Executable
 } from './Executable';
-export { IFileErrorOptions, IFileErrorFormattingOptions, FileError } from './FileError';
-export {
+export { type IFileErrorOptions, type IFileErrorFormattingOptions, FileError } from './FileError';
+export type {
   INodePackageJson,
   IPackageJson,
   IPackageJsonDependencyTable,
   IPackageJsonScriptTable,
   IPackageJsonRepository,
   IPeerDependenciesMetaTable,
-  IDependenciesMetaTable
+  IDependenciesMetaTable,
+  IPackageJsonExports
 } from './IPackageJson';
 export {
   Import,
-  IImportResolveOptions,
-  IImportResolveAsyncOptions,
-  IImportResolveModuleOptions,
-  IImportResolveModuleAsyncOptions,
-  IImportResolvePackageOptions,
-  IImportResolvePackageAsyncOptions
+  type IImportResolveOptions,
+  type IImportResolveAsyncOptions,
+  type IImportResolveModuleOptions,
+  type IImportResolveModuleAsyncOptions,
+  type IImportResolvePackageOptions,
+  type IImportResolvePackageAsyncOptions
 } from './Import';
 export { InternalError } from './InternalError';
 export {
-  JsonObject,
-  JsonNull,
+  type JsonObject,
+  type JsonNull,
   JsonSyntax,
-  IJsonFileParseOptions,
-  IJsonFileLoadAndValidateOptions,
-  IJsonFileStringifyOptions,
-  IJsonFileSaveOptions,
+  type IJsonFileParseOptions,
+  type IJsonFileLoadAndValidateOptions,
+  type IJsonFileStringifyOptions,
+  type IJsonFileSaveOptions,
   JsonFile
 } from './JsonFile';
 export {
+  type IJsonSchemaErrorInfo,
+  type IJsonSchemaFromFileOptions,
+  type IJsonSchemaFromObjectOptions,
+  type IJsonSchemaLoadOptions,
+  type IJsonSchemaValidateOptions,
   JsonSchema,
-  IJsonSchemaErrorInfo,
-  IJsonSchemaValidateOptions,
-  IJsonSchemaFromFileOptions
+  type JsonSchemaVersion
 } from './JsonSchema';
 export { LockFile } from './LockFile';
 export { MapExtensions } from './MapExtensions';
 export { MinimumHeap } from './MinimumHeap';
 export { PosixModeBits } from './PosixModeBits';
-export { ProtectableMap, IProtectableMapParameters } from './ProtectableMap';
-export { IPackageJsonLookupParameters, PackageJsonLookup } from './PackageJsonLookup';
+export { ProtectableMap, type IProtectableMapParameters } from './ProtectableMap';
+export { type IPackageJsonLookupParameters, PackageJsonLookup } from './PackageJsonLookup';
 export {
   PackageName,
   PackageNameParser,
-  IPackageNameParserOptions,
-  IParsedPackageName,
-  IParsedPackageNameOrError
+  type IPackageNameParserOptions,
+  type IParsedPackageName,
+  type IParsedPackageNameOrError
 } from './PackageName';
-export { Path, FileLocationStyle, IPathFormatFileLocationOptions, IPathFormatConciselyOptions } from './Path';
+export {
+  Path,
+  type FileLocationStyle,
+  type IPathFormatFileLocationOptions,
+  type IPathFormatConciselyOptions
+} from './Path';
 export { Encoding, Text, NewlineKind, type IReadLinesFromIterableOptions } from './Text';
 export { Sort } from './Sort';
 export {
   AlreadyExistsBehavior,
   FileSystem,
-  FileSystemCopyFilesAsyncFilter,
-  FileSystemCopyFilesFilter,
-  FolderItem,
-  FileSystemStats,
-  IFileSystemCopyFileBaseOptions,
-  IFileSystemCopyFileOptions,
-  IFileSystemCopyFilesAsyncOptions,
-  IFileSystemCopyFilesOptions,
-  IFileSystemCreateLinkOptions,
-  IFileSystemDeleteFileOptions,
-  IFileSystemMoveOptions,
-  IFileSystemReadFileOptions,
-  IFileSystemReadFolderOptions,
-  IFileSystemUpdateTimeParameters,
-  IFileSystemWriteBinaryFileOptions,
-  IFileSystemWriteFileOptions
+  type FileSystemCopyFilesAsyncFilter,
+  type FileSystemCopyFilesFilter,
+  type FolderItem,
+  type FileSystemStats,
+  type IFileSystemCopyFileBaseOptions,
+  type IFileSystemCopyFileOptions,
+  type IFileSystemCopyFilesAsyncOptions,
+  type IFileSystemCopyFilesOptions,
+  type IFileSystemCreateLinkOptions,
+  type IFileSystemDeleteFileOptions,
+  type IFileSystemMoveOptions,
+  type IFileSystemReadFileOptions,
+  type IFileSystemReadFolderOptions,
+  type IFileSystemUpdateTimeParameters,
+  type IFileSystemWriteBinaryFileOptions,
+  type IFileSystemWriteFileOptions
 } from './FileSystem';
-export { FileWriter, IFileWriterFlags } from './FileWriter';
-export { LegacyAdapters, LegacyCallback } from './LegacyAdapters';
-export { StringBuilder, IStringBuilder } from './StringBuilder';
-export { ISubprocessOptions, SubprocessTerminator } from './SubprocessTerminator';
+export { FileWriter, type IFileWriterFlags } from './FileWriter';
+export { LegacyAdapters, type LegacyCallback } from './LegacyAdapters';
+export { StringBuilder, type IStringBuilder } from './StringBuilder';
+export { type ISubprocessOptions, SubprocessTerminator } from './SubprocessTerminator';
 export { TypeUuid } from './TypeUuid';

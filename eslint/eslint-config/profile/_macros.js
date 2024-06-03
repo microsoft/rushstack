@@ -86,7 +86,7 @@ function expandNamingConventionSelectors(inputBlocks) {
 
       const expandedBlock2 = {
         ...block,
-        modifiers: ['private'],
+        modifiers: [...(block.modifiers ?? []), 'private'],
         leadingUnderscore: 'require'
       };
       delete expandedBlock2.enforceLeadingUnderscoreWhenPrivate;

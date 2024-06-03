@@ -158,7 +158,7 @@ export interface IStdioLineTransformOptions extends ITerminalTransformOptions {
 }
 
 // @beta
-export interface IStdioSummarizerOptions {
+export interface IStdioSummarizerOptions extends ITerminalWritableOptions {
     leadingLines?: number;
     trailingLines?: number;
 }
@@ -359,7 +359,7 @@ export class Terminal implements ITerminal {
 }
 
 // @public
-export const enum TerminalChunkKind {
+export enum TerminalChunkKind {
     Stderr = "E",
     Stdout = "O"
 }

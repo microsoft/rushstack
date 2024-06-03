@@ -165,8 +165,8 @@ export class PublishUtilities {
           change.changeType! >= ChangeType.patch
             ? semver.inc(packageJson.version, PublishUtilities._getReleaseType(change.changeType!))!
             : change.changeType === ChangeType.hotfix
-            ? change.newVersion
-            : packageJson.version;
+              ? change.newVersion
+              : packageJson.version;
       }
 
       if (deps) {
@@ -253,14 +253,14 @@ export class PublishUtilities {
    * @param secretSubstring -- if specified, a substring to be replaced by `<<SECRET>>` to avoid printing secrets
    * on the console
    */
-  public static execCommand(
+  public static async execCommandAsync(
     shouldExecute: boolean,
     command: string,
     args: string[] = [],
     workingDirectory: string = process.cwd(),
     environment?: IEnvironment,
     secretSubstring?: string
-  ): void {
+  ): Promise<void> {
     let relativeDirectory: string = path.relative(process.cwd(), workingDirectory);
 
     if (relativeDirectory) {
@@ -280,7 +280,7 @@ export class PublishUtilities {
     );
 
     if (shouldExecute) {
-      Utilities.executeCommand({
+      await Utilities.executeCommandAsync({
         command,
         args,
         workingDirectory,

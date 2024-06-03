@@ -39,7 +39,7 @@ export class Async {
         weighted: true;
     }): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
-    static sleep(ms: number): Promise<void>;
+    static sleepAsync(ms: number): Promise<void>;
     static validateWeightedIterable(operation: IWeighted): void;
 }
 
@@ -116,9 +116,9 @@ export type ExecutableStdioMapping = 'pipe' | 'ignore' | 'inherit' | ExecutableS
 export type ExecutableStdioStreamMapping = 'pipe' | 'ignore' | 'inherit' | NodeJS.WritableStream | NodeJS.ReadableStream | number | undefined;
 
 // @public
-export enum FileConstants {
-    PackageJson = "package.json"
-}
+export const FileConstants: {
+    readonly PackageJson: "package.json";
+};
 
 // @public
 export class FileError extends Error {
@@ -225,10 +225,10 @@ export class FileWriter {
 }
 
 // @public
-export enum FolderConstants {
-    Git = ".git",
-    NodeModules = "node_modules"
-}
+export const FolderConstants: {
+    readonly Git: ".git";
+    readonly NodeModules: "node_modules";
+};
 
 // @public
 export type FolderItem = fs.Dirent;
@@ -429,8 +429,15 @@ export interface IJsonSchemaErrorInfo {
 }
 
 // @public
-export interface IJsonSchemaFromFileOptions {
+export type IJsonSchemaFromFileOptions = IJsonSchemaLoadOptions;
+
+// @public
+export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
+
+// @public
+export interface IJsonSchemaLoadOptions {
     dependentSchemas?: JsonSchema[];
+    schemaVersion?: JsonSchemaVersion;
 }
 
 // @public
@@ -454,6 +461,8 @@ export interface INodePackageJson {
     dependenciesMeta?: IDependenciesMetaTable;
     description?: string;
     devDependencies?: IPackageJsonDependencyTable;
+    exports?: string | string[] | Record<string, null | string | IPackageJsonExports>;
+    files?: string[];
     homepage?: string;
     license?: string;
     main?: string;
@@ -468,6 +477,7 @@ export interface INodePackageJson {
     // @beta
     tsdocMetadata?: string;
     types?: string;
+    typesVersions?: Record<string, Record<string, [string, ...string[]]>>;
     typings?: string;
     version?: string;
 }
@@ -489,6 +499,19 @@ export interface IPackageJson extends INodePackageJson {
 // @public
 export interface IPackageJsonDependencyTable {
     [dependencyName: string]: string;
+}
+
+// @public
+export interface IPackageJsonExports {
+    'node-addons'?: string | IPackageJsonExports;
+    browser?: string | IPackageJsonExports;
+    default?: string | IPackageJsonExports;
+    development?: string | IPackageJsonExports;
+    import?: string | IPackageJsonExports;
+    node?: string | IPackageJsonExports;
+    production?: string | IPackageJsonExports;
+    require?: string | IPackageJsonExports;
+    types?: string | IPackageJsonExports;
 }
 
 // @public
@@ -595,11 +618,13 @@ export interface ISubprocessOptions {
 export interface IWaitForExitOptions {
     encoding?: BufferEncoding | 'buffer';
     throwOnNonZeroExitCode?: boolean;
+    throwOnSignal?: boolean;
 }
 
 // @public
 export interface IWaitForExitResult<T extends Buffer | string | never = never> {
     exitCode: number | null;
+    signal: string | null;
     stderr: T;
     stdout: T;
 }
@@ -647,11 +672,14 @@ export type JsonObject = any;
 export class JsonSchema {
     ensureCompiled(): void;
     static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSchema;
-    static fromLoadedObject(schemaObject: JsonObject): JsonSchema;
+    static fromLoadedObject(schemaObject: JsonObject, options?: IJsonSchemaFromObjectOptions): JsonSchema;
     get shortName(): string;
     validateObject(jsonObject: JsonObject, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
     validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
 }
+
+// @public
+export type JsonSchemaVersion = 'draft-04' | 'draft-07';
 
 // @public
 export enum JsonSyntax {

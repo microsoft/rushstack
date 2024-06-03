@@ -4,10 +4,10 @@
 export { SetPublicPathPluginBase } from './SetPublicPathPluginBase';
 export {
   SetPublicPathPlugin,
-  ISetWebpackPublicPathOptions,
-  ISetWebpackPublicPathPluginOptions,
-  IScriptNameAssetNameOptions,
-  IScriptNameOptions,
-  IScriptNameRegexOptions
+  type ISetWebpackPublicPathOptions,
+  type ISetWebpackPublicPathPluginOptions,
+  type IScriptNameAssetNameOptions,
+  type IScriptNameOptions,
+  type IScriptNameRegexOptions
 } from './SetPublicPathPlugin';
 export { SetPublicPathCurrentScriptPlugin } from './SetPublicPathCurrentScriptPlugin';

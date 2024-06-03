@@ -2,6 +2,240 @@
   "name": "@rushstack/heft-typescript-plugin",
   "entries": [
     {
+      "version": "0.5.15",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.15",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.16` to `0.66.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.14",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.14",
+      "date": "Wed, 29 May 2024 02:03:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.15` to `0.66.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.13",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.13",
+      "date": "Wed, 29 May 2024 00:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.14` to `0.66.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.12",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.12",
+      "date": "Tue, 28 May 2024 15:10:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.13` to `0.66.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.11",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.11",
+      "date": "Tue, 28 May 2024 00:09:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.12` to `0.66.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.10",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.10",
+      "date": "Sat, 25 May 2024 04:54:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.11` to `0.66.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.9",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.9",
+      "date": "Fri, 24 May 2024 00:15:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.10` to `0.66.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.8",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.8",
+      "date": "Thu, 23 May 2024 02:26:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.11.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.9` to `0.66.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.7",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.7",
+      "date": "Thu, 16 May 2024 15:10:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.8` to `0.66.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.6",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.6",
+      "date": "Wed, 15 May 2024 23:42:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.7` to `0.66.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.5",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.5",
+      "date": "Wed, 15 May 2024 06:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.10.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.6` to `0.66.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.4",
       "tag": "@rushstack/heft-typescript-plugin_v0.5.4",
       "date": "Fri, 10 May 2024 05:33:34 GMT",

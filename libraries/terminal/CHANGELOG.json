@@ -2,6 +2,117 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@rushstack/terminal_v0.13.0",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing `type` modifiers on type-only exports."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Eliminate a const enum from the public API."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.3",
+      "tag": "@rushstack/terminal_v0.12.3",
+      "date": "Wed, 29 May 2024 02:03:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.2",
+      "tag": "@rushstack/terminal_v0.12.2",
+      "date": "Tue, 28 May 2024 15:10:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.1",
+      "tag": "@rushstack/terminal_v0.12.1",
+      "date": "Tue, 28 May 2024 00:09:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.0",
+      "tag": "@rushstack/terminal_v0.12.0",
+      "date": "Sat, 25 May 2024 04:54:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Change the `eolCharacter` property value of `StringBufferTerminalProvider` to `\\n` from `[n]`. This does not change the default `getOutput()` result, but removes the `[n]` characters from the `getOutput({ normalizeSpecialCharacters: false })` result."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.1",
+      "tag": "@rushstack/terminal_v0.11.1",
+      "date": "Thu, 23 May 2024 02:26:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.0",
+      "tag": "@rushstack/terminal_v0.11.0",
+      "date": "Wed, 15 May 2024 23:42:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow use of 'preventAutoclose' flag in StdioSummarizer."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.4",
+      "tag": "@rushstack/terminal_v0.10.4",
+      "date": "Wed, 15 May 2024 06:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.3",
       "tag": "@rushstack/terminal_v0.10.3",
       "date": "Fri, 10 May 2024 05:33:34 GMT",

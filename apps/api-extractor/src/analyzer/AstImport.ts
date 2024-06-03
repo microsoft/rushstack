@@ -154,8 +154,8 @@ export class AstImport extends AstSyntheticEntity {
         const subKey: string = !options.exportName
           ? '*' // Equivalent to StarImport
           : options.exportName.includes('.') // Equivalent to a named export
-          ? options.exportName.split('.')[0]
-          : options.exportName;
+            ? options.exportName.split('.')[0]
+            : options.exportName;
         return `${options.modulePath}:${subKey}`;
       }
       default:

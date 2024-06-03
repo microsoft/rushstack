@@ -93,7 +93,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public readonly consumers: Set<OperationExecutionRecord> = new Set();
 
   public readonly stopwatch: Stopwatch = new Stopwatch();
-  public readonly stdioSummarizer: StdioSummarizer = new StdioSummarizer();
+  public readonly stdioSummarizer: StdioSummarizer = new StdioSummarizer({
+    // Allow writing to this object after transforms have been closed. We clean it up manually in a finally block.
+    preventAutoclose: true
+  });
 
   public readonly runner: IOperationRunner;
   public readonly associatedPhase: IPhase | undefined;
@@ -121,7 +124,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     if (operation.associatedPhase && operation.associatedProject) {
       this._operationMetadataManager = new OperationMetadataManager({
         phase: operation.associatedPhase,
-        rushProject: operation.associatedProject
+        rushProject: operation.associatedProject,
+        operation
       });
     }
     this._context = context;
@@ -192,12 +196,13 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     const { associatedPhase, associatedProject, stdioSummarizer } = this;
     const { createLogFile, logFileSuffix = '' } = options;
     const projectLogWritable: ProjectLogWritable | undefined =
-      createLogFile && associatedProject && associatedPhase
-        ? new ProjectLogWritable(
-            associatedProject,
-            this.collatedWriter.terminal,
-            `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`
-          )
+      createLogFile && associatedProject && associatedPhase && this._operationMetadataManager
+        ? await ProjectLogWritable.initializeAsync({
+            project: associatedProject,
+            terminal: this.collatedWriter.terminal,
+            logFilenameIdentifier: `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`,
+            enableChunkedOutput: true
+          })
         : undefined;
 
     try {

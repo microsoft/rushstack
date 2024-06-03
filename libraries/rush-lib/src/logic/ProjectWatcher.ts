@@ -130,8 +130,8 @@ export class ProjectWatcher {
    * If no change is currently present, watches the source tree of all selected projects for file changes.
    * `waitForChange` is not allowed to be called multiple times concurrently.
    */
-  public async waitForChange(onWatchingFiles?: () => void): Promise<IProjectChangeResult> {
-    const initialChangeResult: IProjectChangeResult = await this._computeChanged();
+  public async waitForChangeAsync(onWatchingFiles?: () => void): Promise<IProjectChangeResult> {
+    const initialChangeResult: IProjectChangeResult = await this._computeChangedAsync();
     // Ensure that the new state is recorded so that we don't loop infinitely
     this._commitChanges(initialChangeResult.state);
     if (initialChangeResult.changedProjects.size) {
@@ -209,7 +209,7 @@ export class ProjectWatcher {
             }
 
             this._setStatus(`Evaluating changes to tracked files...`);
-            const result: IProjectChangeResult = await this._computeChanged();
+            const result: IProjectChangeResult = await this._computeChangedAsync();
             this._setStatus(`Finished analyzing.`);
 
             // Need an async tick to allow for more file system events to be handled
@@ -391,7 +391,7 @@ export class ProjectWatcher {
   /**
    * Determines which, if any, projects (within the selection) have new hashes for files that are not in .gitignore
    */
-  private async _computeChanged(): Promise<IProjectChangeResult> {
+  private async _computeChangedAsync(): Promise<IProjectChangeResult> {
     const state: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this._rushConfiguration);
 
     const previousState: ProjectChangeAnalyzer | undefined = this._previousState;

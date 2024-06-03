@@ -18,9 +18,9 @@
  */
 
 export {
-  ICertificate,
+  type ICertificate,
   CertificateManager,
-  ICertificateGenerationOptions,
+  type ICertificateGenerationOptions,
   DEFAULT_CERTIFICATE_SUBJECT_NAMES
 } from './CertificateManager';
 export { CertificateStore } from './CertificateStore';

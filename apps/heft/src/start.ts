@@ -8,7 +8,7 @@ import { HeftCommandLineParser } from './cli/HeftCommandLineParser';
 const parser: HeftCommandLineParser = new HeftCommandLineParser();
 
 parser
-  .execute()
+  .executeAsync()
   .then(() => {
     // This should be removed when the issue with aria not tearing down
     process.exit(process.exitCode === undefined ? 0 : process.exitCode);

@@ -1,6 +1,63 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Fri, 10 May 2024 05:33:34 GMT and should not be manually modified.
+This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+
+## 0.6.31
+Thu, 30 May 2024 00:13:05 GMT
+
+_Version update only_
+
+## 0.6.30
+Wed, 29 May 2024 02:03:50 GMT
+
+_Version update only_
+
+## 0.6.29
+Wed, 29 May 2024 00:10:52 GMT
+
+_Version update only_
+
+## 0.6.28
+Tue, 28 May 2024 15:10:09 GMT
+
+_Version update only_
+
+## 0.6.27
+Tue, 28 May 2024 00:09:47 GMT
+
+_Version update only_
+
+## 0.6.26
+Sat, 25 May 2024 04:54:07 GMT
+
+_Version update only_
+
+## 0.6.25
+Fri, 24 May 2024 00:15:08 GMT
+
+_Version update only_
+
+## 0.6.24
+Thu, 23 May 2024 02:26:56 GMT
+
+### Patches
+
+- Fix an edge case where the Storybook STDOUT might not be flushed completely when an error occurs
+
+## 0.6.23
+Thu, 16 May 2024 15:10:22 GMT
+
+_Version update only_
+
+## 0.6.22
+Wed, 15 May 2024 23:42:58 GMT
+
+_Version update only_
+
+## 0.6.21
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
 
 ## 0.6.20
 Fri, 10 May 2024 05:33:34 GMT

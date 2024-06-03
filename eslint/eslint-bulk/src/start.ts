@@ -53,9 +53,9 @@ function findPatchPath(): string {
   if (eslintPackageJsonPath) {
     eslintPackageJsonPath = eslintPackageJsonPath.replace(/\\/g, '/');
     const packagePath: string = eslintPackageJsonPath.substring(0, eslintPackageJsonPath.lastIndexOf('/'));
-    const {
-      bin: { eslint: relativeEslintBinPath } = {}
-    }: { bin?: Record<string, string> } = require(eslintPackageJsonPath);
+    const { bin: { eslint: relativeEslintBinPath } = {} }: { bin?: Record<string, string> } = require(
+      eslintPackageJsonPath
+    );
     if (relativeEslintBinPath) {
       eslintBinPath = `${packagePath}/${relativeEslintBinPath}`;
     } else {

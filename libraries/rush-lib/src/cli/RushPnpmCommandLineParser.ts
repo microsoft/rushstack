@@ -412,19 +412,14 @@ export class RushPnpmCommandLineParser {
     }
 
     try {
-      await Utilities.executeCommandAndInspectOutputAsync(
-        {
-          command: rushConfiguration.packageManagerToolFilename,
-          args: this._pnpmArgs,
-          workingDirectory: process.cwd(),
-          environment: pnpmEnvironmentMap.toObject(),
-          keepEnvironment: true
-        },
-        onStdoutStreamChunk,
-        (exitCode: number, signal: string) => {
-          process.exitCode = exitCode;
-        }
-      );
+      await Utilities.executeCommandAsync({
+        command: rushConfiguration.packageManagerToolFilename,
+        args: this._pnpmArgs,
+        workingDirectory: process.cwd(),
+        environment: pnpmEnvironmentMap.toObject(),
+        keepEnvironment: true,
+        onStdoutStreamChunk
+      });
     } catch (e) {
       this._terminal.writeDebugLine(`Error: ${e}`);
     }
@@ -510,7 +505,8 @@ export class RushPnpmCommandLineParser {
       offline: false,
       collectLogFile: false,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-      filteredProjects: [],
+      pnpmFilterArgumentValues: [],
+      selectedProjects: new Set(this._rushConfiguration.projects),
       checkOnly: false,
       // TODO: Support subspaces
       subspace: this._rushConfiguration.defaultSubspace,

@@ -1,6 +1,65 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 10 May 2024 05:33:33 GMT and should not be manually modified.
+This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+
+## 7.25.2
+Thu, 30 May 2024 00:13:05 GMT
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
+
+## 7.25.1
+Wed, 29 May 2024 02:03:50 GMT
+
+_Version update only_
+
+## 7.25.0
+Wed, 29 May 2024 00:10:52 GMT
+
+### Minor changes
+
+- Bump TSDoc dependencies.
+
+## 7.24.13
+Tue, 28 May 2024 15:10:09 GMT
+
+_Version update only_
+
+## 7.24.12
+Tue, 28 May 2024 00:09:47 GMT
+
+_Version update only_
+
+## 7.24.11
+Sat, 25 May 2024 04:54:07 GMT
+
+_Version update only_
+
+## 7.24.10
+Fri, 24 May 2024 00:15:08 GMT
+
+_Version update only_
+
+## 7.24.9
+Thu, 23 May 2024 02:26:56 GMT
+
+_Version update only_
+
+## 7.24.8
+Thu, 16 May 2024 15:10:22 GMT
+
+_Version update only_
+
+## 7.24.7
+Wed, 15 May 2024 23:42:58 GMT
+
+_Version update only_
+
+## 7.24.6
+Wed, 15 May 2024 06:04:17 GMT
+
+_Version update only_
 
 ## 7.24.5
 Fri, 10 May 2024 05:33:33 GMT

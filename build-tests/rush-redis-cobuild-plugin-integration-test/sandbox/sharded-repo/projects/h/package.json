@@ -1,0 +1,11 @@
+{
+  "name": "h",
+  "version": "1.0.0",
+  "scripts": {
+    "_phase:build": "node ../collate h",
+    "_phase:build:shard": "node ../build h"
+  },
+  "dependencies": {
+    "a": "workspace:*"
+  }
+}

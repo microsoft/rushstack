@@ -19,7 +19,7 @@ describe('PublishGit Test', () => {
   });
 
   beforeEach(() => {
-    execCommand = jest.spyOn(PublishUtilities, 'execCommand').mockImplementation(() => {
+    execCommand = jest.spyOn(PublishUtilities, 'execCommandAsync').mockImplementation(async () => {
       /* no-op */
     });
 
@@ -33,8 +33,8 @@ describe('PublishGit Test', () => {
     execCommand.mockClear();
   });
 
-  it('Test git with no command line arg tag', () => {
-    publishGit.addTag(
+  it('Test git with no command line arg tag', async () => {
+    await publishGit.addTagAsync(
       false,
       'project1',
       '2',
@@ -45,8 +45,8 @@ describe('PublishGit Test', () => {
     expect(execCommand).toBeCalledWith(false, gitPath, ['tag', '-a', `project1_v2`, '-m', 'project1 v2']);
   });
 
-  it('Test git with command line arg tag', () => {
-    publishGit.addTag(
+  it('Test git with command line arg tag', async () => {
+    await publishGit.addTagAsync(
       false,
       'project1',
       '2',

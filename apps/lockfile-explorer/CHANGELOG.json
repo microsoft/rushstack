@@ -2,6 +2,207 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.4.16",
+      "tag": "@rushstack/lockfile-explorer_v1.4.16",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.15",
+      "tag": "@rushstack/lockfile-explorer_v1.4.15",
+      "date": "Wed, 29 May 2024 02:03:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.14",
+      "tag": "@rushstack/lockfile-explorer_v1.4.14",
+      "date": "Wed, 29 May 2024 00:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.13",
+      "tag": "@rushstack/lockfile-explorer_v1.4.13",
+      "date": "Tue, 28 May 2024 15:10:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.12",
+      "tag": "@rushstack/lockfile-explorer_v1.4.12",
+      "date": "Tue, 28 May 2024 00:09:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.11",
+      "tag": "@rushstack/lockfile-explorer_v1.4.11",
+      "date": "Sat, 25 May 2024 04:54:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.10",
+      "tag": "@rushstack/lockfile-explorer_v1.4.10",
+      "date": "Fri, 24 May 2024 00:15:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.9",
+      "tag": "@rushstack/lockfile-explorer_v1.4.9",
+      "date": "Thu, 23 May 2024 02:26:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.11.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.8",
+      "tag": "@rushstack/lockfile-explorer_v1.4.8",
+      "date": "Thu, 16 May 2024 15:10:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.7",
+      "tag": "@rushstack/lockfile-explorer_v1.4.7",
+      "date": "Wed, 15 May 2024 23:42:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.6",
+      "tag": "@rushstack/lockfile-explorer_v1.4.6",
+      "date": "Wed, 15 May 2024 15:09:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the exit code to 0 for `lockfile-explorer --help`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.5",
+      "tag": "@rushstack/lockfile-explorer_v1.4.5",
+      "date": "Wed, 15 May 2024 06:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.10.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.4",
+      "tag": "@rushstack/lockfile-explorer_v1.4.4",
+      "date": "Wed, 15 May 2024 03:05:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix some issues when parsing certain lockfile syntaxes"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.3",
       "tag": "@rushstack/lockfile-explorer_v1.4.3",
       "date": "Fri, 10 May 2024 05:33:34 GMT",

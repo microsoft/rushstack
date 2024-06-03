@@ -1,6 +1,80 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 10 May 2024 06:35:26 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Jun 2024 02:49:05 GMT and should not be manually modified.
+
+## 5.126.0
+Mon, 03 Jun 2024 02:49:05 GMT
+
+### Updates
+
+- Fixes a string schema validation warning message when running `rush deploy`.
+- Update the functionality that runs external lifecycle processes to be async.
+- Move logs into the project `rush-logs` folder regardless of whether or not the `"phasedCommands"` experiment is enabled.
+- Update the `nodeSupportedVersionRange` in the `rush init` template to the LTS and current Node versions.
+- Update the `pnpmVersion` in the `rush init` template to the latest version of pnpm 8.
+- Update the `.gitignore` in the `rush init` template to include some common toolchain output files and folders.
+- Include missing `type` modifiers on type-only exports.
+
+## 5.125.1
+Wed, 29 May 2024 05:39:54 GMT
+
+### Updates
+
+- Fix an issue where if `missingScriptBehavior` is set to `"error"` and a script is present and empty, an error would be thrown.
+
+## 5.125.0
+Sat, 25 May 2024 05:12:20 GMT
+
+### Updates
+
+- Fixes a bug where no-op operations were treated as having build cache disabled.
+- Adds support for sharding operations during task execution.
+- Fix an issue where warnings and errors were not shown in the build summary for all cobuild agents.
+- Add a `rush check --subspace` parameter to specify which subspace to analyze
+- Rename the subspace level lockfile from `.pnpmfile-subspace.cjs` to `.pnpmfile.cjs`. This is a breaking change for the experimental feature.
+
+## 5.124.7
+Thu, 23 May 2024 02:27:13 GMT
+
+### Updates
+
+- Improve the `usePnpmSyncForInjectedDependencies` experiment to also include any dependency whose lockfile entry has the `file:` protocol, unless it is a tarball reference
+- Fix an issue where the build cache analysis was incorrect in rare situations due to a race condition (GitHub #4711)
+
+## 5.124.6
+Thu, 16 May 2024 01:12:22 GMT
+
+### Updates
+
+- Fix an edge case for pnpm-sync when the .pnpm folder is absent but still a valid installation.
+
+## 5.124.5
+Wed, 15 May 2024 23:43:15 GMT
+
+### Updates
+
+- Fix count of completed operations when silent operations are blocked. Add explicit message for child processes terminated by signals. Ensure that errors show up in summarized view.
+- Ensure that errors thrown in afterExecuteOperation show up in the summary at the end of the build.
+
+## 5.124.4
+Wed, 15 May 2024 03:05:57 GMT
+
+### Updates
+
+- Improve the detection of PNPM lockfile versions.
+- Fix an issue where the `--subspace` CLI parameter would install for all subspaces in a monorepo when passed to the install or update action
+
+## 5.124.3
+Wed, 15 May 2024 01:18:25 GMT
+
+### Patches
+
+- Ensure async telemetry tasks are flushed by error reporter
+
+### Updates
+
+- Fix an issue where `rush install` and `rush update` will fail with an `ENAMETOOLONG` error on Windows in repos with a large number of projects.
+- Fix an issue where installing multiple subspaces consecutively can cause unexpected cross-contamination between pnpmfiles.
 
 ## 5.124.2
 Fri, 10 May 2024 06:35:26 GMT

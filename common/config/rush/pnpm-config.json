@@ -120,6 +120,68 @@
   "preventManualShrinkwrapChanges": true,
 
   /**
+   * When a project uses `workspace:` to depend on another Rush project, PNPM normally installs
+   * it by creating a symlink under `node_modules`.  This generally works well, but in certain
+   * cases such as differing `peerDependencies` versions, symlinking may cause trouble
+   * such as incorrectly satisfied versions.  For such cases, the dependency can be declared
+   * as "injected", causing PNPM to copy its built output into `node_modules` like a real
+   * install from a registry.  Details here: https://rushjs.io/pages/advanced/injected_deps/
+   *
+   * When using Rush subspaces, these sorts of versioning problems are much more likely if
+   * `workspace:` refers to a project from a different subspace.  This is because the symlink
+   * would point to a separate `node_modules` tree installed by a different PNPM lockfile.
+   * A comprehensive solution is to enable `alwaysInjectDependenciesFromOtherSubspaces`,
+   * which automatically treats all projects from other subspaces as injected dependencies
+   * without having to manually configure them.
+   *
+   * NOTE: Use carefully -- excessive file copying can slow down the `rush install` and
+   * `pnpm-sync` operations if too many dependencies become injected.
+   *
+   * The default value is false.
+   */
+  // "alwaysInjectDependenciesFromOtherSubspaces": false,
+
+  /**
+   * Defines the policies to be checked for the `pnpm-lock.yaml` file.
+   */
+  "pnpmLockfilePolicies": {
+    /**
+     * This policy will cause "rush update" to report an error if `pnpm-lock.yaml` contains
+     * any SHA1 integrity hashes.
+     *
+     * For each NPM dependency, `pnpm-lock.yaml` normally stores an `integrity` hash.  Although
+     * its main purpose is to detect corrupted or truncated network requests, this hash can also
+     * serve as a security fingerprint to protect against attacks that would substitute a
+     * malicious tarball, for example if a misconfigured .npmrc caused a machine to accidentally
+     * download a matching package name+version from npmjs.com instead of the private NPM registry.
+     * NPM originally used a SHA1 hash; this was insecure because an attacker can too easily craft
+     * a tarball with a matching fingerprint.  For this reason, NPM later deprecated SHA1 and
+     * instead adopted a cryptographically strong SHA512 hash.  Nonetheless, SHA1 hashes can
+     * occasionally reappear during "rush update", for example due to missing metadata fallbacks
+     * (https://github.com/orgs/pnpm/discussions/6194) or an incompletely migrated private registry.
+     * The `disallowInsecureSha1` policy prevents this, avoiding potential security/compliance alerts.
+     */
+    // "disallowInsecureSha1": {
+    //   /**
+    //    * Enables the "disallowInsecureSha1" policy.  The default value is false.
+    //    */
+    //   "enabled": true,
+    //
+    //   /**
+    //    * In rare cases, a private NPM registry may continue to serve SHA1 hashes for very old
+    //    * package versions, perhaps due to a caching issue or database migration glitch.  To avoid
+    //    * having to disable the "disallowInsecureSha1" policy for the entire monorepo, the problematic
+    //    * package versions can be individually ignored.  The "exemptPackageVersions" key is the
+    //    * package name, and the array value lists exact version numbers to be ignored.
+    //    */
+    //   "exemptPackageVersions": {
+    //     "example1": ["1.0.0"],
+    //     "example2": ["2.0.0", "2.0.1"]
+    //   }
+    // }
+  },
+
+  /**
    * The "globalOverrides" setting provides a simple mechanism for overriding version selections
    * for all dependencies of all projects in the monorepo workspace.  The settings are copied
    * into the `pnpm.overrides` field of the `common/temp/package.json` file that is generated
@@ -200,42 +262,6 @@
       }
     },
 
-    "@storybook/addons": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
-    "@storybook/api": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
-    "@storybook/router": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
-    "emotion-theming": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
-    "react-router": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
-    "react-router-dom": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
     "@jest/reporters": {
       "dependencies": {
         "@types/istanbul-lib-coverage": "2.0.4"
@@ -248,9 +274,27 @@
       }
     },
 
+    "@storybook/addons": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "@storybook/api": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
     "@storybook/react": {
       "peerDependencies": {
         "@types/node": ">=12",
+        "@types/react": ">=16"
+      }
+    },
+
+    "@storybook/router": {
+      "peerDependencies": {
         "@types/react": ">=16"
       }
     },
@@ -293,6 +337,12 @@
       }
     },
 
+    "emotion-theming": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
     "http-proxy-middleware": {
       "dependencies": {
         "@types/express": "*"
@@ -302,6 +352,30 @@
     "http2-express-bridge": {
       "peerDependencies": {
         "@types/express": "*"
+      }
+    },
+
+    "query-ast": {
+      "dependencies": {
+        "lodash": "~4.17.15"
+      }
+    },
+
+    "react-router": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "react-router-dom": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "scss-parser": {
+      "dependencies": {
+        "lodash": "~4.17.15"
       }
     },
 
@@ -329,18 +403,6 @@
         "@types/webpack": {
           "optional": true
         }
-      }
-    },
-
-    "scss-parser": {
-      "dependencies": {
-        "lodash": "~4.17.15"
-      }
-    },
-
-    "query-ast": {
-      "dependencies": {
-        "lodash": "~4.17.15"
       }
     }
   },

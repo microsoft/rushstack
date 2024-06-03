@@ -36,9 +36,9 @@ async function rushRush(args: string[]): Promise<void> {
   // eslint-disable-next-line no-console
   console.log(`Executing: rush ${args.join(' ')}`);
   await parser
-    .execute(args)
+    .executeAsync(args)
     // eslint-disable-next-line no-console
-    .catch(console.error); // CommandLineParser.execute() should never reject the promise
+    .catch(console.error); // CommandLineParser.executeAsync() should never reject the promise
 }
 
 // eslint-disable-next-line no-console

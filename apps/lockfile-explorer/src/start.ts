@@ -11,7 +11,9 @@ import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { FileSystem, type IPackageJson, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { IAppContext } from '@rushstack/lockfile-explorer-web/lib/AppContext';
 import { Colorize } from '@rushstack/terminal';
+import type { Lockfile } from '@pnpm/lockfile-types';
 
+import { convertLockfileV6DepPathToV5DepPath } from './utils';
 import { init } from './init';
 import type { IAppState } from './state';
 import { type ICommandLine, parseCommandLine } from './commandLine';
@@ -45,13 +47,12 @@ function startApp(debugMode: boolean): void {
 
   const result: ICommandLine = parseCommandLine(process.argv.slice(2));
   if (result.showedHelp) {
-    console.error('\nFor help, use:  ' + Colorize.yellow('lockfile-explorer --help'));
-    process.exitCode = 1;
     return;
   }
 
   if (result.error) {
     console.error('\n' + Colorize.red('ERROR: ' + result.error));
+    console.error('\nFor help, use:  ' + Colorize.yellow('lockfile-explorer --help'));
     process.exitCode = 1;
     return;
   }
@@ -103,7 +104,34 @@ function startApp(debugMode: boolean): void {
 
   app.get('/api/lockfile', async (req: express.Request, res: express.Response) => {
     const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
-    const doc = yaml.load(pnpmLockfileText);
+    const doc = yaml.load(pnpmLockfileText) as Lockfile;
+    const { packages, lockfileVersion } = doc;
+
+    let shrinkwrapFileMajorVersion: number;
+    if (typeof lockfileVersion === 'string') {
+      const isDotIncluded: boolean = lockfileVersion.includes('.');
+      shrinkwrapFileMajorVersion = parseInt(
+        lockfileVersion.substring(0, isDotIncluded ? lockfileVersion.indexOf('.') : undefined),
+        10
+      );
+    } else if (typeof lockfileVersion === 'number') {
+      shrinkwrapFileMajorVersion = Math.floor(lockfileVersion);
+    } else {
+      shrinkwrapFileMajorVersion = 0;
+    }
+
+    if (shrinkwrapFileMajorVersion < 5 || shrinkwrapFileMajorVersion > 6) {
+      throw new Error('The current lockfile version is not supported.');
+    }
+
+    if (packages && shrinkwrapFileMajorVersion === 6) {
+      const updatedPackages: Lockfile['packages'] = {};
+      for (const [dependencyPath, dependency] of Object.entries(packages)) {
+        updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = dependency;
+      }
+      doc.packages = updatedPackages;
+    }
+
     res.send({
       doc,
       subspaceName

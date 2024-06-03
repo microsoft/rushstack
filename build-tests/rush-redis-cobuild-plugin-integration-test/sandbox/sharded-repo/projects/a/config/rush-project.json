@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../../../../libraries/rush-lib/src/schemas/rush-project.schema.json",
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": ["dist"],
+      "sharding": {
+        "count": 4,
+        "outputFolderArgumentFormat": "--output-directory=.rush/{phaseName}/shards/{shardIndex}",
+
+        "shardOperationSettings": {
+          "weight": 4
+        }
+      }
+    }
+  ]
+}

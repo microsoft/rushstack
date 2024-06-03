@@ -1,0 +1,15 @@
+{
+  "exampleString": "This is a string",
+  "exampleLink": "http://example.com",
+  "exampleArray": ["apple", "banana", "coconut"],
+  "exampleUniqueObjectArray": [
+    {
+      "field2": "a",
+      "field3": "b"
+    },
+    {
+      "field2": "c",
+      "field3": "d"
+    }
+  ]
+}

@@ -164,8 +164,9 @@ export class ChangeAction extends BaseRushAction {
   }
 
   public async runAsync(): Promise<void> {
+    const targetBranch: string = await this._getTargetBranchAsync();
     // eslint-disable-next-line no-console
-    console.log(`The target branch is ${this._targetBranch}`);
+    console.log(`The target branch is ${targetBranch}`);
 
     if (this._verifyParameter.value) {
       const errors: string[] = [
@@ -197,11 +198,11 @@ export class ChangeAction extends BaseRushAction {
     const sortedProjectList: string[] = (await this._getChangedProjectNamesAsync()).sort();
     if (sortedProjectList.length === 0) {
       this._logNoChangeFileRequired();
-      this._warnUnstagedChanges();
+      await this._warnUnstagedChangesAsync();
       return;
     }
 
-    this._warnUnstagedChanges();
+    await this._warnUnstagedChangesAsync();
 
     const inquirer: typeof InquirerType = await import('inquirer');
     const promptModule: InquirerType.PromptModule = inquirer.createPromptModule();
@@ -277,9 +278,9 @@ export class ChangeAction extends BaseRushAction {
       interactiveMode = true;
 
       const existingChangeComments: Map<string, string[]> = ChangeFiles.getChangeComments(
-        this._getChangeFiles()
+        await this._getChangeFilesAsync()
       );
-      changeFileData = await this._promptForChangeFileData(
+      changeFileData = await this._promptForChangeFileDataAsync(
         promptModule,
         sortedProjectList,
         existingChangeComments
@@ -288,7 +289,7 @@ export class ChangeAction extends BaseRushAction {
       if (this._isEmailRequired(changeFileData)) {
         const email: string = this._changeEmailParameter.value
           ? this._changeEmailParameter.value
-          : await this._detectOrAskForEmail(promptModule);
+          : await this._detectOrAskForEmailAsync(promptModule);
         changeFileData.forEach((changeFile: IChangeFile) => {
           changeFile.email = this.rushConfiguration.getProjectByName(changeFile.packageName)?.versionPolicy
             ?.includeEmailInChangeFile
@@ -299,7 +300,7 @@ export class ChangeAction extends BaseRushAction {
     }
     let changefiles: string[];
     try {
-      changefiles = await this._writeChangeFiles(
+      changefiles = await this._writeChangeFilesAsync(
         promptModule,
         changeFileData,
         this._overwriteFlagParameter.value,
@@ -310,7 +311,7 @@ export class ChangeAction extends BaseRushAction {
     }
     if (this._commitChangesFlagParameter.value || this._commitChangesMessageStringParameter.value) {
       if (changefiles && changefiles.length !== 0) {
-        this._stageAndCommitGitChanges(
+        await this._stageAndCommitGitChangesAsync(
           changefiles,
           this._commitChangesMessageStringParameter.value ||
             this.rushConfiguration.gitChangefilesCommitMessage ||
@@ -340,15 +341,16 @@ export class ChangeAction extends BaseRushAction {
   private async _verifyAsync(): Promise<void> {
     const changedPackages: string[] = await this._getChangedProjectNamesAsync();
     if (changedPackages.length > 0) {
-      this._validateChangeFile(changedPackages);
+      await this._validateChangeFileAsync(changedPackages);
     } else {
       this._logNoChangeFileRequired();
     }
   }
 
-  private get _targetBranch(): string {
+  private async _getTargetBranchAsync(): Promise<string> {
     if (!this._targetBranchName) {
-      this._targetBranchName = this._targetBranchParameter.value || this._git.getRemoteDefaultBranch();
+      this._targetBranchName =
+        this._targetBranchParameter.value || (await this._git.getRemoteDefaultBranchAsync());
     }
 
     return this._targetBranchName;
@@ -358,7 +360,7 @@ export class ChangeAction extends BaseRushAction {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const changedProjects: Set<RushConfigurationProject> =
       await projectChangeAnalyzer.getChangedProjectsAsync({
-        targetBranchName: this._targetBranch,
+        targetBranchName: await this._getTargetBranchAsync(),
         terminal: this._terminal,
         shouldFetch: !this._noFetchParameter.value,
         // Lockfile evaluation will expand the set of projects that request change files
@@ -382,25 +384,34 @@ export class ChangeAction extends BaseRushAction {
     return Array.from(changedProjectNames);
   }
 
-  private _validateChangeFile(changedPackages: string[]): void {
-    const files: string[] = this._getChangeFiles();
+  private async _validateChangeFileAsync(changedPackages: string[]): Promise<void> {
+    const files: string[] = await this._getChangeFilesAsync();
     ChangeFiles.validate(files, changedPackages, this.rushConfiguration);
   }
 
-  private _getChangeFiles(): string[] {
+  private async _getChangeFilesAsync(): Promise<string[]> {
     const repoRoot: string = getRepoRoot(this.rushConfiguration.rushJsonFolder);
     const relativeChangesFolder: string = path.relative(repoRoot, this.rushConfiguration.changesFolder);
-    return this._git
-      .getChangedFiles(this._targetBranch, this._terminal, true, relativeChangesFolder)
-      .map((relativePath) => {
-        return path.join(repoRoot, relativePath);
-      });
+    const targetBranch: string = await this._getTargetBranchAsync();
+    const changedFiles: string[] = await this._git.getChangedFilesAsync(
+      targetBranch,
+      this._terminal,
+      true,
+      relativeChangesFolder
+    );
+
+    const result: string[] = [];
+    for (const changedFile of changedFiles) {
+      result.push(path.join(repoRoot, changedFile));
+    }
+
+    return result;
   }
 
   /**
    * The main loop which prompts the user for information on changed projects.
    */
-  private async _promptForChangeFileData(
+  private async _promptForChangeFileDataAsync(
     promptModule: InquirerType.PromptModule,
     sortedProjectList: string[],
     existingChangeComments: Map<string, string[]>
@@ -408,7 +419,7 @@ export class ChangeAction extends BaseRushAction {
     const changedFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
 
     for (const projectName of sortedProjectList) {
-      const changeInfo: IChangeInfo | undefined = await this._askQuestions(
+      const changeInfo: IChangeInfo | undefined = await this._askQuestionsAsync(
         promptModule,
         projectName,
         existingChangeComments
@@ -435,7 +446,7 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Asks all questions which are needed to generate changelist for a project.
    */
-  private async _askQuestions(
+  private async _askQuestionsAsync(
     promptModule: InquirerType.PromptModule,
     packageName: string,
     existingChangeComments: Map<string, string[]>
@@ -470,14 +481,14 @@ export class ChangeAction extends BaseRushAction {
       if (appendComment === 'skip') {
         return undefined;
       } else {
-        return await this._promptForComments(promptModule, packageName);
+        return await this._promptForCommentsAsync(promptModule, packageName);
       }
     } else {
-      return await this._promptForComments(promptModule, packageName);
+      return await this._promptForCommentsAsync(promptModule, packageName);
     }
   }
 
-  private async _promptForComments(
+  private async _promptForCommentsAsync(
     promptModule: InquirerType.PromptModule,
     packageName: string
   ): Promise<IChangeInfo | undefined> {
@@ -569,8 +580,11 @@ export class ChangeAction extends BaseRushAction {
    * Will determine a user's email by first detecting it from their Git config,
    * or will ask for it if it is not found or the Git config is wrong.
    */
-  private async _detectOrAskForEmail(promptModule: InquirerType.PromptModule): Promise<string> {
-    return (await this._detectAndConfirmEmail(promptModule)) || (await this._promptForEmail(promptModule));
+  private async _detectOrAskForEmailAsync(promptModule: InquirerType.PromptModule): Promise<string> {
+    return (
+      (await this._detectAndConfirmEmailAsync(promptModule)) ||
+      (await this._promptForEmailAsync(promptModule))
+    );
   }
 
   private _detectEmail(): string | undefined {
@@ -590,7 +604,9 @@ export class ChangeAction extends BaseRushAction {
    * Detects the user's email address from their Git configuration, prompts the user to approve the
    * detected email. It returns undefined if it cannot be detected.
    */
-  private async _detectAndConfirmEmail(promptModule: InquirerType.PromptModule): Promise<string | undefined> {
+  private async _detectAndConfirmEmailAsync(
+    promptModule: InquirerType.PromptModule
+  ): Promise<string | undefined> {
     const email: string | undefined = this._detectEmail();
 
     if (email) {
@@ -611,7 +627,7 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Asks the user for their email address
    */
-  private async _promptForEmail(promptModule: InquirerType.PromptModule): Promise<string> {
+  private async _promptForEmailAsync(promptModule: InquirerType.PromptModule): Promise<string> {
     const { email }: { email: string } = await promptModule([
       {
         type: 'input',
@@ -625,9 +641,10 @@ export class ChangeAction extends BaseRushAction {
     return email;
   }
 
-  private _warnUnstagedChanges(): void {
+  private async _warnUnstagedChangesAsync(): Promise<void> {
     try {
-      if (this._git.hasUnstagedChanges()) {
+      const hasUnstagedChanges: boolean = await this._git.hasUnstagedChangesAsync();
+      if (hasUnstagedChanges) {
         // eslint-disable-next-line no-console
         console.log(
           '\n' +
@@ -646,7 +663,7 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Writes change files to the common/changes folder. Will prompt for overwrite if file already exists.
    */
-  private async _writeChangeFiles(
+  private async _writeChangeFilesAsync(
     promptModule: InquirerType.PromptModule,
     changeFileData: Map<string, IChangeFile>,
     overwrite: boolean,
@@ -654,7 +671,7 @@ export class ChangeAction extends BaseRushAction {
   ): Promise<string[]> {
     const writtenFiles: string[] = [];
     await changeFileData.forEach(async (changeFile: IChangeFile) => {
-      const writtenFile: string | undefined = await this._writeChangeFile(
+      const writtenFile: string | undefined = await this._writeChangeFileAsync(
         promptModule,
         changeFile,
         overwrite,
@@ -667,7 +684,7 @@ export class ChangeAction extends BaseRushAction {
     return writtenFiles;
   }
 
-  private async _writeChangeFile(
+  private async _writeChangeFileAsync(
     promptModule: InquirerType.PromptModule,
     changeFileData: IChangeFile,
     overwrite: boolean,
@@ -681,7 +698,7 @@ export class ChangeAction extends BaseRushAction {
     const shouldWrite: boolean =
       !fileExists ||
       overwrite ||
-      (interactiveMode ? await this._promptForOverwrite(promptModule, filePath) : false);
+      (interactiveMode ? await this._promptForOverwriteAsync(promptModule, filePath) : false);
 
     if (!interactiveMode && fileExists && !overwrite) {
       throw new Error(`Changefile ${filePath} already exists`);
@@ -693,7 +710,7 @@ export class ChangeAction extends BaseRushAction {
     }
   }
 
-  private async _promptForOverwrite(
+  private async _promptForOverwriteAsync(
     promptModule: InquirerType.PromptModule,
     filePath: string
   ): Promise<boolean> {
@@ -733,14 +750,14 @@ export class ChangeAction extends BaseRushAction {
     console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
   }
 
-  private _stageAndCommitGitChanges(pattern: string[], message: string): void {
+  private async _stageAndCommitGitChangesAsync(pattern: string[], message: string): Promise<void> {
     try {
-      Utilities.executeCommand({
+      await Utilities.executeCommandAsync({
         command: 'git',
         args: ['add', ...pattern],
         workingDirectory: this.rushConfiguration.changesFolder
       });
-      Utilities.executeCommand({
+      await Utilities.executeCommandAsync({
         command: 'git',
         args: ['commit', ...pattern, '-m', message],
         workingDirectory: this.rushConfiguration.changesFolder

@@ -24,7 +24,7 @@ export class PushAction extends CommandLineAction {
 
   protected onExecute(): Promise<void> {
     // abstract
-    return BusinessLogic.doTheWork(this._force.value, this._protocol.value);
+    return BusinessLogic.doTheWorkAsync(this._force.value, this._protocol.value);
   }
 
   protected onDefineParameters(): void {

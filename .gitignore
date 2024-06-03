@@ -82,7 +82,6 @@ common/autoinstallers/*/.npmrc
 .cache
 .heft
 
-
 # Common toolchain intermediate files
 temp
 lib
@@ -93,6 +92,4 @@ lib-commonjs
 lib-shim
 dist
 dist-storybook
-*.scss.ts
-*.sass.ts
 *.tsbuildinfo
