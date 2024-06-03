@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+
+## 7.47.0
+Mon, 03 Jun 2024 23:43:15 GMT
+
+### Minor changes
+
+- Add support for re-exporting modules using syntax such as `export * as ns from './file'` (GitHub #2780)
 
 ## 7.46.2
 Thu, 30 May 2024 00:13:05 GMT

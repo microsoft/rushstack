@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-typescript-plugin",
   "entries": [
     {
+      "version": "0.5.16",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.16",
+      "date": "Mon, 03 Jun 2024 23:43:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.17` to `0.66.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.15",
       "tag": "@rushstack/heft-typescript-plugin_v0.5.15",
       "date": "Thu, 30 May 2024 00:13:05 GMT",

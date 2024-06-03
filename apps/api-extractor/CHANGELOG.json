@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.47.0",
+      "tag": "@microsoft/api-extractor_v7.47.0",
+      "date": "Mon, 03 Jun 2024 23:43:15 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for re-exporting modules using syntax such as `export * as ns from './file'` (GitHub #2780)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.46.2",
       "tag": "@microsoft/api-extractor_v7.46.2",
       "date": "Thu, 30 May 2024 00:13:05 GMT",
