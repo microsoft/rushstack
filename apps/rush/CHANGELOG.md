@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 29 May 2024 05:39:54 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Jun 2024 02:49:05 GMT and should not be manually modified.
+
+## 5.126.0
+Mon, 03 Jun 2024 02:49:05 GMT
+
+### Updates
+
+- Fixes a string schema validation warning message when running `rush deploy`.
+- Update the functionality that runs external lifecycle processes to be async.
+- Move logs into the project `rush-logs` folder regardless of whether or not the `"phasedCommands"` experiment is enabled.
+- Update the `nodeSupportedVersionRange` in the `rush init` template to the LTS and current Node versions.
+- Update the `pnpmVersion` in the `rush init` template to the latest version of pnpm 8.
+- Update the `.gitignore` in the `rush init` template to include some common toolchain output files and folders.
+- Include missing `type` modifiers on type-only exports.
 
 ## 5.125.1
 Wed, 29 May 2024 05:39:54 GMT

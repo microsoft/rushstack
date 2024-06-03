@@ -2,6 +2,36 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.126.0",
+      "tag": "@microsoft/rush_v5.126.0",
+      "date": "Mon, 03 Jun 2024 02:49:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixes a string schema validation warning message when running `rush deploy`."
+          },
+          {
+            "comment": "Update the functionality that runs external lifecycle processes to be async."
+          },
+          {
+            "comment": "Move logs into the project `rush-logs` folder regardless of whether or not the `\"phasedCommands\"` experiment is enabled."
+          },
+          {
+            "comment": "Update the `nodeSupportedVersionRange` in the `rush init` template to the LTS and current Node versions."
+          },
+          {
+            "comment": "Update the `pnpmVersion` in the `rush init` template to the latest version of pnpm 8."
+          },
+          {
+            "comment": "Update the `.gitignore` in the `rush init` template to include some common toolchain output files and folders."
+          },
+          {
+            "comment": "Include missing `type` modifiers on type-only exports."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.125.1",
       "tag": "@microsoft/rush_v5.125.1",
       "date": "Wed, 29 May 2024 05:39:54 GMT",
