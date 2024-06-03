@@ -24,4 +24,3 @@ steps:
 
   - script: 'node common/scripts/install-run-rush.js retest --verbose --production ${{ parameters.BuildParameters }}'
     displayName: 'Rush retest (install-run-rush)'
-    
