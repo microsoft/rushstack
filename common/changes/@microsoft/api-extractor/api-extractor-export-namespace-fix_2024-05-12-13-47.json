@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Add support for NamespaceExport syntax, i.e: export * as ns from './file'.",
-      "type": "patch"
+      "comment": "Add support for re-exporting modules using syntax such as `export * as ns from './file'` (GitHub #2780)",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-extractor"
