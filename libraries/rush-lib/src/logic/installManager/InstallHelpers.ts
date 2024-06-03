@@ -177,7 +177,7 @@ export class InstallHelpers {
       );
 
       // note that this will remove the last-install flag from the directory
-      Utilities.installPackageInDirectory({
+      await Utilities.installPackageInDirectoryAsync({
         directory: packageManagerToolFolder,
         packageName: packageManager,
         version: rushConfiguration.packageManagerToolVersion,

@@ -463,16 +463,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             }
           : undefined;
       try {
-        await Utilities.executeCommandAndProcessOutputWithRetryAsync(
+        await Utilities.executeCommandWithRetryAsync(
           {
             command: packageManagerFilename,
             args: installArgs,
             workingDirectory: subspace.getSubspaceTempFolder(),
             environment: packageManagerEnv,
-            suppressOutput: false
+            suppressOutput: false,
+            onStdoutStreamChunk: onPnpmStdoutChunk
           },
           this.options.maxInstallAttempts,
-          onPnpmStdoutChunk,
           () => {
             if (this.rushConfiguration.packageManager === 'pnpm') {
               this._terminal.writeWarningLine(`Deleting the "node_modules" folder`);

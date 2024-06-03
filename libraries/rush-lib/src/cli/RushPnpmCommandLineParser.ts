@@ -412,24 +412,14 @@ export class RushPnpmCommandLineParser {
     }
 
     try {
-      await Utilities.executeCommandAndInspectOutputAsync(
-        {
-          command: rushConfiguration.packageManagerToolFilename,
-          args: this._pnpmArgs,
-          workingDirectory: process.cwd(),
-          environment: pnpmEnvironmentMap.toObject(),
-          keepEnvironment: true
-        },
-        onStdoutStreamChunk,
-        (exitCode: number | null, signal: NodeJS.Signals | null) => {
-          if (typeof exitCode === 'number') {
-            process.exitCode = exitCode;
-          } else {
-            // Terminated by a signal
-            process.exitCode = 1;
-          }
-        }
-      );
+      await Utilities.executeCommandAsync({
+        command: rushConfiguration.packageManagerToolFilename,
+        args: this._pnpmArgs,
+        workingDirectory: process.cwd(),
+        environment: pnpmEnvironmentMap.toObject(),
+        keepEnvironment: true,
+        onStdoutStreamChunk
+      });
     } catch (e) {
       this._terminal.writeDebugLine(`Error: ${e}`);
     }

@@ -12,7 +12,8 @@ import {
   FileSystem,
   FileConstants,
   type FileSystemStats,
-  SubprocessTerminator
+  SubprocessTerminator,
+  Executable
 } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -33,7 +34,7 @@ export interface IEnvironment {
 }
 
 /**
- * Options for Utilities.executeCommand().
+ * Options for {@link Utilities.executeCommandAsync}.
  */
 export interface IExecuteCommandOptions {
   command: string;
@@ -42,10 +43,14 @@ export interface IExecuteCommandOptions {
   environment?: IEnvironment;
   suppressOutput?: boolean;
   keepEnvironment?: boolean;
+  /**
+   * Note that this takes precedence over {@link IExecuteCommandOptions.suppressOutput}
+   */
+  onStdoutStreamChunk?: (chunk: string) => string | void;
 }
 
 /**
- * Options for Utilities.installPackageInDirectory().
+ * Options for {@link Utilities.installPackageInDirectoryAsync}.
  */
 export interface IInstallPackageInDirectoryOptions {
   directory: string;
@@ -142,6 +147,11 @@ interface ICreateEnvironmentForRushCommandOptions {
    * Options for what should be added to the PATH variable
    */
   pathOptions?: ICreateEnvironmentForRushCommandPathOptions;
+}
+
+interface IExecuteCommandResult {
+  stdout: string;
+  stderr: string;
 }
 
 export class Utilities {
@@ -302,119 +312,68 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static executeCommand(options: IExecuteCommandOptions): void {
-    Utilities._executeCommandInternal(
-      options.command,
-      options.args,
-      options.workingDirectory,
-      options.suppressOutput ? undefined : [0, 1, 2],
-      options.environment,
-      options.keepEnvironment
-    );
-  }
-
-  /**
-   * Executes the command with the specified command-line parameters, and waits for it to complete.
-   * The current directory will be set to the specified workingDirectory.
-   *
-   * It's basically the same as executeCommand() except that it returns a Promise.
-   */
-  public static async executeCommandAndInspectOutputAsync(
-    options: IExecuteCommandOptions,
-    onStdoutStreamChunk?: (chunk: string) => string | void,
-    // eslint-disable-next-line @rushstack/no-new-null
-    onExit?: (exitCode: number | null, signal: NodeJS.Signals | null) => void
-  ): Promise<void> {
-    await Utilities._executeCommandAndInspectOutputInternalAsync(
-      options.command,
-      options.args,
-      options.workingDirectory,
-      options.suppressOutput ? undefined : onStdoutStreamChunk ? ['inherit', 'pipe', 'inherit'] : [0, 1, 2],
-      options.environment,
-      options.keepEnvironment,
+  public static async executeCommandAsync({
+    command,
+    args,
+    workingDirectory,
+    suppressOutput,
+    onStdoutStreamChunk,
+    environment,
+    keepEnvironment
+  }: IExecuteCommandOptions): Promise<void> {
+    await Utilities._executeCommandInternalAsync({
+      command,
+      args,
+      workingDirectory,
+      stdio: onStdoutStreamChunk
+        ? // Inherit the stdin and stderr streams, but pipe the stdout stream, which will then be piped
+          // to the process's stdout after being intercepted by the onStdoutStreamChunk callback.
+          ['inherit', 'pipe', 'inherit']
+        : suppressOutput
+          ? // If the output is being suppressed, create pipes for all streams to prevent the child process
+            // from printing to the parent process's (this process's) stdout/stderr, but allow the stdout and
+            // stderr to be inspected if an error occurs.
+            // TODO: Consider ignoring stdout and stdin and only piping stderr for inspection on error.
+            ['pipe', 'pipe', 'pipe']
+          : // If the output is not being suppressed or intercepted, inherit all streams from the parent process.
+            ['inherit', 'inherit', 'inherit'],
+      environment,
+      keepEnvironment,
       onStdoutStreamChunk,
-      onExit
-    );
+      captureOutput: false
+    });
   }
 
   /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static executeCommandAndCaptureOutput(
+  public static async executeCommandAndCaptureOutputAsync(
     command: string,
     args: string[],
     workingDirectory: string,
     environment?: IEnvironment,
     keepEnvironment: boolean = false
-  ): string {
-    const result: child_process.SpawnSyncReturns<string | Buffer> = Utilities._executeCommandInternal(
+  ): Promise<string> {
+    const { stdout } = await Utilities._executeCommandInternalAsync({
       command,
       args,
       workingDirectory,
-      ['pipe', 'pipe', 'pipe'],
+      stdio: ['pipe', 'pipe', 'pipe'],
       environment,
-      keepEnvironment
-    );
+      keepEnvironment,
+      captureOutput: true
+    });
 
-    return result.stdout.toString();
+    return stdout;
   }
 
   /**
    * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
    */
-  public static executeCommandWithRetry(
+  public static async executeCommandWithRetryAsync(
     options: IExecuteCommandOptions,
     maxAttempts: number,
-    retryCallback?: () => void
-  ): void {
-    if (maxAttempts < 1) {
-      throw new Error('The maxAttempts parameter cannot be less than 1');
-    }
-
-    let attemptNumber: number = 1;
-
-    for (;;) {
-      try {
-        Utilities.executeCommand(options);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log('\nThe command failed:');
-        // eslint-disable-next-line no-console
-        console.log(` ${options.command} ` + options.args.join(' '));
-        // eslint-disable-next-line no-console
-        console.log(`ERROR: ${(error as Error).toString()}`);
-
-        if (attemptNumber < maxAttempts) {
-          ++attemptNumber;
-          // eslint-disable-next-line no-console
-          console.log(`Trying again (attempt #${attemptNumber})...\n`);
-          if (retryCallback) {
-            retryCallback();
-          }
-
-          continue;
-        } else {
-          // eslint-disable-next-line no-console
-          console.error(`Giving up after ${attemptNumber} attempts\n`);
-          throw error;
-        }
-      }
-
-      break;
-    }
-  }
-
-  /**
-   * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
-   * Using `onStdoutStreamChunk` to process the output of the command.
-   *
-   * Note: This is similar to {@link executeCommandWithRetry} except that it returns a Promise and provides a callback to process the output.
-   */
-  public static async executeCommandAndProcessOutputWithRetryAsync(
-    options: IExecuteCommandOptions,
-    maxAttempts: number,
-    onStdoutStreamChunk?: (chunk: string) => string | void,
     retryCallback?: () => void
   ): Promise<void> {
     if (maxAttempts < 1) {
@@ -425,12 +384,13 @@ export class Utilities {
 
     for (;;) {
       try {
-        await Utilities.executeCommandAndInspectOutputAsync(options, onStdoutStreamChunk);
+        await Utilities.executeCommandAsync(options);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log('\nThe command failed:');
+        const { command, args } = options;
         // eslint-disable-next-line no-console
-        console.log(` ${options.command} ` + options.args.join(' '));
+        console.log(` ${command} ` + args.join(' '));
         // eslint-disable-next-line no-console
         console.log(`ERROR: ${(error as Error).toString()}`);
 
@@ -464,7 +424,11 @@ export class Utilities {
       Utilities._executeLifecycleCommandInternal(command, child_process.spawnSync, options);
 
     if (options.handleOutput) {
-      Utilities._processResult(result);
+      Utilities._processResult({
+        error: result.error,
+        status: result.status,
+        stderr: result.stderr.toString()
+      });
     }
 
     if (result.status !== null) {
@@ -509,29 +473,38 @@ export class Utilities {
   /**
    * Installs a package by name and version in the specified directory.
    */
-  public static installPackageInDirectory(options: IInstallPackageInDirectoryOptions): void {
-    const directory: string = path.resolve(options.directory);
-    if (FileSystem.exists(directory)) {
+  public static async installPackageInDirectoryAsync({
+    packageName,
+    version,
+    tempPackageTitle,
+    commonRushConfigFolder,
+    maxInstallAttempts,
+    suppressOutput,
+    directory
+  }: IInstallPackageInDirectoryOptions): Promise<void> {
+    directory = path.resolve(directory);
+    const directoryExists: boolean = await FileSystem.existsAsync(directory);
+    if (directoryExists) {
       // eslint-disable-next-line no-console
       console.log('Deleting old files from ' + directory);
     }
 
-    FileSystem.ensureEmptyFolder(directory);
+    await FileSystem.ensureEmptyFolderAsync(directory);
 
     const npmPackageJson: IPackageJson = {
       dependencies: {
-        [options.packageName]: options.version
+        [packageName]: version
       },
       description: 'Temporary file generated by the Rush tool',
-      name: options.tempPackageTitle,
+      name: tempPackageTitle,
       private: true,
       version: '0.0.0'
     };
-    JsonFile.save(npmPackageJson, path.join(directory, FileConstants.PackageJson));
+    await JsonFile.saveAsync(npmPackageJson, path.join(directory, FileConstants.PackageJson));
 
-    if (options.commonRushConfigFolder) {
+    if (commonRushConfigFolder) {
       Utilities.syncNpmrc({
-        sourceNpmrcFolder: options.commonRushConfigFolder,
+        sourceNpmrcFolder: commonRushConfigFolder,
         targetNpmrcFolder: directory
       });
     }
@@ -540,15 +513,15 @@ export class Utilities {
     console.log('\nRunning "npm install" in ' + directory);
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
-    Utilities.executeCommandWithRetry(
+    await Utilities.executeCommandWithRetryAsync(
       {
         command: 'npm',
         args: ['install'],
         workingDirectory: directory,
         environment: Utilities._createEnvironmentForRushCommand({}),
-        suppressOutput: options.suppressOutput
+        suppressOutput
       },
-      options.maxInstallAttempts
+      maxInstallAttempts
     );
   }
 
@@ -763,85 +736,20 @@ export class Utilities {
   /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
-   *
-   * It's the same as _executeCommandInternal except that it returns a promise.
    */
-  private static async _executeCommandAndInspectOutputInternalAsync(
-    command: string,
-    args: string[],
-    workingDirectory: string,
-    stdio: child_process.SpawnSyncOptions['stdio'],
-    environment?: IEnvironment,
-    keepEnvironment: boolean = false,
-    onStdoutStreamChunk?: (chunk: string) => string | void,
-    onExit?: (exitCode: number | null, signal: NodeJS.Signals | null) => void
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const options: child_process.SpawnOptions = {
-        cwd: workingDirectory,
-        shell: true,
-        stdio: stdio,
-        env: keepEnvironment
-          ? environment
-          : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment })
-      };
-
-      // Only escape the command if it actually contains spaces:
-      const escapedCommand: string =
-        command.indexOf(' ') < 0 ? command : Utilities.escapeShellParameter(command);
-
-      const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
-
-      const childProcess: child_process.ChildProcess = child_process.spawn(
-        escapedCommand,
-        escapedArgs,
-        options
-      );
-
-      const inspectStream: Transform = new Transform({
-        transform: onStdoutStreamChunk
-          ? (
-              chunk: string | Buffer,
-              encoding: BufferEncoding,
-              callback: (error?: Error, data?: string | Buffer) => void
-            ) => {
-              const chunkString: string = chunk.toString();
-              const updatedChunk: string | void = onStdoutStreamChunk(chunkString);
-              callback(undefined, updatedChunk ?? chunk);
-            }
-          : undefined
-      });
-
-      childProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
-        onExit?.(exitCode, signal);
-
-        // TODO: Is it possible that the childProcess is closed before the receiving the last chunks?
-        if (exitCode === 0) {
-          resolve();
-        } else if (signal) {
-          reject(new Error(`The command was terminated by signal ${signal}`));
-        } else {
-          // mimic the current sync version "_executeCommandInternal" behavior.
-          reject(new Error(`The command failed with exit code ${exitCode}`));
-        }
-      });
-
-      childProcess.stdout?.pipe(inspectStream).pipe(process.stdout);
-    });
-  }
-
-  /**
-   * Executes the command with the specified command-line parameters, and waits for it to complete.
-   * The current directory will be set to the specified workingDirectory.
-   */
-  private static _executeCommandInternal(
-    command: string,
-    args: string[],
-    workingDirectory: string,
-    stdio: child_process.SpawnSyncOptions['stdio'],
-    environment?: IEnvironment,
-    keepEnvironment: boolean = false
-  ): child_process.SpawnSyncReturns<string | Buffer> {
+  private static async _executeCommandInternalAsync({
+    command,
+    args,
+    workingDirectory,
+    stdio,
+    environment,
+    keepEnvironment,
+    onStdoutStreamChunk,
+    captureOutput
+  }: Omit<IExecuteCommandOptions, 'suppressOutput'> & {
+    stdio: child_process.SpawnSyncOptions['stdio'];
+    captureOutput: boolean;
+  }): Promise<IExecuteCommandResult> {
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,
@@ -870,39 +778,62 @@ export class Utilities {
 
     const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
 
-    let result: child_process.SpawnSyncReturns<string | Buffer> = child_process.spawnSync(
+    const childProcess: child_process.ChildProcess = child_process.spawn(
       escapedCommand,
       escapedArgs,
       options
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (result.error && (result.error as any).errno === 'ENOENT') {
-      // This is a workaround for GitHub issue #25330
-      // https://github.com/nodejs/node-v0.x-archive/issues/25330
-      //
-      // TODO: The fully worked out solution for this problem is now provided by the "Executable" API
-      // from @rushstack/node-core-library
-      result = child_process.spawnSync(command + '.cmd', args, options);
+    if (onStdoutStreamChunk) {
+      const inspectStream: Transform = new Transform({
+        transform: onStdoutStreamChunk
+          ? (
+              chunk: string | Buffer,
+              encoding: BufferEncoding,
+              callback: (error?: Error, data?: string | Buffer) => void
+            ) => {
+              const chunkString: string = chunk.toString();
+              const updatedChunk: string | void = onStdoutStreamChunk(chunkString);
+              callback(undefined, updatedChunk ?? chunk);
+            }
+          : undefined
+      });
+
+      childProcess.stdout?.pipe(inspectStream).pipe(process.stdout);
     }
 
-    Utilities._processResult(result);
-    return result;
+    const { stdout, stderr } = await Executable.waitForExitAsync(childProcess, {
+      encoding: captureOutput ? 'utf8' : undefined,
+      throwOnNonZeroExitCode: true,
+      throwOnSignal: true
+    });
+
+    return {
+      stdout,
+      stderr
+    };
   }
 
-  private static _processResult(result: child_process.SpawnSyncReturns<string | Buffer>): void {
-    if (result.error) {
-      result.error.message += '\n' + (result.stderr ? result.stderr.toString() + '\n' : '');
-      throw result.error;
+  private static _processResult({
+    error,
+    stderr,
+    status
+  }: {
+    error: Error | undefined;
+    stderr: string;
+    status: number | null;
+  }): void {
+    if (error) {
+      error.message += `\n${stderr}`;
+      if (status) {
+        error.message += `\nExited with status ${status}`;
+      }
+
+      throw error;
     }
 
-    if (result.status) {
-      throw new Error(
-        'The command failed with exit code ' +
-          result.status +
-          '\n' +
-          (result.stderr ? result.stderr.toString() : '')
-      );
+    if (status) {
+      throw new Error(`The command failed with exit code ${status}\n${stderr}`);
     }
   }
 }

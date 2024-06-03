@@ -223,9 +223,10 @@ export class ProjectChangeAnalyzer {
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
 
     // if the given targetBranchName is a commit, we assume it is the merge base
-    const mergeCommit: string = this._git.isRefACommit(targetBranchName)
+    const IsTargetBranchACommit: boolean = await this._git.determineIfRefIsACommitAsync(targetBranchName);
+    const mergeCommit: string = IsTargetBranchACommit
       ? targetBranchName
-      : this._git.getMergeBase(targetBranchName, terminal, shouldFetch);
+      : await this._git.getMergeBaseAsync(targetBranchName, terminal, shouldFetch);
 
     const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, mergeCommit, gitPath);
 
@@ -256,7 +257,7 @@ export class ProjectChangeAnalyzer {
             throw new Error(`Unable to obtain current shrinkwrap file.`);
           }
 
-          const oldShrinkwrapText: string = this._git.getBlobContent({
+          const oldShrinkwrapText: string = await this._git.getBlobContentAsync({
             // <ref>:<path> syntax: https://git-scm.com/docs/gitrevisions
             blobSpec: `${mergeCommit}:${shrinkwrapFile}`,
             repositoryRoot: repoRoot

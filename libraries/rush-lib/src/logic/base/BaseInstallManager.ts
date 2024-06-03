@@ -323,7 +323,7 @@ export abstract class BaseInstallManager {
     // Check the policies
     await PolicyValidator.validatePolicyAsync(this.rushConfiguration, subspace, this.options);
 
-    this._installGitHooks();
+    await this._installGitHooksAsync();
 
     const approvedPackagesChecker: ApprovedPackagesChecker = new ApprovedPackagesChecker(
       this.rushConfiguration
@@ -541,7 +541,7 @@ export abstract class BaseInstallManager {
   /**
    * Git hooks are only installed if the repo opts in by including files in /common/git-hooks
    */
-  private _installGitHooks(): void {
+  private async _installGitHooksAsync(): Promise<void> {
     const hookSource: string = path.join(this.rushConfiguration.commonFolder, 'git-hooks');
     const git: Git = new Git(this.rushConfiguration);
     const hookDestination: string | undefined = git.getHooksFolder();
@@ -554,7 +554,8 @@ export abstract class BaseInstallManager {
         // eslint-disable-next-line no-console
         console.log('\n' + Colorize.bold('Found files in the "common/git-hooks" folder.'));
 
-        if (!git.isHooksPathDefault()) {
+        if (!(await git.getIsHooksPathDefaultAsync())) {
+          const hooksPath: string = await git.getConfigHooksPathAsync();
           const color: (str: string) => string = this.options.bypassPolicy ? Colorize.yellow : Colorize.red;
           // eslint-disable-next-line no-console
           console.error(
@@ -562,7 +563,7 @@ export abstract class BaseInstallManager {
               [
                 ' ',
                 `Rush cannot install the "common/git-hooks" scripts because your Git configuration `,
-                `specifies "core.hooksPath=${git.getConfigHooksPath()}". You can remove the setting by running:`,
+                `specifies "core.hooksPath=${hooksPath}". You can remove the setting by running:`,
                 ' ',
                 '    git config --unset core.hooksPath',
                 ' '
@@ -957,10 +958,10 @@ ${gitLfsHookHandling}
   }
 
   private _syncTempShrinkwrap(subspace: Subspace, shrinkwrapFile: BaseShrinkwrapFile | undefined): void {
-    const commitedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilename();
+    const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilename();
     if (shrinkwrapFile) {
-      Utilities.syncFile(commitedShrinkwrapFileName, subspace.getTempShrinkwrapFilename());
-      Utilities.syncFile(commitedShrinkwrapFileName, subspace.getTempShrinkwrapPreinstallFilename());
+      Utilities.syncFile(committedShrinkwrapFileName, subspace.getTempShrinkwrapFilename());
+      Utilities.syncFile(committedShrinkwrapFileName, subspace.getTempShrinkwrapPreinstallFilename());
     } else {
       // Otherwise delete the temporary file
       FileSystem.deleteFile(subspace.getTempShrinkwrapFilename());

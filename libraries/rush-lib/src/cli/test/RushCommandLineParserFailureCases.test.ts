@@ -21,7 +21,6 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
-import type { IParserTestInstance } from './TestUtils';
 import { getCommandLineParserInstanceAsync, setSpawnMock } from './TestUtils';
 
 describe('RushCommandLineParserFailureCases', () => {
@@ -43,15 +42,15 @@ describe('RushCommandLineParserFailureCases', () => {
           }) as any);
         });
 
-        const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'build');
+        const { parser } = await getCommandLineParserInstanceAsync(repoName, 'build');
 
-        const telemetryFilePath: string = `${instance.parser.rushConfiguration.commonTempFolder}/test-telemetry.json`;
+        const telemetryFilePath: string = `${parser.rushConfiguration.commonTempFolder}/test-telemetry.json`;
         FileSystem.deleteFile(telemetryFilePath);
 
         jest.spyOn(Autoinstaller.prototype, 'prepareAsync').mockImplementation(async function () {});
 
         setSpawnMock({ emitError: false, returnCode: 1 });
-        await instance.parser.executeAsync();
+        await parser.executeAsync();
         await procProm;
         expect(process.exit).toHaveBeenCalledWith(1);
 
