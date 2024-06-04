@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.127.0",
+      "tag": "@microsoft/rush_v5.127.0",
+      "date": "Tue, 04 Jun 2024 00:44:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixes build cache no-op and sharded operation clustering."
+          },
+          {
+            "comment": "Updated common-veresions.json schema with ensureConsistentVersions property"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.126.0",
       "tag": "@microsoft/rush_v5.126.0",
       "date": "Mon, 03 Jun 2024 02:49:05 GMT",

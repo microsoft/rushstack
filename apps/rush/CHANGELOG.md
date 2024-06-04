@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 03 Jun 2024 02:49:05 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Jun 2024 00:44:18 GMT and should not be manually modified.
+
+## 5.127.0
+Tue, 04 Jun 2024 00:44:18 GMT
+
+### Updates
+
+- Fixes build cache no-op and sharded operation clustering.
+- Updated common-veresions.json schema with ensureConsistentVersions property
 
 ## 5.126.0
 Mon, 03 Jun 2024 02:49:05 GMT
