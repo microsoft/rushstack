@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as crypto from 'crypto';
 
 import { FileSystem } from '@rushstack/node-core-library';
-import { hasher as objectHasher } from 'node-object-hash';
 import type { RushConfiguration } from './RushConfiguration';
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
@@ -365,7 +365,15 @@ export class Subspace {
       relatedProjects.push(...rushProject.dependencyProjects);
     }
 
-    return objectHasher({ sort: true }).hash(allPackageJson);
+    allPackageJson.sort((pa, pb) => pa.name.localeCompare(pb.name));
+    const hash: crypto.Hash = crypto.createHash('sha1');
+    for (const packageFile of allPackageJson) {
+      hash.update(JSON.stringify(packageFile));
+    }
+
+    const packageJsonInjectedDependenciesHash: string = hash.digest('hex');
+
+    return packageJsonInjectedDependenciesHash;
   }
 
   private _getImportantFieldsInPackageJson(packageJson: IPackageJson): IPackageJson {

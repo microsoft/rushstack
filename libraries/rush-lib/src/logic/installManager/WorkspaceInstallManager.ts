@@ -153,8 +153,18 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         shrinkwrapIsUpToDate = false;
       }
 
+      const packageJsonHashStartTime: bigint = process.hrtime.bigint();
+
       const packageJsonInjectedDependenciesHash: string | undefined =
         subspace.getPackageJsonInjectedDependenciesHash();
+
+      const packageJsonHashEndTime: bigint = process.hrtime.bigint();
+      const packageJsonHashExecutionTimeInMs: number =
+        Number(packageJsonHashEndTime - packageJsonHashStartTime) / 1e6;
+
+      this._terminal.writeDebugLine(
+        `Total amount of time spent to hash related package.json files in the injected installation case: ${packageJsonHashExecutionTimeInMs} ms`
+      );
 
       if (
         packageJsonInjectedDependenciesHash &&
