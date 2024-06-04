@@ -2,7 +2,6 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Rush common-versions.json config file",
   "description": "For use with the Rush tool, this file manages dependency versions that affect all projects in the repo. See http://rushjs.io for details.",
-
   "type": "object",
   "properties": {
     "$schema": {
@@ -18,6 +17,10 @@
     },
     "implicitlyPreferredVersions": {
       "description": "When set to true, for all projects in the repo, all dependencies will be automatically added as preferredVersions, except in cases where different projects specify different version ranges for a given dependency.  For older package managers, this tended to reduce duplication of indirect dependencies.  However, it can sometimes cause trouble for indirect dependencies with incompatible peerDependencies ranges.",
+      "type": "boolean"
+    },
+    "ensureConsistentVersions": {
+      "description": "If true, consistent version specifiers for dependencies will be enforced (i.e. \"rush check\" is run before some commands).",
       "type": "boolean"
     },
     "allowedAlternativeVersions": {

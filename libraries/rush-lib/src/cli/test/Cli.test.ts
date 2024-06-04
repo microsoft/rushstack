@@ -5,6 +5,9 @@ import * as path from 'path';
 
 import { Utilities } from '../../utilities/Utilities';
 
+// Increase the timeout since this command spawns child processes
+jest.setTimeout(10000);
+
 describe('CLI', () => {
   it('should not fail when there is no rush.json', async () => {
     const workingDir: string = '/';

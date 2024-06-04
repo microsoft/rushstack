@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Updated common-veresions.json schema with ensureConsistentVersions property",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
