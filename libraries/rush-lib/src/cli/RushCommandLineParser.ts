@@ -58,6 +58,7 @@ import { type ICustomCommandLineConfigurationInfo, PluginManager } from '../plug
 import { RushSession } from '../pluginFramework/RushSession';
 import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
+import { InitSubspaceAction } from './actions/initSubspaceAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -263,6 +264,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new InitAction(this));
       this.addAction(new InitAutoinstallerAction(this));
       this.addAction(new InitDeployAction(this));
+      this.addAction(new InitSubspaceAction(this));
       this.addAction(new InstallAction(this));
       this.addAction(new LinkAction(this));
       this.addAction(new ListAction(this));

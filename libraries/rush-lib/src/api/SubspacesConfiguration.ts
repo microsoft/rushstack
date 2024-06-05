@@ -20,7 +20,7 @@ export const SPLIT_WORKSPACE_SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9][+_\-a-z0-
  * This represents the JSON data structure for the "subspaces.json" configuration file.
  * See subspace.schema.json for documentation.
  */
-interface ISubspacesConfigurationJson {
+export interface ISubspacesConfigurationJson {
   subspacesEnabled: boolean;
   splitWorkspaceCompatibility?: boolean;
   preventSelectingAllSubspaces?: boolean;
