@@ -1,13 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CLI Tool Tests should display help information with --help 1`] = `
-"lockfile-explorer [command]
+"lockfile-explorer
 
-Commands:
-  lockfile-explorer check                   Check if the specified package has a
-  <package-specifier>                       inconsistent package versions in
-                                            target project
-  lockfile-explorer start                   Start the application
+Start the application
+
+Options:
+  -h, --help      Show help                                            [boolean]
+      --version   Show version number                                  [boolean]
+      --subspace  The subspace name where the package resides
+                                                   [string] [default: \\"default\\"]
+      --debug     Enable debug mode                                    [boolean]
+"
+`;
+
+exports[`CLI Tool Tests should display help information with --help 2`] = `
+"lockfile-explorer
+
+Check if the specified package has a inconsistent package versions in target
+project
 
 Options:
   -h, --help     Show help                                             [boolean]
