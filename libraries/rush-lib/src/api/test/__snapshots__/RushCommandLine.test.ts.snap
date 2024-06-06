@@ -303,6 +303,19 @@ Object {
       ],
     },
     Object {
+      "actionName": "init-subspace",
+      "parameters": Array [
+        Object {
+          "description": "The name of the subspace that is being initialized.",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--name",
+          "required": true,
+          "shortName": "-n",
+        },
+      ],
+    },
+    Object {
       "actionName": "install",
       "parameters": Array [
         Object {
