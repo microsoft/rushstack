@@ -13,8 +13,8 @@ import { Colorize } from '@rushstack/terminal';
 import type { Lockfile } from '@pnpm/lockfile-types';
 import type { CommandModule } from 'yargs';
 
-import { convertLockfileV6DepPathToV5DepPath, getShrinkwrapFileMajorVersion } from './utils';
-import { init } from './init';
+import { convertLockfileV6DepPathToV5DepPath, getShrinkwrapFileMajorVersion } from '../utils/shrinkwrap';
+import { init } from '../utils/init';
 import type { IAppState } from '../state';
 
 interface IStartCommandOptions {
@@ -206,7 +206,7 @@ function startApp(subspaceName: string, debugMode: boolean): void {
 
 // Example usage: lockfile-explorer start
 // Example usage: lockfile-explorer start --subspace xxx
-export const startAppCommand: CommandModule<{}, IStartCommandOptions> = {
+export const startCommand: CommandModule<{}, IStartCommandOptions> = {
   command: '$0',
   describe: 'Start the application',
   builder: (yargs) => {

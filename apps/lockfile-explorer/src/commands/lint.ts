@@ -12,7 +12,7 @@ import type { CommandModule } from 'yargs';
 import { Colorize } from '@rushstack/terminal';
 import semver from 'semver';
 
-import { getShrinkwrapFileMajorVersion, parseDependencyPath } from './utils';
+import { getShrinkwrapFileMajorVersion, parseDependencyPath } from '../utils/shrinkwrap';
 
 export interface ICheckCommandOptions {
   packageSpecifier: string;
