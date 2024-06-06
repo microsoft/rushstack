@@ -204,8 +204,8 @@ function startApp(subspaceName: string, debugMode: boolean): void {
   });
 }
 
-// Example usage: lockfile-explorer start
-// Example usage: lockfile-explorer start --subspace xxx
+// Example usage: lockfile-explorer
+// Example usage: lockfile-explorer --subspace xxx
 export const startCommand: CommandModule<{}, IStartCommandOptions> = {
   command: '$0',
   describe: 'Start the application',
