@@ -139,8 +139,8 @@ async function performDependencyCheck(
 // Example usage: lockfile-explorer check --project xxx react@18
 // Example usage: lockfile-explorer check --project xxx react@18.2
 // Example usage: lockfile-explorer check --project xxx react@18.2.0
-export const checkCommand: CommandModule<{}, ICheckCommandOptions> = {
-  command: 'check <package-specifier>',
+export const lintCommand: CommandModule<{}, ICheckCommandOptions> = {
+  command: '$0',
   describe: 'Check if the specified package has a inconsistent package versions in target project',
   builder: (yargs) => {
     return yargs

@@ -207,7 +207,7 @@ function startApp(subspaceName: string, debugMode: boolean): void {
 // Example usage: lockfile-explorer start
 // Example usage: lockfile-explorer start --subspace xxx
 export const startAppCommand: CommandModule<{}, IStartCommandOptions> = {
-  command: 'start',
+  command: '$0',
   describe: 'Start the application',
   builder: (yargs) => {
     return yargs

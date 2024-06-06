@@ -4,11 +4,11 @@
 import yargs from 'yargs';
 import { Colorize } from '@rushstack/terminal';
 
-import { startAppCommand } from './commands/startApp';
+import { lintCommand } from './commands/lint';
 
 yargs
   .scriptName('lockfile-explorer')
-  .command(startAppCommand)
+  .command(lintCommand)
   // --debug
   .boolean('debug')
   .alias('help', 'h')
