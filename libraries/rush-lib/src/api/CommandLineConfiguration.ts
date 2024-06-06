@@ -20,7 +20,6 @@ import type {
   IPhasedCommandWithoutPhasesJson
 } from './CommandLineJson';
 import schemaJson from '../schemas/command-line.schema.json';
-import { normalizeNameForLogFilenameIdentifiers } from '../logic/operations/OperationMetadataManager';
 
 export interface IShellCommandTokenContext {
   packageFolder: string;
@@ -188,6 +187,16 @@ interface ICommandLineConfigurationOptions {
 }
 
 /**
+ * This function replaces colons (":") with underscores ("_").
+ *
+ * ts-command-line restricts command names to lowercase letters, numbers, underscores, and colons.
+ * Replacing colons with underscores produces a filesystem-safe name.
+ */
+function _normalizeNameForLogFilenameIdentifiers(name: string): string {
+  return name.replace(/:/g, '_'); // Replace colons with underscores to be filesystem-safe
+}
+
+/**
  * Custom Commands and Options for the Rush Command Line
  */
 export class CommandLineConfiguration {
@@ -257,7 +266,7 @@ export class CommandLineConfiguration {
         const processedPhase: IPhase = {
           name: phase.name,
           isSynthetic: false,
-          logFilenameIdentifier: normalizeNameForLogFilenameIdentifiers(phase.name),
+          logFilenameIdentifier: _normalizeNameForLogFilenameIdentifiers(phase.name),
           associatedParameters: new Set(),
           dependencies: {
             self: new Set(),
@@ -678,7 +687,7 @@ export class CommandLineConfiguration {
     const phase: IPhase = {
       name: phaseName,
       isSynthetic: true,
-      logFilenameIdentifier: normalizeNameForLogFilenameIdentifiers(command.name),
+      logFilenameIdentifier: _normalizeNameForLogFilenameIdentifiers(command.name),
       associatedParameters: new Set(),
       dependencies: {
         self: new Set(),

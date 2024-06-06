@@ -26,7 +26,8 @@ function nullSort(a: OperationExecutionRecord, b: OperationExecutionRecord): num
 function createRecord(name: string): OperationExecutionRecord {
   return new OperationExecutionRecord(
     new Operation({
-      runner: new MockOperationRunner(name)
+      runner: new MockOperationRunner(name),
+      logFilenameIdentifier: 'operation'
     }),
     {} as unknown as IOperationExecutionRecordContext
   );

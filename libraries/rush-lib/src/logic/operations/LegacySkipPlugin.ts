@@ -76,7 +76,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
         await Async.forEachAsync(operations.values(), async (record: IOperationExecutionResult) => {
           const { operation } = record;
-          const { associatedProject, associatedPhase, runner } = operation;
+          const { associatedProject, associatedPhase, runner, logFilenameIdentifier } = operation;
           if (!associatedProject || !associatedPhase || !runner) {
             return;
           }
@@ -90,7 +90,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
             return;
           }
 
-          const packageDepsFilename: string = `package-deps_${associatedPhase.logFilenameIdentifier}.json`;
+          const packageDepsFilename: string = `package-deps_${logFilenameIdentifier}.json`;
 
           const packageDepsPath: string = path.join(
             associatedProject.projectRushTempFolder,
