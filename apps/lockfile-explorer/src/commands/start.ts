@@ -204,6 +204,8 @@ function startApp(subspaceName: string, debugMode: boolean): void {
   });
 }
 
+// Example usage: lfx
+// Example usage: lfx --subspace xxx
 // Example usage: lockfile-explorer
 // Example usage: lockfile-explorer --subspace xxx
 export const startCommand: CommandModule<{}, IStartCommandOptions> = {

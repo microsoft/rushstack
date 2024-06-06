@@ -7,12 +7,24 @@ import yaml from 'js-yaml';
 import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
 import type { RushConfigurationProject } from '@microsoft/rush-lib/lib/api/RushConfigurationProject';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import type { CommandModule } from 'yargs';
 import { Colorize } from '@rushstack/terminal';
 import semver from 'semver';
 
 import { getShrinkwrapFileMajorVersion, parseDependencyPath } from '../utils/shrinkwrap';
+
+export interface ILintRule {
+  rule: 'side-by-side';
+  project: string;
+  dependency: string;
+  // If the user does not specify a version, by default only the consistency of the package versions is checked.
+  specifiedVersion?: string;
+}
+
+export interface ILockfileLint {
+  rules: ILintRule[];
+}
 
 export interface ICheckCommandOptions {
   packageSpecifier: string;
@@ -23,7 +35,7 @@ async function checkVersionCompatibility(
   shrinkwrapFileMajorVersion: number,
   packages: Lockfile['packages'],
   dependencyPath: string,
-  packageName: string,
+  dependency: string,
   versionRange: { current: string | undefined },
   checkedDependencyPaths: Set<string>
 ): Promise<void> {
@@ -31,10 +43,9 @@ async function checkVersionCompatibility(
     checkedDependencyPaths.add(dependencyPath);
     const { name, version } = parseDependencyPath(shrinkwrapFileMajorVersion, dependencyPath);
     if (!versionRange.current) {
-      // If the user does not specify a version, by default only the consistency of the package versions is checked.
       versionRange.current = version;
     } else {
-      if (name === packageName && !semver.satisfies(version, versionRange.current)) {
+      if (name === dependency && !semver.satisfies(version, versionRange.current)) {
         throw new Error(`Detected inconsistent version numbers: ${version}!`);
       }
     }
@@ -46,7 +57,7 @@ async function checkVersionCompatibility(
         shrinkwrapFileMajorVersion,
         packages,
         `/${dependencyPackageName}${shrinkwrapFileMajorVersion === 6 ? '@' : '/'}${dependencyPackageVersion}`,
-        packageName,
+        dependency,
         versionRange,
         checkedDependencyPaths
       );
@@ -58,7 +69,7 @@ async function searchAndValidateDependencies(
   rushConfiguration: RushConfiguration,
   checkedProjects: Set<RushConfigurationProject>,
   project: RushConfigurationProject,
-  packageName: string,
+  dependency: string,
   versionRange: { current: string | undefined }
 ): Promise<void> {
   console.log(`Checking the project: ${project.packageName}.`);
@@ -95,7 +106,7 @@ async function searchAndValidateDependencies(
                 rushConfiguration,
                 checkedProjects,
                 dependencyProject,
-                packageName,
+                dependency,
                 versionRange
               );
             }
@@ -104,7 +115,7 @@ async function searchAndValidateDependencies(
               shrinkwrapFileMajorVersion,
               packages,
               fullDependencyPath,
-              packageName,
+              dependency,
               versionRange,
               checkedDependencyPaths
             );
@@ -115,50 +126,53 @@ async function searchAndValidateDependencies(
   }
 }
 
-async function performDependencyCheck(
-  packageName: string,
+async function performSideBySideCheck(
+  rushConfiguration: RushConfiguration,
+  dependency: string,
   versionRange: { current: string | undefined },
-  projectName: string | undefined
+  projectName: string
 ): Promise<void> {
-  const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
-  const project: RushConfigurationProject | undefined = projectName
-    ? rushConfiguration?.getProjectByName(projectName)
-    : rushConfiguration?.tryGetProjectForPath(process.cwd());
-  if (!rushConfiguration || !project) {
-    throw new Error(
-      'The "lockfile-explorer check" must be executed in a folder that is under a Rush workspace folder'
-    );
+  const project: RushConfigurationProject | undefined = rushConfiguration?.getProjectByName(projectName);
+  if (!project) {
+    throw new Error(`Cannot found project name: ${projectName}`);
   }
   const checkedProjects: Set<RushConfigurationProject> = new Set<RushConfigurationProject>([project]);
-  await searchAndValidateDependencies(rushConfiguration, checkedProjects, project, packageName, versionRange);
-  console.log(Colorize.green('Check passed!'));
+  await searchAndValidateDependencies(rushConfiguration, checkedProjects, project, dependency, versionRange);
 }
 
-// Example usage: lockfile-explorer check react
-// Example usage: lockfile-explorer check --project xxx react
-// Example usage: lockfile-explorer check --project xxx react@18
-// Example usage: lockfile-explorer check --project xxx react@18.2
-// Example usage: lockfile-explorer check --project xxx react@18.2.0
+// Example usage: lflint
+// Example usage: lockfile-lint
 export const lintCommand: CommandModule<{}, ICheckCommandOptions> = {
   command: '$0',
   describe: 'Check if the specified package has a inconsistent package versions in target project',
-  builder: (yargs) => {
-    return yargs
-      .positional('packageSpecifier', {
-        describe: 'The name of the package and version to check',
-        type: 'string',
-        demandOption: true
-      })
-      .option('project', {
-        describe: 'The name of the project that should be checked',
-        type: 'string'
-      });
-  },
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  handler: async (argv) => {
+  handler: async () => {
     try {
-      const [packageName, specifier] = argv.packageSpecifier.split('@');
-      await performDependencyCheck(packageName, { current: specifier }, argv.project);
+      const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
+      if (!rushConfiguration) {
+        throw new Error(
+          'The "lockfile-explorer check" must be executed in a folder that is under a Rush workspace folder'
+        );
+      }
+      const lintingFile: string = `${rushConfiguration.rushJsonFolder}/lockfile-lint.json`;
+      const { rules }: ILockfileLint = JsonFile.load(lintingFile);
+      for (const { specifiedVersion, dependency, project, rule } of rules) {
+        switch (rule) {
+          case 'side-by-side': {
+            await performSideBySideCheck(
+              rushConfiguration,
+              dependency,
+              { current: specifiedVersion },
+              project
+            );
+            break;
+          }
+          default: {
+            throw new Error('Unsupported rule name: ' + rule);
+          }
+        }
+      }
+      console.log(Colorize.green('Check passed!'));
     } catch (error) {
       console.error(Colorize.red('ERROR: ' + error.message));
       process.exit(1);
