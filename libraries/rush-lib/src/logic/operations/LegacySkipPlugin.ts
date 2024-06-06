@@ -76,8 +76,8 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
         await Async.forEachAsync(operations.values(), async (record: IOperationExecutionResult) => {
           const { operation } = record;
-          const { associatedProject, associatedPhase, runner, logFilenameIdentifier } = operation;
-          if (!associatedProject || !associatedPhase || !runner) {
+          const { associatedProject, runner, logFilenameIdentifier } = operation;
+          if (!associatedProject || !runner) {
             return;
           }
 
