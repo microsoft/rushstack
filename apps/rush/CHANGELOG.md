@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 06 Jun 2024 03:05:21 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Jun 2024 22:59:12 GMT and should not be manually modified.
+
+## 5.128.0
+Fri, 07 Jun 2024 22:59:12 GMT
+
+### Updates
+
+- Graduate the `phasedCommands` experiment to a standard feature.
+- Improve `rush init` template for `.gitignore`
+- Remove an unnecessary condition in the logic for skipping operations when build cache is disabled.
 
 ## 5.127.1
 Thu, 06 Jun 2024 03:05:21 GMT

@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.128.0",
+      "tag": "@microsoft/rush_v5.128.0",
+      "date": "Fri, 07 Jun 2024 22:59:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Graduate the `phasedCommands` experiment to a standard feature."
+          },
+          {
+            "comment": "Improve `rush init` template for `.gitignore`"
+          },
+          {
+            "comment": "Remove an unnecessary condition in the logic for skipping operations when build cache is disabled."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.127.1",
       "tag": "@microsoft/rush_v5.127.1",
       "date": "Thu, 06 Jun 2024 03:05:21 GMT",
