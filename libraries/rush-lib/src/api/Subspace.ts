@@ -361,11 +361,38 @@ export class Subspace {
     // get all related package.json
     while (relatedProjects.length > 0) {
       const rushProject: RushConfigurationProject = relatedProjects.pop()!;
-      allPackageJson.push(this._getImportantFieldsInPackageJson(rushProject.packageJson));
+      // collect fields that could update the `pnpm-lock.yaml`
+      const {
+        name,
+        version,
+        bin,
+        dependencies,
+        devDependencies,
+        peerDependencies,
+        optionalDependencies,
+        dependenciesMeta,
+        peerDependenciesMeta,
+        resolutions
+      } = rushProject.packageJson;
+
+      allPackageJson.push({
+        name,
+        version,
+        bin,
+        dependencies,
+        devDependencies,
+        peerDependencies,
+        optionalDependencies,
+        dependenciesMeta,
+        peerDependenciesMeta,
+        resolutions
+      });
+
       relatedProjects.push(...rushProject.dependencyProjects);
     }
 
-    allPackageJson.sort((pa, pb) => pa.name.localeCompare(pb.name));
+    const collator: Intl.Collator = new Intl.Collator('en');
+    allPackageJson.sort((pa, pb) => collator.compare(pa.name, pb.name));
     const hash: crypto.Hash = crypto.createHash('sha1');
     for (const packageFile of allPackageJson) {
       hash.update(JSON.stringify(packageFile));
@@ -374,22 +401,5 @@ export class Subspace {
     const packageJsonInjectedDependenciesHash: string = hash.digest('hex');
 
     return packageJsonInjectedDependenciesHash;
-  }
-
-  private _getImportantFieldsInPackageJson(packageJson: IPackageJson): IPackageJson {
-    // collect fields that could update the `pnpm-lock.yaml`
-    const packageJsonWithImportantFields: IPackageJson = {
-      name: packageJson.name,
-      version: packageJson.version,
-      bin: packageJson?.bin,
-      dependencies: packageJson?.dependencies,
-      devDependencies: packageJson?.devDependencies,
-      peerDependencies: packageJson?.peerDependencies,
-      optionalDependencies: packageJson?.optionalDependencies,
-      dependenciesMeta: packageJson?.dependenciesMeta,
-      peerDependenciesMeta: packageJson?.peerDependenciesMeta,
-      resolutions: packageJson?.resolutions
-    };
-    return packageJsonWithImportantFields;
   }
 }

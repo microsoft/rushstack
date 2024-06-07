@@ -46,6 +46,7 @@ import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 import { FlagFile } from '../../api/FlagFile';
+import { Stopwatch } from '../../utilities/Stopwatch';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -153,25 +154,32 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         shrinkwrapIsUpToDate = false;
       }
 
-      const packageJsonHashStartTime: bigint = process.hrtime.bigint();
+      const stopwatch: Stopwatch = Stopwatch.start();
 
       const packageJsonInjectedDependenciesHash: string | undefined =
         subspace.getPackageJsonInjectedDependenciesHash();
 
-      const packageJsonHashEndTime: bigint = process.hrtime.bigint();
-      const packageJsonHashExecutionTimeInMs: number =
-        Number(packageJsonHashEndTime - packageJsonHashStartTime) / 1e6;
+      stopwatch.stop();
 
       this._terminal.writeDebugLine(
-        `Total amount of time spent to hash related package.json files in the injected installation case: ${packageJsonHashExecutionTimeInMs} ms`
+        `Total amount of time spent to hash related package.json files in the injected installation case: ${stopwatch.toString()}`
       );
 
-      if (
-        packageJsonInjectedDependenciesHash &&
-        packageJsonInjectedDependenciesHash !== repoState.packageJsonInjectedDependenciesHash
-      ) {
-        shrinkwrapWarnings.push(`Some injected dependencies' package.json might have been modified.`);
-        shrinkwrapIsUpToDate = false;
+      if (packageJsonInjectedDependenciesHash) {
+        // if packageJsonInjectedDependenciesHash exists
+        // make sure it matches the value in repoState
+        if (packageJsonInjectedDependenciesHash !== repoState.packageJsonInjectedDependenciesHash) {
+          shrinkwrapWarnings.push(`Some injected dependencies' package.json might have been modified.`);
+          shrinkwrapIsUpToDate = false;
+        }
+      } else {
+        // if packageJsonInjectedDependenciesHash not exists
+        // there is a situation that the subspace previously has injected dependencies but removed
+        // so we can check if the repoState up to date
+        if (repoState.packageJsonInjectedDependenciesHash !== undefined) {
+          shrinkwrapWarnings.push(`Some injected dependencies' package.json might have been modified.`);
+          shrinkwrapIsUpToDate = false;
+        }
       }
     }
 
