@@ -7,6 +7,7 @@
 import type { AsyncParallelHook } from 'tapable';
 import type { AsyncSeriesBailHook } from 'tapable';
 import type { AsyncSeriesHook } from 'tapable';
+import type { AsyncSeriesWaterfallHook } from 'tapable';
 import type { Configuration } from 'webpack-dev-server';
 import type { HeftConfiguration } from '@rushstack/heft';
 import type { IHeftTaskSession } from '@rushstack/heft';
@@ -41,6 +42,7 @@ export interface IWebpackPluginAccessorHooks {
     readonly onAfterConfigure: AsyncParallelHook<IWebpackConfiguration, never, never>;
     readonly onConfigure: AsyncSeriesHook<IWebpackConfiguration, never, never>;
     readonly onEmitStats: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats, never, never>;
+    readonly onGetWatchOptions: AsyncSeriesWaterfallHook<Parameters<TWebpack.Compiler['watch']>[0], Readonly<IWebpackConfiguration>, never>;
     readonly onLoadConfiguration: AsyncSeriesBailHook<never, never, never, IWebpackConfiguration | false>;
 }
 
