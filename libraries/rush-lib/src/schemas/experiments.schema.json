@@ -39,7 +39,7 @@
       "type": "boolean"
     },
     "phasedCommands": {
-      "description": "If true, the phased commands feature is enabled. To use this feature, create a \"phased\" command in common/config/rush/command-line.json.",
+      "description": "THIS EXPERIMENT HAS BEEN GRADUATED TO A STANDARD FEATURE. THIS PROPERTY SHOULD BE REMOVED.",
       "type": "boolean"
     },
     "cleanInstallAfterNpmrcChanges": {

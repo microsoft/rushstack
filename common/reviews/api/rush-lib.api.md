@@ -297,7 +297,7 @@ export class EventHooks {
 // @public
 export class ExperimentsConfiguration {
     // @internal
-    constructor(jsonFileName: string);
+    constructor(jsonFilePath: string);
     // @beta
     readonly configuration: Readonly<IExperimentsJson>;
 }
@@ -473,7 +473,6 @@ export interface IExperimentsJson {
     generateProjectImpactGraphDuringRushUpdate?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
-    phasedCommands?: boolean;
     printEventHooksOutputToConsole?: boolean;
     useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
