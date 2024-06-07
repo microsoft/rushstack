@@ -715,10 +715,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "node-object-hash",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "node-sass",
       "allowedCategories": [ "libraries", "tests" ]
     },
