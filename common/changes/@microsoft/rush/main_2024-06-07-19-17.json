@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Graduate the `phasedCommands` experiment to a standard feature.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
