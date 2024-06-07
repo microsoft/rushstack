@@ -323,8 +323,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     const lockfileDependenciesMetaByProjectRelativePath: { [key: string]: IDependenciesMetaTable } = {};
     if (shrinkwrapFile?.importers !== undefined) {
       for (const [key, value] of shrinkwrapFile?.importers) {
+        const projectRelativePath: string = Path.convertToSlashes(key);
+
+        // we only need to verify packages that exist in package.json and pnpm-lock.yaml
+        // PNPM won't actively remove deleted packages in importers, unless it has to
+        // so it is possible that a deleted package still showing in pnpm-lock.yaml
+        if (expectedDependenciesMetaByProjectRelativePath[projectRelativePath] === undefined) {
+          continue;
+        }
         if (value.dependenciesMeta !== undefined) {
-          lockfileDependenciesMetaByProjectRelativePath[Path.convertToSlashes(key)] = value.dependenciesMeta;
+          lockfileDependenciesMetaByProjectRelativePath[projectRelativePath] = value.dependenciesMeta;
         }
       }
     }
@@ -334,6 +342,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       expectedDependenciesMetaByProjectRelativePath,
       lockfileDependenciesMetaByProjectRelativePath
     );
+
     if (!dependenciesMetaAreEqual) {
       shrinkwrapWarnings.push(
         "The dependenciesMeta settings in one or more package.json don't match the current shrinkwrap."
