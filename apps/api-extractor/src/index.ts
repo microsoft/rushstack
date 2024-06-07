@@ -11,14 +11,14 @@
 
 export { ConsoleMessageId } from './api/ConsoleMessageId';
 
-export { CompilerState, ICompilerStateCreateOptions } from './api/CompilerState';
+export { CompilerState, type ICompilerStateCreateOptions } from './api/CompilerState';
 
-export { Extractor, IExtractorInvokeOptions, ExtractorResult } from './api/Extractor';
+export { Extractor, type IExtractorInvokeOptions, ExtractorResult } from './api/Extractor';
 
 export {
-  IExtractorConfigApiReport,
-  IExtractorConfigPrepareOptions,
-  IExtractorConfigLoadForFolderOptions,
+  type IExtractorConfigApiReport,
+  type IExtractorConfigPrepareOptions,
+  type IExtractorConfigLoadForFolderOptions,
   ExtractorConfig
 } from './api/ExtractorConfig';
 
@@ -26,13 +26,13 @@ export { ExtractorLogLevel } from './api/ExtractorLogLevel';
 
 export {
   ExtractorMessage,
-  IExtractorMessageProperties,
+  type IExtractorMessageProperties,
   ExtractorMessageCategory
 } from './api/ExtractorMessage';
 
 export { ExtractorMessageId } from './api/ExtractorMessageId';
 
-export {
+export type {
   ApiReportVariant,
   IConfigCompiler,
   IConfigApiReport,

@@ -2,6 +2,26 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.14.25",
+      "tag": "@rushstack/heft-config-file_v0.14.25",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing `type` modifiers on type-only exports."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.24",
       "tag": "@rushstack/heft-config-file_v0.14.24",
       "date": "Wed, 29 May 2024 02:03:51 GMT",

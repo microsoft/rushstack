@@ -52,7 +52,7 @@ export interface ILogChunkStorage {
 export class OperationMetadataManager {
   public readonly stateFile: OperationStateFile;
   public readonly logFilenameIdentifier: string;
-  private readonly _metadataFolder: string;
+  private readonly _metadataFolderPath: string;
   private readonly _logPath: string;
   private readonly _errorLogPath: string;
   private readonly _logChunksPath: string;
@@ -61,23 +61,25 @@ export class OperationMetadataManager {
   private readonly _relativeErrorLogPath: string;
 
   public constructor(options: IOperationMetadataManagerOptions) {
-    const { rushProject, operation, phase } = options;
+    const {
+      rushProject,
+      operation: { logFilenameIdentifier }
+    } = options;
     const { projectFolder } = rushProject;
 
-    this.logFilenameIdentifier = operation.name
-      ? normalizeNameForLogFilenameIdentifiers(operation.name)
-      : phase.logFilenameIdentifier;
+    this.logFilenameIdentifier = logFilenameIdentifier;
 
-    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${this.logFilenameIdentifier}`;
+    const metadataFolderPath: string = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${logFilenameIdentifier}`;
 
     this.stateFile = new OperationStateFile({
       projectFolder: projectFolder,
-      metadataFolder: this._metadataFolder
+      metadataFolder: metadataFolderPath
     });
 
-    this._relativeLogPath = `${this._metadataFolder}/all.log`;
-    this._relativeErrorLogPath = `${this._metadataFolder}/error.log`;
-    this._relativeLogChunksPath = `${this._metadataFolder}/log-chunks.jsonl`;
+    this._metadataFolderPath = metadataFolderPath;
+    this._relativeLogPath = `${metadataFolderPath}/all.log`;
+    this._relativeErrorLogPath = `${metadataFolderPath}/error.log`;
+    this._relativeLogChunksPath = `${metadataFolderPath}/log-chunks.jsonl`;
     this._logPath = `${projectFolder}/${this._relativeLogPath}`;
     this._errorLogPath = `${projectFolder}/${this._relativeErrorLogPath}`;
     this._logChunksPath = `${projectFolder}/${this._relativeLogChunksPath}`;
@@ -188,10 +190,6 @@ export class OperationMetadataManager {
       }
     }
   }
-}
-
-export function normalizeNameForLogFilenameIdentifiers(name: string): string {
-  return name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '_');
 }
 
 async function restoreFromLogFile(terminal: ITerminal, path: string): Promise<void> {

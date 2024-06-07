@@ -3,9 +3,9 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@rushstack/heft"
+      "packageName": "@rushstack/eslint-plugin-security"
     }
   ],
-  "packageName": "@rushstack/heft",
+  "packageName": "@rushstack/eslint-plugin-security",
   "email": "iclanton@users.noreply.github.com"
 }

@@ -3,9 +3,9 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@rushstack/heft-api-extractor-plugin"
+      "packageName": "@rushstack/eslint-plugin-packlets"
     }
   ],
-  "packageName": "@rushstack/heft-api-extractor-plugin",
+  "packageName": "@rushstack/eslint-plugin-packlets",
   "email": "iclanton@users.noreply.github.com"
 }

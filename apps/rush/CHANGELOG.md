@@ -1,6 +1,34 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 29 May 2024 05:39:54 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Jun 2024 03:05:21 GMT and should not be manually modified.
+
+## 5.127.1
+Thu, 06 Jun 2024 03:05:21 GMT
+
+### Updates
+
+- Remove the second instance of the project name from the project operation filenames in `<projectFolder>/rush-logs`. This restores the log filenames to their format before Rush 5.125.0.
+
+## 5.127.0
+Tue, 04 Jun 2024 00:44:18 GMT
+
+### Updates
+
+- Fixes build cache no-op and sharded operation clustering.
+- Updated common-veresions.json schema with ensureConsistentVersions property
+
+## 5.126.0
+Mon, 03 Jun 2024 02:49:05 GMT
+
+### Updates
+
+- Fixes a string schema validation warning message when running `rush deploy`.
+- Update the functionality that runs external lifecycle processes to be async.
+- Move logs into the project `rush-logs` folder regardless of whether or not the `"phasedCommands"` experiment is enabled.
+- Update the `nodeSupportedVersionRange` in the `rush init` template to the LTS and current Node versions.
+- Update the `pnpmVersion` in the `rush init` template to the latest version of pnpm 8.
+- Update the `.gitignore` in the `rush init` template to include some common toolchain output files and folders.
+- Include missing `type` modifiers on type-only exports.
 
 ## 5.125.1
 Wed, 29 May 2024 05:39:54 GMT

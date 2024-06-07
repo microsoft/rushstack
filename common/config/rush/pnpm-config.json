@@ -262,42 +262,6 @@
       }
     },
 
-    "@storybook/addons": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
-    "@storybook/api": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
-    "@storybook/router": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
-    "emotion-theming": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
-    "react-router": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
-    "react-router-dom": {
-      "peerDependencies": {
-        "@types/react": ">=16"
-      }
-    },
-
     "@jest/reporters": {
       "dependencies": {
         "@types/istanbul-lib-coverage": "2.0.4"
@@ -310,9 +274,27 @@
       }
     },
 
+    "@storybook/addons": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "@storybook/api": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
     "@storybook/react": {
       "peerDependencies": {
         "@types/node": ">=12",
+        "@types/react": ">=16"
+      }
+    },
+
+    "@storybook/router": {
+      "peerDependencies": {
         "@types/react": ">=16"
       }
     },
@@ -355,6 +337,12 @@
       }
     },
 
+    "emotion-theming": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
     "http-proxy-middleware": {
       "dependencies": {
         "@types/express": "*"
@@ -364,6 +352,30 @@
     "http2-express-bridge": {
       "peerDependencies": {
         "@types/express": "*"
+      }
+    },
+
+    "query-ast": {
+      "dependencies": {
+        "lodash": "~4.17.15"
+      }
+    },
+
+    "react-router": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "react-router-dom": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "scss-parser": {
+      "dependencies": {
+        "lodash": "~4.17.15"
       }
     },
 
@@ -391,18 +403,6 @@
         "@types/webpack": {
           "optional": true
         }
-      }
-    },
-
-    "scss-parser": {
-      "dependencies": {
-        "lodash": "~4.17.15"
-      }
-    },
-
-    "query-ast": {
-      "dependencies": {
-        "lodash": "~4.17.15"
       }
     }
   },

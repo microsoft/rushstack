@@ -241,7 +241,7 @@ export class PublishAction extends BaseRushAction {
     const git: Git = new Git(this.rushConfiguration);
     const publishGit: PublishGit = new PublishGit(git, this._targetBranch.value);
     if (this._includeAll.value) {
-      this._publishAll(publishGit, allPackages);
+      await this._publishAllAsync(publishGit, allPackages);
     } else {
       this._prereleaseToken = new PrereleaseToken(
         this._prereleaseName.value,
@@ -287,7 +287,7 @@ export class PublishAction extends BaseRushAction {
       const tempBranchName: string = `publish-${Date.now()}`;
 
       // Make changes in temp branch.
-      publishGit.checkout(tempBranchName, true);
+      await publishGit.checkoutAsync(tempBranchName, true);
 
       this._setDependenciesBeforePublish();
 
@@ -297,14 +297,14 @@ export class PublishAction extends BaseRushAction {
 
       this._setDependenciesBeforeCommit();
 
-      if (git.hasUncommittedChanges()) {
+      if (await git.hasUncommittedChangesAsync()) {
         // Stage, commit, and push the changes to remote temp branch.
-        publishGit.addChanges(':/*');
-        publishGit.commit(
+        await publishGit.addChangesAsync(':/*');
+        await publishGit.commitAsync(
           this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE,
           !this._ignoreGitHooksParameter.value
         );
-        publishGit.push(tempBranchName, !this._ignoreGitHooksParameter.value);
+        await publishGit.pushAsync(tempBranchName, !this._ignoreGitHooksParameter.value);
 
         this._setDependenciesBeforePublish();
 
@@ -321,8 +321,8 @@ export class PublishAction extends BaseRushAction {
           if (change.changeType && change.changeType > ChangeType.dependency) {
             const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
             if (project) {
-              if (!this._packageExists(project)) {
-                this._npmPublish(change.packageName, project.publishFolder);
+              if (!(await this._packageExistsAsync(project))) {
+                await this._npmPublishAsync(change.packageName, project.publishFolder);
               } else {
                 // eslint-disable-next-line no-console
                 console.log(`Skip ${change.packageName}. Package exists.`);
@@ -337,34 +337,37 @@ export class PublishAction extends BaseRushAction {
         this._setDependenciesBeforeCommit();
 
         // Create and push appropriate Git tags.
-        this._gitAddTags(publishGit, orderedChanges);
-        publishGit.push(tempBranchName, !this._ignoreGitHooksParameter.value);
+        await this._gitAddTagsAsync(publishGit, orderedChanges);
+        await publishGit.pushAsync(tempBranchName, !this._ignoreGitHooksParameter.value);
 
         // Now merge to target branch.
-        publishGit.checkout(this._targetBranch.value!);
-        publishGit.pull(!this._ignoreGitHooksParameter.value);
-        publishGit.merge(tempBranchName, !this._ignoreGitHooksParameter.value);
-        publishGit.push(this._targetBranch.value!, !this._ignoreGitHooksParameter.value);
-        publishGit.deleteBranch(tempBranchName, true, !this._ignoreGitHooksParameter.value);
+        await publishGit.checkoutAsync(this._targetBranch.value!);
+        await publishGit.pullAsync(!this._ignoreGitHooksParameter.value);
+        await publishGit.mergeAsync(tempBranchName, !this._ignoreGitHooksParameter.value);
+        await publishGit.pushAsync(this._targetBranch.value!, !this._ignoreGitHooksParameter.value);
+        await publishGit.deleteBranchAsync(tempBranchName, true, !this._ignoreGitHooksParameter.value);
       } else {
-        publishGit.checkout(this._targetBranch.value!);
-        publishGit.deleteBranch(tempBranchName, false, !this._ignoreGitHooksParameter.value);
+        await publishGit.checkoutAsync(this._targetBranch.value!);
+        await publishGit.deleteBranchAsync(tempBranchName, false, !this._ignoreGitHooksParameter.value);
       }
     }
   }
 
-  private _publishAll(git: PublishGit, allPackages: ReadonlyMap<string, RushConfigurationProject>): void {
+  private async _publishAllAsync(
+    git: PublishGit,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>
+  ): Promise<void> {
     // eslint-disable-next-line no-console
     console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
 
     let updated: boolean = false;
 
-    allPackages.forEach((packageConfig, packageName) => {
+    for (const [packageName, packageConfig] of allPackages) {
       if (
         packageConfig.shouldPublish &&
         (!this._versionPolicy.value || this._versionPolicy.value === packageConfig.versionPolicyName)
       ) {
-        const applyTag: (apply: boolean) => void = (apply: boolean): void => {
+        const applyTagAsync: (apply: boolean) => Promise<void> = async (apply: boolean): Promise<void> => {
           if (!apply) {
             return;
           }
@@ -372,7 +375,7 @@ export class PublishAction extends BaseRushAction {
           const packageVersion: string = packageConfig.packageJson.version;
 
           // Do not create a new tag if one already exists, this will result in a fatal error
-          if (git.hasTag(packageConfig)) {
+          if (await git.hasTagAsync(packageConfig)) {
             // eslint-disable-next-line no-console
             console.log(
               `Not tagging ${packageName}@${packageVersion}. A tag already exists for this version.`
@@ -380,7 +383,7 @@ export class PublishAction extends BaseRushAction {
             return;
           }
 
-          git.addTag(
+          await git.addTagAsync(
             !!this._publish.value,
             packageName,
             packageVersion,
@@ -392,32 +395,32 @@ export class PublishAction extends BaseRushAction {
 
         if (this._pack.value) {
           // packs to tarball instead of publishing to NPM repository
-          this._npmPack(packageName, packageConfig);
-          applyTag(this._applyGitTagsOnPack.value);
-        } else if (this._force.value || !this._packageExists(packageConfig)) {
+          await this._npmPackAsync(packageName, packageConfig);
+          await applyTagAsync(this._applyGitTagsOnPack.value);
+        } else if (this._force.value || !(await this._packageExistsAsync(packageConfig))) {
           // Publish to npm repository
-          this._npmPublish(packageName, packageConfig.publishFolder);
-          applyTag(true);
+          await this._npmPublishAsync(packageName, packageConfig.publishFolder);
+          await applyTagAsync(true);
         } else {
           // eslint-disable-next-line no-console
           console.log(`Skip ${packageName}. Not updated.`);
         }
       }
-    });
+    }
 
     if (updated) {
-      git.push(this._targetBranch.value!, !this._ignoreGitHooksParameter.value);
+      await git.pushAsync(this._targetBranch.value!, !this._ignoreGitHooksParameter.value);
     }
   }
 
-  private _gitAddTags(git: PublishGit, orderedChanges: IChangeInfo[]): void {
+  private async _gitAddTagsAsync(git: PublishGit, orderedChanges: IChangeInfo[]): Promise<void> {
     for (const change of orderedChanges) {
       if (
         change.changeType &&
         change.changeType > ChangeType.dependency &&
         this.rushConfiguration.projectsByName.get(change.packageName)!.shouldPublish
       ) {
-        git.addTag(
+        await git.addTagAsync(
           !!this._publish.value && !this._registryUrl.value,
           change.packageName,
           change.newVersion!,
@@ -428,7 +431,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _npmPublish(packageName: string, packagePath: string): void {
+  private async _npmPublishAsync(packageName: string, packagePath: string): Promise<void> {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
 
@@ -466,7 +469,7 @@ export class PublishAction extends BaseRushAction {
       // If the auth token was specified via the command line, avoid printing it on the console
       const secretSubstring: string | undefined = this._npmAuthToken.value;
 
-      PublishUtilities.execCommand(
+      await PublishUtilities.execCommandAsync(
         !!this._publish.value,
         packageManagerToolFilename,
         args,
@@ -477,12 +480,12 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _packageExists(packageConfig: RushConfigurationProject): boolean {
+  private async _packageExistsAsync(packageConfig: RushConfigurationProject): Promise<boolean> {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = [];
     this._addSharedNpmConfig(env, args);
 
-    const publishedVersions: string[] = Npm.publishedVersions(
+    const publishedVersions: string[] = await Npm.getPublishedVersionsAsync(
       packageConfig.packageName,
       packageConfig.publishFolder,
       env,
@@ -511,11 +514,11 @@ export class PublishAction extends BaseRushAction {
     return publishedVersions.indexOf(normalizedVersion) >= 0;
   }
 
-  private _npmPack(packageName: string, project: RushConfigurationProject): void {
+  private async _npmPackAsync(packageName: string, project: RushConfigurationProject): Promise<void> {
     const args: string[] = ['pack'];
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
 
-    PublishUtilities.execCommand(
+    await PublishUtilities.execCommandAsync(
       !!this._publish.value,
       this.rushConfiguration.packageManagerToolFilename,
       args,

@@ -13,5 +13,7 @@
     "!lib-commonjs/**/__tests__/**",
     "!lib-commonjs/**/__fixtures__/**",
     "!lib-commonjs/**/__mocks__/**"
-  ]
+  ],
+
+  "globalTeardown": "<rootDir>/lib-commonjs/utilities/test/global-teardown.js"
 }

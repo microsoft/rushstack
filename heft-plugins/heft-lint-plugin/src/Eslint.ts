@@ -20,7 +20,7 @@ interface IEslintTiming {
   time: (key: string, fn: (...args: unknown[]) => void) => (...args: unknown[]) => void;
 }
 
-const enum EslintMessageSeverity {
+enum EslintMessageSeverity {
   warning = 1,
   error = 2
 }

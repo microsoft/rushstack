@@ -10,7 +10,6 @@ import type {
 import { RushConstants } from '../RushConstants';
 import { NullOperationRunner } from './NullOperationRunner';
 import { Operation } from './Operation';
-import { normalizeNameForLogFilenameIdentifiers } from './OperationMetadataManager';
 import { OperationStatus } from './OperationStatus';
 import {
   formatCommand,
@@ -52,7 +51,12 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
     getCustomParameterValuesByPhase();
 
   for (const operation of existingOperations) {
-    const { associatedPhase: phase, associatedProject: project, settings: operationSettings } = operation;
+    const {
+      associatedPhase: phase,
+      associatedProject: project,
+      settings: operationSettings,
+      logFilenameIdentifier: baseLogFilenameIdentifier
+    } = operation;
     if (phase && project && operationSettings?.sharding && !operation.runner) {
       const { count: shards, shardOperationSettings } = operationSettings.sharding;
 
@@ -72,7 +76,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           name: `${getDisplayName(phase, project)} - pre-shard`,
           result: OperationStatus.NoOp,
           silent: true
-        })
+        }),
+        logFilenameIdentifier: `${baseLogFilenameIdentifier}_pre-shard`
       });
 
       existingOperations.add(preShardOperation);
@@ -101,7 +106,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       // Replace the phase name only to begin with.
       const outputDirectoryArgument: string = outputFolderArgumentFormat.replace(
         TemplateStringRegexes.PHASE_NAME,
-        normalizeNameForLogFilenameIdentifiers(phase.name)
+        baseLogFilenameIdentifier
       );
 
       const outputFolderWithTemplate: string = outputDirectoryArgument.substring(
@@ -129,6 +134,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         ? formatCommand(rawCommandToRun, collatorParameters)
         : undefined;
 
+      operation.logFilenameIdentifier = `${baseLogFilenameIdentifier}_collate`;
       operation.runner = initializeShellOperationRunner({
         phase,
         project,
@@ -172,7 +178,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
             ...shardOperationSettings,
             operationName: shardOperationName,
             outputFolderNames: [outputDirectory]
-          }
+          },
+          logFilenameIdentifier: `${baseLogFilenameIdentifier}_shard_${shard}`
         });
 
         const shardArgument: string = shardArgumentFormat

@@ -666,7 +666,7 @@ export class PackageJsonUpdater {
           commandArgs = ['view', packageName, 'versions', '--json'];
         }
 
-        const allVersions: string = Utilities.executeCommandAndCaptureOutput(
+        const allVersions: string = await Utilities.executeCommandAndCaptureOutputAsync(
           this._rushConfiguration.packageManagerToolFilename,
           commandArgs,
           this._rushConfiguration.commonTempFolder
@@ -727,10 +727,12 @@ export class PackageJsonUpdater {
           commandArgs = ['view', `${packageName}@latest`, 'version'];
         }
 
-        selectedVersion = Utilities.executeCommandAndCaptureOutput(
-          this._rushConfiguration.packageManagerToolFilename,
-          commandArgs,
-          this._rushConfiguration.commonTempFolder
+        selectedVersion = (
+          await Utilities.executeCommandAndCaptureOutputAsync(
+            this._rushConfiguration.packageManagerToolFilename,
+            commandArgs,
+            this._rushConfiguration.commonTempFolder
+          )
         ).trim();
       }
 

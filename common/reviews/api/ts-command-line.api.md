@@ -65,7 +65,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
 }
 
 // @public
-export const enum CommandLineConstants {
+export enum CommandLineConstants {
     TabCompletionActionName = "tab-complete"
 }
 

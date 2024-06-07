@@ -39,7 +39,7 @@ export interface IBaseBuildCacheJson {
    * - `[arch]`
    * @privateRemarks
    * NOTE: If you update this comment, make sure to update build-cache.json in the "rush init" template.
-   * The token parser is in CachEntryId.ts
+   * The token parser is in CacheEntryId.ts
    */
   cacheEntryNamePattern?: string;
 }

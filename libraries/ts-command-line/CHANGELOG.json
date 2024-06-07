@@ -2,6 +2,23 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.22.0",
+      "tag": "@rushstack/ts-command-line_v4.22.0",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Eliminate a const enum from the public API."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.21.5",
       "tag": "@rushstack/ts-command-line_v4.21.5",
       "date": "Wed, 29 May 2024 02:03:51 GMT",

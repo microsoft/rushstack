@@ -2,7 +2,10 @@
   "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
   "compilerOptions": {
     "strictPropertyInitialization": false,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    // Intentionally turn this off for this project to test a combination of `export` and `export type`
+    // with type-only exports
+    "isolatedModules": false
   },
   "include": ["src/**/*.ts", "typings/tsd.d.ts"]
 }

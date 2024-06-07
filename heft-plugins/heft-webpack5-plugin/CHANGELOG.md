@@ -1,6 +1,23 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Wed, 29 May 2024 02:03:50 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Jun 2024 15:10:25 GMT and should not be manually modified.
+
+## 0.10.0
+Fri, 07 Jun 2024 15:10:25 GMT
+
+### Minor changes
+
+- Add `onGetWatchOptions` accessor hook to allow cooperating plugins to, for example, configure a list of globs for the file watcher to ignore.
+
+## 0.9.55
+Mon, 03 Jun 2024 23:43:15 GMT
+
+_Version update only_
+
+## 0.9.54
+Thu, 30 May 2024 00:13:05 GMT
+
+_Version update only_
 
 ## 0.9.53
 Wed, 29 May 2024 02:03:50 GMT

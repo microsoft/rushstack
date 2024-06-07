@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
+import { AlreadyExistsBehavior, FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
 import { FlagFile } from '../../api/FlagFile';
 import { RushConstants } from '../../logic/RushConstants';
@@ -13,6 +12,7 @@ import { RushConstants } from '../../logic/RushConstants';
 export interface IParserTestInstance {
   parser: RushCommandLineParserType;
   spawnMock: jest.Mock;
+  repoPath: string;
 }
 
 /**
@@ -45,20 +45,8 @@ export function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
   return spawnMock;
 }
 
-export function getDirnameInLib(): string {
-  // Run these tests in the /lib folder because some of them require compiled output
-  const projectRootFolder: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
-  const projectRootRelativeDirnamePath: string = path.relative(projectRootFolder, __dirname);
-  const projectRootRelativeLibDirnamePath: string = projectRootRelativeDirnamePath.replace(
-    /^src/,
-    'lib-commonjs'
-  );
-  const dirnameInLIb: string = `${projectRootFolder}/${projectRootRelativeLibDirnamePath}`;
-  return dirnameInLIb;
-}
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const __dirnameInLib: string = getDirnameInLib();
+const PROJECT_ROOT: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
+export const TEST_REPO_FOLDER_PATH: string = `${PROJECT_ROOT}/temp/test/unit-test-repos`;
 
 /**
  * Helper to set up a test instance for RushCommandLineParser.
@@ -67,14 +55,21 @@ export async function getCommandLineParserInstanceAsync(
   repoName: string,
   taskName: string
 ): Promise<IParserTestInstance> {
-  // Run these tests in the /lib folder because some of them require compiled output
-  // Point to the test repo folder
-  const startPath: string = `${__dirnameInLib}/${repoName}`;
+  // Copy the test repo to a sandbox folder
+  const repoPath: string = `${TEST_REPO_FOLDER_PATH}/${repoName}-${performance.now()}`;
+
+  await FileSystem.copyFilesAsync({
+    sourcePath: `${__dirname}/${repoName}`,
+    destinationPath: repoPath,
+    alreadyExistsBehavior: AlreadyExistsBehavior.Error
+  });
 
   // The `build` task is hard-coded to be incremental. So delete the package-deps file folder in
   // the test repo to guarantee the test actually runs.
-  FileSystem.deleteFolder(`${startPath}/a/.rush/temp`);
-  FileSystem.deleteFolder(`${startPath}/b/.rush/temp`);
+  await Promise.all([
+    FileSystem.deleteFolderAsync(`${repoPath}/a/.rush/temp`),
+    FileSystem.deleteFolderAsync(`${repoPath}/b/.rush/temp`)
+  ]);
 
   const { RushCommandLineParser } = await import('../RushCommandLineParser');
 
@@ -82,7 +77,7 @@ export async function getCommandLineParserInstanceAsync(
   // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
   // repo will fail due to contention over the same lock which is kept until the test runner process
   // ends.
-  const parser: RushCommandLineParserType = new RushCommandLineParser({ cwd: startPath });
+  const parser: RushCommandLineParserType = new RushCommandLineParser({ cwd: repoPath });
 
   // Bulk tasks are hard-coded to expect install to have been completed. So, ensure the last-link.flag
   // file exists and is valid
@@ -98,6 +93,7 @@ export async function getCommandLineParserInstanceAsync(
 
   return {
     parser,
-    spawnMock
+    spawnMock,
+    repoPath
   };
 }

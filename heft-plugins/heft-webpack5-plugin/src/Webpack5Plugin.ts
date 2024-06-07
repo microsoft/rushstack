@@ -5,7 +5,7 @@ import type { AddressInfo } from 'net';
 
 import type * as TWebpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
-import { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook } from 'tapable';
+import { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 import { CertificateManager, type ICertificate } from '@rushstack/debug-certificate-manager';
 import { FileError, InternalError, LegacyAdapters } from '@rushstack/node-core-library';
@@ -356,7 +356,14 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       } else {
         // Create the watcher. Compilation will start immediately after invoking watch().
         taskSession.logger.terminal.writeLine('Starting Webpack watcher');
-        compiler.watch({}, (error?: Error | null) => {
+
+        const { onGetWatchOptions } = this.accessor.hooks;
+
+        const watchOptions: Parameters<TWebpack.Compiler['watch']>[0] = onGetWatchOptions.isUsed()
+          ? await onGetWatchOptions.promise({}, webpackConfiguration)
+          : {};
+
+        compiler.watch(watchOptions, (error?: Error | null) => {
           if (error) {
             taskSession.logger.emitError(error);
           }
@@ -485,6 +492,7 @@ export function _createAccessorHooks(): IWebpackPluginAccessorHooks {
     onLoadConfiguration: new AsyncSeriesBailHook(),
     onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
     onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
-    onEmitStats: new AsyncParallelHook(['webpackStats'])
+    onEmitStats: new AsyncParallelHook(['webpackStats']),
+    onGetWatchOptions: new AsyncSeriesWaterfallHook(['watchOptions', 'webpackConfiguration'])
   };
 }

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Update the `nodeSupportedVersionRange` in the `rush init` template to the LTS and current Node versions.",
+      "comment": "Remove an unnecessary condition in the logic for skipping operations when build cache is disabled.",
       "type": "none"
     }
   ],

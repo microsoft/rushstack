@@ -3,9 +3,9 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@rushstack/webpack4-localization-plugin"
+      "packageName": "@rushstack/rig-package"
     }
   ],
-  "packageName": "@rushstack/webpack4-localization-plugin",
+  "packageName": "@rushstack/rig-package",
   "email": "iclanton@users.noreply.github.com"
 }

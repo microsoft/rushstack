@@ -5,9 +5,9 @@ import { RushAmazonS3BuildCachePlugin } from './RushAmazonS3BuildCachePlugin';
 
 export { type IAmazonS3Credentials } from './AmazonS3Credentials';
 export { AmazonS3Client } from './AmazonS3Client';
-export { WebClient, IGetFetchOptions, IPutFetchOptions, WebClientResponse } from './WebClient';
+export { WebClient, type IGetFetchOptions, type IPutFetchOptions, type WebClientResponse } from './WebClient';
 export default RushAmazonS3BuildCachePlugin;
-export {
+export type {
   IAmazonS3BuildCacheProviderOptionsBase,
   IAmazonS3BuildCacheProviderOptionsAdvanced,
   IAmazonS3BuildCacheProviderOptionsSimple

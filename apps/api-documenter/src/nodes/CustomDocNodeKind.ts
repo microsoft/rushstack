@@ -12,7 +12,7 @@ import { DocTableRow } from './DocTableRow';
 /**
  * Identifies custom subclasses of {@link DocNode}.
  */
-export const enum CustomDocNodeKind {
+export enum CustomDocNodeKind {
   EmphasisSpan = 'EmphasisSpan',
   Heading = 'Heading',
   NoteBox = 'NoteBox',

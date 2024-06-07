@@ -5,6 +5,7 @@
 
   "compilerOptions": {
     "resolveJsonModule": true,
+    "isolatedModules": true,
 
     "outDir": "../../../../lib",
     "rootDir": "../../../../src",

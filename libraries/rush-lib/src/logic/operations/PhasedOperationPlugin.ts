@@ -75,13 +75,19 @@ function createOperations(
     let operation: Operation | undefined = operations.get(key);
 
     if (!operation) {
+      const {
+        dependencies: { self, upstream },
+        name,
+        logFilenameIdentifier
+      } = phase;
       const operationSettings: IOperationSettings | undefined = projectConfigurations
         .get(project)
-        ?.operationSettingsByOperationName.get(phase.name);
+        ?.operationSettingsByOperationName.get(name);
       operation = new Operation({
         project,
         phase,
-        settings: operationSettings
+        settings: operationSettings,
+        logFilenameIdentifier: logFilenameIdentifier
       });
 
       if (!phaseSelection.has(phase) || !projectSelection.has(project)) {
@@ -97,10 +103,6 @@ function createOperations(
 
       operations.set(key, operation);
       existingOperations.add(operation);
-
-      const {
-        dependencies: { self, upstream }
-      } = phase;
 
       for (const depPhase of self) {
         operation.addDependency(getOrCreateOperation(depPhase, project));

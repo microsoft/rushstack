@@ -12,7 +12,7 @@ import { OperationStatus } from './OperationStatus';
 import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { RushConstants } from '../RushConstants';
-import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { type IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
@@ -123,10 +123,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               );
             }
 
-            const cacheDisabledReason: string | undefined = projectConfiguration
-              ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, operation.isNoOp)
-              : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-                'or one provided by a rig, so it does not support caching.';
+            const cacheDisabledReason: string | undefined =
+              RushProjectConfiguration.getCacheDisabledReasonForProject({
+                projectConfiguration,
+                phaseName: phaseName,
+                isNoOp: operation.isNoOp,
+                trackedFileNames: fileHashes.keys()
+              });
 
             disjointSet?.add(operation);
 
@@ -227,17 +230,24 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         }
 
         const runBeforeExecute = async (): Promise<OperationStatus | undefined> => {
-          const buildCacheTerminal: ITerminal = this._getBuildCacheTerminal({
-            record,
-            buildCacheContext,
-            buildCacheEnabled: buildCacheConfiguration?.buildCacheEnabled,
-            rushProject: project,
-            logFilenameIdentifier: operationMetadataManager.logFilenameIdentifier,
-            quietMode: record.quietMode,
-            debugMode: record.debugMode
-          });
-          buildCacheContext.buildCacheTerminal = buildCacheTerminal;
+          if (
+            !buildCacheContext.buildCacheTerminal ||
+            buildCacheContext.buildCacheProjectLogWritable?.isOpen === false
+          ) {
+            // The ProjectLogWritable is does not exist or is closed, re-create one
+            // eslint-disable-next-line require-atomic-updates
+            buildCacheContext.buildCacheTerminal = await this._createBuildCacheTerminalAsync({
+              record,
+              buildCacheContext,
+              buildCacheEnabled: buildCacheConfiguration?.buildCacheEnabled,
+              rushProject: project,
+              logFilenameIdentifier: operationMetadataManager.logFilenameIdentifier,
+              quietMode: record.quietMode,
+              debugMode: record.debugMode
+            });
+          }
 
+          const buildCacheTerminal: ITerminal = buildCacheContext.buildCacheTerminal;
           const configHash: string = runner.getConfigHash() || '';
 
           let projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
@@ -719,43 +729,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     return buildCacheContext.cobuildLock;
   }
 
-  private _getBuildCacheTerminal({
-    record,
-    buildCacheContext,
-    buildCacheEnabled: buildCacheEnabled,
-    rushProject,
-    logFilenameIdentifier,
-    quietMode,
-    debugMode
-  }: {
-    record: OperationExecutionRecord;
-    buildCacheContext: IOperationBuildCacheContext;
-    buildCacheEnabled: boolean | undefined;
-    rushProject: RushConfigurationProject;
-    logFilenameIdentifier: string;
-    quietMode: boolean;
-    debugMode: boolean;
-  }): ITerminal {
-    if (
-      !buildCacheContext.buildCacheTerminal ||
-      buildCacheContext.buildCacheProjectLogWritable?.isOpen === false
-    ) {
-      // The ProjectLogWritable is does not exist or is closed, re-create one
-      buildCacheContext.buildCacheTerminal = this._createBuildCacheTerminal({
-        record,
-        buildCacheContext,
-        buildCacheEnabled,
-        rushProject,
-        logFilenameIdentifier,
-        quietMode,
-        debugMode
-      });
-    }
-
-    return buildCacheContext.buildCacheTerminal;
-  }
-
-  private _createBuildCacheTerminal({
+  private async _createBuildCacheTerminalAsync({
     record,
     buildCacheContext,
     buildCacheEnabled,
@@ -771,7 +745,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     logFilenameIdentifier: string;
     quietMode: boolean;
     debugMode: boolean;
-  }): ITerminal {
+  }): Promise<ITerminal> {
     const silent: boolean = record.runner.silent;
     if (silent) {
       const nullTerminalProvider: NullTerminalProvider = new NullTerminalProvider();
@@ -781,13 +755,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     let cacheConsoleWritable: TerminalWritable;
     // This creates the writer, only do this if necessary.
     const collatedWriter: CollatedWriter = record.collatedWriter;
-    const cacheProjectLogWritable: ProjectLogWritable | undefined = this._tryGetBuildCacheProjectLogWritable({
-      buildCacheContext,
-      buildCacheEnabled,
-      rushProject,
-      collatedTerminal: collatedWriter.terminal,
-      logFilenameIdentifier
-    });
+    const cacheProjectLogWritable: ProjectLogWritable | undefined =
+      await this._tryGetBuildCacheProjectLogWritableAsync({
+        buildCacheContext,
+        buildCacheEnabled,
+        rushProject,
+        collatedTerminal: collatedWriter.terminal,
+        logFilenameIdentifier
+      });
 
     if (quietMode) {
       const discardTransform: DiscardStdoutTransform = new DiscardStdoutTransform({
@@ -822,7 +797,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     return new Terminal(buildCacheTerminalProvider);
   }
 
-  private _tryGetBuildCacheProjectLogWritable({
+  private async _tryGetBuildCacheProjectLogWritableAsync({
     buildCacheEnabled,
     rushProject,
     buildCacheContext,
@@ -834,17 +809,17 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     buildCacheContext: IOperationBuildCacheContext;
     collatedTerminal: CollatedTerminal;
     logFilenameIdentifier: string;
-  }): ProjectLogWritable | undefined {
+  }): Promise<ProjectLogWritable | undefined> {
     // Only open the *.cache.log file(s) if the cache is enabled.
     if (!buildCacheEnabled) {
       return;
     }
 
-    buildCacheContext.buildCacheProjectLogWritable = new ProjectLogWritable(
-      rushProject,
-      collatedTerminal,
-      `${logFilenameIdentifier}.cache`
-    );
+    buildCacheContext.buildCacheProjectLogWritable = await ProjectLogWritable.initializeAsync({
+      project: rushProject,
+      terminal: collatedTerminal,
+      logFilenameIdentifier: `${logFilenameIdentifier}.cache`
+    });
     return buildCacheContext.buildCacheProjectLogWritable;
   }
 }
