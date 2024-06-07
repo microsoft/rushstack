@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.127.1",
+  "version": "5.128.0",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
