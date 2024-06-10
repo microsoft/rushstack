@@ -49,18 +49,18 @@ export class InitSubspaceAction extends BaseRushAction {
 
     const subspaceConfigPath: string = `${this.rushConfiguration.commonFolder}/config/subspaces/${newSubspaceName}`;
 
-    FileSystem.ensureFolder(subspaceConfigPath);
-    FileSystem.copyFiles({
+    await FileSystem.ensureFolderAsync(subspaceConfigPath);
+    await FileSystem.copyFilesAsync({
       sourcePath: SUBSPACE_TEMPLATE_FOLDER_PATH,
       destinationPath: subspaceConfigPath
     });
 
     // Add the subspace name to subspaces.json
-    const subspaceJson: ISubspacesConfigurationJson = JsonFile.load(
+    const subspaceJson: ISubspacesConfigurationJson = await JsonFile.loadAsync(
       subspacesConfiguration.subspaceJsonFilePath
     );
     subspaceJson.subspaceNames.push(newSubspaceName);
-    JsonFile.save(subspaceJson, subspacesConfiguration.subspaceJsonFilePath, {
+    await JsonFile.saveAsync(subspaceJson, subspacesConfiguration.subspaceJsonFilePath, {
       updateExistingFile: true
     });
 
