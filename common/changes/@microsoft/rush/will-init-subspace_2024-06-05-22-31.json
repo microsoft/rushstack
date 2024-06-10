@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Adds the new init-subspace command to initialize a new subspace",
+      "comment": "Add a new `init-subspace` command to initialize a new subspace.",
       "type": "none"
     }
   ],
