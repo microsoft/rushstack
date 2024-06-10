@@ -1,17 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-line';
 import { assetsFolderPath } from '../../utilities/PathConstants';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
-import type { ISubspacesConfigurationJson, SubspacesConfiguration } from '../../api/SubspacesConfiguration';
+import { ISubspacesConfigurationJson, SubspacesConfiguration } from '../../api/SubspacesConfiguration';
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
 const SUBSPACE_TEMPLATE_FOLDER_PATH: string = `${assetsFolderPath}/rush-init-subspace`;
 
 export class InitSubspaceAction extends BaseRushAction {
-  private readonly _subspaceName: CommandLineStringParameter;
+  private readonly _subspaceNameParameter: IRequiredCommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -22,7 +23,7 @@ export class InitSubspaceAction extends BaseRushAction {
       parser
     });
 
-    this._subspaceName = this.defineStringParameter({
+    this._subspaceNameParameter = this.defineStringParameter({
       parameterLongName: '--name',
       parameterShortName: '-n',
       argumentName: 'SUBSPACE_NAME',
@@ -32,6 +33,8 @@ export class InitSubspaceAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+
     if (!this.rushConfiguration.subspacesFeatureEnabled) {
       throw new Error('The subspaces feature must be enabled to create a new subspace.');
     }
@@ -40,16 +43,24 @@ export class InitSubspaceAction extends BaseRushAction {
       .subspacesConfiguration as SubspacesConfiguration;
     // Verify this subspace name does not already exist
     const existingSubspaceNames: ReadonlySet<string> = subspacesConfiguration.subspaceNames;
-    const newSubspaceName: string = this._subspaceName.value as string;
+    const newSubspaceName: string = this._subspaceNameParameter.value;
     if (existingSubspaceNames.has(newSubspaceName)) {
       throw new Error(
-        `The subspace name: ${this._subspaceName.value} already exists in the subspace.json file.`
+        `The subspace name: ${this._subspaceNameParameter.value} already exists in the subspace.json file.`
       );
+    }
+    if (
+      SubspacesConfiguration.explainIfInvalidSubspaceName(
+        newSubspaceName,
+        this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility
+      )
+    ) {
+      return;
     }
 
     const subspaceConfigPath: string = `${this.rushConfiguration.commonFolder}/config/subspaces/${newSubspaceName}`;
 
-    await FileSystem.ensureFolderAsync(subspaceConfigPath);
+    await FileSystem.ensureEmptyFolderAsync(subspaceConfigPath);
     await FileSystem.copyFilesAsync({
       sourcePath: SUBSPACE_TEMPLATE_FOLDER_PATH,
       destinationPath: subspaceConfigPath
@@ -65,7 +76,7 @@ export class InitSubspaceAction extends BaseRushAction {
     });
 
     // eslint-disable-next-line no-console
-    console.log(
+    terminal.writeLine(
       '\nSubspace successfully created. Please review the subspace configuration files before committing.'
     );
   }
