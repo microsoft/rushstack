@@ -5,11 +5,11 @@ import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-
 import { assetsFolderPath } from '../../utilities/PathConstants';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
-import { ISubspacesConfigurationJson, SubspacesConfiguration } from '../../api/SubspacesConfiguration';
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { type ISubspacesConfigurationJson, SubspacesConfiguration } from '../../api/SubspacesConfiguration';
+import { FileSystem, InternalError, JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
-
-const SUBSPACE_TEMPLATE_FOLDER_PATH: string = `${assetsFolderPath}/rush-init-subspace`;
+import path from 'path';
+import { TemplateUtilities } from '../../utilities/templateUtilities';
 
 export class InitSubspaceAction extends BaseRushAction {
   private readonly _subspaceNameParameter: IRequiredCommandLineStringParameter;
@@ -59,12 +59,31 @@ export class InitSubspaceAction extends BaseRushAction {
     }
 
     const subspaceConfigPath: string = `${this.rushConfiguration.commonFolder}/config/subspaces/${newSubspaceName}`;
+    const assetsSubfolder: string = `${assetsFolderPath}/rush-init`;
+    const templateFilePaths: string[] = [
+      '[dot]npmrc',
+      '.pnpmfile.cjs',
+      'common-versions.json',
+      'pnpm-config.json'
+    ];
 
     await FileSystem.ensureEmptyFolderAsync(subspaceConfigPath);
-    await FileSystem.copyFilesAsync({
-      sourcePath: SUBSPACE_TEMPLATE_FOLDER_PATH,
-      destinationPath: subspaceConfigPath
-    });
+    // await FileSystem.copyFilesAsync({
+    //   sourcePath: SUBSPACE_TEMPLATE_FOLDER_PATH,
+    //   destinationPath: subspaceConfigPath
+    // });
+    for (const templateFilePath of templateFilePaths) {
+      const sourcePath: string = `${assetsSubfolder}/common/config/rush/${templateFilePath}`;
+
+      if (!FileSystem.exists(sourcePath)) {
+        // If this happens, please report a Rush bug
+        throw new InternalError('Unable to find template input file: ' + sourcePath);
+      }
+
+      const destinationPath: string = path.join(subspaceConfigPath, templateFilePath).replace('[dot]', '.');
+
+      TemplateUtilities.copyTemplateFile(sourcePath, destinationPath, true);
+    }
 
     // Add the subspace name to subspaces.json
     const subspaceJson: ISubspacesConfigurationJson = await JsonFile.loadAsync(
