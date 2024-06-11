@@ -618,7 +618,7 @@ export class RushConfiguration {
 
     if (this.subspacesFeatureEnabled && rushConfigurationJson.ensureConsistentVersions !== undefined) {
       throw new Error(
-        'When using subspaces, the ensureConsistentVersions config is now defined in the common-versions.json file, ' +
+        `When using subspaces, the ensureConsistentVersions config is now defined in the ${RushConstants.commonVersionsFilename} file, ` +
           `you must remove the old setting "ensureConsistentVersions" from ${RushConstants.rushJsonFilename}`
       );
     } else if (
