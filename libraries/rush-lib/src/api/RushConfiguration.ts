@@ -616,22 +616,6 @@ export class RushConfiguration {
     this.subspacesConfiguration = SubspacesConfiguration.tryLoadFromDefaultLocation(this);
     this.subspacesFeatureEnabled = !!this.subspacesConfiguration?.subspacesEnabled;
 
-    if (this.subspacesFeatureEnabled && rushConfigurationJson.ensureConsistentVersions !== undefined) {
-      throw new Error(
-        `When using subspaces, the ensureConsistentVersions config is now defined in the ${RushConstants.commonVersionsFilename} file, ` +
-          `you must remove the old setting "ensureConsistentVersions" from ${RushConstants.rushJsonFilename}`
-      );
-    } else if (
-      !this.subspacesFeatureEnabled &&
-      rushConfigurationJson.ensureConsistentVersions === true &&
-      this.defaultSubspace.getCommonVersions().ensureConsistentVersions
-    ) {
-      throw new Error(
-        `When the ensureConsistentVersions config is defined in the ${RushConstants.rushJsonFilename} file, ` +
-          `it cannot also be defined in the ${RushConstants.commonVersionsFilename} file`
-      );
-    }
-
     this._subspacesByName = new Map();
 
     const experimentsConfigFile: string = path.join(
@@ -835,6 +819,22 @@ export class RushConfiguration {
     this._hasVariantsField = !!rushConfigurationJson.variants;
 
     this._pathTrees = new Map();
+
+    if (this.subspacesFeatureEnabled && rushConfigurationJson.ensureConsistentVersions !== undefined) {
+      throw new Error(
+        `When using subspaces, the ensureConsistentVersions config is now defined in the ${RushConstants.commonVersionsFilename} file, ` +
+          `you must remove the old setting "ensureConsistentVersions" from ${RushConstants.rushJsonFilename}`
+      );
+    } else if (
+      !this.subspacesFeatureEnabled &&
+      rushConfigurationJson.ensureConsistentVersions === true &&
+      this.defaultSubspace.getCommonVersions().ensureConsistentVersions
+    ) {
+      throw new Error(
+        `When the ensureConsistentVersions config is defined in the ${RushConstants.rushJsonFilename} file, ` +
+          `it cannot also be defined in the ${RushConstants.commonVersionsFilename} file`
+      );
+    }
   }
 
   private _initializeAndValidateLocalProjects(): void {
