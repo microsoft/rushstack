@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix check git email on install even user didn't set up allowedEmailRegExps",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
