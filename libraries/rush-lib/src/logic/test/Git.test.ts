@@ -227,9 +227,9 @@ describe(Git.name, () => {
   describe(Git.prototype.tryGetGitEmailAsync.name, () => {
     async function getMockGitEmail(hasGitPath: boolean, output: string | Error): Promise<string | undefined> {
       const gitInstance: Git = new Git({ rushJsonFolder: '/repo/root' } as RushConfiguration);
-      jest.spyOn(gitInstance, 'getGitPathOrThrow').mockImplementation(() => {
+      jest.spyOn(gitInstance, 'gitPath', 'get').mockImplementation(() => {
         if (hasGitPath) return '/git/bin/path';
-        else throw new Error('Git is not present');
+        else return undefined;
       });
 
       jest
@@ -244,16 +244,20 @@ describe(Git.name, () => {
       return await gitInstance.tryGetGitEmailAsync();
     }
 
-    it('Throw exception when cannot find git path', () => {
-      expect(() => getMockGitEmail(false, 'user@example.com')).toThrow('Git is not present');
+    it('Throw exception when cannot find git path', async () => {
+      await expect(getMockGitEmail(false, 'user@example.com')).rejects.toBeInstanceOf(Error);
     });
 
-    it('Returns result when git user.email has been found', () => {
-      expect(getMockGitEmail(true, 'user@example.com')).toEqual('user@example.com');
+    it('Returns result when git user.email has been found', async () => {
+      await expect(getMockGitEmail(true, 'user@example.com')).resolves.toEqual('user@example.com');
     });
 
-    it('Returns undefined when git user.email not configure', () => {
-      expect(getMockGitEmail(true, '')).toEqual(undefined);
+    it('Returns empty email when git user.email return empty string', async () => {
+      await expect(getMockGitEmail(true, '')).resolves.toEqual('');
+    });
+
+    it('Returns undefined when git user.email not configure', async () => {
+      await expect(getMockGitEmail(true, new Error('Email is missing'))).resolves.toEqual(undefined);
     });
   });
 });
