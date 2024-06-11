@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "When deploy new packages, the publish flow didn't detected error message correctly",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
