@@ -1,24 +1,138 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
+import { DependencySpecifier } from '../DependencySpecifier';
 
 describe(DependencySpecifier.name, () => {
-  it('correctly parses workspace protocol in package.json', () => {
-    const specifier = new DependencySpecifier('dep', 'workspace:*');
-    expect(specifier.versionSpecifier).toBe('*');
-    expect(specifier.aliasTarget).toBeUndefined();
-    expect(specifier.specifierType).toBe(DependencySpecifierType.Workspace);
+  it('parses a simple version', () => {
+    const specifier = new DependencySpecifier('dep', '1.2.3');
+    expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "dep",
+  "specifierType": "Version",
+  "versionSpecifier": "1.2.3",
+}
+`);
+  });
 
-    const specifier2 = new DependencySpecifier('dep', 'workspace:^1.0.0');
-    expect(specifier2.versionSpecifier).toBe('^1.0.0');
-    expect(specifier2.aliasTarget).toBeUndefined();
-    expect(specifier2.specifierType).toBe(DependencySpecifierType.Workspace);
+  it('parses a range version', () => {
+    const specifier = new DependencySpecifier('dep', '^1.2.3');
+    expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "dep",
+  "specifierType": "Range",
+  "versionSpecifier": "^1.2.3",
+}
+`);
+  });
 
-    const specifier3 = new DependencySpecifier('dep', 'workspace:alias-target@*');
-    expect(specifier3.versionSpecifier).toBe('alias-target@*');
-    expect(specifier3.aliasTarget?.packageName).toBe('alias-target');
-    expect(specifier3.aliasTarget?.versionSpecifier).toBe('*');
-    expect(specifier3.specifierType).toBe(DependencySpecifierType.Workspace);
+  it('parses an alias version', () => {
+    const specifier = new DependencySpecifier('dep', 'npm:alias-target@1.2.3');
+    expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": DependencySpecifier {
+    "aliasTarget": undefined,
+    "packageName": "alias-target",
+    "specifierType": "Version",
+    "versionSpecifier": "1.2.3",
+  },
+  "packageName": "dep",
+  "specifierType": "Alias",
+  "versionSpecifier": "npm:alias-target@1.2.3",
+}
+`);
+  });
+
+  it('parses a git version', () => {
+    const specifier = new DependencySpecifier('dep', 'git+https://github.com/user/foo');
+    expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "dep",
+  "specifierType": "Git",
+  "versionSpecifier": "git+https://github.com/user/foo",
+}
+`);
+  });
+
+  it('parses a file version', () => {
+    const specifier = new DependencySpecifier('dep', 'file:foo.tar.gz');
+    expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "dep",
+  "specifierType": "File",
+  "versionSpecifier": "file:foo.tar.gz",
+}
+`);
+  });
+
+  it('parses a directory version', () => {
+    const specifier = new DependencySpecifier('dep', 'file:../foo/bar/');
+    expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "dep",
+  "specifierType": "Directory",
+  "versionSpecifier": "file:../foo/bar/",
+}
+`);
+  });
+
+  it('parses a remote version', () => {
+    const specifier = new DependencySpecifier('dep', 'https://example.com/foo.tgz');
+    expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "dep",
+  "specifierType": "Remote",
+  "versionSpecifier": "https://example.com/foo.tgz",
+}
+`);
+  });
+
+  describe('Workspace protocol', () => {
+    it('correctly parses a "workspace:*" version', () => {
+      const specifier = new DependencySpecifier('dep', 'workspace:*');
+      expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "dep",
+  "specifierType": "Workspace",
+  "versionSpecifier": "*",
+}
+`);
+    });
+
+    it('correctly parses a "workspace:^1.0.0" version', () => {
+      const specifier = new DependencySpecifier('dep', 'workspace:^1.0.0');
+      expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "dep",
+  "specifierType": "Workspace",
+  "versionSpecifier": "^1.0.0",
+}
+`);
+    });
+
+    it('correctly parses a "workspace:alias@1.2.3" version', () => {
+      const specifier = new DependencySpecifier('dep', 'workspace:alias-target@*');
+      expect(specifier).toMatchInlineSnapshot(`
+DependencySpecifier {
+  "aliasTarget": DependencySpecifier {
+    "aliasTarget": undefined,
+    "packageName": "alias-target",
+    "specifierType": "Range",
+    "versionSpecifier": "*",
+  },
+  "packageName": "dep",
+  "specifierType": "Workspace",
+  "versionSpecifier": "alias-target@*",
+}
+`);
+    });
   });
 });
