@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix missing selection when declaring dependency using `workspace:alias@1.2.3`",
+      "comment": "Fix an issue where selection syntax (like `--to` or `--from`) misses project dependencies declared using workspace alias syntax (i.e. - `workspace:alias@1.2.3`).",
       "type": "none"
     }
   ],
