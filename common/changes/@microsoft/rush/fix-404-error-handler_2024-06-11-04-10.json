@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where not published packages are not correctly identified as not published when querying a package feed under certain versions of NPM.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
