@@ -7,7 +7,7 @@ import { Colorize } from '@rushstack/terminal';
 import { lintCommand } from './commands/lint';
 
 yargs
-  .scriptName('lockfile-explorer')
+  .scriptName('lockfile-lint')
   .command(lintCommand)
   // --debug
   .boolean('debug')

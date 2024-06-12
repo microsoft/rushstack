@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CLI Tool Tests should display help information with --help 1`] = `
+exports[`CLI Tool Tests should display help for "lockfile-explorer --help" 1`] = `
 "lockfile-explorer
 
 Start the application
@@ -14,8 +14,8 @@ Options:
 "
 `;
 
-exports[`CLI Tool Tests should display help information with --help 2`] = `
-"lockfile-explorer
+exports[`CLI Tool Tests should display help for "lockfile-lint --help" 1`] = `
+"lockfile-lint
 
 Check if the specified package has a inconsistent package versions in target
 project
