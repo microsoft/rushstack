@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "didUserSelectAnything() should also take the _fromProject property into account.\"",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
