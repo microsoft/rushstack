@@ -279,6 +279,12 @@ export class RushConfiguration {
   public readonly commonRushConfigFolder: string;
 
   /**
+   *  The folder where lockfile-explorer config files are stored.
+   * Example: `C:\MyRepo\common\config\lockfile-explorer`
+   */
+  public readonly commonLockfileExplorerConfigFolder: string;
+
+  /**
    * The folder where temporary files will be stored.  This is always a subfolder called "temp"
    * under the common folder.
    * Example: `C:\MyRepo\common\temp`
@@ -591,6 +597,8 @@ export class RushConfiguration {
     this.commonFolder = path.resolve(path.join(this.rushJsonFolder, RushConstants.commonFolderName));
 
     this.commonRushConfigFolder = path.join(this.commonFolder, 'config', 'rush');
+
+    this.commonLockfileExplorerConfigFolder = path.join(this.commonFolder, 'config', 'lockfile-explorer');
 
     this.commonTempFolder =
       EnvironmentConfiguration.rushTempFolderOverride ||

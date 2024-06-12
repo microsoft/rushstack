@@ -1154,6 +1154,7 @@ export class RushConfiguration {
     readonly changesFolder: string;
     get commonAutoinstallersFolder(): string;
     readonly commonFolder: string;
+    readonly commonLockfileExplorerConfigFolder: string;
     readonly commonRushConfigFolder: string;
     readonly commonScriptsFolder: string;
     readonly commonTempFolder: string;
