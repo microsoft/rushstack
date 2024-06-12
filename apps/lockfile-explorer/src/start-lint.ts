@@ -5,10 +5,12 @@ import yargs from 'yargs';
 import { Colorize } from '@rushstack/terminal';
 
 import { lintCommand } from './commands/lint';
+import { initCommand } from './commands/init';
 
 yargs
   .scriptName('lockfile-lint')
   .command(lintCommand)
+  .command(initCommand)
   // --debug
   .boolean('debug')
   .alias('help', 'h')
