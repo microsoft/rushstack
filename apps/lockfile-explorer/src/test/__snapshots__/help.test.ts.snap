@@ -20,6 +20,11 @@ exports[`CLI Tool Tests should display help for "lockfile-lint --help" 1`] = `
 Check if the specified package has a inconsistent package versions in target
 project
 
+Commands:
+  lockfile-lint       Check if the specified package has a inconsistent package
+                      versions in target project                       [default]
+  lockfile-lint init  Create lockfile-lint.json config file
+
 Options:
   -h, --help     Show help                                             [boolean]
       --version  Show version number                                   [boolean]
