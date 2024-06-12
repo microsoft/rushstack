@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where running `rush install` in a subspace with only a `--from` selector is treated as selecting all projects.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
