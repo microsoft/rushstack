@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/lockfile-explorer",
-      "comment": "Add version validation capability",
+      "comment": "Add new \"lockfile-lint\" command",
       "type": "minor"
     }
   ],
