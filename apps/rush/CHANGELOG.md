@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 07 Jun 2024 22:59:12 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Jun 2024 20:07:44 GMT and should not be manually modified.
+
+## 5.128.1
+Wed, 12 Jun 2024 20:07:44 GMT
+
+### Updates
+
+- Fix an issue where running `rush install` in a subspace with only a `--from` selector is treated as selecting all projects.
+- Fix an issue where not published packages are not correctly identified as not published when querying a package feed under certain versions of NPM.
+- Fix an issue where selection syntax (like `--to` or `--from`) misses project dependencies declared using workspace alias syntax (i.e. - `workspace:alias@1.2.3`).
+- Fix an issue where an error is thrown if a Git email address isn't configured and email validation isn't configured in `rush.json` via `allowedEmailRegExps`.
+- Display the name of the subspace when an error is emitted because a dependency hash uses the SHA1 algorithm and the "disallowInsecureSha1" option is enabled.
 
 ## 5.128.0
 Fri, 07 Jun 2024 22:59:12 GMT
