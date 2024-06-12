@@ -18,7 +18,9 @@ import { Operation } from '../Operation';
 const mockWritable: MockWritable = new MockWritable();
 const mockTerminal: Terminal = new Terminal(new CollatedTerminalProvider(new CollatedTerminal(mockWritable)));
 
-const operation = new Operation();
+const operation = new Operation({
+  logFilenameIdentifier: 'identifier'
+});
 
 const manager: OperationMetadataManager = new OperationMetadataManager({
   rushProject: {

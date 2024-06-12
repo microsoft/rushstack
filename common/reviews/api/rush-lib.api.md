@@ -297,7 +297,7 @@ export class EventHooks {
 // @public
 export class ExperimentsConfiguration {
     // @internal
-    constructor(jsonFileName: string);
+    constructor(jsonFilePath: string);
     // @beta
     readonly configuration: Readonly<IExperimentsJson>;
 }
@@ -473,7 +473,6 @@ export interface IExperimentsJson {
     generateProjectImpactGraphDuringRushUpdate?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
-    phasedCommands?: boolean;
     printEventHooksOutputToConsole?: boolean;
     useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
@@ -585,6 +584,7 @@ export interface _IOperationMetadataManagerOptions {
 
 // @alpha
 export interface IOperationOptions {
+    logFilenameIdentifier: string;
     phase?: IPhase | undefined;
     project?: RushConfigurationProject | undefined;
     runner?: IOperationRunner | undefined;
@@ -912,7 +912,7 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
 
 // @alpha
 export class Operation {
-    constructor(options?: IOperationOptions);
+    constructor(options: IOperationOptions);
     addDependency(dependency: Operation): void;
     readonly associatedPhase: IPhase | undefined;
     readonly associatedProject: RushConfigurationProject | undefined;
@@ -920,6 +920,7 @@ export class Operation {
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
     get isNoOp(): boolean;
+    logFilenameIdentifier: string;
     get name(): string | undefined;
     runner: IOperationRunner | undefined;
     settings: IOperationSettings | undefined;

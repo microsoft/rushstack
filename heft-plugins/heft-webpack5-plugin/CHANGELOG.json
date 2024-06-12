@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.10.0",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.10.0",
+      "date": "Fri, 07 Jun 2024 15:10:25 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `onGetWatchOptions` accessor hook to allow cooperating plugins to, for example, configure a list of globs for the file watcher to ignore."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.55",
       "tag": "@rushstack/heft-webpack5-plugin_v0.9.55",
       "date": "Mon, 03 Jun 2024 23:43:15 GMT",

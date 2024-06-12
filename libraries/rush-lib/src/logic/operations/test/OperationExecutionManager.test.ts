@@ -50,7 +50,8 @@ function createExecutionManager(
   operationRunner: IOperationRunner
 ): OperationExecutionManager {
   const operation: Operation = new Operation({
-    runner: operationRunner
+    runner: operationRunner,
+    logFilenameIdentifier: 'operation'
   });
 
   return new OperationExecutionManager(new Set([operation]), executionManagerOptions);
@@ -127,13 +128,15 @@ describe(OperationExecutionManager.name, () => {
       const failingOperation = new Operation({
         runner: new MockOperationRunner('fail', async () => {
           return OperationStatus.Failure;
-        })
+        }),
+        logFilenameIdentifier: 'fail'
       });
 
       const blockedRunFn: jest.Mock = jest.fn();
 
       const blockedOperation = new Operation({
-        runner: new MockOperationRunner('blocked', blockedRunFn)
+        runner: new MockOperationRunner('blocked', blockedRunFn),
+        logFilenameIdentifier: 'blocked'
       });
 
       blockedOperation.addDependency(failingOperation);

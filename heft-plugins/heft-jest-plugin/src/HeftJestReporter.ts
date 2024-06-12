@@ -59,7 +59,15 @@ export default class HeftJestReporter implements Reporter {
     aggregatedResult: AggregatedResult
   ): Promise<void> {
     this._writeConsoleOutput(testResult);
-    const { numPassingTests, numFailingTests, failureMessage, testExecError, perfStats } = testResult;
+    const {
+      numPassingTests,
+      numFailingTests,
+      failureMessage,
+      testExecError,
+      perfStats,
+      memoryUsage,
+      snapshot: { updated: updatedSnapshots, added: addedSnapshots, unchecked: uncheckedSnapshots }
+    } = testResult;
 
     // Calculate the suite duration time from the test result. This is necessary because Jest doesn't
     // provide the duration on the 'test' object (at least not as of Jest 25), and other reporters
@@ -68,9 +76,7 @@ export default class HeftJestReporter implements Reporter {
     const duration: string = perfStats ? `${((perfStats.end - perfStats.start) / 1000).toFixed(3)}s` : '?';
 
     // calculate memoryUsage to MB reference -> https://jestjs.io/docs/cli#--logheapusage
-    const memUsage: string = testResult.memoryUsage
-      ? `, ${Math.floor(testResult.memoryUsage / 1000000)}MB heap size`
-      : '';
+    const memUsage: string = memoryUsage ? `, ${Math.floor(memoryUsage / 1000000)}MB heap size` : '';
 
     const message: string =
       ` ${this._getTestPath(test.path)} ` +
@@ -91,15 +97,21 @@ export default class HeftJestReporter implements Reporter {
       this._terminal.writeErrorLine(failureMessage);
     }
 
-    if (testResult.snapshot.updated) {
+    if (updatedSnapshots) {
       this._terminal.writeErrorLine(
-        `Updated ${this._formatWithPlural(testResult.snapshot.updated, 'snapshot', 'snapshots')}`
+        `Updated ${this._formatWithPlural(updatedSnapshots, 'snapshot', 'snapshots')}`
       );
     }
 
-    if (testResult.snapshot.added) {
+    if (addedSnapshots) {
       this._terminal.writeErrorLine(
-        `Added ${this._formatWithPlural(testResult.snapshot.added, 'snapshot', 'snapshots')}`
+        `Added ${this._formatWithPlural(addedSnapshots, 'snapshot', 'snapshots')}`
+      );
+    }
+
+    if (uncheckedSnapshots) {
+      this._terminal.writeWarningLine(
+        `${this._formatWithPlural(uncheckedSnapshots, 'snapshot was', 'snapshots were')} not checked`
       );
     }
   }
@@ -191,7 +203,13 @@ export default class HeftJestReporter implements Reporter {
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   public async onRunComplete(contexts: Set<TestContext>, results: AggregatedResult): Promise<void> {
-    const { numPassedTests, numFailedTests, numTotalTests, numRuntimeErrorTestSuites } = results;
+    const {
+      numPassedTests,
+      numFailedTests,
+      numTotalTests,
+      numRuntimeErrorTestSuites,
+      snapshot: { uncheckedKeysByFile: uncheckedSnapshotsByFile }
+    } = results;
 
     this._terminal.writeLine();
     this._terminal.writeLine('Tests finished:');
@@ -204,6 +222,12 @@ export default class HeftJestReporter implements Reporter {
 
     if (numRuntimeErrorTestSuites) {
       this._terminal.writeLine(Colorize.red(`  Failed test suites: ${numRuntimeErrorTestSuites}`));
+    }
+
+    if (uncheckedSnapshotsByFile.length > 0) {
+      this._terminal.writeWarningLine(
+        `  Test suites with unchecked snapshots: ${uncheckedSnapshotsByFile.length}`
+      );
     }
 
     this._terminal.writeLine(`  Total: ${numTotalTests}`);
