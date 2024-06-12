@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix check git email on install even user didn't set up allowedEmailRegExps",
+      "comment": "Fix an issue where an error is thrown if a Git email address isn't configured and email validation isn't configured in `rush.json` via `allowedEmailRegExps`.",
       "type": "none"
     }
   ],
