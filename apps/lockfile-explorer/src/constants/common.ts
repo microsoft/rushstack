@@ -2,5 +2,5 @@
 // See LICENSE in the project root for license information.
 
 export const enum LockfileExplorerConfig {
-  FileName = 'lockfile-explorer.json'
+  FileName = 'lockfile-lint.json'
 }

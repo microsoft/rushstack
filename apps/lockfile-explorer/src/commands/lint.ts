@@ -7,11 +7,12 @@ import yaml from 'js-yaml';
 import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
 import type { RushConfigurationProject } from '@microsoft/rush-lib/lib/api/RushConfigurationProject';
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import type { CommandModule } from 'yargs';
 import { Colorize } from '@rushstack/terminal';
 import semver from 'semver';
 
+import lockfileLintSchema from '../schemas/lockfile-lint.schema.json';
 import { getShrinkwrapFileMajorVersion, parseDependencyPath } from '../utils/shrinkwrap';
 import { LockfileExplorerConfig } from '../constants/common';
 
@@ -36,7 +37,7 @@ async function checkVersionCompatibility(
     checkedDependencyPaths.add(dependencyPath);
     const { name, version } = parseDependencyPath(shrinkwrapFileMajorVersion, dependencyPath);
     if (name in requiredVersions && !semver.satisfies(version, requiredVersions[name])) {
-      throw new Error(`Detected inconsistent version numbers: ${version}!`);
+      throw new Error(`ERROR: Detected inconsistent version numbers in package '${name}': '${version}'!`);
     }
 
     for (const [dependencyPackageName, dependencyPackageVersion] of Object.entries(
@@ -111,7 +112,7 @@ async function searchAndValidateDependencies(
   }
 }
 
-async function performVersionRestriction(
+async function performVersionRestrictionCheck(
   rushConfiguration: RushConfiguration,
   requiredVersions: Record<string, string>,
   projectName: string
@@ -142,11 +143,14 @@ export const lintCommand: CommandModule = {
         rushConfiguration.commonLockfileExplorerConfigFolder,
         LockfileExplorerConfig.FileName
       );
-      const { rules }: ILockfileLint = JsonFile.load(lintingFile);
+      const { rules }: ILockfileLint = JsonFile.loadAndValidate(
+        lintingFile,
+        JsonSchema.fromLoadedObject(lockfileLintSchema)
+      );
       for (const { requiredVersions, project, rule } of rules) {
         switch (rule) {
           case 'restrict-versions': {
-            await performVersionRestriction(rushConfiguration, requiredVersions, project);
+            await performVersionRestrictionCheck(rushConfiguration, requiredVersions, project);
             break;
           }
           default: {
