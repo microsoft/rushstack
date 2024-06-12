@@ -5,12 +5,12 @@ import { execSync } from 'child_process';
 
 describe('CLI Tool Tests', () => {
   it('should display help for "lockfile-explorer --help"', () => {
-    const startOutput = execSync('node lib/start.js --help').toString();
+    const startOutput = execSync('node lib/start-explorer.js --help').toString();
     expect(startOutput).toMatchSnapshot();
   });
 
   it('should display help for "lockfile-lint --help"', () => {
-    const lintOutput = execSync('node lib/lint.js --help').toString();
+    const lintOutput = execSync('node lib/start-lint.js --help').toString();
     expect(lintOutput).toMatchSnapshot();
   });
 });
