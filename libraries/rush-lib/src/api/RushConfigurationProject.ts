@@ -412,9 +412,8 @@ export class RushConfigurationProject {
         if (dependencySet) {
           for (const [dependency, version] of Object.entries(dependencySet)) {
             const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
-            const dependencyName: string = dependencySpecifier.aliasTarget
-              ? dependencySpecifier.aliasTarget.packageName
-              : dependencySpecifier.packageName;
+            const dependencyName: string =
+              dependencySpecifier.aliasTarget?.packageName ?? dependencySpecifier.packageName;
             // Skip if we can't find the local project or it's a cyclic dependency
             const localProject: RushConfigurationProject | undefined =
               this.rushConfiguration.getProjectByName(dependencyName);
