@@ -13,41 +13,30 @@ import { Colorize } from '@rushstack/terminal';
 import semver from 'semver';
 
 import { getShrinkwrapFileMajorVersion, parseDependencyPath } from '../utils/shrinkwrap';
+import { LockfileExplorerConfig } from '../constants/common';
 
 export interface ILintRule {
-  rule: 'side-by-side';
+  rule: 'restrict-versions';
   project: string;
-  dependency: string;
-  // If the user does not specify a version, by default only the consistency of the package versions is checked.
-  specifiedVersion?: string;
+  requiredVersions: Record<string, string>;
 }
 
 export interface ILockfileLint {
   rules: ILintRule[];
 }
 
-export interface ICheckCommandOptions {
-  packageSpecifier: string;
-  project?: string;
-}
-
 async function checkVersionCompatibility(
   shrinkwrapFileMajorVersion: number,
   packages: Lockfile['packages'],
   dependencyPath: string,
-  dependency: string,
-  versionRange: { current: string | undefined },
+  requiredVersions: Record<string, string>,
   checkedDependencyPaths: Set<string>
 ): Promise<void> {
   if (packages && packages[dependencyPath] && !checkedDependencyPaths.has(dependencyPath)) {
     checkedDependencyPaths.add(dependencyPath);
     const { name, version } = parseDependencyPath(shrinkwrapFileMajorVersion, dependencyPath);
-    if (!versionRange.current) {
-      versionRange.current = version;
-    } else {
-      if (name === dependency && !semver.satisfies(version, versionRange.current)) {
-        throw new Error(`Detected inconsistent version numbers: ${version}!`);
-      }
+    if (name in requiredVersions && !semver.satisfies(version, requiredVersions[name])) {
+      throw new Error(`Detected inconsistent version numbers: ${version}!`);
     }
 
     for (const [dependencyPackageName, dependencyPackageVersion] of Object.entries(
@@ -57,8 +46,7 @@ async function checkVersionCompatibility(
         shrinkwrapFileMajorVersion,
         packages,
         `/${dependencyPackageName}${shrinkwrapFileMajorVersion === 6 ? '@' : '/'}${dependencyPackageVersion}`,
-        dependency,
-        versionRange,
+        requiredVersions,
         checkedDependencyPaths
       );
     }
@@ -69,8 +57,7 @@ async function searchAndValidateDependencies(
   rushConfiguration: RushConfiguration,
   checkedProjects: Set<RushConfigurationProject>,
   project: RushConfigurationProject,
-  dependency: string,
-  versionRange: { current: string | undefined }
+  requiredVersions: Record<string, string>
 ): Promise<void> {
   console.log(`Checking the project: ${project.packageName}.`);
 
@@ -106,8 +93,7 @@ async function searchAndValidateDependencies(
                 rushConfiguration,
                 checkedProjects,
                 dependencyProject,
-                dependency,
-                versionRange
+                requiredVersions
               );
             }
           } else {
@@ -115,8 +101,7 @@ async function searchAndValidateDependencies(
               shrinkwrapFileMajorVersion,
               packages,
               fullDependencyPath,
-              dependency,
-              versionRange,
+              requiredVersions,
               checkedDependencyPaths
             );
           }
@@ -126,10 +111,9 @@ async function searchAndValidateDependencies(
   }
 }
 
-async function performSideBySideCheck(
+async function performVersionRestriction(
   rushConfiguration: RushConfiguration,
-  dependency: string,
-  versionRange: { current: string | undefined },
+  requiredVersions: Record<string, string>,
   projectName: string
 ): Promise<void> {
   const project: RushConfigurationProject | undefined = rushConfiguration?.getProjectByName(projectName);
@@ -137,12 +121,12 @@ async function performSideBySideCheck(
     throw new Error(`Cannot found project name: ${projectName}`);
   }
   const checkedProjects: Set<RushConfigurationProject> = new Set<RushConfigurationProject>([project]);
-  await searchAndValidateDependencies(rushConfiguration, checkedProjects, project, dependency, versionRange);
+  await searchAndValidateDependencies(rushConfiguration, checkedProjects, project, requiredVersions);
 }
 
 // Example usage: lflint
 // Example usage: lockfile-lint
-export const lintCommand: CommandModule<{}, ICheckCommandOptions> = {
+export const lintCommand: CommandModule = {
   command: '$0',
   describe: 'Check if the specified package has a inconsistent package versions in target project',
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -154,17 +138,15 @@ export const lintCommand: CommandModule<{}, ICheckCommandOptions> = {
           'The "lockfile-explorer check" must be executed in a folder that is under a Rush workspace folder'
         );
       }
-      const lintingFile: string = `${rushConfiguration.rushJsonFolder}/lockfile-lint.json`;
+      const lintingFile: string = path.resolve(
+        rushConfiguration.commonLockfileExplorerConfigFolder,
+        LockfileExplorerConfig.FileName
+      );
       const { rules }: ILockfileLint = JsonFile.load(lintingFile);
-      for (const { specifiedVersion, dependency, project, rule } of rules) {
+      for (const { requiredVersions, project, rule } of rules) {
         switch (rule) {
-          case 'side-by-side': {
-            await performSideBySideCheck(
-              rushConfiguration,
-              dependency,
-              { current: specifiedVersion },
-              project
-            );
+          case 'restrict-versions': {
+            await performVersionRestriction(rushConfiguration, requiredVersions, project);
             break;
           }
           default: {

@@ -6,12 +6,13 @@ import { FileSystem } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 import type { CommandModule } from 'yargs';
 import * as path from 'path';
+import { LockfileExplorerConfig } from '../constants/common';
 
 // Example usage: lflint init
 // Example usage: lockfile-lint init
-export const initCommand: CommandModule<{}, {}> = {
+export const initCommand: CommandModule = {
   command: 'init',
-  describe: 'Check if the specified package has a inconsistent package versions in target project',
+  describe: `Create ${LockfileExplorerConfig.FileName} config file`,
   handler: () => {
     try {
       const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
@@ -23,7 +24,7 @@ export const initCommand: CommandModule<{}, {}> = {
       const inputFilePath: string = path.resolve(__dirname, '../schemas/lockfile-lint-template.json');
       const outputFilePath: string = path.resolve(
         rushConfiguration.commonLockfileExplorerConfigFolder,
-        'lockfile-lint.json'
+        LockfileExplorerConfig.FileName
       );
 
       if (FileSystem.exists(outputFilePath)) {
