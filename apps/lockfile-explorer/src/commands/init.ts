@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConfiguration } from '@microsoft/rush-lib';
+import { RushConfiguration } from '@rushstack/rush-sdk';
 import { FileSystem } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 import type { CommandModule } from 'yargs';

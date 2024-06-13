@@ -6,7 +6,7 @@ import path from 'path';
 import yaml from 'js-yaml';
 import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
-import type { RushConfigurationProject } from '@microsoft/rush-lib/lib/api/RushConfigurationProject';
+import type { RushConfigurationProject } from '@rushstack/rush-sdk';
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import type { CommandModule } from 'yargs';
 import { Colorize } from '@rushstack/terminal';
