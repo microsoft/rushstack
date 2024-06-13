@@ -112,7 +112,7 @@ async function searchAndValidateDependencies(
   }
 }
 
-async function performVersionRestrictionCheck(
+async function performVersionRestrictionCheckAsync(
   rushConfiguration: RushConfiguration,
   requiredVersions: Record<string, string>,
   projectName: string
