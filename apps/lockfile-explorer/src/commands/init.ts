@@ -6,6 +6,7 @@ import { FileSystem } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 import type { CommandModule } from 'yargs';
 import * as path from 'path';
+
 import { LOCKFILE_LINT_JSON_FILENAME } from '../constants/common';
 
 // Example usage: lflint init
@@ -22,7 +23,10 @@ export const initCommand: CommandModule = {
           'The "lockfile-explorer check" must be executed in a folder that is under a Rush workspace folder'
         );
       }
-      const inputFilePath: string = path.resolve(__dirname, '../schemas/lockfile-lint-template.json');
+      const inputFilePath: string = path.resolve(
+        __dirname,
+        '../assets/lint-init/lockfile-lint-template.json'
+      );
       const outputFilePath: string = path.resolve(
         rushConfiguration.commonLockfileExplorerConfigFolder,
         LOCKFILE_LINT_JSON_FILENAME
