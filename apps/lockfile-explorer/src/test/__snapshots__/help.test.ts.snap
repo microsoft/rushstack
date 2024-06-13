@@ -22,7 +22,8 @@ Optional arguments:
 `;
 
 exports[`CLI Tool Tests should display help for "lockfile-lint --help" 1`] = `
-"usage: lockfile-lint [-h] <command> ...
+"[33mThe experiment \\"phasedCommands\\" has graduated to a standard feature. Remove this experiment from \\"/workspaces/rushstack/common/config/rush/experiments.json\\".[39m
+usage: lockfile-lint [-h] <command> ...
 
 lockfile-lint is a tool for linting lockfiles.
 

@@ -7,7 +7,7 @@ import { RushConfiguration, type RushConfigurationProject, type Subspace } from 
 import path from 'path';
 import yaml from 'js-yaml';
 import semver from 'semver';
-import { Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { AlreadyReportedError, Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import lockfileLintSchema from '../../../schemas/lockfile-lint.schema.json';
 import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../../../constants/common';
@@ -31,6 +31,10 @@ export interface ILockfileLint {
 
 export class LintAction extends CommandLineAction {
   private readonly _terminal: ITerminal;
+  private readonly _rushConfiguration: RushConfiguration;
+
+  private _checkedProjects: Set<RushConfigurationProject>;
+  private _docMap: Map<string, Lockfile | LockfileV6>;
 
   public constructor(parser: LintCommandLineParser) {
     super({
@@ -38,7 +42,17 @@ export class LintAction extends CommandLineAction {
       summary: 'Check if the specified package has a inconsistent package versions in target project',
       documentation: 'Check if the specified package has a inconsistent package versions in target project'
     });
+
+    const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
+    if (!rushConfiguration) {
+      throw new Error(
+        'The "lockfile-explorer check" must be executed in a folder that is under a Rush workspace folder'
+      );
+    }
+    this._rushConfiguration = rushConfiguration;
     this._terminal = parser.globalTerminal;
+    this._checkedProjects = new Set();
+    this._docMap = new Map();
   }
 
   private async _checkVersionCompatibilityAsync(
@@ -55,27 +69,27 @@ export class LintAction extends CommandLineAction {
         throw new Error(`ERROR: Detected inconsistent version numbers in package '${name}': '${version}'!`);
       }
 
-      for (const [dependencyPackageName, dependencyPackageVersion] of Object.entries(
-        packages[dependencyPath].dependencies ?? {}
-      )) {
-        await this._checkVersionCompatibilityAsync(
-          shrinkwrapFileMajorVersion,
-          packages,
-          splicePackageWithVersion(
-            shrinkwrapFileMajorVersion,
-            dependencyPackageName,
-            dependencyPackageVersion
-          ),
-          requiredVersions,
-          checkedDependencyPaths
-        );
-      }
+      await Promise.all(
+        Object.entries(packages[dependencyPath].dependencies ?? {}).map(
+          async ([dependencyPackageName, dependencyPackageVersion]) => {
+            await this._checkVersionCompatibilityAsync(
+              shrinkwrapFileMajorVersion,
+              packages,
+              splicePackageWithVersion(
+                shrinkwrapFileMajorVersion,
+                dependencyPackageName,
+                dependencyPackageVersion
+              ),
+              requiredVersions,
+              checkedDependencyPaths
+            );
+          }
+        )
+      );
     }
   }
 
   private async _searchAndValidateDependenciesAsync(
-    rushConfiguration: RushConfiguration,
-    checkedProjects: Set<RushConfigurationProject>,
     project: RushConfigurationProject,
     requiredVersions: Record<string, string>
   ): Promise<void> {
@@ -84,78 +98,79 @@ export class LintAction extends CommandLineAction {
     const projectFolder: string = project.projectFolder;
     const subspace: Subspace = project.subspace;
     const shrinkwrapFilename: string = subspace.getCommittedShrinkwrapFilename();
-    const pnpmLockfileText: string = await FileSystem.readFileAsync(shrinkwrapFilename);
-    const doc = yaml.load(pnpmLockfileText) as Lockfile | LockfileV6;
+    let doc: Lockfile | LockfileV6;
+    if (this._docMap.has(shrinkwrapFilename)) {
+      doc = this._docMap.get(shrinkwrapFilename)!;
+    } else {
+      const pnpmLockfileText: string = await FileSystem.readFileAsync(shrinkwrapFilename);
+      doc = yaml.load(pnpmLockfileText) as Lockfile | LockfileV6;
+      this._docMap.set(shrinkwrapFilename, doc);
+    }
     const { importers, lockfileVersion, packages } = doc;
     const shrinkwrapFileMajorVersion: number = getShrinkwrapFileMajorVersion(lockfileVersion);
     const checkedDependencyPaths: Set<string> = new Set<string>();
-    for (const [relativePath, { dependencies }] of Object.entries(importers)) {
-      if (path.resolve(projectFolder, relativePath) === projectFolder) {
-        const dependenciesEntries = Object.entries(dependencies ?? {});
-        for (const [dependencyName, dependencyValue] of dependenciesEntries) {
-          const fullDependencyPath = `/${dependencyName}${shrinkwrapFileMajorVersion === 6 ? '@' : '/'}${
-            typeof dependencyValue === 'string'
-              ? dependencyValue
-              : (
-                  dependencyValue as {
-                    version: string;
-                    specifier: string;
-                  }
-                ).version
-          }`;
-          if (fullDependencyPath.includes('link:')) {
-            const dependencyProject: RushConfigurationProject | undefined =
-              rushConfiguration.getProjectByName(dependencyName);
-            if (dependencyProject && !checkedProjects.has(dependencyProject)) {
-              checkedProjects.add(project);
-              await this._searchAndValidateDependenciesAsync(
-                rushConfiguration,
-                checkedProjects,
-                dependencyProject,
-                requiredVersions
+
+    await Promise.all(
+      Object.entries(importers).map(async ([relativePath, { dependencies }]) => {
+        if (path.resolve(projectFolder, relativePath) === projectFolder) {
+          const dependenciesEntries = Object.entries(dependencies ?? {});
+          for (const [dependencyName, dependencyValue] of dependenciesEntries) {
+            const fullDependencyPath = splicePackageWithVersion(
+              shrinkwrapFileMajorVersion,
+              dependencyName,
+              typeof dependencyValue === 'string'
+                ? dependencyValue
+                : (
+                    dependencyValue as {
+                      version: string;
+                      specifier: string;
+                    }
+                  ).version
+            );
+            if (fullDependencyPath.includes('link:')) {
+              const dependencyProject: RushConfigurationProject | undefined =
+                this._rushConfiguration.getProjectByName(dependencyName);
+              if (dependencyProject && !this._checkedProjects?.has(dependencyProject)) {
+                this._checkedProjects!.add(project);
+                await this._searchAndValidateDependenciesAsync(dependencyProject, requiredVersions);
+              }
+            } else {
+              await this._checkVersionCompatibilityAsync(
+                shrinkwrapFileMajorVersion,
+                packages,
+                fullDependencyPath,
+                requiredVersions,
+                checkedDependencyPaths
               );
             }
-          } else {
-            await this._checkVersionCompatibilityAsync(
-              shrinkwrapFileMajorVersion,
-              packages,
-              fullDependencyPath,
-              requiredVersions,
-              checkedDependencyPaths
-            );
           }
         }
-      }
-    }
-  }
-
-  private async _performVersionRestrictionCheckAsync(
-    rushConfiguration: RushConfiguration,
-    requiredVersions: Record<string, string>,
-    projectName: string
-  ): Promise<void> {
-    const project: RushConfigurationProject | undefined = rushConfiguration?.getProjectByName(projectName);
-    if (!project) {
-      throw new Error(`Specified project "${projectName}" does not exist in ${LOCKFILE_LINT_JSON_FILENAME}`);
-    }
-    const checkedProjects: Set<RushConfigurationProject> = new Set<RushConfigurationProject>([project]);
-    await this._searchAndValidateDependenciesAsync(
-      rushConfiguration,
-      checkedProjects,
-      project,
-      requiredVersions
+      })
     );
   }
 
-  protected async onExecute(): Promise<void> {
-    const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
-    if (!rushConfiguration) {
-      throw new Error(
-        'The "lockfile-explorer check" must be executed in a folder that is under a Rush workspace folder'
-      );
+  private async _performVersionRestrictionCheckAsync(
+    requiredVersions: Record<string, string>,
+    projectName: string
+  ): Promise<string | void> {
+    try {
+      const project: RushConfigurationProject | undefined =
+        this._rushConfiguration?.getProjectByName(projectName);
+      if (!project) {
+        throw new Error(
+          `Specified project "${projectName}" does not exist in ${LOCKFILE_LINT_JSON_FILENAME}`
+        );
+      }
+      this._checkedProjects.add(project);
+      await this._searchAndValidateDependenciesAsync(project, requiredVersions);
+    } catch (e) {
+      return e.message;
     }
+  }
+
+  protected async onExecute(): Promise<void> {
     const lintingFile: string = path.resolve(
-      rushConfiguration.commonFolder,
+      this._rushConfiguration.commonFolder,
       'config',
       LOCKFILE_EXPLORER_FOLDERNAME,
       LOCKFILE_LINT_JSON_FILENAME
@@ -164,12 +179,16 @@ export class LintAction extends CommandLineAction {
       lintingFile,
       JsonSchema.fromLoadedObject(lockfileLintSchema)
     );
+    const errorMessageList: string[] = [];
     await Async.forEachAsync(
       rules,
       async ({ requiredVersions, project, rule }) => {
         switch (rule) {
           case 'restrict-versions': {
-            await this._performVersionRestrictionCheckAsync(rushConfiguration, requiredVersions, project);
+            const errorMessage = await this._performVersionRestrictionCheckAsync(requiredVersions, project);
+            if (errorMessage) {
+              errorMessageList.push(errorMessage);
+            }
             break;
           }
 
@@ -180,6 +199,10 @@ export class LintAction extends CommandLineAction {
       },
       { concurrency: 50 }
     );
+    if (errorMessageList.length > 0) {
+      this._terminal.writeError(errorMessageList.join('\n'));
+      throw new AlreadyReportedError();
+    }
     this._terminal.writeLine(Colorize.green('Check passed!'));
   }
 }
