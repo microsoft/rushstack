@@ -54,7 +54,7 @@ async function checkVersionCompatibility(
   }
 }
 
-async function searchAndValidateDependencies(
+async function searchAndValidateDependenciesAsync(
   rushConfiguration: RushConfiguration,
   checkedProjects: Set<RushConfigurationProject>,
   project: RushConfigurationProject,
