@@ -55,7 +55,6 @@
     "@types/update-notifier": "~6.0.1",
     "local-node-rig": "workspace:*",
     "@pnpm/lockfile-types": "^5.1.5",
-    "@types/yargs": "~17.0.32",
     "@types/semver": "7.5.0"
   },
   "dependencies": {
