@@ -6,13 +6,14 @@ import { FileSystem } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 import type { CommandModule } from 'yargs';
 import * as path from 'path';
-import { LockfileExplorerConfig } from '../constants/common';
+import { LOCKFILE_LINT_JSON_FILENAME } from '../constants/common';
 
 // Example usage: lflint init
 // Example usage: lockfile-lint init
 export const initCommand: CommandModule = {
   command: 'init',
-  describe: `Create ${LockfileExplorerConfig.FileName} config file`,
+  describe: `Create ${LOCKFILE_LINT_JSON_FILENAME} config file`,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   handler: async () => {
     try {
       const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
@@ -24,7 +25,7 @@ export const initCommand: CommandModule = {
       const inputFilePath: string = path.resolve(__dirname, '../schemas/lockfile-lint-template.json');
       const outputFilePath: string = path.resolve(
         rushConfiguration.commonLockfileExplorerConfigFolder,
-        LockfileExplorerConfig.FileName
+        LOCKFILE_LINT_JSON_FILENAME
       );
 
       if (await FileSystem.existsAsync(outputFilePath)) {

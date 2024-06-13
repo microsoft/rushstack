@@ -49,3 +49,11 @@ export function getShrinkwrapFileMajorVersion(lockfileVersion: string | number):
 
   return shrinkwrapFileMajorVersion;
 }
+
+export function splicePackageWithVersion(
+  shrinkwrapFileMajorVersion: number,
+  dependencyPackageName: string,
+  dependencyPackageVersion: string
+): string {
+  return `/${dependencyPackageName}${shrinkwrapFileMajorVersion === 6 ? '@' : '/'}${dependencyPackageVersion}`;
+}

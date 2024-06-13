@@ -7,14 +7,18 @@ import yaml from 'js-yaml';
 import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
 import type { RushConfigurationProject } from '@rushstack/rush-sdk';
-import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import type { CommandModule } from 'yargs';
 import { Colorize } from '@rushstack/terminal';
 import semver from 'semver';
 
 import lockfileLintSchema from '../schemas/lockfile-lint.schema.json';
-import { getShrinkwrapFileMajorVersion, parseDependencyPath } from '../utils/shrinkwrap';
-import { LockfileExplorerConfig } from '../constants/common';
+import {
+  getShrinkwrapFileMajorVersion,
+  parseDependencyPath,
+  splicePackageWithVersion
+} from '../utils/shrinkwrap';
+import { LOCKFILE_LINT_JSON_FILENAME } from '../constants/common';
 
 export interface ILintRule {
   rule: 'restrict-versions';
@@ -46,7 +50,7 @@ async function checkVersionCompatibility(
       await checkVersionCompatibility(
         shrinkwrapFileMajorVersion,
         packages,
-        `/${dependencyPackageName}${shrinkwrapFileMajorVersion === 6 ? '@' : '/'}${dependencyPackageVersion}`,
+        splicePackageWithVersion(shrinkwrapFileMajorVersion, dependencyPackageName, dependencyPackageVersion),
         requiredVersions,
         checkedDependencyPaths
       );
@@ -62,50 +66,48 @@ async function searchAndValidateDependenciesAsync(
 ): Promise<void> {
   console.log(`Checking the project: ${project.packageName}.`);
 
-  const projectFolder: string | undefined = project.projectFolder;
-  const subspace: Subspace | undefined = project.subspace;
-  if (subspace && projectFolder) {
-    const shrinkwrapFilename: string = subspace.getCommittedShrinkwrapFilename();
-    const pnpmLockfileText: string = await FileSystem.readFileAsync(shrinkwrapFilename);
-    const doc = yaml.load(pnpmLockfileText) as Lockfile | LockfileV6;
-    const { importers, lockfileVersion, packages } = doc;
-    const shrinkwrapFileMajorVersion: number = getShrinkwrapFileMajorVersion(lockfileVersion);
-    const checkedDependencyPaths: Set<string> = new Set<string>();
-    for (const [relativePath, { dependencies }] of Object.entries(importers)) {
-      if (path.resolve(projectFolder, relativePath) === projectFolder) {
-        const dependenciesEntries = Object.entries(dependencies ?? {});
-        for (const [dependencyName, dependencyValue] of dependenciesEntries) {
-          const fullDependencyPath = `/${dependencyName}${shrinkwrapFileMajorVersion === 6 ? '@' : '/'}${
-            typeof dependencyValue === 'string'
-              ? dependencyValue
-              : (
-                  dependencyValue as {
-                    version: string;
-                    specifier: string;
-                  }
-                ).version
-          }`;
-          if (fullDependencyPath.includes('link:')) {
-            const dependencyProject: RushConfigurationProject | undefined =
-              rushConfiguration.getProjectByName(dependencyName);
-            if (dependencyProject && !checkedProjects.has(dependencyProject)) {
-              checkedProjects.add(project);
-              await searchAndValidateDependencies(
-                rushConfiguration,
-                checkedProjects,
-                dependencyProject,
-                requiredVersions
-              );
-            }
-          } else {
-            await checkVersionCompatibility(
-              shrinkwrapFileMajorVersion,
-              packages,
-              fullDependencyPath,
-              requiredVersions,
-              checkedDependencyPaths
+  const projectFolder: string = project.projectFolder;
+  const subspace: Subspace = project.subspace;
+  const shrinkwrapFilename: string = subspace.getCommittedShrinkwrapFilename();
+  const pnpmLockfileText: string = await FileSystem.readFileAsync(shrinkwrapFilename);
+  const doc = yaml.load(pnpmLockfileText) as Lockfile | LockfileV6;
+  const { importers, lockfileVersion, packages } = doc;
+  const shrinkwrapFileMajorVersion: number = getShrinkwrapFileMajorVersion(lockfileVersion);
+  const checkedDependencyPaths: Set<string> = new Set<string>();
+  for (const [relativePath, { dependencies }] of Object.entries(importers)) {
+    if (path.resolve(projectFolder, relativePath) === projectFolder) {
+      const dependenciesEntries = Object.entries(dependencies ?? {});
+      for (const [dependencyName, dependencyValue] of dependenciesEntries) {
+        const fullDependencyPath = `/${dependencyName}${shrinkwrapFileMajorVersion === 6 ? '@' : '/'}${
+          typeof dependencyValue === 'string'
+            ? dependencyValue
+            : (
+                dependencyValue as {
+                  version: string;
+                  specifier: string;
+                }
+              ).version
+        }`;
+        if (fullDependencyPath.includes('link:')) {
+          const dependencyProject: RushConfigurationProject | undefined =
+            rushConfiguration.getProjectByName(dependencyName);
+          if (dependencyProject && !checkedProjects.has(dependencyProject)) {
+            checkedProjects.add(project);
+            await searchAndValidateDependenciesAsync(
+              rushConfiguration,
+              checkedProjects,
+              dependencyProject,
+              requiredVersions
             );
           }
+        } else {
+          await checkVersionCompatibility(
+            shrinkwrapFileMajorVersion,
+            packages,
+            fullDependencyPath,
+            requiredVersions,
+            checkedDependencyPaths
+          );
         }
       }
     }
@@ -119,10 +121,10 @@ async function performVersionRestrictionCheckAsync(
 ): Promise<void> {
   const project: RushConfigurationProject | undefined = rushConfiguration?.getProjectByName(projectName);
   if (!project) {
-    throw new Error(`Specified project "${projectName}" does not exist in ${RushConstants.RushJsonFilename}`);
+    throw new Error(`Specified project "${projectName}" does not exist in ${LOCKFILE_LINT_JSON_FILENAME}`);
   }
   const checkedProjects: Set<RushConfigurationProject> = new Set<RushConfigurationProject>([project]);
-  await searchAndValidateDependencies(rushConfiguration, checkedProjects, project, requiredVersions);
+  await searchAndValidateDependenciesAsync(rushConfiguration, checkedProjects, project, requiredVersions);
 }
 
 // Example usage: lflint
@@ -141,16 +143,18 @@ export const lintCommand: CommandModule = {
       }
       const lintingFile: string = path.resolve(
         rushConfiguration.commonLockfileExplorerConfigFolder,
-        LockfileExplorerConfig.FileName
+        LOCKFILE_LINT_JSON_FILENAME
       );
       const { rules }: ILockfileLint = await JsonFile.loadAndValidateAsync(
         lintingFile,
         JsonSchema.fromLoadedObject(lockfileLintSchema)
       );
-      await Async.forEachAsync(rules, async ({ requiredVersions, project, rule }) => {
+      await Async.forEachAsync(
+        rules,
+        async ({ requiredVersions, project, rule }) => {
           switch (rule) {
             case 'restrict-versions': {
-              await performVersionRestrictionCheck(rushConfiguration, requiredVersions, project);
+              await performVersionRestrictionCheckAsync(rushConfiguration, requiredVersions, project);
               break;
             }
 
@@ -160,7 +164,7 @@ export const lintCommand: CommandModule = {
           }
         },
         { concurrency: 50 }
-      );      
+      );
       console.log(Colorize.green('Check passed!'));
     } catch (error) {
       console.error(Colorize.red('ERROR: ' + error.message));
