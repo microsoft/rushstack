@@ -27,7 +27,7 @@ export const initCommand: CommandModule = {
         LockfileExplorerConfig.FileName
       );
 
-      if (FileSystem.exists(outputFilePath)) {
+      if (await FileSystem.existsAsync(outputFilePath)) {
         console.log(Colorize.red('The output file already exists:'));
         console.log('\n  ' + outputFilePath + '\n');
         throw new Error('Unable to write output file');
