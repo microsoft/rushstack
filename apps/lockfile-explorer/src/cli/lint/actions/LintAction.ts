@@ -9,7 +9,7 @@ import yaml from 'js-yaml';
 import semver from 'semver';
 import { Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
-import lockfileLintSchema from '../schemas/lockfile-lint.schema.json';
+import lockfileLintSchema from '../../../schemas/lockfile-lint.schema.json';
 import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../../../constants/common';
 import type { LintCommandLineParser } from '../LintCommandLineParser';
 import {

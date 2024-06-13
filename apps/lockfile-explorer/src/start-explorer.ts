@@ -1,19 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import yargs from 'yargs';
-import { Colorize } from '@rushstack/terminal';
+import { ExplorerCommandLineParser } from './cli/explorer/ExplorerCommandLineParser';
 
-import { startCommand } from './commands/start';
+const parser: ExplorerCommandLineParser = new ExplorerCommandLineParser();
 
-yargs
-  .scriptName('lockfile-explorer')
-  .command(startCommand)
-  // --debug
-  .boolean('debug')
-  .alias('help', 'h')
-  .parseAsync()
-  .catch((error) => {
-    console.log(Colorize.red('ERROR: ' + error.message));
-    process.exit(1);
-  });
+parser.executeAsync().catch(console.error); // CommandLineParser.executeAsync() should never reject the promise

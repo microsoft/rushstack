@@ -1,32 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CLI Tool Tests should display help for "lockfile-explorer --help" 1`] = `
-"lockfile-explorer
+"usage: lockfile-explorer [-h] [-d] [--subspace SUBSPACE_NAME] <command> ...
 
-Start the application
+lockfile-lint is a tool for linting lockfiles.
 
-Options:
-  -h, --help      Show help                                            [boolean]
-      --version   Show version number                                  [boolean]
-      --subspace  The subspace name where the package resides
-                                                   [string] [default: \\"default\\"]
-      --debug     Enable debug mode                                    [boolean]
+Positional arguments:
+  <command>
+    start               Start the application
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -d, --debug           Show the full call stack if an error occurs while 
+                        executing the tool
+  --subspace SUBSPACE_NAME
+                        Specifies an individual Rush subspace to check.
+
+[1mFor detailed help about a specific command, use: lockfile-explorer 
+<command> -h[22m
 "
 `;
 
 exports[`CLI Tool Tests should display help for "lockfile-lint --help" 1`] = `
-"lockfile-lint
+"usage: lockfile-lint [-h] <command> ...
 
-Check if the specified package has a inconsistent package versions in target
-project
+lockfile-lint is a tool for linting lockfiles.
 
-Commands:
-  lockfile-lint       Check if the specified package has a inconsistent package
-                      versions in target project                       [default]
-  lockfile-lint init  Create lockfile-lint.json config file
+Positional arguments:
+  <command>
+    init      Create lockfile-lint.json config file
+    lint      Check if the specified package has a inconsistent package 
+              versions in target project
 
-Options:
-  -h, --help     Show help                                             [boolean]
-      --version  Show version number                                   [boolean]
+Optional arguments:
+  -h, --help  Show this help message and exit.
+
+[1mFor detailed help about a specific command, use: lockfile-lint <command> 
+-h[22m
 "
 `;
