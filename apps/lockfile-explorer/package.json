@@ -68,8 +68,8 @@
     "open": "~8.4.0",
     "update-notifier": "~5.1.0",
     "@pnpm/dependency-path": "~2.1.2",
-    "yargs": "~17.7.2",
     "semver": "~7.5.4",
-    "@rushstack/rush-sdk": "workspace:*"
+    "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*"
   }
 }
