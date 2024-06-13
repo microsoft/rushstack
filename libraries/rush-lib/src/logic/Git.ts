@@ -97,8 +97,21 @@ export class Git {
   public async getGitEmailAsync(): Promise<string> {
     // Determine the user's account
     // Ex: "bob@example.com"
-    const emailResult: string | undefined = await this.tryGetGitEmailAsync();
-    return this.validateGitEmail(emailResult);
+    const { error, result } = await this._tryGetGitEmailAsync();
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.log(
+        [
+          `Error: ${error.message}`,
+          'Unable to determine your Git configuration using this command:',
+          '',
+          '    git config user.email',
+          ''
+        ].join('\n')
+      );
+      throw new AlreadyReportedError();
+    }
+    return this.validateGitEmail(result);
   }
 
   /**
@@ -501,10 +514,20 @@ export class Git {
   }
 
   /**
+   * This will throw errors only if we cannot find Git commandline.
+   * If git email didn't configure, this will return undefined; otherwise,
+   * returns user.email config
+   */
+  public async tryGetGitEmailAsync(): Promise<string | undefined> {
+    const { result } = await this._tryGetGitEmailAsync();
+    return result;
+  }
+
+  /**
    * Returns an object containing either the result of the `git config user.email`
    * command or an error.
    */
-  public async tryGetGitEmailAsync(): Promise<string | undefined> {
+  private async _tryGetGitEmailAsync(): Promise<IResultOrError<string>> {
     if (this._gitEmailResult === undefined) {
       const gitPath: string = this.getGitPathOrThrow();
       try {
@@ -520,22 +543,7 @@ export class Git {
       }
     }
 
-    const { error, result } = this._gitEmailResult;
-    if (error) {
-      // eslint-disable-next-line no-console
-      console.log(
-        [
-          `Error: ${error.message}`,
-          'Unable to determine your Git configuration using this command:',
-          '',
-          '    git config user.email',
-          ''
-        ].join('\n')
-      );
-      throw new AlreadyReportedError();
-    }
-
-    return result;
+    return this._gitEmailResult;
   }
 
   private async _tryGetGitHooksPathAsync(): Promise<IResultOrError<string>> {

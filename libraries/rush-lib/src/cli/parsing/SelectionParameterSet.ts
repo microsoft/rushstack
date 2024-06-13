@@ -223,6 +223,7 @@ export class SelectionParameterSet {
       this._impactedByExceptProject,
       this._onlyProject,
       this._toProject,
+      this._fromProject,
       this._toExceptProject,
       this._fromVersionPolicy,
       this._toVersionPolicy
