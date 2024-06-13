@@ -16,6 +16,7 @@ import type { CommandModule } from 'yargs';
 import { convertLockfileV6DepPathToV5DepPath, getShrinkwrapFileMajorVersion } from '../utils/shrinkwrap';
 import { init } from '../utils/init';
 import type { IAppState } from '../state';
+import { terminal } from '../utils/logger';
 
 interface IStartCommandOptions {
   subspace: string;
@@ -198,7 +199,7 @@ function startApp(subspaceName: string, debugMode: boolean): void {
         // Launch the web browser
         await open(SERVICE_URL);
       } catch (e) {
-        console.error('Error launching browser: ' + e.toString());
+        terminal.writeError('Error launching browser: ' + e.toString());
       }
     }
   });
@@ -228,7 +229,7 @@ export const startCommand: CommandModule<{}, IStartCommandOptions> = {
     try {
       startApp(args.subspace, args.debug ?? false);
     } catch (error) {
-      console.error(Colorize.red('ERROR: ' + error.message));
+      terminal.writeError('ERROR: ' + error.message);
       process.exit(1);
     }
   }

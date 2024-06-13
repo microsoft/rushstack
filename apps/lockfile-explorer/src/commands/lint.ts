@@ -4,9 +4,7 @@
 import type { Lockfile, LockfileV6 } from '@pnpm/lockfile-types';
 import path from 'path';
 import yaml from 'js-yaml';
-import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
-import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
-import type { RushConfigurationProject } from '@rushstack/rush-sdk';
+import { type RushConfigurationProject, type Subspace, RushConfiguration } from '@rushstack/rush-sdk';
 import { Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import type { CommandModule } from 'yargs';
 import { Colorize } from '@rushstack/terminal';
@@ -19,6 +17,7 @@ import {
   splicePackageWithVersion
 } from '../utils/shrinkwrap';
 import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../constants/common';
+import { terminal } from '../utils/logger';
 
 export interface ILintRule {
   rule: 'restrict-versions';
@@ -64,7 +63,7 @@ async function searchAndValidateDependenciesAsync(
   project: RushConfigurationProject,
   requiredVersions: Record<string, string>
 ): Promise<void> {
-  console.log(`Checking the project: ${project.packageName}.`);
+  terminal.writeLine(`Checking the project: ${project.packageName}.`);
 
   const projectFolder: string = project.projectFolder;
   const subspace: Subspace = project.subspace;
@@ -167,9 +166,9 @@ export const lintCommand: CommandModule = {
         },
         { concurrency: 50 }
       );
-      console.log(Colorize.green('Check passed!'));
+      terminal.writeLine(Colorize.green('Check passed!'));
     } catch (error) {
-      console.error(Colorize.red('ERROR: ' + error.message));
+      terminal.writeError(Colorize.red('ERROR: ' + error.message));
       process.exit(1);
     }
   }

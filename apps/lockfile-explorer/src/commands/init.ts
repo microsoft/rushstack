@@ -8,6 +8,7 @@ import type { CommandModule } from 'yargs';
 import * as path from 'path';
 
 import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../constants/common';
+import { terminal } from '../utils/logger';
 
 // Example usage: lflint init
 // Example usage: lockfile-lint init
@@ -35,18 +36,18 @@ export const initCommand: CommandModule = {
       );
 
       if (await FileSystem.existsAsync(outputFilePath)) {
-        console.log(Colorize.red('The output file already exists:'));
-        console.log('\n  ' + outputFilePath + '\n');
+        terminal.writeError('The output file already exists:');
+        terminal.writeLine('\n  ' + outputFilePath + '\n');
         throw new Error('Unable to write output file');
       }
 
-      console.log(Colorize.green('Writing file: ') + outputFilePath);
+      terminal.writeLine(Colorize.green('Writing file: ') + outputFilePath);
       await FileSystem.copyFileAsync({
         sourcePath: inputFilePath,
         destinationPath: outputFilePath
       });
     } catch (error) {
-      console.error(Colorize.red('ERROR: ' + error.message));
+      terminal.writeError('ERROR: ' + error.message);
       process.exit(1);
     }
   }
