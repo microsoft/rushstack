@@ -31,8 +31,8 @@ export interface ILockfileLint {
 
 export class LintAction extends CommandLineAction {
   private readonly _terminal: ITerminal;
-  private readonly _rushConfiguration: RushConfiguration;
 
+  private _rushConfiguration!: RushConfiguration;
   private _checkedProjects: Set<RushConfigurationProject>;
   private _docMap: Map<string, Lockfile | LockfileV6>;
 
@@ -43,13 +43,6 @@ export class LintAction extends CommandLineAction {
       documentation: 'Check if the specified package has a inconsistent package versions in target project'
     });
 
-    const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
-    if (!rushConfiguration) {
-      throw new Error(
-        'The "lockfile-explorer check" must be executed in a folder that is under a Rush workspace folder'
-      );
-    }
-    this._rushConfiguration = rushConfiguration;
     this._terminal = parser.globalTerminal;
     this._checkedProjects = new Set();
     this._docMap = new Map();
@@ -169,6 +162,14 @@ export class LintAction extends CommandLineAction {
   }
 
   protected async onExecute(): Promise<void> {
+    const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
+    if (!rushConfiguration) {
+      throw new Error(
+        'The "lockfile-explorer check" must be executed in a folder that is under a Rush workspace folder'
+      );
+    }
+    this._rushConfiguration = rushConfiguration!;
+
     const lintingFile: string = path.resolve(
       this._rushConfiguration.commonFolder,
       'config',
