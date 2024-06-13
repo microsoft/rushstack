@@ -34,7 +34,7 @@ export const initCommand: CommandModule = {
       }
 
       console.log(Colorize.green('Writing file: ') + outputFilePath);
-      FileSystem.copyFile({
+      await FileSystem.copyFileAsync({
         sourcePath: inputFilePath,
         destinationPath: outputFilePath
       });
