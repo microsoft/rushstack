@@ -143,7 +143,7 @@ export const lintCommand: CommandModule = {
         rushConfiguration.commonLockfileExplorerConfigFolder,
         LockfileExplorerConfig.FileName
       );
-      const { rules }: ILockfileLint = JsonFile.loadAndValidate(
+      const { rules }: ILockfileLint = await JsonFile.loadAndValidateAsync(
         lintingFile,
         JsonSchema.fromLoadedObject(lockfileLintSchema)
       );
