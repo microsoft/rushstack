@@ -13,7 +13,7 @@ import { LockfileExplorerConfig } from '../constants/common';
 export const initCommand: CommandModule = {
   command: 'init',
   describe: `Create ${LockfileExplorerConfig.FileName} config file`,
-  handler: () => {
+  handler: async () => {
     try {
       const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
       if (!rushConfiguration) {
