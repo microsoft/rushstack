@@ -147,17 +147,20 @@ export const lintCommand: CommandModule = {
         lintingFile,
         JsonSchema.fromLoadedObject(lockfileLintSchema)
       );
-      for (const { requiredVersions, project, rule } of rules) {
-        switch (rule) {
-          case 'restrict-versions': {
-            await performVersionRestrictionCheck(rushConfiguration, requiredVersions, project);
-            break;
+      await Async.forEachAsync(rules, async ({ requiredVersions, project, rule }) => {
+          switch (rule) {
+            case 'restrict-versions': {
+              await performVersionRestrictionCheck(rushConfiguration, requiredVersions, project);
+              break;
+            }
+
+            default: {
+              throw new Error('Unsupported rule name: ' + rule);
+            }
           }
-          default: {
-            throw new Error('Unsupported rule name: ' + rule);
-          }
-        }
-      }
+        },
+        { concurrency: 50 }
+      );      
       console.log(Colorize.green('Check passed!'));
     } catch (error) {
       console.error(Colorize.red('ERROR: ' + error.message));
