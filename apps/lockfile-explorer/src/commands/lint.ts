@@ -18,7 +18,7 @@ import {
   parseDependencyPath,
   splicePackageWithVersion
 } from '../utils/shrinkwrap';
-import { LOCKFILE_LINT_JSON_FILENAME } from '../constants/common';
+import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../constants/common';
 
 export interface ILintRule {
   rule: 'restrict-versions';
@@ -142,7 +142,9 @@ export const lintCommand: CommandModule = {
         );
       }
       const lintingFile: string = path.resolve(
-        rushConfiguration.commonLockfileExplorerConfigFolder,
+        rushConfiguration.commonFolder,
+        'config',
+        LOCKFILE_EXPLORER_FOLDERNAME,
         LOCKFILE_LINT_JSON_FILENAME
       );
       const { rules }: ILockfileLint = await JsonFile.loadAndValidateAsync(

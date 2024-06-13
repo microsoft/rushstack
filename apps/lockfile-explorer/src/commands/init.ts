@@ -7,7 +7,7 @@ import { Colorize } from '@rushstack/terminal';
 import type { CommandModule } from 'yargs';
 import * as path from 'path';
 
-import { LOCKFILE_LINT_JSON_FILENAME } from '../constants/common';
+import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../constants/common';
 
 // Example usage: lflint init
 // Example usage: lockfile-lint init
@@ -28,7 +28,9 @@ export const initCommand: CommandModule = {
         '../assets/lint-init/lockfile-lint-template.json'
       );
       const outputFilePath: string = path.resolve(
-        rushConfiguration.commonLockfileExplorerConfigFolder,
+        rushConfiguration.commonFolder,
+        'config',
+        LOCKFILE_EXPLORER_FOLDERNAME,
         LOCKFILE_LINT_JSON_FILENAME
       );
 
