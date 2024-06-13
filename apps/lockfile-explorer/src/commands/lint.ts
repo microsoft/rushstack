@@ -119,7 +119,7 @@ async function performVersionRestrictionCheck(
 ): Promise<void> {
   const project: RushConfigurationProject | undefined = rushConfiguration?.getProjectByName(projectName);
   if (!project) {
-    throw new Error(`Cannot found project name: ${projectName}`);
+    throw new Error(`Specified project "${projectName}" does not exist in ${RushConstants.RushJsonFilename}`);
   }
   const checkedProjects: Set<RushConfigurationProject> = new Set<RushConfigurationProject>([project]);
   await searchAndValidateDependencies(rushConfiguration, checkedProjects, project, requiredVersions);
