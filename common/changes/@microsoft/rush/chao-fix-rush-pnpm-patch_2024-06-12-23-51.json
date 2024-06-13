@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where rush-pnpm patch is not working for the subspace scenario",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
