@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where rush update can not detect package.json changes in other subspaces for the injected installation case",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
