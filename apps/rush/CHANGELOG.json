@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.128.4",
+      "tag": "@microsoft/rush_v5.128.4",
+      "date": "Mon, 17 Jun 2024 23:22:49 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump the `@azure/identity` package to `~4.2.1` to mitigate GHSA-m5vv-6r4h-3vj9."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.128.3",
       "tag": "@microsoft/rush_v5.128.3",
       "date": "Mon, 17 Jun 2024 20:46:21 GMT",

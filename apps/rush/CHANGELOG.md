@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 17 Jun 2024 20:46:21 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Jun 2024 23:22:49 GMT and should not be manually modified.
+
+## 5.128.4
+Mon, 17 Jun 2024 23:22:49 GMT
+
+### Updates
+
+- Bump the `@azure/identity` package to `~4.2.1` to mitigate GHSA-m5vv-6r4h-3vj9.
 
 ## 5.128.3
 Mon, 17 Jun 2024 20:46:21 GMT
