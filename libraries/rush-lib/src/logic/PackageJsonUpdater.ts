@@ -414,7 +414,10 @@ export class PackageJsonUpdater {
       // we need to do a mismatch check
       if (updateOtherPackages) {
         const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-          this._rushConfiguration
+          this._rushConfiguration,
+          {
+            subspace
+          }
         );
         otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
       }
