@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 12 Jun 2024 20:07:44 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Jun 2024 17:08:00 GMT and should not be manually modified.
+
+## 5.128.2
+Mon, 17 Jun 2024 17:08:00 GMT
+
+### Updates
+
+- Fix an issue where rush-pnpm patch is not working for the subspace scenario
+- Fix an issue where rush update can not detect package.json changes in other subspaces for the injected installation case
 
 ## 5.128.1
 Wed, 12 Jun 2024 20:07:44 GMT

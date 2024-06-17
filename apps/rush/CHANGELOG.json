@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.128.2",
+      "tag": "@microsoft/rush_v5.128.2",
+      "date": "Mon, 17 Jun 2024 17:08:00 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush-pnpm patch is not working for the subspace scenario"
+          },
+          {
+            "comment": "Fix an issue where rush update can not detect package.json changes in other subspaces for the injected installation case"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.128.1",
       "tag": "@microsoft/rush_v5.128.1",
       "date": "Wed, 12 Jun 2024 20:07:44 GMT",
