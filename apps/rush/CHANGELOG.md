@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 17 Jun 2024 17:08:00 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Jun 2024 20:46:21 GMT and should not be manually modified.
+
+## 5.128.3
+Mon, 17 Jun 2024 20:46:21 GMT
+
+### Updates
+
+- Fixed an issue where the --make-consistent flag would affect projects outside the current subspace.
 
 ## 5.128.2
 Mon, 17 Jun 2024 17:08:00 GMT

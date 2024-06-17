@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.128.3",
+      "tag": "@microsoft/rush_v5.128.3",
+      "date": "Mon, 17 Jun 2024 20:46:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed an issue where the --make-consistent flag would affect projects outside the current subspace."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.128.2",
       "tag": "@microsoft/rush_v5.128.2",
       "date": "Mon, 17 Jun 2024 17:08:00 GMT",
