@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixed a key collision for cobuild clustering for operations that share the same phase name.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
