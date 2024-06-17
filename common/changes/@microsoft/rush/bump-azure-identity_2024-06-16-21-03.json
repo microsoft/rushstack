@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Bump the `@azure/identity` package to `~4.2.1` to mitigate GHSA-m5vv-6r4h-3vj9.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
