@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { ITerminal } from '@rushstack/terminal';
-import { CommandLineAction } from '@rushstack/ts-command-line';
+import { CommandLineAction, type CommandLineStringParameter } from '@rushstack/ts-command-line';
 import express from 'express';
 import yaml from 'js-yaml';
 import cors from 'cors';
@@ -25,7 +25,7 @@ import type { ExplorerCommandLineParser } from '../ExplorerCommandLineParser';
 export class StartAction extends CommandLineAction {
   private readonly _terminal: ITerminal;
   private readonly _isDebug: boolean;
-  private readonly _subspaceName: string;
+  private readonly _subspaceParameter: CommandLineStringParameter;
 
   public constructor(parser: ExplorerCommandLineParser) {
     super({
@@ -33,9 +33,16 @@ export class StartAction extends CommandLineAction {
       summary: 'Start the application',
       documentation: 'Start the application'
     });
+
+    this._subspaceParameter = this.defineStringParameter({
+      parameterLongName: '--subspace',
+      argumentName: 'SUBSPACE_NAME',
+      description: 'Specifies an individual Rush subspace to check.',
+      defaultValue: 'default'
+    });
+
     this._terminal = parser.globalTerminal;
     this._isDebug = parser.isDebug;
-    this._subspaceName = parser.subspace;
   }
 
   protected async onExecute(): Promise<void> {
@@ -70,7 +77,7 @@ export class StartAction extends CommandLineAction {
       lockfileExplorerProjectRoot,
       appVersion,
       debugMode: this._isDebug,
-      subspaceName: this._subspaceName
+      subspaceName: this._subspaceParameter.value!
     });
 
     // Important: This must happen after init() reads the current working directory
@@ -131,7 +138,7 @@ export class StartAction extends CommandLineAction {
 
       res.send({
         doc,
-        subspaceName: this._subspaceName
+        subspaceName: this._subspaceParameter.value
       });
     });
 

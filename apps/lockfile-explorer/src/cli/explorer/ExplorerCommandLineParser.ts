@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
-import {
-  type CommandLineFlagParameter,
-  CommandLineParser,
-  type CommandLineStringParameter
-} from '@rushstack/ts-command-line';
+import { type CommandLineFlagParameter, CommandLineParser } from '@rushstack/ts-command-line';
 
 import { StartAction } from './actions/StartAction';
 
@@ -16,7 +12,6 @@ export class ExplorerCommandLineParser extends CommandLineParser {
   public readonly globalTerminal: ITerminal;
   private readonly _terminalProvider: ConsoleTerminalProvider;
   private readonly _debugParameter: CommandLineFlagParameter;
-  private readonly _subspaceParameter: CommandLineStringParameter;
 
   public constructor() {
     super({
@@ -28,13 +23,6 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       parameterLongName: '--debug',
       parameterShortName: '-d',
       description: 'Show the full call stack if an error occurs while executing the tool'
-    });
-
-    this._subspaceParameter = this.defineStringParameter({
-      parameterLongName: '--subspace',
-      argumentName: 'SUBSPACE_NAME',
-      description: 'Specifies an individual Rush subspace to check.',
-      defaultValue: 'default'
     });
 
     this._terminalProvider = new ConsoleTerminalProvider();
@@ -49,9 +37,5 @@ export class ExplorerCommandLineParser extends CommandLineParser {
 
   public get isDebug(): boolean {
     return this._debugParameter.value;
-  }
-
-  public get subspace(): string {
-    return this._subspaceParameter.value ?? 'default';
   }
 }
