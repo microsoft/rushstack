@@ -58,7 +58,7 @@ import { type ICustomCommandLineConfigurationInfo, PluginManager } from '../plug
 import { RushSession } from '../pluginFramework/RushSession';
 import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
-import { InitSubspaceAction } from './actions/initSubspaceAction';
+import { InitSubspaceAction } from './actions/InitSubspaceAction';
 
 /**
  * Options for `RushCommandLineParser`.
