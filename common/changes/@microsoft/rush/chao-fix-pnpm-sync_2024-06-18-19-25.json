@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a logic to remove out of date .pnpm-sync.json file during rush install or update",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
