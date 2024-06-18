@@ -827,7 +827,7 @@ export class RushConfiguration {
       );
     } else if (
       !this.subspacesFeatureEnabled &&
-      rushConfigurationJson.ensureConsistentVersions === true &&
+      rushConfigurationJson.ensureConsistentVersions !== undefined &&
       this.defaultSubspace.getCommonVersions().ensureConsistentVersions
     ) {
       throw new Error(
