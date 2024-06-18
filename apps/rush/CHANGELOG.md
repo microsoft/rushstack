@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 17 Jun 2024 23:22:49 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Jun 2024 04:02:54 GMT and should not be manually modified.
+
+## 5.128.5
+Tue, 18 Jun 2024 04:02:54 GMT
+
+### Updates
+
+- Fix a key collision for cobuild clustering for operations that share the same phase name.
 
 ## 5.128.4
 Mon, 17 Jun 2024 23:22:49 GMT

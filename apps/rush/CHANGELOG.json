@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.128.5",
+      "tag": "@microsoft/rush_v5.128.5",
+      "date": "Tue, 18 Jun 2024 04:02:54 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a key collision for cobuild clustering for operations that share the same phase name."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.128.4",
       "tag": "@microsoft/rush_v5.128.4",
       "date": "Mon, 17 Jun 2024 23:22:49 GMT",
