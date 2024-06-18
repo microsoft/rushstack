@@ -41,7 +41,7 @@ export class SubspacesConfiguration {
   public readonly subspaceJsonFilePath: string;
 
   /*
-   * Determines if the subspace feature is enabled
+   * Determines whether the subspaces feature is enabled.
    */
   public readonly subspacesEnabled: boolean;
 

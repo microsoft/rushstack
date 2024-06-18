@@ -35,7 +35,7 @@ export class InitSubspaceAction extends BaseRushAction {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 
     if (!this.rushConfiguration.subspacesFeatureEnabled) {
-      throw new Error('The subspaces feature must be enabled to create a new subspace.');
+      throw new Error('Unable to create a subspace because the subspaces feature is not enabled.');
     }
 
     const subspacesConfiguration: SubspacesConfiguration = this.rushConfiguration
