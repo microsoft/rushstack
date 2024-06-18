@@ -68,10 +68,6 @@ export class InitSubspaceAction extends BaseRushAction {
     ];
 
     await FileSystem.ensureEmptyFolderAsync(subspaceConfigPath);
-    // await FileSystem.copyFilesAsync({
-    //   sourcePath: SUBSPACE_TEMPLATE_FOLDER_PATH,
-    //   destinationPath: subspaceConfigPath
-    // });
     for (const templateFilePath of templateFilePaths) {
       const sourcePath: string = `${assetsSubfolder}/common/config/rush/${templateFilePath}`;
 
