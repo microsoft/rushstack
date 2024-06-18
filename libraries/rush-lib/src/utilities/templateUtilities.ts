@@ -37,194 +37,192 @@ const VARIABLE_MACRO_REGEXP: RegExp = /\[(%[A-Z0-9_]+%)\]/;
 // Used to catch malformed macro expressions
 const ANY_MACRO_REGEXP: RegExp = /\/\*\s*\[.*\]\s*\*\//;
 
-export class TemplateUtilities {
-  // Copy the template from sourcePath, transform any macros, and write the output to destinationPath.
-  //
-  // We implement a simple template engine.  "Single-line section" macros have this form:
-  //
-  //     /*[LINE "NAME"]*/ (content goes here)
-  //
-  // ...and when commented out will look like this:
-  //
-  //     // (content goes here)
-  //
-  // "Block section" macros have this form:
-  //
-  //     /*[BEGIN "NAME"]*/
-  //     (content goes
-  //     here)
-  //     /*[END "NAME"]*/
-  //
-  // ...and when commented out will look like this:
-  //
-  //     // (content goes
-  //     // here)
-  //
-  // Lastly, a variable expansion has this form:
-  //
-  //     // The value is [%NAME%].
-  //
-  // ...and when expanded with e.g. "123" will look like this:
-  //
-  //     // The value is 123.
-  //
-  // The section names must be one of the predefined names used by "rush init".
-  // A single-line section may appear inside a block section, in which case it will get
-  // commented twice.
-  public static copyTemplateFile(
-    sourcePath: string,
-    destinationPath: string,
-    overwrite: boolean,
-    demo: boolean = false
-  ): void {
-    const destinationFileExists: boolean = FileSystem.exists(destinationPath);
+// Copy the template from sourcePath, transform any macros, and write the output to destinationPath.
+//
+// We implement a simple template engine.  "Single-line section" macros have this form:
+//
+//     /*[LINE "NAME"]*/ (content goes here)
+//
+// ...and when commented out will look like this:
+//
+//     // (content goes here)
+//
+// "Block section" macros have this form:
+//
+//     /*[BEGIN "NAME"]*/
+//     (content goes
+//     here)
+//     /*[END "NAME"]*/
+//
+// ...and when commented out will look like this:
+//
+//     // (content goes
+//     // here)
+//
+// Lastly, a variable expansion has this form:
+//
+//     // The value is [%NAME%].
+//
+// ...and when expanded with e.g. "123" will look like this:
+//
+//     // The value is 123.
+//
+// The section names must be one of the predefined names used by "rush init".
+// A single-line section may appear inside a block section, in which case it will get
+// commented twice.
+export async function copyTemplateFileAsync(
+  sourcePath: string,
+  destinationPath: string,
+  overwrite: boolean,
+  demo: boolean = false
+): Promise<void> {
+  const destinationFileExists: boolean = await FileSystem.existsAsync(destinationPath);
 
-    if (!overwrite) {
-      if (destinationFileExists) {
-        // eslint-disable-next-line no-console
-        console.log(Colorize.yellow('Not overwriting already existing file: ') + destinationPath);
-        return;
-      }
-    }
-
+  if (!overwrite) {
     if (destinationFileExists) {
       // eslint-disable-next-line no-console
-      console.log(Colorize.yellow(`Overwriting: ${destinationPath}`));
-    } else {
-      // eslint-disable-next-line no-console
-      console.log(`Generating: ${destinationPath}`);
+      console.log(Colorize.yellow('Not overwriting already existing file: ') + destinationPath);
+      return;
     }
+  }
 
-    const outputLines: string[] = [];
-    const lines: string[] = FileSystem.readFile(sourcePath, { convertLineEndings: NewlineKind.Lf }).split(
-      '\n'
-    );
+  if (destinationFileExists) {
+    // eslint-disable-next-line no-console
+    console.log(Colorize.yellow(`Overwriting: ${destinationPath}`));
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(`Generating: ${destinationPath}`);
+  }
 
-    let activeBlockSectionName: string | undefined = undefined;
-    let activeBlockIndent: string = '';
+  const outputLines: string[] = [];
+  const lines: string[] = (
+    await FileSystem.readFileAsync(sourcePath, { convertLineEndings: NewlineKind.Lf })
+  ).split('\n');
 
-    for (const line of lines) {
-      let match: RegExpMatchArray | null;
+  let activeBlockSectionName: string | undefined = undefined;
+  let activeBlockIndent: string = '';
 
-      // Check for a block section start
-      // Example:  /*[BEGIN "DEMO"]*/
-      match = line.match(BEGIN_MARCO_REGEXP);
-      if (match) {
-        if (activeBlockSectionName) {
-          // If this happens, please report a Rush bug
-          throw new InternalError(
-            `The template contains an unmatched BEGIN macro for "${activeBlockSectionName}"`
-          );
-        }
+  for (const line of lines) {
+    let match: RegExpMatchArray | null;
 
-        activeBlockSectionName = match[2];
-        activeBlockIndent = match[1];
-        // Remove the entire line containing the macro
-        continue;
-      }
-
-      // Check for a block section end
-      // Example:  /*[END "DEMO"]*/
-      match = line.match(END_MACRO_REGEXP);
-      if (match) {
-        if (activeBlockSectionName === undefined) {
-          // If this happens, please report a Rush bug
-          throw new InternalError(
-            `The template contains an unmatched END macro for "${activeBlockSectionName}"`
-          );
-        }
-
-        if (activeBlockSectionName !== match[2]) {
-          // If this happens, please report a Rush bug
-          throw new InternalError(
-            `The template contains an mismatched END macro for "${activeBlockSectionName}"`
-          );
-        }
-
-        if (activeBlockIndent !== match[1]) {
-          // If this happens, please report a Rush bug
-          throw new InternalError(
-            `The template contains an inconsistently indented section "${activeBlockSectionName}"`
-          );
-        }
-
-        activeBlockSectionName = undefined;
-
-        // Remove the entire line containing the macro
-        continue;
-      }
-
-      let transformedLine: string = line;
-
-      // Check for a single-line section
-      // Example:  /*[LINE "HYPOTHETICAL"]*/
-      match = transformedLine.match(LINE_MACRO_REGEXP);
-      if (match) {
-        const sectionName: string = match[1];
-        const replacement: string = this._isSectionCommented(sectionName, demo) ? '// ' : '';
-        transformedLine = transformedLine.replace(LINE_MACRO_REGEXP, replacement);
-      }
-
-      // Check for variable expansions
-      // Example:  [%RUSH_VERSION%]
-      while ((match = transformedLine.match(VARIABLE_MACRO_REGEXP))) {
-        const variableName: string = match[1];
-        const replacement: string = this._expandMacroVariable(variableName);
-        transformedLine = transformedLine.replace(VARIABLE_MACRO_REGEXP, replacement);
-      }
-
-      // Verify that all macros were handled
-      match = transformedLine.match(ANY_MACRO_REGEXP);
-      if (match) {
+    // Check for a block section start
+    // Example:  /*[BEGIN "DEMO"]*/
+    match = line.match(BEGIN_MARCO_REGEXP);
+    if (match) {
+      if (activeBlockSectionName) {
         // If this happens, please report a Rush bug
         throw new InternalError(
-          'The template contains a malformed macro expression: ' + JSON.stringify(match[0])
+          `The template contains an unmatched BEGIN macro for "${activeBlockSectionName}"`
         );
       }
 
-      // If we are inside a block section that is commented out, then insert the "//" after indentation
-      if (activeBlockSectionName !== undefined) {
-        if (this._isSectionCommented(activeBlockSectionName, demo)) {
-          // Is the line indented properly?
-          if (transformedLine.substr(0, activeBlockIndent.length).trim().length > 0) {
-            // If this happens, please report a Rush bug
-            throw new InternalError(
-              `The template contains inconsistently indented lines inside` +
-                ` the "${activeBlockSectionName}" section`
-            );
-          }
+      activeBlockSectionName = match[2];
+      activeBlockIndent = match[1];
+      // Remove the entire line containing the macro
+      continue;
+    }
 
-          // Insert comment characters after the indentation
-          const contentAfterIndent: string = transformedLine.substr(activeBlockIndent.length);
-          transformedLine = activeBlockIndent + '// ' + contentAfterIndent;
-        }
+    // Check for a block section end
+    // Example:  /*[END "DEMO"]*/
+    match = line.match(END_MACRO_REGEXP);
+    if (match) {
+      if (activeBlockSectionName === undefined) {
+        // If this happens, please report a Rush bug
+        throw new InternalError(
+          `The template contains an unmatched END macro for "${activeBlockSectionName}"`
+        );
       }
 
-      outputLines.push(transformedLine);
+      if (activeBlockSectionName !== match[2]) {
+        // If this happens, please report a Rush bug
+        throw new InternalError(
+          `The template contains an mismatched END macro for "${activeBlockSectionName}"`
+        );
+      }
+
+      if (activeBlockIndent !== match[1]) {
+        // If this happens, please report a Rush bug
+        throw new InternalError(
+          `The template contains an inconsistently indented section "${activeBlockSectionName}"`
+        );
+      }
+
+      activeBlockSectionName = undefined;
+
+      // Remove the entire line containing the macro
+      continue;
     }
 
-    // Write the output
-    FileSystem.writeFile(destinationPath, outputLines.join('\n'), {
-      ensureFolderExists: true
-    });
-  }
+    let transformedLine: string = line;
 
-  private static _isSectionCommented(sectionName: string, demo: boolean): boolean {
-    // The "HYPOTHETICAL" sections are always commented out by "rush init".
-    // They are uncommented in the "assets" source folder so that we can easily validate
-    // that they conform to their JSON schema.
-    if (sectionName === 'HYPOTHETICAL') return true;
-    if (sectionName === 'DEMO') return demo;
-    // If this happens, please report a Rush bug
-    throw new InternalError(`The template references an undefined section name ${sectionName}`);
-  }
-
-  private static _expandMacroVariable(variableName: string): string {
-    switch (variableName) {
-      case '%RUSH_VERSION%':
-        return Rush.version;
-      default:
-        throw new InternalError(`The template references an undefined variable "${variableName}"`);
+    // Check for a single-line section
+    // Example:  /*[LINE "HYPOTHETICAL"]*/
+    match = transformedLine.match(LINE_MACRO_REGEXP);
+    if (match) {
+      const sectionName: string = match[1];
+      const replacement: string = _isSectionCommented(sectionName, demo) ? '// ' : '';
+      transformedLine = transformedLine.replace(LINE_MACRO_REGEXP, replacement);
     }
+
+    // Check for variable expansions
+    // Example:  [%RUSH_VERSION%]
+    while ((match = transformedLine.match(VARIABLE_MACRO_REGEXP))) {
+      const variableName: string = match[1];
+      const replacement: string = _expandMacroVariable(variableName);
+      transformedLine = transformedLine.replace(VARIABLE_MACRO_REGEXP, replacement);
+    }
+
+    // Verify that all macros were handled
+    match = transformedLine.match(ANY_MACRO_REGEXP);
+    if (match) {
+      // If this happens, please report a Rush bug
+      throw new InternalError(
+        'The template contains a malformed macro expression: ' + JSON.stringify(match[0])
+      );
+    }
+
+    // If we are inside a block section that is commented out, then insert the "//" after indentation
+    if (activeBlockSectionName !== undefined) {
+      if (_isSectionCommented(activeBlockSectionName, demo)) {
+        // Is the line indented properly?
+        if (transformedLine.substr(0, activeBlockIndent.length).trim().length > 0) {
+          // If this happens, please report a Rush bug
+          throw new InternalError(
+            `The template contains inconsistently indented lines inside` +
+              ` the "${activeBlockSectionName}" section`
+          );
+        }
+
+        // Insert comment characters after the indentation
+        const contentAfterIndent: string = transformedLine.substr(activeBlockIndent.length);
+        transformedLine = activeBlockIndent + '// ' + contentAfterIndent;
+      }
+    }
+
+    outputLines.push(transformedLine);
+  }
+
+  // Write the output
+  await FileSystem.writeFileAsync(destinationPath, outputLines.join('\n'), {
+    ensureFolderExists: true
+  });
+}
+
+function _isSectionCommented(sectionName: string, demo: boolean): boolean {
+  // The "HYPOTHETICAL" sections are always commented out by "rush init".
+  // They are uncommented in the "assets" source folder so that we can easily validate
+  // that they conform to their JSON schema.
+  if (sectionName === 'HYPOTHETICAL') return true;
+  if (sectionName === 'DEMO') return demo;
+  // If this happens, please report a Rush bug
+  throw new InternalError(`The template references an undefined section name ${sectionName}`);
+}
+
+function _expandMacroVariable(variableName: string): string {
+  switch (variableName) {
+    case '%RUSH_VERSION%':
+      return Rush.version;
+    default:
+      throw new InternalError(`The template references an undefined variable "${variableName}"`);
   }
 }

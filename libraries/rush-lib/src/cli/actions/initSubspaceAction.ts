@@ -6,10 +6,9 @@ import { assetsFolderPath } from '../../utilities/PathConstants';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { type ISubspacesConfigurationJson, SubspacesConfiguration } from '../../api/SubspacesConfiguration';
-import { FileSystem, InternalError, JsonFile } from '@rushstack/node-core-library';
+import { Async, FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
-import path from 'path';
-import { TemplateUtilities } from '../../utilities/templateUtilities';
+import { copyTemplateFileAsync } from '../../utilities/templateUtilities';
 
 export class InitSubspaceAction extends BaseRushAction {
   private readonly _subspaceNameParameter: IRequiredCommandLineStringParameter;
@@ -68,11 +67,15 @@ export class InitSubspaceAction extends BaseRushAction {
     ];
 
     await FileSystem.ensureEmptyFolderAsync(subspaceConfigPath);
-    await Async.forEachAsync(templateFilePaths, async (templateFilePath) => {
-      const sourcePath: string = `${assetsSubfolder}/common/config/rush/${templateFilePath}`;
-      const destinationPath: string = `${subspaceConfigPath}/${templateFilePath.replace('[dot]', '.')}`;
-      await TemplateUtilities.copyTemplateFile(sourcePath, destinationPath, true);
-    }, { concurrency: 10 })
+    await Async.forEachAsync(
+      templateFilePaths,
+      async (templateFilePath) => {
+        const sourcePath: string = `${assetsSubfolder}/common/config/rush/${templateFilePath}`;
+        const destinationPath: string = `${subspaceConfigPath}/${templateFilePath.replace('[dot]', '.')}`;
+        await copyTemplateFileAsync(sourcePath, destinationPath, true);
+      },
+      { concurrency: 10 }
+    );
 
     // Add the subspace name to subspaces.json
     const subspaceJson: ISubspacesConfigurationJson = await JsonFile.loadAsync(

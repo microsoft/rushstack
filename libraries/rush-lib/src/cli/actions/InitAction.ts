@@ -16,7 +16,7 @@ import { BaseConfiglessRushAction } from './BaseRushAction';
 
 import { assetsFolderPath } from '../../utilities/PathConstants';
 import { RushConstants } from '../../logic/RushConstants';
-import { TemplateUtilities } from '../../utilities/templateUtilities';
+import { copyTemplateFileAsync } from '../../utilities/templateUtilities';
 
 export class InitAction extends BaseConfiglessRushAction {
   private readonly _overwriteParameter: CommandLineFlagParameter;
@@ -67,7 +67,7 @@ export class InitAction extends BaseConfiglessRushAction {
       }
     }
 
-    this._copyTemplateFiles(initFolder);
+    await this._copyTemplateFiles(initFolder);
   }
 
   // Check whether it's safe to run "rush init" in the current working directory.
@@ -114,7 +114,7 @@ export class InitAction extends BaseConfiglessRushAction {
     return true;
   }
 
-  private _copyTemplateFiles(initFolder: string): void {
+  private async _copyTemplateFiles(initFolder: string): Promise<void> {
     // The "[dot]" base name is used for hidden files to prevent various tools from interpreting them.
     // For example, "npm publish" will always exclude the filename ".gitignore"
     const templateFilePaths: string[] = [
@@ -163,7 +163,7 @@ export class InitAction extends BaseConfiglessRushAction {
       const destinationPath: string = path.join(initFolder, templateFilePath).replace('[dot]', '.');
 
       // The "DEMO" sections are uncommented only when "--rush-example-repo" is specified.
-      TemplateUtilities.copyTemplateFile(
+      await copyTemplateFileAsync(
         sourcePath,
         destinationPath,
         this._overwriteParameter.value,
