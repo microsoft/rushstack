@@ -67,7 +67,7 @@ export class InitAction extends BaseConfiglessRushAction {
       }
     }
 
-    await this._copyTemplateFiles(initFolder);
+    await this._copyTemplateFilesAsync(initFolder);
   }
 
   // Check whether it's safe to run "rush init" in the current working directory.
@@ -114,7 +114,7 @@ export class InitAction extends BaseConfiglessRushAction {
     return true;
   }
 
-  private async _copyTemplateFiles(initFolder: string): Promise<void> {
+  private async _copyTemplateFilesAsync(initFolder: string): Promise<void> {
     // The "[dot]" base name is used for hidden files to prevent various tools from interpreting them.
     // For example, "npm publish" will always exclude the filename ".gitignore"
     const templateFilePaths: string[] = [
