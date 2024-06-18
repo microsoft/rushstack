@@ -33,7 +33,8 @@ export class ExplorerCommandLineParser extends CommandLineParser {
     this._subspaceParameter = this.defineStringParameter({
       parameterLongName: '--subspace',
       argumentName: 'SUBSPACE_NAME',
-      description: 'Specifies an individual Rush subspace to check.'
+      description: 'Specifies an individual Rush subspace to check.',
+      defaultValue: 'default'
     });
 
     this._terminalProvider = new ConsoleTerminalProvider();
