@@ -1,6 +1,35 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 12 Jun 2024 20:07:44 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Jun 2024 04:02:54 GMT and should not be manually modified.
+
+## 5.128.5
+Tue, 18 Jun 2024 04:02:54 GMT
+
+### Updates
+
+- Fix a key collision for cobuild clustering for operations that share the same phase name.
+
+## 5.128.4
+Mon, 17 Jun 2024 23:22:49 GMT
+
+### Updates
+
+- Bump the `@azure/identity` package to `~4.2.1` to mitigate GHSA-m5vv-6r4h-3vj9.
+
+## 5.128.3
+Mon, 17 Jun 2024 20:46:21 GMT
+
+### Updates
+
+- Fixed an issue where the --make-consistent flag would affect projects outside the current subspace.
+
+## 5.128.2
+Mon, 17 Jun 2024 17:08:00 GMT
+
+### Updates
+
+- Fix an issue where rush-pnpm patch is not working for the subspace scenario
+- Fix an issue where rush update can not detect package.json changes in other subspaces for the injected installation case
 
 ## 5.128.1
 Wed, 12 Jun 2024 20:07:44 GMT

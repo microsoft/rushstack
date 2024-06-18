@@ -2,6 +2,57 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.128.5",
+      "tag": "@microsoft/rush_v5.128.5",
+      "date": "Tue, 18 Jun 2024 04:02:54 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a key collision for cobuild clustering for operations that share the same phase name."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.128.4",
+      "tag": "@microsoft/rush_v5.128.4",
+      "date": "Mon, 17 Jun 2024 23:22:49 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump the `@azure/identity` package to `~4.2.1` to mitigate GHSA-m5vv-6r4h-3vj9."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.128.3",
+      "tag": "@microsoft/rush_v5.128.3",
+      "date": "Mon, 17 Jun 2024 20:46:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed an issue where the --make-consistent flag would affect projects outside the current subspace."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.128.2",
+      "tag": "@microsoft/rush_v5.128.2",
+      "date": "Mon, 17 Jun 2024 17:08:00 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush-pnpm patch is not working for the subspace scenario"
+          },
+          {
+            "comment": "Fix an issue where rush update can not detect package.json changes in other subspaces for the injected installation case"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.128.1",
       "tag": "@microsoft/rush_v5.128.1",
       "date": "Wed, 12 Jun 2024 20:07:44 GMT",
