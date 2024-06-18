@@ -68,18 +68,11 @@ export class InitSubspaceAction extends BaseRushAction {
     ];
 
     await FileSystem.ensureEmptyFolderAsync(subspaceConfigPath);
-    for (const templateFilePath of templateFilePaths) {
+    await Async.forEachAsync(templateFilePaths, async (templateFilePath) => {
       const sourcePath: string = `${assetsSubfolder}/common/config/rush/${templateFilePath}`;
-
-      if (!FileSystem.exists(sourcePath)) {
-        // If this happens, please report a Rush bug
-        throw new InternalError('Unable to find template input file: ' + sourcePath);
-      }
-
-      const destinationPath: string = path.join(subspaceConfigPath, templateFilePath).replace('[dot]', '.');
-
-      TemplateUtilities.copyTemplateFile(sourcePath, destinationPath, true);
-    }
+      const destinationPath: string = `${subspaceConfigPath}/${templateFilePath.replace('[dot]', '.')}`;
+      await TemplateUtilities.copyTemplateFile(sourcePath, destinationPath, true);
+    }, { concurrency: 10 })
 
     // Add the subspace name to subspaces.json
     const subspaceJson: ISubspacesConfigurationJson = await JsonFile.loadAsync(
