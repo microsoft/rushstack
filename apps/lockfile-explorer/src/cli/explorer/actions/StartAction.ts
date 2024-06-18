@@ -45,7 +45,7 @@ export class StartAction extends CommandLineAction {
     );
     const appVersion: string = lockfileExplorerPackageJson.version;
 
-    console.log(
+    this._terminal.writeLine(
       Colorize.bold(`\nRush Lockfile Explorer ${appVersion}`) +
         Colorize.cyan(' - https://lfx.rushstack.io/\n')
     );
