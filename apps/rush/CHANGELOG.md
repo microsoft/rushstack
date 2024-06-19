@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 19 Jun 2024 03:31:48 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Jun 2024 04:20:03 GMT and should not be manually modified.
+
+## 5.129.1
+Wed, 19 Jun 2024 04:20:03 GMT
+
+### Updates
+
+- Add logic to remove outdated .pnpm-sync.json files during rush install or update
 
 ## 5.129.0
 Wed, 19 Jun 2024 03:31:48 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.129.1",
+      "tag": "@microsoft/rush_v5.129.1",
+      "date": "Wed, 19 Jun 2024 04:20:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add logic to remove outdated .pnpm-sync.json files during rush install or update"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.129.0",
       "tag": "@microsoft/rush_v5.129.0",
       "date": "Wed, 19 Jun 2024 03:31:48 GMT",
