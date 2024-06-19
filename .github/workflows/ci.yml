@@ -65,9 +65,9 @@ jobs:
         with:
           path: |
             repo-a/common/temp/node_modules
-            repo-a/common/temp/**/node_modules
+            repo-a/common/temp/*/node_modules
           # If the lock files have changed, then we should reasonably assume that a new install is needed
-          key: ${{ matrix.NodeVersionDisplayName }}-(${{ matrix.OS }})-${{ hashFiles('common/temp/**/pnpm-lock.yaml') }}
+          key: ${{ matrix.NodeVersionDisplayName }}-(${{ matrix.OS }})-${{ hashFiles('repo-a/common/temp/**/pnpm-lock.yaml') }}
 
       - name: Rush Install
         run: node common/scripts/install-run-rush.js install
