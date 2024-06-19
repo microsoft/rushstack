@@ -65,6 +65,7 @@ jobs:
           path: |
             common/temp/node-modules
             common/temp/*/node_modules
+          # If the lock files have changed, then we should reasonably assume that a new install is needed
           key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Rush Install
