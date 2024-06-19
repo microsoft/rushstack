@@ -64,7 +64,8 @@ jobs:
 
         with:
           path: |
-            common/temp/*/node_modules
+            repo-a/common/temp/node_modules
+            repo-a/common/temp/**/node_modules
           # If the lock files have changed, then we should reasonably assume that a new install is needed
           key: ${{ matrix.NodeVersionDisplayName }}-(${{ matrix.OS }})-${{ hashFiles('common/temp/**/pnpm-lock.yaml') }}
 
