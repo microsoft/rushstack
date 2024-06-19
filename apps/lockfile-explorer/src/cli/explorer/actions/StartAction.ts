@@ -77,7 +77,7 @@ export class StartAction extends CommandLineAction {
       lockfileExplorerProjectRoot,
       appVersion,
       debugMode: this._isDebug,
-      subspaceName: this._subspaceParameter.value!
+      subspaceName: this._subspaceParameter.value
     });
 
     // Important: This must happen after init() reads the current working directory
