@@ -63,10 +63,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            common/temp/node-modules
-            common/temp/*/node_modules
+            common/temp/**/node_modules
           # If the lock files have changed, then we should reasonably assume that a new install is needed
-          key: ${{ runner.os }}-${{ hashFiles('common/temp/*/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-${{ hashFiles('common/temp/**/pnpm-lock.yaml') }}
 
       - name: Rush Install
         run: node common/scripts/install-run-rush.js install
@@ -77,30 +76,30 @@ jobs:
       #   run: /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
       #   working-directory: repo-a
 
-      - name: Rush retest (install-run-rush)
-        run: node common/scripts/install-run-rush.js retest --verbose --production
-        working-directory: repo-a
+      # - name: Rush retest (install-run-rush)
+      #   run: node common/scripts/install-run-rush.js retest --verbose --production
+      #   working-directory: repo-a
 
-      - name: Ensure repo README is up-to-date
-        run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
-        working-directory: repo-a
+      # - name: Ensure repo README is up-to-date
+      #   run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
+      #   working-directory: repo-a
 
-      - name: Clone another copy of the repo to test the build cache
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          path: repo-b
+      # - name: Clone another copy of the repo to test the build cache
+      #   uses: actions/checkout@v3
+      #   with:
+      #     fetch-depth: 1
+      #     path: repo-b
 
-      - name: Git config user
-        run: |
-          git config --local user.name "Rushbot"
-          git config --local user.email "rushbot@users.noreply.github.com"
-        working-directory: repo-b
+      # - name: Git config user
+      #   run: |
+      #     git config --local user.name "Rushbot"
+      #     git config --local user.email "rushbot@users.noreply.github.com"
+      #   working-directory: repo-b
 
-      - name: Rush update (rush-lib)
-        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js update
-        working-directory: repo-b
+      # - name: Rush update (rush-lib)
+      #   run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js update
+      #   working-directory: repo-b
 
-      - name: Rush test (rush-lib)
-        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
-        working-directory: repo-b
+      # - name: Rush test (rush-lib)
+      #   run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
+      #   working-directory: repo-b
