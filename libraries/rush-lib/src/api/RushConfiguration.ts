@@ -828,7 +828,7 @@ export class RushConfiguration {
     } else if (
       !this.subspacesFeatureEnabled &&
       rushConfigurationJson.ensureConsistentVersions !== undefined &&
-      this.defaultSubspace.getCommonVersions().ensureConsistentVersions
+      this.defaultSubspace.getCommonVersions().ensureConsistentVersions !== undefined
     ) {
       throw new Error(
         `When the ensureConsistentVersions config is defined in the ${RushConstants.rushJsonFilename} file, ` +
