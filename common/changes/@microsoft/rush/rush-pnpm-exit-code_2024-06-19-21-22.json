@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the `rush pnpm ...` command always terminates with an exit code of 1.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
