@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 19 Jun 2024 04:20:03 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Jun 2024 23:59:09 GMT and should not be manually modified.
+
+## 5.129.2
+Wed, 19 Jun 2024 23:59:09 GMT
+
+### Updates
+
+- Fix an issue where the `rush pnpm ...` command always terminates with an exit code of 1.
 
 ## 5.129.1
 Wed, 19 Jun 2024 04:20:03 GMT
