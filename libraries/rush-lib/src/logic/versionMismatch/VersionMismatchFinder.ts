@@ -17,13 +17,13 @@ import type { Subspace } from '../../api/Subspace';
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
 export interface IVersionMismatchFinderOptions {
-  subspace?: Subspace;
+  subspace: Subspace;
 }
 
 export interface IVersionMismatchFinderRushCheckOptions extends IVersionMismatchFinderOptions {
   printAsJson?: boolean | undefined;
   truncateLongPackageNameLists?: boolean | undefined;
-  subspace?: Subspace | undefined;
+  subspace: Subspace;
 }
 
 export interface IVersionMismatchFinderEnsureConsistentVersionsOptions
@@ -70,7 +70,9 @@ export class VersionMismatchFinder {
   public static rushCheck(
     rushConfiguration: RushConfiguration,
     terminal: ITerminal,
-    options: IVersionMismatchFinderRushCheckOptions = {}
+    options: IVersionMismatchFinderRushCheckOptions = {
+      subspace: rushConfiguration.defaultSubspace
+    }
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
@@ -82,7 +84,9 @@ export class VersionMismatchFinder {
   public static ensureConsistentVersions(
     rushConfiguration: RushConfiguration,
     terminal: ITerminal,
-    options: IVersionMismatchFinderEnsureConsistentVersionsOptions = {}
+    options: IVersionMismatchFinderEnsureConsistentVersionsOptions = {
+      subspace: rushConfiguration.defaultSubspace
+    }
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
@@ -98,7 +102,9 @@ export class VersionMismatchFinder {
    */
   public static getMismatches(
     rushConfiguration: RushConfiguration,
-    options: IVersionMismatchFinderOptions = {}
+    options: IVersionMismatchFinderOptions = {
+      subspace: rushConfiguration.defaultSubspace
+    }
   ): VersionMismatchFinder {
     const commonVersions: CommonVersionsConfiguration = (
       options.subspace ?? rushConfiguration.defaultSubspace
@@ -128,7 +134,7 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     options: {
       isRushCheckCommand: boolean;
-      subspace?: Subspace | undefined;
+      subspace: Subspace;
       printAsJson?: boolean | undefined;
       terminal: ITerminal;
       truncateLongPackageNameLists?: boolean | undefined;
