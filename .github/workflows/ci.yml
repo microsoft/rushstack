@@ -61,11 +61,12 @@ jobs:
       - name: Cache Rush Installed Dependencies
         id: cache-deps
         uses: actions/cache@v3
+
         with:
           path: |
-            common/temp/**/node_modules
+            common/temp/*/node_modules
           # If the lock files have changed, then we should reasonably assume that a new install is needed
-          key: ${{ runner.os }}-${{ hashFiles('common/temp/**/pnpm-lock.yaml') }}
+          key: ${{ matrix.NodeVersionDisplayName }}-(${{ matrix.OS }})-${{ hashFiles('common/temp/**/pnpm-lock.yaml') }}
 
       - name: Rush Install
         run: node common/scripts/install-run-rush.js install
