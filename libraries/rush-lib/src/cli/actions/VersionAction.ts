@@ -95,14 +95,12 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    await PolicyValidator.validatePolicyAsync(
-      this.rushConfiguration,
-      this.rushConfiguration.defaultSubspace,
-      {
+    for (const subspace of this.rushConfiguration.subspaces) {
+      await PolicyValidator.validatePolicyAsync(this.rushConfiguration, subspace, {
         bypassPolicyAllowed: true,
         bypassPolicy: this._bypassPolicy.value
-      }
-    );
+      });
+    }
     const git: Git = new Git(this.rushConfiguration);
     const userEmail: string = await git.getGitEmailAsync();
 
@@ -213,17 +211,22 @@ export class VersionAction extends BaseRushAction {
       this.rushConfiguration.rushJsonFile
     );
 
-    // Respect the `ensureConsistentVersions` field in rush.json
-    if (!rushConfig.ensureConsistentVersions) {
-      return;
-    }
+    // Validate result of all subspaces
+    for (const subspace of rushConfig.subspaces) {
+      // Respect the `ensureConsistentVersions` field in rush.json
+      if (!subspace.shouldEnsureConsistentVersions) {
+        return;
+      }
 
-    const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig);
-    if (mismatchFinder.numberOfMismatches) {
-      throw new Error(
-        'Unable to finish version bump because inconsistencies were encountered. ' +
-          'Run "rush check" to find more details.'
-      );
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig, {
+        subspace: subspace
+      });
+      if (mismatchFinder.numberOfMismatches) {
+        throw new Error(
+          'Unable to finish version bump because inconsistencies were encountered. ' +
+            'Run "rush check" to find more details.'
+        );
+      }
     }
   }
 

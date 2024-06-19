@@ -473,6 +473,10 @@ export class RushConfiguration {
   /**
    * If true, then consistent version specifiers for dependencies will be enforced.
    * I.e. "rush check" is run before some commands.
+   *
+   * @deprecated
+   * This setting was moved from `rush.json` to `common-versions.json`.
+   * Read it using {@link Subspace.shouldEnsureConsistentVersions} instead.
    */
   public readonly ensureConsistentVersions: boolean;
 
@@ -815,6 +819,22 @@ export class RushConfiguration {
     this._hasVariantsField = !!rushConfigurationJson.variants;
 
     this._pathTrees = new Map();
+
+    if (this.subspacesFeatureEnabled && rushConfigurationJson.ensureConsistentVersions !== undefined) {
+      throw new Error(
+        `When using subspaces, the ensureConsistentVersions config is now defined in the ${RushConstants.commonVersionsFilename} file, ` +
+          `you must remove the old setting "ensureConsistentVersions" from ${RushConstants.rushJsonFilename}`
+      );
+    } else if (
+      !this.subspacesFeatureEnabled &&
+      rushConfigurationJson.ensureConsistentVersions !== undefined &&
+      this.defaultSubspace.getCommonVersions().ensureConsistentVersions !== undefined
+    ) {
+      throw new Error(
+        `When the ensureConsistentVersions config is defined in the ${RushConstants.rushJsonFilename} file, ` +
+          `it cannot also be defined in the ${RushConstants.commonVersionsFilename} file`
+      );
+    }
   }
 
   private _initializeAndValidateLocalProjects(): void {

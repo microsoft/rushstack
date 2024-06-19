@@ -271,6 +271,25 @@ export class Subspace {
   }
 
   /**
+   * Gets the ensureConsistentVersions property from the common-versions.json config file,
+   * or from the rush.json file if it isn't defined in common-versions.json
+   * @beta
+   */
+  public get shouldEnsureConsistentVersions(): boolean {
+    // If the subspaces feature is enabled, or the ensureConsistentVersions field is defined, return the value of the field
+    if (
+      this._rushConfiguration.subspacesFeatureEnabled ||
+      this.getCommonVersions().ensureConsistentVersions !== undefined
+    ) {
+      return !!this.getCommonVersions().ensureConsistentVersions;
+    }
+
+    // Fallback to ensureConsistentVersions in rush.json if subspaces is not enabled,
+    // or if the setting is not defined in the common-versions.json file
+    return this._rushConfiguration.ensureConsistentVersions;
+  }
+
+  /**
    * Gets the path to the repo-state.json file.
    * @beta
    */

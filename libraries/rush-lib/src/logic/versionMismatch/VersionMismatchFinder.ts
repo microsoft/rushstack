@@ -11,19 +11,18 @@ import type { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity'
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
 import { CustomTipId } from '../../api/CustomTipsConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { Subspace } from '../../api/Subspace';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
 export interface IVersionMismatchFinderOptions {
-  subspace?: Subspace;
+  subspace: Subspace;
 }
 
 export interface IVersionMismatchFinderRushCheckOptions extends IVersionMismatchFinderOptions {
   printAsJson?: boolean | undefined;
   truncateLongPackageNameLists?: boolean | undefined;
-  subspace?: Subspace | undefined;
+  subspace: Subspace;
 }
 
 export interface IVersionMismatchFinderEnsureConsistentVersionsOptions
@@ -70,7 +69,9 @@ export class VersionMismatchFinder {
   public static rushCheck(
     rushConfiguration: RushConfiguration,
     terminal: ITerminal,
-    options: IVersionMismatchFinderRushCheckOptions = {}
+    options: IVersionMismatchFinderRushCheckOptions = {
+      subspace: rushConfiguration.defaultSubspace
+    }
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
@@ -82,7 +83,9 @@ export class VersionMismatchFinder {
   public static ensureConsistentVersions(
     rushConfiguration: RushConfiguration,
     terminal: ITerminal,
-    options: IVersionMismatchFinderEnsureConsistentVersionsOptions = {}
+    options: IVersionMismatchFinderEnsureConsistentVersionsOptions = {
+      subspace: rushConfiguration.defaultSubspace
+    }
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
@@ -98,11 +101,11 @@ export class VersionMismatchFinder {
    */
   public static getMismatches(
     rushConfiguration: RushConfiguration,
-    options: IVersionMismatchFinderOptions = {}
+    options: IVersionMismatchFinderOptions = {
+      subspace: rushConfiguration.defaultSubspace
+    }
   ): VersionMismatchFinder {
-    const commonVersions: CommonVersionsConfiguration = (
-      options.subspace ?? rushConfiguration.defaultSubspace
-    ).getCommonVersions();
+    const commonVersions: CommonVersionsConfiguration = options.subspace.getCommonVersions();
 
     const projects: VersionMismatchFinderEntity[] = [];
 
@@ -111,13 +114,7 @@ export class VersionMismatchFinder {
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
     // If subspace is specified, only go through projects in that subspace
-    let projectsToParse: RushConfigurationProject[] = [];
-    if (options.subspace) {
-      projectsToParse = options.subspace.getProjects();
-    } else {
-      projectsToParse = rushConfiguration.projects;
-    }
-    for (const project of projectsToParse) {
+    for (const project of options.subspace.getProjects()) {
       projects.push(new VersionMismatchFinderProject(project));
     }
 
@@ -128,13 +125,13 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     options: {
       isRushCheckCommand: boolean;
-      subspace?: Subspace | undefined;
+      subspace: Subspace;
       printAsJson?: boolean | undefined;
       terminal: ITerminal;
       truncateLongPackageNameLists?: boolean | undefined;
     }
   ): void {
-    if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
+    if (options.subspace.shouldEnsureConsistentVersions || options.isRushCheckCommand) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
         rushConfiguration,
         options

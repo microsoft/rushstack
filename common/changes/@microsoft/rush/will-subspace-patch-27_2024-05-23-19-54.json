@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Move the `ensureConsistentVersions` setting from `rush.json` to `common/config/rush/common-versions.json`, or to `common/config/rush/<subspace>/common-versions.json` if subspaces are enabled.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
