@@ -415,14 +415,22 @@ export class RushPnpmCommandLineParser {
     }
 
     try {
-      await Utilities.executeCommandAsync({
+      const { exitCode } = await Utilities.executeCommandAsync({
         command: rushConfiguration.packageManagerToolFilename,
         args: this._pnpmArgs,
         workingDirectory: process.cwd(),
         environment: pnpmEnvironmentMap.toObject(),
         keepEnvironment: true,
-        onStdoutStreamChunk
+        onStdoutStreamChunk,
+        captureExitCodeAndSignal: true
       });
+
+      if (typeof exitCode === 'number') {
+        process.exitCode = exitCode;
+      } else {
+        // If the exit code is not a number, the process was terminated by a signal
+        process.exitCode = 1;
+      }
     } catch (e) {
       this._terminal.writeDebugLine(`Error: ${e}`);
     }

@@ -13,7 +13,8 @@ import {
   FileConstants,
   type FileSystemStats,
   SubprocessTerminator,
-  Executable
+  Executable,
+  type IWaitForExitResult
 } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -47,6 +48,7 @@ export interface IExecuteCommandOptions {
    * Note that this takes precedence over {@link IExecuteCommandOptions.suppressOutput}
    */
   onStdoutStreamChunk?: (chunk: string) => string | void;
+  captureExitCodeAndSignal?: boolean;
 }
 
 /**
@@ -147,11 +149,6 @@ interface ICreateEnvironmentForRushCommandOptions {
    * Options for what should be added to the PATH variable
    */
   pathOptions?: ICreateEnvironmentForRushCommandPathOptions;
-}
-
-interface IExecuteCommandResult {
-  stdout: string;
-  stderr: string;
 }
 
 export class Utilities {
@@ -308,6 +305,10 @@ export class Utilities {
     return true;
   }
 
+  public static async executeCommandAsync(
+    options: IExecuteCommandOptions & { captureExitCodeAndSignal: true }
+  ): Promise<Pick<IWaitForExitResult, 'exitCode' | 'signal'>>;
+  public static async executeCommandAsync(options: IExecuteCommandOptions): Promise<void>;
   /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
@@ -319,9 +320,10 @@ export class Utilities {
     suppressOutput,
     onStdoutStreamChunk,
     environment,
-    keepEnvironment
-  }: IExecuteCommandOptions): Promise<void> {
-    await Utilities._executeCommandInternalAsync({
+    keepEnvironment,
+    captureExitCodeAndSignal
+  }: IExecuteCommandOptions): Promise<void | Pick<IWaitForExitResult, 'exitCode' | 'signal'>> {
+    const { exitCode, signal } = await Utilities._executeCommandInternalAsync({
       command,
       args,
       workingDirectory,
@@ -340,8 +342,13 @@ export class Utilities {
       environment,
       keepEnvironment,
       onStdoutStreamChunk,
-      captureOutput: false
+      captureOutput: false,
+      captureExitCodeAndSignal
     });
+
+    if (captureExitCodeAndSignal) {
+      return { exitCode, signal };
+    }
   }
 
   /**
@@ -745,11 +752,12 @@ export class Utilities {
     environment,
     keepEnvironment,
     onStdoutStreamChunk,
-    captureOutput
+    captureOutput,
+    captureExitCodeAndSignal
   }: Omit<IExecuteCommandOptions, 'suppressOutput'> & {
     stdio: child_process.SpawnSyncOptions['stdio'];
     captureOutput: boolean;
-  }): Promise<IExecuteCommandResult> {
+  }): Promise<IWaitForExitResult> {
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,
@@ -802,16 +810,11 @@ export class Utilities {
       childProcess.stdout?.pipe(inspectStream).pipe(process.stdout);
     }
 
-    const { stdout, stderr } = await Executable.waitForExitAsync(childProcess, {
+    return await Executable.waitForExitAsync(childProcess, {
       encoding: captureOutput ? 'utf8' : undefined,
-      throwOnNonZeroExitCode: true,
-      throwOnSignal: true
+      throwOnNonZeroExitCode: !captureExitCodeAndSignal,
+      throwOnSignal: !captureExitCodeAndSignal
     });
-
-    return {
-      stdout,
-      stderr
-    };
   }
 
   private static _processResult({
