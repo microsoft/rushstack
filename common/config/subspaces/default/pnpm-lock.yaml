@@ -3330,8 +3330,8 @@ importers:
         specifier: ~6.1.0
         version: 6.1.1
       pnpm-sync-lib:
-        specifier: 0.2.6
-        version: 0.2.6
+        specifier: 0.2.8
+        version: 0.2.8
       read-package-tree:
         specifier: ~5.1.5
         version: 5.1.6
@@ -22707,8 +22707,8 @@ packages:
       - typescript
     dev: true
 
-  /pnpm-sync-lib@0.2.6:
-    resolution: {integrity: sha512-6bEpWpEo2AJnUeMy6j1+3xm71C/h4LtHDmaBVyNgnsErgJ8uiB8ekWvgheVHsUxz038oFy2tAXPMHrr59VLbdA==}
+  /pnpm-sync-lib@0.2.8:
+    resolution: {integrity: sha512-Jo89drCjl2GNR33we72uTIkhXeuVGxL+xHmNHwmh9nh83TbaveQWC7rfHDM6anczzNb5Vs5sElS6Vxlru3Ba7A==}
     dependencies:
       '@pnpm/dependency-path': 2.1.8
       yaml: 2.4.1
