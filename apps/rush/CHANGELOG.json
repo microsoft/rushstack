@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.129.0",
+      "tag": "@microsoft/rush_v5.129.0",
+      "date": "Wed, 19 Jun 2024 03:31:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new `init-subspace` command to initialize a new subspace."
+          },
+          {
+            "comment": "Move the `ensureConsistentVersions` setting from `rush.json` to `common/config/rush/common-versions.json`, or to `common/config/rush/<subspace>/common-versions.json` if subspaces are enabled."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.128.5",
       "tag": "@microsoft/rush_v5.128.5",
       "date": "Tue, 18 Jun 2024 04:02:54 GMT",

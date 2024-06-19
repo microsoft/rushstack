@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 18 Jun 2024 04:02:54 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Jun 2024 03:31:48 GMT and should not be manually modified.
+
+## 5.129.0
+Wed, 19 Jun 2024 03:31:48 GMT
+
+### Updates
+
+- Add a new `init-subspace` command to initialize a new subspace.
+- Move the `ensureConsistentVersions` setting from `rush.json` to `common/config/rush/common-versions.json`, or to `common/config/rush/<subspace>/common-versions.json` if subspaces are enabled.
 
 ## 5.128.5
 Tue, 18 Jun 2024 04:02:54 GMT
