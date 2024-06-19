@@ -58,6 +58,15 @@ jobs:
         run: node common/scripts/install-run-rush.js change --verify
         working-directory: repo-a
 
+      - name: Cache Rush Installed Dependencies
+        id: cache-deps
+        uses: actions/cache@v3
+        with:
+          path: |
+            common/temp/node-modules
+            common/temp/*/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
       - name: Rush Install
         run: node common/scripts/install-run-rush.js install
         working-directory: repo-a
