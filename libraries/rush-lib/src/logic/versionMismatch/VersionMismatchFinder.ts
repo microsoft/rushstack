@@ -11,7 +11,6 @@ import type { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity'
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
 import { CustomTipId } from '../../api/CustomTipsConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { Subspace } from '../../api/Subspace';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
@@ -115,8 +114,7 @@ export class VersionMismatchFinder {
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
     // If subspace is specified, only go through projects in that subspace
-    let projectsToParse: RushConfigurationProject[] = options.subspace.getProjects();
-    for (const project of projectsToParse) {
+    for (const project of options.subspace.getProjects()) {
       projects.push(new VersionMismatchFinderProject(project));
     }
 
