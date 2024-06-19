@@ -278,7 +278,7 @@ export class Subspace {
   public get shouldEnsureConsistentVersions(): boolean {
     // If the subspaces feature is enabled, or the ensureConsistentVersions field is defined, return the value of the field
     if (
-      this._rushConfiguration.subspacesFeatureEnabled &&
+      this._rushConfiguration.subspacesFeatureEnabled ||
       this.getCommonVersions().ensureConsistentVersions !== undefined
     ) {
       return !!this.getCommonVersions().ensureConsistentVersions;
