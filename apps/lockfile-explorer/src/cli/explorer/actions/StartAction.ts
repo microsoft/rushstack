@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { ITerminal } from '@rushstack/terminal';
-import { CommandLineAction, type CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { CommandLineAction, type IRequiredCommandLineStringParameter } from '@rushstack/ts-command-line';
 import express from 'express';
 import yaml from 'js-yaml';
 import cors from 'cors';
@@ -25,7 +25,7 @@ import type { ExplorerCommandLineParser } from '../ExplorerCommandLineParser';
 export class StartAction extends CommandLineAction {
   private readonly _terminal: ITerminal;
   private readonly _isDebug: boolean;
-  private readonly _subspaceParameter: IReqiuredCommandLineStringParameter;
+  private readonly _subspaceParameter: IRequiredCommandLineStringParameter;
 
   public constructor(parser: ExplorerCommandLineParser) {
     super({
