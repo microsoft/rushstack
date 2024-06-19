@@ -69,7 +69,7 @@
       "type": "number"
     },
     "ensureConsistentVersions": {
-      "description": "If true, consistent version specifiers for dependencies will be enforced (i.e. \"rush check\" is run before some commands).",
+      "description": "If true, consistent version specifiers for dependencies will be enforced (i.e. \"rush check\" is run before some commands). Used when property is not defined in common-versions.json.",
       "type": "boolean"
     },
     "hotfixChangeEnabled": {
