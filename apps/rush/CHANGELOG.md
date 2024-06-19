@@ -1,6 +1,46 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 07 Jun 2024 22:59:12 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Jun 2024 04:02:54 GMT and should not be manually modified.
+
+## 5.128.5
+Tue, 18 Jun 2024 04:02:54 GMT
+
+### Updates
+
+- Fix a key collision for cobuild clustering for operations that share the same phase name.
+
+## 5.128.4
+Mon, 17 Jun 2024 23:22:49 GMT
+
+### Updates
+
+- Bump the `@azure/identity` package to `~4.2.1` to mitigate GHSA-m5vv-6r4h-3vj9.
+
+## 5.128.3
+Mon, 17 Jun 2024 20:46:21 GMT
+
+### Updates
+
+- Fixed an issue where the --make-consistent flag would affect projects outside the current subspace.
+
+## 5.128.2
+Mon, 17 Jun 2024 17:08:00 GMT
+
+### Updates
+
+- Fix an issue where rush-pnpm patch is not working for the subspace scenario
+- Fix an issue where rush update can not detect package.json changes in other subspaces for the injected installation case
+
+## 5.128.1
+Wed, 12 Jun 2024 20:07:44 GMT
+
+### Updates
+
+- Fix an issue where running `rush install` in a subspace with only a `--from` selector is treated as selecting all projects.
+- Fix an issue where not published packages are not correctly identified as not published when querying a package feed under certain versions of NPM.
+- Fix an issue where selection syntax (like `--to` or `--from`) misses project dependencies declared using workspace alias syntax (i.e. - `workspace:alias@1.2.3`).
+- Fix an issue where an error is thrown if a Git email address isn't configured and email validation isn't configured in `rush.json` via `allowedEmailRegExps`.
+- Display the name of the subspace when an error is emitted because a dependency hash uses the SHA1 algorithm and the "disallowInsecureSha1" option is enabled.
 
 ## 5.128.0
 Fri, 07 Jun 2024 22:59:12 GMT

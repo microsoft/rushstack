@@ -46,6 +46,7 @@ import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 import { FlagFile } from '../../api/FlagFile';
+import { Stopwatch } from '../../utilities/Stopwatch';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -151,6 +152,34 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           `Preferred versions from ${RushConstants.commonVersionsFilename} have been modified.`
         );
         shrinkwrapIsUpToDate = false;
+      }
+
+      const stopwatch: Stopwatch = Stopwatch.start();
+
+      const packageJsonInjectedDependenciesHash: string | undefined =
+        subspace.getPackageJsonInjectedDependenciesHash();
+
+      stopwatch.stop();
+
+      this._terminal.writeDebugLine(
+        `Total amount of time spent to hash related package.json files in the injected installation case: ${stopwatch.toString()}`
+      );
+
+      if (packageJsonInjectedDependenciesHash) {
+        // if packageJsonInjectedDependenciesHash exists
+        // make sure it matches the value in repoState
+        if (packageJsonInjectedDependenciesHash !== repoState.packageJsonInjectedDependenciesHash) {
+          shrinkwrapWarnings.push(`Some injected dependencies' package.json might have been modified.`);
+          shrinkwrapIsUpToDate = false;
+        }
+      } else {
+        // if packageJsonInjectedDependenciesHash not exists
+        // there is a situation that the subspace previously has injected dependencies but removed
+        // so we can check if the repoState up to date
+        if (repoState.packageJsonInjectedDependenciesHash !== undefined) {
+          shrinkwrapWarnings.push(`Some injected dependencies' package.json might have been modified.`);
+          shrinkwrapIsUpToDate = false;
+        }
       }
     }
 
@@ -302,8 +331,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     const lockfileDependenciesMetaByProjectRelativePath: { [key: string]: IDependenciesMetaTable } = {};
     if (shrinkwrapFile?.importers !== undefined) {
       for (const [key, value] of shrinkwrapFile?.importers) {
+        const projectRelativePath: string = Path.convertToSlashes(key);
+
+        // we only need to verify packages that exist in package.json and pnpm-lock.yaml
+        // PNPM won't actively remove deleted packages in importers, unless it has to
+        // so it is possible that a deleted package still showing in pnpm-lock.yaml
+        if (expectedDependenciesMetaByProjectRelativePath[projectRelativePath] === undefined) {
+          continue;
+        }
         if (value.dependenciesMeta !== undefined) {
-          lockfileDependenciesMetaByProjectRelativePath[Path.convertToSlashes(key)] = value.dependenciesMeta;
+          lockfileDependenciesMetaByProjectRelativePath[projectRelativePath] = value.dependenciesMeta;
         }
       }
     }
@@ -313,6 +350,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       expectedDependenciesMetaByProjectRelativePath,
       lockfileDependenciesMetaByProjectRelativePath
     );
+
     if (!dependenciesMetaAreEqual) {
       shrinkwrapWarnings.push(
         "The dependenciesMeta settings in one or more package.json don't match the current shrinkwrap."

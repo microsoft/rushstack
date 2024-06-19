@@ -29,6 +29,7 @@ Positional arguments:
     init-autoinstaller  Initializes a new autoinstaller
     init-deploy         Creates a deployment scenario config file for use 
                         with \\"rush deploy\\".
+    init-subspace       Create a new subspace.
     install             Install package dependencies for all projects in the 
                         repo according to the shrinkwrap file
     link                Create node_modules symlinks for all projects
@@ -582,6 +583,19 @@ Optional arguments:
                         name must be lowercase and separated by dashes. For 
                         example, if the name is \\"web\\", then the config file 
                         would be \\"common/config/rush/deploy-web.json\\".
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: init-subspace 1`] = `
+"usage: rush init-subspace [-h] -n SUBSPACE_NAME
+
+Use this command to create a new subspace with the default subspace 
+configuration files.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -n SUBSPACE_NAME, --name SUBSPACE_NAME
+                        The name of the subspace that is being initialized.
 "
 `;
 
