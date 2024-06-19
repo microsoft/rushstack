@@ -25,7 +25,7 @@ import type { ExplorerCommandLineParser } from '../ExplorerCommandLineParser';
 export class StartAction extends CommandLineAction {
   private readonly _terminal: ITerminal;
   private readonly _isDebug: boolean;
-  private readonly _subspaceParameter: CommandLineStringParameter;
+  private readonly _subspaceParameter: IReqiuredCommandLineStringParameter;
 
   public constructor(parser: ExplorerCommandLineParser) {
     super({
