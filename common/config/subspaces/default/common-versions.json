@@ -48,6 +48,7 @@
    * will recalculate all version selections.
    */
   // "implicitlyPreferredVersions": false,
+
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
    * uncomment this line. This is effectively similar to running "rush check" before any
