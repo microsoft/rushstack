@@ -59,7 +59,7 @@ export class DependencyAnalyzer {
       this._analysisBySubspace = new WeakMap();
     }
 
-    const subspaceToAnalyze = subspace || this._rushConfiguration.defaultSubspace;
+    const subspaceToAnalyze: Subspace = subspace || this._rushConfiguration.defaultSubspace;
     if (!this._analysisBySubspace.has(subspaceToAnalyze)) {
       this._analysisBySubspace.set(
         subspaceToAnalyze,
