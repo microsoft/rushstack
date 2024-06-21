@@ -137,10 +137,7 @@ if (sdkContext.rushLibModule === undefined) {
       terminal.writeVerboseLine(`Try to load ${RUSH_LIB_NAME} from rush global folder`);
       const rushGlobalFolder: typeof RushGlobalFolder = new RushGlobalFolder();
       // The path needs to keep align with the logic inside RushVersionSelector
-      const expectedGlobalRushInstalledFolder: string = path.join(
-        rushGlobalFolder.nodeSpecificPath,
-        `rush-${rushVersion}`
-      );
+      const expectedGlobalRushInstalledFolder: string = `${rushGlobalFolder.nodeSpecificPath}/rush-${rushVersion}`
       terminal.writeVerboseLine(
         `The expected global rush installed folder is "${expectedGlobalRushInstalledFolder}"`
       );
@@ -154,10 +151,7 @@ if (sdkContext.rushLibModule === undefined) {
       global.___rush___rushLibModuleFromRushGlobalFolder = sdkContext.rushLibModule;
       terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} installed from rush global folder`);
     } else {
-      const installRunNodeModuleFolder: string = path.join(
-        monorepoRoot,
-        `common/temp/install-run/@microsoft+rush@${rushVersion}`
-      );
+      const installRunNodeModuleFolder: string = `${monorepoRoot}/common/temp/install-run/@microsoft+rush@${rushVersion}`
 
       try {
         // First, try to load the version of "rush-lib" that was installed by install-run-rush.js
@@ -166,10 +160,7 @@ if (sdkContext.rushLibModule === undefined) {
       } catch (e1) {
         let installAndRunRushStderrContent: string = '';
         try {
-          const installAndRunRushJSPath: string = path.join(
-            monorepoRoot,
-            'common/scripts/install-run-rush.js'
-          );
+          const installAndRunRushJSPath: string = `${monorepoRoot}/common/scripts/install-run-rush.js`;
 
           terminal.writeLine('The Rush engine has not been installed yet. Invoking install-run-rush.js...');
 

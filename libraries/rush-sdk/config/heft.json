@@ -40,7 +40,7 @@
         },
 
         "generate-stubs": {
-          "taskDependencies": ["webpack"],
+          "taskDependencies": ["typescript"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft",
             "pluginName": "run-script-plugin",
