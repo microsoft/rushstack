@@ -18,8 +18,8 @@ module.exports = () => {
     mode: 'development', // So the output isn't minified
     devtool: 'source-map',
     entry: {
-      index: `${__dirname}/lib-esnext/index.js`,
-      loader: `${__dirname}/lib-esnext/loader.js`
+      index: `${__dirname}/lib-commonjs/index.js`,
+      loader: `${__dirname}/lib-commonjs/loader.js`
     },
     output: {
       path: `${__dirname}/lib-shim`,
