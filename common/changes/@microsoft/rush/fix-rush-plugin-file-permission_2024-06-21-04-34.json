@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "The permission of Git committed rush plugin files are consolidated to 644",
+      "comment": "Normalize the file permissions (644) for Rush plugin files that are committed to Git",
       "type": "none"
     }
   ],
