@@ -18,8 +18,8 @@ module.exports = () => {
     mode: 'development', // So the output isn't minified
     devtool: 'source-map',
     entry: {
-      index: `${__dirname}/lib-commonjs/index.js`,
-      loader: `${__dirname}/lib-commonjs/loader.js`
+      index: `${__dirname}/lib-esnext/index.js`,
+      loader: `${__dirname}/lib-esnext/loader.js`
     },
     output: {
       path: `${__dirname}/lib-shim`,
@@ -30,12 +30,7 @@ module.exports = () => {
       }
     },
     target: 'node',
-    plugins: [
-      new PreserveDynamicRequireWebpackPlugin(),
-      new webpack.ids.DeterministicModuleIdsPlugin({
-        maxLength: 6
-      })
-    ],
+    plugins: [new PreserveDynamicRequireWebpackPlugin()],
     externals: [
       ({ request }, callback) => {
         let packageName;

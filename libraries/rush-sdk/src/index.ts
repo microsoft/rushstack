@@ -10,6 +10,7 @@ import {
   Executable
 } from '@rushstack/node-core-library';
 import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
+import { RushGlobalFolder } from '@microsoft/rush-lib/lib-esnext/api/RushGlobalFolder';
 import type { SpawnSyncReturns } from 'child_process';
 import {
   RUSH_LIB_NAME,
@@ -132,12 +133,10 @@ if (sdkContext.rushLibModule === undefined) {
     const { rushVersion } = rushJson;
 
     try {
-      const { RushGlobalFolder } = require('@microsoft/rush-lib/lib-esnext/api/RushGlobalFolder');
-      terminal.writeLine(RushGlobalFolder);
       terminal.writeVerboseLine(`Try to load ${RUSH_LIB_NAME} from rush global folder`);
       const rushGlobalFolder: typeof RushGlobalFolder = new RushGlobalFolder();
       // The path needs to keep align with the logic inside RushVersionSelector
-      const expectedGlobalRushInstalledFolder: string = `${rushGlobalFolder.nodeSpecificPath}/rush-${rushVersion}`
+      const expectedGlobalRushInstalledFolder: string = `${rushGlobalFolder.nodeSpecificPath}/rush-${rushVersion}`;
       terminal.writeVerboseLine(
         `The expected global rush installed folder is "${expectedGlobalRushInstalledFolder}"`
       );
@@ -151,7 +150,7 @@ if (sdkContext.rushLibModule === undefined) {
       global.___rush___rushLibModuleFromRushGlobalFolder = sdkContext.rushLibModule;
       terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} installed from rush global folder`);
     } else {
-      const installRunNodeModuleFolder: string = `${monorepoRoot}/common/temp/install-run/@microsoft+rush@${rushVersion}`
+      const installRunNodeModuleFolder: string = `${monorepoRoot}/common/temp/install-run/@microsoft+rush@${rushVersion}`;
 
       try {
         // First, try to load the version of "rush-lib" that was installed by install-run-rush.js
