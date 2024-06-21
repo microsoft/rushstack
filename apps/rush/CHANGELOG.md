@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 19 Jun 2024 23:59:09 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Jun 2024 00:15:54 GMT and should not be manually modified.
+
+## 5.129.3
+Fri, 21 Jun 2024 00:15:54 GMT
+
+### Updates
+
+- Fixed an issue where DependencyAnalyzer caches the same analysis for all subspaces
 
 ## 5.129.2
 Wed, 19 Jun 2024 23:59:09 GMT

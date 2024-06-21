@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.129.3",
+      "tag": "@microsoft/rush_v5.129.3",
+      "date": "Fri, 21 Jun 2024 00:15:54 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed an issue where DependencyAnalyzer caches the same analysis for all subspaces"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.129.2",
       "tag": "@microsoft/rush_v5.129.2",
       "date": "Wed, 19 Jun 2024 23:59:09 GMT",
