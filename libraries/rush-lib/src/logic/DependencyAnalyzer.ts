@@ -33,7 +33,7 @@ export class DependencyAnalyzer {
     | undefined;
 
   private _rushConfiguration: RushConfiguration;
-  private _analysis: IDependencyAnalysis | undefined;
+  private _analysisBySubspace: WeakMap<Subspace, IDependencyAnalysis> | undefined;
 
   private constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
@@ -55,14 +55,19 @@ export class DependencyAnalyzer {
   }
 
   public getAnalysis(subspace?: Subspace, addAction?: boolean): IDependencyAnalysis {
-    if (!this._analysis) {
-      this._analysis = this._getAnalysisInternal(
-        subspace || this._rushConfiguration.defaultSubspace,
-        addAction
+    if (!this._analysisBySubspace) {
+      this._analysisBySubspace = new WeakMap();
+    }
+
+    const subspaceToAnalyze: Subspace = subspace || this._rushConfiguration.defaultSubspace;
+    if (!this._analysisBySubspace.has(subspaceToAnalyze)) {
+      this._analysisBySubspace.set(
+        subspaceToAnalyze,
+        this._getAnalysisInternal(subspace || this._rushConfiguration.defaultSubspace, addAction)
       );
     }
 
-    return this._analysis;
+    return this._analysisBySubspace.get(subspaceToAnalyze) as IDependencyAnalysis;
   }
 
   /**

@@ -17,7 +17,16 @@ import {
   type FolderItem,
   Async
 } from '@rushstack/node-core-library';
+import { existsSync } from 'fs';
+import { readFile, unlink } from 'fs/promises';
 import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
+import {
+  type ILockfile,
+  type ILockfilePackage,
+  type ILogMessageCallbackOptions,
+  pnpmSyncGetJsonVersion,
+  pnpmSyncPrepareAsync
+} from 'pnpm-sync-lib';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
@@ -49,6 +58,8 @@ import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfigura
 import type { Subspace } from '../../api/Subspace';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 import { FlagFile } from '../../api/FlagFile';
+import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
+import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -258,6 +269,77 @@ export abstract class BaseInstallManager {
     } else {
       // eslint-disable-next-line no-console
       console.log('Installation is already up-to-date.');
+    }
+
+    const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+    // if usePnpmSyncForInjectedDependencies is true
+    // the pnpm-sync will generate the pnpm-sync.json based on lockfile
+    if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
+      const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
+      const dotPnpmFolder: string = `${subspace.getSubspaceTempFolder()}/node_modules/.pnpm`;
+
+      // we have an edge case here
+      // if a package.json has no dependencies, pnpm will still generate the pnpm-lock.yaml but not .pnpm folder
+      // so we need to make sure pnpm-lock.yaml and .pnpm exists before calling the pnpmSync APIs
+      if ((await FileSystem.existsAsync(pnpmLockfilePath)) && (await FileSystem.existsAsync(dotPnpmFolder))) {
+        await pnpmSyncPrepareAsync({
+          lockfilePath: pnpmLockfilePath,
+          dotPnpmFolder,
+          lockfileId: subspace.subspaceName,
+          ensureFolderAsync: FileSystem.ensureFolderAsync,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          readPnpmLockfile: async (lockfilePath: string) => {
+            const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
+              lockfilePath,
+              { withCaching: true }
+            );
+
+            if (!wantedPnpmLockfile) {
+              return undefined;
+            } else {
+              const lockfilePackages: Record<string, ILockfilePackage> = Object.create(null);
+              for (const versionPath of wantedPnpmLockfile.packages.keys()) {
+                lockfilePackages[versionPath] = {
+                  dependencies: wantedPnpmLockfile.packages.get(versionPath)?.dependencies as Record<
+                    string,
+                    string
+                  >,
+                  optionalDependencies: wantedPnpmLockfile.packages.get(versionPath)
+                    ?.optionalDependencies as Record<string, string>
+                };
+              }
+
+              const result: ILockfile = {
+                lockfileVersion: wantedPnpmLockfile.shrinkwrapFileMajorVersion,
+                importers: Object.fromEntries(wantedPnpmLockfile.importers.entries()),
+                packages: lockfilePackages
+              };
+
+              return result;
+            }
+          },
+          logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
+            PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
+        });
+      }
+
+      // clean up the out of date .pnpm-sync.json
+      for (const rushProject of subspace.getProjects()) {
+        const pnpmSyncJsonPath: string = `${rushProject.projectFolder}/node_modules/.pnpm-sync.json`;
+        if (!existsSync(pnpmSyncJsonPath)) {
+          continue;
+        }
+
+        let existingPnpmSyncJsonFile: { version: string } | undefined;
+        try {
+          existingPnpmSyncJsonFile = JSON.parse((await readFile(pnpmSyncJsonPath)).toString());
+          if (existingPnpmSyncJsonFile?.version !== pnpmSyncGetJsonVersion()) {
+            await unlink(pnpmSyncJsonPath);
+          }
+        } catch (e) {
+          await unlink(pnpmSyncJsonPath);
+        }
+      }
     }
 
     // Perform any post-install work the install manager requires

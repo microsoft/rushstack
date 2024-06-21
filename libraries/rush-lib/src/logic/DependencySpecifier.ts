@@ -5,6 +5,41 @@ import npmPackageArg from 'npm-package-arg';
 import { InternalError } from '@rushstack/node-core-library';
 
 /**
+ * match workspace protocol in dependencies value declaration in `package.json`
+ * example:
+ * `"workspace:*"`
+ * `"workspace:alias@1.2.3"`
+ */
+const WORKSPACE_PREFIX_REGEX: RegExp = /^workspace:((?<alias>[^._/][^@]*)@)?(?<version>.*)$/;
+
+/**
+ * resolve workspace protocol(from `@pnpm/workspace.spec-parser`).
+ * used by pnpm. see [pkgs-graph](https://github.com/pnpm/pnpm/blob/27c33f0319f86c45c1645d064cd9c28aada80780/workspace/pkgs-graph/src/index.ts#L49)
+ */
+class WorkspaceSpec {
+  public readonly alias?: string;
+  public readonly version: string;
+  public readonly versionSpecifier: string;
+
+  public constructor(version: string, alias?: string) {
+    this.version = version;
+    this.alias = alias;
+    this.versionSpecifier = alias ? `${alias}@${version}` : version;
+  }
+
+  public static tryParse(pref: string): WorkspaceSpec | undefined {
+    const parts: RegExpExecArray | null = WORKSPACE_PREFIX_REGEX.exec(pref);
+    if (parts?.groups) {
+      return new WorkspaceSpec(parts.groups.version, parts.groups.alias);
+    }
+  }
+
+  public toString(): `workspace:${string}` {
+    return `workspace:${this.versionSpecifier}`;
+  }
+}
+
+/**
  * The parsed format of a provided version specifier.
  */
 export enum DependencySpecifierType {
@@ -89,10 +124,18 @@ export class DependencySpecifier {
 
     // Workspace ranges are a feature from PNPM and Yarn. Set the version specifier
     // to the trimmed version range.
-    if (versionSpecifier.startsWith('workspace:')) {
+    const workspaceSpecResult: WorkspaceSpec | undefined = WorkspaceSpec.tryParse(versionSpecifier);
+    if (workspaceSpecResult) {
       this.specifierType = DependencySpecifierType.Workspace;
-      this.versionSpecifier = versionSpecifier.slice(this.specifierType.length + 1).trim();
-      this.aliasTarget = undefined;
+      this.versionSpecifier = workspaceSpecResult.versionSpecifier;
+
+      if (workspaceSpecResult.alias) {
+        // "workspace:some-package@^1.2.3" should be resolved as alias
+        this.aliasTarget = new DependencySpecifier(workspaceSpecResult.alias, workspaceSpecResult.version);
+      } else {
+        this.aliasTarget = undefined;
+      }
+
       return;
     }
 

@@ -43,7 +43,7 @@ export class SubspacePnpmfileConfiguration {
     });
 
     const subspaceGlobalPnpmfileShimSettings: ISubspacePnpmfileShimSettings =
-      SubspacePnpmfileConfiguration._getSubspacePnpmfileShimSettings(rushConfiguration, subspace);
+      SubspacePnpmfileConfiguration.getSubspacePnpmfileShimSettings(rushConfiguration, subspace);
 
     // Write the settings file used by the shim
     await JsonFile.saveAsync(
@@ -55,7 +55,7 @@ export class SubspacePnpmfileConfiguration {
     );
   }
 
-  private static _getSubspacePnpmfileShimSettings(
+  public static getSubspacePnpmfileShimSettings(
     rushConfiguration: RushConfiguration,
     subspace: Subspace
   ): ISubspacePnpmfileShimSettings {

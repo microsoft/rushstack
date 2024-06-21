@@ -120,6 +120,7 @@ export type CobuildLockProviderFactory = (cobuildJson: ICobuildJson) => ICobuild
 // @public
 export class CommonVersionsConfiguration {
     readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
+    readonly ensureConsistentVersions: boolean | undefined;
     readonly filePath: string;
     getAllPreferredVersions(): Map<string, string>;
     getPreferredVersionsHash(): string;
@@ -1124,6 +1125,7 @@ export class RepoStateFile {
     readonly filePath: string;
     get isValid(): boolean;
     static loadFromFile(jsonFilename: string): RepoStateFile;
+    get packageJsonInjectedDependenciesHash(): string | undefined;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
     refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined): boolean;
@@ -1165,6 +1167,7 @@ export class RushConfiguration {
     readonly customTipsConfigurationFilePath: string;
     // @beta (undocumented)
     get defaultSubspace(): Subspace;
+    // @deprecated
     readonly ensureConsistentVersions: boolean;
     // @beta
     readonly eventHooks: EventHooks;
@@ -1459,6 +1462,8 @@ export class Subspace {
     // @beta
     getCommonVersionsFilePath(): string;
     // @beta
+    getPackageJsonInjectedDependenciesHash(): string | undefined;
+    // @beta
     getPnpmConfigFilePath(): string;
     // @beta
     getPnpmfilePath(): string;
@@ -1478,6 +1483,8 @@ export class Subspace {
     getTempShrinkwrapFilename(): string;
     // @beta
     getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string;
+    // @beta
+    get shouldEnsureConsistentVersions(): boolean;
     // (undocumented)
     readonly subspaceName: string;
 }

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as crypto from 'crypto';
 
 import { FileSystem } from '@rushstack/node-core-library';
 import type { RushConfiguration } from './RushConfiguration';
@@ -12,6 +13,9 @@ import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import type { IPackageJson } from '@rushstack/node-core-library';
+import { SubspacePnpmfileConfiguration } from '../logic/pnpm/SubspacePnpmfileConfiguration';
+import type { ISubspacePnpmfileShimSettings } from '../logic/pnpm/IPnpmfile';
 
 /**
  * @internal
@@ -267,6 +271,25 @@ export class Subspace {
   }
 
   /**
+   * Gets the ensureConsistentVersions property from the common-versions.json config file,
+   * or from the rush.json file if it isn't defined in common-versions.json
+   * @beta
+   */
+  public get shouldEnsureConsistentVersions(): boolean {
+    // If the subspaces feature is enabled, or the ensureConsistentVersions field is defined, return the value of the field
+    if (
+      this._rushConfiguration.subspacesFeatureEnabled ||
+      this.getCommonVersions().ensureConsistentVersions !== undefined
+    ) {
+      return !!this.getCommonVersions().ensureConsistentVersions;
+    }
+
+    // Fallback to ensureConsistentVersions in rush.json if subspaces is not enabled,
+    // or if the setting is not defined in the common-versions.json file
+    return this._rushConfiguration.ensureConsistentVersions;
+  }
+
+  /**
    * Gets the path to the repo-state.json file.
    * @beta
    */
@@ -320,5 +343,82 @@ export class Subspace {
   /** @internal */
   public _addProject(project: RushConfigurationProject): void {
     this._projects.push(project);
+  }
+
+  /**
+   * Returns hash value of injected dependencies in related package.json.
+   * @beta
+   */
+  public getPackageJsonInjectedDependenciesHash(): string | undefined {
+    const allPackageJson: IPackageJson[] = [];
+
+    const relatedProjects: RushConfigurationProject[] = [];
+    const subspacePnpmfileShimSettings: ISubspacePnpmfileShimSettings =
+      SubspacePnpmfileConfiguration.getSubspacePnpmfileShimSettings(this._rushConfiguration, this);
+
+    for (const rushProject of this.getProjects()) {
+      const injectedDependencies: Array<string> =
+        subspacePnpmfileShimSettings?.subspaceProjects[rushProject.packageName]?.injectedDependencies || [];
+      if (injectedDependencies.length === 0) {
+        continue;
+      }
+
+      const injectedDependencySet: Set<string> = new Set(injectedDependencies);
+
+      for (const dependencyProject of rushProject.dependencyProjects) {
+        if (injectedDependencySet.has(dependencyProject.packageName)) {
+          relatedProjects.push(dependencyProject);
+        }
+      }
+    }
+
+    // this means no injected dependencies found for current subspace
+    if (relatedProjects.length === 0) {
+      return undefined;
+    }
+
+    // get all related package.json
+    while (relatedProjects.length > 0) {
+      const rushProject: RushConfigurationProject = relatedProjects.pop()!;
+      // collect fields that could update the `pnpm-lock.yaml`
+      const {
+        name,
+        version,
+        bin,
+        dependencies,
+        devDependencies,
+        peerDependencies,
+        optionalDependencies,
+        dependenciesMeta,
+        peerDependenciesMeta,
+        resolutions
+      } = rushProject.packageJson;
+
+      allPackageJson.push({
+        name,
+        version,
+        bin,
+        dependencies,
+        devDependencies,
+        peerDependencies,
+        optionalDependencies,
+        dependenciesMeta,
+        peerDependenciesMeta,
+        resolutions
+      });
+
+      relatedProjects.push(...rushProject.dependencyProjects);
+    }
+
+    const collator: Intl.Collator = new Intl.Collator('en');
+    allPackageJson.sort((pa, pb) => collator.compare(pa.name, pb.name));
+    const hash: crypto.Hash = crypto.createHash('sha1');
+    for (const packageFile of allPackageJson) {
+      hash.update(JSON.stringify(packageFile));
+    }
+
+    const packageJsonInjectedDependenciesHash: string = hash.digest('hex');
+
+    return packageJsonInjectedDependenciesHash;
   }
 }

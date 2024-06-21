@@ -346,7 +346,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _disallowInsecureSha1(
     customTipsConfiguration: CustomTipsConfiguration,
     exemptPackageVersions: Record<string, string[]>,
-    terminal: ITerminal
+    terminal: ITerminal,
+    subspaceName: string
   ): boolean {
     const exemptPackageList: Map<string, boolean> = new Map();
     for (const [pkgName, versions] of Object.entries(exemptPackageVersions)) {
@@ -361,8 +362,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         !exemptPackageList.has(this._parseDependencyPath(pkgName))
       ) {
         terminal.writeErrorLine(
-          'Error: An integrity field with "sha1" was found in pnpm-lock.yaml;' +
-            ' this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n'
+          'Error: An integrity field with "sha1" was detected in the pnpm-lock.yaml file located in subspace ' +
+            `${subspaceName}; this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n`
         );
 
         customTipsConfiguration._showErrorTip(terminal, CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1);
@@ -388,7 +389,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       const isError: boolean = this._disallowInsecureSha1(
         rushConfiguration.customTipsConfiguration,
         pnpmLockfilePolicies.disallowInsecureSha1.exemptPackageVersions,
-        terminal
+        terminal,
+        subspace.subspaceName
       );
       if (isError) {
         invalidPoliciesCount += 1;

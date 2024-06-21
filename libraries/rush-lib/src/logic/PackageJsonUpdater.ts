@@ -150,7 +150,8 @@ export class PackageJsonUpdater {
         latestVersion,
         implicitlyPreferredVersion,
         explicitlyPreferredVersion,
-        inferredRangeStyle
+        inferredRangeStyle,
+        commonVersionsConfiguration.ensureConsistentVersions
       );
 
       if (devDependency) {
@@ -170,7 +171,7 @@ export class PackageJsonUpdater {
       if (
         existingSpecifiedVersions &&
         !existingSpecifiedVersions.has(version) &&
-        this._rushConfiguration.ensureConsistentVersions &&
+        commonVersionsConfiguration.ensureConsistentVersions &&
         !updateOtherPackages
       ) {
         // There are existing versions, and the version we're going to use is not one of them, and this repo
@@ -369,7 +370,8 @@ export class PackageJsonUpdater {
         initialVersion,
         implicitlyPreferredVersion,
         explicitlyPreferredVersion,
-        rangeStyle
+        rangeStyle,
+        commonVersionsConfiguration.ensureConsistentVersions
       );
 
       dependenciesToAddOrUpdate[packageName] = version;
@@ -384,7 +386,7 @@ export class PackageJsonUpdater {
       if (
         existingSpecifiedVersions &&
         !existingSpecifiedVersions.has(version) &&
-        this._rushConfiguration.ensureConsistentVersions &&
+        commonVersionsConfiguration.ensureConsistentVersions &&
         !updateOtherPackages
       ) {
         // There are existing versions, and the version we're going to use is not one of them, and this repo
@@ -414,7 +416,10 @@ export class PackageJsonUpdater {
       // we need to do a mismatch check
       if (updateOtherPackages) {
         const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-          this._rushConfiguration
+          this._rushConfiguration,
+          {
+            subspace
+          }
         );
         otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
       }
@@ -551,7 +556,8 @@ export class PackageJsonUpdater {
     initialSpec: string | undefined,
     implicitlyPreferredVersion: string | undefined,
     explicitlyPreferredVersion: string | undefined,
-    rangeStyle: SemVerStyle
+    rangeStyle: SemVerStyle,
+    ensureConsistentVersions: boolean | undefined
   ): Promise<string> {
     this._terminal.writeLine(Colorize.gray(`Determining new version for dependency: ${packageName}`));
     if (initialSpec) {
@@ -589,7 +595,7 @@ export class PackageJsonUpdater {
       }
     }
 
-    if (this._rushConfiguration.ensureConsistentVersions && !initialSpec) {
+    if (ensureConsistentVersions && !initialSpec) {
       if (implicitlyPreferredVersion) {
         this._terminal.writeLine(
           `Assigning the version "${Colorize.cyan(implicitlyPreferredVersion)}" for "${packageName}" ` +

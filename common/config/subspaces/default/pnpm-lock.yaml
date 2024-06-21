@@ -3330,8 +3330,8 @@ importers:
         specifier: ~6.1.0
         version: 6.1.1
       pnpm-sync-lib:
-        specifier: 0.2.6
-        version: 0.2.6
+        specifier: 0.2.8
+        version: 0.2.8
       read-package-tree:
         specifier: ~5.1.5
         version: 5.1.6
@@ -3934,8 +3934,8 @@ importers:
   ../../../rush-plugins/rush-azure-storage-build-cache-plugin:
     dependencies:
       '@azure/identity':
-        specifier: ~4.0.0
-        version: 4.0.1
+        specifier: ~4.2.1
+        version: 4.2.1
       '@azure/storage-blob':
         specifier: ~12.17.0
         version: 12.17.0
@@ -5201,8 +5201,8 @@ packages:
       tslib: 2.6.2
     dev: false
 
-  /@azure/identity@4.0.1:
-    resolution: {integrity: sha512-yRdgF03SFLqUMZZ1gKWt0cs0fvrDIkq2bJ6Oidqcoo5uM85YMBnXWMzYKK30XqIT76lkFyAaoAAy5knXhrG4Lw==}
+  /@azure/identity@4.2.1:
+    resolution: {integrity: sha512-U8hsyC9YPcEIzoaObJlRDvp7KiF0MGS7xcWbyJSVvXRkC/HXo1f0oYeBYmEvVgRfacw7GHf6D6yAoh9JHz6A5Q==}
     engines: {node: '>=18.0.0'}
     dependencies:
       '@azure/abort-controller': 1.1.0
@@ -5212,8 +5212,8 @@ packages:
       '@azure/core-tracing': 1.1.0
       '@azure/core-util': 1.8.0
       '@azure/logger': 1.1.0
-      '@azure/msal-browser': 3.10.0
-      '@azure/msal-node': 2.6.4
+      '@azure/msal-browser': 3.17.0
+      '@azure/msal-node': 2.9.2
       events: 3.3.0
       jws: 4.0.0
       open: 8.4.2
@@ -5230,23 +5230,23 @@ packages:
       tslib: 2.6.2
     dev: false
 
-  /@azure/msal-browser@3.10.0:
-    resolution: {integrity: sha512-mnmi8dCXVNZI+AGRq0jKQ3YiodlIC4W9npr6FCB9WN6NQT+6rq+cIlxgUb//BjLyzKsnYo+i4LROGeMyU+6v1A==}
+  /@azure/msal-browser@3.17.0:
+    resolution: {integrity: sha512-csccKXmW2z7EkZ0I3yAoW/offQt+JECdTIV/KrnRoZyM7wCSsQWODpwod8ZhYy7iOyamcHApR9uCh0oD1M+0/A==}
     engines: {node: '>=0.8.0'}
     dependencies:
-      '@azure/msal-common': 14.7.1
+      '@azure/msal-common': 14.12.0
     dev: false
 
-  /@azure/msal-common@14.7.1:
-    resolution: {integrity: sha512-v96btzjM7KrAu4NSEdOkhQSTGOuNUIIsUdB8wlyB9cdgl5KqEKnTonHUZ8+khvZ6Ap542FCErbnTyDWl8lZ2rA==}
+  /@azure/msal-common@14.12.0:
+    resolution: {integrity: sha512-IDDXmzfdwmDkv4SSmMEyAniJf6fDu3FJ7ncOjlxkDuT85uSnLEhZi3fGZpoR7T4XZpOMx9teM9GXBgrfJgyeBw==}
     engines: {node: '>=0.8.0'}
     dev: false
 
-  /@azure/msal-node@2.6.4:
-    resolution: {integrity: sha512-nNvEPx009/80UATCToF+29NZYocn01uKrB91xtFr7bSqkqO1PuQGXRyYwryWRztUrYZ1YsSbw9A+LmwOhpVvcg==}
+  /@azure/msal-node@2.9.2:
+    resolution: {integrity: sha512-8tvi6Cos3m+0KmRbPjgkySXi+UQU/QiuVRFnrxIwt5xZlEEFa69O04RTaNESGgImyBBlYbo2mfE8/U8Bbdk1WQ==}
     engines: {node: '>=16'}
     dependencies:
-      '@azure/msal-common': 14.7.1
+      '@azure/msal-common': 14.12.0
       jsonwebtoken: 9.0.2
       uuid: 8.3.2
     dev: false
@@ -22716,8 +22716,8 @@ packages:
       - typescript
     dev: true
 
-  /pnpm-sync-lib@0.2.6:
-    resolution: {integrity: sha512-6bEpWpEo2AJnUeMy6j1+3xm71C/h4LtHDmaBVyNgnsErgJ8uiB8ekWvgheVHsUxz038oFy2tAXPMHrr59VLbdA==}
+  /pnpm-sync-lib@0.2.8:
+    resolution: {integrity: sha512-Jo89drCjl2GNR33we72uTIkhXeuVGxL+xHmNHwmh9nh83TbaveQWC7rfHDM6anczzNb5Vs5sElS6Vxlru3Ba7A==}
     dependencies:
       '@pnpm/dependency-path': 2.1.8
       yaml: 2.4.1

@@ -33,19 +33,13 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
-import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
+import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
-import {
-  type ILockfile,
-  pnpmSyncPrepareAsync,
-  type ILogMessageCallbackOptions,
-  type ILockfilePackage
-} from 'pnpm-sync-lib';
 import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
-import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 import { FlagFile } from '../../api/FlagFile';
+import { Stopwatch } from '../../utilities/Stopwatch';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -151,6 +145,34 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           `Preferred versions from ${RushConstants.commonVersionsFilename} have been modified.`
         );
         shrinkwrapIsUpToDate = false;
+      }
+
+      const stopwatch: Stopwatch = Stopwatch.start();
+
+      const packageJsonInjectedDependenciesHash: string | undefined =
+        subspace.getPackageJsonInjectedDependenciesHash();
+
+      stopwatch.stop();
+
+      this._terminal.writeDebugLine(
+        `Total amount of time spent to hash related package.json files in the injected installation case: ${stopwatch.toString()}`
+      );
+
+      if (packageJsonInjectedDependenciesHash) {
+        // if packageJsonInjectedDependenciesHash exists
+        // make sure it matches the value in repoState
+        if (packageJsonInjectedDependenciesHash !== repoState.packageJsonInjectedDependenciesHash) {
+          shrinkwrapWarnings.push(`Some injected dependencies' package.json might have been modified.`);
+          shrinkwrapIsUpToDate = false;
+        }
+      } else {
+        // if packageJsonInjectedDependenciesHash not exists
+        // there is a situation that the subspace previously has injected dependencies but removed
+        // so we can check if the repoState up to date
+        if (repoState.packageJsonInjectedDependenciesHash !== undefined) {
+          shrinkwrapWarnings.push(`Some injected dependencies' package.json might have been modified.`);
+          shrinkwrapIsUpToDate = false;
+        }
       }
     }
 
@@ -302,8 +324,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     const lockfileDependenciesMetaByProjectRelativePath: { [key: string]: IDependenciesMetaTable } = {};
     if (shrinkwrapFile?.importers !== undefined) {
       for (const [key, value] of shrinkwrapFile?.importers) {
+        const projectRelativePath: string = Path.convertToSlashes(key);
+
+        // we only need to verify packages that exist in package.json and pnpm-lock.yaml
+        // PNPM won't actively remove deleted packages in importers, unless it has to
+        // so it is possible that a deleted package still showing in pnpm-lock.yaml
+        if (expectedDependenciesMetaByProjectRelativePath[projectRelativePath] === undefined) {
+          continue;
+        }
         if (value.dependenciesMeta !== undefined) {
-          lockfileDependenciesMetaByProjectRelativePath[Path.convertToSlashes(key)] = value.dependenciesMeta;
+          lockfileDependenciesMetaByProjectRelativePath[projectRelativePath] = value.dependenciesMeta;
         }
       }
     }
@@ -313,6 +343,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       expectedDependenciesMetaByProjectRelativePath,
       lockfileDependenciesMetaByProjectRelativePath
     );
+
     if (!dependenciesMetaAreEqual) {
       shrinkwrapWarnings.push(
         "The dependenciesMeta settings in one or more package.json don't match the current shrinkwrap."
@@ -515,57 +546,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       });
     } else {
       await doInstallInternalAsync(this.options);
-    }
-
-    // if usePnpmSyncForInjectedDependencies is true
-    // the pnpm-sync will generate the pnpm-sync.json based on lockfile
-    if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
-      const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
-      const dotPnpmFolder: string = `${subspace.getSubspaceTempFolder()}/node_modules/.pnpm`;
-
-      // we have an edge case here
-      // if a package.json has no dependencies, pnpm will still generate the pnpm-lock.yaml but not .pnpm folder
-      // so we need to make sure pnpm-lock.yaml and .pnpm exists before calling the pnpmSync APIs
-      if ((await FileSystem.existsAsync(pnpmLockfilePath)) && (await FileSystem.existsAsync(dotPnpmFolder))) {
-        await pnpmSyncPrepareAsync({
-          lockfilePath: pnpmLockfilePath,
-          dotPnpmFolder,
-          ensureFolderAsync: FileSystem.ensureFolderAsync,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          readPnpmLockfile: async (lockfilePath: string) => {
-            const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFile(
-              lockfilePath,
-              { withCaching: true }
-            );
-
-            if (!wantedPnpmLockfile) {
-              return undefined;
-            } else {
-              const lockfilePackages: Record<string, ILockfilePackage> = Object.create(null);
-              for (const versionPath of wantedPnpmLockfile.packages.keys()) {
-                lockfilePackages[versionPath] = {
-                  dependencies: wantedPnpmLockfile.packages.get(versionPath)?.dependencies as Record<
-                    string,
-                    string
-                  >,
-                  optionalDependencies: wantedPnpmLockfile.packages.get(versionPath)
-                    ?.optionalDependencies as Record<string, string>
-                };
-              }
-
-              const result: ILockfile = {
-                lockfileVersion: wantedPnpmLockfile.shrinkwrapFileMajorVersion,
-                importers: Object.fromEntries(wantedPnpmLockfile.importers.entries()),
-                packages: lockfilePackages
-              };
-
-              return result;
-            }
-          },
-          logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
-            PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
-        });
-      }
     }
 
     // If all attempts fail we just terminate. No special handling needed.

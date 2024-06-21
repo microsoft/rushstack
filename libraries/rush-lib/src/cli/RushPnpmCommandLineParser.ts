@@ -404,7 +404,10 @@ export class RushPnpmCommandLineParser {
         // Replace `pnpm patch-commit` with `rush-pnpm patch-commit` when running
         // `pnpm patch` to avoid the `pnpm patch` command being suggested in the output
         onStdoutStreamChunk = (stdoutChunk: string) => {
-          return stdoutChunk.replace(/pnpm patch-commit/g, 'rush-pnpm patch-commit');
+          return stdoutChunk.replace(
+            /pnpm patch-commit/g,
+            `rush-pnpm --subspace ${this._subspace.subspaceName} patch-commit`
+          );
         };
 
         break;
@@ -412,14 +415,22 @@ export class RushPnpmCommandLineParser {
     }
 
     try {
-      await Utilities.executeCommandAsync({
+      const { exitCode } = await Utilities.executeCommandAsync({
         command: rushConfiguration.packageManagerToolFilename,
         args: this._pnpmArgs,
         workingDirectory: process.cwd(),
         environment: pnpmEnvironmentMap.toObject(),
         keepEnvironment: true,
-        onStdoutStreamChunk
+        onStdoutStreamChunk,
+        captureExitCodeAndSignal: true
       });
+
+      if (typeof exitCode === 'number') {
+        process.exitCode = exitCode;
+      } else {
+        // If the exit code is not a number, the process was terminated by a signal
+        process.exitCode = 1;
+      }
     } catch (e) {
       this._terminal.writeDebugLine(`Error: ${e}`);
     }
@@ -483,11 +494,6 @@ export class RushPnpmCommandLineParser {
   }
 
   private async _doRushUpdateAsync(): Promise<void> {
-    if (this._rushConfiguration.subspacesFeatureEnabled) {
-      this._terminal.writeLine(Colorize.red('The rush-pnpm command is not yet supported for subspaces.'));
-      throw new AlreadyReportedError();
-    }
-
     this._terminal.writeLine();
     this._terminal.writeLine(Colorize.green('Running "rush update"'));
     this._terminal.writeLine();
@@ -508,8 +514,7 @@ export class RushPnpmCommandLineParser {
       pnpmFilterArgumentValues: [],
       selectedProjects: new Set(this._rushConfiguration.projects),
       checkOnly: false,
-      // TODO: Support subspaces
-      subspace: this._rushConfiguration.defaultSubspace,
+      subspace: this._subspace,
       terminal: this._terminal
     };
 
