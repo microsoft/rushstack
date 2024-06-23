@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, writeFile, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import type { Terminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -48,16 +48,19 @@ export class RushAlerts {
     }
     const rushAlertsData: IRushAlertsState = JSON.parse((await readFile(rushAlertsStateFilePath)).toString());
 
-    if (rushAlertsData.lastUpdateTime) {
-      const currentTime: Date = new Date();
-      const lastUpdateTime: Date = new Date(rushAlertsData.lastUpdateTime);
-
-      const hours: number = (Number(currentTime) - Number(lastUpdateTime)) / (1000 * 60 * 60);
-
-      if (hours > 24) {
-        return false;
-      }
+    if (!rushAlertsData.lastUpdateTime) {
+      return false;
     }
+
+    const currentTime: Date = new Date();
+    const lastUpdateTime: Date = new Date(rushAlertsData.lastUpdateTime);
+
+    const hours: number = (Number(currentTime) - Number(lastUpdateTime)) / (1000 * 60 * 60);
+
+    if (hours > 24) {
+      return false;
+    }
+
     return true;
   }
 
@@ -82,13 +85,7 @@ export class RushAlerts {
           }
         }
 
-        if (validAlerts.length > 0) {
-          const rushAlertsState: IRushAlertsState = {
-            lastUpdateTime: new Date().toString(),
-            alerts: validAlerts
-          };
-          await this._writeRushAlertStateAsync(rushAlertsState);
-        }
+        await this._writeRushAlertStateAsync(validAlerts);
       }
     } catch (e) {
       // console the message only in debug mode
@@ -159,10 +156,25 @@ export class RushAlerts {
     this._terminal.writeLine(borderLine);
   }
 
-  private async _writeRushAlertStateAsync(rushAlertsState: IRushAlertsState): Promise<void> {
-    await writeFile(
-      `${this._rushConfiguration.commonTempFolder}/alerts-state.json`,
-      JSON.stringify(rushAlertsState, null, 2)
-    );
+  private async _writeRushAlertStateAsync(validAlerts: Array<IRushAlertStateEntry>): Promise<void> {
+    const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/alerts-state.json`;
+
+    if (validAlerts.length > 0) {
+      const rushAlertsState: IRushAlertsState = {
+        lastUpdateTime: new Date().toString(),
+        alerts: validAlerts
+      };
+
+      await writeFile(
+        `${this._rushConfiguration.commonTempFolder}/alerts-state.json`,
+        JSON.stringify(rushAlertsState, null, 2)
+      );
+    } else {
+      // if no valid alerts
+      // remove exist alerts state if exist
+      if (existsSync(rushAlertsStateFilePath)) {
+        await unlink(rushAlertsStateFilePath);
+      }
+    }
   }
 }
