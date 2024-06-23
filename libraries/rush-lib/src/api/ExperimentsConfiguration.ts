@@ -98,6 +98,12 @@ export interface IExperimentsJson {
    * across invocations.
    */
   useIPCScriptsInWatchMode?: boolean;
+
+  /**
+   * (UNDER DEVELOPMENT) The Rush alerts is a mechanism to let Monorepo maintainers be able to push alerts to
+   * users during their day to day development activities in CLI.
+   */
+  enablePushRushAlertsToEndUsersInCLI?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);

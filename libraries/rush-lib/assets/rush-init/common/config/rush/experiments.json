@@ -87,5 +87,11 @@
    * of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist
    * across invocations.
    */
-  /*[LINE "HYPOTHETICAL"]*/ "useIPCScriptsInWatchMode": true
+  /*[LINE "HYPOTHETICAL"]*/ "useIPCScriptsInWatchMode": true,
+
+  /**
+   * (UNDER DEVELOPMENT) The Rush alerts is a mechanism to let Monorepo maintainers be able to push alerts to
+   * users during their day to day development activities in CLI.
+   */
+   /*[LINE "HYPOTHETICAL"]*/ "enablePushRushAlertsToEndUsersInCLI": true
 }
