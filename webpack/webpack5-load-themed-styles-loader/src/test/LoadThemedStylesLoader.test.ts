@@ -9,6 +9,9 @@ import getCompiler from './testData/getCompiler';
 const MATCH_GENERATED_LOADER_STRING_REGEXP: RegExp = /var\sloader\s\=\srequire\(["'](.+?)["']\)/;
 const MATCH_LOADER_DOT_LOADSTYLES_FUNCTION_ASYNC_VALUE_REGEXP: RegExp = /loader\.loadStyles\(.+?,\s(.+?)\)/;
 
+// During a parallel build, getCompiler() can sometimes exceed Jest's default timeout of 5 seconds
+jest.setTimeout(10 * 1000); // 10 seconds
+
 describe('webpack5-load-themed-style-loader', () => {
   beforeEach(() => {
     LoadThemedStylesMock.loadedData = [];
