@@ -409,7 +409,8 @@
       "packageName": "@rushstack/lockfile-explorer",
       "projectFolder": "apps/lockfile-explorer",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      // Temporarily suspend publishing while we investigate some issues
+      "shouldPublish": false
     },
     {
       "packageName": "@rushstack/lockfile-explorer-web",
