@@ -9,7 +9,7 @@ import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration
 import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
 import path from 'path';
 
-import { type IAppState, type IRushProjectDetails, ProjectType } from './state';
+import { type IAppState, type IRushProjectDetails, ProjectType } from '../state';
 
 export const init = (options: {
   lockfileExplorerProjectRoot: string;

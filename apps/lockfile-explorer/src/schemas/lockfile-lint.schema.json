@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Lockfile Lint Configuration",
+  "description": "The lockfile-explorer.json configuration file for lockfile-lint tool.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "rules": {
+      "description": "The rules adopted by Monorepo and the lockfile-lint will help to check.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["rule", "project", "requiredVersions"],
+            "properties": {
+              "rule": {
+                "description": "Rule name applied to the project.",
+                "const": "restrict-versions"
+              },
+              "project": {
+                "description": "Project name.",
+                "type": "string"
+              },
+              "requiredVersions": {
+                "description": "List of restrict dependency version.",
+                "type": "object",
+                "patternProperties": {
+                  ".*": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CLI Tool Tests should display help for "lockfile-explorer --help" 1`] = `
+"usage: lockfile-explorer [-h] [-d] <command> ...
+
+lockfile-lint is a tool for linting lockfiles.
+
+Positional arguments:
+  <command>
+    start      Start the application
+
+Optional arguments:
+  -h, --help   Show this help message and exit.
+  -d, --debug  Show the full call stack if an error occurs while executing 
+               the tool
+
+[1mFor detailed help about a specific command, use: lockfile-explorer 
+<command> -h[22m
+"
+`;
+
+exports[`CLI Tool Tests should display help for "lockfile-lint --help" 1`] = `
+"usage: lockfile-lint [-h] <command> ...
+
+lockfile-lint is a tool for linting lockfiles.
+
+Positional arguments:
+  <command>
+    init      Create lockfile-lint.json config file
+    lint      Check if the specified package has a inconsistent package 
+              versions in target project
+
+Optional arguments:
+  -h, --help  Show this help message and exit.
+
+[1mFor detailed help about a specific command, use: lockfile-lint <command> 
+-h[22m
+"
+`;
