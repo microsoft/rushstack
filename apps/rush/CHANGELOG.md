@@ -1,6 +1,35 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 18 Jun 2024 04:02:54 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Jun 2024 00:15:54 GMT and should not be manually modified.
+
+## 5.129.3
+Fri, 21 Jun 2024 00:15:54 GMT
+
+### Updates
+
+- Fixed an issue where DependencyAnalyzer caches the same analysis for all subspaces
+
+## 5.129.2
+Wed, 19 Jun 2024 23:59:09 GMT
+
+### Updates
+
+- Fix an issue where the `rush pnpm ...` command always terminates with an exit code of 1.
+
+## 5.129.1
+Wed, 19 Jun 2024 04:20:03 GMT
+
+### Updates
+
+- Add logic to remove outdated .pnpm-sync.json files during rush install or update
+
+## 5.129.0
+Wed, 19 Jun 2024 03:31:48 GMT
+
+### Updates
+
+- Add a new `init-subspace` command to initialize a new subspace.
+- Move the `ensureConsistentVersions` setting from `rush.json` to `common/config/rush/common-versions.json`, or to `common/config/rush/<subspace>/common-versions.json` if subspaces are enabled.
 
 ## 5.128.5
 Tue, 18 Jun 2024 04:02:54 GMT

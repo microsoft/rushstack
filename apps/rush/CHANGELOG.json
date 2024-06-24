@@ -2,6 +2,57 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.129.3",
+      "tag": "@microsoft/rush_v5.129.3",
+      "date": "Fri, 21 Jun 2024 00:15:54 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed an issue where DependencyAnalyzer caches the same analysis for all subspaces"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.2",
+      "tag": "@microsoft/rush_v5.129.2",
+      "date": "Wed, 19 Jun 2024 23:59:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the `rush pnpm ...` command always terminates with an exit code of 1."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.1",
+      "tag": "@microsoft/rush_v5.129.1",
+      "date": "Wed, 19 Jun 2024 04:20:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add logic to remove outdated .pnpm-sync.json files during rush install or update"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.0",
+      "tag": "@microsoft/rush_v5.129.0",
+      "date": "Wed, 19 Jun 2024 03:31:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new `init-subspace` command to initialize a new subspace."
+          },
+          {
+            "comment": "Move the `ensureConsistentVersions` setting from `rush.json` to `common/config/rush/common-versions.json`, or to `common/config/rush/<subspace>/common-versions.json` if subspaces are enabled."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.128.5",
       "tag": "@microsoft/rush_v5.128.5",
       "date": "Tue, 18 Jun 2024 04:02:54 GMT",

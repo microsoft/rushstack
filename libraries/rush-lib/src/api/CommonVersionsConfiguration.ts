@@ -49,6 +49,8 @@ interface ICommonVersionsJson {
   implicitlyPreferredVersions?: boolean;
 
   allowedAlternativeVersions?: ICommonVersionsJsonVersionsMap;
+
+  ensureConsistentVersions?: boolean;
 }
 
 /**
@@ -77,6 +79,12 @@ export class CommonVersionsConfiguration {
    * If the value is `undefined`, then the default value is `true`.
    */
   public readonly implicitlyPreferredVersions: boolean | undefined;
+
+  /**
+   * If true, then consistent version specifiers for dependencies will be enforced.
+   * I.e. "rush check" is run before some commands.
+   */
+  public readonly ensureConsistentVersions: boolean | undefined;
 
   /**
    * A table that specifies a "preferred version" for a given NPM package.  This feature is typically used
@@ -124,6 +132,7 @@ export class CommonVersionsConfiguration {
       onSet: this._onSetAllowedAlternativeVersions.bind(this)
     });
     this.allowedAlternativeVersions = this._allowedAlternativeVersions.protectedView;
+    this.ensureConsistentVersions = commonVersionsJson?.ensureConsistentVersions;
 
     if (commonVersionsJson) {
       try {
