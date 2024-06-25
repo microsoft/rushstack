@@ -13,4 +13,14 @@ describe('CLI Tool Tests', () => {
     const lintOutput = execSync('node lib/start-lint.js --help').toString();
     expect(lintOutput).toMatchSnapshot();
   });
+
+  it('should display help for "lockfile-lint init --help"', () => {
+    const lintOutput = execSync('node lib/start-lint.js init --help').toString();
+    expect(lintOutput).toMatchSnapshot();
+  });
+
+  it('should display help for "lockfile-lint lint --help"', () => {
+    const lintOutput = execSync('node lib/start-lint.js lint --help').toString();
+    expect(lintOutput).toMatchSnapshot();
+  });
 });

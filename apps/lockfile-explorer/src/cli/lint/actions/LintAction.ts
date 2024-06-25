@@ -39,8 +39,11 @@ export class LintAction extends CommandLineAction {
   public constructor(parser: LintCommandLineParser) {
     super({
       actionName: 'lint',
-      summary: 'Check if the specified package has a inconsistent package versions in target project',
-      documentation: 'Check if the specified package has a inconsistent package versions in target project'
+      summary: 'Check and report dependency issues in your workspace',
+      documentation:
+        'This command applies the policies that are configured in ' +
+        LOCKFILE_LINT_JSON_FILENAME +
+        ', reporting any problems found in your PNPM workspace.'
     });
 
     this._terminal = parser.globalTerminal;

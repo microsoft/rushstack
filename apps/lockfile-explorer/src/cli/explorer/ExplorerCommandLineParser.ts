@@ -34,7 +34,8 @@ export class ExplorerCommandLineParser extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: EXPLORER_TOOL_FILENAME,
-      toolDescription: 'lockfile-lint is a tool for linting lockfiles.'
+      toolDescription:
+        'Lockfile Explorer is a desktop app for investigating and solving version conflicts in a PNPM workspace.'
     });
 
     this._debugParameter = this.defineFlagParameter({

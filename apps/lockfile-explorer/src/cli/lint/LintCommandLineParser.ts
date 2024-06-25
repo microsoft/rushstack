@@ -15,7 +15,8 @@ export class LintCommandLineParser extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: LINT_TOOL_FILENAME,
-      toolDescription: 'lockfile-lint is a tool for linting lockfiles.'
+      toolDescription:
+        'Lockfile Lint applies configured policies to find and report dependency issues in your PNPM workspace.'
     });
 
     this._terminalProvider = new ConsoleTerminalProvider();
