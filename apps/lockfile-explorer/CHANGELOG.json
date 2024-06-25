@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.5.0",
+      "tag": "@rushstack/lockfile-explorer_v1.5.0",
+      "date": "Tue, 25 Jun 2024 06:01:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new \"lockfile-lint\" command"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.17",
       "tag": "@rushstack/lockfile-explorer_v1.4.17",
       "date": "Mon, 03 Jun 2024 23:43:15 GMT",

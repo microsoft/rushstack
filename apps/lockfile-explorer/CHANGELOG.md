@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jun 2024 06:01:28 GMT and should not be manually modified.
+
+## 1.5.0
+Tue, 25 Jun 2024 06:01:28 GMT
+
+### Minor changes
+
+- Add new "lockfile-lint" command
 
 ## 1.4.17
 Mon, 03 Jun 2024 23:43:15 GMT
