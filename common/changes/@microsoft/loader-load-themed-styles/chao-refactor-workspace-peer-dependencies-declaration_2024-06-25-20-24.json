@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "change workspace peer dependencies declaration to workspace:*",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles"
+}

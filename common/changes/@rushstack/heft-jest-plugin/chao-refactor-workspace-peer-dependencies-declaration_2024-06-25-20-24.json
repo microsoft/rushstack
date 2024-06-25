@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "change workspace peer dependencies declaration to workspace:*",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}

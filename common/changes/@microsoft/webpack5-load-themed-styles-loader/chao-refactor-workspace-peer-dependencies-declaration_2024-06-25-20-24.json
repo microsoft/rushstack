@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/webpack5-load-themed-styles-loader",
+      "comment": "change workspace peer dependencies declaration to workspace:*",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/webpack5-load-themed-styles-loader"
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-api-extractor-plugin",
+      "comment": "change workspace peer dependencies declaration to workspace:*",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/heft-api-extractor-plugin"
+}
