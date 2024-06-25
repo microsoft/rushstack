@@ -30,6 +30,7 @@ export interface ILockfileLint {
 }
 
 export interface ILintIssue {
+  project: string;
   rule: string;
   message: string;
 }
@@ -97,7 +98,7 @@ export class CheckAction extends CommandLineAction {
     project: RushConfigurationProject,
     requiredVersions: Record<string, string>
   ): Promise<void> {
-    this._terminal.writeLine(`\nChecking project "${project.packageName}"...\n`);
+    this._terminal.writeLine(`Checking project "${project.packageName}"`);
 
     const projectFolder: string = project.projectFolder;
     const subspace: Subspace = project.subspace;
@@ -203,7 +204,7 @@ export class CheckAction extends CommandLineAction {
               project
             );
             if (message) {
-              issues.push({ rule, message });
+              issues.push({ project, rule, message });
             }
             break;
           }
@@ -216,7 +217,20 @@ export class CheckAction extends CommandLineAction {
       { concurrency: 50 }
     );
     if (issues.length > 0) {
-      for (const issue of issues) {
+      this._terminal.writeLine();
+
+      // Deterministic order
+      for (const issue of issues.sort((a, b): number => {
+        let diff: number = a.project.localeCompare(b.project);
+        if (diff !== 0) {
+          return diff;
+        }
+        diff = a.rule.localeCompare(b.rule);
+        if (diff !== 0) {
+          return diff;
+        }
+        return a.message.localeCompare(b.message);
+      })) {
         this._terminal.writeLine(
           Colorize.red('PROBLEM: ') + Colorize.cyan(`[${issue.rule}] `) + issue.message + '\n'
         );
