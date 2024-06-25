@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 24 Jun 2024 23:49:10 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jun 2024 20:13:29 GMT and should not be manually modified.
+
+## 5.129.5
+Tue, 25 Jun 2024 20:13:29 GMT
+
+### Updates
+
+- Don't include package.json version field when calculating packageJsonInjectedDependenciesHash
 
 ## 5.129.4
 Mon, 24 Jun 2024 23:49:10 GMT
