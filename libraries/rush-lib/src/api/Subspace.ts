@@ -33,6 +33,8 @@ interface ISubspaceDetail {
   tempShrinkwrapPreinstallFilename: string;
 }
 
+interface IPackageJsonLite extends Omit<IPackageJson, 'version'> {}
+
 /**
  * This represents the subspace configurations for a repository, based on the "subspaces.json"
  * configuration file.
@@ -331,7 +333,7 @@ export class Subspace {
    * @beta
    */
   public getPackageJsonInjectedDependenciesHash(): string | undefined {
-    const allPackageJson: IPackageJson[] = [];
+    const allPackageJson: IPackageJsonLite[] = [];
 
     const relatedProjects: RushConfigurationProject[] = [];
     const subspacePnpmfileShimSettings: ISubspacePnpmfileShimSettings =
@@ -364,7 +366,6 @@ export class Subspace {
       // collect fields that could update the `pnpm-lock.yaml`
       const {
         name,
-        version,
         bin,
         dependencies,
         devDependencies,
@@ -377,7 +378,6 @@ export class Subspace {
 
       allPackageJson.push({
         name,
-        version,
         bin,
         dependencies,
         devDependencies,
