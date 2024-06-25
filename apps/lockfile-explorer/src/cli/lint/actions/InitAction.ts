@@ -17,8 +17,10 @@ export class InitAction extends CommandLineAction {
   public constructor(parser: LintCommandLineParser) {
     super({
       actionName: 'init',
-      summary: `Create ${LOCKFILE_LINT_JSON_FILENAME} config file`,
-      documentation: `Create ${LOCKFILE_LINT_JSON_FILENAME} config file`
+      summary: `Create a new ${LOCKFILE_LINT_JSON_FILENAME} config file`,
+      documentation:
+        `This command initializes a new ${LOCKFILE_LINT_JSON_FILENAME} config file.` +
+        `  The created template file includes source code comments that document the settings.`
     });
     this._terminal = parser.globalTerminal;
   }
