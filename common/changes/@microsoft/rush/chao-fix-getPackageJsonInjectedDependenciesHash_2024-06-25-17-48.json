@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Don't include package.json version field when calculating packageJsonInjectedDependenciesHash",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
