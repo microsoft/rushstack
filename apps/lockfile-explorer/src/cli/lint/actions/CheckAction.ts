@@ -29,7 +29,7 @@ export interface ILockfileLint {
   rules: ILintRule[];
 }
 
-export class LintAction extends CommandLineAction {
+export class CheckAction extends CommandLineAction {
   private readonly _terminal: ITerminal;
 
   private _rushConfiguration!: RushConfiguration;
@@ -38,7 +38,7 @@ export class LintAction extends CommandLineAction {
 
   public constructor(parser: LintCommandLineParser) {
     super({
-      actionName: 'lint',
+      actionName: 'check',
       summary: 'Check and report dependency issues in your workspace',
       documentation:
         'This command applies the policies that are configured in ' +

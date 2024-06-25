@@ -4,7 +4,7 @@
 import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 import { CommandLineParser } from '@rushstack/ts-command-line';
 import { InitAction } from './actions/InitAction';
-import { LintAction } from './actions/LintAction';
+import { CheckAction } from './actions/CheckAction';
 
 const LINT_TOOL_FILENAME: 'lockfile-lint' = 'lockfile-lint';
 
@@ -27,6 +27,6 @@ export class LintCommandLineParser extends CommandLineParser {
 
   private _populateActions(): void {
     this.addAction(new InitAction(this));
-    this.addAction(new LintAction(this));
+    this.addAction(new CheckAction(this));
   }
 }

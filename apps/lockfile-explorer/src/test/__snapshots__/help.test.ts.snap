@@ -28,7 +28,7 @@ issues in your PNPM workspace.
 Positional arguments:
   <command>
     init      Create a new lockfile-lint.json config file
-    lint      Check and report dependency issues in your workspace
+    check     Check and report dependency issues in your workspace
 
 Optional arguments:
   -h, --help  Show this help message and exit.
@@ -38,22 +38,22 @@ Optional arguments:
 "
 `;
 
-exports[`CLI Tool Tests should display help for "lockfile-lint init --help" 1`] = `
-"usage: lockfile-lint init [-h]
+exports[`CLI Tool Tests should display help for "lockfile-lint check --help" 1`] = `
+"usage: lockfile-lint check [-h]
 
-This command initializes a new lockfile-lint.json config file. The created 
-template file includes source code comments that document the settings.
+This command applies the policies that are configured in lockfile-lint.json, 
+reporting any problems found in your PNPM workspace.
 
 Optional arguments:
   -h, --help  Show this help message and exit.
 "
 `;
 
-exports[`CLI Tool Tests should display help for "lockfile-lint lint --help" 1`] = `
-"usage: lockfile-lint lint [-h]
+exports[`CLI Tool Tests should display help for "lockfile-lint init --help" 1`] = `
+"usage: lockfile-lint init [-h]
 
-This command applies the policies that are configured in lockfile-lint.json, 
-reporting any problems found in your PNPM workspace.
+This command initializes a new lockfile-lint.json config file. The created 
+template file includes source code comments that document the settings.
 
 Optional arguments:
   -h, --help  Show this help message and exit.
