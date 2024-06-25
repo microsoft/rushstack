@@ -1,18 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CLI Tool Tests should display help for "lockfile-explorer --help" 1`] = `
-"usage: lockfile-explorer [-h] [-d] <command> ...
+"usage: lockfile-explorer [-h] [-d] [--subspace SUBSPACE_NAME]
 
 lockfile-lint is a tool for linting lockfiles.
 
-Positional arguments:
-  <command>
-    start      Start the application
-
 Optional arguments:
-  -h, --help   Show this help message and exit.
-  -d, --debug  Show the full call stack if an error occurs while executing 
-               the tool
+  -h, --help            Show this help message and exit.
+  -d, --debug           Show the full call stack if an error occurs while 
+                        executing the tool
+  --subspace SUBSPACE_NAME
+                        Specifies an individual Rush subspace to check. The 
+                        default value is \\"default\\".
 
 [1mFor detailed help about a specific command, use: lockfile-explorer 
 <command> -h[22m
