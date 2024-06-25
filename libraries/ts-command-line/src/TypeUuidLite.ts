@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 const classPrototypeUuidSymbol: symbol = Symbol.for('TypeUuid.classPrototypeUuid');
 
 export const uuidAlreadyReportedError: string = 'f26b0640-a49b-49d1-9ead-1a516d5920c7';

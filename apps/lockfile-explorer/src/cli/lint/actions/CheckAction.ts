@@ -29,6 +29,11 @@ export interface ILockfileLint {
   rules: ILintRule[];
 }
 
+export interface ILintIssue {
+  rule: string;
+  message: string;
+}
+
 export class CheckAction extends CommandLineAction {
   private readonly _terminal: ITerminal;
 
@@ -62,7 +67,10 @@ export class CheckAction extends CommandLineAction {
       checkedDependencyPaths.add(dependencyPath);
       const { name, version } = parseDependencyPath(shrinkwrapFileMajorVersion, dependencyPath);
       if (name in requiredVersions && !semver.satisfies(version, requiredVersions[name])) {
-        throw new Error(`ERROR: Detected inconsistent version numbers in package '${name}': '${version}'!`);
+        throw new Error(
+          `The version of "${name}" should match "${requiredVersions[name]}";` +
+            ` actual version is "${version}"`
+        );
       }
 
       await Promise.all(
@@ -89,7 +97,7 @@ export class CheckAction extends CommandLineAction {
     project: RushConfigurationProject,
     requiredVersions: Record<string, string>
   ): Promise<void> {
-    this._terminal.writeLine(`Checking the project: ${project.packageName}.`);
+    this._terminal.writeLine(`\nChecking project "${project.packageName}"...\n`);
 
     const projectFolder: string = project.projectFolder;
     const subspace: Subspace = project.subspace;
@@ -148,7 +156,7 @@ export class CheckAction extends CommandLineAction {
   private async _performVersionRestrictionCheckAsync(
     requiredVersions: Record<string, string>,
     projectName: string
-  ): Promise<string | void> {
+  ): Promise<string | undefined> {
     try {
       const project: RushConfigurationProject | undefined =
         this._rushConfiguration?.getProjectByName(projectName);
@@ -159,6 +167,7 @@ export class CheckAction extends CommandLineAction {
       }
       this._checkedProjects.add(project);
       await this._searchAndValidateDependenciesAsync(project, requiredVersions);
+      return undefined;
     } catch (e) {
       return e.message;
     }
@@ -183,15 +192,18 @@ export class CheckAction extends CommandLineAction {
       lintingFile,
       JsonSchema.fromLoadedObject(lockfileLintSchema)
     );
-    const errorMessageList: string[] = [];
+    const issues: ILintIssue[] = [];
     await Async.forEachAsync(
       rules,
       async ({ requiredVersions, project, rule }) => {
         switch (rule) {
           case 'restrict-versions': {
-            const errorMessage = await this._performVersionRestrictionCheckAsync(requiredVersions, project);
-            if (errorMessage) {
-              errorMessageList.push(errorMessage);
+            const message: string | undefined = await this._performVersionRestrictionCheckAsync(
+              requiredVersions,
+              project
+            );
+            if (message) {
+              issues.push({ rule, message });
             }
             break;
           }
@@ -203,10 +215,15 @@ export class CheckAction extends CommandLineAction {
       },
       { concurrency: 50 }
     );
-    if (errorMessageList.length > 0) {
-      this._terminal.writeError(errorMessageList.join('\n'));
+    if (issues.length > 0) {
+      for (const issue of issues) {
+        this._terminal.writeLine(
+          Colorize.red('PROBLEM: ') + Colorize.cyan(`[${issue.rule}] `) + issue.message + '\n'
+        );
+      }
+
       throw new AlreadyReportedError();
     }
-    this._terminal.writeLine(Colorize.green('Check passed!'));
+    this._terminal.writeLine(Colorize.green('SUCCESS: ') + 'All checks passed.');
   }
 }
