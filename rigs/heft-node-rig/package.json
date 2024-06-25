@@ -13,7 +13,7 @@
     "directory": "rigs/heft-node-rig"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.66.18"
+    "@rushstack/heft": "workspace:*"
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",

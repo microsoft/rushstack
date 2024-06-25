@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@microsoft/load-themed-styles": "^2.0.131",
+    "@microsoft/load-themed-styles": "workspace:*",
     "webpack": "^5"
   },
   "peerDependenciesMeta": {

@@ -22,7 +22,7 @@
   },
   "peerDependencies": {
     "@types/webpack": "^4",
-    "@microsoft/load-themed-styles": "^2.0.131"
+    "@microsoft/load-themed-styles": "workspace:*"
   },
   "dependencies": {
     "loader-utils": "1.4.2"
