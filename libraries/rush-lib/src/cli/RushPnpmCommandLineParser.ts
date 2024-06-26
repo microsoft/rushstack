@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import {
   AlreadyReportedError,
   EnvironmentMap,
@@ -135,7 +134,7 @@ export class RushPnpmCommandLineParser {
     this._subspace = subspace;
 
     const workspaceFolder: string = subspace.getSubspaceTempFolder();
-    const workspaceFilePath: string = path.join(workspaceFolder, 'pnpm-workspace.yaml');
+    const workspaceFilePath: string = `${workspaceFolder}/pnpm-workspace.yaml`;
 
     if (!FileSystem.exists(workspaceFilePath)) {
       this._terminal.writeErrorLine('Error: The PNPM workspace file has not been generated:');
@@ -316,12 +315,10 @@ export class RushPnpmCommandLineParser {
           }
           break;
         }
+
         case 'patch-commit': {
-          const pnpmOptionsJsonFilename: string = path.join(
-            this._rushConfiguration.commonRushConfigFolder,
-            RushConstants.pnpmConfigFilename
-          );
           if (this._rushConfiguration.rushConfigurationJson.pnpmOptions) {
+            const pnpmOptionsJsonFilename: string = `${this._rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}`;
             this._terminal.writeErrorLine(
               PrintUtilities.wrapWords(
                 `Error: The "pnpm patch-commit" command is incompatible with specifying "pnpmOptions" in ${RushConstants.rushJsonFilename} file.` +
@@ -330,10 +327,11 @@ export class RushPnpmCommandLineParser {
             );
             throw new AlreadyReportedError();
           }
+
           // patch-commit internally calls installation under cwd instead of the common/temp folder
           // It throws missing package.json error, so in this case, we need to set the dir to the common/temp folder here
-          if (pnpmArgs.indexOf('--dir') < 0 && pnpmArgs.indexOf('-C') < 0) {
-            if (!FileSystem.exists(`${process.cwd()}/package.json`)) {
+          if (!pnpmArgs.includes('--dir') && !pnpmArgs.includes('-C')) {
+            if (!(await FileSystem.existsAsync(`${process.cwd()}/${FileConstants.PackageJson}`))) {
               pnpmArgs.push('--dir');
               pnpmArgs.push(this._rushConfiguration.commonTempFolder);
             }
@@ -455,28 +453,28 @@ export class RushPnpmCommandLineParser {
       case 'patch-commit': {
         // Example: "C:\MyRepo\common\temp\package.json"
         const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
-        const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
+        const commonPackageJson: JsonObject = await JsonFile.loadAsync(commonPackageJsonFilename);
         const newGlobalPatchedDependencies: Record<string, string> | undefined =
           commonPackageJson?.pnpm?.patchedDependencies;
 
         const commonTempPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
         const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
         // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
-        if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
-          FileSystem.ensureEmptyFolder(rushPnpmPatchesFolder);
+        if (await FileSystem.existsAsync(commonTempPnpmPatchesFolder)) {
+          await FileSystem.ensureEmptyFolderAsync(rushPnpmPatchesFolder);
           // eslint-disable-next-line no-console
           console.log(`Copying ${commonTempPnpmPatchesFolder}`);
           // eslint-disable-next-line no-console
           console.log(`  --> ${rushPnpmPatchesFolder}`);
-          FileSystem.copyFiles({
+          await FileSystem.copyFilesAsync({
             sourcePath: commonTempPnpmPatchesFolder,
             destinationPath: rushPnpmPatchesFolder
           });
         } else {
-          if (FileSystem.exists(rushPnpmPatchesFolder)) {
+          if (await FileSystem.existsAsync(rushPnpmPatchesFolder)) {
             // eslint-disable-next-line no-console
             console.log(`Deleting ${rushPnpmPatchesFolder}`);
-            FileSystem.deleteFolder(rushPnpmPatchesFolder);
+            await FileSystem.deleteFolderAsync(rushPnpmPatchesFolder);
           }
         }
 
