@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.129.5",
+      "tag": "@microsoft/rush_v5.129.5",
+      "date": "Tue, 25 Jun 2024 20:13:29 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Don't include package.json version field when calculating packageJsonInjectedDependenciesHash"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.4",
+      "tag": "@microsoft/rush_v5.129.4",
+      "date": "Mon, 24 Jun 2024 23:49:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Normalize the file permissions (644) for Rush plugin files that are committed to Git"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.129.3",
       "tag": "@microsoft/rush_v5.129.3",
       "date": "Fri, 21 Jun 2024 00:15:54 GMT",

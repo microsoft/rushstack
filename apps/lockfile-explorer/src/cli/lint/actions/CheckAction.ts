@@ -29,7 +29,13 @@ export interface ILockfileLint {
   rules: ILintRule[];
 }
 
-export class LintAction extends CommandLineAction {
+export interface ILintIssue {
+  project: string;
+  rule: string;
+  message: string;
+}
+
+export class CheckAction extends CommandLineAction {
   private readonly _terminal: ITerminal;
 
   private _rushConfiguration!: RushConfiguration;
@@ -38,9 +44,12 @@ export class LintAction extends CommandLineAction {
 
   public constructor(parser: LintCommandLineParser) {
     super({
-      actionName: 'lint',
-      summary: 'Check if the specified package has a inconsistent package versions in target project',
-      documentation: 'Check if the specified package has a inconsistent package versions in target project'
+      actionName: 'check',
+      summary: 'Check and report dependency issues in your workspace',
+      documentation:
+        'This command applies the policies that are configured in ' +
+        LOCKFILE_LINT_JSON_FILENAME +
+        ', reporting any problems found in your PNPM workspace.'
     });
 
     this._terminal = parser.globalTerminal;
@@ -59,7 +68,10 @@ export class LintAction extends CommandLineAction {
       checkedDependencyPaths.add(dependencyPath);
       const { name, version } = parseDependencyPath(shrinkwrapFileMajorVersion, dependencyPath);
       if (name in requiredVersions && !semver.satisfies(version, requiredVersions[name])) {
-        throw new Error(`ERROR: Detected inconsistent version numbers in package '${name}': '${version}'!`);
+        throw new Error(
+          `The version of "${name}" should match "${requiredVersions[name]}";` +
+            ` actual version is "${version}"`
+        );
       }
 
       await Promise.all(
@@ -86,7 +98,7 @@ export class LintAction extends CommandLineAction {
     project: RushConfigurationProject,
     requiredVersions: Record<string, string>
   ): Promise<void> {
-    this._terminal.writeLine(`Checking the project: ${project.packageName}.`);
+    this._terminal.writeLine(`Checking project "${project.packageName}"`);
 
     const projectFolder: string = project.projectFolder;
     const subspace: Subspace = project.subspace;
@@ -145,7 +157,7 @@ export class LintAction extends CommandLineAction {
   private async _performVersionRestrictionCheckAsync(
     requiredVersions: Record<string, string>,
     projectName: string
-  ): Promise<string | void> {
+  ): Promise<string | undefined> {
     try {
       const project: RushConfigurationProject | undefined =
         this._rushConfiguration?.getProjectByName(projectName);
@@ -156,6 +168,7 @@ export class LintAction extends CommandLineAction {
       }
       this._checkedProjects.add(project);
       await this._searchAndValidateDependenciesAsync(project, requiredVersions);
+      return undefined;
     } catch (e) {
       return e.message;
     }
@@ -180,15 +193,18 @@ export class LintAction extends CommandLineAction {
       lintingFile,
       JsonSchema.fromLoadedObject(lockfileLintSchema)
     );
-    const errorMessageList: string[] = [];
+    const issues: ILintIssue[] = [];
     await Async.forEachAsync(
       rules,
       async ({ requiredVersions, project, rule }) => {
         switch (rule) {
           case 'restrict-versions': {
-            const errorMessage = await this._performVersionRestrictionCheckAsync(requiredVersions, project);
-            if (errorMessage) {
-              errorMessageList.push(errorMessage);
+            const message: string | undefined = await this._performVersionRestrictionCheckAsync(
+              requiredVersions,
+              project
+            );
+            if (message) {
+              issues.push({ project, rule, message });
             }
             break;
           }
@@ -200,10 +216,28 @@ export class LintAction extends CommandLineAction {
       },
       { concurrency: 50 }
     );
-    if (errorMessageList.length > 0) {
-      this._terminal.writeError(errorMessageList.join('\n'));
+    if (issues.length > 0) {
+      this._terminal.writeLine();
+
+      // Deterministic order
+      for (const issue of issues.sort((a, b): number => {
+        let diff: number = a.project.localeCompare(b.project);
+        if (diff !== 0) {
+          return diff;
+        }
+        diff = a.rule.localeCompare(b.rule);
+        if (diff !== 0) {
+          return diff;
+        }
+        return a.message.localeCompare(b.message);
+      })) {
+        this._terminal.writeLine(
+          Colorize.red('PROBLEM: ') + Colorize.cyan(`[${issue.rule}] `) + issue.message + '\n'
+        );
+      }
+
       throw new AlreadyReportedError();
     }
-    this._terminal.writeLine(Colorize.green('Check passed!'));
+    this._terminal.writeLine(Colorize.green('SUCCESS: ') + 'All checks passed.');
   }
 }
