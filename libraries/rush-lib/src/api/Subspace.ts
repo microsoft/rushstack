@@ -13,7 +13,7 @@ import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
-import type { IPackageJson, IPackageJsonDependencyTable } from '@rushstack/node-core-library';
+import type { IPackageJson } from '@rushstack/node-core-library';
 import { SubspacePnpmfileConfiguration } from '../logic/pnpm/SubspacePnpmfileConfiguration';
 import type { ISubspacePnpmfileShimSettings } from '../logic/pnpm/IPnpmfile';
 
@@ -399,22 +399,15 @@ export class Subspace {
         resolutions
       } = rushProject.packageJson;
 
-      this._handleWorkspaceDependencyForPackageJsonInjectedDependenciesHash(
-        allWorkspaceProjectSet,
-        dependencies
-      );
-      this._handleWorkspaceDependencyForPackageJsonInjectedDependenciesHash(
-        allWorkspaceProjectSet,
-        devDependencies
-      );
-      this._handleWorkspaceDependencyForPackageJsonInjectedDependenciesHash(
-        allWorkspaceProjectSet,
-        optionalDependencies
-      );
-      this._handleWorkspaceDependencyForPackageJsonInjectedDependenciesHash(
-        allWorkspaceProjectSet,
-        peerDependencies
-      );
+      // special handing for peerDependencies
+      // for workspace packages, the version range is meaningless here.
+      if (peerDependencies) {
+        for (const packageName of Object.keys(peerDependencies)) {
+          if (allWorkspaceProjectSet.has(packageName)) {
+            peerDependencies[packageName] = 'workspace:*';
+          }
+        }
+      }
 
       allPackageJson.push({
         name,
@@ -441,24 +434,5 @@ export class Subspace {
     const packageJsonInjectedDependenciesHash: string = hash.digest('hex');
 
     return packageJsonInjectedDependenciesHash;
-  }
-
-  /** @internal
-   *
-   * No need to recognize workspace dependencies' version field when calculating packageJsonInjectedDependenciesHash.
-   * It is because we always using the whatever latest version in the Monorepo when PNPM installs them.
-   *
-   */
-  private _handleWorkspaceDependencyForPackageJsonInjectedDependenciesHash(
-    allWorkspaceProjectSet: Set<string>,
-    dependencies: IPackageJsonDependencyTable | undefined
-  ): void {
-    if (dependencies) {
-      for (const packageName of Object.keys(dependencies)) {
-        if (allWorkspaceProjectSet.has(packageName)) {
-          dependencies[packageName] = 'workspace:*';
-        }
-      }
-    }
   }
 }
