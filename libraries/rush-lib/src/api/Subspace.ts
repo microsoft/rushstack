@@ -443,7 +443,12 @@ export class Subspace {
     return packageJsonInjectedDependenciesHash;
   }
 
-  /** @internal */
+  /** @internal
+   *
+   * No need to recognize workspace dependencies' version field when calculating packageJsonInjectedDependenciesHash.
+   * It is because we always using the whatever latest version in the Monorepo when PNPM installs them.
+   *
+   */
   private _handleWorkspaceDependencyForPackageJsonInjectedDependenciesHash(
     allWorkspaceProjectSet: Set<string>,
     dependencies: IPackageJsonDependencyTable | undefined
