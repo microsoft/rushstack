@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Normalize workspace dependencies' version when calculating packageJsonInjectedDependenciesHash to improve its accuracy ",
+      "comment": "Fix an edge case for workspace peer dependencies when calculating packageJsonInjectedDependenciesHash to improve its accuracy ",
       "type": "none"
     }
   ],
