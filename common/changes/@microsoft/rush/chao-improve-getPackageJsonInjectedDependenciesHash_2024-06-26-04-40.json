@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an edge case for workspace peer dependencies when calculating packageJsonInjectedDependenciesHash to improve its accuracy ",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
