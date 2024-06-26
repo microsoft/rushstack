@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update link to pnpmfile.cjs docs",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
