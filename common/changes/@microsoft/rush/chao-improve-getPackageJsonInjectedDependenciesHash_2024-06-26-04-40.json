@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Normalize workspace dependencies' version when calculating packageJsonInjectedDependenciesHash to improve its accuracy ",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
