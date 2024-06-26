@@ -13,7 +13,7 @@ import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
-import type { IPackageJson } from '@rushstack/node-core-library';
+import type { IPackageJson, IPackageJsonDependencyTable } from '@rushstack/node-core-library';
 import { SubspacePnpmfileConfiguration } from '../logic/pnpm/SubspacePnpmfileConfiguration';
 import type { ISubspacePnpmfileShimSettings } from '../logic/pnpm/IPnpmfile';
 
@@ -379,6 +379,10 @@ export class Subspace {
       return undefined;
     }
 
+    const allWorkspaceProjectSet: Set<string> = new Set(
+      this._rushConfiguration.projects.map((rushProject) => rushProject.packageName)
+    );
+
     // get all related package.json
     while (relatedProjects.length > 0) {
       const rushProject: RushConfigurationProject = relatedProjects.pop()!;
@@ -394,6 +398,23 @@ export class Subspace {
         peerDependenciesMeta,
         resolutions
       } = rushProject.packageJson;
+
+      this._handleWorkspaceDependencyForPackageJsonInjectedDependenciesHash(
+        allWorkspaceProjectSet,
+        dependencies
+      );
+      this._handleWorkspaceDependencyForPackageJsonInjectedDependenciesHash(
+        allWorkspaceProjectSet,
+        devDependencies
+      );
+      this._handleWorkspaceDependencyForPackageJsonInjectedDependenciesHash(
+        allWorkspaceProjectSet,
+        optionalDependencies
+      );
+      this._handleWorkspaceDependencyForPackageJsonInjectedDependenciesHash(
+        allWorkspaceProjectSet,
+        peerDependencies
+      );
 
       allPackageJson.push({
         name,
@@ -420,5 +441,19 @@ export class Subspace {
     const packageJsonInjectedDependenciesHash: string = hash.digest('hex');
 
     return packageJsonInjectedDependenciesHash;
+  }
+
+  /** @internal */
+  private _handleWorkspaceDependencyForPackageJsonInjectedDependenciesHash(
+    allWorkspaceProjectSet: Set<string>,
+    dependencies: IPackageJsonDependencyTable | undefined
+  ): void {
+    if (dependencies) {
+      for (const packageName of Object.keys(dependencies)) {
+        if (allWorkspaceProjectSet.has(packageName)) {
+          dependencies[packageName] = 'workspace:*';
+        }
+      }
+    }
   }
 }
