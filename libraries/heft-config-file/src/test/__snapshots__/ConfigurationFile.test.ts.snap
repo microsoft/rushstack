@@ -619,12 +619,6 @@ Object {
 `;
 
 exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON 1`] = `
-"In config file \\"<project root>/lib/test/errorCases/invalidJson/config.json\\": SyntaxError: Unexpected token '\\\\n' at 2:19
-  \\"filePaths\\": \\"A
-                 ^"
-`;
-
-exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON 2`] = `
 Object {
   "debug": "",
   "error": "",
@@ -635,12 +629,6 @@ Object {
 `;
 
 exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON async 1`] = `
-"In config file \\"<project root>/lib/test/errorCases/invalidJson/config.json\\": SyntaxError: Unexpected token '}' at 2:19
-  \\"filePaths\\": \\"A
-                 ^"
-`;
-
-exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON async 2`] = `
 Object {
   "debug": "",
   "error": "",

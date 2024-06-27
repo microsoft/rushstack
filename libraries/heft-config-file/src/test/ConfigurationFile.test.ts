@@ -1776,9 +1776,12 @@ describe(ConfigurationFile.name, () => {
         )
       });
 
-      expect(() =>
-        configFileLoader.loadConfigurationFileForProject(terminal, __dirname)
-      ).toThrowErrorMatchingSnapshot();
+      // The synchronous code path on Windows somehow determines that the unexpected character is
+      // a newline on Windows, and a curly brace on other platforms, even though the location is
+      // accurate in both cases. Use a regex to match either.
+      expect(() => configFileLoader.loadConfigurationFileForProject(terminal, __dirname)).toThrowError(
+        /In config file "<project root>\/lib\/test\/errorCases\/invalidJson\/config.json": SyntaxError: Unexpected token '(}|\\n)' at 2:19/
+      );
 
       jest.restoreAllMocks();
     });
@@ -1811,7 +1814,9 @@ describe(ConfigurationFile.name, () => {
 
       await expect(
         configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
-      ).rejects.toThrowErrorMatchingSnapshot();
+      ).rejects.toThrowError(
+        /In config file "<project root>\/lib\/test\/errorCases\/invalidJson\/config.json": SyntaxError: Unexpected token '(}|\\n)' at 2:19/
+      );
 
       jest.restoreAllMocks();
     });
