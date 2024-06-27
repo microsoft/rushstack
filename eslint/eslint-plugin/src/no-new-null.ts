@@ -32,7 +32,7 @@ const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
         ' private members, or types that are not exported.',
       recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
-    } as TSESLint.RuleMetaDataDocs
+    } as TSESLint.RuleMetaDataDocs<Options>
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {

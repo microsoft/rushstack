@@ -4,8 +4,6 @@
 
 ```ts
 
-/// <reference types="node" />
-
 import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import { CommandLineChoiceListParameter } from '@rushstack/ts-command-line';

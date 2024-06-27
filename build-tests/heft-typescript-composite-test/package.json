@@ -20,6 +20,6 @@
     "@types/webpack-env": "1.18.0",
     "eslint": "~8.57.0",
     "tslint": "~5.20.1",
-    "typescript": "~5.4.2"
+    "typescript": "~5.5.2"
   }
 }

@@ -23,7 +23,7 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
         ' whose names have an underscore prefix',
       recommended: 'strict',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
-    } as TSESLint.RuleMetaDataDocs
+    } as TSESLint.RuleMetaDataDocs<Options>
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
     const parserServices: ParserServices | undefined = context.parserServices;

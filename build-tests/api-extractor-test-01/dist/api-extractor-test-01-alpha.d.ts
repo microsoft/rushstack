@@ -9,10 +9,6 @@
  * @packageDocumentation
  */
 
-/// <reference types="jest" />
-/// <reference lib="es2015.symbol.wellknown" />
-/// <reference lib="es2018.intl" />
-
 import { default as Long_2 } from 'long';
 import { MAX_UNSIGNED_VALUE } from 'long';
 

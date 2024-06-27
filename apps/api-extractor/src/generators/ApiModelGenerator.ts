@@ -266,7 +266,7 @@ export class ApiModelGenerator {
   }
 
   private _tryFindFunctionDeclaration(astDeclaration: AstDeclaration): ts.FunctionDeclaration | undefined {
-    const children: ts.Node[] = astDeclaration.declaration.getChildren(
+    const children: readonly ts.Node[] = astDeclaration.declaration.getChildren(
       astDeclaration.declaration.getSourceFile()
     );
     return children.find(ts.isFunctionTypeNode) as ts.FunctionDeclaration | undefined;

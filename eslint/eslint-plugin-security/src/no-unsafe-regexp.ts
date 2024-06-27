@@ -62,7 +62,7 @@ const noUnsafeRegExp: TSESLint.RuleModule<MessageIds, Options> = {
         ' building strings at runtime.',
       recommended: 'strict',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-security'
-    } as TSESLint.RuleMetaDataDocs
+    } as TSESLint.RuleMetaDataDocs<Options>
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {

@@ -44,7 +44,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
       description: 'Check that file paths and imports follow the basic mechanics for the packlet formalism',
       recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets'
-    } as TSESLint.RuleMetaDataDocs
+    } as TSESLint.RuleMetaDataDocs<Options>
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {

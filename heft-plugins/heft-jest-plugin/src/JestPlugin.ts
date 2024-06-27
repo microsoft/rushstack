@@ -126,6 +126,7 @@ const JEST_CONFIGURATION_LOCATION: 'config/jest.config.json' = `config/jest.conf
 const ROOTDIR_TOKEN: '<rootDir>' = '<rootDir>';
 const CONFIGDIR_TOKEN: '<configDir>' = '<configDir>';
 const PACKAGE_CAPTUREGROUP: 'package' = 'package';
+//@ts-expect-error Named capturing groups are only available when targeting 'ES2018'
 const PACKAGEDIR_REGEX: RegExp = /^<packageDir:\s*(?<package>[^\s>]+)\s*>/;
 const JSONPATHPROPERTY_REGEX: RegExp = /^\$\['([^']+)'\]/;
 
