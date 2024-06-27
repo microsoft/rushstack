@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "fix spelling of \"committing\" in rush.json init template and schema",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
