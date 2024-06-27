@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Add `ConfigurationFile.loadConfigurationFileForProject` and `ConfigurationFile.tryLoadConfigurationFileForProject` APIs to allow for synchronously loading Heft configuration files",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file"
+}
