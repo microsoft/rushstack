@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/loader-raw-script",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/loader-raw-script"
+}
