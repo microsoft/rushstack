@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.15.0",
+      "tag": "@rushstack/heft-config-file_v0.15.0",
+      "date": "Thu, 27 Jun 2024 21:01:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `ConfigurationFile.loadConfigurationFileForProject` and `ConfigurationFile.tryLoadConfigurationFileForProject` APIs to allow for synchronously loading Heft configuration files"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.25",
       "tag": "@rushstack/heft-config-file_v0.14.25",
       "date": "Thu, 30 May 2024 00:13:05 GMT",

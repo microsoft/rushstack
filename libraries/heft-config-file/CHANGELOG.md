@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Jun 2024 21:01:36 GMT and should not be manually modified.
+
+## 0.15.0
+Thu, 27 Jun 2024 21:01:36 GMT
+
+### Minor changes
+
+- Add `ConfigurationFile.loadConfigurationFileForProject` and `ConfigurationFile.tryLoadConfigurationFileForProject` APIs to allow for synchronously loading Heft configuration files
 
 ## 0.14.25
 Thu, 30 May 2024 00:13:05 GMT
