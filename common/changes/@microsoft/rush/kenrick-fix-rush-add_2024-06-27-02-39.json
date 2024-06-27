@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix malformed package.json by explicitly setting jsonSyntax to strict",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
