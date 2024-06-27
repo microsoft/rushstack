@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Update dependency npm-packlist to 8.0.2",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor"
+}
