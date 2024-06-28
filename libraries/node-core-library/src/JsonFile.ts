@@ -363,7 +363,7 @@ export class JsonFile {
     if (previousJson !== '') {
       // NOTE: We don't use mode=json here because comments aren't allowed by strict JSON
       stringified = jju.update(previousJson, newJsonObject, {
-        mode: explicitMode ? explicitMode : JsonSyntax.Json5,
+        mode: explicitMode ?? JsonSyntax.Json5,
         indent: 2
       });
     } else if (options.prettyFormatting) {
