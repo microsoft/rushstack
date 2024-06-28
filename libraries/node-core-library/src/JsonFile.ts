@@ -368,7 +368,7 @@ export class JsonFile {
       });
     } else if (options.prettyFormatting) {
       stringified = jju.stringify(newJsonObject, {
-        mode: explicitMode ? explicitMode : 'json',
+        mode: explicitMode ?? 'json',
         indent: 2
       });
 
