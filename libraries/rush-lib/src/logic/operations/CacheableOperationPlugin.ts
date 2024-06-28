@@ -393,6 +393,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               });
               periodicCallback.start();
             } else {
+              // sleep to prevent churn when processing the same remote executing event.
+              await Async.sleepAsync(5000);
               // failed to acquire the lock, mark current operation to remote executing
               return OperationStatus.RemoteExecuting;
             }
