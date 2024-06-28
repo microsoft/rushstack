@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Jun 2024 21:01:36 GMT and should not be manually modified.
+
+## 0.14.9
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.14.8
 Mon, 03 Jun 2024 23:43:15 GMT

@@ -379,6 +379,10 @@ export class Subspace {
       return undefined;
     }
 
+    const allWorkspaceProjectSet: Set<string> = new Set(
+      this._rushConfiguration.projects.map((rushProject) => rushProject.packageName)
+    );
+
     // get all related package.json
     while (relatedProjects.length > 0) {
       const rushProject: RushConfigurationProject = relatedProjects.pop()!;
@@ -394,6 +398,16 @@ export class Subspace {
         peerDependenciesMeta,
         resolutions
       } = rushProject.packageJson;
+
+      // special handing for peerDependencies
+      // for workspace packages, the version range is meaningless here.
+      if (peerDependencies) {
+        for (const packageName of Object.keys(peerDependencies)) {
+          if (allWorkspaceProjectSet.has(packageName)) {
+            peerDependencies[packageName] = 'workspace:*';
+          }
+        }
+      }
 
       allPackageJson.push({
         name,
