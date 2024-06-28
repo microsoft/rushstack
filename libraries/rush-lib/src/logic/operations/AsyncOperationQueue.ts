@@ -35,6 +35,7 @@ export class AsyncOperationQueue
   private readonly _pendingIterators: ((result: IteratorResult<IOperationIteratorResult>) => void)[];
   private readonly _totalOperations: number;
   private readonly _completedOperations: Set<OperationExecutionRecord>;
+  private readonly _remoteExecutingOperations: Record<string, number> = {};
 
   private _isDone: boolean;
 
@@ -166,7 +167,13 @@ export class AsyncOperationQueue
     if (waitingIterators.length > 0) {
       // returns an unassigned operation to let caller decide when there is at least one
       // remote executing operation which is not ready to process.
-      if (queue.some((operation) => operation.status === OperationStatus.RemoteExecuting)) {
+      const remoteExecutingOperation = this.tryGetRemoteExecutingOperation();
+      if (remoteExecutingOperation) {
+        waitingIterators.shift()!({
+          value: remoteExecutingOperation,
+          done: false
+        });
+      } else {
         waitingIterators.shift()!({
           value: { weight: 1, status: UNASSIGNED_OPERATION },
           done: false
@@ -175,19 +182,69 @@ export class AsyncOperationQueue
     }
   }
 
+  public hasRemoteExecutingOperations(): boolean {
+    for (const operation of this._queue) {
+      if (operation.status === OperationStatus.RemoteExecuting) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public tryGetRemoteExecutingOperation(): OperationExecutionRecord | undefined {
-    const { _queue: queue } = this;
+    const { _queue: queue, _remoteExecutingOperations: remoteExecutingOperations } = this;
+    this._cleanupRemoteExecutingOperationRecords();
+
+    const currentTime: number = new Date().getTime();
+
     // cycle through the queue to find the next operation that is executed remotely
     for (let i: number = queue.length - 1; i >= 0; i--) {
       const operation: OperationExecutionRecord = queue[i];
 
-      if (operation.status === OperationStatus.RemoteExecuting) {
+      // Only grab events that are ready to check again, this prevent checking the same operation multiple times or too early.
+      if (
+        operation.status === OperationStatus.RemoteExecuting &&
+        remoteExecutingOperations[operation.name] <= currentTime
+      ) {
+        remoteExecutingOperations[operation.name] = this._getRemoteExecutingSleepUntil();
         return operation;
       }
     }
     return undefined;
   }
 
+  /**
+   * As the queue executes, it may have operations that are no longer in the queue. Clean those out and
+   *  note any new remote executing operations.
+   */
+  private _cleanupRemoteExecutingOperationRecords(): void {
+    const { _queue: queue, _remoteExecutingOperations: remoteExecutingOperations } = this;
+    const notYetSeen: Set<string> = new Set(Object.keys(remoteExecutingOperations));
+    // Add new operations to the remote executing operations list.
+    for (let i: number = queue.length - 1; i >= 0; i--) {
+      const operation: OperationExecutionRecord = queue[i];
+      if (operation.status === OperationStatus.RemoteExecuting) {
+        if (!(operation.name in remoteExecutingOperations)) {
+          // This operation probably started recently, we don't need to check it again immediately.
+          remoteExecutingOperations[operation.name] = this._getRemoteExecutingSleepUntil();
+        }
+        notYetSeen.delete(operation.name);
+      }
+    }
+
+    // Remove operations that are no longer in the queue.
+    for (const name of notYetSeen) {
+      delete remoteExecutingOperations[name];
+    }
+  }
+
+  private _getRemoteExecutingSleepUntil(): number {
+    return this.getRemoteExecutingSleepDuration() + new Date().getTime();
+  }
+
+  public getRemoteExecutingSleepDuration(): number {
+    return 5000;
+  }
   /**
    * Returns this queue as an async iterator, such that multiple functions iterating this object concurrently
    * receive distinct iteration results.

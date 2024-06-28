@@ -261,8 +261,7 @@ export class OperationExecutionManager {
          */
         if (operation.status === UNASSIGNED_OPERATION) {
           // Pause for a few time
-          await Async.sleepAsync(5000);
-          record = this._executionQueue.tryGetRemoteExecutingOperation();
+          await Async.sleepAsync(this._executionQueue.getRemoteExecutingSleepDuration());
         } else {
           record = operation;
         }
