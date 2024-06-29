@@ -3451,12 +3451,18 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/heft-webpack5-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-webpack5-plugin
       '@rushstack/stream-collator':
         specifier: workspace:*
         version: link:../stream-collator
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../ts-command-line
+      '@rushstack/webpack-preserve-dynamic-require-plugin':
+        specifier: workspace:*
+        version: link:../../webpack/preserve-dynamic-require-plugin
       '@types/semver':
         specifier: 7.5.0
         version: 7.5.0
@@ -3466,6 +3472,9 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
+      webpack:
+        specifier: ~5.82.1
+        version: 5.82.1
 
   ../../../libraries/rush-themed-ui:
     dependencies:

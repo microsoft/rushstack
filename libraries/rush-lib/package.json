@@ -14,6 +14,13 @@
   "homepage": "https://rushjs.io",
   "main": "lib/index.js",
   "typings": "dist/rush-lib.d.ts",
+  "typesVersions": {
+    "*": {
+      "lib-esnext/*": [
+        "lib/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "test": "heft test --clean",

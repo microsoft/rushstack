@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Improve `@rushtack/rush-sdk` and make it reuse `@microsoft/rush-lib` from rush global folder",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
