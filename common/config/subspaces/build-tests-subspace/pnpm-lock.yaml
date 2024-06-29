@@ -4850,8 +4850,8 @@ packages:
     dependencies:
       semver-compare: 1.0.0
 
-  /pnpm-sync-lib@0.2.8:
-    resolution: {integrity: sha512-Jo89drCjl2GNR33we72uTIkhXeuVGxL+xHmNHwmh9nh83TbaveQWC7rfHDM6anczzNb5Vs5sElS6Vxlru3Ba7A==}
+  /pnpm-sync-lib@0.2.9:
+    resolution: {integrity: sha512-qd2/crPxmpEXAWHlotOQfxQZ3a1fZIG4u73CiSPwPYDtd7Ithx7O3gtqzQb/0LXDEvk1NpL7u4xf7yEiUCqg3Q==}
     dependencies:
       '@pnpm/dependency-path': 2.1.8
       yaml: 2.4.1
@@ -6433,7 +6433,7 @@ packages:
       node-fetch: 2.6.7
       npm-check: 6.0.1
       npm-package-arg: 6.1.1
-      pnpm-sync-lib: 0.2.8
+      pnpm-sync-lib: 0.2.9
       read-package-tree: 5.1.6
       rxjs: 6.6.7
       semver: 7.5.4

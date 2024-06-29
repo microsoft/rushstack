@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Upgrade pnpm-sync-lib to fix an edge case when handling node_modules folder",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
