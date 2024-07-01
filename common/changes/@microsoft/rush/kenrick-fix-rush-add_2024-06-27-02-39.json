@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where running `rush add` in a project can generate a `package.json` file that uses JSON5 syntax. Package managers expect strict JSON.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

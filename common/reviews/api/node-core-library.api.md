@@ -416,7 +416,7 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
 }
 
 // @public
-export interface IJsonFileStringifyOptions {
+export interface IJsonFileStringifyOptions extends IJsonFileParseOptions {
     headerComment?: string;
     ignoreUndefinedValues?: boolean;
     newlineConversion?: NewlineKind;
