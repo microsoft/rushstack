@@ -65,6 +65,10 @@
     "useIPCScriptsInWatchMode": {
       "description": "If true, when running in watch mode, Rush will check for phase scripts named `_phase:<name>:ipc` and run them instead of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist across invocations.",
       "type": "boolean"
+    },
+    "rushAlerts": {
+      "description": "(UNDER DEVELOPMENT) The Rush alerts feature provides a way to send announcements to engineers working in the monorepo, by printing directly in the user's shell window when they invoke Rush commands. This ensures that important notices will be seen by anyone doing active development, since people often ignore normal discussion group messages or don't know to subscribe.",
+      "type": "boolean"
     }
   },
   "additionalProperties": false

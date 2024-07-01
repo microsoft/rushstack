@@ -59,6 +59,7 @@ import { RushSession } from '../pluginFramework/RushSession';
 import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
+import { RushAlerts } from '../utilities/RushAlerts';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -230,6 +231,25 @@ export class RushCommandLineParser extends CommandLineParser {
 
     // This only gets hit if the wrapped execution completes successfully
     await this.telemetry?.ensureFlushedAsync();
+
+    try {
+      const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+      if (experiments.rushAlerts) {
+        // Print out alerts if have after each successful command actions
+        const rushAlerts: RushAlerts = new RushAlerts({
+          rushConfiguration: this.rushConfiguration,
+          terminal: this._terminal
+        });
+        if (await rushAlerts.isAlertsStateUpToDateAsync()) {
+          await rushAlerts.printAlertsAsync();
+        } else {
+          await rushAlerts.retrieveAlertsAsync();
+        }
+      }
+    } catch (error) {
+      // Only print errors in debug mode
+      this._terminal.writeDebugLine(error.message);
+    }
   }
 
   private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {

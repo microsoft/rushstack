@@ -143,7 +143,8 @@ export class InitAction extends BaseConfiglessRushAction {
     ];
 
     const experimentalTemplateFilePaths: string[] = [
-      `common/config/rush/${RushConstants.subspacesConfigFilename}`
+      `common/config/rush/${RushConstants.subspacesConfigFilename}`,
+      'common/config/rush/rush-alerts.json'
     ];
 
     if (this._experimentsParameter.value) {
