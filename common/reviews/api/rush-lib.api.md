@@ -863,6 +863,7 @@ export interface ITelemetryOperationResult {
     nonCachedDurationMs?: number;
     result: string;
     startTimestampMs?: number;
+    wasExecutedOnThisMachine?: boolean;
 }
 
 // @public
