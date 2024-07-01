@@ -82,6 +82,7 @@
    * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
    */
   /*[LINE "HYPOTHETICAL"]*/ "generateProjectImpactGraphDuringRushUpdate": true,
+
   /**
    * If true, when running in watch mode, Rush will check for phase scripts named `_phase:<name>:ipc` and run them instead
    * of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist
@@ -90,8 +91,10 @@
   /*[LINE "HYPOTHETICAL"]*/ "useIPCScriptsInWatchMode": true,
 
   /**
-   * (UNDER DEVELOPMENT) The Rush alerts is a mechanism to let Monorepo maintainers be able to push alerts to
-   * users during their day to day development activities in CLI.
+   * (UNDER DEVELOPMENT) The Rush alerts feature provides a way to send announcements to engineers
+   * working in the monorepo, by printing directly in the user's shell window when they invoke Rush commands.
+   * This ensures that important notices will be seen by anyone doing active development, since people often
+   * ignore normal discussion group messages or don't know to subscribe.
    */
-   /*[LINE "HYPOTHETICAL"]*/ "enablePushRushAlertsToEndUsersInCLI": true
+   /*[LINE "HYPOTHETICAL"]*/ "rushAlerts": true
 }

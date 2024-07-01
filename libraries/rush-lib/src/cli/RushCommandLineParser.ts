@@ -234,7 +234,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
     try {
       const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
-      if (experiments.enablePushRushAlertsToEndUsersInCLI) {
+      if (experiments.rushAlerts) {
         // Print out alerts if have after each successful command actions
         const rushAlerts: RushAlerts = new RushAlerts({
           rushConfiguration: this.rushConfiguration,
