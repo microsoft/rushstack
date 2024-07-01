@@ -65,7 +65,7 @@ export class RushAlerts {
   }
 
   public async retrieveAlertsAsync(): Promise<void> {
-    const rushAlertsConfigFilePath: string = `${this._rushConfiguration.commonRushConfigFolder}/alerts-config.json`;
+    const rushAlertsConfigFilePath: string = `${this._rushConfiguration.commonRushConfigFolder}/rush-alerts.json`;
     try {
       if (existsSync(rushAlertsConfigFilePath)) {
         const rushAlertsConfig: IRushAlertsConfig = JSON.parse(

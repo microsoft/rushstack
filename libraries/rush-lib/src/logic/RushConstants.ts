@@ -329,5 +329,5 @@ export class RushConstants {
   /**
    * The filename for rush alerts config
    */
-  public static readonly alertsConfigFilename: 'alerts-config.json' = 'alerts-config.json';
+  public static readonly rushAlertsConfigFilename: 'rush-alerts.json' = 'rush-alerts.json';
 }
