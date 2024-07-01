@@ -24,11 +24,13 @@ import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { ProjectLogWritable } from './ProjectLogWritable';
+import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
   onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
 
+  cobuildConfiguration?: CobuildConfiguration;
   debugMode: boolean;
   quietMode: boolean;
 }
@@ -92,7 +94,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
    */
   public readonly consumers: Set<OperationExecutionRecord> = new Set();
 
-  public readonly stopwatch: Stopwatch = new Stopwatch();
+  /**
+   * The stopwatch used to measure the duration of this operation. This is purposefully not
+   *  readonly as we want to override it in the case of a cache hit.
+   */
+  private _stopwatch: Stopwatch = new Stopwatch();
   public readonly stdioSummarizer: StdioSummarizer = new StdioSummarizer({
     // Allow writing to this object after transforms have been closed. We clean it up manually in a finally block.
     preventAutoclose: true
@@ -148,6 +154,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._context.quietMode;
   }
 
+  public get stopwatch(): Stopwatch {
+    return this._stopwatch;
+  }
+
   public get collatedWriter(): CollatedWriter {
     // Lazy instantiate because the registerTask() call affects display ordering
     if (!this._collatedWriter) {
@@ -164,6 +174,17 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public get cobuildRunnerId(): string | undefined {
     // Lazy calculated because the state file is created/restored later on
     return this._operationMetadataManager?.stateFile.state?.cobuildRunnerId;
+  }
+
+  public get executedOnThisAgent(): boolean {
+    if (!this._context.cobuildConfiguration) {
+      return this.cobuildRunnerId === undefined;
+    }
+    return (
+      // this can happen if this property is retrieved before `beforeResult` is called.
+      this.cobuildRunnerId !== undefined &&
+      this._context.cobuildConfiguration?.cobuildRunnerId === this.cobuildRunnerId
+    );
   }
 
   /**
@@ -272,15 +293,20 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public async executeAsync({
     onStart,
-    onResult
+    onResult,
+    beforeResult
   }: {
     onStart: (record: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
-    onResult: (record: OperationExecutionRecord) => Promise<void>;
+    beforeResult: (record: OperationExecutionRecord) => Promise<void>;
+    onResult: (record: OperationExecutionRecord) => Promise<void> | void;
   }): Promise<void> {
-    if (this.status === OperationStatus.RemoteExecuting) {
-      this.stopwatch.reset();
+    if (
+      this.status !== OperationStatus.RemoteExecuting ||
+      // If the operation is remote executing, but we haven't seen it start yet, start the stopwatch.
+      (this.status === OperationStatus.RemoteExecuting && this.stopwatch.startTime === undefined)
+    ) {
+      this.stopwatch.start();
     }
-    this.stopwatch.start();
     this.status = OperationStatus.Executing;
 
     try {
@@ -291,18 +317,34 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       } else {
         this.status = await this.runner.executeAsync(this);
       }
-      // Delegate global state reporting
-      await onResult(this);
     } catch (error) {
       this.status = OperationStatus.Failure;
       this.error = error;
+    } finally {
+      // We may need to clean up and finalize resources (_operationMetadataManager for example needs to be saved by CacheableOperationPlugin)
+      await beforeResult(this);
+      if (this.status !== OperationStatus.RemoteExecuting) {
+        this.stopwatch.stop();
+        if (
+          !this.executedOnThisAgent &&
+          this.nonCachedDurationMs &&
+          this.status !== OperationStatus.FromCache
+        ) {
+          const { startTime } = this.stopwatch;
+          if (startTime) {
+            this._stopwatch = Stopwatch.fromState({
+              // use endtime as it's the more accurate version of when this operation was marked as complete.
+              startTime,
+              endTime: startTime + this.nonCachedDurationMs
+            });
+          }
+        }
+      }
       // Delegate global state reporting
       await onResult(this);
-    } finally {
       if (this.status !== OperationStatus.RemoteExecuting) {
         this._collatedWriter?.close();
         this.stdioSummarizer.close();
-        this.stopwatch.stop();
       }
     }
   }

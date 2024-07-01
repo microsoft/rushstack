@@ -22,6 +22,7 @@ import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { type IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import type { IExecutionResult } from './IOperationExecutionResult';
+import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -29,6 +30,7 @@ export interface IOperationExecutionManagerOptions {
   parallelism: number;
   changedProjectsOnly: boolean;
   destination?: TerminalWritable;
+  cobuildConfiguration?: CobuildConfiguration;
 
   beforeExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
   afterExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<void>;
@@ -75,6 +77,7 @@ export class OperationExecutionManager {
   private readonly _beforeExecuteOperations?: (
     records: Map<Operation, OperationExecutionRecord>
   ) => Promise<void>;
+  private readonly _cobuildConfiguration: CobuildConfiguration | undefined;
 
   // Variables for current status
   private _hasAnyFailures: boolean;
@@ -91,7 +94,8 @@ export class OperationExecutionManager {
       beforeExecuteOperationAsync: beforeExecuteOperation,
       afterExecuteOperationAsync: afterExecuteOperation,
       onOperationStatusChangedAsync: onOperationStatusChanged,
-      beforeExecuteOperationsAsync: beforeExecuteOperations
+      beforeExecuteOperationsAsync: beforeExecuteOperations,
+      cobuildConfiguration
     } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
@@ -99,6 +103,7 @@ export class OperationExecutionManager {
     this._hasAnyNonAllowedWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
+    this._cobuildConfiguration = cobuildConfiguration;
 
     this._beforeExecuteOperation = beforeExecuteOperation;
     this._afterExecuteOperation = afterExecuteOperation;
@@ -126,7 +131,8 @@ export class OperationExecutionManager {
       streamCollator: this._streamCollator,
       onOperationStatusChanged,
       debugMode,
-      quietMode
+      quietMode,
+      cobuildConfiguration: this._cobuildConfiguration
     };
 
     let totalOperations: number = 0;
@@ -229,9 +235,7 @@ export class OperationExecutionManager {
 
     await this._beforeExecuteOperations?.(this._executionRecords);
 
-    // This function is a callback because it may write to the collatedWriter before
-    // operation.executeAsync returns (and cleans up the writer)
-    const onOperationCompleteAsync: (record: OperationExecutionRecord) => Promise<void> = async (
+    const beforeOperationResult: (record: OperationExecutionRecord) => Promise<void> = async (
       record: OperationExecutionRecord
     ) => {
       try {
@@ -241,7 +245,6 @@ export class OperationExecutionManager {
         record.error = e;
         record.status = OperationStatus.Failure;
       }
-      this._onOperationComplete(record);
     };
 
     const onOperationStartAsync: (
@@ -273,7 +276,8 @@ export class OperationExecutionManager {
         } else {
           await record.executeAsync({
             onStart: onOperationStartAsync,
-            onResult: onOperationCompleteAsync
+            beforeResult: beforeOperationResult,
+            onResult: this._onOperationComplete.bind(this)
           });
         }
       },

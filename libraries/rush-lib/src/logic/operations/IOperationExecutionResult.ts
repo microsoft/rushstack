@@ -43,6 +43,11 @@ export interface IOperationExecutionResult {
    * The id of the runner which actually runs the building process in cobuild mode.
    */
   readonly cobuildRunnerId: string | undefined;
+
+  /**
+   * Returns true if this operation was co-built using this machine or cobuilds are disabled, false it was executed on another agent.
+   */
+  readonly executedOnThisAgent: boolean;
 }
 
 /**
