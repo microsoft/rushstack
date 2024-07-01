@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Accept jsonSyntax option at save method to avoid malformed package.json",
-      "type": "patch"
+      "comment": "Add support for the `jsonSyntax` option to the `JsonFile.save`, `JsonFile.saveAsync`, and `JsonFile.stringify` functions.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/node-core-library"
