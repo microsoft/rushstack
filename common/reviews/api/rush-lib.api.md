@@ -470,12 +470,12 @@ export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
-    enablePushRushAlertsToEndUsersInCLI?: boolean;
     forbidPhantomResolvableNodeModulesFolders?: boolean;
     generateProjectImpactGraphDuringRushUpdate?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     printEventHooksOutputToConsole?: boolean;
+    rushAlerts?: boolean;
     useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
@@ -1315,7 +1315,6 @@ export class RushConfigurationProject {
 
 // @beta
 export class RushConstants {
-    static readonly alertsConfigFilename: 'alerts-config.json';
     static readonly artifactoryFilename: 'artifactory.json';
     static readonly browserApprovedPackagesFilename: 'browser-approved-packages.json';
     static readonly buildCacheFilename: 'build-cache.json';
@@ -1357,6 +1356,7 @@ export class RushConstants {
     static readonly projectShrinkwrapFilename: 'shrinkwrap-deps.json';
     static readonly rebuildCommandName: 'rebuild';
     static readonly repoStateFilename: 'repo-state.json';
+    static readonly rushAlertsConfigFilename: 'rush-alerts.json';
     static readonly rushJsonFilename: 'rush.json';
     static readonly rushLogsFolderName: 'rush-logs';
     static readonly rushPackageName: '@microsoft/rush';
