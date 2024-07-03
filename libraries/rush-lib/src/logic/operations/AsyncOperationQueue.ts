@@ -36,6 +36,7 @@ export class AsyncOperationQueue
   private readonly _totalOperations: number;
   private readonly _completedOperations: Set<OperationExecutionRecord>;
   private readonly _remoteExecutingOperations: Record<string, number> = {};
+  private readonly _remoteExecutingPollingInterval: number;
 
   private _isDone: boolean;
 
@@ -46,12 +47,17 @@ export class AsyncOperationQueue
    *   - Returning a negative value indicates that `b` should execute before `a`.
    *   - Returning 0 indicates no preference.
    */
-  public constructor(operations: Iterable<OperationExecutionRecord>, sortFn: IOperationSortFunction) {
+  public constructor(
+    operations: Iterable<OperationExecutionRecord>,
+    sortFn: IOperationSortFunction,
+    options?: { remoteExecutingPollingInterval: number }
+  ) {
     this._queue = computeTopologyAndSort(operations, sortFn);
     this._pendingIterators = [];
     this._totalOperations = this._queue.length;
     this._isDone = false;
     this._completedOperations = new Set<OperationExecutionRecord>();
+    this._remoteExecutingPollingInterval = options?.remoteExecutingPollingInterval ?? 5000;
   }
 
   /**
@@ -164,10 +170,11 @@ export class AsyncOperationQueue
       return;
     }
 
-    if (waitingIterators.length > 0) {
+    if (waitingIterators.length > 0 && this.hasRemoteExecutingOperations()) {
       // returns an unassigned operation to let caller decide when there is at least one
       // remote executing operation which is not ready to process.
-      const remoteExecutingOperation = this.tryGetRemoteExecutingOperation();
+      const remoteExecutingOperation: OperationExecutionRecord | undefined =
+        this.tryGetRemoteExecutingOperation();
       if (remoteExecutingOperation) {
         waitingIterators.shift()!({
           value: remoteExecutingOperation,
@@ -243,8 +250,9 @@ export class AsyncOperationQueue
   }
 
   public getRemoteExecutingSleepDuration(): number {
-    return 5000;
+    return this._remoteExecutingPollingInterval;
   }
+
   /**
    * Returns this queue as an async iterator, such that multiple functions iterating this object concurrently
    * receive distinct iteration results.
