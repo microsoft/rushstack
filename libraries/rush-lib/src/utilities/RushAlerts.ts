@@ -5,6 +5,8 @@ import { readFile, writeFile, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import type { Terminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '../api/RushConfiguration';
+import { JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
 
 export interface IRushAlertsOptions {
   rushConfiguration: RushConfiguration;
@@ -16,11 +18,11 @@ interface IRushAlertsConfig {
 }
 interface IRushAlertsConfigEntry {
   title: string;
-  details: Array<string>;
+  message: Array<string>;
   detailsUrl: string;
   startTime: string;
   endTime: string;
-  condition?: string;
+  conditionScript?: string;
 }
 interface IRushAlertsState {
   lastUpdateTime: string;
@@ -28,13 +30,16 @@ interface IRushAlertsState {
 }
 interface IRushAlertStateEntry {
   title: string;
-  details: Array<string>;
+  message: Array<string>;
   detailsUrl: string;
 }
 
 export class RushAlerts {
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _terminal: Terminal;
+  private static _rushAlertsJsonSchema: JsonSchema = JsonSchema.fromLoadedObject(rushAlertsSchemaJson);
+  private static __rushAlertsConfigFileName: string = 'rush-alerts.json';
+  private static __rushAlertsStateFileName: string = 'rush-alerts-state.json';
 
   public constructor(options: IRushAlertsOptions) {
     this._rushConfiguration = options.rushConfiguration;
@@ -42,7 +47,7 @@ export class RushAlerts {
   }
 
   public async isAlertsStateUpToDateAsync(): Promise<boolean> {
-    const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/alerts-state.json`;
+    const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`;
     if (!existsSync(rushAlertsStateFilePath)) {
       return false;
     }
@@ -65,20 +70,20 @@ export class RushAlerts {
   }
 
   public async retrieveAlertsAsync(): Promise<void> {
-    const rushAlertsConfigFilePath: string = `${this._rushConfiguration.commonRushConfigFolder}/rush-alerts.json`;
+    const rushAlertsConfigFilePath: string = `${this._rushConfiguration.commonRushConfigFolder}/${RushAlerts.__rushAlertsConfigFileName}`;
     try {
       if (existsSync(rushAlertsConfigFilePath)) {
-        const rushAlertsConfig: IRushAlertsConfig = JSON.parse(
-          (await readFile(rushAlertsConfigFilePath)).toString()
+        const rushAlertsConfig: IRushAlertsConfig = JsonFile.loadAndValidate(
+          rushAlertsConfigFilePath,
+          RushAlerts._rushAlertsJsonSchema
         );
-
         const validAlerts: Array<IRushAlertStateEntry> = [];
         if (rushAlertsConfig?.alerts.length !== 0) {
           for (const alert of rushAlertsConfig.alerts) {
             if (await this._isAlertValidAsync(alert)) {
               validAlerts.push({
                 title: alert.title,
-                details: alert.details,
+                message: alert.message,
                 detailsUrl: alert.detailsUrl
               });
             }
@@ -94,7 +99,7 @@ export class RushAlerts {
   }
 
   public async printAlertsAsync(): Promise<void> {
-    const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/alerts-state.json`;
+    const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`;
 
     try {
       if (existsSync(rushAlertsStateFilePath)) {
@@ -118,14 +123,14 @@ export class RushAlerts {
     if (timeNow < new Date(alert.startTime) || timeNow > new Date(alert.endTime)) {
       return false;
     }
-    if (alert.condition) {
-      const conditionScriptPath: string = `${this._rushConfiguration.rushJsonFolder}/${alert.condition}`;
+    if (alert.conditionScript) {
+      const conditionScriptPath: string = `${this._rushConfiguration.rushJsonFolder}/${alert.conditionScript}`;
       if (!existsSync(conditionScriptPath)) {
         this._terminal.writeDebugLine(`${conditionScriptPath} is not exist!`);
         return false;
       }
 
-      if (!(await require(`${this._rushConfiguration.rushJsonFolder}/${alert.condition}`))()) {
+      if (!(await require(`${this._rushConfiguration.rushJsonFolder}/${alert.conditionScript}`))()) {
         return false;
       }
     }
@@ -135,7 +140,7 @@ export class RushAlerts {
   private _printMessageInBoxStyle(alert: IRushAlertStateEntry): void {
     const messageToBePrinted: Array<string> = [];
     messageToBePrinted.push(alert.title);
-    messageToBePrinted.push(...alert.details);
+    messageToBePrinted.push(...alert.message);
     messageToBePrinted.push(alert.detailsUrl);
 
     // Calculate max length for the border
@@ -157,7 +162,7 @@ export class RushAlerts {
   }
 
   private async _writeRushAlertStateAsync(validAlerts: Array<IRushAlertStateEntry>): Promise<void> {
-    const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/alerts-state.json`;
+    const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`;
 
     if (validAlerts.length > 0) {
       const rushAlertsState: IRushAlertsState = {
@@ -166,7 +171,7 @@ export class RushAlerts {
       };
 
       await writeFile(
-        `${this._rushConfiguration.commonTempFolder}/alerts-state.json`,
+        `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`,
         JSON.stringify(rushAlertsState, null, 2)
       );
     } else {
