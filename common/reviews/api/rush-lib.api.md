@@ -61,6 +61,26 @@ export class ApprovedPackagesPolicy {
     readonly reviewCategories: ReadonlySet<string>;
 }
 
+// @public (undocumented)
+export class Autoinstaller {
+    // Warning: (ae-forgotten-export) The symbol "IAutoinstallerOptions" needs to be exported by the entry point index.d.ts
+    constructor(options: IAutoinstallerOptions);
+    // (undocumented)
+    get folderFullPath(): string;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    get packageJsonPath(): string;
+    // (undocumented)
+    prepareAsync(): Promise<void>;
+    // (undocumented)
+    get shrinkwrapFilePath(): string;
+    // (undocumented)
+    updateAsync(): Promise<void>;
+    // (undocumented)
+    static validateName(autoinstallerName: string): void;
+}
+
 // @beta
 export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
@@ -1365,12 +1385,14 @@ export class RushConstants {
     static readonly yarnShrinkwrapFilename: 'yarn.lock';
 }
 
-// @internal
-export class _RushGlobalFolder {
+// @public
+class RushGlobalFolder {
     constructor();
     readonly nodeSpecificPath: string;
     readonly path: string;
 }
+export { RushGlobalFolder }
+export { RushGlobalFolder as _RushGlobalFolder }
 
 // @internal
 export class _RushInternals {

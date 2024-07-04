@@ -61,6 +61,7 @@ import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
+import { InstallAutoinstallerAction } from './actions/InstallAutoinstallerAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -313,6 +314,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new SetupAction(this));
       this.addAction(new UnlinkAction(this));
       this.addAction(new UpdateAction(this));
+      this.addAction(new InstallAutoinstallerAction(this));
       this.addAction(new UpdateAutoinstallerAction(this));
       this.addAction(new UpdateCloudCredentialsAction(this));
       this.addAction(new UpgradeInteractiveAction(this));
