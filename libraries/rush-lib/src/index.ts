@@ -191,3 +191,7 @@ export {
   type IRushCommandLineParameter,
   type IRushCommandLineAction
 } from './api/RushCommandLine';
+
+export { RushGlobalFolder } from './api/RushGlobalFolder';
+
+export { Autoinstaller } from './logic/Autoinstaller';
