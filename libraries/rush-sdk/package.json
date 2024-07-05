@@ -19,25 +19,9 @@
       "types": "./dist/loader.d.ts",
       "default": "./lib-shim/loader.js"
     },
-    "./lib/api/*": {
-      "types": "./lib/api/*.d.ts",
-      "default": "./lib/api/*.js"
-    },
-    "./lib/logic/*": {
-      "types": "./lib/logic/*.d.ts",
-      "default": "./lib/logic/*.js"
-    },
-    "./lib/utilities/*": {
-      "types": "./lib/utilities/*.d.ts",
-      "default": "./lib/utilities/*.js"
-    },
-    "./lib/pluginFramework/*": {
-      "types": "./lib/pluginFramework/*.d.ts",
-      "default": "./lib/pluginFramework/*.js"
-    },
-    "./lib/cli/*": {
-      "types": "./lib/cli/*.d.ts",
-      "default": "./lib/cli/*.js"
+    "./lib/*": {
+      "types": "./lib/*.d.ts",
+      "default": "./lib/*.js"
     }
   },
   "typesVersions": {
