@@ -196,4 +196,4 @@ export {
 
 export { RushGlobalFolder } from './api/RushGlobalFolder';
 
-export { Autoinstaller } from './logic/Autoinstaller';
+export { Autoinstaller, type IAutoinstallerOptions } from './logic/Autoinstaller';
