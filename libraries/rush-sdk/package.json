@@ -26,6 +26,18 @@
     "./lib/logic/*": {
       "types": "./lib/logic/*.d.ts",
       "default": "./lib/logic/*.js"
+    },
+    "./lib/utilities/*": {
+      "types": "./lib/utilities/*.d.ts",
+      "default": "./lib/utilities/*.js"
+    },
+    "./lib/pluginFramework/*": {
+      "types": "./lib/pluginFramework/*.d.ts",
+      "default": "./lib/pluginFramework/*.js"
+    },
+    "./lib/cli/*": {
+      "types": "./lib/cli/*.d.ts",
+      "default": "./lib/cli/*.js"
     }
   },
   "scripts": {
