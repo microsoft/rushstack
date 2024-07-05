@@ -19,16 +19,13 @@
       "types": "./dist/loader.d.ts",
       "default": "./lib-shim/loader.js"
     },
-    "./lib/*": {
-      "types": "./lib/*.d.ts",
-      "default": "./lib/*.js"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "loader": [
-        "./dist/loader.d.ts"
-      ]
+    "./lib/api/*": {
+      "types": "./lib/api/*.d.ts",
+      "default": "./lib/api/*.js"
+    },
+    "./lib/logic/*": {
+      "types": "./lib/logic/*.d.ts",
+      "default": "./lib/logic/*.js"
     }
   },
   "scripts": {
