@@ -63,7 +63,6 @@ export class ApprovedPackagesPolicy {
 
 // @public (undocumented)
 export class Autoinstaller {
-    // Warning: (ae-forgotten-export) The symbol "IAutoinstallerOptions" needs to be exported by the entry point index.d.ts
     constructor(options: IAutoinstallerOptions);
     // (undocumented)
     get folderFullPath(): string;
@@ -345,6 +344,18 @@ export class _FlagFile<TState extends JsonObject = JsonObject> {
 
 // @beta
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
+
+// @public (undocumented)
+export interface IAutoinstallerOptions {
+    // (undocumented)
+    autoinstallerName: string;
+    // (undocumented)
+    restrictConsoleOutput?: boolean;
+    // (undocumented)
+    rushConfiguration: RushConfiguration;
+    // (undocumented)
+    rushGlobalFolder: RushGlobalFolder;
+}
 
 // @internal (undocumented)
 export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
