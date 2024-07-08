@@ -394,6 +394,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               periodicCallback.start();
             } else {
               // failed to acquire the lock, mark current operation to remote executing
+              const currentTime: number = new Date().getTime();
+              // eslint-disable-next-line require-atomic-updates -- this should be safe
+              record.lastCheckedAt = currentTime;
+              // eslint-disable-next-line require-atomic-updates -- this should also be safe
+              record.checkAfter = currentTime + 500;
               return OperationStatus.RemoteExecuting;
             }
           }

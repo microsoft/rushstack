@@ -35,8 +35,6 @@ export class AsyncOperationQueue
   private readonly _pendingIterators: ((result: IteratorResult<IOperationIteratorResult>) => void)[];
   private readonly _totalOperations: number;
   private readonly _completedOperations: Set<OperationExecutionRecord>;
-  private readonly _remoteExecutingOperations: Record<string, number> = {};
-  private readonly _remoteExecutingPollingInterval: number;
 
   private _isDone: boolean;
 
@@ -47,17 +45,12 @@ export class AsyncOperationQueue
    *   - Returning a negative value indicates that `b` should execute before `a`.
    *   - Returning 0 indicates no preference.
    */
-  public constructor(
-    operations: Iterable<OperationExecutionRecord>,
-    sortFn: IOperationSortFunction,
-    options?: { remoteExecutingPollingInterval: number }
-  ) {
+  public constructor(operations: Iterable<OperationExecutionRecord>, sortFn: IOperationSortFunction) {
     this._queue = computeTopologyAndSort(operations, sortFn);
     this._pendingIterators = [];
     this._totalOperations = this._queue.length;
     this._isDone = false;
     this._completedOperations = new Set<OperationExecutionRecord>();
-    this._remoteExecutingPollingInterval = options?.remoteExecutingPollingInterval ?? 5000;
   }
 
   /**
@@ -199,58 +192,22 @@ export class AsyncOperationQueue
   }
 
   public tryGetRemoteExecutingOperation(): OperationExecutionRecord | undefined {
-    const { _queue: queue, _remoteExecutingOperations: remoteExecutingOperations } = this;
-    this._cleanupRemoteExecutingOperationRecords();
-
-    const currentTime: number = new Date().getTime();
+    const { _queue: queue } = this;
 
     // cycle through the queue to find the next operation that is executed remotely
     for (let i: number = queue.length - 1; i >= 0; i--) {
       const operation: OperationExecutionRecord = queue[i];
 
-      // Only grab events that are ready to check again, this prevent checking the same operation multiple times or too early.
-      if (
-        operation.status === OperationStatus.RemoteExecuting &&
-        remoteExecutingOperations[operation.name] <= currentTime
-      ) {
-        remoteExecutingOperations[operation.name] = this._getRemoteExecutingSleepUntil();
+      const currentTime: number = new Date().getTime();
+      if (operation.status === OperationStatus.RemoteExecuting && operation.checkAfter < currentTime) {
         return operation;
       }
     }
     return undefined;
   }
 
-  /**
-   * As the queue executes, it may have operations that are no longer in the queue. Clean those out and
-   *  note any new remote executing operations.
-   */
-  private _cleanupRemoteExecutingOperationRecords(): void {
-    const { _queue: queue, _remoteExecutingOperations: remoteExecutingOperations } = this;
-    const notYetSeen: Set<string> = new Set(Object.keys(remoteExecutingOperations));
-    // Add new operations to the remote executing operations list.
-    for (let i: number = queue.length - 1; i >= 0; i--) {
-      const operation: OperationExecutionRecord = queue[i];
-      if (operation.status === OperationStatus.RemoteExecuting) {
-        if (!(operation.name in remoteExecutingOperations)) {
-          // This operation probably started recently, we don't need to check it again immediately.
-          remoteExecutingOperations[operation.name] = this._getRemoteExecutingSleepUntil();
-        }
-        notYetSeen.delete(operation.name);
-      }
-    }
-
-    // Remove operations that are no longer in the queue.
-    for (const name of notYetSeen) {
-      delete remoteExecutingOperations[name];
-    }
-  }
-
-  private _getRemoteExecutingSleepUntil(): number {
-    return this.getRemoteExecutingSleepDuration() + new Date().getTime();
-  }
-
   public getRemoteExecutingSleepDuration(): number {
-    return this._remoteExecutingPollingInterval;
+    return 5000;
   }
 
   /**

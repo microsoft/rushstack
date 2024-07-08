@@ -179,9 +179,7 @@ describe(AsyncOperationQueue.name, () => {
     // b remote executing -> a -> b (remote executed) -> c -> d -> e
     const expectedOrder: string[] = ['b', 'a', 'b', 'c', 'd', 'e'];
 
-    const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, nullSort, {
-      remoteExecutingPollingInterval: 10
-    });
+    const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, nullSort);
 
     const actualOrder: string[] = [];
     let remoteExecuted: boolean = false;

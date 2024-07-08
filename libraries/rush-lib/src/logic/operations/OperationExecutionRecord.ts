@@ -98,6 +98,17 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     preventAutoclose: true
   });
 
+  /**
+   * Used to check for remote executing operations. When this is set, the operation will only be queued after the timestamp.
+   */
+  public checkAfter: number = Number.MAX_SAFE_INTEGER;
+
+  /**
+   * Used with checkAfter to determine when to check for remote executing operations again. This may be useful if you want
+   *  to customize the check interval.
+   */
+  public lastCheckedAt: number = 0;
+
   public readonly runner: IOperationRunner;
   public readonly associatedPhase: IPhase | undefined;
   public readonly associatedProject: RushConfigurationProject | undefined;
