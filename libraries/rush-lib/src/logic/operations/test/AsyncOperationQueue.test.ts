@@ -202,6 +202,9 @@ describe(AsyncOperationQueue.name, () => {
           operations[1].status = OperationStatus.RemoteExecuting;
           // remote executed operation is finished later
           remoteExecuted = true;
+          const currentTime: number = new Date().getTime();
+          record.lastCheckedAt = currentTime;
+          record.checkAfter = currentTime + 10;
           continue;
         }
       }
