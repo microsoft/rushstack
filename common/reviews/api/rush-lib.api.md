@@ -120,12 +120,12 @@ export type CobuildLockProviderFactory = (cobuildJson: ICobuildJson) => ICobuild
 // @public
 export class CommonVersionsConfiguration {
     readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
-    readonly ensureConsistentVersions: boolean | undefined;
+    readonly ensureConsistentVersions: boolean;
     readonly filePath: string;
     getAllPreferredVersions(): Map<string, string>;
     getPreferredVersionsHash(): string;
     readonly implicitlyPreferredVersions: boolean | undefined;
-    static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
+    static loadFromFile(jsonFilename: string, rushConfiguration?: RushConfiguration): CommonVersionsConfiguration;
     readonly preferredVersions: Map<string, string>;
     save(): boolean;
 }
@@ -1169,6 +1169,8 @@ export class RushConfiguration {
     get defaultSubspace(): Subspace;
     // @deprecated
     readonly ensureConsistentVersions: boolean;
+    // @internal
+    readonly _ensureConsistentVersionsJsonValue: boolean | undefined;
     // @beta
     readonly eventHooks: EventHooks;
     // @beta

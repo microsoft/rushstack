@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where `rush add` would ignore the `ensureConsistentVersions` option if that option was set in `rush.json` instead of in `common/config/rush/common-versions.json`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
