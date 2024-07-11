@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Support deep references to internal Apis",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -11,8 +11,18 @@
   "main": "lib-shim/index.js",
   "typings": "dist/rush-lib.d.ts",
   "exports": {
-    ".": "./lib-shim/index.js",
-    "./loader": "./lib-shim/loader.js"
+    ".": {
+      "types": "./dist/rush-lib.d.ts",
+      "default": "./lib-shim/index.js"
+    },
+    "./loader": {
+      "types": "./dist/loader.d.ts",
+      "default": "./lib-shim/loader.js"
+    },
+    "./lib/*": {
+      "types": "./lib/*.d.ts",
+      "default": "./lib/*.js"
+    }
   },
   "typesVersions": {
     "*": {
