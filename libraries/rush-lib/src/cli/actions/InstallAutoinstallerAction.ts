@@ -23,7 +23,7 @@ export class InstallAutoinstallerAction extends BaseRushAction {
       argumentName: 'AUTOINSTALLER_NAME',
       required: true,
       description:
-        'Specifies the name of the autoinstaller, which must be one of the folders under common/autoinstallers.'
+        'The name of the autoinstaller, which must be one of the folders under common/autoinstallers.'
     });
   }
 
