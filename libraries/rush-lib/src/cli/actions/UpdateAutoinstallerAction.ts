@@ -7,7 +7,7 @@ import { BaseAutoinstallerAction } from './BaseAutoinstallerAction';
 
 export class UpdateAutoinstallerAction extends BaseAutoinstallerAction {
   public constructor(parser: RushCommandLineParser) {
-    super(parser, {
+    super({
       actionName: 'update-autoinstaller',
       summary: 'Updates autoinstaller package dependencies',
       documentation: 'Use this command to regenerate the shrinkwrap file for an autoinstaller folder.',

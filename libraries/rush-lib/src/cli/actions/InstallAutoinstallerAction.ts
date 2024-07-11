@@ -7,7 +7,7 @@ import { BaseAutoinstallerAction } from './BaseAutoinstallerAction';
 
 export class InstallAutoinstallerAction extends BaseAutoinstallerAction {
   public constructor(parser: RushCommandLineParser) {
-    super(parser, {
+    super({
       actionName: 'install-autoinstaller',
       summary: 'Install autoinstaller package dependencies',
       documentation: 'Use this command to install dependencies for an autoinstaller folder.',

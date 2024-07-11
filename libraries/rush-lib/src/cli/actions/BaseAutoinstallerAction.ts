@@ -5,13 +5,12 @@ import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-
 import type { ITerminal } from '@rushstack/terminal';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
-import type { RushCommandLineParser } from '../RushCommandLineParser';
 
 export abstract class BaseAutoinstallerAction extends BaseRushAction {
   protected readonly _name: IRequiredCommandLineStringParameter;
   protected readonly _terminal: ITerminal;
 
-  public constructor(parser: RushCommandLineParser, options: IBaseRushActionOptions) {
+  public constructor(options: IBaseRushActionOptions) {
     super(options);
 
     this._name = this.defineStringParameter({
@@ -22,7 +21,7 @@ export abstract class BaseAutoinstallerAction extends BaseRushAction {
         'The name of the autoinstaller, which must be one of the folders under common/autoinstallers.'
     });
 
-    this._terminal = parser.terminal;
+    this._terminal = this.parser.terminal;
   }
 
   protected abstract runAsync(): Promise<void>;
