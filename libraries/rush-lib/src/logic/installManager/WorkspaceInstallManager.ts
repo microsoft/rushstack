@@ -170,8 +170,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // there is a situation that the subspace previously has injected dependencies but removed
         // so we can check if the repoState up to date
         if (repoState.packageJsonInjectedDependenciesHash !== undefined) {
-          shrinkwrapWarnings.push(`Some injected dependencies' package.json might have been modified.`);
-          shrinkwrapIsUpToDate = false;
+          shrinkwrapWarnings.push(
+            'It was detected that the repo-state.json contains packageJsonInjectedDependenciesHash, ' +
+              'but the inject dependencies feature is not enabled.'
+          );
         }
       }
     }
