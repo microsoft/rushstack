@@ -171,8 +171,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // so we can check if the repoState up to date
         if (repoState.packageJsonInjectedDependenciesHash !== undefined) {
           shrinkwrapWarnings.push(
-            'It was detected that the repo-state.json contains packageJsonInjectedDependenciesHash, ' +
-              'but the inject dependencies feature is not enabled.'
+            `It was detected that ${repoState.filePath} contains packageJsonInjectedDependenciesHash` +
+              ' but the injected dependencies feature is not enabled. You can delete this file' +
+              ' and rerun the rush update command to generate the correct repo-state.json file.'
           );
         }
       }
