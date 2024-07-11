@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-line';
+import type { ITerminal } from '@rushstack/terminal';
 
 import { BaseRushAction } from './BaseRushAction';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
@@ -9,6 +10,7 @@ import { Autoinstaller } from '../../logic/Autoinstaller';
 
 export class UpdateAutoinstallerAction extends BaseRushAction {
   private readonly _name: IRequiredCommandLineStringParameter;
+  private readonly _terminal: ITerminal;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -25,6 +27,8 @@ export class UpdateAutoinstallerAction extends BaseRushAction {
       description:
         'Specifies the name of the autoinstaller, which must be one of the folders under common/autoinstallers.'
     });
+
+    this._terminal = parser.terminal;
   }
 
   protected async runAsync(): Promise<void> {
@@ -41,7 +45,6 @@ export class UpdateAutoinstallerAction extends BaseRushAction {
 
     await autoinstaller.updateAsync();
 
-    // eslint-disable-next-line no-console
-    console.log('\nSuccess.');
+    this._terminal.writeLine('\nSuccess.');
   }
 }
