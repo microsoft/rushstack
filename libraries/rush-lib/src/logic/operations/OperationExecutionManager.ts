@@ -224,6 +224,18 @@ export class OperationExecutionManager {
 
     await this._beforeExecuteOperations?.(this._executionRecords);
 
+    /**
+     * For cobuilt operations, we need to periodically check for completion of remote operations.
+     * As they can finish at any time, we use this to check if they're ready to check. Otherwise, we'd
+     *  have to do some convoluted sleeping logic in the main loop to ensure we can continue to
+     *  queue events. This simplifies that a whole bunch.
+     */
+    let intervalId = setInterval(() => {
+      this._executionQueue.assignOperations();
+    }, 1000);
+    // Unref the interval so that it doesn't keep the process alive
+    intervalId.unref();
+
     // This function is a callback because it may write to the collatedWriter before
     // operation.executeAsync returns (and cleans up the writer)
     const onOperationCompleteAsync: (record: OperationExecutionRecord) => Promise<void> = async (
@@ -258,6 +270,13 @@ export class OperationExecutionManager {
         weighted: true
       }
     );
+
+    // Attempt to clear the interval after the queue completes.
+    try {
+      clearInterval(intervalId);
+    } catch (_error) {
+      // Ignore errors
+    }
 
     const status: OperationStatus = this._hasAnyFailures
       ? OperationStatus.Failure
