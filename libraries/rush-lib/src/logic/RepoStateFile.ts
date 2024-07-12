@@ -208,6 +208,12 @@ export class RepoStateFile {
       ) {
         this._packageJsonInjectedDependenciesHash = packageJsonInjectedDependenciesHash;
         this._modified = true;
+      } else if (!packageJsonInjectedDependenciesHash && this._packageJsonInjectedDependenciesHash) {
+        // if packageJsonInjectedDependenciesHash is undefined, but this._packageJsonInjectedDependenciesHash is not
+        // means users may turn off the injected installation
+        // so we will need to remove unused fields in repo-state.json as well
+        this._packageJsonInjectedDependenciesHash = undefined;
+        this._modified = true
       }
     }
 

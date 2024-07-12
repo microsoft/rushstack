@@ -172,8 +172,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         if (repoState.packageJsonInjectedDependenciesHash !== undefined) {
           shrinkwrapWarnings.push(
             `It was detected that ${repoState.filePath} contains packageJsonInjectedDependenciesHash` +
-              ' but the injected dependencies feature is not enabled. You can delete this file' +
-              ' and rerun the rush update command to generate the correct repo-state.json file.'
+              ' but the injected dependencies feature is not enabled. You can manually remove this field in repo-state.json.' +
+              ' Or run rush update command to update the repo-state.json file.'
           );
         }
       }
