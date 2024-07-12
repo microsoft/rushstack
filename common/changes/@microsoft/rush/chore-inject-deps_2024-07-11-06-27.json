@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Don't interrupt the installation process if the user hasn't enabled the inject dependencies feature.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
