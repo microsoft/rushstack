@@ -230,7 +230,7 @@ export class OperationExecutionManager {
      *  have to do some convoluted sleeping logic in the main loop to ensure we can continue to
      *  queue events. This simplifies that a whole bunch.
      */
-    let intervalId = setInterval(() => {
+    const intervalId: NodeJS.Timeout = setInterval(() => {
       this._executionQueue.assignOperations();
     }, 1000);
     // Unref the interval so that it doesn't keep the process alive
