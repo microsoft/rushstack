@@ -75,24 +75,12 @@ export interface ICacheableOperationPluginOptions {
 
 export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   private _buildCacheContextByOperation: Map<Operation, IOperationBuildCacheContext> = new Map();
-  private _intervalId: NodeJS.Timeout;
   private _itemsToCheck: Set<OperationExecutionRecord> = new Set();
 
   private readonly _options: ICacheableOperationPluginOptions;
 
   public constructor(options: ICacheableOperationPluginOptions) {
     this._options = options;
-    this._intervalId = setInterval(() => {
-      if (this._itemsToCheck.size > 0) {
-        const currentTime: number = new Date().getTime();
-        for (const item of this._itemsToCheck) {
-          if (item.checkAfter > currentTime) {
-            item.status = OperationStatus.RemoteExecutingPossiblyComplete;
-          }
-        }
-      }
-    }, 1000);
-    this._intervalId.unref();
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -225,14 +213,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         }
 
         const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
-        if (record.status === OperationStatus.RemoteExecuting) {
-          if (record.checkAfter < new Date().getTime()) {
-            await Async.sleepAsync(500);
-            return OperationStatus.RemoteExecuting;
-          } else {
-            return OperationStatus.Ready;
-          }
-        }
 
         const {
           associatedProject: project,
@@ -415,13 +395,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               });
               periodicCallback.start();
             } else {
-              // failed to acquire the lock, mark current operation to remote executing
-              const currentTime: number = new Date().getTime();
-              // eslint-disable-next-line require-atomic-updates -- this should be safe
-              record.lastCheckedAt = currentTime;
-              // eslint-disable-next-line require-atomic-updates -- this should also be safe
-              record.checkAfter = currentTime + 500;
-              this._itemsToCheck.add(record);
+              setTimeout(() => {
+                record.status = OperationStatus.RemoteExecutingPossiblyComplete;
+              }, 500);
+
+              record.stopwatch.reset();
               return OperationStatus.RemoteExecuting;
             }
           }
@@ -459,6 +437,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         // No need to run for the following operation status
         switch (record.status) {
           case OperationStatus.NoOp:
+          case OperationStatus.RemoteExecutingPossiblyComplete:
           case OperationStatus.RemoteExecuting: {
             return;
           }

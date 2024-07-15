@@ -27,7 +27,7 @@ export enum OperationStatus {
    */
   RemoteExecuting = 'REMOTE EXECUTING',
   /**
-   * The Operation has been remote executing, but may have completed.
+   * The Operation is currently executing by a remote process
    */
   RemoteExecutingPossiblyComplete = 'REMOTE EXECUTING BUT MIGHT BE COMPLETE',
   /**
@@ -59,3 +59,17 @@ export enum OperationStatus {
    */
   NoOp = 'NO OP'
 }
+
+/**
+ * The set of statuses that are considered terminal.
+ * @alpha
+ */
+export const TERMINAL_STATUSES: Set<OperationStatus> = new Set([
+  OperationStatus.Success,
+  OperationStatus.SuccessWithWarning,
+  OperationStatus.Skipped,
+  OperationStatus.Blocked,
+  OperationStatus.FromCache,
+  OperationStatus.Failure,
+  OperationStatus.NoOp
+]);

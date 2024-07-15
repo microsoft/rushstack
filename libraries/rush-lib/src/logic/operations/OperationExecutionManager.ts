@@ -98,7 +98,12 @@ export class OperationExecutionManager {
     this._beforeExecuteOperation = beforeExecuteOperation;
     this._afterExecuteOperation = afterExecuteOperation;
     this._beforeExecuteOperations = beforeExecuteOperations;
-    this._onOperationStatusChanged = onOperationStatusChanged;
+    this._onOperationStatusChanged = (record: OperationExecutionRecord) => {
+      if (record.isRemoteExecuting) {
+        this._executionQueue.assignOperations();
+      }
+      onOperationStatusChanged?.(record);
+    };
 
     // TERMINAL PIPELINE:
     //
@@ -158,10 +163,6 @@ export class OperationExecutionManager {
       prioritySort
     );
     this._executionQueue = executionQueue;
-    this._onOperationStatusChanged = (record: OperationExecutionRecord) => {
-      this._executionQueue.assignOperations();
-      this._onOperationStatusChanged?.(record);
-    };
   }
 
   private _streamCollator_onWriterActive = (writer: CollatedWriter | undefined): void => {
@@ -401,9 +402,11 @@ export class OperationExecutionManager {
       }
     }
 
-    if (record.status !== OperationStatus.RemoteExecuting) {
+    if (record.isTerminal) {
       // If the operation was not remote, then we can notify queue that it is complete
       this._executionQueue.complete(record);
+    } else {
+      this._executionQueue.assignOperations();
     }
   }
 }

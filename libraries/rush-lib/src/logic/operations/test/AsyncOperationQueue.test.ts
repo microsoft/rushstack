@@ -6,7 +6,6 @@ import { type IOperationExecutionRecordContext, OperationExecutionRecord } from 
 import { MockOperationRunner } from './MockOperationRunner';
 import { AsyncOperationQueue, type IOperationSortFunction } from '../AsyncOperationQueue';
 import { OperationStatus } from '../OperationStatus';
-import { Async } from '@rushstack/node-core-library';
 
 function addDependency(consumer: OperationExecutionRecord, dependency: OperationExecutionRecord): void {
   consumer.dependencies.add(dependency);
@@ -131,60 +130,6 @@ describe(AsyncOperationQueue.name, () => {
     for (const [operation, operationConcurrency] of expectedConcurrency) {
       expect(actualConcurrency.get(operation)).toEqual(operationConcurrency);
     }
-  });
-
-  it('handles remote executed operations', async () => {
-    const operations = [
-      createRecord('a'),
-      createRecord('b'),
-      createRecord('c'),
-      createRecord('d'),
-      createRecord('e')
-    ];
-
-    addDependency(operations[2], operations[1]);
-    addDependency(operations[3], operations[1]);
-    addDependency(operations[4], operations[1]);
-    addDependency(operations[3], operations[2]);
-    addDependency(operations[4], operations[3]);
-
-    // b remote executing -> a -> b (remote executed) -> c -> d -> e
-    const expectedOrder: string[] = ['b', 'a', 'b', 'c', 'd', 'e'];
-
-    const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, nullSort);
-
-    const actualOrder: string[] = [];
-    let remoteExecuted: boolean = false;
-    for await (const operation of queue) {
-      let record: OperationExecutionRecord | undefined;
-      if (operation.status === OperationStatus.RemoteExecuting) {
-        await Async.sleepAsync(100);
-        record = queue.tryGetRemoteExecutingOperation();
-      } else {
-        record = operation;
-      }
-      if (!record) {
-        continue;
-      }
-
-      actualOrder.push(record.name);
-
-      if (record === operations[1]) {
-        if (!remoteExecuted) {
-          operations[1].status = OperationStatus.RemoteExecuting;
-          // remote executed operation is finished later
-          remoteExecuted = true;
-          const currentTime: number = new Date().getTime();
-          record.lastCheckedAt = currentTime;
-          record.checkAfter = currentTime + 100;
-          continue;
-        }
-      }
-      record.status = OperationStatus.Success;
-      queue.complete(record);
-    }
-
-    expect(actualOrder).toEqual(expectedOrder);
   });
 
   it('handles an empty queue', async () => {

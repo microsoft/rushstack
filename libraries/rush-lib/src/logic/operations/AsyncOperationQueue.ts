@@ -115,14 +115,14 @@ export class AsyncOperationQueue
         // This operation is not yet ready to be executed
         // next one plz :)
         continue;
-      } else if (record.status === OperationStatus.RemoteExecuting) {
+      } else if (
+        record.status === OperationStatus.RemoteExecuting ||
+        record.status === OperationStatus.RemoteExecutingPossiblyComplete
+      ) {
         // This operation is not ready to execute yet, but it may become ready later
         // next one plz :)
         continue;
-      } else if (
-        record.status !== OperationStatus.Ready &&
-        record.status !== OperationStatus.RemoteExecutingPossiblyComplete
-      ) {
+      } else if (record.status !== OperationStatus.Ready) {
         // Sanity check
         throw new Error(`Unexpected status "${record.status}" for queued operation: ${record.name}`);
       } else {
@@ -173,7 +173,7 @@ export class AsyncOperationQueue
     for (let i: number = queue.length - 1; i >= 0; i--) {
       const operation: OperationExecutionRecord = queue[i];
 
-      if (operation.status === OperationStatus.RemoteExecuting) {
+      if (operation.status === OperationStatus.RemoteExecutingPossiblyComplete) {
         return operation;
       }
     }

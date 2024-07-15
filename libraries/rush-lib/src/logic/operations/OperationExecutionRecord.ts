@@ -15,7 +15,7 @@ import {
 import { InternalError, NewlineKind } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rushstack/stream-collator';
 
-import { OperationStatus } from './OperationStatus';
+import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
@@ -98,17 +98,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     preventAutoclose: true
   });
 
-  /**
-   * Used to check for remote executing operations. When this is set, the operation will only be queued after the timestamp.
-   */
-  public checkAfter: number = Number.MAX_SAFE_INTEGER;
-
-  /**
-   * Used with checkAfter to determine when to check for remote executing operations again. This may be useful if you want
-   *  to customize the check interval.
-   */
-  public lastCheckedAt: number = 0;
-
   public readonly runner: IOperationRunner;
   public readonly associatedPhase: IPhase | undefined;
   public readonly associatedProject: RushConfigurationProject | undefined;
@@ -175,6 +164,17 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public get cobuildRunnerId(): string | undefined {
     // Lazy calculated because the state file is created/restored later on
     return this._operationMetadataManager?.stateFile.state?.cobuildRunnerId;
+  }
+
+  public get isTerminal(): boolean {
+    return TERMINAL_STATUSES.has(this.status);
+  }
+
+  public get isRemoteExecuting(): boolean {
+    return (
+      this.status === OperationStatus.RemoteExecuting ||
+      this.status === OperationStatus.RemoteExecutingPossiblyComplete
+    );
   }
 
   /**
@@ -288,12 +288,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     onStart: (record: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
     onResult: (record: OperationExecutionRecord) => Promise<void>;
   }): Promise<void> {
-    if (
-      this.status === OperationStatus.RemoteExecuting ||
-      this.status === OperationStatus.RemoteExecutingPossiblyComplete
-    ) {
-      this.stopwatch.reset();
-    }
     this.stopwatch.start();
     this.status = OperationStatus.Executing;
 
@@ -313,7 +307,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       // Delegate global state reporting
       await onResult(this);
     } finally {
-      if (this.status !== OperationStatus.RemoteExecuting) {
+      if (this.isTerminal) {
         this._collatedWriter?.close();
         this.stdioSummarizer.close();
         this.stopwatch.stop();
