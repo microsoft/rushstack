@@ -21,7 +21,6 @@ export class AsyncOperationQueue
   private readonly _pendingIterators: ((result: IteratorResult<OperationExecutionRecord>) => void)[];
   private readonly _totalOperations: number;
   private readonly _completedOperations: Set<OperationExecutionRecord>;
-  private _intervalId: NodeJS.Timeout | undefined;
 
   private _isDone: boolean;
 
@@ -38,11 +37,6 @@ export class AsyncOperationQueue
     this._totalOperations = this._queue.length;
     this._isDone = false;
     this._completedOperations = new Set<OperationExecutionRecord>();
-    this._intervalId = setInterval(() => {
-      this.assignOperations();
-    }, 1000);
-    // Unref the interval so that it doesn't keep the process alive
-    this._intervalId.unref();
   }
 
   /**
@@ -125,7 +119,10 @@ export class AsyncOperationQueue
         // This operation is not ready to execute yet, but it may become ready later
         // next one plz :)
         continue;
-      } else if (record.status !== OperationStatus.Ready) {
+      } else if (
+        record.status !== OperationStatus.Ready &&
+        record.status !== OperationStatus.RemoteExecutingPossiblyComplete
+      ) {
         // Sanity check
         throw new Error(`Unexpected status "${record.status}" for queued operation: ${record.name}`);
       } else {
@@ -146,15 +143,6 @@ export class AsyncOperationQueue
     }
 
     if (this._isDone) {
-      if (this._intervalId) {
-        // Attempt to clear the interval after the queue completes.
-        try {
-          clearInterval(this._intervalId);
-          this._intervalId = undefined;
-        } catch (_error) {
-          // Ignore errors
-        }
-      }
       for (const resolveAsyncIterator of waitingIterators.splice(0)) {
         resolveAsyncIterator({
           value: undefined,
@@ -185,8 +173,7 @@ export class AsyncOperationQueue
     for (let i: number = queue.length - 1; i >= 0; i--) {
       const operation: OperationExecutionRecord = queue[i];
 
-      const currentTime: number = new Date().getTime();
-      if (operation.status === OperationStatus.RemoteExecuting && operation.checkAfter < currentTime) {
+      if (operation.status === OperationStatus.RemoteExecuting) {
         return operation;
       }
     }

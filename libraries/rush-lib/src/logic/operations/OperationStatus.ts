@@ -27,6 +27,10 @@ export enum OperationStatus {
    */
   RemoteExecuting = 'REMOTE EXECUTING',
   /**
+   * The Operation has been remote executing, but may have completed.
+   */
+  RemoteExecutingPossiblyComplete = 'REMOTE EXECUTING BUT MIGHT BE COMPLETE',
+  /**
    * The Operation completed successfully and did not write to standard output
    */
   Success = 'SUCCESS',

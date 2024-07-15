@@ -119,7 +119,7 @@ export class OperationExecutionManager {
     // Convert the developer graph to the mutable execution graph
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
-      onOperationStatusChanged,
+      onOperationStatusChanged: this._onOperationStatusChanged,
       debugMode,
       quietMode
     };
@@ -158,6 +158,10 @@ export class OperationExecutionManager {
       prioritySort
     );
     this._executionQueue = executionQueue;
+    this._onOperationStatusChanged = (record: OperationExecutionRecord) => {
+      this._executionQueue.assignOperations();
+      this._onOperationStatusChanged?.(record);
+    };
   }
 
   private _streamCollator_onWriterActive = (writer: CollatedWriter | undefined): void => {

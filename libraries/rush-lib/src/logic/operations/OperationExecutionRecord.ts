@@ -288,7 +288,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     onStart: (record: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
     onResult: (record: OperationExecutionRecord) => Promise<void>;
   }): Promise<void> {
-    if (this.status === OperationStatus.RemoteExecuting) {
+    if (
+      this.status === OperationStatus.RemoteExecuting ||
+      this.status === OperationStatus.RemoteExecutingPossiblyComplete
+    ) {
       this.stopwatch.reset();
     }
     this.stopwatch.start();

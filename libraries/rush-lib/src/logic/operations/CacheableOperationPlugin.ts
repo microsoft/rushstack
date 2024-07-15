@@ -75,11 +75,24 @@ export interface ICacheableOperationPluginOptions {
 
 export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   private _buildCacheContextByOperation: Map<Operation, IOperationBuildCacheContext> = new Map();
+  private _intervalId: NodeJS.Timeout;
+  private _itemsToCheck: Set<OperationExecutionRecord> = new Set();
 
   private readonly _options: ICacheableOperationPluginOptions;
 
   public constructor(options: ICacheableOperationPluginOptions) {
     this._options = options;
+    this._intervalId = setInterval(() => {
+      if (this._itemsToCheck.size > 0) {
+        const currentTime: number = new Date().getTime();
+        for (const item of this._itemsToCheck) {
+          if (item.checkAfter > currentTime) {
+            item.status = OperationStatus.RemoteExecutingPossiblyComplete;
+          }
+        }
+      }
+    }, 1000);
+    this._intervalId.unref();
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -212,6 +225,15 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         }
 
         const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
+        if (record.status === OperationStatus.RemoteExecuting) {
+          if (record.checkAfter < new Date().getTime()) {
+            await Async.sleepAsync(500);
+            return OperationStatus.RemoteExecuting;
+          } else {
+            return OperationStatus.Ready;
+          }
+        }
+
         const {
           associatedProject: project,
           associatedPhase: phase,
@@ -399,6 +421,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               record.lastCheckedAt = currentTime;
               // eslint-disable-next-line require-atomic-updates -- this should also be safe
               record.checkAfter = currentTime + 500;
+              this._itemsToCheck.add(record);
               return OperationStatus.RemoteExecuting;
             }
           }
@@ -443,6 +466,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             break;
           }
         }
+        this._itemsToCheck.delete(record);
 
         const { cobuildLock, projectBuildCache, isCacheWriteAllowed, buildCacheTerminal, cacheRestored } =
           buildCacheContext;
