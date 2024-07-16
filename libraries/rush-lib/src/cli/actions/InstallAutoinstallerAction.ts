@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseAutoinstallerAction } from './BaseAutoinstallerAction';
 
 export class InstallAutoinstallerAction extends BaseAutoinstallerAction {
@@ -15,16 +15,7 @@ export class InstallAutoinstallerAction extends BaseAutoinstallerAction {
     });
   }
 
-  protected async runAsync(): Promise<void> {
-    const autoinstallerName: string = this._name.value;
-    const autoinstaller: Autoinstaller = new Autoinstaller({
-      autoinstallerName,
-      rushConfiguration: this.rushConfiguration,
-      rushGlobalFolder: this.rushGlobalFolder
-    });
-
+  protected async prepareAsync(autoinstaller: Autoinstaller): Promise<void> {
     await autoinstaller.prepareAsync();
-
-    this._terminal.writeLine('\nSuccess.');
   }
 }

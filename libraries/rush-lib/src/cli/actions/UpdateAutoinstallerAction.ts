@@ -15,20 +15,10 @@ export class UpdateAutoinstallerAction extends BaseAutoinstallerAction {
     });
   }
 
-  protected async runAsync(): Promise<void> {
-    const autoinstallerName: string = this._name.value;
-    const autoinstaller: Autoinstaller = new Autoinstaller({
-      autoinstallerName,
-      rushConfiguration: this.rushConfiguration,
-      rushGlobalFolder: this.rushGlobalFolder
-    });
-
+  protected async prepareAsync(autoinstaller: Autoinstaller): Promise<void> {
     // Do not run `autoinstaller.prepareAsync` here. It tries to install the autoinstaller with
     // --frozen-lockfile or equivalent, which will fail if the autoinstaller's dependencies
     // have been changed.
-
     await autoinstaller.updateAsync();
-
-    this._terminal.writeLine('\nSuccess.');
   }
 }
