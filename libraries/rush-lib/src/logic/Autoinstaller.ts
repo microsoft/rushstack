@@ -25,7 +25,7 @@ import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import type { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
 /**
- * @public
+ * @beta
  */
 export interface IAutoinstallerOptions {
   autoinstallerName: string;
@@ -35,7 +35,7 @@ export interface IAutoinstallerOptions {
 }
 
 /**
- * @public
+ * @beta
  */
 export class Autoinstaller {
   public readonly name: string;

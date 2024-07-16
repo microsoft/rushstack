@@ -5,6 +5,7 @@ import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-
 import type { ITerminal } from '@rushstack/terminal';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
+import { Autoinstaller } from '../../logic/Autoinstaller';
 
 export abstract class BaseAutoinstallerAction extends BaseRushAction {
   protected readonly _name: IRequiredCommandLineStringParameter;
@@ -24,5 +25,18 @@ export abstract class BaseAutoinstallerAction extends BaseRushAction {
     this._terminal = this.parser.terminal;
   }
 
-  protected abstract runAsync(): Promise<void>;
+  protected abstract prepareAsync(autoinstaller: Autoinstaller): Promise<void>;
+
+  protected async runAsync(): Promise<void> {
+    const autoinstallerName: string = this._name.value;
+    const autoinstaller: Autoinstaller = new Autoinstaller({
+      autoinstallerName,
+      rushConfiguration: this.rushConfiguration,
+      rushGlobalFolder: this.rushGlobalFolder
+    });
+
+    await this.prepareAsync(autoinstaller);
+
+    this._terminal.writeLine('\nSuccess.');
+  }
 }
