@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
-import { Autoinstaller } from '../../logic/Autoinstaller';
+import type { Autoinstaller } from '../../logic/Autoinstaller';
 import { BaseAutoinstallerAction } from './BaseAutoinstallerAction';
 
 export class UpdateAutoinstallerAction extends BaseAutoinstallerAction {
