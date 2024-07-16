@@ -62,7 +62,7 @@
    *
    * In the case that subspaces is enabled, this setting will take effect at a subspace level.
    */
-  "ensureConsistentVersions": false,
+  "ensureConsistentVersions": true,
 
   /**
    * The "rush check" command can be used to enforce that every project in the repo must specify
