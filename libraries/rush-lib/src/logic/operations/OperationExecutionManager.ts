@@ -12,12 +12,7 @@ import {
 import { StreamCollator, type CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 
-import {
-  AsyncOperationQueue,
-  type IOperationIteratorResult,
-  type IOperationSortFunction,
-  UNASSIGNED_OPERATION
-} from './AsyncOperationQueue';
+import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { type IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
@@ -103,7 +98,12 @@ export class OperationExecutionManager {
     this._beforeExecuteOperation = beforeExecuteOperation;
     this._afterExecuteOperation = afterExecuteOperation;
     this._beforeExecuteOperations = beforeExecuteOperations;
-    this._onOperationStatusChanged = onOperationStatusChanged;
+    this._onOperationStatusChanged = (record: OperationExecutionRecord) => {
+      if (record.status === OperationStatus.Ready) {
+        this._executionQueue.assignOperations();
+      }
+      onOperationStatusChanged?.(record);
+    };
 
     // TERMINAL PIPELINE:
     //
@@ -124,7 +124,7 @@ export class OperationExecutionManager {
     // Convert the developer graph to the mutable execution graph
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
-      onOperationStatusChanged,
+      onOperationStatusChanged: this._onOperationStatusChanged,
       debugMode,
       quietMode
     };
@@ -252,30 +252,11 @@ export class OperationExecutionManager {
 
     await Async.forEachAsync(
       this._executionQueue,
-      async (operation: IOperationIteratorResult) => {
-        let record: OperationExecutionRecord | undefined;
-        /**
-         * If the operation is UNASSIGNED_OPERATION, it means that the queue is not able to assign a operation.
-         * This happens when some operations run remotely. So, we should try to get a remote executing operation
-         * from the queue manually here.
-         */
-        if (operation.status === UNASSIGNED_OPERATION) {
-          // Pause for a few time
-          await Async.sleepAsync(5000);
-          record = this._executionQueue.tryGetRemoteExecutingOperation();
-        } else {
-          record = operation;
-        }
-
-        if (!record) {
-          // Fail to assign a operation, start over again
-          return;
-        } else {
-          await record.executeAsync({
-            onStart: onOperationStartAsync,
-            onResult: onOperationCompleteAsync
-          });
-        }
+      async (operation: OperationExecutionRecord) => {
+        await operation.executeAsync({
+          onStart: onOperationStartAsync,
+          onResult: onOperationCompleteAsync
+        });
       },
       {
         concurrency: maxParallelism,
@@ -421,11 +402,10 @@ export class OperationExecutionManager {
       }
     }
 
-    if (record.status !== OperationStatus.RemoteExecuting) {
+    if (record.isTerminal) {
       // If the operation was not remote, then we can notify queue that it is complete
       this._executionQueue.complete(record);
     } else {
-      // Attempt to requeue other operations if the operation was remote
       this._executionQueue.assignOperations();
     }
   }

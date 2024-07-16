@@ -970,7 +970,6 @@ export enum OperationStatus {
     NoOp = "NO OP",
     Queued = "QUEUED",
     Ready = "READY",
-    RemoteExecuting = "REMOTE EXECUTING",
     Skipped = "SKIPPED",
     Success = "SUCCESS",
     SuccessWithWarning = "SUCCESS WITH WARNINGS",

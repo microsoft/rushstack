@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Adjusts how cobuilt operations are added and requeued to the operation graph. Removes the 'RemoteExecuting' status.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
