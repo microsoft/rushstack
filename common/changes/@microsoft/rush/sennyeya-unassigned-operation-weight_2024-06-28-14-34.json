@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fixes an issue with cobuilds where weighted operations could ignore the scheduler's weighting requirements.",
+      "comment": "Adjusts how cobuilt operations are added and requeued to the operation graph. Removes the 'RemoteExecuting' status.",
       "type": "none"
     }
   ],
