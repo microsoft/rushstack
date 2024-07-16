@@ -59,7 +59,7 @@ export class ApprovedPackagesPolicy {
     readonly reviewCategories: ReadonlySet<string>;
 }
 
-// @public (undocumented)
+// @beta (undocumented)
 export class Autoinstaller {
     constructor(options: IAutoinstallerOptions);
     // (undocumented)
@@ -343,7 +343,7 @@ export class _FlagFile<TState extends JsonObject = JsonObject> {
 // @beta
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
-// @public (undocumented)
+// @beta (undocumented)
 export interface IAutoinstallerOptions {
     // (undocumented)
     autoinstallerName: string;
