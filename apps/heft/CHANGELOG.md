@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 27 Jun 2024 21:01:36 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Jul 2024 00:36:21 GMT and should not be manually modified.
+
+## 0.66.20
+Tue, 16 Jul 2024 00:36:21 GMT
+
+### Patches
+
+- Update schemas/templates/heft.json to reflect new settings
 
 ## 0.66.19
 Thu, 27 Jun 2024 21:01:36 GMT

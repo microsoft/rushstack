@@ -472,6 +472,13 @@ export class RushConfiguration {
   public readonly suppressNodeLtsWarning: boolean;
 
   /**
+   * The raw value of `ensureConsistentVersions` from the `rush.json` file.
+   *
+   * @internal
+   */
+  public readonly _ensureConsistentVersionsJsonValue: boolean | undefined;
+
+  /**
    * If true, then consistent version specifiers for dependencies will be enforced.
    * I.e. "rush check" is run before some commands.
    *
@@ -611,6 +618,7 @@ export class RushConfiguration {
 
     this.suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
+    this._ensureConsistentVersionsJsonValue = rushConfigurationJson.ensureConsistentVersions;
     this.ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
     // Try getting a subspace configuration
@@ -820,22 +828,6 @@ export class RushConfiguration {
     this._hasVariantsField = !!rushConfigurationJson.variants;
 
     this._pathTrees = new Map();
-
-    if (this.subspacesFeatureEnabled && rushConfigurationJson.ensureConsistentVersions !== undefined) {
-      throw new Error(
-        `When using subspaces, the ensureConsistentVersions config is now defined in the ${RushConstants.commonVersionsFilename} file, ` +
-          `you must remove the old setting "ensureConsistentVersions" from ${RushConstants.rushJsonFilename}`
-      );
-    } else if (
-      !this.subspacesFeatureEnabled &&
-      rushConfigurationJson.ensureConsistentVersions !== undefined &&
-      this.defaultSubspace.getCommonVersions().ensureConsistentVersions !== undefined
-    ) {
-      throw new Error(
-        `When the ensureConsistentVersions config is defined in the ${RushConstants.rushJsonFilename} file, ` +
-          `it cannot also be defined in the ${RushConstants.commonVersionsFilename} file`
-      );
-    }
   }
 
   private _initializeAndValidateLocalProjects(): void {
