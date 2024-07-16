@@ -265,8 +265,6 @@ function tryEnableBuildStatusWebSocketServer(
     [OperationStatus.Ready]: 'Ready',
     [OperationStatus.Queued]: 'Queued',
     [OperationStatus.Executing]: 'Executing',
-    [OperationStatus.RemoteExecuting]: 'RemoteExecuting',
-    [OperationStatus.RemoteExecutingPossiblyComplete]: 'RemoteExecutingPossiblyComplete',
     [OperationStatus.Success]: 'Success',
     [OperationStatus.SuccessWithWarning]: 'SuccessWithWarning',
     [OperationStatus.Skipped]: 'Skipped',

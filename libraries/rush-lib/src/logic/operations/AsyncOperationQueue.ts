@@ -115,13 +115,6 @@ export class AsyncOperationQueue
         // This operation is not yet ready to be executed
         // next one plz :)
         continue;
-      } else if (
-        record.status === OperationStatus.RemoteExecuting ||
-        record.status === OperationStatus.RemoteExecutingPossiblyComplete
-      ) {
-        // This operation is not ready to execute yet, but it may become ready later
-        // next one plz :)
-        continue;
       } else if (record.status !== OperationStatus.Ready) {
         // Sanity check
         throw new Error(`Unexpected status "${record.status}" for queued operation: ${record.name}`);
@@ -151,33 +144,6 @@ export class AsyncOperationQueue
       }
       return;
     }
-
-    if (waitingIterators.length > 0) {
-      // returns an unassigned operation to let caller decide when there is at least one
-      // remote executing operation which is not ready to process.
-      const remoteExecutingOperation: OperationExecutionRecord | undefined =
-        this.tryGetRemoteExecutingOperation();
-      if (remoteExecutingOperation) {
-        waitingIterators.shift()!({
-          value: remoteExecutingOperation,
-          done: false
-        });
-      }
-    }
-  }
-
-  public tryGetRemoteExecutingOperation(): OperationExecutionRecord | undefined {
-    const { _queue: queue } = this;
-
-    // cycle through the queue to find the next operation that is executed remotely
-    for (let i: number = queue.length - 1; i >= 0; i--) {
-      const operation: OperationExecutionRecord = queue[i];
-
-      if (operation.status === OperationStatus.RemoteExecutingPossiblyComplete) {
-        return operation;
-      }
-    }
-    return undefined;
   }
 
   /**

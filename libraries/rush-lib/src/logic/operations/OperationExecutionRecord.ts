@@ -170,13 +170,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return TERMINAL_STATUSES.has(this.status);
   }
 
-  public get isRemoteExecuting(): boolean {
-    return (
-      this.status === OperationStatus.RemoteExecuting ||
-      this.status === OperationStatus.RemoteExecutingPossiblyComplete
-    );
-  }
-
   /**
    * The current execution status of an operation. Operations start in the 'ready' state,
    * but can be 'blocked' if an upstream operation failed. It is 'executing' when
@@ -288,6 +281,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     onStart: (record: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
     onResult: (record: OperationExecutionRecord) => Promise<void>;
   }): Promise<void> {
+    if (!this.isTerminal) {
+      this.stopwatch.reset();
+    }
     this.stopwatch.start();
     this.status = OperationStatus.Executing;
 

@@ -396,11 +396,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               periodicCallback.start();
             } else {
               setTimeout(() => {
-                record.status = OperationStatus.RemoteExecutingPossiblyComplete;
+                record.status = OperationStatus.Ready;
               }, 500);
-
-              record.stopwatch.reset();
-              return OperationStatus.RemoteExecuting;
+              return OperationStatus.Executing;
             }
           }
         };
@@ -435,16 +433,10 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         }
 
         // No need to run for the following operation status
-        switch (record.status) {
-          case OperationStatus.NoOp:
-          case OperationStatus.RemoteExecutingPossiblyComplete:
-          case OperationStatus.RemoteExecuting: {
-            return;
-          }
-          default: {
-            break;
-          }
+        if (!record.isTerminal || record.status === OperationStatus.NoOp) {
+          return;
         }
+
         this._itemsToCheck.delete(record);
 
         const { cobuildLock, projectBuildCache, isCacheWriteAllowed, buildCacheTerminal, cacheRestored } =

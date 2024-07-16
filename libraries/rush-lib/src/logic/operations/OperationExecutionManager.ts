@@ -99,7 +99,7 @@ export class OperationExecutionManager {
     this._afterExecuteOperation = afterExecuteOperation;
     this._beforeExecuteOperations = beforeExecuteOperations;
     this._onOperationStatusChanged = (record: OperationExecutionRecord) => {
-      if (record.isRemoteExecuting) {
+      if (record.status === OperationStatus.Ready) {
         this._executionQueue.assignOperations();
       }
       onOperationStatusChanged?.(record);
