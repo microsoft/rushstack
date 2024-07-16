@@ -75,7 +75,6 @@ export interface ICacheableOperationPluginOptions {
 
 export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   private _buildCacheContextByOperation: Map<Operation, IOperationBuildCacheContext> = new Map();
-  private _itemsToCheck: Set<OperationExecutionRecord> = new Set();
 
   private readonly _options: ICacheableOperationPluginOptions;
 
@@ -436,8 +435,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         if (!record.isTerminal || record.status === OperationStatus.NoOp) {
           return;
         }
-
-        this._itemsToCheck.delete(record);
 
         const { cobuildLock, projectBuildCache, isCacheWriteAllowed, buildCacheTerminal, cacheRestored } =
           buildCacheContext;
