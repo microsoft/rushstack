@@ -160,12 +160,13 @@ Array [
   "This Thursday, we will complete the",
   "Node.js version upgrade.  Any",
   "pipelines that still have not",
-  "upgraded will be temporarily disabled.",
+  "upgraded will be temporarily",
+  "disabled.",
 ]
 `);
 
       for (const line of lines) {
-        expect(line.length).toBeLessThan(36);
+        expect(line.length).toBeLessThanOrEqual(36);
       }
     });
   });
