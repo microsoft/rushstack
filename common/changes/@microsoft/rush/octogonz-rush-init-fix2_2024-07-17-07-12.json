@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a recent regression for `rush init`",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
