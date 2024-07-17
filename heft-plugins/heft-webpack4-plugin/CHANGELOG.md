@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-webpack4-plugin
 
-This log was last generated on Wed, 17 Jul 2024 00:11:19 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Jul 2024 06:55:09 GMT and should not be manually modified.
+
+## 0.10.59
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
 
 ## 0.10.58
 Wed, 17 Jul 2024 00:11:19 GMT
