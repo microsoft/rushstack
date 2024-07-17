@@ -1,11 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { readFile, writeFile, unlink } from 'fs/promises';
-import { existsSync } from 'fs';
 import type { Terminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '../api/RushConfiguration';
-import { JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
 import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
 
 export interface IRushAlertsOptions {
@@ -48,7 +46,7 @@ export class RushAlerts {
 
   public async isAlertsStateUpToDateAsync(): Promise<boolean> {
     const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`;
-    if (!existsSync(rushAlertsStateFilePath)) {
+    if (!(await FileSystem.existsAsync(rushAlertsStateFilePath))) {
       return false;
     }
     const rushAlertsData: IRushAlertsState = await JsonFile.loadAsync(rushAlertsStateFilePath, {
@@ -74,7 +72,7 @@ export class RushAlerts {
   public async retrieveAlertsAsync(): Promise<void> {
     const rushAlertsConfigFilePath: string = `${this._rushConfiguration.commonRushConfigFolder}/${RushAlerts.__rushAlertsConfigFileName}`;
 
-    if (existsSync(rushAlertsConfigFilePath)) {
+    if (await FileSystem.existsAsync(rushAlertsConfigFilePath)) {
       const rushAlertsConfig: IRushAlertsConfig = JsonFile.loadAndValidate(
         rushAlertsConfigFilePath,
         RushAlerts._rushAlertsJsonSchema
@@ -99,10 +97,10 @@ export class RushAlerts {
   public async printAlertsAsync(): Promise<void> {
     const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`;
 
-    if (existsSync(rushAlertsStateFilePath)) {
-      const rushAlertsData: IRushAlertsState = JSON.parse(
-        (await readFile(rushAlertsStateFilePath)).toString()
-      );
+    if (await FileSystem.existsAsync(rushAlertsStateFilePath)) {
+      const rushAlertsData: IRushAlertsState = await JsonFile.loadAsync(rushAlertsStateFilePath, {
+        jsonSyntax: JsonSyntax.Strict
+      });
       if (rushAlertsData?.alerts.length !== 0) {
         for (const alert of rushAlertsData.alerts) {
           this._printMessageInBoxStyle(alert);
@@ -118,7 +116,7 @@ export class RushAlerts {
     }
     if (alert.conditionScript) {
       const conditionScriptPath: string = `${this._rushConfiguration.rushJsonFolder}/${alert.conditionScript}`;
-      if (!existsSync(conditionScriptPath)) {
+      if (!(await FileSystem.existsAsync(conditionScriptPath))) {
         this._terminal.writeDebugLine(`${conditionScriptPath} is not exist!`);
         return false;
       }
@@ -163,16 +161,14 @@ export class RushAlerts {
         alerts: validAlerts
       };
 
-      await writeFile(
-        `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`,
-        JSON.stringify(rushAlertsState, null, 2)
+      await JsonFile.saveAsync(
+        rushAlertsState,
+        `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`
       );
     } else {
       // if no valid alerts
       // remove exist alerts state if exist
-      if (existsSync(rushAlertsStateFilePath)) {
-        await unlink(rushAlertsStateFilePath);
-      }
+      await FileSystem.deleteFileAsync(rushAlertsStateFilePath);
     }
   }
 }
