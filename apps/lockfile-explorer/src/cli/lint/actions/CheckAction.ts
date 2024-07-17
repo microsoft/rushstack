@@ -23,7 +23,7 @@ export interface ILintRule {
   rule: 'restrict-versions';
   project: string;
   requiredVersions: Record<string, string>;
-  exemptProjectList: string[];
+  exemptProjectList?: string[];
 }
 
 export interface ILockfileLint {
@@ -213,7 +213,7 @@ export class CheckAction extends CommandLineAction {
             const message: string | undefined = await this._performVersionRestrictionCheckAsync(
               requiredVersions,
               project,
-              exemptProjectList
+              exemptProjectList ?? []
             );
             if (message) {
               issues.push({ project, rule, message });
