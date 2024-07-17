@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 16 Jul 2024 04:16:56 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Jul 2024 06:55:27 GMT and should not be manually modified.
+
+## 5.130.0
+Wed, 17 Jul 2024 06:55:27 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Initial implementation of Rush alerts feature
+- Adjusts how cobuilt operations are added and requeued to the operation graph. Removes the 'RemoteExecuting' status.
 
 ## 5.129.7
 Tue, 16 Jul 2024 04:16:56 GMT

@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.130.0",
+      "tag": "@microsoft/rush_v5.130.0",
+      "date": "Wed, 17 Jul 2024 06:55:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Initial implementation of Rush alerts feature"
+          },
+          {
+            "comment": "Adjusts how cobuilt operations are added and requeued to the operation graph. Removes the 'RemoteExecuting' status."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.129.7",
       "tag": "@microsoft/rush_v5.129.7",
       "date": "Tue, 16 Jul 2024 04:16:56 GMT",
