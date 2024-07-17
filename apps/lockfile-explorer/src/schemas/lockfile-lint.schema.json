@@ -27,8 +27,8 @@
                 "description": "Project name.",
                 "type": "string"
               },
-              "exemptProject": {
-                "description": "A project that you would like to exempt.",
+              "exemptProjectList": {
+                "description": "Projects that you would like to exempt.",
                 "type": "string"
               },
               "requiredVersions": {
