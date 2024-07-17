@@ -5,6 +5,7 @@ import type { Terminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { FileSystem, JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
 import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
+import { RushConstants } from '../logic/RushConstants';
 
 export interface IRushAlertsOptions {
   rushConfiguration: RushConfiguration;
@@ -36,29 +37,35 @@ export class RushAlerts {
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _terminal: Terminal;
   private static _rushAlertsJsonSchema: JsonSchema = JsonSchema.fromLoadedObject(rushAlertsSchemaJson);
-  private static __rushAlertsConfigFileName: string = 'rush-alerts.json';
-  private static __rushAlertsStateFileName: string = 'rush-alerts-state.json';
+
+  public readonly rushAlertsStateFilePath: string;
 
   public constructor(options: IRushAlertsOptions) {
     this._rushConfiguration = options.rushConfiguration;
     this._terminal = options.terminal;
+
+    this.rushAlertsStateFilePath = `${this._rushConfiguration.commonTempFolder}/${RushConstants.rushAlertsConfigFilename}`;
+  }
+
+  private async _loadRushAlertsStateAsync(): Promise<IRushAlertsState | undefined> {
+    if (!(await FileSystem.existsAsync(this.rushAlertsStateFilePath))) {
+      return undefined;
+    }
+    const rushAlertsState: IRushAlertsState = await JsonFile.loadAsync(this.rushAlertsStateFilePath, {
+      jsonSyntax: JsonSyntax.JsonWithComments
+    });
+    return rushAlertsState;
   }
 
   public async isAlertsStateUpToDateAsync(): Promise<boolean> {
-    const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`;
-    if (!(await FileSystem.existsAsync(rushAlertsStateFilePath))) {
-      return false;
-    }
-    const rushAlertsData: IRushAlertsState = await JsonFile.loadAsync(rushAlertsStateFilePath, {
-      jsonSyntax: JsonSyntax.JsonWithComments
-    });
+    const rushAlertsState: IRushAlertsState | undefined = await this._loadRushAlertsStateAsync();
 
-    if (!rushAlertsData.lastUpdateTime) {
+    if (rushAlertsState === undefined || !rushAlertsState.lastUpdateTime) {
       return false;
     }
 
     const currentTime: Date = new Date();
-    const lastUpdateTime: Date = new Date(rushAlertsData.lastUpdateTime);
+    const lastUpdateTime: Date = new Date(rushAlertsState.lastUpdateTime);
 
     const hours: number = (Number(currentTime) - Number(lastUpdateTime)) / (1000 * 60 * 60);
 
@@ -70,7 +77,7 @@ export class RushAlerts {
   }
 
   public async retrieveAlertsAsync(): Promise<void> {
-    const rushAlertsConfigFilePath: string = `${this._rushConfiguration.commonRushConfigFolder}/${RushAlerts.__rushAlertsConfigFileName}`;
+    const rushAlertsConfigFilePath: string = `${this._rushConfiguration.commonRushConfigFolder}/${RushConstants.rushAlertsConfigFilename}`;
 
     if (await FileSystem.existsAsync(rushAlertsConfigFilePath)) {
       const rushAlertsConfig: IRushAlertsConfig = JsonFile.loadAndValidate(
@@ -95,16 +102,15 @@ export class RushAlerts {
   }
 
   public async printAlertsAsync(): Promise<void> {
-    const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`;
+    const rushAlertsState: IRushAlertsState | undefined = await this._loadRushAlertsStateAsync();
 
-    if (await FileSystem.existsAsync(rushAlertsStateFilePath)) {
-      const rushAlertsData: IRushAlertsState = await JsonFile.loadAsync(rushAlertsStateFilePath, {
-        jsonSyntax: JsonSyntax.Strict
-      });
-      if (rushAlertsData?.alerts.length !== 0) {
-        for (const alert of rushAlertsData.alerts) {
-          this._printMessageInBoxStyle(alert);
-        }
+    if (!rushAlertsState) {
+      return;
+    }
+
+    if (rushAlertsState?.alerts.length !== 0) {
+      for (const alert of rushAlertsState.alerts) {
+        this._printMessageInBoxStyle(alert);
       }
     }
   }
@@ -134,16 +140,64 @@ export class RushAlerts {
       }
     }
 
-    if (alert.conditionScript) {
-      const conditionScriptPath: string = `${this._rushConfiguration.rushJsonFolder}/${alert.conditionScript}`;
+    const conditionScript: string | undefined = alert.conditionScript;
+    if (conditionScript) {
+      // "(OPTIONAL) The filename of a script that determines whether this alert can be shown,
+      // found in the "common/config/rush/alert-scripts" folder." ... "To ensure up-to-date alerts, Rush
+      // may fetch and checkout the "common/config/rush-alerts" folder in an unpredictable temporary
+      // path.  Therefore, your script should avoid importing dependencies from outside its folder,
+      // generally be kept as simple and reliable and quick as possible."
+      if (conditionScript.indexOf('/') >= 0 || conditionScript.indexOf('\\') >= 0) {
+        throw new Error(
+          `The rush-alerts.json file contains a "conditionScript" that is not inside the "alert-scripts" folder: ` +
+            JSON.stringify(conditionScript)
+        );
+      }
+      const conditionScriptPath: string = `${this._rushConfiguration.rushJsonFolder}/common/config/rush/alert-scripts/${conditionScript}`;
       if (!(await FileSystem.existsAsync(conditionScriptPath))) {
-        this._terminal.writeDebugLine(`${conditionScriptPath} does not exist`);
-        return false;
+        throw new Error(
+          'The "conditionScript" field in rush-alerts.json refers to a nonexistent file:\n' +
+            conditionScriptPath
+        );
       }
 
-      if (!(await require(`${this._rushConfiguration.rushJsonFolder}/${alert.conditionScript}`))()) {
-        return false;
+      this._terminal.writeDebugLine(`Invoking condition script "${conditionScript}" from rush-alerts.json`);
+      const startTimemark: number = performance.now();
+
+      interface IAlertsConditionScriptModule {
+        canShowAlert(): boolean;
       }
+
+      let conditionScriptModule: IAlertsConditionScriptModule;
+      try {
+        conditionScriptModule = require(conditionScriptPath);
+      } catch (e) {
+        throw new Error(
+          `Error loading condition script "${conditionScript}" from rush-alerts.json:\n${e.toString()}`
+        );
+      }
+
+      const oldCwd: string = process.cwd();
+
+      let conditionResult: boolean;
+      try {
+        // "Rush will invoke this script with the working directory set to the monorepo root folder,
+        // with no guarantee that `rush install` has been run."
+        process.chdir(this._rushConfiguration.rushJsonFolder);
+        conditionResult = conditionScriptModule.canShowAlert();
+      } catch (e) {
+        throw new Error(
+          `Error invoking condition script "${conditionScript}" from rush-alerts.json:\n${e.toString()}`
+        );
+      } finally {
+        process.chdir(oldCwd);
+      }
+
+      const totalMs: number = performance.now() - startTimemark;
+      this._terminal.writeDebugLine(
+        `Invoked conditionScript "${conditionScript}"` +
+          ` in ${Math.round(totalMs)} ms with result "${conditionResult}"`
+      );
     }
     return true;
   }
@@ -173,27 +227,21 @@ export class RushAlerts {
   }
 
   private async _writeRushAlertStateAsync(validAlerts: Array<IRushAlertStateEntry>): Promise<void> {
-    const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`;
-
     if (validAlerts.length > 0) {
       const rushAlertsState: IRushAlertsState = {
         lastUpdateTime: new Date().toString(),
         alerts: validAlerts
       };
 
-      await JsonFile.saveAsync(
-        rushAlertsState,
-        `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`,
-        {
-          ignoreUndefinedValues: true,
-          headerComment: 'THIS FILE IS MACHINE-GENERATED -- DO NOT MODIFY',
-          jsonSyntax: JsonSyntax.JsonWithComments
-        }
-      );
+      await JsonFile.saveAsync(rushAlertsState, this.rushAlertsStateFilePath, {
+        ignoreUndefinedValues: true,
+        headerComment: '// THIS FILE IS MACHINE-GENERATED -- DO NOT MODIFY',
+        jsonSyntax: JsonSyntax.JsonWithComments
+      });
     } else {
       // if no valid alerts
       // remove exist alerts state if exist
-      await FileSystem.deleteFileAsync(rushAlertsStateFilePath);
+      await FileSystem.deleteFileAsync(this.rushAlertsStateFilePath);
     }
   }
 }

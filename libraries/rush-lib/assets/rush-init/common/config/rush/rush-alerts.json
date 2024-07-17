@@ -83,7 +83,7 @@
        * we suggest to design some other process that prepares a data file or environment variable
        * that can be cheaply checked by your condition script.
        */
-      /*[LINE "HYPOTHETICAL"]*/ "conditionScript": "rush-alert-node-upgrade.js"
+      /*[LINE "HYPOTHETICAL"]*/ "conditionScript": "rush-alexrt-node-upgrade.js"
     }
     /*[END "DEMO"]*/
   ]
