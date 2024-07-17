@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Prototype for Rush alerts feature",
+      "comment": "(EXPERIMENTAL) Initial implementation of Rush alerts feature",
       "type": "none"
     }
   ],
