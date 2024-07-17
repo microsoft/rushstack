@@ -50,7 +50,7 @@ export class RushAlerts {
       return false;
     }
     const rushAlertsData: IRushAlertsState = await JsonFile.loadAsync(rushAlertsStateFilePath, {
-      jsonSyntax: JsonSyntax.Strict
+      jsonSyntax: JsonSyntax.JsonWithComments
     });
 
     if (!rushAlertsData.lastUpdateTime) {
@@ -109,15 +109,35 @@ export class RushAlerts {
     }
   }
 
+  private static _parseDate(dateString: string): Date {
+    const parsedDate: Date = new Date(dateString);
+    if (isNaN(parsedDate.getTime())) {
+      throw new Error(`Invalid date/time value ${JSON.stringify(dateString)}`);
+    }
+    return parsedDate;
+  }
+
   private async _isAlertValidAsync(alert: IRushAlertsConfigEntry): Promise<boolean> {
     const timeNow: Date = new Date();
-    if (timeNow < new Date(alert.startTime) || timeNow > new Date(alert.endTime)) {
-      return false;
+
+    if (alert.startTime) {
+      const startTime: Date = RushAlerts._parseDate(alert.startTime);
+      if (timeNow < startTime) {
+        return false;
+      }
     }
+
+    if (alert.endTime) {
+      const endTime: Date = RushAlerts._parseDate(alert.endTime);
+      if (timeNow > endTime) {
+        return false;
+      }
+    }
+
     if (alert.conditionScript) {
       const conditionScriptPath: string = `${this._rushConfiguration.rushJsonFolder}/${alert.conditionScript}`;
       if (!(await FileSystem.existsAsync(conditionScriptPath))) {
-        this._terminal.writeDebugLine(`${conditionScriptPath} is not exist!`);
+        this._terminal.writeDebugLine(`${conditionScriptPath} does not exist`);
         return false;
       }
 
@@ -163,7 +183,12 @@ export class RushAlerts {
 
       await JsonFile.saveAsync(
         rushAlertsState,
-        `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`
+        `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`,
+        {
+          ignoreUndefinedValues: true,
+          headerComment: 'THIS FILE IS MACHINE-GENERATED -- DO NOT MODIFY',
+          jsonSyntax: JsonSyntax.JsonWithComments
+        }
       );
     } else {
       // if no valid alerts
