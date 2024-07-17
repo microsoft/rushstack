@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue that `rush-pnpm patch-commit` can not generate correct pnpm-config.json file in subspace case",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
