@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.130.1",
+      "tag": "@microsoft/rush_v5.130.1",
+      "date": "Wed, 17 Jul 2024 07:37:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent regression for `rush init`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.130.0",
       "tag": "@microsoft/rush_v5.130.0",
       "date": "Wed, 17 Jul 2024 06:55:27 GMT",

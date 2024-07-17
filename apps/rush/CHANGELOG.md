@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 17 Jul 2024 06:55:27 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Jul 2024 07:37:13 GMT and should not be manually modified.
+
+## 5.130.1
+Wed, 17 Jul 2024 07:37:13 GMT
+
+### Updates
+
+- Fix a recent regression for `rush init`
 
 ## 5.130.0
 Wed, 17 Jul 2024 06:55:27 GMT
