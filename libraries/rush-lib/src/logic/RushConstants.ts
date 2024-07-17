@@ -325,4 +325,14 @@ export class RushConstants {
    * The filename for the last link flag
    */
   public static readonly lastLinkFlagFilename: 'last-link' = 'last-link';
+
+  /**
+   * The filename for the Rush alerts config file.
+   */
+  public static readonly rushAlertsConfigFilename: 'rush-alerts.json' = 'rush-alerts.json';
+
+  /**
+   * The filename for the machine-generated file that tracks state for Rush alerts.
+   */
+  public static readonly rushAlertsStateFilename: 'rush-alerts-state.json' = 'rush-alerts-state.json';
 }

@@ -95,13 +95,16 @@ Array [
 exports[`PrintUtilities wrapWordsToLines with prefix="| " applies pre-existing indents on both margins 1`] = `
 Array [
   "| Lorem ipsum dolor sit amet, consectetuer",
-  "| adipiscing elit. Maecenas porttitor congue massa.",
+  "| adipiscing elit. Maecenas porttitor congue",
+  "| massa.",
   "| ",
   "|     Lorem ipsum dolor sit amet, consectetuer",
-  "|     adipiscing elit. Maecenas porttitor congue massa.",
+  "|     adipiscing elit. Maecenas porttitor congue",
+  "|     massa.",
   "| ",
   "| Lorem ipsum dolor sit amet, consectetuer",
-  "| adipiscing elit. Maecenas porttitor congue massa.",
+  "| adipiscing elit. Maecenas porttitor congue",
+  "| massa.",
 ]
 `;
 
@@ -111,7 +114,8 @@ Array [
   "| occurrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrred",
   "| while pushing commits to git remote. Please make",
   "| sure you have installed and enabled git lfs. The",
-  "| easiest way to do that is run the provided setup script:",
+  "| easiest way to do that is run the provided setup",
+  "| script:",
   "| ",
   "|     common/scripts/setup.sh",
   "| ",
@@ -166,13 +170,16 @@ Array [
 exports[`PrintUtilities wrapWordsToLines with prefix="4" applies pre-existing indents on both margins 1`] = `
 Array [
   "    Lorem ipsum dolor sit amet, consectetuer",
-  "    adipiscing elit. Maecenas porttitor congue massa.",
+  "    adipiscing elit. Maecenas porttitor congue",
+  "    massa.",
   "    ",
   "        Lorem ipsum dolor sit amet, consectetuer",
-  "        adipiscing elit. Maecenas porttitor congue massa.",
+  "        adipiscing elit. Maecenas porttitor congue",
+  "        massa.",
   "    ",
   "    Lorem ipsum dolor sit amet, consectetuer",
-  "    adipiscing elit. Maecenas porttitor congue massa.",
+  "    adipiscing elit. Maecenas porttitor congue",
+  "    massa.",
 ]
 `;
 
@@ -254,7 +261,8 @@ Array [
   "occurrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrred",
   "while pushing commits to git remote. Please make",
   "sure you have installed and enabled git lfs. The",
-  "easiest way to do that is run the provided setup script:",
+  "easiest way to do that is run the provided setup",
+  "script:",
   "",
   "    common/scripts/setup.sh",
   "",

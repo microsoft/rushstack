@@ -71,7 +71,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.versionPoliciesFilename,
   RushConstants.rushPluginsConfigFilename,
   RushConstants.pnpmConfigFilename,
-  RushConstants.subspacesConfigFilename
+  RushConstants.subspacesConfigFilename,
+  RushConstants.rushAlertsConfigFilename
 ];
 
 /**

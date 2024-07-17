@@ -59,6 +59,7 @@ import { RushSession } from '../pluginFramework/RushSession';
 import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
+import { RushAlerts } from '../utilities/RushAlerts';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -222,6 +223,33 @@ export class RushCommandLineParser extends CommandLineParser {
 
     try {
       await this._wrapOnExecuteAsync();
+
+      try {
+        const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+        if (experiments.rushAlerts) {
+          this._terminal.writeDebugLine('Checking Rush alerts...');
+          // Print out alerts if have after each successful command actions
+          const rushAlerts: RushAlerts = new RushAlerts({
+            rushConfiguration: this.rushConfiguration,
+            terminal: this._terminal
+          });
+          if (await rushAlerts.isAlertsStateUpToDateAsync()) {
+            await rushAlerts.printAlertsAsync();
+          } else {
+            await rushAlerts.retrieveAlertsAsync();
+          }
+        }
+      } catch (error) {
+        if (error instanceof AlreadyReportedError) {
+          throw error;
+        }
+        // Generally the RushAlerts implementation should handle its own error reporting; if not,
+        // clarify the source, since the Rush Alerts behavior is nondeterministic and may not repro easily:
+        this._terminal.writeErrorLine(`\nAn unexpected error was encountered by the Rush alerts feature:`);
+        this._terminal.writeErrorLine(error.message);
+        throw new AlreadyReportedError();
+      }
+
       // If we make it here, everything went fine, so reset the exit code back to 0
       process.exitCode = 0;
     } catch (error) {

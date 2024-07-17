@@ -156,6 +156,20 @@ export class PrintUtilities {
           previousWhitespaceMatch = currentWhitespaceMatch;
         }
 
+        if (
+          previousWhitespaceMatch &&
+          line.length + linePrefixLength - currentLineStartIndex > maxLineLength
+        ) {
+          const whitespaceToSplitAt: RegExpExecArray = previousWhitespaceMatch;
+
+          wrappedLines.push(
+            linePrefix +
+              lineAdditionalPrefix +
+              line.substring(currentLineStartIndex, whitespaceToSplitAt.index)
+          );
+          currentLineStartIndex = whitespaceToSplitAt.index + whitespaceToSplitAt[0].length;
+        }
+
         if (currentLineStartIndex < line.length) {
           wrappedLines.push(linePrefix + lineAdditionalPrefix + line.substring(currentLineStartIndex));
         }

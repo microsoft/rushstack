@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(EXPERIMENTAL) Initial implementation of Rush alerts feature",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -475,6 +475,7 @@ export interface IExperimentsJson {
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     printEventHooksOutputToConsole?: boolean;
+    rushAlerts?: boolean;
     useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
@@ -1356,6 +1357,8 @@ export class RushConstants {
     static readonly projectShrinkwrapFilename: 'shrinkwrap-deps.json';
     static readonly rebuildCommandName: 'rebuild';
     static readonly repoStateFilename: 'repo-state.json';
+    static readonly rushAlertsConfigFilename: 'rush-alerts.json';
+    static readonly rushAlertsStateFilename: 'rush-alerts-state.json';
     static readonly rushJsonFilename: 'rush.json';
     static readonly rushLogsFolderName: 'rush-logs';
     static readonly rushPackageName: '@microsoft/rush';
