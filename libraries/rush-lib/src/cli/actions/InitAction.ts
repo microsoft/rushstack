@@ -15,7 +15,6 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
 
 import { assetsFolderPath } from '../../utilities/PathConstants';
-import { RushConstants } from '../../logic/RushConstants';
 import { copyTemplateFileAsync } from '../../utilities/templateUtilities';
 
 export class InitAction extends BaseConfiglessRushAction {
@@ -139,13 +138,10 @@ export class InitAction extends BaseConfiglessRushAction {
 
       '[dot]gitattributes',
       '[dot]gitignore',
-      RushConstants.rushJsonFilename
+      'rush.json'
     ];
 
-    const experimentalTemplateFilePaths: string[] = [
-      `common/config/rush/${RushConstants.subspacesConfigFilename}`,
-      'common/config/rush/rush-alerts.json'
-    ];
+    const experimentalTemplateFilePaths: string[] = ['common/config/rush/rush-alerts.json'];
 
     if (this._experimentsParameter.value) {
       templateFilePaths.push(...experimentalTemplateFilePaths);
