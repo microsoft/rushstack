@@ -5,7 +5,7 @@ import { readFile, writeFile, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import type { Terminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '../api/RushConfiguration';
-import { JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
 import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
 
 export interface IRushAlertsOptions {
@@ -51,7 +51,9 @@ export class RushAlerts {
     if (!existsSync(rushAlertsStateFilePath)) {
       return false;
     }
-    const rushAlertsData: IRushAlertsState = JSON.parse((await readFile(rushAlertsStateFilePath)).toString());
+    const rushAlertsData: IRushAlertsState = await JsonFile.loadAsync(rushAlertsStateFilePath, {
+      jsonSyntax: JsonSyntax.Strict
+    });
 
     if (!rushAlertsData.lastUpdateTime) {
       return false;
@@ -71,50 +73,41 @@ export class RushAlerts {
 
   public async retrieveAlertsAsync(): Promise<void> {
     const rushAlertsConfigFilePath: string = `${this._rushConfiguration.commonRushConfigFolder}/${RushAlerts.__rushAlertsConfigFileName}`;
-    try {
-      if (existsSync(rushAlertsConfigFilePath)) {
-        const rushAlertsConfig: IRushAlertsConfig = JsonFile.loadAndValidate(
-          rushAlertsConfigFilePath,
-          RushAlerts._rushAlertsJsonSchema
-        );
-        const validAlerts: Array<IRushAlertStateEntry> = [];
-        if (rushAlertsConfig?.alerts.length !== 0) {
-          for (const alert of rushAlertsConfig.alerts) {
-            if (await this._isAlertValidAsync(alert)) {
-              validAlerts.push({
-                title: alert.title,
-                message: alert.message,
-                detailsUrl: alert.detailsUrl
-              });
-            }
+
+    if (existsSync(rushAlertsConfigFilePath)) {
+      const rushAlertsConfig: IRushAlertsConfig = JsonFile.loadAndValidate(
+        rushAlertsConfigFilePath,
+        RushAlerts._rushAlertsJsonSchema
+      );
+      const validAlerts: Array<IRushAlertStateEntry> = [];
+      if (rushAlertsConfig?.alerts.length !== 0) {
+        for (const alert of rushAlertsConfig.alerts) {
+          if (await this._isAlertValidAsync(alert)) {
+            validAlerts.push({
+              title: alert.title,
+              message: alert.message,
+              detailsUrl: alert.detailsUrl
+            });
           }
         }
-
-        await this._writeRushAlertStateAsync(validAlerts);
       }
-    } catch (e) {
-      // console the message only in debug mode
-      this._terminal.writeDebugLine(e.message);
+
+      await this._writeRushAlertStateAsync(validAlerts);
     }
   }
 
   public async printAlertsAsync(): Promise<void> {
     const rushAlertsStateFilePath: string = `${this._rushConfiguration.commonTempFolder}/${RushAlerts.__rushAlertsStateFileName}`;
 
-    try {
-      if (existsSync(rushAlertsStateFilePath)) {
-        const rushAlertsData: IRushAlertsState = JSON.parse(
-          (await readFile(rushAlertsStateFilePath)).toString()
-        );
-        if (rushAlertsData?.alerts.length !== 0) {
-          for (const alert of rushAlertsData.alerts) {
-            this._printMessageInBoxStyle(alert);
-          }
+    if (existsSync(rushAlertsStateFilePath)) {
+      const rushAlertsData: IRushAlertsState = JSON.parse(
+        (await readFile(rushAlertsStateFilePath)).toString()
+      );
+      if (rushAlertsData?.alerts.length !== 0) {
+        for (const alert of rushAlertsData.alerts) {
+          this._printMessageInBoxStyle(alert);
         }
       }
-    } catch (e) {
-      // console the message only in debug mode
-      this._terminal.writeDebugLine(e.message);
     }
   }
 
