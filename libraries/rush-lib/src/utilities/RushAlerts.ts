@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Terminal } from '@rushstack/terminal';
+import { Colorize, PrintUtilities, type Terminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { FileSystem, JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
 import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
@@ -29,7 +29,7 @@ interface IRushAlertsState {
 }
 interface IRushAlertStateEntry {
   title: string;
-  message: Array<string>;
+  message: Array<string> | string;
   detailsUrl: string;
 }
 
@@ -109,6 +109,7 @@ export class RushAlerts {
     }
 
     if (rushAlertsState?.alerts.length !== 0) {
+      this._terminal.writeLine();
       for (const alert of rushAlertsState.alerts) {
         this._printMessageInBoxStyle(alert);
       }
@@ -215,27 +216,46 @@ export class RushAlerts {
   }
 
   private _printMessageInBoxStyle(alert: IRushAlertStateEntry): void {
-    const messageToBePrinted: Array<string> = [];
-    messageToBePrinted.push(alert.title);
-    messageToBePrinted.push(...alert.message);
-    messageToBePrinted.push(alert.detailsUrl);
+    const boxTitle: string = alert.title.toUpperCase();
 
-    // Calculate max length for the border
-    const maxLength: number = messageToBePrinted.reduce((max, line) => Math.max(max, line.length), 0);
+    const boxMessage: string = typeof alert.message === 'string' ? alert.message : alert.message.join('');
 
-    // Add padding for border
-    const paddedLength: number = maxLength + 4;
+    const boxDetails: string = alert.detailsUrl ? 'Details: ' + alert.detailsUrl : '';
 
-    // Create border lines
-    const borderLine: string = '+'.padEnd(paddedLength - 1, '-') + '+';
+    // ...minus the padding.
+    const PADDING: number = '╔══╗'.length;
+
+    // Try to make it wide enough to fit the (unwrapped) strings...
+    let lineLength: number = Math.max(boxTitle.length, boxMessage.length, boxDetails.length);
+
+    // ...but don't exceed the console width, and also keep it under 80...
+    lineLength = Math.min(lineLength, (PrintUtilities.getConsoleWidth() ?? 80) - PADDING, 80 - PADDING);
+
+    // ...and the width needs to be at least 40 characters...
+    lineLength = Math.max(lineLength, 40 - PADDING);
+
+    const lines: string[] = [
+      ...PrintUtilities.wrapWordsToLines(boxTitle, lineLength).map((x) =>
+        Colorize.bold(x.padEnd(lineLength))
+      ),
+      '',
+      ...PrintUtilities.wrapWordsToLines(boxMessage, lineLength).map((x) => x.padEnd(lineLength))
+    ];
+    if (boxDetails) {
+      lines.push(
+        '',
+        ...PrintUtilities.wrapWordsToLines(boxDetails, lineLength).map((x) =>
+          Colorize.cyan(x.padEnd(lineLength))
+        )
+      );
+    }
 
     // Print the box
-    this._terminal.writeLine(borderLine);
-    messageToBePrinted.forEach((line) => {
-      const padding: number = maxLength - line.length;
-      this._terminal.writeLine(`| ${line}${' '.repeat(padding)} |`);
-    });
-    this._terminal.writeLine(borderLine);
+    this._terminal.writeLine('╔═' + '═'.repeat(lineLength) + '═╗');
+    for (const line of lines) {
+      this._terminal.writeLine(`║ ${line.padEnd(lineLength)} ║`);
+    }
+    this._terminal.writeLine('╚═' + '═'.repeat(lineLength) + '═╝');
   }
 
   private async _writeRushAlertStateAsync(validAlerts: Array<IRushAlertStateEntry>): Promise<void> {
