@@ -171,9 +171,13 @@ export class RushAlerts {
       let conditionScriptModule: IAlertsConditionScriptModule;
       try {
         conditionScriptModule = require(conditionScriptPath);
+
+        if (typeof conditionScriptModule.canShowAlert !== 'function') {
+          throw new Error('The "canShowAlert" module export is missing');
+        }
       } catch (e) {
         throw new Error(
-          `Error loading condition script "${conditionScript}" from rush-alerts.json:\n${e.toString()}`
+          `Error loading condition script "${conditionScript}" from rush-alerts.json:\n${e.stack}`
         );
       }
 
@@ -187,7 +191,7 @@ export class RushAlerts {
         conditionResult = conditionScriptModule.canShowAlert();
       } catch (e) {
         throw new Error(
-          `Error invoking condition script "${conditionScript}" from rush-alerts.json:\n${e.toString()}`
+          `Error invoking condition script "${conditionScript}" from rush-alerts.json:\n${e.stack}`
         );
       } finally {
         process.chdir(oldCwd);
