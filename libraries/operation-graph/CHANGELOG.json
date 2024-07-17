@@ -2,6 +2,18 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.2.27",
+      "tag": "@rushstack/operation-graph_v0.2.27",
+      "date": "Wed, 17 Jul 2024 00:11:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Handle errors when sending IPC messages to host."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.26",
       "tag": "@rushstack/operation-graph_v0.2.26",
       "date": "Tue, 16 Jul 2024 00:36:21 GMT",
