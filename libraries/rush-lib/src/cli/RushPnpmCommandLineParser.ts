@@ -446,6 +446,14 @@ export class RushPnpmCommandLineParser {
 
     switch (commandName) {
       case 'patch-commit': {
+        if (this._subspace.getPnpmOptions() === undefined) {
+          this._terminal.writeErrorLine(
+            `You are using rush-pnpm patch-commit command, but Rush could not find the pnpm-config.json for ${this._subspace.subspaceName} subspace! ` +
+              `Make sure the pnpm-config.json exists in ${this._subspace.getSubspaceConfigFolder()}`
+          );
+          break;
+        }
+
         // Example: "C:\MyRepo\common\temp\package.json"
         const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
         const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
