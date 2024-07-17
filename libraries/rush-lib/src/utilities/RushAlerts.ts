@@ -189,6 +189,10 @@ export class RushAlerts {
         // with no guarantee that `rush install` has been run."
         process.chdir(this._rushConfiguration.rushJsonFolder);
         conditionResult = conditionScriptModule.canShowAlert();
+
+        if (typeof conditionResult !== 'boolean') {
+          throw new Error('canShowAlert() did not return a boolean value');
+        }
       } catch (e) {
         throw new Error(
           `Error invoking condition script "${conditionScript}" from rush-alerts.json:\n${e.stack}`
@@ -202,6 +206,10 @@ export class RushAlerts {
         `Invoked conditionScript "${conditionScript}"` +
           ` in ${Math.round(totalMs)} ms with result "${conditionResult}"`
       );
+
+      if (!conditionResult) {
+        return false;
+      }
     }
     return true;
   }
@@ -233,7 +241,7 @@ export class RushAlerts {
   private async _writeRushAlertStateAsync(validAlerts: Array<IRushAlertStateEntry>): Promise<void> {
     if (validAlerts.length > 0) {
       const rushAlertsState: IRushAlertsState = {
-        lastUpdateTime: new Date().toString(),
+        lastUpdateTime: new Date().toISOString(),
         alerts: validAlerts
       };
 
