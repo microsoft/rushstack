@@ -446,6 +446,10 @@ export class RushPnpmCommandLineParser {
 
     switch (commandName) {
       case 'patch-commit': {
+        // why need to throw error when pnpm-config.json not exists?
+        // 1. pnpm-config.json is required for `rush-pnpm patch-commit`. Rush writes the patched dependency to the pnpm-config.json when finishes.
+        // 2. we can not fallback to use Monorepo config folder (common/config/rush) due to that this command is intended to apply to input subspace only.
+        //    It will produce unexpected behavior if we use the fallback.
         if (this._subspace.getPnpmOptions() === undefined) {
           this._terminal.writeErrorLine(
             `You are using rush-pnpm patch-commit command, but Rush could not find the pnpm-config.json for ${this._subspace.subspaceName} subspace! ` +
