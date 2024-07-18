@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix edge cases where Rush does not update the lockfile",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
