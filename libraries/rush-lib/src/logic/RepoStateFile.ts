@@ -213,7 +213,7 @@ export class RepoStateFile {
         // means users may turn off the injected installation
         // so we will need to remove unused fields in repo-state.json as well
         this._packageJsonInjectedDependenciesHash = undefined;
-        this._modified = true
+        this._modified = true;
       }
     }
 
