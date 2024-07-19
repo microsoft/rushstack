@@ -212,6 +212,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         }
 
         const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
+
         const {
           associatedProject: project,
           associatedPhase: phase,
@@ -393,8 +394,10 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               });
               periodicCallback.start();
             } else {
-              // failed to acquire the lock, mark current operation to remote executing
-              return OperationStatus.RemoteExecuting;
+              setTimeout(() => {
+                record.status = OperationStatus.Ready;
+              }, 500);
+              return OperationStatus.Executing;
             }
           }
         };
@@ -429,14 +432,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         }
 
         // No need to run for the following operation status
-        switch (record.status) {
-          case OperationStatus.NoOp:
-          case OperationStatus.RemoteExecuting: {
-            return;
-          }
-          default: {
-            break;
-          }
+        if (!record.isTerminal || record.status === OperationStatus.NoOp) {
+          return;
         }
 
         const { cobuildLock, projectBuildCache, isCacheWriteAllowed, buildCacheTerminal, cacheRestored } =

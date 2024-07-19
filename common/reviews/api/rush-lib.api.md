@@ -120,12 +120,12 @@ export type CobuildLockProviderFactory = (cobuildJson: ICobuildJson) => ICobuild
 // @public
 export class CommonVersionsConfiguration {
     readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
-    readonly ensureConsistentVersions: boolean | undefined;
+    readonly ensureConsistentVersions: boolean;
     readonly filePath: string;
     getAllPreferredVersions(): Map<string, string>;
     getPreferredVersionsHash(): string;
     readonly implicitlyPreferredVersions: boolean | undefined;
-    static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
+    static loadFromFile(jsonFilename: string, rushConfiguration?: RushConfiguration): CommonVersionsConfiguration;
     readonly preferredVersions: Map<string, string>;
     save(): boolean;
 }
@@ -475,6 +475,7 @@ export interface IExperimentsJson {
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     printEventHooksOutputToConsole?: boolean;
+    rushAlerts?: boolean;
     useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
@@ -970,7 +971,6 @@ export enum OperationStatus {
     NoOp = "NO OP",
     Queued = "QUEUED",
     Ready = "READY",
-    RemoteExecuting = "REMOTE EXECUTING",
     Skipped = "SKIPPED",
     Success = "SUCCESS",
     SuccessWithWarning = "SUCCESS WITH WARNINGS",
@@ -1169,6 +1169,8 @@ export class RushConfiguration {
     get defaultSubspace(): Subspace;
     // @deprecated
     readonly ensureConsistentVersions: boolean;
+    // @internal
+    readonly _ensureConsistentVersionsJsonValue: boolean | undefined;
     // @beta
     readonly eventHooks: EventHooks;
     // @beta
@@ -1355,6 +1357,8 @@ export class RushConstants {
     static readonly projectShrinkwrapFilename: 'shrinkwrap-deps.json';
     static readonly rebuildCommandName: 'rebuild';
     static readonly repoStateFilename: 'repo-state.json';
+    static readonly rushAlertsConfigFilename: 'rush-alerts.json';
+    static readonly rushAlertsStateFilename: 'rush-alerts-state.json';
     static readonly rushJsonFilename: 'rush.json';
     static readonly rushLogsFolderName: 'rush-logs';
     static readonly rushPackageName: '@microsoft/rush';

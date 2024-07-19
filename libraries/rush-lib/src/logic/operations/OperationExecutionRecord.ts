@@ -15,7 +15,7 @@ import {
 import { InternalError, NewlineKind } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rushstack/stream-collator';
 
-import { OperationStatus } from './OperationStatus';
+import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
@@ -166,6 +166,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._operationMetadataManager?.stateFile.state?.cobuildRunnerId;
   }
 
+  public get isTerminal(): boolean {
+    return TERMINAL_STATUSES.has(this.status);
+  }
+
   /**
    * The current execution status of an operation. Operations start in the 'ready' state,
    * but can be 'blocked' if an upstream operation failed. It is 'executing' when
@@ -277,7 +281,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     onStart: (record: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
     onResult: (record: OperationExecutionRecord) => Promise<void>;
   }): Promise<void> {
-    if (this.status === OperationStatus.RemoteExecuting) {
+    if (!this.isTerminal) {
       this.stopwatch.reset();
     }
     this.stopwatch.start();
@@ -299,7 +303,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       // Delegate global state reporting
       await onResult(this);
     } finally {
-      if (this.status !== OperationStatus.RemoteExecuting) {
+      if (this.isTerminal) {
         this._collatedWriter?.close();
         this.stdioSummarizer.close();
         this.stopwatch.stop();
