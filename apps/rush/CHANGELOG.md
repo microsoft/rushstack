@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 17 Jul 2024 07:37:13 GMT and should not be manually modified.
+This log was last generated on Fri, 19 Jul 2024 03:41:44 GMT and should not be manually modified.
+
+## 5.130.2
+Fri, 19 Jul 2024 03:41:44 GMT
+
+### Updates
+
+- Fix an issue where `rush-pnpm patch-commit` did not work correctly when subspaces are enabled.
 
 ## 5.130.1
 Wed, 17 Jul 2024 07:37:13 GMT

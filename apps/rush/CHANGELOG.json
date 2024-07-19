@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.130.2",
+      "tag": "@microsoft/rush_v5.130.2",
+      "date": "Fri, 19 Jul 2024 03:41:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush-pnpm patch-commit` did not work correctly when subspaces are enabled."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.130.1",
       "tag": "@microsoft/rush_v5.130.1",
       "date": "Wed, 17 Jul 2024 07:37:13 GMT",
