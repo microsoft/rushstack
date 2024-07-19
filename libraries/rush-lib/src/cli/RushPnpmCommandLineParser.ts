@@ -452,8 +452,8 @@ export class RushPnpmCommandLineParser {
         //    It will produce unexpected behavior if we use the fallback.
         if (this._subspace.getPnpmOptions() === undefined) {
           this._terminal.writeErrorLine(
-            `You are using rush-pnpm patch-commit command, but Rush could not find the pnpm-config.json for ${this._subspace.subspaceName} subspace! ` +
-              `Make sure the pnpm-config.json exists in ${this._subspace.getSubspaceConfigFolder()}`
+            `The "rush-pnpm patch-commit" command cannot proceed without a pnpm-config.json file.` +
+              `  Create one in this folder: ${this._subspace.getSubspaceConfigFolder()}`
           );
           break;
         }
