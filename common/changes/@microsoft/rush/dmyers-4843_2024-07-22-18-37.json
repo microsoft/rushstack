@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Ensure that RushInstallManager doesn't install peerDependencies if pnpm's autoInstallPeers setting is disabled",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
