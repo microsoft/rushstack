@@ -5,8 +5,11 @@ import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
+import { RushAlerts } from '../../utilities/RushAlerts';
 export class AlertAction extends BaseRushAction {
   private readonly _snoozeParameter: CommandLineFlagParameter;
+  private readonly _rushAlerts: RushAlerts;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -20,13 +23,21 @@ export class AlertAction extends BaseRushAction {
 
     this._snoozeParameter = this.defineFlagParameter({
       parameterLongName: '--snooze',
-      description: 'Snooze the alerts for today.'
+      description:
+        'Snooze the alerts for today.' +
+        ' Please note, if you delete the `common/temp` folder, the snooze state will be reset. '
+    });
+
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+    this._rushAlerts = new RushAlerts({
+      rushConfiguration: this.rushConfiguration,
+      terminal
     });
   }
 
   protected async runAsync(): Promise<void> {
     if (this._snoozeParameter.value!) {
-      console.log('Snoozing');
+      await this._rushAlerts.snoozeAlertsAsync();
     }
   }
 }

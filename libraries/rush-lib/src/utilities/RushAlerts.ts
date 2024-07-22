@@ -25,6 +25,7 @@ interface IRushAlertsConfigEntry {
 }
 interface IRushAlertsState {
   lastUpdateTime: string;
+  snooze: boolean;
   alerts: Array<IRushAlertStateEntry>;
 }
 interface IRushAlertStateEntry {
@@ -70,6 +71,11 @@ export class RushAlerts {
     const hours: number = (Number(currentTime) - Number(lastUpdateTime)) / (1000 * 60 * 60);
 
     if (hours > 24) {
+      return false;
+    }
+
+    // if snooze is enabled, also return false
+    if (rushAlertsState.snooze) {
       return false;
     }
 
@@ -262,6 +268,7 @@ export class RushAlerts {
     if (validAlerts.length > 0) {
       const rushAlertsState: IRushAlertsState = {
         lastUpdateTime: new Date().toISOString(),
+        snooze: false,
         alerts: validAlerts
       };
 
@@ -275,5 +282,23 @@ export class RushAlerts {
       // remove exist alerts state if exist
       await FileSystem.deleteFileAsync(this.rushAlertsStateFilePath);
     }
+  }
+
+  public async snoozeAlertsAsync(): Promise<void> {
+    const rushAlertsState: IRushAlertsState | undefined = await this._loadRushAlertsStateAsync();
+
+    if (!rushAlertsState) {
+      return;
+    }
+
+    rushAlertsState.snooze = true;
+
+    await JsonFile.saveAsync(rushAlertsState, this.rushAlertsStateFilePath, {
+      ignoreUndefinedValues: true,
+      headerComment: '// THIS FILE IS MACHINE-GENERATED -- DO NOT MODIFY',
+      jsonSyntax: JsonSyntax.JsonWithComments
+    });
+
+    this._terminal.writeLine('Snoozing the rush alerts for today!');
   }
 }
