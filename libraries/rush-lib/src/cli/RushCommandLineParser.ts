@@ -237,7 +237,9 @@ export class RushCommandLineParser extends CommandLineParser {
               terminal: this._terminal
             });
             if (await rushAlerts.isAlertsStateUpToDateAsync()) {
-              await rushAlerts.printAlertsAsync();
+              if (!(await rushAlerts.isSnoozeAsync())) {
+                await rushAlerts.printAlertsAsync();
+              }
             } else {
               await rushAlerts.retrieveAlertsAsync();
             }
