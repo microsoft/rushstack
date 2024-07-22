@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add rush alert CLI",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
