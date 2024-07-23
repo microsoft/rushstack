@@ -182,9 +182,9 @@
      * prepend a folder token such as "<projectFolder>".
      *
      * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
-     * DEFAULT VALUE: "<projectFolder>/temp/"
+     * DEFAULT VALUE: "<projectFolder>/etc/"
      */
-    // "reportFolder": "<projectFolder>/temp/",
+    // "reportFolder": "<projectFolder>/etc/",
 
     /**
      * Specifies the folder where the temporary report file is written.  The file name portion is determined by
@@ -249,7 +249,7 @@
      * item's file path is "api/ExtractorConfig.ts", the full URL file path would be
      * "https://github.com/microsoft/rushstack/tree/main/apps/api-extractor/api/ExtractorConfig.js".
      *
-     * Can be omitted if you don't need source code links in your API documentation reference.
+     * This setting can be omitted if you don't need source code links in your API documentation reference.
      *
      * SUPPORTED TOKENS: none
      * DEFAULT VALUE: ""
@@ -284,6 +284,8 @@
      * Specifies the output path for a .d.ts rollup file to be generated with trimming for an "alpha" release.
      * This file will include only declarations that are marked as "@public", "@beta", or "@alpha".
      *
+     * If the path is an empty string, then this file will not be written.
+     *
      * The path is resolved relative to the folder of the config file that contains the setting; to change this,
      * prepend a folder token such as "<projectFolder>".
      *
@@ -295,6 +297,8 @@
     /**
      * Specifies the output path for a .d.ts rollup file to be generated with trimming for a "beta" release.
      * This file will include only declarations that are marked as "@public" or "@beta".
+     *
+     * If the path is an empty string, then this file will not be written.
      *
      * The path is resolved relative to the folder of the config file that contains the setting; to change this,
      * prepend a folder token such as "<projectFolder>".
