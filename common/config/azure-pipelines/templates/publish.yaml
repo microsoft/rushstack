@@ -6,19 +6,18 @@ parameters:
     default: $(Build.SourceBranchName)
 
 steps:
-  - task: EsrpRelease@7
+  - script: 'node common/scripts/install-run-rush.js publish --apply --publish --pack --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details --set-access-level public'
+    displayName: 'Rush Publish (Policy: ${{ parameters.VersionPolicyName }})'
+    env:
+      NPM_AUTH_TOKEN: $(npmToken)
+
+  - task: PowerShell@2
+    displayName: Publish Packages
     inputs:
-      connectedservicename: 'odsp-web-esrp'
-      keyvaultname: 'odsp-web-esrp'
-      authcertname: 'esrp-cert'
-      signcertname: 'esrp-sign'
-      clientid: 'be2088dc-be24-46c8-b0b1-aa555603f375'
-      intent: 'PackageDistribution'
-      contenttype: 'npm'
-      folderlocation: '$(System.DefaultWorkingDirectory)/ts/out/pkg'
-      waitforreleasecompletion: true
-      owners: 'odspxfun@microsoft.com'
-      approvers: 'odspxfun@microsoft.com'
-      serviceendpointurl: 'https://api.esrp.microsoft.com'
-      mainpublisher: 'ESRPRELPACMAN'
-      domaintenantid: 'cdc5aeea-15c5-4db6-b079-fcadd2505dc2'
+      targetType: 'filePath'
+      filePath: '$(Build.SourcesDirectory)/common/temp/artifacts/packages'
+      arguments: '-Registry "//onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/"$(DRY_RUN)'
+      workingDirectory: '$(Pipeline.Workspace)/odsp-web-packages/npm'
+      pwsh: true
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
