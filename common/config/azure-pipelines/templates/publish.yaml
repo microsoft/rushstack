@@ -6,16 +6,5 @@ parameters:
     default: $(Build.SourceBranchName)
 
 steps:
-  - script: 'node common/scripts/install-run-rush.js publish --apply --publish --pack --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details --set-access-level public --release-folder FOLDER'
+  - script: 'node common/scripts/install-run-rush.js publish --apply --publish --pack --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details --set-access-level public --release-folder $(Build.ArtifactStagingDirectory)/packages'
     displayName: 'Rush Publish (Policy: ${{ parameters.VersionPolicyName }})'
-
-  - task: PowerShell@2
-    displayName: Publish Packages
-    inputs:
-      targetType: 'filePath'
-      filePath: '$(Build.SourcesDirectory)/common/temp/artifacts/packages'
-      arguments: '-Registry "//onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/"$(DRY_RUN)'
-      workingDirectory: '$(Pipeline.Workspace)/odsp-web-packages/npm'
-      pwsh: true
-    env:
-      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
