@@ -133,6 +133,20 @@ export class WatchLoop implements IWatchLoopState {
       let runRequestedFromHost: boolean = true;
       let status: OperationStatus = OperationStatus.Ready;
 
+      function tryMessageHost(
+        message: ISyncEventMessage | IRequestRunEventMessage | IAfterExecuteEventMessage
+      ): void {
+        if (!host.send) {
+          return reject(new Error('Host does not support IPC'));
+        }
+
+        try {
+          host.send(message);
+        } catch (err) {
+          reject(new Error(`Unable to communicate with host: ${err}`));
+        }
+      }
+
       function requestRunFromHost(requestor?: string): void {
         if (runRequestedFromHost) {
           return;
@@ -145,7 +159,7 @@ export class WatchLoop implements IWatchLoopState {
           requestor
         };
 
-        host.send!(requestRunMessage);
+        tryMessageHost(requestRunMessage);
       }
 
       function sendSync(): void {
@@ -153,7 +167,7 @@ export class WatchLoop implements IWatchLoopState {
           event: 'sync',
           status
         };
-        host.send!(syncMessage);
+        tryMessageHost(syncMessage);
       }
 
       host.on('message', async (message: CommandMessageFromHost) => {
@@ -189,7 +203,7 @@ export class WatchLoop implements IWatchLoopState {
                 event: 'after-execute',
                 status
               };
-              host.send!(afterExecuteMessage);
+              tryMessageHost(afterExecuteMessage);
             }
             return;
           }

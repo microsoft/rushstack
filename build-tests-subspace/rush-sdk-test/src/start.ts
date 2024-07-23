@@ -7,7 +7,7 @@ console.log('rush-sdk-test loading Rush configuration...');
 
 // Important: Since we're calling an internal API, we need to use the unbundled .d.ts files
 // instead of the normal .d.ts rollup
-import { RushConfiguration } from '@rushstack/rush-sdk/lib/';
+import { RushConfiguration } from '@rushstack/rush-sdk/lib/index';
 
 const config: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 console.log(config.commonFolder);

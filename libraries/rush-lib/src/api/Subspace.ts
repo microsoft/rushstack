@@ -267,7 +267,10 @@ export class Subspace {
   public getCommonVersions(): CommonVersionsConfiguration {
     const commonVersionsFilename: string = this.getCommonVersionsFilePath();
     if (!this._commonVersionsConfiguration) {
-      this._commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
+      this._commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(
+        commonVersionsFilename,
+        this._rushConfiguration
+      );
     }
     return this._commonVersionsConfiguration;
   }

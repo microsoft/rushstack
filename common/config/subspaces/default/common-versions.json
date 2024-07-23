@@ -59,6 +59,8 @@
    * In some cases you may want this turned on, but need to allow certain packages to use a different
    * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
    * section of the common-versions.json.
+   *
+   * In the case that subspaces is enabled, this setting will take effect at a subspace level.
    */
   "ensureConsistentVersions": true,
 

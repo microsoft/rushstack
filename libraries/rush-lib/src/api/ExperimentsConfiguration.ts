@@ -98,6 +98,14 @@ export interface IExperimentsJson {
    * across invocations.
    */
   useIPCScriptsInWatchMode?: boolean;
+
+  /**
+   * (UNDER DEVELOPMENT) The Rush alerts feature provides a way to send announcements to engineers
+   * working in the monorepo, by printing directly in the user's shell window when they invoke Rush commands.
+   * This ensures that important notices will be seen by anyone doing active development, since people often
+   * ignore normal discussion group messages or don't know to subscribe.
+   */
+  rushAlerts?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);

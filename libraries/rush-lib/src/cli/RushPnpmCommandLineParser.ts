@@ -446,17 +446,29 @@ export class RushPnpmCommandLineParser {
 
     switch (commandName) {
       case 'patch-commit': {
+        // why need to throw error when pnpm-config.json not exists?
+        // 1. pnpm-config.json is required for `rush-pnpm patch-commit`. Rush writes the patched dependency to the pnpm-config.json when finishes.
+        // 2. we can not fallback to use Monorepo config folder (common/config/rush) due to that this command is intended to apply to input subspace only.
+        //    It will produce unexpected behavior if we use the fallback.
+        if (this._subspace.getPnpmOptions() === undefined) {
+          this._terminal.writeErrorLine(
+            `The "rush-pnpm patch-commit" command cannot proceed without a pnpm-config.json file.` +
+              `  Create one in this folder: ${this._subspace.getSubspaceConfigFolder()}`
+          );
+          break;
+        }
+
         // Example: "C:\MyRepo\common\temp\package.json"
         const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
         const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
         const newGlobalPatchedDependencies: Record<string, string> | undefined =
           commonPackageJson?.pnpm?.patchedDependencies;
         const currentGlobalPatchedDependencies: Record<string, string> | undefined =
-          this._rushConfiguration.pnpmOptions.globalPatchedDependencies;
+          this._subspace.getPnpmOptions()?.globalPatchedDependencies;
 
         if (!objectsAreDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
           const commonTempPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
-          const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
+          const rushPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
           // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
           if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
             FileSystem.ensureEmptyFolder(rushPnpmPatchesFolder);
@@ -477,14 +489,14 @@ export class RushPnpmCommandLineParser {
           }
 
           // Update patchedDependencies to pnpm configuration file
-          this._rushConfiguration.pnpmOptions.updateGlobalPatchedDependencies(newGlobalPatchedDependencies);
+          this._subspace.getPnpmOptions()?.updateGlobalPatchedDependencies(newGlobalPatchedDependencies);
 
           // Rerun installation to update
           await this._doRushUpdateAsync();
 
           this._terminal.writeWarningLine(
             `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the ` +
-              `"${RushConstants.commonFolderName}/${RushConstants.pnpmPatchesCommonFolderName}" folder.\n` +
+              `"${commonTempPnpmPatchesFolder}" folder.\n` +
               '  Please commit this change to Git.'
           );
         }

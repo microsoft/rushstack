@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Jul 2024 00:36:21 GMT and should not be manually modified.
+
+## 5.5.0
+Tue, 16 Jul 2024 00:36:21 GMT
+
+### Minor changes
+
+- Add support for the `jsonSyntax` option to the `JsonFile.save`, `JsonFile.saveAsync`, and `JsonFile.stringify` functions.
 
 ## 5.4.1
 Thu, 30 May 2024 00:13:05 GMT

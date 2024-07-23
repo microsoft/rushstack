@@ -2,6 +2,30 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.13.2",
+      "tag": "@rushstack/terminal_v0.13.2",
+      "date": "Wed, 17 Jul 2024 06:55:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the PrintUtilities API to handle an edge case when word-wrapping a final line"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.1",
+      "tag": "@rushstack/terminal_v0.13.1",
+      "date": "Tue, 16 Jul 2024 00:36:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.5.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.0",
       "tag": "@rushstack/terminal_v0.13.0",
       "date": "Thu, 30 May 2024 00:13:05 GMT",

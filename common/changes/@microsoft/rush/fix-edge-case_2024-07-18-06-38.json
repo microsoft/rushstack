@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where Rush does not detect an outdated lockfile if the `dependenciesMeta` `package.json` field is edited.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

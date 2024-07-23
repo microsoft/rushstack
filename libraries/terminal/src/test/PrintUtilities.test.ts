@@ -103,7 +103,7 @@ describe(PrintUtilities.name, () => {
         .split('[n]');
       expect(outputLines).toMatchSnapshot();
 
-      expect(outputLines[0].trim().length).toEqual(expectedWidth);
+      expect(outputLines.every((x) => x.length <= expectedWidth));
     }
 
     const MESSAGE: string =
@@ -148,6 +148,26 @@ describe(PrintUtilities.name, () => {
 
       PrintUtilities.printMessageInBox(userMessage, terminal, 50);
       validateOutput(50);
+    });
+
+    it('word-wraps a message with a trailing fragment', () => {
+      const lines: string[] = PrintUtilities.wrapWordsToLines(
+        'This Thursday, we will complete the Node.js version upgrade.  Any pipelines that still have not upgraded will be temporarily disabled.',
+        36
+      );
+      expect(lines).toMatchInlineSnapshot(`
+Array [
+  "This Thursday, we will complete the",
+  "Node.js version upgrade.  Any",
+  "pipelines that still have not",
+  "upgraded will be temporarily",
+  "disabled.",
+]
+`);
+
+      for (const line of lines) {
+        expect(line.length).toBeLessThanOrEqual(36);
+      }
     });
   });
 });
