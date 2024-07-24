@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 17 Jul 2024 06:55:09 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Jul 2024 00:12:14 GMT and should not be manually modified.
+
+## 7.47.3
+Wed, 24 Jul 2024 00:12:14 GMT
+
+### Patches
+
+- Fix an edge case when discarding the file extension from the "reportFileName" setting and improve its documentation
 
 ## 7.47.2
 Wed, 17 Jul 2024 06:55:09 GMT
