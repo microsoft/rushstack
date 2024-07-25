@@ -11,6 +11,7 @@
 !CHANGELOG.md
 !CHANGELOG.json
 !ThirdPartyNotice.txt
+!heft-plugin.json
 
 # Ignore certain patterns that should not get published.
 /dist/*.stats.*
@@ -27,7 +28,6 @@
 # ---------------------------------------------------------------------------
 # DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
 # ---------------------------------------------------------------------------
-
 /lib/start-dev.*
 /lib/start-dev-docs.*
 
