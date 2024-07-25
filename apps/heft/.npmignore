@@ -8,10 +8,12 @@
 !/lib/**
 !/lib-*/**
 !/dist/**
+
 !CHANGELOG.md
 !CHANGELOG.json
-!ThirdPartyNotice.txt
 !heft-plugin.json
+!rush-plugin-manifest.json
+!ThirdPartyNotice.txt
 
 # Ignore certain patterns that should not get published.
 /dist/*.stats.*
