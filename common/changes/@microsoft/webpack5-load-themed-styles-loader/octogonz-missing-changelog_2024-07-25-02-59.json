@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Include CHANGELOG.md in published releases again",
+      "type": "patch",
+      "packageName": "@microsoft/webpack5-load-themed-styles-loader"
+    }
+  ],
+  "packageName": "@microsoft/webpack5-load-themed-styles-loader",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

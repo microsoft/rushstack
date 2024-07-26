@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Include CHANGELOG.md in published releases again",
+      "type": "patch",
+      "packageName": "@rushstack/webpack5-module-minifier-plugin"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-module-minifier-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
