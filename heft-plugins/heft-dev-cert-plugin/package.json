@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-dev-cert-plugin",
-  "version": "0.4.60",
+  "version": "0.4.61",
   "description": "A Heft plugin for generating and using local development certificates",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.66.23"
+    "@rushstack/heft": "^0.66.24"
   },
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*"
