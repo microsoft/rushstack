@@ -402,13 +402,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           }
         };
 
-        try {
-          const earlyReturnStatus: OperationStatus | undefined = await runBeforeExecute();
-          return earlyReturnStatus;
-        } catch (e) {
-          buildCacheContext.buildCacheProjectLogWritable?.close();
-          throw e;
-        }
+        return await runBeforeExecute();
       }
     );
 
