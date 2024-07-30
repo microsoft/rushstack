@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "prevent workspace deps in decoupledLocalDependencies",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "jamesmaher-dd@users.noreply.github.com"
+}
