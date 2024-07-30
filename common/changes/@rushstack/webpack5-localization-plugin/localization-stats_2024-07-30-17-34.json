@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "comment": "Include webpack compilation in localizationStats callback.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-localization-plugin"
+}

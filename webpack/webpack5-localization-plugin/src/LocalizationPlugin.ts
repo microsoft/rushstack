@@ -413,7 +413,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
 
             if (callback) {
               try {
-                callback(localizationStats);
+                callback(localizationStats, compilation);
               } catch (e) {
                 /* swallow errors from the callback */
               }
