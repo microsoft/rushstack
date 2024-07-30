@@ -27,6 +27,7 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
     '/'
   );
 
+  let compilationInStats: webpack.Compilation | undefined;
   const resJsonLoader: string = resolve(__dirname, '../loaders/resjson-loader.js');
   const options: ILocalizationPluginOptions = {
     localizedData: {
@@ -53,7 +54,10 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
       }
     },
     localizationStats: {
-      dropPath: 'localization-stats.json'
+      dropPath: 'localization-stats.json',
+      callback: (stats, compilation) => {
+        compilationInStats = compilation;
+      }
     },
     realContentHash: true
   };
@@ -109,6 +113,9 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
 
   expect(errors).toHaveLength(0);
   expect(warnings).toHaveLength(0);
+
+  expect(compilationInStats).toBeDefined();
+  expect(compilationInStats).toBeInstanceOf(webpack.Compilation);
 }
 
 describe(LocalizationPlugin.name, () => {
