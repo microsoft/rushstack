@@ -60,6 +60,7 @@ import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
+import { AlertAction } from './actions/AlertAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -236,7 +237,9 @@ export class RushCommandLineParser extends CommandLineParser {
               terminal: this._terminal
             });
             if (await rushAlerts.isAlertsStateUpToDateAsync()) {
-              await rushAlerts.printAlertsAsync();
+              if (!(await rushAlerts.isSnoozeAsync())) {
+                await rushAlerts.printAlertsAsync();
+              }
             } else {
               await rushAlerts.retrieveAlertsAsync();
             }
@@ -289,6 +292,7 @@ export class RushCommandLineParser extends CommandLineParser {
     try {
       // Alphabetical order
       this.addAction(new AddAction(this));
+      this.addAction(new AlertAction(this));
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
       this.addAction(new DeployAction(this));
