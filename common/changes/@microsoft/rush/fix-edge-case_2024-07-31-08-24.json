@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for maxDailyDisplays in rush alerts to limit daily alert displays",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

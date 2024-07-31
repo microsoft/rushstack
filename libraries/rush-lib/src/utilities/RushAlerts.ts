@@ -22,6 +22,7 @@ interface IRushAlertsConfigEntry {
   startTime: string;
   endTime: string;
   conditionScript?: string;
+  maxDailyDisplays?: number;
 }
 interface IRushAlertsState {
   lastUpdateTime: string;
@@ -31,6 +32,8 @@ interface IRushAlertStateEntry {
   title: string;
   message: Array<string> | string;
   detailsUrl: string;
+  maxDailyDisplays?: number;
+  currentDisplayCount?: number;
 }
 
 export class RushAlerts {
@@ -91,7 +94,9 @@ export class RushAlerts {
             validAlerts.push({
               title: alert.title,
               message: alert.message,
-              detailsUrl: alert.detailsUrl
+              detailsUrl: alert.detailsUrl,
+              currentDisplayCount: alert.maxDailyDisplays ? 0 : undefined,
+              maxDailyDisplays: alert.maxDailyDisplays
             });
           }
         }
@@ -104,16 +109,24 @@ export class RushAlerts {
   public async printAlertsAsync(): Promise<void> {
     const rushAlertsState: IRushAlertsState | undefined = await this._loadRushAlertsStateAsync();
 
-    if (!rushAlertsState) {
+    if (!rushAlertsState || rushAlertsState.alerts.length === 0) {
       return;
     }
 
-    if (rushAlertsState?.alerts.length !== 0) {
-      this._terminal.writeLine();
-      for (const alert of rushAlertsState.alerts) {
+    this._terminal.writeLine();
+
+    for (const alert of rushAlertsState.alerts) {
+      const needsDisplay: boolean =
+        !alert.maxDailyDisplays || alert.currentDisplayCount! < alert.maxDailyDisplays;
+      if (needsDisplay) {
         this._printMessageInBoxStyle(alert);
+        if (alert.currentDisplayCount) {
+          alert.currentDisplayCount = alert.currentDisplayCount + 1;
+        }
       }
     }
+
+    await this._writeRushAlertStateAsync(rushAlertsState.alerts);
   }
 
   private static _parseDate(dateString: string): Date {

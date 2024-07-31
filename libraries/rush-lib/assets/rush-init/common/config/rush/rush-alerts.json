@@ -64,6 +64,13 @@
       /*[LINE "HYPOTHETICAL"]*/ "endTime": "2024-01-05",
 
       /**
+       * (OPTIONAL) If `maxDailyDisplays` is specified, then this alert will not be
+       * shown more than that number of times per day. If you need to display the alert more frequently,
+       * consider using the `conditionScript` setting instead.
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "maxDailyDisplays": 1,
+
+      /**
        * (OPTIONAL) The filename of a script that determines whether this alert can be shown,
        * found in the "common/config/rush/alert-scripts" folder.  The script must define
        * a CommonJS export named `canShowAlert` that returns a boolean value, for example:
