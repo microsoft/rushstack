@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 19 Jul 2024 03:41:44 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Jul 2024 23:30:13 GMT and should not be manually modified.
+
+## 5.130.3
+Wed, 31 Jul 2024 23:30:13 GMT
+
+### Updates
+
+- Fix an issue where Rush does not detect an outdated lockfile if the `dependenciesMeta` `package.json` field is edited.
+- Include CHANGELOG.md in published releases again
+- Fix a bug that caused the build cache to close its terminal writer before execution on error.
 
 ## 5.130.2
 Fri, 19 Jul 2024 03:41:44 GMT
