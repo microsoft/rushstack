@@ -126,7 +126,7 @@ export class RushAlerts {
       }
     }
 
-    await this._writeRushAlertStateAsync(rushAlertsState.alerts);
+    await this._writeRushAlertStateAsync(rushAlertsState.alerts, rushAlertsState.lastUpdateTime);
   }
 
   private static _parseDate(dateString: string): Date {
@@ -271,10 +271,13 @@ export class RushAlerts {
     this._terminal.writeLine('╚═' + '═'.repeat(lineLength) + '═╝');
   }
 
-  private async _writeRushAlertStateAsync(validAlerts: Array<IRushAlertStateEntry>): Promise<void> {
+  private async _writeRushAlertStateAsync(
+    validAlerts: Array<IRushAlertStateEntry>,
+    lastUpdateTime?: string
+  ): Promise<void> {
     if (validAlerts.length > 0) {
       const rushAlertsState: IRushAlertsState = {
-        lastUpdateTime: new Date().toISOString(),
+        lastUpdateTime: lastUpdateTime ?? new Date().toISOString(),
         alerts: validAlerts
       };
 
