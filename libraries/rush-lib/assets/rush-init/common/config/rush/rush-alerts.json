@@ -64,11 +64,25 @@
       /*[LINE "HYPOTHETICAL"]*/ "endTime": "2024-01-05",
 
       /**
-       * (OPTIONAL) If `maxDailyDisplays` is specified, then this alert will not be
-       * shown more than that number of times per day. If you need to display the alert more frequently,
-       * consider using the `conditionScript` setting instead.
+       * (OPTIONAL) Specifies the maximum frequency at which this alert can be displayed within a defined time period.
+       * Options are:
+       *  "always" (default) - no limit on display frequency,
+       *  "monthly" - display up to once per month
+       *  "weekly" - display up to once per week
+       *  "daily" - display up to once per day
+       *  "hourly" - display up to once per hour
        */
-      /*[LINE "HYPOTHETICAL"]*/ "maxDailyDisplays": 1,
+      /*[LINE "HYPOTHETICAL"]*/ "maximumDisplayInterval": "always",
+
+      /**
+       * (OPTIONAL) Determines the order in which this alert is shown relative to other alerts, based on urgency.
+       * Options are:
+       *  "high" - displayed first
+       *  "mid" - moderate urgency
+       *  "normal" (default) - standard urgency
+       *  "low" - least urgency
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "priority": "normal",
 
       /**
        * (OPTIONAL) The filename of a script that determines whether this alert can be shown,
