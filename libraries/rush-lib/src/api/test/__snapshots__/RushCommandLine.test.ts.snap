@@ -1048,6 +1048,14 @@ Object {
       ],
     },
     Object {
+      "actionName": "snooze-alert",
+      "parameters": Array [],
+    },
+    Object {
+      "actionName": "alert",
+      "parameters": Array [],
+    },
+    Object {
       "actionName": "import-strings",
       "parameters": Array [
         Object {
