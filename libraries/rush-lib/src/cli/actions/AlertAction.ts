@@ -20,7 +20,7 @@ export class AlertAction extends BaseRushAction {
   }
 
   public async runAsync(): Promise<void> {
-    const rushAlerts: RushAlerts = await RushAlerts.loadFromConfiguration(
+    const rushAlerts: RushAlerts = await RushAlerts.loadFromConfigurationAsync(
       this.rushConfiguration,
       this._terminal
     );

@@ -69,7 +69,6 @@ const enum AlertPriority {
 
 export class RushAlerts {
   private readonly _terminal: Terminal;
-  private static _rushAlertsJsonSchema: JsonSchema = JsonSchema.fromLoadedObject(rushAlertsSchemaJson);
 
   private readonly _rushAlertsConfig: IRushAlertsConfig | undefined;
   private readonly _rushAlertsState: IRushAlertsState | undefined;
@@ -106,7 +105,10 @@ export class RushAlerts {
     this.rushAlertsConfigFilePath = options.rushAlertsConfigFilePath;
   }
 
-  public static async loadFromConfiguration(rushConfiguration: RushConfiguration, terminal: Terminal) {
+  public static async loadFromConfigurationAsync(
+    rushConfiguration: RushConfiguration,
+    terminal: Terminal
+  ): Promise<RushAlerts> {
     const rushAlertsStateFilePath: string = `${rushConfiguration.commonTempFolder}/${RushConstants.rushAlertsConfigFilename}`;
     const rushAlertsConfigFilePath: string = `${rushConfiguration.commonRushConfigFolder}/${RushConstants.rushAlertsConfigFilename}`;
     const rushJsonFolder: string = rushConfiguration.rushJsonFolder;
@@ -118,7 +120,10 @@ export class RushAlerts {
 
     const [rushAlertsConfig, rushAlertsState] = await Promise.all([
       isRushAlertsConfigFileExists
-        ? JsonFile.loadAndValidateAsync(rushAlertsConfigFilePath, RushAlerts._rushAlertsJsonSchema)
+        ? JsonFile.loadAndValidateAsync(
+            rushAlertsConfigFilePath,
+            JsonSchema.fromLoadedObject(rushAlertsSchemaJson)
+          )
         : undefined,
       isRushAlertsStateFileExists
         ? JsonFile.loadAsync(rushAlertsStateFilePath, { jsonSyntax: JsonSyntax.JsonWithComments })

@@ -233,7 +233,7 @@ export class RushCommandLineParser extends CommandLineParser {
           if (experiments.rushAlerts) {
             this._terminal.writeDebugLine('Checking Rush alerts...');
             // Print out alerts if have after each successful command actions
-            const rushAlerts: RushAlerts = await RushAlerts.loadFromConfiguration(
+            const rushAlerts: RushAlerts = await RushAlerts.loadFromConfigurationAsync(
               this.rushConfiguration,
               this._terminal
             );
