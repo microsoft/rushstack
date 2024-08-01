@@ -26,6 +26,8 @@ interface IRushAlertsConfigEntry {
 }
 interface IRushAlertsState {
   lastUpdateTime: string;
+  snooze: boolean;
+  snoozeTime?: string;
   alerts: Array<IRushAlertStateEntry>;
 }
 interface IRushAlertStateEntry {
@@ -36,12 +38,25 @@ interface IRushAlertStateEntry {
   currentDisplayCount?: number;
 }
 
+const enum AlertChoice {
+  SHOW_ALERTS = 'Show me alerts',
+  NEVER_SHOW_ALERTS = 'Never show me alerts',
+  DO_NOT_SHOW_THIS_WEEK = 'Do not show alerts this week'
+}
+
 export class RushAlerts {
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _terminal: Terminal;
   private static _rushAlertsJsonSchema: JsonSchema = JsonSchema.fromLoadedObject(rushAlertsSchemaJson);
 
   public readonly rushAlertsStateFilePath: string;
+
+  public static readonly ALERT_MESSAGE: string = 'How would you like to handle alerts?';
+  public static readonly ALERT_CHOICES: string[] = [
+    AlertChoice.SHOW_ALERTS,
+    AlertChoice.NEVER_SHOW_ALERTS,
+    AlertChoice.DO_NOT_SHOW_THIS_WEEK
+  ];
 
   public constructor(options: IRushAlertsOptions) {
     this._rushConfiguration = options.rushConfiguration;
@@ -102,7 +117,13 @@ export class RushAlerts {
         }
       }
 
-      await this._writeRushAlertStateAsync(validAlerts);
+      const rushAlertsState: IRushAlertsState = {
+        lastUpdateTime: new Date().toISOString(),
+        snooze: false,
+        alerts: validAlerts
+      };
+
+      await this._writeRushAlertStateAsync(rushAlertsState);
     }
   }
 
@@ -110,6 +131,14 @@ export class RushAlerts {
     const rushAlertsState: IRushAlertsState | undefined = await this._loadRushAlertsStateAsync();
 
     if (!rushAlertsState || rushAlertsState.alerts.length === 0) {
+      return;
+    }
+
+    // the case of user run `rush snooze-alert`
+    if (
+      rushAlertsState.snooze &&
+      (!rushAlertsState.snoozeTime || Number(new Date()) < Number(new Date(rushAlertsState.snoozeTime)))
+    ) {
       return;
     }
 
@@ -126,7 +155,32 @@ export class RushAlerts {
       }
     }
 
-    await this._writeRushAlertStateAsync(rushAlertsState.alerts, rushAlertsState.lastUpdateTime);
+    await this._writeRushAlertStateAsync(rushAlertsState);
+  }
+
+  public async snoozeAlerts(choice: string): Promise<void> {
+    const rushAlertsState: IRushAlertsState | undefined = await this._loadRushAlertsStateAsync();
+    if (!rushAlertsState || rushAlertsState.alerts.length === 0) {
+      return;
+    }
+    switch (choice) {
+      case AlertChoice.SHOW_ALERTS: {
+        rushAlertsState.snooze = false;
+        break;
+      }
+      case AlertChoice.NEVER_SHOW_ALERTS: {
+        rushAlertsState.snooze = true;
+        break;
+      }
+      case AlertChoice.DO_NOT_SHOW_THIS_WEEK: {
+        rushAlertsState.snooze = true;
+        const snoozeTime: Date = new Date();
+        snoozeTime.setDate(snoozeTime.getDate() + 7);
+        rushAlertsState.snoozeTime = snoozeTime.toISOString();
+        break;
+      }
+    }
+    await this._writeRushAlertStateAsync(rushAlertsState);
   }
 
   private static _parseDate(dateString: string): Date {
@@ -271,16 +325,8 @@ export class RushAlerts {
     this._terminal.writeLine('╚═' + '═'.repeat(lineLength) + '═╝');
   }
 
-  private async _writeRushAlertStateAsync(
-    validAlerts: Array<IRushAlertStateEntry>,
-    lastUpdateTime?: string
-  ): Promise<void> {
-    if (validAlerts.length > 0) {
-      const rushAlertsState: IRushAlertsState = {
-        lastUpdateTime: lastUpdateTime ?? new Date().toISOString(),
-        alerts: validAlerts
-      };
-
+  private async _writeRushAlertStateAsync(rushAlertsState: IRushAlertsState): Promise<void> {
+    if (rushAlertsState.alerts.length > 0) {
       await JsonFile.saveAsync(rushAlertsState, this.rushAlertsStateFilePath, {
         ignoreUndefinedValues: true,
         headerComment: '// THIS FILE IS MACHINE-GENERATED -- DO NOT MODIFY',

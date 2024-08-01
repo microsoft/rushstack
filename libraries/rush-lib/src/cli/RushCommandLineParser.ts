@@ -60,6 +60,7 @@ import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
+import { SnoozeAlertAction } from './actions/SnoozeAlertAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -310,6 +311,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UpdateCloudCredentialsAction(this));
       this.addAction(new UpgradeInteractiveAction(this));
       this.addAction(new VersionAction(this));
+      this.addAction(new SnoozeAlertAction(this));
 
       this._populateScriptActions();
     } catch (error) {
