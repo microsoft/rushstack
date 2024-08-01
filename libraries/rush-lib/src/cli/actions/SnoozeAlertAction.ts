@@ -37,6 +37,6 @@ export class SnoozeAlertAction extends BaseRushAction {
       rushConfiguration: this.rushConfiguration,
       terminal: this._terminal
     });
-    await rushAlerts.snoozeAlerts(answers.alertChoice);
+    await rushAlerts.snoozeAlertsAsync(answers.alertChoice);
   }
 }

@@ -22,7 +22,8 @@ interface IRushAlertsConfigEntry {
   startTime: string;
   endTime: string;
   conditionScript?: string;
-  maxDailyDisplays?: number;
+  priority?: AlertPriority;
+  maximumDisplayInterval?: AlertDisplayInterval;
 }
 interface IRushAlertsState {
   lastUpdateTime: string;
@@ -36,12 +37,30 @@ interface IRushAlertStateEntry {
   detailsUrl: string;
   maxDailyDisplays?: number;
   currentDisplayCount?: number;
+  lastDisplayTime?: string;
+  priority?: AlertPriority;
+  maximumDisplayInterval?: AlertDisplayInterval;
 }
 
-export const enum AlertChoice {
+const enum AlertChoice {
   SHOW_ALERTS = 'Show me alerts',
   NEVER_SHOW_ALERTS = 'Never show me alerts',
   DO_NOT_SHOW_THIS_WEEK = 'Do not show alerts this week'
+}
+
+const enum AlertDisplayInterval {
+  ALWAYS = 'always',
+  MONTHLY = 'monthly',
+  WEEKLY = 'weekly',
+  DAILY = 'daily',
+  HOURLY = 'hourly'
+}
+
+const enum AlertPriority {
+  HIGH = 'high',
+  MID = 'mid',
+  NORMAL = 'normal',
+  LOW = 'low'
 }
 
 export class RushAlerts {
@@ -57,6 +76,19 @@ export class RushAlerts {
     AlertChoice.NEVER_SHOW_ALERTS,
     AlertChoice.DO_NOT_SHOW_THIS_WEEK
   ];
+  public static readonly ALERT_PRIORITY: string[] = [
+    AlertPriority.HIGH,
+    AlertPriority.MID,
+    AlertPriority.NORMAL,
+    AlertPriority.LOW
+  ];
+  public static readonly IntervalMap = new Map([
+    [AlertDisplayInterval.ALWAYS, -1],
+    [AlertDisplayInterval.MONTHLY, 1000 * 60 * 60 * 24 * 30],
+    [AlertDisplayInterval.WEEKLY, 1000 * 60 * 60 * 24 * 7],
+    [AlertDisplayInterval.DAILY, 1000 * 60 * 60 * 24],
+    [AlertDisplayInterval.HOURLY, 1000 * 60 * 60]
+  ]);
 
   public constructor(options: IRushAlertsOptions) {
     this._rushConfiguration = options.rushConfiguration;
@@ -116,8 +148,8 @@ export class RushAlerts {
               title: alert.title,
               message: alert.message,
               detailsUrl: alert.detailsUrl,
-              currentDisplayCount: alert.maxDailyDisplays ? 0 : undefined,
-              maxDailyDisplays: alert.maxDailyDisplays
+              priority: alert.priority,
+              maximumDisplayInterval: alert.maximumDisplayInterval
             });
           }
         }
@@ -161,6 +193,8 @@ export class RushAlerts {
       }
     }
 
+    this._printMessageInBoxStyle(this._selectAlertByPriority(rushAlertsState.alerts));
+
     await this._writeRushAlertStateAsync(rushAlertsState);
   }
 
@@ -174,7 +208,7 @@ export class RushAlerts {
     }
   }
 
-  public async snoozeAlerts(choice: string): Promise<void> {
+  public async snoozeAlertsAsync(choice: string): Promise<void> {
     const rushAlertsState: IRushAlertsState | undefined = await this._loadRushAlertsStateAsync();
     if (!rushAlertsState || rushAlertsState.alerts.length === 0) {
       return;
@@ -197,6 +231,23 @@ export class RushAlerts {
       }
     }
     await this._writeRushAlertStateAsync(rushAlertsState);
+  }
+
+  private _selectAlertByPriority(alerts: IRushAlertStateEntry[]): IRushAlertStateEntry {
+    const needDisplayAlerts: IRushAlertStateEntry[] = alerts.filter((alert) => {
+      const needsDisplay: boolean =
+        !alert.lastDisplayTime ||
+        Number(new Date()) - Number(new Date(alert.lastDisplayTime)) >
+          RushAlerts.IntervalMap.get(alert.maximumDisplayInterval ?? AlertDisplayInterval.ALWAYS)!;
+      return needsDisplay;
+    });
+    const alertsSortedByPriority: IRushAlertStateEntry[] = needDisplayAlerts.sort((a, b) => {
+      return (
+        RushAlerts.ALERT_PRIORITY.indexOf(a.priority ?? AlertPriority.NORMAL) -
+        RushAlerts.ALERT_PRIORITY.indexOf(b.priority ?? AlertPriority.NORMAL)
+      );
+    });
+    return alertsSortedByPriority[0];
   }
 
   private static _parseDate(dateString: string): Date {
