@@ -33,7 +33,6 @@ export class SnoozeAlertAction extends BaseRushAction {
       }
     ];
     const answers: inquirer.Answers = await inquirer.prompt(promptQuestions);
-    console.log('🚀 ~ SnoozeAlertAction ~ runAsync ~ answers:', answers);
     const rushAlerts: RushAlerts = new RushAlerts({
       rushConfiguration: this.rushConfiguration,
       terminal: this._terminal

@@ -38,7 +38,7 @@ interface IRushAlertStateEntry {
   currentDisplayCount?: number;
 }
 
-const enum AlertChoice {
+export const enum AlertChoice {
   SHOW_ALERTS = 'Show me alerts',
   NEVER_SHOW_ALERTS = 'Never show me alerts',
   DO_NOT_SHOW_THIS_WEEK = 'Do not show alerts this week'
@@ -75,6 +75,17 @@ export class RushAlerts {
     return rushAlertsState;
   }
 
+  private async _loadRushAlertsConfigAsync(): Promise<IRushAlertsConfig | undefined> {
+    const rushAlertsConfigFilePath: string = `${this._rushConfiguration.commonRushConfigFolder}/${RushConstants.rushAlertsConfigFilename}`;
+    if (await FileSystem.existsAsync(rushAlertsConfigFilePath)) {
+      const rushAlertsConfig: IRushAlertsConfig = JsonFile.loadAndValidate(
+        rushAlertsConfigFilePath,
+        RushAlerts._rushAlertsJsonSchema
+      );
+      return rushAlertsConfig;
+    }
+  }
+
   public async isAlertsStateUpToDateAsync(): Promise<boolean> {
     const rushAlertsState: IRushAlertsState | undefined = await this._loadRushAlertsStateAsync();
 
@@ -95,13 +106,8 @@ export class RushAlerts {
   }
 
   public async retrieveAlertsAsync(): Promise<void> {
-    const rushAlertsConfigFilePath: string = `${this._rushConfiguration.commonRushConfigFolder}/${RushConstants.rushAlertsConfigFilename}`;
-
-    if (await FileSystem.existsAsync(rushAlertsConfigFilePath)) {
-      const rushAlertsConfig: IRushAlertsConfig = JsonFile.loadAndValidate(
-        rushAlertsConfigFilePath,
-        RushAlerts._rushAlertsJsonSchema
-      );
+    const rushAlertsConfig: IRushAlertsConfig | undefined = await this._loadRushAlertsConfigAsync();
+    if (rushAlertsConfig) {
       const validAlerts: Array<IRushAlertStateEntry> = [];
       if (rushAlertsConfig?.alerts.length !== 0) {
         for (const alert of rushAlertsConfig.alerts) {
@@ -156,6 +162,16 @@ export class RushAlerts {
     }
 
     await this._writeRushAlertStateAsync(rushAlertsState);
+  }
+
+  public async printAllAlertsAsync(): Promise<void> {
+    const rushAlertsState: IRushAlertsConfig | undefined = await this._loadRushAlertsConfigAsync();
+    if (!rushAlertsState || rushAlertsState.alerts.length === 0) {
+      return;
+    }
+    for (const alert of rushAlertsState.alerts) {
+      this._printMessageInBoxStyle(alert);
+    }
   }
 
   public async snoozeAlerts(choice: string): Promise<void> {

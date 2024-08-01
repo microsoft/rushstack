@@ -46,6 +46,8 @@ import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
 import { VersionAction } from './actions/VersionAction';
 import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
 import { UpgradeInteractiveAction } from './actions/UpgradeInteractiveAction';
+import { SnoozeAlertAction } from './actions/SnoozeAlertAction';
+import { AlertAction } from './actions/AlertAction';
 
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import type { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
@@ -60,7 +62,6 @@ import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
-import { SnoozeAlertAction } from './actions/SnoozeAlertAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -312,6 +313,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UpgradeInteractiveAction(this));
       this.addAction(new VersionAction(this));
       this.addAction(new SnoozeAlertAction(this));
+      this.addAction(new AlertAction(this));
 
       this._populateScriptActions();
     } catch (error) {
