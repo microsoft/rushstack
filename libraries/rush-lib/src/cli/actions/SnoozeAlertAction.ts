@@ -33,10 +33,10 @@ export class SnoozeAlertAction extends BaseRushAction {
       }
     ];
     const answers: inquirer.Answers = await inquirer.prompt(promptQuestions);
-    const rushAlerts: RushAlerts = new RushAlerts({
-      rushConfiguration: this.rushConfiguration,
-      terminal: this._terminal
-    });
+    const rushAlerts: RushAlerts = await RushAlerts.loadFromConfiguration(
+      this.rushConfiguration,
+      this._terminal
+    );
     await rushAlerts.snoozeAlertsAsync(answers.alertChoice);
   }
 }
