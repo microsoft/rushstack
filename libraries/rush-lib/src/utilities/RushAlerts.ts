@@ -74,7 +74,6 @@ export class RushAlerts {
   private readonly _rushAlertsState: IRushAlertsState | undefined;
 
   private readonly _rushJsonFolder: string;
-
   public readonly rushAlertsStateFilePath: string;
   public readonly rushAlertsConfigFilePath: string;
 
@@ -103,6 +102,8 @@ export class RushAlerts {
     this._rushJsonFolder = options.rushJsonFolder;
     this.rushAlertsStateFilePath = options.rushAlertsStateFilePath;
     this.rushAlertsConfigFilePath = options.rushAlertsConfigFilePath;
+    this._rushAlertsConfig = options.rushAlertsConfig;
+    this._rushAlertsState = options.rushAlertsState;
   }
 
   public static async loadFromConfigurationAsync(
@@ -189,7 +190,7 @@ export class RushAlerts {
       return;
     }
 
-    // the case of user run `rush snooze-alert`
+    // Skip printing alerts when the user has chosen to snooze them.
     if (
       this._rushAlertsState.snooze &&
       (!this._rushAlertsState.snoozeEndTime ||
@@ -211,10 +212,10 @@ export class RushAlerts {
   }
 
   public async printAllAlertsAsync(): Promise<void> {
-    if (!this._rushAlertsState || this._rushAlertsState.alerts.length === 0) {
+    if (!this._rushAlertsConfig || this._rushAlertsConfig.alerts.length === 0) {
       return;
     }
-    for (const alert of this._rushAlertsState.alerts) {
+    for (const alert of this._rushAlertsConfig.alerts) {
       this._printMessageInBoxStyle(alert);
     }
   }
