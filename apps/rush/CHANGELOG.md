@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 31 Jul 2024 23:30:13 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Aug 2024 17:26:59 GMT and should not be manually modified.
+
+## 5.131.0
+Fri, 02 Aug 2024 17:26:59 GMT
+
+### Updates
+
+- Improve Rush alerts with a new "rush alert" command and snooze feature
 
 ## 5.130.3
 Wed, 31 Jul 2024 23:30:13 GMT

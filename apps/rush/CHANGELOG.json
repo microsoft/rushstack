@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.131.0",
+      "tag": "@microsoft/rush_v5.131.0",
+      "date": "Fri, 02 Aug 2024 17:26:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve Rush alerts with a new \"rush alert\" command and snooze feature"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.130.3",
       "tag": "@microsoft/rush_v5.130.3",
       "date": "Wed, 31 Jul 2024 23:30:13 GMT",
