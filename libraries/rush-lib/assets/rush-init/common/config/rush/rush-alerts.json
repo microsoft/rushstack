@@ -18,6 +18,11 @@
     /*[BEGIN "DEMO"]*/
     {
       /**
+       * The alertId is used to identify the alert.
+       */
+       "alertId": "node-js",
+
+      /**
        * When the alert is displayed, this title will appear at the top of the message box.
        * It should be a single line of text, as concise as possible.
        */

@@ -26,6 +26,10 @@
     "IAlert": {
       "type": "object",
       "properties": {
+        "alertId": {
+          "description": "The alertId is used to identify the alert.",
+          "type": "string"
+        },
         "title": {
           "description": "When the alert is displayed, this title will appear at the top of the message box. It should be a single line of text, as concise as possible.",
           "type": "string"
@@ -69,7 +73,7 @@
           "type": "string"
         }
       },
-      "required": ["title", "message"]
+      "required": ["alertId", "title", "message"]
     }
   }
 }
