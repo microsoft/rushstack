@@ -78,7 +78,6 @@
        * (OPTIONAL) Determines the order in which this alert is shown relative to other alerts, based on urgency.
        * Options are:
        *  "high" - displayed first
-       *  "mid" - moderate urgency
        *  "normal" (default) - standard urgency
        *  "low" - least urgency
        */

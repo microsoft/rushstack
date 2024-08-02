@@ -62,7 +62,6 @@ const enum AlertDisplayInterval {
 
 const enum AlertPriority {
   HIGH = 'high',
-  MID = 'mid',
   NORMAL = 'normal',
   LOW = 'low'
 }
@@ -85,7 +84,6 @@ export class RushAlerts {
   ];
   public static readonly ALERT_PRIORITY: string[] = [
     AlertPriority.HIGH,
-    AlertPriority.MID,
     AlertPriority.NORMAL,
     AlertPriority.LOW
   ];
