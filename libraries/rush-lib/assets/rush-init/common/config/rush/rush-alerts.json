@@ -18,6 +18,11 @@
     /*[BEGIN "DEMO"]*/
     {
       /**
+       * The alertId is used to identify the alert.
+       */
+      "alertId": "node-js",
+
+      /**
        * When the alert is displayed, this title will appear at the top of the message box.
        * It should be a single line of text, as concise as possible.
        */
@@ -64,6 +69,26 @@
       /*[LINE "HYPOTHETICAL"]*/ "endTime": "2024-01-05",
 
       /**
+       * (OPTIONAL) Specifies the maximum frequency at which this alert can be displayed within a defined time period.
+       * Options are:
+       *  "always" (default) - no limit on display frequency,
+       *  "monthly" - display up to once per month
+       *  "weekly" - display up to once per week
+       *  "daily" - display up to once per day
+       *  "hourly" - display up to once per hour
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "maximumDisplayInterval": "always",
+
+      /**
+       * (OPTIONAL) Determines the order in which this alert is shown relative to other alerts, based on urgency.
+       * Options are:
+       *  "high" - displayed first
+       *  "normal" (default) - standard urgency
+       *  "low" - least urgency
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "priority": "normal",
+
+      /**
        * (OPTIONAL) The filename of a script that determines whether this alert can be shown,
        * found in the "common/config/rush/alert-scripts" folder.  The script must define
        * a CommonJS export named `canShowAlert` that returns a boolean value, for example:
@@ -83,7 +108,7 @@
        * we suggest to design some other process that prepares a data file or environment variable
        * that can be cheaply checked by your condition script.
        */
-      /*[LINE "HYPOTHETICAL"]*/ "conditionScript": "rush-alexrt-node-upgrade.js"
+      /*[LINE "HYPOTHETICAL"]*/ "conditionScript": "rush-alert-node-upgrade.js"
     }
     /*[END "DEMO"]*/
   ]

@@ -46,6 +46,7 @@ import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
 import { VersionAction } from './actions/VersionAction';
 import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
 import { UpgradeInteractiveAction } from './actions/UpgradeInteractiveAction';
+import { AlertAction } from './actions/AlertAction';
 
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import type { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
@@ -228,17 +229,23 @@ export class RushCommandLineParser extends CommandLineParser {
       if (this.rushConfiguration) {
         try {
           const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+
           if (experiments.rushAlerts) {
-            this._terminal.writeDebugLine('Checking Rush alerts...');
-            // Print out alerts if have after each successful command actions
-            const rushAlerts: RushAlerts = new RushAlerts({
-              rushConfiguration: this.rushConfiguration,
-              terminal: this._terminal
-            });
-            if (await rushAlerts.isAlertsStateUpToDateAsync()) {
+            // TODO: Fix this
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const actionName: string = (this as any)
+              ._getArgumentParser()
+              .parseArgs(process.argv.slice(2)).action;
+
+            // only display alerts when certain specific actions are triggered
+            if (RushAlerts.alertTriggerActions.includes(actionName)) {
+              this._terminal.writeDebugLine('Checking Rush alerts...');
+              const rushAlerts: RushAlerts = await RushAlerts.loadFromConfigurationAsync(
+                this.rushConfiguration,
+                this._terminal
+              );
+              // Print out alerts if have after each successful command actions
               await rushAlerts.printAlertsAsync();
-            } else {
-              await rushAlerts.retrieveAlertsAsync();
             }
           }
         } catch (error) {
@@ -310,6 +317,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UpdateCloudCredentialsAction(this));
       this.addAction(new UpgradeInteractiveAction(this));
       this.addAction(new VersionAction(this));
+      this.addAction(new AlertAction(this));
 
       this._populateScriptActions();
     } catch (error) {

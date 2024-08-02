@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Improve Rush alerts with a new \"rush alert\" command and snooze feature",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
