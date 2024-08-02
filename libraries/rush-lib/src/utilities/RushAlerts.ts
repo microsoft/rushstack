@@ -39,6 +39,8 @@ interface IRushAlertStateEntry {
   snoozeEndTime?: string;
 }
 
+type AlertStatus = 'active' | 'inactive' | 'snoozed';
+
 const enum AlertDisplayInterval {
   ALWAYS = 'always',
   MONTHLY = 'monthly',
@@ -75,6 +77,7 @@ export class RushAlerts {
     [AlertDisplayInterval.DAILY, 1000 * 60 * 60 * 24],
     [AlertDisplayInterval.HOURLY, 1000 * 60 * 60]
   ]);
+  // only display alerts when certain specific actions are triggered
   public static readonly alertTriggerActions: string[] = [
     'add',
     'change',
@@ -148,25 +151,22 @@ export class RushAlerts {
   }
 
   public async printAlertsAsync(): Promise<void> {
-    this._ensureAlertStateIsUpToDate();
-
     if (!this._rushAlertsConfig || this._rushAlertsConfig.alerts.length === 0) return;
 
-    const rushAlertsState: IRushAlertsState = this._rushAlertsState;
+    this._ensureAlertStateIsUpToDate();
 
     this._terminal.writeLine();
-    const alert: IRushAlertsConfigEntry | undefined = await this._selectAlertByPriorityAsync();
 
+    const alert: IRushAlertsConfigEntry | undefined = await this._selectAlertByPriorityAsync();
     if (alert) {
       this._printMessageInBoxStyle(alert);
-      rushAlertsState[alert.alertId].lastDisplayTime = new Date().toISOString();
+      this._rushAlertsState[alert.alertId].lastDisplayTime = new Date().toISOString();
     }
 
     await this._writeRushAlertStateAsync();
   }
 
   public async printAllAlertsAsync(): Promise<void> {
-    const alertsState: IRushAlertsState = this._rushAlertsState;
     const allAlerts: IRushAlertsConfigEntry[] = this._rushAlertsConfig?.alerts ?? [];
 
     const activeAlerts: IRushAlertsConfigEntry[] = [];
@@ -176,7 +176,7 @@ export class RushAlerts {
     await Promise.all(
       allAlerts.map(async (alert) => {
         const isAlertValid: boolean = await this._isAlertValidAsync(alert);
-        const alertState: IRushAlertStateEntry = alertsState[alert.alertId];
+        const alertState: IRushAlertStateEntry = this._rushAlertsState[alert.alertId];
 
         if (!isAlertValid) {
           inactiveAlerts.push(alert);
@@ -197,7 +197,7 @@ export class RushAlerts {
     this._printAlerts(inactiveAlerts, 'inactive');
   }
 
-  private _printAlerts(alerts: IRushAlertsConfigEntry[], status: 'active' | 'inactive' | 'snoozed'): void {
+  private _printAlerts(alerts: IRushAlertsConfigEntry[], status: AlertStatus): void {
     if (alerts.length === 0) return;
     switch (status) {
       case 'active':

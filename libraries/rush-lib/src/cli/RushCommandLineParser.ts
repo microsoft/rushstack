@@ -230,13 +230,14 @@ export class RushCommandLineParser extends CommandLineParser {
         try {
           const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
           const actionName: string = this._getArgumentParser().parseArgs(process.argv.slice(2)).action;
+          // only display alerts when certain specific actions are triggered
           if (experiments.rushAlerts && RushAlerts.alertTriggerActions.includes(actionName)) {
             this._terminal.writeDebugLine('Checking Rush alerts...');
-            // Print out alerts if have after each successful command actions
             const rushAlerts: RushAlerts = await RushAlerts.loadFromConfigurationAsync(
               this.rushConfiguration,
               this._terminal
             );
+            // Print out alerts if have after each successful command actions
             await rushAlerts.printAlertsAsync();
           }
         } catch (error) {
