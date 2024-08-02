@@ -6,6 +6,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { FileSystem, JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
 import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
 import { RushConstants } from '../logic/RushConstants';
+import { c } from 'tar';
 
 export interface IRushAlertsOptions {
   terminal: Terminal;
@@ -94,6 +95,7 @@ export class RushAlerts {
     [AlertDisplayInterval.DAILY, 1000 * 60 * 60 * 24],
     [AlertDisplayInterval.HOURLY, 1000 * 60 * 60]
   ]);
+  public static readonly DISPLAY_ALERT_COMMAND_LIST: string[] = ['alert', 'snooze-alert'];
 
   public constructor(options: IRushAlertsOptions) {
     this._terminal = options.terminal;
@@ -189,11 +191,7 @@ export class RushAlerts {
     }
 
     // Skip printing alerts when the user has chosen to snooze them.
-    if (
-      this._rushAlertsState.snooze &&
-      (!this._rushAlertsState.snoozeEndTime ||
-        Number(new Date()) < Number(new Date(this._rushAlertsState.snoozeEndTime)))
-    ) {
+    if (this._isSnoozing()) {
       return;
     }
 
@@ -210,12 +208,29 @@ export class RushAlerts {
   }
 
   public async printAllAlertsAsync(): Promise<void> {
-    if (!this._rushAlertsConfig || this._rushAlertsConfig.alerts.length === 0) {
-      return;
-    }
-    for (const alert of this._rushAlertsConfig.alerts) {
-      this._printMessageInBoxStyle(alert);
-    }
+    const alertsConfig = this._rushAlertsConfig?.alerts ?? [];
+    const alertsState = this._rushAlertsState?.alerts ?? [];
+
+    const allAlerts = alertsConfig.map((alert, index) => ({ title: alert.title, index }));
+    const activeAlertsSet = new Set(this._isSnoozing() ? [] : alertsState.map((alert) => alert.title));
+
+    const activeAlerts = allAlerts.filter(({ title }) => activeAlertsSet.has(title));
+    const inactiveAlerts = allAlerts.filter(({ title }) => !activeAlertsSet.has(title));
+
+    this._printAlerts(activeAlerts, 'active');
+    this._printAlerts(inactiveAlerts, 'inactive');
+  }
+
+  private _printAlerts(alerts: { title: string; index: number }[], status: string): void {
+    if (alerts.length === 0) return;
+
+    const statusText = status === 'active' ? 'active' : 'inactive';
+    this._terminal.writeLine(Colorize.yellow(`The following alerts are currently ${statusText}:`));
+
+    alerts.forEach(({ title, index }) => {
+      this._terminal.writeLine(Colorize.green(`"${title}" (#${index + 1})`));
+    });
+    this._terminal.writeLine();
   }
 
   public async snoozeAlertsAsync(choice: string): Promise<void> {
@@ -267,6 +282,18 @@ export class RushAlerts {
       throw new Error(`Invalid date/time value ${JSON.stringify(dateString)}`);
     }
     return parsedDate;
+  }
+
+  private _isSnoozing(): boolean {
+    if (!this._rushAlertsState) {
+      return true;
+    }
+
+    return (
+      this._rushAlertsState.snooze &&
+      (!this._rushAlertsState.snoozeEndTime ||
+        Number(new Date()) < Number(new Date(this._rushAlertsState.snoozeEndTime)))
+    );
   }
 
   private async _isAlertValidAsync(alert: IRushAlertsConfigEntry): Promise<boolean> {
