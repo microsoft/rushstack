@@ -51,12 +51,6 @@ interface IRushAlertStateEntry {
   snoozeEndTime?: string;
 }
 
-const enum AlertChoice {
-  SHOW_ALERTS = 'Show me alerts',
-  NEVER_SHOW_ALERTS = 'Never show me alerts',
-  DO_NOT_SHOW_THIS_WEEK = 'Do not show alerts this week'
-}
-
 const enum AlertDisplayInterval {
   ALWAYS = 'always',
   MONTHLY = 'monthly',
@@ -82,11 +76,6 @@ export class RushAlerts {
   public readonly rushAlertsConfigFilePath: string;
 
   public static readonly ALERT_MESSAGE: string = 'How would you like to handle alerts?';
-  public static readonly ALERT_CHOICES: string[] = [
-    AlertChoice.SHOW_ALERTS,
-    AlertChoice.NEVER_SHOW_ALERTS,
-    AlertChoice.DO_NOT_SHOW_THIS_WEEK
-  ];
   public static readonly ALERT_PRIORITY: string[] = [
     AlertPriority.HIGH,
     AlertPriority.NORMAL,
@@ -213,39 +202,48 @@ export class RushAlerts {
       title: alert.title,
       index
     }));
-    const activeAlertsSet: Set<string> = new Set(
+    const activeAlertsSet: Set<string> = new Set(alertsState.map((alert) => alert.title));
+    const snoozeAlertSet: Set<string> = new Set(
       alertsState.filter((alert) => !this._isSnoozing(alert)).map((alert) => alert.title)
     );
 
-    const activeAlerts: IAlertPrintingFormat[] = allAlerts.filter(({ title }) => activeAlertsSet.has(title));
+    const activeAlerts: IAlertPrintingFormat[] = allAlerts.filter(
+      ({ title }) => activeAlertsSet.has(title) && !snoozeAlertSet.has(title)
+    );
+    const snoozeAlerts: IAlertPrintingFormat[] = allAlerts.filter(({ title }) => snoozeAlertSet.has(title));
     const inactiveAlerts: IAlertPrintingFormat[] = allAlerts.filter(
       ({ title }) => !activeAlertsSet.has(title)
     );
 
     this._printAlerts(activeAlerts, 'active');
+    this._printAlerts(snoozeAlerts, 'snoozed');
     this._printAlerts(inactiveAlerts, 'inactive');
   }
 
-  private _printAlerts(alerts: IAlertPrintingFormat[], status: string): void {
+  private _printAlerts(alerts: IAlertPrintingFormat[], status: 'active' | 'inactive' | 'snoozed'): void {
     if (alerts.length === 0) return;
-
-    const statusText: 'active' | 'inactive' = status === 'active' ? 'active' : 'inactive';
-    this._terminal.writeLine(Colorize.yellow(`The following alerts are currently ${statusText}:`));
-
+    switch (status) {
+      case 'active':
+      case 'inactive':
+        this._terminal.writeLine(Colorize.yellow(`The following alerts are currently ${status}:`));
+        break;
+      case 'snoozed':
+        this._terminal.writeLine(Colorize.yellow('The following alerts are currently active but snoozed:'));
+        break;
+    }
     alerts.forEach(({ title, index }) => {
       this._terminal.writeLine(Colorize.green(`"${title}" (#${index + 1})`));
     });
     this._terminal.writeLine();
   }
 
-  public async snoozeAlertsAsync(choice: string, snoozeAlertIndex: number): Promise<void> {
+  public async snoozeAlertsAsync(snoozeAlertIndex: number, forever: boolean = false): Promise<void> {
     const selectedAlert: IRushAlertsConfigEntry | undefined =
       this._rushAlertsConfig?.alerts[snoozeAlertIndex];
 
     if (!this._rushAlertsState || !selectedAlert || this._rushAlertsState.alerts.length === 0) {
       return;
     }
-
     let selectedStateAlert: IRushAlertStateEntry = this._rushAlertsState.alerts.filter(
       (alert) => alert.title === selectedAlert.title
     )[0];
@@ -253,23 +251,13 @@ export class RushAlerts {
       selectedStateAlert = selectedAlert;
       this._rushAlertsState.alerts.push(selectedStateAlert);
     }
-
-    switch (choice) {
-      case AlertChoice.SHOW_ALERTS: {
-        selectedStateAlert.snooze = false;
-        break;
-      }
-      case AlertChoice.NEVER_SHOW_ALERTS: {
-        selectedStateAlert.snooze = true;
-        break;
-      }
-      case AlertChoice.DO_NOT_SHOW_THIS_WEEK: {
-        selectedStateAlert.snooze = true;
-        const snoozeEndTime: Date = new Date();
-        snoozeEndTime.setDate(snoozeEndTime.getDate() + 7);
-        selectedStateAlert.snoozeEndTime = snoozeEndTime.toISOString();
-        break;
-      }
+    if (forever) {
+      selectedStateAlert.snooze = true;
+    } else {
+      selectedStateAlert.snooze = true;
+      const snoozeEndTime: Date = new Date();
+      snoozeEndTime.setDate(snoozeEndTime.getDate() + 7);
+      selectedStateAlert.snoozeEndTime = snoozeEndTime.toISOString();
     }
     await this._writeRushAlertStateAsync(this._rushAlertsState);
   }
