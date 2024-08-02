@@ -8,6 +8,11 @@
 !/lib/**
 !/lib-*/**
 !/dist/**
+
+!CHANGELOG.md
+!CHANGELOG.json
+!heft-plugin.json
+!rush-plugin-manifest.json
 !ThirdPartyNotice.txt
 
 # Ignore certain patterns that should not get published.
@@ -19,12 +24,9 @@
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
 # package.json
-# README (and its variants)
-# CHANGELOG (and its variants)
-# LICENSE / LICENCE
+# README.md
+# LICENSE
 
-#--------------------------------------------
-# DO NOT MODIFY THE TEMPLATE ABOVE THIS LINE
-#--------------------------------------------
-
-# (Add your project-specific overrides here)
+# ---------------------------------------------------------------------------
+# DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
+# ---------------------------------------------------------------------------

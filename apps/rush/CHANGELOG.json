@@ -2,6 +2,36 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.130.3",
+      "tag": "@microsoft/rush_v5.130.3",
+      "date": "Wed, 31 Jul 2024 23:30:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Rush does not detect an outdated lockfile if the `dependenciesMeta` `package.json` field is edited."
+          },
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          },
+          {
+            "comment": "Fix a bug that caused the build cache to close its terminal writer before execution on error."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.130.2",
+      "tag": "@microsoft/rush_v5.130.2",
+      "date": "Fri, 19 Jul 2024 03:41:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush-pnpm patch-commit` did not work correctly when subspaces are enabled."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.130.1",
       "tag": "@microsoft/rush_v5.130.1",
       "date": "Wed, 17 Jul 2024 07:37:13 GMT",

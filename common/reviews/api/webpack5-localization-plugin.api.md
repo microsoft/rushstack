@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import type { Chunk } from 'webpack';
+import type { Compilation } from 'webpack';
 import type { Compiler } from 'webpack';
 import { ILocalizationFile } from '@rushstack/localization-utilities';
 import type { IPseudolocaleOptions } from '@rushstack/localization-utilities';
@@ -77,7 +78,7 @@ export interface ILocalizationStatsEntrypoint {
 
 // @public
 export interface ILocalizationStatsOptions {
-    callback?: (stats: ILocalizationStats) => void;
+    callback?: (stats: ILocalizationStats, compilation: Compilation) => void;
     dropPath?: string;
 }
 

@@ -2,6 +2,32 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "3.7.1",
+      "tag": "@rushstack/eslint-config_v3.7.1",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.10.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.15.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.9.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.8.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.7.0",
       "tag": "@rushstack/eslint-config_v3.7.0",
       "date": "Wed, 29 May 2024 00:10:52 GMT",

@@ -70,21 +70,20 @@ export interface IConfigApiReport {
   enabled: boolean;
 
   /**
-   * The base component of API report filenames.
+   * The base filename for the API report files, to be combined with {@link IConfigApiReport.reportFolder} or
+   * {@link IConfigApiReport.reportTempFolder} to produce the full file path.
    *
    * @remarks
-   * It will be combined with the specified {@link IConfigApiReport.reportVariants}, and {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
-   * produce a full output filenames in the form `<folder><reportFileName>.<variant>.api.md`.
+   * The `reportFileName` should not include any path separators such as `\` or `/`.  The `reportFileName` should
+   * not include a file extension, since API Extractor will automatically append an appropriate file extension such
+   * as `.api.md`.  If the {@link IConfigApiReport.reportVariants} setting is used, then the file extension includes
+   * the variant name, for example `my-report.public.api.md` or `my-report.beta.api.md`. The `complete` variant always
+   * uses the simple extension `my-report.api.md`.
    *
-   * The string should not contain a file extension.
-   * Note: previous guidance noted that this should be specified in a form including the `.api.md` extension.
-   * This is no longer recommended, and support for this will be removed in a future release.
-   * For example, if you were previously specifying `Foo.api.md`, you should now specify `Foo`.
-   * The `.api.md` extension will be added automatically to the resulting filename.
+   * Previous versions of API Extractor required `reportFileName` to include the `.api.md` extension explicitly;
+   * for backwards compatibility, that is still accepted but will be discarded before applying the above rules.
    *
-   * The string must not contain a path separator such as `\` or `/`.
-   *
-   * @defaultValue `<unscopedPackageName>.api.md` will be used if this argument is not specified or if it is empty.
+   * @defaultValue `<unscopedPackageName>`
    */
   reportFileName?: string;
 
@@ -92,16 +91,15 @@ export interface IConfigApiReport {
    * The set of report variants to generate.
    *
    * @remarks
-   * Each variant corresponds to a minimal release level, denoted by release tag in the TSDoc comment for each API item.
-   * E.g., the `beta` report variant will include all API items tagged `@beta` or higher (i.e. `@beta` and `@public`).
+   * To support different approval requirements for different API levels, multiple "variants" of the API report can
+   * be generated.  The `reportVariants` setting specifies a list of variants to be generated.  If omitted,
+   * by default only the `complete` variant will be generated, which includes all `@internal`, `@alpha`, `@beta`,
+   * and `@public` items.  Other possible variants are `alpha` (`@alpha` + `@beta` + `@public`),
+   * `beta` (`@beta` + `@public`), and `public` (`@public only`).
    *
    * The resulting API report file names will be derived from the {@link IConfigApiReport.reportFileName}.
-   * E.g., `foo.beta.api.md`.
-   * The only exception to this is the `complete` variant.
-   * This variant name will not be contained in the corresponding file name.
-   * I.e., `foo.api.md`.
    *
-   * @defaultValue `['complete']`
+   * @defaultValue `[ "complete" ]`
    */
   reportVariants?: ApiReportVariant[];
 

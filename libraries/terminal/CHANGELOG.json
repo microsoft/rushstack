@@ -2,6 +2,23 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.13.3",
+      "tag": "@rushstack/terminal_v0.13.3",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.5.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.2",
       "tag": "@rushstack/terminal_v0.13.2",
       "date": "Wed, 17 Jul 2024 06:55:09 GMT",
