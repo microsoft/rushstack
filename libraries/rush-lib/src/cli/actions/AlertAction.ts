@@ -2,12 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
+import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import inquirer from 'inquirer';
+
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { RushAlerts } from '../../utilities/RushAlerts';
 
 export class AlertAction extends BaseRushAction {
   private readonly _terminal: Terminal;
+  private readonly _snooze: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -17,6 +21,13 @@ export class AlertAction extends BaseRushAction {
       parser
     });
     this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
+
+    this._snooze = this.defineStringParameter({
+      parameterLongName: '--snooze',
+      parameterShortName: '-s',
+      argumentName: 'SNOOZE',
+      description: 'Snooze the alert'
+    });
   }
 
   public async runAsync(): Promise<void> {
@@ -24,6 +35,19 @@ export class AlertAction extends BaseRushAction {
       this.rushConfiguration,
       this._terminal
     );
+    const snoozeAlertIndex: string | undefined = this._snooze.value;
+    if (snoozeAlertIndex) {
+      const promptQuestions: inquirer.QuestionCollection = [
+        {
+          type: 'list',
+          name: 'alertChoice',
+          message: RushAlerts.ALERT_MESSAGE,
+          choices: RushAlerts.ALERT_CHOICES
+        }
+      ];
+      const answers: inquirer.Answers = await inquirer.prompt(promptQuestions);
+      await rushAlerts.snoozeAlertsAsync(answers.alertChoice, snoozeAlertIndex);
+    }
     await rushAlerts.printAllAlertsAsync();
   }
 }

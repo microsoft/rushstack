@@ -60,7 +60,6 @@ Positional arguments:
                         Provides interactive prompt for upgrading package 
                         dependencies per project
     version             Manage package versions in the repo.
-    snooze-alert        Snooze an alert
     alert               Display alerts
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
@@ -128,12 +127,14 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: alert 1`] = `
-"usage: rush alert [-h]
+"usage: rush alert [-h] [-s SNOOZE]
 
 This command displays alerts that may be relevant to the current project.
 
 Optional arguments:
-  -h, --help  Show this help message and exit.
+  -h, --help            Show this help message and exit.
+  -s SNOOZE, --snooze SNOOZE
+                        Snooze the alert
 "
 `;
 
@@ -1161,17 +1162,6 @@ exports[`CommandLineHelp prints the help for each action: setup 1`] = `
 that any required prerequisites are installed and permissions are configured. 
 The initial implementation configures the NPM registry credentials. More 
 features will be added later.
-
-Optional arguments:
-  -h, --help  Show this help message and exit.
-"
-`;
-
-exports[`CommandLineHelp prints the help for each action: snooze-alert 1`] = `
-"usage: rush snooze-alert [-h]
-
-This command snoozes an alert that was previously displayed. The alert will 
-not be displayed again until the next time Rush is run.
 
 Optional arguments:
   -h, --help  Show this help message and exit.

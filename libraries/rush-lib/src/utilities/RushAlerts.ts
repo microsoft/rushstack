@@ -6,7 +6,6 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { FileSystem, JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
 import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
 import { RushConstants } from '../logic/RushConstants';
-import { c } from 'tar';
 
 export interface IRushAlertsOptions {
   terminal: Terminal;
@@ -15,6 +14,11 @@ export interface IRushAlertsOptions {
   rushAlertsState: IRushAlertsState | undefined;
   rushAlertsConfigFilePath: string;
   rushAlertsStateFilePath: string;
+}
+
+interface IAlertPrintingFormat {
+  title: string;
+  index: number;
 }
 
 interface IRushAlertsConfig {
@@ -208,23 +212,30 @@ export class RushAlerts {
   }
 
   public async printAllAlertsAsync(): Promise<void> {
-    const alertsConfig = this._rushAlertsConfig?.alerts ?? [];
-    const alertsState = this._rushAlertsState?.alerts ?? [];
+    const alertsConfig: IRushAlertsConfigEntry[] = this._rushAlertsConfig?.alerts ?? [];
+    const alertsState: IRushAlertStateEntry[] = this._rushAlertsState?.alerts ?? [];
 
-    const allAlerts = alertsConfig.map((alert, index) => ({ title: alert.title, index }));
-    const activeAlertsSet = new Set(this._isSnoozing() ? [] : alertsState.map((alert) => alert.title));
+    const allAlerts: IAlertPrintingFormat[] = alertsConfig.map((alert, index) => ({
+      title: alert.title,
+      index
+    }));
+    const activeAlertsSet: Set<string> = new Set(
+      this._isSnoozing() ? [] : alertsState.map((alert) => alert.title)
+    );
 
-    const activeAlerts = allAlerts.filter(({ title }) => activeAlertsSet.has(title));
-    const inactiveAlerts = allAlerts.filter(({ title }) => !activeAlertsSet.has(title));
+    const activeAlerts: IAlertPrintingFormat[] = allAlerts.filter(({ title }) => activeAlertsSet.has(title));
+    const inactiveAlerts: IAlertPrintingFormat[] = allAlerts.filter(
+      ({ title }) => !activeAlertsSet.has(title)
+    );
 
     this._printAlerts(activeAlerts, 'active');
     this._printAlerts(inactiveAlerts, 'inactive');
   }
 
-  private _printAlerts(alerts: { title: string; index: number }[], status: string): void {
+  private _printAlerts(alerts: IAlertPrintingFormat[], status: string): void {
     if (alerts.length === 0) return;
 
-    const statusText = status === 'active' ? 'active' : 'inactive';
+    const statusText: 'active' | 'inactive' = status === 'active' ? 'active' : 'inactive';
     this._terminal.writeLine(Colorize.yellow(`The following alerts are currently ${statusText}:`));
 
     alerts.forEach(({ title, index }) => {
@@ -233,7 +244,7 @@ export class RushAlerts {
     this._terminal.writeLine();
   }
 
-  public async snoozeAlertsAsync(choice: string): Promise<void> {
+  public async snoozeAlertsAsync(choice: string, snoozeAlertIndex: string): Promise<void> {
     if (!this._rushAlertsState || this._rushAlertsState.alerts.length === 0) {
       return;
     }

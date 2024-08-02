@@ -1048,12 +1048,17 @@ Object {
       ],
     },
     Object {
-      "actionName": "snooze-alert",
-      "parameters": Array [],
-    },
-    Object {
       "actionName": "alert",
-      "parameters": Array [],
+      "parameters": Array [
+        Object {
+          "description": "Snooze the alert",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--snooze",
+          "required": false,
+          "shortName": "-s",
+        },
+      ],
     },
     Object {
       "actionName": "import-strings",
