@@ -46,8 +46,9 @@ export class AlertAction extends BaseRushAction {
         }
       ];
       const answers: inquirer.Answers = await inquirer.prompt(promptQuestions);
-      await rushAlerts.snoozeAlertsAsync(answers.alertChoice, snoozeAlertIndex);
+      await rushAlerts.snoozeAlertsAsync(answers.alertChoice, Number(snoozeAlertIndex));
+    } else {
+      await rushAlerts.printAllAlertsAsync();
     }
-    await rushAlerts.printAllAlertsAsync();
   }
 }

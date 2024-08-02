@@ -36,8 +36,6 @@ interface IRushAlertsConfigEntry {
 }
 interface IRushAlertsState {
   lastUpdateTime: string;
-  snooze: boolean;
-  snoozeEndTime?: string;
   alerts: Array<IRushAlertStateEntry>;
 }
 interface IRushAlertStateEntry {
@@ -49,6 +47,8 @@ interface IRushAlertStateEntry {
   lastDisplayTime?: string;
   priority?: AlertPriority;
   maximumDisplayInterval?: AlertDisplayInterval;
+  snooze?: boolean;
+  snoozeEndTime?: string;
 }
 
 const enum AlertChoice {
@@ -181,7 +181,6 @@ export class RushAlerts {
 
       const rushAlertsState: IRushAlertsState = {
         lastUpdateTime: new Date().toISOString(),
-        snooze: false,
         alerts: validAlerts
       };
 
@@ -191,11 +190,6 @@ export class RushAlerts {
 
   public async printAlertsAsync(): Promise<void> {
     if (!this._rushAlertsState || this._rushAlertsState.alerts.length === 0) {
-      return;
-    }
-
-    // Skip printing alerts when the user has chosen to snooze them.
-    if (this._isSnoozing()) {
       return;
     }
 
@@ -220,7 +214,7 @@ export class RushAlerts {
       index
     }));
     const activeAlertsSet: Set<string> = new Set(
-      this._isSnoozing() ? [] : alertsState.map((alert) => alert.title)
+      alertsState.filter((alert) => !this._isSnoozing(alert)).map((alert) => alert.title)
     );
 
     const activeAlerts: IAlertPrintingFormat[] = allAlerts.filter(({ title }) => activeAlertsSet.has(title));
@@ -244,24 +238,36 @@ export class RushAlerts {
     this._terminal.writeLine();
   }
 
-  public async snoozeAlertsAsync(choice: string, snoozeAlertIndex: string): Promise<void> {
-    if (!this._rushAlertsState || this._rushAlertsState.alerts.length === 0) {
+  public async snoozeAlertsAsync(choice: string, snoozeAlertIndex: number): Promise<void> {
+    const selectedAlert: IRushAlertsConfigEntry | undefined =
+      this._rushAlertsConfig?.alerts[snoozeAlertIndex];
+
+    if (!this._rushAlertsState || !selectedAlert || this._rushAlertsState.alerts.length === 0) {
       return;
     }
+
+    let selectedStateAlert: IRushAlertStateEntry = this._rushAlertsState.alerts.filter(
+      (alert) => alert.title === selectedAlert.title
+    )[0];
+    if (!selectedStateAlert) {
+      selectedStateAlert = selectedAlert;
+      this._rushAlertsState.alerts.push(selectedStateAlert);
+    }
+
     switch (choice) {
       case AlertChoice.SHOW_ALERTS: {
-        this._rushAlertsState.snooze = false;
+        selectedStateAlert.snooze = false;
         break;
       }
       case AlertChoice.NEVER_SHOW_ALERTS: {
-        this._rushAlertsState.snooze = true;
+        selectedStateAlert.snooze = true;
         break;
       }
       case AlertChoice.DO_NOT_SHOW_THIS_WEEK: {
-        this._rushAlertsState.snooze = true;
+        selectedStateAlert.snooze = true;
         const snoozeEndTime: Date = new Date();
         snoozeEndTime.setDate(snoozeEndTime.getDate() + 7);
-        this._rushAlertsState.snoozeEndTime = snoozeEndTime.toISOString();
+        selectedStateAlert.snoozeEndTime = snoozeEndTime.toISOString();
         break;
       }
     }
@@ -271,11 +277,12 @@ export class RushAlerts {
   private _selectAlertByPriority(alerts: IRushAlertStateEntry[]): IRushAlertStateEntry | undefined {
     const needDisplayAlerts: IRushAlertStateEntry[] = alerts.filter((alert) => {
       const needsDisplay: boolean =
-        !alert.lastDisplayTime ||
-        Number(new Date()) - Number(new Date(alert.lastDisplayTime)) >
-          RushAlerts.alertDisplayIntervalDurations.get(
-            alert.maximumDisplayInterval ?? AlertDisplayInterval.ALWAYS
-          )!;
+        (!alert.lastDisplayTime ||
+          Number(new Date()) - Number(new Date(alert.lastDisplayTime)) >
+            RushAlerts.alertDisplayIntervalDurations.get(
+              alert.maximumDisplayInterval ?? AlertDisplayInterval.ALWAYS
+            )!) &&
+        !this._isSnoozing(alert);
       return needsDisplay;
     });
     const alertsSortedByPriority: IRushAlertStateEntry[] = needDisplayAlerts.sort((a, b) => {
@@ -295,15 +302,10 @@ export class RushAlerts {
     return parsedDate;
   }
 
-  private _isSnoozing(): boolean {
-    if (!this._rushAlertsState) {
-      return true;
-    }
-
+  private _isSnoozing(alert: IRushAlertStateEntry): boolean {
     return (
-      this._rushAlertsState.snooze &&
-      (!this._rushAlertsState.snoozeEndTime ||
-        Number(new Date()) < Number(new Date(this._rushAlertsState.snoozeEndTime)))
+      Boolean(alert.snooze) &&
+      (!alert.snoozeEndTime || Number(new Date()) < Number(new Date(alert.snoozeEndTime)))
     );
   }
 
