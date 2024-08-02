@@ -40,10 +40,10 @@ export class AlertAction extends BaseRushAction {
       this.rushConfiguration,
       this._terminal
     );
-    const snoozeAlertIndex: string | undefined = this._snoozeParameter.value;
-    if (snoozeAlertIndex) {
+    const snoozeAlertId: string | undefined = this._snoozeParameter.value;
+    if (snoozeAlertId) {
       const snoozeTimeFlag: boolean = this._snoozeTimeFlagParameter.value;
-      await rushAlerts.snoozeAlertsAsync(Number(snoozeAlertIndex) - 1, snoozeTimeFlag);
+      await rushAlerts.snoozeAlertsByAlertIdAsync(snoozeAlertId, snoozeTimeFlag);
     }
     await rushAlerts.printAllAlertsAsync();
   }

@@ -16,15 +16,11 @@ export interface IRushAlertsOptions {
   rushAlertsStateFilePath: string;
 }
 
-interface IAlertPrintingFormat {
-  title: string;
-  index: number;
-}
-
 interface IRushAlertsConfig {
   alerts: Array<IRushAlertsConfigEntry>;
 }
 interface IRushAlertsConfigEntry {
+  alertId: string;
   title: string;
   message: Array<string>;
   detailsUrl: string;
@@ -35,18 +31,10 @@ interface IRushAlertsConfigEntry {
   maximumDisplayInterval?: AlertDisplayInterval;
 }
 interface IRushAlertsState {
-  lastUpdateTime: string;
-  alerts: Array<IRushAlertStateEntry>;
+  [alertId: string]: IRushAlertStateEntry;
 }
 interface IRushAlertStateEntry {
-  title: string;
-  message: Array<string> | string;
-  detailsUrl: string;
-  maxDailyDisplays?: number;
-  currentDisplayCount?: number;
   lastDisplayTime?: string;
-  priority?: AlertPriority;
-  maximumDisplayInterval?: AlertDisplayInterval;
   snooze?: boolean;
   snoozeEndTime?: string;
 }
@@ -69,13 +57,12 @@ export class RushAlerts {
   private readonly _terminal: Terminal;
 
   private readonly _rushAlertsConfig: IRushAlertsConfig | undefined;
-  private readonly _rushAlertsState: IRushAlertsState | undefined;
+  private readonly _rushAlertsState: IRushAlertsState;
 
   private readonly _rushJsonFolder: string;
   public readonly rushAlertsStateFilePath: string;
   public readonly rushAlertsConfigFilePath: string;
 
-  public static readonly ALERT_MESSAGE: string = 'How would you like to handle alerts?';
   public static readonly ALERT_PRIORITY: string[] = [
     AlertPriority.HIGH,
     AlertPriority.NORMAL,
@@ -88,7 +75,6 @@ export class RushAlerts {
     [AlertDisplayInterval.DAILY, 1000 * 60 * 60 * 24],
     [AlertDisplayInterval.HOURLY, 1000 * 60 * 60]
   ]);
-  public static readonly DISPLAY_ALERT_COMMAND_LIST: string[] = ['alert', 'snooze-alert'];
 
   public constructor(options: IRushAlertsOptions) {
     this._terminal = options.terminal;
@@ -96,7 +82,7 @@ export class RushAlerts {
     this.rushAlertsStateFilePath = options.rushAlertsStateFilePath;
     this.rushAlertsConfigFilePath = options.rushAlertsConfigFilePath;
     this._rushAlertsConfig = options.rushAlertsConfig;
-    this._rushAlertsState = options.rushAlertsState;
+    this._rushAlertsState = options.rushAlertsState ?? {};
   }
 
   public static async loadFromConfigurationAsync(
@@ -134,93 +120,70 @@ export class RushAlerts {
     });
   }
 
-  public async isAlertsStateUpToDateAsync(): Promise<boolean> {
-    if (this._rushAlertsState === undefined || !this._rushAlertsState.lastUpdateTime) {
-      return false;
-    }
-
-    const currentTime: Date = new Date();
-    const lastUpdateTime: Date = new Date(this._rushAlertsState.lastUpdateTime);
-
-    const hours: number = (Number(currentTime) - Number(lastUpdateTime)) / (1000 * 60 * 60);
-
-    if (hours > 24) {
-      return false;
-    }
-
-    return true;
-  }
-
-  public async retrieveAlertsAsync(): Promise<void> {
+  private _ensureAlertStateIsUpToDate(): void {
+    // ensure `temp/rush-alerts.json` is up to date
     if (this._rushAlertsConfig) {
-      const validAlerts: Array<IRushAlertStateEntry> = [];
-      if (this._rushAlertsConfig?.alerts.length !== 0) {
-        for (const alert of this._rushAlertsConfig.alerts) {
-          if (await this._isAlertValidAsync(alert)) {
-            validAlerts.push({
-              title: alert.title,
-              message: alert.message,
-              detailsUrl: alert.detailsUrl,
-              priority: alert.priority,
-              maximumDisplayInterval: alert.maximumDisplayInterval
-            });
-          }
+      for (const alert of this._rushAlertsConfig.alerts) {
+        if (!(alert.alertId in this._rushAlertsState)) {
+          this._rushAlertsState[alert.alertId] = {
+            snooze: false
+          };
         }
       }
-
-      const rushAlertsState: IRushAlertsState = {
-        lastUpdateTime: new Date().toISOString(),
-        alerts: validAlerts
-      };
-
-      await this._writeRushAlertStateAsync(rushAlertsState);
     }
   }
 
   public async printAlertsAsync(): Promise<void> {
-    if (!this._rushAlertsState || this._rushAlertsState.alerts.length === 0) {
-      return;
-    }
+    this._ensureAlertStateIsUpToDate();
+
+    if (!this._rushAlertsConfig || this._rushAlertsConfig.alerts.length === 0) return;
+
+    const rushAlertsState: IRushAlertsState = this._rushAlertsState;
 
     this._terminal.writeLine();
-
-    const alert: IRushAlertStateEntry | undefined = this._selectAlertByPriority(this._rushAlertsState.alerts);
+    const alert: IRushAlertsConfigEntry | undefined = await this._selectAlertByPriorityAsync();
 
     if (alert) {
       this._printMessageInBoxStyle(alert);
-      alert.lastDisplayTime = new Date().toISOString();
+      rushAlertsState[alert.alertId].lastDisplayTime = new Date().toISOString();
     }
 
-    await this._writeRushAlertStateAsync(this._rushAlertsState);
+    await this._writeRushAlertStateAsync();
   }
 
   public async printAllAlertsAsync(): Promise<void> {
-    const alertsConfig: IRushAlertsConfigEntry[] = this._rushAlertsConfig?.alerts ?? [];
-    const alertsState: IRushAlertStateEntry[] = this._rushAlertsState?.alerts ?? [];
+    const alertsState: IRushAlertsState = this._rushAlertsState;
+    const allAlerts: IRushAlertsConfigEntry[] = this._rushAlertsConfig?.alerts ?? [];
 
-    const allAlerts: IAlertPrintingFormat[] = alertsConfig.map((alert, index) => ({
-      title: alert.title,
-      index
-    }));
-    const activeAlertsSet: Set<string> = new Set(alertsState.map((alert) => alert.title));
-    const snoozeAlertSet: Set<string> = new Set(
-      alertsState.filter((alert) => !this._isSnoozing(alert)).map((alert) => alert.title)
-    );
+    const activeAlerts: IRushAlertsConfigEntry[] = [];
+    const snoozedAlerts: IRushAlertsConfigEntry[] = [];
+    const inactiveAlerts: IRushAlertsConfigEntry[] = [];
 
-    const activeAlerts: IAlertPrintingFormat[] = allAlerts.filter(
-      ({ title }) => activeAlertsSet.has(title) && !snoozeAlertSet.has(title)
-    );
-    const snoozeAlerts: IAlertPrintingFormat[] = allAlerts.filter(({ title }) => snoozeAlertSet.has(title));
-    const inactiveAlerts: IAlertPrintingFormat[] = allAlerts.filter(
-      ({ title }) => !activeAlertsSet.has(title)
+    await Promise.all(
+      allAlerts.map(async (alert) => {
+        const isAlertValid: boolean = await this._isAlertValidAsync(alert);
+        const alertState: IRushAlertStateEntry = alertsState[alert.alertId];
+
+        if (!isAlertValid) {
+          inactiveAlerts.push(alert);
+          return;
+        }
+
+        if (this._isSnoozing(alertState)) {
+          snoozedAlerts.push(alert);
+          return;
+        }
+
+        activeAlerts.push(alert);
+      })
     );
 
     this._printAlerts(activeAlerts, 'active');
-    this._printAlerts(snoozeAlerts, 'snoozed');
+    this._printAlerts(snoozedAlerts, 'snoozed');
     this._printAlerts(inactiveAlerts, 'inactive');
   }
 
-  private _printAlerts(alerts: IAlertPrintingFormat[], status: 'active' | 'inactive' | 'snoozed'): void {
+  private _printAlerts(alerts: IRushAlertsConfigEntry[], status: 'active' | 'inactive' | 'snoozed'): void {
     if (alerts.length === 0) return;
     switch (status) {
       case 'active':
@@ -231,49 +194,50 @@ export class RushAlerts {
         this._terminal.writeLine(Colorize.yellow('The following alerts are currently active but snoozed:'));
         break;
     }
-    alerts.forEach(({ title, index }) => {
-      this._terminal.writeLine(Colorize.green(`"${title}" (#${index + 1})`));
+    alerts.forEach(({ title }) => {
+      this._terminal.writeLine(Colorize.green(`"${title}"`));
     });
     this._terminal.writeLine();
   }
 
-  public async snoozeAlertsAsync(snoozeAlertIndex: number, forever: boolean = false): Promise<void> {
-    const selectedAlert: IRushAlertsConfigEntry | undefined =
-      this._rushAlertsConfig?.alerts[snoozeAlertIndex];
-
-    if (!this._rushAlertsState || !selectedAlert || this._rushAlertsState.alerts.length === 0) {
-      return;
-    }
-    let selectedStateAlert: IRushAlertStateEntry = this._rushAlertsState.alerts.filter(
-      (alert) => alert.title === selectedAlert.title
-    )[0];
-    if (!selectedStateAlert) {
-      selectedStateAlert = selectedAlert;
-      this._rushAlertsState.alerts.push(selectedStateAlert);
-    }
+  public async snoozeAlertsByAlertIdAsync(alertId: string, forever: boolean = false): Promise<void> {
+    this._ensureAlertStateIsUpToDate();
     if (forever) {
-      selectedStateAlert.snooze = true;
+      this._rushAlertsState[alertId].snooze = true;
     } else {
-      selectedStateAlert.snooze = true;
+      this._rushAlertsState[alertId].snooze = true;
       const snoozeEndTime: Date = new Date();
       snoozeEndTime.setDate(snoozeEndTime.getDate() + 7);
-      selectedStateAlert.snoozeEndTime = snoozeEndTime.toISOString();
+      this._rushAlertsState[alertId].snoozeEndTime = snoozeEndTime.toISOString();
     }
-    await this._writeRushAlertStateAsync(this._rushAlertsState);
+    await this._writeRushAlertStateAsync();
   }
 
-  private _selectAlertByPriority(alerts: IRushAlertStateEntry[]): IRushAlertStateEntry | undefined {
-    const needDisplayAlerts: IRushAlertStateEntry[] = alerts.filter((alert) => {
-      const needsDisplay: boolean =
-        (!alert.lastDisplayTime ||
-          Number(new Date()) - Number(new Date(alert.lastDisplayTime)) >
-            RushAlerts.alertDisplayIntervalDurations.get(
-              alert.maximumDisplayInterval ?? AlertDisplayInterval.ALWAYS
-            )!) &&
-        !this._isSnoozing(alert);
-      return needsDisplay;
-    });
-    const alertsSortedByPriority: IRushAlertStateEntry[] = needDisplayAlerts.sort((a, b) => {
+  private async _selectAlertByPriorityAsync(): Promise<IRushAlertsConfigEntry | undefined> {
+    const alerts: Array<IRushAlertsConfigEntry> = this._rushAlertsConfig!.alerts;
+    const alertsState: IRushAlertsState = this._rushAlertsState;
+
+    const needDisplayAlerts: Array<IRushAlertsConfigEntry> = (
+      await Promise.all(
+        alerts.map(async (alert) => {
+          const isAlertValid: boolean = await this._isAlertValidAsync(alert);
+          const alertState: IRushAlertStateEntry = alertsState[alert.alertId];
+          if (
+            isAlertValid &&
+            !this._isSnoozing(alertState) &&
+            (!alertState.lastDisplayTime ||
+              Number(new Date()) - Number(new Date(alertState.lastDisplayTime)) >
+                RushAlerts.alertDisplayIntervalDurations.get(
+                  alert.maximumDisplayInterval ?? AlertDisplayInterval.ALWAYS
+                )!)
+          ) {
+            return alert;
+          }
+        })
+      )
+    ).filter((alert) => alert !== undefined) as Array<IRushAlertsConfigEntry>;
+
+    const alertsSortedByPriority: IRushAlertsConfigEntry[] = needDisplayAlerts.sort((a, b) => {
       return (
         RushAlerts.ALERT_PRIORITY.indexOf(a.priority ?? AlertPriority.NORMAL) -
         RushAlerts.ALERT_PRIORITY.indexOf(b.priority ?? AlertPriority.NORMAL)
@@ -290,10 +254,10 @@ export class RushAlerts {
     return parsedDate;
   }
 
-  private _isSnoozing(alert: IRushAlertStateEntry): boolean {
+  private _isSnoozing(alertState: IRushAlertStateEntry): boolean {
     return (
-      Boolean(alert.snooze) &&
-      (!alert.snoozeEndTime || Number(new Date()) < Number(new Date(alert.snoozeEndTime)))
+      Boolean(alertState.snooze) &&
+      (!alertState.snoozeEndTime || Number(new Date()) < Number(new Date(alertState.snoozeEndTime)))
     );
   }
 
@@ -388,7 +352,7 @@ export class RushAlerts {
     return true;
   }
 
-  private _printMessageInBoxStyle(alert: IRushAlertStateEntry): void {
+  private _printMessageInBoxStyle(alert: IRushAlertsConfigEntry): void {
     const boxTitle: string = alert.title.toUpperCase();
 
     const boxMessage: string = typeof alert.message === 'string' ? alert.message : alert.message.join('');
@@ -429,20 +393,14 @@ export class RushAlerts {
       this._terminal.writeLine(`║ ${line.padEnd(lineLength)} ║`);
     }
     this._terminal.writeLine('╚═' + '═'.repeat(lineLength) + '═╝');
-    this._terminal.writeLine('To stop seeing this event, run "rush snooze-alert"');
+    this._terminal.writeLine(`To stop seeing this alert, run "rush alert --snooze ${alert.alertId}"`);
   }
 
-  private async _writeRushAlertStateAsync(rushAlertsState: IRushAlertsState): Promise<void> {
-    if (rushAlertsState.alerts.length > 0) {
-      await JsonFile.saveAsync(rushAlertsState, this.rushAlertsStateFilePath, {
-        ignoreUndefinedValues: true,
-        headerComment: '// THIS FILE IS MACHINE-GENERATED -- DO NOT MODIFY',
-        jsonSyntax: JsonSyntax.JsonWithComments
-      });
-    } else {
-      // if no valid alerts
-      // remove exist alerts state if exist
-      await FileSystem.deleteFileAsync(this.rushAlertsStateFilePath);
-    }
+  private async _writeRushAlertStateAsync(): Promise<void> {
+    await JsonFile.saveAsync(this._rushAlertsState, this.rushAlertsStateFilePath, {
+      ignoreUndefinedValues: true,
+      headerComment: '// THIS FILE IS MACHINE-GENERATED -- DO NOT MODIFY',
+      jsonSyntax: JsonSyntax.JsonWithComments
+    });
   }
 }
