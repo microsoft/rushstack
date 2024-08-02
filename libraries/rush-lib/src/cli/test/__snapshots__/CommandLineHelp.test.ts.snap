@@ -127,7 +127,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: alert 1`] = `
-"usage: rush alert [-h] [-s SNOOZE]
+"usage: rush alert [-h] [-s SNOOZE] [--forever]
 
 This command displays alerts that may be relevant to the current project.
 
@@ -135,6 +135,7 @@ Optional arguments:
   -h, --help            Show this help message and exit.
   -s SNOOZE, --snooze SNOOZE
                         Snooze the alert
+  --forever             Snooze the alert for a long time
 "
 `;
 

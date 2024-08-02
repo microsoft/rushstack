@@ -1058,6 +1058,14 @@ Object {
           "required": false,
           "shortName": "-s",
         },
+        Object {
+          "description": "Snooze the alert for a long time",
+          "environmentVariable": undefined,
+          "kind": "Flag",
+          "longName": "--forever",
+          "required": false,
+          "shortName": undefined,
+        },
       ],
     },
     Object {
