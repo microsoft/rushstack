@@ -229,16 +229,24 @@ export class RushCommandLineParser extends CommandLineParser {
       if (this.rushConfiguration) {
         try {
           const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
-          const actionName: string = this._getArgumentParser().parseArgs(process.argv.slice(2)).action;
-          // only display alerts when certain specific actions are triggered
-          if (experiments.rushAlerts && RushAlerts.alertTriggerActions.includes(actionName)) {
-            this._terminal.writeDebugLine('Checking Rush alerts...');
-            const rushAlerts: RushAlerts = await RushAlerts.loadFromConfigurationAsync(
-              this.rushConfiguration,
-              this._terminal
-            );
-            // Print out alerts if have after each successful command actions
-            await rushAlerts.printAlertsAsync();
+
+          if (experiments.rushAlerts) {
+            // TODO: Fix this
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const actionName: string = (this as any)
+              ._getArgumentParser()
+              .parseArgs(process.argv.slice(2)).action;
+
+            // only display alerts when certain specific actions are triggered
+            if (RushAlerts.alertTriggerActions.includes(actionName)) {
+              this._terminal.writeDebugLine('Checking Rush alerts...');
+              const rushAlerts: RushAlerts = await RushAlerts.loadFromConfigurationAsync(
+                this.rushConfiguration,
+                this._terminal
+              );
+              // Print out alerts if have after each successful command actions
+              await rushAlerts.printAlertsAsync();
+            }
           }
         } catch (error) {
           if (error instanceof AlreadyReportedError) {

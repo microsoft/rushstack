@@ -261,6 +261,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     executeWithoutErrorHandling(args?: string[]): Promise<void>;
     executeWithoutErrorHandlingAsync(args?: string[]): Promise<void>;
     getAction(actionName: string): CommandLineAction;
+    // @internal
     protected _getArgumentParser(): argparse.ArgumentParser;
     protected onExecute(): Promise<void>;
     // @internal (undocumented)
