@@ -75,6 +75,20 @@ export class RushAlerts {
     [AlertDisplayInterval.DAILY, 1000 * 60 * 60 * 24],
     [AlertDisplayInterval.HOURLY, 1000 * 60 * 60]
   ]);
+  public static readonly alertTriggerActions: string[] = [
+    'add',
+    'change',
+    'deploy',
+    'init',
+    'publish',
+    'purge',
+    'remove',
+    'update',
+    'install',
+    'build',
+    'list',
+    'version'
+  ];
 
   public constructor(options: IRushAlertsOptions) {
     this._terminal = options.terminal;

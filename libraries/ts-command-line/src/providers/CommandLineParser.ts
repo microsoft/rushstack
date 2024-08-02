@@ -341,7 +341,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
 
   /**
    * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
-   * @internal
    */
   protected _getArgumentParser(): argparse.ArgumentParser {
     // override
