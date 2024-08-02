@@ -60,7 +60,8 @@ Positional arguments:
                         Provides interactive prompt for upgrading package 
                         dependencies per project
     version             Manage package versions in the repo.
-    alert               Display alerts
+    alert               (EXPERIMENTAL) View and manage Rush alerts for the 
+                        repository
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
@@ -127,15 +128,19 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: alert 1`] = `
-"usage: rush alert [-h] [-s SNOOZE] [--forever]
+"usage: rush alert [-h] [-s ALERT_ID] [--forever]
 
-This command displays alerts that may be relevant to the current project.
+This command displays the Rush alerts for this repository. Rush alerts are 
+customizable announcements and reminders that Rush prints occasionally on the 
+command line. The alert definitions can be found in the rush-alerts.json 
+config file.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
-  -s SNOOZE, --snooze SNOOZE
-                        Snooze the alert
-  --forever             Snooze the alert for a long time
+  -s ALERT_ID, --snooze ALERT_ID
+                        Temporarily suspend the specified alert for one week
+  --forever             Combined with \\"--snooze\\", causes that alert to be 
+                        suspended permanently
 "
 `;
 

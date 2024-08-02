@@ -1051,7 +1051,7 @@ Object {
       "actionName": "alert",
       "parameters": Array [
         Object {
-          "description": "Snooze the alert",
+          "description": "Temporarily suspend the specified alert for one week",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--snooze",
@@ -1059,7 +1059,7 @@ Object {
           "shortName": "-s",
         },
         Object {
-          "description": "Snooze the alert for a long time",
+          "description": "Combined with \\"--snooze\\", causes that alert to be suspended permanently",
           "environmentVariable": undefined,
           "kind": "Flag",
           "longName": "--forever",
