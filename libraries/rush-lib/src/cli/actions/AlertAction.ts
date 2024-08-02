@@ -16,8 +16,11 @@ export class AlertAction extends BaseRushAction {
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'alert',
-      summary: 'Display alerts',
-      documentation: 'This command displays alerts that may be relevant to the current project.',
+      summary: '(EXPERIMENTAL) View and manage Rush alerts for the repository',
+      documentation:
+        'This command displays the Rush alerts for this repository.  Rush alerts are customizable announcements' +
+        ' and reminders that Rush prints occasionally on the command line.' +
+        '  The alert definitions can be found in the rush-alerts.json config file.',
       parser
     });
     this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
@@ -25,13 +28,13 @@ export class AlertAction extends BaseRushAction {
     this._snoozeParameter = this.defineStringParameter({
       parameterLongName: '--snooze',
       parameterShortName: '-s',
-      argumentName: 'SNOOZE',
-      description: 'Snooze the alert'
+      argumentName: 'ALERT_ID',
+      description: 'Temporarily suspend the specified alert for one week'
     });
 
     this._snoozeTimeFlagParameter = this.defineFlagParameter({
       parameterLongName: '--forever',
-      description: 'Snooze the alert for a long time'
+      description: 'Combined with "--snooze", causes that alert to be suspended permanently'
     });
   }
 
