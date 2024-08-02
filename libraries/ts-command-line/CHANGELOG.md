@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Sat, 27 Jul 2024 00:10:27 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Aug 2024 17:26:42 GMT and should not be manually modified.
+
+## 4.22.4
+Fri, 02 Aug 2024 17:26:42 GMT
+
+### Patches
+
+- Remove @internal so that subclasses can call _getArgumentParser
 
 ## 4.22.3
 Sat, 27 Jul 2024 00:10:27 GMT

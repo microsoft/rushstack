@@ -2,6 +2,18 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.22.4",
+      "tag": "@rushstack/ts-command-line_v4.22.4",
+      "date": "Fri, 02 Aug 2024 17:26:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove @internal so that subclasses can call _getArgumentParser"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.22.3",
       "tag": "@rushstack/ts-command-line_v4.22.3",
       "date": "Sat, 27 Jul 2024 00:10:27 GMT",

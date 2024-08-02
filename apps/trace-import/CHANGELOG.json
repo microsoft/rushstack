@@ -2,6 +2,21 @@
   "name": "@rushstack/trace-import",
   "entries": [
     {
+      "version": "0.3.62",
+      "tag": "@rushstack/trace-import_v0.3.62",
+      "date": "Fri, 02 Aug 2024 17:26:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.25`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.61",
       "tag": "@rushstack/trace-import_v0.3.61",
       "date": "Sat, 27 Jul 2024 00:10:27 GMT",

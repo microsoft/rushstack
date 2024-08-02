@@ -1,6 +1,11 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 27 Jul 2024 00:10:27 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Aug 2024 17:26:42 GMT and should not be manually modified.
+
+## 7.47.5
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
 
 ## 7.47.4
 Sat, 27 Jul 2024 00:10:27 GMT
