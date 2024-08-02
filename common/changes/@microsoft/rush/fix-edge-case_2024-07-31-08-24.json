@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add support for maxDailyDisplays in rush alerts to limit daily alert displays",
+      "comment": "Improve Rush alerts with a new \"rush alert\" command and snooze feature",
       "type": "none"
     }
   ],
