@@ -208,8 +208,7 @@ function _reconstructLocalized(
 ): ILocalizedReconstructionResult {
   const issues: string[] = [];
 
-  for (let i: number = reconstructionSeries.length - 1; i >= 0; i--) {
-    const element: IReconstructionElement = reconstructionSeries[i];
+  for (const element of reconstructionSeries) {
     switch (element.kind) {
       case 'localized': {
         const { data } = element;
@@ -274,8 +273,7 @@ function _reconstructNonLocalized(
 ): INonLocalizedReconstructionResult {
   const issues: string[] = [];
 
-  for (let i: number = reconstructionSeries.length - 1; i >= 0; i--) {
-    const element: IReconstructionElement = reconstructionSeries[i];
+  for (const element of reconstructionSeries) {
     switch (element.kind) {
       case 'localized': {
         issues.push(
