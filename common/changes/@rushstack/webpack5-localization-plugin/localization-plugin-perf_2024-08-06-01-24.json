@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "comment": "Improve performance of localized asset reconstruction.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-localization-plugin"
+}
