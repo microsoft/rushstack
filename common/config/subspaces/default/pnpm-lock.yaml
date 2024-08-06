@@ -3946,8 +3946,8 @@ importers:
   ../../../rush-plugins/rush-azure-storage-build-cache-plugin:
     dependencies:
       '@azure/identity':
-        specifier: ~4.2.1
-        version: 4.2.1
+        specifier: ~4.4.1
+        version: 4.4.1
       '@azure/storage-blob':
         specifier: ~12.17.0
         version: 12.17.0
@@ -5120,8 +5120,8 @@ packages:
       tslib: 2.6.2
     dev: false
 
-  /@azure/core-client@1.9.0:
-    resolution: {integrity: sha512-x50SSD7bbG5wen3tMDI2oWVSAjt1K1xw6JZSnc6239RmBwqLJF9dPsKsh9w0Rzh5+mGpsu9FDu3DlsT0lo1+Uw==}
+  /@azure/core-client@1.9.2:
+    resolution: {integrity: sha512-kRdry/rav3fUKHl/aDLd/pDLcB+4pOFwPPTVEExuMyaI5r+JBbMWqRbCY1pn5BniDaU3lRxO9eaQ1AmSMehl/w==}
     engines: {node: '>=18.0.0'}
     dependencies:
       '@azure/abort-controller': 2.1.0
@@ -5213,13 +5213,13 @@ packages:
       tslib: 2.6.2
     dev: false
 
-  /@azure/identity@4.2.1:
-    resolution: {integrity: sha512-U8hsyC9YPcEIzoaObJlRDvp7KiF0MGS7xcWbyJSVvXRkC/HXo1f0oYeBYmEvVgRfacw7GHf6D6yAoh9JHz6A5Q==}
+  /@azure/identity@4.4.1:
+    resolution: {integrity: sha512-DwnG4cKFEM7S3T+9u05NstXU/HN0dk45kPOinUyNKsn5VWwpXd9sbPKEg6kgJzGbm1lMuhx9o31PVbCtM5sfBA==}
     engines: {node: '>=18.0.0'}
     dependencies:
       '@azure/abort-controller': 1.1.0
       '@azure/core-auth': 1.7.0
-      '@azure/core-client': 1.9.0
+      '@azure/core-client': 1.9.2
       '@azure/core-rest-pipeline': 1.15.0
       '@azure/core-tracing': 1.1.0
       '@azure/core-util': 1.8.0
