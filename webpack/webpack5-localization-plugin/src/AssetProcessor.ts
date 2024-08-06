@@ -208,7 +208,8 @@ function _reconstructLocalized(
 ): ILocalizedReconstructionResult {
   const issues: string[] = [];
 
-  for (const element of reconstructionSeries) {
+  for (let i: number = reconstructionSeries.length - 1; i >= 0; i--) {
+    const element: IReconstructionElement = reconstructionSeries[i];
     switch (element.kind) {
       case 'localized': {
         const { data } = element;
@@ -228,19 +229,25 @@ function _reconstructLocalized(
 
         const escapedBackslash: string = element.escapedBackslash || '\\';
 
-        // Replace backslashes with the properly escaped backslash
-        BACKSLASH_REGEX.lastIndex = -1;
-        newValue = newValue.replace(BACKSLASH_REGEX, escapedBackslash);
-
-        // @todo: look into using JSON.parse(...) to get the escaping characters
-        const escapingCharacterSequence: string = escapedBackslash.slice(escapedBackslash.length / 2);
+        if (newValue.includes('\\')) {
+          // The vast majority of localized strings do not contain `\\`, so this check avoids an allocation.
+          // Replace backslashes with the properly escaped backslash
+          BACKSLASH_REGEX.lastIndex = -1;
+          newValue = newValue.replace(BACKSLASH_REGEX, escapedBackslash);
+        }
 
         // Ensure the the quotemark, apostrophe, tab, and newline characters are properly escaped
         ESCAPE_REGEX.lastIndex = -1;
-        newValue = newValue.replace(
-          ESCAPE_REGEX,
-          (match) => `${escapingCharacterSequence}${ESCAPE_MAP.get(match)}`
-        );
+        if (ESCAPE_REGEX.test(newValue)) {
+          // The majority of localized strings do not contain the characters that need to be escaped,
+          // so this check avoids an allocation.
+          // @todo: look into using JSON.parse(...) to get the escaping characters
+          const escapingCharacterSequence: string = escapedBackslash.slice(escapedBackslash.length / 2);
+          newValue = newValue.replace(
+            ESCAPE_REGEX,
+            (match) => `${escapingCharacterSequence}${ESCAPE_MAP.get(match)}`
+          );
+        }
 
         result.replace(element.start, element.end - 1, newValue);
         break;
@@ -267,7 +274,8 @@ function _reconstructNonLocalized(
 ): INonLocalizedReconstructionResult {
   const issues: string[] = [];
 
-  for (const element of reconstructionSeries) {
+  for (let i: number = reconstructionSeries.length - 1; i >= 0; i--) {
+    const element: IReconstructionElement = reconstructionSeries[i];
     switch (element.kind) {
       case 'localized': {
         issues.push(
@@ -305,9 +313,7 @@ function _parseStringToReconstructionSequence(
   const jsonStringifyFormatLocaleForFilenameFn: FormatLocaleForFilenameFn = (locale: string) =>
     JSON.stringify(formatLocaleForFilenameFn(locale));
 
-  let regexResult: RegExpExecArray | null;
-  PLACEHOLDER_REGEX.lastIndex = -1;
-  while ((regexResult = PLACEHOLDER_REGEX.exec(source))) {
+  for (const regexResult of source.matchAll(PLACEHOLDER_REGEX)) {
     const [placeholder, escapedBackslash, elementLabel, placeholderSerialNumber] = regexResult;
     const start: number = regexResult.index;
     const end: number = start + placeholder.length;
