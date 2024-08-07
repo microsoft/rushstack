@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.11.2",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.11.2",
+      "date": "Wed, 07 Aug 2024 00:11:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve performance of localized asset reconstruction."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.1",
       "tag": "@rushstack/webpack5-localization-plugin_v0.11.1",
       "date": "Fri, 02 Aug 2024 17:26:42 GMT",
