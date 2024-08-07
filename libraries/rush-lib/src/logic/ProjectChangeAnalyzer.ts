@@ -20,7 +20,7 @@ import { Git } from './Git';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
-import type { LookupByPath } from './LookupByPath';
+import type { PathTrie } from '@rushstack/path-trie';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { UNINITIALIZED } from '../utilities/Utilities';
 
@@ -283,8 +283,7 @@ export class ProjectChangeAnalyzer {
     }
 
     const changesByProject: Map<RushConfigurationProject, Map<string, IFileDiffStatus>> = new Map();
-    const lookup: LookupByPath<RushConfigurationProject> =
-      rushConfiguration.getProjectLookupForRoot(repoRoot);
+    const lookup: PathTrie<RushConfigurationProject> = rushConfiguration.getProjectLookupForRoot(repoRoot);
 
     for (const [file, diffStatus] of repoChanges) {
       const project: RushConfigurationProject | undefined = lookup.findChildPath(file);
@@ -341,7 +340,7 @@ export class ProjectChangeAnalyzer {
       };
     }
 
-    const lookup: LookupByPath<RushConfigurationProject> = this._rushConfiguration.getProjectLookupForRoot(
+    const lookup: PathTrie<RushConfigurationProject> = this._rushConfiguration.getProjectLookupForRoot(
       repoState.rootDir
     );
     const projectHashDeps: Map<RushConfigurationProject, Map<string, string>> = new Map();

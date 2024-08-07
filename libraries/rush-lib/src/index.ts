@@ -6,6 +6,9 @@
  * @packageDocumentation
  */
 
+// For backwards compatibility
+export { PathTrie as LookupByPath, type IPrefixMatch } from '@rushstack/path-trie';
+
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
 export { RushConfiguration, type ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
@@ -88,7 +91,6 @@ export {
 
 export { RepoStateFile } from './logic/RepoStateFile';
 
-export { LookupByPath, type IPrefixMatch } from './logic/LookupByPath';
 export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';

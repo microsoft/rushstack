@@ -223,6 +223,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/path-trie",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rig-package",
       "allowedCategories": [ "libraries" ]
     },
@@ -862,7 +866,6 @@
       "name": "tslint",
       "allowedCategories": [ "libraries", "tests" ]
     },
-
     {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]

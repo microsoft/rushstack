@@ -3230,6 +3230,15 @@ importers:
         specifier: ~5.82.1
         version: 5.82.1
 
+  ../../../libraries/path-trie:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../libraries/rig-package:
     dependencies:
       resolve:
@@ -3281,6 +3290,9 @@ importers:
       '@rushstack/package-extractor':
         specifier: workspace:*
         version: link:../package-extractor
+      '@rushstack/path-trie':
+        specifier: workspace:*
+        version: link:../path-trie
       '@rushstack/rig-package':
         specifier: workspace:*
         version: link:../rig-package
@@ -3454,6 +3466,9 @@ importers:
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
+      '@rushstack/path-trie':
+        specifier: workspace:*
+        version: link:../path-trie
       '@rushstack/stream-collator':
         specifier: workspace:*
         version: link:../stream-collator

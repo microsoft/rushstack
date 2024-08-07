@@ -1056,6 +1056,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/path-trie",
+      "projectFolder": "libraries/path-trie",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/rig-package",
       "projectFolder": "libraries/rig-package",
       "reviewCategory": "libraries",

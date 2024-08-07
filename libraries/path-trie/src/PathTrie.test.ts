@@ -1,40 +1,40 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LookupByPath } from '../LookupByPath';
+import { PathTrie } from './PathTrie';
 
-describe(LookupByPath.iteratePathSegments.name, () => {
+describe(PathTrie.iteratePathSegments.name, () => {
   it('returns empty for an empty string', () => {
-    const result = [...LookupByPath.iteratePathSegments('')];
+    const result = [...PathTrie.iteratePathSegments('')];
     expect(result.length).toEqual(0);
   });
   it('returns the only segment of a trival string', () => {
-    const result = [...LookupByPath.iteratePathSegments('foo')];
+    const result = [...PathTrie.iteratePathSegments('foo')];
     expect(result).toEqual(['foo']);
   });
   it('treats backslashes as ordinary characters, per POSIX', () => {
-    const result = [...LookupByPath.iteratePathSegments('foo\\bar\\baz')];
+    const result = [...PathTrie.iteratePathSegments('foo\\bar\\baz')];
     expect(result).toEqual(['foo\\bar\\baz']);
   });
   it('iterates segments', () => {
-    const result = [...LookupByPath.iteratePathSegments('foo/bar/baz')];
+    const result = [...PathTrie.iteratePathSegments('foo/bar/baz')];
     expect(result).toEqual(['foo', 'bar', 'baz']);
   });
   it('returns correct last single character segment', () => {
-    const result = [...LookupByPath.iteratePathSegments('foo/a')];
+    const result = [...PathTrie.iteratePathSegments('foo/a')];
     expect(result).toEqual(['foo', 'a']);
   });
 });
 
-describe(LookupByPath.prototype.findChildPath.name, () => {
+describe(PathTrie.prototype.findChildPath.name, () => {
   it('returns empty for an empty tree', () => {
-    expect(new LookupByPath().findChildPath('foo')).toEqual(undefined);
+    expect(new PathTrie().findChildPath('foo')).toEqual(undefined);
   });
   it('returns the matching node for a trivial tree', () => {
-    expect(new LookupByPath([['foo', 1]]).findChildPath('foo')).toEqual(1);
+    expect(new PathTrie([['foo', 1]]).findChildPath('foo')).toEqual(1);
   });
   it('returns the matching node for a single-layer tree', () => {
-    const tree: LookupByPath<number> = new LookupByPath([
+    const tree: PathTrie<number> = new PathTrie([
       ['foo', 1],
       ['bar', 2],
       ['baz', 3]
@@ -46,7 +46,7 @@ describe(LookupByPath.prototype.findChildPath.name, () => {
     expect(tree.findChildPath('buzz')).toEqual(undefined);
   });
   it('returns the matching parent for multi-layer queries', () => {
-    const tree: LookupByPath<number> = new LookupByPath([
+    const tree: PathTrie<number> = new PathTrie([
       ['foo', 1],
       ['bar', 2],
       ['baz', 3]
@@ -58,7 +58,7 @@ describe(LookupByPath.prototype.findChildPath.name, () => {
     expect(tree.findChildPath('foo/foo')).toEqual(1);
   });
   it('returns the matching parent for multi-layer queries in multi-layer trees', () => {
-    const tree: LookupByPath<number> = new LookupByPath([
+    const tree: PathTrie<number> = new PathTrie([
       ['foo', 1],
       ['bar', 2],
       ['baz', 3],
@@ -92,7 +92,7 @@ describe(LookupByPath.prototype.findChildPath.name, () => {
     expect(tree.findChildPath('foo\\bar\\baz')).toEqual(undefined);
   });
   it('handles custom delimiters', () => {
-    const tree: LookupByPath<number> = new LookupByPath(
+    const tree: PathTrie<number> = new PathTrie(
       [
         ['foo,bar', 1],
         ['foo/bar', 2]
@@ -106,15 +106,15 @@ describe(LookupByPath.prototype.findChildPath.name, () => {
   });
 });
 
-describe(LookupByPath.prototype.findLongestPrefixMatch.name, () => {
+describe(PathTrie.prototype.findLongestPrefixMatch.name, () => {
   it('returns empty for an empty tree', () => {
-    expect(new LookupByPath().findLongestPrefixMatch('foo')).toEqual(undefined);
+    expect(new PathTrie().findLongestPrefixMatch('foo')).toEqual(undefined);
   });
   it('returns the matching node for a trivial tree', () => {
-    expect(new LookupByPath([['foo', 1]]).findLongestPrefixMatch('foo')).toEqual({ value: 1, index: 3 });
+    expect(new PathTrie([['foo', 1]]).findLongestPrefixMatch('foo')).toEqual({ value: 1, index: 3 });
   });
   it('returns the matching node for a single-layer tree', () => {
-    const tree: LookupByPath<number> = new LookupByPath([
+    const tree: PathTrie<number> = new PathTrie([
       ['foo', 1],
       ['barbar', 2],
       ['baz', 3]
@@ -126,7 +126,7 @@ describe(LookupByPath.prototype.findLongestPrefixMatch.name, () => {
     expect(tree.findLongestPrefixMatch('buzz')).toEqual(undefined);
   });
   it('returns the matching parent for multi-layer queries', () => {
-    const tree: LookupByPath<number> = new LookupByPath([
+    const tree: PathTrie<number> = new PathTrie([
       ['foo', 1],
       ['barbar', 2],
       ['baz', 3],

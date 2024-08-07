@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 /**
- * A node in the path tree used in LookupByPath
+ * A node in the path trie used in PathTrie
  */
-interface IPathTreeNode<TItem> {
+interface IPathTrieNode<TItem> {
   /**
    * The value that exactly matches the current relative path
    */
@@ -12,11 +12,17 @@ interface IPathTreeNode<TItem> {
   /**
    * Child nodes by subfolder
    */
-  children: Map<string, IPathTreeNode<TItem>> | undefined;
+  children: Map<string, IPathTrieNode<TItem>> | undefined;
 }
 
 interface IPrefixEntry {
+  /**
+   * The prefix that was matched
+   */
   prefix: string;
+  /**
+   * The index of the first character after the matched prefix
+   */
   index: number;
 }
 
@@ -26,41 +32,50 @@ interface IPrefixEntry {
  * @beta
  */
 export interface IPrefixMatch<TItem> {
+  /**
+   * The item that matched the prefix
+   */
   value: TItem;
+  /**
+   * The index of the first character after the matched prefix
+   */
   index: number;
 }
 
 /**
- * This class is used to associate POSIX relative paths, such as those returned by `git` commands,
- * with entities that correspond with ancestor folders, such as Rush Projects.
+ * This class is used to associate path-like-strings, such as those returned by `git` commands,
+ * with entities that correspond with ancestor folders, such as Rush Projects or npm packages.
  *
  * It is optimized for efficiently locating the nearest ancestor path with an associated value.
  *
+ * It is implemented as a Trie (https://en.wikipedia.org/wiki/Trie) data structure, with each edge
+ * being a path segment.
+ *
  * @example
  * ```ts
- * const tree = new LookupByPath([['foo', 1], ['bar', 2], ['foo/bar', 3]]);
- * tree.findChildPath('foo'); // returns 1
- * tree.findChildPath('foo/baz'); // returns 1
- * tree.findChildPath('baz'); // returns undefined
- * tree.findChildPath('foo/bar/baz'); returns 3
- * tree.findChildPath('bar/foo/bar'); returns 2
+ * const trie = new PathTrie([['foo', 1], ['bar', 2], ['foo/bar', 3]]);
+ * trie.findChildPath('foo'); // returns 1
+ * trie.findChildPath('foo/baz'); // returns 1
+ * trie.findChildPath('baz'); // returns undefined
+ * trie.findChildPath('foo/bar/baz'); returns 3
+ * trie.findChildPath('bar/foo/bar'); returns 2
  * ```
  * @beta
  */
-export class LookupByPath<TItem> {
+export class PathTrie<TItem> {
   /**
    * The delimiter used to split paths
    */
   public readonly delimiter: string;
   /**
-   * The root node of the tree, corresponding to the path ''
+   * The root node of the trie, corresponding to the path ''
    */
-  private readonly _root: IPathTreeNode<TItem>;
+  private readonly _root: IPathTrieNode<TItem>;
 
   /**
-   * Constructs a new `LookupByPath`
+   * Constructs a new `PathTrie`
    *
-   * @param entries - Initial path-value pairs to populate the tree.
+   * @param entries - Initial path-value pairs to populate the trie.
    */
   public constructor(entries?: Iterable<[string, TItem]>, delimiter?: string) {
     this._root = {
@@ -82,9 +97,9 @@ export class LookupByPath<TItem> {
    *
    * @example
    *
-   * `LookupByPath.iteratePathSegments('foo/bar/baz')` yields 'foo', 'bar', 'baz'
+   * `PathTrie.iteratePathSegments('foo/bar/baz')` yields 'foo', 'bar', 'baz'
    *
-   * `LookupByPath.iteratePathSegments('foo\\bar\\baz', '\\')` yields 'foo', 'bar', 'baz'
+   * `PathTrie.iteratePathSegments('foo\\bar\\baz', '\\')` yields 'foo', 'bar', 'baz'
    */
   public static *iteratePathSegments(serializedPath: string, delimiter: string = '/'): Iterable<string> {
     for (const prefixMatch of this._iteratePrefixes(serializedPath, delimiter)) {
@@ -126,7 +141,7 @@ export class LookupByPath<TItem> {
    * @returns this, for chained calls
    */
   public setItem(serializedPath: string, value: TItem): this {
-    return this.setItemFromSegments(LookupByPath.iteratePathSegments(serializedPath, this.delimiter), value);
+    return this.setItemFromSegments(PathTrie.iteratePathSegments(serializedPath, this.delimiter), value);
   }
 
   /**
@@ -136,12 +151,12 @@ export class LookupByPath<TItem> {
    * @returns this, for chained calls
    */
   public setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this {
-    let node: IPathTreeNode<TItem> = this._root;
+    let node: IPathTrieNode<TItem> = this._root;
     for (const segment of pathSegments) {
       if (!node.children) {
         node.children = new Map();
       }
-      let child: IPathTreeNode<TItem> | undefined = node.children.get(segment);
+      let child: IPathTrieNode<TItem> | undefined = node.children.get(segment);
       if (!child) {
         node.children.set(
           segment,
@@ -166,13 +181,13 @@ export class LookupByPath<TItem> {
    *
    * @example
    * ```ts
-   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
-   * tree.findChildPath('foo/baz'); // returns 1
-   * tree.findChildPath('foo/bar/baz'); // returns 2
+   * const trie = new PathTrie([['foo', 1], ['foo/bar', 2]]);
+   * trie.findChildPath('foo/baz'); // returns 1
+   * trie.findChildPath('foo/bar/baz'); // returns 2
    * ```
    */
   public findChildPath(childPath: string): TItem | undefined {
-    return this.findChildPathFromSegments(LookupByPath.iteratePathSegments(childPath, this.delimiter));
+    return this.findChildPathFromSegments(PathTrie.iteratePathSegments(childPath, this.delimiter));
   }
 
   /**
@@ -184,13 +199,13 @@ export class LookupByPath<TItem> {
    *
    * @example
    * ```ts
-   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
-   * tree.findLongestPrefixMatch('foo/baz'); // returns { item: 1, index: 3 }
-   * tree.findLongestPrefixMatch('foo/bar/baz'); // returns { item: 2, index: 7 }
+   * const trie = new PathTrie([['foo', 1], ['foo/bar', 2]]);
+   * trie.findLongestPrefixMatch('foo/baz'); // returns { item: 1, index: 3 }
+   * trie.findLongestPrefixMatch('foo/bar/baz'); // returns { item: 2, index: 7 }
    * ```
    */
   public findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined {
-    return this._findLongestPrefixMatch(LookupByPath._iteratePrefixes(query, this.delimiter));
+    return this._findLongestPrefixMatch(PathTrie._iteratePrefixes(query, this.delimiter));
   }
 
   /**
@@ -201,18 +216,18 @@ export class LookupByPath<TItem> {
    *
    * @example
    * ```ts
-   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
-   * tree.findChildPathFromSegments(['foo', 'baz']); // returns 1
-   * tree.findChildPathFromSegments(['foo','bar', 'baz']); // returns 2
+   * const trie = new PathTrie([['foo', 1], ['foo/bar', 2]]);
+   * trie.findChildPathFromSegments(['foo', 'baz']); // returns 1
+   * trie.findChildPathFromSegments(['foo','bar', 'baz']); // returns 2
    * ```
    */
   public findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined {
-    let node: IPathTreeNode<TItem> = this._root;
+    let node: IPathTrieNode<TItem> = this._root;
     let best: TItem | undefined = node.value;
     // Trivial cases
     if (node.children) {
       for (const segment of childPathSegments) {
-        const child: IPathTreeNode<TItem> | undefined = node.children.get(segment);
+        const child: IPathTrieNode<TItem> | undefined = node.children.get(segment);
         if (!child) {
           break;
         }
@@ -236,7 +251,7 @@ export class LookupByPath<TItem> {
    * @returns the found item, or `undefined` if no item was found
    */
   private _findLongestPrefixMatch(prefixes: Iterable<IPrefixEntry>): IPrefixMatch<TItem> | undefined {
-    let node: IPathTreeNode<TItem> = this._root;
+    let node: IPathTrieNode<TItem> = this._root;
     let best: IPrefixMatch<TItem> | undefined = node.value
       ? {
           value: node.value,
@@ -246,7 +261,7 @@ export class LookupByPath<TItem> {
     // Trivial cases
     if (node.children) {
       for (const { prefix: hash, index } of prefixes) {
-        const child: IPathTreeNode<TItem> | undefined = node.children.get(hash);
+        const child: IPathTrieNode<TItem> | undefined = node.children.get(hash);
         if (!child) {
           break;
         }
