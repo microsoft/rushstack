@@ -285,16 +285,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         ) {
           // If the dependency is a local project that is decoupled, then we need to ensure that it is not specified
           // as a workspace project. If it is, then we need to update the package.json to remove the workspace notation.
-          // eslint-disable-next-line no-console
-          console.log();
-          // eslint-disable-next-line no-console
-          console.log(
-            Colorize.red(
-              `"${rushProject.packageName}" depends on package ${name}@${version}, but also lists it in ` +
-                `its "decoupledLocalDependencies" array. Either update the host project's package.json to use ` +
-                `a version from an external feed instead of "workspace:" notation, or remove the dependency from the ` +
-                `host project's "decoupledLocalDependencies" array in rush.json.`
-            )
+          this._terminal.writeWarningLine(
+            `"${rushProject.packageName}" depends on package ${name}@${version}, but also lists it in ` +
+              `its "decoupledLocalDependencies" array. Either update the host project's package.json to use ` +
+              `a version from an external feed instead of "workspace:" notation, or remove the dependency from the ` +
+              `host project's "decoupledLocalDependencies" array in rush.json.`
           );
           throw new AlreadyReportedError();
         } else if (!rushProject.decoupledLocalDependencies.has(name)) {
