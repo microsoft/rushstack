@@ -6466,6 +6466,7 @@ packages:
     id: file:../../../libraries/rush-sdk
     name: '@rushstack/rush-sdk'
     dependencies:
+      '@rushstack/lookup-by-path': file:../../../libraries/lookup-by-path(@types/node@18.17.15)
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@18.17.15)
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@18.17.15)
       '@types/node-fetch': 2.6.2

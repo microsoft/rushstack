@@ -38,6 +38,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@types/node-fetch": "2.6.2",
@@ -48,7 +49,6 @@
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
-    "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
