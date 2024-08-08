@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.131.1",
+      "tag": "@microsoft/rush_v5.131.1",
+      "date": "Thu, 08 Aug 2024 22:08:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush-sdk can't be bundled by a consuming package."
+          },
+          {
+            "comment": "Extract LookupByPath to @rushstack/lookup-by-path and load it from there."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.131.0",
       "tag": "@microsoft/rush_v5.131.0",
       "date": "Fri, 02 Aug 2024 17:26:59 GMT",

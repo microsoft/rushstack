@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 02 Aug 2024 17:26:59 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Aug 2024 22:08:41 GMT and should not be manually modified.
+
+## 5.131.1
+Thu, 08 Aug 2024 22:08:41 GMT
+
+### Updates
+
+- Fix an issue where rush-sdk can't be bundled by a consuming package.
+- Extract LookupByPath to @rushstack/lookup-by-path and load it from there.
 
 ## 5.131.0
 Fri, 02 Aug 2024 17:26:59 GMT
