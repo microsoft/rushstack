@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 08 Aug 2024 22:08:41 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Aug 2024 23:38:18 GMT and should not be manually modified.
+
+## 5.131.2
+Thu, 08 Aug 2024 23:38:18 GMT
+
+### Updates
+
+- Include a missing dependency in `@rushstack/rush-sdk`.
 
 ## 5.131.1
 Thu, 08 Aug 2024 22:08:41 GMT

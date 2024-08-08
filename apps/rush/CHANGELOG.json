@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.131.2",
+      "tag": "@microsoft/rush_v5.131.2",
+      "date": "Thu, 08 Aug 2024 23:38:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Include a missing dependency in `@rushstack/rush-sdk`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.131.1",
       "tag": "@microsoft/rush_v5.131.1",
       "date": "Thu, 08 Aug 2024 22:08:41 GMT",
