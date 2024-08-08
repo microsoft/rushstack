@@ -14,7 +14,7 @@ import {
   type FileSystemStats,
   InternalError
 } from '@rushstack/node-core-library';
-import { PathTrie } from '@rushstack/path-trie';
+import { LookupByPath } from '@rushstack/lookup-by-path';
 import { trueCasePathSync } from 'true-case-path';
 
 import { Rush } from '../api/Rush';
@@ -209,7 +209,7 @@ export interface ITryFindRushJsonLocationOptions {
 export class RushConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private readonly _pathTrees: Map<string, PathTrie<RushConfigurationProject>>;
+  private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
 
   // Lazily loaded when the projects() getter is called.
   private _projects: RushConfigurationProject[] | undefined;
@@ -1488,13 +1488,13 @@ export class RushConfiguration {
    * @returns An optimized lookup engine to find a project by its path relative to the specified root.
    * @beta
    */
-  public getProjectLookupForRoot(rootPath: string): PathTrie<RushConfigurationProject> {
-    let pathTree: PathTrie<RushConfigurationProject> | undefined = this._pathTrees.get(rootPath);
+  public getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject> {
+    let pathTree: LookupByPath<RushConfigurationProject> | undefined = this._pathTrees.get(rootPath);
     if (!pathTree) {
-      this._pathTrees.set(rootPath, (pathTree = new PathTrie()));
+      this._pathTrees.set(rootPath, (pathTree = new LookupByPath()));
       for (const project of this.projects) {
         const relativePath: string = path.relative(rootPath, project.projectFolder);
-        pathTree.setItemFromSegments(PathTrie.iteratePathSegments(relativePath, path.sep), project);
+        pathTree.setItemFromSegments(LookupByPath.iteratePathSegments(relativePath, path.sep), project);
       }
     }
     return pathTree;

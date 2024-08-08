@@ -1,14 +1,21 @@
 {
-  "name": "@rushstack/path-trie",
+  "name": "@rushstack/lookup-by-path",
   "version": "0.0.0",
   "description": "Strongly typed trie data structure for path and URL-like strings.",
   "main": "lib/index.js",
-  "typings": "dist/path-trie.d.ts",
+  "typings": "dist/lookup-by-path.d.ts",
+  "keywords": [
+    "trie",
+    "path",
+    "url",
+    "radix tree",
+    "prefix tree"
+  ],
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
-    "directory": "libraries/path-trie"
+    "directory": "libraries/lookup-by-path"
   },
   "scripts": {
     "build": "heft build --clean",

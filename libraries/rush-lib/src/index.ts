@@ -7,7 +7,7 @@
  */
 
 // For backwards compatibility
-export { PathTrie as LookupByPath, type IPrefixMatch } from '@rushstack/path-trie';
+export { LookupByPath as LookupByPath, type IPrefixMatch } from '@rushstack/lookup-by-path';
 
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 

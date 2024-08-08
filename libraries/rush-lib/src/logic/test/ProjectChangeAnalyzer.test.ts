@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { PathTrie } from '@rushstack/path-trie';
+import { LookupByPath } from '@rushstack/lookup-by-path';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
@@ -32,8 +32,8 @@ describe(ProjectChangeAnalyzer.name, () => {
       getCommittedShrinkwrapFilename(): string {
         return 'common/config/rush/pnpm-lock.yaml';
       },
-      getProjectLookupForRoot(root: string): PathTrie<RushConfigurationProject> {
-        const lookup: PathTrie<RushConfigurationProject> = new PathTrie();
+      getProjectLookupForRoot(root: string): LookupByPath<RushConfigurationProject> {
+        const lookup: LookupByPath<RushConfigurationProject> = new LookupByPath();
         for (const project of projects) {
           lookup.setItem(project.projectRelativeFolder, project);
         }

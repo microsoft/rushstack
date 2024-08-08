@@ -1030,6 +1030,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/lookup-by-path",
+      "projectFolder": "libraries/lookup-by-path",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/module-minifier",
       "projectFolder": "libraries/module-minifier",
       "reviewCategory": "libraries",
@@ -1052,12 +1058,6 @@
     {
       "packageName": "@rushstack/package-deps-hash",
       "projectFolder": "libraries/package-deps-hash",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@rushstack/path-trie",
-      "projectFolder": "libraries/path-trie",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

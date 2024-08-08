@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * A node in the path trie used in PathTrie
+ * A node in the path trie used in LookupByPath
  */
 interface IPathTrieNode<TItem> {
   /**
@@ -53,7 +53,7 @@ export interface IPrefixMatch<TItem> {
  *
  * @example
  * ```ts
- * const trie = new PathTrie([['foo', 1], ['bar', 2], ['foo/bar', 3]]);
+ * const trie = new LookupByPath([['foo', 1], ['bar', 2], ['foo/bar', 3]]);
  * trie.findChildPath('foo'); // returns 1
  * trie.findChildPath('foo/baz'); // returns 1
  * trie.findChildPath('baz'); // returns undefined
@@ -62,7 +62,7 @@ export interface IPrefixMatch<TItem> {
  * ```
  * @beta
  */
-export class PathTrie<TItem> {
+export class LookupByPath<TItem> {
   /**
    * The delimiter used to split paths
    */
@@ -73,7 +73,7 @@ export class PathTrie<TItem> {
   private readonly _root: IPathTrieNode<TItem>;
 
   /**
-   * Constructs a new `PathTrie`
+   * Constructs a new `LookupByPath`
    *
    * @param entries - Initial path-value pairs to populate the trie.
    */
@@ -97,9 +97,9 @@ export class PathTrie<TItem> {
    *
    * @example
    *
-   * `PathTrie.iteratePathSegments('foo/bar/baz')` yields 'foo', 'bar', 'baz'
+   * `LookupByPath.iteratePathSegments('foo/bar/baz')` yields 'foo', 'bar', 'baz'
    *
-   * `PathTrie.iteratePathSegments('foo\\bar\\baz', '\\')` yields 'foo', 'bar', 'baz'
+   * `LookupByPath.iteratePathSegments('foo\\bar\\baz', '\\')` yields 'foo', 'bar', 'baz'
    */
   public static *iteratePathSegments(serializedPath: string, delimiter: string = '/'): Iterable<string> {
     for (const prefixMatch of this._iteratePrefixes(serializedPath, delimiter)) {
@@ -141,7 +141,7 @@ export class PathTrie<TItem> {
    * @returns this, for chained calls
    */
   public setItem(serializedPath: string, value: TItem): this {
-    return this.setItemFromSegments(PathTrie.iteratePathSegments(serializedPath, this.delimiter), value);
+    return this.setItemFromSegments(LookupByPath.iteratePathSegments(serializedPath, this.delimiter), value);
   }
 
   /**
@@ -181,13 +181,13 @@ export class PathTrie<TItem> {
    *
    * @example
    * ```ts
-   * const trie = new PathTrie([['foo', 1], ['foo/bar', 2]]);
+   * const trie = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
    * trie.findChildPath('foo/baz'); // returns 1
    * trie.findChildPath('foo/bar/baz'); // returns 2
    * ```
    */
   public findChildPath(childPath: string): TItem | undefined {
-    return this.findChildPathFromSegments(PathTrie.iteratePathSegments(childPath, this.delimiter));
+    return this.findChildPathFromSegments(LookupByPath.iteratePathSegments(childPath, this.delimiter));
   }
 
   /**
@@ -199,13 +199,13 @@ export class PathTrie<TItem> {
    *
    * @example
    * ```ts
-   * const trie = new PathTrie([['foo', 1], ['foo/bar', 2]]);
+   * const trie = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
    * trie.findLongestPrefixMatch('foo/baz'); // returns { item: 1, index: 3 }
    * trie.findLongestPrefixMatch('foo/bar/baz'); // returns { item: 2, index: 7 }
    * ```
    */
   public findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined {
-    return this._findLongestPrefixMatch(PathTrie._iteratePrefixes(query, this.delimiter));
+    return this._findLongestPrefixMatch(LookupByPath._iteratePrefixes(query, this.delimiter));
   }
 
   /**
@@ -216,7 +216,7 @@ export class PathTrie<TItem> {
    *
    * @example
    * ```ts
-   * const trie = new PathTrie([['foo', 1], ['foo/bar', 2]]);
+   * const trie = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
    * trie.findChildPathFromSegments(['foo', 'baz']); // returns 1
    * trie.findChildPathFromSegments(['foo','bar', 'baz']); // returns 2
    * ```

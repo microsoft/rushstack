@@ -223,7 +223,7 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
-      "name": "@rushstack/path-trie",
+      "name": "@rushstack/lookup-by-path",
       "allowedCategories": [ "libraries" ]
     },
     {

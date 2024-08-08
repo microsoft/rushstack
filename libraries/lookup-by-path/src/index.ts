@@ -7,5 +7,5 @@
  * @packageDocumentation
  */
 
-export type { IPrefixMatch } from './PathTrie';
-export { PathTrie } from './PathTrie';
+export type { IPrefixMatch } from './LookupByPath';
+export { LookupByPath } from './LookupByPath';

@@ -6334,6 +6334,18 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
 
+  file:../../../libraries/lookup-by-path(@types/node@18.17.15):
+    resolution: {directory: ../../../libraries/lookup-by-path, type: directory}
+    id: file:../../../libraries/lookup-by-path
+    name: '@rushstack/lookup-by-path'
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+    dependencies:
+      '@types/node': 18.17.15
+
   file:../../../libraries/node-core-library(@types/node@18.17.15):
     resolution: {directory: ../../../libraries/node-core-library, type: directory}
     id: file:../../../libraries/node-core-library
@@ -6394,18 +6406,6 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
 
-  file:../../../libraries/path-trie(@types/node@18.17.15):
-    resolution: {directory: ../../../libraries/path-trie, type: directory}
-    id: file:../../../libraries/path-trie
-    name: '@rushstack/path-trie'
-    peerDependencies:
-      '@types/node': '*'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-    dependencies:
-      '@types/node': 18.17.15
-
   file:../../../libraries/rig-package:
     resolution: {directory: ../../../libraries/rig-package, type: directory}
     name: '@rushstack/rig-package'
@@ -6422,10 +6422,10 @@ packages:
       '@pnpm/dependency-path': 2.1.8
       '@pnpm/link-bins': 5.3.25
       '@rushstack/heft-config-file': file:../../../libraries/heft-config-file(@types/node@18.17.15)
+      '@rushstack/lookup-by-path': file:../../../libraries/lookup-by-path(@types/node@18.17.15)
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@18.17.15)
       '@rushstack/package-deps-hash': file:../../../libraries/package-deps-hash(@types/node@18.17.15)
       '@rushstack/package-extractor': file:../../../libraries/package-extractor(@types/node@18.17.15)
-      '@rushstack/path-trie': file:../../../libraries/path-trie(@types/node@18.17.15)
       '@rushstack/rig-package': file:../../../libraries/rig-package
       '@rushstack/stream-collator': file:../../../libraries/stream-collator(@types/node@18.17.15)
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@18.17.15)
