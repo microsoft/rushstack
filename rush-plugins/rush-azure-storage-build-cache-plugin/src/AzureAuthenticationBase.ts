@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import {
+  AzurePipelinesCredential,
   DeviceCodeCredential,
   type DeviceCodeInfo,
   AzureAuthorityHosts,
@@ -80,7 +81,7 @@ export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 /**
  * @public
  */
-export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth';
+export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth' | 'AzurePipelines';
 
 /**
  * @public
@@ -150,6 +151,7 @@ export abstract class AzureAuthenticationBase {
     this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
     this._loginFlow = options.loginFlow || 'DeviceCode';
     this._failoverOrder = options.loginFlowFailover || {
+      AzurePipelines: 'AdoCodespacesAuth',
       AdoCodespacesAuth: 'InteractiveBrowser',
       InteractiveBrowser: 'DeviceCode',
       DeviceCode: undefined
@@ -299,6 +301,28 @@ export abstract class AzureAuthenticationBase {
       case 'AdoCodespacesAuth': {
         tokenCredential = new AdoCodespacesAuthCredential();
         break;
+      }
+      case 'AzurePipelines': {
+        const systemAccessToken = process.env.SYSTEM_ACCESSTOKEN;
+        // If we have a system access token, we are in Azure Pipelines
+        if (systemAccessToken) {
+          const serviceConnectionID = process.env.AZURESUBSCRIPTION_SERVICE_CONNECTION_ID;
+          const clientID = process.env.AZURESUBSCRIPTION_CLIENT_ID;
+          const tenantID = process.env.AZURESUBSCRIPTION_TENANT_ID;
+          if (serviceConnectionID && clientID && tenantID) {
+            tokenCredential = new AzurePipelinesCredential(
+              tenantID,
+              clientID,
+              serviceConnectionID,
+              systemAccessToken
+            );
+          } else {
+            throw new Error(
+              `Running in Azure Pipelines environment. Missing environment variables: serviceConnectionID: ${serviceConnectionID}, tenantID: ${tenantID}, clientID: ${clientID}`
+            );
+          }
+        }
+        throw new Error(`SYSTEM_ACCESSTOKEN is not set while attempting '${loginFlow}' login flow`);
       }
       case 'InteractiveBrowser': {
         tokenCredential = new InteractiveBrowserCredential(interactiveCredentialOptions);
