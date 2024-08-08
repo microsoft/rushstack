@@ -15,9 +15,11 @@ import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
+import { IPrefixMatch } from '@rushstack/lookup-by-path';
 import { ITerminal } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
 import { JsonObject } from '@rushstack/node-core-library';
+import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
@@ -737,13 +739,7 @@ export interface IPnpmPeerDependencyRules {
     ignoreMissing?: string[];
 }
 
-// @beta
-export interface IPrefixMatch<TItem> {
-    // (undocumented)
-    index: number;
-    // (undocumented)
-    value: TItem;
-}
+export { IPrefixMatch }
 
 // @internal (undocumented)
 export interface _IRawRepoState {
@@ -894,17 +890,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
     get version(): string;
 }
 
-// @beta
-export class LookupByPath<TItem> {
-    constructor(entries?: Iterable<[string, TItem]>, delimiter?: string);
-    readonly delimiter: string;
-    findChildPath(childPath: string): TItem | undefined;
-    findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
-    findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
-    static iteratePathSegments(serializedPath: string, delimiter?: string): Iterable<string>;
-    setItem(serializedPath: string, value: TItem): this;
-    setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this;
-}
+export { LookupByPath }
 
 // @public
 export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {

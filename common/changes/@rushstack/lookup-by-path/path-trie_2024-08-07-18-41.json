@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lookup-by-path",
+      "comment": "Extract LookupByPath from @rushstack/rush-lib.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/lookup-by-path"
+}

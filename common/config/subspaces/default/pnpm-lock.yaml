@@ -3054,6 +3054,15 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../libraries/lookup-by-path:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../libraries/module-minifier:
     dependencies:
       '@rushstack/worker-pool':
@@ -3272,6 +3281,9 @@ importers:
       '@rushstack/heft-config-file':
         specifier: workspace:*
         version: link:../heft-config-file
+      '@rushstack/lookup-by-path':
+        specifier: workspace:*
+        version: link:../lookup-by-path
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
@@ -3454,6 +3466,9 @@ importers:
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
+      '@rushstack/lookup-by-path':
+        specifier: workspace:*
+        version: link:../lookup-by-path
       '@rushstack/stream-collator':
         specifier: workspace:*
         version: link:../stream-collator

@@ -20,7 +20,7 @@ import { Git } from './Git';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
-import type { LookupByPath } from './LookupByPath';
+import type { LookupByPath } from '@rushstack/lookup-by-path';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { UNINITIALIZED } from '../utilities/Utilities';
 

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Extract LookupByPath to @rushstack/lookup-by-path and load it from there.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -1030,6 +1030,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/lookup-by-path",
+      "projectFolder": "libraries/lookup-by-path",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/module-minifier",
       "projectFolder": "libraries/module-minifier",
       "reviewCategory": "libraries",
