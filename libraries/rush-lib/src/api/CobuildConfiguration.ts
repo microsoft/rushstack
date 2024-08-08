@@ -70,9 +70,8 @@ export class CobuildConfiguration {
   public readonly cobuildLeafProjectLogOnlyAllowed: boolean;
 
   /**
-   * If true, Rush will automatically handle the leaf project with build cache "disabled" by writing
-   * to the cache in a special "log files only mode". This is useful when you want to use Cobuilds
-   * to improve the performance in CI validations and the leaf projects have not enabled cache.
+   * If true, operations can opt into leveraging cobuild orchestration without restoring from the build cache.
+   *  Operations will need to us the allowCobuildOrchestration flag to opt into this behavior per phase.
    */
   public readonly cobuildOrchestrationOnlyAllowed: boolean;
 
