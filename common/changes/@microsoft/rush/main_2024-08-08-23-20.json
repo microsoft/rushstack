@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Include a missing dependency in `@rushstack/rush-sdk`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

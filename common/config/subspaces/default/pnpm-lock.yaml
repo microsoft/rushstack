@@ -3444,6 +3444,9 @@ importers:
 
   ../../../libraries/rush-sdk:
     dependencies:
+      '@rushstack/lookup-by-path':
+        specifier: workspace:*
+        version: link:../lookup-by-path
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
@@ -3466,9 +3469,6 @@ importers:
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
-      '@rushstack/lookup-by-path':
-        specifier: workspace:*
-        version: link:../lookup-by-path
       '@rushstack/stream-collator':
         specifier: workspace:*
         version: link:../stream-collator
