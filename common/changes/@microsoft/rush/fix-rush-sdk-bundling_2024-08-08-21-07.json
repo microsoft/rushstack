@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where rush-sdk can't be bundled by a consuming package.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

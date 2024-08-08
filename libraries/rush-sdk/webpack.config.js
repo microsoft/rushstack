@@ -1,7 +1,6 @@
 /* eslint-env es6 */
 'use strict';
 
-const webpack = require('webpack');
 const { PackageJsonLookup } = require('@rushstack/node-core-library');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
 
@@ -54,18 +53,6 @@ module.exports = () => {
           callback();
         }
       }
-    ],
-    optimization: {
-      splitChunks: {
-        chunks: 'all',
-        minChunks: 1,
-        cacheGroups: {
-          commons: {
-            name: 'commons',
-            chunks: 'initial'
-          }
-        }
-      }
-    }
+    ]
   };
 };
