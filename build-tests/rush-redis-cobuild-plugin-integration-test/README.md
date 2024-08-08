@@ -150,3 +150,21 @@ rm -rf common/temp/build-cache
 5. Open command palette (Ctrl+Shift+P or Command+Shift+P) and select `Tasks: Run Task` and select `cobuild`.
 
 Expected behavior: Cobuild feature is enabled, cobuild related logs out in both terminals. These two cobuild commands fail because of the failing build of project "A". And, one of them restored the failing build cache created by the other one.
+
+#### Case 5: Sharded cobuilds
+Navigate to the sandbox for sharded cobuilds,
+```sh
+cd sandbox/sharded-repo
+```
+
+Next, start up your Redis instance,
+```sh
+docker compose down && docker compose up -d
+```
+
+Then, open 2 terminals and run this in each (changing the RUSH_COBUILD_RUNNER_ID across the 2 terminals),
+```sh
+rm -rf common/temp/build-cache && RUSH_COBUILD_CONTEXT_ID=foo REDIS_PASS=redis123 RUSH_COBUILD_RUNNER_ID=runner1 RUSH_COBUILD_ORCHESTRATION_ONLY_ALLOWED=1 node ../../lib/runRush.js cobuild -p 10 --timeline
+```
+
+If all goes well, you should see a bunch of operation with `- shard xx/yy`. Operations `h (build)` and `e (build)` are both sharded heavily and should be cobuild compatible. To validate changes you're making, ensure that the timeline view for all of the shards of those 2 operations are cobuilt across both terminals. If they're not, something is wrong with your update.

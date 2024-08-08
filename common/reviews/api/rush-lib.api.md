@@ -104,6 +104,7 @@ export class CobuildConfiguration {
     readonly cobuildContextId: string | undefined;
     readonly cobuildFeatureEnabled: boolean;
     readonly cobuildLeafProjectLogOnlyAllowed: boolean;
+    readonly cobuildOrchestrationOnlyAllowed: boolean;
     readonly cobuildRunnerId: string;
     // (undocumented)
     createLockProviderAsync(terminal: ITerminal): Promise<void>;
@@ -234,6 +235,7 @@ export class EnvironmentConfiguration {
     static get buildCacheWriteAllowed(): boolean | undefined;
     static get cobuildContextId(): string | undefined;
     static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined;
+    static get cobuildOrchestrationOnlyAllowed(): boolean | undefined;
     static get cobuildRunnerId(): string | undefined;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
     //
@@ -269,6 +271,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_COBUILD_CONTEXT_ID: "RUSH_COBUILD_CONTEXT_ID";
     readonly RUSH_COBUILD_RUNNER_ID: "RUSH_COBUILD_RUNNER_ID";
     readonly RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED";
+    readonly RUSH_COBUILD_ORCHESTRATION_ONLY_ALLOWED: "RUSH_COBUILD_ORCHESTRATION_ONLY_ALLOWED";
     readonly RUSH_GIT_BINARY_PATH: "RUSH_GIT_BINARY_PATH";
     readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
     readonly _RUSH_RECURSIVE_RUSHX_CALL: "_RUSH_RECURSIVE_RUSHX_CALL";
@@ -625,6 +628,7 @@ export interface IOperationRunnerContext {
 
 // @alpha (undocumented)
 export interface IOperationSettings {
+    allowCobuildOrchestration?: boolean;
     dependsOnAdditionalFiles?: string[];
     dependsOnEnvVars?: string[];
     disableBuildCacheForOperation?: boolean;

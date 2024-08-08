@@ -1,18 +1,16 @@
 {
+  "$schema": "../../../../../../../libraries/rush-lib/src/schemas/rush-project.schema.json",
   "operationSettings": [
     {
       "operationName": "_phase:build",
       "outputFolderNames": ["dist"],
-      "sharding": {
-        "count": 75,
-        "shardOperationSettings": {
-          "weight": 10
-        }
-      }
+      "allowCobuildOrchestration": true,
+      "disableBuildCacheForOperation": true
     },
     {
       "operationName": "_phase:build:shard",
-      "weight": 1
+      "weight": 1,
+      "allowCobuildOrchestration": true
     }
   ]
 }
