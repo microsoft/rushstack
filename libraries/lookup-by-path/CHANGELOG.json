@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/lookup-by-path",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/lookup-by-path_v0.1.0",
+      "date": "Thu, 08 Aug 2024 22:08:25 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Extract LookupByPath from @rushstack/rush-lib."
+          }
+        ]
+      }
+    }
+  ]
+}
