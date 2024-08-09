@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix rush-pnpm patch-commit",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
