@@ -24,13 +24,19 @@ import { LastInstallFlag } from '../api/LastInstallFlag';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import type { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
-interface IAutoinstallerOptions {
+/**
+ * @beta
+ */
+export interface IAutoinstallerOptions {
   autoinstallerName: string;
   rushConfiguration: RushConfiguration;
   rushGlobalFolder: RushGlobalFolder;
   restrictConsoleOutput?: boolean;
 }
 
+/**
+ * @beta
+ */
 export class Autoinstaller {
   public readonly name: string;
 

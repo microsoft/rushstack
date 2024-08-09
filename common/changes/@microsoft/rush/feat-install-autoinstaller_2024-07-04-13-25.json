@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a new `rush install-autoinstaller` command that ensures that the specified autoinstaller is installed.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
