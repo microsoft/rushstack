@@ -364,12 +364,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
   }
 
-  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace): boolean {
-    if (!super.canSkipInstall(lastModifiedDate, subspace)) {
+  protected async canSkipInstallAsync(lastModifiedDate: Date, subspace: Subspace): Promise<boolean> {
+    const parentCanSkipInstall: boolean = await super.canSkipInstallAsync(lastModifiedDate, subspace);
+    if (!parentCanSkipInstall) {
       return false;
     }
-
-    const potentiallyChangedFiles: string[] = [];
 
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // Add workspace file. This file is only modified when workspace packages change.
@@ -378,26 +377,28 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         'pnpm-workspace.yaml'
       );
 
-      if (FileSystem.exists(pnpmWorkspaceFilename)) {
-        potentiallyChangedFiles.push(pnpmWorkspaceFilename);
+      const isPnpmWorkspaceFileCurrent: boolean = await Utilities.isFileTimestampCurrentAsync(
+        lastModifiedDate,
+        [pnpmWorkspaceFilename],
+        false
+      );
+      if (!isPnpmWorkspaceFileCurrent) {
+        return false;
       }
     }
 
     // Also consider timestamps for all the project node_modules folders, as well as the package.json
     // files
     // Example: [ "C:\MyRepo\projects\projectA\node_modules", "C:\MyRepo\projects\projectA\package.json" ]
-    potentiallyChangedFiles.push(
-      ...subspace.getProjects().map((project) => {
-        return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
-      }),
-      ...subspace.getProjects().map((project) => {
-        return path.join(project.projectFolder, FileConstants.PackageJson);
-      })
-    );
+    const potentiallyChangedFiles: string[] = [];
+    for (const { projectFolder } of subspace.getProjects()) {
+      potentiallyChangedFiles.push(`${projectFolder}/${RushConstants.nodeModulesFolderName}`);
+      potentiallyChangedFiles.push(`${projectFolder}/${FileConstants.PackageJson}`);
+    }
 
     // NOTE: If any of the potentiallyChangedFiles does not exist, then isFileTimestampCurrent()
     // returns false.
-    return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
+    return await Utilities.isFileTimestampCurrentAsync(lastModifiedDate, potentiallyChangedFiles, true);
   }
 
   /**
