@@ -99,6 +99,25 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           ? new DisjointSet()
           : undefined;
 
+        for (const operation of recordByOperation.keys()) {
+          if (
+            operation.settings?.allowCobuildOrchestration &&
+            !cobuildConfiguration?.cobuildOrchestrationOnlyAllowed
+          ) {
+            throw new Error(
+              `Operation ${operation.name} is not allowed to run without the cobuild orchestration experiment enabled. You must use the RUSH_COBUILD_ORCHESTRATION_ONLY_ALLOWED environment variable to enable that mode.`
+            );
+          }
+          if (
+            operation.settings?.allowCobuildOrchestration &&
+            !operation.settings.disableBuildCacheForOperation
+          ) {
+            throw new Error(
+              `Operation ${operation.name} must have disableBuildCacheForOperation set to true when using the cobuild orchestration experiment. This is to prevent implicit cache dependencies for this operation.`
+            );
+          }
+        }
+
         await Async.forEachAsync(
           recordByOperation.keys(),
           async (operation: Operation) => {
@@ -258,7 +277,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             phase,
             configHash,
             terminal: buildCacheTerminal,
-            operationMetadataManager
+            operationMetadataManager,
+            operation: record.operation
           });
 
           // Try to acquire the cobuild lock
@@ -359,15 +379,17 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             if (cobuildCompletedState) {
               const { status, cacheId } = cobuildCompletedState;
 
+              if (record.operation.settings?.allowCobuildOrchestration) {
+                // This should only be enabled if the experiment for cobuild orchestration is enabled.
+                return status;
+              }
+
               const restoreFromCacheSuccess: boolean = await restoreCacheAsync(
                 cobuildLock.projectBuildCache,
                 cacheId
               );
 
               if (restoreFromCacheSuccess) {
-                if (cobuildCompletedState) {
-                  return cobuildCompletedState.status;
-                }
                 return status;
               }
             } else if (!buildCacheContext.isCacheReadAttempted && buildCacheContext.isCacheReadAllowed) {
@@ -569,7 +591,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     phase,
     configHash,
     terminal,
-    operationMetadataManager
+    operationMetadataManager,
+    operation
   }: {
     buildCacheContext: IOperationBuildCacheContext;
     buildCacheConfiguration: BuildCacheConfiguration | undefined;
@@ -578,10 +601,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     configHash: string;
     terminal: ITerminal;
     operationMetadataManager: OperationMetadataManager | undefined;
+    operation: Operation;
   }): Promise<ProjectBuildCache | undefined> {
     if (!buildCacheContext.projectBuildCache) {
       const { cacheDisabledReason } = buildCacheContext;
-      if (cacheDisabledReason) {
+      if (cacheDisabledReason && !operation.settings?.allowCobuildOrchestration) {
         terminal.writeVerboseLine(cacheDisabledReason);
         return;
       }
@@ -863,7 +887,7 @@ export function clusterOperations(
   for (const [operation, { cacheDisabledReason }] of operationBuildCacheMap) {
     const { associatedProject: project, associatedPhase: phase } = operation;
     if (project && phase) {
-      if (cacheDisabledReason) {
+      if (cacheDisabledReason && !operation.settings?.allowCobuildOrchestration) {
         /**
          * Group the project build cache disabled with its consumers. This won't affect too much in
          * a monorepo with high build cache coverage.

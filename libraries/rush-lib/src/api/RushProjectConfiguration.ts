@@ -140,6 +140,11 @@ export interface IOperationSettings {
    *  determined by the -p flag.
    */
   weight?: number;
+
+  /**
+   * If true, this operation can use cobuilds for orchestration without restoring build cache entries.
+   */
+  allowCobuildOrchestration?: boolean;
 }
 
 interface IOldRushProjectJson {
