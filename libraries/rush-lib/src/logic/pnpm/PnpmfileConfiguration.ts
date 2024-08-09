@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as semver from 'semver';
 import { FileSystem, Import, type IPackageJson, JsonFile, MapExtensions } from '@rushstack/node-core-library';
 
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
@@ -91,11 +92,16 @@ export class PnpmfileConfiguration {
     if ((rushConfiguration.packageManagerOptions as PnpmOptionsConfiguration).useWorkspaces) {
       const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions();
       const preferredVersions: Map<string, string> = new Map();
-      MapExtensions.mergeFromMap(preferredVersions, commonVersionsConfiguration.getAllPreferredVersions());
       MapExtensions.mergeFromMap(
         preferredVersions,
         rushConfiguration.getImplicitlyPreferredVersions(subspace)
       );
+      commonVersionsConfiguration.getAllPreferredVersions().forEach((version, name) => {
+        // Use the most restrictive version range available
+        if (!preferredVersions.has(name) || semver.subset(version, preferredVersions.get(name)!)) {
+          preferredVersions.set(name, version);
+        }
+      });
       allPreferredVersions = MapExtensions.toObject(preferredVersions);
       allowedAlternativeVersions = MapExtensions.toObject(
         commonVersionsConfiguration.allowedAlternativeVersions

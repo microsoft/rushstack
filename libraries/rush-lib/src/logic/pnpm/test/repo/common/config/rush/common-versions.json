@@ -1,0 +1,8 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/common-versions.schema.json",
+  "preferredVersions": {
+    "core-js": "3.6.5",
+    "delay": "4.0.0",
+    "find-up": "5.0.0"
+  }
+}
