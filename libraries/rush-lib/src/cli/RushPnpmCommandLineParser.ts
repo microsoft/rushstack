@@ -443,6 +443,7 @@ export class RushPnpmCommandLineParser {
     }
 
     const subspaceTempFolder: string = this._subspace.getSubspaceTempFolder();
+    const subspaceConfigFolder: string = this._subspace.getSubspaceConfigFolder();
 
     switch (commandName) {
       case 'patch-commit': {
@@ -468,8 +469,8 @@ export class RushPnpmCommandLineParser {
 
         if (!objectsAreDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
           const commonTempPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
-          const rushPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
-          // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
+          const rushPnpmPatchesFolder: string = `${subspaceConfigFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
+          // Copy (or delete) common\temp\patches\ --> common\config\subspaces\<subspace_name>\pnpm-patches\
           if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
             FileSystem.ensureEmptyFolder(rushPnpmPatchesFolder);
             // eslint-disable-next-line no-console

@@ -496,7 +496,9 @@ export abstract class BaseInstallManager {
       const commonTempPnpmPatchesFolder: string = `${subspace.getSubspaceTempFolder()}/${
         RushConstants.pnpmPatchesFolderName
       }`;
-      const rushPnpmPatchesFolder: string = `${this.rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
+      const rushPnpmPatchesFolder: string = `${subspace.getSubspaceConfigFolder()}/${
+        RushConstants.pnpmPatchesCommonFolderName
+      }`;
       let rushPnpmPatches: FolderItem[] | undefined;
       try {
         rushPnpmPatches = await FileSystem.readFolderItemsAsync(rushPnpmPatchesFolder);
