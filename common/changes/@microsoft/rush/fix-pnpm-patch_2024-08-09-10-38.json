@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where `rush-pnpm patch-commit` would not correctly resolve patch files when the subspaces feature is enabled.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
