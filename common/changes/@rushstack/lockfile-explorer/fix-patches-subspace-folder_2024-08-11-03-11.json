@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/lockfile-explorer"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer",
+  "email": "iclanton@users.noreply.github.com"
+}
