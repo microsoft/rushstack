@@ -27,8 +27,9 @@ export interface ISubspaceOptions {
 }
 
 interface ISubspaceDetail {
-  subspaceConfigFolder: string;
-  subspaceTempFolder: string;
+  subspaceConfigFolderPath: string;
+  subspacePnpmPatchesFolderPath: string;
+  subspaceTempFolderPath: string;
   tempShrinkwrapFilename: string;
   tempShrinkwrapPreinstallFilename: string;
 }
@@ -74,8 +75,8 @@ export class Subspace {
   public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
     if (!this._cachedPnpmOptionsInitialized) {
       // Calculate these outside the try/catch block since their error messages shouldn't be annotated:
-      const subspaceConfigFolder: string = this.getSubspaceConfigFolder();
-      const subspaceTempFolder: string = this.getSubspaceTempFolder();
+      const subspaceConfigFolder: string = this.getSubspaceConfigFolderPath();
+      const subspaceTempFolder: string = this.getSubspaceTempFolderPath();
       try {
         this._cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
           `${subspaceConfigFolder}/${RushConstants.pnpmConfigFilename}`,
@@ -99,7 +100,8 @@ export class Subspace {
   private _ensureDetail(): ISubspaceDetail {
     if (!this._detail) {
       const rushConfiguration: RushConfiguration = this._rushConfiguration;
-      let subspaceConfigFolder: string;
+      let subspaceConfigFolderPath: string;
+      let subspacePnpmPatchesFolderPath: string;
 
       if (rushConfiguration.subspacesFeatureEnabled) {
         if (!rushConfiguration.pnpmOptions.useWorkspaces) {
@@ -114,7 +116,7 @@ export class Subspace {
         // Example: C:\MyRepo\common\config\subspaces\my-subspace
         const standardSubspaceConfigFolder: string = `${rushConfiguration.commonFolder}/config/subspaces/${this.subspaceName}`;
 
-        subspaceConfigFolder = standardSubspaceConfigFolder;
+        subspaceConfigFolderPath = standardSubspaceConfigFolder;
 
         if (this._splitWorkspaceCompatibility && this.subspaceName.startsWith('split_')) {
           if (FileSystem.exists(standardSubspaceConfigFolder + '/pnpm-lock.yaml')) {
@@ -132,47 +134,52 @@ export class Subspace {
           }
           const project: RushConfigurationProject = this._projects[0];
 
-          subspaceConfigFolder = `${project.projectFolder}/subspace/${this.subspaceName}`;
+          subspaceConfigFolderPath = `${project.projectFolder}/subspace/${this.subspaceName}`;
 
           // Ensure that this project does not have it's own pnpmfile.cjs or .npmrc file
           if (FileSystem.exists(`${project.projectFolder}/.npmrc`)) {
             throw new Error(
-              `The project level configuration file ${project.projectFolder}/.npmrc is no longer valid. Please use a ${subspaceConfigFolder}/.npmrc file instead.`
+              `The project level configuration file ${project.projectFolder}/.npmrc is no longer valid. Please use a ${subspaceConfigFolderPath}/.npmrc file instead.`
             );
           }
           if (FileSystem.exists(`${project.projectFolder}/.pnpmfile.cjs`)) {
             throw new Error(
-              `The project level configuration file ${project.projectFolder}/.pnpmfile.cjs is no longer valid. Please use a ${subspaceConfigFolder}/.pnpmfile.cjs file instead.`
+              `The project level configuration file ${project.projectFolder}/.pnpmfile.cjs is no longer valid. Please use a ${subspaceConfigFolderPath}/.pnpmfile.cjs file instead.`
             );
           }
         }
 
-        if (!FileSystem.exists(subspaceConfigFolder)) {
+        if (!FileSystem.exists(subspaceConfigFolderPath)) {
           throw new Error(
             `The configuration folder for the "${this.subspaceName}" subspace does not exist: ` +
-              subspaceConfigFolder
+              subspaceConfigFolderPath
           );
         }
+
+        subspacePnpmPatchesFolderPath = `${subspaceConfigFolderPath}/${RushConstants.pnpmPatchesCommonFolderName}`;
       } else {
         // Example: C:\MyRepo\common\config\rush
-        subspaceConfigFolder = rushConfiguration.commonRushConfigFolder;
+        subspaceConfigFolderPath = rushConfiguration.commonRushConfigFolder;
+        // Example: C:\MyRepo\common\pnpm-patches
+        subspacePnpmPatchesFolderPath = `${rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
       }
 
       // Example: C:\MyRepo\common\temp
       const commonTempFolder: string =
         EnvironmentConfiguration.rushTempFolderOverride || rushConfiguration.commonTempFolder;
 
-      let subspaceTempFolder: string;
+      let subspaceTempFolderPath: string;
       if (rushConfiguration.subspacesFeatureEnabled) {
         // Example: C:\MyRepo\common\temp\my-subspace
-        subspaceTempFolder = path.join(commonTempFolder, this.subspaceName);
+        subspaceTempFolderPath = path.join(commonTempFolder, this.subspaceName);
       } else {
         // Example: C:\MyRepo\common\temp
-        subspaceTempFolder = commonTempFolder;
+        subspaceTempFolderPath = commonTempFolder;
       }
 
       // Example: C:\MyRepo\common\temp\my-subspace\pnpm-lock.yaml
-      const tempShrinkwrapFilename: string = subspaceTempFolder + `/${rushConfiguration.shrinkwrapFilename}`;
+      const tempShrinkwrapFilename: string =
+        subspaceTempFolderPath + `/${rushConfiguration.shrinkwrapFilename}`;
 
       /// From "C:\MyRepo\common\temp\pnpm-lock.yaml" --> "C:\MyRepo\common\temp\pnpm-lock-preinstall.yaml"
       const parsedPath: path.ParsedPath = path.parse(tempShrinkwrapFilename);
@@ -182,8 +189,9 @@ export class Subspace {
       );
 
       this._detail = {
-        subspaceConfigFolder,
-        subspaceTempFolder,
+        subspaceConfigFolderPath,
+        subspacePnpmPatchesFolderPath,
+        subspaceTempFolderPath,
         tempShrinkwrapFilename,
         tempShrinkwrapPreinstallFilename
       };
@@ -197,8 +205,19 @@ export class Subspace {
    * Example: `common/config/subspaces/my-subspace`
    * @beta
    */
-  public getSubspaceConfigFolder(): string {
-    return this._ensureDetail().subspaceConfigFolder;
+  public getSubspaceConfigFolderPath(): string {
+    return this._ensureDetail().subspaceConfigFolderPath;
+  }
+
+  /**
+   * Returns the full path of the folder containing this subspace's configuration files such as `pnpm-lock.yaml`.
+   *
+   * Example: `common/config/subspaces/my-subspace/pnpm-patches` (subspaces feature enabled)
+   * Example: `common/config/pnpm-patches` (subspaces feature disabled)
+   * @beta
+   */
+  public getSubspacePnpmPatchesFolderPath(): string {
+    return this._ensureDetail().subspacePnpmPatchesFolderPath;
   }
 
   /**
@@ -207,8 +226,8 @@ export class Subspace {
    * Example: `common/temp/subspaces/my-subspace`
    * @beta
    */
-  public getSubspaceTempFolder(): string {
-    return this._ensureDetail().subspaceTempFolder;
+  public getSubspaceTempFolderPath(): string {
+    return this._ensureDetail().subspaceTempFolderPath;
   }
 
   /**
@@ -247,7 +266,7 @@ export class Subspace {
    * @beta
    */
   public getCommonVersionsFilePath(): string {
-    return this._ensureDetail().subspaceConfigFolder + '/' + RushConstants.commonVersionsFilename;
+    return this._ensureDetail().subspaceConfigFolderPath + '/' + RushConstants.commonVersionsFilename;
   }
 
   /**
@@ -257,7 +276,7 @@ export class Subspace {
    * @beta
    */
   public getPnpmConfigFilePath(): string {
-    return this._ensureDetail().subspaceConfigFolder + '/' + RushConstants.pnpmConfigFilename;
+    return this._ensureDetail().subspaceConfigFolderPath + '/' + RushConstants.pnpmConfigFilename;
   }
 
   /**
@@ -299,7 +318,7 @@ export class Subspace {
    * @beta
    */
   public getRepoStateFilePath(): string {
-    return this._ensureDetail().subspaceConfigFolder + '/' + RushConstants.repoStateFilename;
+    return this._ensureDetail().subspaceConfigFolderPath + '/' + RushConstants.repoStateFilename;
   }
 
   /**
@@ -317,7 +336,7 @@ export class Subspace {
    * @beta
    */
   public getCommittedShrinkwrapFilename(): string {
-    const subspaceConfigFolderPath: string = this.getSubspaceConfigFolder();
+    const subspaceConfigFolderPath: string = this.getSubspaceConfigFolderPath();
     return path.join(subspaceConfigFolderPath, this._rushConfiguration.shrinkwrapFilename);
   }
 
@@ -329,7 +348,7 @@ export class Subspace {
    * @beta
    */
   public getPnpmfilePath(): string {
-    const subspaceConfigFolderPath: string = this.getSubspaceConfigFolder();
+    const subspaceConfigFolderPath: string = this.getSubspaceConfigFolderPath();
 
     const pnpmFilename: string = (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager)
       .pnpmfileFilename;

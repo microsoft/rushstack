@@ -175,7 +175,7 @@ export class DeployAction extends BaseRushAction {
         }
 
         if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
-          subspace.pnpmInstallFolder = project.subspace.getSubspaceTempFolder();
+          subspace.pnpmInstallFolder = project.subspace.getSubspaceTempFolderPath();
         }
         subspaces.set(subspace.subspaceName, subspace);
       }

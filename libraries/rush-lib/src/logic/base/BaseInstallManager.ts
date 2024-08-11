@@ -100,7 +100,7 @@ export abstract class BaseInstallManager {
     this.options = options;
 
     this._commonTempLinkFlag = new FlagFile(
-      options.subspace.getSubspaceTempFolder(),
+      options.subspace.getSubspaceTempFolderPath(),
       RushConstants.lastLinkFlagFilename,
       {}
     );
@@ -165,7 +165,7 @@ export abstract class BaseInstallManager {
     }
 
     // eslint-disable-next-line no-console
-    console.log('\n' + Colorize.bold(`Checking installation in "${subspace.getSubspaceTempFolder()}"`));
+    console.log('\n' + Colorize.bold(`Checking installation in "${subspace.getSubspaceTempFolderPath()}"`));
 
     // This marker file indicates that the last "rush install" completed successfully.
     // Always perform a clean install if filter flags were provided. Additionally, if
@@ -276,7 +276,7 @@ export abstract class BaseInstallManager {
     // the pnpm-sync will generate the pnpm-sync.json based on lockfile
     if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
       const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
-      const dotPnpmFolder: string = `${subspace.getSubspaceTempFolder()}/node_modules/.pnpm`;
+      const dotPnpmFolder: string = `${subspace.getSubspaceTempFolderPath()}/node_modules/.pnpm`;
 
       // we have an edge case here
       // if a package.json has no dependencies, pnpm will still generate the pnpm-lock.yaml but not .pnpm folder
@@ -367,7 +367,7 @@ export abstract class BaseInstallManager {
     // Consider the timestamp on the node_modules folder; if someone tampered with it
     // or deleted it entirely, then we can't skip this install
     potentiallyChangedFiles.push(
-      path.join(subspace.getSubspaceTempFolder(), RushConstants.nodeModulesFolderName)
+      path.join(subspace.getSubspaceTempFolderPath(), RushConstants.nodeModulesFolderName)
     );
 
     // Additionally, if they pulled an updated shrinkwrap file from Git,
@@ -472,7 +472,7 @@ export abstract class BaseInstallManager {
       }
 
       extraNpmrcLines.push(
-        `global-pnpmfile=${subspace.getSubspaceTempFolder()}/${RushConstants.pnpmfileGlobalFilename}`
+        `global-pnpmfile=${subspace.getSubspaceTempFolderPath()}/${RushConstants.pnpmfileGlobalFilename}`
       );
     }
 
@@ -480,8 +480,8 @@ export abstract class BaseInstallManager {
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
     const npmrcText: string | undefined = Utilities.syncNpmrc({
-      sourceNpmrcFolder: subspace.getSubspaceConfigFolder(),
-      targetNpmrcFolder: subspace.getSubspaceTempFolder(),
+      sourceNpmrcFolder: subspace.getSubspaceConfigFolderPath(),
+      targetNpmrcFolder: subspace.getSubspaceTempFolderPath(),
       linesToPrepend: extraNpmrcLines,
       createIfMissing: this.rushConfiguration.subspacesFeatureEnabled
     });
@@ -493,10 +493,10 @@ export abstract class BaseInstallManager {
 
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // Copy the committed patches folder if using pnpm
-      const commonTempPnpmPatchesFolder: string = `${subspace.getSubspaceTempFolder()}/${
+      const commonTempPnpmPatchesFolder: string = `${subspace.getSubspaceTempFolderPath()}/${
         RushConstants.pnpmPatchesFolderName
       }`;
-      const rushPnpmPatchesFolder: string = `${subspace.getSubspaceConfigFolder()}/${RushConstants.pnpmPatchesCommonFolderName}`;
+      const rushPnpmPatchesFolder: string = subspace.getSubspacePnpmPatchesFolderPath();
       let rushPnpmPatches: FolderItem[] | undefined;
       try {
         rushPnpmPatches = await FileSystem.readFolderItemsAsync(rushPnpmPatchesFolder);
@@ -549,7 +549,7 @@ export abstract class BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(
         this.rushConfiguration,
-        subspace.getSubspaceTempFolder(),
+        subspace.getSubspaceTempFolderPath(),
         subspace
       );
 
@@ -849,7 +849,7 @@ ${gitLfsHookHandling}
         If user does not set auto-install-peers in both pnpm-config.json and .npmrc, rush will default it to "false"
       */
       const isAutoInstallPeersInNpmrc: boolean = isVariableSetInNpmrcFile(
-        subspace.getSubspaceConfigFolder(),
+        subspace.getSubspaceConfigFolderPath(),
         'auto-install-peers'
       );
 
@@ -877,7 +877,7 @@ ${gitLfsHookHandling}
         If user does not set resolution-mode in pnpm-config.json and .npmrc, rush will default it to "highest"
       */
       const isResolutionModeInNpmrc: boolean = isVariableSetInNpmrcFile(
-        subspace.getSubspaceConfigFolder(),
+        subspace.getSubspaceConfigFolderPath(),
         'resolution-mode'
       );
 
@@ -1059,7 +1059,7 @@ ${gitLfsHookHandling}
           .packageManagerWrapper as PnpmPackageManager;
 
         FileSystem.deleteFile(
-          path.join(subspace.getSubspaceTempFolder(), pnpmPackageManager.internalShrinkwrapRelativePath)
+          path.join(subspace.getSubspaceTempFolderPath(), pnpmPackageManager.internalShrinkwrapRelativePath)
         );
       }
     }
