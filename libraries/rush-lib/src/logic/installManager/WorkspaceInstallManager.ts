@@ -89,7 +89,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // eslint-disable-next-line no-console
-    console.log('\n' + Colorize.bold('Updating workspace files in ' + subspace.getSubspaceTempFolder()));
+    console.log('\n' + Colorize.bold('Updating workspace files in ' + subspace.getSubspaceTempFolderPath()));
 
     const shrinkwrapWarnings: string[] = [];
 
@@ -181,7 +181,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // To generate the workspace file, we will add each project to the file as we loop through and validate
     const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(
-      path.join(subspace.getSubspaceTempFolder(), 'pnpm-workspace.yaml')
+      path.join(subspace.getSubspaceTempFolderPath(), 'pnpm-workspace.yaml')
     );
 
     // For pnpm package manager, we need to handle dependenciesMeta changes in package.json. See more: https://pnpm.io/package_json#dependenciesmeta
@@ -189,7 +189,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Build a object for dependenciesMeta settings in projects' package.json
     // key is the package path, value is the dependenciesMeta info for that package
     const expectedDependenciesMetaByProjectRelativePath: Record<string, IDependenciesMetaTable> = {};
-    const commonTempFolder: string = subspace.getSubspaceTempFolder();
+    const commonTempFolder: string = subspace.getSubspaceTempFolderPath();
     const rushJsonFolder: string = this.rushConfiguration.rushJsonFolder;
     // get the relative path from common temp folder to repo root folder
     const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);
@@ -374,7 +374,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // Add workspace file. This file is only modified when workspace packages change.
       const pnpmWorkspaceFilename: string = path.join(
-        subspace.getSubspaceTempFolder(),
+        subspace.getSubspaceTempFolderPath(),
         'pnpm-workspace.yaml'
       );
 
@@ -416,7 +416,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     const commonNodeModulesFolder: string = path.join(
-      subspace.getSubspaceTempFolder(),
+      subspace.getSubspaceTempFolderPath(),
       RushConstants.nodeModulesFolderName
     );
 
@@ -448,7 +448,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         '\n' +
           Colorize.bold(
             `Running "${this.rushConfiguration.packageManager} install" in` +
-              ` ${subspace.getSubspaceTempFolder()}`
+              ` ${subspace.getSubspaceTempFolderPath()}`
           ) +
           '\n'
       );
@@ -501,7 +501,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           {
             command: packageManagerFilename,
             args: installArgs,
-            workingDirectory: subspace.getSubspaceTempFolder(),
+            workingDirectory: subspace.getSubspaceTempFolderPath(),
             environment: packageManagerEnv,
             suppressOutput: false,
             onStdoutStreamChunk: onPnpmStdoutChunk
@@ -556,7 +556,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Ensure that node_modules folders exist after install, since the timestamps on these folders are used
     // to determine if the install can be skipped
     const projectNodeModulesFolders: string[] = [
-      path.join(subspace.getSubspaceTempFolder(), RushConstants.nodeModulesFolderName),
+      path.join(subspace.getSubspaceTempFolderPath(), RushConstants.nodeModulesFolderName),
       ...this.rushConfiguration.projects.map((project) => {
         return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
       })
@@ -622,7 +622,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.rushConfiguration.subspacesFeatureEnabled &&
       this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility
     ) {
-      const tempNodeModulesPath: string = `${subspace.getSubspaceTempFolder()}/node_modules`;
+      const tempNodeModulesPath: string = `${subspace.getSubspaceTempFolderPath()}/node_modules`;
       const modulesFilePath: string = `${tempNodeModulesPath}/${RushConstants.pnpmModulesFilename}`;
       if (
         subspace.subspaceName.startsWith('split_') &&
@@ -676,7 +676,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     await new FlagFile(
-      subspace.getSubspaceTempFolder(),
+      subspace.getSubspaceTempFolderPath(),
       RushConstants.lastLinkFlagFilename,
       {}
     ).createAsync();

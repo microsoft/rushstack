@@ -210,5 +210,5 @@ export function getCommonTempFlag(
     }
   }
 
-  return new LastInstallFlag(subspace.getSubspaceTempFolder(), currentState);
+  return new LastInstallFlag(subspace.getSubspaceTempFolderPath(), currentState);
 }

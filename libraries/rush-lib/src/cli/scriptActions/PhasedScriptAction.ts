@@ -304,7 +304,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     if (!this._runsBeforeInstall) {
       // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are removed
       const lastLinkFlag: FlagFile = new FlagFile(
-        this.rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
+        this.rushConfiguration.defaultSubspace.getSubspaceTempFolderPath(),
         RushConstants.lastLinkFlagFilename,
         {}
       );

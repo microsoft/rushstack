@@ -1466,9 +1466,11 @@ export class Subspace {
     // @beta
     getRepoStateFilePath(): string;
     // @beta
-    getSubspaceConfigFolder(): string;
+    getSubspaceConfigFolderPath(): string;
     // @beta
-    getSubspaceTempFolder(): string;
+    getSubspacePnpmPatchesFolderPath(): string;
+    // @beta
+    getSubspaceTempFolderPath(): string;
     // @beta
     getTempShrinkwrapFilename(): string;
     // @beta
