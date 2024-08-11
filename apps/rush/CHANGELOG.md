@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 10 Aug 2024 02:27:14 GMT and should not be manually modified.
+This log was last generated on Sun, 11 Aug 2024 05:02:05 GMT and should not be manually modified.
+
+## 5.131.4
+Sun, 11 Aug 2024 05:02:05 GMT
+
+### Updates
+
+- Revert a breaking change in Rush 5.131.3 where pnpm patches were moved from `common/pnpm-patches` to `common/config/rush/pnpm-patches`.
 
 ## 5.131.3
 Sat, 10 Aug 2024 02:27:14 GMT
