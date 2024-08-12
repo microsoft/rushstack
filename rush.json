@@ -543,19 +543,22 @@
       "packageName": "eslint-7-7-test",
       "projectFolder": "build-tests/eslint-7-7-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-7-11-test",
       "projectFolder": "build-tests/eslint-7-11-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-7-test",
       "projectFolder": "build-tests/eslint-7-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-8-test",
@@ -568,6 +571,13 @@
       "projectFolder": "build-tests/eslint-bulk-suppressions-test",
       "reviewCategory": "tests",
       "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-bulk-suppressions-test-legacy",
+      "projectFolder": "build-tests/eslint-bulk-suppressions-test-legacy",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "package-extractor-test-01",
