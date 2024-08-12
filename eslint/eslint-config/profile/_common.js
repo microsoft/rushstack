@@ -389,7 +389,9 @@ function buildRules(profile) {
               // Unused function arguments often indicate a mistake in JavaScript code.  However in TypeScript code,
               // the compiler catches most of those mistakes, and unused arguments are fairly common for type signatures
               // that are overriding a base class method or implementing an interface.
-              args: 'none'
+              args: 'none',
+              // Unused error arguments are common and useful for inspection when a debugger is attached.
+              caughtErrors: 'none'
             }
           ],
 
