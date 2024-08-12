@@ -75,6 +75,9 @@
    * This design avoids unnecessary churn in this file.
    */
   "allowedAlternativeVersions": {
+    "@typescript-eslint/parser": [
+      "~6.19.0" // Used by build-tests/eslint-7(-*)-test projects
+    ],
     "eslint": [
       "7.7.0", // Used by build-tests/eslint-7-7-test
       "7.11.0", // Used by build-tests/eslint-7-11-test
