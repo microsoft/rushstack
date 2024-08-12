@@ -1,6 +1,6 @@
 {
-  "name": "eslint-bulk-suppressions-test",
-  "description": "Sample code to test eslint bulk suppressions",
+  "name": "eslint-bulk-suppressions-test-legacy",
+  "description": "Sample code to test eslint bulk suppressions for versions of eslint < 8.57.0",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -8,11 +8,13 @@
   },
   "devDependencies": {
     "@rushstack/eslint-bulk": "workspace:*",
+    "@rushstack/eslint-config": "3.7.1",
     "@rushstack/eslint-patch": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@typescript-eslint/parser": "~8.1.0",
-    "eslint": "~8.57.0",
+    "@typescript-eslint/parser": "~6.19.0",
+    "eslint": "8.23.1",
+    "eslint-oldest": "npm:eslint@8.6.0",
     "local-node-rig": "workspace:*",
     "typescript": "~5.4.2"
   }
