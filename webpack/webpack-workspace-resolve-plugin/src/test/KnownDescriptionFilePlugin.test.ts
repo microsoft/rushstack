@@ -9,10 +9,10 @@ import { WorkspaceLayoutCache } from '../WorkspaceLayoutCache';
 type ResolveCallback = Parameters<Resolver['hooks']['result']['tapAsync']>[1];
 type ResolveRequest = Parameters<ResolveCallback>[0];
 type ResolveContext = Parameters<ResolveCallback>[1];
-// eslint-disable-next-line @rushstack/no-new-null
 type WrappedResolve = (
   request: ResolveRequest,
   resolveContext: ResolveContext
+  // eslint-disable-next-line @rushstack/no-new-null
 ) => [Error | false | null | undefined, ResolveRequest | undefined];
 
 const parsedJson: Record<string, object> = {
