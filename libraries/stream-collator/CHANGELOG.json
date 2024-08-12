@@ -2,6 +2,24 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "4.1.64",
+      "tag": "@rushstack/stream-collator_v4.1.64",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.26`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.63",
       "tag": "@rushstack/stream-collator_v4.1.63",
       "date": "Fri, 02 Aug 2024 17:26:42 GMT",

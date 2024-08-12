@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 27 Jul 2024 00:10:27 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Aug 2024 22:16:04 GMT and should not be manually modified.
+
+## 5.6.0
+Mon, 12 Aug 2024 22:16:04 GMT
+
+### Minor changes
+
+- Add a `ignoreSchemaField` option to the `JsonSchema.validateObject` options to ignore `$schema` properties and add an options object argument to `JsonSchema.validateObjectWithCallback` with the same `ignoreSchemaField` option.
 
 ## 5.5.1
 Sat, 27 Jul 2024 00:10:27 GMT
