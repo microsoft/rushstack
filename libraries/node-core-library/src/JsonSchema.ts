@@ -370,8 +370,11 @@ export class JsonSchema {
     this.ensureCompiled();
 
     if (options?.ignoreSchemaField) {
-      jsonObject = { ...jsonObject };
-      delete jsonObject.$schema;
+      const {
+        $schema,
+        ...remainder
+      } = jsonObject;
+      jsonObject = remainder;
     }
 
     if (this._validator && !this._validator(jsonObject)) {
