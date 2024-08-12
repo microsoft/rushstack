@@ -441,7 +441,12 @@ export interface IJsonSchemaLoadOptions {
 }
 
 // @public
-export interface IJsonSchemaValidateOptions {
+export interface IJsonSchemaValidateObjectWithOptions {
+    ignoreSchemaField?: boolean;
+}
+
+// @public
+export interface IJsonSchemaValidateOptions extends IJsonSchemaValidateObjectWithOptions {
     customErrorHeader?: string;
 }
 
@@ -675,7 +680,7 @@ export class JsonSchema {
     static fromLoadedObject(schemaObject: JsonObject, options?: IJsonSchemaFromObjectOptions): JsonSchema;
     get shortName(): string;
     validateObject(jsonObject: JsonObject, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
-    validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
+    validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void, options?: IJsonSchemaValidateObjectWithOptions): void;
 }
 
 // @public

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-utilities",
+      "comment": "Update the schema for `.loc.json` files to allow string names that include the `$` character.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-utilities"
+}
