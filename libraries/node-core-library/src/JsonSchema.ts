@@ -349,8 +349,7 @@ export class JsonSchema {
     this.validateObjectWithCallback(
       jsonObject,
       (errorInfo: IJsonSchemaErrorInfo) => {
-        const prefix: string =
-          options?.customErrorHeader ?? 'JSON validation failed:';
+        const prefix: string = options?.customErrorHeader ?? 'JSON validation failed:';
 
         throw new Error(prefix + os.EOL + filenameForErrors + os.EOL + errorInfo.details);
       },
@@ -371,6 +370,7 @@ export class JsonSchema {
 
     if (options?.ignoreSchemaField) {
       const {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         $schema,
         ...remainder
       } = jsonObject;
