@@ -26,7 +26,6 @@ export const normalizedImportsRule: RuleModule = {
       description:
         'Prevents and normalizes references to relative imports using paths that make unnecessary ' +
         'traversals (ex. "../blah/module" in directory "blah" -> "./module")',
-      recommended: 'strict',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     },
     fixable: 'code'

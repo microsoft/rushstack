@@ -36,7 +36,7 @@ export function getRootDirectoryFromContext(
   let rootDirectory: string | undefined;
   try {
     // First attempt to get the root directory from the tsconfig baseUrl, then the program current directory
-    const program: Program | null = (
+    const program: Program | null | undefined = (
       context.sourceCode?.parserServices ?? ESLintUtils.getParserServices(context)
     ).program;
     rootDirectory = program?.getCompilerOptions().baseUrl ?? program?.getCurrentDirectory();

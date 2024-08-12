@@ -22,7 +22,6 @@ export const noTransitiveDependencyImportsRule: RuleModule = {
       description:
         'Prevents referencing imports that are transitive dependencies, ie. imports that are not ' +
         'direct dependencies of the package.',
-      recommended: 'strict',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     }
   },

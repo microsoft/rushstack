@@ -26,7 +26,6 @@ export const noExternalLocalImportsRule: RuleModule = {
       description:
         'Prevents referencing relative imports that are either not under the "rootDir" specified in ' +
         'the tsconfig.json (if one exists) or not under the package directory.',
-      recommended: 'strict',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     }
   },

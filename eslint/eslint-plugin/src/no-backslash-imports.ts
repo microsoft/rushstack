@@ -22,7 +22,6 @@ export const noBackslashImportsRule: RuleModule = {
     schema: [],
     docs: {
       description: 'Prevents imports using paths that use backslashes',
-      recommended: 'strict',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     },
     fixable: 'code'
