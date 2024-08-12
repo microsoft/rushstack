@@ -176,6 +176,14 @@ export interface IRushConfigurationJson {
 }
 
 /**
+ * This represents the JSON data structure for the "projects.json" configuration file.
+ * See projects.schema.json for documentation
+ */
+export interface IRushProjectsJson {
+  projects: IRushConfigurationProjectJson[];
+}
+
+/**
  * The filter parameters to search from all projects
  */
 export interface IRushConfigurationProjectsFilter {
@@ -246,6 +254,13 @@ export class RushConfiguration {
    * @internal
    */
   public readonly rushConfigurationJson: IRushConfigurationJson;
+
+  /**
+   * Gets the JSON data structure for the "projects.json" configuration file.
+   *
+   * @internal
+   */
+  public readonly rushProjectsJson: IRushProjectsJson | undefined;
 
   /**
    * The absolute path to the "rush.json" configuration file that was loaded to construct this object.
@@ -867,9 +882,27 @@ export class RushConfiguration {
       throw new InternalError('The default subspace was not created');
     }
 
+    // Look for rush projects in a seperate file first, and if it does not exist fallback onto rush.json
+
+    const resolvedRushProjectsFilename: string = path.resolve(
+      `${path.dirname(this.rushJsonFile)}/${RushConstants.rushProjectsFilename}`
+    );
+    let rushProjects: IRushConfigurationProjectJson[];
+    if (FileSystem.exists(resolvedRushProjectsFilename)) {
+      // Load the rush.json before we fix the casing. If the case is wrong on a case-sensitive filesystem,
+      // the next line show throw.
+      const rushProjectsJson: IRushProjectsJson = JsonFile.load(resolvedRushProjectsFilename);
+      rushProjects = rushProjectsJson.projects;
+    } else if (this.rushConfigurationJson.projects) {
+      rushProjects = this.rushConfigurationJson.projects;
+    } else {
+      throw new Error(
+        `The rush.json is missing a projects field, and a seperate ${RushConstants.rushProjectsFilename} file is missing. Rush projects need to be defined in one of the two places.`
+      );
+    }
     // Sort the projects array in alphabetical order.  This ensures that the packages
     // are processed in a deterministic order by the various Rush algorithms.
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = this.rushConfigurationJson.projects.slice(0);
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = rushProjects.slice(0);
     sortedProjectJsons.sort((a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) =>
       a.packageName.localeCompare(b.packageName)
     );

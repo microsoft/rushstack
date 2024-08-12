@@ -354,5 +354,5 @@
     }
   },
   "additionalProperties": false,
-  "required": ["rushVersion", "projects"]
+  "required": ["rushVersion"]
 }

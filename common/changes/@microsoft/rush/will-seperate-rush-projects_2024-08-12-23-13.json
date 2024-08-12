@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Adds the option of seperately defining the list of rush projects in a dedicated \"rush-projects.json\" file",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
