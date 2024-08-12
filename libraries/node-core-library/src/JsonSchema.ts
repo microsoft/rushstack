@@ -350,7 +350,7 @@ export class JsonSchema {
       jsonObject,
       (errorInfo: IJsonSchemaErrorInfo) => {
         const prefix: string =
-          options && options.customErrorHeader ? options.customErrorHeader : 'JSON validation failed:';
+          options?.customErrorHeader ?? 'JSON validation failed:';
 
         throw new Error(prefix + os.EOL + filenameForErrors + os.EOL + errorInfo.details);
       },
