@@ -14,7 +14,7 @@ const LOC_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(locJsonSchema);
 export function parseLocJson({ content, filePath, ignoreString }: IParseFileOptions): ILocalizationFile {
   const parsedFile: ILocalizationFile = JsonFile.parseString(content);
   try {
-    LOC_JSON_SCHEMA.validateObject(parsedFile, filePath);
+    LOC_JSON_SCHEMA.validateObject(parsedFile, filePath, { ignoreSchemaField: true });
   } catch (e) {
     throw new Error(`The loc file is invalid. Error: ${e}`);
   }
