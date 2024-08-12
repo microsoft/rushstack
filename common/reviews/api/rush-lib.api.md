@@ -1232,7 +1232,7 @@ export class RushConfiguration {
     // Warning: (ae-forgotten-export) The symbol "IRushProjectsJson" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    readonly rushProjectsJson: IRushProjectsJson;
+    readonly rushProjectsJson: IRushProjectsJson | undefined;
     readonly shrinkwrapFilename: string;
     get shrinkwrapFilePhrase(): string;
     // @beta

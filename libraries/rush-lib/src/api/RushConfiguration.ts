@@ -887,15 +887,20 @@ export class RushConfiguration {
     const resolvedRushProjectsFilename: string = path.resolve(
       `${path.dirname(this.rushJsonFile)}/${RushConstants.rushProjectsFilename}`
     );
-    let rushProjects: IRushConfigurationProjectJson[];
+    let rushProjects: IRushConfigurationProjectJson[] | undefined;
     if (FileSystem.exists(resolvedRushProjectsFilename)) {
-      // Load the rush.json before we fix the casing. If the case is wrong on a case-sensitive filesystem,
-      // the next line show throw.
       const rushProjectsJson: IRushProjectsJson = JsonFile.load(resolvedRushProjectsFilename);
       rushProjects = rushProjectsJson.projects;
-    } else if (this.rushConfigurationJson.projects) {
+    }
+    if (this.rushConfigurationJson.projects) {
+      if (rushProjects) {
+        throw new Error(
+          `When using the ${RushConstants.rushProjectsFilename} configuration file, the "projects" field of the ${RushConstants.rushJsonFilename} is no longer allowed.`
+        );
+      }
       rushProjects = this.rushConfigurationJson.projects;
-    } else {
+    }
+    if (!rushProjects) {
       throw new Error(
         `The rush.json is missing a projects field, and a seperate ${RushConstants.rushProjectsFilename} file is missing. Rush projects need to be defined in one of the two places.`
       );
