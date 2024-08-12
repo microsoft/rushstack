@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { sep as directorySeparator } from 'node:path';
-
 import type { Resolver } from 'webpack';
 import type { IPrefixMatch } from '@rushstack/lookup-by-path';
 import type { IResolveContext, WorkspaceLayoutCache } from './WorkspaceLayoutCache';
-
-import { normalizeToSlash } from './normalizeSlashes';
 
 type ResolveRequest = Parameters<Resolver['hooks']['resolveStep']['call']>[1];
 
@@ -51,14 +47,14 @@ export class KnownPackageDependenciesPlugin {
         const fullySpecified: boolean | undefined = isPackageRoot ? false : request.fullySpecified;
         const relativePath: string = isPackageRoot
           ? '.'
-          : `.${normalizeToSlash(rawRequest.slice(match.index))}`;
+          : `.${cache.normalizeToSlash(rawRequest.slice(match.index))}`;
         const { descriptionFileRoot } = match.value;
         const obj: ResolveRequest = {
           ...request,
           path: descriptionFileRoot,
           descriptionFileRoot,
           descriptionFileData: undefined,
-          descriptionFilePath: `${descriptionFileRoot}${directorySeparator}package.json`,
+          descriptionFilePath: `${descriptionFileRoot}${cache.resolverPathSeparator}package.json`,
 
           relativePath: relativePath,
           request: relativePath,

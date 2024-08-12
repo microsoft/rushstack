@@ -5,8 +5,6 @@ import { sep as directorySeparator } from 'node:path';
 
 import { LookupByPath, type IPrefixMatch } from '@rushstack/lookup-by-path';
 
-import { normalizeToPlatform } from './normalizeSlashes';
-
 /**
  * Information about a local or installed npm package.
  * @beta
@@ -74,6 +72,23 @@ export interface IWorkspaceLayoutCacheOptions {
    * The parsed cache data. File reading is left as an exercise for the caller.
    */
   cacheData: IResolverCacheFile;
+  /**
+   * The directory separator used in the `path` field of the resolver inputs.
+   * Will usually be `path.sep`.
+   */
+  resolverPathSeparator?: '/' | '\\';
+}
+
+function preservePath(path: string): string {
+  return path;
+}
+
+function backslashToSlash(path: string): string {
+  return path.replace(/\\/g, '/');
+}
+
+function slashToBackslash(path: string): string {
+  return path.replace(/\//g, '\\');
 }
 
 /**
@@ -90,14 +105,31 @@ export class WorkspaceLayoutCache {
    */
   public readonly contextForPackage: WeakMap<object, IResolveContext>;
 
+  public readonly resolverPathSeparator: string;
+  public readonly normalizeToSlash: (input: string) => string;
+  public readonly normalizeToPlatform: (input: string) => string;
+
   public constructor(options: IWorkspaceLayoutCacheOptions) {
-    const { workspaceRoot, cacheData } = options;
+    const { workspaceRoot, cacheData, resolverPathSeparator = directorySeparator } = options;
+
+    if (resolverPathSeparator !== '/' && resolverPathSeparator !== '\\') {
+      throw new Error(`Unsupported directory separator: ${resolverPathSeparator}`);
+    }
 
     const resolveContexts: IResolveContext[] = [];
-    const contextLookup: LookupByPath<IResolveContext> = new LookupByPath(undefined, directorySeparator);
+    const contextLookup: LookupByPath<IResolveContext> = new LookupByPath(undefined, resolverPathSeparator);
 
     this.contextLookup = contextLookup;
     this.contextForPackage = new WeakMap<object, IResolveContext>();
+
+    const normalizeToSlash: (path: string) => string =
+      resolverPathSeparator === '/' ? preservePath : backslashToSlash;
+    const normalizeToPlatform: (path: string) => string =
+      resolverPathSeparator === '/' ? preservePath : slashToBackslash;
+
+    this.resolverPathSeparator = resolverPathSeparator;
+    this.normalizeToSlash = normalizeToSlash;
+    this.normalizeToPlatform = normalizeToPlatform;
 
     // Internal class due to coupling of deserialization.
     class ResolveContext implements IResolveContext {
@@ -113,7 +145,7 @@ export class WorkspaceLayoutCache {
 
       public get descriptionFileRoot(): string {
         if (!this._descriptionFileRoot) {
-          this._descriptionFileRoot = `${workspaceRoot}${directorySeparator}${normalizeToPlatform(this._serialized.root)}`;
+          this._descriptionFileRoot = `${workspaceRoot}${resolverPathSeparator}${normalizeToPlatform(this._serialized.root)}`;
         }
         return this._descriptionFileRoot;
       }
@@ -148,7 +180,7 @@ export class WorkspaceLayoutCache {
           contextLookup.setItemFromSegments(
             concat<string>(
               // Root is normalized to platform slashes
-              LookupByPath.iteratePathSegments(descriptionFileRoot, directorySeparator),
+              LookupByPath.iteratePathSegments(descriptionFileRoot, resolverPathSeparator),
               // Subpaths are platform-agnostic
               LookupByPath.iteratePathSegments(file, '/')
             ),

@@ -31,6 +31,7 @@ export interface ISerializedResolveContext {
 // @beta
 export interface IWorkspaceLayoutCacheOptions {
     cacheData: IResolverCacheFile;
+    resolverPathSeparator?: '/' | '\\';
     workspaceRoot: string;
 }
 
@@ -44,6 +45,12 @@ export class WorkspaceLayoutCache {
     constructor(options: IWorkspaceLayoutCacheOptions);
     readonly contextForPackage: WeakMap<object, IResolveContext>;
     readonly contextLookup: LookupByPath<IResolveContext>;
+    // (undocumented)
+    readonly normalizeToPlatform: (input: string) => string;
+    // (undocumented)
+    readonly normalizeToSlash: (input: string) => string;
+    // (undocumented)
+    readonly resolverPathSeparator: string;
 }
 
 // @beta

@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { sep as directorySeparator } from 'node:path';
-
 import type { Resolver } from 'webpack';
 import type { IPrefixMatch } from '@rushstack/lookup-by-path';
 import type { IResolveContext, WorkspaceLayoutCache } from './WorkspaceLayoutCache';
-
-import { normalizeToSlash } from './normalizeSlashes';
 
 type ResolveRequest = Parameters<Resolver['hooks']['resolveStep']['call']>[1];
 
@@ -76,9 +72,9 @@ export class KnownDescriptionFilePlugin {
         // No description file available, proceed without.
         if (!match) return callback();
 
-        const relativePath: string = `.${normalizeToSlash(path.slice(match.index))}`;
+        const relativePath: string = `.${cache.normalizeToSlash(path.slice(match.index))}`;
         const descriptionFileRoot: string = `${path.slice(0, match.index)}`;
-        const descriptionFilePath: string = `${descriptionFileRoot}${directorySeparator}package.json`;
+        const descriptionFilePath: string = `${descriptionFileRoot}${cache.resolverPathSeparator}package.json`;
 
         const { contextForPackage } = cache;
 
