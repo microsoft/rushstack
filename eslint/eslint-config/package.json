@@ -23,7 +23,7 @@
     "typescript"
   ],
   "peerDependencies": {
-    "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0",
+    "eslint": "^8.57.0",
     "typescript": ">=4.7.0"
   },
   "dependencies": {
