@@ -1267,7 +1267,7 @@ importers:
         version: link:../../eslint/eslint-bulk
       '@rushstack/eslint-config':
         specifier: 3.7.0
-        version: 3.7.0(eslint@8.23.1)(typescript@5.4.2)
+        version: 3.7.0(eslint@8.57.0)(supports-color@8.1.1)(typescript@5.4.2)
       '@rushstack/eslint-patch':
         specifier: workspace:*
         version: link:../../eslint/eslint-patch
@@ -1279,10 +1279,13 @@ importers:
         version: link:../../libraries/node-core-library
       '@typescript-eslint/parser':
         specifier: ~6.19.0
-        version: 6.19.1(eslint@8.23.1)(typescript@5.4.2)
+        version: 6.19.1(eslint@8.57.0)(supports-color@8.1.1)(typescript@5.4.2)
       eslint:
-        specifier: 8.23.1
-        version: 8.23.1
+        specifier: ~8.57.0
+        version: 8.57.0(supports-color@8.1.1)
+      eslint-8.23:
+        specifier: npm:eslint@8.23.1
+        version: /eslint@8.23.1
       eslint-oldest:
         specifier: npm:eslint@8.6.0
         version: /eslint@8.6.0
@@ -3544,7 +3547,7 @@ importers:
         version: 1.0.4(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@radix-ui/react-icons':
         specifier: ~1.1.1
-        version: 1.1.1(react@17.0.2)
+        version: 1.1.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@radix-ui/react-scroll-area':
         specifier: ~1.0.2
         version: 1.0.5(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
@@ -7313,16 +7316,6 @@ packages:
       eslint-visitor-keys: 3.4.3
     dev: true
 
-  /@eslint-community/eslint-utils@4.4.0(eslint@8.23.1):
-    resolution: {integrity: sha512-1/sA4dwrzBAyeUoQ6oxahHKmrZvsnLCg4RfxW3ZFGGmQkSNQPFNLV9CUEFQP1x9EYXHTo5p6xdhZM1Ne9p/AfA==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-    peerDependencies:
-      eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
-    dependencies:
-      eslint: 8.23.1
-      eslint-visitor-keys: 3.4.3
-    dev: true
-
   /@eslint-community/eslint-utils@4.4.0(eslint@8.57.0):
     resolution: {integrity: sha512-1/sA4dwrzBAyeUoQ6oxahHKmrZvsnLCg4RfxW3ZFGGmQkSNQPFNLV9CUEFQP1x9EYXHTo5p6xdhZM1Ne9p/AfA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
@@ -8894,6 +8887,7 @@ packages:
   /@humanwhocodes/config-array@0.11.14(supports-color@8.1.1):
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
     engines: {node: '>=10.10.0'}
+    deprecated: Use @eslint/config-array instead
     dependencies:
       '@humanwhocodes/object-schema': 2.0.2
       debug: 4.3.4(supports-color@8.1.1)
@@ -8939,6 +8933,7 @@ packages:
 
   /@humanwhocodes/object-schema@2.0.2:
     resolution: {integrity: sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==}
+    deprecated: Use @eslint/object-schema instead
 
   /@istanbuljs/load-nyc-config@1.1.0:
     resolution: {integrity: sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ==}
@@ -9755,13 +9750,13 @@ packages:
     dependencies:
       '@babel/runtime': 7.24.0
       '@radix-ui/primitive': 1.0.1
-      '@radix-ui/react-compose-refs': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-context': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-context': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@radix-ui/react-presence': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@radix-ui/react-primitive': 1.0.3(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-use-previous': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-use-size': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-controllable-state': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-previous': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-size': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@types/react': 17.0.74
       '@types/react-dom': 17.0.25
       react: 17.0.2
@@ -9782,20 +9777,21 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.24.0
-      '@radix-ui/react-compose-refs': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-context': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-context': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@radix-ui/react-primitive': 1.0.3(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@radix-ui/react-slot': 1.0.2(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-slot': 1.0.2(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@types/react': 17.0.74
       '@types/react-dom': 17.0.25
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
     dev: true
 
-  /@radix-ui/react-compose-refs@1.0.1(@types/react@17.0.74)(react@17.0.2):
+  /@radix-ui/react-compose-refs@1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2):
     resolution: {integrity: sha512-fDSBgd44FKHa1FRMU59qBMPFcl2PZE+2nmqunj+BWFyYYjnhIDWL2ItDs3rrbJDQOtzt5nIebLCQc4QRfz6LJw==}
     peerDependencies:
       '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0
     peerDependenciesMeta:
       '@types/react':
@@ -9803,13 +9799,15 @@ packages:
     dependencies:
       '@babel/runtime': 7.24.0
       '@types/react': 17.0.74
+      '@types/react-dom': 17.0.25
       react: 17.0.2
     dev: true
 
-  /@radix-ui/react-context@1.0.1(@types/react@17.0.74)(react@17.0.2):
+  /@radix-ui/react-context@1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2):
     resolution: {integrity: sha512-ebbrdFoYTcuZ0v4wG5tedGnp9tzcV8awzsxYph7gXUyvnNLuTIcCk1q17JEbnVhXAKG9oX3KtchwiMIAYp9NLg==}
     peerDependencies:
       '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0
     peerDependenciesMeta:
       '@types/react':
@@ -9817,13 +9815,15 @@ packages:
     dependencies:
       '@babel/runtime': 7.24.0
       '@types/react': 17.0.74
+      '@types/react-dom': 17.0.25
       react: 17.0.2
     dev: true
 
-  /@radix-ui/react-direction@1.0.1(@types/react@17.0.74)(react@17.0.2):
+  /@radix-ui/react-direction@1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2):
     resolution: {integrity: sha512-RXcvnXgyvYvBEOhCBuddKecVkoMiI10Jcm5cTI7abJRAHYfFxeu+FBQs/DvdxSYucxR5mna0dNsL6QFlds5TMA==}
     peerDependencies:
       '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0
     peerDependenciesMeta:
       '@types/react':
@@ -9831,29 +9831,36 @@ packages:
     dependencies:
       '@babel/runtime': 7.24.0
       '@types/react': 17.0.74
+      '@types/react-dom': 17.0.25
       react: 17.0.2
     dev: true
 
-  /@radix-ui/react-icons@1.1.1(react@17.0.2):
+  /@radix-ui/react-icons@1.1.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2):
     resolution: {integrity: sha512-xc3wQC59rsFylVbSusQCrrM+6695ppF730Q6yqzhRdqDcRNWIm2R6ngpzBoSOQMcwnq4p805F+Gr7xo4fmtN1A==}
     peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.x || ^17.x || ^18.x
     dependencies:
+      '@types/react': 17.0.74
+      '@types/react-dom': 17.0.25
       react: 17.0.2
     dev: true
 
-  /@radix-ui/react-id@1.0.1(@types/react@17.0.74)(react@17.0.2):
+  /@radix-ui/react-id@1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2):
     resolution: {integrity: sha512-tI7sT/kqYp8p96yGWY1OAnLHrqDgzHefRBKQ2YAkBS5ja7QLcZ9Z/uY7bEjPUatf8RomoXM8/1sMj1IJaE5UzQ==}
     peerDependencies:
       '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
     dependencies:
       '@babel/runtime': 7.24.0
-      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@types/react': 17.0.74
+      '@types/react-dom': 17.0.25
       react: 17.0.2
     dev: true
 
@@ -9871,8 +9878,8 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.24.0
-      '@radix-ui/react-compose-refs': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@types/react': 17.0.74
       '@types/react-dom': 17.0.25
       react: 17.0.2
@@ -9893,7 +9900,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.24.0
-      '@radix-ui/react-slot': 1.0.2(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-slot': 1.0.2(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@types/react': 17.0.74
       '@types/react-dom': 17.0.25
       react: 17.0.2
@@ -9916,13 +9923,13 @@ packages:
       '@babel/runtime': 7.24.0
       '@radix-ui/primitive': 1.0.1
       '@radix-ui/react-collection': 1.0.3(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@radix-ui/react-compose-refs': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-context': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-direction': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-id': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-context': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-direction': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-id': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@radix-ui/react-primitive': 1.0.3(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@radix-ui/react-use-callback-ref': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-callback-ref': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-controllable-state': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@types/react': 17.0.74
       '@types/react-dom': 17.0.25
       react: 17.0.2
@@ -9945,31 +9952,33 @@ packages:
       '@babel/runtime': 7.24.0
       '@radix-ui/number': 1.0.1
       '@radix-ui/primitive': 1.0.1
-      '@radix-ui/react-compose-refs': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-context': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-direction': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-context': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-direction': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@radix-ui/react-presence': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@radix-ui/react-primitive': 1.0.3(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@radix-ui/react-use-callback-ref': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-callback-ref': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@types/react': 17.0.74
       '@types/react-dom': 17.0.25
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
     dev: true
 
-  /@radix-ui/react-slot@1.0.2(@types/react@17.0.74)(react@17.0.2):
+  /@radix-ui/react-slot@1.0.2(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2):
     resolution: {integrity: sha512-YeTpuq4deV+6DusvVUW4ivBgnkHwECUu0BiN43L5UCDFgdhsRUWAghhTF5MbvNTPzmiFOx90asDSUjWuCNapwg==}
     peerDependencies:
       '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
     dependencies:
       '@babel/runtime': 7.24.0
-      '@radix-ui/react-compose-refs': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@types/react': 17.0.74
+      '@types/react-dom': 17.0.25
       react: 17.0.2
     dev: true
 
@@ -9988,23 +9997,24 @@ packages:
     dependencies:
       '@babel/runtime': 7.24.0
       '@radix-ui/primitive': 1.0.1
-      '@radix-ui/react-context': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-direction': 1.0.1(@types/react@17.0.74)(react@17.0.2)
-      '@radix-ui/react-id': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-context': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-direction': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-id': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@radix-ui/react-presence': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@radix-ui/react-primitive': 1.0.3(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@radix-ui/react-roving-focus': 1.0.4(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-controllable-state': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@types/react': 17.0.74
       '@types/react-dom': 17.0.25
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
     dev: true
 
-  /@radix-ui/react-use-callback-ref@1.0.1(@types/react@17.0.74)(react@17.0.2):
+  /@radix-ui/react-use-callback-ref@1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2):
     resolution: {integrity: sha512-D94LjX4Sp0xJFVaoQOd3OO9k7tpBYNOXdVhkltUbGv2Qb9OXdrg/CpsjlZv7ia14Sylv398LswWBVVu5nqKzAQ==}
     peerDependencies:
       '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0
     peerDependenciesMeta:
       '@types/react':
@@ -10012,28 +10022,32 @@ packages:
     dependencies:
       '@babel/runtime': 7.24.0
       '@types/react': 17.0.74
+      '@types/react-dom': 17.0.25
       react: 17.0.2
     dev: true
 
-  /@radix-ui/react-use-controllable-state@1.0.1(@types/react@17.0.74)(react@17.0.2):
+  /@radix-ui/react-use-controllable-state@1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2):
     resolution: {integrity: sha512-Svl5GY5FQeN758fWKrjM6Qb7asvXeiZltlT4U2gVfl8Gx5UAv2sMR0LWo8yhsIZh2oQ0eFdZ59aoOOMV7b47VA==}
     peerDependencies:
       '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
     dependencies:
       '@babel/runtime': 7.24.0
-      '@radix-ui/react-use-callback-ref': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-callback-ref': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@types/react': 17.0.74
+      '@types/react-dom': 17.0.25
       react: 17.0.2
     dev: true
 
-  /@radix-ui/react-use-layout-effect@1.0.1(@types/react@17.0.74)(react@17.0.2):
+  /@radix-ui/react-use-layout-effect@1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2):
     resolution: {integrity: sha512-v/5RegiJWYdoCvMnITBkNNx6bCj20fiaJnWtRkU18yITptraXjffz5Qbn05uOiQnOvi+dbkznkoaMltz1GnszQ==}
     peerDependencies:
       '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0
     peerDependenciesMeta:
       '@types/react':
@@ -10041,13 +10055,15 @@ packages:
     dependencies:
       '@babel/runtime': 7.24.0
       '@types/react': 17.0.74
+      '@types/react-dom': 17.0.25
       react: 17.0.2
     dev: true
 
-  /@radix-ui/react-use-previous@1.0.1(@types/react@17.0.74)(react@17.0.2):
+  /@radix-ui/react-use-previous@1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2):
     resolution: {integrity: sha512-cV5La9DPwiQ7S0gf/0qiD6YgNqM5Fk97Kdrlc5yBcrF3jyEZQwm7vYFqMo4IfeHgJXsRaMvLABFtd0OVEmZhDw==}
     peerDependencies:
       '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0
     peerDependenciesMeta:
       '@types/react':
@@ -10055,21 +10071,24 @@ packages:
     dependencies:
       '@babel/runtime': 7.24.0
       '@types/react': 17.0.74
+      '@types/react-dom': 17.0.25
       react: 17.0.2
     dev: true
 
-  /@radix-ui/react-use-size@1.0.1(@types/react@17.0.74)(react@17.0.2):
+  /@radix-ui/react-use-size@1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2):
     resolution: {integrity: sha512-ibay+VqrgcaI6veAojjofPATwledXiSmX+C0KrBk/xgpX9rBzPV3OsfwlhQdUOFbh+LKQorLYT+xTXW9V8yd0g==}
     peerDependencies:
       '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
     dependencies:
       '@babel/runtime': 7.24.0
-      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react@17.0.74)(react@17.0.2)
+      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react-dom@17.0.25)(@types/react@17.0.74)(react@17.0.2)
       '@types/react': 17.0.74
+      '@types/react-dom': 17.0.25
       react: 17.0.2
     dev: true
 
@@ -10175,29 +10194,6 @@ packages:
       - supports-color
     dev: true
 
-  /@rushstack/eslint-config@3.7.0(eslint@8.23.1)(typescript@5.4.2):
-    resolution: {integrity: sha512-9AWc0eIElbrTm9VTfdjaXeqrS7gGoZJ7oMmUdUX0dtPzYrWBHLCuR4eOgLo3pQIC+HyLFt/AzX1ontQTJlWjtQ==}
-    peerDependencies:
-      eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
-      typescript: '>=4.7.0'
-    dependencies:
-      '@rushstack/eslint-patch': 1.10.3
-      '@rushstack/eslint-plugin': 0.15.1(eslint@8.23.1)(typescript@5.4.2)
-      '@rushstack/eslint-plugin-packlets': 0.9.1(eslint@8.23.1)(typescript@5.4.2)
-      '@rushstack/eslint-plugin-security': 0.8.1(eslint@8.23.1)(typescript@5.4.2)
-      '@typescript-eslint/eslint-plugin': 6.19.1(@typescript-eslint/parser@6.19.1)(eslint@8.23.1)(typescript@5.4.2)
-      '@typescript-eslint/parser': 6.19.1(eslint@8.23.1)(typescript@5.4.2)
-      '@typescript-eslint/typescript-estree': 6.19.1(supports-color@8.1.1)(typescript@5.4.2)
-      '@typescript-eslint/utils': 6.19.1(eslint@8.23.1)(typescript@5.4.2)
-      eslint: 8.23.1
-      eslint-plugin-promise: 6.1.1(eslint@8.23.1)
-      eslint-plugin-react: 7.33.2(eslint@8.23.1)
-      eslint-plugin-tsdoc: 0.3.0
-      typescript: 5.4.2
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /@rushstack/eslint-config@3.7.0(eslint@8.57.0)(supports-color@8.1.1)(typescript@5.4.2):
     resolution: {integrity: sha512-9AWc0eIElbrTm9VTfdjaXeqrS7gGoZJ7oMmUdUX0dtPzYrWBHLCuR4eOgLo3pQIC+HyLFt/AzX1ontQTJlWjtQ==}
     peerDependencies:
@@ -10287,19 +10283,6 @@ packages:
       - typescript
     dev: true
 
-  /@rushstack/eslint-plugin-packlets@0.9.1(eslint@8.23.1)(typescript@5.4.2):
-    resolution: {integrity: sha512-CN7RKrrpBj+UXzOYUxArzV7lUKX8UlZBJWPzdAI8HFYg0g1EVASjGRlcq3Q+e1KRZ1MeliVigRsoodfmJCHv+A==}
-    peerDependencies:
-      eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
-    dependencies:
-      '@rushstack/tree-pattern': 0.3.3
-      '@typescript-eslint/utils': 6.19.1(eslint@8.23.1)(typescript@5.4.2)
-      eslint: 8.23.1
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
-    dev: true
-
   /@rushstack/eslint-plugin-packlets@0.9.1(eslint@8.57.0)(supports-color@8.1.1)(typescript@5.4.2):
     resolution: {integrity: sha512-CN7RKrrpBj+UXzOYUxArzV7lUKX8UlZBJWPzdAI8HFYg0g1EVASjGRlcq3Q+e1KRZ1MeliVigRsoodfmJCHv+A==}
     peerDependencies:
@@ -10365,19 +10348,6 @@ packages:
       - typescript
     dev: true
 
-  /@rushstack/eslint-plugin-security@0.8.1(eslint@8.23.1)(typescript@5.4.2):
-    resolution: {integrity: sha512-XEMt9dvifXO6mmIfVggUNd4PP8pZlewn1D7OGXdMtLasRUiOkZGOYu24Kj5fgLnPDH1xqAdG9okhPZwT4yar7w==}
-    peerDependencies:
-      eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
-    dependencies:
-      '@rushstack/tree-pattern': 0.3.3
-      '@typescript-eslint/utils': 6.19.1(eslint@8.23.1)(typescript@5.4.2)
-      eslint: 8.23.1
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
-    dev: true
-
   /@rushstack/eslint-plugin-security@0.8.1(eslint@8.57.0)(supports-color@8.1.1)(typescript@5.4.2):
     resolution: {integrity: sha512-XEMt9dvifXO6mmIfVggUNd4PP8pZlewn1D7OGXdMtLasRUiOkZGOYu24Kj5fgLnPDH1xqAdG9okhPZwT4yar7w==}
     peerDependencies:
@@ -10438,19 +10408,6 @@ packages:
       '@rushstack/tree-pattern': 0.3.3
       '@typescript-eslint/utils': 6.19.1(eslint@7.7.0)(typescript@5.4.2)
       eslint: 7.7.0
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
-    dev: true
-
-  /@rushstack/eslint-plugin@0.15.1(eslint@8.23.1)(typescript@5.4.2):
-    resolution: {integrity: sha512-xgu6jwMscLCX0SWCDAUEpIFou3ApyTkJC76zgrWs6oOH1oeF8PLfzkdwhaSF8QptXG6oxXV7aqGMkDwH5ToBwQ==}
-    peerDependencies:
-      eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
-    dependencies:
-      '@rushstack/tree-pattern': 0.3.3
-      '@typescript-eslint/utils': 6.19.1(eslint@8.23.1)(typescript@5.4.2)
-      eslint: 8.23.1
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -13373,35 +13330,6 @@ packages:
       - supports-color
     dev: true
 
-  /@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1)(eslint@8.23.1)(typescript@5.4.2):
-    resolution: {integrity: sha512-roQScUGFruWod9CEyoV5KlCYrubC/fvG8/1zXuT0WTcxX87GnMMmnksMwSg99lo1xiKrBzw2icsJPMAw1OtKxg==}
-    engines: {node: ^16.0.0 || >=18.0.0}
-    peerDependencies:
-      '@typescript-eslint/parser': ^6.0.0 || ^6.0.0-alpha
-      eslint: ^7.0.0 || ^8.0.0
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      '@eslint-community/regexpp': 4.10.0
-      '@typescript-eslint/parser': 6.19.1(eslint@8.23.1)(typescript@5.4.2)
-      '@typescript-eslint/scope-manager': 6.19.1(typescript@5.4.2)
-      '@typescript-eslint/type-utils': 6.19.1(eslint@8.23.1)(typescript@5.4.2)
-      '@typescript-eslint/utils': 6.19.1(eslint@8.23.1)(typescript@5.4.2)
-      '@typescript-eslint/visitor-keys': 6.19.1(typescript@5.4.2)
-      debug: 4.3.4(supports-color@8.1.1)
-      eslint: 8.23.1
-      graphemer: 1.4.0
-      ignore: 5.3.1
-      natural-compare: 1.4.0
-      semver: 7.5.4
-      ts-api-utils: 1.3.0(typescript@5.4.2)
-      typescript: 5.4.2
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1)(eslint@8.57.0)(supports-color@8.1.1)(typescript@5.4.2):
     resolution: {integrity: sha512-roQScUGFruWod9CEyoV5KlCYrubC/fvG8/1zXuT0WTcxX87GnMMmnksMwSg99lo1xiKrBzw2icsJPMAw1OtKxg==}
     engines: {node: ^16.0.0 || >=18.0.0}
@@ -13545,27 +13473,6 @@ packages:
       '@typescript-eslint/visitor-keys': 6.19.1(typescript@5.4.2)
       debug: 4.3.4(supports-color@8.1.1)
       eslint: 7.7.0
-      typescript: 5.4.2
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-  /@typescript-eslint/parser@6.19.1(eslint@8.23.1)(typescript@5.4.2):
-    resolution: {integrity: sha512-WEfX22ziAh6pRE9jnbkkLGp/4RhTpffr2ZK5bJ18M8mIfA8A+k97U9ZyaXCEJRlmMHh7R9MJZWXp/r73DzINVQ==}
-    engines: {node: ^16.0.0 || >=18.0.0}
-    peerDependencies:
-      eslint: ^7.0.0 || ^8.0.0
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      '@typescript-eslint/scope-manager': 6.19.1(typescript@5.4.2)
-      '@typescript-eslint/types': 6.19.1(typescript@5.4.2)
-      '@typescript-eslint/typescript-estree': 6.19.1(supports-color@8.1.1)(typescript@5.4.2)
-      '@typescript-eslint/visitor-keys': 6.19.1(typescript@5.4.2)
-      debug: 4.3.4(supports-color@8.1.1)
-      eslint: 8.23.1
       typescript: 5.4.2
     transitivePeerDependencies:
       - supports-color
@@ -13737,26 +13644,6 @@ packages:
       '@typescript-eslint/utils': 6.19.1(eslint@7.7.0)(typescript@5.4.2)
       debug: 4.3.4(supports-color@8.1.1)
       eslint: 7.7.0
-      ts-api-utils: 1.3.0(typescript@5.4.2)
-      typescript: 5.4.2
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-  /@typescript-eslint/type-utils@6.19.1(eslint@8.23.1)(typescript@5.4.2):
-    resolution: {integrity: sha512-0vdyld3ecfxJuddDjACUvlAeYNrHP/pDeQk2pWBR2ESeEzQhg52DF53AbI9QCBkYE23lgkhLCZNkHn2hEXXYIg==}
-    engines: {node: ^16.0.0 || >=18.0.0}
-    peerDependencies:
-      eslint: ^7.0.0 || ^8.0.0
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      '@typescript-eslint/typescript-estree': 6.19.1(supports-color@8.1.1)(typescript@5.4.2)
-      '@typescript-eslint/utils': 6.19.1(eslint@8.23.1)(typescript@5.4.2)
-      debug: 4.3.4(supports-color@8.1.1)
-      eslint: 8.23.1
       ts-api-utils: 1.3.0(typescript@5.4.2)
       typescript: 5.4.2
     transitivePeerDependencies:
@@ -13971,25 +13858,6 @@ packages:
       '@typescript-eslint/types': 6.19.1(typescript@5.4.2)
       '@typescript-eslint/typescript-estree': 6.19.1(supports-color@8.1.1)(typescript@5.4.2)
       eslint: 7.7.0
-      semver: 7.5.4
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
-    dev: true
-
-  /@typescript-eslint/utils@6.19.1(eslint@8.23.1)(typescript@5.4.2):
-    resolution: {integrity: sha512-JvjfEZuP5WoMqwh9SPAPDSHSg9FBHHGhjPugSRxu5jMfjvBpq5/sGTD+9M9aQ5sh6iJ8AY/Kk/oUYVEMAPwi7w==}
-    engines: {node: ^16.0.0 || >=18.0.0}
-    peerDependencies:
-      eslint: ^7.0.0 || ^8.0.0
-    dependencies:
-      '@eslint-community/eslint-utils': 4.4.0(eslint@8.23.1)
-      '@types/json-schema': 7.0.15
-      '@types/semver': 7.5.0
-      '@typescript-eslint/scope-manager': 6.19.1(typescript@5.4.2)
-      '@typescript-eslint/types': 6.19.1(typescript@5.4.2)
-      '@typescript-eslint/typescript-estree': 6.19.1(supports-color@8.1.1)(typescript@5.4.2)
-      eslint: 8.23.1
       semver: 7.5.4
     transitivePeerDependencies:
       - supports-color
@@ -18012,15 +17880,6 @@ packages:
       eslint: 7.7.0
     dev: true
 
-  /eslint-plugin-promise@6.1.1(eslint@8.23.1):
-    resolution: {integrity: sha512-tjqWDwVZQo7UIPMeDReOpUgHCmCiH+ePnVT+5zVapL0uuHnegBUs2smM13CzOs2Xb5+MHMRFTs9v24yjba4Oig==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-    peerDependencies:
-      eslint: ^7.0.0 || ^8.0.0
-    dependencies:
-      eslint: 8.23.1
-    dev: true
-
   /eslint-plugin-promise@6.1.1(eslint@8.57.0):
     resolution: {integrity: sha512-tjqWDwVZQo7UIPMeDReOpUgHCmCiH+ePnVT+5zVapL0uuHnegBUs2smM13CzOs2Xb5+MHMRFTs9v24yjba4Oig==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
@@ -18113,31 +17972,6 @@ packages:
       string.prototype.matchall: 4.0.10
     dev: true
 
-  /eslint-plugin-react@7.33.2(eslint@8.23.1):
-    resolution: {integrity: sha512-73QQMKALArI8/7xGLNI/3LylrEYrlKZSb5C9+q3OtOewTnMQi5cT+aE9E41sLCmli3I9PGGmD1yiZydyo4FEPw==}
-    engines: {node: '>=4'}
-    peerDependencies:
-      eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
-    dependencies:
-      array-includes: 3.1.7
-      array.prototype.flatmap: 1.3.2
-      array.prototype.tosorted: 1.1.3
-      doctrine: 2.1.0
-      es-iterator-helpers: 1.0.18
-      eslint: 8.23.1
-      estraverse: 5.3.0
-      jsx-ast-utils: 3.3.5
-      minimatch: 3.1.2
-      object.entries: 1.1.8
-      object.fromentries: 2.0.7
-      object.hasown: 1.1.3
-      object.values: 1.2.0
-      prop-types: 15.8.1
-      resolve: 2.0.0-next.5
-      semver: 6.3.1
-      string.prototype.matchall: 4.0.10
-    dev: true
-
   /eslint-plugin-react@7.33.2(eslint@8.57.0):
     resolution: {integrity: sha512-73QQMKALArI8/7xGLNI/3LylrEYrlKZSb5C9+q3OtOewTnMQi5cT+aE9E41sLCmli3I9PGGmD1yiZydyo4FEPw==}
     engines: {node: '>=4'}
@@ -18196,13 +18030,13 @@ packages:
       eslint-visitor-keys: 1.3.0
     dev: true
 
-  /eslint-utils@3.0.0(eslint@8.23.1):
+  /eslint-utils@3.0.0(eslint@8.57.0):
     resolution: {integrity: sha512-uuQC43IGctw68pJA1RgbQS8/NP7rch6Cwd4j3ZBtgo4/8Flj4eGE7ZYSZRN3iq5pVUv6GPdW5Z1RFleo84uLDA==}
     engines: {node: ^10.0.0 || ^12.0.0 || >= 14.0.0}
     peerDependencies:
       eslint: '>=5'
     dependencies:
-      eslint: 8.23.1
+      eslint: 8.57.0(supports-color@8.1.1)
       eslint-visitor-keys: 2.1.0
     dev: true
 
@@ -18381,7 +18215,7 @@ packages:
       doctrine: 3.0.0
       escape-string-regexp: 4.0.0
       eslint-scope: 7.2.2
-      eslint-utils: 3.0.0(eslint@8.23.1)
+      eslint-utils: 3.0.0(eslint@8.57.0)
       eslint-visitor-keys: 3.4.3
       espree: 9.6.1
       esquery: 1.5.0
@@ -18474,7 +18308,7 @@ packages:
       enquirer: 2.4.1
       escape-string-regexp: 4.0.0
       eslint-scope: 7.2.2
-      eslint-utils: 3.0.0(eslint@8.23.1)
+      eslint-utils: 3.0.0(eslint@8.57.0)
       eslint-visitor-keys: 3.4.3
       espree: 9.6.1
       esquery: 1.5.0
@@ -25215,6 +25049,7 @@ packages:
 
   /rimraf@2.6.3:
     resolution: {integrity: sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
     dependencies:
       glob: 7.2.3
@@ -25222,12 +25057,14 @@ packages:
 
   /rimraf@2.7.1:
     resolution: {integrity: sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
     dependencies:
       glob: 7.2.3
 
   /rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
     dependencies:
       glob: 7.2.3
