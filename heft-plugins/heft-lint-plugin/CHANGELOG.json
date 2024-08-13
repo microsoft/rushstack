@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.3.48",
+      "tag": "@rushstack/heft-lint-plugin_v0.3.48",
+      "date": "Tue, 13 Aug 2024 18:17:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Supported linters (ESLint, TSLint) are now loaded asynchronously"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.47",
       "tag": "@rushstack/heft-lint-plugin_v0.3.47",
       "date": "Mon, 12 Aug 2024 22:16:04 GMT",
