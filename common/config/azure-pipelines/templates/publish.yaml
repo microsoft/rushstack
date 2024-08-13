@@ -4,9 +4,30 @@ parameters:
   - name: BranchName
     type: string
     default: $(Build.SourceBranchName)
+  - name: TestRun
+    type: boolean
+    default: true
 
 steps:
-  - script: 'node common/scripts/install-run-rush.js publish --apply --publish --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details --set-access-level public'
-    displayName: 'Rush Publish (Policy: ${{ parameters.VersionPolicyName }})'
-    env:
-      NPM_AUTH_TOKEN: $(npmToken)
+  - script: 'node common/scripts/install-run-rush.js publish --publish --pack --include-all --release-folder esrp-release'
+    displayName: 'Create TarBallz folder for Rush packages'
+
+  - task: EsrpRelease@7
+    inputs:
+      connectedservicename: 'ODSP-Web-NPM-ESRP'
+      keyvaultname: 'odsp-web-esrp'
+      signcertname: 'be2088dc-be24-46c8-b0b1-aa555603f375'
+      authcertname: 'be2088dc-odsp-web-ESRP'
+      clientid: 'be2088dc-be24-46c8-b0b1-aa555603f375'
+      intent: 'PackageDistribution'
+      folderlocation: '$(Pipeline.Workspace)/esrp-release'
+      waitforreleasecompletion: true
+      owners: 'jonguy@microsoft.com'
+      approvers: 'aterentiev@microsoft.com'
+      serviceendpointurl: 'https://api.esrp.microsoft.com'
+      mainpublisher: 'ESRPPACMAN'
+      domaintenantid: 'cdc5aeea-15c5-4db6-b079-fcadd2505dc2'
+      ${{ if eq(parameters.TestRun, false) }}:
+        contenttype: 'npm'
+      ${{ else }}:
+        contenttype: 'maven'

@@ -1,3 +1,9 @@
+parameters:
+  - name: TestRun
+    displayName: 'Test Run (Will Not Publish Tests)'
+    type: boolean
+    default: true
+
 variables:
   - name: FORCE_COLOR
     value: 1
@@ -52,11 +58,13 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/publish.yaml@self
                 parameters:
+                  TestRun: ${{ parameters.TestRun }}
                   VersionPolicyName: noRush
                   BranchName: $(SourceBranch)
 
               - template: /common/config/azure-pipelines/templates/publish.yaml@self
                 parameters:
+                  TestRun: ${{ parameters.TestRun }}
                   VersionPolicyName: rush
                   BranchName: $(SourceBranch)
 
