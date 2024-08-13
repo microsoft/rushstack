@@ -713,7 +713,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const orphanedProjectPaths: string[] = [];
     for (const importerKey of this.getImporterKeys()) {
       // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
-      const rushProjectPath: string = path.resolve(subspace.getSubspaceTempFolder(), importerKey);
+      const rushProjectPath: string = path.resolve(subspace.getSubspaceTempFolderPath(), importerKey);
       if (!rushConfiguration.tryGetProjectForPath(rushProjectPath)) {
         orphanedProjectPaths.push(rushProjectPath);
       }
@@ -794,7 +794,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     subspace: Subspace
   ): Promise<boolean> {
     const importerKey: string = this.getImporterKeyByPath(
-      subspace.getSubspaceTempFolder(),
+      subspace.getSubspaceTempFolderPath(),
       project.projectFolder
     );
 
@@ -820,7 +820,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (project.rushConfiguration.subspacesFeatureEnabled) {
       // Get the pnpmfile
       const subspacePnpmfilePath: string = path.join(
-        subspace.getSubspaceTempFolder(),
+        subspace.getSubspaceTempFolderPath(),
         RushConstants.pnpmfileGlobalFilename
       );
 

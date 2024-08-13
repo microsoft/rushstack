@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.131.4",
+      "tag": "@microsoft/rush_v5.131.4",
+      "date": "Sun, 11 Aug 2024 05:02:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Revert a breaking change in Rush 5.131.3 where pnpm patches were moved from `common/pnpm-patches` to `common/config/rush/pnpm-patches`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.131.3",
+      "tag": "@microsoft/rush_v5.131.3",
+      "date": "Sat, 10 Aug 2024 02:27:14 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush-pnpm patch-commit` would not correctly resolve patch files when the subspaces feature is enabled."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.131.2",
       "tag": "@microsoft/rush_v5.131.2",
       "date": "Thu, 08 Aug 2024 23:38:18 GMT",

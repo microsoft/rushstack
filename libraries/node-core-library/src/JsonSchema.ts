@@ -26,7 +26,7 @@ interface ISchemaWithId {
 export type JsonSchemaVersion = 'draft-04' | 'draft-07';
 
 /**
- * Callback function arguments for JsonSchema.validateObjectWithCallback();
+ * Callback function arguments for {@link JsonSchema.validateObjectWithCallback}
  * @public
  */
 export interface IJsonSchemaErrorInfo {
@@ -37,10 +37,22 @@ export interface IJsonSchemaErrorInfo {
 }
 
 /**
- * Options for JsonSchema.validateObject()
+ * Options for {@link JsonSchema.validateObjectWithCallback}
  * @public
  */
-export interface IJsonSchemaValidateOptions {
+export interface IJsonSchemaValidateObjectWithOptions {
+  /**
+   * If true, the root-level `$schema` property in a JSON object being validated will be ignored during validation.
+   * If this is set to `true` and the schema requires a `$schema` property, validation will fail.
+   */
+  ignoreSchemaField?: boolean;
+}
+
+/**
+ * Options for {@link JsonSchema.validateObject}
+ * @public
+ */
+export interface IJsonSchemaValidateOptions extends IJsonSchemaValidateObjectWithOptions {
   /**
    * A custom header that will be used to report schema errors.
    * @remarks
@@ -53,7 +65,7 @@ export interface IJsonSchemaValidateOptions {
 }
 
 /**
- * Options for JsonSchema.fromFile() and JsonSchema.fromLoadedObject()
+ * Options for {@link JsonSchema.fromFile} and {@link JsonSchema.fromLoadedObject}
  * @public
  */
 export interface IJsonSchemaLoadOptions {
@@ -85,13 +97,13 @@ export interface IJsonSchemaLoadOptions {
 }
 
 /**
- * Options for JsonSchema.fromFile()
+ * Options for {@link JsonSchema.fromFile}
  * @public
  */
 export type IJsonSchemaFromFileOptions = IJsonSchemaLoadOptions;
 
 /**
- * Options for JsonSchema.fromLoadedObject()
+ * Options for {@link JsonSchema.fromLoadedObject}
  * @public
  */
 export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
@@ -334,12 +346,15 @@ export class JsonSchema {
     filenameForErrors: string,
     options?: IJsonSchemaValidateOptions
   ): void {
-    this.validateObjectWithCallback(jsonObject, (errorInfo: IJsonSchemaErrorInfo) => {
-      const prefix: string =
-        options && options.customErrorHeader ? options.customErrorHeader : 'JSON validation failed:';
+    this.validateObjectWithCallback(
+      jsonObject,
+      (errorInfo: IJsonSchemaErrorInfo) => {
+        const prefix: string = options?.customErrorHeader ?? 'JSON validation failed:';
 
-      throw new Error(prefix + os.EOL + filenameForErrors + os.EOL + errorInfo.details);
-    });
+        throw new Error(prefix + os.EOL + filenameForErrors + os.EOL + errorInfo.details);
+      },
+      options
+    );
   }
 
   /**
@@ -348,9 +363,19 @@ export class JsonSchema {
    */
   public validateObjectWithCallback(
     jsonObject: JsonObject,
-    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void
+    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void,
+    options?: IJsonSchemaValidateObjectWithOptions
   ): void {
     this.ensureCompiled();
+
+    if (options?.ignoreSchemaField) {
+      const {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        $schema,
+        ...remainder
+      } = jsonObject;
+      jsonObject = remainder;
+    }
 
     if (this._validator && !this._validator(jsonObject)) {
       const errorDetails: string = JsonSchema._formatErrorDetails(this._validator.errors!);

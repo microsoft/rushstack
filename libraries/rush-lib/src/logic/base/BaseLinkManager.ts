@@ -199,7 +199,7 @@ export abstract class BaseLinkManager {
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     await new FlagFile(
-      this._rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
+      this._rushConfiguration.defaultSubspace.getSubspaceTempFolderPath(),
       RushConstants.lastLinkFlagFilename,
       {}
     ).createAsync();

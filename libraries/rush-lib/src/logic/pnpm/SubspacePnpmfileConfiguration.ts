@@ -33,7 +33,7 @@ export class SubspacePnpmfileConfiguration {
       );
     }
 
-    const targetDir: string = subspace.getSubspaceTempFolder();
+    const targetDir: string = subspace.getSubspaceTempFolderPath();
     const subspaceGlobalPnpmfilePath: string = path.join(targetDir, RushConstants.pnpmfileGlobalFilename);
 
     // Write the shim itself
@@ -85,7 +85,7 @@ export class SubspacePnpmfileConfiguration {
 
     // common/config/subspaces/<subspace_name>/.pnpmfile.cjs
     const userPnpmfilePath: string = path.join(
-      subspace.getSubspaceConfigFolder(),
+      subspace.getSubspaceConfigFolderPath(),
       (rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
     );
     if (FileSystem.exists(userPnpmfilePath)) {
