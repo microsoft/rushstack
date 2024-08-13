@@ -13642,6 +13642,7 @@ packages:
     dependencies:
       '@eslint/eslintrc': 3.0.2
       '@types/semver': 7.5.0
+      '@typescript-eslint/parser': 8.1.0(eslint@8.57.0)(typescript@5.4.2)
       '@typescript-eslint/typescript-estree': 8.1.0(typescript@5.4.2)
       '@typescript-eslint/utils': 8.1.0(eslint@8.57.0)(typescript@5.4.2)
       ajv: 6.12.6
