@@ -11,9 +11,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - NodeVersion: 16.20.x
-            NodeVersionDisplayName: 16
-            OS: ubuntu-latest
           - NodeVersion: 18.18.x
             NodeVersionDisplayName: 18
             OS: ubuntu-latest
