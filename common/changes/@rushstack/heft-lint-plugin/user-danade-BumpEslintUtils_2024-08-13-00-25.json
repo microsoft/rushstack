@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "comment": "Supported linters (ESLint, TSLint) are now loaded asynchronously",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-lint-plugin"
+}
