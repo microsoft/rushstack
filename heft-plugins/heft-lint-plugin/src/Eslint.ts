@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import * as crypto from 'crypto';
 import * as semver from 'semver';
 import type * as TTypescript from 'typescript';
@@ -26,8 +25,10 @@ enum EslintMessageSeverity {
   error = 2
 }
 
+// Patch the timer used to track rule execution time. This allows us to get access to the detailed information
+// about how long each rule took to execute, which we provide on the CLI when running in verbose mode.
 async function patchTimerAsync(eslintPackagePath: string, timingsMap: Map<string, number>): Promise<void> {
-  const timingModulePath: string = path.join(eslintPackagePath, 'lib', 'linter', 'timing');
+  const timingModulePath: string = `${eslintPackagePath}/lib/linter/timing`;
   const timing: IEslintTiming = (await import(timingModulePath)).default;
   timing.enabled = true;
   const patchedTime: (key: string, fn: (...args: unknown[]) => unknown) => (...args: unknown[]) => unknown = (
