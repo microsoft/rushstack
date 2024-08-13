@@ -96,12 +96,12 @@ export class PnpmfileConfiguration {
         preferredVersions,
         rushConfiguration.getImplicitlyPreferredVersions(subspace)
       );
-      commonVersionsConfiguration.getAllPreferredVersions().forEach((version, name) => {
+      for (const [name, version] of commonVersionsConfiguration.getAllPreferredVersions()) {
         // Use the most restrictive version range available
         if (!preferredVersions.has(name) || semver.subset(version, preferredVersions.get(name)!)) {
           preferredVersions.set(name, version);
         }
-      });
+      }
       allPreferredVersions = MapExtensions.toObject(preferredVersions);
       allowedAlternativeVersions = MapExtensions.toObject(
         commonVersionsConfiguration.allowedAlternativeVersions
