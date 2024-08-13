@@ -2,23 +2,20 @@
 // See LICENSE in the project root for license information.
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
-import type { Subspace } from '../../../api/Subspace';
 import { PnpmfileConfiguration } from '../PnpmfileConfiguration';
-import { JsonFile, JsonObject } from '@rushstack/node-core-library';
-import { RushConstants } from '../../RushConstants';
-import { before } from 'node:test';
+import { JsonFile, type JsonObject } from '@rushstack/node-core-library';
 
 describe(PnpmfileConfiguration.name, () => {
   const repoPath: string = `${__dirname}/repo`;
   const rushFilename: string = `${repoPath}/rush3.json`;
   const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
-  const shimPath: string = `${rushConfiguration.defaultSubspace.getSubspaceTempFolder()}/pnpmfileSettings.json`;
+  const shimPath: string = `${rushConfiguration.defaultSubspace.getSubspaceTempFolderPath()}/pnpmfileSettings.json`;
 
   beforeAll(async () => {
     const subspace = rushConfiguration.defaultSubspace;
     await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(
       rushConfiguration,
-      subspace.getSubspaceTempFolder(),
+      subspace.getSubspaceTempFolderPath(),
       subspace
     );
   });
