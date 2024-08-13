@@ -23,7 +23,7 @@
     "typescript"
   ],
   "peerDependencies": {
-    "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0",
+    "eslint": "^8.57.0",
     "typescript": ">=4.7.0"
   },
   "dependencies": {
@@ -31,10 +31,10 @@
     "@rushstack/eslint-plugin": "workspace:*",
     "@rushstack/eslint-plugin-packlets": "workspace:*",
     "@rushstack/eslint-plugin-security": "workspace:*",
-    "@typescript-eslint/eslint-plugin": "~6.19.0",
-    "@typescript-eslint/utils": "~6.19.0",
-    "@typescript-eslint/parser": "~6.19.0",
-    "@typescript-eslint/typescript-estree": "~6.19.0",
+    "@typescript-eslint/eslint-plugin": "~8.1.0",
+    "@typescript-eslint/utils": "~8.1.0",
+    "@typescript-eslint/parser": "~8.1.0",
+    "@typescript-eslint/typescript-estree": "~8.1.0",
     "eslint-plugin-promise": "~6.1.1",
     "eslint-plugin-react": "~7.33.2",
     "eslint-plugin-tsdoc": "~0.3.0"

@@ -18,6 +18,13 @@ module.exports = {
   }
 };
 
+function fixUndeclaredDependency(packageJson, dependencyName) {
+  packageJson.dependencies[dependencyName] =
+    packageJson.dependencies[dependencyName] ||
+    packageJson.devDependencies?.[dependencyName] ||
+    packageJson.version;
+}
+
 /**
  * This hook is invoked during installation before a package's dependencies
  * are selected.
@@ -38,14 +45,21 @@ function readPackage(packageJson, context) {
     case '@jest/test-result': {
       // The `@jest/test-result` package takes undeclared dependencies on `jest-haste-map`
       // and `jest-resolve`
-      packageJson.dependencies['jest-haste-map'] = packageJson.version;
-      packageJson.dependencies['jest-resolve'] = packageJson.version;
+      fixUndeclaredDependency(packageJson, 'jest-haste-map');
+      fixUndeclaredDependency(packageJson, 'jest-resolve');
     }
 
     case '@serverless-stack/core': {
       delete packageJson.dependencies['@typescript-eslint/eslint-plugin'];
       delete packageJson.dependencies['eslint-config-serverless-stack'];
       delete packageJson.dependencies['lerna'];
+      break;
+    }
+
+    case '@typescript-eslint/rule-tester': {
+      // The `@typescript-eslint/rule-tester` package takes an undeclared dependency
+      // on `@typescript-eslint/parser`
+      fixUndeclaredDependency(packageJson, '@typescript-eslint/parser');
       break;
     }
   }

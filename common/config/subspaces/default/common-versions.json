@@ -75,12 +75,15 @@
    * This design avoids unnecessary churn in this file.
    */
   "allowedAlternativeVersions": {
+    "@typescript-eslint/parser": [
+      "~6.19.0" // Used by build-tests/eslint-7(-*)-test / build-tests/eslint-bulk-suppressions-test-legacy
+    ],
     "eslint": [
       "7.7.0", // Used by build-tests/eslint-7-7-test
       "7.11.0", // Used by build-tests/eslint-7-11-test
       "~7.30.0", // Used by build-tests/eslint-7-test
-      "8.6.0", // Used by build-tests/eslint-bulk-suppressions-test
-      "~8.23.1" // Used by build-tests/eslint-bulk-suppressions-test
+      "8.6.0", // Used by build-tests/eslint-bulk-suppressions-test-legacy
+      "8.23.1" // Used by build-tests/eslint-bulk-suppressions-test-legacy
     ],
     /**
      * For example, allow some projects to use an older TypeScript compiler

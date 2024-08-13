@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "[BREAKING CHANGE] Bump \"@typescript-eslint/eslint-plugin\" to \"~8.1.0\" and \"@typescript-eslint/eslint-parser\" to \"~8.1.0\". Due to these changes, node@>=17.0.0 and eslint@^8.57.0 are now required due to breaking changes in the newer rules set.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config"
+}

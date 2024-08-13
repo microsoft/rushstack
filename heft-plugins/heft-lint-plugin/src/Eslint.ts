@@ -12,7 +12,8 @@ import { FileError } from '@rushstack/node-core-library';
 import { LinterBase, type ILinterBaseOptions } from './LinterBase';
 
 interface IEslintOptions extends ILinterBaseOptions {
-  eslintPackagePath: string;
+  eslintPackage: typeof TEslint;
+  eslintTimings: Map<string, number>;
 }
 
 interface IEslintTiming {
@@ -25,44 +26,84 @@ enum EslintMessageSeverity {
   error = 2
 }
 
+async function patchTimerAsync(eslintPackagePath: string, timingsMap: Map<string, number>): Promise<void> {
+  const timingModulePath: string = path.join(eslintPackagePath, 'lib', 'linter', 'timing');
+  const timing: IEslintTiming = (await import(timingModulePath)).default;
+  timing.enabled = true;
+  const patchedTime: (key: string, fn: (...args: unknown[]) => unknown) => (...args: unknown[]) => unknown = (
+    key: string,
+    fn: (...args: unknown[]) => unknown
+  ) => {
+    return (...args: unknown[]) => {
+      const startTime: number = performance.now();
+      const result: unknown = fn(...args);
+      const endTime: number = performance.now();
+      const existingTiming: number = timingsMap.get(key) || 0;
+      timingsMap.set(key, existingTiming + endTime - startTime);
+      return result;
+    };
+  };
+  timing.time = patchedTime;
+}
+
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
-  private readonly _eslintPackagePath: string;
+  private readonly _eslintPackage: typeof TEslint;
+  private readonly _linter: TEslint.ESLint;
   private readonly _eslintTimings: Map<string, number> = new Map();
 
-  private _eslintPackage: typeof TEslint;
-  private _eslint!: TEslint.ESLint;
-
-  public constructor(options: IEslintOptions) {
+  protected constructor(options: IEslintOptions) {
     super('eslint', options);
-    this._eslintPackagePath = options.eslintPackagePath;
 
+    const { buildFolderPath, eslintPackage, linterConfigFilePath, tsProgram, eslintTimings } = options;
+    this._eslintPackage = eslintPackage;
+    this._linter = new eslintPackage.ESLint({
+      cwd: buildFolderPath,
+      overrideConfigFile: linterConfigFilePath,
+      // Override config takes precedence over overrideConfigFile, which allows us to provide
+      // the source TypeScript program to ESLint
+      overrideConfig: {
+        parserOptions: {
+          programs: [tsProgram]
+        }
+      }
+    });
+    this._eslintTimings = eslintTimings;
+  }
+
+  public static async initializeAsync(options: ILinterBaseOptions): Promise<Eslint> {
+    const { linterToolPath } = options;
+    const eslintTimings: Map<string, number> = new Map();
     // This must happen before the rest of the linter package is loaded
-    this._patchTimer(options.eslintPackagePath);
-    this._eslintPackage = require(options.eslintPackagePath);
+    await patchTimerAsync(linterToolPath, eslintTimings);
+
+    const eslintPackage: typeof TEslint = await import(linterToolPath);
+    return new Eslint({
+      ...options,
+      eslintPackage,
+      eslintTimings
+    });
   }
 
   public printVersionHeader(): void {
-    this._terminal.writeLine(`Using ESLint version ${this._eslintPackage.Linter.version}`);
+    const linterVersion: string = this._eslintPackage.Linter.version;
+    this._terminal.writeLine(`Using ESLint version ${linterVersion}`);
 
-    const majorVersion: number = semver.major(this._eslintPackage.Linter.version);
+    const majorVersion: number = semver.major(linterVersion);
     if (majorVersion < 7) {
-      throw new Error(
-        'Heft requires ESLint 7 or newer.  Your ESLint version is too old:\n' + this._eslintPackagePath
-      );
+      throw new Error('Heft requires ESLint 7 or newer.  Your ESLint version is too old');
     }
     if (majorVersion > 8) {
       // We don't use writeWarningLine() here because, if the person wants to take their chances with
       // a newer ESLint release, their build should be allowed to succeed.
       this._terminal.writeLine(
-        'The ESLint version is newer than the latest version that was tested with Heft; it may not work correctly:'
+        'The ESLint version is newer than the latest version that was tested with Heft, so it may not work correctly.'
       );
-      this._terminal.writeLine(this._eslintPackagePath);
     }
   }
 
   protected async getCacheVersionAsync(): Promise<string> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const eslintBaseConfiguration: any = await this._eslint.calculateConfigForFile(
+    const eslintBaseConfiguration: any = await this._linter.calculateConfigForFile(
       this._linterConfigFilePath
     );
     const eslintConfigHash: crypto.Hash = crypto
@@ -75,22 +116,8 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     return eslintConfigVersion;
   }
 
-  protected async initializeAsync(tsProgram: TTypescript.Program): Promise<void> {
-    // Override config takes precedence over overrideConfigFile, which allows us to provide
-    // the source TypeScript program.
-    this._eslint = new this._eslintPackage.ESLint({
-      cwd: this._buildFolderPath,
-      overrideConfigFile: this._linterConfigFilePath,
-      overrideConfig: {
-        parserOptions: {
-          programs: [tsProgram]
-        }
-      }
-    });
-  }
-
   protected async lintFileAsync(sourceFile: TTypescript.SourceFile): Promise<TEslint.ESLint.LintResult[]> {
-    const lintResults: TEslint.ESLint.LintResult[] = await this._eslint.lintText(sourceFile.text, {
+    const lintResults: TEslint.ESLint.LintResult[] = await this._linter.lintText(sourceFile.text, {
       filePath: sourceFile.fileName
     });
 
@@ -162,25 +189,6 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   }
 
   protected async isFileExcludedAsync(filePath: string): Promise<boolean> {
-    return await this._eslint.isPathIgnored(filePath);
-  }
-
-  private _patchTimer(eslintPackagePath: string): void {
-    const timing: IEslintTiming = require(path.join(eslintPackagePath, 'lib', 'linter', 'timing'));
-    timing.enabled = true;
-    const patchedTime: (
-      key: string,
-      fn: (...args: unknown[]) => unknown
-    ) => (...args: unknown[]) => unknown = (key: string, fn: (...args: unknown[]) => unknown) => {
-      return (...args: unknown[]) => {
-        const startTime: number = performance.now();
-        const result: unknown = fn(...args);
-        const endTime: number = performance.now();
-        const existingTiming: number = this._eslintTimings.get(key) || 0;
-        this._eslintTimings.set(key, existingTiming + endTime - startTime);
-        return result;
-      };
-    };
-    timing.time = patchedTime;
+    return await this._linter.isPathIgnored(filePath);
   }
 }
