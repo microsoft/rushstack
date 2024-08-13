@@ -90,7 +90,7 @@ export class InstallHelpers {
 
     // Example: "C:\MyRepo\common\temp\package.json"
     const commonPackageJsonFilename: string = path.join(
-      subspace.getSubspaceTempFolder(),
+      subspace.getSubspaceTempFolderPath(),
       FileConstants.PackageJson
     );
 

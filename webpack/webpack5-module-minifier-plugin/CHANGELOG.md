@@ -1,6 +1,33 @@
 # Change Log - @rushstack/webpack5-module-minifier-plugin
 
-This log was last generated on Wed, 17 Jul 2024 00:11:19 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Aug 2024 22:16:04 GMT and should not be manually modified.
+
+## 5.5.66
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 5.5.65
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 5.5.64
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 5.5.63
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 5.5.62
+Wed, 17 Jul 2024 06:55:10 GMT
+
+_Version update only_
 
 ## 5.5.61
 Wed, 17 Jul 2024 00:11:19 GMT

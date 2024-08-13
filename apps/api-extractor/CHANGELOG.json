@@ -2,6 +2,95 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.47.6",
+      "tag": "@microsoft/api-extractor_v7.47.6",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.29.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.47.5",
+      "tag": "@microsoft/api-extractor_v7.47.5",
+      "date": "Fri, 02 Aug 2024 17:26:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.47.4",
+      "tag": "@microsoft/api-extractor_v7.47.4",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.29.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.47.3",
+      "tag": "@microsoft/api-extractor_v7.47.3",
+      "date": "Wed, 24 Jul 2024 00:12:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an edge case when discarding the file extension from the \"reportFileName\" setting and improve its documentation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.47.2",
+      "tag": "@microsoft/api-extractor_v7.47.2",
+      "date": "Wed, 17 Jul 2024 06:55:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.47.1",
       "tag": "@microsoft/api-extractor_v7.47.1",
       "date": "Tue, 16 Jul 2024 00:36:22 GMT",

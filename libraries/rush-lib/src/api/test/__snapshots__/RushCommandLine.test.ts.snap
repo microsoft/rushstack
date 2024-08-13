@@ -1048,6 +1048,27 @@ Object {
       ],
     },
     Object {
+      "actionName": "alert",
+      "parameters": Array [
+        Object {
+          "description": "Temporarily suspend the specified alert for one week",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--snooze",
+          "required": false,
+          "shortName": "-s",
+        },
+        Object {
+          "description": "Combined with \\"--snooze\\", causes that alert to be suspended permanently",
+          "environmentVariable": undefined,
+          "kind": "Flag",
+          "longName": "--forever",
+          "required": false,
+          "shortName": undefined,
+        },
+      ],
+    },
+    Object {
       "actionName": "import-strings",
       "parameters": Array [
         Object {

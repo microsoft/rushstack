@@ -14,6 +14,7 @@ import {
   type FileSystemStats,
   InternalError
 } from '@rushstack/node-core-library';
+import { LookupByPath } from '@rushstack/lookup-by-path';
 import { trueCasePathSync } from 'true-case-path';
 
 import { Rush } from '../api/Rush';
@@ -32,7 +33,6 @@ import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
 import type { RepoStateFile } from '../logic/RepoStateFile';
-import { LookupByPath } from '../logic/LookupByPath';
 import { RushPluginsConfiguration } from './RushPluginsConfiguration';
 import { type IPnpmOptionsJson, PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
 import { type INpmOptionsJson, NpmOptionsConfiguration } from '../logic/npm/NpmOptionsConfiguration';
@@ -71,7 +71,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.versionPoliciesFilename,
   RushConstants.rushPluginsConfigFilename,
   RushConstants.pnpmConfigFilename,
-  RushConstants.subspacesConfigFilename
+  RushConstants.subspacesConfigFilename,
+  RushConstants.rushAlertsConfigFilename
 ];
 
 /**

@@ -1,6 +1,73 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 16 Jul 2024 04:16:56 GMT and should not be manually modified.
+This log was last generated on Sun, 11 Aug 2024 05:02:05 GMT and should not be manually modified.
+
+## 5.131.4
+Sun, 11 Aug 2024 05:02:05 GMT
+
+### Updates
+
+- Revert a breaking change in Rush 5.131.3 where pnpm patches were moved from `common/pnpm-patches` to `common/config/rush/pnpm-patches`.
+
+## 5.131.3
+Sat, 10 Aug 2024 02:27:14 GMT
+
+### Updates
+
+- Fix an issue where `rush-pnpm patch-commit` would not correctly resolve patch files when the subspaces feature is enabled.
+
+## 5.131.2
+Thu, 08 Aug 2024 23:38:18 GMT
+
+### Updates
+
+- Include a missing dependency in `@rushstack/rush-sdk`.
+
+## 5.131.1
+Thu, 08 Aug 2024 22:08:41 GMT
+
+### Updates
+
+- Fix an issue where rush-sdk can't be bundled by a consuming package.
+- Extract LookupByPath to @rushstack/lookup-by-path and load it from there.
+
+## 5.131.0
+Fri, 02 Aug 2024 17:26:59 GMT
+
+### Updates
+
+- Improve Rush alerts with a new "rush alert" command and snooze feature
+
+## 5.130.3
+Wed, 31 Jul 2024 23:30:13 GMT
+
+### Updates
+
+- Fix an issue where Rush does not detect an outdated lockfile if the `dependenciesMeta` `package.json` field is edited.
+- Include CHANGELOG.md in published releases again
+- Fix a bug that caused the build cache to close its terminal writer before execution on error.
+
+## 5.130.2
+Fri, 19 Jul 2024 03:41:44 GMT
+
+### Updates
+
+- Fix an issue where `rush-pnpm patch-commit` did not work correctly when subspaces are enabled.
+
+## 5.130.1
+Wed, 17 Jul 2024 07:37:13 GMT
+
+### Updates
+
+- Fix a recent regression for `rush init`
+
+## 5.130.0
+Wed, 17 Jul 2024 06:55:27 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Initial implementation of Rush alerts feature
+- Adjusts how cobuilt operations are added and requeued to the operation graph. Removes the 'RemoteExecuting' status.
 
 ## 5.129.7
 Tue, 16 Jul 2024 04:16:56 GMT

@@ -713,7 +713,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const orphanedProjectPaths: string[] = [];
     for (const importerKey of this.getImporterKeys()) {
       // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
-      const rushProjectPath: string = path.resolve(subspace.getSubspaceTempFolder(), importerKey);
+      const rushProjectPath: string = path.resolve(subspace.getSubspaceTempFolderPath(), importerKey);
       if (!rushConfiguration.tryGetProjectForPath(rushProjectPath)) {
         orphanedProjectPaths.push(rushProjectPath);
       }
@@ -794,7 +794,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     subspace: Subspace
   ): Promise<boolean> {
     const importerKey: string = this.getImporterKeyByPath(
-      subspace.getSubspaceTempFolder(),
+      subspace.getSubspaceTempFolderPath(),
       project.projectFolder
     );
 
@@ -820,7 +820,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (project.rushConfiguration.subspacesFeatureEnabled) {
       // Get the pnpmfile
       const subspacePnpmfilePath: string = path.join(
-        subspace.getSubspaceTempFolder(),
+        subspace.getSubspaceTempFolderPath(),
         RushConstants.pnpmfileGlobalFilename
       );
 
@@ -872,7 +872,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
     // found versions much simpler.
-    const { dependencyList, devDependencyList } = PackageJsonEditor.fromObject(
+    const { dependencyList, devDependencyList, dependencyMetaList } = PackageJsonEditor.fromObject(
       this._pnpmfileConfiguration.transform(transformedPackageJson),
       project.packageJsonEditor.filePath
     );
@@ -960,6 +960,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       );
       const importerDependencies: Set<string> = new Set(Object.keys(importer.dependencies ?? {}));
       const importerDevDependencies: Set<string> = new Set(Object.keys(importer.devDependencies ?? {}));
+      const importerDependenciesMeta: Set<string> = new Set(Object.keys(importer.dependenciesMeta ?? {}));
 
       for (const { dependencyType, name, version } of allDependencies) {
         let isOptional: boolean = false;
@@ -1019,11 +1020,18 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         }
       }
 
+      for (const { name, injected } of dependencyMetaList) {
+        if (importer.dependenciesMeta?.[name]?.injected === injected) {
+          importerDependenciesMeta.delete(name);
+        }
+      }
+
       // Finally, validate that all values in the importer are also present in the dependency list.
       if (
         importerOptionalDependencies.size > 0 ||
         importerDependencies.size > 0 ||
-        importerDevDependencies.size > 0
+        importerDevDependencies.size > 0 ||
+        importerDependenciesMeta.size > 0
       ) {
         return true;
       }

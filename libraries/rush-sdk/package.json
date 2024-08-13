@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.129.7",
+  "version": "5.131.4",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
@@ -38,6 +38,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@types/node-fetch": "2.6.2",

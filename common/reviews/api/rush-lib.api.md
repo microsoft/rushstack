@@ -15,9 +15,11 @@ import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
+import { IPrefixMatch } from '@rushstack/lookup-by-path';
 import { ITerminal } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
 import { JsonObject } from '@rushstack/node-core-library';
+import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
@@ -475,6 +477,7 @@ export interface IExperimentsJson {
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     printEventHooksOutputToConsole?: boolean;
+    rushAlerts?: boolean;
     useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
@@ -736,13 +739,7 @@ export interface IPnpmPeerDependencyRules {
     ignoreMissing?: string[];
 }
 
-// @beta
-export interface IPrefixMatch<TItem> {
-    // (undocumented)
-    index: number;
-    // (undocumented)
-    value: TItem;
-}
+export { IPrefixMatch }
 
 // @internal (undocumented)
 export interface _IRawRepoState {
@@ -893,17 +890,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
     get version(): string;
 }
 
-// @beta
-export class LookupByPath<TItem> {
-    constructor(entries?: Iterable<[string, TItem]>, delimiter?: string);
-    readonly delimiter: string;
-    findChildPath(childPath: string): TItem | undefined;
-    findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
-    findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
-    static iteratePathSegments(serializedPath: string, delimiter?: string): Iterable<string>;
-    setItem(serializedPath: string, value: TItem): this;
-    setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this;
-}
+export { LookupByPath }
 
 // @public
 export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
@@ -1356,6 +1343,8 @@ export class RushConstants {
     static readonly projectShrinkwrapFilename: 'shrinkwrap-deps.json';
     static readonly rebuildCommandName: 'rebuild';
     static readonly repoStateFilename: 'repo-state.json';
+    static readonly rushAlertsConfigFilename: 'rush-alerts.json';
+    static readonly rushAlertsStateFilename: 'rush-alerts-state.json';
     static readonly rushJsonFilename: 'rush.json';
     static readonly rushLogsFolderName: 'rush-logs';
     static readonly rushPackageName: '@microsoft/rush';
@@ -1477,9 +1466,11 @@ export class Subspace {
     // @beta
     getRepoStateFilePath(): string;
     // @beta
-    getSubspaceConfigFolder(): string;
+    getSubspaceConfigFolderPath(): string;
     // @beta
-    getSubspaceTempFolder(): string;
+    getSubspacePnpmPatchesFolderPath(): string;
+    // @beta
+    getSubspaceTempFolderPath(): string;
     // @beta
     getTempShrinkwrapFilename(): string;
     // @beta

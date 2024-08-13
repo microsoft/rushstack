@@ -2,6 +2,35 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.29.5",
+      "tag": "@microsoft/api-extractor-model_v7.29.5",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.29.4",
+      "tag": "@microsoft/api-extractor-model_v7.29.4",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.5.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.29.3",
       "tag": "@microsoft/api-extractor-model_v7.29.3",
       "date": "Tue, 16 Jul 2024 00:36:21 GMT",

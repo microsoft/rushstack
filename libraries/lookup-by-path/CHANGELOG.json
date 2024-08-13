@@ -1,0 +1,29 @@
+{
+  "name": "@rushstack/lookup-by-path",
+  "entries": [
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/lookup-by-path_v0.1.1",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/lookup-by-path_v0.1.0",
+      "date": "Thu, 08 Aug 2024 22:08:25 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Extract LookupByPath from @rushstack/rush-lib."
+          }
+        ]
+      }
+    }
+  ]
+}

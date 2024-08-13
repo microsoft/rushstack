@@ -14,7 +14,7 @@
   "dependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/eslint-patch": "workspace:*",
-    "@typescript-eslint/parser": "~6.19.0",
+    "@typescript-eslint/parser": "~8.1.0",
     "eslint-plugin-deprecation": "2.0.0",
     "eslint-plugin-header": "~3.1.1",
     "eslint-plugin-import": "2.25.4",

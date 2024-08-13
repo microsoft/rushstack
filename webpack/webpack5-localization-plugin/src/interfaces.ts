@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { LoaderContext } from 'webpack';
+import type { LoaderContext, Compilation } from 'webpack';
 import type { IPseudolocaleOptions } from '@rushstack/localization-utilities';
 
 /**
@@ -97,9 +97,9 @@ export interface ILocalizationStatsOptions {
 
   /**
    * This option is used to specify a callback to be called with the stats data that would be
-   * dropped at `localizationStats.dropPath` after compilation completes.
+   * dropped at `localizationStats.dropPath` after compilation completes, and the compilation instance.
    */
-  callback?: (stats: ILocalizationStats) => void;
+  callback?: (stats: ILocalizationStats, compilation: Compilation) => void;
 }
 
 /**

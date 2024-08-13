@@ -203,6 +203,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/lookup-by-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/module-minifier",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -348,7 +352,7 @@
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "allowedCategories": [ "libraries", "vscode-extensions" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@typescript-eslint/parser",
@@ -862,7 +866,6 @@
       "name": "tslint",
       "allowedCategories": [ "libraries", "tests" ]
     },
-
     {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]

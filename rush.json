@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "8.15.8",
+  "pnpmVersion": "8.15.9",
 
   // "npmVersion": "6.14.15",
   // "yarnVersion": "1.9.4",
@@ -42,7 +42,7 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=16.13.0 <17.0.0 || >=18.15.0 <19.0.0 || >=20.9.0 <21.0.0",
+  "nodeSupportedVersionRange": ">=18.15.0 <19.0.0 || >=20.9.0 <21.0.0",
 
   /**
    * If the version check above fails, Rush will display a message showing the current
@@ -543,19 +543,22 @@
       "packageName": "eslint-7-7-test",
       "projectFolder": "build-tests/eslint-7-7-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-7-11-test",
       "projectFolder": "build-tests/eslint-7-11-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-7-test",
       "projectFolder": "build-tests/eslint-7-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-8-test",
@@ -568,6 +571,13 @@
       "projectFolder": "build-tests/eslint-bulk-suppressions-test",
       "reviewCategory": "tests",
       "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-bulk-suppressions-test-legacy",
+      "projectFolder": "build-tests/eslint-bulk-suppressions-test-legacy",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "package-extractor-test-01",
@@ -1026,6 +1036,12 @@
     {
       "packageName": "@rushstack/localization-utilities",
       "projectFolder": "libraries/localization-utilities",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/lookup-by-path",
+      "projectFolder": "libraries/lookup-by-path",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
