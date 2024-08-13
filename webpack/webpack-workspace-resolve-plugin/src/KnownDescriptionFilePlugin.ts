@@ -9,6 +9,8 @@ type ResolveRequest = Parameters<Resolver['hooks']['resolveStep']['call']>[1];
 
 /**
  * A resolver plugin that optimizes locating the package.json file for a module.
+ *
+ * @internal
  */
 export class KnownDescriptionFilePlugin {
   public readonly source: string;
@@ -17,6 +19,13 @@ export class KnownDescriptionFilePlugin {
   private readonly _skipForContext: boolean;
   private readonly _cache: WorkspaceLayoutCache;
 
+  /**
+   * Constructs a new instance of `KnownDescriptionFilePlugin`.
+   * @param cache - The workspace layout cache
+   * @param source - The resolve step to hook into
+   * @param target - The resolve step to delegate to
+   * @param skipForContext - If true, don't apply this plugin if the resolver is configured to resolve to a context
+   */
   public constructor(cache: WorkspaceLayoutCache, source: string, target: string, skipForContext?: boolean) {
     this.source = source;
     this.target = target;
@@ -31,19 +40,11 @@ export class KnownDescriptionFilePlugin {
 
     const target: ReturnType<Resolver['ensureHook']> = resolver.ensureHook(this.target);
     const { fileSystem } = resolver;
-    function readDescriptionFileAsJson(
-      descriptionFilePath: string,
-      callback: (err: Error | null | undefined, data?: object) => void
-    ): void {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      fileSystem.readJson!(descriptionFilePath, callback);
-    }
 
     function readDescriptionFileWithParse(
       descriptionFilePath: string,
       callback: (err: Error | null | undefined, data?: object) => void
     ): void {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       fileSystem.readFile(descriptionFilePath, (err: Error | null | undefined, data?: string | Buffer) => {
         if (!data?.length) {
           return callback(err);
@@ -56,23 +57,28 @@ export class KnownDescriptionFilePlugin {
     const readDescriptionFile: (
       descriptionFilePath: string,
       cb: (err: Error | null | undefined, data?: object) => void
-    ) => void = fileSystem.readJson ? readDescriptionFileAsJson : readDescriptionFileWithParse;
+    ) => void = fileSystem.readJson?.bind(fileSystem) ?? readDescriptionFileWithParse;
 
     resolver
       .getHook(this.source)
       .tapAsync(KnownDescriptionFilePlugin.name, (request, resolveContext, callback) => {
         const { path } = request;
-        // No request, nothing to do.
-        if (!path) return callback();
+        if (!path) {
+          // No request, nothing to do.
+          return callback();
+        }
 
         const cache: WorkspaceLayoutCache = this._cache;
 
         const match: IPrefixMatch<IResolveContext> | undefined =
           cache.contextLookup.findLongestPrefixMatch(path);
-        // No description file available, proceed without.
-        if (!match) return callback();
+        if (!match) {
+          // No description file available, proceed without.
+          return callback();
+        }
 
-        const relativePath: string = `.${cache.normalizeToSlash(path.slice(match.index))}`;
+        const remainingPath: string = path.slice(match.index);
+        const relativePath: string = `.${cache.normalizeToSlash?.(remainingPath) ?? remainingPath}`;
         const descriptionFileRoot: string = `${path.slice(0, match.index)}`;
         const descriptionFilePath: string = `${descriptionFileRoot}${cache.resolverPathSeparator}package.json`;
 
@@ -92,21 +98,25 @@ export class KnownDescriptionFilePlugin {
           // instead of cloning it.
           request.descriptionFileRoot = descriptionFileRoot;
           request.descriptionFilePath = descriptionFilePath;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          request.descriptionFileData = descriptionFileData as any;
+          request.descriptionFileData = descriptionFileData;
           request.relativePath = relativePath;
 
+          // Delegate to the resolver step at `target`.
           resolver.doResolve(
             target,
             request,
             'using description file: ' + descriptionFilePath + ' (relative path: ' + relativePath + ')',
             resolveContext,
             (e: Error | undefined, result: ResolveRequest | undefined) => {
-              if (e) return callback(e);
+              if (e) {
+                return callback(e);
+              }
 
               // Don't allow other processing
-              // eslint-disable-next-line @rushstack/no-new-null
-              if (result === undefined) return callback(null, null);
+              if (result === undefined) {
+                // eslint-disable-next-line @rushstack/no-new-null
+                return callback(null, null);
+              }
               // eslint-disable-next-line @rushstack/no-new-null
               callback(null, result);
             }

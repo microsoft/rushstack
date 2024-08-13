@@ -19,7 +19,7 @@ When using this plugin, the following options should be configured for your reso
 
 ## Limitations
 
-This plugin depends on the presence of a cache file in the workspace to function. Data in this cache file is assumed not to change while the webpack process is running, although the file will be.
+This plugin depends on the presence of a cache file in the workspace to function. Data in this cache file is assumed not to change while the webpack process is running.
 
 **Note:** Generating the cache file is not in the scope of this plugin.
 

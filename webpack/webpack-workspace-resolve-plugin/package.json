@@ -23,9 +23,7 @@
     "@types/node": "*"
   },
   "dependencies": {
-    "@rushstack/lookup-by-path": "workspace:*",
-    "@types/tapable": "1.0.6",
-    "tapable": "2.2.1"
+    "@rushstack/lookup-by-path": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

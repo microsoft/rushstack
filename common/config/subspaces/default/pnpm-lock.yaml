@@ -4406,12 +4406,6 @@ importers:
       '@rushstack/lookup-by-path':
         specifier: workspace:*
         version: link:../../libraries/lookup-by-path
-      '@types/tapable':
-        specifier: 1.0.6
-        version: 1.0.6
-      tapable:
-        specifier: 2.2.1
-        version: 2.2.1
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { WebpackPluginInstance, Compiler } from 'webpack';
+
 import type { WorkspaceLayoutCache } from './WorkspaceLayoutCache';
 import { KnownDescriptionFilePlugin } from './KnownDescriptionFilePlugin';
 import { KnownPackageDependenciesPlugin } from './KnownPackageDependenciesPlugin';

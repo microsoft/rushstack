@@ -10,6 +10,9 @@ import { LookupByPath } from '@rushstack/lookup-by-path';
 import type { WebpackPluginInstance } from 'webpack';
 
 // @beta
+export type IPathNormalizationFunction = ((input: string) => string) | undefined;
+
+// @beta
 export interface IResolveContext {
     descriptionFileRoot: string;
     findDependency(request: string): IPrefixMatch<IResolveContext> | undefined;
@@ -46,9 +49,9 @@ export class WorkspaceLayoutCache {
     readonly contextForPackage: WeakMap<object, IResolveContext>;
     readonly contextLookup: LookupByPath<IResolveContext>;
     // (undocumented)
-    readonly normalizeToPlatform: (input: string) => string;
+    readonly normalizeToPlatform: IPathNormalizationFunction;
     // (undocumented)
-    readonly normalizeToSlash: (input: string) => string;
+    readonly normalizeToSlash: IPathNormalizationFunction;
     // (undocumented)
     readonly resolverPathSeparator: string;
 }

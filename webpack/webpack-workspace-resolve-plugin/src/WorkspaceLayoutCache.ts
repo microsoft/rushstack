@@ -79,9 +79,13 @@ export interface IWorkspaceLayoutCacheOptions {
   resolverPathSeparator?: '/' | '\\';
 }
 
-function preservePath(path: string): string {
-  return path;
-}
+/**
+ * A function that normalizes a path to a platform-specific format (if needed).
+ * Will be undefined if the platform uses `/` as the path separator.
+ *
+ * @beta
+ */
+export type IPathNormalizationFunction = ((input: string) => string) | undefined;
 
 function backslashToSlash(path: string): string {
   return path.replace(/\\/g, '/');
@@ -106,8 +110,8 @@ export class WorkspaceLayoutCache {
   public readonly contextForPackage: WeakMap<object, IResolveContext>;
 
   public readonly resolverPathSeparator: string;
-  public readonly normalizeToSlash: (input: string) => string;
-  public readonly normalizeToPlatform: (input: string) => string;
+  public readonly normalizeToSlash: IPathNormalizationFunction;
+  public readonly normalizeToPlatform: IPathNormalizationFunction;
 
   public constructor(options: IWorkspaceLayoutCacheOptions) {
     const { workspaceRoot, cacheData, resolverPathSeparator = directorySeparator } = options;
@@ -122,16 +126,16 @@ export class WorkspaceLayoutCache {
     this.contextLookup = contextLookup;
     this.contextForPackage = new WeakMap<object, IResolveContext>();
 
-    const normalizeToSlash: (path: string) => string =
-      resolverPathSeparator === '/' ? preservePath : backslashToSlash;
-    const normalizeToPlatform: (path: string) => string =
-      resolverPathSeparator === '/' ? preservePath : slashToBackslash;
+    const normalizeToSlash: IPathNormalizationFunction =
+      resolverPathSeparator === '\\' ? backslashToSlash : undefined;
+    const normalizeToPlatform: IPathNormalizationFunction =
+      resolverPathSeparator === '\\' ? slashToBackslash : undefined;
 
     this.resolverPathSeparator = resolverPathSeparator;
     this.normalizeToSlash = normalizeToSlash;
     this.normalizeToPlatform = normalizeToPlatform;
 
-    // Internal class due to coupling of deserialization.
+    // Internal class due to coupling to `resolveContexts`
     class ResolveContext implements IResolveContext {
       private readonly _serialized: ISerializedResolveContext;
       private _descriptionFileRoot: string | undefined;
@@ -145,7 +149,9 @@ export class WorkspaceLayoutCache {
 
       public get descriptionFileRoot(): string {
         if (!this._descriptionFileRoot) {
-          this._descriptionFileRoot = `${workspaceRoot}${resolverPathSeparator}${normalizeToPlatform(this._serialized.root)}`;
+          this._descriptionFileRoot = `${workspaceRoot}${resolverPathSeparator}${
+            normalizeToPlatform?.(this._serialized.root) ?? this._serialized.root
+          }`;
         }
         return this._descriptionFileRoot;
       }
@@ -157,6 +163,7 @@ export class WorkspaceLayoutCache {
           // Handle the self-reference scenario
           dependencies.setItem(this._serialized.name, this);
           for (const [key, ordinal] of Object.entries(this._serialized.deps)) {
+            // This calls into the array of instances that is owned by WorkpaceLayoutCache
             dependencies.setItem(key, resolveContexts[ordinal]);
           }
           this._dependencies = dependencies;

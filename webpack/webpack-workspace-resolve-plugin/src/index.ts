@@ -4,6 +4,7 @@
 export { WorkspaceResolvePlugin, type IWorkspaceResolvePluginOptions } from './WorkspaceResolvePlugin';
 export {
   WorkspaceLayoutCache,
+  type IPathNormalizationFunction,
   type IWorkspaceLayoutCacheOptions,
   type IResolveContext,
   type ISerializedResolveContext,

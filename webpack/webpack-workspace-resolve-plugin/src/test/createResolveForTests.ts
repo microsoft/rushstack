@@ -48,7 +48,7 @@ export function createResolveForTests(
   });
 
   const platformJson: Record<string, object> = Object.fromEntries(
-    Object.entries(parsedJson).map(([key, value]) => [cache.normalizeToPlatform(key), value])
+    Object.entries(parsedJson).map(([key, value]) => [cache.normalizeToPlatform?.(key) ?? key, value])
   );
 
   const serializedJson: Record<string, string> = Object.fromEntries(
