@@ -1,3 +1,7 @@
+// This project is a duplicate of "eslint-bulk-suppressions-test" intended to test eslint
+// against the older version of the TypeScript parser. Any modifications made to this project
+// should be reflected in "eslint-bulk-suppressions-test" as well.
+
 const { FileSystem, Executable, Text, Import } = require('@rushstack/node-core-library');
 const path = require('path');
 const {
@@ -22,7 +26,7 @@ function tryLoadSuppressions(suppressionsJsonPath) {
 }
 
 const RUN_FOLDER_PATHS = ['client', 'server'];
-const ESLINT_PACKAGE_NAMES = ['eslint', 'eslint-oldest'];
+const ESLINT_PACKAGE_NAMES = ['eslint', 'eslint-8.23', 'eslint-oldest'];
 
 const updateFilePaths = new Set();
 
