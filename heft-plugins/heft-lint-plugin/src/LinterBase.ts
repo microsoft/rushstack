@@ -17,7 +17,9 @@ export interface ILinterBaseOptions {
    * The path where the linter state will be written to.
    */
   buildMetadataFolderPath: string;
+  linterToolPath: string;
   linterConfigFilePath: string;
+  tsProgram: IExtendedProgram;
 }
 
 export interface IRunLinterOptions {
@@ -71,8 +73,6 @@ export abstract class LinterBase<TLintResult> {
   public async performLintingAsync(options: IRunLinterOptions): Promise<void> {
     const startTime: number = performance.now();
     let fileCount: number = 0;
-
-    await this.initializeAsync(options.tsProgram);
 
     const commonDirectory: string = options.tsProgram.getCommonSourceDirectory();
 
@@ -170,8 +170,6 @@ export abstract class LinterBase<TLintResult> {
   }
 
   protected abstract getCacheVersionAsync(): Promise<string>;
-
-  protected abstract initializeAsync(tsProgram: IExtendedProgram): Promise<void>;
 
   protected abstract lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TLintResult[]>;
 

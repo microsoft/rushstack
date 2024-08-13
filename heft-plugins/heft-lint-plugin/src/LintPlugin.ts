@@ -15,6 +15,7 @@ import type {
   ITypeScriptPluginAccessor
 } from '@rushstack/heft-typescript-plugin';
 
+import type { LinterBase } from './LinterBase';
 import { Eslint } from './Eslint';
 import { Tslint } from './Tslint';
 import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
@@ -123,82 +124,44 @@ export default class LintPlugin implements IHeftTaskPlugin {
     // multiple times will only init once.
     await this._ensureInitializedAsync(taskSession, heftConfiguration);
 
+    const linters: LinterBase<unknown>[] = [];
+    if (this._eslintConfigFilePath && this._eslintToolPath) {
+      const eslintLinter: Eslint = await Eslint.initializeAsync({
+        tsProgram,
+        scopedLogger: taskSession.logger,
+        linterToolPath: this._eslintToolPath,
+        linterConfigFilePath: this._eslintConfigFilePath,
+        buildFolderPath: heftConfiguration.buildFolderPath,
+        buildMetadataFolderPath: taskSession.tempFolderPath
+      });
+      linters.push(eslintLinter);
+    }
+
+    if (this._tslintConfigFilePath && this._tslintToolPath) {
+      const tslintLinter: Tslint = await Tslint.initializeAsync({
+        tsProgram,
+        scopedLogger: taskSession.logger,
+        linterToolPath: this._tslintToolPath,
+        linterConfigFilePath: this._tslintConfigFilePath,
+        buildFolderPath: heftConfiguration.buildFolderPath,
+        buildMetadataFolderPath: taskSession.tempFolderPath
+      });
+      linters.push(tslintLinter);
+    }
+
     // Now that we know we have initialized properly, run the linter(s)
-    const lintingPromises: Promise<void>[] = [];
-    if (this._eslintToolPath) {
-      lintingPromises.push(
-        this._runEslintAsync(
-          taskSession,
-          heftConfiguration,
-          this._eslintToolPath,
-          this._eslintConfigFilePath!,
-          tsProgram,
-          changedFiles
-        )
-      );
-    }
-    if (this._tslintToolPath) {
-      lintingPromises.push(
-        this._runTslintAsync(
-          taskSession,
-          heftConfiguration,
-          this._tslintToolPath,
-          this._tslintConfigFilePath!,
-          tsProgram,
-          changedFiles
-        )
-      );
-    }
-
-    await Promise.all(lintingPromises);
+    await Promise.all(linters.map((linter) => this._runLinterAsync(linter, tsProgram, changedFiles)));
   }
 
-  private async _runEslintAsync(
-    taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
-    eslintToolPath: string,
-    eslintConfigFilePath: string,
+  private async _runLinterAsync(
+    linter: LinterBase<unknown>,
     tsProgram: IExtendedProgram,
     changedFiles?: ReadonlySet<IExtendedSourceFile> | undefined
   ): Promise<void> {
-    const eslint: Eslint = new Eslint({
-      scopedLogger: taskSession.logger,
-      eslintPackagePath: eslintToolPath,
-      linterConfigFilePath: eslintConfigFilePath,
-      buildFolderPath: heftConfiguration.buildFolderPath,
-      buildMetadataFolderPath: taskSession.tempFolderPath
-    });
-
-    eslint.printVersionHeader();
+    linter.printVersionHeader();
 
     const typeScriptFilenames: Set<string> = new Set(tsProgram.getRootFileNames());
-    await eslint.performLintingAsync({
-      tsProgram,
-      typeScriptFilenames,
-      changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
-    });
-  }
-
-  private async _runTslintAsync(
-    taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
-    tslintToolPath: string,
-    tslintConfigFilePath: string,
-    tsProgram: IExtendedProgram,
-    changedFiles?: ReadonlySet<IExtendedSourceFile> | undefined
-  ): Promise<void> {
-    const tslint: Tslint = new Tslint({
-      scopedLogger: taskSession.logger,
-      tslintPackagePath: tslintToolPath,
-      linterConfigFilePath: tslintConfigFilePath,
-      buildFolderPath: heftConfiguration.buildFolderPath,
-      buildMetadataFolderPath: taskSession.tempFolderPath
-    });
-
-    tslint.printVersionHeader();
-
-    const typeScriptFilenames: Set<string> = new Set(tsProgram.getRootFileNames());
-    await tslint.performLintingAsync({
+    await linter.performLintingAsync({
       tsProgram,
       typeScriptFilenames,
       changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
