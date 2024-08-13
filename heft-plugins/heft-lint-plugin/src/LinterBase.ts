@@ -20,6 +20,7 @@ export interface ILinterBaseOptions {
   linterToolPath: string;
   linterConfigFilePath: string;
   tsProgram: IExtendedProgram;
+  fix?: boolean;
 }
 
 export interface IRunLinterOptions {
@@ -56,6 +57,9 @@ export abstract class LinterBase<TLintResult> {
   protected readonly _buildFolderPath: string;
   protected readonly _buildMetadataFolderPath: string;
   protected readonly _linterConfigFilePath: string;
+  protected readonly _fix: boolean;
+
+  protected _fixesPossible: boolean = false;
 
   private readonly _linterName: string;
 
@@ -66,6 +70,7 @@ export abstract class LinterBase<TLintResult> {
     this._buildMetadataFolderPath = options.buildMetadataFolderPath;
     this._linterConfigFilePath = options.linterConfigFilePath;
     this._linterName = linterName;
+    this._fix = options.fix || false;
   }
 
   public abstract printVersionHeader(): void;
@@ -157,6 +162,12 @@ export abstract class LinterBase<TLintResult> {
     //#endregion
 
     this.lintingFinished(lintFailures);
+
+    if (!this._fix && this._fixesPossible) {
+      this._terminal.writeWarningLine(
+        'The linter reported that fixes are possible. To apply fixes, run Heft with the "--fix" option.'
+      );
+    }
 
     const updatedTslintCacheData: ILinterCacheData = {
       cacheVersion: linterCacheVersion,

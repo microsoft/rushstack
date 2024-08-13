@@ -22,10 +22,23 @@ import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/Ty
 
 const PLUGIN_NAME: 'lint-plugin' = 'lint-plugin';
 const TYPESCRIPT_PLUGIN_NAME: typeof TypeScriptPluginName = 'typescript-plugin';
+const FIX_PARAMETER_NAME: string = '--fix';
 const ESLINTRC_JS_FILENAME: string = '.eslintrc.js';
 const ESLINTRC_CJS_FILENAME: string = '.eslintrc.cjs';
 
-export default class LintPlugin implements IHeftTaskPlugin {
+interface ILintPluginOptions {
+  alwaysFix?: boolean;
+}
+
+interface ILintOptions {
+  taskSession: IHeftTaskSession;
+  heftConfiguration: HeftConfiguration;
+  tsProgram: IExtendedProgram;
+  fix?: boolean;
+  changedFiles?: ReadonlySet<IExtendedSourceFile>;
+}
+
+export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
   private readonly _lintingPromises: Promise<void>[] = [];
 
   // These are initliazed by _initAsync
@@ -35,7 +48,11 @@ export default class LintPlugin implements IHeftTaskPlugin {
   private _tslintToolPath: string | undefined;
   private _tslintConfigFilePath: string | undefined;
 
-  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
+    pluginOptions?: ILintPluginOptions
+  ): void {
     // Disable linting in watch mode. Some lint rules require the context of multiple files, which
     // may not be available in watch mode.
     if (!taskSession.parameters.watch) {
@@ -48,12 +65,15 @@ export default class LintPlugin implements IHeftTaskPlugin {
           accessor.onChangedFilesHook.tap(
             PLUGIN_NAME,
             (changedFilesHookOptions: IChangedFilesHookOptions) => {
-              const lintingPromise: Promise<void> = this._lintAsync(
+              const lintingPromise: Promise<void> = this._lintAsync({
                 taskSession,
                 heftConfiguration,
-                changedFilesHookOptions.program as IExtendedProgram,
-                changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
-              );
+                fix:
+                  pluginOptions?.alwaysFix ||
+                  taskSession.parameters.getFlagParameter(FIX_PARAMETER_NAME).value,
+                tsProgram: changedFilesHookOptions.program as IExtendedProgram,
+                changedFiles: changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
+              });
               lintingPromise.catch(() => {
                 // Suppress unhandled promise rejection error
               });
@@ -114,12 +134,9 @@ export default class LintPlugin implements IHeftTaskPlugin {
     }
   }
 
-  private async _lintAsync(
-    taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
-    tsProgram: IExtendedProgram,
-    changedFiles?: ReadonlySet<IExtendedSourceFile>
-  ): Promise<void> {
+  private async _lintAsync(options: ILintOptions): Promise<void> {
+    const { taskSession, heftConfiguration, tsProgram, changedFiles, fix } = options;
+
     // Ensure that we have initialized. This promise is cached, so calling init
     // multiple times will only init once.
     await this._ensureInitializedAsync(taskSession, heftConfiguration);
@@ -128,6 +145,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
     if (this._eslintConfigFilePath && this._eslintToolPath) {
       const eslintLinter: Eslint = await Eslint.initializeAsync({
         tsProgram,
+        fix,
         scopedLogger: taskSession.logger,
         linterToolPath: this._eslintToolPath,
         linterConfigFilePath: this._eslintConfigFilePath,
@@ -140,6 +158,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
     if (this._tslintConfigFilePath && this._tslintToolPath) {
       const tslintLinter: Tslint = await Tslint.initializeAsync({
         tsProgram,
+        fix,
         scopedLogger: taskSession.logger,
         linterToolPath: this._tslintToolPath,
         linterConfigFilePath: this._tslintConfigFilePath,
