@@ -12,7 +12,7 @@
         {
           "longName": "--fix",
           "parameterKind": "flag",
-          "description": "Fix all encountered rule violations where the violated rule provides a fixer."
+          "description": "Fix all encountered rule violations where the violated rule provides a fixer. When running in production mode, fixes will be disabled regardless of this parameter."
         }
       ]
     }

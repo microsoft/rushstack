@@ -13,8 +13,8 @@ import type {
   IHeftConfigurationJsonTaskSpecifier,
   IHeftConfigurationJsonPluginSpecifier
 } from '../utilities/CoreConfigFiles';
-import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
-import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
+import type { IHeftTaskPlugin } from './IHeftPlugin';
+import type { IScopedLogger } from './logging/ScopedLogger';
 
 const RESERVED_TASK_NAMES: Set<string> = new Set(['clean']);
 

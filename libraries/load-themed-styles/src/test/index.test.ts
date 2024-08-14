@@ -8,7 +8,7 @@ import {
   loadStyles,
   configureLoadStyles,
   type IThemingInstruction
-} from './../index';
+} from '../index';
 
 describe('detokenize', () => {
   it('handles colors', () => {

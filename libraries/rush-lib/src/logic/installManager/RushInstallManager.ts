@@ -18,10 +18,10 @@ import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
-import type { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
-import type { IRushTempPackageJson } from '../../logic/base/BasePackage';
+import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
+import type { IRushTempPackageJson } from '../base/BasePackage';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../../logic/RushConstants';
+import { RushConstants } from '../RushConstants';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
 import {

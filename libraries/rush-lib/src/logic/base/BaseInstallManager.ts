@@ -30,7 +30,7 @@ import {
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
-import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
+import type { BaseShrinkwrapFile } from './BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
 import {

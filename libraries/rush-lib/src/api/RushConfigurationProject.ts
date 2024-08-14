@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import { type IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from './RushConfiguration';
 import type { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 import type { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConstants } from '../logic/RushConstants';

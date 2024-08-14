@@ -17,7 +17,7 @@ import {
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { trueCasePathSync } from 'true-case-path';
 
-import { Rush } from '../api/Rush';
+import { Rush } from './Rush';
 import { RushConfigurationProject, type IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';

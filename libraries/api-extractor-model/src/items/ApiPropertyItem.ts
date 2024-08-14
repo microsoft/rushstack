@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
-import {
-  type IApiDeclaredItemOptions,
-  ApiDeclaredItem,
-  type IApiDeclaredItemJson
-} from '../items/ApiDeclaredItem';
+import { type IApiDeclaredItemOptions, ApiDeclaredItem, type IApiDeclaredItemJson } from './ApiDeclaredItem';
 import { ApiReleaseTagMixin, type IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import type { DeserializerContext } from '../model/DeserializerContext';

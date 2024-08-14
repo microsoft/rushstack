@@ -6,7 +6,7 @@ import { Colorize } from '@rushstack/terminal';
 
 import { AsyncRecycler } from '../utilities/AsyncRecycler';
 import type { RushConfiguration } from '../api/RushConfiguration';
-import { RushConstants } from '../logic/RushConstants';
+import { RushConstants } from './RushConstants';
 import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 
 /**
