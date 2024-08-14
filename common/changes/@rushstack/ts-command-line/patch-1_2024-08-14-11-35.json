@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/ts-command-line",
-      "comment": "Typo",
+      "comment": "Fix a README typo.",
       "type": "none"
     }
   ],
