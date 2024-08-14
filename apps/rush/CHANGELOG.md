@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 08 Aug 2024 23:38:18 GMT and should not be manually modified.
+This log was last generated on Sun, 11 Aug 2024 05:02:05 GMT and should not be manually modified.
+
+## 5.131.4
+Sun, 11 Aug 2024 05:02:05 GMT
+
+### Updates
+
+- Revert a breaking change in Rush 5.131.3 where pnpm patches were moved from `common/pnpm-patches` to `common/config/rush/pnpm-patches`.
+
+## 5.131.3
+Sat, 10 Aug 2024 02:27:14 GMT
+
+### Updates
+
+- Fix an issue where `rush-pnpm patch-commit` would not correctly resolve patch files when the subspaces feature is enabled.
 
 ## 5.131.2
 Thu, 08 Aug 2024 23:38:18 GMT

@@ -7,8 +7,7 @@ import { Async, FileSystem, LegacyAdapters, Path } from '@rushstack/node-core-li
 
 const PLUGIN_NAME: 'DeepImportsPlugin' = 'DeepImportsPlugin';
 
-declare const dummyDllPlugin: DllPlugin;
-type DllPluginOptions = typeof dummyDllPlugin.options;
+type DllPluginOptions = DllPlugin['options'];
 
 /**
  * @public

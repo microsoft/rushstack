@@ -31,7 +31,7 @@ export const init = (options: {
 
       const rushConfiguration: RushConfiguration = RushConfiguration.tryLoadFromDefaultLocation()!;
       const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
-      const workspaceFolder: string = subspace.getSubspaceTempFolder();
+      const workspaceFolder: string = subspace.getSubspaceTempFolderPath();
 
       const projectsByProjectFolder: Map<string, IRushProjectDetails> = new Map();
       for (const project of rushConfiguration.projects) {

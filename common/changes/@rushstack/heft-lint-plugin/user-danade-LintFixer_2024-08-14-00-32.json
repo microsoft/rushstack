@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "comment": "Add autofix functionality for ESLint and TSLint. Fixes can now be applied by providing the \"--fix\" command-line argument, or setting the \"alwaysFix\" plugin option to \"true\"",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-lint-plugin"
+}

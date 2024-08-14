@@ -69,6 +69,7 @@ export {
   type IJsonSchemaFromObjectOptions,
   type IJsonSchemaLoadOptions,
   type IJsonSchemaValidateOptions,
+  type IJsonSchemaValidateObjectWithOptions,
   JsonSchema,
   type JsonSchemaVersion
 } from './JsonSchema';
