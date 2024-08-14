@@ -15,7 +15,7 @@ import {
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
-import type { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
+import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import {
   type PackageJsonEditor,
@@ -24,7 +24,7 @@ import {
 } from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../../logic/RushConstants';
+import { RushConstants } from '../RushConstants';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
 import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';

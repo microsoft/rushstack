@@ -4,7 +4,7 @@
 import * as semver from 'semver';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { RushConstants } from '../../logic/RushConstants';
+import { RushConstants } from '../RushConstants';
 import { type DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import type { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import type { RushConfiguration } from '../../api/RushConfiguration';

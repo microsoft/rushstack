@@ -29,7 +29,7 @@ import { HeftParameterManager } from '../pluginFramework/HeftParameterManager';
 import { TaskOperationRunner } from '../operations/runners/TaskOperationRunner';
 import { PhaseOperationRunner } from '../operations/runners/PhaseOperationRunner';
 import type { HeftPhase } from '../pluginFramework/HeftPhase';
-import type { IHeftAction, IHeftActionOptions } from '../cli/actions/IHeftAction';
+import type { IHeftAction, IHeftActionOptions } from './actions/IHeftAction';
 import type {
   IHeftLifecycleCleanHookOptions,
   IHeftLifecycleSession,
