@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/heft-lint-plugin_v0.4.0",
+      "date": "Wed, 14 Aug 2024 22:37:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add autofix functionality for ESLint and TSLint. Fixes can now be applied by providing the \"--fix\" command-line argument, or setting the \"alwaysFix\" plugin option to \"true\""
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Unintrusively disable \"--fix\" mode when running in \"--production\" mode"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.48",
       "tag": "@rushstack/heft-lint-plugin_v0.3.48",
       "date": "Tue, 13 Aug 2024 18:17:05 GMT",
