@@ -137,7 +137,15 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     // Some of this code comes from here:
     // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
     // Modified to only lint files that have changed and that we care about
-    const failures: TTslint.RuleFailure[] = this._linter.getAllFailures(sourceFile, this._enabledRules);
+    let failures: TTslint.RuleFailure[] = this._linter.getAllFailures(sourceFile, this._enabledRules);
+    const hasFixableIssue: boolean = failures.some((f) => f.hasFix());
+    if (hasFixableIssue) {
+      if (this._fix) {
+        failures = this._linter.applyAllFixes(this._enabledRules, failures, sourceFile, sourceFile.fileName);
+      } else {
+        this._fixesPossible = true;
+      }
+    }
 
     for (const failure of failures) {
       const severity: TTslint.RuleSeverity | undefined = this._ruleSeverityMap.get(failure.getRuleName());
@@ -151,24 +159,31 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     return failures;
   }
 
-  protected lintingFinished(failures: TTslint.RuleFailure[]): void {
+  protected async lintingFinishedAsync(failures: TTslint.RuleFailure[]): Promise<void> {
     this._linter.failures = failures;
     const lintResult: TTslint.LintResult = this._linter.getResult();
 
-    // Report linter errors and warnings to the logger
-    if (lintResult.failures.length) {
-      for (const tslintFailure of lintResult.failures) {
-        const errorObject: FileError = this._getLintFileError(tslintFailure);
-        switch (tslintFailure.getRuleSeverity()) {
-          case 'error': {
-            this._scopedLogger.emitError(errorObject);
-            break;
-          }
+    // Report linter fixes to the logger. These will only be returned when the underlying failure was fixed
+    if (lintResult.fixes?.length) {
+      for (const fixedTslintFailure of lintResult.fixes) {
+        const formattedMessage: string = `[FIXED] ${getFormattedErrorMessage(fixedTslintFailure)}`;
+        const errorObject: FileError = this._getLintFileError(fixedTslintFailure, formattedMessage);
+        this._scopedLogger.emitWarning(errorObject);
+      }
+    }
 
-          case 'warning': {
-            this._scopedLogger.emitWarning(errorObject);
-            break;
-          }
+    // Report linter errors and warnings to the logger
+    for (const tslintFailure of lintResult.failures) {
+      const errorObject: FileError = this._getLintFileError(tslintFailure);
+      switch (tslintFailure.getRuleSeverity()) {
+        case 'error': {
+          this._scopedLogger.emitError(errorObject);
+          break;
+        }
+
+        case 'warning': {
+          this._scopedLogger.emitWarning(errorObject);
+          break;
         }
       }
     }
