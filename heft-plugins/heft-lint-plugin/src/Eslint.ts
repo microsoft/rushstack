@@ -154,9 +154,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     // Map the fix messages to the results. This API should only return one result per file, so we can be sure
     // that the fix messages belong to the returned result. If we somehow receive multiple results, we will
     // drop the messages on the floor, but since they are only used for logging, this should not be a problem.
-    const fixMessages: TEslint.Linter.LintMessage[] = this._currentFixMessages.splice(
-      0
-    );
+    const fixMessages: TEslint.Linter.LintMessage[] = this._currentFixMessages.splice(0);
     if (lintResults.length === 1) {
       this._fixMessagesByResult.set(lintResults[0], fixMessages);
     }
