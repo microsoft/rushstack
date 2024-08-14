@@ -56,6 +56,17 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     // Disable linting in watch mode. Some lint rules require the context of multiple files, which
     // may not be available in watch mode.
     if (!taskSession.parameters.watch) {
+      let fix: boolean =
+        pluginOptions?.alwaysFix || taskSession.parameters.getFlagParameter(FIX_PARAMETER_NAME).value;
+      if (fix && taskSession.parameters.production) {
+        // Write this as a standard output message since we don't want to throw errors when running in
+        // production mode and "alwaysFix" is specified in the plugin options
+        taskSession.logger.terminal.writeLine(
+          'Fix mode has been disabled since Heft is running in production mode'
+        );
+        fix = false;
+      }
+
       // Use the changed files hook to kick off linting asynchronously
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-typescript-plugin',
@@ -68,9 +79,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
               const lintingPromise: Promise<void> = this._lintAsync({
                 taskSession,
                 heftConfiguration,
-                fix:
-                  pluginOptions?.alwaysFix ||
-                  taskSession.parameters.getFlagParameter(FIX_PARAMETER_NAME).value,
+                fix,
                 tsProgram: changedFilesHookOptions.program as IExtendedProgram,
                 changedFiles: changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
               });
@@ -96,7 +105,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         warningPrinted = true;
 
         // Warn since don't run the linters when in watch mode.
-        taskSession.logger.terminal.writeWarningLine("Linting isn't currently supported in watch mode.");
+        taskSession.logger.terminal.writeWarningLine("Linting isn't currently supported in watch mode");
       } else {
         await Promise.all(this._lintingPromises);
       }

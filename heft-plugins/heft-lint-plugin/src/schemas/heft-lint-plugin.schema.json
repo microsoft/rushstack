@@ -9,7 +9,7 @@
   "properties": {
     "alwaysFix": {
       "title": "Always Fix",
-      "description": "If set to true, fix all encountered rule violations where the violated rule provides a fixer, regardless of if the \"--fix\" command-line argument is provided.",
+      "description": "If set to true, fix all encountered rule violations where the violated rule provides a fixer, regardless of if the \"--fix\" command-line argument is provided. When running in production mode, fixes will be disabled regardless of this setting.",
       "type": "boolean"
     }
   }
