@@ -138,7 +138,8 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
     // Modified to only lint files that have changed and that we care about
     let failures: TTslint.RuleFailure[] = this._linter.getAllFailures(sourceFile, this._enabledRules);
-    if (failures.some((f) => f.hasFix())) {
+    const hasFixableIssue: boolean = failures.some((f) => f.hasFix());
+    if (hasFixableIssue) {
       if (this._fix) {
         failures = this._linter.applyAllFixes(this._enabledRules, failures, sourceFile, sourceFile.fileName);
       } else {
@@ -158,7 +159,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     return failures;
   }
 
-  protected lintingFinished(failures: TTslint.RuleFailure[]): void {
+  protected async lintingFinishedAsync(failures: TTslint.RuleFailure[]): Promise<void> {
     this._linter.failures = failures;
     const lintResult: TTslint.LintResult = this._linter.getResult();
 
@@ -172,19 +173,17 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     }
 
     // Report linter errors and warnings to the logger
-    if (lintResult.failures.length) {
-      for (const tslintFailure of lintResult.failures) {
-        const errorObject: FileError = this._getLintFileError(tslintFailure);
-        switch (tslintFailure.getRuleSeverity()) {
-          case 'error': {
-            this._scopedLogger.emitError(errorObject);
-            break;
-          }
+    for (const tslintFailure of lintResult.failures) {
+      const errorObject: FileError = this._getLintFileError(tslintFailure);
+      switch (tslintFailure.getRuleSeverity()) {
+        case 'error': {
+          this._scopedLogger.emitError(errorObject);
+          break;
+        }
 
-          case 'warning': {
-            this._scopedLogger.emitWarning(errorObject);
-            break;
-          }
+        case 'warning': {
+          this._scopedLogger.emitWarning(errorObject);
+          break;
         }
       }
     }

@@ -161,7 +161,7 @@ export abstract class LinterBase<TLintResult> {
     }
     //#endregion
 
-    this.lintingFinished(lintFailures);
+    await this.lintingFinishedAsync(lintFailures);
 
     if (!this._fix && this._fixesPossible) {
       this._terminal.writeWarningLine(
@@ -184,7 +184,7 @@ export abstract class LinterBase<TLintResult> {
 
   protected abstract lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TLintResult[]>;
 
-  protected abstract lintingFinished(lintFailures: TLintResult[]): void;
+  protected abstract lintingFinishedAsync(lintFailures: TLintResult[]): Promise<void>;
 
   protected abstract isFileExcludedAsync(filePath: string): Promise<boolean>;
 }
