@@ -58,8 +58,6 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/publish-tarballs.yaml@self
                 parameters:
-                  VersionPolicyName: noRush
-                  BranchName: $(SourceBranch)
-                  publish: $(Publish)
+                  Publish: $(Publish)
 
               - template: /common/config/azure-pipelines/templates/record-published-versions.yaml@self

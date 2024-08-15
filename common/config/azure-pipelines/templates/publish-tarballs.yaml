@@ -1,9 +1,4 @@
 parameters:
-  - name: VersionPolicyName
-    type: string
-  - name: BranchName
-    type: string
-    default: $(Build.SourceBranchName)
   - name: Publish
     type: string
     default: ''
