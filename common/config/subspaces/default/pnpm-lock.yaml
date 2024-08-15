@@ -4440,6 +4440,25 @@ importers:
         specifier: ~5.82.1
         version: 5.82.1
 
+  ../../../webpack/webpack-workspace-resolve-plugin:
+    dependencies:
+      '@rushstack/lookup-by-path':
+        specifier: workspace:*
+        version: link:../../libraries/lookup-by-path
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+      memfs:
+        specifier: 3.4.3
+        version: 3.4.3
+      webpack:
+        specifier: ~5.82.1
+        version: 5.82.1
+
   ../../../webpack/webpack4-localization-plugin:
     dependencies:
       '@rushstack/localization-utilities':

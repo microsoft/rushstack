@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack-workspace-resolve-plugin",
+      "comment": "Add plugin for more efficient import resolution in a monorepo with known structure. Optimizes lookup of the relevant `package.json` for a given path, and lookup of npm dependencies of the containing package.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack-workspace-resolve-plugin"
+}

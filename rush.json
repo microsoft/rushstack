@@ -1286,6 +1286,12 @@
       "shouldPublish": false // for now
     },
     {
+      "packageName": "@rushstack/webpack-workspace-resolve-plugin",
+      "projectFolder": "webpack/webpack-workspace-resolve-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/set-webpack-public-path-plugin",
       "projectFolder": "webpack/set-webpack-public-path-plugin",
       "reviewCategory": "libraries",
