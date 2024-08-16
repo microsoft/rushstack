@@ -78,12 +78,13 @@ export interface IPseudolocaleOptions {
 
 // @public (undocumented)
 export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
-    // (undocumented)
     exportAsDefault?: boolean;
+    exportAsDefaultDocumentationComment?: string;
     // (undocumented)
     ignoreMissingResxComments?: boolean | undefined;
     // (undocumented)
     ignoreString?: IgnoreStringFunction;
+    inferDefaultExportInterfaceNameFromFilename?: boolean;
     // (undocumented)
     processComment?: (comment: string | undefined, resxFilePath: string, stringName: string) => string | undefined;
     // (undocumented)

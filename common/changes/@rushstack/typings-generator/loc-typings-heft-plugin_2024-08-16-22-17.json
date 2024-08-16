@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Add a `exportAsDefaultDocumentationComment` option to `StringValuesTypingsGenerator` that allows a documentation comment to be provided to the interface for the default export.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator"
+}

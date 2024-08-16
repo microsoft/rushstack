@@ -15,10 +15,27 @@ import { parseLocFile } from './LocFileParser';
  * @public
  */
 export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
+  /**
+   * Setting this option wraps the typings export in a default property.
+   */
   exportAsDefault?: boolean;
+  /**
+   * When `exportAsDefault` is true, this value is placed in a documentation comment for the
+   * exported default interface. Ignored when `exportAsDefault` is false.
+   */
+  exportAsDefaultDocumentationComment?: string;
+  /**
+   * When `exportAsDefault` is true and this option is true, the default export interface name will be inferred
+   * from the filename.
+   */
+  inferDefaultExportInterfaceNameFromFilename?: boolean;
+
   resxNewlineNormalization?: NewlineKind | undefined;
+
   ignoreMissingResxComments?: boolean | undefined;
+
   ignoreString?: IgnoreStringFunction;
+
   processComment?: (
     comment: string | undefined,
     resxFilePath: string,

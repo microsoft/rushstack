@@ -34,10 +34,18 @@ export interface IStringValuesTypingsGeneratorBaseOptions {
   exportAsDefault?: boolean;
 
   /**
-   * When `exportAsDefault` is true, this optional setting determines the interface name
+   * When `exportAsDefault` is true, this optional setting overrides the the interface name
    * for the default wrapped export. Ignored when `exportAsDefault` is false.
+   *
+   * @defaultValue "IExport"
    */
   exportAsDefaultInterfaceName?: string;
+
+  /**
+   * When `exportAsDefault` is true, this value is placed in a documentation comment for the
+   * exported default interface. Ignored when `exportAsDefault` is false.
+   */
+  exportAsDefaultDocumentationComment?: string;
 }
 
 /**
@@ -63,6 +71,7 @@ const EXPORT_AS_DEFAULT_INTERFACE_NAME: string = 'IExport';
 function convertToTypingsGeneratorOptions<TFileContents>(
   options: IStringValuesTypingsGeneratorOptionsWithCustomReadFile<TFileContents>
 ): ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents> {
+  const { exportAsDefault, exportAsDefaultInterfaceName, exportAsDefaultDocumentationComment } = options;
   async function parseAndGenerateTypings(
     fileContents: TFileContents,
     filePath: string,
@@ -79,11 +88,19 @@ function convertToTypingsGeneratorOptions<TFileContents>(
     }
 
     const outputLines: string[] = [];
-    const interfaceName: string = options.exportAsDefaultInterfaceName
-      ? options.exportAsDefaultInterfaceName
-      : EXPORT_AS_DEFAULT_INTERFACE_NAME;
+    const interfaceName: string = exportAsDefaultInterfaceName || EXPORT_AS_DEFAULT_INTERFACE_NAME;
     let indent: string = '';
-    if (options.exportAsDefault) {
+    if (exportAsDefault) {
+      if (exportAsDefaultDocumentationComment) {
+        const documentationCommentLines: string[] = exportAsDefaultDocumentationComment.split(/\r?\n/);
+        outputLines.push(`/**`);
+        for (const line of documentationCommentLines) {
+          outputLines.push(` * ${line}`);
+        }
+
+        outputLines.push(` */`);
+      }
+
       outputLines.push(`export interface ${interfaceName} {`);
       indent = '  ';
     }
@@ -95,14 +112,14 @@ function convertToTypingsGeneratorOptions<TFileContents>(
         outputLines.push(`${indent}/**`, `${indent} * ${comment.replace(/\*\//g, '*\\/')}`, `${indent} */`);
       }
 
-      if (options.exportAsDefault) {
+      if (exportAsDefault) {
         outputLines.push(`${indent}'${exportName}': string;`, '');
       } else {
         outputLines.push(`export declare const ${exportName}: string;`, '');
       }
     }
 
-    if (options.exportAsDefault) {
+    if (exportAsDefault) {
       outputLines.push('}', '', `declare const strings: ${interfaceName};`, '', 'export default strings;');
     }
 

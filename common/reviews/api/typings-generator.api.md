@@ -9,6 +9,7 @@ import { ITerminal } from '@rushstack/terminal';
 // @public (undocumented)
 export interface IStringValuesTypingsGeneratorBaseOptions {
     exportAsDefault?: boolean;
+    exportAsDefaultDocumentationComment?: string;
     exportAsDefaultInterfaceName?: string;
 }
 
