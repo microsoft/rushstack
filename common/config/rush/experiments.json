@@ -9,7 +9,7 @@
    * By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'.
    * Set this option to true to pass '--frozen-lockfile' instead for faster installs.
    */
-  "usePnpmFrozenLockfileForRushInstall": true,
+  // "usePnpmFrozenLockfileForRushInstall": true,
 
   /**
    * By default, 'rush update' passes --no-prefer-frozen-lockfile to 'pnpm install'.
