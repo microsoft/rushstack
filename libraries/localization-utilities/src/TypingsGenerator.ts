@@ -19,11 +19,13 @@ export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
    * Setting this option wraps the typings export in a default property.
    */
   exportAsDefault?: boolean;
+
   /**
    * When `exportAsDefault` is true, this value is placed in a documentation comment for the
    * exported default interface. Ignored when `exportAsDefault` is false.
    */
   exportAsDefaultDocumentationComment?: string;
+
   /**
    * When `exportAsDefault` is true and this option is true, the default export interface name will be inferred
    * from the filename.
@@ -50,17 +52,24 @@ export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
  */
 export class TypingsGenerator extends StringValuesTypingsGenerator {
   public constructor(options: ITypingsGeneratorOptions) {
-    const { ignoreString, processComment } = options;
+    const {
+      ignoreString,
+      processComment,
+      terminal,
+      resxNewlineNormalization,
+      ignoreMissingResxComments,
+      inferDefaultExportInterfaceNameFromFilename
+    } = options;
     super({
       ...options,
       fileExtensions: ['.resx', '.resx.json', '.loc.json', '.resjson'],
       parseAndGenerateTypings: (fileContents: string, filePath: string, resxFilePath: string) => {
         const locFileData: ILocalizationFile = parseLocFile({
-          filePath: filePath,
+          filePath,
           content: fileContents,
-          terminal: this._options.terminal!,
-          resxNewlineNormalization: options.resxNewlineNormalization,
-          ignoreMissingResxComments: options.ignoreMissingResxComments,
+          terminal: terminal!,
+          resxNewlineNormalization,
+          ignoreMissingResxComments,
           ignoreString
         });
 
@@ -79,7 +88,23 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
           });
         }
 
-        return { typings };
+        let exportAsDefaultInterfaceName: string | undefined;
+        if (inferDefaultExportInterfaceNameFromFilename) {
+          const lastSlashIndex: number = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
+          const extensionIndex: number = Math.max(
+            filePath.lastIndexOf('.resx'),
+            filePath.lastIndexOf('.resjson'),
+            filePath.lastIndexOf('.loc.json')
+          );
+          const fileNameWithoutExtension: string = filePath.substring(lastSlashIndex + 1, extensionIndex);
+          const normalizedFileName: string = fileNameWithoutExtension.replace(/[^a-zA-Z0-9]/g, '');
+          exportAsDefaultInterfaceName = `I${normalizedFileName}Strings`;
+        }
+
+        return {
+          typings,
+          exportAsDefaultInterfaceName
+        };
       }
     });
   }
