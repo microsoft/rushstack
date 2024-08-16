@@ -31,6 +31,8 @@ export interface IStringValueTyping {
 
 // @public (undocumented)
 export interface IStringValueTypings {
+    exportAsDefaultDocumentationComment?: string;
+    exportAsDefaultInterfaceName?: string;
     // (undocumented)
     typings: IStringValueTyping[];
 }

@@ -22,6 +22,20 @@ export interface IStringValueTyping {
  */
 export interface IStringValueTypings {
   typings: IStringValueTyping[];
+
+  /**
+   * If provided, and  {@link IStringValuesTypingsGeneratorBaseOptions.exportAsDefault} is set to true,
+   * this value will be used as the interface name for the default export. Note that this value takes
+   * precedence over a value provided in {@link IStringValuesTypingsGeneratorBaseOptions.exportAsDefaultInterfaceName}.
+   */
+  exportAsDefaultInterfaceName?: string;
+
+  /**
+   * If provided, and  {@link IStringValuesTypingsGeneratorBaseOptions.exportAsDefault} is set to true,
+   * this value will be used as the documentation comment for the default export. Note that this value takes
+   * precedence over a value provided in {@link IStringValuesTypingsGeneratorBaseOptions.exportAsDefaultDocumentationComment}.
+   */
+  exportAsDefaultDocumentationComment?: string;
 }
 
 /**
@@ -71,13 +85,18 @@ const EXPORT_AS_DEFAULT_INTERFACE_NAME: string = 'IExport';
 function convertToTypingsGeneratorOptions<TFileContents>(
   options: IStringValuesTypingsGeneratorOptionsWithCustomReadFile<TFileContents>
 ): ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents> {
-  const { exportAsDefault, exportAsDefaultInterfaceName, exportAsDefaultDocumentationComment } = options;
-  async function parseAndGenerateTypings(
+  const {
+    exportAsDefault,
+    exportAsDefaultInterfaceName,
+    exportAsDefaultDocumentationComment,
+    parseAndGenerateTypings
+  } = options;
+  async function parseAndGenerateTypingsOuter(
     fileContents: TFileContents,
     filePath: string,
     relativePath: string
   ): Promise<string | undefined> {
-    const stringValueTypings: IStringValueTypings | undefined = await options.parseAndGenerateTypings(
+    const stringValueTypings: IStringValueTypings | undefined = await parseAndGenerateTypings(
       fileContents,
       filePath,
       relativePath
@@ -87,12 +106,23 @@ function convertToTypingsGeneratorOptions<TFileContents>(
       return;
     }
 
+    const {
+      exportAsDefaultInterfaceName: exportAsDefaultInterfaceNameOverride,
+      exportAsDefaultDocumentationComment: exportAsDefaultDocumentationCommentOverride,
+      typings
+    } = stringValueTypings;
+
     const outputLines: string[] = [];
-    const interfaceName: string = exportAsDefaultInterfaceName || EXPORT_AS_DEFAULT_INTERFACE_NAME;
+    const interfaceName: string =
+      exportAsDefaultInterfaceNameOverride ||
+      exportAsDefaultInterfaceName ||
+      EXPORT_AS_DEFAULT_INTERFACE_NAME;
     let indent: string = '';
     if (exportAsDefault) {
-      if (exportAsDefaultDocumentationComment) {
-        const documentationCommentLines: string[] = exportAsDefaultDocumentationComment.split(/\r?\n/);
+      const documentationComment: string | undefined =
+        exportAsDefaultDocumentationCommentOverride || exportAsDefaultDocumentationComment;
+      if (documentationComment) {
+        const documentationCommentLines: string[] = documentationComment.split(/\r?\n/);
         outputLines.push(`/**`);
         for (const line of documentationCommentLines) {
           outputLines.push(` * ${line}`);
@@ -105,7 +135,7 @@ function convertToTypingsGeneratorOptions<TFileContents>(
       indent = '  ';
     }
 
-    for (const stringValueTyping of stringValueTypings.typings) {
+    for (const stringValueTyping of typings) {
       const { exportName, comment } = stringValueTyping;
 
       if (comment && comment.trim() !== '') {
@@ -128,7 +158,7 @@ function convertToTypingsGeneratorOptions<TFileContents>(
 
   const convertedOptions: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents> = {
     ...options,
-    parseAndGenerateTypings
+    parseAndGenerateTypings: parseAndGenerateTypingsOuter
   };
 
   return convertedOptions;
