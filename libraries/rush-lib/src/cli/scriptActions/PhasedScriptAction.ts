@@ -11,6 +11,7 @@ import type {
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
+import type { Subspace } from '../../api/Subspace';
 import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
 import {
   PhasedCommandHooks,
@@ -297,7 +298,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         terminal: this._terminal,
         rushConfiguration: this.rushConfiguration,
         rushGlobalFolder: this.rushGlobalFolder,
-        isDebug: this.parser.isDebug
+        isDebug: this.parser.isDebug,
+        beforeInstallAsync: (subspace: Subspace) =>
+          this.rushSession.hooks.beforeInstall.promise(this, subspace),
+        afterInstallAsync: (subspace: Subspace) => this.rushSession.hooks.afterInstall.promise(this, subspace)
       });
     }
 
