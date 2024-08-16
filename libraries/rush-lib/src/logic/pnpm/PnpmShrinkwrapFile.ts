@@ -52,9 +52,11 @@ export type IPnpmVersionSpecifier = IPnpmV7VersionSpecifier | IPnpmV8VersionSpec
 export interface IPnpmShrinkwrapDependencyYaml {
   /** Information about the resolved package */
   resolution?: {
+    /** The directory this package should clone, for injected dependencies */
+    directory?: string;
     /** The hash of the tarball, to ensure archive integrity */
-    integrity: string;
-    /** The name of the tarball, if this was from a TGX file */
+    integrity?: string;
+    /** The name of the tarball, if this was from a TGZ file */
     tarball?: string;
   };
   /** The list of dependencies and the resolved version */
@@ -68,6 +70,16 @@ export interface IPnpmShrinkwrapDependencyYaml {
    * https://github.com/yarnpkg/rfcs/blob/master/accepted/0000-optional-peer-dependencies.md
    */
   peerDependenciesMeta?: Record<string, IPeerDependenciesMetaYaml>;
+  /** The name of the package, if the package is a local tarball */
+  name?: string;
+  /** If this is an optional dependency */
+  optional?: boolean;
+  /** The values of process.platform supported by this package */
+  os?: readonly string[];
+  /** The values of process.arch supported by this package */
+  cpu?: readonly string[];
+  /** The libc runtimes supported by this package */
+  libc?: readonly string[];
 }
 
 export interface IPnpmShrinkwrapImporterYaml {
