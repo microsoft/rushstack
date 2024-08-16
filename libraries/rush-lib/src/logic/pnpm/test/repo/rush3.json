@@ -1,0 +1,14 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
+  "pnpmVersion": "7.0.0",
+  "rushVersion": "5.46.1",
+  "projects": [
+    {
+      "packageName": "baz",
+      "projectFolder": "apps/baz"
+    }
+  ],
+  "pnpmOptions": {
+    "useWorkspaces": true
+  }
+}
