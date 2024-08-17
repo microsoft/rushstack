@@ -98,7 +98,15 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
           );
           const fileNameWithoutExtension: string = filePath.substring(lastSlashIndex + 1, extensionIndex);
           const normalizedFileName: string = fileNameWithoutExtension.replace(/[^a-zA-Z0-9]/g, '');
-          exportAsDefaultInterfaceName = `I${normalizedFileName}Strings`;
+          const [firstCharacter, ...restOfCharacters] = normalizedFileName;
+          exportAsDefaultInterfaceName = `I${firstCharacter.toUpperCase()}${restOfCharacters.join('')}`;
+
+          if (
+            !exportAsDefaultInterfaceName.endsWith('strings') &&
+            !exportAsDefaultInterfaceName.endsWith('Strings')
+          ) {
+            exportAsDefaultInterfaceName += 'Strings';
+          }
         }
 
         return {
