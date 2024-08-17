@@ -55,7 +55,6 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
     const {
       ignoreString,
       processComment,
-      terminal,
       resxNewlineNormalization,
       ignoreMissingResxComments,
       inferDefaultExportInterfaceNameFromFilename
@@ -63,11 +62,13 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
     super({
       ...options,
       fileExtensions: ['.resx', '.resx.json', '.loc.json', '.resjson'],
-      parseAndGenerateTypings: (fileContents: string, filePath: string, resxFilePath: string) => {
+      parseAndGenerateTypings: (content: string, filePath: string, resxFilePath: string) => {
         const locFileData: ILocalizationFile = parseLocFile({
           filePath,
-          content: fileContents,
-          terminal: terminal!,
+          content,
+          // Explicitly grab this from `this._options` as `this._options.terminal` is initialized later
+          // by the `TypingsGenerator` (from @rushstack/typings-generator) constructor if it isn't provided.
+          terminal: this._options.terminal!,
           resxNewlineNormalization,
           ignoreMissingResxComments,
           ignoreString
