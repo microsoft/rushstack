@@ -2780,6 +2780,28 @@ importers:
         specifier: ~5.4.2
         version: 5.4.2
 
+  ../../../heft-plugins/heft-localization-typings-plugin:
+    dependencies:
+      '@rushstack/localization-utilities':
+        specifier: workspace:*
+        version: link:../../libraries/localization-utilities
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+    devDependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      eslint:
+        specifier: ~8.57.0
+        version: 8.57.0(supports-color@8.1.1)
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../heft-plugins/heft-sass-plugin:
     dependencies:
       '@rushstack/heft-config-file':

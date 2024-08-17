@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "exportAsDefault": {
+      "type": "boolean",
+      "description": "Setting this option wraps the typings export in a default property."
+    },
+
+    "secondaryGeneratedTsFolders": {
+      "type": "array",
+      "description": "Additional folders, relative to the project root, where the generated typings should be emitted to.",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "inferDefaultExportInterfaceNameFromFilename": {
+      "type": "boolean",
+      "description": "When `exportAsDefault` is true and this option is true, the default export interface name will be inferred from the filename."
+    },
+
+    "exportAsDefaultDocumentationComment": {
+      "type": "string",
+      "description": "When `exportAsDefault` is true, this value is placed in a documentation comment for the exported default interface. Ignored when `exportAsDefault` is false."
+    },
+
+    "stringNamesToIgnore": {
+      "type": "array",
+      "description": "An array of string names to ignore when generating typings.",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
