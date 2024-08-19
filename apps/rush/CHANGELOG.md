@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 11 Aug 2024 05:02:05 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Aug 2024 20:03:03 GMT and should not be manually modified.
+
+## 5.131.5
+Mon, 19 Aug 2024 20:03:03 GMT
+
+### Updates
+
+- Fix an issue where PreferredVersions are ignored when a project contains an overlapping dependency entry (https://github.com/microsoft/rushstack/issues/3205)
 
 ## 5.131.4
 Sun, 11 Aug 2024 05:02:05 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.131.5",
+      "tag": "@microsoft/rush_v5.131.5",
+      "date": "Mon, 19 Aug 2024 20:03:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where PreferredVersions are ignored when a project contains an overlapping dependency entry (https://github.com/microsoft/rushstack/issues/3205)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.131.4",
       "tag": "@microsoft/rush_v5.131.4",
       "date": "Sun, 11 Aug 2024 05:02:05 GMT",
