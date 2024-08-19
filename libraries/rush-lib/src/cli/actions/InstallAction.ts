@@ -11,7 +11,7 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 
 export class InstallAction extends BaseInstallAction {
   private readonly _checkOnlyParameter: CommandLineFlagParameter;
-  private readonly _resolutionOnlyParameter: CommandLineFlagParameter;
+  private readonly _resolutionOnlyParameter: CommandLineFlagParameter | undefined;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -47,10 +47,12 @@ export class InstallAction extends BaseInstallAction {
       description: `Only check the validity of the shrinkwrap file without performing an install.`
     });
 
-    this._resolutionOnlyParameter = this.defineFlagParameter({
-      parameterLongName: '--resolution-only',
-      description: `Only perform dependency resolution, useful for ensuring peer dependendencies are up to date.`
-    });
+    if (this.rushConfiguration.packageManager !== 'pnpm') {
+      this._resolutionOnlyParameter = this.defineFlagParameter({
+        parameterLongName: '--resolution-only',
+        description: `Only perform dependency resolution, useful for ensuring peer dependendencies are up to date.`
+      });
+    }
   }
 
   protected async buildInstallOptionsAsync(): Promise<Omit<IInstallManagerOptions, 'subspace'>> {
@@ -77,7 +79,7 @@ export class InstallAction extends BaseInstallAction {
       pnpmFilterArgumentValues:
         (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this._terminal)) ?? [],
       checkOnly: this._checkOnlyParameter.value,
-      resolutionOnly: this._resolutionOnlyParameter.value,
+      resolutionOnly: this._resolutionOnlyParameter?.value,
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
       terminal: this._terminal
     };

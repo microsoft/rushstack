@@ -627,7 +627,6 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME]
                     [--subspace SUBSPACE_NAME] [--check-only]
-                    [--resolution-only]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -756,8 +755,6 @@ Optional arguments:
                         be enabled in subspaces.json.
   --check-only          Only check the validity of the shrinkwrap file 
                         without performing an install.
-  --resolution-only     Only perform dependency resolution, useful for 
-                        ensuring peer dependendencies are up to date.
 "
 `;
 
