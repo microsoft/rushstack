@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Emit an error if a `workspace:` specifier is used in a dependency that is listed in `decoupledLocalDependencies`.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "jamesmaher-dd@users.noreply.github.com"
+}
