@@ -47,7 +47,7 @@ export class InstallAction extends BaseInstallAction {
       description: `Only check the validity of the shrinkwrap file without performing an install.`
     });
 
-    if (this.rushConfiguration.packageManager !== 'pnpm') {
+    if (this.rushConfiguration.packageManager === 'pnpm') {
       this._resolutionOnlyParameter = this.defineFlagParameter({
         parameterLongName: '--resolution-only',
         description: `Only perform dependency resolution, useful for ensuring peer dependendencies are up to date.`
