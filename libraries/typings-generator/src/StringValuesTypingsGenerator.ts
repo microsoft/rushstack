@@ -126,12 +126,14 @@ function convertToTypingsGeneratorOptions<TFileContents>(
     let interfaceDocumentationCommentLines: string[] | undefined;
     if (typeof exportAsDefaultOptionsOverride === 'boolean') {
       if (exportAsDefaultOptionsOverride) {
-        exportAsDefaultInterfaceName = defaultExportAsDefaultInterfaceName;
+        exportAsDefaultInterfaceName =
+          defaultExportAsDefaultInterfaceName ?? EXPORT_AS_DEFAULT_INTERFACE_NAME;
         interfaceDocumentationCommentLines = defaultSplitExportAsDefaultDocumentationComment;
       }
     } else if (exportAsDefaultOptionsOverride) {
       const { interfaceName, documentationComment } = exportAsDefaultOptionsOverride;
-      exportAsDefaultInterfaceName = interfaceName ?? defaultExportAsDefaultInterfaceName;
+      exportAsDefaultInterfaceName =
+        interfaceName ?? defaultExportAsDefaultInterfaceName ?? EXPORT_AS_DEFAULT_INTERFACE_NAME;
       interfaceDocumentationCommentLines =
         documentationComment?.split(/\r?\n/) ?? defaultSplitExportAsDefaultDocumentationComment;
     } else {
