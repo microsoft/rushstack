@@ -12,19 +12,57 @@ import { LinterBase, type ILinterBaseOptions } from './LinterBase';
 import type { IExtendedLinter } from './internalTypings/TslintInternals';
 
 interface ITslintOptions extends ILinterBaseOptions {
-  tslintPackagePath: string;
+  tslintPackage: typeof TTslint;
+  tslintConfiguration: TTslint.Configuration.IConfigurationFile;
+}
+
+function getFormattedErrorMessage(tslintFailure: TTslint.RuleFailure): string {
+  return `(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`;
 }
 
 export class Tslint extends LinterBase<TTslint.RuleFailure> {
-  private _tslint: typeof TTslint;
-  private _tslintConfiguration!: TTslint.Configuration.IConfigurationFile;
-  private _linter!: IExtendedLinter;
-  private _enabledRules!: TTslint.IRule[];
-  private _ruleSeverityMap!: Map<string, TTslint.RuleSeverity>;
+  private readonly _tslintPackage: typeof TTslint;
+  private readonly _tslintConfiguration: TTslint.Configuration.IConfigurationFile;
+  private readonly _linter: IExtendedLinter;
+  private readonly _enabledRules: TTslint.IRule[];
+  private readonly _ruleSeverityMap: Map<string, TTslint.RuleSeverity>;
 
   public constructor(options: ITslintOptions) {
     super('tslint', options);
-    this._tslint = require(options.tslintPackagePath);
+
+    const { tslintPackage, tsProgram } = options;
+    this._tslintPackage = tslintPackage;
+    this._tslintConfiguration = options.tslintConfiguration;
+    this._linter = new tslintPackage.Linter(
+      {
+        // This is not handled by the linter in the way that we use it, so we will manually apply
+        // fixes later
+        fix: false,
+        rulesDirectory: this._tslintConfiguration.rulesDirectory
+      },
+      tsProgram
+    ) as unknown as IExtendedLinter;
+
+    this._enabledRules = this._linter.getEnabledRules(this._tslintConfiguration, false);
+
+    this._ruleSeverityMap = new Map<string, TTslint.RuleSeverity>(
+      this._enabledRules.map((rule): [string, TTslint.RuleSeverity] => [
+        rule.getOptions().ruleName,
+        rule.getOptions().ruleSeverity
+      ])
+    );
+  }
+
+  public static async initializeAsync(options: ILinterBaseOptions): Promise<Tslint> {
+    const { linterToolPath, linterConfigFilePath } = options;
+    const tslintPackage: typeof TTslint = await import(linterToolPath);
+    const tslintConfiguration: TTslint.Configuration.IConfigurationFile =
+      tslintPackage.Configuration.loadConfigurationFromPath(linterConfigFilePath);
+    return new Tslint({
+      ...options,
+      tslintPackage,
+      tslintConfiguration
+    });
   }
 
   /**
@@ -80,7 +118,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   }
 
   public printVersionHeader(): void {
-    this._terminal.writeLine(`Using TSLint version ${this._tslint.Linter.VERSION}`);
+    this._terminal.writeLine(`Using TSLint version ${this._tslintPackage.Linter.VERSION}`);
   }
 
   protected async getCacheVersionAsync(): Promise<string> {
@@ -88,38 +126,26 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
       this._linterConfigFilePath,
       this._terminal
     );
-    const tslintConfigVersion: string = `${this._tslint.Linter.VERSION}_${tslintConfigHash.digest('hex')}`;
+    const tslintConfigVersion: string = `${this._tslintPackage.Linter.VERSION}_${tslintConfigHash.digest(
+      'hex'
+    )}`;
 
     return tslintConfigVersion;
-  }
-
-  protected async initializeAsync(tsProgram: TTypescript.Program): Promise<void> {
-    this._tslintConfiguration = this._tslint.Configuration.loadConfigurationFromPath(
-      this._linterConfigFilePath
-    );
-    this._linter = new this._tslint.Linter(
-      {
-        fix: false,
-        rulesDirectory: this._tslintConfiguration.rulesDirectory
-      },
-      tsProgram
-    ) as unknown as IExtendedLinter;
-
-    this._enabledRules = this._linter.getEnabledRules(this._tslintConfiguration, false);
-
-    this._ruleSeverityMap = new Map<string, TTslint.RuleSeverity>(
-      this._enabledRules.map((rule): [string, TTslint.RuleSeverity] => [
-        rule.getOptions().ruleName,
-        rule.getOptions().ruleSeverity
-      ])
-    );
   }
 
   protected async lintFileAsync(sourceFile: TTypescript.SourceFile): Promise<TTslint.RuleFailure[]> {
     // Some of this code comes from here:
     // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
     // Modified to only lint files that have changed and that we care about
-    const failures: TTslint.RuleFailure[] = this._linter.getAllFailures(sourceFile, this._enabledRules);
+    let failures: TTslint.RuleFailure[] = this._linter.getAllFailures(sourceFile, this._enabledRules);
+    const hasFixableIssue: boolean = failures.some((f) => f.hasFix());
+    if (hasFixableIssue) {
+      if (this._fix) {
+        failures = this._linter.applyAllFixes(this._enabledRules, failures, sourceFile, sourceFile.fileName);
+      } else {
+        this._fixesPossible = true;
+      }
+    }
 
     for (const failure of failures) {
       const severity: TTslint.RuleSeverity | undefined = this._ruleSeverityMap.get(failure.getRuleName());
@@ -133,37 +159,51 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     return failures;
   }
 
-  protected lintingFinished(failures: TTslint.RuleFailure[]): void {
+  protected async lintingFinishedAsync(failures: TTslint.RuleFailure[]): Promise<void> {
     this._linter.failures = failures;
     const lintResult: TTslint.LintResult = this._linter.getResult();
 
-    // Report linter errors and warnings to the logger
-    if (lintResult.failures.length) {
-      for (const tslintFailure of lintResult.failures) {
-        const { line, character } = tslintFailure.getStartPosition().getLineAndCharacter();
-        const formattedFailure: string = `(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`;
-        const errorObject: FileError = new FileError(formattedFailure, {
-          absolutePath: tslintFailure.getFileName(),
-          projectFolder: this._buildFolderPath,
-          line: line + 1,
-          column: character + 1
-        });
-        switch (tslintFailure.getRuleSeverity()) {
-          case 'error': {
-            this._scopedLogger.emitError(errorObject);
-            break;
-          }
+    // Report linter fixes to the logger. These will only be returned when the underlying failure was fixed
+    if (lintResult.fixes?.length) {
+      for (const fixedTslintFailure of lintResult.fixes) {
+        const formattedMessage: string = `[FIXED] ${getFormattedErrorMessage(fixedTslintFailure)}`;
+        const errorObject: FileError = this._getLintFileError(fixedTslintFailure, formattedMessage);
+        this._scopedLogger.emitWarning(errorObject);
+      }
+    }
 
-          case 'warning': {
-            this._scopedLogger.emitWarning(errorObject);
-            break;
-          }
+    // Report linter errors and warnings to the logger
+    for (const tslintFailure of lintResult.failures) {
+      const errorObject: FileError = this._getLintFileError(tslintFailure);
+      switch (tslintFailure.getRuleSeverity()) {
+        case 'error': {
+          this._scopedLogger.emitError(errorObject);
+          break;
+        }
+
+        case 'warning': {
+          this._scopedLogger.emitWarning(errorObject);
+          break;
         }
       }
     }
   }
 
   protected async isFileExcludedAsync(filePath: string): Promise<boolean> {
-    return this._tslint.Configuration.isFileExcluded(filePath, this._tslintConfiguration);
+    return this._tslintPackage.Configuration.isFileExcluded(filePath, this._tslintConfiguration);
+  }
+
+  private _getLintFileError(tslintFailure: TTslint.RuleFailure, message?: string): FileError {
+    if (!message) {
+      message = getFormattedErrorMessage(tslintFailure);
+    }
+
+    const { line, character } = tslintFailure.getStartPosition().getLineAndCharacter();
+    return new FileError(message, {
+      absolutePath: tslintFailure.getFileName(),
+      projectFolder: this._buildFolderPath,
+      line: line + 1,
+      column: character + 1
+    });
   }
 }

@@ -18,7 +18,7 @@ import { Colorize } from '@rushstack/terminal';
 
 import { BaseLinkManager } from '../base/BaseLinkManager';
 import { BasePackage } from '../base/BasePackage';
-import { RushConstants } from '../../logic/RushConstants';
+import { RushConstants } from '../RushConstants';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {
   PnpmShrinkwrapFile,

@@ -2,6 +2,30 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "4.0.1",
+      "tag": "@rushstack/eslint-config_v4.0.1",
+      "date": "Wed, 14 Aug 2024 22:37:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.16.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.0",
+      "tag": "@rushstack/eslint-config_v4.0.0",
+      "date": "Tue, 13 Aug 2024 18:17:05 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "[BREAKING CHANGE] Bump \"@typescript-eslint/eslint-plugin\" to \"~8.1.0\" and \"@typescript-eslint/eslint-parser\" to \"~8.1.0\". Due to these changes, node@>=17.0.0 and eslint@^8.57.0 are now required due to breaking changes in the newer rules set."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.7.1",
       "tag": "@rushstack/eslint-config_v3.7.1",
       "date": "Sat, 27 Jul 2024 00:10:27 GMT",

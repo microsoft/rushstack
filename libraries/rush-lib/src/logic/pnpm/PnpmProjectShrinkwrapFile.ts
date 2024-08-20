@@ -76,7 +76,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
     const subspace: Subspace = this.project.subspace;
 
     const importerKey: string = this.shrinkwrapFile.getImporterKeyByPath(
-      subspace.getSubspaceTempFolder(),
+      subspace.getSubspaceTempFolderPath(),
       this.project.projectFolder
     );
 

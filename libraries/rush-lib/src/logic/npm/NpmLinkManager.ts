@@ -8,7 +8,7 @@ import readPackageTree from 'read-package-tree';
 import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
-import { RushConstants } from '../../logic/RushConstants';
+import { RushConstants } from '../RushConstants';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
 import { NpmPackage, type IResolveOrCreateResult, PackageDependencyKind } from './NpmPackage';

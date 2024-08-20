@@ -9,7 +9,7 @@ import { Colorize } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
-import { RushCommandLineParser } from './../RushCommandLineParser';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { RushSession } from '../../pluginFramework/RushSession';

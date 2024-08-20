@@ -2,6 +2,72 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.24.28",
+      "tag": "@rushstack/heft-web-rig_v0.24.28",
+      "date": "Wed, 14 Aug 2024 22:37:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `4.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.27",
+      "tag": "@rushstack/heft-web-rig_v0.24.27",
+      "date": "Tue, 13 Aug 2024 18:17:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `4.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.3.48`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.26",
+      "tag": "@rushstack/heft-web-rig_v0.24.26",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.3.46`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.12.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.3.47`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.14.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.5.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.10.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.25` to `0.66.26`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.24.25",
       "tag": "@rushstack/heft-web-rig_v0.24.25",
       "date": "Fri, 02 Aug 2024 17:26:42 GMT",

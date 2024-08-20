@@ -1,0 +1,9 @@
+{
+  "name": "baz",
+  "version": "1.0.0",
+  "dependencies": {
+    "core-js": "^3.0.0",
+    "delay": "5.0.0",
+    "find-up": "*"
+  }
+}

@@ -1,6 +1,29 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Fri, 02 Aug 2024 17:26:42 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Aug 2024 22:37:32 GMT and should not be manually modified.
+
+## 0.4.0
+Wed, 14 Aug 2024 22:37:32 GMT
+
+### Minor changes
+
+- Add autofix functionality for ESLint and TSLint. Fixes can now be applied by providing the "--fix" command-line argument, or setting the "alwaysFix" plugin option to "true"
+
+### Patches
+
+- Unintrusively disable "--fix" mode when running in "--production" mode
+
+## 0.3.48
+Tue, 13 Aug 2024 18:17:05 GMT
+
+### Patches
+
+- Supported linters (ESLint, TSLint) are now loaded asynchronously
+
+## 0.3.47
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
 
 ## 0.3.46
 Fri, 02 Aug 2024 17:26:42 GMT
