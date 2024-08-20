@@ -24,18 +24,28 @@ export interface IStringValueTypings {
   typings: IStringValueTyping[];
 
   /**
-   * If provided, and  {@link IStringValuesTypingsGeneratorBaseOptions.exportAsDefault} is set to true,
-   * this value will be used as the interface name for the default export. Note that this value takes
-   * precedence over a value provided in {@link IStringValuesTypingsGeneratorBaseOptions.exportAsDefaultInterfaceName}.
+   * Options for default exports. Note that options provided here will override
+   * options provided in {@link IStringValuesTypingsGeneratorBaseOptions.exportAsDefault}.
    */
-  exportAsDefaultInterfaceName?: string;
+  exportAsDefault?: boolean | IExportAsDefaultOptions;
+}
+
+/**
+ * @public
+ */
+export interface IExportAsDefaultOptions {
+  /**
+   * This setting overrides the the interface name for the default wrapped export.
+   *
+   * @defaultValue "IExport"
+   */
+  interfaceName?: string;
 
   /**
-   * If provided, and  {@link IStringValuesTypingsGeneratorBaseOptions.exportAsDefault} is set to true,
-   * this value will be used as the documentation comment for the default export. Note that this value takes
-   * precedence over a value provided in {@link IStringValuesTypingsGeneratorBaseOptions.exportAsDefaultDocumentationComment}.
+   * This value is placed in a documentation comment for the
+   * exported default interface.
    */
-  exportAsDefaultDocumentationComment?: string;
+  documentationComment?: string;
 }
 
 /**
@@ -45,21 +55,13 @@ export interface IStringValuesTypingsGeneratorBaseOptions {
   /**
    * Setting this option wraps the typings export in a default property.
    */
-  exportAsDefault?: boolean;
+  exportAsDefault?: boolean | IExportAsDefaultOptions;
 
   /**
-   * When `exportAsDefault` is true, this optional setting overrides the the interface name
-   * for the default wrapped export. Ignored when `exportAsDefault` is false.
-   *
-   * @defaultValue "IExport"
+   * @deprecated Use {@link IStringValuesTypingsGeneratorBaseOptions.exportAsDefault}'s
+   * {@link IExportAsDefaultOptions.interfaceName} instead.
    */
   exportAsDefaultInterfaceName?: string;
-
-  /**
-   * When `exportAsDefault` is true, this value is placed in a documentation comment for the
-   * exported default interface. Ignored when `exportAsDefault` is false.
-   */
-  exportAsDefaultDocumentationComment?: string;
 }
 
 /**
@@ -86,11 +88,24 @@ function convertToTypingsGeneratorOptions<TFileContents>(
   options: IStringValuesTypingsGeneratorOptionsWithCustomReadFile<TFileContents>
 ): ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents> {
   const {
-    exportAsDefault,
-    exportAsDefaultInterfaceName,
-    exportAsDefaultDocumentationComment,
+    exportAsDefault: exportAsDefaultOptions,
+    exportAsDefaultInterfaceName: exportAsDefaultInterfaceName_deprecated,
     parseAndGenerateTypings
   } = options;
+  let defaultSplitExportAsDefaultDocumentationComment: string[] | undefined;
+  let defaultExportAsDefaultInterfaceName: string | undefined;
+  if (typeof exportAsDefaultOptions === 'object') {
+    defaultSplitExportAsDefaultDocumentationComment =
+      exportAsDefaultOptions.documentationComment?.split(/\r?\n/);
+    defaultExportAsDefaultInterfaceName =
+      exportAsDefaultOptions.interfaceName ??
+      exportAsDefaultInterfaceName_deprecated ??
+      EXPORT_AS_DEFAULT_INTERFACE_NAME;
+  } else if (exportAsDefaultOptions) {
+    defaultExportAsDefaultInterfaceName =
+      exportAsDefaultInterfaceName_deprecated ?? EXPORT_AS_DEFAULT_INTERFACE_NAME;
+  }
+
   async function parseAndGenerateTypingsOuter(
     fileContents: TFileContents,
     filePath: string,
@@ -106,32 +121,37 @@ function convertToTypingsGeneratorOptions<TFileContents>(
       return;
     }
 
-    const {
-      exportAsDefaultInterfaceName: exportAsDefaultInterfaceNameOverride,
-      exportAsDefaultDocumentationComment: exportAsDefaultDocumentationCommentOverride,
-      typings
-    } = stringValueTypings;
+    const { exportAsDefault: exportAsDefaultOptionsOverride, typings } = stringValueTypings;
+    let exportAsDefaultInterfaceName: string | undefined;
+    let interfaceDocumentationCommentLines: string[] | undefined;
+    if (typeof exportAsDefaultOptionsOverride === 'boolean') {
+      if (exportAsDefaultOptionsOverride) {
+        exportAsDefaultInterfaceName = defaultExportAsDefaultInterfaceName;
+        interfaceDocumentationCommentLines = defaultSplitExportAsDefaultDocumentationComment;
+      }
+    } else if (exportAsDefaultOptionsOverride) {
+      const { interfaceName, documentationComment } = exportAsDefaultOptionsOverride;
+      exportAsDefaultInterfaceName = interfaceName ?? defaultExportAsDefaultInterfaceName;
+      interfaceDocumentationCommentLines =
+        documentationComment?.split(/\r?\n/) ?? defaultSplitExportAsDefaultDocumentationComment;
+    } else {
+      exportAsDefaultInterfaceName = defaultExportAsDefaultInterfaceName;
+      interfaceDocumentationCommentLines = defaultSplitExportAsDefaultDocumentationComment;
+    }
 
     const outputLines: string[] = [];
-    const interfaceName: string =
-      exportAsDefaultInterfaceNameOverride ||
-      exportAsDefaultInterfaceName ||
-      EXPORT_AS_DEFAULT_INTERFACE_NAME;
     let indent: string = '';
-    if (exportAsDefault) {
-      const documentationComment: string | undefined =
-        exportAsDefaultDocumentationCommentOverride || exportAsDefaultDocumentationComment;
-      if (documentationComment) {
-        const documentationCommentLines: string[] = documentationComment.split(/\r?\n/);
+    if (exportAsDefaultInterfaceName) {
+      if (interfaceDocumentationCommentLines) {
         outputLines.push(`/**`);
-        for (const line of documentationCommentLines) {
+        for (const line of interfaceDocumentationCommentLines) {
           outputLines.push(` * ${line}`);
         }
 
         outputLines.push(` */`);
       }
 
-      outputLines.push(`export interface ${interfaceName} {`);
+      outputLines.push(`export interface ${exportAsDefaultInterfaceName} {`);
       indent = '  ';
     }
 
@@ -142,15 +162,21 @@ function convertToTypingsGeneratorOptions<TFileContents>(
         outputLines.push(`${indent}/**`, `${indent} * ${comment.replace(/\*\//g, '*\\/')}`, `${indent} */`);
       }
 
-      if (exportAsDefault) {
+      if (exportAsDefaultInterfaceName) {
         outputLines.push(`${indent}'${exportName}': string;`, '');
       } else {
         outputLines.push(`export declare const ${exportName}: string;`, '');
       }
     }
 
-    if (exportAsDefault) {
-      outputLines.push('}', '', `declare const strings: ${interfaceName};`, '', 'export default strings;');
+    if (exportAsDefaultInterfaceName) {
+      outputLines.push(
+        '}',
+        '',
+        `declare const strings: ${exportAsDefaultInterfaceName};`,
+        '',
+        'export default strings;'
+      );
     }
 
     return outputLines.join(EOL);

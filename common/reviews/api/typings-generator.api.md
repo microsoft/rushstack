@@ -7,9 +7,15 @@
 import { ITerminal } from '@rushstack/terminal';
 
 // @public (undocumented)
+export interface IExportAsDefaultOptions {
+    documentationComment?: string;
+    interfaceName?: string;
+}
+
+// @public (undocumented)
 export interface IStringValuesTypingsGeneratorBaseOptions {
-    exportAsDefault?: boolean;
-    exportAsDefaultDocumentationComment?: string;
+    exportAsDefault?: boolean | IExportAsDefaultOptions;
+    // @deprecated (undocumented)
     exportAsDefaultInterfaceName?: string;
 }
 
@@ -31,8 +37,7 @@ export interface IStringValueTyping {
 
 // @public (undocumented)
 export interface IStringValueTypings {
-    exportAsDefaultDocumentationComment?: string;
-    exportAsDefaultInterfaceName?: string;
+    exportAsDefault?: boolean | IExportAsDefaultOptions;
     // (undocumented)
     typings: IStringValueTyping[];
 }
@@ -67,8 +72,6 @@ export interface ITypingsGeneratorOptionsWithCustomReadFile<TTypingsResult = str
 export interface ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult = string | undefined, TFileContents = string> extends ITypingsGeneratorBaseOptions {
     // (undocumented)
     fileExtensions: string[];
-    // @deprecated (undocumented)
-    filesToIgnore?: string[];
     // (undocumented)
     getAdditionalOutputFiles?: (relativePath: string) => string[];
     // (undocumented)

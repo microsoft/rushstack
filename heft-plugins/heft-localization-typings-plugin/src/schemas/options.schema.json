@@ -3,9 +3,40 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "exportAsDefault": {
-      "type": "boolean",
-      "description": "Setting this option wraps the typings export in a default property."
+    "exportAsDefaultOptions": {
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "interfaceName": {
+              "type": "string",
+              "description": "The interface name for the default wrapped export. Defaults to \"IExport\""
+            },
+            "documentationComment": {
+              "type": "string",
+              "description": "This value is placed in a documentation comment for the exported default interface."
+            },
+            "inferInterfaceNameFromFilename": {
+              "type": "boolean",
+              "description": "When set to true, the default export interface name will be inferred from the filename. This takes precedence over the interfaceName option."
+            }
+          }
+        }
+      ]
+    },
+
+    "srcFolder": {
+      "type": "string",
+      "description": "Source code root directory. Defaults to \"src/\"."
+    },
+
+    "generatedTsFolder": {
+      "type": "string",
+      "description": "Output directory for generated typings. Defaults to \"temp/loc-ts/\"."
     },
 
     "secondaryGeneratedTsFolders": {
@@ -14,16 +45,6 @@
       "items": {
         "type": "string"
       }
-    },
-
-    "inferDefaultExportInterfaceNameFromFilename": {
-      "type": "boolean",
-      "description": "When `exportAsDefault` is true and this option is true, the default export interface name will be inferred from the filename."
-    },
-
-    "exportAsDefaultDocumentationComment": {
-      "type": "string",
-      "description": "When `exportAsDefault` is true, this value is placed in a documentation comment for the exported default interface. Ignored when `exportAsDefault` is false."
     },
 
     "stringNamesToIgnore": {

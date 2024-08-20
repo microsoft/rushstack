@@ -33,12 +33,6 @@ export interface ITypingsGeneratorOptionsWithoutReadFile<
     relativePath: string
   ) => TTypingsResult | Promise<TTypingsResult>;
   getAdditionalOutputFiles?: (relativePath: string) => string[];
-  /**
-   * @deprecated
-   *
-   * TODO: Remove when version 1.0.0 is released.
-   */
-  filesToIgnore?: string[];
 }
 
 /**
@@ -117,10 +111,6 @@ export class TypingsGenerator<TFileContents = string> {
         ((filePath: string, relativePath: string): Promise<TFileContents> =>
           FileSystem.readFileAsync(filePath) as Promise<TFileContents>)
     };
-
-    if (options.filesToIgnore) {
-      throw new Error('The filesToIgnore option is no longer supported. Please use globsToIgnore instead.');
-    }
 
     if (!options.generatedTsFolder) {
       throw new Error('generatedTsFolder must be provided');

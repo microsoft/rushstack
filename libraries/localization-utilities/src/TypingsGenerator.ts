@@ -3,6 +3,7 @@
 
 import {
   StringValuesTypingsGenerator,
+  type IExportAsDefaultOptions,
   type IStringValueTyping,
   type ITypingsGeneratorBaseOptions
 } from '@rushstack/typings-generator';
@@ -14,23 +15,20 @@ import { parseLocFile } from './LocFileParser';
 /**
  * @public
  */
-export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
-  /**
-   * Setting this option wraps the typings export in a default property.
-   */
-  exportAsDefault?: boolean;
-
-  /**
-   * When `exportAsDefault` is true, this value is placed in a documentation comment for the
-   * exported default interface. Ignored when `exportAsDefault` is false.
-   */
-  exportAsDefaultDocumentationComment?: string;
-
+export interface IInferInterfaceNameExportAsDefaultOptions
+  extends Omit<IExportAsDefaultOptions, 'interfaceName'> {
   /**
    * When `exportAsDefault` is true and this option is true, the default export interface name will be inferred
    * from the filename.
    */
-  inferDefaultExportInterfaceNameFromFilename?: boolean;
+  inferInterfaceNameFromFilename?: boolean;
+}
+
+/**
+ * @public
+ */
+export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
+  exportAsDefault?: boolean | IExportAsDefaultOptions | IInferInterfaceNameExportAsDefaultOptions;
 
   resxNewlineNormalization?: NewlineKind | undefined;
 
@@ -57,8 +55,12 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
       processComment,
       resxNewlineNormalization,
       ignoreMissingResxComments,
-      inferDefaultExportInterfaceNameFromFilename
+      exportAsDefault
     } = options;
+    const inferDefaultExportInterfaceNameFromFilename: boolean | undefined =
+      typeof exportAsDefault === 'object'
+        ? (exportAsDefault as IInferInterfaceNameExportAsDefaultOptions).inferInterfaceNameFromFilename
+        : undefined;
     super({
       ...options,
       fileExtensions: ['.resx', '.resx.json', '.loc.json', '.resjson'],
