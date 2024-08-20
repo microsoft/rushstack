@@ -17,7 +17,7 @@ function runTestsForTerminalProvider(
       log: baseProvider.getOutput(),
       warning: baseProvider.getWarningOutput(),
       error: baseProvider.getErrorOutput(),
-      verbose: baseProvider.getVerbose(),
+      verbose: baseProvider.getVerboseOutput(),
       debug: baseProvider.getDebugOutput()
     }).toMatchSnapshot();
   }
