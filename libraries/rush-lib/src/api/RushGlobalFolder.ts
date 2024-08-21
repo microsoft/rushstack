@@ -8,7 +8,7 @@ import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 /**
  * This class provides global folders that are used for rush's internal install locations.
  *
- * @public
+ * @internal
  */
 export class RushGlobalFolder {
   /**

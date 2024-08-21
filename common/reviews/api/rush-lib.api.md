@@ -61,25 +61,6 @@ export class ApprovedPackagesPolicy {
     readonly reviewCategories: ReadonlySet<string>;
 }
 
-// @beta (undocumented)
-export class Autoinstaller {
-    constructor(options: IAutoinstallerOptions);
-    // (undocumented)
-    get folderFullPath(): string;
-    // (undocumented)
-    readonly name: string;
-    // (undocumented)
-    get packageJsonPath(): string;
-    // (undocumented)
-    prepareAsync(): Promise<void>;
-    // (undocumented)
-    get shrinkwrapFilePath(): string;
-    // (undocumented)
-    updateAsync(): Promise<void>;
-    // (undocumented)
-    static validateName(autoinstallerName: string): void;
-}
-
 // @beta
 export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
@@ -344,18 +325,6 @@ export class _FlagFile<TState extends JsonObject = JsonObject> {
 
 // @beta
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
-
-// @beta (undocumented)
-export interface IAutoinstallerOptions {
-    // (undocumented)
-    autoinstallerName: string;
-    // (undocumented)
-    restrictConsoleOutput?: boolean;
-    // (undocumented)
-    rushConfiguration: RushConfiguration;
-    // (undocumented)
-    rushGlobalFolder: RushGlobalFolder;
-}
 
 // @internal (undocumented)
 export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
@@ -1396,14 +1365,12 @@ export class RushConstants {
     static readonly yarnShrinkwrapFilename: 'yarn.lock';
 }
 
-// @public
-class RushGlobalFolder {
+// @internal
+export class _RushGlobalFolder {
     constructor();
     readonly nodeSpecificPath: string;
     readonly path: string;
 }
-export { RushGlobalFolder }
-export { RushGlobalFolder as _RushGlobalFolder }
 
 // @internal
 export class _RushInternals {
