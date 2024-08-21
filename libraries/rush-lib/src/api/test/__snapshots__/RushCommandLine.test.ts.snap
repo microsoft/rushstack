@@ -463,7 +463,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "Only perform dependency resolution, useful for ensuring peer dependendencies are up to date.",
+          "description": "Only perform dependency resolution, useful for ensuring peer dependendencies are up to date. Note that this flag is only supported when using the pnpm package manager.",
           "environmentVariable": undefined,
           "kind": "Flag",
           "longName": "--resolution-only",
