@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-utilities
 
-This log was last generated on Wed, 21 Aug 2024 05:43:04 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Aug 2024 16:24:51 GMT and should not be manually modified.
+
+## 0.11.1
+Wed, 21 Aug 2024 16:24:51 GMT
+
+### Patches
+
+- Fix an issue where `inferDefaultExportInterfaceNameFromFilename` did not apply.
 
 ## 0.11.0
 Wed, 21 Aug 2024 05:43:04 GMT

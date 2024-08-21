@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-localization-typings-plugin",
   "entries": [
     {
+      "version": "0.1.2",
+      "tag": "@rushstack/heft-localization-typings-plugin_v0.1.2",
+      "date": "Wed, 21 Aug 2024 16:24:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the `stringNamesToIgnore` option was ignored."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.11.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@rushstack/heft-localization-typings-plugin_v0.1.1",
       "date": "Wed, 21 Aug 2024 06:52:07 GMT",
