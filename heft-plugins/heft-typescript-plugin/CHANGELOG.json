@@ -2,6 +2,30 @@
   "name": "@rushstack/heft-typescript-plugin",
   "entries": [
     {
+      "version": "0.5.25",
+      "tag": "@rushstack/heft-typescript-plugin_v0.5.25",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.15.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.66.26` to `0.67.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.24",
       "tag": "@rushstack/heft-typescript-plugin_v0.5.24",
       "date": "Mon, 12 Aug 2024 22:16:04 GMT",

@@ -2,6 +2,32 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@rushstack/typings-generator_v0.13.0",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expand the `exportAsDefault` option for `StringValuesTypingsGenerator` to take an object with the following properties: `interfaceName` and `documentationComment`. Note that the `exportAsDefaultInterfaceName` option has been deprecated."
+          },
+          {
+            "comment": "Add an optional `exportAsDefault` property to the return value of `parseAndGenerateTypings` that overrides options provided by the same property in the `StringValuesTypingsGenerator`'s options object."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.63",
       "tag": "@rushstack/typings-generator_v0.12.63",
       "date": "Mon, 12 Aug 2024 22:16:04 GMT",

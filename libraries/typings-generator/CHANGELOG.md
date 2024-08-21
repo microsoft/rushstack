@@ -1,6 +1,14 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Mon, 12 Aug 2024 22:16:04 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Aug 2024 05:43:04 GMT and should not be manually modified.
+
+## 0.13.0
+Wed, 21 Aug 2024 05:43:04 GMT
+
+### Minor changes
+
+- Expand the `exportAsDefault` option for `StringValuesTypingsGenerator` to take an object with the following properties: `interfaceName` and `documentationComment`. Note that the `exportAsDefaultInterfaceName` option has been deprecated.
+- Add an optional `exportAsDefault` property to the return value of `parseAndGenerateTypings` that overrides options provided by the same property in the `StringValuesTypingsGenerator`'s options object.
 
 ## 0.12.63
 Mon, 12 Aug 2024 22:16:04 GMT

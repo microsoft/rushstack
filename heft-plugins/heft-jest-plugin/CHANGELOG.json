@@ -2,6 +2,30 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.12.9",
+      "tag": "@rushstack/heft-jest-plugin_v0.12.9",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.15.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.26` to `0.67.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.8",
       "tag": "@rushstack/heft-jest-plugin_v0.12.8",
       "date": "Mon, 12 Aug 2024 22:16:04 GMT",

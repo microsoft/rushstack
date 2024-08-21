@@ -1,6 +1,13 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Mon, 12 Aug 2024 22:16:04 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Aug 2024 05:43:04 GMT and should not be manually modified.
+
+## 0.14.0
+Wed, 21 Aug 2024 05:43:04 GMT
+
+### Minor changes
+
+- Create a new instance function called `getVerboseOutput` on `StringBufferTerminalProvider` and mark `getVerbose` as deprecated.
 
 ## 0.13.4
 Mon, 12 Aug 2024 22:16:04 GMT
