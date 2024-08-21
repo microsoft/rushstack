@@ -23,6 +23,11 @@ export interface IInstallManagerOptions {
   checkOnly: boolean;
 
   /**
+   * Whether to only run resolutions. Only supported for PNPM.
+   */
+  resolutionOnly?: boolean;
+
+  /**
    * Whether a "--bypass-policy" flag can be specified.
    */
   bypassPolicyAllowed?: boolean;

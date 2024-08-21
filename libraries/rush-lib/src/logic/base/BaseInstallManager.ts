@@ -745,11 +745,17 @@ ${gitLfsHookHandling}
       pnpmFilterArgumentValues,
       onlyShrinkwrap,
       networkConcurrency,
-      allowShrinkwrapUpdates
+      allowShrinkwrapUpdates,
+      resolutionOnly
     } = options;
 
     if (offline && this.rushConfiguration.packageManager !== 'pnpm') {
       throw new Error('The "--offline" parameter is only supported when using the PNPM package manager.');
+    }
+    if (resolutionOnly && this.rushConfiguration.packageManager !== 'pnpm') {
+      throw new Error(
+        'The "--resolution-only" parameter is only supported when using the PNPM package manager.'
+      );
     }
     if (this.rushConfiguration.packageManager === 'npm') {
       if (semver.lt(this.rushConfiguration.packageManagerToolVersion, '5.0.0')) {
@@ -840,6 +846,10 @@ ${gitLfsHookHandling}
         args.push('--no-strict-peer-dependencies');
       } else {
         args.push('--strict-peer-dependencies');
+      }
+
+      if (resolutionOnly) {
+        args.push('--resolution-only');
       }
 
       /*

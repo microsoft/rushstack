@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for `--resolution-only` to `rush install` to enforce strict peer dependency resolution.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
