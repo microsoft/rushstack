@@ -24,9 +24,6 @@ import { LastInstallFlag } from '../api/LastInstallFlag';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import type { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
-/**
- * @beta
- */
 export interface IAutoinstallerOptions {
   autoinstallerName: string;
   rushConfiguration: RushConfiguration;
