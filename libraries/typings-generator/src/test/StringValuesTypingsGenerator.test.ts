@@ -77,9 +77,7 @@ describe('StringValuesTypingsGenerator', () => {
         },
         terminal,
         ...baseOptions
-      } as ConstructorParameters<
-        typeof import('../StringValuesTypingsGenerator').StringValuesTypingsGenerator
-      >[0]);
+      });
 
       await generator.generateTypingsAsync(['test.ext']);
       expect(outputFs).toMatchSnapshot();

@@ -366,10 +366,10 @@ export class TypingsGenerator<TFileContents = string> {
   private *_getTypingsFilePaths(relativePath: string): Iterable<string> {
     const { generatedTsFolder, secondaryGeneratedTsFolders } = this._options;
     const dtsFilename: string = `${relativePath}.d.ts`;
-    yield path.resolve(generatedTsFolder, dtsFilename);
+    yield `${generatedTsFolder}/${dtsFilename}`;
     if (secondaryGeneratedTsFolders) {
       for (const secondaryGeneratedTsFolder of secondaryGeneratedTsFolders) {
-        yield path.resolve(secondaryGeneratedTsFolder, dtsFilename);
+        yield `${secondaryGeneratedTsFolder}/${dtsFilename}`;
       }
     }
   }
