@@ -31,9 +31,6 @@ export interface IAutoinstallerOptions {
   restrictConsoleOutput?: boolean;
 }
 
-/**
- * @beta
- */
 export class Autoinstaller {
   public readonly name: string;
 
