@@ -37,6 +37,7 @@ export abstract class BaseAutoinstallerAction extends BaseRushAction {
 
     await this.prepareAsync(autoinstaller);
 
-    this._terminal.writeLine('\nSuccess.');
+    this._terminal.writeLine();
+    this._terminal.writeLine('Success.');
   }
 }
