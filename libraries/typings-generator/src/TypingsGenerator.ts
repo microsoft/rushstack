@@ -80,7 +80,9 @@ export class TypingsGenerator<TFileContents = string> {
   // Map of resolved file path -> relative file path
   private readonly _relativePaths: Map<string, string>;
 
-  protected _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
+  protected readonly _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
+
+  protected readonly terminal: ITerminal;
 
   /**
    * The folder path that contains all input source files.
@@ -135,9 +137,7 @@ export class TypingsGenerator<TFileContents = string> {
 
     this.ignoredFileGlobs = options.globsToIgnore || [];
 
-    if (!options.terminal) {
-      this._options.terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
-    }
+    this.terminal = options.terminal ?? new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
 
     this._options.fileExtensions = this._normalizeFileExtensions(options.fileExtensions);
 
@@ -344,7 +344,7 @@ export class TypingsGenerator<TFileContents = string> {
         });
       }
     } catch (e) {
-      this._options.terminal!.writeError(
+      this.terminal.writeError(
         `Error occurred parsing and generating typings for file "${resolvedPath}": ${e}`
       );
     }

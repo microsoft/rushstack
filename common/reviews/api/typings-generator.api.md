@@ -97,11 +97,13 @@ export class TypingsGenerator<TFileContents = string> {
     readonly ignoredFileGlobs: readonly string[];
     readonly inputFileGlob: string;
     // (undocumented)
-    protected _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
+    protected readonly _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
     registerDependency(consumer: string, rawDependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;
     readonly sourceFolderPath: string;
+    // (undocumented)
+    protected readonly terminal: ITerminal;
 }
 
 ```

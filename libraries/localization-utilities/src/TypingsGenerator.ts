@@ -68,9 +68,7 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
         const locFileData: ILocalizationFile = parseLocFile({
           filePath,
           content,
-          // Explicitly grab this from `this._options` as `this._options.terminal` is initialized later
-          // by the `TypingsGenerator` (from @rushstack/typings-generator) constructor if it isn't provided.
-          terminal: this._options.terminal!,
+          terminal: this.terminal,
           resxNewlineNormalization,
           ignoreMissingResxComments,
           ignoreString
