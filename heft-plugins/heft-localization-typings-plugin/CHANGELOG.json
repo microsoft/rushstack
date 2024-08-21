@@ -1,0 +1,43 @@
+{
+  "name": "@rushstack/heft-localization-typings-plugin",
+  "entries": [
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/heft-localization-typings-plugin_v0.1.1",
+      "date": "Wed, 21 Aug 2024 06:52:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a misnamed property in the options schema."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft-localization-typings-plugin_v0.1.0",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.26` to `0.67.0`"
+          }
+        ]
+      }
+    }
+  ]
+}

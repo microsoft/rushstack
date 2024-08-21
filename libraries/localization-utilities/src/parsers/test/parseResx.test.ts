@@ -23,7 +23,7 @@ describe(parseResx.name, () => {
       outputObject.output = output;
     }
 
-    const verboseOutput: string = terminalProvider.getVerbose();
+    const verboseOutput: string = terminalProvider.getVerboseOutput();
     if (verboseOutput) {
       outputObject.verboseOutput = verboseOutput;
     }

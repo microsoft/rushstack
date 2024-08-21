@@ -2,6 +2,23 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.14.0",
+      "tag": "@rushstack/terminal_v0.14.0",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Create a new instance function called `getVerboseOutput` on `StringBufferTerminalProvider` and mark `getVerbose` as deprecated."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.7.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.4",
       "tag": "@rushstack/terminal_v0.13.4",
       "date": "Mon, 12 Aug 2024 22:16:04 GMT",

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Text } from '@rushstack/node-core-library';
 import type { ITerminal } from './ITerminal';
 
 /**
@@ -116,7 +117,7 @@ export class PrintUtilities {
 
     // Apply word wrapping and the provided line prefix, while also respecting existing newlines
     // and prefix spaces that may exist in the text string already.
-    const lines: string[] = text.split(/\r?\n/);
+    const lines: string[] = Text.splitByNewLines(text);
 
     const wrappedLines: string[] = [];
     for (const line of lines) {

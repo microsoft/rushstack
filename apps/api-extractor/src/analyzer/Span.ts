@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { InternalError, Sort } from '@rushstack/node-core-library';
+import { InternalError, Sort, Text } from '@rushstack/node-core-library';
 
 import { IndentedWriter } from '../generators/IndentedWriter';
 
@@ -637,12 +637,7 @@ export class Span {
   }
 
   private _getTrimmed(text: string): string {
-    const trimmed: string = text.replace(/\r?\n/g, '\\n');
-
-    if (trimmed.length > 100) {
-      return trimmed.substr(0, 97) + '...';
-    }
-    return trimmed;
+    return Text.truncateWithEllipsis(Text.convertToLf(text), 100);
   }
 
   private _getSubstring(startIndex: number, endIndex: number): string {
