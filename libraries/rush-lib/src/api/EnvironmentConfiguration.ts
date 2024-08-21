@@ -170,7 +170,7 @@ export const EnvironmentVariableNames = {
    * If this variable is set to "1", When getting distributed builds, Rush will allow uncacheable projects to still leverage
    * the cobuild feature. This is useful when you want to speed up operations that can't (or shouldn't) be cached.
    */
-  RUSH_COBUILD_ORCHESTRATION_ONLY_ALLOWED: 'RUSH_COBUILD_ORCHESTRATION_ONLY_ALLOWED',
+  RUSH_COBUILD_WITHOUT_CACHE_ALLOWED: 'RUSH_COBUILD_WITHOUT_CACHE_ALLOWED',
 
   /**
    * Explicitly specifies the path for the Git binary that is invoked by certain Rush operations.
@@ -254,7 +254,7 @@ export class EnvironmentConfiguration {
 
   private static _cobuildLeafProjectLogOnlyAllowed: boolean | undefined;
 
-  private static _cobuildOrchestrationOnlyAllowed: boolean | undefined;
+  private static _cobuildWithoutCacheAllowed: boolean | undefined;
 
   private static _gitBinaryPath: string | undefined;
 
@@ -382,11 +382,11 @@ export class EnvironmentConfiguration {
 
   /**
    * If set, enables or disables the cobuild leaf project log only feature.
-   * See {@link EnvironmentVariableNames.RUSH_COBUILD_ORCHESTRATION_ONLY_ALLOWED}
+   * See {@link EnvironmentVariableNames.RUSH_COBUILD_WITHOUT_CACHE_ALLOWED}
    */
-  public static get cobuildOrchestrationOnlyAllowed(): boolean | undefined {
+  public static get cobuildWithoutCacheAllowed(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._cobuildOrchestrationOnlyAllowed;
+    return EnvironmentConfiguration._cobuildWithoutCacheAllowed;
   }
 
   /**
@@ -538,10 +538,10 @@ export class EnvironmentConfiguration {
             break;
           }
 
-          case EnvironmentVariableNames.RUSH_COBUILD_ORCHESTRATION_ONLY_ALLOWED: {
-            EnvironmentConfiguration._cobuildOrchestrationOnlyAllowed =
+          case EnvironmentVariableNames.RUSH_COBUILD_WITHOUT_CACHE_ALLOWED: {
+            EnvironmentConfiguration._cobuildWithoutCacheAllowed =
               EnvironmentConfiguration.parseBooleanEnvironmentVariable(
-                EnvironmentVariableNames.RUSH_COBUILD_ORCHESTRATION_ONLY_ALLOWED,
+                EnvironmentVariableNames.RUSH_COBUILD_WITHOUT_CACHE_ALLOWED,
                 value
               );
             break;

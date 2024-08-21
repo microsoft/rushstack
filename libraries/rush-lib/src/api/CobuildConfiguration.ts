@@ -70,10 +70,10 @@ export class CobuildConfiguration {
   public readonly cobuildLeafProjectLogOnlyAllowed: boolean;
 
   /**
-   * If true, operations can opt into leveraging cobuild orchestration without restoring from the build cache.
-   *  Operations will need to us the allowCobuildOrchestration flag to opt into this behavior per phase.
+   * If true, operations can opt into leveraging cobuilds without restoring from the build cache.
+   *  Operations will need to us the allowCobuildWithoutCache flag to opt into this behavior per phase.
    */
-  public readonly cobuildOrchestrationOnlyAllowed: boolean;
+  public readonly cobuildWithoutCacheAllowed: boolean;
 
   private _cobuildLockProvider: ICobuildLockProvider | undefined;
   private readonly _cobuildLockProviderFactory: CobuildLockProviderFactory;
@@ -87,7 +87,7 @@ export class CobuildConfiguration {
     this.cobuildRunnerId = EnvironmentConfiguration.cobuildRunnerId || uuidv4();
     this.cobuildLeafProjectLogOnlyAllowed =
       EnvironmentConfiguration.cobuildLeafProjectLogOnlyAllowed ?? false;
-    this.cobuildOrchestrationOnlyAllowed = EnvironmentConfiguration.cobuildOrchestrationOnlyAllowed ?? false;
+    this.cobuildWithoutCacheAllowed = EnvironmentConfiguration.cobuildWithoutCacheAllowed ?? false;
 
     this._cobuildLockProviderFactory = cobuildLockProviderFactory;
     this._cobuildJson = cobuildJson;

@@ -138,7 +138,7 @@ export interface IOperationSettings {
   /**
    * If true, this operation can use cobuilds for orchestration without restoring build cache entries.
    */
-  allowCobuildOrchestration?: boolean;
+  allowCobuildWithoutCache?: boolean;
 }
 
 interface IOldRushProjectJson {

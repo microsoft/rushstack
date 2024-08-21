@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Adds a new experiment for cobuilds to allow uncacheable operations to benefit from cobuild orchestration without using the build cache.",
+      "comment": "Adds a new experiment 'allowCobuildWithoutCache' for cobuilds to allow uncacheable operations to benefit from cobuild orchestration without using the build cache.",
       "type": "none"
     }
   ],
