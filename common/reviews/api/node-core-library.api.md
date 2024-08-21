@@ -864,6 +864,11 @@ export class Text {
     static readLinesFromIterableAsync(iterable: AsyncIterable<string | Buffer>, options?: IReadLinesFromIterableOptions): AsyncGenerator<string>;
     static replaceAll(input: string, searchValue: string, replaceValue: string): string;
     static reverse(s: string): string;
+    static splitByNewLines(s: undefined): undefined;
+    // (undocumented)
+    static splitByNewLines(s: string): string[];
+    // (undocumented)
+    static splitByNewLines(s: string | undefined): string[] | undefined;
     static truncateWithEllipsis(s: string, maximumLength: number): string;
 }
 

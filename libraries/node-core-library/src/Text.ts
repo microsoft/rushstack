@@ -279,4 +279,15 @@ export class Text {
     // Benchmarks of several algorithms: https://jsbench.me/4bkfflcm2z
     return s.split('').reduce((newString, char) => char + newString, '');
   }
+
+  /**
+   * Splits the provided string by newlines. Note that leading and trailing newlines will produce
+   * leading or trailing empty string array entries.
+   */
+  public static splitByNewLines(s: undefined): undefined;
+  public static splitByNewLines(s: string): string[];
+  public static splitByNewLines(s: string | undefined): string[] | undefined;
+  public static splitByNewLines(s: string | undefined): string[] | undefined {
+    return s?.split(/\r?\n/);
+  }
 }

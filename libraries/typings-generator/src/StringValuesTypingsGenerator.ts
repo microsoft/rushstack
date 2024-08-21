@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
+import { Text } from '@rushstack/node-core-library';
 
 import {
   type ITypingsGeneratorOptions,
@@ -95,8 +96,9 @@ function convertToTypingsGeneratorOptions<TFileContents>(
   let defaultSplitExportAsDefaultDocumentationComment: string[] | undefined;
   let defaultExportAsDefaultInterfaceName: string | undefined;
   if (typeof exportAsDefaultOptions === 'object') {
-    defaultSplitExportAsDefaultDocumentationComment =
-      exportAsDefaultOptions.documentationComment?.split(/\r?\n/);
+    defaultSplitExportAsDefaultDocumentationComment = Text.splitByNewLines(
+      exportAsDefaultOptions.documentationComment
+    );
     defaultExportAsDefaultInterfaceName =
       exportAsDefaultOptions.interfaceName ??
       exportAsDefaultInterfaceName_deprecated ??
@@ -135,7 +137,7 @@ function convertToTypingsGeneratorOptions<TFileContents>(
       exportAsDefaultInterfaceName =
         interfaceName ?? defaultExportAsDefaultInterfaceName ?? EXPORT_AS_DEFAULT_INTERFACE_NAME;
       interfaceDocumentationCommentLines =
-        documentationComment?.split(/\r?\n/) ?? defaultSplitExportAsDefaultDocumentationComment;
+        Text.splitByNewLines(documentationComment) ?? defaultSplitExportAsDefaultDocumentationComment;
     } else {
       exportAsDefaultInterfaceName = defaultExportAsDefaultInterfaceName;
       interfaceDocumentationCommentLines = defaultSplitExportAsDefaultDocumentationComment;
