@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.132.0",
+      "tag": "@microsoft/rush_v5.132.0",
+      "date": "Wed, 21 Aug 2024 16:25:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new `rush install-autoinstaller` command that ensures that the specified autoinstaller is installed."
+          },
+          {
+            "comment": "Emit an error if a `workspace:` specifier is used in a dependency that is listed in `decoupledLocalDependencies`."
+          },
+          {
+            "comment": "Add support for `--resolution-only` to `rush install` to enforce strict peer dependency resolution."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.131.5",
       "tag": "@microsoft/rush_v5.131.5",
       "date": "Mon, 19 Aug 2024 20:03:03 GMT",

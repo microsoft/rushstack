@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 19 Aug 2024 20:03:03 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Aug 2024 16:25:07 GMT and should not be manually modified.
+
+## 5.132.0
+Wed, 21 Aug 2024 16:25:07 GMT
+
+### Updates
+
+- Add a new `rush install-autoinstaller` command that ensures that the specified autoinstaller is installed.
+- Emit an error if a `workspace:` specifier is used in a dependency that is listed in `decoupledLocalDependencies`.
+- Add support for `--resolution-only` to `rush install` to enforce strict peer dependency resolution.
 
 ## 5.131.5
 Mon, 19 Aug 2024 20:03:03 GMT
