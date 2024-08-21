@@ -6,9 +6,9 @@
 
 /// <reference types="node" />
 
-import type { MessagePort } from 'worker_threads';
 import { MinifyOptions } from 'terser';
 import type { RawSourceMap } from 'source-map';
+import type * as WorkerThreads from 'worker_threads';
 
 // @public
 export function getIdentifier(ordinal: number): string;
@@ -92,13 +92,13 @@ export class LocalMinifier implements IModuleMinifier {
 
 // @public
 export class MessagePortMinifier implements IModuleMinifier {
-    constructor(port: MessagePort);
+    constructor(port: WorkerThreads.MessagePort);
     // @deprecated (undocumented)
     connect(): Promise<IMinifierConnection>;
     connectAsync(): Promise<IMinifierConnection>;
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
     // (undocumented)
-    readonly port: MessagePort;
+    readonly port: WorkerThreads.MessagePort;
 }
 
 export { MinifyOptions }
