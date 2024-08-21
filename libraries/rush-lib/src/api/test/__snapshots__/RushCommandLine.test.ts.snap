@@ -916,10 +916,23 @@ Object {
       ],
     },
     Object {
+      "actionName": "install-autoinstaller",
+      "parameters": Array [
+        Object {
+          "description": "The name of the autoinstaller, which must be one of the folders under common/autoinstallers.",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--name",
+          "required": true,
+          "shortName": undefined,
+        },
+      ],
+    },
+    Object {
       "actionName": "update-autoinstaller",
       "parameters": Array [
         Object {
-          "description": "Specifies the name of the autoinstaller, which must be one of the folders under common/autoinstallers.",
+          "description": "The name of the autoinstaller, which must be one of the folders under common/autoinstallers.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--name",

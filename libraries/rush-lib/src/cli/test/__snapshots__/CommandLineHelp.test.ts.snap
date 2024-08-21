@@ -51,6 +51,8 @@ Positional arguments:
     update              Install package dependencies for all projects in the 
                         repo, and create or update the shrinkwrap file as 
                         needed
+    install-autoinstaller
+                        Install autoinstaller package dependencies
     update-autoinstaller
                         Updates autoinstaller package dependencies
     update-cloud-credentials
@@ -763,6 +765,19 @@ Optional arguments:
 "
 `;
 
+exports[`CommandLineHelp prints the help for each action: install-autoinstaller 1`] = `
+"usage: rush install-autoinstaller [-h] --name AUTOINSTALLER_NAME
+
+Use this command to install dependencies for an autoinstaller folder.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --name AUTOINSTALLER_NAME
+                        The name of the autoinstaller, which must be one of 
+                        the folders under common/autoinstallers.
+"
+`;
+
 exports[`CommandLineHelp prints the help for each action: link 1`] = `
 "usage: rush link [-h] [-f]
 
@@ -1284,8 +1299,8 @@ folder.
 Optional arguments:
   -h, --help            Show this help message and exit.
   --name AUTOINSTALLER_NAME
-                        Specifies the name of the autoinstaller, which must 
-                        be one of the folders under common/autoinstallers.
+                        The name of the autoinstaller, which must be one of 
+                        the folders under common/autoinstallers.
 "
 `;
 
