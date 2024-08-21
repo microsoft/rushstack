@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Path } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -30,25 +29,14 @@ export default class SassPlugin implements IHeftPlugin {
    * Generate typings for Sass files before TypeScript compilation.
    */
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
-    const slashNormalizedBuildFolderPath: string = Path.convertToSlashes(heftConfiguration.buildFolderPath);
-
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runSassTypingsGeneratorAsync(
-        taskSession,
-        heftConfiguration,
-        slashNormalizedBuildFolderPath
-      );
+      await this._runSassTypingsGeneratorAsync(taskSession, heftConfiguration);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        await this._runSassTypingsGeneratorAsync(
-          taskSession,
-          heftConfiguration,
-          slashNormalizedBuildFolderPath,
-          runIncrementalOptions
-        );
+        await this._runSassTypingsGeneratorAsync(taskSession, heftConfiguration, runIncrementalOptions);
       }
     );
   }
@@ -56,13 +44,11 @@ export default class SassPlugin implements IHeftPlugin {
   private async _runSassTypingsGeneratorAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    slashNormalizedBuildFolderPath: string,
     runIncrementalOptions?: IHeftTaskRunIncrementalHookOptions
   ): Promise<void> {
     taskSession.logger.terminal.writeVerboseLine('Starting sass typings generation...');
     const sassProcessor: SassProcessor = await this._loadSassProcessorAsync(
       heftConfiguration,
-      slashNormalizedBuildFolderPath,
       taskSession.logger
     );
     // If we have the incremental options, use them to determine which files to process.
@@ -98,26 +84,23 @@ export default class SassPlugin implements IHeftPlugin {
 
   private async _loadSassProcessorAsync(
     heftConfiguration: HeftConfiguration,
-    slashNormalizedBuildFolderPath: string,
     logger: IScopedLogger
   ): Promise<SassProcessor> {
     if (!this._sassProcessor) {
       const sassConfiguration: ISassConfiguration = await this._loadSassConfigurationAsync(
         heftConfiguration,
-        slashNormalizedBuildFolderPath,
         logger
       );
       this._sassProcessor = new SassProcessor({
         sassConfiguration,
-        buildFolder: slashNormalizedBuildFolderPath
+        buildFolder: heftConfiguration.slashNormalizedBuildFolderPath
       });
     }
     return this._sassProcessor;
   }
 
   private async _loadSassConfigurationAsync(
-    heftConfiguration: HeftConfiguration,
-    slashNormalizedBuildFolderPath: string,
+    { rigConfig, slashNormalizedBuildFolderPath }: HeftConfiguration,
     logger: IScopedLogger
   ): Promise<ISassConfiguration> {
     if (!this._sassConfiguration) {
@@ -132,7 +115,7 @@ export default class SassPlugin implements IHeftPlugin {
         await SassPlugin._sassConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
           logger.terminal,
           slashNormalizedBuildFolderPath,
-          heftConfiguration.rigConfig
+          rigConfig
         );
       if (sassConfigurationJson) {
         if (sassConfigurationJson.srcFolder) {

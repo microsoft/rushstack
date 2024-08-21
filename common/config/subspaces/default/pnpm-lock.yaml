@@ -2785,9 +2785,6 @@ importers:
       '@rushstack/localization-utilities':
         specifier: workspace:*
         version: link:../../libraries/localization-utilities
-      '@rushstack/node-core-library':
-        specifier: workspace:*
-        version: link:../../libraries/node-core-library
     devDependencies:
       '@microsoft/api-extractor':
         specifier: workspace:*

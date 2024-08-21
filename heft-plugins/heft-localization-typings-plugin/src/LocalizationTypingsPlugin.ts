@@ -10,7 +10,6 @@ import type {
   IWatchedFileState
 } from '@rushstack/heft';
 import { type ITypingsGeneratorOptions, TypingsGenerator } from '@rushstack/localization-utilities';
-import { Path } from '@rushstack/node-core-library';
 
 export interface ILocalizationTypingsPluginOptions {
   /**
@@ -43,11 +42,9 @@ const PLUGIN_NAME: 'localization-typings-plugin' = 'localization-typings-plugin'
 export default class LocalizationTypingsPlugin implements IHeftTaskPlugin<ILocalizationTypingsPluginOptions> {
   public apply(
     taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
+    { slashNormalizedBuildFolderPath }: HeftConfiguration,
     options?: ILocalizationTypingsPluginOptions
   ): void {
-    const slashNormalizedBuildFolderPath: string = Path.convertToSlashes(heftConfiguration.buildFolderPath);
-
     const {
       srcFolder,
       generatedTsFolder,
