@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -12,10 +13,20 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "documentationComment": {
+              "type": "string",
+              "description": "This value is placed in a documentation comment for the exported default interface."
+            },
             "interfaceName": {
               "type": "string",
               "description": "The interface name for the default wrapped export. Defaults to \"IExport\""
-            },
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
             "documentationComment": {
               "type": "string",
               "description": "This value is placed in a documentation comment for the exported default interface."
