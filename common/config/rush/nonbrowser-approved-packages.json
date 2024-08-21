@@ -163,6 +163,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-localization-typings-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },

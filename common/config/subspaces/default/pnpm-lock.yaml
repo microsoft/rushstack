@@ -2070,6 +2070,21 @@ importers:
 
   ../../../build-tests/localization-plugin-test-02:
     dependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-lint-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-localization-typings-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-localization-typings-plugin
+      '@rushstack/heft-typescript-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-typescript-plugin
+      '@rushstack/heft-webpack4-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-webpack4-plugin
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
@@ -2094,9 +2109,6 @@ importers:
       lodash:
         specifier: ~4.17.15
         version: 4.17.21
-      ts-loader:
-        specifier: 6.0.0
-        version: 6.0.0(typescript@5.4.2)
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -2779,6 +2791,25 @@ importers:
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
+
+  ../../../heft-plugins/heft-localization-typings-plugin:
+    dependencies:
+      '@rushstack/localization-utilities':
+        specifier: workspace:*
+        version: link:../../libraries/localization-utilities
+    devDependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      eslint:
+        specifier: ~8.57.0
+        version: 8.57.0(supports-color@8.1.1)
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../heft-plugins/heft-sass-plugin:
     dependencies:

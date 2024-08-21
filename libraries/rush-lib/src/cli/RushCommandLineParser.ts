@@ -8,7 +8,7 @@ import {
   type CommandLineFlagParameter,
   CommandLineHelper
 } from '@rushstack/ts-command-line';
-import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
+import { InternalError, AlreadyReportedError, Text } from '@rushstack/node-core-library';
 import {
   ConsoleTerminalProvider,
   Terminal,
@@ -456,8 +456,7 @@ export class RushCommandLineParser extends CommandLineParser {
       // The colors package will eat multi-newlines, which could break formatting
       // in user-specified messages and instructions, so we prefer to color each
       // line individually.
-      const message: string = PrintUtilities.wrapWords(prefix + error.message)
-        .split(/\r?\n/)
+      const message: string = Text.splitByNewLines(PrintUtilities.wrapWords(prefix + error.message))
         .map((line) => Colorize.red(line))
         .join('\n');
       // eslint-disable-next-line no-console

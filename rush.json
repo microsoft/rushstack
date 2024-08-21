@@ -963,6 +963,12 @@
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
     },
     {
+      "packageName": "@rushstack/heft-localization-typings-plugin",
+      "projectFolder": "heft-plugins/heft-localization-typings-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-sass-plugin",
       "projectFolder": "heft-plugins/heft-sass-plugin",
       "reviewCategory": "libraries",

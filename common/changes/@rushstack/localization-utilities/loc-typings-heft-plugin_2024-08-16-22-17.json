@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-utilities",
+      "comment": "Expand the typings generator to take a richer set of options for default exports. See `exportAsDefault` in @rushstack/typings-generator's `StringValuesTypingsGenerator`. Also included is another property in `exportAsDefault`: `inferInterfaceNameFromFilename`.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-utilities"
+}

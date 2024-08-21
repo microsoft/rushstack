@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Create a new instance function called `getVerboseOutput` on `StringBufferTerminalProvider` and mark `getVerbose` as deprecated.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}

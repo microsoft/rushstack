@@ -12,30 +12,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 function generateConfiguration(mode, outputFolderName) {
   return {
     mode: mode,
-    module: {
-      rules: [
-        {
-          test: /\.tsx?$/,
-          loader: require.resolve('ts-loader'),
-          exclude: /(node_modules)/,
-          options: {
-            compiler: require.resolve('typescript'),
-            logLevel: 'ERROR',
-            configFile: path.resolve(__dirname, 'tsconfig.json')
-          }
-        }
-      ]
-    },
-    resolve: {
-      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
-    },
     entry: {
-      'localization-test-A': path.join(__dirname, 'src', 'indexA.ts'),
-      'localization-test-B': path.join(__dirname, 'src', 'indexB.ts'),
-      'localization-test-C': path.join(__dirname, 'src', 'indexC.ts')
+      'localization-test-A': `${__dirname}/lib/indexA.js`,
+      'localization-test-B': `${__dirname}/lib/indexB.js`,
+      'localization-test-C': `${__dirname}/lib/indexC.js`
     },
     output: {
-      path: path.join(__dirname, outputFolderName),
+      path: `${__dirname}/${outputFolderName}`,
       filename: '[name]_[locale]_[contenthash].js',
       chunkFilename: '[id].[name]_[locale]_[contenthash].js'
     },
@@ -84,22 +67,17 @@ function generateConfiguration(mode, outputFolderName) {
           normalizeResxNewlines: 'crlf',
           ignoreMissingResxComments: true
         },
-        typingsOptions: {
-          generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
-          sourceRoot: path.resolve(__dirname, 'src'),
-          processComment: (comment) => (comment ? `${comment} (processed)` : comment)
-        },
         localizationStats: {
-          dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
+          dropPath: `${__dirname}/temp/localization-stats.json`
         },
         ignoreString: (filePath, stringName) => stringName === '__IGNORED_STRING__'
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
         analyzerMode: 'static',
-        reportFilename: path.resolve(__dirname, 'temp', 'stats.html'),
+        reportFilename: `${__dirname}/temp/stats.html`,
         generateStatsFile: true,
-        statsFilename: path.resolve(__dirname, 'temp', 'stats.json'),
+        statsFilename: `${__dirname}/temp/stats.json`,
         logLevel: 'error'
       }),
       new SetPublicPathPlugin({

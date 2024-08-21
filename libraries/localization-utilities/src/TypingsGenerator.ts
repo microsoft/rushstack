@@ -3,6 +3,7 @@
 
 import {
   StringValuesTypingsGenerator,
+  type IExportAsDefaultOptions,
   type IStringValueTyping,
   type ITypingsGeneratorBaseOptions
 } from '@rushstack/typings-generator';
@@ -14,14 +15,30 @@ import { parseLocFile } from './LocFileParser';
 /**
  * @public
  */
+export interface IInferInterfaceNameExportAsDefaultOptions
+  extends Omit<IExportAsDefaultOptions, 'interfaceName'> {
+  /**
+   * When `exportAsDefault` is true and this option is true, the default export interface name will be inferred
+   * from the filename.
+   */
+  inferInterfaceNameFromFilename?: boolean;
+}
+
+/**
+ * @public
+ */
 export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
-  exportAsDefault?: boolean;
+  exportAsDefault?: boolean | IExportAsDefaultOptions | IInferInterfaceNameExportAsDefaultOptions;
+
   resxNewlineNormalization?: NewlineKind | undefined;
+
   ignoreMissingResxComments?: boolean | undefined;
+
   ignoreString?: IgnoreStringFunction;
+
   processComment?: (
     comment: string | undefined,
-    resxFilePath: string,
+    relativeFilePath: string,
     stringName: string
   ) => string | undefined;
 }
@@ -33,17 +50,27 @@ export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
  */
 export class TypingsGenerator extends StringValuesTypingsGenerator {
   public constructor(options: ITypingsGeneratorOptions) {
-    const { ignoreString, processComment } = options;
+    const {
+      ignoreString,
+      processComment,
+      resxNewlineNormalization,
+      ignoreMissingResxComments,
+      exportAsDefault
+    } = options;
+    const inferDefaultExportInterfaceNameFromFilename: boolean | undefined =
+      typeof exportAsDefault === 'object'
+        ? (exportAsDefault as IInferInterfaceNameExportAsDefaultOptions).inferInterfaceNameFromFilename
+        : undefined;
     super({
       ...options,
       fileExtensions: ['.resx', '.resx.json', '.loc.json', '.resjson'],
-      parseAndGenerateTypings: (fileContents: string, filePath: string, resxFilePath: string) => {
+      parseAndGenerateTypings: (content: string, filePath: string, relativeFilePath: string) => {
         const locFileData: ILocalizationFile = parseLocFile({
-          filePath: filePath,
-          content: fileContents,
-          terminal: this._options.terminal!,
-          resxNewlineNormalization: options.resxNewlineNormalization,
-          ignoreMissingResxComments: options.ignoreMissingResxComments,
+          filePath,
+          content,
+          terminal: this.terminal,
+          resxNewlineNormalization,
+          ignoreMissingResxComments,
           ignoreString
         });
 
@@ -53,7 +80,7 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
         for (const stringName in locFileData) {
           let comment: string | undefined = locFileData[stringName].comment;
           if (processComment) {
-            comment = processComment(comment, resxFilePath, stringName);
+            comment = processComment(comment, relativeFilePath, stringName);
           }
 
           typings.push({
@@ -62,7 +89,31 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
           });
         }
 
-        return { typings };
+        let exportAsDefaultInterfaceName: string | undefined;
+        if (inferDefaultExportInterfaceNameFromFilename) {
+          const lastSlashIndex: number = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
+          let extensionIndex: number = filePath.lastIndexOf('.');
+          if (filePath.slice(extensionIndex).toLowerCase() === '.json') {
+            extensionIndex = filePath.lastIndexOf('.', extensionIndex - 1);
+          }
+
+          const fileNameWithoutExtension: string = filePath.substring(lastSlashIndex + 1, extensionIndex);
+          const normalizedFileName: string = fileNameWithoutExtension.replace(/[^a-zA-Z0-9$_]/g, '');
+          const firstCharUpperCased: string = normalizedFileName.charAt(0).toUpperCase();
+          exportAsDefaultInterfaceName = `I${firstCharUpperCased}${normalizedFileName.slice(1)}`;
+
+          if (
+            !exportAsDefaultInterfaceName.endsWith('strings') &&
+            !exportAsDefaultInterfaceName.endsWith('Strings')
+          ) {
+            exportAsDefaultInterfaceName += 'Strings';
+          }
+        }
+
+        return {
+          typings,
+          exportAsDefaultInterfaceName
+        };
       }
     });
   }

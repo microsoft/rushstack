@@ -18,5 +18,9 @@ export { parseLocJson } from './parsers/parseLocJson';
 export { parseResJson } from './parsers/parseResJson';
 export { parseResx, type IParseResxOptions, type IParseResxOptionsBase } from './parsers/parseResx';
 export { parseLocFile, type IParseLocFileOptions, type ParserKind } from './LocFileParser';
-export { type ITypingsGeneratorOptions, TypingsGenerator } from './TypingsGenerator';
+export {
+  type ITypingsGeneratorOptions,
+  type IInferInterfaceNameExportAsDefaultOptions,
+  TypingsGenerator
+} from './TypingsGenerator';
 export { getPseudolocalizer } from './Pseudolocalization';

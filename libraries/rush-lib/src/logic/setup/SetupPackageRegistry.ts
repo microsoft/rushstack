@@ -496,7 +496,7 @@ export class SetupPackageRegistry {
    * @returns the JSON section, or `undefined` if a JSON object could not be detected
    */
   private static _tryFindJson(dirtyOutput: string): string | undefined {
-    const lines: string[] = dirtyOutput.split(/\r?\n/g);
+    const lines: string[] = Text.splitByNewLines(dirtyOutput);
     let startIndex: number | undefined;
     let endIndex: number | undefined;
 

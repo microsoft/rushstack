@@ -33,12 +33,6 @@ export interface ITypingsGeneratorOptionsWithoutReadFile<
     relativePath: string
   ) => TTypingsResult | Promise<TTypingsResult>;
   getAdditionalOutputFiles?: (relativePath: string) => string[];
-  /**
-   * @deprecated
-   *
-   * TODO: Remove when version 1.0.0 is released.
-   */
-  filesToIgnore?: string[];
 }
 
 /**
@@ -86,7 +80,9 @@ export class TypingsGenerator<TFileContents = string> {
   // Map of resolved file path -> relative file path
   private readonly _relativePaths: Map<string, string>;
 
-  protected _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
+  protected readonly _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
+
+  protected readonly terminal: ITerminal;
 
   /**
    * The folder path that contains all input source files.
@@ -118,10 +114,6 @@ export class TypingsGenerator<TFileContents = string> {
           FileSystem.readFileAsync(filePath) as Promise<TFileContents>)
     };
 
-    if (options.filesToIgnore) {
-      throw new Error('The filesToIgnore option is no longer supported. Please use globsToIgnore instead.');
-    }
-
     if (!options.generatedTsFolder) {
       throw new Error('generatedTsFolder must be provided');
     }
@@ -145,9 +137,7 @@ export class TypingsGenerator<TFileContents = string> {
 
     this.ignoredFileGlobs = options.globsToIgnore || [];
 
-    if (!options.terminal) {
-      this._options.terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
-    }
+    this.terminal = options.terminal ?? new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
 
     this._options.fileExtensions = this._normalizeFileExtensions(options.fileExtensions);
 
@@ -354,7 +344,7 @@ export class TypingsGenerator<TFileContents = string> {
         });
       }
     } catch (e) {
-      this._options.terminal!.writeError(
+      this.terminal.writeError(
         `Error occurred parsing and generating typings for file "${resolvedPath}": ${e}`
       );
     }
@@ -376,10 +366,10 @@ export class TypingsGenerator<TFileContents = string> {
   private *_getTypingsFilePaths(relativePath: string): Iterable<string> {
     const { generatedTsFolder, secondaryGeneratedTsFolders } = this._options;
     const dtsFilename: string = `${relativePath}.d.ts`;
-    yield path.resolve(generatedTsFolder, dtsFilename);
+    yield `${generatedTsFolder}/${dtsFilename}`;
     if (secondaryGeneratedTsFolders) {
       for (const secondaryGeneratedTsFolder of secondaryGeneratedTsFolders) {
-        yield path.resolve(secondaryGeneratedTsFolder, dtsFilename);
+        yield `${secondaryGeneratedTsFolder}/${dtsFilename}`;
       }
     }
   }

@@ -14,7 +14,7 @@ describe(Terminal.name, () => {
       log: provider.getOutput(),
       warning: provider.getWarningOutput(),
       error: provider.getErrorOutput(),
-      verbose: provider.getVerbose(),
+      verbose: provider.getVerboseOutput(),
       debug: provider.getDebugOutput()
     }).toMatchSnapshot();
   }
