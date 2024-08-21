@@ -38,7 +38,7 @@ export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
 
   processComment?: (
     comment: string | undefined,
-    resxFilePath: string,
+    relativeFilePath: string,
     stringName: string
   ) => string | undefined;
 }
@@ -64,7 +64,7 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
     super({
       ...options,
       fileExtensions: ['.resx', '.resx.json', '.loc.json', '.resjson'],
-      parseAndGenerateTypings: (content: string, filePath: string, resxFilePath: string) => {
+      parseAndGenerateTypings: (content: string, filePath: string, relativeFilePath: string) => {
         const locFileData: ILocalizationFile = parseLocFile({
           filePath,
           content,
@@ -80,7 +80,7 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
         for (const stringName in locFileData) {
           let comment: string | undefined = locFileData[stringName].comment;
           if (processComment) {
-            comment = processComment(comment, resxFilePath, stringName);
+            comment = processComment(comment, relativeFilePath, stringName);
           }
 
           typings.push({
@@ -92,15 +92,15 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
         let exportAsDefaultInterfaceName: string | undefined;
         if (inferDefaultExportInterfaceNameFromFilename) {
           const lastSlashIndex: number = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
-          const extensionIndex: number = Math.max(
-            filePath.lastIndexOf('.resx'),
-            filePath.lastIndexOf('.resjson'),
-            filePath.lastIndexOf('.loc.json')
-          );
+          let extensionIndex: number = filePath.lastIndexOf('.');
+          if (filePath.slice(extensionIndex).toLowerCase() === '.json') {
+            extensionIndex = filePath.lastIndexOf('.', extensionIndex - 1);
+          }
+
           const fileNameWithoutExtension: string = filePath.substring(lastSlashIndex + 1, extensionIndex);
-          const normalizedFileName: string = fileNameWithoutExtension.replace(/[^a-zA-Z0-9]/g, '');
-          const [firstCharacter, ...restOfCharacters] = normalizedFileName;
-          exportAsDefaultInterfaceName = `I${firstCharacter.toUpperCase()}${restOfCharacters.join('')}`;
+          const normalizedFileName: string = fileNameWithoutExtension.replace(/[^a-zA-Z0-9$_]/g, '');
+          const firstCharUpperCased: string = normalizedFileName.charAt(0).toUpperCase();
+          exportAsDefaultInterfaceName = `I${firstCharUpperCased}${normalizedFileName.slice(1)}`;
 
           if (
             !exportAsDefaultInterfaceName.endsWith('strings') &&
