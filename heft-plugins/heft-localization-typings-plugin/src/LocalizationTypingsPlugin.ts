@@ -71,7 +71,7 @@ export default class LocalizationTypingsPlugin implements IHeftTaskPlugin<ILocal
       generatedTsFolder: `${slashNormalizedBuildFolderPath}/${generatedTsFolder ?? 'temp/loc-ts'}`,
       terminal: logger.terminal,
       ignoreString: stringNamesToIgnoreSet
-        ? (stringName: string) => stringNamesToIgnoreSet.has(stringName)
+        ? (filePath: string, stringName: string) => stringNamesToIgnoreSet.has(stringName)
         : undefined,
       secondaryGeneratedTsFolders
     });

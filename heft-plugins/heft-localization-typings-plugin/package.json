@@ -19,7 +19,6 @@
     "@rushstack/heft": "^0.67.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "eslint": "~8.57.0"

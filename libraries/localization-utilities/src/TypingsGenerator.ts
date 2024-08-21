@@ -3,6 +3,7 @@
 
 import {
   StringValuesTypingsGenerator,
+  type IStringValueTypings,
   type IExportAsDefaultOptions,
   type IStringValueTyping,
   type ITypingsGeneratorBaseOptions
@@ -64,7 +65,11 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
     super({
       ...options,
       fileExtensions: ['.resx', '.resx.json', '.loc.json', '.resjson'],
-      parseAndGenerateTypings: (content: string, filePath: string, relativeFilePath: string) => {
+      parseAndGenerateTypings: (
+        content: string,
+        filePath: string,
+        relativeFilePath: string
+      ): IStringValueTypings => {
         const locFileData: ILocalizationFile = parseLocFile({
           filePath,
           content,
@@ -89,7 +94,6 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
           });
         }
 
-        let exportAsDefaultInterfaceName: string | undefined;
         if (inferDefaultExportInterfaceNameFromFilename) {
           const lastSlashIndex: number = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
           let extensionIndex: number = filePath.lastIndexOf('.');
@@ -100,20 +104,23 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
           const fileNameWithoutExtension: string = filePath.substring(lastSlashIndex + 1, extensionIndex);
           const normalizedFileName: string = fileNameWithoutExtension.replace(/[^a-zA-Z0-9$_]/g, '');
           const firstCharUpperCased: string = normalizedFileName.charAt(0).toUpperCase();
-          exportAsDefaultInterfaceName = `I${firstCharUpperCased}${normalizedFileName.slice(1)}`;
+          let interfaceName: string | undefined = `I${firstCharUpperCased}${normalizedFileName.slice(1)}`;
 
-          if (
-            !exportAsDefaultInterfaceName.endsWith('strings') &&
-            !exportAsDefaultInterfaceName.endsWith('Strings')
-          ) {
-            exportAsDefaultInterfaceName += 'Strings';
+          if (!interfaceName.endsWith('strings') && !interfaceName.endsWith('Strings')) {
+            interfaceName += 'Strings';
           }
-        }
 
-        return {
-          typings,
-          exportAsDefaultInterfaceName
-        };
+          return {
+            typings,
+            exportAsDefault: {
+              interfaceName
+            }
+          };
+        } else {
+          return {
+            typings
+          };
+        }
       }
     });
   }
