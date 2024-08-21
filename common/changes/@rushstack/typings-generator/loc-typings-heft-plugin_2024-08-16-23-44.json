@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/typings-generator",
-      "comment": "Add optional `exportAsDefaultInterfaceName` and `exportAsDefaultDocumentationComment` properties to the return value of `parseAndGenerateTypings` that override those values from the options passed to `StringValuesTypingsGenerator`.",
+      "comment": "Add an optional `exportAsDefault` property to the return value of `parseAndGenerateTypings` that overrides options provided by the same property in the `StringValuesTypingsGenerator`'s options object.",
       "type": "minor"
     }
   ],
