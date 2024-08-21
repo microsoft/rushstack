@@ -2798,9 +2798,6 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/localization-utilities
     devDependencies:
-      '@microsoft/api-extractor':
-        specifier: workspace:*
-        version: link:../../apps/api-extractor
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft

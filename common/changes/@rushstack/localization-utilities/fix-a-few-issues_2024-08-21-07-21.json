@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-utilities",
+      "comment": "Fix an issue where `inferDefaultExportInterfaceNameFromFilename` did not apply.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/localization-utilities"
+}
