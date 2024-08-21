@@ -9,11 +9,6 @@ variables:
     value: 1
   - name: SourceBranch
     value: $[ replace(replace(resources.repositories.self.ref, 'refs/heads/', ''), 'refs/pull/', 'refs/remotes/pull/') ]
-  - name: Publish
-    ${{ if eq(parameters.TestRun, false) }}:
-      value: '--publish'
-    ${{ else }}:
-      value: ''
 
 resources:
   repositories:
@@ -40,6 +35,9 @@ extends:
                 - output: pipelineArtifact
                   targetPath: $(Build.ArtifactStagingDirectory)/published-versions
                   artifactName: published-versions
+                - output: pipelineArtifact
+                  targetPath: $(Build.ArtifactStagingDirectory)/packages
+                  artifactNames: packages
             steps:
               - checkout: self
                 persistCredentials: true
@@ -57,7 +55,5 @@ extends:
                 displayName: 'Prepublish workaround for rush-lib'
 
               - template: /common/config/azure-pipelines/templates/publish-tarballs.yaml@self
-                parameters:
-                  Publish: $(Publish)
 
               - template: /common/config/azure-pipelines/templates/record-published-versions.yaml@self

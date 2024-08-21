@@ -1,8 +1,7 @@
-parameters:
-  - name: Publish
-    type: string
-    default: ''
-
 steps:
-  - script: 'node common/scripts/install-run-rush.js publish $(Publish) --pack --include-all --release-folder esrp-release'
+  - bash: >
+      mkdir -p $(Build.ArtifactStagingDirectory)/packages
+    displyName: 'Create Folder for Packages File'
+
+  - script: 'node common/scripts/install-run-rush.js publish --publish --pack --include-all --release-folder esrp-release'
     displayName: 'Create TarBallz folder for Rush packages'
