@@ -72,9 +72,9 @@ export function resolveDependencyKey(
     return getDescriptionFileRootFromKey(lockfileFolder, specifier);
   } else if (specifier.startsWith('link:')) {
     if (context.isProject) {
-      return path.resolve(context.descriptionFileRoot, specifier.slice(5));
+      return path.posix.join(context.descriptionFileRoot, specifier.slice(5));
     } else {
-      return path.resolve(lockfileFolder, specifier.slice(5));
+      return path.posix.join(lockfileFolder, specifier.slice(5));
     }
   } else if (specifier.startsWith('file:')) {
     return getDescriptionFileRootFromKey(lockfileFolder, specifier, key);
