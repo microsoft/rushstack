@@ -251,6 +251,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@rushstack/rush-resolver-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-sdk",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
@@ -289,6 +293,10 @@
     {
       "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/webpack-workspace-resolve-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/webpack4-localization-plugin",
