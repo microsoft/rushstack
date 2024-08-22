@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Always update shrinkwrap when globalOverrides has been changed",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
