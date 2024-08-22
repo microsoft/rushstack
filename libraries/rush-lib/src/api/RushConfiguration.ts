@@ -158,6 +158,7 @@ export interface IRushConfigurationJson {
   nodeSupportedVersionRange?: string;
   nodeSupportedVersionInstructions?: string;
   suppressNodeLtsWarning?: boolean;
+  suppressRushIsPublicVersionCheck?: boolean;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
   allowMostlyStandardPackageNames?: boolean;

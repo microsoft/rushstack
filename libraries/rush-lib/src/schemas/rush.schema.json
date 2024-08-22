@@ -64,6 +64,10 @@
       "description": "Rush normally prints a warning if it detects a pre-LTS Node.js version. If you are testing pre-LTS versions in preparation for supporting the first LTS version, you can use this setting to disable Rush's warning.",
       "type": "boolean"
     },
+    "suppressRushIsPublicVersionCheck": {
+      "description": "Rush normally prints a warning if it detects that the current version is not one published to the public npmjs.org registry. If you need to block calls to the npm registry, you can use this setting to disable Rush's check.",
+      "type": "boolean"
+    },
     "projectFolderMinDepth": {
       "description": "The minimum folder depth for the projectFolder field.  The default value is 1, i.e. no slashes in the path name.",
       "type": "number"

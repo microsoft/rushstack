@@ -66,6 +66,13 @@
   /*[LINE "HYPOTHETICAL"]*/ "suppressNodeLtsWarning": false,
 
   /**
+   * Rush normally prints a warning if it detects that the current version is not one published to the
+   * public npmjs.org registry. If you need to block calls to the npm registry, you can use this setting to disable
+   * Rush's check.
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "suppressRushIsPublicVersionCheck": false,
+
+  /**
    * Large monorepos can become intimidating for newcomers if project folder paths don't follow
    * a consistent and recognizable pattern.  When the system allows nested folder trees,
    * we've found that teams will often use subfolders to create islands that isolate

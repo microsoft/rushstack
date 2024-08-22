@@ -48,7 +48,7 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import * as PolicyValidator from '../policy/PolicyValidator';
-import { WebClient, type WebClientResponse } from '../../utilities/WebClient';
+import type { WebClient as WebClientType, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
@@ -207,19 +207,21 @@ export abstract class BaseInstallManager {
       console.log();
       await this.validateNpmSetupAsync();
 
-      let publishedRelease: boolean | undefined;
-      try {
-        publishedRelease = await this._checkIfReleaseIsPublishedAsync();
-      } catch {
-        // If the user is working in an environment that can't reach the registry,
-        // don't bother them with errors.
-      }
+      if (!this.rushConfiguration.rushConfigurationJson.suppressRushIsPublicVersionCheck) {
+        let publishedRelease: boolean | undefined;
+        try {
+          publishedRelease = await this._checkIfReleaseIsPublishedAsync();
+        } catch {
+          // If the user is working in an environment that can't reach the registry,
+          // don't bother them with errors.
+        }
 
-      if (publishedRelease === false) {
-        // eslint-disable-next-line no-console
-        console.log(
-          Colorize.yellow('Warning: This release of the Rush tool was unpublished; it may be unstable.')
-        );
+        if (publishedRelease === false) {
+          // eslint-disable-next-line no-console
+          console.log(
+            Colorize.yellow('Warning: This release of the Rush tool was unpublished; it may be unstable.')
+          );
+        }
       }
 
       // Delete the successful install file to indicate the install transaction has started
@@ -1008,7 +1010,9 @@ ${gitLfsHookHandling}
     // Note that the "@" symbol does not normally get URL-encoded
     queryUrl += RushConstants.rushPackageName.replace('/', '%2F');
 
-    const webClient: WebClient = new WebClient();
+    const { WebClient } = await import('../../utilities/WebClient');
+
+    const webClient: WebClientType = new WebClient();
     webClient.userAgent = `pnpm/? npm/? node/${process.version} ${os.platform()} ${os.arch()}`;
     webClient.accept = 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*';
 
