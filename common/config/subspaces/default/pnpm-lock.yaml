@@ -4134,6 +4134,9 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/rush-sdk
     devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
       '@rushstack/lookup-by-path':
         specifier: workspace:*
         version: link:../../libraries/lookup-by-path
