@@ -25,11 +25,11 @@ import type { IResolverContext } from './types';
 function getPlatformInfo(): IPlatformInfo {
   // Acquiring the libc version is a bit more obnoxious than platform and arch,
   // but all of them are ultimately on the same object.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const {
     platform: os,
     arch: cpu,
     glibcVersionRuntime
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = (process.report?.getReport() as any)?.header ?? process;
   const libc: 'glibc' | 'musl' = glibcVersionRuntime ? 'glibc' : 'musl';
 

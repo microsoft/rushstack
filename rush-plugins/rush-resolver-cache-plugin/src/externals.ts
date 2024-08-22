@@ -20,8 +20,6 @@ type OperationStatus = OperationStatusType;
 export { Operation, OperationStatus };
 
 // Support this plugin being webpacked.
-// eslint-disable-next-line @typescript-eslint/naming-convention
-declare const __non_webpack_require__: typeof require;
 const req: typeof require = typeof __non_webpack_require__ === 'function' ? __non_webpack_require__ : require;
 
 const entryModule: Module | undefined = req.main;
