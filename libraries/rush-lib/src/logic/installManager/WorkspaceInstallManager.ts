@@ -367,6 +367,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       shrinkwrapIsUpToDate = false;
     }
 
+    // Check if overrides and globalOverrides are the same
+    const overridesAreEqual: boolean = objectsAreDeepEqual<Record<string, string>>(
+      this.rushConfiguration.pnpmOptions.globalOverrides ?? {},
+      shrinkwrapFile?.overrides ? Object.fromEntries(shrinkwrapFile?.overrides) : {}
+    );
+
+    if (!overridesAreEqual) {
+      shrinkwrapWarnings.push("The overrides settings doesn't match the current shrinkwrap.");
+      shrinkwrapIsUpToDate = false;
+    }
+
     // Write the common package.json
     InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined);
 
