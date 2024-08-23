@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 21 Aug 2024 16:25:07 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Aug 2024 00:40:08 GMT and should not be manually modified.
+
+## 5.133.0
+Fri, 23 Aug 2024 00:40:08 GMT
+
+### Updates
+
+- Always update shrinkwrap when globalOverrides has been changed
+- Add `afterInstall` plugin hook, which runs after any install finishes.
+- Add rush.json option "suppressRushIsPublicVersionCheck" to allow suppressing hardcoded calls to the npmjs.org registry.
 
 ## 5.132.0
 Wed, 21 Aug 2024 16:25:07 GMT
