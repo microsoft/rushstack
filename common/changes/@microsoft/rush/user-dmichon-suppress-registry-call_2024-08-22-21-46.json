@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add rush.json option \"suppressRushIsPublicVersionCheck\" to allow suppressing hardcoded calls to the npmjs.org registry.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

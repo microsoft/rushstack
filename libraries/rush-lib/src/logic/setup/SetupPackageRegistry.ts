@@ -17,7 +17,7 @@ import { PrintUtilities, Colorize, ConsoleTerminalProvider, Terminal } from '@ru
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { type IArtifactoryPackageRegistryJson, ArtifactoryConfiguration } from './ArtifactoryConfiguration';
-import { WebClient, type WebClientResponse } from '../../utilities/WebClient';
+import type { WebClient as WebClientType, WebClientResponse } from '../../utilities/WebClient';
 import { TerminalInput } from './TerminalInput';
 
 interface IArtifactoryCustomizableMessages {
@@ -284,7 +284,9 @@ export class SetupPackageRegistry {
   ): Promise<void> {
     this._terminal.writeLine('\nFetching an NPM token from the Artifactory service...');
 
-    const webClient: WebClient = new WebClient();
+    // Defer this import since it is conditionally needed.
+    const { WebClient } = await import('../../utilities/WebClient');
+    const webClient: WebClientType = new WebClient();
 
     webClient.addBasicAuthHeader(artifactoryUser, artifactoryKey);
 
