@@ -8,6 +8,7 @@ import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManager
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { Subspace } from '../../api/Subspace';
 
 export class InstallAction extends BaseInstallAction {
   private readonly _checkOnlyParameter: CommandLineFlagParameter;
@@ -80,7 +81,9 @@ export class InstallAction extends BaseInstallAction {
         (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this._terminal)) ?? [],
       checkOnly: this._checkOnlyParameter.value,
       resolutionOnly: this._resolutionOnlyParameter?.value,
-      beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
+      beforeInstallAsync: (subspace: Subspace) =>
+        this.rushSession.hooks.beforeInstall.promise(this, subspace),
+      afterInstallAsync: (subspace: Subspace) => this.rushSession.hooks.afterInstall.promise(this, subspace),
       terminal: this._terminal
     };
   }

@@ -233,7 +233,7 @@ export abstract class BaseInstallManager {
 
       // Give plugins an opportunity to act before invoking the installation process
       if (this.options.beforeInstallAsync !== undefined) {
-        await this.options.beforeInstallAsync();
+        await this.options.beforeInstallAsync(subspace);
       }
 
       await Promise.all([
@@ -346,8 +346,14 @@ export abstract class BaseInstallManager {
 
     // Perform any post-install work the install manager requires
     await this.postInstallAsync(subspace);
+
     // Create the marker file to indicate a successful install
     await commonTempInstallFlag.createAsync();
+
+    // Give plugins an opportunity to act after a successful install
+    if (this.options.afterInstallAsync !== undefined) {
+      await this.options.afterInstallAsync(subspace);
+    }
 
     // eslint-disable-next-line no-console
     console.log('');

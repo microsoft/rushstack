@@ -107,7 +107,12 @@ export interface IInstallManagerOptions {
   /**
    * Callback to invoke between preparing the common/temp folder and running installation.
    */
-  beforeInstallAsync?: () => Promise<void>;
+  beforeInstallAsync?: (subspace: Subspace) => Promise<void>;
+
+  /**
+   * Callback to invoke after a successful installation.
+   */
+  afterInstallAsync?: (subspace: Subspace) => Promise<void>;
 
   /**
    * The specific subspace to install.
