@@ -53,22 +53,28 @@ export class KnownPackageDependenciesPlugin {
 
         const cache: WorkspaceLayoutCache = this._cache;
 
-        const context: IResolveContext | undefined = cache.contextForPackage.get(descriptionFileData);
-        if (!context) {
+        let scope: IPrefixMatch<IResolveContext> | undefined =
+          cache.contextForPackage.get(descriptionFileData);
+        if (!scope) {
           return callback(new Error(`Expected context for ${request.descriptionFileRoot}`));
         }
 
-        const match: IPrefixMatch<IResolveContext> | undefined = context.findDependency(rawRequest);
-        if (!match) {
+        let dependency: IPrefixMatch<IResolveContext> | undefined;
+        while (scope && !dependency) {
+          dependency = scope.value.findDependency(rawRequest);
+          scope = scope.lastMatch;
+        }
+
+        if (!dependency) {
           return callback();
         }
 
-        const isPackageRoot: boolean = match.index === rawRequest.length;
+        const isPackageRoot: boolean = dependency.index === rawRequest.length;
         const fullySpecified: boolean | undefined = isPackageRoot ? false : request.fullySpecified;
-        const remainingPath: string = isPackageRoot ? '.' : `.${rawRequest.slice(match.index)}`;
+        const remainingPath: string = isPackageRoot ? '.' : `.${rawRequest.slice(dependency.index)}`;
         const relativePath: string =
           (remainingPath.length > 1 && cache.normalizeToSlash?.(remainingPath)) || remainingPath;
-        const { descriptionFileRoot } = match.value;
+        const { descriptionFileRoot } = dependency.value;
         const obj: ResolveRequest = {
           ...request,
           path: descriptionFileRoot,

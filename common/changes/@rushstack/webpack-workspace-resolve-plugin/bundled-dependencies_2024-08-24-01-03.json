@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack-workspace-resolve-plugin",
+      "comment": "Support hierarchical node_modules.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack-workspace-resolve-plugin"
+}

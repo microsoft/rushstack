@@ -3,6 +3,7 @@
 
 import { Volume } from 'memfs/lib/volume';
 import type { Compiler, Resolver } from 'webpack';
+import type { IPrefixMatch } from '@rushstack/lookup-by-path';
 
 import { WorkspaceLayoutCache, type IResolveContext } from '../WorkspaceLayoutCache';
 
@@ -18,7 +19,8 @@ export type WrappedResolve = (
 export const parsedJson: Record<string, object> = {
   '/workspace/a/package.json': { name: 'a' },
   '/workspace/a/lib-esm/package.json': { type: 'module' },
-  '/workspace/b/package.json': { name: 'b', dependencies: { a: 'workspace:*' } }
+  '/workspace/b/package.json': { name: 'b', dependencies: { a: 'workspace:*' }, bundledDepencies: ['c'] },
+  '/workspace/b/node_modules/c/package.json': { name: 'c' }
 };
 
 export function createResolveForTests(
@@ -40,7 +42,12 @@ export function createResolveForTests(
         {
           root: 'b',
           name: 'b',
-          deps: { a: 0 }
+          deps: { a: 0, c: 2 }
+        },
+        {
+          root: 'b/node_modules/c',
+          name: 'c',
+          deps: {}
         }
       ]
     },
@@ -98,9 +105,10 @@ export function createResolveForTests(
 
   // Backfill the contexts
   for (const [path, json] of Object.entries(platformJson)) {
-    const context: IResolveContext | undefined = cache.contextLookup.findChildPath(path);
-    if (!context) throw new Error(`No context found for ${path}`);
-    cache.contextForPackage.set(json, context);
+    const contextList: IPrefixMatch<IResolveContext> | undefined =
+      cache.contextLookup.findLongestPrefixMatch(path);
+    if (!contextList) throw new Error(`No context found for ${path}`);
+    cache.contextForPackage.set(json, contextList);
   }
 
   attachPlugins(cache, resolver);

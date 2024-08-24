@@ -25,7 +25,7 @@ export interface IResolverCacheFile {
 
 // @beta
 export interface ISerializedResolveContext {
-    deps: Record<string, number>;
+    deps?: Record<string, number>;
     dirInfoFiles?: string[];
     name: string;
     root: string;
@@ -46,7 +46,7 @@ export interface IWorkspaceResolvePluginOptions {
 // @beta
 export class WorkspaceLayoutCache {
     constructor(options: IWorkspaceLayoutCacheOptions);
-    readonly contextForPackage: WeakMap<object, IResolveContext>;
+    readonly contextForPackage: WeakMap<object, IPrefixMatch<IResolveContext>>;
     readonly contextLookup: LookupByPath<IResolveContext>;
     // (undocumented)
     readonly normalizeToPlatform: IPathNormalizationFunction;
