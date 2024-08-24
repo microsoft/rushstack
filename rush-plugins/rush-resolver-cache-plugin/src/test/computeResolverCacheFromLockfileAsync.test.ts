@@ -8,9 +8,78 @@ import { PnpmShrinkwrapFile } from '@rushstack/rush-sdk/lib/logic/pnpm/PnpmShrin
 
 import {
   computeResolverCacheFromLockfileAsync,
+  type IComputeResolverCacheFromLockfileOptions,
   type IPartialRushProject,
   type IPlatformInfo
 } from '../computeResolverCacheFromLockfileAsync';
+import type { IResolverContext } from '../types';
+
+interface ITestCase {
+  workspaceRoot: string;
+  commonPrefixToTrim: string;
+  lockfileName: string;
+  afterExternalPackagesAsync?: IComputeResolverCacheFromLockfileOptions['afterExternalPackagesAsync'];
+}
+
+const TEST_CASES: readonly ITestCase[] = [
+  {
+    workspaceRoot: '/$root/common/temp/build-tests',
+    commonPrefixToTrim: '/$root',
+    lockfileName: 'build-tests-subspace.yaml'
+  },
+  {
+    workspaceRoot: '/$root/common/temp/default',
+    commonPrefixToTrim: '/$root',
+    lockfileName: 'default-subspace.yaml'
+  },
+  {
+    workspaceRoot: '/$root/common/temp/bundled-dependencies',
+    commonPrefixToTrim: '/$root',
+    lockfileName: 'bundled-dependencies.yaml',
+    afterExternalPackagesAsync: async (contexts: Map<string, IResolverContext>) => {
+      for (const context of contexts.values()) {
+        context.nestedPackageDirs = [
+          'node_modules/@baz/bar/node_modules/.ignored/@graphql-codegen/cli',
+          'node_modules/@baz/bar/node_modules/.ignored/@graphql-codegen/typescript-react-apollo',
+          'node_modules/@baz/bar/node_modules/.ignored/@typescript-eslint/parser',
+          'node_modules/@baz/bar/node_modules/.ignored/eslint-config-prettier',
+          'node_modules/@baz/bar/node_modules/.ignored/eslint-plugin-prettier',
+          'node_modules/@baz/bar/node_modules/@graphql-codegen/cli',
+          'node_modules/@baz/bar/node_modules/@graphql-codegen/typescript-react-apollo',
+          'node_modules/@baz/bar/node_modules/@graphql-codegen/visitor-plugin-common',
+          'node_modules/@baz/bar/node_modules/@graphql-tools/optimize',
+          'node_modules/@baz/bar/node_modules/@graphql-tools/relay-operation-optimizer',
+          'node_modules/@baz/bar/node_modules/@graphql-tools/url-loader',
+          'node_modules/@baz/bar/node_modules/@graphql-tools/utils',
+          'node_modules/@baz/bar/node_modules/@graphql-tools/wrap',
+          'node_modules/@baz/bar/node_modules/@n1ru4l/graphql-live-query/esm',
+          'node_modules/@baz/bar/node_modules/@n1ru4l/graphql-live-query',
+          'node_modules/@baz/bar/node_modules/@typescript-eslint/parser',
+          'node_modules/@baz/bar/node_modules/@typescript-eslint/typescript-estree/node_modules/globby',
+          'node_modules/@baz/bar/node_modules/@typescript-eslint/typescript-estree',
+          'node_modules/@baz/bar/node_modules/chokidar',
+          'node_modules/@baz/bar/node_modules/dset',
+          'node_modules/@baz/bar/node_modules/eslint-config-prettier',
+          'node_modules/@baz/bar/node_modules/eslint-plugin-prettier',
+          'node_modules/@baz/bar/node_modules/isomorphic-ws',
+          'node_modules/@baz/bar/node_modules/minimatch',
+          'node_modules/@baz/bar/node_modules/mkdirp',
+          'node_modules/@baz/bar/node_modules/semver',
+          'node_modules/@baz/bar/node_modules/string-width',
+          'node_modules/@baz/bar/node_modules/strip-ansi',
+          'node_modules/@baz/bar/node_modules/tslib/modules',
+          'node_modules/@baz/bar/node_modules/tslib',
+          'node_modules/@baz/bar/node_modules/ws',
+          'node_modules/@baz/bar/node_modules/y18n',
+          'node_modules/@baz/bar/node_modules/yargs-parser',
+          'node_modules/@baz/bar/node_modules/yargs/helpers',
+          'node_modules/@baz/bar/node_modules/yargs',
+          'node_modules/@baz/bar'
+        ];
+      }
+    }
+  }
+];
 
 describe(computeResolverCacheFromLockfileAsync.name, () => {
   it('matches snapshot behavior', async () => {
@@ -22,19 +91,8 @@ describe(computeResolverCacheFromLockfileAsync.name, () => {
       libc: 'glibc'
     };
 
-    for (const testCase of [
-      {
-        workspaceRoot: '/$root/common/temp/build-tests',
-        commonPrefixToTrim: '/$root',
-        lockfileName: 'build-tests-subspace.yaml'
-      },
-      {
-        workspaceRoot: '/$root/common/temp/default',
-        commonPrefixToTrim: '/$root',
-        lockfileName: 'default-subspace.yaml'
-      }
-    ]) {
-      const { workspaceRoot, commonPrefixToTrim, lockfileName } = testCase;
+    for (const testCase of TEST_CASES) {
+      const { workspaceRoot, commonPrefixToTrim, lockfileName, afterExternalPackagesAsync } = testCase;
 
       const lockfile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
         `${collateralFolder}/${lockfileName}`
@@ -59,7 +117,8 @@ describe(computeResolverCacheFromLockfileAsync.name, () => {
         commonPrefixToTrim,
         lockfile,
         platformInfo,
-        projectByImporterPath
+        projectByImporterPath,
+        afterExternalPackagesAsync
       });
 
       // Trim undefined properties

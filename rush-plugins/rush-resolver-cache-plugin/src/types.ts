@@ -8,8 +8,9 @@ export interface IResolverContext {
   deps: Map<string, string>;
   isProject: boolean;
   ordinal: number;
+  parent?: IResolverContext | undefined;
   optional?: boolean;
-  files?: string[];
+  nestedPackageDirs?: string[];
 }
 
 export type IDependencyEntry =

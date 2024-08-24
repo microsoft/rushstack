@@ -145,8 +145,11 @@ export function createContextSerializer(
   commonPathPrefix: string
 ): (entry: [string, IResolverContext]) => ISerializedResolveContext {
   return ([descriptionFileRoot, context]: [string, IResolverContext]): ISerializedResolveContext => {
-    const deps: ISerializedResolveContext['deps'] = {};
-    for (const [key, contextRoot] of context.deps) {
+    const { deps } = context;
+
+    let hasAnyDeps: boolean = false;
+    const serializedDeps: ISerializedResolveContext['deps'] = {};
+    for (const [key, contextRoot] of deps) {
       if (missingOptionalDependencies.has(contextRoot)) {
         continue;
       }
@@ -155,7 +158,8 @@ export function createContextSerializer(
       if (!resolutionContext) {
         throw new Error(`Missing context for ${contextRoot}!`);
       }
-      deps[key] = resolutionContext.ordinal;
+      serializedDeps[key] = resolutionContext.ordinal;
+      hasAnyDeps = true;
     }
 
     if (!context.name) {
@@ -165,8 +169,8 @@ export function createContextSerializer(
     const serializedContext: ISerializedResolveContext = {
       name: context.name,
       root: descriptionFileRoot.slice(commonPathPrefix.length),
-      dirInfoFiles: context.files,
-      deps
+      dirInfoFiles: context.nestedPackageDirs?.length ? context.nestedPackageDirs : undefined,
+      deps: hasAnyDeps ? serializedDeps : undefined
     };
 
     return serializedContext;
