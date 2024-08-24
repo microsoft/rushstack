@@ -94,17 +94,18 @@ export class KnownDescriptionFilePlugin {
           // Store the resolver context since a WeakMap lookup is cheaper than walking the tree again
           contextForPackage.set(descriptionFileData, match.value);
 
-          // Since we don't allow any alternative processing of request, we can mutate it
-          // instead of cloning it.
-          request.descriptionFileRoot = descriptionFileRoot;
-          request.descriptionFilePath = descriptionFilePath;
-          request.descriptionFileData = descriptionFileData;
-          request.relativePath = relativePath;
+          const obj: ResolveRequest = {
+            ...request,
+            descriptionFileRoot,
+            descriptionFilePath,
+            descriptionFileData,
+            relativePath
+          };
 
           // Delegate to the resolver step at `target`.
           resolver.doResolve(
             target,
-            request,
+            obj,
             'using description file: ' + descriptionFilePath + ' (relative path: ' + relativePath + ')',
             resolveContext,
             (e: Error | undefined, result: ResolveRequest | undefined) => {
