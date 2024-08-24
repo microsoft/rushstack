@@ -1,7 +1,5 @@
 steps:
-  - bash: >
+  - script: |
       mkdir -p $(Build.ArtifactStagingDirectory)/packages
-    displyName: 'Create Folder for Packages File'
-
-  - script: 'node common/scripts/install-run-rush.js publish --publish --pack --include-all --release-folder esrp-release'
-    displayName: 'Create TarBallz folder for Rush packages'
+      node common/scripts/install-run-rush.js publish --publish --pack --include-all --release-folder "$(Build.ArtifactStagingDirectory)/packages"
+    displayName: 'Pack tarballs'

@@ -1,9 +1,3 @@
-parameters:
-  - name: TestRun
-    displayName: 'Test Run (Will Not Create Tar Files for Rushstack)'
-    type: boolean
-    default: true
-
 variables:
   - name: FORCE_COLOR
     value: 1
@@ -37,7 +31,7 @@ extends:
                   artifactName: published-versions
                 - output: pipelineArtifact
                   targetPath: $(Build.ArtifactStagingDirectory)/packages
-                  artifactNames: packages
+                  artifactName: packages
             steps:
               - checkout: self
                 persistCredentials: true
