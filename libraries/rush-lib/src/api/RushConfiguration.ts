@@ -176,7 +176,7 @@ export interface IRushConfigurationJson {
 }
 
 /**
- * This represents the JSON data structure for the "projects.json" configuration file.
+ * This represents the JSON data structure for the "rush-projects.json" configuration file.
  * See projects.schema.json for documentation
  */
 export interface IRushProjectsJson {
