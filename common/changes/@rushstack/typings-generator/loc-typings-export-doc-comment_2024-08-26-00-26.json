@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Add a `valueDocumentationComment` option to `exportAsDefault` that allows a documentation comment to be generated for the exported value.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator"
+}

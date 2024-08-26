@@ -43,10 +43,21 @@ export interface IExportAsDefaultOptions {
   interfaceName?: string;
 
   /**
+   * @deprecated - Use {@link IExportAsDefaultOptions.interfaceDocumentationComment} instead.
+   */
+  documentationComment?: string;
+
+  /**
    * This value is placed in a documentation comment for the
    * exported default interface.
    */
-  documentationComment?: string;
+  interfaceDocumentationComment?: string;
+
+  /**
+   * This value is placed in a documentation comment for the
+   * exported const value.
+   */
+  valueDocumentationComment?: string;
 }
 
 /**
@@ -93,16 +104,22 @@ function convertToTypingsGeneratorOptions<TFileContents>(
     exportAsDefaultInterfaceName: exportAsDefaultInterfaceName_deprecated,
     parseAndGenerateTypings
   } = options;
-  let defaultSplitExportAsDefaultDocumentationComment: string[] | undefined;
+  let defaultSplitExportAsDefaultInterfaceDocumentationComment: string[] | undefined;
+  let defaultSplitExportAsDefaultValueDocumentationComment: string[] | undefined;
   let defaultExportAsDefaultInterfaceName: string | undefined;
   if (typeof exportAsDefaultOptions === 'object') {
-    defaultSplitExportAsDefaultDocumentationComment = Text.splitByNewLines(
-      exportAsDefaultOptions.documentationComment
+    const {
+      interfaceDocumentationComment,
+      documentationComment: interfaceDocumentationComment_deprecated,
+      valueDocumentationComment,
+      interfaceName
+    } = exportAsDefaultOptions;
+    defaultSplitExportAsDefaultInterfaceDocumentationComment = Text.splitByNewLines(
+      interfaceDocumentationComment ?? interfaceDocumentationComment_deprecated
     );
+    defaultSplitExportAsDefaultValueDocumentationComment = Text.splitByNewLines(valueDocumentationComment);
     defaultExportAsDefaultInterfaceName =
-      exportAsDefaultOptions.interfaceName ??
-      exportAsDefaultInterfaceName_deprecated ??
-      EXPORT_AS_DEFAULT_INTERFACE_NAME;
+      interfaceName ?? exportAsDefaultInterfaceName_deprecated ?? EXPORT_AS_DEFAULT_INTERFACE_NAME;
   } else if (exportAsDefaultOptions) {
     defaultExportAsDefaultInterfaceName =
       exportAsDefaultInterfaceName_deprecated ?? EXPORT_AS_DEFAULT_INTERFACE_NAME;
@@ -126,21 +143,34 @@ function convertToTypingsGeneratorOptions<TFileContents>(
     const { exportAsDefault: exportAsDefaultOptionsOverride, typings } = stringValueTypings;
     let exportAsDefaultInterfaceName: string | undefined;
     let interfaceDocumentationCommentLines: string[] | undefined;
+    let valueDocumentationCommentLines: string[] | undefined;
     if (typeof exportAsDefaultOptionsOverride === 'boolean') {
       if (exportAsDefaultOptionsOverride) {
         exportAsDefaultInterfaceName =
           defaultExportAsDefaultInterfaceName ?? EXPORT_AS_DEFAULT_INTERFACE_NAME;
-        interfaceDocumentationCommentLines = defaultSplitExportAsDefaultDocumentationComment;
+        interfaceDocumentationCommentLines = defaultSplitExportAsDefaultInterfaceDocumentationComment;
+        valueDocumentationCommentLines = defaultSplitExportAsDefaultValueDocumentationComment;
       }
     } else if (exportAsDefaultOptionsOverride) {
-      const { interfaceName, documentationComment } = exportAsDefaultOptionsOverride;
+      const {
+        interfaceName,
+        documentationComment,
+        interfaceDocumentationComment,
+        valueDocumentationComment
+      } = exportAsDefaultOptionsOverride;
       exportAsDefaultInterfaceName =
         interfaceName ?? defaultExportAsDefaultInterfaceName ?? EXPORT_AS_DEFAULT_INTERFACE_NAME;
       interfaceDocumentationCommentLines =
-        Text.splitByNewLines(documentationComment) ?? defaultSplitExportAsDefaultDocumentationComment;
+        Text.splitByNewLines(interfaceDocumentationComment) ??
+        Text.splitByNewLines(documentationComment) ??
+        defaultSplitExportAsDefaultInterfaceDocumentationComment;
+      valueDocumentationCommentLines =
+        Text.splitByNewLines(valueDocumentationComment) ??
+        defaultSplitExportAsDefaultValueDocumentationComment;
     } else {
       exportAsDefaultInterfaceName = defaultExportAsDefaultInterfaceName;
-      interfaceDocumentationCommentLines = defaultSplitExportAsDefaultDocumentationComment;
+      interfaceDocumentationCommentLines = defaultSplitExportAsDefaultInterfaceDocumentationComment;
+      valueDocumentationCommentLines = defaultSplitExportAsDefaultValueDocumentationComment;
     }
 
     const outputLines: string[] = [];
@@ -174,9 +204,18 @@ function convertToTypingsGeneratorOptions<TFileContents>(
     }
 
     if (exportAsDefaultInterfaceName) {
+      outputLines.push('}', '');
+
+      if (valueDocumentationCommentLines) {
+        outputLines.push(`/**`);
+        for (const line of valueDocumentationCommentLines) {
+          outputLines.push(` * ${line}`);
+        }
+
+        outputLines.push(` */`);
+      }
+
       outputLines.push(
-        '}',
-        '',
         `declare const strings: ${exportAsDefaultInterfaceName};`,
         '',
         'export default strings;'

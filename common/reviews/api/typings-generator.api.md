@@ -8,8 +8,11 @@ import { ITerminal } from '@rushstack/terminal';
 
 // @public (undocumented)
 export interface IExportAsDefaultOptions {
+    // @deprecated (undocumented)
     documentationComment?: string;
+    interfaceDocumentationComment?: string;
     interfaceName?: string;
+    valueDocumentationComment?: string;
 }
 
 // @public (undocumented)

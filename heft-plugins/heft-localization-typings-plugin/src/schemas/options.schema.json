@@ -13,9 +13,13 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "documentationComment": {
+            "interfaceDocumentationComment": {
               "type": "string",
               "description": "This value is placed in a documentation comment for the exported default interface."
+            },
+            "valueDocumentationComment": {
+              "type": "string",
+              "description": "This value is placed in a documentation comment for the exported value."
             },
             "interfaceName": {
               "type": "string",
@@ -27,9 +31,13 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "documentationComment": {
+            "interfaceDocumentationComment": {
               "type": "string",
               "description": "This value is placed in a documentation comment for the exported default interface."
+            },
+            "valueDocumentationComment": {
+              "type": "string",
+              "description": "This value is placed in a documentation comment for the exported value."
             },
             "inferInterfaceNameFromFilename": {
               "type": "boolean",

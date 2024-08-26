@@ -122,10 +122,20 @@ describe('StringValuesTypingsGenerator', () => {
       });
     });
 
-    describe("with { exportAsDefault: { documentationComment: 'doc-comment\\nsecond line' } }", () => {
+    describe("with { exportAsDefault: documentationComment: 'deprecated', interfaceDocumentationComment: 'doc-comment' }", () => {
       runTests({
         exportAsDefault: {
-          documentationComment: 'doc-comment\nsecond line'
+          documentationComment: 'deprecated',
+          interfaceDocumentationComment: 'doc-comment'
+        }
+      });
+    });
+
+    describe("with { exportAsDefault: { *DocumentationComment: 'doc-comment\\nsecond line' } }", () => {
+      runTests({
+        exportAsDefault: {
+          interfaceDocumentationComment: 'doc-comment\nsecond line',
+          valueDocumentationComment: 'value-comment\nsecond line'
         }
       });
     });
@@ -157,7 +167,8 @@ describe('StringValuesTypingsGenerator', () => {
             {},
             {
               exportAsDefault: {
-                documentationComment: 'doc-comment\nsecond line'
+                interfaceDocumentationComment: 'doc-comment\nsecond line',
+                valueDocumentationComment: 'value-comment\nsecond line'
               }
             }
           );
@@ -196,7 +207,8 @@ describe('StringValuesTypingsGenerator', () => {
             },
             {
               exportAsDefault: {
-                documentationComment: 'doc-comment\nsecond line'
+                interfaceDocumentationComment: 'doc-comment\nsecond line',
+                valueDocumentationComment: 'value-comment\nsecond line'
               }
             }
           );
@@ -235,7 +247,8 @@ describe('StringValuesTypingsGenerator', () => {
             },
             {
               exportAsDefault: {
-                documentationComment: 'doc-comment\nsecond line'
+                interfaceDocumentationComment: 'doc-comment\nsecond line',
+                valueDocumentationComment: 'value-comment\nsecond line'
               }
             }
           );
@@ -248,7 +261,8 @@ describe('StringValuesTypingsGenerator', () => {
             {
               exportAsDefault: {
                 interfaceName: 'IBase',
-                documentationComment: 'base-comment'
+                interfaceDocumentationComment: 'base-comment',
+                valueDocumentationComment: 'base-value-comment'
               }
             },
             {
@@ -262,7 +276,8 @@ describe('StringValuesTypingsGenerator', () => {
             {
               exportAsDefault: {
                 interfaceName: 'IBase',
-                documentationComment: 'base-comment'
+                interfaceDocumentationComment: 'base-comment',
+                valueDocumentationComment: 'base-value-comment'
               }
             },
             {
@@ -278,12 +293,14 @@ describe('StringValuesTypingsGenerator', () => {
             {
               exportAsDefault: {
                 interfaceName: 'IBase',
-                documentationComment: 'base-comment'
+                interfaceDocumentationComment: 'base-comment',
+                valueDocumentationComment: 'base-value-comment'
               }
             },
             {
               exportAsDefault: {
-                documentationComment: 'doc-comment\nsecond line'
+                interfaceDocumentationComment: 'doc-comment\nsecond line',
+                valueDocumentationComment: 'value-comment\nsecond line'
               }
             }
           );
