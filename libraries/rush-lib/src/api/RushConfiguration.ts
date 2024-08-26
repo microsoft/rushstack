@@ -260,7 +260,7 @@ export class RushConfiguration {
    *
    * @internal
    */
-  public readonly rushProjectsJson: IRushProjectsJson | undefined;
+  public readonly _rushProjectsJson: IRushProjectsJson | undefined;
 
   /**
    * The absolute path to the "rush.json" configuration file that was loaded to construct this object.
@@ -884,13 +884,15 @@ export class RushConfiguration {
 
     // Look for rush projects in a seperate file first, and if it does not exist fallback onto rush.json
 
-    const resolvedRushProjectsFilename: string = path.resolve(
-      `${path.dirname(this.rushJsonFile)}/${RushConstants.rushProjectsFilename}`
-    );
+    const resolvedRushProjectsFilename: string = `${this.rushJsonFolder}/${RushConstants.rushProjectsFilename}`;
     let rushProjects: IRushConfigurationProjectJson[] | undefined;
-    if (FileSystem.exists(resolvedRushProjectsFilename)) {
+    try {
       const rushProjectsJson: IRushProjectsJson = JsonFile.load(resolvedRushProjectsFilename);
       rushProjects = rushProjectsJson.projects;
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
     }
     if (this.rushConfigurationJson.projects) {
       if (rushProjects) {
@@ -900,6 +902,7 @@ export class RushConfiguration {
       }
       rushProjects = this.rushConfigurationJson.projects;
     }
+
     if (!rushProjects) {
       throw new Error(
         `The rush.json is missing a projects field, and a seperate ${RushConstants.rushProjectsFilename} file is missing. Rush projects need to be defined in one of the two places.`
