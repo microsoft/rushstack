@@ -108,16 +108,18 @@ function convertToTypingsGeneratorOptions<TFileContents>(
   let defaultSplitExportAsDefaultValueDocumentationComment: string[] | undefined;
   let defaultExportAsDefaultInterfaceName: string | undefined;
   if (typeof exportAsDefaultOptions === 'object') {
+    const {
+      interfaceDocumentationComment,
+      documentationComment: interfaceDocumentationComment_deprecated,
+      valueDocumentationComment,
+      interfaceName
+    } = exportAsDefaultOptions;
     defaultSplitExportAsDefaultInterfaceDocumentationComment = Text.splitByNewLines(
-      exportAsDefaultOptions.interfaceDocumentationComment ?? exportAsDefaultOptions.documentationComment
+      interfaceDocumentationComment ?? interfaceDocumentationComment_deprecated
     );
-    defaultSplitExportAsDefaultValueDocumentationComment = Text.splitByNewLines(
-      exportAsDefaultOptions.valueDocumentationComment
-    );
+    defaultSplitExportAsDefaultValueDocumentationComment = Text.splitByNewLines(valueDocumentationComment);
     defaultExportAsDefaultInterfaceName =
-      exportAsDefaultOptions.interfaceName ??
-      exportAsDefaultInterfaceName_deprecated ??
-      EXPORT_AS_DEFAULT_INTERFACE_NAME;
+      interfaceName ?? exportAsDefaultInterfaceName_deprecated ?? EXPORT_AS_DEFAULT_INTERFACE_NAME;
   } else if (exportAsDefaultOptions) {
     defaultExportAsDefaultInterfaceName =
       exportAsDefaultInterfaceName_deprecated ?? EXPORT_AS_DEFAULT_INTERFACE_NAME;
