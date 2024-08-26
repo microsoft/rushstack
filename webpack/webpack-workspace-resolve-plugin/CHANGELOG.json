@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-workspace-resolve-plugin",
   "entries": [
     {
+      "version": "0.1.2",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.1.2",
+      "date": "Mon, 26 Aug 2024 02:00:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix bug caused by mutating resolver request object."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.1.1",
       "date": "Wed, 21 Aug 2024 05:43:04 GMT",

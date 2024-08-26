@@ -1,6 +1,14 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Wed, 21 Aug 2024 05:43:04 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Aug 2024 02:00:11 GMT and should not be manually modified.
+
+## 0.14.0
+Mon, 26 Aug 2024 02:00:11 GMT
+
+### Minor changes
+
+- Add a `valueDocumentationComment` option to `exportAsDefault` that allows a documentation comment to be generated for the exported value.
+- Rename the `documentationComment` property in the `exportAsDefault` value to `interfaceDocumentationComment`.
 
 ## 0.13.0
 Wed, 21 Aug 2024 05:43:04 GMT
