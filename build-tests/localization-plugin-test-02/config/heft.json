@@ -14,7 +14,12 @@
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-localization-typings-plugin",
             "options": {
-              "generatedTsFolder": "temp/loc-json-ts"
+              "generatedTsFolder": "temp/loc-json-ts",
+              "exportAsDefault": {
+                "interfaceDocumentationComment": "This interface represents a JSON object that has been loaded from a localization file.",
+                "valueDocumentationComment": "@public",
+                "inferInterfaceNameFromFilename": true
+              }
             }
           }
         },

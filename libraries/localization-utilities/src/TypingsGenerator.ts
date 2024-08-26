@@ -82,8 +82,8 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
         const typings: IStringValueTyping[] = [];
 
         // eslint-disable-next-line guard-for-in
-        for (const stringName in locFileData) {
-          let comment: string | undefined = locFileData[stringName].comment;
+        for (const [stringName, value] of Object.entries(locFileData)) {
+          let comment: string | undefined = value.comment;
           if (processComment) {
             comment = processComment(comment, relativeFilePath, stringName);
           }
