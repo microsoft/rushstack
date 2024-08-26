@@ -256,7 +256,7 @@ export class RushConfiguration {
   public readonly rushConfigurationJson: IRushConfigurationJson;
 
   /**
-   * Gets the JSON data structure for the "projects.json" configuration file.
+   * Gets the JSON data structure for the "rush-projects.json" configuration file.
    *
    * @internal
    */
