@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lookup-by-path
 
-This log was last generated on Wed, 21 Aug 2024 05:43:04 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Aug 2024 15:12:33 GMT and should not be manually modified.
+
+## 0.2.0
+Tue, 27 Aug 2024 15:12:33 GMT
+
+### Minor changes
+
+- Return a linked list of matches in `findLongestPrefixMatch` in the event that multiple prefixes match. The head of the list is the most specific match.
 
 ## 0.1.2
 Wed, 21 Aug 2024 05:43:04 GMT

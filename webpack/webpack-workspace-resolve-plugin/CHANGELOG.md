@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack-workspace-resolve-plugin
 
-This log was last generated on Mon, 26 Aug 2024 02:00:11 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Aug 2024 15:12:33 GMT and should not be manually modified.
+
+## 0.2.0
+Tue, 27 Aug 2024 15:12:33 GMT
+
+### Minor changes
+
+- Support hierarchical `node_modules` folders.
 
 ## 0.1.2
 Mon, 26 Aug 2024 02:00:11 GMT

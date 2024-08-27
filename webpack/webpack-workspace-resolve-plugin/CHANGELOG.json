@@ -2,6 +2,23 @@
   "name": "@rushstack/webpack-workspace-resolve-plugin",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.2.0",
+      "date": "Tue, 27 Aug 2024 15:12:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support hierarchical `node_modules` folders."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.2",
       "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.1.2",
       "date": "Mon, 26 Aug 2024 02:00:11 GMT",
