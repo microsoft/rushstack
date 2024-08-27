@@ -38,6 +38,10 @@ export interface ISerializedResolveContext {
  */
 export interface IResolverCacheFile {
   /**
+   * The base path. All paths in context entries are prefixed by this path.
+   */
+  basePath: string;
+  /**
    * The ordered list of all contexts in the cache
    */
   contexts: ISerializedResolveContext[];
@@ -64,10 +68,6 @@ export interface IResolveContext {
  * @beta
  */
 export interface IWorkspaceLayoutCacheOptions {
-  /**
-   * The root folder of the workspace. All paths in the cache file are assumed to be relative to this folder.
-   */
-  workspaceRoot: string;
   /**
    * The parsed cache data. File reading is left as an exercise for the caller.
    */
@@ -114,12 +114,13 @@ export class WorkspaceLayoutCache {
   public readonly normalizeToPlatform: IPathNormalizationFunction;
 
   public constructor(options: IWorkspaceLayoutCacheOptions) {
-    const { workspaceRoot, cacheData, resolverPathSeparator = directorySeparator } = options;
+    const { cacheData, resolverPathSeparator = directorySeparator } = options;
 
     if (resolverPathSeparator !== '/' && resolverPathSeparator !== '\\') {
       throw new Error(`Unsupported directory separator: ${resolverPathSeparator}`);
     }
 
+    const { basePath } = cacheData;
     const resolveContexts: ResolveContext[] = [];
     const contextLookup: LookupByPath<IResolveContext> = new LookupByPath(undefined, resolverPathSeparator);
 
@@ -149,7 +150,7 @@ export class WorkspaceLayoutCache {
 
       public get descriptionFileRoot(): string {
         if (!this._descriptionFileRoot) {
-          this._descriptionFileRoot = `${workspaceRoot}${resolverPathSeparator}${
+          this._descriptionFileRoot = `${basePath}${
             normalizeToPlatform?.(this._serialized.root) ?? this._serialized.root
           }`;
         }

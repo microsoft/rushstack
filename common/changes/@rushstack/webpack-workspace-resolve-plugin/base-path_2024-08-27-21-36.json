@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack-workspace-resolve-plugin",
+      "comment": "Expect the base path to be part of the resolver cache file.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack-workspace-resolve-plugin"
+}

@@ -254,6 +254,7 @@ export async function computeResolverCacheFromLockfileAsync(
   );
 
   const cacheFile: IResolverCacheFile = {
+    basePath: commonPrefixToTrim,
     contexts: serializedContexts
   };
 

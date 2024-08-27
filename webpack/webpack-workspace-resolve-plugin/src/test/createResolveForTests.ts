@@ -30,8 +30,8 @@ export function createResolveForTests(
   const fileSystem: Volume = new Volume();
 
   const cache: WorkspaceLayoutCache = new WorkspaceLayoutCache({
-    workspaceRoot: `${separator}workspace`,
     cacheData: {
+      basePath: `${separator}workspace${separator}`,
       contexts: [
         {
           root: 'a',

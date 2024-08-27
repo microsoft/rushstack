@@ -24,17 +24,17 @@ interface ITestCase {
 const TEST_CASES: readonly ITestCase[] = [
   {
     workspaceRoot: '/$root/common/temp/build-tests',
-    commonPrefixToTrim: '/$root',
+    commonPrefixToTrim: '/$root/',
     lockfileName: 'build-tests-subspace.yaml'
   },
   {
     workspaceRoot: '/$root/common/temp/default',
-    commonPrefixToTrim: '/$root',
+    commonPrefixToTrim: '/$root/',
     lockfileName: 'default-subspace.yaml'
   },
   {
     workspaceRoot: '/$root/common/temp/bundled-dependencies',
-    commonPrefixToTrim: '/$root',
+    commonPrefixToTrim: '/$root/',
     lockfileName: 'bundled-dependencies.yaml',
     afterExternalPackagesAsync: async (contexts: Map<string, IResolverContext>) => {
       for (const context of contexts.values()) {
@@ -105,7 +105,7 @@ describe(computeResolverCacheFromLockfileAsync.name, () => {
       for (const importerPath of lockfile.importers.keys()) {
         const remainder: string = importerPath.slice(importerPath.lastIndexOf('../') + 3);
         projectByImporterPath.setItem(importerPath, {
-          projectFolder: `${commonPrefixToTrim}/${remainder}`,
+          projectFolder: `${commonPrefixToTrim}${remainder}`,
           packageJson: {
             name: `@local/${remainder.replace(/\//g, '+')}`
           }

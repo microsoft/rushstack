@@ -17,6 +17,14 @@ When using this plugin, the following options should be configured for your reso
 - `symlinks: false` - Since the cache knows the symlinks for package dependencies, you can avoid the cost of testing for other symlinks unless you are using additional symlinks.
 - `modules: []` - The cache should contain all information necessary to locate available dependencies for any arbitrary folder. If you need to allow resolution in other roots, you can add those, but omit `'node_modules'`.
 
+## Impact
+
+This plugin should eliminate file system calls associated with the following operations of NodeJS module resolution in webpack:
+- Find the nearest `package.json` to the calling module
+- Locate a named package from a calling module
+- Identify a `package.json` in a resolved directory
+- Find the nearest `package.json` to a resolved file path
+
 ## Limitations
 
 This plugin depends on the presence of a cache file in the workspace to function. Data in this cache file is assumed not to change while the webpack process is running.
