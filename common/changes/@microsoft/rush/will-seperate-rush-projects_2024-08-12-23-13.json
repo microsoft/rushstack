@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Adds the option of seperately defining the list of rush projects in a dedicated \"rush-projects.json\" file",
+      "comment": "Enable Rush projects to be defined in a dedicated file \"rush-projects.json\" instead of in \"rush.json\"",
       "type": "none"
     }
   ],
