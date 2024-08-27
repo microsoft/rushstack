@@ -38,6 +38,7 @@ import { type IPnpmOptionsJson, PnpmOptionsConfiguration } from '../logic/pnpm/P
 import { type INpmOptionsJson, NpmOptionsConfiguration } from '../logic/npm/NpmOptionsConfiguration';
 import { type IYarnOptionsJson, YarnOptionsConfiguration } from '../logic/yarn/YarnOptionsConfiguration';
 import schemaJson from '../schemas/rush.schema.json';
+import projectSchemaJson from '../schemas/projects.schema.json';
 
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
@@ -216,6 +217,7 @@ export interface ITryFindRushJsonLocationOptions {
  */
 export class RushConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+  private static _projectsJsonSchema: JsonSchema = JsonSchema.fromLoadedObject(projectSchemaJson);
 
   private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
 
@@ -888,6 +890,7 @@ export class RushConfiguration {
     let rushProjects: IRushConfigurationProjectJson[] | undefined;
     try {
       const rushProjectsJson: IRushProjectsJson = JsonFile.load(resolvedRushProjectsFilename);
+      RushConfiguration._projectsJsonSchema.validateObject(rushProjectsJson, resolvedRushProjectsFilename);
       rushProjects = rushProjectsJson.projects;
     } catch (e) {
       if (!FileSystem.isNotExistError(e)) {
