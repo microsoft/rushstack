@@ -108,6 +108,68 @@ describe(KnownPackageDependenciesPlugin.name, () => {
     });
   });
 
+  it('should find a parent (/)', () => {
+    const resolver: WrappedResolve = createResolve('/');
+
+    const descriptionFilePath: string = '/workspace/b/node_modules/c/package.json';
+    const descriptionFileData: object = parsedJson[descriptionFilePath];
+    const descriptionFileRoot: string = '/workspace/b/node_modules/c';
+
+    const [err1, result1] = resolver(
+      {
+        path: '/workspace/b/node_modules/c/lib/foo.js',
+        request: 'b/lib/index.js',
+        descriptionFileRoot,
+        descriptionFileData,
+        descriptionFilePath,
+        relativePath: './lib/foo.js'
+      },
+      {}
+    );
+
+    expect(err1).toBeFalsy();
+    expect(result1).toEqual({
+      path: '/workspace/b',
+      request: './lib/index.js',
+      descriptionFileRoot: '/workspace/b',
+      descriptionFilePath: '/workspace/b/package.json',
+      relativePath: './lib/index.js',
+      fullySpecified: undefined,
+      module: false
+    });
+  });
+
+  it('should resolve through a parent (/)', () => {
+    const resolver: WrappedResolve = createResolve('/');
+
+    const descriptionFilePath: string = '/workspace/b/node_modules/c/package.json';
+    const descriptionFileData: object = parsedJson[descriptionFilePath];
+    const descriptionFileRoot: string = '/workspace/b/node_modules/c';
+
+    const [err1, result1] = resolver(
+      {
+        path: '/workspace/b/node_modules/c/lib/foo.js',
+        request: 'a/lib/index.js',
+        descriptionFileRoot,
+        descriptionFileData,
+        descriptionFilePath,
+        relativePath: './lib/foo.js'
+      },
+      {}
+    );
+
+    expect(err1).toBeFalsy();
+    expect(result1).toEqual({
+      path: '/workspace/a',
+      request: './lib/index.js',
+      descriptionFileRoot: '/workspace/a',
+      descriptionFilePath: '/workspace/a/package.json',
+      relativePath: './lib/index.js',
+      fullySpecified: undefined,
+      module: false
+    });
+  });
+
   it('should defer to other plugins if not in a context', () => {
     const resolver: WrappedResolve = createResolve('/');
 

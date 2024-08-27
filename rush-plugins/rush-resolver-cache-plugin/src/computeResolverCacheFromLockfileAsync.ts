@@ -45,6 +45,59 @@ function isPackageCompatible(
   return true;
 }
 
+function extractBundledDependencies(
+  contexts: Map<string, IResolverContext>,
+  context: IResolverContext
+): void {
+  const { nestedPackageDirs } = context;
+  if (!nestedPackageDirs) {
+    return;
+  }
+
+  for (let i: number = nestedPackageDirs.length - 1; i >= 0; i--) {
+    const nestedDir: string = nestedPackageDirs[i];
+    if (!nestedDir.startsWith('node_modules/')) {
+      continue;
+    }
+
+    const isScoped: boolean = nestedDir.charAt(/* 'node_modules/'.length */ 13) === '@';
+    let index: number = nestedDir.indexOf('/', 13);
+    if (isScoped) {
+      index = nestedDir.indexOf('/', index + 1);
+    }
+
+    const name: string = index === -1 ? nestedDir.slice(13) : nestedDir.slice(13, index);
+    if (name.startsWith('.')) {
+      continue;
+    }
+
+    // Remove this nested package from the list
+    nestedPackageDirs.splice(i, 1);
+
+    const remainder: string = index === -1 ? '' : nestedDir.slice(index + 1);
+    const nestedRoot: string = `${context.descriptionFileRoot}/node_modules/${name}`;
+    let nestedContext: IResolverContext | undefined = contexts.get(nestedRoot);
+    if (!nestedContext) {
+      nestedContext = {
+        descriptionFileRoot: nestedRoot,
+        descriptionFileHash: undefined,
+        isProject: false,
+        name,
+        deps: new Map(),
+        ordinal: -1
+      };
+      contexts.set(nestedRoot, nestedContext);
+    }
+
+    context.deps.set(name, nestedRoot);
+
+    if (remainder) {
+      nestedContext.nestedPackageDirs ??= [];
+      nestedContext.nestedPackageDirs.push(remainder);
+    }
+  }
+}
+
 /**
  * Options for computing the resolver cache from a lockfile.
  */
@@ -130,7 +183,7 @@ export async function computeResolverCacheFromLockfileAsync(
       isProject: false,
       name,
       deps: new Map(),
-      ordinal: contexts.size,
+      ordinal: -1,
       optional: pack.optional
     };
 
@@ -146,6 +199,12 @@ export async function computeResolverCacheFromLockfileAsync(
 
   if (afterExternalPackagesAsync) {
     await afterExternalPackagesAsync(contexts, missingOptionalDependencies);
+  }
+
+  for (const context of contexts.values()) {
+    if (context.nestedPackageDirs) {
+      extractBundledDependencies(contexts, context);
+    }
   }
 
   // Add the data for workspace projects
@@ -167,7 +226,7 @@ export async function computeResolverCacheFromLockfileAsync(
       name: project.packageJson.name,
       isProject: true,
       deps: new Map(),
-      ordinal: contexts.size
+      ordinal: -1
     };
 
     contexts.set(project.projectFolder, context);
@@ -181,6 +240,11 @@ export async function computeResolverCacheFromLockfileAsync(
     if (importer.optionalDependencies) {
       resolveDependencies(workspaceRoot, importer.optionalDependencies, context);
     }
+  }
+
+  let ordinal: number = 0;
+  for (const context of contexts.values()) {
+    context.ordinal = ordinal++;
   }
 
   // Convert the intermediate representation to the final cache file

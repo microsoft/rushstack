@@ -59,6 +59,8 @@ export interface IPnpmShrinkwrapDependencyYaml {
     /** The name of the tarball, if this was from a TGZ file */
     tarball?: string;
   };
+  /** The list of bundled dependencies in this package */
+  bundledDependencies?: ReadonlyArray<string>;
   /** The list of dependencies and the resolved version */
   dependencies?: Record<string, IPnpmVersionSpecifier>;
   /** The list of optional dependencies and the resolved version */

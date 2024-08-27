@@ -40,6 +40,10 @@ export interface IPrefixMatch<TItem> {
    * The index of the first character after the matched prefix
    */
   index: number;
+  /**
+   * The last match found (with a shorter prefix), if any
+   */
+  lastMatch?: IPrefixMatch<TItem>;
 }
 
 /**
@@ -255,7 +259,8 @@ export class LookupByPath<TItem> {
     let best: IPrefixMatch<TItem> | undefined = node.value
       ? {
           value: node.value,
-          index: 0
+          index: 0,
+          lastMatch: undefined
         }
       : undefined;
     // Trivial cases
@@ -269,7 +274,8 @@ export class LookupByPath<TItem> {
         if (node.value !== undefined) {
           best = {
             value: node.value,
-            index
+            index,
+            lastMatch: best
           };
         }
         if (!node.children) {

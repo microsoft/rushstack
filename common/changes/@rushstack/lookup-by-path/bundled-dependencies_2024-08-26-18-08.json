@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lookup-by-path",
+      "comment": "Return a linked list of matches in `findLongestPrefixMatch` in the event that multiple prefixes match. The head of the list is the most specific match.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/lookup-by-path"
+}

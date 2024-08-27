@@ -7,6 +7,7 @@
 // @beta
 export interface IPrefixMatch<TItem> {
     index: number;
+    lastMatch?: IPrefixMatch<TItem>;
     value: TItem;
 }
 

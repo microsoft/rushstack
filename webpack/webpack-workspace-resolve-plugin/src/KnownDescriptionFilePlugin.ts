@@ -92,7 +92,7 @@ export class KnownDescriptionFilePlugin {
 
           resolveContext.fileDependencies?.add(descriptionFilePath);
           // Store the resolver context since a WeakMap lookup is cheaper than walking the tree again
-          contextForPackage.set(descriptionFileData, match.value);
+          contextForPackage.set(descriptionFileData, match);
 
           const obj: ResolveRequest = {
             ...request,

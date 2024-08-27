@@ -20,9 +20,9 @@ export interface ISerializedResolveContext {
    */
   name: string;
   /**
-   * Map of declared dependencies to the ordinal of the corresponding context.
+   * Map of declared dependencies (if any) to the ordinal of the corresponding context.
    */
-  deps: Record<string, number>;
+  deps?: Record<string, number>;
   /**
    * Set of relative paths to nested `package.json` files within this context.
    * These paths are normalized to use `/` as the separator and should not begin with a leading `./`.
@@ -107,7 +107,7 @@ export class WorkspaceLayoutCache {
   /**
    * A weak map of package JSON contents to their corresponding context objects
    */
-  public readonly contextForPackage: WeakMap<object, IResolveContext>;
+  public readonly contextForPackage: WeakMap<object, IPrefixMatch<IResolveContext>>;
 
   public readonly resolverPathSeparator: string;
   public readonly normalizeToSlash: IPathNormalizationFunction;
@@ -120,11 +120,11 @@ export class WorkspaceLayoutCache {
       throw new Error(`Unsupported directory separator: ${resolverPathSeparator}`);
     }
 
-    const resolveContexts: IResolveContext[] = [];
+    const resolveContexts: ResolveContext[] = [];
     const contextLookup: LookupByPath<IResolveContext> = new LookupByPath(undefined, resolverPathSeparator);
 
     this.contextLookup = contextLookup;
-    this.contextForPackage = new WeakMap<object, IResolveContext>();
+    this.contextForPackage = new WeakMap<object, IPrefixMatch<IResolveContext>>();
 
     const normalizeToSlash: IPathNormalizationFunction =
       resolverPathSeparator === '\\' ? backslashToSlash : undefined;
@@ -160,11 +160,16 @@ export class WorkspaceLayoutCache {
         if (!this._dependencies) {
           // Lazy initialize this object since most packages won't be requested.
           const dependencies: LookupByPath<IResolveContext> = new LookupByPath(undefined, '/');
+
+          const { name, deps } = this._serialized;
+
           // Handle the self-reference scenario
-          dependencies.setItem(this._serialized.name, this);
-          for (const [key, ordinal] of Object.entries(this._serialized.deps)) {
-            // This calls into the array of instances that is owned by WorkpaceLayoutCache
-            dependencies.setItem(key, resolveContexts[ordinal]);
+          dependencies.setItem(name, this);
+          if (deps) {
+            for (const [key, ordinal] of Object.entries(deps)) {
+              // This calls into the array of instances that is owned by WorkpaceLayoutCache
+              dependencies.setItem(key, resolveContexts[ordinal]);
+            }
           }
           this._dependencies = dependencies;
         }
@@ -174,7 +179,7 @@ export class WorkspaceLayoutCache {
     }
 
     for (const serialized of cacheData.contexts) {
-      const resolveContext: IResolveContext = new ResolveContext(serialized);
+      const resolveContext: ResolveContext = new ResolveContext(serialized);
       resolveContexts.push(resolveContext);
 
       const descriptionFileRoot: string = resolveContext.descriptionFileRoot;

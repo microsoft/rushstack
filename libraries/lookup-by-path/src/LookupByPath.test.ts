@@ -133,7 +133,11 @@ describe(LookupByPath.prototype.findLongestPrefixMatch.name, () => {
       ['foo/bar', 4]
     ]);
 
-    expect(tree.findLongestPrefixMatch('foo/bar')).toEqual({ value: 4, index: 7 });
+    expect(tree.findLongestPrefixMatch('foo/bar')).toEqual({
+      value: 4,
+      index: 7,
+      lastMatch: { value: 1, index: 3 }
+    });
     expect(tree.findLongestPrefixMatch('barbar/baz')).toEqual({ value: 2, index: 6 });
     expect(tree.findLongestPrefixMatch('baz/foo')).toEqual({ value: 3, index: 3 });
     expect(tree.findLongestPrefixMatch('foo/foo')).toEqual({ value: 1, index: 3 });
