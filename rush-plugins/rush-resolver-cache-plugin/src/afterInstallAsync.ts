@@ -117,7 +117,7 @@ export async function afterInstallAsync(
 
         const filteredFiles: string[] = Object.keys(files).filter((file) => file.endsWith('/package.json'));
         if (filteredFiles.length > 0) {
-          const nestedPackageDirs: string[] = filteredFiles.map((x) => x.slice(0, -13));
+          const nestedPackageDirs: string[] = filteredFiles.map((x) => x.slice(0, /* -'/package.json'.length */ -13));
 
           if (nestedPackageDirs.length > 0) {
             // eslint-disable-next-line require-atomic-updates

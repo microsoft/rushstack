@@ -60,7 +60,7 @@ function extractBundledDependencies(
       continue;
     }
 
-    const isScoped: boolean = nestedDir.charAt(13) === '@';
+    const isScoped: boolean = nestedDir.charAt(/* 'node_modules/'.length */ 13) === '@';
     let index: number = nestedDir.indexOf('/', 13);
     if (isScoped) {
       index = nestedDir.indexOf('/', index + 1);

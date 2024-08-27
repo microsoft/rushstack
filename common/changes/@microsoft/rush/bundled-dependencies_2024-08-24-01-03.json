@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Support \"bundledDependencies\" in rush-resolver-cache-plugin.",
+      "comment": "Support `bundledDependencies` in rush-resolver-cache-plugin.",
       "type": "none"
     }
   ],
