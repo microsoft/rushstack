@@ -20,6 +20,7 @@ export interface IResolveContext {
 
 // @beta
 export interface IResolverCacheFile {
+    basePath: string;
     contexts: ISerializedResolveContext[];
 }
 
@@ -35,7 +36,6 @@ export interface ISerializedResolveContext {
 export interface IWorkspaceLayoutCacheOptions {
     cacheData: IResolverCacheFile;
     resolverPathSeparator?: '/' | '\\';
-    workspaceRoot: string;
 }
 
 // @beta
