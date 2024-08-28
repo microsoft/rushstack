@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 23 Aug 2024 00:40:08 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Aug 2024 18:19:55 GMT and should not be manually modified.
+
+## 5.133.1
+Wed, 28 Aug 2024 18:19:55 GMT
+
+### Updates
+
+- In rush-resolver-cache-plugin, include the base path in the resolver cache file.
+- Support `bundledDependencies` in rush-resolver-cache-plugin.
 
 ## 5.133.0
 Fri, 23 Aug 2024 00:40:08 GMT

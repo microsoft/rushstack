@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.133.1",
+      "tag": "@microsoft/rush_v5.133.1",
+      "date": "Wed, 28 Aug 2024 18:19:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "In rush-resolver-cache-plugin, include the base path in the resolver cache file."
+          },
+          {
+            "comment": "Support `bundledDependencies` in rush-resolver-cache-plugin."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.133.0",
       "tag": "@microsoft/rush_v5.133.0",
       "date": "Fri, 23 Aug 2024 00:40:08 GMT",
