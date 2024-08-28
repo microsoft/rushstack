@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where running `rush install --resolution-only` followed by `rush install` would not actually install modules.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
