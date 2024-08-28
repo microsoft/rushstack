@@ -52,7 +52,9 @@ export class WorkspaceResolvePlugin implements WebpackPluginInstance {
           new KnownDescriptionFilePlugin(cache, 'parsed-resolve', 'described-resolve'),
           // Optimize locating the installed dependencies of the current package
           new KnownPackageDependenciesPlugin(cache, 'raw-module', 'resolve-as-module'),
-          // Optimize loading the package.json file for the destination package
+          // Optimize loading the package.json file for the destination package (bare specifier)
+          new KnownDescriptionFilePlugin(cache, 'resolve-as-module', 'resolve-in-package'),
+          // Optimize loading the package.json file for the destination package (relative path)
           new KnownDescriptionFilePlugin(cache, 'relative', 'described-relative'),
           // Optimize locating and loading nested package.json for a directory
           new KnownDescriptionFilePlugin(cache, 'undescribed-existing-directory', 'existing-directory', true),
