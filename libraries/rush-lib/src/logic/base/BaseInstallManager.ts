@@ -114,7 +114,8 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstallAsync(): Promise<void> {
-    const { allowShrinkwrapUpdates, selectedProjects, pnpmFilterArgumentValues } = this.options;
+    const { allowShrinkwrapUpdates, selectedProjects, pnpmFilterArgumentValues, resolutionOnly } =
+      this.options;
     const isFilteredInstall: boolean = pnpmFilterArgumentValues.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
@@ -202,7 +203,13 @@ export abstract class BaseInstallManager {
       return this.canSkipInstall(outputStats.mtime, subspace);
     };
 
-    if (cleanInstall || !shrinkwrapIsUpToDate || !canSkipInstall() || !projectImpactGraphIsUpToDate) {
+    if (
+      resolutionOnly ||
+      cleanInstall ||
+      !shrinkwrapIsUpToDate ||
+      !canSkipInstall() ||
+      !projectImpactGraphIsUpToDate
+    ) {
       // eslint-disable-next-line no-console
       console.log();
       await this.validateNpmSetupAsync();
@@ -224,12 +231,14 @@ export abstract class BaseInstallManager {
         }
       }
 
-      // Delete the successful install file to indicate the install transaction has started
-      await commonTempInstallFlag.clearAsync();
+      if (!resolutionOnly) {
+        // Delete the successful install file to indicate the install transaction has started
+        await commonTempInstallFlag.clearAsync();
 
-      // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
-      // this ensures that a full "rush link" is required next time
-      await this._commonTempLinkFlag.clearAsync();
+        // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
+        // this ensures that a full "rush link" is required next time
+        await this._commonTempLinkFlag.clearAsync();
+      }
 
       // Give plugins an opportunity to act before invoking the installation process
       if (this.options.beforeInstallAsync !== undefined) {
@@ -347,8 +356,10 @@ export abstract class BaseInstallManager {
     // Perform any post-install work the install manager requires
     await this.postInstallAsync(subspace);
 
-    // Create the marker file to indicate a successful install
-    await commonTempInstallFlag.createAsync();
+    if (!resolutionOnly) {
+      // Create the marker file to indicate a successful install
+      await commonTempInstallFlag.createAsync();
+    }
 
     // Give plugins an opportunity to act after a successful install
     if (this.options.afterInstallAsync !== undefined) {
