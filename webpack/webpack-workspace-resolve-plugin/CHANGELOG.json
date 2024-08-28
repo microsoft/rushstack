@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-workspace-resolve-plugin",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.0",
+      "date": "Wed, 28 Aug 2024 00:11:41 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expect the base path to be part of the resolver cache file."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.2.0",
       "date": "Tue, 27 Aug 2024 15:12:33 GMT",
