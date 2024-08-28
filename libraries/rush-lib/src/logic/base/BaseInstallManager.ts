@@ -776,7 +776,6 @@ ${gitLfsHookHandling}
         'The "--resolution-only" parameter is only supported when using the PNPM package manager.'
       );
     }
-    console.log(resolutionOnly);
     if (this.rushConfiguration.packageManager === 'npm') {
       if (semver.lt(this.rushConfiguration.packageManagerToolVersion, '5.0.0')) {
         // NOTE:
