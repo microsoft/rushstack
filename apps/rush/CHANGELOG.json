@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.133.2",
+      "tag": "@microsoft/rush_v5.133.2",
+      "date": "Wed, 28 Aug 2024 20:46:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where running `rush install --resolution-only` followed by `rush install` would not actually install modules."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.133.1",
       "tag": "@microsoft/rush_v5.133.1",
       "date": "Wed, 28 Aug 2024 18:19:55 GMT",

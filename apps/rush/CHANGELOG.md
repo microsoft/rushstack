@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 28 Aug 2024 18:19:55 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Aug 2024 20:46:32 GMT and should not be manually modified.
+
+## 5.133.2
+Wed, 28 Aug 2024 20:46:32 GMT
+
+### Updates
+
+- Fix an issue where running `rush install --resolution-only` followed by `rush install` would not actually install modules.
 
 ## 5.133.1
 Wed, 28 Aug 2024 18:19:55 GMT
