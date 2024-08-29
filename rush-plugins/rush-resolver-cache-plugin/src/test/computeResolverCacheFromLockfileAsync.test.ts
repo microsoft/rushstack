@@ -23,13 +23,15 @@ interface ITestCase {
 
 const TEST_CASES: readonly ITestCase[] = [
   {
+    // Validate with POSIX-style path inputs
     workspaceRoot: '/$root/common/temp/build-tests',
     commonPrefixToTrim: '/$root/',
     lockfileName: 'build-tests-subspace.yaml'
   },
   {
-    workspaceRoot: '/$root/common/temp/default',
-    commonPrefixToTrim: '/$root/',
+    // Validate that it works with Windows-style path inputs
+    workspaceRoot: '\\$root\\common\\temp\\default',
+    commonPrefixToTrim: '\\$root\\',
     lockfileName: 'default-subspace.yaml'
   },
   {
@@ -105,7 +107,7 @@ describe(computeResolverCacheFromLockfileAsync.name, () => {
       for (const importerPath of lockfile.importers.keys()) {
         const remainder: string = importerPath.slice(importerPath.lastIndexOf('../') + 3);
         projectByImporterPath.setItem(importerPath, {
-          projectFolder: `${commonPrefixToTrim}${remainder}`,
+          projectFolder: `${commonPrefixToTrim.replace(/\\/g, '/')}${remainder}`,
           packageJson: {
             name: `@local/${remainder.replace(/\//g, '+')}`
           }
