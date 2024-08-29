@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.133.3",
+      "tag": "@microsoft/rush_v5.133.3",
+      "date": "Thu, 29 Aug 2024 22:49:36 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix Windows compatibility for `@rushstack/rush-resolver-cache-plugin`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.133.2",
       "tag": "@microsoft/rush_v5.133.2",
       "date": "Wed, 28 Aug 2024 20:46:32 GMT",

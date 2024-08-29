@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 28 Aug 2024 20:46:32 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Aug 2024 22:49:36 GMT and should not be manually modified.
+
+## 5.133.3
+Thu, 29 Aug 2024 22:49:36 GMT
+
+### Updates
+
+- Fix Windows compatibility for `@rushstack/rush-resolver-cache-plugin`.
 
 ## 5.133.2
 Wed, 28 Aug 2024 20:46:32 GMT
