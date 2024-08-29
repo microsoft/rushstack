@@ -144,14 +144,12 @@ export interface IComputeResolverCacheFromLockfileOptions {
 export async function computeResolverCacheFromLockfileAsync(
   params: IComputeResolverCacheFromLockfileOptions
 ): Promise<IResolverCacheFile> {
-  const {
-    workspaceRoot,
-    commonPrefixToTrim,
-    platformInfo,
-    projectByImporterPath,
-    lockfile,
-    afterExternalPackagesAsync
-  } = params;
+  const { platformInfo, projectByImporterPath, lockfile, afterExternalPackagesAsync } = params;
+  // Needs to be normalized to `/` for path.posix.join to work correctly
+  const workspaceRoot: string = params.workspaceRoot.replace(/\\/g, '/');
+  // Needs to be normalized to `/` for path.posix.join to work correctly
+  const commonPrefixToTrim: string = params.commonPrefixToTrim.replace(/\\/g, '/');
+
   const contexts: Map<string, IResolverContext> = new Map();
   const missingOptionalDependencies: Set<string> = new Set();
 
