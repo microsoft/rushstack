@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-workspace-resolve-plugin",
   "entries": [
     {
+      "version": "0.3.1",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.1",
+      "date": "Thu, 29 Aug 2024 00:11:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix description file resolution after cross-package import."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.0",
       "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.0",
       "date": "Wed, 28 Aug 2024 00:11:41 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack-workspace-resolve-plugin
 
-This log was last generated on Wed, 28 Aug 2024 00:11:41 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Aug 2024 00:11:32 GMT and should not be manually modified.
+
+## 0.3.1
+Thu, 29 Aug 2024 00:11:32 GMT
+
+### Patches
+
+- Fix description file resolution after cross-package import.
 
 ## 0.3.0
 Wed, 28 Aug 2024 00:11:41 GMT
