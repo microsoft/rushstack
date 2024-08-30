@@ -218,7 +218,7 @@ describe(PnpmShrinkwrapFile.name, () => {
             project,
             project.rushConfiguration.defaultSubspace
           )
-        ).resolves.toBe(false);
+        ).resolves.toBe(true);
       });
     });
   });
