@@ -334,6 +334,22 @@ export class RushPnpmCommandLineParser {
           }
           break;
         }
+        case 'patch-remove': {
+          const semver: typeof import('semver') = await import('semver');
+          /**
+           * The "patch-remove" command was introduced in pnpm version 8.5.0
+           */
+          if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '8.5.0')) {
+            this._terminal.writeErrorLine(
+              PrintUtilities.wrapWords(
+                `Error: The "pnpm patch-remove" command is added after pnpm@8.5.0.` +
+                  ` Please update "pnpmVersion" >= 8.5.0 in ${RushConstants.rushJsonFilename} file and run "rush update" to use this command.`
+              ) + '\n'
+            );
+            throw new AlreadyReportedError();
+          }
+          break;
+        }
 
         // Known safe
         case 'audit':
@@ -447,6 +463,7 @@ export class RushPnpmCommandLineParser {
     const subspaceConfigFolder: string = this._subspace.getSubspaceConfigFolderPath();
 
     switch (commandName) {
+      case 'patch-remove':
       case 'patch-commit': {
         // why need to throw error when pnpm-config.json not exists?
         // 1. pnpm-config.json is required for `rush-pnpm patch-commit`. Rush writes the patched dependency to the pnpm-config.json when finishes.
