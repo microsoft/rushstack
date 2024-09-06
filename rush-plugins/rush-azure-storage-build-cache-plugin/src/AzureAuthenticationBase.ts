@@ -131,7 +131,7 @@ export abstract class AzureAuthenticationBase {
   protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined>;
 
   private __credentialCacheId: string | undefined;
-  private get _credentialCacheId(): string {
+  protected get _credentialCacheId(): string {
     if (!this.__credentialCacheId) {
       const cacheIdParts: string[] = [
         this._credentialNameForCache,
