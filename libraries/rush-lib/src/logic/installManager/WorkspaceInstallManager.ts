@@ -10,8 +10,10 @@ import {
   AlreadyReportedError,
   Async,
   type IDependenciesMetaTable,
-  Path
+  Path,
+  Sort
 } from '@rushstack/node-core-library';
+import { createHash } from 'crypto';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
@@ -378,6 +380,18 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       shrinkwrapIsUpToDate = false;
     }
 
+    // Check if packageExtensionsChecksum matches globalPackageExtension's hash
+    const packageExtensionsChecksum: string | undefined = this._getPackageExtensionChecksum(
+      this.rushConfiguration.pnpmOptions.globalPackageExtensions
+    );
+    const packageExtensionsChecksumAreEqual: boolean =
+      packageExtensionsChecksum === shrinkwrapFile?.packageExtensionsChecksum;
+
+    if (!packageExtensionsChecksumAreEqual) {
+      shrinkwrapWarnings.push("The package extension hash doesn't match the current shrinkwrap.");
+      shrinkwrapIsUpToDate = false;
+    }
+
     // Write the common package.json
     InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined);
 
@@ -386,6 +400,22 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });
 
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
+  }
+
+  private _getPackageExtensionChecksum(
+    packageExtensions: Record<string, unknown> | undefined
+  ): string | undefined {
+    const packageExtensionsChecksum: string | undefined =
+      Object.keys(packageExtensions ?? {}).length === 0
+        ? undefined
+        : createObjectChecksum(packageExtensions!);
+
+    function createObjectChecksum(obj: Record<string, unknown>): string {
+      const s: string = JSON.stringify(Sort.sortKeys(obj, { deep: true }));
+      return createHash('md5').update(s).digest('hex');
+    }
+
+    return packageExtensionsChecksum;
   }
 
   protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace): boolean {

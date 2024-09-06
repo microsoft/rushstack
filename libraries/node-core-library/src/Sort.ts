@@ -231,4 +231,92 @@ export class Sort {
       set.add(item);
     }
   }
+
+  /**
+   * Sort the keys given in an object
+   *
+   * @example
+   *
+   * ```ts
+   * console.log(Sort.sortKeys({ c: 3, b: 2, a: 1 })); // { a: 1, b: 2, c: 3}
+   * ```
+   */
+  public static sortKeys<T extends Partial<Record<string, unknown>> | unknown[]>(
+    object: T,
+    { deep, compare }: { deep?: boolean; compare?: (x: string, y: string) => number } = {
+      deep: false,
+      compare: Sort.compareByValue
+    }
+  ): T {
+    function isPlainObject(obj: unknown): obj is object {
+      return obj !== null && typeof obj === 'object';
+    }
+    if (!isPlainObject(object) && !Array.isArray(object)) {
+      throw new TypeError(`Expected object or array`);
+    }
+
+    const cache: WeakMap<
+      Partial<Record<string, unknown>> | unknown[],
+      Partial<Record<string, unknown>> | unknown[]
+    > = new WeakMap();
+
+    function innerSortArray(arr: unknown[]): unknown[] {
+      const resultFromCache: undefined | Partial<Record<string, unknown>> | unknown[] = cache.get(arr);
+      if (resultFromCache !== undefined) {
+        return resultFromCache as unknown[];
+      }
+      const result: unknown[] = [];
+      cache.set(arr, result);
+      if (deep) {
+        result.push(
+          ...arr.map((entry) => {
+            if (Array.isArray(entry)) {
+              return innerSortArray(entry);
+            } else if (isPlainObject(entry)) {
+              return innerSortKeys(entry);
+            }
+            return entry;
+          })
+        );
+      } else {
+        result.push(...arr);
+      }
+
+      return result;
+    }
+    function innerSortKeys(obj: Partial<Record<string, unknown>>): Partial<Record<string, unknown>> {
+      const resultFromCache: undefined | Partial<Record<string, unknown>> | unknown[] = cache.get(obj);
+      if (resultFromCache !== undefined) {
+        return resultFromCache as Partial<Record<string, unknown>>;
+      }
+      const result: Partial<Record<string, unknown>> = {};
+      const keys: string[] = Object.keys(obj).sort(compare);
+
+      cache.set(obj, result);
+
+      for (const key of keys) {
+        const value: unknown = obj[key];
+        let newValue: unknown;
+        if (deep) {
+          if (Array.isArray(value)) {
+            newValue = innerSortArray(value);
+          } else if (isPlainObject(value)) {
+            newValue = innerSortKeys(value);
+          } else {
+            newValue = value;
+          }
+        } else {
+          newValue = value;
+        }
+        Object.defineProperty(result, key, {
+          ...Object.getOwnPropertyDescriptor(obj, key),
+          value: newValue
+        });
+      }
+
+      return result;
+    }
+
+    return Array.isArray(object) ? (innerSortArray(object) as T) : (innerSortKeys(object) as T);
+  }
 }
