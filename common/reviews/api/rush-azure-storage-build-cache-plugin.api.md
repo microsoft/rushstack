@@ -24,6 +24,8 @@ export abstract class AzureAuthenticationBase {
     // (undocumented)
     protected readonly _azureEnvironment: AzureEnvironmentName;
     // (undocumented)
+    protected get _credentialCacheId(): string;
+    // (undocumented)
     protected abstract readonly _credentialKindForLogging: string;
     // (undocumented)
     protected abstract readonly _credentialNameForCache: string;
