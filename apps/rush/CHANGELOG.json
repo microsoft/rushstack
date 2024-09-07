@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.133.4",
+      "tag": "@microsoft/rush_v5.133.4",
+      "date": "Sat, 07 Sep 2024 00:18:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Mark `AzureAuthenticationBase._credentialCacheId` as protected in `@rushstack/rush-azure-storage-build-cache-plugin`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.133.3",
       "tag": "@microsoft/rush_v5.133.3",
       "date": "Thu, 29 Aug 2024 22:49:36 GMT",

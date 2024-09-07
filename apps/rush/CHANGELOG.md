@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 29 Aug 2024 22:49:36 GMT and should not be manually modified.
+This log was last generated on Sat, 07 Sep 2024 00:18:08 GMT and should not be manually modified.
+
+## 5.133.4
+Sat, 07 Sep 2024 00:18:08 GMT
+
+### Updates
+
+- Mark `AzureAuthenticationBase._credentialCacheId` as protected in `@rushstack/rush-azure-storage-build-cache-plugin`.
 
 ## 5.133.3
 Thu, 29 Aug 2024 22:49:36 GMT
