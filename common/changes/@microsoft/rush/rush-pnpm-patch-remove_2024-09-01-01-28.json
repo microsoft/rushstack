@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Support \"rush-pnpm patch-remove\" command",
+      "comment": "Support the `rush-pnpm patch-remove` command.",
       "type": "none"
     }
   ],
