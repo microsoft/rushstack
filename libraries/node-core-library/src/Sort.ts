@@ -2,6 +2,38 @@
 // See LICENSE in the project root for license information.
 
 /**
+ * Options of {@link Sort.sortKeys}
+ *
+ * @public
+ */
+export interface ISortKeysOptions {
+  /**
+   * Whether or not to recursively sort keys, both in objects and arrays
+   * @defaultValue false
+   */
+  deep?: boolean;
+  /**
+   * Custom compare function when sorting the keys
+   *
+   * @defaultValue Sort.compareByValue
+   * @param x - Key name
+   * @param y - Key name
+   * @returns -1 if `x` is smaller than `y`, 1 if `x` is greater than `y`, or 0 if the values are equal.
+   */
+  compare?: (x: string, y: string) => number;
+}
+
+interface ISortKeysContext {
+  cache: SortKeysCache;
+  options: ISortKeysOptions;
+}
+
+type SortKeysCache = WeakMap<
+  Partial<Record<string, unknown>> | unknown[],
+  Partial<Record<string, unknown>> | unknown[]
+>;
+
+/**
  * Operations for sorting collections.
  *
  * @public
@@ -235,6 +267,9 @@ export class Sort {
   /**
    * Sort the keys given in an object
    *
+   * @param object - The object to be sorted
+   * @param options - The options for sort keys
+   *
    * @example
    *
    * ```ts
@@ -243,80 +278,85 @@ export class Sort {
    */
   public static sortKeys<T extends Partial<Record<string, unknown>> | unknown[]>(
     object: T,
-    { deep, compare }: { deep?: boolean; compare?: (x: string, y: string) => number } = {
+    options: ISortKeysOptions = {
       deep: false,
       compare: Sort.compareByValue
     }
   ): T {
-    function isPlainObject(obj: unknown): obj is object {
-      return obj !== null && typeof obj === 'object';
-    }
     if (!isPlainObject(object) && !Array.isArray(object)) {
       throw new TypeError(`Expected object or array`);
     }
+    const cache: SortKeysCache = new WeakMap();
+    const context: ISortKeysContext = {
+      cache,
+      options
+    };
 
-    const cache: WeakMap<
-      Partial<Record<string, unknown>> | unknown[],
-      Partial<Record<string, unknown>> | unknown[]
-    > = new WeakMap();
-
-    function innerSortArray(arr: unknown[]): unknown[] {
-      const resultFromCache: undefined | Partial<Record<string, unknown>> | unknown[] = cache.get(arr);
-      if (resultFromCache !== undefined) {
-        return resultFromCache as unknown[];
-      }
-      const result: unknown[] = [];
-      cache.set(arr, result);
-      if (deep) {
-        result.push(
-          ...arr.map((entry) => {
-            if (Array.isArray(entry)) {
-              return innerSortArray(entry);
-            } else if (isPlainObject(entry)) {
-              return innerSortKeys(entry);
-            }
-            return entry;
-          })
-        );
-      } else {
-        result.push(...arr);
-      }
-
-      return result;
-    }
-    function innerSortKeys(obj: Partial<Record<string, unknown>>): Partial<Record<string, unknown>> {
-      const resultFromCache: undefined | Partial<Record<string, unknown>> | unknown[] = cache.get(obj);
-      if (resultFromCache !== undefined) {
-        return resultFromCache as Partial<Record<string, unknown>>;
-      }
-      const result: Partial<Record<string, unknown>> = {};
-      const keys: string[] = Object.keys(obj).sort(compare);
-
-      cache.set(obj, result);
-
-      for (const key of keys) {
-        const value: unknown = obj[key];
-        let newValue: unknown;
-        if (deep) {
-          if (Array.isArray(value)) {
-            newValue = innerSortArray(value);
-          } else if (isPlainObject(value)) {
-            newValue = innerSortKeys(value);
-          } else {
-            newValue = value;
-          }
-        } else {
-          newValue = value;
-        }
-        Object.defineProperty(result, key, {
-          ...Object.getOwnPropertyDescriptor(obj, key),
-          value: newValue
-        });
-      }
-
-      return result;
-    }
-
-    return Array.isArray(object) ? (innerSortArray(object) as T) : (innerSortKeys(object) as T);
+    return Array.isArray(object)
+      ? (innerSortArray(object, context) as T)
+      : (innerSortKeys(object, context) as T);
   }
+}
+function isPlainObject(obj: unknown): obj is object {
+  return obj !== null && typeof obj === 'object';
+}
+
+function innerSortArray(arr: unknown[], context: ISortKeysContext): unknown[] {
+  const resultFromCache: undefined | Partial<Record<string, unknown>> | unknown[] = context.cache.get(arr);
+  if (resultFromCache !== undefined) {
+    return resultFromCache as unknown[];
+  }
+  const result: unknown[] = [];
+  context.cache.set(arr, result);
+  if (context.options.deep) {
+    result.push(
+      ...arr.map((entry) => {
+        if (Array.isArray(entry)) {
+          return innerSortArray(entry, context);
+        } else if (isPlainObject(entry)) {
+          return innerSortKeys(entry, context);
+        }
+        return entry;
+      })
+    );
+  } else {
+    result.push(...arr);
+  }
+
+  return result;
+}
+function innerSortKeys(
+  obj: Partial<Record<string, unknown>>,
+  context: ISortKeysContext
+): Partial<Record<string, unknown>> {
+  const resultFromCache: undefined | Partial<Record<string, unknown>> | unknown[] = context.cache.get(obj);
+  if (resultFromCache !== undefined) {
+    return resultFromCache as Partial<Record<string, unknown>>;
+  }
+  const result: Partial<Record<string, unknown>> = {};
+  const keys: string[] = Object.keys(obj).sort(context.options.compare);
+
+  context.cache.set(obj, result);
+
+  for (const key of keys) {
+    const value: unknown = obj[key];
+    let newValue: unknown;
+    if (context.options.deep) {
+      if (Array.isArray(value)) {
+        newValue = innerSortArray(value, context);
+      } else if (isPlainObject(value)) {
+        newValue = innerSortKeys(value, context);
+      } else {
+        newValue = value;
+      }
+    } else {
+      newValue = value;
+    }
+    Object.defineProperty(result, key, {
+      ...Object.getOwnPropertyDescriptor(obj, key),
+      value: newValue
+    });
+  }
+
+  return result;
 }

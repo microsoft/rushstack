@@ -609,6 +609,12 @@ export interface IRunWithRetriesOptions<TResult> {
 }
 
 // @public
+export interface ISortKeysOptions {
+    compare?: (x: string, y: string) => number;
+    deep?: boolean;
+}
+
+// @public
 export interface IStringBuilder {
     append(text: string): void;
     toString(): string;
@@ -831,10 +837,7 @@ export class Sort {
     static isSorted<T>(collection: Iterable<T>, comparer?: (x: any, y: any) => number): boolean;
     static isSortedBy<T>(collection: Iterable<T>, keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): boolean;
     static sortBy<T>(array: T[], keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): void;
-    static sortKeys<T extends Partial<Record<string, unknown>> | unknown[]>(object: T, { deep, compare }?: {
-        deep?: boolean;
-        compare?: (x: string, y: string) => number;
-    }): T;
+    static sortKeys<T extends Partial<Record<string, unknown>> | unknown[]>(object: T, options?: ISortKeysOptions): T;
     static sortMapKeys<K, V>(map: Map<K, V>, keyComparer?: (x: K, y: K) => number): void;
     static sortSet<T>(set: Set<T>, comparer?: (x: T, y: T) => number): void;
     static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any, keyComparer?: (x: T, y: T) => number): void;

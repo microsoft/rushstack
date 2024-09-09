@@ -115,7 +115,12 @@ describe('Sort.sortKeys', () => {
   }
 
   test('sort the keys of an object', () => {
-    deepEqualInOrder(Sort.sortKeys({ c: 0, a: 0, b: 0 }), { a: 0, b: 0, c: 0 });
+    const unsortedObj = { c: 0, a: 0, b: 0 };
+    const sortedObj = Sort.sortKeys(unsortedObj);
+    // Assert that it's not sorted in-place
+    expect(sortedObj).not.toBe(unsortedObj);
+    deepEqualInOrder(unsortedObj, { c: 0, a: 0, b: 0 });
+    deepEqualInOrder(sortedObj, { a: 0, b: 0, c: 0 });
   });
 
   test('custom compare function', () => {
@@ -142,6 +147,11 @@ describe('Sort.sortKeys', () => {
     object.circular = object;
     const sortedObject = Sort.sortKeys(object, { deep: true });
 
+    // Assert that it's not sorted in-place
+    expect(sortedObject).not.toBe(object);
+    expect(Object.keys(object)).toEqual(['z', 'circular']);
+
+    // Assert that circular value references the same thing
     expect(sortedObject).toBe(sortedObject.circular);
     expect(Object.keys(sortedObject)).toEqual(['circular', 'z']);
 
