@@ -26,6 +26,24 @@ interface ISchemaWithId {
 export type JsonSchemaVersion = 'draft-04' | 'draft-07';
 
 /**
+ * A definition for a custom format to consider during validation.
+ * @public
+ */
+export interface IJsonSchemaCustomFormat<T extends string | number> {
+  /**
+   * The base JSON type.
+   */
+  type: T extends string ? 'string' : T extends number ? 'number' : never;
+
+  /**
+   * A validation function for the format.
+   * @param data - The raw field data to validate.
+   * @returns whether the data is valid according to the format.
+   */
+  validate: (data: T) => boolean;
+}
+
+/**
  * Callback function arguments for {@link JsonSchema.validateObjectWithCallback}
  * @public
  */
@@ -94,6 +112,13 @@ export interface IJsonSchemaLoadOptions {
    * or does not match an expected URL, the default version will be used.
    */
   schemaVersion?: JsonSchemaVersion;
+
+  /**
+   * Any custom formats to consider during validation. Some standard formats are supported
+   * out-of-the-box (e.g. emails, uris), but additional formats can be defined here. You could
+   * for example define generic numeric formats (e.g. uint8) or domain-specific formats.
+   */
+  customFormats?: Record<string, IJsonSchemaCustomFormat<string> | IJsonSchemaCustomFormat<number>>;
 }
 
 /**
@@ -141,6 +166,9 @@ export class JsonSchema {
   private _validator: ValidateFunction | undefined = undefined;
   private _schemaObject: JsonObject | undefined = undefined;
   private _schemaVersion: JsonSchemaVersion | undefined = undefined;
+  private _customFormats:
+    | Record<string, IJsonSchemaCustomFormat<string> | IJsonSchemaCustomFormat<number>>
+    | undefined = undefined;
 
   private constructor() {}
 
@@ -163,6 +191,7 @@ export class JsonSchema {
     if (options) {
       schema._dependentSchemas = options.dependentSchemas || [];
       schema._schemaVersion = options.schemaVersion;
+      schema._customFormats = options.customFormats;
     }
 
     return schema;
@@ -181,6 +210,7 @@ export class JsonSchema {
     if (options) {
       schema._dependentSchemas = options.dependentSchemas || [];
       schema._schemaVersion = options.schemaVersion;
+      schema._customFormats = options.customFormats;
     }
 
     return schema;
@@ -308,6 +338,11 @@ export class JsonSchema {
       // Enable json-schema format validation
       // https://ajv.js.org/packages/ajv-formats.html
       addFormats(validator);
+      if (this._customFormats) {
+        for (const [name, format] of Object.entries(this._customFormats)) {
+          validator.addFormat(name, { ...format, async: false });
+        }
+      }
 
       const collectedSchemas: JsonSchema[] = [];
       const seenObjects: Set<JsonSchema> = new Set<JsonSchema>();
