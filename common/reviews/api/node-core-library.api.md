@@ -425,7 +425,7 @@ export interface IJsonFileStringifyOptions extends IJsonFileParseOptions {
 
 // @public
 export interface IJsonSchemaCustomFormat<T extends string | number> {
-    type: T extends string ? "string" : T extends number ? "number" : never;
+    type: T extends string ? 'string' : T extends number ? 'number' : never;
     validate: (data: T) => boolean;
 }
 
