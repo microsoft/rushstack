@@ -336,7 +336,7 @@ export class JsonSchema {
       // https://ajv.js.org/packages/ajv-formats.html
       addFormats(validator);
       if (this._customFormats) {
-        Object.entries(this._customFormats).forEach(([name, format]) => {
+        for (const [name, format] of Object.entries(this._customFormats)) {
           validator.addFormat(name, { ...format, async: false });
         });
       }
