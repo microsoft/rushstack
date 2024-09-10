@@ -1005,7 +1005,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
             break;
           }
 
-          // eslint-disable-next-line no-fallthrough
           case DependencyType.Regular:
             specifierFromLockfile = importer.dependencies?.[name];
             importerDependencies.delete(name);
