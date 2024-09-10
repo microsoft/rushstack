@@ -34,6 +34,7 @@ export interface IJsonSchemaCustomFormat<T extends string | number> {
    * The base JSON type.
    */
   type: T extends string ? 'string' : T extends number ? 'number' : never;
+
   /**
    * A validation function for the format.
    * @param data - The raw field data to validate.
