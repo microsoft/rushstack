@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 21 Aug 2024 05:43:04 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Sep 2024 20:08:11 GMT and should not be manually modified.
+
+## 5.8.0
+Tue, 10 Sep 2024 20:08:11 GMT
+
+### Minor changes
+
+- Add a `customFormats` option to `JsonSchema`.
 
 ## 5.7.0
 Wed, 21 Aug 2024 05:43:04 GMT
