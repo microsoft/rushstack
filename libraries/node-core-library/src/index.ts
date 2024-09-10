@@ -65,6 +65,7 @@ export {
 } from './JsonFile';
 export {
   type IJsonSchemaErrorInfo,
+  type IJsonSchemaCustomFormat,
   type IJsonSchemaFromFileOptions,
   type IJsonSchemaFromObjectOptions,
   type IJsonSchemaLoadOptions,
