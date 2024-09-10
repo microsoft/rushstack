@@ -114,7 +114,9 @@ export interface IJsonSchemaLoadOptions {
   schemaVersion?: JsonSchemaVersion;
 
   /**
-   * Any custom formats to consider during validation.
+   * Any custom formats to consider during validation. Some standard formats are supported
+   * out-of-the-box (e.g. emails, uris), but additional formats can be defined here. You could
+   * for example define generic numeric formats (e.g. uint8) or domain-specific formats.
    */
   customFormats?: Record<string, IJsonSchemaCustomFormat<string> | IJsonSchemaCustomFormat<number>>;
 }
@@ -339,7 +341,7 @@ export class JsonSchema {
       if (this._customFormats) {
         for (const [name, format] of Object.entries(this._customFormats)) {
           validator.addFormat(name, { ...format, async: false });
-        });
+        }
       }
 
       const collectedSchemas: JsonSchema[] = [];
