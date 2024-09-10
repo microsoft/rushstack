@@ -93,7 +93,7 @@ export {
   type IPathFormatConciselyOptions
 } from './Path';
 export { Encoding, Text, NewlineKind, type IReadLinesFromIterableOptions } from './Text';
-export { Sort, type ISortKeysOptions } from './Sort';
+export { Sort } from './Sort';
 export {
   AlreadyExistsBehavior,
   FileSystem,

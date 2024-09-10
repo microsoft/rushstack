@@ -777,6 +777,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
  * @returns
  */
 function createObjectChecksum(obj: Record<string, unknown>): string {
-  const s: string = JSON.stringify(Sort.sortKeys(obj, { deep: true }));
+  const s: string = JSON.stringify(Sort.sortKeys(obj));
   return createHash('md5').update(s).digest('hex');
 }
