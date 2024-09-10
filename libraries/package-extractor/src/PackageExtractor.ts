@@ -15,7 +15,6 @@ import {
   FileSystem,
   Import,
   JsonFile,
-  AlreadyExistsBehavior,
   type IPackageJson
 } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
@@ -35,6 +34,9 @@ declare module 'npm-packlist' {
     public start(): void;
   }
 }
+
+export const TARGET_ROOT_SCRIPT_RELATIVE_PATH_TEMPLATE_STRING: '{TARGET_ROOT_SCRIPT_RELATIVE_PATH}' =
+  '{TARGET_ROOT_SCRIPT_RELATIVE_PATH}';
 
 /**
  * Part of the extractor-matadata.json file format. Represents an extracted project.
@@ -188,7 +190,7 @@ export interface IExtractorOptions {
 
   /**
    * Whether to skip copying files to the extraction target directory, and only create an extraction
-   * archive. This is only supported when linkCreation is 'script' or 'none'.
+   * archive. This is only supported when {@link IExtractorOptions.linkCreation} is 'script' or 'none'.
    */
   createArchiveOnly?: boolean;
 
@@ -223,6 +225,12 @@ export interface IExtractorOptions {
    * "none": Do nothing; some other tool may create the links later, based on the extractor-metadata.json file.
    */
   linkCreation?: 'default' | 'script' | 'none';
+
+  /**
+   * The path to the generated link creation script. This is only used when {@link IExtractorOptions.linkCreation}
+   * is 'script'.
+   */
+  linkCreationScriptPath?: string;
 
   /**
    * An additional folder containing files which will be copied into the root of the extraction.
@@ -363,7 +371,9 @@ export class PackageExtractor {
       sourceRootFolder,
       targetRootFolder,
       folderToCopy: additionalFolderToCopy,
-      linkCreation
+      linkCreation,
+      linkCreationScriptPath,
+      createArchiveOnly
     } = options;
     const { projectConfigurationsByName, foldersToCopy, symlinkAnalyzer } = state;
 
@@ -395,7 +405,7 @@ export class PackageExtractor {
       await this._collectFoldersAsync(projectFolder, options, state);
     }
 
-    if (!options.createArchiveOnly) {
+    if (!createArchiveOnly) {
       terminal.writeLine(`Copying folders to target folder "${targetRootFolder}"`);
     }
     await Async.forEachAsync(
@@ -415,24 +425,30 @@ export class PackageExtractor {
       const additionalFolderExtractorOptions: IExtractorOptions = {
         ...options,
         sourceRootFolder: additionalFolderPath,
-        targetRootFolder: options.targetRootFolder
+        targetRootFolder
       };
       await this._extractFolderAsync(additionalFolderPath, additionalFolderExtractorOptions, state);
     }
 
     switch (linkCreation) {
       case 'script': {
-        const sourceFilePath: string = path.join(scriptsFolderPath, createLinksScriptFilename);
-        if (!options.createArchiveOnly) {
-          terminal.writeLine(`Creating ${createLinksScriptFilename}`);
-          await FileSystem.copyFileAsync({
-            sourcePath: sourceFilePath,
-            destinationPath: path.join(targetRootFolder, createLinksScriptFilename),
-            alreadyExistsBehavior: AlreadyExistsBehavior.Error
+        terminal.writeLine(`Creating ${createLinksScriptFilename}`);
+        const createLinksSourceFilePath: string = path.join(scriptsFolderPath, createLinksScriptFilename);
+        const createLinksTargetFilePath: string = linkCreationScriptPath
+          ? path.resolve(targetRootFolder, linkCreationScriptPath)
+          : path.join(targetRootFolder, createLinksScriptFilename);
+        let createLinksScriptContent: string = await FileSystem.readFileAsync(createLinksSourceFilePath);
+        createLinksScriptContent = createLinksScriptContent.replace(
+          TARGET_ROOT_SCRIPT_RELATIVE_PATH_TEMPLATE_STRING,
+          Path.convertToSlashes(path.relative(path.dirname(createLinksTargetFilePath), targetRootFolder))
+        );
+        if (!createArchiveOnly) {
+          await FileSystem.writeFileAsync(createLinksTargetFilePath, createLinksScriptContent, {
+            ensureFolderExists: true
           });
         }
         await state.archiver?.addToArchiveAsync({
-          filePath: sourceFilePath,
+          fileData: createLinksTargetFilePath,
           archivePath: createLinksScriptFilename
         });
         break;
@@ -951,11 +967,18 @@ export class PackageExtractor {
     options: IExtractorOptions,
     state: IExtractorState
   ): Promise<void> {
-    const { mainProjectName, targetRootFolder } = options;
+    const { mainProjectName, targetRootFolder, linkCreation, linkCreationScriptPath } = options;
     const { projectConfigurationsByPath } = state;
 
     const extractorMetadataFileName: string = 'extractor-metadata.json';
-    const extractorMetadataFilePath: string = path.join(targetRootFolder, extractorMetadataFileName);
+    const extractorMetadataFolderPath: string =
+      linkCreation === 'script' && linkCreationScriptPath
+        ? path.dirname(path.resolve(targetRootFolder, linkCreationScriptPath))
+        : targetRootFolder;
+    const extractorMetadataFilePath: string = path.join(
+      extractorMetadataFolderPath,
+      extractorMetadataFileName
+    );
     const extractorMetadataJson: IExtractorMetadataJson = {
       mainProjectName,
       projects: [],
@@ -983,12 +1006,13 @@ export class PackageExtractor {
 
     const extractorMetadataFileContent: string = JSON.stringify(extractorMetadataJson, undefined, 0);
     if (!options.createArchiveOnly) {
-      await FileSystem.writeFileAsync(extractorMetadataFilePath, extractorMetadataFileContent);
+      await FileSystem.writeFileAsync(extractorMetadataFilePath, extractorMetadataFileContent, {
+        ensureFolderExists: true
+      });
     }
-    await state.archiver?.addToArchiveAsync({
-      fileData: extractorMetadataFileContent,
-      archivePath: extractorMetadataFileName
-    });
+
+    const archivePath: string = path.relative(targetRootFolder, extractorMetadataFilePath);
+    await state.archiver?.addToArchiveAsync({ archivePath, fileData: extractorMetadataFileContent });
   }
 
   private async _makeBinLinksAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
