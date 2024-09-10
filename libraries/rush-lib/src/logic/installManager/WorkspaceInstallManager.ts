@@ -405,15 +405,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   private _getPackageExtensionChecksum(
     packageExtensions: Record<string, unknown> | undefined
   ): string | undefined {
+    // https://github.com/pnpm/pnpm/blob/ba9409ffcef0c36dc1b167d770a023c87444822d/pkg-manager/core/src/install/index.ts#L331
     const packageExtensionsChecksum: string | undefined =
       Object.keys(packageExtensions ?? {}).length === 0
         ? undefined
         : createObjectChecksum(packageExtensions!);
-
-    function createObjectChecksum(obj: Record<string, unknown>): string {
-      const s: string = JSON.stringify(Sort.sortKeys(obj, { deep: true }));
-      return createHash('md5').update(s).digest('hex');
-    }
 
     return packageExtensionsChecksum;
   }
@@ -773,4 +769,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
   }
+}
+
+/**
+ * Source: https://github.com/pnpm/pnpm/blob/ba9409ffcef0c36dc1b167d770a023c87444822d/pkg-manager/core/src/install/index.ts#L821-L824
+ * @param obj
+ * @returns
+ */
+function createObjectChecksum(obj: Record<string, unknown>): string {
+  const s: string = JSON.stringify(Sort.sortKeys(obj, { deep: true }));
+  return createHash('md5').update(s).digest('hex');
 }

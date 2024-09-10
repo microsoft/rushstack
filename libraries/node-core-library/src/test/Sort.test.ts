@@ -73,21 +73,14 @@ test('Sort.sortSet', () => {
 describe('Sort.sortKeys', () => {
   // Test cases from https://github.com/sindresorhus/sort-keys/blob/v4.2.0/test.js
   function deepEqualInOrder(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    actual: Partial<Record<string, any>>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expected: Partial<Record<string, any>>
+    actual: Partial<Record<string, unknown>>,
+    expected: Partial<Record<string, unknown>>
   ): void {
     expect(actual).toEqual(expected);
 
-    const seen = new Set();
+    const seen: Set<unknown> = new Set();
 
-    function assertSameKeysInOrder(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      object1: Partial<Record<string, any>>,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      object2: Partial<Record<string, any>>
-    ): void {
+    function assertSameKeysInOrder(object1: unknown, object2: unknown): void {
       // This function assumes the objects given are already deep equal.
 
       if (seen.has(object1) && seen.has(object2)) {
@@ -97,16 +90,24 @@ describe('Sort.sortKeys', () => {
       seen.add(object1);
       seen.add(object2);
 
-      if (Array.isArray(object1)) {
+      if (Array.isArray(object1) && Array.isArray(object2)) {
         for (const index of object1.keys()) {
           assertSameKeysInOrder(object1[index], object2[index]);
         }
-      } else if (typeof object1 === 'object') {
+      } else if (
+        typeof object1 === 'object' &&
+        typeof object2 === 'object' &&
+        object1 != null &&
+        object2 != null
+      ) {
         const keys1 = Object.keys(object1);
         const keys2 = Object.keys(object2);
         expect(keys1).toEqual(keys2);
         for (const index of keys1.keys()) {
-          assertSameKeysInOrder(object1[keys1[index]], object2[keys2[index]]);
+          assertSameKeysInOrder(
+            (object1 as Partial<Record<string, unknown>>)[keys1[index]],
+            (object2 as Partial<Record<string, unknown>>)[keys2[index]]
+          );
         }
       }
     }
@@ -135,13 +136,6 @@ describe('Sort.sortKeys', () => {
       c: { a: 0, b: 0, c: 0 }
     });
 
-    expect(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const object: Partial<Record<string, any>> = { a: 0 };
-      object.circular = object;
-      Sort.sortKeys(object, { deep: true });
-    }).not.toThrow();
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const object: Partial<Record<string, any>> = { z: 0 };
     object.circular = object;
@@ -169,20 +163,13 @@ describe('Sort.sortKeys', () => {
     object3.a[0].a = object4.a[0];
     object4.a[0].c = object3.a[0];
 
-    expect(() => {
-      Sort.sortKeys(object1, { deep: true });
-      Sort.sortKeys(object2, { deep: true });
-      Sort.sortKeys(object3, { deep: true });
-      Sort.sortKeys(object4, { deep: true });
-    }).not.toThrow();
+    const sortedObject1 = Sort.sortKeys(object1, { deep: true });
+    const sortedObject3 = Sort.sortKeys(object3, { deep: true });
 
-    const sorted = Sort.sortKeys(object1, { deep: true });
-    const deepSorted = Sort.sortKeys(object3, { deep: true });
-
-    expect(sorted).toBe(sorted.a.c);
-    deepEqualInOrder(deepSorted.a[0], deepSorted.a[0].a.c);
-    expect(Object.keys(sorted)).toStrictEqual(['a', 'b']);
-    expect(Object.keys(deepSorted.a[0])).toStrictEqual(['a', 'b']);
+    expect(sortedObject1).toBe(sortedObject1.a.c);
+    deepEqualInOrder(sortedObject3.a[0], sortedObject3.a[0].a.c);
+    expect(Object.keys(sortedObject1)).toStrictEqual(['a', 'b']);
+    expect(Object.keys(sortedObject3.a[0])).toStrictEqual(['a', 'b']);
     deepEqualInOrder(
       Sort.sortKeys({ c: { c: 0, a: 0, b: 0 }, a: 0, b: 0, z: [9, 8, 7, 6, 5] }, { deep: true }),
       { a: 0, b: 0, c: { a: 0, b: 0, c: 0 }, z: [9, 8, 7, 6, 5] }
@@ -199,10 +186,6 @@ describe('Sort.sortKeys', () => {
     object.a.push(object);
     object.a[1].push(object.a[1]);
 
-    expect(() => {
-      Sort.sortKeys(object, { deep: true });
-    }).not.toThrow();
-
     const sorted = Sort.sortKeys(object, { deep: true });
     // Cannot use .toBe() as Jest will encounter https://github.com/jestjs/jest/issues/10577
     expect(sorted.a[2] === sorted).toBeTruthy();
@@ -213,8 +196,7 @@ describe('Sort.sortKeys', () => {
   });
 
   test('top-level array', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const array: Array<any> = [
+    const array: Array<Partial<Record<string, number>>> = [
       { b: 0, a: 0 },
       { c: 0, d: 0 }
     ];
@@ -232,8 +214,7 @@ describe('Sort.sortKeys', () => {
   });
 
   test('keeps property descriptors intact', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const descriptors: Partial<Record<string, any>> = {
+    const descriptors: PropertyDescriptorMap = {
       b: {
         value: 1,
         configurable: true,
@@ -248,8 +229,7 @@ describe('Sort.sortKeys', () => {
       }
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const object: Partial<Record<string, any>> = {};
+    const object: Partial<Record<string, unknown>> = {};
     Object.defineProperties(object, descriptors);
 
     const sorted = Sort.sortKeys(object);

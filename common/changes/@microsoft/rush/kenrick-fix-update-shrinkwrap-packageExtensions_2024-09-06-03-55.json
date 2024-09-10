@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Always update shrinkwrap when globalPackageExtensions has been changed",
+      "comment": "Always update shrinkwrap when `globalPackageExtensions` in `common/config/rush/pnpm-config.json` has been changed.",
       "type": "none"
     }
   ],

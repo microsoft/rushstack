@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Add Sort.sortKeys for sorting keys in an object",
+      "comment": "Add a `Sort.sortKeys` function for sorting keys in an object",
       "type": "minor"
     }
   ],

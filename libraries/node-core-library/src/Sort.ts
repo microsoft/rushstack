@@ -12,6 +12,7 @@ export interface ISortKeysOptions {
    * @defaultValue false
    */
   deep?: boolean;
+
   /**
    * Custom compare function when sorting the keys
    *
@@ -297,6 +298,7 @@ export class Sort {
       : (innerSortKeys(object, context) as T);
   }
 }
+
 function isPlainObject(obj: unknown): obj is object {
   return obj !== null && typeof obj === 'object';
 }
@@ -309,22 +311,24 @@ function innerSortArray(arr: unknown[], context: ISortKeysContext): unknown[] {
   const result: unknown[] = [];
   context.cache.set(arr, result);
   if (context.options.deep) {
-    result.push(
-      ...arr.map((entry) => {
-        if (Array.isArray(entry)) {
-          return innerSortArray(entry, context);
-        } else if (isPlainObject(entry)) {
-          return innerSortKeys(entry, context);
-        }
-        return entry;
-      })
-    );
+    for (const entry of arr) {
+      if (Array.isArray(entry)) {
+        result.push(innerSortArray(entry, context));
+      } else if (isPlainObject(entry)) {
+        result.push(innerSortKeys(entry, context));
+      } else {
+        result.push(entry);
+      }
+    }
   } else {
-    result.push(...arr);
+    for (const entry of arr) {
+      result.push(entry);
+    }
   }
 
   return result;
 }
+
 function innerSortKeys(
   obj: Partial<Record<string, unknown>>,
   context: ISortKeysContext
