@@ -448,8 +448,8 @@ export class PackageExtractor {
           });
         }
         await state.archiver?.addToArchiveAsync({
-          fileData: createLinksTargetFilePath,
-          archivePath: createLinksScriptFilename
+          fileData: createLinksScriptContent,
+          archivePath: path.relative(targetRootFolder, createLinksTargetFilePath)
         });
         break;
       }
