@@ -112,7 +112,7 @@ function main(): boolean {
     return false;
   }
 
-  const extractorMetadataPath: string = path.join(__dirname, 'extractor-metadata.json');
+  const extractorMetadataPath: string = `${__dirname}/extractor-metadata.json`;
   if (!fs.existsSync(extractorMetadataPath)) {
     throw new Error('Input file not found: ' + extractorMetadataPath);
   }

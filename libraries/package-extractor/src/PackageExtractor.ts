@@ -433,10 +433,10 @@ export class PackageExtractor {
     switch (linkCreation) {
       case 'script': {
         terminal.writeLine(`Creating ${createLinksScriptFilename}`);
-        const createLinksSourceFilePath: string = path.join(scriptsFolderPath, createLinksScriptFilename);
+        const createLinksSourceFilePath: string = `${scriptsFolderPath}/${createLinksScriptFilename}`;
         const createLinksTargetFilePath: string = linkCreationScriptPath
           ? path.resolve(targetRootFolder, linkCreationScriptPath)
-          : path.join(targetRootFolder, createLinksScriptFilename);
+          : `${targetRootFolder}/${createLinksScriptFilename}`;
         let createLinksScriptContent: string = await FileSystem.readFileAsync(createLinksSourceFilePath);
         createLinksScriptContent = createLinksScriptContent.replace(
           TARGET_ROOT_SCRIPT_RELATIVE_PATH_TEMPLATE_STRING,
