@@ -31,6 +31,7 @@ export interface IExtractorOptions {
     includeDevDependencies?: boolean;
     includeNpmIgnoreFiles?: boolean;
     linkCreation?: 'default' | 'script' | 'none';
+    linkCreationScriptPath?: string;
     mainProjectName: string;
     overwriteExisting: boolean;
     pnpmInstallFolder?: string;

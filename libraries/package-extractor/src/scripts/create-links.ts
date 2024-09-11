@@ -7,8 +7,15 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import type { IExtractorMetadataJson } from '../PackageExtractor';
 import type { IFileSystemCreateLinkOptions } from '@rushstack/node-core-library';
+import type {
+  TARGET_ROOT_SCRIPT_RELATIVE_PATH_TEMPLATE_STRING as TargetRootScriptRelativePathTemplateString,
+  IExtractorMetadataJson
+} from '../PackageExtractor';
+
+const TARGET_ROOT_SCRIPT_RELATIVE_PATH: typeof TargetRootScriptRelativePathTemplateString =
+  '{TARGET_ROOT_SCRIPT_RELATIVE_PATH}';
+const TARGET_ROOT_FOLDER: string = path.resolve(__dirname, TARGET_ROOT_SCRIPT_RELATIVE_PATH);
 
 // API borrowed from @rushstack/node-core-library, since this script avoids using any
 // NPM dependencies.
@@ -105,9 +112,7 @@ function main(): boolean {
     return false;
   }
 
-  const targetRootFolder: string = __dirname;
-  const extractorMetadataPath: string = path.join(targetRootFolder, 'extractor-metadata.json');
-
+  const extractorMetadataPath: string = `${__dirname}/extractor-metadata.json`;
   if (!fs.existsSync(extractorMetadataPath)) {
     throw new Error('Input file not found: ' + extractorMetadataPath);
   }
@@ -116,12 +121,12 @@ function main(): boolean {
   const extractorMetadataObject: IExtractorMetadataJson = JSON.parse(extractorMetadataJson);
 
   if (args[0] === 'create') {
-    console.log(`\nCreating links for extraction at path "${targetRootFolder}"`);
-    removeLinks(targetRootFolder, extractorMetadataObject);
-    createLinks(targetRootFolder, extractorMetadataObject);
+    console.log(`\nCreating links for extraction at path "${TARGET_ROOT_FOLDER}"`);
+    removeLinks(TARGET_ROOT_FOLDER, extractorMetadataObject);
+    createLinks(TARGET_ROOT_FOLDER, extractorMetadataObject);
   } else {
-    console.log(`\nRemoving links for extraction at path "${targetRootFolder}"`);
-    removeLinks(targetRootFolder, extractorMetadataObject);
+    console.log(`\nRemoving links for extraction at path "${TARGET_ROOT_FOLDER}"`);
+    removeLinks(TARGET_ROOT_FOLDER, extractorMetadataObject);
   }
 
   console.log('The operation completed successfully.');
