@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Tue, 10 Sep 2024 20:08:11 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Sep 2024 19:54:47 GMT and should not be manually modified.
+
+## 0.8.0
+Wed, 11 Sep 2024 19:54:47 GMT
+
+### Minor changes
+
+- Add the ability to change where the "create-links.js" file and the associated metadata file are generated when running in the "script" linkCreation mode
 
 ## 0.7.26
 Tue, 10 Sep 2024 20:08:11 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@rushstack/package-extractor_v0.8.0",
+      "date": "Wed, 11 Sep 2024 19:54:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add the ability to change where the \"create-links.js\" file and the associated metadata file are generated when running in the \"script\" linkCreation mode"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.26",
       "tag": "@rushstack/package-extractor_v0.7.26",
       "date": "Tue, 10 Sep 2024 20:08:11 GMT",
