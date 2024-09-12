@@ -101,7 +101,7 @@ export class Autoinstaller {
 
     this._logIfConsoleOutputIsNotRestricted(`Acquiring lock for "${relativePathForLogs}" folder...`);
 
-    const lock: LockFile = await LockFile.acquire(autoinstallerFullPath, 'autoinstaller');
+    const lock: LockFile = await LockFile.acquireAsync(autoinstallerFullPath, 'autoinstaller');
 
     try {
       // Example: .../common/autoinstallers/my-task/.rush/temp

@@ -719,7 +719,9 @@ export type LegacyCallback<TResult, TError> = (error: TError | null | undefined,
 
 // @public
 export class LockFile {
+    // @deprecated (undocumented)
     static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
+    static acquireAsync(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
     get dirtyWhenAcquired(): boolean;
     get filePath(): string;
     static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;

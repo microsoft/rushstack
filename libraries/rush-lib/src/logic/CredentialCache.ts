@@ -82,7 +82,7 @@ export class CredentialCache /* implements IDisposable */ {
 
     let lockfile: LockFile | undefined;
     if (options.supportEditing) {
-      lockfile = await LockFile.acquire(rushUserFolderPath, `${CACHE_FILENAME}.lock`);
+      lockfile = await LockFile.acquireAsync(rushUserFolderPath, `${CACHE_FILENAME}.lock`);
     }
 
     const credentialCache: CredentialCache = new CredentialCache(cacheFilePath, loadedJson, lockfile);
