@@ -241,12 +241,14 @@ export class LockFile {
   ): Promise<LockFile> {
     const interval: number = 100;
     const startTime: number = Date.now();
+    const timeoutTime: number | undefined = maxWaitMs ? startTime + maxWaitMs : undefined;
 
     await FileSystem.ensureFolderAsync(resourceFolder);
 
     const lockFilePath: string = LockFile.getLockFilePath(resourceFolder, resourceName);
 
-    const retryLoop: () => Promise<LockFile> = async () => {
+    // eslint-disable-next-line no-unmodified-loop-condition
+    while (!timeoutTime || Date.now() <= timeoutTime) {
       const lock: LockFile | undefined = LockFile._tryAcquireInner(
         resourceFolder,
         resourceName,
@@ -256,15 +258,10 @@ export class LockFile {
         return lock;
       }
 
-      if (maxWaitMs && Date.now() > startTime + maxWaitMs) {
-        throw new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`);
-      }
-
       await Async.sleepAsync(interval);
-      return await retryLoop();
-    };
+    }
 
-    return await retryLoop();
+    throw new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`);
   }
 
   private static _tryAcquireInner(
