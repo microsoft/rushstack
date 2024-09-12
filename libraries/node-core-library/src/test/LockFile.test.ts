@@ -105,8 +105,8 @@ describe(LockFile.name, () => {
 
     const resourceName: string = 'test1';
 
-    const lock1: LockFile = await LockFile.acquire(testFolder, resourceName);
-    const lock2Promise: Promise<LockFile> = LockFile.acquire(testFolder, resourceName);
+    const lock1: LockFile = await LockFile.acquireAsync(testFolder, resourceName);
+    const lock2Promise: Promise<LockFile> = LockFile.acquireAsync(testFolder, resourceName);
 
     let lock2Acquired: boolean = false;
     lock2Promise

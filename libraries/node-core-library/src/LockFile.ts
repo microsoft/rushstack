@@ -205,6 +205,13 @@ export class LockFile {
   }
 
   /**
+   * @deprecated Use {@link LockFile.acquireAsync} instead.
+   */
+  public static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile> {
+    return LockFile.acquireAsync(resourceFolder, resourceName, maxWaitMs);
+  }
+
+  /**
    * Attempts to create the lockfile.  Will continue to loop at every 100ms until the lock becomes available
    * or the maxWaitMs is surpassed.
    *
@@ -218,7 +225,11 @@ export class LockFile {
    *   the filename of the temporary file created to manage the lock.
    * @param maxWaitMs - The maximum number of milliseconds to wait for the lock before reporting an error
    */
-  public static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile> {
+  public static async acquireAsync(
+    resourceFolder: string,
+    resourceName: string,
+    maxWaitMs?: number
+  ): Promise<LockFile> {
     const interval: number = 100;
     const startTime: number = Date.now();
 
