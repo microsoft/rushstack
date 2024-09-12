@@ -186,7 +186,7 @@ export class LockFile {
 
     switch (process.platform) {
       case 'win32': {
-        return path.join(path.resolve(resourceFolder), `${resourceName}.lock`);
+        return path.resolve(resourceFolder, `${resourceName}.lock`);
       }
 
       case 'linux':
