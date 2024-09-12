@@ -180,7 +180,7 @@ export class LockFile {
     if (!resourceName.match(/^[a-zA-Z0-9][a-zA-Z0-9-.]+[a-zA-Z0-9]$/)) {
       throw new Error(
         `The resource name "${resourceName}" is invalid.` +
-          ` It must be an alphanumeric string with only "-" or "." It must start with an alphanumeric character.`
+          ` It must be an alphanumeric string with only "-" or "." It must start and end with an alphanumeric character.`
       );
     }
 
