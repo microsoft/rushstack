@@ -191,7 +191,7 @@ export class LockFile {
 
       case 'linux':
       case 'darwin': {
-        return path.join(path.resolve(resourceFolder), `${resourceName}#${pid}.lock`);
+        return path.resolve(resourceFolder, `${resourceName}#${pid}.lock`);
       }
 
       default: {
