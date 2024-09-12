@@ -148,6 +148,8 @@ export interface IPnpmShrinkwrapYaml {
   specifiers: Record<string, string>;
   /** The list of override version number for dependencies */
   overrides?: { [dependency: string]: string };
+  /** The checksum of package extensions fields for extending dependencies */
+  packageExtensionsChecksum?: string;
 }
 
 export interface ILoadFromFileOptions {
@@ -275,6 +277,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly specifiers: ReadonlyMap<string, string>;
   public readonly packages: ReadonlyMap<string, IPnpmShrinkwrapDependencyYaml>;
   public readonly overrides: ReadonlyMap<string, string>;
+  public readonly packageExtensionsChecksum: undefined | string;
 
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
   private readonly _integrities: Map<string, Map<string, string>>;
@@ -304,6 +307,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     this.specifiers = new Map(Object.entries(shrinkwrapJson.specifiers || {}));
     this.packages = new Map(Object.entries(shrinkwrapJson.packages || {}));
     this.overrides = new Map(Object.entries(shrinkwrapJson.overrides || {}));
+    this.packageExtensionsChecksum = shrinkwrapJson.packageExtensionsChecksum;
 
     // Importers only exist in workspaces
     this.isWorkspaceCompatible = this.importers.size > 0;
