@@ -181,32 +181,45 @@ export abstract class AzureAuthenticationBase {
     terminal: ITerminal,
     onlyIfExistingCredentialExpiresAfter?: Date
   ): Promise<void> {
-    await CredentialCache.usingAsync(
-      {
-        supportEditing: true
-      },
-      async (credentialsCache: CredentialCache) => {
-        if (onlyIfExistingCredentialExpiresAfter) {
-          const existingCredentialExpiration: Date | undefined = credentialsCache.tryGetCacheEntry(
-            this._credentialCacheId
-          )?.expires;
-          if (
-            existingCredentialExpiration &&
-            existingCredentialExpiration > onlyIfExistingCredentialExpiresAfter
-          ) {
-            return;
-          }
+    let shouldUpdateCredential: boolean;
+    if (onlyIfExistingCredentialExpiresAfter) {
+      let existingCredentialExpiration: Date | undefined;
+      await CredentialCache.usingAsync(
+        {
+          supportEditing: false
+        },
+        async (credentialsCache: CredentialCache) => {
+          existingCredentialExpiration = credentialsCache.tryGetCacheEntry(this._credentialCacheId)?.expires;
         }
+      );
 
-        const credential: ICredentialResult = await this._getCredentialAsync(terminal, this._loginFlow);
-        credentialsCache.setCacheEntry(this._credentialCacheId, {
-          credential: credential.credentialString,
-          expires: credential.expiresOn,
-          credentialMetadata: credential.credentialMetadata
-        });
-        await credentialsCache.saveIfModifiedAsync();
-      }
-    );
+      shouldUpdateCredential =
+        !existingCredentialExpiration || existingCredentialExpiration <= onlyIfExistingCredentialExpiresAfter;
+    } else {
+      shouldUpdateCredential = true;
+    }
+
+    if (shouldUpdateCredential) {
+      const {
+        credentialString: credential,
+        expiresOn: expires,
+        credentialMetadata
+      }: ICredentialResult = await this._getCredentialAsync(terminal, this._loginFlow);
+
+      await CredentialCache.usingAsync(
+        {
+          supportEditing: true
+        },
+        async (credentialsCache: CredentialCache) => {
+          credentialsCache.setCacheEntry(this._credentialCacheId, {
+            credential,
+            expires,
+            credentialMetadata
+          });
+          await credentialsCache.saveIfModifiedAsync();
+        }
+      );
+    }
   }
 
   public async deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void> {
