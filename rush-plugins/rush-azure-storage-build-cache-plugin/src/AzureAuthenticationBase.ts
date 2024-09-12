@@ -198,7 +198,11 @@ export abstract class AzureAuthenticationBase {
           }
         }
 
-        const credential: ICredentialResult = await this._getCredentialAsync(terminal, this._loginFlow);
+        const credential: ICredentialResult = await this._getCredentialAsync(
+          terminal,
+          this._loginFlow,
+          credentialsCache
+        );
         credentialsCache.setCacheEntry(this._credentialCacheId, {
           credential: credential.credentialString,
           expires: credential.expiresOn,
@@ -272,12 +276,14 @@ export abstract class AzureAuthenticationBase {
 
   protected abstract _getCredentialFromTokenAsync(
     terminal: ITerminal,
-    tokenCredential: TokenCredential
+    tokenCredential: TokenCredential,
+    credentialsCache: CredentialCache
   ): Promise<ICredentialResult>;
 
   private async _getCredentialAsync(
     terminal: ITerminal,
-    loginFlow: LoginFlowType
+    loginFlow: LoginFlowType,
+    credentialsCache: CredentialCache
   ): Promise<ICredentialResult> {
     const authorityHost: string | undefined = AzureAuthorityHosts[this._azureEnvironment];
     if (!authorityHost) {
@@ -319,13 +325,13 @@ export abstract class AzureAuthenticationBase {
     }
 
     try {
-      return await this._getCredentialFromTokenAsync(terminal, tokenCredential);
+      return await this._getCredentialFromTokenAsync(terminal, tokenCredential, credentialsCache);
     } catch (error) {
       terminal.writeVerbose(`Failed to get credentials with ${loginFlow}: ${error}`);
       const fallbackFlow: LoginFlowType | undefined = this._failoverOrder[loginFlow];
       if (fallbackFlow) {
         terminal.writeVerbose(`Falling back to ${fallbackFlow} login flow`);
-        return this._getCredentialAsync(terminal, fallbackFlow);
+        return this._getCredentialAsync(terminal, fallbackFlow, credentialsCache);
       } else {
         throw error;
       }
