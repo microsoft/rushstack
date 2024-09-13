@@ -63,17 +63,6 @@ export interface IRushPhaseSharding {
    * @defaultValue `--shard-output-folder=.rush/operations/{phaseName}/shards/{shardIndex}`.
    */
   outputFolderArgumentFormat?: string;
-
-  /**
-   * Configuration for the shard operation. All other configuration applies to the collator operation.
-   */
-  shardOperationSettings?: {
-    /**
-     * How many concurrency units this operation should take up during execution. The maximum concurrent units is
-     *  determined by the -p flag.
-     */
-    weight?: number;
-  };
 }
 
 /**

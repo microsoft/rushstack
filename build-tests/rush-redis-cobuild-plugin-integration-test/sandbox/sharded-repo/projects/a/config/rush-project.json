@@ -6,12 +6,12 @@
       "outputFolderNames": ["dist"],
       "sharding": {
         "count": 4,
-        "outputFolderArgumentFormat": "--output-directory=.rush/{phaseName}/shards/{shardIndex}",
-
-        "shardOperationSettings": {
-          "weight": 4
-        }
+        "outputFolderArgumentFormat": "--output-directory=.rush/{phaseName}/shards/{shardIndex}"
       }
+    },
+    {
+      "operationName": "_phase:build:shard",
+      "weight": 4
     }
   ]
 }
