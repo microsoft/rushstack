@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Remove sharding.shardOperationSettings. Use a new operationSettings object with a name of ':shard'",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "aramissennyeydd@users.noreply.github.com"
+}
