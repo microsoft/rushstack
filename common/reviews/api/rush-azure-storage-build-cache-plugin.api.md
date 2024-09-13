@@ -5,6 +5,7 @@
 ```ts
 
 import { AzureAuthorityHosts } from '@azure/identity';
+import { CredentialCache } from '@rushstack/rush-sdk';
 import { DeviceCodeCredentialOptions } from '@azure/identity';
 import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import { InteractiveBrowserCredentialNodeOptions } from '@azure/identity';
@@ -37,7 +38,7 @@ export abstract class AzureAuthenticationBase {
     protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined>;
     protected abstract _getCacheIdParts(): string[];
     // (undocumented)
-    protected abstract _getCredentialFromTokenAsync(terminal: ITerminal, tokenCredential: TokenCredential): Promise<ICredentialResult>;
+    protected abstract _getCredentialFromTokenAsync(terminal: ITerminal, tokenCredential: TokenCredential, credentialsCache: CredentialCache): Promise<ICredentialResult>;
     // (undocumented)
     protected readonly _loginFlow: LoginFlowType;
     // (undocumented)
