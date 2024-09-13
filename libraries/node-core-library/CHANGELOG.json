@@ -2,6 +2,26 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.9.0",
+      "tag": "@rushstack/node-core-library_v5.9.0",
+      "date": "Fri, 13 Sep 2024 00:11:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `Sort.sortKeys` function for sorting keys in an object"
+          },
+          {
+            "comment": "Rename `LockFile.acquire` to `Lockfile.acquireAsync`."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue where attempting to acquire multiple `LockFile`s at the same time on POSIX would cause the second to immediately be acquired without releasing the first."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.8.0",
       "tag": "@rushstack/node-core-library_v5.8.0",
       "date": "Tue, 10 Sep 2024 20:08:11 GMT",
