@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 07 Sep 2024 00:18:08 GMT and should not be manually modified.
+This log was last generated on Fri, 13 Sep 2024 01:02:46 GMT and should not be manually modified.
+
+## 5.134.0
+Fri, 13 Sep 2024 01:02:46 GMT
+
+### Updates
+
+- Always update shrinkwrap when `globalPackageExtensions` in `common/config/rush/pnpm-config.json` has been changed.
+- Pass the initialized credentials cache to `AzureAuthenticationBase._getCredentialFromTokenAsync` in `@rushstack/rush-azure-storage-build-cache-plugin`.
+- Support the `rush-pnpm patch-remove` command.
 
 ## 5.133.4
 Sat, 07 Sep 2024 00:18:08 GMT
