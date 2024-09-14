@@ -178,6 +178,13 @@ export interface IExtractorDependencyConfiguration {
 }
 
 /**
+ * The mode to use for link creation.
+ *
+ * @public
+ */
+export type LinkCreationMode = 'default' | 'script' | 'none';
+
+/**
  * Options that can be provided to the extractor.
  *
  * @public
@@ -259,7 +266,7 @@ export interface IExtractorOptions {
    * to create links on the server machine, after the files have been uploaded.
    * "none": Do nothing; some other tool may create the links later, based on the extractor-metadata.json file.
    */
-  linkCreation?: 'default' | 'script' | 'none';
+  linkCreation?: LinkCreationMode;
 
   /**
    * The path to the generated link creation script. This is only used when {@link IExtractorOptions.linkCreation}
@@ -331,52 +338,22 @@ export class PackageExtractor {
       targetRootFolder,
       mainProjectName,
       overwriteExisting,
-      createArchiveFilePath,
-      createArchiveOnly,
       dependencyConfigurations
     } = options;
-
-    if (createArchiveOnly) {
-      if (options.linkCreation !== 'script' && options.linkCreation !== 'none') {
-        throw new Error('createArchiveOnly is only supported when linkCreation is "script" or "none"');
-      }
-      if (!createArchiveFilePath) {
-        throw new Error('createArchiveOnly is only supported when createArchiveFilePath is specified');
-      }
-    }
-
-    let archiveFilePath: string | undefined;
-    if (createArchiveFilePath) {
-      if (path.extname(createArchiveFilePath) !== '.zip') {
-        throw new Error('Only archives with the .zip file extension are currently supported.');
-      }
-
-      archiveFilePath = path.resolve(targetRootFolder, createArchiveFilePath);
-    }
-
-    await FileSystem.ensureFolderAsync(targetRootFolder);
 
     terminal.writeLine(Colorize.cyan(`Extracting to target folder:  ${targetRootFolder}`));
     terminal.writeLine(Colorize.cyan(`Main project for extraction: ${mainProjectName}`));
 
-    try {
-      const existingExtraction: boolean =
-        (await FileSystem.readFolderItemNamesAsync(targetRootFolder)).length > 0;
-      if (existingExtraction) {
-        if (!overwriteExisting) {
-          throw new Error(
-            'The extraction target folder is not empty. Overwrite must be explicitly requested'
-          );
-        } else {
-          terminal.writeLine('Deleting target folder contents...');
-          terminal.writeLine('');
-          await FileSystem.ensureEmptyFolderAsync(targetRootFolder);
-        }
+    await FileSystem.ensureFolderAsync(targetRootFolder);
+    const existingExtraction: boolean =
+      (await FileSystem.readFolderItemNamesAsync(targetRootFolder)).length > 0;
+    if (existingExtraction) {
+      if (!overwriteExisting) {
+        throw new Error('The extraction target folder is not empty. Overwrite must be explicitly requested');
       }
-    } catch (error: unknown) {
-      if (!FileSystem.isFolderDoesNotExistError(error as Error)) {
-        throw error;
-      }
+      terminal.writeLine('Deleting target folder contents...');
+      terminal.writeLine('');
+      await FileSystem.ensureEmptyFolderAsync(targetRootFolder);
     }
 
     // Create a new state for each run
@@ -387,12 +364,7 @@ export class PackageExtractor {
       projectConfigurationsByPath: new Map(projectConfigurations.map((p) => [p.projectFolder, p])),
       dependencyConfigurationsByName: new Map(),
       symlinkAnalyzer: new SymlinkAnalyzer({ requiredSourceParentPath: sourceRootFolder }),
-      assetHandler: new AssetHandler({
-        terminal,
-        targetRootFolder,
-        createArchiveOnly,
-        archiveFilePath
-      })
+      assetHandler: new AssetHandler(options)
     };
 
     // set state dependencyConfigurationsByName
@@ -508,6 +480,15 @@ export class PackageExtractor {
     }
 
     switch (linkCreation) {
+      case 'default': {
+        terminal.writeLine('Creating symlinks');
+        const linksToCopy: ILinkInfo[] = symlinkAnalyzer.reportSymlinks();
+        await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
+          await this._extractSymlinkAsync(linkToCopy, options, state);
+        });
+        await this._makeBinLinksAsync(options, state);
+        break;
+      }
       case 'script': {
         terminal.writeLine(`Creating ${createLinksScriptFilename}`);
         const createLinksSourceFilePath: string = `${scriptsFolderPath}/${createLinksScriptFilename}`;
@@ -526,15 +507,7 @@ export class PackageExtractor {
         });
         break;
       }
-      case 'default': {
-        terminal.writeLine('Creating symlinks');
-        const linksToCopy: ILinkInfo[] = symlinkAnalyzer.reportSymlinks();
-        await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
-          await this._extractSymlinkAsync(linkToCopy, options, state);
-        });
-        await this._makeBinLinksAsync(options, state);
-        break;
-      }
+      case 'none':
       default: {
         break;
       }
@@ -889,7 +862,7 @@ export class PackageExtractor {
           const { kind, linkStats: sourceFileStats } = await state.symlinkAnalyzer.analyzePathAsync({
             inputPath: sourceFilePath
           });
-          if (kind !== 'link') {
+          if (kind === 'file') {
             const targetFilePath: string = path.resolve(targetFolderPath, npmPackFile);
             await assetHandler.includeAssetAsync({
               sourceFilePath,

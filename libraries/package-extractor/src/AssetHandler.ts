@@ -6,13 +6,7 @@ import fs from 'node:fs';
 import { FileSystem, Path, type FileSystemStats } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { ArchiveManager } from './ArchiveManager';
-
-export interface IAssetHandlerOptions {
-  terminal: ITerminal;
-  targetRootFolder: string;
-  createArchiveOnly?: boolean;
-  archiveFilePath?: string;
-}
+import type { IExtractorOptions, LinkCreationMode } from './PackageExtractor';
 
 export interface IIncludeAssetOptions {
   sourceFilePath?: string;
@@ -44,18 +38,32 @@ export class AssetHandler {
   private readonly _createArchiveOnly: boolean;
   private readonly _archiveManager: ArchiveManager | undefined;
   private readonly _archiveFilePath: string | undefined;
+  private readonly _linkCreationMode: LinkCreationMode;
   private readonly _includedAssetPaths: Set<string> = new Set<string>();
   private _isFinalized: boolean = false;
 
-  public constructor(options: IAssetHandlerOptions) {
-    const { terminal, targetRootFolder, archiveFilePath, createArchiveOnly = false } = options;
+  public constructor(options: IExtractorOptions) {
+    const {
+      terminal,
+      targetRootFolder,
+      linkCreation,
+      createArchiveFilePath,
+      createArchiveOnly = false
+    } = options;
     this._terminal = terminal;
     this._targetRootFolder = targetRootFolder;
-    this._archiveFilePath = archiveFilePath;
-    this._createArchiveOnly = createArchiveOnly;
-    if (this._archiveFilePath) {
+    if (createArchiveFilePath) {
+      if (path.extname(createArchiveFilePath) !== '.zip') {
+        throw new Error('Only archives with the .zip file extension are currently supported.');
+      }
+      this._archiveFilePath = path.resolve(targetRootFolder, createArchiveFilePath);
       this._archiveManager = new ArchiveManager();
     }
+    if (createArchiveOnly && !this._archiveManager) {
+      throw new Error('createArchiveOnly cannot be true if createArchiveFilePath is not provided');
+    }
+    this._createArchiveOnly = createArchiveOnly;
+    this._linkCreationMode = linkCreation || 'default';
   }
 
   public async includeAssetAsync(options: IIncludeAssetPathOptions): Promise<void>;
