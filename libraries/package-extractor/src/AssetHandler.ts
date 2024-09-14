@@ -3,10 +3,12 @@
 
 import path from 'node:path';
 import fs from 'node:fs';
-import { FileSystem, Path, type FileSystemStats } from '@rushstack/node-core-library';
+import { Async, FileSystem, Path, type FileSystemStats } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { ArchiveManager } from './ArchiveManager';
 import type { IExtractorOptions, LinkCreationMode } from './PackageExtractor';
+import type { ILinkInfo, SymlinkAnalyzer } from './SymlinkAnalyzer';
+import { remapSourcePathForTargetFolder } from './Utils';
 
 export interface IIncludeAssetOptions {
   sourceFilePath?: string;
@@ -32,26 +34,36 @@ export interface IIncludeAssetContentOptions extends IIncludeAssetOptions {
   sourceFileStats?: never;
 }
 
+export interface IAssetHandlerOptions extends IExtractorOptions {
+  symlinkAnalyzer: SymlinkAnalyzer;
+}
+
 export class AssetHandler {
   private readonly _terminal: ITerminal;
+  private readonly _sourceRootFolder: string;
   private readonly _targetRootFolder: string;
   private readonly _createArchiveOnly: boolean;
+  private readonly _symlinkAnalyzer: SymlinkAnalyzer;
   private readonly _archiveManager: ArchiveManager | undefined;
   private readonly _archiveFilePath: string | undefined;
   private readonly _linkCreationMode: LinkCreationMode;
   private readonly _includedAssetPaths: Set<string> = new Set<string>();
   private _isFinalized: boolean = false;
 
-  public constructor(options: IExtractorOptions) {
+  public constructor(options: IAssetHandlerOptions) {
     const {
       terminal,
+      sourceRootFolder,
       targetRootFolder,
       linkCreation,
+      symlinkAnalyzer,
       createArchiveFilePath,
       createArchiveOnly = false
     } = options;
     this._terminal = terminal;
+    this._sourceRootFolder = sourceRootFolder;
     this._targetRootFolder = targetRootFolder;
+    this._symlinkAnalyzer = symlinkAnalyzer;
     if (createArchiveFilePath) {
       if (path.extname(createArchiveFilePath) !== '.zip') {
         throw new Error('Only archives with the .zip file extension are currently supported.');
@@ -140,10 +152,73 @@ export class AssetHandler {
     if (this._isFinalized) {
       throw new Error('finalizeAsync() has already been called');
     }
+
+    if (this._linkCreationMode === 'default') {
+      this._terminal.writeLine('Creating symlinks');
+      const linksToCopy: ILinkInfo[] = this._symlinkAnalyzer.reportSymlinks();
+      await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
+        await this._extractSymlinkAsync(linkToCopy);
+      });
+    }
+
     if (this._archiveManager && this._archiveFilePath) {
       this._terminal.writeLine(`Creating archive at "${this._archiveFilePath}"`);
       await this._archiveManager.createArchiveAsync(this._archiveFilePath);
     }
+
     this._isFinalized = true;
+  }
+
+  /**
+   * Create a symlink as described by the ILinkInfo object.
+   */
+  private async _extractSymlinkAsync(linkInfo: ILinkInfo): Promise<void> {
+    const { kind, linkPath, targetPath } = {
+      ...linkInfo,
+      linkPath: remapSourcePathForTargetFolder({
+        sourceRootFolder: this._sourceRootFolder,
+        targetRootFolder: this._targetRootFolder,
+        sourcePath: linkInfo.linkPath
+      }),
+      targetPath: remapSourcePathForTargetFolder({
+        sourceRootFolder: this._sourceRootFolder,
+        targetRootFolder: this._targetRootFolder,
+        sourcePath: linkInfo.targetPath
+      })
+    };
+
+    const newLinkFolder: string = path.dirname(linkPath);
+    await FileSystem.ensureFolderAsync(newLinkFolder);
+
+    // Link to the relative path for symlinks
+    const relativeTargetPath: string = path.relative(newLinkFolder, targetPath);
+
+    // NOTE: This logic is based on NpmLinkManager._createSymlink()
+    if (kind === 'fileLink') {
+      // For files, we use a Windows "hard link", because creating a symbolic link requires
+      // administrator permission. However hard links seem to cause build failures on Mac,
+      // so for all other operating systems we use symbolic links for this case.
+      if (process.platform === 'win32') {
+        await FileSystem.createHardLinkAsync({
+          linkTargetPath: relativeTargetPath,
+          newLinkPath: linkPath
+        });
+      } else {
+        await FileSystem.createSymbolicLinkFileAsync({
+          linkTargetPath: relativeTargetPath,
+          newLinkPath: linkPath
+        });
+      }
+    } else {
+      // Junctions are only supported on Windows. This will create a symbolic link on other platforms.
+      await FileSystem.createSymbolicLinkJunctionAsync({
+        linkTargetPath: relativeTargetPath,
+        newLinkPath: linkPath
+      });
+    }
+
+    // Since the created symlinks have the required relative paths, they can be added directly to
+    // the archive.
+    await this.includeAssetAsync({ targetFilePath: linkPath });
   }
 }
