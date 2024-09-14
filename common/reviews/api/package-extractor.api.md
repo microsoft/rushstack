@@ -31,7 +31,7 @@ export interface IExtractorOptions {
     folderToCopy?: string;
     includeDevDependencies?: boolean;
     includeNpmIgnoreFiles?: boolean;
-    linkCreation?: 'default' | 'script' | 'none';
+    linkCreation?: LinkCreationMode;
     linkCreationScriptPath?: string;
     mainProjectName: string;
     overwriteExisting: boolean;
@@ -74,6 +74,9 @@ export interface IProjectInfoJson {
     path: string;
     projectName: string;
 }
+
+// @public
+export type LinkCreationMode = 'default' | 'script' | 'none';
 
 // @public
 export class PackageExtractor {
