@@ -17,6 +17,7 @@ export interface IExtractorDependencyConfiguration {
 
 // @public
 export interface IExtractorMetadataJson {
+    files: string[];
     links: ILinkInfo[];
     mainProjectName: string;
     projects: IProjectInfoJson[];

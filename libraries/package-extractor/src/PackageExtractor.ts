@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as fs from 'fs';
 import { type IMinimatch, Minimatch } from 'minimatch';
 import semver from 'semver';
 import npmPacklist from 'npm-packlist';
@@ -19,8 +18,8 @@ import {
 } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { ArchiveManager } from './ArchiveManager';
 import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyzer';
+import { AssetHandler } from './AssetHandler';
 import { matchesWithStar } from './Utils';
 import { createLinksScriptFilename, scriptsFolderPath } from './PathConstants';
 
@@ -72,6 +71,10 @@ export interface IExtractorMetadataJson {
    * A list of all links that are part of the extracted project.
    */
   links: ILinkInfo[];
+  /**
+   * A list of all files that are part of the extracted project.
+   */
+  files: string[];
 }
 
 /**
@@ -103,7 +106,7 @@ interface IExtractorState {
   projectConfigurationsByName: Map<string, IExtractorProjectConfiguration>;
   dependencyConfigurationsByName: Map<string, IExtractorDependencyConfiguration[]>;
   symlinkAnalyzer: SymlinkAnalyzer;
-  archiver?: ArchiveManager;
+  assetHandler: AssetHandler;
 }
 
 /**
@@ -342,7 +345,6 @@ export class PackageExtractor {
       }
     }
 
-    let archiver: ArchiveManager | undefined;
     let archiveFilePath: string | undefined;
     if (createArchiveFilePath) {
       if (path.extname(createArchiveFilePath) !== '.zip') {
@@ -350,7 +352,6 @@ export class PackageExtractor {
       }
 
       archiveFilePath = path.resolve(targetRootFolder, createArchiveFilePath);
-      archiver = new ArchiveManager();
     }
 
     await FileSystem.ensureFolderAsync(targetRootFolder);
@@ -386,8 +387,14 @@ export class PackageExtractor {
       projectConfigurationsByPath: new Map(projectConfigurations.map((p) => [p.projectFolder, p])),
       dependencyConfigurationsByName: new Map(),
       symlinkAnalyzer: new SymlinkAnalyzer({ requiredSourceParentPath: sourceRootFolder }),
-      archiver
+      assetHandler: new AssetHandler({
+        terminal,
+        targetRootFolder,
+        createArchiveOnly,
+        archiveFilePath
+      })
     };
+
     // set state dependencyConfigurationsByName
     for (const dependencyConfiguration of dependencyConfigurations || []) {
       const { dependencyName } = dependencyConfiguration;
@@ -401,10 +408,7 @@ export class PackageExtractor {
     }
 
     await this._performExtractionAsync(options, state);
-    if (archiver && archiveFilePath) {
-      terminal.writeLine(`Creating archive at "${archiveFilePath}"`);
-      await archiver.createArchiveAsync(archiveFilePath);
-    }
+    await state.assetHandler.finalizeAsync();
   }
 
   private static _normalizeOptions(options: IExtractorOptions): IExtractorOptions {
@@ -448,7 +452,7 @@ export class PackageExtractor {
       linkCreationScriptPath,
       createArchiveOnly
     } = options;
-    const { projectConfigurationsByName, foldersToCopy, symlinkAnalyzer } = state;
+    const { projectConfigurationsByName, foldersToCopy, assetHandler, symlinkAnalyzer } = state;
 
     const mainProjectConfiguration: IExtractorProjectConfiguration | undefined =
       projectConfigurationsByName.get(mainProjectName);
@@ -507,22 +511,18 @@ export class PackageExtractor {
       case 'script': {
         terminal.writeLine(`Creating ${createLinksScriptFilename}`);
         const createLinksSourceFilePath: string = `${scriptsFolderPath}/${createLinksScriptFilename}`;
-        const createLinksTargetFilePath: string = linkCreationScriptPath
-          ? path.resolve(targetRootFolder, linkCreationScriptPath)
-          : `${targetRootFolder}/${createLinksScriptFilename}`;
+        const createLinksTargetFilePath: string = path.resolve(
+          targetRootFolder,
+          linkCreationScriptPath || createLinksScriptFilename
+        );
         let createLinksScriptContent: string = await FileSystem.readFileAsync(createLinksSourceFilePath);
         createLinksScriptContent = createLinksScriptContent.replace(
           TARGET_ROOT_SCRIPT_RELATIVE_PATH_TEMPLATE_STRING,
           Path.convertToSlashes(path.relative(path.dirname(createLinksTargetFilePath), targetRootFolder))
         );
-        if (!createArchiveOnly) {
-          await FileSystem.writeFileAsync(createLinksTargetFilePath, createLinksScriptContent, {
-            ensureFolderExists: true
-          });
-        }
-        await state.archiver?.addToArchiveAsync({
-          fileData: createLinksScriptContent,
-          archivePath: path.relative(targetRootFolder, createLinksTargetFilePath)
+        await assetHandler.includeAssetAsync({
+          sourceFileContent: createLinksScriptContent,
+          targetFilePath: createLinksTargetFilePath
         });
         break;
       }
@@ -739,7 +739,7 @@ export class PackageExtractor {
    * Example input: "C:\\MyRepo\\libraries\\my-lib"
    * Example output: "C:\\MyRepo\\common\\deploy\\libraries\\my-lib"
    */
-  private _remapPathForExtractorFolder(
+  private _remapSourcePathForExtractorFolder(
     absolutePathInSourceFolder: string,
     options: IExtractorOptions
   ): string {
@@ -758,14 +758,32 @@ export class PackageExtractor {
    * Example input: "C:\\MyRepo\\libraries\\my-lib"
    * Example output: "libraries/my-lib"
    */
-  private _remapPathForExtractorMetadata(
+  private _remapSourcePathForExtractorMetadata(
     absolutePathInSourceFolder: string,
     options: IExtractorOptions
   ): string {
     const { sourceRootFolder } = options;
-    const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
+    return this._remapPathForExtractorMetadata(sourceRootFolder, absolutePathInSourceFolder);
+  }
+
+  /**
+   * Maps a file path from IExtractorOptions.targetRootFolder to relative path
+   *
+   * Example input: "C:\\MyRepo\\libraries\\my-lib"
+   * Example output: "libraries/my-lib"
+   */
+  private _remapTargetPathForExtractorMetadata(
+    absolutePathInTargetFolder: string,
+    options: IExtractorOptions
+  ): string {
+    const { targetRootFolder } = options;
+    return this._remapPathForExtractorMetadata(targetRootFolder, absolutePathInTargetFolder);
+  }
+
+  private _remapPathForExtractorMetadata(folderPath: string, filePath: string): string {
+    const relativePath: string = path.relative(folderPath, filePath);
     if (relativePath.startsWith('..')) {
-      throw new Error(`Source path "${absolutePathInSourceFolder}" is not under "${sourceRootFolder}"`);
+      throw new Error(`Path "${filePath}" is not under "${folderPath}"`);
     }
     return Path.convertToSlashes(relativePath);
   }
@@ -778,8 +796,8 @@ export class PackageExtractor {
     options: IExtractorOptions,
     state: IExtractorState
   ): Promise<void> {
-    const { includeNpmIgnoreFiles, targetRootFolder } = options;
-    const { projectConfigurationsByPath, packageJsonByPath, dependencyConfigurationsByName, archiver } =
+    const { includeNpmIgnoreFiles } = options;
+    const { projectConfigurationsByPath, packageJsonByPath, dependencyConfigurationsByName, assetHandler } =
       state;
     let useNpmIgnoreFilter: boolean = false;
 
@@ -788,8 +806,8 @@ export class PackageExtractor {
       projectConfigurationsByPath.get(sourceFolderRealPath);
 
     const packagesJson: IPackageJson | undefined = packageJsonByPath.get(sourceFolderRealPath);
-    // As this function will be used to copy folder for both project inside monorepo and third party dependencies insides node_modules
-    // Third party dependencies won't have project configurations
+    // As this function will be used to copy folder for both project inside monorepo and third party
+    // dependencies insides node_modules. Third party dependencies won't have project configurations
     const isLocalProject: boolean = !!sourceProjectConfiguration;
 
     // Function to filter files inside local project or third party dependencies.
@@ -849,13 +867,9 @@ export class PackageExtractor {
       useNpmIgnoreFilter = true;
     }
 
-    const targetFolderPath: string = this._remapPathForExtractorFolder(sourceFolderPath, options);
-
+    const targetFolderPath: string = this._remapSourcePathForExtractorFolder(sourceFolderPath, options);
     if (useNpmIgnoreFilter) {
       const npmPackFiles: string[] = await PackageExtractor.getPackageIncludedFilesAsync(sourceFolderPath);
-
-      const alreadyCopiedSourcePaths: Set<string> = new Set();
-
       await Async.forEachAsync(
         npmPackFiles,
         async (npmPackFile: string) => {
@@ -871,35 +885,17 @@ export class PackageExtractor {
             return;
           }
 
-          // We can detect the duplicates by comparing the path.resolve() result.
-          const copySourcePath: string = path.resolve(sourceFolderPath, npmPackFile);
-
-          if (alreadyCopiedSourcePaths.has(copySourcePath)) {
-            return;
-          }
-          alreadyCopiedSourcePaths.add(copySourcePath);
-
-          const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
-
-          const copySourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync({
-            inputPath: copySourcePath
+          const sourceFilePath: string = path.resolve(sourceFolderPath, npmPackFile);
+          const { kind, linkStats: sourceFileStats } = await state.symlinkAnalyzer.analyzePathAsync({
+            inputPath: sourceFilePath
           });
-          if (copySourcePathNode.kind !== 'link') {
-            if (!options.createArchiveOnly) {
-              await FileSystem.ensureFolderAsync(path.dirname(copyDestinationPath));
-              // Use the fs.copyFile API instead of FileSystem.copyFileAsync() since copyFileAsync performs
-              // a needless stat() call to determine if it's a file or folder, and we already know it's a file.
-              await fs.promises.copyFile(copySourcePath, copyDestinationPath, fs.constants.COPYFILE_EXCL);
-            }
-
-            if (archiver) {
-              const archivePath: string = path.relative(targetRootFolder, copyDestinationPath);
-              await archiver.addToArchiveAsync({
-                filePath: copySourcePath,
-                archivePath,
-                stats: copySourcePathNode.linkStats
-              });
-            }
+          if (kind !== 'link') {
+            const targetFilePath: string = path.resolve(targetFolderPath, npmPackFile);
+            await assetHandler.includeAssetAsync({
+              sourceFilePath,
+              sourceFileStats,
+              targetFilePath
+            });
           }
         },
         {
@@ -955,23 +951,12 @@ export class PackageExtractor {
               return;
             }
 
-            const targetPath: string = path.join(targetFolderPath, relativeSourcePath);
-            if (!options.createArchiveOnly) {
-              // Manually call fs.copyFile to avoid unnecessary stat calls.
-              const targetParentPath: string = path.dirname(targetPath);
-              await FileSystem.ensureFolderAsync(targetParentPath);
-              await fs.promises.copyFile(sourcePath, targetPath, fs.constants.COPYFILE_EXCL);
-            }
-
-            // Add the file to the archive. Only need to add files since directories will be auto-created
-            if (archiver) {
-              const archivePath: string = path.relative(targetRootFolder, targetPath);
-              await archiver.addToArchiveAsync({
-                filePath: sourcePath,
-                archivePath: archivePath,
-                stats: sourcePathNode.linkStats
-              });
-            }
+            const targetFilePath: string = path.resolve(targetFolderPath, relativeSourcePath);
+            await assetHandler.includeAssetAsync({
+              sourceFilePath: sourcePath,
+              sourceFileStats: sourcePathNode.linkStats,
+              targetFilePath
+            });
           } else if (sourcePathNode.kind === 'folder') {
             const children: string[] = await FileSystem.readFolderItemNamesAsync(sourcePath);
             for (const child of children) {
@@ -996,47 +981,46 @@ export class PackageExtractor {
     options: IExtractorOptions,
     state: IExtractorState
   ): Promise<void> {
-    const linkInfo: ILinkInfo = {
+    const { kind, linkPath, targetPath } = {
       kind: originalLinkInfo.kind,
-      linkPath: this._remapPathForExtractorFolder(originalLinkInfo.linkPath, options),
-      targetPath: this._remapPathForExtractorFolder(originalLinkInfo.targetPath, options)
+      linkPath: this._remapSourcePathForExtractorFolder(originalLinkInfo.linkPath, options),
+      targetPath: this._remapSourcePathForExtractorFolder(originalLinkInfo.targetPath, options)
     };
 
-    const newLinkFolder: string = path.dirname(linkInfo.linkPath);
+    const newLinkFolder: string = path.dirname(linkPath);
     await FileSystem.ensureFolderAsync(newLinkFolder);
 
     // Link to the relative path for symlinks
-    const relativeTargetPath: string = path.relative(newLinkFolder, linkInfo.targetPath);
+    const relativeTargetPath: string = path.relative(newLinkFolder, targetPath);
 
     // NOTE: This logic is based on NpmLinkManager._createSymlink()
-    if (linkInfo.kind === 'fileLink') {
+    if (kind === 'fileLink') {
       // For files, we use a Windows "hard link", because creating a symbolic link requires
       // administrator permission. However hard links seem to cause build failures on Mac,
       // so for all other operating systems we use symbolic links for this case.
       if (process.platform === 'win32') {
         await FileSystem.createHardLinkAsync({
           linkTargetPath: relativeTargetPath,
-          newLinkPath: linkInfo.linkPath
+          newLinkPath: linkPath
         });
       } else {
         await FileSystem.createSymbolicLinkFileAsync({
           linkTargetPath: relativeTargetPath,
-          newLinkPath: linkInfo.linkPath
+          newLinkPath: linkPath
         });
       }
     } else {
       // Junctions are only supported on Windows. This will create a symbolic link on other platforms.
       await FileSystem.createSymbolicLinkJunctionAsync({
         linkTargetPath: relativeTargetPath,
-        newLinkPath: linkInfo.linkPath
+        newLinkPath: linkPath
       });
     }
 
     // Since the created symlinks have the required relative paths, they can be added directly to
     // the archive.
-    await state.archiver?.addToArchiveAsync({
-      filePath: linkInfo.linkPath,
-      archivePath: path.relative(options.targetRootFolder, linkInfo.linkPath)
+    await state.assetHandler.includeAssetAsync({
+      targetFilePath: linkPath
     });
   }
 
@@ -1062,37 +1046,37 @@ export class PackageExtractor {
     const extractorMetadataJson: IExtractorMetadataJson = {
       mainProjectName,
       projects: [],
-      links: []
+      links: [],
+      files: []
     };
 
     for (const { projectFolder, projectName } of projectConfigurationsByPath.values()) {
       if (state.foldersToCopy.has(projectFolder)) {
         extractorMetadataJson.projects.push({
           projectName,
-          path: this._remapPathForExtractorMetadata(projectFolder, options)
+          path: this._remapSourcePathForExtractorMetadata(projectFolder, options)
         });
       }
     }
 
     // Remap the links to be relative to target folder
-    for (const absoluteLinkInfo of state.symlinkAnalyzer.reportSymlinks()) {
-      const relativeInfo: ILinkInfo = {
-        kind: absoluteLinkInfo.kind,
-        linkPath: this._remapPathForExtractorMetadata(absoluteLinkInfo.linkPath, options),
-        targetPath: this._remapPathForExtractorMetadata(absoluteLinkInfo.targetPath, options)
-      };
-      extractorMetadataJson.links.push(relativeInfo);
-    }
-
-    const extractorMetadataFileContent: string = JSON.stringify(extractorMetadataJson, undefined, 0);
-    if (!options.createArchiveOnly) {
-      await FileSystem.writeFileAsync(extractorMetadataFilePath, extractorMetadataFileContent, {
-        ensureFolderExists: true
+    for (const { kind, linkPath, targetPath } of state.symlinkAnalyzer.reportSymlinks()) {
+      extractorMetadataJson.links.push({
+        kind,
+        linkPath: this._remapSourcePathForExtractorMetadata(linkPath, options),
+        targetPath: this._remapSourcePathForExtractorMetadata(targetPath, options)
       });
     }
 
-    const archivePath: string = path.relative(targetRootFolder, extractorMetadataFilePath);
-    await state.archiver?.addToArchiveAsync({ archivePath, fileData: extractorMetadataFileContent });
+    for (const assetPath of state.assetHandler.assetPaths) {
+      extractorMetadataJson.files.push(this._remapTargetPathForExtractorMetadata(assetPath, options));
+    }
+
+    const extractorMetadataFileContent: string = JSON.stringify(extractorMetadataJson, undefined, 0);
+    await state.assetHandler.includeAssetAsync({
+      sourceFileContent: extractorMetadataFileContent,
+      targetFilePath: extractorMetadataFilePath
+    });
   }
 
   private async _makeBinLinksAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
@@ -1105,7 +1089,10 @@ export class PackageExtractor {
     await Async.forEachAsync(
       extractedProjectFolders,
       async (projectFolder: string) => {
-        const extractedProjectFolder: string = this._remapPathForExtractorFolder(projectFolder, options);
+        const extractedProjectFolder: string = this._remapSourcePathForExtractorFolder(
+          projectFolder,
+          options
+        );
         const extractedProjectNodeModulesFolder: string = path.join(extractedProjectFolder, 'node_modules');
         const extractedProjectBinFolder: string = path.join(extractedProjectNodeModulesFolder, '.bin');
 
@@ -1117,14 +1104,13 @@ export class PackageExtractor {
           }
         );
 
-        if (linkedBinPackageNames.length && state.archiver) {
+        if (linkedBinPackageNames.length) {
           const binFolderItems: string[] =
             await FileSystem.readFolderItemNamesAsync(extractedProjectBinFolder);
           for (const binFolderItem of binFolderItems) {
-            const binFilePath: string = path.join(extractedProjectBinFolder, binFolderItem);
-            await state.archiver.addToArchiveAsync({
-              filePath: binFilePath,
-              archivePath: path.relative(options.targetRootFolder, binFilePath)
+            const binFilePath: string = path.resolve(extractedProjectBinFolder, binFolderItem);
+            await state.assetHandler.includeAssetAsync({
+              targetFilePath: binFilePath
             });
           }
         }
