@@ -4,9 +4,13 @@
 import path from 'path';
 import type { ChildProcess } from 'child_process';
 
-import { Executable, FileSystem } from '@rushstack/node-core-library';
+import { Executable, FileSystem, Sort } from '@rushstack/node-core-library';
 import { Terminal, StringBufferTerminalProvider } from '@rushstack/terminal';
-import { PackageExtractor, type IExtractorProjectConfiguration } from '../PackageExtractor';
+import {
+  PackageExtractor,
+  type IExtractorProjectConfiguration,
+  type IExtractorMetadataJson
+} from '../PackageExtractor';
 
 // Do this work in the "temp/test.jest" directory since it gets cleaned on clean runs
 const extractorTargetFolder: string = path.resolve(__dirname, '..', '..', 'test-output');
@@ -529,6 +533,15 @@ describe(PackageExtractor.name, () => {
         )
       )
     ).resolves.toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
+
+    const metadataFileContent: string = await FileSystem.readFileAsync(
+      `${targetFolder}/extractor-metadata.json`
+    );
+    const metadata: IExtractorMetadataJson = JSON.parse(metadataFileContent);
+    Sort.sortBy(metadata.files, (x) => x);
+    Sort.sortBy(metadata.links, (x) => x.linkPath);
+    Sort.sortBy(metadata.projects, (x) => x.path);
+    expect(metadata).toMatchSnapshot();
   });
 
   it('should extract project with script linkCreation and custom linkCreationScriptPath', async () => {
@@ -596,5 +609,14 @@ describe(PackageExtractor.name, () => {
         )
       )
     ).resolves.toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
+
+    const metadataFileContent: string = await FileSystem.readFileAsync(
+      `${path.dirname(linkCreationScriptPath)}/extractor-metadata.json`
+    );
+    const metadata: IExtractorMetadataJson = JSON.parse(metadataFileContent);
+    Sort.sortBy(metadata.files, (x) => x);
+    Sort.sortBy(metadata.links, (x) => x.linkPath);
+    Sort.sortBy(metadata.projects, (x) => x.path);
+    expect(metadata).toMatchSnapshot();
   });
 });
