@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/package-extractor",
-      "comment": "Add a \"files\" field to the extractor-metadata.json file",
+      "comment": "Add a `files` field to the `extractor-metadata.json` file",
       "type": "minor"
     }
   ],
