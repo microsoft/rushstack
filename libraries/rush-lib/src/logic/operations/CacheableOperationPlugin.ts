@@ -34,8 +34,6 @@ import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
-import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { ExperimentsConfiguration } from '../../api/ExperimentsConfiguration';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 const PERIODIC_CALLBACK_INTERVAL_IN_SECONDS: number = 10;

@@ -87,7 +87,6 @@ export class CobuildConfiguration {
     this.cobuildRunnerId = EnvironmentConfiguration.cobuildRunnerId || uuidv4();
     this.cobuildLeafProjectLogOnlyAllowed =
       EnvironmentConfiguration.cobuildLeafProjectLogOnlyAllowed ?? false;
-    console.log(JSON.stringify(rushConfiguration.experimentsConfiguration.configuration));
     this.cobuildWithoutCacheAllowed =
       rushConfiguration.experimentsConfiguration.configuration.allowCobuildWithoutCache ?? false;
 
