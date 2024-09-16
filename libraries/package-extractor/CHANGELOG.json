@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@rushstack/package-extractor_v0.9.0",
+      "date": "Mon, 16 Sep 2024 02:09:00 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `files` field to the `extractor-metadata.json` file"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.1",
       "tag": "@rushstack/package-extractor_v0.8.1",
       "date": "Fri, 13 Sep 2024 00:11:43 GMT",

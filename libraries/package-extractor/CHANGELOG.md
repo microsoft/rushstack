@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Fri, 13 Sep 2024 00:11:43 GMT and should not be manually modified.
+This log was last generated on Mon, 16 Sep 2024 02:09:00 GMT and should not be manually modified.
+
+## 0.9.0
+Mon, 16 Sep 2024 02:09:00 GMT
+
+### Minor changes
+
+- Add a `files` field to the `extractor-metadata.json` file
 
 ## 0.8.1
 Fri, 13 Sep 2024 00:11:43 GMT
