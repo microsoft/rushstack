@@ -167,12 +167,6 @@ export const EnvironmentVariableNames = {
   RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: 'RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED',
 
   /**
-   * If this variable is set to "1", When getting distributed builds, Rush will allow uncacheable projects to still leverage
-   * the cobuild feature. This is useful when you want to speed up operations that can't (or shouldn't) be cached.
-   */
-  RUSH_COBUILD_WITHOUT_CACHE_ALLOWED: 'RUSH_COBUILD_WITHOUT_CACHE_ALLOWED',
-
-  /**
    * Explicitly specifies the path for the Git binary that is invoked by certain Rush operations.
    */
   RUSH_GIT_BINARY_PATH: 'RUSH_GIT_BINARY_PATH',
@@ -253,8 +247,6 @@ export class EnvironmentConfiguration {
   private static _cobuildRunnerId: string | undefined;
 
   private static _cobuildLeafProjectLogOnlyAllowed: boolean | undefined;
-
-  private static _cobuildWithoutCacheAllowed: boolean | undefined;
 
   private static _gitBinaryPath: string | undefined;
 
@@ -378,15 +370,6 @@ export class EnvironmentConfiguration {
   public static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._cobuildLeafProjectLogOnlyAllowed;
-  }
-
-  /**
-   * If set, enables or disables the cobuild leaf project log only feature.
-   * See {@link EnvironmentVariableNames.RUSH_COBUILD_WITHOUT_CACHE_ALLOWED}
-   */
-  public static get cobuildWithoutCacheAllowed(): boolean | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._cobuildWithoutCacheAllowed;
   }
 
   /**
@@ -533,15 +516,6 @@ export class EnvironmentConfiguration {
             EnvironmentConfiguration._cobuildLeafProjectLogOnlyAllowed =
               EnvironmentConfiguration.parseBooleanEnvironmentVariable(
                 EnvironmentVariableNames.RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED,
-                value
-              );
-            break;
-          }
-
-          case EnvironmentVariableNames.RUSH_COBUILD_WITHOUT_CACHE_ALLOWED: {
-            EnvironmentConfiguration._cobuildWithoutCacheAllowed =
-              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
-                EnvironmentVariableNames.RUSH_COBUILD_WITHOUT_CACHE_ALLOWED,
                 value
               );
             break;

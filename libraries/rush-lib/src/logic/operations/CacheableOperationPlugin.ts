@@ -35,6 +35,7 @@ import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration'
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import { ExperimentsConfiguration } from '../../api/ExperimentsConfiguration';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 const PERIODIC_CALLBACK_INTERVAL_IN_SECONDS: number = 10;
@@ -106,7 +107,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             !cobuildConfiguration?.cobuildWithoutCacheAllowed
           ) {
             throw new Error(
-              `Operation ${operation.name} is not allowed to run without the cobuild orchestration experiment enabled. You must use the ${EnvironmentVariableNames.RUSH_COBUILD_WITHOUT_CACHE_ALLOWED} environment variable to enable that mode.`
+              `Operation ${operation.name} is not allowed to run without the cobuild orchestration experiment enabled. You must enable the "allowCobuildWithoutCache" experiment in experiments.json.`
             );
           }
           if (

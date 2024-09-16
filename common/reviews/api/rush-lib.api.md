@@ -236,7 +236,6 @@ export class EnvironmentConfiguration {
     static get cobuildContextId(): string | undefined;
     static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined;
     static get cobuildRunnerId(): string | undefined;
-    static get cobuildWithoutCacheAllowed(): boolean | undefined;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -271,7 +270,6 @@ export const EnvironmentVariableNames: {
     readonly RUSH_COBUILD_CONTEXT_ID: "RUSH_COBUILD_CONTEXT_ID";
     readonly RUSH_COBUILD_RUNNER_ID: "RUSH_COBUILD_RUNNER_ID";
     readonly RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED";
-    readonly RUSH_COBUILD_WITHOUT_CACHE_ALLOWED: "RUSH_COBUILD_WITHOUT_CACHE_ALLOWED";
     readonly RUSH_GIT_BINARY_PATH: "RUSH_GIT_BINARY_PATH";
     readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
     readonly _RUSH_RECURSIVE_RUSHX_CALL: "_RUSH_RECURSIVE_RUSHX_CALL";
@@ -472,6 +470,7 @@ export interface IExecutionResult {
 
 // @beta
 export interface IExperimentsJson {
+    allowCobuildWithoutCache?: boolean;
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;

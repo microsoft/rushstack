@@ -80,14 +80,16 @@ export class CobuildConfiguration {
   private readonly _cobuildJson: ICobuildJson;
 
   private constructor(options: ICobuildConfigurationOptions) {
-    const { cobuildJson, cobuildLockProviderFactory } = options;
+    const { cobuildJson, cobuildLockProviderFactory, rushConfiguration } = options;
 
     this.cobuildContextId = EnvironmentConfiguration.cobuildContextId;
     this.cobuildFeatureEnabled = this.cobuildContextId ? cobuildJson.cobuildFeatureEnabled : false;
     this.cobuildRunnerId = EnvironmentConfiguration.cobuildRunnerId || uuidv4();
     this.cobuildLeafProjectLogOnlyAllowed =
       EnvironmentConfiguration.cobuildLeafProjectLogOnlyAllowed ?? false;
-    this.cobuildWithoutCacheAllowed = EnvironmentConfiguration.cobuildWithoutCacheAllowed ?? false;
+    console.log(JSON.stringify(rushConfiguration.experimentsConfiguration.configuration));
+    this.cobuildWithoutCacheAllowed =
+      rushConfiguration.experimentsConfiguration.configuration.allowCobuildWithoutCache ?? false;
 
     this._cobuildLockProviderFactory = cobuildLockProviderFactory;
     this._cobuildJson = cobuildJson;
