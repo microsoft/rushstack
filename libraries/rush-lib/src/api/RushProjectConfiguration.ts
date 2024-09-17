@@ -582,11 +582,8 @@ export class RushProjectConfiguration {
 
       for (const [operationName, operationSettings] of operationSettingsByOperationName) {
         if (operationSettings.sharding?.shardOperationSettings) {
-          // eslint-disable-next-line no-console
-          console.log(
-            Colorize.yellow(
-              `DEPRECATED: The "sharding.shardOperationSettings" field is deprecated. Please create a new operation, '${operationName}:shard' to track shard operation settings.`
-            )
+          terminal.writeWarningLine(
+            `DEPRECATED: The "sharding.shardOperationSettings" field is deprecated. Please create a new operation, '${operationName}:shard' to track shard operation settings.`
           );
         }
       }
