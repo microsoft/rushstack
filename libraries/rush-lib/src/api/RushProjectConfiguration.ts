@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AlreadyReportedError, Async, Path } from '@rushstack/node-core-library';
-import { type ITerminal } from '@rushstack/terminal';
+import type { ITerminal } from '@rushstack/terminal';
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
