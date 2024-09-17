@@ -785,6 +785,8 @@ export interface IRushPhaseSharding {
     count: number;
     outputFolderArgumentFormat?: string;
     shardArgumentFormat?: string;
+    // @deprecated (undocumented)
+    shardOperationSettings?: unknown;
 }
 
 // @beta (undocumented)

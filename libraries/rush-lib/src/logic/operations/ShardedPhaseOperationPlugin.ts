@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
@@ -173,11 +173,15 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           shard.toString()
         );
 
+        const shardOperationSettings: IOperationSettings =
+          projectConfiguration?.operationSettingsByOperationName.get(shardOperationName) ??
+          (operationSettings.sharding.shardOperationSettings as IOperationSettings);
+
         const shardOperation: Operation = new Operation({
           project,
           phase,
           settings: {
-            ...projectConfiguration?.operationSettingsByOperationName.get(shardOperationName),
+            ...shardOperationSettings,
             operationName: shardOperationName,
             outputFolderNames: [outputDirectory]
           },

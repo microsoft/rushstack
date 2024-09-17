@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AlreadyReportedError, Async, Path } from '@rushstack/node-core-library';
-import type { ITerminal } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
@@ -63,6 +63,11 @@ export interface IRushPhaseSharding {
    * @defaultValue `--shard-output-folder=.rush/operations/{phaseName}/shards/{shardIndex}`.
    */
   outputFolderArgumentFormat?: string;
+
+  /**
+   * @deprecated Create a separate operation settings object for the shard operation settings with the name `{operationName}:shard`.
+   */
+  shardOperationSettings?: unknown;
 }
 
 /**
@@ -572,6 +577,17 @@ export class RushProjectConfiguration {
           terminal.writeErrorLine(errorMessage);
         } else {
           operationSettingsByOperationName.set(operationName, operationSettings);
+        }
+      }
+
+      for (const [operationName, operationSettings] of operationSettingsByOperationName) {
+        if (operationSettings.sharding?.shardOperationSettings) {
+          // eslint-disable-next-line no-console
+          console.log(
+            Colorize.yellow(
+              `DEPRECATED: The "sharding.shardOperationSettings" field is deprecated. Please create a new operation, '${operationName}:shard' to track shard operation settings.`
+            )
+          );
         }
       }
     }

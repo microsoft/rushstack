@@ -90,6 +90,11 @@
               "outputFolderArgumentFormat": {
                 "type": "string",
                 "description": "The command-line argument to pass to the operation to specify the output folder. The string may contain the following placeholders: {phaseName} {shardIndex}. Must end with {shardIndex}. Defaults to --shard-output-folder=\".rush/operations/{phaseName}/shards/{shardIndex}\""
+              },
+              "shardOperationSettings": {
+                "type": "object",
+                "description": "DEPRECATED. Use a separate operationSettings entry with {this operation's name}:shard as the name, ex _phase:build would have a separate operation _phase:build:shard to manage per-shard settings.",
+                "additionalProperties": true
               }
             }
           },
