@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin-security",
+      "comment": "Fix ESLint broken links",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin-security"
+}
