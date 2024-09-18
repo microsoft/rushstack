@@ -161,14 +161,6 @@ Object {
       "actionName": "check",
       "parameters": Array [
         Object {
-          "description": "Run command using a variant installation configuration",
-          "environmentVariable": "RUSH_VARIANT",
-          "kind": "String",
-          "longName": "--variant",
-          "required": false,
-          "shortName": undefined,
-        },
-        Object {
           "description": "If this flag is specified, output will be in JSON format.",
           "environmentVariable": undefined,
           "kind": "Flag",
@@ -189,6 +181,14 @@ Object {
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--subspace",
+          "required": false,
+          "shortName": undefined,
+        },
+        Object {
+          "description": "Run command using a variant installation configuration",
+          "environmentVariable": "RUSH_VARIANT",
+          "kind": "String",
+          "longName": "--variant",
           "required": false,
           "shortName": undefined,
         },
