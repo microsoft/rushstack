@@ -346,8 +346,8 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: check 1`] = `
-"usage: rush check [-h] [--variant VARIANT] [--json] [--verbose]
-                  [--subspace SUBSPACE_NAME]
+"usage: rush check [-h] [--json] [--verbose] [--subspace SUBSPACE_NAME]
+                  [--variant VARIANT]
                   
 
 Checks each project's package.json files and ensures that all dependencies 
@@ -355,9 +355,6 @@ are of the same version throughout the repository.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
-  --variant VARIANT     Run command using a variant installation 
-                        configuration. This parameter may alternatively be 
-                        specified via the RUSH_VARIANT environment variable.
   --json                If this flag is specified, output will be in JSON 
                         format.
   --verbose             If this flag is specified, long lists of package 
@@ -369,6 +366,9 @@ Optional arguments:
                         within that subspace (ignoring other subspaces). This 
                         parameter is required when the \\"subspacesEnabled\\" 
                         setting is set to true in subspaces.json.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
 "
 `;
 
