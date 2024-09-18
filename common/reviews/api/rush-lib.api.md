@@ -1162,6 +1162,10 @@ export class RushConfiguration {
     // @deprecated
     get commonVersions(): CommonVersionsConfiguration;
     readonly currentVariantJsonFilePath: string;
+    // Warning: (ae-forgotten-export) The symbol "ICurrentVariantJson" needs to be exported by the entry point index.d.ts
+    //
+    // @internal (undocumented)
+    _currentVariantJsonLoadingPromise: Promise<ICurrentVariantJson | undefined> | undefined;
     // @beta
     readonly customTipsConfiguration: CustomTipsConfiguration;
     // @beta
@@ -1206,8 +1210,6 @@ export class RushConfiguration {
     readonly gitTagSeparator: string | undefined;
     readonly gitVersionBumpCommitMessage: string | undefined;
     readonly hotfixChangeEnabled: boolean;
-    // Warning: (ae-forgotten-export) The symbol "ICurrentVariantJson" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     _loadCurrentVariantJsonAsync(): Promise<ICurrentVariantJson | undefined>;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;

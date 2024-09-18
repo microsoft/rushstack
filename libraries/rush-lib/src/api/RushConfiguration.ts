@@ -228,7 +228,10 @@ export class RushConfiguration {
 
   private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
 
-  private _currentVariantJsonLoadingPromise: Promise<ICurrentVariantJson | undefined> | undefined;
+  /**
+   * @internal
+   */
+  public _currentVariantJsonLoadingPromise: Promise<ICurrentVariantJson | undefined> | undefined;
 
   // Lazily loaded when the projects() getter is called.
   private _projects: RushConfigurationProject[] | undefined;

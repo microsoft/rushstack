@@ -416,8 +416,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     return packageExtensionsChecksum;
   }
 
-  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace, variant: string | undefined): boolean {
-    if (!super.canSkipInstall(lastModifiedDate, subspace, variant)) {
+  protected async canSkipInstallAsync(
+    lastModifiedDate: Date,
+    subspace: Subspace,
+    variant: string | undefined
+  ): Promise<boolean> {
+    if (!(await super.canSkipInstallAsync(lastModifiedDate, subspace, variant))) {
       return false;
     }
 
@@ -449,7 +453,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // NOTE: If any of the potentiallyChangedFiles does not exist, then isFileTimestampCurrent()
     // returns false.
-    return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
+    return Utilities.isFileTimestampCurrentAsync(lastModifiedDate, potentiallyChangedFiles);
   }
 
   /**
