@@ -696,6 +696,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     autoInstallPeers?: boolean;
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalNeverBuiltDependencies?: string[];
+    globalIgnoredOptionalDependencies?: string[];
     globalOverrides?: Record<string, string>;
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
     globalPatchedDependencies?: Record<string, string>;
@@ -1062,6 +1063,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly autoInstallPeers: boolean | undefined;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
     readonly globalNeverBuiltDependencies: string[] | undefined;
+    readonly globalIgnoredOptionalDependencies: string[] | undefined;
     readonly globalOverrides: Record<string, string> | undefined;
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
     get globalPatchedDependencies(): Record<string, string> | undefined;
