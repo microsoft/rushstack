@@ -14,7 +14,8 @@ import {
   type FileSystemStats,
   SubprocessTerminator,
   Executable,
-  type IWaitForExitResult
+  type IWaitForExitResult,
+  Async
 } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -290,19 +291,35 @@ export class Utilities {
    * NOTE: The filenames can also be paths for directories, in which case the directory
    * timestamp is compared.
    */
-  public static isFileTimestampCurrent(dateToCompare: Date, inputFilenames: string[]): boolean {
-    for (const inputFilename of inputFilenames) {
-      if (!FileSystem.exists(inputFilename)) {
-        return false;
-      }
+  public static async isFileTimestampCurrentAsync(
+    dateToCompare: Date,
+    inputFilePaths: string[]
+  ): Promise<boolean> {
+    let anyAreOutOfDate: boolean = false;
+    await Async.forEachAsync(
+      inputFilePaths,
+      async (filePath) => {
+        if (!anyAreOutOfDate) {
+          let inputStats: FileSystemStats | undefined;
+          try {
+            inputStats = FileSystem.getStatistics(filePath);
+          } catch (e) {
+            if (FileSystem.isNotExistError(e)) {
+              anyAreOutOfDate = true;
+            } else {
+              throw e;
+            }
+          }
 
-      const inputStats: FileSystemStats = FileSystem.getStatistics(inputFilename);
-      if (dateToCompare < inputStats.mtime) {
-        return false;
-      }
-    }
+          if (inputStats && dateToCompare < inputStats.mtime) {
+            anyAreOutOfDate = true;
+          }
+        }
+      },
+      { concurrency: 10 }
+    );
 
-    return true;
+    return !anyAreOutOfDate;
   }
 
   public static async executeCommandAsync(

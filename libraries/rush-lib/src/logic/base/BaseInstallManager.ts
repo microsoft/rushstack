@@ -156,11 +156,8 @@ export abstract class BaseInstallManager {
       .experimentsConfiguration.configuration.generateProjectImpactGraphDuringRushUpdate
       ? new ProjectImpactGraphGenerator(this._terminal, this.rushConfiguration)
       : undefined;
-    const { shrinkwrapIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate } = await this.prepareAsync(
-      subspace,
-      variant,
-      projectImpactGraphGenerator
-    );
+    const { shrinkwrapIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate, variantIsUpToDate } =
+      await this.prepareAsync(subspace, variant, projectImpactGraphGenerator);
 
     if (this.options.checkOnly) {
       return;
@@ -198,17 +195,18 @@ export abstract class BaseInstallManager {
     }));
 
     // Allow us to defer the file read until we need it
-    const canSkipInstall: () => boolean = () => {
+    const canSkipInstallAsync: () => Promise<boolean> = async () => {
       // Based on timestamps, can we skip this install entirely?
-      const outputStats: FileSystemStats = FileSystem.getStatistics(commonTempInstallFlag.path);
-      return this.canSkipInstall(outputStats.mtime, subspace, variant);
+      const outputStats: FileSystemStats = await FileSystem.getStatisticsAsync(commonTempInstallFlag.path);
+      return this.canSkipInstallAsync(outputStats.mtime, subspace, variant);
     };
 
     if (
       resolutionOnly ||
       cleanInstall ||
+      !variantIsUpToDate ||
       !shrinkwrapIsUpToDate ||
-      !canSkipInstall() ||
+      !(await canSkipInstallAsync()) ||
       !projectImpactGraphIsUpToDate
     ) {
       // eslint-disable-next-line no-console
@@ -380,7 +378,11 @@ export abstract class BaseInstallManager {
 
   protected abstract postInstallAsync(subspace: Subspace): Promise<void>;
 
-  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace, variant: string | undefined): boolean {
+  protected async canSkipInstallAsync(
+    lastModifiedDate: Date,
+    subspace: Subspace,
+    variant: string | undefined
+  ): Promise<boolean> {
     // Based on timestamps, can we skip this install entirely?
     const potentiallyChangedFiles: string[] = [];
 
@@ -402,14 +404,15 @@ export abstract class BaseInstallManager {
 
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // If the repo is using pnpmfile.js, consider that also
-      const pnpmFileFilename: string = subspace.getPnpmfilePath();
+      const pnpmFileFilePath: string = subspace.getPnpmfilePath();
+      const pnpmFileExists: boolean = await FileSystem.existsAsync(pnpmFileFilePath);
 
-      if (FileSystem.exists(pnpmFileFilename)) {
-        potentiallyChangedFiles.push(pnpmFileFilename);
+      if (pnpmFileExists) {
+        potentiallyChangedFiles.push(pnpmFileFilePath);
       }
     }
 
-    return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
+    return await Utilities.isFileTimestampCurrentAsync(lastModifiedDate, potentiallyChangedFiles);
   }
 
   protected async prepareAsync(
@@ -420,6 +423,7 @@ export abstract class BaseInstallManager {
     shrinkwrapIsUpToDate: boolean;
     npmrcHash: string | undefined;
     projectImpactGraphIsUpToDate: boolean;
+    variantIsUpToDate: boolean;
   }> {
     const terminal: ITerminal = this._terminal;
     const { allowShrinkwrapUpdates } = this.options;
@@ -495,6 +499,7 @@ export abstract class BaseInstallManager {
         onlyIfChanged: true
       }
     ));
+    this.rushConfiguration._currentVariantJsonLoadingPromise = undefined;
 
     if (this.options.variant) {
       terminal.writeLine();
@@ -666,7 +671,7 @@ export abstract class BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
-    return { shrinkwrapIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate };
+    return { shrinkwrapIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate, variantIsUpToDate };
   }
 
   /**

@@ -440,8 +440,12 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace, variant: string | undefined): boolean {
-    if (!super.canSkipInstall(lastModifiedDate, subspace, variant)) {
+  protected async canSkipInstallAsync(
+    lastModifiedDate: Date,
+    subspace: Subspace,
+    variant: string | undefined
+  ): Promise<boolean> {
+    if (!(await super.canSkipInstallAsync(lastModifiedDate, subspace, variant))) {
       return false;
     }
 
@@ -456,7 +460,7 @@ export class RushInstallManager extends BaseInstallManager {
       })
     );
 
-    return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
+    return Utilities.isFileTimestampCurrentAsync(lastModifiedDate, potentiallyChangedFiles);
   }
 
   /**
