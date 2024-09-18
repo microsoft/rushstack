@@ -12,7 +12,7 @@
     },
     {
       "operationName": "_phase:build:shard",
-      "weight": 1,
+      "weight": 10,
       "allowCobuildOrchestration": true
     }
   ]
