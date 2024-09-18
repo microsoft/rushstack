@@ -65,15 +65,9 @@ export interface IRushPhaseSharding {
   outputFolderArgumentFormat?: string;
 
   /**
-   * Configuration for the shard operation. All other configuration applies to the collator operation.
+   * @deprecated Create a separate operation settings object for the shard operation settings with the name `{operationName}:shard`.
    */
-  shardOperationSettings?: {
-    /**
-     * How many concurrency units this operation should take up during execution. The maximum concurrent units is
-     *  determined by the -p flag.
-     */
-    weight?: number;
-  };
+  shardOperationSettings?: unknown;
 }
 
 /**
@@ -583,6 +577,14 @@ export class RushProjectConfiguration {
           terminal.writeErrorLine(errorMessage);
         } else {
           operationSettingsByOperationName.set(operationName, operationSettings);
+        }
+      }
+
+      for (const [operationName, operationSettings] of operationSettingsByOperationName) {
+        if (operationSettings.sharding?.shardOperationSettings) {
+          terminal.writeWarningLine(
+            `DEPRECATED: The "sharding.shardOperationSettings" field is deprecated. Please create a new operation, '${operationName}:shard' to track shard operation settings.`
+          );
         }
       }
     }

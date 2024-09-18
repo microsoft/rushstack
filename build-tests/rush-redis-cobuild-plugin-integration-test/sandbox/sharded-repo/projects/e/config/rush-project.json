@@ -4,8 +4,15 @@
       "operationName": "_phase:build",
       "outputFolderNames": ["dist"],
       "sharding": {
-        "count": 75
+        "count": 75,
+        "shardOperationSettings": {
+          "weight": 10
+        }
       }
+    },
+    {
+      "operationName": "_phase:build:shard",
+      "weight": 1
     }
   ]
 }
