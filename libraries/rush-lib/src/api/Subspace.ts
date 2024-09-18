@@ -30,8 +30,8 @@ interface ISubspaceDetail {
   subspaceConfigFolderPath: string;
   subspacePnpmPatchesFolderPath: string;
   subspaceTempFolderPath: string;
-  tempShrinkwrapFilename: string;
-  tempShrinkwrapPreinstallFilename: string;
+  tempShrinkwrapFilePath: string;
+  tempShrinkwrapPreinstallFilePath: string;
 }
 
 interface IPackageJsonLite extends Omit<IPackageJson, 'version'> {}
@@ -171,29 +171,25 @@ export class Subspace {
       let subspaceTempFolderPath: string;
       if (rushConfiguration.subspacesFeatureEnabled) {
         // Example: C:\MyRepo\common\temp\my-subspace
-        subspaceTempFolderPath = path.join(commonTempFolder, this.subspaceName);
+        subspaceTempFolderPath = `${commonTempFolder}/${this.subspaceName}`;
       } else {
         // Example: C:\MyRepo\common\temp
         subspaceTempFolderPath = commonTempFolder;
       }
 
       // Example: C:\MyRepo\common\temp\my-subspace\pnpm-lock.yaml
-      const tempShrinkwrapFilename: string =
-        subspaceTempFolderPath + `/${rushConfiguration.shrinkwrapFilename}`;
+      const tempShrinkwrapFilePath: string = `${subspaceTempFolderPath}/${rushConfiguration.shrinkwrapFilename}`;
 
       /// From "C:\MyRepo\common\temp\pnpm-lock.yaml" --> "C:\MyRepo\common\temp\pnpm-lock-preinstall.yaml"
-      const parsedPath: path.ParsedPath = path.parse(tempShrinkwrapFilename);
-      const tempShrinkwrapPreinstallFilename: string = path.join(
-        parsedPath.dir,
-        parsedPath.name + '-preinstall' + parsedPath.ext
-      );
+      const parsedPath: path.ParsedPath = path.parse(tempShrinkwrapFilePath);
+      const tempShrinkwrapPreinstallFilePath: string = `${parsedPath.dir}/${parsedPath.name}-preinstall${parsedPath.ext}`;
 
       this._detail = {
         subspaceConfigFolderPath,
         subspacePnpmPatchesFolderPath,
         subspaceTempFolderPath,
-        tempShrinkwrapFilename,
-        tempShrinkwrapPreinstallFilename
+        tempShrinkwrapFilePath,
+        tempShrinkwrapPreinstallFilePath
       };
     }
     return this._detail;
@@ -264,7 +260,14 @@ export class Subspace {
    * @beta
    */
   public getTempShrinkwrapFilename(): string {
-    return this._ensureDetail().tempShrinkwrapFilename;
+    return this._ensureDetail().tempShrinkwrapFilePath;
+  }
+
+  /**
+   * @deprecated - Use {@link Subspace.getTempShrinkwrapPreinstallFilePath} instead.
+   */
+  public getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string {
+    return this.getTempShrinkwrapPreinstallFilePath();
   }
 
   /**
@@ -277,8 +280,8 @@ export class Subspace {
    * or `C:\MyRepo\common\temp\pnpm-lock-preinstall.yaml`
    * @beta
    */
-  public getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string {
-    return this._ensureDetail().tempShrinkwrapPreinstallFilename;
+  public getTempShrinkwrapPreinstallFilePath(): string {
+    return this._ensureDetail().tempShrinkwrapPreinstallFilePath;
   }
 
   /**
@@ -308,10 +311,10 @@ export class Subspace {
    * @beta
    */
   public getCommonVersions(variant?: string): CommonVersionsConfiguration {
-    const commonVersionsFilename: string = this.getCommonVersionsFilePath(variant);
+    const commonVersionsFilePath: string = this.getCommonVersionsFilePath(variant);
     if (!this._commonVersionsConfiguration) {
       this._commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(
-        commonVersionsFilename,
+        commonVersionsFilePath,
         this._rushConfiguration
       );
     }
@@ -351,8 +354,15 @@ export class Subspace {
    * @beta
    */
   public getRepoState(): RepoStateFile {
-    const repoStateFilename: string = this.getRepoStateFilePath();
-    return RepoStateFile.loadFromFile(repoStateFilename);
+    const repoStateFilePath: string = this.getRepoStateFilePath();
+    return RepoStateFile.loadFromFile(repoStateFilePath);
+  }
+
+  /**
+   * @deprecated - Use {@link Subspace.getCommittedShrinkwrapFilePath} instead.
+   */
+  public getCommittedShrinkwrapFilename(): string {
+    return this.getCommittedShrinkwrapFilePath();
   }
 
   /**
@@ -362,7 +372,7 @@ export class Subspace {
    */
   public getCommittedShrinkwrapFilePath(variant?: string): string {
     const subspaceConfigFolderPath: string = this.getVariantDependentSubspaceConfigFolderPath(variant);
-    return path.join(subspaceConfigFolderPath, this._rushConfiguration.shrinkwrapFilename);
+    return `${subspaceConfigFolderPath}/${this._rushConfiguration.shrinkwrapFilename}`;
   }
 
   /**
@@ -378,7 +388,7 @@ export class Subspace {
     const pnpmFilename: string = (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager)
       .pnpmfileFilename;
 
-    return path.join(subspaceConfigFolderPath, pnpmFilename);
+    return `${subspaceConfigFolderPath}/${pnpmFilename}`;
   }
 
   /**

@@ -1467,6 +1467,8 @@ export class Subspace {
     _addProject(project: RushConfigurationProject): void;
     // @beta
     contains(project: RushConfigurationProject): boolean;
+    // @deprecated (undocumented)
+    getCommittedShrinkwrapFilename(): string;
     // @beta
     getCommittedShrinkwrapFilePath(variant?: string): string;
     // @beta
@@ -1495,8 +1497,10 @@ export class Subspace {
     getSubspaceTempFolderPath(): string;
     // @beta
     getTempShrinkwrapFilename(): string;
-    // @beta
+    // @deprecated (undocumented)
     getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string;
+    // @beta
+    getTempShrinkwrapPreinstallFilePath(): string;
     // @beta
     getVariantDependentSubspaceConfigFolderPath(variant: string | undefined): string;
     // @beta
