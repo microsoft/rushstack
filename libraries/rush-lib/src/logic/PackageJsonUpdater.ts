@@ -53,6 +53,10 @@ export interface IPackageJsonUpdaterRushUpgradeOptions {
    * If specified, "rush update" will be run in debug mode.
    */
   debugInstall: boolean;
+  /**
+   * The variant to consider when performing installations and validating shrinkwrap updates.
+   */
+  variant: string | undefined;
 }
 
 /**
@@ -112,7 +116,7 @@ export class PackageJsonUpdater {
    * "rush upgrade-interactive".
    */
   public async doRushUpgradeAsync(options: IPackageJsonUpdaterRushUpgradeOptions): Promise<void> {
-    const { projects, packagesToAdd, updateOtherPackages, skipUpdate, debugInstall } = options;
+    const { projects, packagesToAdd, updateOtherPackages, skipUpdate, debugInstall, variant } = options;
     const { DependencyAnalyzer } = await import(
       /* webpackChunkName: 'DependencyAnalyzer' */
       './DependencyAnalyzer'
@@ -216,7 +220,8 @@ export class PackageJsonUpdater {
 
     if (updateOtherPackages) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-        this._rushConfiguration
+        this._rushConfiguration,
+        options
       );
       for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
         this.updateProject(update);
@@ -236,10 +241,10 @@ export class PackageJsonUpdater {
           options.projects
         );
         for (const subspace of subspaceSet) {
-          await this._doUpdateAsync(debugInstall, subspace);
+          await this._doUpdateAsync(debugInstall, subspace, variant);
         }
       } else {
-        await this._doUpdateAsync(debugInstall, this._rushConfiguration.defaultSubspace);
+        await this._doUpdateAsync(debugInstall, this._rushConfiguration.defaultSubspace, variant);
       }
     }
   }
@@ -253,7 +258,7 @@ export class PackageJsonUpdater {
     } else {
       throw new Error('only accept "rush add" or "rush remove"');
     }
-    const { skipUpdate, debugInstall } = options;
+    const { skipUpdate, debugInstall, variant } = options;
     for (const { project } of allPackageUpdates) {
       if (project.saveIfModified()) {
         this._terminal.writeLine(Colorize.green('Wrote'), project.filePath);
@@ -266,15 +271,19 @@ export class PackageJsonUpdater {
           options.projects
         );
         for (const subspace of subspaceSet) {
-          await this._doUpdateAsync(debugInstall, subspace);
+          await this._doUpdateAsync(debugInstall, subspace, variant);
         }
       } else {
-        await this._doUpdateAsync(debugInstall, this._rushConfiguration.defaultSubspace);
+        await this._doUpdateAsync(debugInstall, this._rushConfiguration.defaultSubspace, variant);
       }
     }
   }
 
-  private async _doUpdateAsync(debugInstall: boolean, subspace: Subspace): Promise<void> {
+  private async _doUpdateAsync(
+    debugInstall: boolean,
+    subspace: Subspace,
+    variant: string | undefined
+  ): Promise<void> {
     this._terminal.writeLine();
     this._terminal.writeLine(Colorize.green('Running "rush update"'));
     this._terminal.writeLine();
@@ -290,6 +299,7 @@ export class PackageJsonUpdater {
       networkConcurrency: undefined,
       offline: false,
       collectLogFile: false,
+      variant,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArgumentValues: [],
       selectedProjects: new Set(this._rushConfiguration.projects),
@@ -342,7 +352,8 @@ export class PackageJsonUpdater {
     dependencyAnalyzer: DependencyAnalyzer,
     options: IPackageJsonUpdaterRushAddOptions
   ): Promise<IUpdateProjectOptions[]> {
-    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages } = options;
+    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages, variant } =
+      options;
 
     // Get projects for this subspace
     const subspaceProjects: RushConfigurationProject[] = projects.filter(
@@ -353,7 +364,7 @@ export class PackageJsonUpdater {
       allVersionsByPackageName,
       implicitlyPreferredVersionByPackageName,
       commonVersionsConfiguration
-    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(subspace, options.actionName === 'add');
+    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(subspace, variant, options.actionName === 'add');
 
     this._terminal.writeLine();
     const dependenciesToAddOrUpdate: Record<string, string> = {};
@@ -418,7 +429,8 @@ export class PackageJsonUpdater {
         const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
           this._rushConfiguration,
           {
-            subspace
+            subspace,
+            variant
           }
         );
         otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));

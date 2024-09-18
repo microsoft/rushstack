@@ -90,6 +90,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
+    const { fullUpgrade, allowShrinkwrapUpdates, variant } = this.options;
+
     // eslint-disable-next-line no-console
     console.log('\n' + Colorize.bold('Updating workspace files in ' + subspace.getSubspaceTempFolderPath()));
 
@@ -102,7 +104,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (!shrinkwrapFile) {
       shrinkwrapIsUpToDate = false;
     } else {
-      if (!shrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
+      if (!shrinkwrapFile.isWorkspaceCompatible && !fullUpgrade) {
         // eslint-disable-next-line no-console
         console.log();
         // eslint-disable-next-line no-console
@@ -141,7 +143,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
       shrinkwrapIsUpToDate = false;
     } else {
-      const commonVersions: CommonVersionsConfiguration = subspace.getCommonVersions();
+      const commonVersions: CommonVersionsConfiguration = subspace.getCommonVersions(variant);
       if (repoState.preferredVersionsHash !== commonVersions.getPreferredVersionsHash()) {
         shrinkwrapWarnings.push(
           `Preferred versions from ${RushConstants.commonVersionsFilename} have been modified.`
@@ -152,7 +154,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       const stopwatch: Stopwatch = Stopwatch.start();
 
       const packageJsonInjectedDependenciesHash: string | undefined =
-        subspace.getPackageJsonInjectedDependenciesHash();
+        subspace.getPackageJsonInjectedDependenciesHash(variant);
 
       stopwatch.stop();
 
@@ -253,7 +255,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             throw new AlreadyReportedError();
           }
 
-          if (!this.options.allowShrinkwrapUpdates) {
+          if (!allowShrinkwrapUpdates) {
             // eslint-disable-next-line no-console
             console.log();
             // eslint-disable-next-line no-console
@@ -269,7 +271,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             throw new AlreadyReportedError();
           }
 
-          if (this.options.fullUpgrade) {
+          if (fullUpgrade) {
             // We will update to `workspace` notation. If the version specified is a range, then use the provided range.
             // Otherwise, use `workspace:*` to ensure we're always using the workspace package.
             const workspaceRange: string =
@@ -312,7 +314,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       // Now validate that the shrinkwrap file matches what is in the package.json
-      if (await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, subspace)) {
+      if (await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, subspace, variant)) {
         shrinkwrapWarnings.push(
           `Dependencies of project "${rushProject.packageName}" do not match the current shrinkwrap.`
         );
@@ -414,8 +416,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     return packageExtensionsChecksum;
   }
 
-  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace): boolean {
-    if (!super.canSkipInstall(lastModifiedDate, subspace)) {
+  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace, variant: string | undefined): boolean {
+    if (!super.canSkipInstall(lastModifiedDate, subspace, variant)) {
       return false;
     }
 

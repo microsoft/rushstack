@@ -136,7 +136,8 @@ describe(PnpmShrinkwrapFile.name, () => {
         await expect(
           pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
             project,
-            project.rushConfiguration.defaultSubspace
+            project.rushConfiguration.defaultSubspace,
+            undefined
           )
         ).resolves.toBe(false);
       });
@@ -149,7 +150,8 @@ describe(PnpmShrinkwrapFile.name, () => {
         await expect(
           pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
             project,
-            project.rushConfiguration.defaultSubspace
+            project.rushConfiguration.defaultSubspace,
+            undefined
           )
         ).resolves.toBe(true);
       });
@@ -162,7 +164,8 @@ describe(PnpmShrinkwrapFile.name, () => {
         await expect(
           pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
             project,
-            project.rushConfiguration.defaultSubspace
+            project.rushConfiguration.defaultSubspace,
+            undefined
           )
         ).resolves.toBe(false);
       });
@@ -177,7 +180,8 @@ describe(PnpmShrinkwrapFile.name, () => {
         await expect(
           pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
             project,
-            project.rushConfiguration.defaultSubspace
+            project.rushConfiguration.defaultSubspace,
+            undefined
           )
         ).resolves.toBe(false);
       });
@@ -190,7 +194,8 @@ describe(PnpmShrinkwrapFile.name, () => {
         await expect(
           pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
             project,
-            project.rushConfiguration.defaultSubspace
+            project.rushConfiguration.defaultSubspace,
+            undefined
           )
         ).resolves.toBe(true);
       });
@@ -203,7 +208,8 @@ describe(PnpmShrinkwrapFile.name, () => {
         await expect(
           pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
             project,
-            project.rushConfiguration.defaultSubspace
+            project.rushConfiguration.defaultSubspace,
+            undefined
           )
         ).resolves.toBe(false);
       });
@@ -216,7 +222,8 @@ describe(PnpmShrinkwrapFile.name, () => {
         await expect(
           pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
             project,
-            project.rushConfiguration.defaultSubspace
+            project.rushConfiguration.defaultSubspace,
+            undefined
           )
         ).resolves.toBe(false);
       });

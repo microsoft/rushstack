@@ -32,6 +32,7 @@ import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 import { Utilities } from '../utilities/Utilities';
 import type { Subspace } from '../api/Subspace';
 import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -460,7 +461,6 @@ export class RushPnpmCommandLineParser {
     }
 
     const subspaceTempFolder: string = this._subspace.getSubspaceTempFolderPath();
-    const subspaceConfigFolder: string = this._subspace.getSubspaceConfigFolderPath();
 
     switch (commandName) {
       case 'patch-remove':
@@ -470,6 +470,7 @@ export class RushPnpmCommandLineParser {
         // 2. we can not fallback to use Monorepo config folder (common/config/rush) due to that this command is intended to apply to input subspace only.
         //    It will produce unexpected behavior if we use the fallback.
         if (this._subspace.getPnpmOptions() === undefined) {
+          const subspaceConfigFolder: string = this._subspace.getSubspaceConfigFolderPath();
           this._terminal.writeErrorLine(
             `The "rush-pnpm patch-commit" command cannot proceed without a pnpm-config.json file.` +
               `  Create one in this folder: ${subspaceConfigFolder}`
@@ -543,6 +544,7 @@ export class RushPnpmCommandLineParser {
       networkConcurrency: undefined,
       offline: false,
       collectLogFile: false,
+      variant: process.env[EnvironmentVariableNames.RUSH_VARIANT], // For `rush-pnpm`, only use the env var
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArgumentValues: [],
       selectedProjects: new Set(this._rushConfiguration.projects),

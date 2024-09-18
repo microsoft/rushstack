@@ -185,16 +185,16 @@ export class CommonVersionsConfiguration {
    * If the file has not been created yet, then an empty object is returned.
    */
   public static loadFromFile(
-    jsonFilename: string,
+    jsonFilePath: string,
     rushConfiguration?: RushConfiguration
   ): CommonVersionsConfiguration {
     let commonVersionsJson: ICommonVersionsJson | undefined = undefined;
 
-    if (FileSystem.exists(jsonFilename)) {
-      commonVersionsJson = JsonFile.loadAndValidate(jsonFilename, CommonVersionsConfiguration._jsonSchema);
+    if (FileSystem.exists(jsonFilePath)) {
+      commonVersionsJson = JsonFile.loadAndValidate(jsonFilePath, CommonVersionsConfiguration._jsonSchema);
     }
 
-    return new CommonVersionsConfiguration(commonVersionsJson, jsonFilename, rushConfiguration);
+    return new CommonVersionsConfiguration(commonVersionsJson, jsonFilePath, rushConfiguration);
   }
 
   private static _deserializeTable<TValue>(

@@ -82,6 +82,11 @@ export interface IInstallManagerOptions {
   collectLogFile: boolean;
 
   /**
+   * The variant to consider when performing installations and validating shrinkwrap updates.
+   */
+  variant: string | undefined;
+
+  /**
    * Retry the install the specified number of times
    */
   maxInstallAttempts: number;

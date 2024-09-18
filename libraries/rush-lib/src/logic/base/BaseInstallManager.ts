@@ -40,7 +40,7 @@ import {
 } from '../../api/LastInstallFlag';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import type { PurgeManager } from '../PurgeManager';
-import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { ICurrentVariantJson, RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { RushConstants } from '../RushConstants';
@@ -114,7 +114,7 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstallAsync(): Promise<void> {
-    const { allowShrinkwrapUpdates, selectedProjects, pnpmFilterArgumentValues, resolutionOnly } =
+    const { allowShrinkwrapUpdates, selectedProjects, pnpmFilterArgumentValues, resolutionOnly, variant } =
       this.options;
     const isFilteredInstall: boolean = pnpmFilterArgumentValues.length > 0;
     const useWorkspaces: boolean =
@@ -158,6 +158,7 @@ export abstract class BaseInstallManager {
       : undefined;
     const { shrinkwrapIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate } = await this.prepareAsync(
       subspace,
+      variant,
       projectImpactGraphGenerator
     );
 
@@ -200,7 +201,7 @@ export abstract class BaseInstallManager {
     const canSkipInstall: () => boolean = () => {
       // Based on timestamps, can we skip this install entirely?
       const outputStats: FileSystemStats = FileSystem.getStatistics(commonTempInstallFlag.path);
-      return this.canSkipInstall(outputStats.mtime, subspace);
+      return this.canSkipInstall(outputStats.mtime, subspace, variant);
     };
 
     if (
@@ -253,7 +254,7 @@ export abstract class BaseInstallManager {
       ]);
 
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
-        const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilename();
+        const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilePath(variant);
         const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
           this.rushConfiguration.packageManager,
           this.rushConfiguration.packageManagerOptions,
@@ -268,7 +269,7 @@ export abstract class BaseInstallManager {
 
       // Always update the state file if running "rush update"
       if (this.options.allowShrinkwrapUpdates) {
-        if (subspace.getRepoState().refreshState(this.rushConfiguration, subspace)) {
+        if (subspace.getRepoState().refreshState(this.rushConfiguration, subspace, variant)) {
           // eslint-disable-next-line no-console
           console.log(
             Colorize.yellow(
@@ -379,7 +380,7 @@ export abstract class BaseInstallManager {
 
   protected abstract postInstallAsync(subspace: Subspace): Promise<void>;
 
-  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace): boolean {
+  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace, variant: string | undefined): boolean {
     // Based on timestamps, can we skip this install entirely?
     const potentiallyChangedFiles: string[] = [];
 
@@ -391,10 +392,10 @@ export abstract class BaseInstallManager {
 
     // Additionally, if they pulled an updated shrinkwrap file from Git,
     // then we can't skip this install
-    potentiallyChangedFiles.push(subspace.getCommittedShrinkwrapFilename());
+    potentiallyChangedFiles.push(subspace.getCommittedShrinkwrapFilePath(variant));
 
     // Add common-versions.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(subspace.getCommonVersionsFilePath());
+    potentiallyChangedFiles.push(subspace.getCommonVersionsFilePath(variant));
 
     // Add pnpm-config.json file to the potentially changed files list.
     potentiallyChangedFiles.push(subspace.getPnpmConfigFilePath());
@@ -413,16 +414,18 @@ export abstract class BaseInstallManager {
 
   protected async prepareAsync(
     subspace: Subspace,
+    variant: string | undefined,
     projectImpactGraphGenerator: ProjectImpactGraphGenerator | undefined
   ): Promise<{
     shrinkwrapIsUpToDate: boolean;
     npmrcHash: string | undefined;
     projectImpactGraphIsUpToDate: boolean;
   }> {
+    const terminal: ITerminal = this._terminal;
     const { allowShrinkwrapUpdates } = this.options;
 
     // Check the policies
-    await PolicyValidator.validatePolicyAsync(this.rushConfiguration, subspace, this.options);
+    await PolicyValidator.validatePolicyAsync(this.rushConfiguration, subspace, variant, this.options);
 
     await this._installGitHooksAsync();
 
@@ -432,8 +435,7 @@ export abstract class BaseInstallManager {
     if (approvedPackagesChecker.approvedPackagesFilesAreOutOfDate) {
       approvedPackagesChecker.rewriteConfigFiles();
       if (allowShrinkwrapUpdates) {
-        // eslint-disable-next-line no-console
-        console.log(
+        terminal.writeLine(
           Colorize.yellow(
             'Approved package files have been updated. These updates should be committed to source control'
           )
@@ -454,7 +456,7 @@ export abstract class BaseInstallManager {
 
     // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
     if (!this.options.fullUpgrade) {
-      const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilename();
+      const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilePath(variant);
       try {
         shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
           this.rushConfiguration.packageManager,
@@ -462,18 +464,14 @@ export abstract class BaseInstallManager {
           committedShrinkwrapFileName
         );
       } catch (ex) {
-        // eslint-disable-next-line no-console
-        console.log();
-        // eslint-disable-next-line no-console
-        console.log(
+        terminal.writeLine();
+        terminal.writeLine(
           `Unable to load the ${this.rushConfiguration.shrinkwrapFilePhrase}: ${(ex as Error).message}`
         );
 
         if (!allowShrinkwrapUpdates) {
-          // eslint-disable-next-line no-console
-          console.log();
-          // eslint-disable-next-line no-console
-          console.log(Colorize.red('You need to run "rush update" to fix this problem'));
+          terminal.writeLine();
+          terminal.writeLine(Colorize.red('You need to run "rush update" to fix this problem'));
           throw new AlreadyReportedError();
         }
 
@@ -481,12 +479,45 @@ export abstract class BaseInstallManager {
       }
     }
 
+    // Write a file indicating which variant is being installed.
+    // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
+    const currentVariantJsonFilePath: string = this.rushConfiguration.currentVariantJsonFilePath;
+    const currentVariantJson: ICurrentVariantJson = {
+      variant: variant ?? null
+    };
+
+    // Determine if the variant is already current by updating current-variant.json.
+    // If nothing is written, the variant has not changed.
+    const variantIsUpToDate: boolean = !(await JsonFile.saveAsync(
+      currentVariantJson,
+      currentVariantJsonFilePath,
+      {
+        onlyIfChanged: true
+      }
+    ));
+
+    if (this.options.variant) {
+      terminal.writeLine();
+      terminal.writeLine(Colorize.bold(`Using variant '${this.options.variant}' for installation.`));
+    } else if (!variantIsUpToDate && !variant && this.rushConfiguration.variants.size > 0) {
+      terminal.writeLine();
+      terminal.writeLine(Colorize.bold('Using the default variant for installation.'));
+    }
+
     const extraNpmrcLines: string[] = [];
     if (this.rushConfiguration.subspacesFeatureEnabled) {
       // Look for a monorepo level .npmrc file
       const commonNpmrcPath: string = `${this.rushConfiguration.commonRushConfigFolder}/.npmrc`;
-      if (FileSystem.exists(commonNpmrcPath)) {
-        const commonNpmrcFileLines: string[] = FileSystem.readFile(commonNpmrcPath).toString().split('\n');
+      let commonNpmrcFileLines: string[] | undefined;
+      try {
+        commonNpmrcFileLines = (await FileSystem.readFileAsync(commonNpmrcPath)).split('\n');
+      } catch (e) {
+        if (!FileSystem.isNotExistError(e)) {
+          throw e;
+        }
+      }
+
+      if (commonNpmrcFileLines) {
         extraNpmrcLines.push(...commonNpmrcFileLines);
       }
 
@@ -569,13 +600,15 @@ export abstract class BaseInstallManager {
       await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(
         this.rushConfiguration,
         subspace.getSubspaceTempFolderPath(),
-        subspace
+        subspace,
+        variant
       );
 
       if (this.rushConfiguration.subspacesFeatureEnabled) {
         await SubspacePnpmfileConfiguration.writeCommonTempSubspaceGlobalPnpmfileAsync(
           this.rushConfiguration,
-          subspace
+          subspace,
+          variant
         );
       }
     }
@@ -589,14 +622,12 @@ export abstract class BaseInstallManager {
       ]);
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
-    this._syncTempShrinkwrap(subspace, shrinkwrapFile);
+    this._syncTempShrinkwrap(subspace, variant, shrinkwrapFile);
 
     // Write out the reported warnings
     if (shrinkwrapWarnings.length > 0) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(
+      terminal.writeLine();
+      terminal.writeLine(
         Colorize.yellow(
           PrintUtilities.wrapWords(
             `The ${this.rushConfiguration.shrinkwrapFilePhrase} contains the following issues:`
@@ -605,18 +636,17 @@ export abstract class BaseInstallManager {
       );
 
       for (const shrinkwrapWarning of shrinkwrapWarnings) {
-        // eslint-disable-next-line no-console
-        console.log(Colorize.yellow('  ' + shrinkwrapWarning));
+        terminal.writeLine(Colorize.yellow('  ' + shrinkwrapWarning));
       }
-      // eslint-disable-next-line no-console
-      console.log();
+
+      terminal.writeLine();
     }
 
     let hasErrors: boolean = false;
     // Force update if the shrinkwrap is out of date
     if (!shrinkwrapIsUpToDate && !allowShrinkwrapUpdates) {
-      this._terminal.writeErrorLine();
-      this._terminal.writeErrorLine(
+      terminal.writeErrorLine();
+      terminal.writeErrorLine(
         `The ${this.rushConfiguration.shrinkwrapFilePhrase} is out of date. You need to run "rush update".`
       );
       hasErrors = true;
@@ -624,8 +654,8 @@ export abstract class BaseInstallManager {
 
     if (!projectImpactGraphIsUpToDate && !allowShrinkwrapUpdates) {
       hasErrors = true;
-      this._terminal.writeErrorLine();
-      this._terminal.writeErrorLine(
+      terminal.writeErrorLine();
+      terminal.writeErrorLine(
         Colorize.red(
           `The ${RushConstants.projectImpactGraphFilename} file is missing or out of date. You need to run "rush update".`
         )
@@ -1070,8 +1100,12 @@ ${gitLfsHookHandling}
     return true;
   }
 
-  private _syncTempShrinkwrap(subspace: Subspace, shrinkwrapFile: BaseShrinkwrapFile | undefined): void {
-    const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilename();
+  private _syncTempShrinkwrap(
+    subspace: Subspace,
+    variant: string | undefined,
+    shrinkwrapFile: BaseShrinkwrapFile | undefined
+  ): void {
+    const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilePath(variant);
     if (shrinkwrapFile) {
       Utilities.syncFile(committedShrinkwrapFileName, subspace.getTempShrinkwrapFilename());
       Utilities.syncFile(committedShrinkwrapFileName, subspace.getTempShrinkwrapPreinstallFilename());

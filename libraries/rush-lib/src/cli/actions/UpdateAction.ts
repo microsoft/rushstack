@@ -9,6 +9,7 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { Subspace } from '../../api/Subspace';
+import { getVariant } from '../../api/Variants';
 
 export class UpdateAction extends BaseInstallAction {
   private readonly _fullParameter: CommandLineFlagParameter;
@@ -84,6 +85,8 @@ export class UpdateAction extends BaseInstallAction {
       (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) ??
       new Set(this.rushConfiguration.projects);
 
+    const variant: string | undefined = getVariant(this._variantParameter, this.rushConfiguration);
+
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: true,
@@ -95,6 +98,7 @@ export class UpdateAction extends BaseInstallAction {
       offline: this._offlineParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
+      variant,
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,

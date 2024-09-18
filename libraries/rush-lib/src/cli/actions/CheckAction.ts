@@ -2,17 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
+import { Colorize, ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
+import { getVariant, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class CheckAction extends BaseRushAction {
   private readonly _terminal: ITerminal;
   private readonly _jsonFlag: CommandLineFlagParameter;
   private readonly _verboseFlag: CommandLineFlagParameter;
   private readonly _subspaceParameter: CommandLineStringParameter | undefined;
+  private readonly _variantParameter: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -46,6 +48,7 @@ export class CheckAction extends BaseRushAction {
         'consistent only within that subspace (ignoring other subspaces). This parameter is required when ' +
         'the "subspacesEnabled" setting is set to true in subspaces.json.'
     });
+    this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
   }
 
   protected async runAsync(): Promise<void> {
@@ -54,7 +57,22 @@ export class CheckAction extends BaseRushAction {
         `The --subspace parameter must be specified with "rush check" when subspaces is enabled.`
       );
     }
+
+    const currentlyInstalledVariant: string | undefined =
+      await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
+    const variant: string | undefined = getVariant(this._variantParameter, this.rushConfiguration);
+    if (!variant && currentlyInstalledVariant) {
+      // eslint-disable-next-line no-console
+      this._terminal.writeWarningLine(
+        Colorize.yellow(
+          `Variant '${currentlyInstalledVariant}' has been installed, but 'rush check' is currently checking the default variant. ` +
+            `Use 'rush ${this.actionName} ${this._variantParameter.longName} '${currentlyInstalledVariant}' to check the current installation.`
+        )
+      );
+    }
+
     VersionMismatchFinder.rushCheck(this.rushConfiguration, this._terminal, {
+      variant,
       printAsJson: this._jsonFlag.value,
       truncateLongPackageNameLists: !this._verboseFlag.value,
       subspace: this._subspaceParameter?.value
