@@ -53,6 +53,13 @@ export class RushConstants {
   public static readonly rushTempNpmScope: '@rush-temp' = '@rush-temp';
 
   /**
+   * The folder name ("variants") under which named variant configurations for
+   * alternate dependency sets may be found.
+   * Example: `C:\MyRepo\common\config\rush\variants`
+   */
+  public static readonly rushVariantsFolderName: 'variants' = 'variants';
+
+  /**
    * The folder name ("temp") under the common folder, or under the .rush folder in each project's directory where
    * temporary files will be stored.
    * Example: `C:\MyRepo\common\temp`

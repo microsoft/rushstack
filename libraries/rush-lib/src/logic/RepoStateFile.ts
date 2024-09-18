@@ -151,7 +151,11 @@ export class RepoStateFile {
    *
    * @returns true if the file was modified, otherwise false.
    */
-  public refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined): boolean {
+  public refreshState(
+    rushConfiguration: RushConfiguration,
+    subspace: Subspace | undefined,
+    variant?: string
+  ): boolean {
     if (subspace === undefined) {
       subspace = rushConfiguration.defaultSubspace;
     }
@@ -163,7 +167,7 @@ export class RepoStateFile {
       rushConfiguration.pnpmOptions.preventManualShrinkwrapChanges;
     if (preventShrinkwrapChanges) {
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        subspace.getCommittedShrinkwrapFilename()
+        subspace.getCommittedShrinkwrapFilePath(variant)
       );
 
       if (pnpmShrinkwrapFile) {
@@ -185,7 +189,7 @@ export class RepoStateFile {
     const useWorkspaces: boolean =
       rushConfiguration.pnpmOptions && rushConfiguration.pnpmOptions.useWorkspaces;
     if (useWorkspaces) {
-      const commonVersions: CommonVersionsConfiguration = subspace.getCommonVersions();
+      const commonVersions: CommonVersionsConfiguration = subspace.getCommonVersions(variant);
       const preferredVersionsHash: string = commonVersions.getPreferredVersionsHash();
       if (this._preferredVersionsHash !== preferredVersionsHash) {
         this._preferredVersionsHash = preferredVersionsHash;
@@ -198,7 +202,7 @@ export class RepoStateFile {
 
     if (rushConfiguration.packageManager === 'pnpm' && rushConfiguration.subspacesFeatureEnabled) {
       const packageJsonInjectedDependenciesHash: string | undefined =
-        subspace.getPackageJsonInjectedDependenciesHash();
+        subspace.getPackageJsonInjectedDependenciesHash(variant);
 
       // packageJsonInjectedDependenciesHash is undefined, means there is no injected dependencies for that subspace
       // so we don't need to track the hash value for that subspace

@@ -289,16 +289,20 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
   public async runAsync(): Promise<void> {
     if (this._alwaysInstall || this._installParameter?.value) {
-      const { doBasicInstallAsync } = await import(
-        /* webpackChunkName: 'doBasicInstallAsync' */
-        '../../logic/installManager/doBasicInstallAsync'
-      );
+      const [{ doBasicInstallAsync }, currentlyInstalledVariant] = await Promise.all([
+        import(
+          /* webpackChunkName: 'doBasicInstallAsync' */
+          '../../logic/installManager/doBasicInstallAsync'
+        ),
+        this.rushConfiguration.getCurrentlyInstalledVariantAsync()
+      ]);
 
       await doBasicInstallAsync({
         terminal: this._terminal,
         rushConfiguration: this.rushConfiguration,
         rushGlobalFolder: this.rushGlobalFolder,
         isDebug: this.parser.isDebug,
+        variant: currentlyInstalledVariant,
         beforeInstallAsync: (subspace: Subspace) =>
           this.rushSession.hooks.beforeInstall.promise(this, subspace),
         afterInstallAsync: (subspace: Subspace) => this.rushSession.hooks.afterInstall.promise(this, subspace)

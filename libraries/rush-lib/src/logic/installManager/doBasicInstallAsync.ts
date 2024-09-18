@@ -19,12 +19,21 @@ export interface IRunInstallOptions {
   rushGlobalFolder: RushGlobalFolder;
   isDebug: boolean;
   terminal: ITerminal;
+  variant: string | undefined;
 }
 
 export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<void> {
-  const { rushConfiguration, rushGlobalFolder, isDebug } = options;
+  const {
+    rushConfiguration,
+    rushGlobalFolder,
+    isDebug,
+    variant,
+    terminal,
+    beforeInstallAsync,
+    afterInstallAsync
+  } = options;
 
-  VersionMismatchFinder.ensureConsistentVersions(rushConfiguration, options.terminal);
+  VersionMismatchFinder.ensureConsistentVersions(rushConfiguration, terminal, { variant });
   SetupChecks.validate(rushConfiguration);
 
   const purgeManager: typeof PurgeManager.prototype = new PurgeManager(rushConfiguration, rushGlobalFolder);
@@ -48,9 +57,10 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
       maxInstallAttempts: 1,
       networkConcurrency: undefined,
       subspace: rushConfiguration.defaultSubspace,
-      terminal: options.terminal,
-      afterInstallAsync: options.afterInstallAsync,
-      beforeInstallAsync: options.beforeInstallAsync
+      terminal,
+      variant,
+      afterInstallAsync,
+      beforeInstallAsync
     }
   );
 

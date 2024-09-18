@@ -160,10 +160,13 @@ export class DeployAction extends BaseRushAction {
 
     const projects: RushConfigurationProject[] = this.rushConfiguration.projects;
     if (this.rushConfiguration.packageManager === 'pnpm') {
+      const currentlyInstalledVariant: string | undefined =
+        await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
       for (const project of projects) {
         const pnpmfileConfiguration: PnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
           this.rushConfiguration,
-          project.subspace
+          project.subspace,
+          currentlyInstalledVariant
         );
         const subspace: IExtractorSubspace = {
           subspaceName: project.subspace.subspaceName,

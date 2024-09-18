@@ -346,13 +346,18 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: check 1`] = `
-"usage: rush check [-h] [--json] [--verbose] [--subspace SUBSPACE_NAME]
+"usage: rush check [-h] [--variant VARIANT] [--json] [--verbose]
+                  [--subspace SUBSPACE_NAME]
+                  
 
 Checks each project's package.json files and ensures that all dependencies 
 are of the same version throughout the repository.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
   --json                If this flag is specified, output will be in JSON 
                         format.
   --verbose             If this flag is specified, long lists of package 
@@ -624,8 +629,8 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
                     [--max-install-attempts NUMBER] [--ignore-hooks]
-                    [--offline] [-t PROJECT] [-T PROJECT] [-f PROJECT]
-                    [-o PROJECT] [-i PROJECT] [-I PROJECT]
+                    [--offline] [--variant VARIANT] [-t PROJECT] [-T PROJECT]
+                    [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME]
                     [--subspace SUBSPACE_NAME] [--check-only]
@@ -675,6 +680,9 @@ Optional arguments:
                         necessary NPM packages cannot be obtained from the 
                         local cache. For details, see the documentation for 
                         PNPM's \\"--offline\\" parameter.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
   -t PROJECT, --to PROJECT
                         Normally all projects in the monorepo will be 
                         processed; adding this parameter will instead select 
@@ -1223,7 +1231,7 @@ exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
                    [--max-install-attempts NUMBER] [--ignore-hooks]
-                   [--offline] [--full] [--recheck]
+                   [--offline] [--variant VARIANT] [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -1268,6 +1276,9 @@ Optional arguments:
                         necessary NPM packages cannot be obtained from the 
                         local cache. For details, see the documentation for 
                         PNPM's \\"--offline\\" parameter.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
   --full                Normally \\"rush update\\" tries to preserve your 
                         existing installed versions and only makes the 
                         minimum updates needed to satisfy the package.json 
@@ -1324,6 +1335,8 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: upgrade-interactive 1`] = `
 "usage: rush upgrade-interactive [-h] [--make-consistent] [-s]
+                                [--variant VARIANT]
+                                
 
 Provide an interactive way to upgrade your dependencies. Running the command 
 will open an interactive prompt that will ask you which projects and which 
@@ -1341,6 +1354,9 @@ Optional arguments:
                      upgrade dependencies from other projects.
   -s, --skip-update  If specified, the \\"rush update\\" command will not be run 
                      after updating the package.json files.
+  --variant VARIANT  Run command using a variant installation configuration. 
+                     This parameter may alternatively be specified via the 
+                     RUSH_VARIANT environment variable.
 "
 `;
 
