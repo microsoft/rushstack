@@ -56,7 +56,7 @@ export interface IPackageJsonUpdaterRushBaseUpdateOptions {
   /**
    * The variant to consider when performing installations and validating shrinkwrap updates.
    */
-  variant?: string | undefined;
+  variant: string | undefined | undefined;
 }
 
 /**

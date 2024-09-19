@@ -304,8 +304,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         isDebug: this.parser.isDebug,
         variant: currentlyInstalledVariant,
         beforeInstallAsync: (subspace: Subspace) =>
-          this.rushSession.hooks.beforeInstall.promise(this, subspace),
-        afterInstallAsync: (subspace: Subspace) => this.rushSession.hooks.afterInstall.promise(this, subspace)
+          this.rushSession.hooks.beforeInstall.promise(this, subspace, currentlyInstalledVariant),
+        afterInstallAsync: (subspace: Subspace) =>
+          this.rushSession.hooks.afterInstall.promise(this, subspace, currentlyInstalledVariant)
       });
     }
 

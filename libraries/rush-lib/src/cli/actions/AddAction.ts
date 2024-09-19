@@ -2,7 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
+import type {
+  CommandLineFlagParameter,
+  CommandLineStringListParameter,
+  CommandLineStringParameter
+} from '@rushstack/ts-command-line';
 
 import { BaseAddAndRemoveAction } from './BaseAddAndRemoveAction';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
@@ -13,6 +17,7 @@ import {
   type IPackageJsonUpdaterRushAddOptions,
   SemVerStyle
 } from '../../logic/PackageJsonUpdaterTypes';
+import { getVariant, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class AddAction extends BaseAddAndRemoveAction {
   protected readonly _allFlag: CommandLineFlagParameter;
@@ -22,6 +27,7 @@ export class AddAction extends BaseAddAndRemoveAction {
   private readonly _devDependencyFlag: CommandLineFlagParameter;
   private readonly _peerDependencyFlag: CommandLineFlagParameter;
   private readonly _makeConsistentFlag: CommandLineFlagParameter;
+  private readonly _variantParameter: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string = [
@@ -85,6 +91,7 @@ export class AddAction extends BaseAddAndRemoveAction {
       parameterLongName: '--all',
       description: 'If specified, the dependency will be added to all projects.'
     });
+    this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
   }
 
   public getUpdateOptions(): IPackageJsonUpdaterRushAddOptions {
@@ -149,6 +156,9 @@ export class AddAction extends BaseAddAndRemoveAction {
 
       packagesToAdd.push({ packageName, version, rangeStyle });
     }
+
+    const variant: string | undefined = getVariant(this._variantParameter, this.rushConfiguration);
+
     return {
       projects: projects,
       packagesToUpdate: packagesToAdd,
@@ -157,7 +167,8 @@ export class AddAction extends BaseAddAndRemoveAction {
       updateOtherPackages: this._makeConsistentFlag.value,
       skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
-      actionName: this.actionName
+      actionName: this.actionName,
+      variant
     };
   }
 }

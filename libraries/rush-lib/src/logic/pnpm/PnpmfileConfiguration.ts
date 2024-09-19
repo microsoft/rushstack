@@ -98,7 +98,7 @@ export class PnpmfileConfiguration {
       const preferredVersions: Map<string, string> = new Map();
       MapExtensions.mergeFromMap(
         preferredVersions,
-        rushConfiguration.getImplicitlyPreferredVersions(subspace)
+        rushConfiguration.getImplicitlyPreferredVersions(subspace, variant)
       );
       for (const [name, version] of commonVersionsConfiguration.getAllPreferredVersions()) {
         // Use the most restrictive version range available

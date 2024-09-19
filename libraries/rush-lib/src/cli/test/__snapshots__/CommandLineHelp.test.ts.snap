@@ -83,7 +83,7 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
 "usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [--peer] [-m]
-                [--all]
+                [--all] [--variant VARIANT]
                 
 
 Adds specified package(s) to the dependencies of the current project (as 
@@ -126,6 +126,9 @@ Optional arguments:
                         same version of the dependency.
   --all                 If specified, the dependency will be added to all 
                         projects.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
 "
 `;
 
@@ -1149,7 +1152,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: remove 1`] = `
-"usage: rush remove [-h] [-s] -p PACKAGE [--all]
+"usage: rush remove [-h] [-s] -p PACKAGE [--all] [--variant VARIANT]
 
 Removes specified package(s) from the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\".
@@ -1164,6 +1167,9 @@ Optional arguments:
                         foo --package bar\\".
   --all                 If specified, the dependency will be removed from all 
                         projects that declare it.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
 "
 `;
 

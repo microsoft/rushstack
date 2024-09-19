@@ -20,7 +20,7 @@ export default class RushResolverCachePlugin implements IRushPlugin {
   public apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void {
     rushSession.hooks.afterInstall.tapPromise(
       this.pluginName,
-      async (command: IRushCommand, subspace: Subspace) => {
+      async (command: IRushCommand, subspace: Subspace, variant: string | undefined) => {
         const logger: ILogger = rushSession.getLogger('RushResolverCachePlugin');
 
         if (rushConfiguration.packageManager !== 'pnpm') {
@@ -47,7 +47,7 @@ export default class RushResolverCachePlugin implements IRushPlugin {
           './afterInstallAsync'
         );
 
-        await afterInstallAsync(rushSession, rushConfiguration, subspace, logger);
+        await afterInstallAsync(rushSession, rushConfiguration, subspace, variant, logger);
       }
     );
   }

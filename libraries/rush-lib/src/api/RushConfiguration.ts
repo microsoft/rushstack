@@ -1464,7 +1464,7 @@ export class RushConfiguration {
     const dependencyAnalyzer: DependencyAnalyzerModuleType.DependencyAnalyzer =
       DependencyAnalyzerModule.DependencyAnalyzer.forRushConfiguration(this);
     const dependencyAnalysis: DependencyAnalyzerModuleType.IDependencyAnalysis =
-      dependencyAnalyzer.getAnalysis(subspace, variant);
+      dependencyAnalyzer.getAnalysis(subspace, variant, false);
     return dependencyAnalysis.implicitlyPreferredVersionByPackageName;
   }
 
@@ -1490,7 +1490,7 @@ export class RushConfiguration {
   }
 
   /**
-   * @deprecated Use {@link Subspace.getRepoStateFilePath} instead
+   * @deprecated Use {@link Subspace.getPnpmfilePath} instead
    */
   public getPnpmfilePath(subspace?: Subspace): string {
     return (subspace ?? this.defaultSubspace).getPnpmfilePath();

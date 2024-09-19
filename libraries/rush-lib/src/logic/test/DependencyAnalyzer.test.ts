@@ -10,7 +10,7 @@ describe(DependencyAnalyzer.name, () => {
       `${__dirname}/DependencyAnalyzerTestRepos/${repoName}/rush.json`
     );
     const dependencyAnalyzer: DependencyAnalyzer = DependencyAnalyzer.forRushConfiguration(rushConfiguration);
-    const analysis: IDependencyAnalysis = dependencyAnalyzer.getAnalysis();
+    const analysis: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(undefined, undefined, false);
     return analysis;
   }
 
