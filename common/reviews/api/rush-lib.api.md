@@ -1476,7 +1476,7 @@ export class Subspace {
     // @beta
     getCommonVersionsFilePath(variant?: string): string;
     // @beta
-    getPackageJsonInjectedDependenciesHash(variant: string | undefined): string | undefined;
+    getPackageJsonInjectedDependenciesHash(variant?: string): string | undefined;
     // @beta
     getPnpmConfigFilePath(): string;
     // @beta
