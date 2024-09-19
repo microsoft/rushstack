@@ -10,7 +10,6 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { UNINITIALIZED } from '../../utilities/Utilities';
-import type { Subspace } from '../../api/Subspace';
 
 describe(ProjectChangeAnalyzer.name, () => {
   beforeEach(() => {
