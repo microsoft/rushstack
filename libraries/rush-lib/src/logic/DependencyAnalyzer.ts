@@ -54,7 +54,11 @@ export class DependencyAnalyzer {
     return analyzer;
   }
 
-  public getAnalysis(subspace?: Subspace, variant?: string, addAction?: boolean): IDependencyAnalysis {
+  public getAnalysis(
+    subspace: Subspace | undefined,
+    variant: string | undefined,
+    addAction: boolean
+  ): IDependencyAnalysis {
     // Use an empty string as the key when no variant provided. Anything else would possibly conflict
     // with a variant created by the user
     const variantKey: string = variant || '';
@@ -73,13 +77,8 @@ export class DependencyAnalyzer {
     }
 
     let analysisForSubspace: IDependencyAnalysis | undefined = analysisForVariant.get(subspaceToAnalyze);
-
     if (!analysisForSubspace) {
-      analysisForSubspace = this._getAnalysisInternal(
-        subspace || this._rushConfiguration.defaultSubspace,
-        variant,
-        addAction
-      );
+      analysisForSubspace = this._getAnalysisInternal(subspaceToAnalyze, variant, addAction);
 
       analysisForVariant.set(subspaceToAnalyze, analysisForSubspace);
     }
@@ -96,7 +95,7 @@ export class DependencyAnalyzer {
   private _getAnalysisInternal(
     subspace: Subspace,
     variant: string | undefined,
-    addAction?: boolean
+    addAction: boolean
   ): IDependencyAnalysis {
     const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions(variant);
     const allVersionsByPackageName: Map<string, Set<string>> = new Map();

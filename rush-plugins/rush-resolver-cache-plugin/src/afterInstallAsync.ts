@@ -51,12 +51,13 @@ export async function afterInstallAsync(
   rushSession: RushSession,
   rushConfiguration: RushConfiguration,
   subspace: Subspace,
+  variant: string | undefined,
   logger: ILogger
 ): Promise<void> {
   const { terminal } = logger;
   const rushRoot: string = `${rushConfiguration.rushJsonFolder}/`;
 
-  const lockFilePath: string = subspace.getCommittedShrinkwrapFilePath();
+  const lockFilePath: string = subspace.getCommittedShrinkwrapFilePath(variant);
   const workspaceRoot: string = subspace.getSubspaceTempFolderPath();
 
   const projectByImporterPath: LookupByPath<RushConfigurationProject> =

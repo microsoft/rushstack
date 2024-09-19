@@ -362,7 +362,7 @@ export class Subspace {
    * @deprecated - Use {@link Subspace.getCommittedShrinkwrapFilePath} instead.
    */
   public getCommittedShrinkwrapFilename(): string {
-    return this.getCommittedShrinkwrapFilePath();
+    return this.getCommittedShrinkwrapFilePath(undefined);
   }
 
   /**

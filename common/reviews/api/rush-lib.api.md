@@ -1400,8 +1400,8 @@ export class _RushInternals {
 
 // @beta
 export class RushLifecycleHooks {
-    readonly afterInstall: AsyncSeriesHook<[IRushCommand, Subspace]>;
-    readonly beforeInstall: AsyncSeriesHook<[IGlobalCommand, Subspace]>;
+    readonly afterInstall: AsyncSeriesHook<[IRushCommand, Subspace, string | undefined]>;
+    readonly beforeInstall: AsyncSeriesHook<[IGlobalCommand, Subspace, string | undefined]>;
     readonly flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]>;
     readonly initialize: AsyncSeriesHook<IRushCommand>;
     readonly runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;

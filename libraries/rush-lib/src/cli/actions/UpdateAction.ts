@@ -108,8 +108,9 @@ export class UpdateAction extends BaseInstallAction {
         (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this._terminal)) ?? [],
       checkOnly: false,
       beforeInstallAsync: (subspace: Subspace) =>
-        this.rushSession.hooks.beforeInstall.promise(this, subspace),
-      afterInstallAsync: (subspace: Subspace) => this.rushSession.hooks.afterInstall.promise(this, subspace),
+        this.rushSession.hooks.beforeInstall.promise(this, subspace, variant),
+      afterInstallAsync: (subspace: Subspace) =>
+        this.rushSession.hooks.afterInstall.promise(this, subspace, variant),
       terminal: this._terminal
     };
   }

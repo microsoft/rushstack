@@ -86,8 +86,9 @@ export class InstallAction extends BaseInstallAction {
       checkOnly: this._checkOnlyParameter.value,
       resolutionOnly: this._resolutionOnlyParameter?.value,
       beforeInstallAsync: (subspace: Subspace) =>
-        this.rushSession.hooks.beforeInstall.promise(this, subspace),
-      afterInstallAsync: (subspace: Subspace) => this.rushSession.hooks.afterInstall.promise(this, subspace),
+        this.rushSession.hooks.beforeInstall.promise(this, subspace, variant),
+      afterInstallAsync: (subspace: Subspace) =>
+        this.rushSession.hooks.afterInstall.promise(this, subspace, variant),
       terminal: this._terminal
     };
   }

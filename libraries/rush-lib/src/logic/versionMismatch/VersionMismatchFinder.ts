@@ -17,7 +17,7 @@ const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
 export interface IVersionMismatchFinderOptions {
   subspace?: Subspace;
-  variant?: string;
+  variant: string | undefined;
 }
 
 export interface IVersionMismatchFinderRushCheckOptions extends IVersionMismatchFinderOptions {

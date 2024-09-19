@@ -33,7 +33,10 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
     afterInstallAsync
   } = options;
 
-  VersionMismatchFinder.ensureConsistentVersions(rushConfiguration, terminal, { variant });
+  VersionMismatchFinder.ensureConsistentVersions(rushConfiguration, terminal, {
+    variant,
+    subspace: undefined
+  });
   SetupChecks.validate(rushConfiguration);
 
   const purgeManager: typeof PurgeManager.prototype = new PurgeManager(rushConfiguration, rushGlobalFolder);
