@@ -20,7 +20,7 @@ export interface IProjectLogWritableOptions {
 }
 
 export interface ILogFileNames {
-  mergedFileName: string;
+  textFileName: string;
   jsonlFileName: string;
   errorFileName: string;
 }
@@ -33,27 +33,29 @@ export interface ILogFileNames {
 export interface ILogFilePaths {
   /**
    * The absolute path to the folder containing the text log files.
+   * Provided as a convenience since it is an intermediary value of producing the text log file path.
    */
-  logFolderPath: string;
+  textFolder: string;
   /**
    * The absolute path to the folder containing the JSONL log files.
+   * Provided as a convenience since it is an intermediary value of producing the jsonl log file path.
    */
-  jsonlFolderPath: string;
+  jsonlFolder: string;
 
   /**
    * The absolute path to the merged (interleaved stdout and stderr) text log.
    * ANSI escape codes have been stripped.
    */
-  logPath: string;
+  text: string;
   /**
    * The absolute path to the stderr text log.
    * ANSI escape codes have been stripped.
    */
-  errorLogPath: string;
+  error: string;
   /**
    * The absolute path to the JSONL log. ANSI escape codes are left intact to be able to reproduce the console output.
    */
-  jsonlPath: string;
+  jsonl: string;
 }
 
 export interface IGetLogFilePathsOptions {
@@ -64,7 +66,7 @@ export interface IGetLogFilePathsOptions {
 const LOG_CHUNKS_FOLDER_RELATIVE_PATH: string = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/chunked-rush-logs`;
 
 /**
- * A new terminal stream that writes all log chunks to a JSONL format so they can be faithfully reconstructed
+ * A terminal stream that writes all log chunks to a JSONL format so they can be faithfully reconstructed
  *  during build cache restores. This is used for adding warning + error messages in cobuilds where the original
  *  logs cannot be completely restored from the existing `all.log` and `error.log` files.
  *
@@ -130,8 +132,7 @@ export class JsonLFileWritable extends TerminalWritable {
 }
 
 /**
- * A terminal stream that writes a merged log file and an error log file.
- * The merged log file contains intermingled stdout and stderr.
+ * A terminal stream that writes two text log files: one with interleaved stdout and stderr, and one with just stderr.
  */
 export class SplitLogFileWritable extends TerminalWritable {
   public readonly logPath: string;
@@ -207,7 +208,13 @@ export async function initializeProjectLogFilesAsync(
 ): Promise<TerminalWritable> {
   const { logFilePaths, enableChunkedOutput = false } = options;
 
-  const { logFolderPath, jsonlFolderPath, logPath, errorLogPath, jsonlPath } = logFilePaths;
+  const {
+    textFolder: logFolderPath,
+    jsonlFolder: jsonlFolderPath,
+    text: logPath,
+    error: errorLogPath,
+    jsonl: jsonlPath
+  } = logFilePaths;
   await Promise.all([
     FileSystem.ensureFolderAsync(logFolderPath),
     enableChunkedOutput && FileSystem.ensureFolderAsync(jsonlFolderPath),
@@ -245,7 +252,7 @@ export function getLogfileBaseNames(packageName: string, logFilenameIdentifier: 
   const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
 
   return {
-    mergedFileName: `${logFileBaseName}.log`,
+    textFileName: `${logFileBaseName}.log`,
     jsonlFileName: `${logFileBaseName}.chunks.jsonl`,
     errorFileName: `${logFileBaseName}.error.log`
   };
@@ -259,11 +266,11 @@ export function getLogfileBaseNames(packageName: string, logFilenameIdentifier: 
  */
 export function getProjectLogFolders(
   projectFolder: string
-): Pick<ILogFilePaths, 'logFolderPath' | 'jsonlFolderPath'> {
-  const logFolderPath: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
-  const jsonlFolderPath: string = `${projectFolder}/${LOG_CHUNKS_FOLDER_RELATIVE_PATH}`;
+): Pick<ILogFilePaths, 'textFolder' | 'jsonlFolder'> {
+  const textFolder: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
+  const jsonlFolder: string = `${projectFolder}/${LOG_CHUNKS_FOLDER_RELATIVE_PATH}`;
 
-  return { logFolderPath, jsonlFolderPath };
+  return { textFolder, jsonlFolder };
 }
 
 /**
@@ -278,23 +285,23 @@ export function getProjectLogFilePaths(options: IGetLogFilePathsOptions): ILogFi
     logFilenameIdentifier
   } = options;
 
-  const { logFolderPath, jsonlFolderPath } = getProjectLogFolders(projectFolder);
+  const { textFolder, jsonlFolder } = getProjectLogFolders(projectFolder);
   const {
-    mergedFileName: log,
-    jsonlFileName: logChunks,
+    textFileName: textLog,
+    jsonlFileName: jsonlLog,
     errorFileName: errorLog
   } = getLogfileBaseNames(packageName, logFilenameIdentifier);
 
-  const logPath: string = `${logFolderPath}/${log}`;
-  const errorLogPath: string = `${logFolderPath}/${errorLog}`;
-  const jsonlPath: string = `${jsonlFolderPath}/${logChunks}`;
+  const textPath: string = `${textFolder}/${textLog}`;
+  const errorPath: string = `${textFolder}/${errorLog}`;
+  const jsonlPath: string = `${jsonlFolder}/${jsonlLog}`;
 
   return {
-    logFolderPath,
-    jsonlFolderPath,
+    textFolder,
+    jsonlFolder,
 
-    logPath,
-    errorLogPath,
-    jsonlPath
+    text: textPath,
+    error: errorPath,
+    jsonl: jsonlPath
   };
 }

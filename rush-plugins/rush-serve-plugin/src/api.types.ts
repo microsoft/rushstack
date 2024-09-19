@@ -10,17 +10,17 @@ export type ReadableOperationStatus = keyof typeof OperationStatus;
 
 export interface ILogFileURLs {
   /**
-   * The URL to the merged log file.
+   * The relative URL to the merged (interleaved stdout and stderr) text log.
    */
-  log: string;
+  text: string;
 
   /**
-   * The URL to the stderr log file.
+   * The relative URL to the stderr log file.
    */
   error: string;
 
   /**
-   * The URL to the JSONL log file.
+   * The relative URL to the JSONL log file.
    */
   jsonl: string;
 }

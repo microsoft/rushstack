@@ -239,7 +239,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             !buildCacheContext.buildCacheTerminal ||
             buildCacheContext.buildCacheTerminalWritable?.isOpen === false
           ) {
-            // The writable is does not exist or is closed, re-create one
+            // The writable does not exist or has been closed, re-create one
             // eslint-disable-next-line require-atomic-updates
             buildCacheContext.buildCacheTerminal = await this._createBuildCacheTerminalAsync({
               record,
@@ -321,7 +321,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           //     has changed happens inside the hashing logic.
           //
 
-          const { errorLogPath } = getProjectLogFilePaths({
+          const { error: errorLogPath } = getProjectLogFilePaths({
             project,
             logFilenameIdentifier: operationMetadataManager.logFilenameIdentifier
           });
@@ -443,9 +443,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             const { logFilenameIdentifier } = operationMetadataManager;
             const { duration: durationInSeconds } = stopwatch;
             const {
-              logPath,
-              errorLogPath,
-              jsonlPath: logChunksPath
+              text: logPath,
+              error: errorLogPath,
+              jsonl: logChunksPath
             } = getProjectLogFilePaths({
               project,
               logFilenameIdentifier

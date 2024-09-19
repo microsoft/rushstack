@@ -525,11 +525,11 @@ export interface ILaunchOptions {
 
 // @alpha
 export interface ILogFilePaths {
-    errorLogPath: string;
-    jsonlFolderPath: string;
-    jsonlPath: string;
-    logFolderPath: string;
-    logPath: string;
+    error: string;
+    jsonl: string;
+    jsonlFolder: string;
+    text: string;
+    textFolder: string;
 }
 
 // @beta (undocumented)

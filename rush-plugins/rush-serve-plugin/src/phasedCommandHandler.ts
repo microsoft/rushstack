@@ -166,17 +166,19 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
       const { logServePath } = options;
       if (logServePath) {
         for (const project of selectedProjects) {
+          const projectLogServePath: string = `${logServePath}/${project.packageName}`;
+
           routingRules.push({
             type: 'folder',
-            diskPath: getProjectLogFolders(project.projectFolder).logFolderPath,
-            servePath: logServePath,
+            diskPath: getProjectLogFolders(project.projectFolder).textFolder,
+            servePath: projectLogServePath,
             immutable: false
           });
 
           routingRules.push({
             type: 'folder',
-            diskPath: getProjectLogFolders(project.projectFolder).jsonlFolderPath,
-            servePath: logServePath,
+            diskPath: getProjectLogFolders(project.projectFolder).jsonlFolder,
+            servePath: projectLogServePath,
             immutable: false
           });
         }
@@ -299,15 +301,20 @@ function tryEnableBuildStatusWebSocketServer(
 
   const { logServePath } = options;
 
-  function convertToLogFileUrls(logFilePaths: ILogFilePaths | undefined): ILogFileURLs | undefined {
+  function convertToLogFileUrls(
+    logFilePaths: ILogFilePaths | undefined,
+    packageName: string
+  ): ILogFileURLs | undefined {
     if (!logFilePaths || !logServePath) {
       return;
     }
 
+    const projectLogServePath: string = `${logServePath}/${packageName}`;
+
     const logFileUrls: ILogFileURLs = {
-      log: `${logServePath}${logFilePaths.logPath.slice(logFilePaths.logFolderPath.length)}`,
-      error: `${logServePath}${logFilePaths.errorLogPath.slice(logFilePaths.logFolderPath.length)}`,
-      jsonl: `${logServePath}${logFilePaths.jsonlPath.slice(logFilePaths.jsonlFolderPath.length)}`
+      text: `${projectLogServePath}${logFilePaths.text.slice(logFilePaths.textFolder.length)}`,
+      error: `${projectLogServePath}${logFilePaths.error.slice(logFilePaths.textFolder.length)}`,
+      jsonl: `${projectLogServePath}${logFilePaths.jsonl.slice(logFilePaths.jsonlFolder.length)}`
     };
 
     return logFileUrls;
@@ -324,9 +331,11 @@ function tryEnableBuildStatusWebSocketServer(
       return;
     }
 
+    const { packageName } = associatedProject;
+
     return {
       name,
-      packageName: associatedProject.packageName,
+      packageName,
       phaseName: associatedPhase.name,
 
       silent: !!runner.silent,
@@ -336,7 +345,7 @@ function tryEnableBuildStatusWebSocketServer(
       startTime: record.stopwatch.startTime,
       endTime: record.stopwatch.endTime,
 
-      logFileURLs: convertToLogFileUrls(record.logFilePaths)
+      logFileURLs: convertToLogFileUrls(record.logFilePaths, packageName)
     };
   }
 
