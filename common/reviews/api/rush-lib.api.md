@@ -523,6 +523,15 @@ export interface ILaunchOptions {
     terminalProvider?: ITerminalProvider;
 }
 
+// @alpha
+export interface ILogFilePaths {
+    errorLogPath: string;
+    jsonlFolderPath: string;
+    jsonlPath: string;
+    logFolderPath: string;
+    logPath: string;
+}
+
 // @beta (undocumented)
 export interface ILogger {
     emitError(error: Error): void;
@@ -553,6 +562,7 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 export interface IOperationExecutionResult {
     readonly cobuildRunnerId: string | undefined;
     readonly error: Error | undefined;
+    readonly logFilePaths: ILogFilePaths | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly operation: Operation;
     readonly status: OperationStatus;
