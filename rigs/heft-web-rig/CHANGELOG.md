@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Fri, 13 Sep 2024 00:11:43 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Sep 2024 00:11:08 GMT and should not be manually modified.
+
+## 0.24.33
+Thu, 19 Sep 2024 00:11:08 GMT
+
+_Version update only_
 
 ## 0.24.32
 Fri, 13 Sep 2024 00:11:43 GMT

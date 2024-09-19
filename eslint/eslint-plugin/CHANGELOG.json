@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.16.1",
+      "tag": "@rushstack/eslint-plugin_v0.16.1",
+      "date": "Thu, 19 Sep 2024 00:11:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix ESLint broken links"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.16.0",
       "tag": "@rushstack/eslint-plugin_v0.16.0",
       "date": "Wed, 14 Aug 2024 22:37:32 GMT",
