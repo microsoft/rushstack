@@ -1210,8 +1210,6 @@ export class RushConfiguration {
     readonly gitTagSeparator: string | undefined;
     readonly gitVersionBumpCommitMessage: string | undefined;
     readonly hotfixChangeEnabled: boolean;
-    // (undocumented)
-    _loadCurrentVariantJsonAsync(): Promise<ICurrentVariantJson | undefined>;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
     static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
