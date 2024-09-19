@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { Colorize, ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
@@ -29,7 +29,7 @@ export class CheckAction extends BaseRushAction {
       parser
     });
 
-    this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
+    this._terminal = parser.terminal;
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
       description: 'If this flag is specified, output will be in JSON format.'
@@ -62,7 +62,6 @@ export class CheckAction extends BaseRushAction {
       await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
     const variant: string | undefined = getVariant(this._variantParameter, this.rushConfiguration);
     if (!variant && currentlyInstalledVariant) {
-      // eslint-disable-next-line no-console
       this._terminal.writeWarningLine(
         Colorize.yellow(
           `Variant '${currentlyInstalledVariant}' has been installed, but 'rush check' is currently checking the default variant. ` +
