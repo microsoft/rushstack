@@ -1579,7 +1579,7 @@ export class RushConfiguration {
     return undefined;
   }
 
-  public async _loadCurrentVariantJsonAsync(): Promise<ICurrentVariantJson | undefined> {
+  private async _loadCurrentVariantJsonAsync(): Promise<ICurrentVariantJson | undefined> {
     try {
       return await JsonFile.loadAsync(this.currentVariantJsonFilePath);
     } catch (e) {
