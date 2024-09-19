@@ -45,6 +45,7 @@ function getPlatformInfo(): IPlatformInfo {
  * @param rushSession - The Rush Session
  * @param rushConfiguration - The Rush Configuration
  * @param subspace - The subspace that was just installed
+ * @param variant - The variant that was just installed
  * @param logger - The initialized logger
  */
 export async function afterInstallAsync(
