@@ -408,7 +408,7 @@ export class Subspace {
    * Returns hash value of injected dependencies in related package.json.
    * @beta
    */
-  public getPackageJsonInjectedDependenciesHash(variant: string | undefined): string | undefined {
+  public getPackageJsonInjectedDependenciesHash(variant?: string): string | undefined {
     const allPackageJson: IPackageJsonLite[] = [];
 
     const relatedProjects: RushConfigurationProject[] = [];
