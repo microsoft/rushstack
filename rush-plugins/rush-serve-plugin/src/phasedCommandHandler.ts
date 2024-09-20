@@ -488,6 +488,6 @@ function getRepositoryIdentifier(rushConfiguration: RushConfiguration): string {
   return `${os.hostname()} - ${rushConfiguration.rushJsonFolder}`;
 }
 
-function getLogServePathForProject(logServePath: string, packageName: string) {
+function getLogServePathForProject(logServePath: string, packageName: string): string {
   return `${logServePath}/${packageName}`;
 }
