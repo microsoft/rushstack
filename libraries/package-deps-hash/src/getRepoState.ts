@@ -303,11 +303,16 @@ function isIterable<T>(value: Iterable<T> | AsyncIterable<T>): value is Iterable
 }
 
 /**
- * Uses `git hash-object` to hash the provided files.
- * @param rootDirectory - The root directory to which paths are specified relative
+ * Uses `git hash-object` to hash the provided files. Unlike `getGitHashForFiles`, this API is asynchronous, and also allows for
+ * the input file paths to be specified as an async iterable.
+ *
+ * @param rootDirectory - The root directory to which paths are specified relative. Must be the root of the Git repository.
  * @param filesToHash - The file paths to hash using `git hash-object`
  * @param gitPath - The path to the Git executable
  * @returns An iterable of [filePath, hash] pairs
+ *
+ * @remarks
+ * The input file paths must be specified relative to the Git repository root, or else be absolute paths.
  */
 export async function hashFilesAsync(
   rootDirectory: string,
