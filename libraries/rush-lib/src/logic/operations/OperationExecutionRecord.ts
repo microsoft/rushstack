@@ -23,7 +23,11 @@ import { OperationMetadataManager } from './OperationMetadataManager';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import { ProjectLogWritable } from './ProjectLogWritable';
+import {
+  getProjectLogFilePaths,
+  type ILogFilePaths,
+  initializeProjectLogFilesAsync
+} from './ProjectLogWritable';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -103,6 +107,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public readonly associatedProject: RushConfigurationProject | undefined;
   public readonly _operationMetadataManager: OperationMetadataManager | undefined;
 
+  public logFilePaths: ILogFilePaths | undefined;
+
   private readonly _context: IOperationExecutionRecordContext;
 
   private _collatedWriter: CollatedWriter | undefined = undefined;
@@ -121,13 +127,17 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     this.runner = runner;
     this.associatedPhase = associatedPhase;
     this.associatedProject = associatedProject;
-    if (operation.associatedPhase && operation.associatedProject) {
-      this._operationMetadataManager = new OperationMetadataManager({
-        phase: operation.associatedPhase,
-        rushProject: operation.associatedProject,
-        operation
-      });
-    }
+    this.logFilePaths = undefined;
+
+    this._operationMetadataManager =
+      associatedPhase && associatedProject
+        ? new OperationMetadataManager({
+            phase: associatedPhase,
+            rushProject: associatedProject,
+            operation
+          })
+        : undefined;
+
     this._context = context;
     this._status = operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
   }
@@ -199,15 +209,22 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   ): Promise<T> {
     const { associatedPhase, associatedProject, stdioSummarizer } = this;
     const { createLogFile, logFileSuffix = '' } = options;
-    const projectLogWritable: ProjectLogWritable | undefined =
+
+    const logFilePaths: ILogFilePaths | undefined =
       createLogFile && associatedProject && associatedPhase && this._operationMetadataManager
-        ? await ProjectLogWritable.initializeAsync({
+        ? getProjectLogFilePaths({
             project: associatedProject,
-            terminal: this.collatedWriter.terminal,
-            logFilenameIdentifier: `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`,
-            enableChunkedOutput: true
+            logFilenameIdentifier: `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`
           })
         : undefined;
+    this.logFilePaths = logFilePaths;
+
+    const projectLogWritable: TerminalWritable | undefined = logFilePaths
+      ? await initializeProjectLogFilesAsync({
+          logFilePaths,
+          enableChunkedOutput: true
+        })
+      : undefined;
 
     try {
       //#region OPERATION LOGGING
@@ -215,19 +232,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       //
       //                             +--> quietModeTransform? --> collatedWriter
       //                             |
-      // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
+      // normalizeNewlineTransform --1--> stderrLineTransform --2--> projectLogWritable
       //                                                        |
       //                                                        +--> stdioSummarizer
       const destination: TerminalWritable = projectLogWritable
         ? new SplitterTransform({
-            destinations: [
-              new TextRewriterTransform({
-                destination: projectLogWritable,
-                removeColors: true,
-                normalizeNewlines: NewlineKind.OsDefault
-              }),
-              stdioSummarizer
-            ]
+            destinations: [projectLogWritable, stdioSummarizer]
           })
         : stdioSummarizer;
 

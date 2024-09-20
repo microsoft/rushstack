@@ -57,7 +57,7 @@ export class RushServeConfiguration {
     projects: Iterable<RushConfigurationProject>,
     terminal: ITerminal,
     workspaceRoutingRules: Iterable<IRoutingRule>
-  ): Promise<Iterable<IRoutingRule>> {
+  ): Promise<IRoutingRule[]> {
     const rules: IRoutingRule[] = Array.from(workspaceRoutingRules);
 
     await Async.forEachAsync(

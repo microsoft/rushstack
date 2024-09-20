@@ -134,6 +134,7 @@ export type {
 } from './logic/operations/IOperationExecutionResult';
 export { type IOperationOptions, Operation } from './logic/operations/Operation';
 export { OperationStatus } from './logic/operations/OperationStatus';
+export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 
 export {
   RushSession,
