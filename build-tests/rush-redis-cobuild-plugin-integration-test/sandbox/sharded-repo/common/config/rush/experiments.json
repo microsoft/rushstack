@@ -3,7 +3,7 @@
  * Rush features.  More documentation is available on the Rush website: https://rushjs.io
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/experiments.schema.json",
+  "$schema": "../../../../../../../libraries/rush-lib/src/schemas/experiments.schema.json",
 
   /**
    * By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'.
@@ -40,7 +40,7 @@
    * If true, the phased commands feature is enabled. To use this feature, create a "phased" command
    * in common/config/rush/command-line.json.
    */
-  "phasedCommands": true
+  "phasedCommands": true,
 
   /**
    * If true, perform a clean install after when running `rush install` or `rush update` if the
@@ -52,4 +52,6 @@
    * If true, print the outputs of shell commands defined in event hooks to the console.
    */
   // "printEventHooksOutputToConsole": true
+
+  "allowCobuildWithoutCache": true
 }

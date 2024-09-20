@@ -105,6 +105,7 @@ export class CobuildConfiguration {
     readonly cobuildFeatureEnabled: boolean;
     readonly cobuildLeafProjectLogOnlyAllowed: boolean;
     readonly cobuildRunnerId: string;
+    readonly cobuildWithoutCacheAllowed: boolean;
     // (undocumented)
     createLockProviderAsync(terminal: ITerminal): Promise<void>;
     // (undocumented)
@@ -469,6 +470,7 @@ export interface IExecutionResult {
 
 // @beta
 export interface IExperimentsJson {
+    allowCobuildWithoutCache?: boolean;
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
@@ -625,6 +627,7 @@ export interface IOperationRunnerContext {
 
 // @alpha (undocumented)
 export interface IOperationSettings {
+    allowCobuildWithoutCache?: boolean;
     dependsOnAdditionalFiles?: string[];
     dependsOnEnvVars?: string[];
     disableBuildCacheForOperation?: boolean;
