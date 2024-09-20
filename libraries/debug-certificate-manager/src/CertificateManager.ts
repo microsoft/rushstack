@@ -110,6 +110,10 @@ export interface ICertificateGenerationOptions {
    * How many days the certificate should be valid for.
    */
   validityInDays?: number;
+  /**
+   * Skip trusting a certificate. Defaults to false.
+   */
+  skipCertificateTrust?: boolean;
 }
 
 const MAX_CERTIFICATE_VALIDITY_DAYS: 365 = 365;
@@ -135,10 +139,9 @@ export class CertificateManager {
   public async ensureCertificateAsync(
     canGenerateNewCertificate: boolean,
     terminal: ITerminal,
-    generationOptions?: ICertificateGenerationOptions
+    options?: ICertificateGenerationOptions
   ): Promise<ICertificate> {
-    const optionsWithDefaults: Required<ICertificateGenerationOptions> =
-      applyDefaultOptions(generationOptions);
+    const optionsWithDefaults: Required<ICertificateGenerationOptions> = applyDefaultOptions(options);
 
     const { certificateData: existingCert, keyData: existingKey } = this._certificateStore;
 
@@ -226,7 +229,9 @@ export class CertificateManager {
         if (canGenerateNewCertificate) {
           messages.push('Attempting to untrust the certificate and generate a new one.');
           terminal.writeWarningLine(messages.join(' '));
-          await this.untrustCertificateAsync(terminal);
+          if (!options?.skipCertificateTrust) {
+            await this.untrustCertificateAsync(terminal);
+          }
           return await this._ensureCertificateInternalAsync(optionsWithDefaults, terminal);
         } else {
           messages.push(
@@ -732,10 +737,9 @@ export class CertificateManager {
       });
     }
 
-    const trustCertificateResult: boolean = await this._tryTrustCertificateAsync(
-      tempCertificatePath,
-      terminal
-    );
+    const trustCertificateResult: boolean = options.skipCertificateTrust
+      ? true
+      : await this._tryTrustCertificateAsync(tempCertificatePath, terminal);
 
     let subjectAltNames: readonly string[] | undefined;
     if (trustCertificateResult) {
@@ -787,6 +791,7 @@ function applyDefaultOptions(
 ): Required<ICertificateGenerationOptions> {
   const subjectNames: ReadonlyArray<string> | undefined = options?.subjectAltNames;
   const subjectIpAddresses: ReadonlyArray<string> | undefined = options?.subjectIPAddresses;
+  const skipCertificateTrust: boolean | undefined = options?.skipCertificateTrust || false;
   return {
     subjectAltNames: subjectNames?.length ? subjectNames : DEFAULT_CERTIFICATE_SUBJECT_NAMES,
     subjectIPAddresses: subjectIpAddresses?.length
@@ -795,7 +800,8 @@ function applyDefaultOptions(
     validityInDays: Math.min(
       MAX_CERTIFICATE_VALIDITY_DAYS,
       options?.validityInDays ?? MAX_CERTIFICATE_VALIDITY_DAYS
-    )
+    ),
+    skipCertificateTrust: skipCertificateTrust
   };
 }
 
