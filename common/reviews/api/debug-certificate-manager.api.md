@@ -39,7 +39,6 @@ export interface ICertificate {
 
 // @public
 export interface ICertificateGenerationOptions {
-    // (undocumented)
     skipCertificateTrust?: boolean;
     subjectAltNames?: ReadonlyArray<string>;
     subjectIPAddresses?: ReadonlyArray<string>;
