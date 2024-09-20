@@ -9,7 +9,7 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { Subspace } from '../../api/Subspace';
-import { getVariant } from '../../api/Variants';
+import { getVariantAsync } from '../../api/Variants';
 
 export class UpdateAction extends BaseInstallAction {
   private readonly _fullParameter: CommandLineFlagParameter;
@@ -85,7 +85,11 @@ export class UpdateAction extends BaseInstallAction {
       (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) ??
       new Set(this.rushConfiguration.projects);
 
-    const variant: string | undefined = getVariant(this._variantParameter, this.rushConfiguration);
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      false
+    );
 
     return {
       debug: this.parser.isDebug,

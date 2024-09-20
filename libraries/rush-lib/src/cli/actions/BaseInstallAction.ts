@@ -23,7 +23,7 @@ import { RushConstants } from '../../logic/RushConstants';
 import { SUBSPACE_LONG_ARG_NAME, type SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { Subspace } from '../../api/Subspace';
-import { getVariant, VARIANT_PARAMETER } from '../../api/Variants';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 /**
  * Temporary data structure used by `BaseInstallAction.runAsync()`
@@ -169,7 +169,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
       }
     }
 
-    const variant: string | undefined = getVariant(this._variantParameter, this.rushConfiguration);
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      false
+    );
     if (selectedSubspaces) {
       // Check each subspace for version inconsistencies
       for (const subspace of selectedSubspaces) {

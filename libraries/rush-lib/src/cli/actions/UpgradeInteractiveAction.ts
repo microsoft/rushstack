@@ -7,7 +7,7 @@ import { BaseRushAction } from './BaseRushAction';
 
 import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
 import type * as InteractiveUpgraderType from '../../logic/InteractiveUpgrader';
-import { getVariant, VARIANT_PARAMETER } from '../../api/Variants';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class UpgradeInteractiveAction extends BaseRushAction {
   private _makeConsistentFlag: CommandLineFlagParameter;
@@ -62,9 +62,11 @@ export class UpgradeInteractiveAction extends BaseRushAction {
       this.rushConfiguration
     );
 
-    const variant: string | undefined =
-      getVariant(this._variantParameter, this.rushConfiguration) ??
-      (await this.rushConfiguration.getCurrentlyInstalledVariantAsync());
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      true
+    );
     const shouldMakeConsistent: boolean =
       this.rushConfiguration.defaultSubspace.shouldEnsureConsistentVersions(variant) ||
       this._makeConsistentFlag.value;

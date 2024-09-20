@@ -15,7 +15,7 @@ import type {
   IPackageForRushRemove,
   IPackageJsonUpdaterRushRemoveOptions
 } from '../../logic/PackageJsonUpdaterTypes';
-import { getVariant, VARIANT_PARAMETER } from '../../api/Variants';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class RemoveAction extends BaseAddAndRemoveAction {
   protected readonly _allFlag: CommandLineFlagParameter;
@@ -54,7 +54,7 @@ export class RemoveAction extends BaseAddAndRemoveAction {
     this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
   }
 
-  public getUpdateOptions(): IPackageJsonUpdaterRushRemoveOptions {
+  public async getUpdateOptionsAsync(): Promise<IPackageJsonUpdaterRushRemoveOptions> {
     const projects: RushConfigurationProject[] = super.getProjects();
 
     const packagesToRemove: IPackageForRushRemove[] = [];
@@ -83,7 +83,11 @@ export class RemoveAction extends BaseAddAndRemoveAction {
       packagesToRemove.push({ packageName });
     }
 
-    const variant: string | undefined = getVariant(this._variantParameter, this.rushConfiguration);
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      true
+    );
 
     return {
       projects: projects,

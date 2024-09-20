@@ -7,7 +7,7 @@ import { Colorize, type ITerminal } from '@rushstack/terminal';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
-import { getVariant, VARIANT_PARAMETER } from '../../api/Variants';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class CheckAction extends BaseRushAction {
   private readonly _terminal: ITerminal;
@@ -60,7 +60,11 @@ export class CheckAction extends BaseRushAction {
 
     const currentlyInstalledVariant: string | undefined =
       await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
-    const variant: string | undefined = getVariant(this._variantParameter, this.rushConfiguration);
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      true
+    );
     if (!variant && currentlyInstalledVariant) {
       this._terminal.writeWarningLine(
         Colorize.yellow(

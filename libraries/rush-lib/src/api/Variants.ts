@@ -17,13 +17,18 @@ export const VARIANT_PARAMETER: ICommandLineStringDefinition = {
   environmentVariable: EnvironmentVariableNames.RUSH_VARIANT
 };
 
-export function getVariant(
+export async function getVariantAsync(
   variantsParameter: CommandLineStringParameter,
-  rushConfiguration: RushConfiguration
-): string | undefined {
-  const variant: string | undefined = variantsParameter.value;
+  rushConfiguration: RushConfiguration,
+  defaultToCurrentlyInstalledVariant: boolean
+): Promise<string | undefined> {
+  let variant: string | undefined = variantsParameter.value;
   if (variant && !rushConfiguration.variants.has(variant)) {
     throw new Error(`The variant "${variant}" is not defined in ${RushConstants.rushJsonFilename}`);
+  }
+
+  if (!variant && defaultToCurrentlyInstalledVariant) {
+    variant = await rushConfiguration.getCurrentlyInstalledVariantAsync();
   }
 
   return variant;

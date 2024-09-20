@@ -54,7 +54,7 @@ export abstract class BaseAddAndRemoveAction extends BaseRushAction {
     });
   }
 
-  protected abstract getUpdateOptions(): IPackageJsonUpdaterRushBaseUpdateOptions;
+  protected abstract getUpdateOptionsAsync(): Promise<IPackageJsonUpdaterRushBaseUpdateOptions>;
 
   protected getProjects(): RushConfigurationProject[] {
     if (this._allFlag.value) {
@@ -83,6 +83,7 @@ export abstract class BaseAddAndRemoveAction extends BaseRushAction {
       this.rushGlobalFolder
     );
 
-    await updater.doRushUpdateAsync(this.getUpdateOptions());
+    const updateOptions: IPackageJsonUpdaterRushBaseUpdateOptions = await this.getUpdateOptionsAsync();
+    await updater.doRushUpdateAsync(updateOptions);
   }
 }
