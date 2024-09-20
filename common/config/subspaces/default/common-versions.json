@@ -131,6 +131,10 @@
       "ts2.9",
       "ts3.9",
       "ts4.9"
+    ],
+    "@rushstack/eslint-config": [
+      // This is used by the ESLint 7 build tests
+      "3.7.1"
     ]
   }
 }

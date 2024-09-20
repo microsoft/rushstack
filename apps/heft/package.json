@@ -51,8 +51,8 @@
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "local-eslint-config": "workspace:*",
-    "@rushstack/heft": "0.66.17",
-    "@rushstack/heft-node-rig": "2.6.15",
+    "@rushstack/heft": "0.67.2",
+    "@rushstack/heft-node-rig": "2.6.31",
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
     "@types/watchpack": "2.4.0",

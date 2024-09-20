@@ -10,7 +10,7 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "3.7.0",
+    "@rushstack/eslint-config": "3.7.1",
     "@rushstack/heft": "workspace:*",
     "@types/node": "18.17.15",
     "@typescript-eslint/parser": "~6.19.0",
