@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/debug-certificate-manager",
-      "comment": "Option to skip automatically trusting and untrusting a certificate",
+      "comment": "Add a `skipCertificateTrust` option to `CertificateManager.ensureCertificateAsync` that skips automatically trusting the generated certificate and untrusting an existing certificate with issues.",
       "type": "minor"
     }
   ],
