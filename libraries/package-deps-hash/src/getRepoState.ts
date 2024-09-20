@@ -313,6 +313,7 @@ function isIterable<T>(value: Iterable<T> | AsyncIterable<T>): value is Iterable
  *
  * @remarks
  * The input file paths must be specified relative to the Git repository root, or else be absolute paths.
+ * @beta
  */
 export async function hashFilesAsync(
   rootDirectory: string,
