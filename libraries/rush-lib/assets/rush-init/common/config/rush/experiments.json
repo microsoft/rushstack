@@ -96,5 +96,11 @@
    * This ensures that important notices will be seen by anyone doing active development, since people often
    * ignore normal discussion group messages or don't know to subscribe.
    */
-   /*[LINE "HYPOTHETICAL"]*/ "rushAlerts": true
+   /*[LINE "HYPOTHETICAL"]*/ "rushAlerts": true,
+
+
+  /**
+   * When using cobuilds, this experiment allows uncacheable operations to benefit from cobuild orchestration without using the build cache.
+   */
+   /*[LINE "HYPOTHETICAL"]*/ "allowCobuildWithoutCache": true
 }

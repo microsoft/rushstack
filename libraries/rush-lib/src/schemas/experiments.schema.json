@@ -67,7 +67,7 @@
       "type": "boolean"
     },
     "allowCobuildWithoutCache": {
-      "description": "Adds a new experiment 'allowCobuildWithoutCache' for cobuilds to allow uncacheable operations to benefit from cobuild orchestration without using the build cache.",
+      "description": "When using cobuilds, this experiment allows uncacheable operations to benefit from cobuild orchestration without using the build cache.",
       "type": "boolean"
     },
     "rushAlerts": {
