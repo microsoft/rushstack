@@ -5,6 +5,7 @@ import type { StdioSummarizer } from '@rushstack/terminal';
 import type { OperationStatus } from './OperationStatus';
 import type { Operation } from './Operation';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
+import type { ILogFilePaths } from './ProjectLogWritable';
 
 /**
  * The `IOperationExecutionResult` interface represents the results of executing an {@link Operation}.
@@ -43,6 +44,10 @@ export interface IOperationExecutionResult {
    * The id of the runner which actually runs the building process in cobuild mode.
    */
   readonly cobuildRunnerId: string | undefined;
+  /**
+   * The paths to the log files, if applicable.
+   */
+  readonly logFilePaths: ILogFilePaths | undefined;
 }
 
 /**
