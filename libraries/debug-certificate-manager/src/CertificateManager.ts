@@ -110,7 +110,7 @@ export interface ICertificateGenerationOptions {
    * How many days the certificate should be valid for.
    */
   validityInDays?: number;
-  /*
+  /**
    * Skip trusting a certificate. Defaults to false.
    */
   skipCertificateTrust?: boolean;
