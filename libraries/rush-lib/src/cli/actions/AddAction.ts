@@ -17,7 +17,7 @@ import {
   type IPackageJsonUpdaterRushAddOptions,
   SemVerStyle
 } from '../../logic/PackageJsonUpdaterTypes';
-import { getVariant, VARIANT_PARAMETER } from '../../api/Variants';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class AddAction extends BaseAddAndRemoveAction {
   protected readonly _allFlag: CommandLineFlagParameter;
@@ -94,7 +94,7 @@ export class AddAction extends BaseAddAndRemoveAction {
     this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
   }
 
-  public getUpdateOptions(): IPackageJsonUpdaterRushAddOptions {
+  public async getUpdateOptionsAsync(): Promise<IPackageJsonUpdaterRushAddOptions> {
     const projects: RushConfigurationProject[] = super.getProjects();
 
     if (this._caretFlag.value && this._exactFlag.value) {
@@ -157,7 +157,11 @@ export class AddAction extends BaseAddAndRemoveAction {
       packagesToAdd.push({ packageName, version, rangeStyle });
     }
 
-    const variant: string | undefined = getVariant(this._variantParameter, this.rushConfiguration);
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      true
+    );
 
     return {
       projects: projects,
