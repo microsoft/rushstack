@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 13 Sep 2024 01:02:46 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Sep 2024 20:23:40 GMT and should not be manually modified.
+
+## 5.135.0
+Fri, 20 Sep 2024 20:23:40 GMT
+
+### Updates
+
+- Fix a bug that caused rush-resolver-cache-plugin to crash on Windows.
+- Make individual Rush log files available via the rush-serve-plugin server at the relative URL specified by "logServePath" option. Annotate operations sent over the WebSocket with the URLs of their log files.
+- Adds a new experiment 'allowCobuildWithoutCache' for cobuilds to allow uncacheable operations to benefit from cobuild orchestration without using the build cache.
+- Deprecate the `sharding.shardOperationSettings` property in the project `config/rush-project.json` in favor of an `operationSettings` entry for an operation with a suffix of `:shard`.
 
 ## 5.134.0
 Fri, 13 Sep 2024 01:02:46 GMT
