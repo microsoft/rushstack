@@ -107,7 +107,8 @@ describe(computeResolverCacheFromLockfileAsync.name, () => {
       for (const importerPath of lockfile.importers.keys()) {
         const remainder: string = importerPath.slice(importerPath.lastIndexOf('../') + 3);
         projectByImporterPath.setItem(importerPath, {
-          projectFolder: `${commonPrefixToTrim.replace(/\\/g, '/')}${remainder}`,
+          // Normalization is the responsibility of the implementation
+          projectFolder: `${commonPrefixToTrim}${remainder}`,
           packageJson: {
             name: `@local/${remainder.replace(/\//g, '+')}`
           }
