@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "Option to skip automatically trusting and untrusting a certificate",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager"
+}
