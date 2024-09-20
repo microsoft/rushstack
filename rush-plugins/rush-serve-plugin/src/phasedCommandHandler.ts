@@ -166,7 +166,7 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
       const { logServePath } = options;
       if (logServePath) {
         for (const project of selectedProjects) {
-          const projectLogServePath: string = `${logServePath}/${project.packageName}`;
+          const projectLogServePath: string = getLogServePathForProject(logServePath, project.packageName);
 
           routingRules.push({
             type: 'folder',
@@ -309,7 +309,7 @@ function tryEnableBuildStatusWebSocketServer(
       return;
     }
 
-    const projectLogServePath: string = `${logServePath}/${packageName}`;
+    const projectLogServePath: string = getLogServePathForProject(logServePath, packageName);
 
     const logFileUrls: ILogFileURLs = {
       text: `${projectLogServePath}${logFilePaths.text.slice(logFilePaths.textFolder.length)}`,
@@ -486,4 +486,8 @@ function getRepositoryIdentifier(rushConfiguration: RushConfiguration): string {
   }
 
   return `${os.hostname()} - ${rushConfiguration.rushJsonFolder}`;
+}
+
+function getLogServePathForProject(logServePath: string, packageName: string) {
+  return `${logServePath}/${packageName}`;
 }
