@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.4.0",
+      "tag": "@rushstack/debug-certificate-manager_v1.4.0",
+      "date": "Sat, 21 Sep 2024 00:10:27 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `skipCertificateTrust` option to `CertificateManager.ensureCertificateAsync` that skips automatically trusting the generated certificate and untrusting an existing certificate with issues."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.66",
       "tag": "@rushstack/debug-certificate-manager_v1.3.66",
       "date": "Fri, 13 Sep 2024 00:11:42 GMT",

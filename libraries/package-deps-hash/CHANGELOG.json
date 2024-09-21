@@ -2,6 +2,18 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "4.2.0",
+      "tag": "@rushstack/package-deps-hash_v4.2.0",
+      "date": "Sat, 21 Sep 2024 00:10:27 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose `hashFilesAsync` API. This serves a similar role as `getGitHashForFiles` but is asynchronous and allows for the file names to be provided as an async iterable."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.68",
       "tag": "@rushstack/package-deps-hash_v4.1.68",
       "date": "Fri, 13 Sep 2024 00:11:43 GMT",

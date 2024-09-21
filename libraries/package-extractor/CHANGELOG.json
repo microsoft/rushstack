@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.9.1",
+      "tag": "@rushstack/package-extractor_v0.9.1",
+      "date": "Sat, 21 Sep 2024 00:10:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.10.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.0",
       "tag": "@rushstack/package-extractor_v0.9.0",
       "date": "Mon, 16 Sep 2024 02:09:00 GMT",
