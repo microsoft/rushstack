@@ -71,10 +71,18 @@ export class VersionMismatchFinder {
     terminal: ITerminal,
     options?: IVersionMismatchFinderRushCheckOptions
   ): void {
+    const {
+      variant,
+      subspace = rushConfiguration.defaultSubspace,
+      printAsJson,
+      truncateLongPackageNameLists
+    } = options ?? {};
+
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
-      subspace: rushConfiguration.defaultSubspace,
-      variant: undefined,
-      ...options,
+      variant,
+      subspace,
+      printAsJson,
+      truncateLongPackageNameLists,
       terminal,
       isRushCheckCommand: true
     });
@@ -85,10 +93,11 @@ export class VersionMismatchFinder {
     terminal: ITerminal,
     options?: IVersionMismatchFinderEnsureConsistentVersionsOptions
   ): void {
+    const { variant, subspace = rushConfiguration.defaultSubspace } = options ?? {};
+
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
-      subspace: rushConfiguration.defaultSubspace,
-      variant: undefined,
-      ...options,
+      subspace,
+      variant,
       terminal,
       isRushCheckCommand: false,
       truncateLongPackageNameLists: true
