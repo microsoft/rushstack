@@ -1,6 +1,25 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 07 Sep 2024 00:18:08 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Sep 2024 20:23:40 GMT and should not be manually modified.
+
+## 5.135.0
+Fri, 20 Sep 2024 20:23:40 GMT
+
+### Updates
+
+- Fix a bug that caused rush-resolver-cache-plugin to crash on Windows.
+- Make individual Rush log files available via the rush-serve-plugin server at the relative URL specified by "logServePath" option. Annotate operations sent over the WebSocket with the URLs of their log files.
+- Adds a new experiment 'allowCobuildWithoutCache' for cobuilds to allow uncacheable operations to benefit from cobuild orchestration without using the build cache.
+- Deprecate the `sharding.shardOperationSettings` property in the project `config/rush-project.json` in favor of an `operationSettings` entry for an operation with a suffix of `:shard`.
+
+## 5.134.0
+Fri, 13 Sep 2024 01:02:46 GMT
+
+### Updates
+
+- Always update shrinkwrap when `globalPackageExtensions` in `common/config/rush/pnpm-config.json` has been changed.
+- Pass the initialized credentials cache to `AzureAuthenticationBase._getCredentialFromTokenAsync` in `@rushstack/rush-azure-storage-build-cache-plugin`.
+- Support the `rush-pnpm patch-remove` command.
 
 ## 5.133.4
 Sat, 07 Sep 2024 00:18:08 GMT

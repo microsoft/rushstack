@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
@@ -45,7 +46,7 @@ export class ShardedPhasedOperationPlugin implements IPhasedCommandPlugin {
 }
 
 function spliceShards(existingOperations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
-  const { rushConfiguration } = context;
+  const { rushConfiguration, projectConfigurations } = context;
 
   const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
     getCustomParameterValuesByPhase();
@@ -58,7 +59,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       logFilenameIdentifier: baseLogFilenameIdentifier
     } = operation;
     if (phase && project && operationSettings?.sharding && !operation.runner) {
-      const { count: shards, shardOperationSettings } = operationSettings.sharding;
+      const { count: shards } = operationSettings.sharding;
 
       /**
        * A single operation to reduce the number of edges in the graph when creating shards.
@@ -165,11 +166,16 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         );
       }
 
+      const projectConfiguration: RushProjectConfiguration | undefined = projectConfigurations.get(project);
       for (let shard: number = 1; shard <= shards; shard++) {
         const outputDirectory: string = outputFolderWithTemplate.replace(
           TemplateStringRegexes.SHARD_INDEX,
           shard.toString()
         );
+
+        const shardOperationSettings: IOperationSettings =
+          projectConfiguration?.operationSettingsByOperationName.get(shardOperationName) ??
+          (operationSettings.sharding.shardOperationSettings as IOperationSettings);
 
         const shardOperation: Operation = new Operation({
           project,

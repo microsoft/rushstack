@@ -2,6 +2,26 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "4.0.2",
+      "tag": "@rushstack/eslint-config_v4.0.2",
+      "date": "Thu, 19 Sep 2024 00:11:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix ESLint broken links"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.16.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.8.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.1",
       "tag": "@rushstack/eslint-config_v4.0.1",
       "date": "Wed, 14 Aug 2024 22:37:32 GMT",

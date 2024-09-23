@@ -106,6 +106,13 @@ export interface IExperimentsJson {
    * ignore normal discussion group messages or don't know to subscribe.
    */
   rushAlerts?: boolean;
+
+  /**
+   * Allow cobuilds without using the build cache to store previous execution info. When setting up
+   *  distributed builds, Rush will allow uncacheable projects to still leverage the cobuild feature.
+   * This is useful when you want to speed up operations that can't (or shouldn't) be cached.
+   */
+  allowCobuildWithoutCache?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);

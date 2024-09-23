@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "7.47.8",
+  "version": "7.47.9",
   "description": "Analyze the exported API for a TypeScript library and generate reviews, documentation, and .d.ts rollups",
   "keywords": [
     "typescript",
@@ -52,8 +52,8 @@
     "typescript": "5.4.2"
   },
   "devDependencies": {
-    "@rushstack/heft-node-rig": "2.6.15",
-    "@rushstack/heft": "0.66.17",
+    "@rushstack/heft-node-rig": "2.6.31",
+    "@rushstack/heft": "0.67.2",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "3.0.5",

@@ -2,6 +2,45 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.135.0",
+      "tag": "@microsoft/rush_v5.135.0",
+      "date": "Fri, 20 Sep 2024 20:23:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a bug that caused rush-resolver-cache-plugin to crash on Windows."
+          },
+          {
+            "comment": "Make individual Rush log files available via the rush-serve-plugin server at the relative URL specified by \"logServePath\" option. Annotate operations sent over the WebSocket with the URLs of their log files."
+          },
+          {
+            "comment": "Adds a new experiment 'allowCobuildWithoutCache' for cobuilds to allow uncacheable operations to benefit from cobuild orchestration without using the build cache."
+          },
+          {
+            "comment": "Deprecate the `sharding.shardOperationSettings` property in the project `config/rush-project.json` in favor of an `operationSettings` entry for an operation with a suffix of `:shard`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.134.0",
+      "tag": "@microsoft/rush_v5.134.0",
+      "date": "Fri, 13 Sep 2024 01:02:46 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Always update shrinkwrap when `globalPackageExtensions` in `common/config/rush/pnpm-config.json` has been changed."
+          },
+          {
+            "comment": "Pass the initialized credentials cache to `AzureAuthenticationBase._getCredentialFromTokenAsync` in `@rushstack/rush-azure-storage-build-cache-plugin`."
+          },
+          {
+            "comment": "Support the `rush-pnpm patch-remove` command."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.133.4",
       "tag": "@microsoft/rush_v5.133.4",
       "date": "Sat, 07 Sep 2024 00:18:08 GMT",

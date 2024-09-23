@@ -105,6 +105,7 @@ export class CobuildConfiguration {
     readonly cobuildFeatureEnabled: boolean;
     readonly cobuildLeafProjectLogOnlyAllowed: boolean;
     readonly cobuildRunnerId: string;
+    readonly cobuildWithoutCacheAllowed: boolean;
     // (undocumented)
     createLockProviderAsync(terminal: ITerminal): Promise<void>;
     // (undocumented)
@@ -469,6 +470,7 @@ export interface IExecutionResult {
 
 // @beta
 export interface IExperimentsJson {
+    allowCobuildWithoutCache?: boolean;
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
@@ -523,6 +525,15 @@ export interface ILaunchOptions {
     terminalProvider?: ITerminalProvider;
 }
 
+// @alpha
+export interface ILogFilePaths {
+    error: string;
+    jsonl: string;
+    jsonlFolder: string;
+    text: string;
+    textFolder: string;
+}
+
 // @beta (undocumented)
 export interface ILogger {
     emitError(error: Error): void;
@@ -553,6 +564,7 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 export interface IOperationExecutionResult {
     readonly cobuildRunnerId: string | undefined;
     readonly error: Error | undefined;
+    readonly logFilePaths: ILogFilePaths | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly operation: Operation;
     readonly status: OperationStatus;
@@ -625,6 +637,7 @@ export interface IOperationRunnerContext {
 
 // @alpha (undocumented)
 export interface IOperationSettings {
+    allowCobuildWithoutCache?: boolean;
     dependsOnAdditionalFiles?: string[];
     dependsOnEnvVars?: string[];
     disableBuildCacheForOperation?: boolean;
@@ -785,9 +798,8 @@ export interface IRushPhaseSharding {
     count: number;
     outputFolderArgumentFormat?: string;
     shardArgumentFormat?: string;
-    shardOperationSettings?: {
-        weight?: number;
-    };
+    // @deprecated (undocumented)
+    shardOperationSettings?: unknown;
 }
 
 // @beta (undocumented)

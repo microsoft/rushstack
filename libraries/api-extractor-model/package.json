@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor-model",
-  "version": "7.29.7",
+  "version": "7.29.8",
   "description": "A helper library for loading and saving the .api.json files created by API Extractor",
   "repository": {
     "type": "git",
@@ -23,8 +23,8 @@
   },
   "devDependencies": {
     "local-eslint-config": "workspace:*",
-    "@rushstack/heft": "0.66.17",
-    "@rushstack/heft-node-rig": "2.6.15",
+    "@rushstack/heft": "0.67.2",
+    "@rushstack/heft-node-rig": "2.6.31",
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15"
   }

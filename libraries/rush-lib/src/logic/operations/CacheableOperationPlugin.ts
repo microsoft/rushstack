@@ -14,7 +14,11 @@ import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { RushConstants } from '../RushConstants';
 import { type IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
-import { ProjectLogWritable } from './ProjectLogWritable';
+import {
+  initializeProjectLogFilesAsync,
+  getProjectLogFilePaths,
+  type ILogFilePaths
+} from './ProjectLogWritable';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { DisjointSet } from '../cobuild/DisjointSet';
 import { PeriodicCallback } from './PeriodicCallback';
@@ -59,7 +63,7 @@ export interface IOperationBuildCacheContext {
 
   // Controls the log for the cache subsystem
   buildCacheTerminal: ITerminal | undefined;
-  buildCacheProjectLogWritable: ProjectLogWritable | undefined;
+  buildCacheTerminalWritable: TerminalWritable | undefined;
 
   periodicCallback: PeriodicCallback;
   cacheRestored: boolean;
@@ -98,6 +102,25 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildFeatureEnabled
           ? new DisjointSet()
           : undefined;
+
+        for (const operation of recordByOperation.keys()) {
+          if (
+            operation.settings?.allowCobuildWithoutCache &&
+            !cobuildConfiguration?.cobuildWithoutCacheAllowed
+          ) {
+            throw new Error(
+              `Operation ${operation.name} is not allowed to run without the cobuild orchestration experiment enabled. You must enable the "allowCobuildWithoutCache" experiment in experiments.json.`
+            );
+          }
+          if (
+            operation.settings?.allowCobuildWithoutCache &&
+            !operation.settings.disableBuildCacheForOperation
+          ) {
+            throw new Error(
+              `Operation ${operation.name} must have disableBuildCacheForOperation set to true when using the cobuild orchestration experiment. This is to prevent implicit cache dependencies for this operation.`
+            );
+          }
+        }
 
         await Async.forEachAsync(
           recordByOperation.keys(),
@@ -145,7 +168,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               cobuildLock: undefined,
               cobuildClusterId: undefined,
               buildCacheTerminal: undefined,
-              buildCacheProjectLogWritable: undefined,
+              buildCacheTerminalWritable: undefined,
               periodicCallback: new PeriodicCallback({
                 interval: PERIODIC_CALLBACK_INTERVAL_IN_SECONDS * 1000
               }),
@@ -233,9 +256,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         const runBeforeExecute = async (): Promise<OperationStatus | undefined> => {
           if (
             !buildCacheContext.buildCacheTerminal ||
-            buildCacheContext.buildCacheProjectLogWritable?.isOpen === false
+            buildCacheContext.buildCacheTerminalWritable?.isOpen === false
           ) {
-            // The ProjectLogWritable is does not exist or is closed, re-create one
+            // The writable does not exist or has been closed, re-create one
             // eslint-disable-next-line require-atomic-updates
             buildCacheContext.buildCacheTerminal = await this._createBuildCacheTerminalAsync({
               record,
@@ -258,7 +281,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             phase,
             configHash,
             terminal: buildCacheTerminal,
-            operationMetadataManager
+            operationMetadataManager,
+            operation: record.operation
           });
 
           // Try to acquire the cobuild lock
@@ -317,7 +341,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           //     has changed happens inside the hashing logic.
           //
 
-          const { errorLogPath } = ProjectLogWritable.getLogFilePaths({
+          const { error: errorLogPath } = getProjectLogFilePaths({
             project,
             logFilenameIdentifier: operationMetadataManager.logFilenameIdentifier
           });
@@ -359,15 +383,17 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             if (cobuildCompletedState) {
               const { status, cacheId } = cobuildCompletedState;
 
+              if (record.operation.settings?.allowCobuildWithoutCache) {
+                // This should only be enabled if the experiment for cobuild orchestration is enabled.
+                return status;
+              }
+
               const restoreFromCacheSuccess: boolean = await restoreCacheAsync(
                 cobuildLock.projectBuildCache,
                 cacheId
               );
 
               if (restoreFromCacheSuccess) {
-                if (cobuildCompletedState) {
-                  return cobuildCompletedState.status;
-                }
                 return status;
               }
             } else if (!buildCacheContext.isCacheReadAttempted && buildCacheContext.isCacheReadAllowed) {
@@ -438,7 +464,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             // Save the metadata to disk
             const { logFilenameIdentifier } = operationMetadataManager;
             const { duration: durationInSeconds } = stopwatch;
-            const { logPath, errorLogPath, logChunksPath } = ProjectLogWritable.getLogFilePaths({
+            const {
+              text: logPath,
+              error: errorLogPath,
+              jsonl: logChunksPath
+            } = getProjectLogFilePaths({
               project,
               logFilenameIdentifier
             });
@@ -505,7 +535,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             }
           }
         } finally {
-          buildCacheContext.buildCacheProjectLogWritable?.close();
+          buildCacheContext.buildCacheTerminalWritable?.close();
           buildCacheContext.periodicCallback.stop();
         }
       }
@@ -569,7 +599,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     phase,
     configHash,
     terminal,
-    operationMetadataManager
+    operationMetadataManager,
+    operation
   }: {
     buildCacheContext: IOperationBuildCacheContext;
     buildCacheConfiguration: BuildCacheConfiguration | undefined;
@@ -578,10 +609,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     configHash: string;
     terminal: ITerminal;
     operationMetadataManager: OperationMetadataManager | undefined;
+    operation: Operation;
   }): Promise<ProjectBuildCache | undefined> {
     if (!buildCacheContext.projectBuildCache) {
       const { cacheDisabledReason } = buildCacheContext;
-      if (cacheDisabledReason) {
+      if (cacheDisabledReason && !operation.settings?.allowCobuildWithoutCache) {
         terminal.writeVerboseLine(cacheDisabledReason);
         return;
       }
@@ -746,12 +778,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     let cacheConsoleWritable: TerminalWritable;
     // This creates the writer, only do this if necessary.
     const collatedWriter: CollatedWriter = record.collatedWriter;
-    const cacheProjectLogWritable: ProjectLogWritable | undefined =
-      await this._tryGetBuildCacheProjectLogWritableAsync({
+    const cacheProjectLogWritable: TerminalWritable | undefined =
+      await this._tryGetBuildCacheTerminalWritableAsync({
         buildCacheContext,
         buildCacheEnabled,
         rushProject,
-        collatedTerminal: collatedWriter.terminal,
         logFilenameIdentifier
       });
 
@@ -788,30 +819,32 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     return new Terminal(buildCacheTerminalProvider);
   }
 
-  private async _tryGetBuildCacheProjectLogWritableAsync({
+  private async _tryGetBuildCacheTerminalWritableAsync({
     buildCacheEnabled,
     rushProject,
     buildCacheContext,
-    collatedTerminal,
     logFilenameIdentifier
   }: {
     buildCacheEnabled: boolean | undefined;
     rushProject: RushConfigurationProject;
     buildCacheContext: IOperationBuildCacheContext;
-    collatedTerminal: CollatedTerminal;
     logFilenameIdentifier: string;
-  }): Promise<ProjectLogWritable | undefined> {
+  }): Promise<TerminalWritable | undefined> {
     // Only open the *.cache.log file(s) if the cache is enabled.
     if (!buildCacheEnabled) {
       return;
     }
 
-    buildCacheContext.buildCacheProjectLogWritable = await ProjectLogWritable.initializeAsync({
+    const logFilePaths: ILogFilePaths = getProjectLogFilePaths({
       project: rushProject,
-      terminal: collatedTerminal,
       logFilenameIdentifier: `${logFilenameIdentifier}.cache`
     });
-    return buildCacheContext.buildCacheProjectLogWritable;
+
+    buildCacheContext.buildCacheTerminalWritable = await initializeProjectLogFilesAsync({
+      logFilePaths
+    });
+
+    return buildCacheContext.buildCacheTerminalWritable;
   }
 }
 async function updateAdditionalContextAsync({
@@ -863,7 +896,7 @@ export function clusterOperations(
   for (const [operation, { cacheDisabledReason }] of operationBuildCacheMap) {
     const { associatedProject: project, associatedPhase: phase } = operation;
     if (project && phase) {
-      if (cacheDisabledReason) {
+      if (cacheDisabledReason && !operation.settings?.allowCobuildWithoutCache) {
         /**
          * Group the project build cache disabled with its consumers. This won't affect too much in
          * a monorepo with high build cache coverage.

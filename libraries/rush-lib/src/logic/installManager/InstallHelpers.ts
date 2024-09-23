@@ -167,7 +167,7 @@ export class InstallHelpers {
 
     logIfConsoleOutputIsNotRestricted(`Trying to acquire lock for ${packageManagerAndVersion}`);
 
-    const lock: LockFile = await LockFile.acquire(rushUserFolder, packageManagerAndVersion);
+    const lock: LockFile = await LockFile.acquireAsync(rushUserFolder, packageManagerAndVersion);
 
     logIfConsoleOutputIsNotRestricted(`Acquired lock for ${packageManagerAndVersion}`);
 

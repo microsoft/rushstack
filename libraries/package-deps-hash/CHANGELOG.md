@@ -1,6 +1,18 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Tue, 10 Sep 2024 20:08:11 GMT and should not be manually modified.
+This log was last generated on Sat, 21 Sep 2024 00:10:27 GMT and should not be manually modified.
+
+## 4.2.0
+Sat, 21 Sep 2024 00:10:27 GMT
+
+### Minor changes
+
+- Expose `hashFilesAsync` API. This serves a similar role as `getGitHashForFiles` but is asynchronous and allows for the file names to be provided as an async iterable.
+
+## 4.1.68
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
 
 ## 4.1.67
 Tue, 10 Sep 2024 20:08:11 GMT

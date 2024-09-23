@@ -2,6 +2,66 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.24.34",
+      "tag": "@rushstack/heft-web-rig_v0.24.34",
+      "date": "Sat, 21 Sep 2024 00:10:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.10.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.33",
+      "tag": "@rushstack/heft-web-rig_v0.24.33",
+      "date": "Thu, 19 Sep 2024 00:11:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `4.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.32",
+      "tag": "@rushstack/heft-web-rig_v0.24.32",
+      "date": "Fri, 13 Sep 2024 00:11:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.3.49`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.12.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.14.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.5.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.10.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.67.1` to `0.67.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.24.31",
       "tag": "@rushstack/heft-web-rig_v0.24.31",
       "date": "Tue, 10 Sep 2024 20:08:11 GMT",

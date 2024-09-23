@@ -2,6 +2,66 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.9.1",
+      "tag": "@rushstack/package-extractor_v0.9.1",
+      "date": "Sat, 21 Sep 2024 00:10:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.10.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.0",
+      "tag": "@rushstack/package-extractor_v0.9.0",
+      "date": "Mon, 16 Sep 2024 02:09:00 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `files` field to the `extractor-metadata.json` file"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.1",
+      "tag": "@rushstack/package-extractor_v0.8.1",
+      "date": "Fri, 13 Sep 2024 00:11:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.10.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.66`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.0",
+      "tag": "@rushstack/package-extractor_v0.8.0",
+      "date": "Wed, 11 Sep 2024 19:54:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add the ability to change where the \"create-links.js\" file and the associated metadata file are generated when running in the \"script\" linkCreation mode"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.26",
       "tag": "@rushstack/package-extractor_v0.7.26",
       "date": "Tue, 10 Sep 2024 20:08:11 GMT",

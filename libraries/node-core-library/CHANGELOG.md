@@ -1,6 +1,18 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 10 Sep 2024 20:08:11 GMT and should not be manually modified.
+This log was last generated on Fri, 13 Sep 2024 00:11:42 GMT and should not be manually modified.
+
+## 5.9.0
+Fri, 13 Sep 2024 00:11:42 GMT
+
+### Minor changes
+
+- Add a `Sort.sortKeys` function for sorting keys in an object
+- Rename `LockFile.acquire` to `Lockfile.acquireAsync`.
+
+### Patches
+
+- Fix an issue where attempting to acquire multiple `LockFile`s at the same time on POSIX would cause the second to immediately be acquired without releasing the first.
 
 ## 5.8.0
 Tue, 10 Sep 2024 20:08:11 GMT
