@@ -117,8 +117,6 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): R
 
     const fileName: string = compilation.getAssetPath(filenameTemplate, data);
 
-    originInfo.related[locale] = fileName;
-
     const info: AssetInfo = {
       ...originInfo,
       locale
@@ -130,8 +128,15 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): R
     // If file already exists
     if (originName === fileName) {
       // This helper throws if the asset doesn't already exist
-      compilation.updateAsset(fileName, wrapped, info);
+      // Use the function form so that the object identity of `related` is preserved.
+      // Since we already read the original info, we don't need fancy merge logic.
+      compilation.updateAsset(fileName, wrapped, () => info);
     } else {
+      // If A.related points to B, B.related can't point to A or the stats emitter explodes
+      // So just strip the related object for the localized assets
+      info.related = undefined;
+      // We omit the `related` property that does a self-reference.
+      originInfo.related[locale] = fileName;
       // This helper throws if the asset already exists
       compilation.emitAsset(fileName, wrapped, info);
     }
