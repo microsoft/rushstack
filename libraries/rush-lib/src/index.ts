@@ -121,11 +121,12 @@ export {
   CustomTipType
 } from './api/CustomTipsConfiguration';
 
-export {
-  ProjectChangeAnalyzer,
-  type IGetChangedProjectsOptions,
-  type IRawRepoState as _IRawRepoState
-} from './logic/ProjectChangeAnalyzer';
+export { ProjectChangeAnalyzer, type IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
+export type {
+  IInputSnapshot,
+  IInputSnapshotProvider,
+  IRushConfigurationProjectForSnapshot
+} from './logic/snapshots/InputSnapshot';
 
 export type { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 export type {

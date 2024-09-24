@@ -44,6 +44,7 @@ import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Tele
 import { parseParallelism } from '../parsing/ParseParallelism';
 import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
+import type { IInputSnapshot, IInputSnapshotProvider } from '../../logic/snapshots/InputSnapshot';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
 import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
@@ -80,7 +81,8 @@ interface IInitialRunPhasesOptions {
 }
 
 interface IRunPhasesOptions extends IInitialRunPhasesOptions {
-  initialState: ProjectChangeAnalyzer;
+  snapshotProvider: IInputSnapshotProvider | undefined;
+  initialSnapshot: IInputSnapshot | undefined;
   executionManagerOptions: IOperationExecutionManagerOptions;
 }
 
@@ -536,24 +538,34 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       terminal
     } = options;
 
+    const { projectConfigurations } = initialCreateOperationsContext;
+
     const operations: Set<Operation> = await this.hooks.createOperations.promise(
       new Set(),
       initialCreateOperationsContext
     );
 
-    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-
     terminal.write('Analyzing repo state... ');
     const repoStateStopwatch: Stopwatch = new Stopwatch();
     repoStateStopwatch.start();
-    await projectChangeAnalyzer._ensureInitializedAsync(terminal);
+
+    const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
+    const snapshotProvider: IInputSnapshotProvider | undefined =
+      await analyzer._tryGetSnapshotProviderAsync(projectConfigurations, terminal);
+    const initialSnapshot: IInputSnapshot | undefined = await snapshotProvider?.();
+
     repoStateStopwatch.stop();
     terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
+    if (!initialSnapshot) {
+      terminal.writeLine(
+        `The Rush monorepo is not in a Git repository. Rush will proceed without incremental build support.`
+      );
+    }
     terminal.writeLine();
 
     const initialExecuteOperationsContext: IExecuteOperationsContext = {
       ...initialCreateOperationsContext,
-      projectChangeAnalyzer
+      inputSnapshot: initialSnapshot
     };
 
     const executionManagerOptions: IOperationExecutionManagerOptions = {
@@ -577,7 +589,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     return {
       ...options,
       executionManagerOptions,
-      initialState: projectChangeAnalyzer
+      snapshotProvider,
+      initialSnapshot
     };
   }
 
@@ -652,13 +665,26 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
    * 3) Goto (1)
    */
   private async _runWatchPhasesAsync(options: IRunPhasesOptions): Promise<void> {
-    const { initialState, initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } =
-      options;
+    const {
+      snapshotProvider,
+      initialSnapshot: initialState,
+      initialCreateOperationsContext,
+      executionManagerOptions,
+      stopwatch,
+      terminal
+    } = options;
 
     const phaseOriginal: Set<IPhase> = new Set(this._watchPhases);
     const phaseSelection: Set<IPhase> = new Set(this._watchPhases);
 
     const { projectSelection: projectsToWatch } = initialCreateOperationsContext;
+
+    if (!snapshotProvider || !initialState) {
+      terminal.writeErrorLine(
+        `Cannot watch for changes if the Rush repo is not in a Git repository, exiting.`
+      );
+      throw new AlreadyReportedError();
+    }
 
     // Use async import so that we don't pay the cost for sync builds
     const { ProjectWatcher } = await import(
@@ -666,12 +692,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       '../../logic/ProjectWatcher'
     );
 
-    const projectWatcher: ProjectWatcher = new ProjectWatcher({
+    const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
+      snapshotProvider,
+      initialState,
       debounceMs: this._watchDebounceMs,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,
-      terminal,
-      initialState
+      terminal
     });
 
     // Ensure process.stdin allows interactivity before using TTY-only APIs
@@ -724,7 +751,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       const executeOperationsContext: IExecuteOperationsContext = {
         ...initialCreateOperationsContext,
         isInitial: false,
-        projectChangeAnalyzer: state,
+        inputSnapshot: state,
         projectsInUnknownState: changedProjects,
         phaseOriginal,
         phaseSelection,

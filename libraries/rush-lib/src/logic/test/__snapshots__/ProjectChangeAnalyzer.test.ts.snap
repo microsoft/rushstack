@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`ProjectChangeAnalyzer _tryGetProjectDependenciesAsync throws an exception if the specified project does not exist 1`] = `[Error: Project "carrot" does not exist in the current Rush configuration.]`;

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING CHANGE) Replace use of `ProjectChangeAnalyzer` in phased command hooks with a new `InputSnapshot` data structure that is completely synchronous and does not perform any disk operations. Perform all disk operations and state computation prior to executing the build graph.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

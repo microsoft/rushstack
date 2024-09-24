@@ -22,9 +22,9 @@ import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import { MockOperationRunner } from './MockOperationRunner';
-import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 import path from 'path';
 import type { ICommandLineJson } from '../../../api/CommandLineJson';
+import type { IInputSnapshot } from '../../snapshots/InputSnapshot';
 
 describe(BuildPlanPlugin.name, () => {
   const rushJsonFile: string = path.resolve(__dirname, `../../test/workspaceRepo/rush.json`);
@@ -104,12 +104,13 @@ describe(BuildPlanPlugin.name, () => {
       const hooks: PhasedCommandHooks = new PhasedCommandHooks();
 
       new BuildPlanPlugin(terminal).apply(hooks);
-      const context: Pick<IExecuteOperationsContext, 'projectChangeAnalyzer' | 'projectConfigurations'> = {
-        projectChangeAnalyzer: {
-          [ProjectChangeAnalyzer.prototype._tryGetProjectDependenciesAsync.name]: async () => {
-            return new Map();
-          }
-        } as unknown as ProjectChangeAnalyzer,
+      const inputSnapshot: Pick<IInputSnapshot, 'getTrackedFileHashesForOperation'> = {
+        getTrackedFileHashesForOperation() {
+          return new Map();
+        }
+      };
+      const context: Pick<IExecuteOperationsContext, 'inputSnapshot' | 'projectConfigurations'> = {
+        inputSnapshot: inputSnapshot as unknown as IInputSnapshot,
         projectConfigurations: new Map()
       };
       const buildCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(

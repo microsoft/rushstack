@@ -12,7 +12,15 @@ export interface IPrefixMatch<TItem> {
 }
 
 // @beta
-export class LookupByPath<TItem> {
+export interface IReadonlyLookupByPath<TItem> {
+    findChildPath(childPath: string): TItem | undefined;
+    findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
+    findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
+    groupByChild<TInfo>(infoByPath: Map<string, TInfo>): Map<TItem, Map<string, TInfo>>;
+}
+
+// @beta
+export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
     constructor(entries?: Iterable<[string, TItem]>, delimiter?: string);
     readonly delimiter: string;
     findChildPath(childPath: string): TItem | undefined;
