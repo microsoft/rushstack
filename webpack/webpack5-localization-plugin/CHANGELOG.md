@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Fri, 13 Sep 2024 00:11:43 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Sep 2024 00:11:19 GMT and should not be manually modified.
+
+## 0.11.9
+Tue, 24 Sep 2024 00:11:19 GMT
+
+### Patches
+
+- Fix circular references between localized assets' "related" properties. This caused emitting of the webpack stats object to fail.
 
 ## 0.11.8
 Fri, 13 Sep 2024 00:11:43 GMT

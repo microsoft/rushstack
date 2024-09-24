@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.11.9",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.11.9",
+      "date": "Tue, 24 Sep 2024 00:11:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix circular references between localized assets' \"related\" properties. This caused emitting of the webpack stats object to fail."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.8",
       "tag": "@rushstack/webpack5-localization-plugin_v0.11.8",
       "date": "Fri, 13 Sep 2024 00:11:43 GMT",
