@@ -1,47 +1,47 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import * as semver from 'semver';
-import yaml from 'js-yaml';
 import {
-  FileSystem,
-  FileConstants,
   AlreadyReportedError,
   Async,
+  FileConstants,
+  FileSystem,
   type IDependenciesMetaTable,
   Path,
   Sort
 } from '@rushstack/node-core-library';
 import { createHash } from 'crypto';
+import yaml from 'js-yaml';
+import * as path from 'path';
+import * as semver from 'semver';
 
+import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { FlagFile } from '../../api/FlagFile';
+import {
+  DependencyType,
+  type PackageJsonDependencyMeta,
+  type PackageJsonEditor
+} from '../../api/PackageJsonEditor';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { Subspace } from '../../api/Subspace';
+import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
+import { Stopwatch } from '../../utilities/Stopwatch';
+import { Utilities } from '../../utilities/Utilities';
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
+import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
+import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import {
-  type PackageJsonEditor,
-  DependencyType,
-  type PackageJsonDependencyMeta
-} from '../../api/PackageJsonEditor';
-import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../RushConstants';
-import { Utilities } from '../../utilities/Utilities';
-import { InstallHelpers } from './InstallHelpers';
-import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import type { RepoStateFile } from '../RepoStateFile';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
-import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
-import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
-import type { Subspace } from '../../api/Subspace';
-import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
-import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
-import { FlagFile } from '../../api/FlagFile';
-import { Stopwatch } from '../../utilities/Stopwatch';
+import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
+import type { RepoStateFile } from '../RepoStateFile';
+import { RushConstants } from '../RushConstants';
+import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
+import { InstallHelpers } from './InstallHelpers';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -232,6 +232,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           (dependencySpecifier.specifierType === DependencySpecifierType.Version ||
             dependencySpecifier.specifierType === DependencySpecifierType.Range) &&
           referencedLocalProject &&
+          !referencedLocalProject.installRemotely &&
           !rushProject.decoupledLocalDependencies.has(name)
         ) {
           // Make sure that this version is intended to target a local package. If not, then we will fail since it
