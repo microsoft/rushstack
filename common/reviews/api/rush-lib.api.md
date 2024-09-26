@@ -1403,8 +1403,16 @@ export class _RushInternals {
 
 // @beta
 export class RushLifecycleHooks {
-    readonly afterInstall: AsyncSeriesHook<[IRushCommand, Subspace, string | undefined]>;
-    readonly beforeInstall: AsyncSeriesHook<[IGlobalCommand, Subspace, string | undefined]>;
+    readonly afterInstall: AsyncSeriesHook<[
+    command: IRushCommand,
+    subspace: Subspace,
+    variant: string | undefined
+    ]>;
+    readonly beforeInstall: AsyncSeriesHook<[
+    command: IGlobalCommand,
+    subspace: Subspace,
+    variant: string | undefined
+    ]>;
     readonly flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]>;
     readonly initialize: AsyncSeriesHook<IRushCommand>;
     readonly runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;
