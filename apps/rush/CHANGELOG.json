@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.136.1",
+      "tag": "@microsoft/rush_v5.136.1",
+      "date": "Thu, 26 Sep 2024 22:59:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the `--variant` parameter was missing from a phased command when the command's `alwaysInstall` property was set to `true`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.136.0",
       "tag": "@microsoft/rush_v5.136.0",
       "date": "Thu, 26 Sep 2024 21:48:00 GMT",

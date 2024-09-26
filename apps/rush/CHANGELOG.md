@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 26 Sep 2024 21:48:00 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Sep 2024 22:59:11 GMT and should not be manually modified.
+
+## 5.136.1
+Thu, 26 Sep 2024 22:59:11 GMT
+
+### Updates
+
+- Fix an issue where the `--variant` parameter was missing from a phased command when the command's `alwaysInstall` property was set to `true`.
 
 ## 5.136.0
 Thu, 26 Sep 2024 21:48:00 GMT
