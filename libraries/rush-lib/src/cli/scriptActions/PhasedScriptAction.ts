@@ -306,7 +306,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         beforeInstallAsync: (subspace: Subspace) =>
           this.rushSession.hooks.beforeInstall.promise(this, subspace, currentlyInstalledVariant),
         afterInstallAsync: (subspace: Subspace) =>
-          this.rushSession.hooks.afterInstall.promise(this, subspace, currentlyInstalledVariant)
+          this.rushSession.hooks.afterInstall.promise(this, subspace, currentlyInstalledVariant),
+        // Eventually we may want to allow a subspace to be selected here
+        subspace: this.rushConfiguration.defaultSubspace
       });
     }
 

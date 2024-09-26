@@ -11,6 +11,7 @@ import { InstallManagerFactory } from '../InstallManagerFactory';
 import { SetupChecks } from '../SetupChecks';
 import { PurgeManager } from '../PurgeManager';
 import { VersionMismatchFinder } from '../versionMismatch/VersionMismatchFinder';
+import type { Subspace } from '../../api/Subspace';
 
 export interface IRunInstallOptions {
   afterInstallAsync?: IInstallManagerOptions['afterInstallAsync'];
@@ -20,6 +21,7 @@ export interface IRunInstallOptions {
   isDebug: boolean;
   terminal: ITerminal;
   variant: string | undefined;
+  subspace: Subspace;
 }
 
 export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<void> {
@@ -30,7 +32,8 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
     variant,
     terminal,
     beforeInstallAsync,
-    afterInstallAsync
+    afterInstallAsync,
+    subspace
   } = options;
 
   VersionMismatchFinder.ensureConsistentVersions(rushConfiguration, terminal, {
@@ -59,7 +62,7 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
       selectedProjects: new Set(rushConfiguration.projects),
       maxInstallAttempts: 1,
       networkConcurrency: undefined,
-      subspace: rushConfiguration.defaultSubspace,
+      subspace,
       terminal,
       variant,
       afterInstallAsync,
