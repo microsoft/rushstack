@@ -38,7 +38,7 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
 
   VersionMismatchFinder.ensureConsistentVersions(rushConfiguration, terminal, {
     variant,
-    subspace: undefined
+    subspace
   });
   SetupChecks.validate(rushConfiguration);
 
