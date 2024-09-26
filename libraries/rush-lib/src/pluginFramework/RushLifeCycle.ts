@@ -86,16 +86,16 @@ export class RushLifecycleHooks {
   /**
    * The hook to run between preparing the common/temp folder and invoking the package manager during "rush install" or "rush update".
    */
-  public readonly beforeInstall: AsyncSeriesHook<[IGlobalCommand, Subspace]> = new AsyncSeriesHook<
-    [IGlobalCommand, Subspace]
-  >(['command', 'subspace'], 'beforeInstall');
+  public readonly beforeInstall: AsyncSeriesHook<
+    [command: IGlobalCommand, subspace: Subspace, variant: string | undefined]
+  > = new AsyncSeriesHook(['command', 'subspace', 'variant'], 'beforeInstall');
 
   /**
    * The hook to run after a successful install.
    */
-  public readonly afterInstall: AsyncSeriesHook<[IRushCommand, Subspace]> = new AsyncSeriesHook<
-    [IRushCommand, Subspace]
-  >(['command', 'subspace'], 'afterInstall');
+  public readonly afterInstall: AsyncSeriesHook<
+    [command: IRushCommand, subspace: Subspace, variant: string | undefined]
+  > = new AsyncSeriesHook(['command', 'subspace', 'variant'], 'afterInstall');
 
   /**
    * A hook to allow plugins to hook custom logic to process telemetry data.

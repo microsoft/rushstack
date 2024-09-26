@@ -213,9 +213,12 @@ export class PublishAction extends BaseRushAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected async runAsync(): Promise<void> {
+    const currentlyInstalledVariant: string | undefined =
+      await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
     await PolicyValidator.validatePolicyAsync(
       this.rushConfiguration,
       this.rushConfiguration.defaultSubspace,
+      currentlyInstalledVariant,
       { bypassPolicy: false }
     );
 

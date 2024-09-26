@@ -809,7 +809,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
-    subspace: Subspace
+    subspace: Subspace,
+    variant: string | undefined
   ): Promise<boolean> {
     const importerKey: string = this.getImporterKeyByPath(
       subspace.getSubspaceTempFolderPath(),
@@ -828,7 +829,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (!this._pnpmfileConfiguration) {
       this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
         project.rushConfiguration,
-        subspace
+        subspace,
+        variant
       );
     }
 

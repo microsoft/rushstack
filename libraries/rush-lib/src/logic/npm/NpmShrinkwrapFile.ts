@@ -134,7 +134,8 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
-    subspace: Subspace
+    subspace: Subspace,
+    variant: string | undefined
   ): Promise<boolean> {
     throw new InternalError('Not implemented');
   }

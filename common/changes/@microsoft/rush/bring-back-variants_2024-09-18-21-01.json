@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Bring back the Variants feature that was removed in https://github.com/microsoft/rushstack/pull/4538.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

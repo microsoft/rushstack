@@ -118,7 +118,7 @@ describe(RushConfiguration.name, () => {
     expect(rushConfiguration.shrinkwrapFilename).toEqual('pnpm-lock.yaml');
     assertPathProperty(
       'getPnpmfilePath',
-      rushConfiguration.getPnpmfilePath(),
+      rushConfiguration.defaultSubspace.getPnpmfilePath(undefined),
       './repo/common/config/rush/.pnpmfile.cjs'
     );
     assertPathProperty('commonFolder', rushConfiguration.commonFolder, './repo/common');
@@ -185,7 +185,7 @@ describe(RushConfiguration.name, () => {
     expect(rushConfiguration.shrinkwrapFilename).toEqual('pnpm-lock.yaml');
     assertPathProperty(
       'getPnpmfilePath',
-      rushConfiguration.getPnpmfilePath(),
+      rushConfiguration.defaultSubspace.getPnpmfilePath(undefined),
       './repo/common/config/rush/pnpmfile.js'
     );
     expect(rushConfiguration.repositoryUrls).toEqual(['someFakeUrl', 'otherFakeUrl']);

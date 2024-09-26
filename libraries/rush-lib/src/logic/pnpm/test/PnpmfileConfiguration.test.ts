@@ -16,7 +16,8 @@ describe(PnpmfileConfiguration.name, () => {
     await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(
       rushConfiguration,
       subspace.getSubspaceTempFolderPath(),
-      subspace
+      subspace,
+      undefined
     );
   });
 

@@ -12,7 +12,8 @@ import {
   FileSystem,
   type PackageNameParser,
   type FileSystemStats,
-  InternalError
+  InternalError,
+  type JsonNull
 } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { trueCasePathSync } from 'true-case-path';
@@ -145,6 +146,14 @@ export interface IRushRepositoryJsonMultipleUrls extends IRushRepositoryJsonBase
 export type IRushRepositoryJson = IRushRepositoryJsonSingleUrl | IRushRepositoryJsonMultipleUrls;
 
 /**
+ * Options defining an allowed variant as part of IRushConfigurationJson.
+ */
+export interface IRushVariantOptionsJson {
+  variantName: string;
+  description: string;
+}
+
+/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
  */
@@ -173,7 +182,14 @@ export interface IRushConfigurationJson {
   pnpmOptions?: IPnpmOptionsJson;
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
-  variants?: unknown;
+  variants?: IRushVariantOptionsJson[];
+}
+
+/**
+ * This represents the JSON data structure for the "current-variant.json" data file.
+ */
+export interface ICurrentVariantJson {
+  variant: string | JsonNull;
 }
 
 /**
@@ -211,6 +227,11 @@ export class RushConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
   private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
+
+  /**
+   * @internal
+   */
+  public _currentVariantJsonLoadingPromise: Promise<ICurrentVariantJson | undefined> | undefined;
 
   // Lazily loaded when the projects() getter is called.
   private _projects: RushConfigurationProject[] | undefined;
@@ -340,12 +361,13 @@ export class RushConfiguration {
   public readonly subspacesFeatureEnabled: boolean;
 
   /**
-   * If true, the `variants` field is present in rush.json.
+   * The filename of the variant dependency data file.  By default this is
+   * called 'current-variant.json' and resides in the Rush common folder.
+   * Its data structure is defined by ICurrentVariantJson.
    *
-   * @internal
-   * @deprecated - Remove when the field is removed from the rush.json schema.
+   * Example: `C:\MyRepo\common\temp\current-variant.json`
    */
-  public readonly _hasVariantsField: boolean;
+  public readonly currentVariantJsonFilePath: string;
 
   /**
    * The version of the locally package manager tool.  (Example: "1.2.3")
@@ -565,6 +587,13 @@ export class RushConfiguration {
   public readonly _rushPluginsConfiguration: RushPluginsConfiguration;
 
   /**
+   * The variants specified in the rush.json configuration file.
+   *
+   * @beta
+   */
+  public readonly variants: ReadonlySet<string>;
+
+  /**
    * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
    * instead.
    */
@@ -616,6 +645,8 @@ export class RushConfiguration {
     this.yarnCacheFolder = path.resolve(path.join(this.commonTempFolder, 'yarn-cache'));
 
     this.changesFolder = path.join(this.commonFolder, RushConstants.changeFilesFolderName);
+
+    this.currentVariantJsonFilePath = path.join(this.commonTempFolder, RushConstants.currentVariantsFilename);
 
     this.suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
@@ -826,7 +857,18 @@ export class RushConfiguration {
     );
     this.customTipsConfiguration = new CustomTipsConfiguration(this.customTipsConfigurationFilePath);
 
-    this._hasVariantsField = !!rushConfigurationJson.variants;
+    const variants: Set<string> = new Set();
+    for (const variantOptions of rushConfigurationJson.variants ?? []) {
+      const { variantName } = variantOptions;
+
+      if (variants.has(variantName)) {
+        throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
+      }
+
+      variants.add(variantName);
+    }
+
+    this.variants = variants;
 
     this._pathTrees = new Map();
   }
@@ -1372,39 +1414,57 @@ export class RushConfiguration {
    * Instead it will be initialized in an empty state, and calling CommonVersionsConfiguration.save()
    * will create the file.
    *
-   * @deprecated Use `getCommonVersions` instead, which gets the correct common version data.
+   * @deprecated Use `getCommonVersions` instead, which gets the correct common version data
+   * for a given active variant.
    */
   public get commonVersions(): CommonVersionsConfiguration {
-    return this.defaultSubspace.getCommonVersions();
+    return this.defaultSubspace.getCommonVersions(undefined);
+  }
+
+  /**
+   * Gets the currently-installed variant, if an installation has occurred.
+   * For Rush operations which do not take a --variant parameter, this method
+   * determines which variant, if any, was last specified when performing "rush install"
+   * or "rush update".
+   */
+  public async getCurrentlyInstalledVariantAsync(): Promise<string | undefined> {
+    if (!this._currentVariantJsonLoadingPromise) {
+      this._currentVariantJsonLoadingPromise = this._loadCurrentVariantJsonAsync();
+    }
+
+    return (await this._currentVariantJsonLoadingPromise)?.variant ?? undefined;
   }
 
   /**
    * @deprecated Use {@link Subspace.getCommonVersionsFilePath} instead
    */
-  public getCommonVersionsFilePath(subspace?: Subspace): string {
-    return (subspace ?? this.defaultSubspace).getCommonVersionsFilePath();
+  public getCommonVersionsFilePath(subspace?: Subspace, variant?: string): string {
+    return (subspace ?? this.defaultSubspace).getCommonVersionsFilePath(variant);
   }
 
   /**
    * @deprecated Use {@link Subspace.getCommonVersions} instead
    */
-  public getCommonVersions(subspace?: Subspace): CommonVersionsConfiguration {
-    return (subspace ?? this.defaultSubspace).getCommonVersions();
+  public getCommonVersions(subspace?: Subspace, variant?: string): CommonVersionsConfiguration {
+    return (subspace ?? this.defaultSubspace).getCommonVersions(variant);
   }
 
   /**
    * Returns a map of all direct dependencies that only have a single semantic version specifier.
    *
+   * @param subspace - The subspace to use
+   * @param variant - The name of the current variant in use by the active command.
+   *
    * @returns A map of dependency name --\> version specifier for implicitly preferred versions.
    */
-  public getImplicitlyPreferredVersions(subspace?: Subspace): Map<string, string> {
+  public getImplicitlyPreferredVersions(subspace?: Subspace, variant?: string): Map<string, string> {
     // TODO: During the next major release of Rush, replace this `require` call with a dynamic import, and
     // change this function to be async.
     const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = require('../logic/DependencyAnalyzer');
     const dependencyAnalyzer: DependencyAnalyzerModuleType.DependencyAnalyzer =
       DependencyAnalyzerModule.DependencyAnalyzer.forRushConfiguration(this);
     const dependencyAnalysis: DependencyAnalyzerModuleType.IDependencyAnalysis =
-      dependencyAnalyzer.getAnalysis(subspace);
+      dependencyAnalyzer.getAnalysis(subspace, variant, false);
     return dependencyAnalysis.implicitlyPreferredVersionByPackageName;
   }
 
@@ -1423,17 +1483,17 @@ export class RushConfiguration {
   }
 
   /**
-   * @deprecated Use {@link Subspace.getCommittedShrinkwrapFilename} instead
+   * @deprecated Use {@link Subspace.getCommittedShrinkwrapFilePath} instead
    */
-  public getCommittedShrinkwrapFilename(subspace?: Subspace): string {
-    return (subspace ?? this.defaultSubspace).getCommittedShrinkwrapFilename();
+  public getCommittedShrinkwrapFilename(subspace?: Subspace, variant?: string): string {
+    return (subspace ?? this.defaultSubspace).getCommittedShrinkwrapFilePath(variant);
   }
 
   /**
-   * @deprecated Use {@link Subspace.getRepoStateFilePath} instead
+   * @deprecated Use {@link Subspace.getPnpmfilePath} instead
    */
-  public getPnpmfilePath(subspace?: Subspace): string {
-    return (subspace ?? this.defaultSubspace).getPnpmfilePath();
+  public getPnpmfilePath(subspace?: Subspace, variant?: string): string {
+    return (subspace ?? this.defaultSubspace).getPnpmfilePath(variant);
   }
 
   /**
@@ -1517,5 +1577,15 @@ export class RushConfiguration {
       }
     }
     return undefined;
+  }
+
+  private async _loadCurrentVariantJsonAsync(): Promise<ICurrentVariantJson | undefined> {
+    try {
+      return await JsonFile.loadAsync(this.currentVariantJsonFilePath);
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
+    }
   }
 }

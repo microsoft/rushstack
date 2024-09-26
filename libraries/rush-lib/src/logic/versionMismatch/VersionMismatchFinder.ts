@@ -16,13 +16,13 @@ import type { Subspace } from '../../api/Subspace';
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
 export interface IVersionMismatchFinderOptions {
-  subspace: Subspace;
+  subspace?: Subspace;
+  variant: string | undefined;
 }
 
 export interface IVersionMismatchFinderRushCheckOptions extends IVersionMismatchFinderOptions {
   printAsJson?: boolean | undefined;
   truncateLongPackageNameLists?: boolean | undefined;
-  subspace: Subspace;
 }
 
 export interface IVersionMismatchFinderEnsureConsistentVersionsOptions
@@ -69,12 +69,20 @@ export class VersionMismatchFinder {
   public static rushCheck(
     rushConfiguration: RushConfiguration,
     terminal: ITerminal,
-    options: IVersionMismatchFinderRushCheckOptions = {
-      subspace: rushConfiguration.defaultSubspace
-    }
+    options?: IVersionMismatchFinderRushCheckOptions
   ): void {
+    const {
+      variant,
+      subspace = rushConfiguration.defaultSubspace,
+      printAsJson,
+      truncateLongPackageNameLists
+    } = options ?? {};
+
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
-      ...options,
+      variant,
+      subspace,
+      printAsJson,
+      truncateLongPackageNameLists,
       terminal,
       isRushCheckCommand: true
     });
@@ -83,12 +91,13 @@ export class VersionMismatchFinder {
   public static ensureConsistentVersions(
     rushConfiguration: RushConfiguration,
     terminal: ITerminal,
-    options: IVersionMismatchFinderEnsureConsistentVersionsOptions = {
-      subspace: rushConfiguration.defaultSubspace
-    }
+    options?: IVersionMismatchFinderEnsureConsistentVersionsOptions
   ): void {
+    const { variant, subspace = rushConfiguration.defaultSubspace } = options ?? {};
+
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
-      ...options,
+      subspace,
+      variant,
       terminal,
       isRushCheckCommand: false,
       truncateLongPackageNameLists: true
@@ -101,11 +110,10 @@ export class VersionMismatchFinder {
    */
   public static getMismatches(
     rushConfiguration: RushConfiguration,
-    options: IVersionMismatchFinderOptions = {
-      subspace: rushConfiguration.defaultSubspace
-    }
+    options?: IVersionMismatchFinderOptions
   ): VersionMismatchFinder {
-    const commonVersions: CommonVersionsConfiguration = options.subspace.getCommonVersions();
+    const { subspace = rushConfiguration.defaultSubspace, variant } = options ?? {};
+    const commonVersions: CommonVersionsConfiguration = subspace.getCommonVersions(variant);
 
     const projects: VersionMismatchFinderEntity[] = [];
 
@@ -114,7 +122,7 @@ export class VersionMismatchFinder {
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
     // If subspace is specified, only go through projects in that subspace
-    for (const project of options.subspace.getProjects()) {
+    for (const project of subspace.getProjects()) {
       projects.push(new VersionMismatchFinderProject(project));
     }
 
@@ -126,36 +134,39 @@ export class VersionMismatchFinder {
     options: {
       isRushCheckCommand: boolean;
       subspace: Subspace;
+      variant: string | undefined;
       printAsJson?: boolean | undefined;
       terminal: ITerminal;
       truncateLongPackageNameLists?: boolean | undefined;
     }
   ): void {
-    if (options.subspace.shouldEnsureConsistentVersions || options.isRushCheckCommand) {
+    const { variant, isRushCheckCommand, printAsJson, subspace, truncateLongPackageNameLists, terminal } =
+      options;
+    if (subspace.shouldEnsureConsistentVersions(variant) || isRushCheckCommand) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
         rushConfiguration,
         options
       );
 
-      if (options.printAsJson) {
+      if (printAsJson) {
         mismatchFinder.printAsJson();
       } else {
-        mismatchFinder.print(options.truncateLongPackageNameLists);
+        mismatchFinder.print(truncateLongPackageNameLists);
 
         if (mismatchFinder.numberOfMismatches > 0) {
           // eslint-disable-next-line no-console
           console.log(
             Colorize.red(
               `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies ${
-                options.subspace?.subspaceName ? `in subspace: ${options.subspace?.subspaceName}` : ''
+                subspace?.subspaceName ? `in subspace: ${subspace?.subspaceName}` : ''
               }`
             )
           );
           rushConfiguration.customTipsConfiguration._showErrorTip(
-            options.terminal,
+            terminal,
             CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS
           );
-          if (!options.isRushCheckCommand && options.truncateLongPackageNameLists) {
+          if (!isRushCheckCommand && truncateLongPackageNameLists) {
             // There isn't a --verbose flag in `rush install`/`rush update`, so a long list will always be truncated.
             // eslint-disable-next-line no-console
             console.log(
@@ -165,7 +176,7 @@ export class VersionMismatchFinder {
 
           throw new AlreadyReportedError();
         } else {
-          if (options.isRushCheckCommand) {
+          if (isRushCheckCommand) {
             // eslint-disable-next-line no-console
             console.log(Colorize.green(`Found no mis-matching dependencies!`));
           }

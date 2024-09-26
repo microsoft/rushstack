@@ -18,6 +18,7 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
 import { ITerminal } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
+import { JsonNull } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
@@ -128,7 +129,7 @@ export class CommonVersionsConfiguration {
     getAllPreferredVersions(): Map<string, string>;
     getPreferredVersionsHash(): string;
     readonly implicitlyPreferredVersions: boolean | undefined;
-    static loadFromFile(jsonFilename: string, rushConfiguration?: RushConfiguration): CommonVersionsConfiguration;
+    static loadFromFile(jsonFilePath: string, rushConfiguration?: RushConfiguration): CommonVersionsConfiguration;
     readonly preferredVersions: Map<string, string>;
     save(): boolean;
 }
@@ -258,6 +259,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_PREVIEW_VERSION: "RUSH_PREVIEW_VERSION";
     readonly RUSH_ALLOW_UNSUPPORTED_NODEJS: "RUSH_ALLOW_UNSUPPORTED_NODEJS";
     readonly RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: "RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD";
+    readonly RUSH_VARIANT: "RUSH_VARIANT";
     readonly RUSH_PARALLELISM: "RUSH_PARALLELISM";
     readonly RUSH_ABSOLUTE_SYMLINKS: "RUSH_ABSOLUTE_SYMLINKS";
     readonly RUSH_PNPM_STORE_PATH: "RUSH_PNPM_STORE_PATH";
@@ -510,6 +512,8 @@ export interface IGetChangedProjectsOptions {
     targetBranchName: string;
     // (undocumented)
     terminal: ITerminal;
+    // (undocumented)
+    variant?: string;
 }
 
 // @beta
@@ -1126,7 +1130,7 @@ export class RepoStateFile {
     get packageJsonInjectedDependenciesHash(): string | undefined;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
-    refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined): boolean;
+    refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined, variant?: string): boolean;
 }
 
 // @public
@@ -1159,6 +1163,11 @@ export class RushConfiguration {
     readonly commonTempFolder: string;
     // @deprecated
     get commonVersions(): CommonVersionsConfiguration;
+    readonly currentVariantJsonFilePath: string;
+    // Warning: (ae-forgotten-export) The symbol "ICurrentVariantJson" needs to be exported by the entry point index.d.ts
+    //
+    // @internal (undocumented)
+    _currentVariantJsonLoadingPromise: Promise<ICurrentVariantJson | undefined> | undefined;
     // @beta
     readonly customTipsConfiguration: CustomTipsConfiguration;
     // @beta
@@ -1176,14 +1185,15 @@ export class RushConfiguration {
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
     // @deprecated (undocumented)
-    getCommittedShrinkwrapFilename(subspace?: Subspace): string;
+    getCommittedShrinkwrapFilename(subspace?: Subspace, variant?: string): string;
     // @deprecated (undocumented)
-    getCommonVersions(subspace?: Subspace): CommonVersionsConfiguration;
+    getCommonVersions(subspace?: Subspace, variant?: string): CommonVersionsConfiguration;
     // @deprecated (undocumented)
-    getCommonVersionsFilePath(subspace?: Subspace): string;
-    getImplicitlyPreferredVersions(subspace?: Subspace): Map<string, string>;
+    getCommonVersionsFilePath(subspace?: Subspace, variant?: string): string;
+    getCurrentlyInstalledVariantAsync(): Promise<string | undefined>;
+    getImplicitlyPreferredVersions(subspace?: Subspace, variant?: string): Map<string, string>;
     // @deprecated (undocumented)
-    getPnpmfilePath(subspace?: Subspace): string;
+    getPnpmfilePath(subspace?: Subspace, variant?: string): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
@@ -1201,8 +1211,6 @@ export class RushConfiguration {
     readonly gitSampleEmail: string;
     readonly gitTagSeparator: string | undefined;
     readonly gitVersionBumpCommitMessage: string | undefined;
-    // @internal @deprecated
-    readonly _hasVariantsField: boolean;
     readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
@@ -1261,6 +1269,8 @@ export class RushConfiguration {
     tryGetSubspace(subspaceName: string): Subspace | undefined;
     // (undocumented)
     static tryLoadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration | undefined;
+    // @beta
+    readonly variants: ReadonlySet<string>;
     // @beta (undocumented)
     readonly versionPolicyConfiguration: VersionPolicyConfiguration;
     // @beta (undocumented)
@@ -1326,6 +1336,7 @@ export class RushConstants {
     static readonly commandLineFilename: 'command-line.json';
     static readonly commonFolderName: 'common';
     static readonly commonVersionsFilename: 'common-versions.json';
+    static readonly currentVariantsFilename: 'current-variants.json';
     static readonly customTipsFilename: 'custom-tips.json';
     static readonly defaultMaxInstallAttempts: 1;
     static readonly defaultSubspaceName: 'default';
@@ -1368,6 +1379,7 @@ export class RushConstants {
     static readonly rushTempNpmScope: '@rush-temp';
     static readonly rushTempProjectsFolderName: 'projects';
     static readonly rushUserConfigurationFolderName: '.rush-user';
+    static readonly rushVariantsFolderName: 'variants';
     static readonly rushWebSiteUrl: 'https://rushjs.io';
     static readonly subspacesConfigFilename: 'subspaces.json';
     // (undocumented)
@@ -1391,8 +1403,16 @@ export class _RushInternals {
 
 // @beta
 export class RushLifecycleHooks {
-    readonly afterInstall: AsyncSeriesHook<[IRushCommand, Subspace]>;
-    readonly beforeInstall: AsyncSeriesHook<[IGlobalCommand, Subspace]>;
+    readonly afterInstall: AsyncSeriesHook<[
+    command: IRushCommand,
+    subspace: Subspace,
+    variant: string | undefined
+    ]>;
+    readonly beforeInstall: AsyncSeriesHook<[
+    command: IGlobalCommand,
+    subspace: Subspace,
+    variant: string | undefined
+    ]>;
     readonly flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]>;
     readonly initialize: AsyncSeriesHook<IRushCommand>;
     readonly runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;
@@ -1458,18 +1478,20 @@ export class Subspace {
     _addProject(project: RushConfigurationProject): void;
     // @beta
     contains(project: RushConfigurationProject): boolean;
-    // @beta
+    // @deprecated (undocumented)
     getCommittedShrinkwrapFilename(): string;
     // @beta
-    getCommonVersions(): CommonVersionsConfiguration;
+    getCommittedShrinkwrapFilePath(variant?: string): string;
     // @beta
-    getCommonVersionsFilePath(): string;
+    getCommonVersions(variant?: string): CommonVersionsConfiguration;
     // @beta
-    getPackageJsonInjectedDependenciesHash(): string | undefined;
+    getCommonVersionsFilePath(variant?: string): string;
     // @beta
-    getPnpmConfigFilePath(): string;
+    getPackageJsonInjectedDependenciesHash(variant?: string): string | undefined;
     // @beta
-    getPnpmfilePath(): string;
+    getPnpmConfigFilePath(variant?: string): string;
+    // @beta
+    getPnpmfilePath(variant?: string): string;
     // @beta
     getPnpmOptions(): PnpmOptionsConfiguration | undefined;
     // @beta
@@ -1486,10 +1508,14 @@ export class Subspace {
     getSubspaceTempFolderPath(): string;
     // @beta
     getTempShrinkwrapFilename(): string;
-    // @beta
+    // @deprecated (undocumented)
     getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string;
     // @beta
-    get shouldEnsureConsistentVersions(): boolean;
+    getTempShrinkwrapPreinstallFilePath(): string;
+    // @beta
+    getVariantDependentSubspaceConfigFolderPath(variant: string | undefined): string;
+    // @beta
+    shouldEnsureConsistentVersions(variant?: string): boolean;
     // (undocumented)
     readonly subspaceName: string;
 }

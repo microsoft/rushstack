@@ -29,8 +29,10 @@ describe(ProjectChangeAnalyzer.name, () => {
       commonRushConfigFolder: '',
       projects,
       rushJsonFolder: '',
-      getCommittedShrinkwrapFilename(): string {
-        return 'common/config/rush/pnpm-lock.yaml';
+      defaultSubspace: {
+        getCommittedShrinkwrapFilePath(variant: string | undefined): string {
+          return 'common/config/rush/pnpm-lock.yaml';
+        }
       },
       getProjectLookupForRoot(root: string): LookupByPath<RushConfigurationProject> {
         const lookup: LookupByPath<RushConfigurationProject> = new LookupByPath();
@@ -41,7 +43,8 @@ describe(ProjectChangeAnalyzer.name, () => {
       },
       getProjectByName(name: string): RushConfigurationProject | undefined {
         return projects.find((project) => project.packageName === name);
-      }
+      },
+      getCurrentlyInstalledVariantAsync: () => Promise.resolve(undefined)
     } as RushConfiguration;
 
     const subject: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);

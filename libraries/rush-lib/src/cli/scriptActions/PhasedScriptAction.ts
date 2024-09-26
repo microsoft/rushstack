@@ -51,6 +51,7 @@ import { ShardedPhasedOperationPlugin } from '../../logic/operations/ShardedPhas
 import type { ProjectWatcher } from '../../logic/ProjectWatcher';
 import { FlagFile } from '../../api/FlagFile';
 import { WeightedOperationPlugin } from '../../logic/operations/WeightedOperationPlugin';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -144,6 +145,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _timelineParameter: CommandLineFlagParameter | undefined;
   private readonly _cobuildPlanParameter: CommandLineFlagParameter | undefined;
   private readonly _installParameter: CommandLineFlagParameter | undefined;
+  private readonly _variantParameter: CommandLineStringParameter | undefined;
   private readonly _noIPCParameter: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
@@ -258,6 +260,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified, ' +
           'Rush will automatically perform an install before processing the current command.'
       });
+
+      this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
     }
 
     if (
@@ -294,14 +298,23 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         '../../logic/installManager/doBasicInstallAsync'
       );
 
+      const variant: string | undefined = await getVariantAsync(
+        this._variantParameter,
+        this.rushConfiguration,
+        true
+      );
       await doBasicInstallAsync({
         terminal: this._terminal,
         rushConfiguration: this.rushConfiguration,
         rushGlobalFolder: this.rushGlobalFolder,
         isDebug: this.parser.isDebug,
+        variant,
         beforeInstallAsync: (subspace: Subspace) =>
-          this.rushSession.hooks.beforeInstall.promise(this, subspace),
-        afterInstallAsync: (subspace: Subspace) => this.rushSession.hooks.afterInstall.promise(this, subspace)
+          this.rushSession.hooks.beforeInstall.promise(this, subspace, variant),
+        afterInstallAsync: (subspace: Subspace) =>
+          this.rushSession.hooks.afterInstall.promise(this, subspace, variant),
+        // Eventually we may want to allow a subspace to be selected here
+        subspace: this.rushConfiguration.defaultSubspace
       });
     }
 

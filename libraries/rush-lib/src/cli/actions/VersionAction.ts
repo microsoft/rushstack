@@ -95,8 +95,10 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
+    const currentlyInstalledVariant: string | undefined =
+      await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
     for (const subspace of this.rushConfiguration.subspaces) {
-      await PolicyValidator.validatePolicyAsync(this.rushConfiguration, subspace, {
+      await PolicyValidator.validatePolicyAsync(this.rushConfiguration, subspace, currentlyInstalledVariant, {
         bypassPolicyAllowed: true,
         bypassPolicy: this._bypassPolicy.value
       });
@@ -128,7 +130,7 @@ export class VersionAction extends BaseRushAction {
       if (updatedPackages.size > 0) {
         // eslint-disable-next-line no-console
         console.log(`${updatedPackages.size} packages are getting updated.`);
-        await this._gitProcessAsync(tempBranch, this._targetBranch.value);
+        await this._gitProcessAsync(tempBranch, this._targetBranch.value, currentlyInstalledVariant);
       }
     } else if (this._bumpVersion.value) {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
@@ -138,7 +140,7 @@ export class VersionAction extends BaseRushAction {
         this._prereleaseIdentifier.value,
         true
       );
-      await this._gitProcessAsync(tempBranch, this._targetBranch.value);
+      await this._gitProcessAsync(tempBranch, this._targetBranch.value, currentlyInstalledVariant);
     }
   }
 
@@ -205,7 +207,7 @@ export class VersionAction extends BaseRushAction {
     }
   }
 
-  private _validateResult(): void {
+  private _validateResult(variant: string | undefined): void {
     // Load the config from file to avoid using inconsistent in-memory data.
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
       this.rushConfiguration.rushJsonFile
@@ -219,7 +221,8 @@ export class VersionAction extends BaseRushAction {
       }
 
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig, {
-        subspace: subspace
+        subspace,
+        variant
       });
       if (mismatchFinder.numberOfMismatches) {
         throw new Error(
@@ -230,9 +233,13 @@ export class VersionAction extends BaseRushAction {
     }
   }
 
-  private async _gitProcessAsync(tempBranch: string, targetBranch: string | undefined): Promise<void> {
+  private async _gitProcessAsync(
+    tempBranch: string,
+    targetBranch: string | undefined,
+    variant: string | undefined
+  ): Promise<void> {
     // Validate the result before commit.
-    this._validateResult();
+    this._validateResult(variant);
 
     const git: Git = new Git(this.rushConfiguration);
     const publishGit: PublishGit = new PublishGit(git, targetBranch);

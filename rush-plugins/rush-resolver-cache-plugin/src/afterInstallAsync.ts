@@ -45,18 +45,20 @@ function getPlatformInfo(): IPlatformInfo {
  * @param rushSession - The Rush Session
  * @param rushConfiguration - The Rush Configuration
  * @param subspace - The subspace that was just installed
+ * @param variant - The variant that was just installed
  * @param logger - The initialized logger
  */
 export async function afterInstallAsync(
   rushSession: RushSession,
   rushConfiguration: RushConfiguration,
   subspace: Subspace,
+  variant: string | undefined,
   logger: ILogger
 ): Promise<void> {
   const { terminal } = logger;
   const rushRoot: string = `${rushConfiguration.rushJsonFolder}/`;
 
-  const lockFilePath: string = subspace.getCommittedShrinkwrapFilename();
+  const lockFilePath: string = subspace.getCommittedShrinkwrapFilePath(variant);
   const workspaceRoot: string = subspace.getSubspaceTempFolderPath();
 
   const projectByImporterPath: LookupByPath<RushConfigurationProject> =
@@ -117,7 +119,9 @@ export async function afterInstallAsync(
 
         const filteredFiles: string[] = Object.keys(files).filter((file) => file.endsWith('/package.json'));
         if (filteredFiles.length > 0) {
-          const nestedPackageDirs: string[] = filteredFiles.map((x) => x.slice(0, /* -'/package.json'.length */ -13));
+          const nestedPackageDirs: string[] = filteredFiles.map((x) =>
+            x.slice(0, /* -'/package.json'.length */ -13)
+          );
 
           if (nestedPackageDirs.length > 0) {
             // eslint-disable-next-line require-atomic-updates

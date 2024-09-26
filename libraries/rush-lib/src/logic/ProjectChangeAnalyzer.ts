@@ -31,6 +31,7 @@ export interface IGetChangedProjectsOptions {
   targetBranchName: string;
   terminal: ITerminal;
   shouldFetch?: boolean;
+  variant?: string;
 
   /**
    * If set to `true`, consider a project's external dependency installation layout as defined in the
@@ -217,7 +218,8 @@ export class ProjectChangeAnalyzer {
   ): Promise<Set<RushConfigurationProject>> {
     const { _rushConfiguration: rushConfiguration } = this;
 
-    const { targetBranchName, terminal, includeExternalDependencies, enableFiltering, shouldFetch } = options;
+    const { targetBranchName, terminal, includeExternalDependencies, enableFiltering, shouldFetch, variant } =
+      options;
 
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
@@ -236,10 +238,15 @@ export class ProjectChangeAnalyzer {
       // Even though changing the installed version of a nested dependency merits a change file,
       // ignore lockfile changes for `rush change` for the moment
 
-      const fullShrinkwrapPath: string = rushConfiguration.getCommittedShrinkwrapFilename();
+      const variantToUse: string | undefined =
+        variant ?? (await this._rushConfiguration.getCurrentlyInstalledVariantAsync());
+      const fullShrinkwrapPath: string =
+        rushConfiguration.defaultSubspace.getCommittedShrinkwrapFilePath(variantToUse);
 
-      const shrinkwrapFile: string = Path.convertToSlashes(path.relative(repoRoot, fullShrinkwrapPath));
-      const shrinkwrapStatus: IFileDiffStatus | undefined = repoChanges.get(shrinkwrapFile);
+      const relativeShrinkwrapFilePath: string = Path.convertToSlashes(
+        path.relative(repoRoot, fullShrinkwrapPath)
+      );
+      const shrinkwrapStatus: IFileDiffStatus | undefined = repoChanges.get(relativeShrinkwrapFilePath);
 
       if (shrinkwrapStatus) {
         if (shrinkwrapStatus.status !== 'M') {
@@ -259,7 +266,7 @@ export class ProjectChangeAnalyzer {
 
           const oldShrinkwrapText: string = await this._git.getBlobContentAsync({
             // <ref>:<path> syntax: https://git-scm.com/docs/gitrevisions
-            blobSpec: `${mergeCommit}:${shrinkwrapFile}`,
+            blobSpec: `${mergeCommit}:${relativeShrinkwrapFilePath}`,
             repositoryRoot: repoRoot
           });
           const oldShrinkWrap: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(oldShrinkwrapText);
@@ -354,9 +361,14 @@ export class ProjectChangeAnalyzer {
 
     // Currently, only pnpm handles project shrinkwraps
     if (this._rushConfiguration.packageManager !== 'pnpm') {
+      const currentVariant: string | undefined =
+        await this._rushConfiguration.getCurrentlyInstalledVariantAsync();
       // Add the shrinkwrap file to every project's dependencies
       const shrinkwrapFile: string = Path.convertToSlashes(
-        path.relative(rootDir, this._rushConfiguration.getCommittedShrinkwrapFilename())
+        path.relative(
+          rootDir,
+          this._rushConfiguration.defaultSubspace.getCommittedShrinkwrapFilePath(currentVariant)
+        )
       );
 
       const shrinkwrapHash: string | undefined = repoDeps.get(shrinkwrapFile);

@@ -9,6 +9,7 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { Subspace } from '../../api/Subspace';
+import { getVariantAsync } from '../../api/Variants';
 
 export class InstallAction extends BaseInstallAction {
   private readonly _checkOnlyParameter: CommandLineFlagParameter;
@@ -61,6 +62,12 @@ export class InstallAction extends BaseInstallAction {
       (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) ??
       new Set(this.rushConfiguration.projects);
 
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      false
+    );
+
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
@@ -72,6 +79,7 @@ export class InstallAction extends BaseInstallAction {
       offline: this._offlineParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
+      variant,
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
@@ -82,8 +90,9 @@ export class InstallAction extends BaseInstallAction {
       checkOnly: this._checkOnlyParameter.value,
       resolutionOnly: this._resolutionOnlyParameter?.value,
       beforeInstallAsync: (subspace: Subspace) =>
-        this.rushSession.hooks.beforeInstall.promise(this, subspace),
-      afterInstallAsync: (subspace: Subspace) => this.rushSession.hooks.afterInstall.promise(this, subspace),
+        this.rushSession.hooks.beforeInstall.promise(this, subspace, variant),
+      afterInstallAsync: (subspace: Subspace) =>
+        this.rushSession.hooks.afterInstall.promise(this, subspace, variant),
       terminal: this._terminal
     };
   }

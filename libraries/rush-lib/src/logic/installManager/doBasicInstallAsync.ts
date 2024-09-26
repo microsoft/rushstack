@@ -11,6 +11,7 @@ import { InstallManagerFactory } from '../InstallManagerFactory';
 import { SetupChecks } from '../SetupChecks';
 import { PurgeManager } from '../PurgeManager';
 import { VersionMismatchFinder } from '../versionMismatch/VersionMismatchFinder';
+import type { Subspace } from '../../api/Subspace';
 
 export interface IRunInstallOptions {
   afterInstallAsync?: IInstallManagerOptions['afterInstallAsync'];
@@ -19,12 +20,26 @@ export interface IRunInstallOptions {
   rushGlobalFolder: RushGlobalFolder;
   isDebug: boolean;
   terminal: ITerminal;
+  variant: string | undefined;
+  subspace: Subspace;
 }
 
 export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<void> {
-  const { rushConfiguration, rushGlobalFolder, isDebug } = options;
+  const {
+    rushConfiguration,
+    rushGlobalFolder,
+    isDebug,
+    variant,
+    terminal,
+    beforeInstallAsync,
+    afterInstallAsync,
+    subspace
+  } = options;
 
-  VersionMismatchFinder.ensureConsistentVersions(rushConfiguration, options.terminal);
+  VersionMismatchFinder.ensureConsistentVersions(rushConfiguration, terminal, {
+    variant,
+    subspace: undefined
+  });
   SetupChecks.validate(rushConfiguration);
 
   const purgeManager: typeof PurgeManager.prototype = new PurgeManager(rushConfiguration, rushGlobalFolder);
@@ -47,10 +62,11 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
       selectedProjects: new Set(rushConfiguration.projects),
       maxInstallAttempts: 1,
       networkConcurrency: undefined,
-      subspace: rushConfiguration.defaultSubspace,
-      terminal: options.terminal,
-      afterInstallAsync: options.afterInstallAsync,
-      beforeInstallAsync: options.beforeInstallAsync
+      subspace,
+      terminal,
+      variant,
+      afterInstallAsync,
+      beforeInstallAsync
     }
   );
 

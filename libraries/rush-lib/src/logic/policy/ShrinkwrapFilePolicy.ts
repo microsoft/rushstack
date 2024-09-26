@@ -18,6 +18,7 @@ export interface IShrinkwrapFilePolicyValidatorOptions extends IPolicyValidatorO
 export function validate(
   rushConfiguration: RushConfiguration,
   subspace: Subspace,
+  variant: string | undefined,
   options: IPolicyValidatorOptions
 ): void {
   // eslint-disable-next-line no-console
@@ -25,7 +26,7 @@ export function validate(
   const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
     rushConfiguration.packageManager,
     rushConfiguration.packageManagerOptions,
-    subspace.getCommittedShrinkwrapFilename()
+    subspace.getCommittedShrinkwrapFilePath(variant)
   );
 
   if (!shrinkwrapFile) {

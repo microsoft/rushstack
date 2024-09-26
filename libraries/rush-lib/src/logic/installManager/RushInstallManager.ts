@@ -90,6 +90,8 @@ export class RushInstallManager extends BaseInstallManager {
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
 
+    const { fullUpgrade, variant } = this.options;
+
     // Example: "C:\MyRepo\common\temp\projects"
     const tempProjectsFolder: string = path.join(
       this.rushConfiguration.commonTempFolder,
@@ -109,7 +111,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     if (!shrinkwrapFile) {
       shrinkwrapIsUpToDate = false;
-    } else if (shrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
+    } else if (shrinkwrapFile.isWorkspaceCompatible && !fullUpgrade) {
       // eslint-disable-next-line no-console
       console.log();
       // eslint-disable-next-line no-console
@@ -124,7 +126,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     // dependency name --> version specifier
     const allExplicitPreferredVersions: Map<string, string> = this.rushConfiguration.defaultSubspace
-      .getCommonVersions()
+      .getCommonVersions(variant)
       .getAllPreferredVersions();
 
     if (shrinkwrapFile) {
@@ -167,7 +169,7 @@ export class RushInstallManager extends BaseInstallManager {
     // dependency name --> version specifier
     const commonDependencies: Map<string, string> = new Map([
       ...allExplicitPreferredVersions,
-      ...this.rushConfiguration.getImplicitlyPreferredVersions(subspace)
+      ...this.rushConfiguration.getImplicitlyPreferredVersions(subspace, variant)
     ]);
 
     // To make the common/package.json file more readable, sort alphabetically
@@ -438,8 +440,12 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace): boolean {
-    if (!super.canSkipInstall(lastModifiedDate, subspace)) {
+  protected async canSkipInstallAsync(
+    lastModifiedDate: Date,
+    subspace: Subspace,
+    variant: string | undefined
+  ): Promise<boolean> {
+    if (!(await super.canSkipInstallAsync(lastModifiedDate, subspace, variant))) {
       return false;
     }
 
@@ -454,7 +460,7 @@ export class RushInstallManager extends BaseInstallManager {
       })
     );
 
-    return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
+    return Utilities.isFileTimestampCurrentAsync(lastModifiedDate, potentiallyChangedFiles);
   }
 
   /**
