@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash, type Hash } from 'crypto';
 import type * as fs from 'fs';
 import * as path from 'path';
+
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
@@ -16,6 +18,11 @@ import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession';
 import type { WatchFileSystemAdapter } from '../utilities/WatchFileSystemAdapter';
+import {
+  type IIncrementalBuildInfo,
+  tryReadBuildInfoAsync,
+  writeBuildInfoAsync
+} from '../pluginFramework/IncrementalBuildInfo';
 
 /**
  * Used to specify a selection of files to copy from a specific source folder to one
@@ -82,14 +89,21 @@ export function normalizeCopyOperation(rootFolderPath: string, copyOperation: IC
 export async function copyFilesAsync(
   copyOperations: Iterable<ICopyOperation>,
   terminal: ITerminal,
+  buildInfoPath: string,
   watchFileSystemAdapter?: WatchFileSystemAdapter
 ): Promise<void> {
+  const hasher: Hash = createHash('sha256');
+  for (const copyOperation of copyOperations) {
+    hasher.update(JSON.stringify(copyOperation));
+  }
+  const configHash: string = hasher.digest('base64');
+
   const copyDescriptorByDestination: Map<string, ICopyDescriptor> = await _getCopyDescriptorsAsync(
     copyOperations,
     watchFileSystemAdapter
   );
 
-  await _copyFilesInnerAsync(copyDescriptorByDestination, terminal);
+  await _copyFilesInnerAsync(copyDescriptorByDestination, configHash, buildInfoPath, terminal);
 }
 
 async function _getCopyDescriptorsAsync(
@@ -158,16 +172,69 @@ async function _getCopyDescriptorsAsync(
 
 async function _copyFilesInnerAsync(
   copyDescriptors: Map<string, ICopyDescriptor>,
+  configHash: string,
+  buildInfoPath: string,
   terminal: ITerminal
 ): Promise<void> {
   if (copyDescriptors.size === 0) {
     return;
   }
 
+  let oldBuildInfo: IIncrementalBuildInfo | undefined = await tryReadBuildInfoAsync(buildInfoPath);
+  if (oldBuildInfo && oldBuildInfo.configHash !== configHash) {
+    terminal.writeVerboseLine(`File copy configuration changed, discarding incremental state.`);
+    oldBuildInfo = undefined;
+  }
+
+  const inputFileVersions: Map<string, string> = new Map();
+
+  const buildInfo: IIncrementalBuildInfo = {
+    configHash,
+    inputFileVersions
+  };
+
+  const allInputFiles: Set<string> = new Set();
+  for (const copyDescriptor of copyDescriptors.values()) {
+    allInputFiles.add(copyDescriptor.sourcePath);
+  }
+
+  await Async.forEachAsync(
+    allInputFiles,
+    async (inputFilePath: string) => {
+      const fileContent: Buffer = await FileSystem.readFileToBufferAsync(inputFilePath);
+      const fileHash: string = createHash('sha256').update(fileContent).digest('base64');
+      inputFileVersions.set(inputFilePath, fileHash);
+    },
+    {
+      concurrency: Constants.maxParallelism
+    }
+  );
+
+  const copyDescriptorsWithWork: ICopyDescriptor[] = [];
+  for (const copyDescriptor of copyDescriptors.values()) {
+    const { sourcePath } = copyDescriptor;
+
+    const sourceFileHash: string | undefined = inputFileVersions.get(sourcePath);
+    if (!sourceFileHash) {
+      throw new Error(`Missing hash for input file: ${sourcePath}`);
+    }
+
+    if (oldBuildInfo?.inputFileVersions.get(sourcePath) === sourceFileHash) {
+      continue;
+    }
+
+    copyDescriptorsWithWork.push(copyDescriptor);
+  }
+
+  if (copyDescriptorsWithWork.length === 0) {
+    terminal.writeLine('All requested file copy operations are up to date. Nothing to do.');
+    return;
+  }
+
   let copiedFolderOrFileCount: number = 0;
   let linkedFileCount: number = 0;
   await Async.forEachAsync(
-    copyDescriptors.values(),
+    copyDescriptorsWithWork,
     async (copyDescriptor: ICopyDescriptor) => {
       if (copyDescriptor.hardlink) {
         linkedFileCount++;
@@ -196,9 +263,11 @@ async function _copyFilesInnerAsync(
 
   const folderOrFilesPlural: string = copiedFolderOrFileCount === 1 ? '' : 's';
   terminal.writeLine(
-    `Copied ${copiedFolderOrFileCount} folder${folderOrFilesPlural} or file${folderOrFilesPlural} and ` +
+    `Copied ${copiedFolderOrFileCount} file${folderOrFilesPlural} and ` +
       `linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'}`
   );
+
+  await writeBuildInfoAsync(buildInfo, buildInfoPath);
 }
 
 const PLUGIN_NAME: 'copy-files-plugin' = 'copy-files-plugin';

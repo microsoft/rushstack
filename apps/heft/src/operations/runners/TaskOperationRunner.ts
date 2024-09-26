@@ -183,6 +183,7 @@ export class TaskOperationRunner implements IOperationRunner {
           ? copyFilesAsync(
               copyOperations,
               logger.terminal,
+              `${taskSession.tempFolderPath}/file-copy.json`,
               isWatchMode ? getWatchFileSystemAdapter() : undefined
             )
           : Promise.resolve(),
