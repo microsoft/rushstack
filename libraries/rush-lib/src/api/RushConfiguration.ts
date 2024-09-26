@@ -362,7 +362,7 @@ export class RushConfiguration {
 
   /**
    * The filename of the variant dependency data file.  By default this is
-   * called 'current-variant.json' resides in the Rush common folder.
+   * called 'current-variant.json' and resides in the Rush common folder.
    * Its data structure is defined by ICurrentVariantJson.
    *
    * Example: `C:\MyRepo\common\temp\current-variant.json`
