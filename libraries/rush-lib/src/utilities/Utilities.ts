@@ -302,7 +302,7 @@ export class Utilities {
         if (!anyAreOutOfDate) {
           let inputStats: FileSystemStats | undefined;
           try {
-            inputStats = FileSystem.getStatistics(filePath);
+            inputStats = await FileSystem.getStatisticsAsync(filePath);
           } catch (e) {
             if (FileSystem.isNotExistError(e)) {
               anyAreOutOfDate = true;
