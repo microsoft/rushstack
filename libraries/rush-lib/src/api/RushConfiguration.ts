@@ -1492,8 +1492,8 @@ export class RushConfiguration {
   /**
    * @deprecated Use {@link Subspace.getPnpmfilePath} instead
    */
-  public getPnpmfilePath(subspace?: Subspace): string {
-    return (subspace ?? this.defaultSubspace).getPnpmfilePath();
+  public getPnpmfilePath(subspace?: Subspace, variant?: string): string {
+    return (subspace ?? this.defaultSubspace).getPnpmfilePath(variant);
   }
 
   /**

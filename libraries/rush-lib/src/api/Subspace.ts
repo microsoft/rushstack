@@ -382,8 +382,8 @@ export class Subspace {
    * The file path is returned even if PNPM is not configured as the package manager.
    * @beta
    */
-  public getPnpmfilePath(): string {
-    const subspaceConfigFolderPath: string = this.getSubspaceConfigFolderPath();
+  public getPnpmfilePath(variant: string | undefined): string {
+    const subspaceConfigFolderPath: string = this.getVariantDependentSubspaceConfigFolderPath(variant);
 
     const pnpmFilename: string = (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager)
       .pnpmfileFilename;

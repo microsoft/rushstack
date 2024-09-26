@@ -124,7 +124,7 @@ export class PnpmfileConfiguration {
     };
 
     // Use the provided path if available. Otherwise, use the default path.
-    const userPnpmfilePath: string | undefined = subspace.getPnpmfilePath();
+    const userPnpmfilePath: string | undefined = subspace.getPnpmfilePath(variant);
     if (userPnpmfilePath && FileSystem.exists(userPnpmfilePath)) {
       settings.userPnpmfilePath = userPnpmfilePath;
     }

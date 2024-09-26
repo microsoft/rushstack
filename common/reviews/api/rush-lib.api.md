@@ -1191,7 +1191,7 @@ export class RushConfiguration {
     getCurrentlyInstalledVariantAsync(): Promise<string | undefined>;
     getImplicitlyPreferredVersions(subspace?: Subspace, variant?: string): Map<string, string>;
     // @deprecated (undocumented)
-    getPnpmfilePath(subspace?: Subspace): string;
+    getPnpmfilePath(subspace?: Subspace, variant?: string): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
@@ -1334,6 +1334,7 @@ export class RushConstants {
     static readonly commandLineFilename: 'command-line.json';
     static readonly commonFolderName: 'common';
     static readonly commonVersionsFilename: 'common-versions.json';
+    static readonly currentVariantsFilename: 'current-variants.json';
     static readonly customTipsFilename: 'custom-tips.json';
     static readonly defaultMaxInstallAttempts: 1;
     static readonly defaultSubspaceName: 'default';
@@ -1480,7 +1481,7 @@ export class Subspace {
     // @beta
     getPnpmConfigFilePath(): string;
     // @beta
-    getPnpmfilePath(): string;
+    getPnpmfilePath(variant: string | undefined): string;
     // @beta
     getPnpmOptions(): PnpmOptionsConfiguration | undefined;
     // @beta
