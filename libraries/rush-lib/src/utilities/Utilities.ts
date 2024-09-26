@@ -305,6 +305,7 @@ export class Utilities {
             inputStats = await FileSystem.getStatisticsAsync(filePath);
           } catch (e) {
             if (FileSystem.isNotExistError(e)) {
+              // eslint-disable-next-line require-atomic-updates
               anyAreOutOfDate = true;
             } else {
               throw e;
@@ -312,6 +313,7 @@ export class Utilities {
           }
 
           if (inputStats && dateToCompare < inputStats.mtime) {
+            // eslint-disable-next-line require-atomic-updates
             anyAreOutOfDate = true;
           }
         }
