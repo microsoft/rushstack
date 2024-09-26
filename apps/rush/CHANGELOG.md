@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 20 Sep 2024 20:23:40 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Sep 2024 21:48:00 GMT and should not be manually modified.
+
+## 5.136.0
+Thu, 26 Sep 2024 21:48:00 GMT
+
+### Updates
+
+- Bring back the Variants feature that was removed in https://github.com/microsoft/rushstack/pull/4538.
+- Bump express dependency to 4.20.0
 
 ## 5.135.0
 Fri, 20 Sep 2024 20:23:40 GMT
