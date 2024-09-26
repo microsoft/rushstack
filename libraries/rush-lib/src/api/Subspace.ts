@@ -207,6 +207,7 @@ export class Subspace {
    * - Lockfiles: (i.e. - `pnpm-lock.yaml`, `npm-shrinkwrap.json`, `yarn.lock`, etc)
    * - 'common-versions.json'
    * - 'pnpmfile.js'/'.pnpmfile.cjs'
+   * - 'pnpm-config.js'
    */
   public getVariantDependentSubspaceConfigFolderPath(variant: string | undefined): string {
     const subspaceConfigFolderPath: string = this.getSubspaceConfigFolderPath();
@@ -302,8 +303,8 @@ export class Subspace {
    * Example: `C:\MyRepo\common\subspaces\my-subspace\pnpm-config.json`
    * @beta
    */
-  public getPnpmConfigFilePath(): string {
-    return this.getSubspaceConfigFolderPath() + '/' + RushConstants.pnpmConfigFilename;
+  public getPnpmConfigFilePath(variant?: string): string {
+    return this.getVariantDependentSubspaceConfigFolderPath(variant) + '/' + RushConstants.pnpmConfigFilename;
   }
 
   /**
