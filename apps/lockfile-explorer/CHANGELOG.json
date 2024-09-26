@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.7.0",
+      "tag": "@rushstack/lockfile-explorer_v1.7.0",
+      "date": "Thu, 26 Sep 2024 21:47:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update to use a new API from rush-sdk."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.6.0",
       "tag": "@rushstack/lockfile-explorer_v1.6.0",
       "date": "Tue, 24 Sep 2024 00:11:19 GMT",
