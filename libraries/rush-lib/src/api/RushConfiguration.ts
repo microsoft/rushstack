@@ -646,7 +646,7 @@ export class RushConfiguration {
 
     this.changesFolder = path.join(this.commonFolder, RushConstants.changeFilesFolderName);
 
-    this.currentVariantJsonFilePath = path.join(this.commonTempFolder, 'current-variant.json');
+    this.currentVariantJsonFilePath = path.join(this.commonTempFolder, RushConstants.currentVariantsFilename);
 
     this.suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
