@@ -31,6 +31,7 @@ export interface IGetChangedProjectsOptions {
   targetBranchName: string;
   terminal: ITerminal;
   shouldFetch?: boolean;
+  variant?: string;
 
   /**
    * If set to `true`, consider a project's external dependency installation layout as defined in the
@@ -217,7 +218,8 @@ export class ProjectChangeAnalyzer {
   ): Promise<Set<RushConfigurationProject>> {
     const { _rushConfiguration: rushConfiguration } = this;
 
-    const { targetBranchName, terminal, includeExternalDependencies, enableFiltering, shouldFetch } = options;
+    const { targetBranchName, terminal, includeExternalDependencies, enableFiltering, shouldFetch, variant } =
+      options;
 
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
@@ -236,10 +238,10 @@ export class ProjectChangeAnalyzer {
       // Even though changing the installed version of a nested dependency merits a change file,
       // ignore lockfile changes for `rush change` for the moment
 
-      const currentVariant: string | undefined =
-        await this._rushConfiguration.getCurrentlyInstalledVariantAsync();
+      const variantToUse: string | undefined =
+        variant ?? (await this._rushConfiguration.getCurrentlyInstalledVariantAsync());
       const fullShrinkwrapPath: string =
-        rushConfiguration.defaultSubspace.getCommittedShrinkwrapFilePath(currentVariant);
+        rushConfiguration.defaultSubspace.getCommittedShrinkwrapFilePath(variantToUse);
 
       const relativeShrinkwrapFilePath: string = Path.convertToSlashes(
         path.relative(repoRoot, fullShrinkwrapPath)

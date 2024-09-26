@@ -512,6 +512,8 @@ export interface IGetChangedProjectsOptions {
     targetBranchName: string;
     // (undocumented)
     terminal: ITerminal;
+    // (undocumented)
+    variant?: string;
 }
 
 // @beta
