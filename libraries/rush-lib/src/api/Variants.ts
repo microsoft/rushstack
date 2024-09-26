@@ -18,11 +18,11 @@ export const VARIANT_PARAMETER: ICommandLineStringDefinition = {
 };
 
 export async function getVariantAsync(
-  variantsParameter: CommandLineStringParameter,
+  variantsParameter: CommandLineStringParameter | undefined,
   rushConfiguration: RushConfiguration,
   defaultToCurrentlyInstalledVariant: boolean
 ): Promise<string | undefined> {
-  let variant: string | undefined = variantsParameter.value;
+  let variant: string | undefined = variantsParameter?.value;
   if (variant && !rushConfiguration.variants.has(variant)) {
     throw new Error(`The variant "${variant}" is not defined in ${RushConstants.rushJsonFilename}`);
   }
