@@ -260,7 +260,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified, ' +
           'Rush will automatically perform an install before processing the current command.'
       });
+    }
 
+    if (this._alwaysInstall !== undefined) {
       this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
     }
 

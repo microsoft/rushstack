@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the `--variant` parameter was missing from a phased command when the command's `alwaysInstall` property was set to `true`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
