@@ -231,7 +231,7 @@ async function _copyFilesInnerAsync(
     return;
   }
 
-  let copiedFolderOrFileCount: number = 0;
+  let copiedFileCount: number = 0;
   let linkedFileCount: number = 0;
   await Async.forEachAsync(
     copyDescriptorsWithWork,
@@ -247,7 +247,7 @@ async function _copyFilesInnerAsync(
           `Linked "${copyDescriptor.sourcePath}" to "${copyDescriptor.destinationPath}".`
         );
       } else {
-        copiedFolderOrFileCount++;
+        copiedFileCount++;
         await FileSystem.copyFilesAsync({
           sourcePath: copyDescriptor.sourcePath,
           destinationPath: copyDescriptor.destinationPath,
@@ -261,9 +261,8 @@ async function _copyFilesInnerAsync(
     { concurrency: Constants.maxParallelism }
   );
 
-  const folderOrFilesPlural: string = copiedFolderOrFileCount === 1 ? '' : 's';
   terminal.writeLine(
-    `Copied ${copiedFolderOrFileCount} file${folderOrFilesPlural} and ` +
+    `Copied ${copiedFileCount} file${copiedFileCount === 1 ? '' : 's'} and ` +
       `linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'}`
   );
 
