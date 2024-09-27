@@ -89,7 +89,7 @@ Use cases include:
 
 ### `terminal`
 
-Optionally provide a [Terminal](https://github.com/microsoft/rushstack/blob/main/libraries/node-core-library/src/Terminal/Terminal.ts)
+Optionally provide a [Terminal](https://github.com/microsoft/rushstack/blob/main/libraries/terminal/src/Terminal.ts)
 object for logging. If one isn't provided, logs will go to the console.
 
 ### `globsToIgnore`

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Fix Terminal reference",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator"
+}
