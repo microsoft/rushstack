@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/typings-generator",
-      "comment": "Fix Terminal reference",
+      "comment": "Fix reference to terminal documentation in README",
       "type": "patch"
     }
   ],
