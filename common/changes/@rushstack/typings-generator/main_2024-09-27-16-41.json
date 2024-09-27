@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Fix reference to terminal documentation in README",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator"
+}
