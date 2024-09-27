@@ -63,16 +63,9 @@ describe(serializeBuildInfo.name, () => {
   });
 
   it('Round trips correctly (Win32)', () => {
-    function makePathPortable(absolutePath: string): string {
-      return Path.convertToSlashes(path.win32.relative(win32BasePath, absolutePath));
-    }
-    function makePathAbsolute(portablePath: string): string {
-      return path.win32.resolve(win32BasePath, portablePath);
-    }
+    const serialized: ISerializedIncrementalBuildInfo = serializeBuildInfo(win32BuildInfo, win32ToPortable);
 
-    const serialized: ISerializedIncrementalBuildInfo = serializeBuildInfo(win32BuildInfo, makePathPortable);
-
-    const deserialized: IIncrementalBuildInfo = deserializeBuildInfo(serialized, makePathAbsolute);
+    const deserialized: IIncrementalBuildInfo = deserializeBuildInfo(serialized, portableToWin32);
 
     expect(deserialized).toEqual(win32BuildInfo);
   });
