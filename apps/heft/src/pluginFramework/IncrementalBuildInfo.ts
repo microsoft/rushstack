@@ -43,38 +43,41 @@ export interface ISerializedIncrementalBuildInfo {
    * A map of input files to their version strings.
    * File paths are specified relative to the folder containing the build info file.
    */
-  inputFileVersions: [string, string][];
+  inputFileVersions: Record<string, string>;
 
   /**
    * Map of output file names to the input file indices used to compute them.
    * File paths are specified relative to the folder containing the build info file.
    */
-  fileDependencies?: [string, number | number[]][];
+  fileDependencies?: Record<string, number | number[]>;
 }
 
 /**
- * Writes a build info object to disk.
- * @param state - The build info to write
- * @param filePath - The file path to write the build info to
+ * Serializes a build info object to a portable format that can be written to disk.
+ * @param state - The build info to serialize
+ * @param makePathPortable - A function that converts an absolute path to a portable path
+ * @returns The serialized build info
  * @beta
  */
-export async function writeBuildInfoAsync(state: IIncrementalBuildInfo, filePath: string): Promise<void> {
+export function serializeBuildInfo(
+  state: IIncrementalBuildInfo,
+  makePathPortable: (absolutePath: string) => string
+): ISerializedIncrementalBuildInfo {
   const fileIndices: Map<string, number> = new Map();
-  const inputFileVersions: [string, string][] = [];
-  const directory: string = path.dirname(filePath);
+  const inputFileVersions: Record<string, string> = {};
 
   for (const [absolutePath, version] of state.inputFileVersions) {
-    const relativePath: string = Path.convertToSlashes(path.relative(directory, absolutePath));
+    const relativePath: string = makePathPortable(absolutePath);
     fileIndices.set(absolutePath, fileIndices.size);
-    inputFileVersions.push([relativePath, version]);
+    inputFileVersions[relativePath] = version;
   }
 
   const { fileDependencies: newFileDependencies } = state;
-  let fileDependencies: [string, number | number[]][] | undefined;
+  let fileDependencies: Record<string, number | number[]> | undefined;
   if (newFileDependencies) {
-    fileDependencies = [];
+    fileDependencies = {};
     for (const [absolutePath, dependencies] of newFileDependencies) {
-      const relativePath: string = Path.convertToSlashes(path.relative(directory, absolutePath));
+      const relativePath: string = makePathPortable(absolutePath);
       const indices: number[] = [];
       for (const dependency of dependencies) {
         const index: number | undefined = fileIndices.get(dependency);
@@ -84,7 +87,7 @@ export async function writeBuildInfoAsync(state: IIncrementalBuildInfo, filePath
         indices.push(index);
       }
 
-      fileDependencies.push([relativePath, indices.length === 1 ? indices[0] : indices]);
+      fileDependencies[relativePath] = indices.length === 1 ? indices[0] : indices;
     }
   }
 
@@ -93,6 +96,70 @@ export async function writeBuildInfoAsync(state: IIncrementalBuildInfo, filePath
     inputFileVersions,
     fileDependencies
   };
+
+  return serializedBuildInfo;
+}
+
+/**
+ * Deserializes a build info object from its portable format.
+ * @param serializedBuildInfo - The build info to deserialize
+ * @param makePathAbsolute - A function that converts a portable path to an absolute path
+ * @returns The deserialized build info
+ */
+export function deserializeBuildInfo(
+  serializedBuildInfo: ISerializedIncrementalBuildInfo,
+  makePathAbsolute: (relativePath: string) => string
+): IIncrementalBuildInfo {
+  const inputFileVersions: Map<string, string> = new Map();
+  const absolutePathByIndex: string[] = [];
+  for (const [relativePath, version] of Object.entries(serializedBuildInfo.inputFileVersions)) {
+    const absolutePath: string = makePathAbsolute(relativePath);
+    absolutePathByIndex.push(absolutePath);
+    inputFileVersions.set(absolutePath, version);
+  }
+
+  let fileDependencies: Map<string, string[]> | undefined;
+  const { fileDependencies: serializedFileDependencies } = serializedBuildInfo;
+  if (serializedFileDependencies) {
+    fileDependencies = new Map();
+    for (const [relativeOutputFile, indices] of Object.entries(serializedFileDependencies)) {
+      const absoluteOutputFile: string = makePathAbsolute(relativeOutputFile);
+      const dependencies: string[] = [];
+      for (const index of Array.isArray(indices) ? indices : [indices]) {
+        const dependencyAbsolutePath: string | undefined = absolutePathByIndex[index];
+        if (dependencyAbsolutePath === undefined) {
+          throw new Error(`Dependency index not found: ${index}`);
+        }
+        dependencies.push(dependencyAbsolutePath);
+      }
+      fileDependencies.set(absoluteOutputFile, dependencies);
+    }
+  }
+
+  const buildInfo: IIncrementalBuildInfo = {
+    configHash: serializedBuildInfo.configHash,
+    inputFileVersions,
+    fileDependencies
+  };
+
+  return buildInfo;
+}
+
+/**
+ * Writes a build info object to disk.
+ * @param state - The build info to write
+ * @param filePath - The file path to write the build info to
+ * @beta
+ */
+export async function writeBuildInfoAsync(state: IIncrementalBuildInfo, filePath: string): Promise<void> {
+  const basePath: string = path.dirname(filePath);
+
+  const serializedBuildInfo: ISerializedIncrementalBuildInfo = serializeBuildInfo(
+    state,
+    (absolutePath: string) => {
+      return Path.convertToSlashes(path.relative(basePath, absolutePath));
+    }
+  );
 
   // This file is meant only for machine reading, so don't pretty-print it.
   const stringified: string = JSON.stringify(serializedBuildInfo);
@@ -118,39 +185,14 @@ export async function tryReadBuildInfoAsync(filePath: string): Promise<IIncremen
     throw error;
   }
 
-  const dirname: string = path.dirname(filePath);
+  const basePath: string = path.dirname(filePath);
 
-  const inputFileVersions: Map<string, string> = new Map();
-  const absolutePathByIndex: string[] = [];
-  for (const [relativePath, version] of serializedBuildInfo.inputFileVersions) {
-    const absolutePath: string = path.resolve(dirname, relativePath);
-    absolutePathByIndex.push(absolutePath);
-    inputFileVersions.set(absolutePath, version);
-  }
-
-  let fileDependencies: Map<string, string[]> | undefined;
-  const { fileDependencies: serializedFileDependencies } = serializedBuildInfo;
-  if (serializedFileDependencies) {
-    fileDependencies = new Map();
-    for (const [relativeOutputFile, indices] of serializedFileDependencies) {
-      const absoluteOutputFile: string = path.resolve(dirname, relativeOutputFile);
-      const dependencies: string[] = [];
-      for (const index of Array.isArray(indices) ? indices : [indices]) {
-        const dependencyAbsolutePath: string | undefined = absolutePathByIndex[index];
-        if (dependencyAbsolutePath === undefined) {
-          throw new Error(`Dependency index not found: ${index}`);
-        }
-        dependencies.push(dependencyAbsolutePath);
-      }
-      fileDependencies.set(absoluteOutputFile, dependencies);
+  const buildInfo: IIncrementalBuildInfo = deserializeBuildInfo(
+    serializedBuildInfo,
+    (relativePath: string) => {
+      return path.resolve(basePath, relativePath);
     }
-  }
-
-  const buildInfo: IIncrementalBuildInfo = {
-    configHash: serializedBuildInfo.configHash,
-    inputFileVersions,
-    fileDependencies
-  };
+  );
 
   return buildInfo;
 }
