@@ -46,16 +46,30 @@ export interface ISerializedIncrementalBuildInfo {
   inputFileVersions: Record<string, string>;
 
   /**
-   * Map of output file names to the input file indices used to compute them.
+   * Map of output file names to the corresponding index in `Object.entries(inputFileVersions)`.
    * File paths are specified relative to the folder containing the build info file.
    */
-  fileDependencies?: Record<string, number | number[]>;
+  fileDependencies?: Record<string, number[]>;
 }
+
+/**
+ * Converts an absolute path to a path relative to a base path.
+ */
+const makePathRelative: (absolutePath: string, basePath: string) => string =
+  process.platform === 'win32'
+    ? (absolutePath: string, basePath: string) => {
+        // On Windows, need to normalize slashes
+        return Path.convertToSlashes(path.win32.relative(basePath, absolutePath));
+      }
+    : (absolutePath: string, basePath: string) => {
+        // On POSIX, can preserve existing slashes
+        return path.posix.relative(basePath, absolutePath);
+      };
 
 /**
  * Serializes a build info object to a portable format that can be written to disk.
  * @param state - The build info to serialize
- * @param makePathPortable - A function that converts an absolute path to a portable path
+ * @param makePathPortable - A function that converts an absolute path to a portable path. This is a separate argument to support cross-platform tests.
  * @returns The serialized build info
  * @beta
  */
@@ -73,7 +87,7 @@ export function serializeBuildInfo(
   }
 
   const { fileDependencies: newFileDependencies } = state;
-  let fileDependencies: Record<string, number | number[]> | undefined;
+  let fileDependencies: Record<string, number[]> | undefined;
   if (newFileDependencies) {
     fileDependencies = {};
     for (const [absolutePath, dependencies] of newFileDependencies) {
@@ -87,7 +101,7 @@ export function serializeBuildInfo(
         indices.push(index);
       }
 
-      fileDependencies[relativePath] = indices.length === 1 ? indices[0] : indices;
+      fileDependencies[relativePath] = indices;
     }
   }
 
@@ -103,7 +117,7 @@ export function serializeBuildInfo(
 /**
  * Deserializes a build info object from its portable format.
  * @param serializedBuildInfo - The build info to deserialize
- * @param makePathAbsolute - A function that converts a portable path to an absolute path
+ * @param makePathAbsolute - A function that converts a portable path to an absolute path. This is a separate argument to support cross-platform tests.
  * @returns The deserialized build info
  */
 export function deserializeBuildInfo(
@@ -157,7 +171,7 @@ export async function writeBuildInfoAsync(state: IIncrementalBuildInfo, filePath
   const serializedBuildInfo: ISerializedIncrementalBuildInfo = serializeBuildInfo(
     state,
     (absolutePath: string) => {
-      return Path.convertToSlashes(path.relative(basePath, absolutePath));
+      return makePathRelative(basePath, absolutePath);
     }
   );
 

@@ -4,7 +4,9 @@ exports[`serializeBuildInfo Has expected serialized format: posix 1`] = `
 Object {
   "configHash": "foobar",
   "fileDependencies": Object {
-    "../c/output1": 0,
+    "../c/output1": Array [
+      0,
+    ],
     "../c/output2": Array [
       0,
       1,
@@ -21,7 +23,9 @@ exports[`serializeBuildInfo Has expected serialized format: win32 1`] = `
 Object {
   "configHash": "foobar",
   "fileDependencies": Object {
-    "../c/output1": 0,
+    "../c/output1": Array [
+      0,
+    ],
     "../c/output2": Array [
       0,
       1,
