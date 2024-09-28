@@ -2,6 +2,18 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.14.3",
+      "tag": "@rushstack/typings-generator_v0.14.3",
+      "date": "Sat, 28 Sep 2024 00:11:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix reference to terminal documentation in README"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.2",
       "tag": "@rushstack/typings-generator_v0.14.2",
       "date": "Fri, 13 Sep 2024 00:11:43 GMT",
