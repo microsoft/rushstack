@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Update file copy logic to use an incremental cache file in the temp directory for the current task to avoid unnecessary file writes.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
