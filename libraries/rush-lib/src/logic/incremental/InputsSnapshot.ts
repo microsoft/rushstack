@@ -3,6 +3,7 @@
 
 import * as path from 'node:path';
 import { createHash, type Hash } from 'node:crypto';
+
 import ignore, { type Ignore } from 'ignore';
 
 import { type IReadonlyLookupByPath, LookupByPath } from '@rushstack/lookup-by-path';
@@ -23,7 +24,7 @@ export type IRushConfigurationProjectForSnapshot = Pick<
 /**
  * @internal
  */
-export interface IRushSnapshotProjectMetadata {
+export interface IInputsSnapshotProjectMetadata {
   /**
    * The contents of rush-project.json for the project, if available
    */
@@ -34,7 +35,7 @@ export interface IRushSnapshotProjectMetadata {
   additionalFilesByOperationName?: ReadonlyMap<string, ReadonlySet<string>>;
 }
 
-interface IInternalRushSnapshotProjectMetadata extends IRushSnapshotProjectMetadata {
+interface IInternalInputsSnapshotProjectMetadata extends IInputsSnapshotProjectMetadata {
   /**
    * Cached filter of files that are not ignored by the project's `incrementalBuildIgnoredGlobs`.
    * @param filePath - The path to the file to check
@@ -62,28 +63,23 @@ interface IInternalRushSnapshotProjectMetadata extends IRushSnapshotProjectMetad
 
 export type IRushSnapshotProjectMetadataMap = ReadonlyMap<
   IRushConfigurationProjectForSnapshot,
-  IRushSnapshotProjectMetadata
+  IInputsSnapshotProjectMetadata
 >;
 
 /**
- * A function that can be invoked to get the current Rush snapshot.
- * Binds the project configurations when created.
+ * Function that computes a new snapshot of the current state of the repository as of the current moment.
+ * Rush-level configuration state will have been bound during creation of the function.
+ * Captures the state of the environment, tracked files, and additional files.
  *
  * @beta
  */
-export interface IInputSnapshotProvider {
-  /**
-   * Compute a new snapshot of the current state of the repository as of the current moment.
-   * Captures the state of the environment, tracked files, and additional files.
-   */
-  (): Promise<IInputSnapshot | undefined>;
-}
+export type GetInputsSnapshotAsyncFn = () => Promise<IInputsSnapshot | undefined>;
 
 /**
- * The parameters for constructing an {@link InputSnapshot}.
+ * The parameters for constructing an {@link InputsSnapshot}.
  * @internal
  */
-export interface IRushSnapshotParameters {
+export interface IInputsSnapshotParameters {
   /**
    * Hashes for files selected by `dependsOnAdditionalFiles`.
    * Separated out to prevent being auto-assigned to a project.
@@ -124,7 +120,7 @@ const { hashDelimiter } = RushConstants;
  * The methods on this interface are idempotent and will return the same result regardless of when they are executed.
  * @beta
  */
-export interface IInputSnapshot {
+export interface IInputsSnapshot {
   /**
    * The raw hashes of all tracked files in the repository.
    */
@@ -167,13 +163,13 @@ export interface IInputSnapshot {
  *
  * @internal
  */
-export class InputSnapshot implements IInputSnapshot {
+export class InputsSnapshot implements IInputsSnapshot {
   /**
-   * {@inheritdoc IInputSnapshot.hashes}
+   * {@inheritdoc IInputsSnapshot.hashes}
    */
   public readonly hashes: ReadonlyMap<string, string>;
   /**
-   * {@inheritdoc IInputSnapshot.rootDirectory}
+   * {@inheritdoc IInputsSnapshot.rootDirectory}
    */
   public readonly rootDirectory: string;
 
@@ -182,7 +178,7 @@ export class InputSnapshot implements IInputSnapshot {
    */
   private readonly _projectMetadataMap: Map<
     IRushConfigurationProjectForSnapshot,
-    IInternalRushSnapshotProjectMetadata
+    IInternalInputsSnapshotProjectMetadata
   >;
   /**
    * Hashes of files to be included in all result sets.
@@ -202,7 +198,7 @@ export class InputSnapshot implements IInputSnapshot {
    * @param params - The parameters for the snapshot
    * @internal
    */
-  public constructor(params: IRushSnapshotParameters) {
+  public constructor(params: IInputsSnapshotParameters) {
     const {
       additionalHashes,
       environment = { ...process.env },
@@ -213,26 +209,10 @@ export class InputSnapshot implements IInputSnapshot {
     } = params;
     const projectMetadataMap: Map<
       IRushConfigurationProjectForSnapshot,
-      IInternalRushSnapshotProjectMetadata
+      IInternalInputsSnapshotProjectMetadata
     > = new Map();
-    const createInternalRecord = (
-      project: IRushConfigurationProjectForSnapshot,
-      baseRecord: IRushSnapshotProjectMetadata | undefined
-    ): IInternalRushSnapshotProjectMetadata => {
-      return {
-        // Data from the caller
-        projectConfig: baseRecord?.projectConfig,
-        additionalFilesByOperationName: baseRecord?.additionalFilesByOperationName,
-
-        // Caches
-        hashes: new Map(),
-        hashByOperationName: new Map(),
-        fileHashesByOperationName: new Map(),
-        relativePrefix: getRelativePrefix(project, rootDir)
-      };
-    };
     for (const [project, record] of params.projectMap) {
-      projectMetadataMap.set(project, createInternalRecord(project, record));
+      projectMetadataMap.set(project, createInternalRecord(project, record, rootDir));
     }
 
     // Route hashes to individual projects
@@ -242,9 +222,9 @@ export class InputSnapshot implements IInputSnapshot {
         continue;
       }
 
-      let record: IInternalRushSnapshotProjectMetadata | undefined = projectMetadataMap.get(project);
+      let record: IInternalInputsSnapshotProjectMetadata | undefined = projectMetadataMap.get(project);
       if (!record) {
-        projectMetadataMap.set(project, (record = createInternalRecord(project, undefined)));
+        projectMetadataMap.set(project, (record = createInternalRecord(project, undefined, rootDir)));
       }
 
       record.hashes.set(file, hash);
@@ -291,7 +271,7 @@ export class InputSnapshot implements IInputSnapshot {
     project: IRushConfigurationProjectForSnapshot,
     operationName?: string
   ): ReadonlyMap<string, string> {
-    const record: IInternalRushSnapshotProjectMetadata | undefined = this._projectMetadataMap.get(project);
+    const record: IInternalInputsSnapshotProjectMetadata | undefined = this._projectMetadataMap.get(project);
     if (!record) {
       throw new InternalError(`No information available for project at ${project.projectFolder}`);
     }
@@ -302,7 +282,7 @@ export class InputSnapshot implements IInputSnapshot {
       hashes = new Map();
       fileHashesByOperationName.set(operationName, hashes);
       // TODO: Support incrementalBuildIgnoredGlobs per-operation
-      const filter: (filePath: string) => boolean = this._getOrCreateProjectFilter(record);
+      const filter: (filePath: string) => boolean = getOrCreateProjectFilter(record);
 
       let outputValidator: LookupByPath<string> | undefined;
 
@@ -366,7 +346,7 @@ export class InputSnapshot implements IInputSnapshot {
     project: IRushConfigurationProjectForSnapshot,
     operationName?: string
   ): string {
-    const record: IInternalRushSnapshotProjectMetadata | undefined = this._projectMetadataMap.get(project);
+    const record: IInternalInputsSnapshotProjectMetadata | undefined = this._projectMetadataMap.get(project);
     if (!record) {
       throw new Error(`No information available for project at ${project.projectFolder}`);
     }
@@ -424,26 +404,44 @@ export class InputSnapshot implements IInputSnapshot {
       yield [filePath, hash];
     }
   }
+}
 
-  private _getOrCreateProjectFilter(
-    record: IInternalRushSnapshotProjectMetadata
-  ): (filePath: string) => boolean {
-    if (!record.projectFilePathFilter) {
-      const ignoredGlobs: readonly string[] | undefined = record.projectConfig?.incrementalBuildIgnoredGlobs;
-      if (!ignoredGlobs || ignoredGlobs.length === 0) {
-        record.projectFilePathFilter = noopFilter;
-      } else {
-        const ignorer: Ignore = ignore();
-        ignorer.add(ignoredGlobs as string[]);
-        const prefixLength: number = record.relativePrefix.length + 1;
-        record.projectFilePathFilter = function projectFilePathFilter(filePath: string): boolean {
-          return !ignorer.ignores(filePath.slice(prefixLength));
-        };
-      }
+function getOrCreateProjectFilter(
+  record: IInternalInputsSnapshotProjectMetadata
+): (filePath: string) => boolean {
+  if (!record.projectFilePathFilter) {
+    const ignoredGlobs: readonly string[] | undefined = record.projectConfig?.incrementalBuildIgnoredGlobs;
+    if (!ignoredGlobs || ignoredGlobs.length === 0) {
+      record.projectFilePathFilter = noopFilter;
+    } else {
+      const ignorer: Ignore = ignore();
+      ignorer.add(ignoredGlobs as string[]);
+      const prefixLength: number = record.relativePrefix.length + 1;
+      record.projectFilePathFilter = function projectFilePathFilter(filePath: string): boolean {
+        return !ignorer.ignores(filePath.slice(prefixLength));
+      };
     }
-
-    return record.projectFilePathFilter;
   }
+
+  return record.projectFilePathFilter;
+}
+
+function createInternalRecord(
+  project: IRushConfigurationProjectForSnapshot,
+  baseRecord: IInputsSnapshotProjectMetadata | undefined,
+  rootDir: string
+): IInternalInputsSnapshotProjectMetadata {
+  return {
+    // Data from the caller
+    projectConfig: baseRecord?.projectConfig,
+    additionalFilesByOperationName: baseRecord?.additionalFilesByOperationName,
+
+    // Caches
+    hashes: new Map(),
+    hashByOperationName: new Map(),
+    fileHashesByOperationName: new Map(),
+    relativePrefix: getRelativePrefix(project, rootDir)
+  };
 }
 
 function getRelativePrefix(project: IRushConfigurationProjectForSnapshot, rootDir: string): string {

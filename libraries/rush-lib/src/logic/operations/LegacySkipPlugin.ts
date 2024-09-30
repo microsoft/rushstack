@@ -73,7 +73,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
         context: IExecuteOperationsContext
       ): void => {
         let logGitWarning: boolean = false;
-        const { inputSnapshot } = context;
+        const { inputsSnapshot } = context;
 
         for (const record of operations.values()) {
           const { operation } = record;
@@ -102,7 +102,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
           try {
             const fileHashes: ReadonlyMap<string, string> | undefined =
-              inputSnapshot?.getTrackedFileHashesForOperation(
+              inputsSnapshot?.getTrackedFileHashesForOperation(
                 associatedProject,
                 operation.associatedPhase?.name
               );

@@ -44,7 +44,7 @@ import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Tele
 import { parseParallelism } from '../parsing/ParseParallelism';
 import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
-import type { IInputSnapshot, IInputSnapshotProvider } from '../../logic/snapshots/InputSnapshot';
+import type { IInputsSnapshot, GetInputsSnapshotAsyncFn } from '../../logic/incremental/InputsSnapshot';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
 import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
@@ -81,8 +81,8 @@ interface IInitialRunPhasesOptions {
 }
 
 interface IRunPhasesOptions extends IInitialRunPhasesOptions {
-  snapshotProvider: IInputSnapshotProvider | undefined;
-  initialSnapshot: IInputSnapshot | undefined;
+  snapshotProvider: GetInputsSnapshotAsyncFn | undefined;
+  initialSnapshot: IInputsSnapshot | undefined;
   executionManagerOptions: IOperationExecutionManagerOptions;
 }
 
@@ -550,9 +550,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     repoStateStopwatch.start();
 
     const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-    const snapshotProvider: IInputSnapshotProvider | undefined =
+    const snapshotProvider: GetInputsSnapshotAsyncFn | undefined =
       await analyzer._tryGetSnapshotProviderAsync(projectConfigurations, terminal);
-    const initialSnapshot: IInputSnapshot | undefined = await snapshotProvider?.();
+    const initialSnapshot: IInputsSnapshot | undefined = await snapshotProvider?.();
 
     repoStateStopwatch.stop();
     terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
@@ -565,7 +565,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const initialExecuteOperationsContext: IExecuteOperationsContext = {
       ...initialCreateOperationsContext,
-      inputSnapshot: initialSnapshot
+      inputsSnapshot: initialSnapshot
     };
 
     const executionManagerOptions: IOperationExecutionManagerOptions = {
@@ -693,7 +693,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     );
 
     const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
-      snapshotProvider,
+      getInputSnapshotAsync: snapshotProvider,
       initialState,
       debounceMs: this._watchDebounceMs,
       rushConfiguration: this.rushConfiguration,
@@ -731,7 +731,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       // On the initial invocation, this promise will return immediately with the full set of projects
-      const { changedProjects, state } = await projectWatcher.waitForChangeAsync(onWaitingForChanges);
+      const { changedProjects, inputsSnapshot: state } =
+        await projectWatcher.waitForChangeAsync(onWaitingForChanges);
 
       if (stopwatch.state === StopwatchState.Stopped) {
         // Clear and reset the stopwatch so that we only report time from a single execution at a time
@@ -751,7 +752,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       const executeOperationsContext: IExecuteOperationsContext = {
         ...initialCreateOperationsContext,
         isInitial: false,
-        inputSnapshot: state,
+        inputsSnapshot: state,
         projectsInUnknownState: changedProjects,
         phaseOriginal,
         phaseSelection,

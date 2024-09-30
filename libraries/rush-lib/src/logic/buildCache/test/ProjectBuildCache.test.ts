@@ -36,7 +36,9 @@ describe(ProjectBuildCache.name, () => {
         projectRelativeFolder: 'apps/acme-wizard',
         dependencyProjects: []
       } as unknown as RushConfigurationProject,
-      operationStateHash: 'build',
+      // Value from past tests, for consistency.
+      // The project build cache is not responsible for calculating this value.
+      operationStateHash: '1926f30e8ed24cb47be89aea39e7efd70fcda075',
       terminal,
       phaseName: 'build'
     });
@@ -47,7 +49,9 @@ describe(ProjectBuildCache.name, () => {
   describe(ProjectBuildCache.getProjectBuildCache.name, () => {
     it('returns a ProjectBuildCache with a calculated cacheId value', () => {
       const subject: ProjectBuildCache = prepareSubject({});
-      expect(subject['_cacheId']).toMatchInlineSnapshot(`"acme-wizard/build"`);
+      expect(subject['_cacheId']).toMatchInlineSnapshot(
+        `"acme-wizard/1926f30e8ed24cb47be89aea39e7efd70fcda075"`
+      );
     });
   });
 });

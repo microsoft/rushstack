@@ -123,10 +123,10 @@ export {
 
 export { ProjectChangeAnalyzer, type IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
 export type {
-  IInputSnapshot,
-  IInputSnapshotProvider,
+  IInputsSnapshot,
+  GetInputsSnapshotAsyncFn as GetInputsSnapshotAsyncFn,
   IRushConfigurationProjectForSnapshot
-} from './logic/snapshots/InputSnapshot';
+} from './logic/incremental/InputsSnapshot';
 
 export type { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 export type {

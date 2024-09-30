@@ -24,7 +24,7 @@ import type { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
 import type { ITelemetryData } from '../logic/Telemetry';
 import type { OperationStatus } from '../logic/operations/OperationStatus';
-import type { IInputSnapshot } from '../logic/snapshots/InputSnapshot';
+import type { IInputsSnapshot } from '../logic/incremental/InputsSnapshot';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -111,7 +111,7 @@ export interface IExecuteOperationsContext extends ICreateOperationsContext {
    * The current state of the repository, if available.
    * Not part of the creation context to avoid the overhead of Git calls when initializing the graph.
    */
-  readonly inputSnapshot?: IInputSnapshot;
+  readonly inputsSnapshot?: IInputsSnapshot;
 }
 
 /**

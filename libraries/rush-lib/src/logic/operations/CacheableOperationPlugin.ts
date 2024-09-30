@@ -36,7 +36,7 @@ import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
-import type { IInputSnapshot } from '../snapshots/InputSnapshot';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 const PERIODIC_CALLBACK_INTERVAL_IN_SECONDS: number = 10;
@@ -95,16 +95,16 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         recordByOperation: Map<Operation, IOperationExecutionResult>,
         context: IExecuteOperationsContext
       ): void => {
-        const { isIncrementalBuildAllowed, inputSnapshot, projectConfigurations, isInitial } = context;
+        const { isIncrementalBuildAllowed, inputsSnapshot, projectConfigurations, isInitial } = context;
 
-        if (!inputSnapshot) {
+        if (!inputsSnapshot) {
           throw new Error(
             `Build cache is only supported if running in a Git repository. Either disable the build cache or run Rush in a Git repository.`
           );
         }
 
         // This redefinition is necessary due to limitations in TypeScript's control flow analysis, due to the nested closure.
-        const definitelyDefinedInputSnapshot: IInputSnapshot = inputSnapshot;
+        const definitelyDefinedInputsSnapshot: IInputsSnapshot = inputsSnapshot;
 
         const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildFeatureEnabled
           ? new DisjointSet()
@@ -130,7 +130,10 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           // - Git hashes of any files specified in `dependsOnAdditionalFiles` (must not be associated with a project)
           const localStateHash: string | undefined =
             associatedProject &&
-            definitelyDefinedInputSnapshot.getOperationOwnStateHash(associatedProject, associatedPhase?.name);
+            definitelyDefinedInputsSnapshot.getOperationOwnStateHash(
+              associatedProject,
+              associatedPhase?.name
+            );
 
           // The final state hashes of operation dependencies are factored into the hash to ensure that any
           // state changes in dependencies will invalidate the cache.
@@ -177,7 +180,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           // This value can *currently* be cached per-project, but in the future the list of files will vary
           // depending on the selected phase.
           const fileHashes: ReadonlyMap<string, string> | undefined =
-            inputSnapshot.getTrackedFileHashesForOperation(associatedProject, phaseName);
+            inputsSnapshot.getTrackedFileHashesForOperation(associatedProject, phaseName);
           const stateHash: string = getOrCreateOperationHash(operation);
 
           const cacheDisabledReason: string | undefined = projectConfiguration

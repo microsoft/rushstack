@@ -22,11 +22,11 @@ import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { Git } from './Git';
 import {
-  type IRushSnapshotProjectMetadata,
-  type IInputSnapshot,
-  InputSnapshot,
-  type IInputSnapshotProvider
-} from './snapshots/InputSnapshot';
+  type IInputsSnapshotProjectMetadata,
+  type IInputsSnapshot,
+  InputsSnapshot,
+  type GetInputsSnapshotAsyncFn
+} from './incremental/InputsSnapshot';
 
 /**
  * @beta
@@ -202,7 +202,7 @@ export class ProjectChangeAnalyzer {
   public async _tryGetSnapshotProviderAsync(
     projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>,
     terminal: ITerminal
-  ): Promise<IInputSnapshotProvider | undefined> {
+  ): Promise<GetInputsSnapshotAsyncFn | undefined> {
     try {
       const gitPath: string = this._git.getGitPathOrThrow();
 
@@ -218,13 +218,13 @@ export class ProjectChangeAnalyzer {
       // Load the rush-project.json files for the whole repository
       const additionalGlobs: IAdditionalGlob[] = [];
 
-      const projectMap: Map<RushConfigurationProject, IRushSnapshotProjectMetadata> = new Map();
+      const projectMap: Map<RushConfigurationProject, IInputsSnapshotProjectMetadata> = new Map();
 
       for (const project of rushConfiguration.projects) {
         const projectConfig: RushProjectConfiguration | undefined = projectConfigurations.get(project);
 
         const additionalFilesByOperationName: Map<string, Set<string>> = new Map();
-        const projectMetadata: IRushSnapshotProjectMetadata = {
+        const projectMetadata: IInputsSnapshotProjectMetadata = {
           projectConfig,
           additionalFilesByOperationName
         };
@@ -291,7 +291,7 @@ export class ProjectChangeAnalyzer {
       const lookupByPath: IReadonlyLookupByPath<RushConfigurationProject> =
         this._rushConfiguration.getProjectLookupForRoot(rootDirectory);
 
-      return async function tryGetSnapshotAsync(): Promise<IInputSnapshot | undefined> {
+      return async function tryGetSnapshotAsync(): Promise<IInputsSnapshot | undefined> {
         try {
           const [hashes, additionalFiles] = await Promise.all([
             getRepoStateAsync(rootDirectory, additionalRelativePathsToHash, gitPath),
@@ -313,7 +313,7 @@ export class ProjectChangeAnalyzer {
             await hashFilesAsync(rootDirectory, additionalFiles, gitPath)
           );
 
-          return new InputSnapshot({
+          return new InputsSnapshot({
             additionalHashes,
             globalAdditionalFiles,
             hashes,

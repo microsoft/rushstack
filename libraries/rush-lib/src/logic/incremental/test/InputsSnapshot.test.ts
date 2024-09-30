@@ -5,15 +5,15 @@ import { LookupByPath } from '@rushstack/lookup-by-path';
 
 import type { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
 import {
-  InputSnapshot,
-  type IRushSnapshotParameters,
+  InputsSnapshot,
+  type IInputsSnapshotParameters,
   type IRushConfigurationProjectForSnapshot
-} from '../InputSnapshot';
+} from '../InputsSnapshot';
 
-describe(InputSnapshot.name, () => {
+describe(InputsSnapshot.name, () => {
   function getTestConfig(): {
     project: IRushConfigurationProjectForSnapshot;
-    options: IRushSnapshotParameters;
+    options: IInputsSnapshotParameters;
   } {
     const project: IRushConfigurationProjectForSnapshot = {
       projectFolder: '/root/a',
@@ -39,16 +39,16 @@ describe(InputSnapshot.name, () => {
 
   function getTrivialSnapshot(): {
     project: IRushConfigurationProjectForSnapshot;
-    input: InputSnapshot;
+    input: InputsSnapshot;
   } {
     const { project, options } = getTestConfig();
 
-    const input: InputSnapshot = new InputSnapshot(options);
+    const input: InputsSnapshot = new InputsSnapshot(options);
 
     return { project, input };
   }
 
-  describe(InputSnapshot.prototype.getTrackedFileHashesForOperation.name, () => {
+  describe(InputsSnapshot.prototype.getTrackedFileHashesForOperation.name, () => {
     it('Handles trivial input', () => {
       const { project, input } = getTrivialSnapshot();
 
@@ -85,7 +85,7 @@ describe(InputSnapshot.name, () => {
         ]
       ]);
 
-      const input: InputSnapshot = new InputSnapshot(options);
+      const input: InputsSnapshot = new InputsSnapshot(options);
 
       expect(() =>
         input.getTrackedFileHashesForOperation(project, '_phase:build')
@@ -106,7 +106,7 @@ describe(InputSnapshot.name, () => {
         ])
       };
 
-      const input: InputSnapshot = new InputSnapshot({
+      const input: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([
           [
@@ -146,7 +146,7 @@ describe(InputSnapshot.name, () => {
         ])
       };
 
-      const input: InputSnapshot = new InputSnapshot({
+      const input: InputsSnapshot = new InputsSnapshot({
         ...options,
         globalAdditionalFiles: new Set(['common/config/some-config.json']),
         projectMap: new Map([
@@ -179,7 +179,7 @@ describe(InputSnapshot.name, () => {
         incrementalBuildIgnoredGlobs: ['*2.js']
       };
 
-      const input: InputSnapshot = new InputSnapshot({
+      const input: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([
           [
@@ -200,7 +200,7 @@ describe(InputSnapshot.name, () => {
     });
   });
 
-  describe(InputSnapshot.prototype.getOperationOwnStateHash.name, () => {
+  describe(InputsSnapshot.prototype.getOperationOwnStateHash.name, () => {
     it('Handles trivial input', () => {
       const { project, input } = getTrivialSnapshot();
 
@@ -212,9 +212,9 @@ describe(InputSnapshot.name, () => {
     it('Is invariant to input hash order', () => {
       const { project, options } = getTestConfig();
 
-      const baseline: string = new InputSnapshot(options).getOperationOwnStateHash(project);
+      const baseline: string = new InputsSnapshot(options).getOperationOwnStateHash(project);
 
-      const input: InputSnapshot = new InputSnapshot({
+      const input: InputsSnapshot = new InputsSnapshot({
         ...options,
         hashes: new Map(Array.from(options.hashes).reverse())
       });
@@ -248,14 +248,14 @@ describe(InputSnapshot.name, () => {
         ]
       ]);
 
-      const input: InputSnapshot = new InputSnapshot(options);
+      const input: InputsSnapshot = new InputsSnapshot(options);
 
       expect(() => input.getOperationOwnStateHash(project, '_phase:build')).toThrowErrorMatchingSnapshot();
     });
 
     it('Changes if outputFileNames changes', () => {
       const { project, options } = getTestConfig();
-      const baseline: string = new InputSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
+      const baseline: string = new InputsSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
 
       const projectConfig1: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
         operationSettingsByOperationName: new Map([
@@ -281,7 +281,7 @@ describe(InputSnapshot.name, () => {
         ])
       };
 
-      const input1: InputSnapshot = new InputSnapshot({
+      const input1: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([
           [
@@ -293,7 +293,7 @@ describe(InputSnapshot.name, () => {
         ])
       });
 
-      const input2: InputSnapshot = new InputSnapshot({
+      const input2: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([
           [
@@ -316,7 +316,7 @@ describe(InputSnapshot.name, () => {
 
     it('Respects additionalOutputFilesByOperationName', () => {
       const { project, options } = getTestConfig();
-      const baseline: string = new InputSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
+      const baseline: string = new InputsSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
 
       const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
         operationSettingsByOperationName: new Map([
@@ -329,7 +329,7 @@ describe(InputSnapshot.name, () => {
         ])
       };
 
-      const input: InputSnapshot = new InputSnapshot({
+      const input: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([
           [
@@ -350,9 +350,9 @@ describe(InputSnapshot.name, () => {
 
     it('Respects globalAdditionalFiles', () => {
       const { project, options } = getTestConfig();
-      const baseline: string = new InputSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
+      const baseline: string = new InputsSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
 
-      const input: InputSnapshot = new InputSnapshot({
+      const input: InputsSnapshot = new InputsSnapshot({
         ...options,
         globalAdditionalFiles: new Set(['common/config/some-config.json'])
       });
@@ -365,13 +365,13 @@ describe(InputSnapshot.name, () => {
 
     it('Respects incrementalBuildIgnoredGlobs', () => {
       const { project, options } = getTestConfig();
-      const baseline: string = new InputSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
+      const baseline: string = new InputsSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
 
       const projectConfig1: Pick<RushProjectConfiguration, 'incrementalBuildIgnoredGlobs'> = {
         incrementalBuildIgnoredGlobs: ['*2.js']
       };
 
-      const input1: InputSnapshot = new InputSnapshot({
+      const input1: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([
           [
@@ -392,7 +392,7 @@ describe(InputSnapshot.name, () => {
         incrementalBuildIgnoredGlobs: ['*1.js']
       };
 
-      const input2: InputSnapshot = new InputSnapshot({
+      const input2: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([
           [
@@ -414,7 +414,7 @@ describe(InputSnapshot.name, () => {
 
     it('Respects dependsOnEnvVars', () => {
       const { project, options } = getTestConfig();
-      const baseline: string = new InputSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
+      const baseline: string = new InputsSnapshot(options).getOperationOwnStateHash(project, '_phase:build');
 
       const projectConfig1: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
         operationSettingsByOperationName: new Map([
@@ -428,7 +428,7 @@ describe(InputSnapshot.name, () => {
         ])
       };
 
-      const input1: InputSnapshot = new InputSnapshot({
+      const input1: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([
           [
@@ -446,7 +446,7 @@ describe(InputSnapshot.name, () => {
       expect(result1).toMatchSnapshot();
       expect(result1).not.toEqual(baseline);
 
-      const input2: InputSnapshot = new InputSnapshot({
+      const input2: InputsSnapshot = new InputsSnapshot({
         ...options,
         projectMap: new Map([
           [

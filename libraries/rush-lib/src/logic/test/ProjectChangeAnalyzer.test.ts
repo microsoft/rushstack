@@ -43,9 +43,9 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
 
 const mockSnapshot: jest.Mock = jest.fn();
 
-jest.mock('../snapshots/InputSnapshot', () => {
+jest.mock('../incremental/InputsSnapshot', () => {
   return {
-    InputSnapshot: mockSnapshot
+    InputsSnapshot: mockSnapshot
   };
 });
 
@@ -56,10 +56,10 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import type {
-  IInputSnapshot,
-  IInputSnapshotProvider,
-  IRushSnapshotParameters
-} from '../snapshots/InputSnapshot';
+  IInputsSnapshot,
+  GetInputsSnapshotAsyncFn,
+  IInputsSnapshotParameters
+} from '../incremental/InputsSnapshot';
 
 describe(ProjectChangeAnalyzer.name, () => {
   beforeEach(() => {
@@ -77,9 +77,9 @@ describe(ProjectChangeAnalyzer.name, () => {
       const terminal: Terminal = new Terminal(terminalProvider);
       const mockSnapshotValue: {} = {};
       mockSnapshot.mockImplementation(() => mockSnapshotValue);
-      const snapshotProvider: IInputSnapshotProvider | undefined =
+      const snapshotProvider: GetInputsSnapshotAsyncFn | undefined =
         await projectChangeAnalyzer._tryGetSnapshotProviderAsync(new Map(), terminal);
-      const snapshot: IInputSnapshot | undefined = await snapshotProvider?.();
+      const snapshot: IInputsSnapshot | undefined = await snapshotProvider?.();
 
       expect(snapshot).toBe(mockSnapshotValue);
       expect(terminalProvider.getErrorOutput()).toEqual('');
@@ -87,7 +87,7 @@ describe(ProjectChangeAnalyzer.name, () => {
 
       expect(mockSnapshot).toHaveBeenCalledTimes(1);
 
-      const mockInput: IRushSnapshotParameters = mockSnapshot.mock.calls[0][0];
+      const mockInput: IInputsSnapshotParameters = mockSnapshot.mock.calls[0][0];
       expect(mockInput.globalAdditionalFiles).toBeDefined();
       expect(mockInput.globalAdditionalFiles).toMatchObject(['common/config/rush/npm-shrinkwrap.json']);
 

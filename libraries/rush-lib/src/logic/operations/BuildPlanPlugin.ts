@@ -46,7 +46,7 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
       recordByOperation: Map<Operation, IOperationExecutionResult>,
       context: IExecuteOperationsContext
     ): void {
-      const { projectConfigurations, inputSnapshot } = context;
+      const { projectConfigurations, inputsSnapshot } = context;
       const disjointSet: DisjointSet<Operation> = new DisjointSet<Operation>();
       const operations: Operation[] = [...recordByOperation.keys()];
       for (const operation of operations) {
@@ -63,7 +63,7 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
           const projectConfiguration: RushProjectConfiguration | undefined =
             projectConfigurations.get(associatedProject);
           const fileHashes: ReadonlyMap<string, string> | undefined =
-            inputSnapshot?.getTrackedFileHashesForOperation(associatedProject, associatedPhase.name);
+            inputsSnapshot?.getTrackedFileHashesForOperation(associatedProject, associatedPhase.name);
           if (!fileHashes) {
             continue;
           }

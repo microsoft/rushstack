@@ -330,6 +330,9 @@ export class _FlagFile<TState extends JsonObject = JsonObject> {
 // @beta
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
+// @beta
+export type GetInputsSnapshotAsyncFn = () => Promise<IInputsSnapshot | undefined>;
+
 // @internal (undocumented)
 export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
     // (undocumented)
@@ -462,7 +465,7 @@ export interface IEnvironmentConfigurationInitializeOptions {
 
 // @alpha
 export interface IExecuteOperationsContext extends ICreateOperationsContext {
-    readonly inputSnapshot?: IInputSnapshot;
+    readonly inputsSnapshot?: IInputsSnapshot;
 }
 
 // @alpha
@@ -522,16 +525,11 @@ export interface IGlobalCommand extends IRushCommand {
 }
 
 // @beta
-export interface IInputSnapshot {
+export interface IInputsSnapshot {
     getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string): string;
     getTrackedFileHashesForOperation(project: IRushConfigurationProjectForSnapshot, operationName?: string): ReadonlyMap<string, string>;
     readonly hashes: ReadonlyMap<string, string>;
     readonly rootDirectory: string;
-}
-
-// @beta
-export interface IInputSnapshotProvider {
-    (): Promise<IInputSnapshot | undefined>;
 }
 
 // @public
@@ -1124,7 +1122,7 @@ export class ProjectChangeAnalyzer {
     // (undocumented)
     protected getChangesByProject(lookup: LookupByPath<RushConfigurationProject>, changedFiles: Map<string, IFileDiffStatus>): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
     // @internal
-    _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal): Promise<IInputSnapshotProvider | undefined>;
+    _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
 
 // @public
