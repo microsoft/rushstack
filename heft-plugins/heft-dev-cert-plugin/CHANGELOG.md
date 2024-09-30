@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-dev-cert-plugin
 
-This log was last generated on Sat, 21 Sep 2024 00:10:27 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Sep 2024 15:12:19 GMT and should not be manually modified.
+
+## 0.4.68
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
 
 ## 0.4.67
 Sat, 21 Sep 2024 00:10:27 GMT

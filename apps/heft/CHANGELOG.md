@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 13 Sep 2024 00:11:42 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Sep 2024 15:12:19 GMT and should not be manually modified.
+
+## 0.68.0
+Mon, 30 Sep 2024 15:12:19 GMT
+
+### Minor changes
+
+- Update file copy logic to use an incremental cache file in the temp directory for the current task to avoid unnecessary file writes.
 
 ## 0.67.2
 Fri, 13 Sep 2024 00:11:42 GMT

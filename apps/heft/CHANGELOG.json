@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.68.0",
+      "tag": "@rushstack/heft_v0.68.0",
+      "date": "Mon, 30 Sep 2024 15:12:19 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update file copy logic to use an incremental cache file in the temp directory for the current task to avoid unnecessary file writes."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.67.2",
       "tag": "@rushstack/heft_v0.67.2",
       "date": "Fri, 13 Sep 2024 00:11:42 GMT",
