@@ -171,7 +171,7 @@ export async function writeBuildInfoAsync(state: IIncrementalBuildInfo, filePath
   const serializedBuildInfo: ISerializedIncrementalBuildInfo = serializeBuildInfo(
     state,
     (absolutePath: string) => {
-      return makePathRelative(basePath, absolutePath);
+      return makePathRelative(absolutePath, basePath);
     }
   );
 

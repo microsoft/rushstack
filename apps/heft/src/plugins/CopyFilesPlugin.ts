@@ -186,7 +186,9 @@ async function _copyFilesInnerAsync(
     oldBuildInfo = undefined;
   }
 
-  const inputFileVersions: Map<string, string> = new Map();
+  // Since in watch mode only changed files will get passed in, need to ensure that all files from
+  // the previous build are still tracked.
+  const inputFileVersions: Map<string, string> = new Map(oldBuildInfo?.inputFileVersions);
 
   const buildInfo: IIncrementalBuildInfo = {
     configHash,
