@@ -81,7 +81,7 @@ interface IInitialRunPhasesOptions {
 }
 
 interface IRunPhasesOptions extends IInitialRunPhasesOptions {
-  snapshotProvider: GetInputsSnapshotAsyncFn | undefined;
+  getInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined;
   initialSnapshot: IInputsSnapshot | undefined;
   executionManagerOptions: IOperationExecutionManagerOptions;
 }
@@ -550,17 +550,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     repoStateStopwatch.start();
 
     const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-    const snapshotProvider: GetInputsSnapshotAsyncFn | undefined =
+    const getInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined =
       await analyzer._tryGetSnapshotProviderAsync(projectConfigurations, terminal);
-    const initialSnapshot: IInputsSnapshot | undefined = await snapshotProvider?.();
+    const initialSnapshot: IInputsSnapshot | undefined = await getInputsSnapshotAsync?.();
 
     repoStateStopwatch.stop();
     terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
-    if (!initialSnapshot) {
-      terminal.writeLine(
-        `The Rush monorepo is not in a Git repository. Rush will proceed without incremental build support.`
-      );
-    }
     terminal.writeLine();
 
     const initialExecuteOperationsContext: IExecuteOperationsContext = {
@@ -589,7 +584,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     return {
       ...options,
       executionManagerOptions,
-      snapshotProvider,
+      getInputsSnapshotAsync,
       initialSnapshot
     };
   }
@@ -666,8 +661,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
    */
   private async _runWatchPhasesAsync(options: IRunPhasesOptions): Promise<void> {
     const {
-      snapshotProvider,
-      initialSnapshot: initialState,
+      getInputsSnapshotAsync,
+      initialSnapshot,
       initialCreateOperationsContext,
       executionManagerOptions,
       stopwatch,
@@ -679,7 +674,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const { projectSelection: projectsToWatch } = initialCreateOperationsContext;
 
-    if (!snapshotProvider || !initialState) {
+    if (!getInputsSnapshotAsync || !initialSnapshot) {
       terminal.writeErrorLine(
         `Cannot watch for changes if the Rush repo is not in a Git repository, exiting.`
       );
@@ -693,8 +688,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     );
 
     const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
-      getInputSnapshotAsync: snapshotProvider,
-      initialState,
+      getInputsSnapshotAsync,
+      initialSnapshot,
       debounceMs: this._watchDebounceMs,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,

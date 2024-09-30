@@ -207,6 +207,10 @@ export class ProjectChangeAnalyzer {
       const gitPath: string = this._git.getGitPathOrThrow();
 
       if (!this._git.isPathUnderGitWorkingTree()) {
+        terminal.writeLine(
+          `The Rush monorepo is not in a Git repository. Rush will proceed without incremental build support.`
+        );
+
         return;
       }
 

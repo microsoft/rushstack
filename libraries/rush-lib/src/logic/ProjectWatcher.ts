@@ -15,12 +15,12 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export interface IProjectWatcherOptions {
-  getInputSnapshotAsync: GetInputsSnapshotAsyncFn;
+  getInputsSnapshotAsync: GetInputsSnapshotAsyncFn;
   debounceMs?: number;
   rushConfiguration: RushConfiguration;
   projectsToWatch: ReadonlySet<RushConfigurationProject>;
   terminal: ITerminal;
-  initialState?: IInputsSnapshot | undefined;
+  initialSnapshot?: IInputsSnapshot | undefined;
 }
 
 export interface IProjectChangeResult {
@@ -60,8 +60,8 @@ export class ProjectWatcher {
   private readonly _projectsToWatch: ReadonlySet<RushConfigurationProject>;
   private readonly _terminal: ITerminal;
 
-  private _initialState: IInputsSnapshot | undefined;
-  private _previousState: IInputsSnapshot | undefined;
+  private _initialSnapshot: IInputsSnapshot | undefined;
+  private _previousSnapshot: IInputsSnapshot | undefined;
   private _forceChangedProjects: Map<RushConfigurationProject, string> = new Map();
   private _resolveIfChanged: undefined | (() => Promise<void>);
   private _getPromptLines: undefined | IPromptGeneratorFunction;
@@ -72,12 +72,12 @@ export class ProjectWatcher {
 
   public constructor(options: IProjectWatcherOptions) {
     const {
-      getInputSnapshotAsync: snapshotProvider,
+      getInputsSnapshotAsync: snapshotProvider,
       debounceMs = 1000,
       rushConfiguration,
       projectsToWatch,
       terminal,
-      initialState
+      initialSnapshot: initialState
     } = options;
 
     this._debounceMs = debounceMs;
@@ -88,8 +88,8 @@ export class ProjectWatcher {
     const gitPath: string = new Git(rushConfiguration).getGitPathOrThrow();
     this._repoRoot = Path.convertToSlashes(getRepoRoot(rushConfiguration.rushJsonFolder, gitPath));
 
-    this._initialState = initialState;
-    this._previousState = initialState;
+    this._initialSnapshot = initialState;
+    this._previousSnapshot = initialState;
 
     this._renderedStatusLines = 0;
     this._getPromptLines = undefined;
@@ -400,27 +400,27 @@ export class ProjectWatcher {
    * Determines which, if any, projects (within the selection) have new hashes for files that are not in .gitignore
    */
   private async _computeChangedAsync(): Promise<IProjectChangeResult> {
-    const state: IInputsSnapshot | undefined = await this._getInputsSnapshotAsync();
+    const currentSnapshot: IInputsSnapshot | undefined = await this._getInputsSnapshotAsync();
 
-    if (!state) {
+    if (!currentSnapshot) {
       throw new AlreadyReportedError();
     }
 
-    const previousState: IInputsSnapshot | undefined = this._previousState;
+    const previousSnapshot: IInputsSnapshot | undefined = this._previousSnapshot;
 
-    if (!previousState) {
+    if (!previousSnapshot) {
       return {
         changedProjects: this._projectsToWatch,
-        inputsSnapshot: state
+        inputsSnapshot: currentSnapshot
       };
     }
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
     for (const project of this._projectsToWatch) {
       const previous: ReadonlyMap<string, string> | undefined =
-        previousState.getTrackedFileHashesForOperation(project);
+        previousSnapshot.getTrackedFileHashesForOperation(project);
       const current: ReadonlyMap<string, string> | undefined =
-        state.getTrackedFileHashesForOperation(project);
+        currentSnapshot.getTrackedFileHashesForOperation(project);
 
       if (ProjectWatcher._haveProjectDepsChanged(previous, current)) {
         // May need to detect if the nature of the change will break the process, e.g. changes to package.json
@@ -434,14 +434,14 @@ export class ProjectWatcher {
 
     return {
       changedProjects,
-      inputsSnapshot: state
+      inputsSnapshot: currentSnapshot
     };
   }
 
   private _commitChanges(state: IInputsSnapshot): void {
-    this._previousState = state;
-    if (!this._initialState) {
-      this._initialState = state;
+    this._previousSnapshot = state;
+    if (!this._initialSnapshot) {
+      this._initialSnapshot = state;
     }
   }
 
