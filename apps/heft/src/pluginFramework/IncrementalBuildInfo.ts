@@ -55,7 +55,7 @@ export interface ISerializedIncrementalBuildInfo {
 /**
  * Converts an absolute path to a path relative to a base path.
  */
-const makePathRelative: (absolutePath: string, basePath: string) => string =
+export const makePathRelative: (absolutePath: string, basePath: string) => string =
   process.platform === 'win32'
     ? (absolutePath: string, basePath: string) => {
         // On Windows, need to normalize slashes
