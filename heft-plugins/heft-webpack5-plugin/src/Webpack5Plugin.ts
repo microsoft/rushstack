@@ -336,9 +336,9 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         compiler.hooks.infrastructureLog.tap(
           PLUGIN_NAME,
-          (name: string, type: string, args: any[] | undefined) => {
+          (name: string, type: string, args: unknown[] | undefined) => {
             if (name === WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME && type === 'error') {
-              const error: Error | undefined = args?.[0];
+              const error: Error | undefined = args?.[0] as Error;
               if (error) {
                 taskSession.logger.emitError(error);
               }
