@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.68.1",
+      "tag": "@rushstack/heft_v0.68.1",
+      "date": "Tue, 01 Oct 2024 00:11:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include all previous `inputFileVersions` in incremental copy files cache file during watch mode. Fix incorrect serialization of cache file for file copy."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.68.0",
       "tag": "@rushstack/heft_v0.68.0",
       "date": "Mon, 30 Sep 2024 15:12:19 GMT",
