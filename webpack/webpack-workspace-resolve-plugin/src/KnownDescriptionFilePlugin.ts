@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Resolver } from 'webpack';
+import type { InputFileSystem, Resolver } from 'webpack';
 import type { IPrefixMatch } from '@rushstack/lookup-by-path';
 import type { IResolveContext, WorkspaceLayoutCache } from './WorkspaceLayoutCache';
 
@@ -41,9 +41,11 @@ export class KnownDescriptionFilePlugin {
     const target: ReturnType<Resolver['ensureHook']> = resolver.ensureHook(this.target);
     const { fileSystem } = resolver;
 
+    type JsonObjectTypes = ReturnType<NonNullable<InputFileSystem['readJsonSync']>>;
+
     function readDescriptionFileWithParse(
       descriptionFilePath: string,
-      callback: (err: Error | null | undefined, data?: object) => void
+      callback: (err: Error | null | undefined, data?: JsonObjectTypes) => void
     ): void {
       fileSystem.readFile(descriptionFilePath, (err: Error | null | undefined, data?: string | Buffer) => {
         if (!data?.length) {
@@ -56,7 +58,7 @@ export class KnownDescriptionFilePlugin {
 
     const readDescriptionFile: (
       descriptionFilePath: string,
-      cb: (err: Error | null | undefined, data?: object) => void
+      cb: (err: Error | null | undefined, data?: JsonObjectTypes) => void
     ) => void = fileSystem.readJson?.bind(fileSystem) ?? readDescriptionFileWithParse;
 
     resolver
@@ -108,7 +110,7 @@ export class KnownDescriptionFilePlugin {
             obj,
             'using description file: ' + descriptionFilePath + ' (relative path: ' + relativePath + ')',
             resolveContext,
-            (e: Error | undefined, result: ResolveRequest | undefined) => {
+            (e: Error | null | undefined, result: ResolveRequest | undefined) => {
               if (e) {
                 return callback(e);
               }
