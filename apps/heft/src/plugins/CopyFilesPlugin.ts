@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createHash, type Hash } from 'crypto';
-import type * as fs from 'fs';
-import * as path from 'path';
+import { createHash } from 'node:crypto';
+import type * as fs from 'node:fs';
+import * as path from 'node:path';
 
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import { Constants } from '../utilities/Constants';
 import {
-  normalizeFileSelectionSpecifier,
+  asAbsoluteFileSelectionSpecifier,
   getFileSelectionSpecifierPathsAsync,
   type IFileSelectionSpecifier
 } from './FileGlobSpecifier';
@@ -20,6 +20,7 @@ import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramewo
 import type { WatchFileSystemAdapter } from '../utilities/WatchFileSystemAdapter';
 import {
   type IIncrementalBuildInfo,
+  makePathRelative,
   tryReadBuildInfoAsync,
   writeBuildInfoAsync
 } from '../pluginFramework/IncrementalBuildInfo';
@@ -79,25 +80,40 @@ interface ICopyDescriptor {
   hardlink: boolean;
 }
 
-export function normalizeCopyOperation(rootFolderPath: string, copyOperation: ICopyOperation): void {
-  normalizeFileSelectionSpecifier(rootFolderPath, copyOperation);
-  copyOperation.destinationFolders = copyOperation.destinationFolders.map((x) =>
-    path.resolve(rootFolderPath, x)
+export function asAbsoluteCopyOperation(
+  rootFolderPath: string,
+  copyOperation: ICopyOperation
+): ICopyOperation {
+  const absoluteCopyOperation: ICopyOperation = asAbsoluteFileSelectionSpecifier(
+    rootFolderPath,
+    copyOperation
   );
+  absoluteCopyOperation.destinationFolders = copyOperation.destinationFolders.map((folder) =>
+    path.resolve(rootFolderPath, folder)
+  );
+  return absoluteCopyOperation;
+}
+
+export function asRelativeCopyOperation(
+  rootFolderPath: string,
+  copyOperation: ICopyOperation
+): ICopyOperation {
+  return {
+    ...copyOperation,
+    destinationFolders: copyOperation.destinationFolders.map((folder) =>
+      makePathRelative(folder, rootFolderPath)
+    ),
+    sourcePath: copyOperation.sourcePath && makePathRelative(copyOperation.sourcePath, rootFolderPath)
+  };
 }
 
 export async function copyFilesAsync(
   copyOperations: Iterable<ICopyOperation>,
   terminal: ITerminal,
   buildInfoPath: string,
+  configHash: string,
   watchFileSystemAdapter?: WatchFileSystemAdapter
 ): Promise<void> {
-  const hasher: Hash = createHash('sha256');
-  for (const copyOperation of copyOperations) {
-    hasher.update(JSON.stringify(copyOperation));
-  }
-  const configHash: string = hasher.digest('base64');
-
   const copyDescriptorByDestination: Map<string, ICopyDescriptor> = await _getCopyDescriptorsAsync(
     copyOperations,
     watchFileSystemAdapter

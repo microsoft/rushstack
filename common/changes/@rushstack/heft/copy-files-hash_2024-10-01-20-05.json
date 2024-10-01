@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Ensure `configHash` for file copy incremental cache file is portable.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
