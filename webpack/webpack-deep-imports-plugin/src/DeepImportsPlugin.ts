@@ -129,6 +129,12 @@ export class DeepImportsPlugin extends DllPlugin {
           }
         }
 
+        const { inputFileSystem } = compiler;
+        if (!inputFileSystem) {
+          compilation.errors.push(new WebpackError(`compiler.inputFileSystem is not defined`));
+          return;
+        }
+
         const outputPath: string | undefined = compilation.options.output.path;
         if (!outputPath) {
           compilation.errors.push(new WebpackError(`The "output.path" option was not specified.`));
@@ -137,7 +143,7 @@ export class DeepImportsPlugin extends DllPlugin {
 
         interface ILibModuleDescriptor {
           libPathWithoutExtension: string;
-          moduleId: string | number;
+          moduleId: string | number | null;
         }
 
         const pathsToIgnoreWithoutExtension: Set<string> = this._pathsToIgnoreWithoutExtensions;
@@ -194,7 +200,7 @@ export class DeepImportsPlugin extends DllPlugin {
                 );
                 return undefined;
               } else {
-                bundleJsFileBaseName = filename.substring(0, filename.length - JS_EXTENSION.length);
+                bundleJsFileBaseName = filename.slice(0, -JS_EXTENSION.length);
               }
             }
           }
@@ -233,10 +239,7 @@ export class DeepImportsPlugin extends DllPlugin {
                 let dtsFileContents: string | undefined;
                 try {
                   dtsFileContents = (
-                    await LegacyAdapters.convertCallbackToPromise(
-                      compiler.inputFileSystem.readFile,
-                      dtsFilePath
-                    )
+                    await LegacyAdapters.convertCallbackToPromise(inputFileSystem.readFile, dtsFilePath)
                   )?.toString();
                 } catch (e) {
                   if (!FileSystem.isNotExistError(e)) {

@@ -4,7 +4,7 @@
 import path from 'path';
 import { Async, Sort, LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
 
-import type { Compiler, Compilation, WebpackPluginInstance, WebpackError } from 'webpack';
+import type { Compiler, Compilation, WebpackPluginInstance, WebpackError, InputFileSystem } from 'webpack';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from './regexpUtils';
@@ -317,23 +317,29 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
     modulePath: string,
     compiler: Compiler
   ): Promise<string | undefined> {
-    type InputFileSystemReadDirResults = Parameters<
-      Parameters<typeof compiler.inputFileSystem.readdir>[1]
-    >[1];
+    type InputFileSystemReadDirResults = Parameters<Parameters<InputFileSystem['readdir']>[2]>[1];
 
-    // TODO: Real fs.readdir can take an arguement ({ withFileTypes: true }) which will filter out directories for better performance
-    //       and return a list of Dirent objects. Currently the webpack types are hand generated for fs.readdir so
-    //       we can't use this feature yet, or we would have to cast the types of inputFileSystem.readdir.
-    //       https://github.com/webpack/webpack/issues/16780 tracks this issue.
+    const { inputFileSystem } = compiler;
+    if (!inputFileSystem) {
+      throw new Error(`Compiler.inputFileSystem is not defined`);
+    }
+
     const files: InputFileSystemReadDirResults = await LegacyAdapters.convertCallbackToPromise(
-      compiler.inputFileSystem.readdir,
-      modulePath
+      inputFileSystem.readdir,
+      modulePath,
+      { withFileTypes: true }
     );
 
-    return files
-      ?.map((file) => file.toString())
-      .filter((file) => LICENSE_FILES_REGEXP.test(file))
-      .map((file) => path.join(modulePath, file))[0]; // Grabbing the first license file if multiple are found
+    if (!files) {
+      return;
+    }
+
+    for (const file of files) {
+      if (file.isFile() && LICENSE_FILES_REGEXP.test(file.name)) {
+        // Grabbing the first license file if multiple are found
+        return path.join(modulePath, file.name);
+      }
+    }
   }
 
   /**

@@ -31,6 +31,6 @@
     "source-map-loader": "~3.0.1",
     "style-loader": "~3.3.1",
     "typescript": "~5.4.2",
-    "webpack": "~5.82.1"
+    "webpack": "~5.95.0"
   }
 }

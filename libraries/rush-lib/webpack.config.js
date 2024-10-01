@@ -82,7 +82,7 @@ module.exports = () => {
       },
       [
         new DeepImportsPlugin({
-          path: `${__dirname}/temp/rush-lib-manifest.json`,
+          path: `${__dirname}/temp/build/webpack-dll/[name].json`,
           inFolderName: 'lib-esnext',
           outFolderName: 'lib',
           pathsToIgnore: ['utilities/prompts/SearchListPrompt.js'],

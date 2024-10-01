@@ -30,7 +30,7 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
-    "webpack": "~5.82.1",
-    "memfs": "3.4.3"
+    "webpack": "~5.95.0",
+    "memfs": "4.12.0"
   }
 }
