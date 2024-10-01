@@ -21,6 +21,7 @@ export interface ILinterBaseOptions {
   linterConfigFilePath: string;
   tsProgram: IExtendedProgram;
   fix?: boolean;
+  sarifLogPath?: string;
 }
 
 export interface IRunLinterOptions {

@@ -6,7 +6,7 @@ import * as semver from 'semver';
 import type * as TTypescript from 'typescript';
 import type * as TEslint from 'eslint';
 import { performance } from 'perf_hooks';
-import { FileError } from '@rushstack/node-core-library';
+import { FileError, FileSystem } from '@rushstack/node-core-library';
 
 import { LinterBase, type ILinterBaseOptions } from './LinterBase';
 
@@ -59,12 +59,22 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   private readonly _currentFixMessages: TEslint.Linter.LintMessage[] = [];
   private readonly _fixMessagesByResult: Map<TEslint.ESLint.LintResult, TEslint.Linter.LintMessage[]> =
     new Map();
+  private readonly _sarifLogPath: string | undefined;
 
   protected constructor(options: IEslintOptions) {
     super('eslint', options);
 
-    const { buildFolderPath, eslintPackage, linterConfigFilePath, tsProgram, eslintTimings, fix } = options;
+    const {
+      buildFolderPath,
+      eslintPackage,
+      linterConfigFilePath,
+      tsProgram,
+      eslintTimings,
+      fix,
+      sarifLogPath
+    } = options;
     this._eslintPackage = eslintPackage;
+    this._sarifLogPath = sarifLogPath;
 
     let overrideConfig: TEslint.Linter.Config | undefined;
     let fixFn: Exclude<TEslint.ESLint.Options['fix'], boolean>;
@@ -166,17 +176,10 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
           return lintResult.fixableErrorCount + lintResult.fixableWarningCount > 0;
         }));
 
-    const failures: TEslint.ESLint.LintResult[] = [];
-    for (const lintResult of lintResults) {
-      if (lintResult.messages.length > 0 || lintResult.output) {
-        failures.push(lintResult);
-      }
-    }
-
-    return failures;
+    return lintResults;
   }
 
-  protected async lintingFinishedAsync(lintFailures: TEslint.ESLint.LintResult[]): Promise<void> {
+  protected async lintingFinishedAsync(lintResults: TEslint.ESLint.LintResult[]): Promise<void> {
     let omittedRuleCount: number = 0;
     const timings: [string, number][] = Array.from(this._eslintTimings).sort(
       (x: [string, number], y: [string, number]) => {
@@ -196,24 +199,23 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     }
 
     if (this._fix && this._fixMessagesByResult.size > 0) {
-      await this._eslintPackage.ESLint.outputFixes(lintFailures);
+      await this._eslintPackage.ESLint.outputFixes(lintResults);
     }
 
-    for (const lintFailure of lintFailures) {
+    for (const lintResult of lintResults) {
       // Report linter fixes to the logger. These will only be returned when the underlying failure was fixed
-      const fixMessages: TEslint.Linter.LintMessage[] | undefined =
-        this._fixMessagesByResult.get(lintFailure);
+      const fixMessages: TEslint.Linter.LintMessage[] | undefined = this._fixMessagesByResult.get(lintResult);
       if (fixMessages) {
         for (const fixMessage of fixMessages) {
           const formattedMessage: string = `[FIXED] ${getFormattedErrorMessage(fixMessage)}`;
-          const errorObject: FileError = this._getLintFileError(lintFailure, fixMessage, formattedMessage);
+          const errorObject: FileError = this._getLintFileError(lintResult, fixMessage, formattedMessage);
           this._scopedLogger.emitWarning(errorObject);
         }
       }
 
       // Report linter errors and warnings to the logger
-      for (const lintMessage of lintFailure.messages) {
-        const errorObject: FileError = this._getLintFileError(lintFailure, lintMessage);
+      for (const lintMessage of lintResult.messages) {
+        const errorObject: FileError = this._getLintFileError(lintResult, lintMessage);
         switch (lintMessage.severity) {
           case EslintMessageSeverity.error: {
             this._scopedLogger.emitError(errorObject);
@@ -226,6 +228,21 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
           }
         }
       }
+    }
+
+    const sarifLogPath: string | undefined = this._sarifLogPath;
+    if (sarifLogPath) {
+      const { formatAsSARIF } = await import('./SarifFormatter');
+      const sarifString: string = JSON.stringify(
+        formatAsSARIF(lintResults, {
+          ignoreSuppressed: false,
+          eslintVersion: this._eslintPackage.ESLint.version
+        }),
+        undefined,
+        2
+      );
+
+      await FileSystem.writeFileAsync(sarifLogPath, sarifString, { ensureFolderExists: true });
     }
   }
 
