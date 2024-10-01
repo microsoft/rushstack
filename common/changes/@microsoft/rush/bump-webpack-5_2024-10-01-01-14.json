@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Update to webpack 5.95.0",
+      "comment": "",
       "type": "none",
       "packageName": "@microsoft/rush"
     }

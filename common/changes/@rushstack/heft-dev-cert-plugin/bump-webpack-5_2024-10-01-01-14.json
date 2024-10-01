@@ -1,8 +1,8 @@
 {
   "changes": [
     {
-      "comment": "Update to webpack 5.95.0",
-      "type": "patch",
+      "comment": "",
+      "type": "none",
       "packageName": "@rushstack/heft-dev-cert-plugin"
     }
   ],

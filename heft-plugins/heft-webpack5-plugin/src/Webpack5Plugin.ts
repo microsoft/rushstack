@@ -338,7 +338,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           PLUGIN_NAME,
           (name: string, type: string, args: unknown[] | undefined) => {
             if (name === WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME && type === 'error') {
-              const error: Error | undefined = args?.[0] as Error;
+              const error: Error | undefined = args?.[0] as Error | undefined;
               if (error) {
                 taskSession.logger.emitError(error);
               }

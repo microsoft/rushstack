@@ -2,7 +2,7 @@
   "changes": [
     {
       "comment": "Update to webpack 5.95.0",
-      "type": "patch",
+      "type": "minor",
       "packageName": "@rushstack/heft-web-rig"
     }
   ],

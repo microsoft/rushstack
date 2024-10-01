@@ -82,6 +82,9 @@ module.exports = () => {
       },
       [
         new DeepImportsPlugin({
+          // A manifest will be produced for each entry point, so since this compilation has multiple entry points,
+          // it needs to specify a template for the manifest filename.
+          // Otherwise webpack will throw an error about multiple writes to the same manifest file.
           path: `${__dirname}/temp/build/webpack-dll/[name].json`,
           inFolderName: 'lib-esnext',
           outFolderName: 'lib',
