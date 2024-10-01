@@ -103,7 +103,7 @@ export class IPCOperationRunner implements IOperationRunner {
 
           this._ipcProcess.on('message', (message: unknown) => {
             if (isRequestRunEventMessage(message)) {
-              this._requestRun(message.requestor);
+              this._requestRun(message.requester);
             } else if (isSyncEventMessage(message)) {
               resolveReadyPromise();
             }

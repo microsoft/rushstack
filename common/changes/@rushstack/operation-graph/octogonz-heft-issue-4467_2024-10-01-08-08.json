@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/operation-graph",
+      "comment": "Require a logging name for every operation.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/operation-graph"
+}

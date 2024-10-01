@@ -156,7 +156,7 @@ export class WatchLoop implements IWatchLoopState {
 
         const requestRunMessage: IRequestRunEventMessage = {
           event: 'requestRun',
-          requestor
+          requester
         };
 
         tryMessageHost(requestRunMessage);
@@ -192,9 +192,12 @@ export class WatchLoop implements IWatchLoopState {
 
             try {
               status = await this.runUntilStableAsync(abortController.signal);
-              this._requestRunPromise.finally(() => {
-                requestRunFromHost('runIPCAsync');
-              });
+              this._requestRunPromise
+                // the reject callback in the promise is discarded so we ignore errors
+                .catch(() => {})
+                .finally(() => {
+                  requestRunFromHost('runIPCAsync');
+                });
             } catch (err) {
               status = OperationStatus.Failure;
               return reject(err);
