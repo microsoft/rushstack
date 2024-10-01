@@ -33,7 +33,7 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
     afterExecute(operation: Operation, state: IOperationState): void;
     beforeExecute(operation: Operation, state: IOperationState): void;
     queueWork(workFn: () => Promise<OperationStatus>, priority: number): Promise<OperationStatus>;
-    requestRun?: (requester: string) => void;
+    requestRun?: (requestor: string) => void;
     terminal: ITerminal;
 }
 
@@ -50,7 +50,7 @@ export interface IOperationExecutionOptions {
     // (undocumented)
     parallelism: number;
     // (undocumented)
-    requestRun?: (requester: string) => void;
+    requestRun?: (requestor: string) => void;
     // (undocumented)
     terminal: ITerminal;
 }
@@ -99,7 +99,7 @@ export interface IRequestRunEventMessage {
     // (undocumented)
     event: 'requestRun';
     // (undocumented)
-    requester: string;
+    requestor: string;
 }
 
 // @beta
@@ -127,7 +127,7 @@ export interface IWatchLoopOptions {
     executeAsync: (state: IWatchLoopState) => Promise<OperationStatus>;
     onAbort: () => void;
     onBeforeExecute: () => void;
-    onRequestRun: (requester: string) => void;
+    onRequestRun: (requestor: string) => void;
 }
 
 // @beta
@@ -135,7 +135,7 @@ export interface IWatchLoopState {
     // (undocumented)
     get abortSignal(): AbortSignal;
     // (undocumented)
-    requestRun: (requester: string) => void;
+    requestRun: (requestor: string) => void;
 }
 
 // @beta
@@ -231,7 +231,7 @@ export class Stopwatch {
 export class WatchLoop implements IWatchLoopState {
     constructor(options: IWatchLoopOptions);
     get abortSignal(): AbortSignal;
-    requestRun: (requester: string) => void;
+    requestRun: (requestor: string) => void;
     runIPCAsync(host?: IPCHost): Promise<void>;
     runUntilAbortedAsync(abortSignal: AbortSignal, onWaiting: () => void): Promise<void>;
     runUntilStableAsync(abortSignal: AbortSignal): Promise<OperationStatus>;

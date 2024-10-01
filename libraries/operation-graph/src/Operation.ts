@@ -68,7 +68,7 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
    * A callback to the overarching orchestrator to request that the operation be invoked again.
    * Used in watch mode to signal that inputs have changed.
    */
-  requestRun?: (requester: string) => void;
+  requestRun?: (requestor: string) => void;
 
   /**
    * Terminal to write output to.

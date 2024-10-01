@@ -31,7 +31,7 @@ export interface IWatchLoopOptions {
   /**
    * Logging callback when a run is requested (and hasn't already been).
    */
-  onRequestRun: (requester: string) => void;
+  onRequestRun: (requestor: string) => void;
   /**
    * Logging callback when a run is aborted.
    */
@@ -45,7 +45,7 @@ export interface IWatchLoopOptions {
  */
 export interface IWatchLoopState {
   get abortSignal(): AbortSignal;
-  requestRun: (requester: string) => void;
+  requestRun: (requestor: string) => void;
 }
 
 /**
@@ -60,7 +60,7 @@ export class WatchLoop implements IWatchLoopState {
   private _isRunning: boolean;
   private _runRequested: boolean;
   private _requestRunPromise: Promise<string | undefined>;
-  private _resolveRequestRun!: (requester: string) => void;
+  private _resolveRequestRun!: (requestor: string) => void;
 
   public constructor(options: IWatchLoopOptions) {
     this._options = options;
@@ -147,7 +147,7 @@ export class WatchLoop implements IWatchLoopState {
         }
       }
 
-      function requestRunFromHost(requester: string): void {
+      function requestRunFromHost(requestor: string): void {
         if (runRequestedFromHost) {
           return;
         }
@@ -156,7 +156,7 @@ export class WatchLoop implements IWatchLoopState {
 
         const requestRunMessage: IRequestRunEventMessage = {
           event: 'requestRun',
-          requester
+          requestor
         };
 
         tryMessageHost(requestRunMessage);
@@ -228,16 +228,16 @@ export class WatchLoop implements IWatchLoopState {
   /**
    * Requests that a new run occur.
    */
-  public requestRun: (requester: string) => void = (requester: string) => {
+  public requestRun: (requestor: string) => void = (requestor: string) => {
     if (!this._runRequested) {
-      this._options.onRequestRun(requester);
+      this._options.onRequestRun(requestor);
       this._runRequested = true;
       if (this._isRunning) {
         this._options.onAbort();
         this._abortCurrent();
       }
     }
-    this._resolveRequestRun(requester);
+    this._resolveRequestRun(requestor);
   };
 
   /**

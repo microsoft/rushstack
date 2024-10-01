@@ -21,7 +21,7 @@ export interface IOperationExecutionOptions {
   parallelism: number;
   terminal: ITerminal;
 
-  requestRun?: (requester: string) => void;
+  requestRun?: (requestor: string) => void;
 }
 
 /**

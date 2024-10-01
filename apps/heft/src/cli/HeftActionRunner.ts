@@ -333,8 +333,8 @@ export class HeftActionRunner {
       executeAsync: (state: IWatchLoopState): Promise<OperationStatus> => {
         return this._executeOnceAsync(executionManager, state.abortSignal, state.requestRun);
       },
-      onRequestRun: (requester: string) => {
-        terminal.writeLine(Colorize.bold(`New run requested by ${requester}`));
+      onRequestRun: (requestor: string) => {
+        terminal.writeLine(Colorize.bold(`New run requested by ${requestor}`));
       },
       onAbort: () => {
         terminal.writeLine(Colorize.bold(`Cancelling incremental build...`));
@@ -346,7 +346,7 @@ export class HeftActionRunner {
   private async _executeOnceAsync(
     executionManager: OperationExecutionManager,
     abortSignal: AbortSignal,
-    requestRun?: (requester: string) => void
+    requestRun?: (requestor: string) => void
   ): Promise<OperationStatus> {
     // Record this as the start of task execution.
     this._metricsCollector.setStartTime();
