@@ -1,38 +1,14 @@
-/* eslint-disable unicorn/no-null */
-/**
- * @fileoverview SARIF v2.1 formatter
- * @author Microsoft
- */
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 import url from 'url';
 
 import type * as TEslint from 'eslint';
 
-//------------------------------------------------------------------------------
-// Helper Functions
-//------------------------------------------------------------------------------
-
-interface Suppression {
-  kind: string;
-  justification: string;
+export interface ISerifFormatterOptions {
+  ignoreSuppressed: boolean;
+  eslintVersion?: string;
 }
-
-/**
- * Returns the severity of warning or error
- * @param {ESLintMessage} message message object to examine
- * @returns {string} severity level
- * @private
- */
-function getResultLevel(message: TEslint.Linter.LintMessage): string {
-  if (message.fatal || message.severity === 2) {
-    return 'error';
-  }
-  return 'warning';
-}
-
-//------------------------------------------------------------------------------
-// Public Interface
-//------------------------------------------------------------------------------
 
 interface ISarifRun {
   tool: {
@@ -40,13 +16,13 @@ interface ISarifRun {
       name: string;
       informationUri: string;
       version?: string;
-      rules: any[];
+      rules: IStaticAnalysisRules[];
     };
   };
-  artifacts?: any[];
-  results?: any[];
+  artifacts?: string[];
+  results?: ISarifRepresentation[];
   invocations?: {
-    toolConfigurationNotifications: any[];
+    toolConfigurationNotifications: ISarifRepresentation[];
     executionSuccessful: boolean;
   }[];
 }
@@ -67,7 +43,12 @@ interface ISarifRepresentation {
   descriptor?: {
     id: string;
   };
-  suppressions?: Suppression[];
+  suppressions?: ISuppressedAnalysis[];
+}
+
+interface ISuppressedAnalysis {
+  kind: string;
+  justification: string;
 }
 
 // Interface for the SARIF log structure
@@ -77,66 +58,90 @@ interface ISarifLog {
   runs: ISarifRun[];
 }
 
-interface ISarifLocation {
-  physicalLocation: {
-    artifactLocation: {
-      uri: string;
-      index: number;
-    };
-    region?: {
-      startLine?: number;
-      startColumn?: number;
-      endLine?: number;
-      endColumn?: number;
-      snippet?: {
-        text: string;
-      };
+interface IRegion {
+  startLine?: number;
+  startColumn?: number;
+  endLine?: number;
+  endColumn?: number;
+  snippet?: {
+    text: string;
+  };
+}
+
+interface IStaticAnalysisRules {
+  id: string;
+  name?: string;
+  shortDescription?: {
+    text: string;
+  };
+  fullDescription?: {
+    text: string;
+  };
+  defaultConfiguration?: {
+    level: 'note' | 'warning' | 'error';
+  };
+  helpUri?: string;
+  properties?: {
+    category?: string;
+    precision?: 'very-high' | 'high' | 'medium' | 'low';
+    tags?: string[];
+    problem?: {
+      severity?: 'recommendation' | 'warning' | 'error';
+      securitySeverity?: number;
     };
   };
 }
 
-interface IMessage extends TEslint.Linter.LintMessage {
-  suppressions?: Suppression[];
+interface ISarifLocation {
+  physicalLocation: ISarifPhysicalLocation;
 }
 
-export interface ISerifFormatterOptions {
-  ignoreSuppressed: boolean;
-  eslintVersion: string;
+interface ISarifPhysicalLocation {
+  artifactLocation: {
+    uri: string;
+    index: number;
+  };
+  region?: IRegion;
+}
+
+interface IMessage extends TEslint.Linter.LintMessage {
+  suppressions?: ISuppressedAnalysis[];
 }
 
 interface IExtendedLintResult extends TEslint.ESLint.LintResult {
   suppressedMessages: TEslint.ESLint.LintResult['suppressedMessages'];
 }
 
+const sarifFiles: Map<string, ISarifFile> = new Map();
+const sarifResults: ISarifRepresentation[] = [];
+
+const internalErrorId: string = 'ESL0999';
+const toolConfigurationNotifications: ISarifRepresentation[] = [];
+
+const sarifRun: ISarifRun = {
+  tool: {
+    driver: {
+      name: 'ESLint',
+      informationUri: 'https://eslint.org',
+      rules: []
+    }
+  }
+};
+
+const sarifLog: ISarifLog = {
+  version: '2.1.0',
+  $schema: 'http://json.schemastore.org/sarif-2.1.0-rtm.5',
+  runs: [sarifRun]
+};
+
 // Main function
 export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFormatterOptions): ISarifLog {
-  const sarifRun: ISarifRun = {
-    tool: {
-      driver: {
-        name: 'ESLint',
-        informationUri: 'https://eslint.org',
-        rules: []
-      }
-    }
-  };
-  const sarifLog: ISarifLog = {
-    version: '2.1.0',
-    $schema: 'http://json.schemastore.org/sarif-2.1.0-rtm.5',
-    runs: [sarifRun]
-  };
-
   const { ignoreSuppressed, eslintVersion } = options;
 
-  if (typeof eslintVersion !== 'undefined') {
+  if (typeof eslintVersion !== undefined) {
     sarifRun.tool.driver.version = eslintVersion;
   }
-
-  const sarifFiles: Map<string, ISarifFile> = new Map();
-  const sarifResults: any[] = [];
-
-  const internalErrorId = 'ESL0999';
-  const toolConfigurationNotifications: any[] = [];
-  let executionSuccessful = true;
+  let executionSuccessful: boolean = true;
 
   for (const result of results) {
     const { filePath } = result;
@@ -152,7 +157,8 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
       };
       sarifFiles.set(filePath, sarifFile);
 
-      const containsSuppressedMessages = result.suppressedMessages && result.suppressedMessages.length > 0;
+      const containsSuppressedMessages: boolean =
+        result.suppressedMessages && result.suppressedMessages.length > 0;
       const messages: IMessage[] =
         containsSuppressedMessages && !ignoreSuppressed
           ? [...result.messages, ...result.suppressedMessages]
@@ -160,8 +166,9 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
 
       if (messages.length > 0) {
         for (const message of messages) {
+          const level: string = message.fatal || message.severity === 2 ? 'error' : 'warning';
           const sarifRepresentation: ISarifRepresentation = {
-            level: getResultLevel(message),
+            level,
             message: {
               text: message.message
             },
@@ -182,7 +189,7 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
 
             if (containsSuppressedMessages && !ignoreSuppressed) {
               sarifRepresentation.suppressions = message.suppressions
-                ? message.suppressions.map((suppression: Suppression) => {
+                ? message.suppressions.map((suppression: ISuppressedAnalysis) => {
                     return {
                       kind: suppression.kind === 'directive' ? 'inSource' : 'external',
                       justification: suppression.justification
@@ -200,22 +207,23 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
             }
           }
 
+          const physicalLocation: ISarifPhysicalLocation = sarifRepresentation.locations[0].physicalLocation;
+
           if (message.line! > 0 || message.column! > 0) {
-            sarifRepresentation.locations[0].physicalLocation.region = {};
+            physicalLocation.region = {};
             const { line, column, endLine, endColumn } = message;
-            const region = {
+            const region: IRegion = {
               startLine: line !== undefined && line > 0 ? line : undefined,
               startColumn: column !== undefined && column > 0 ? column : undefined,
               endLine: endLine !== undefined && endLine > 0 ? endLine : undefined,
               endColumn: endColumn !== undefined && endColumn > 0 ? endColumn : undefined
             };
-            sarifRepresentation.locations[0].physicalLocation.region = region;
+            physicalLocation.region = region;
           }
 
           if (message.source) {
-            sarifRepresentation.locations[0].physicalLocation.region =
-              sarifRepresentation.locations[0].physicalLocation.region || {};
-            sarifRepresentation.locations[0].physicalLocation.region.snippet = {
+            physicalLocation.region = physicalLocation.region || {};
+            physicalLocation.region.snippet = {
               text: message.source
             };
           }

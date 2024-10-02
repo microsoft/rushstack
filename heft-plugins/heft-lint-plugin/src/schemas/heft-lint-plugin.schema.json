@@ -15,7 +15,7 @@
 
     "sarifLogPath": {
       "title": "SARIF Log Path",
-      "description": "",
+      "description": "Provides the path of where SARIF log files should be created.",
       "type": "string"
     }
   }
