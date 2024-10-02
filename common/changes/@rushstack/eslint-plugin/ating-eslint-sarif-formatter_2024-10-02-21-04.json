@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "comment": "Upgraded @types/eslint to version 8.56.10",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin"
+}
