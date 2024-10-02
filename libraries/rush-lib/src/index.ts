@@ -123,6 +123,7 @@ export {
 
 export {
   ProjectChangeAnalyzer,
+  type IGetChangesByProjectOptions,
   type IGetChangedProjectsOptions,
   type IRawRepoState as _IRawRepoState
 } from './logic/ProjectChangeAnalyzer';

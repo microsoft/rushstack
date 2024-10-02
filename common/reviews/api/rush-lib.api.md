@@ -517,6 +517,14 @@ export interface IGetChangedProjectsOptions {
     variant?: string;
 }
 
+// @beta (undocumented)
+export interface IGetChangesByProjectOptions {
+    // (undocumented)
+    changedFiles: Map<string, IFileDiffStatus>;
+    // (undocumented)
+    lookup: LookupByPath<RushConfigurationProject>;
+}
+
 // @beta
 export interface IGlobalCommand extends IRushCommand {
 }
@@ -1117,8 +1125,6 @@ export class ProjectChangeAnalyzer {
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
-    // Warning: (ae-forgotten-export) The symbol "IGetChangesByProjectOptions" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     protected getChangesByProject(options: IGetChangesByProjectOptions): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
     // @internal

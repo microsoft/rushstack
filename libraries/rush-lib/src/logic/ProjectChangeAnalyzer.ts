@@ -46,6 +46,9 @@ export interface IGetChangedProjectsOptions {
   enableFiltering: boolean;
 }
 
+/**
+ * @beta
+ */
 export interface IGetChangesByProjectOptions {
   lookup: LookupByPath<RushConfigurationProject>;
   changedFiles: Map<string, IFileDiffStatus>;
