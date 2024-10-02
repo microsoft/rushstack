@@ -49,9 +49,31 @@ export interface IGetChangedProjectsOptions {
 /**
  * @beta
  */
-export interface IGetChangesByProjectOptions {
-  lookup: LookupByPath<RushConfigurationProject>;
-  changedFiles: Map<string, IFileDiffStatus>;
+export interface IClusterFileInfoOptions<TItem, TGroup> {
+  lookup: LookupByPath<TGroup>;
+  infoByPath: ReadonlyMap<string, TItem>;
+}
+
+function clusterFileInfo<TItem, TGroup>(
+  options: IClusterFileInfoOptions<TItem, TGroup>
+): Map<TGroup, Map<string, TItem>> {
+  const { lookup, infoByPath } = options;
+  const clusteredFileInfo: Map<TGroup, Map<string, TItem>> = new Map();
+
+  for (const [file, diffStatus] of infoByPath) {
+    const group: TGroup | undefined = lookup.findChildPath(file);
+    if (!group) {
+      continue;
+    }
+    let groupInfo: Map<string, TItem> | undefined = clusteredFileInfo.get(group);
+    if (!groupInfo) {
+      groupInfo = new Map();
+      clusteredFileInfo.set(group, groupInfo);
+    }
+    groupInfo.set(file, diffStatus);
+  }
+
+  return clusteredFileInfo;
 }
 
 interface IGitState {
@@ -244,7 +266,7 @@ export class ProjectChangeAnalyzer {
     const changesByProject: Map<
       RushConfigurationProject,
       Map<string, IFileDiffStatus>
-    > = this.getChangesByProject({ changedFiles, lookup });
+    > = this.getChangesByProject({ infoByPath: changedFiles, lookup });
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
     if (enableFiltering) {
@@ -333,25 +355,9 @@ export class ProjectChangeAnalyzer {
   }
 
   protected getChangesByProject(
-    options: IGetChangesByProjectOptions
+    options: IClusterFileInfoOptions<IFileDiffStatus, RushConfigurationProject>
   ): Map<RushConfigurationProject, Map<string, IFileDiffStatus>> {
-    const { lookup, changedFiles } = options;
-    const changesByProject: Map<RushConfigurationProject, Map<string, IFileDiffStatus>> = new Map();
-
-    for (const [file, diffStatus] of changedFiles) {
-      const project: RushConfigurationProject | undefined = lookup.findChildPath(file);
-      if (!project) {
-        continue;
-      }
-      let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
-      if (!projectChanges) {
-        projectChanges = new Map();
-        changesByProject.set(project, projectChanges);
-      }
-      projectChanges.set(file, diffStatus);
-    }
-
-    return changesByProject;
+    return clusterFileInfo(options);
   }
 
   private async _getDataAsync(terminal: ITerminal): Promise<IRawRepoState> {
