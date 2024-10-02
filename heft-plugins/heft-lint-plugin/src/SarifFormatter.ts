@@ -12,27 +12,9 @@ import type * as TEslint from 'eslint';
 // Helper Functions
 //------------------------------------------------------------------------------
 
-interface ESLint {
-  version: string;
-}
-
 interface Suppression {
   kind: string;
   justification: string;
-}
-
-// Interface for ESLint message object
-interface ESLintMessage {
-  fatal?: boolean;
-  severity?: number;
-  message: string;
-  ruleId?: string;
-  line?: number;
-  column?: number;
-  endLine?: number;
-  endColumn?: number;
-  source?: string;
-  suppressions?: Suppression[];
 }
 
 /**
@@ -41,7 +23,7 @@ interface ESLintMessage {
  * @returns {string} severity level
  * @private
  */
-function getResultLevel(message: ESLintMessage): string {
+function getResultLevel(message: TEslint.Linter.LintMessage): string {
   if (message.fatal || message.severity === 2) {
     return 'error';
   }
@@ -69,11 +51,52 @@ interface ISarifRun {
   }[];
 }
 
+interface ISarifFile {
+  location: {
+    uri: string;
+  };
+}
+
+interface ISarifRepresentation {
+  level: string;
+  message: {
+    text: string;
+  };
+  locations: ISarifLocation[];
+  ruleId?: string;
+  descriptor?: {
+    id: string;
+  };
+  suppressions?: Suppression[];
+}
+
 // Interface for the SARIF log structure
 interface ISarifLog {
   version: string;
   $schema: string;
   runs: ISarifRun[];
+}
+
+interface ISarifLocation {
+  physicalLocation: {
+    artifactLocation: {
+      uri: string;
+      index: number;
+    };
+    region?: {
+      startLine?: number;
+      startColumn?: number;
+      endLine?: number;
+      endColumn?: number;
+      snippet?: {
+        text: string;
+      };
+    };
+  };
+}
+
+interface IMessage extends TEslint.Linter.LintMessage {
+  suppressions?: Suppression[];
 }
 
 export interface ISerifFormatterOptions {
@@ -82,7 +105,7 @@ export interface ISerifFormatterOptions {
 }
 
 interface IExtendedLintResult extends TEslint.ESLint.LintResult {
-  suppressedMessages?: TEslint.ESLint.LintResult['messages'];
+  suppressedMessages: TEslint.ESLint.LintResult['suppressedMessages'];
 }
 
 // Main function
@@ -117,7 +140,7 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
 
   for (const result of results) {
     const { filePath } = result;
-    let sarifFile: ISarifFIle | undefined = sarifFiles.get(filePath);
+    let sarifFile: ISarifFile | undefined = sarifFiles.get(filePath);
     if (sarifFile === undefined) {
       const artifactIndex: number = sarifFiles.size;
       const fileUrl: string = url.pathToFileURL(filePath).toString();
@@ -130,14 +153,14 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
       sarifFiles.set(filePath, sarifFile);
 
       const containsSuppressedMessages = result.suppressedMessages && result.suppressedMessages.length > 0;
-      const messages =
+      const messages: IMessage[] =
         containsSuppressedMessages && !ignoreSuppressed
           ? [...result.messages, ...result.suppressedMessages]
           : result.messages;
 
       if (messages.length > 0) {
         for (const message of messages) {
-          const sarifRepresentation: any = {
+          const sarifRepresentation: ISarifRepresentation = {
             level: getResultLevel(message),
             message: {
               text: message.message
@@ -179,18 +202,14 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
 
           if (message.line! > 0 || message.column! > 0) {
             sarifRepresentation.locations[0].physicalLocation.region = {};
-            if (message.line! > 0) {
-              sarifRepresentation.locations[0].physicalLocation.region.startLine = message.line;
-            }
-            if (message.column! > 0) {
-              sarifRepresentation.locations[0].physicalLocation.region.startColumn = message.column;
-            }
-            if (message.endLine! > 0) {
-              sarifRepresentation.locations[0].physicalLocation.region.endLine = message.endLine;
-            }
-            if (message.endColumn! > 0) {
-              sarifRepresentation.locations[0].physicalLocation.region.endColumn = message.endColumn;
-            }
+            const { line, column, endLine, endColumn } = message;
+            const region = {
+              startLine: line !== undefined && line > 0 ? line : undefined,
+              startColumn: column !== undefined && column > 0 ? column : undefined,
+              endLine: endLine !== undefined && endLine > 0 ? endLine : undefined,
+              endColumn: endColumn !== undefined && endColumn > 0 ? endColumn : undefined
+            };
+            sarifRepresentation.locations[0].physicalLocation.region = region;
           }
 
           if (message.source) {
@@ -221,8 +240,8 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
   if (toolConfigurationNotifications.length > 0) {
     sarifRun.invocations = [
       {
-        toolConfigurationNotifications: toolConfigurationNotifications,
-        executionSuccessful: executionSuccessful
+        toolConfigurationNotifications,
+        executionSuccessful
       }
     ];
   }
