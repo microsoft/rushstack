@@ -2,6 +2,23 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "entries": [
     {
+      "version": "1.0.61",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.0.61",
+      "date": "Wed, 02 Oct 2024 00:11:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure compatibility with webpack 5.95.0"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.60",
       "tag": "@rushstack/hashed-folder-copy-plugin_v1.0.60",
       "date": "Tue, 01 Oct 2024 00:11:28 GMT",

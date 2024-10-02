@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Tue, 01 Oct 2024 00:11:28 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Oct 2024 00:11:19 GMT and should not be manually modified.
+
+## 0.11.0
+Wed, 02 Oct 2024 00:11:19 GMT
+
+### Minor changes
+
+- Update the `webpack` peer dependency to `^5.82.1` from `~5.82.1`. Also bump `webpack-dev-server` to `^5.1.0`. This drops support for Node 16 and includes some breaking configuration changes. See https://github.com/webpack/webpack-dev-server/blob/master/migration-v5.md.
 
 ## 0.10.14
 Tue, 01 Oct 2024 00:11:28 GMT

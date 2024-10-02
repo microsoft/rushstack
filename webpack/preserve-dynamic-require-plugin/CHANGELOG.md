@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack-preserve-dynamic-require-plugin
 
-This log was last generated on Tue, 01 Oct 2024 00:11:28 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Oct 2024 00:11:19 GMT and should not be manually modified.
+
+## 0.11.69
+Wed, 02 Oct 2024 00:11:19 GMT
+
+### Patches
+
+- Ensure compatibility with webpack 5.95.0
 
 ## 0.11.68
 Tue, 01 Oct 2024 00:11:28 GMT

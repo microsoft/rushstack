@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 01 Oct 2024 00:11:28 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Oct 2024 00:11:19 GMT and should not be manually modified.
+
+## 0.68.2
+Wed, 02 Oct 2024 00:11:19 GMT
+
+### Patches
+
+- Ensure `configHash` for file copy incremental cache file is portable.
 
 ## 0.68.1
 Tue, 01 Oct 2024 00:11:28 GMT

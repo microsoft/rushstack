@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.68.2",
+      "tag": "@rushstack/heft_v0.68.2",
+      "date": "Wed, 02 Oct 2024 00:11:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure `configHash` for file copy incremental cache file is portable."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.68.1",
       "tag": "@rushstack/heft_v0.68.1",
       "date": "Tue, 01 Oct 2024 00:11:28 GMT",
