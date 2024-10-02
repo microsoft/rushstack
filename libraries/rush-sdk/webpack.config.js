@@ -17,6 +17,7 @@ module.exports = () => {
     mode: 'development', // So the output isn't minified
     devtool: 'source-map',
     entry: {
+      // Using CommonJS due to access of module.parent
       index: `${__dirname}/lib-commonjs/index.js`,
       loader: `${__dirname}/lib-commonjs/loader.js`
     },
@@ -27,6 +28,17 @@ module.exports = () => {
       library: {
         type: 'commonjs2'
       }
+    },
+    optimization: {
+      flagIncludedChunks: true,
+      concatenateModules: true,
+      providedExports: true,
+      usedExports: true,
+      sideEffects: true,
+      removeAvailableModules: true,
+      minimize: false,
+      realContentHash: true,
+      innerGraph: true
     },
     target: 'node',
     plugins: [new PreserveDynamicRequireWebpackPlugin()],

@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { PathOrFileDescriptor } from 'node:fs';
+
 import { Volume } from 'memfs/lib/volume';
-import type { Compiler, Resolver } from 'webpack';
+import type { Resolver, InputFileSystem } from 'webpack';
+
 import type { IPrefixMatch } from '@rushstack/lookup-by-path';
 
 import { WorkspaceLayoutCache, type IResolveContext } from '../WorkspaceLayoutCache';
@@ -16,7 +19,8 @@ export type WrappedResolve = (
   // eslint-disable-next-line @rushstack/no-new-null
 ) => [Error | false | null | undefined, ResolveRequest | undefined];
 
-export const parsedJson: Record<string, object> = {
+export type JsonObjectTypes = ReturnType<NonNullable<InputFileSystem['readJsonSync']>>;
+export const parsedJson: Record<string, JsonObjectTypes> = {
   '/workspace/a/package.json': { name: 'a' },
   '/workspace/a/lib-esm/package.json': { type: 'module' },
   '/workspace/b/package.json': { name: 'b', dependencies: { a: 'workspace:*' }, bundledDepencies: ['c'] },
@@ -54,7 +58,7 @@ export function createResolveForTests(
     resolverPathSeparator: separator
   });
 
-  const platformJson: Record<string, object> = Object.fromEntries(
+  const platformJson: Record<string, JsonObjectTypes> = Object.fromEntries(
     Object.entries(parsedJson).map(([key, value]) => [cache.normalizeToPlatform?.(key) ?? key, value])
   );
 
@@ -63,11 +67,15 @@ export function createResolveForTests(
   );
 
   fileSystem.fromJSON(serializedJson);
-  (fileSystem as Compiler['inputFileSystem']).readJson = (
-    path: string,
-    cb: (err: Error | null | undefined, data?: object) => void
+  (fileSystem as InputFileSystem).readJson = (
+    pathOrFileDescriptor: PathOrFileDescriptor,
+    cb: (err: Error | null, data?: JsonObjectTypes) => void
   ) => {
-    const parsed: object | undefined = platformJson[path];
+    if (typeof pathOrFileDescriptor === 'number') {
+      return cb(new Error(`Expected string path, got ${pathOrFileDescriptor}`));
+    }
+    const path: string = pathOrFileDescriptor.toString();
+    const parsed: JsonObjectTypes | undefined = platformJson[path];
     if (parsed) {
       return cb(null, parsed);
     }

@@ -54,6 +54,6 @@
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/semver": "7.5.0",
     "@types/webpack-env": "1.18.0",
-    "webpack": "~5.82.1"
+    "webpack": "~5.95.0"
   }
 }
