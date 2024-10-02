@@ -2,7 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { KnownPackageDependenciesPlugin } from '../KnownPackageDependenciesPlugin';
-import { createResolveForTests, parsedJson, type WrappedResolve } from './createResolveForTests';
+import {
+  createResolveForTests,
+  parsedJson,
+  type WrappedResolve,
+  type JsonObjectTypes
+} from './createResolveForTests';
 
 function createResolve(separator: '/' | '\\'): WrappedResolve {
   return createResolveForTests(separator, (cache, resolver) => {
@@ -20,7 +25,7 @@ describe(KnownPackageDependenciesPlugin.name, () => {
     const resolver: WrappedResolve = createResolve('/');
 
     const descriptionFilePath: string = '/workspace/b/package.json';
-    const descriptionFileData: object = parsedJson[descriptionFilePath];
+    const descriptionFileData: JsonObjectTypes = parsedJson[descriptionFilePath];
     const descriptionFileRoot: string = '/workspace/b';
 
     const [err1, result1] = resolver(
@@ -50,7 +55,7 @@ describe(KnownPackageDependenciesPlugin.name, () => {
     const resolver: WrappedResolve = createResolve('\\');
 
     const descriptionFilePath: string = '\\workspace\\b\\package.json';
-    const descriptionFileData: object = parsedJson['/workspace/b/package.json'];
+    const descriptionFileData: JsonObjectTypes = parsedJson['/workspace/b/package.json'];
     const descriptionFileRoot: string = '\\workspace\\b';
 
     const [err1, result1] = resolver(
@@ -81,7 +86,7 @@ describe(KnownPackageDependenciesPlugin.name, () => {
     const resolver: WrappedResolve = createResolve('/');
 
     const descriptionFilePath: string = '/workspace/b/package.json';
-    const descriptionFileData: object = parsedJson[descriptionFilePath];
+    const descriptionFileData: JsonObjectTypes = parsedJson[descriptionFilePath];
     const descriptionFileRoot: string = '/workspace/b';
 
     const [err1, result1] = resolver(
@@ -112,7 +117,7 @@ describe(KnownPackageDependenciesPlugin.name, () => {
     const resolver: WrappedResolve = createResolve('/');
 
     const descriptionFilePath: string = '/workspace/b/node_modules/c/package.json';
-    const descriptionFileData: object = parsedJson[descriptionFilePath];
+    const descriptionFileData: JsonObjectTypes = parsedJson[descriptionFilePath];
     const descriptionFileRoot: string = '/workspace/b/node_modules/c';
 
     const [err1, result1] = resolver(
@@ -143,7 +148,7 @@ describe(KnownPackageDependenciesPlugin.name, () => {
     const resolver: WrappedResolve = createResolve('/');
 
     const descriptionFilePath: string = '/workspace/b/node_modules/c/package.json';
-    const descriptionFileData: object = parsedJson[descriptionFilePath];
+    const descriptionFileData: JsonObjectTypes = parsedJson[descriptionFilePath];
     const descriptionFileRoot: string = '/workspace/b/node_modules/c';
 
     const [err1, result1] = resolver(
@@ -182,7 +187,7 @@ describe(KnownPackageDependenciesPlugin.name, () => {
     const resolver: WrappedResolve = createResolve('/');
 
     const descriptionFilePath: string = '/workspace/a/package.json';
-    const descriptionFileData: object = parsedJson[descriptionFilePath];
+    const descriptionFileData: JsonObjectTypes = parsedJson[descriptionFilePath];
     const descriptionFileRoot: string = '/workspace/a';
 
     const [err1, result1] = resolver(

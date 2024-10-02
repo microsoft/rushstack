@@ -1,6 +1,16 @@
 # Change Log - @rushstack/heft-api-extractor-plugin
 
-This log was last generated on Mon, 30 Sep 2024 15:12:19 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Oct 2024 00:11:19 GMT and should not be manually modified.
+
+## 0.3.52
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.3.51
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
 
 ## 0.3.50
 Mon, 30 Sep 2024 15:12:19 GMT
