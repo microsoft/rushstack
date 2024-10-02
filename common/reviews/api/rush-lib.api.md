@@ -14,6 +14,7 @@ import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
+import { IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
 import { ITerminal } from '@rushstack/terminal';
@@ -503,17 +504,29 @@ export interface IGenerateCacheEntryIdOptions {
 }
 
 // @beta (undocumented)
-export interface IGetChangedProjectsOptions {
+export interface IGetChangedFilesOptions extends IGetMergeCommitOptions {
+    // (undocumented)
+    mergeCommit?: string;
+}
+
+// @beta (undocumented)
+export interface IGetChangedProjectsOptions extends IGetChangedFilesOptions {
+    // (undocumented)
+    changedFiles?: Map<string, IFileDiffStatus>;
     enableFiltering: boolean;
     includeExternalDependencies: boolean;
+    // (undocumented)
+    variant?: string;
+}
+
+// @beta (undocumented)
+export interface IGetMergeCommitOptions {
     // (undocumented)
     shouldFetch?: boolean;
     // (undocumented)
     targetBranchName: string;
     // (undocumented)
     terminal: ITerminal;
-    // (undocumented)
-    variant?: string;
 }
 
 // @beta
@@ -1115,7 +1128,11 @@ export class ProjectChangeAnalyzer {
     _ensureInitializedAsync(terminal: ITerminal): Promise<_IRawRepoState | undefined>;
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
+    // (undocumented)
+    getChangedFilesAsync(options: IGetChangedFilesOptions): Promise<Map<string, IFileDiffStatus>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
+    // (undocumented)
+    getMergeCommitAsync(options: IGetMergeCommitOptions): Promise<string>;
     // @internal
     _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal

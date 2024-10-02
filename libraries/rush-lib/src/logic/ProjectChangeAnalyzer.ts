@@ -27,11 +27,25 @@ import { UNINITIALIZED } from '../utilities/Utilities';
 /**
  * @beta
  */
-export interface IGetChangedProjectsOptions {
-  targetBranchName: string;
+export interface IGetMergeCommitOptions {
   terminal: ITerminal;
+  targetBranchName: string;
   shouldFetch?: boolean;
+}
+
+/**
+ * @beta
+ */
+export interface IGetChangedFilesOptions extends IGetMergeCommitOptions {
+  mergeCommit?: string;
+}
+
+/**
+ * @beta
+ */
+export interface IGetChangedProjectsOptions extends IGetChangedFilesOptions {
   variant?: string;
+  changedFiles?: Map<string, IFileDiffStatus>;
 
   /**
    * If set to `true`, consider a project's external dependency installation layout as defined in the
@@ -208,6 +222,27 @@ export class ProjectChangeAnalyzer {
     return filteredProjectData;
   }
 
+  public async getMergeCommitAsync(options: IGetMergeCommitOptions): Promise<string> {
+    const { terminal, targetBranchName, shouldFetch } = options;
+
+    // if the given targetBranchName is a commit, we assume it is the merge base
+    const isTargetBranchACommit: boolean = await this._git.determineIfRefIsACommitAsync(targetBranchName);
+    return isTargetBranchACommit
+      ? targetBranchName
+      : await this._git.getMergeBaseAsync(targetBranchName, terminal, shouldFetch);
+  }
+
+  public async getChangedFilesAsync(options: IGetChangedFilesOptions): Promise<Map<string, IFileDiffStatus>> {
+    const { terminal, targetBranchName, mergeCommit, shouldFetch } = options;
+    const { _rushConfiguration: rushConfiguration } = this;
+
+    const gitPath: string = this._git.getGitPathOrThrow();
+    const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
+    const resolvedMergeCommit: string =
+      mergeCommit ?? (await this.getMergeCommitAsync({ terminal, targetBranchName, shouldFetch }));
+    return getRepoChanges(repoRoot, resolvedMergeCommit, gitPath);
+  }
+
   /**
    * Gets a list of projects that have changed in the current state of the repo
    * when compared to the specified branch, optionally taking the shrinkwrap and settings in
@@ -216,23 +251,19 @@ export class ProjectChangeAnalyzer {
   public async getChangedProjectsAsync(
     options: IGetChangedProjectsOptions
   ): Promise<Set<RushConfigurationProject>> {
+    const { terminal, includeExternalDependencies, enableFiltering, variant } = options;
+    let { changedFiles, mergeCommit } = options;
     const { _rushConfiguration: rushConfiguration } = this;
-
-    const { targetBranchName, terminal, includeExternalDependencies, enableFiltering, shouldFetch, variant } =
-      options;
-
-    const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
-
-    // if the given targetBranchName is a commit, we assume it is the merge base
-    const IsTargetBranchACommit: boolean = await this._git.determineIfRefIsACommitAsync(targetBranchName);
-    const mergeCommit: string = IsTargetBranchACommit
-      ? targetBranchName
-      : await this._git.getMergeBaseAsync(targetBranchName, terminal, shouldFetch);
-
-    const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, mergeCommit, gitPath);
-
     const changedProjects: Set<RushConfigurationProject> = new Set();
+
+    if (!mergeCommit) {
+      mergeCommit = await this.getMergeCommitAsync(options);
+    }
+
+    if (!changedFiles) {
+      changedFiles = await this.getChangedFilesAsync({ ...options, mergeCommit });
+    }
 
     if (includeExternalDependencies) {
       // Even though changing the installed version of a nested dependency merits a change file,
@@ -246,7 +277,7 @@ export class ProjectChangeAnalyzer {
       const relativeShrinkwrapFilePath: string = Path.convertToSlashes(
         path.relative(repoRoot, fullShrinkwrapPath)
       );
-      const shrinkwrapStatus: IFileDiffStatus | undefined = repoChanges.get(relativeShrinkwrapFilePath);
+      const shrinkwrapStatus: IFileDiffStatus | undefined = changedFiles.get(relativeShrinkwrapFilePath);
 
       if (shrinkwrapStatus) {
         if (shrinkwrapStatus.status !== 'M') {
@@ -293,7 +324,7 @@ export class ProjectChangeAnalyzer {
     const lookup: LookupByPath<RushConfigurationProject> =
       rushConfiguration.getProjectLookupForRoot(repoRoot);
 
-    for (const [file, diffStatus] of repoChanges) {
+    for (const [file, diffStatus] of changedFiles) {
       const project: RushConfigurationProject | undefined = lookup.findChildPath(file);
       if (project) {
         if (changedProjects.has(project)) {
