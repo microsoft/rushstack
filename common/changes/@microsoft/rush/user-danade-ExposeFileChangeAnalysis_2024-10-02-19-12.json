@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Expose changed file analysis in ProjectChangeAnalyzer",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
