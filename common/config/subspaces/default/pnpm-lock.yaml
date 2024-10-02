@@ -3517,6 +3517,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
+      '@rushstack/package-deps-hash':
+        specifier: workspace:*
+        version: link:../package-deps-hash
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../terminal
