@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Expose changed file analysis in ProjectChangeAnalyzer",
+      "comment": "Expose `getChangesByProject` to allow classes that extend ProjectChangeAnalyzer to override file change analysis",
       "type": "patch"
     }
   ],
