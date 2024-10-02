@@ -504,29 +504,17 @@ export interface IGenerateCacheEntryIdOptions {
 }
 
 // @beta (undocumented)
-export interface IGetChangedFilesOptions extends IGetMergeCommitOptions {
-    // (undocumented)
-    mergeCommit?: string;
-}
-
-// @beta (undocumented)
-export interface IGetChangedProjectsOptions extends IGetChangedFilesOptions {
-    // (undocumented)
-    changedFiles?: Map<string, IFileDiffStatus>;
+export interface IGetChangedProjectsOptions {
     enableFiltering: boolean;
     includeExternalDependencies: boolean;
-    // (undocumented)
-    variant?: string;
-}
-
-// @beta (undocumented)
-export interface IGetMergeCommitOptions {
     // (undocumented)
     shouldFetch?: boolean;
     // (undocumented)
     targetBranchName: string;
     // (undocumented)
     terminal: ITerminal;
+    // (undocumented)
+    variant?: string;
 }
 
 // @beta
@@ -1128,11 +1116,11 @@ export class ProjectChangeAnalyzer {
     _ensureInitializedAsync(terminal: ITerminal): Promise<_IRawRepoState | undefined>;
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
-    // (undocumented)
-    getChangedFilesAsync(options: IGetChangedFilesOptions): Promise<Map<string, IFileDiffStatus>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
+    // Warning: (ae-forgotten-export) The symbol "IGetChangesByProjectOptions" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    getMergeCommitAsync(options: IGetMergeCommitOptions): Promise<string>;
+    protected getChangesByProject(options: IGetChangesByProjectOptions): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
     // @internal
     _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal
