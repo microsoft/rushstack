@@ -128,9 +128,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       ];
 
       const { scripts } = project.packageJson;
-      const commandToRun: string | undefined = [phase.shellCommand, scripts?.[phase.name]].find(
-        (x) => typeof x === 'string'
-      );
+      const commandToRun: string | undefined = phase.shellCommand ?? scripts?.[phase.name];
 
       operation.logFilenameIdentifier = `${baseLogFilenameIdentifier}_collate`;
       operation.runner = initializeShellOperationRunner({

@@ -55,13 +55,15 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
             continue;
           }
 
+          const { scripts } = project.packageJson;
+          if (!scripts) {
+            continue;
+          }
+
           const { name: phaseName } = phase;
 
-          const { scripts } = project.packageJson;
-          const rawScript: string | undefined = [
-            !isInitial && scripts?.[`${phaseName}:incremental:ipc`],
-            scripts?.[`${phaseName}:ipc`]
-          ].find((x): x is string => typeof x === 'string');
+          const rawScript: string | undefined =
+            (!isInitial ? scripts[`${phaseName}:incremental:ipc`] : undefined) ?? scripts[`${phaseName}:ipc`];
 
           if (!rawScript) {
             continue;

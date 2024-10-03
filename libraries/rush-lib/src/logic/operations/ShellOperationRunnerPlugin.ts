@@ -47,14 +47,16 @@ function createShellOperations(
       const { name: phaseName, shellCommand } = phase;
 
       const { scripts } = project.packageJson;
-      const commandForHash: string | undefined = [shellCommand, scripts?.[phaseName]].find(
-        (x): x is string => typeof x === 'string'
-      );
-      const commandToRun: string | undefined = [
-        shellCommand,
-        !isInitial && scripts?.[`${phaseName}:incremental`],
-        scripts?.[phaseName]
-      ].find((x): x is string => typeof x === 'string');
+
+      // This is the command that will be used to identify the cache entry for this operation
+      const commandForHash: string | undefined = shellCommand ?? scripts?.[phaseName];
+
+      // For execution of non-initial runs, prefer the `:incremental` script if it exists.
+      // However, the `shellCommand` value still takes precedence per the spec for that feature.
+      const commandToRun: string | undefined =
+        shellCommand ??
+        (!isInitial ? scripts?.[`${phaseName}:incremental`] : undefined) ??
+        scripts?.[phaseName];
 
       operation.runner = initializeShellOperationRunner({
         phase,
