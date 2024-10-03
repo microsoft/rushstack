@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 03 Oct 2024 19:46:40 GMT and should not be manually modified.
+This log was last generated on Thu, 03 Oct 2024 22:31:07 GMT and should not be manually modified.
+
+## 5.138.0
+Thu, 03 Oct 2024 22:31:07 GMT
+
+### Updates
+
+- Changes the behavior of phased commands in watch mode to, when running a phase `_phase:<name>` in all iterations after the first, prefer a script entry named `_phase:<name>:incremental` if such a script exists. The build cache will expect the outputs from the corresponding `_phase:<name>` script (with otherwise the same inputs) to be equivalent when looking for a cache hit.
 
 ## 5.137.0
 Thu, 03 Oct 2024 19:46:40 GMT
