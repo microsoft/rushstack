@@ -28,6 +28,7 @@ import {
   type ILogFilePaths,
   initializeProjectLogFilesAsync
 } from './ProjectLogWritable';
+import type { IOperationExecutionResult } from './IOperationExecutionResult';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -42,7 +43,7 @@ export interface IOperationExecutionRecordContext {
  *
  * @internal
  */
-export class OperationExecutionRecord implements IOperationRunnerContext {
+export class OperationExecutionRecord implements IOperationRunnerContext, IOperationExecutionResult {
   /**
    * The associated operation.
    */
@@ -174,6 +175,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public get cobuildRunnerId(): string | undefined {
     // Lazy calculated because the state file is created/restored later on
     return this._operationMetadataManager?.stateFile.state?.cobuildRunnerId;
+  }
+
+  public get metadataFolderPath(): string | undefined {
+    return this._operationMetadataManager?.metadataFolderPath;
   }
 
   public get isTerminal(): boolean {

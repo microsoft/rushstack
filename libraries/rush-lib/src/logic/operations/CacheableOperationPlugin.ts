@@ -32,7 +32,6 @@ import type {
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
@@ -54,7 +53,7 @@ export interface IOperationBuildCacheContext {
 
   operationBuildCache: ProjectBuildCache | undefined;
   cacheDisabledReason: string | undefined;
-  outputFolderNames: ReadonlyArray<string> | undefined;
+  outputFolderNames: ReadonlyArray<string>;
 
   cobuildLock: CobuildLock | undefined;
 
@@ -166,8 +165,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           return `${RushConstants.hashDelimiter}${operation.name}=${getOrCreateOperationHash(operation)}`;
         }
 
-        for (const operation of recordByOperation.keys()) {
-          const { associatedProject, associatedPhase, runner } = operation;
+        for (const [operation, record] of recordByOperation) {
+          const { associatedProject, associatedPhase, runner, settings: operationSettings } = operation;
           if (!associatedProject || !associatedPhase || !runner) {
             return;
           }
@@ -188,8 +187,15 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
               'or one provided by a rig, so it does not support caching.';
 
-          const outputFolderNames: ReadonlyArray<string> | undefined =
-            projectConfiguration?.operationSettingsByOperationName.get(phaseName)?.outputFolderNames;
+          const metadataFolderPath: string | undefined = record.metadataFolderPath;
+
+          const outputFolderNames: string[] = metadataFolderPath ? [metadataFolderPath] : [];
+          const configuredOutputFolderNames: string[] | undefined = operationSettings?.outputFolderNames;
+          if (configuredOutputFolderNames) {
+            for (const folderName of configuredOutputFolderNames) {
+              outputFolderNames.push(folderName);
+            }
+          }
 
           disjointSet?.add(operation);
 
@@ -273,7 +279,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           associatedProject: project,
           associatedPhase: phase,
           runner,
-          _operationMetadataManager: operationMetadataManager
+          _operationMetadataManager: operationMetadataManager,
+          operation
         } = record;
 
         if (
@@ -312,8 +319,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             rushProject: project,
             phase,
             terminal: buildCacheTerminal,
-            operationMetadataManager,
-            operation: record.operation
+            operation: operation
           });
 
           // Try to acquire the cobuild lock
@@ -321,7 +327,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           if (cobuildConfiguration?.cobuildFeatureEnabled) {
             if (
               cobuildConfiguration?.cobuildLeafProjectLogOnlyAllowed &&
-              record.operation.consumers.size === 0 &&
+              operation.consumers.size === 0 &&
               !projectBuildCache
             ) {
               // When the leaf project log only is allowed and the leaf project is build cache "disabled", try to get
@@ -332,8 +338,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 buildCacheContext,
                 rushProject: project,
                 phase,
-                terminal: buildCacheTerminal,
-                operationMetadataManager
+                terminal: buildCacheTerminal
               });
               if (projectBuildCache) {
                 buildCacheTerminal.writeVerboseLine(
@@ -628,7 +633,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     rushProject,
     phase,
     terminal,
-    operationMetadataManager,
     operation
   }: {
     buildCacheContext: IOperationBuildCacheContext;
@@ -636,7 +640,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     rushProject: RushConfigurationProject;
     phase: IPhase;
     terminal: ITerminal;
-    operationMetadataManager: OperationMetadataManager | undefined;
     operation: Operation;
   }): ProjectBuildCache | undefined {
     if (!buildCacheContext.operationBuildCache) {
@@ -652,14 +655,10 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         return;
       }
 
-      const additionalProjectOutputFilePaths: ReadonlyArray<string> =
-        operationMetadataManager?.relativeFilepaths || [];
-
       // eslint-disable-next-line require-atomic-updates -- This is guaranteed to not be concurrent
       buildCacheContext.operationBuildCache = ProjectBuildCache.getProjectBuildCache({
         project: rushProject,
         projectOutputFolderNames: outputFolderNames,
-        additionalProjectOutputFilePaths,
         buildCacheConfiguration,
         terminal,
         operationStateHash,
@@ -677,8 +676,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     terminal,
     buildCacheConfiguration,
     cobuildConfiguration,
-    phase,
-    operationMetadataManager
+    phase
   }: {
     buildCacheContext: IOperationBuildCacheContext;
     buildCacheConfiguration: BuildCacheConfiguration | undefined;
@@ -686,16 +684,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     rushProject: RushConfigurationProject;
     phase: IPhase;
     terminal: ITerminal;
-    operationMetadataManager: OperationMetadataManager | undefined;
   }): Promise<ProjectBuildCache | undefined> {
     if (!buildCacheConfiguration?.buildCacheEnabled) {
       return;
     }
 
     const { outputFolderNames, stateHash } = buildCacheContext;
-
-    const additionalProjectOutputFilePaths: ReadonlyArray<string> =
-      operationMetadataManager?.relativeFilepaths || [];
 
     const hasher: crypto.Hash = crypto.createHash('sha1');
     hasher.update(stateHash);
@@ -710,8 +704,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
     const projectBuildCache: ProjectBuildCache = ProjectBuildCache.getProjectBuildCache({
       project: rushProject,
-      projectOutputFolderNames: outputFolderNames || [],
-      additionalProjectOutputFilePaths,
+      projectOutputFolderNames: outputFolderNames,
       buildCacheConfiguration,
       terminal,
       operationStateHash,

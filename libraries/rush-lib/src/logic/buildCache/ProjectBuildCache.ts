@@ -28,10 +28,6 @@ export interface IProjectBuildCacheOptions {
    */
   projectOutputFolderNames: ReadonlyArray<string>;
   /**
-   * Value from CacheableOperationPlugin
-   */
-  additionalProjectOutputFilePaths?: ReadonlyArray<string>;
-  /**
    * The hash of all relevant inputs and configuration that uniquely identifies this execution.
    */
   operationStateHash: string;
@@ -59,7 +55,6 @@ export class ProjectBuildCache {
   private readonly _buildCacheEnabled: boolean;
   private readonly _cacheWriteEnabled: boolean;
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
-  private readonly _additionalProjectOutputFilePaths: ReadonlyArray<string>;
   private readonly _cacheId: string | undefined;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
@@ -71,8 +66,7 @@ export class ProjectBuildCache {
         cacheWriteEnabled
       },
       project,
-      projectOutputFolderNames,
-      additionalProjectOutputFilePaths
+      projectOutputFolderNames
     } = options;
     this._project = project;
     this._localBuildCacheProvider = localCacheProvider;
@@ -80,7 +74,6 @@ export class ProjectBuildCache {
     this._buildCacheEnabled = buildCacheEnabled;
     this._cacheWriteEnabled = cacheWriteEnabled;
     this._projectOutputFolderNames = projectOutputFolderNames || [];
-    this._additionalProjectOutputFilePaths = additionalProjectOutputFilePaths || [];
     this._cacheId = cacheId;
   }
 
@@ -360,19 +353,6 @@ export class ProjectBuildCache {
       return undefined;
     }
 
-    // Add additional output file paths
-    await Async.forEachAsync(
-      this._additionalProjectOutputFilePaths,
-      async (additionalProjectOutputFilePath: string) => {
-        const fullPath: string = `${projectFolderPath}/${additionalProjectOutputFilePath}`;
-        const pathExists: boolean = await FileSystem.existsAsync(fullPath);
-        if (pathExists) {
-          outputFilePaths.push(additionalProjectOutputFilePath);
-        }
-      },
-      { concurrency: 10 }
-    );
-
     // Ensure stable output path order.
     outputFilePaths.sort();
 
@@ -387,7 +367,12 @@ export class ProjectBuildCache {
   }
 
   private static _getCacheId(options: IProjectBuildCacheOptions): string | undefined {
-    const { buildCacheConfiguration, project: { packageName }, operationStateHash, phaseName } = options;
+    const {
+      buildCacheConfiguration,
+      project: { packageName },
+      operationStateHash,
+      phaseName
+    } = options;
     return buildCacheConfiguration.getCacheEntryId({
       projectName: packageName,
       projectStateHash: operationStateHash,

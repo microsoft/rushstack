@@ -45,6 +45,10 @@ export interface IOperationExecutionResult {
    */
   readonly cobuildRunnerId: string | undefined;
   /**
+   * The relative path to the folder that contains operation metadata. This folder will be automatically included in cache entries.
+   */
+  readonly metadataFolderPath: string | undefined;
+  /**
    * The paths to the log files, if applicable.
    */
   readonly logFilePaths: ILogFilePaths | undefined;
