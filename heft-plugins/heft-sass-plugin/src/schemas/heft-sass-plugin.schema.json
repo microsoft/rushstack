@@ -88,6 +88,19 @@
         "type": "string",
         "pattern": "[^\\\\]"
       }
+    },
+
+    "ignoreDeprecationsInDependencies": {
+      "type": "boolean",
+      "description": "If set, deprecation warnings from dependencies will be suppressed."
+    },
+
+    "silenceDeprecations": {
+      "type": "array",
+      "description": "A list of deprecation codes to silence.  This is useful for suppressing warnings from deprecated Sass features that are used in the project and known not to be a problem.",
+      "items": {
+        "type": "string"
+      }
     }
   }
 }
