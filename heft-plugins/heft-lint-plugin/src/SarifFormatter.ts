@@ -118,25 +118,37 @@ const sarifResults: ISarifRepresentation[] = [];
 const internalErrorId: string = 'ESL0999';
 const toolConfigurationNotifications: ISarifRepresentation[] = [];
 
-const sarifRun: ISarifRun = {
-  tool: {
-    driver: {
-      name: 'ESLint',
-      informationUri: 'https://eslint.org',
-      rules: []
-    }
-  }
-};
-
-const sarifLog: ISarifLog = {
-  version: '2.1.0',
-  $schema: 'http://json.schemastore.org/sarif-2.1.0-rtm.5',
-  runs: [sarifRun]
-};
-
-// Main function
+/**
+ * Converts ESLint results into a SARIF (Static Analysis Results Interchange Format) log.
+ *
+ * This function takes in a list of ESLint lint results, processes them to extract
+ * relevant information such as errors, warnings, and suppressed messages, and
+ * outputs a SARIF log which conforms to the SARIF v2.1.0 specification.
+ *
+ * @param results - An array of lint results (`IExtendedLintResult[]`) from ESLint that contains linting information,
+ *                  such as file paths, messages, and suppression details.
+ * @param options - An object (`ISerifFormatterOptions`) containing options for formatting:
+ *                  - `ignoreSuppressed`: Boolean flag to decide whether to ignore suppressed messages.
+ *                  - `eslintVersion`: Optional string to include the version of ESLint in the SARIF log.
+ * @returns The SARIF log (`ISarifLog`) containing information about the linting results in SARIF format.
+ */
 export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFormatterOptions): ISarifLog {
   const { ignoreSuppressed, eslintVersion } = options;
+  const sarifRun: ISarifRun = {
+    tool: {
+      driver: {
+        name: 'ESLint',
+        informationUri: 'https://eslint.org',
+        rules: []
+      }
+    }
+  };
+
+  const sarifLog: ISarifLog = {
+    version: '2.1.0',
+    $schema: 'http://json.schemastore.org/sarif-2.1.0-rtm.5',
+    runs: [sarifRun]
+  };
 
   if (typeof eslintVersion !== undefined) {
     sarifRun.tool.driver.version = eslintVersion;
@@ -209,14 +221,14 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
 
           const physicalLocation: ISarifPhysicalLocation = sarifRepresentation.locations[0].physicalLocation;
 
-          if (message.line! > 0 || message.column! > 0) {
+          if (message.line || message.column) {
             physicalLocation.region = {};
             const { line, column, endLine, endColumn } = message;
             const region: IRegion = {
-              startLine: line !== undefined && line > 0 ? line : undefined,
-              startColumn: column !== undefined && column > 0 ? column : undefined,
-              endLine: endLine !== undefined && endLine > 0 ? endLine : undefined,
-              endColumn: endColumn !== undefined && endColumn > 0 ? endColumn : undefined
+              startLine: line ? line : undefined,
+              startColumn: column ? column : undefined,
+              endLine: endLine ? endLine : undefined,
+              endColumn: endColumn ? endColumn : undefined
             };
             physicalLocation.region = region;
           }
