@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lookup-by-path",
+      "comment": "Allow for a map of file paths to arbitrary info to be grouped by the nearest entry in the LookupByPath trie",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/lookup-by-path"
+}

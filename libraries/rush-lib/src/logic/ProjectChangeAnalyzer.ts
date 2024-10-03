@@ -225,15 +225,47 @@ export class ProjectChangeAnalyzer {
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
 
     // if the given targetBranchName is a commit, we assume it is the merge base
-    const IsTargetBranchACommit: boolean = await this._git.determineIfRefIsACommitAsync(targetBranchName);
-    const mergeCommit: string = IsTargetBranchACommit
+    const isTargetBranchACommit: boolean = await this._git.determineIfRefIsACommitAsync(targetBranchName);
+    const mergeCommit: string = isTargetBranchACommit
       ? targetBranchName
       : await this._git.getMergeBaseAsync(targetBranchName, terminal, shouldFetch);
 
-    const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, mergeCommit, gitPath);
+    const changedFiles: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, mergeCommit, gitPath);
+    const lookup: LookupByPath<RushConfigurationProject> =
+      rushConfiguration.getProjectLookupForRoot(repoRoot);
+    const changesByProject: Map<
+      RushConfigurationProject,
+      Map<string, IFileDiffStatus>
+    > = this.getChangesByProject(lookup, changedFiles);
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
+    if (enableFiltering) {
+      // Reading rush-project.json may be problematic if, e.g. rush install has not yet occurred and rigs are in use
+      await Async.forEachAsync(
+        changesByProject,
+        async ([project, projectChanges]) => {
+          const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
+            project,
+            projectChanges,
+            repoRoot,
+            terminal
+          );
 
+          if (filteredChanges.size > 0) {
+            changedProjects.add(project);
+          }
+        },
+        { concurrency: 10 }
+      );
+    } else {
+      for (const [project, projectChanges] of changesByProject) {
+        if (projectChanges.size > 0) {
+          changedProjects.add(project);
+        }
+      }
+    }
+
+    // External dependency changes are not allowed to be filtered, so add these after filtering
     if (includeExternalDependencies) {
       // Even though changing the installed version of a nested dependency merits a change file,
       // ignore lockfile changes for `rush change` for the moment
@@ -246,7 +278,7 @@ export class ProjectChangeAnalyzer {
       const relativeShrinkwrapFilePath: string = Path.convertToSlashes(
         path.relative(repoRoot, fullShrinkwrapPath)
       );
-      const shrinkwrapStatus: IFileDiffStatus | undefined = repoChanges.get(relativeShrinkwrapFilePath);
+      const shrinkwrapStatus: IFileDiffStatus | undefined = changedFiles.get(relativeShrinkwrapFilePath);
 
       if (shrinkwrapStatus) {
         if (shrinkwrapStatus.status !== 'M') {
@@ -289,52 +321,14 @@ export class ProjectChangeAnalyzer {
       }
     }
 
-    const changesByProject: Map<RushConfigurationProject, Map<string, IFileDiffStatus>> = new Map();
-    const lookup: LookupByPath<RushConfigurationProject> =
-      rushConfiguration.getProjectLookupForRoot(repoRoot);
-
-    for (const [file, diffStatus] of repoChanges) {
-      const project: RushConfigurationProject | undefined = lookup.findChildPath(file);
-      if (project) {
-        if (changedProjects.has(project)) {
-          // Lockfile changes cannot be ignored via rush-project.json
-          continue;
-        }
-
-        if (enableFiltering) {
-          let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
-          if (!projectChanges) {
-            projectChanges = new Map();
-            changesByProject.set(project, projectChanges);
-          }
-          projectChanges.set(file, diffStatus);
-        } else {
-          changedProjects.add(project);
-        }
-      }
-    }
-
-    if (enableFiltering) {
-      // Reading rush-project.json may be problematic if, e.g. rush install has not yet occurred and rigs are in use
-      await Async.forEachAsync(
-        changesByProject,
-        async ([project, projectChanges]) => {
-          const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
-            project,
-            projectChanges,
-            repoRoot,
-            terminal
-          );
-
-          if (filteredChanges.size > 0) {
-            changedProjects.add(project);
-          }
-        },
-        { concurrency: 10 }
-      );
-    }
-
     return changedProjects;
+  }
+
+  protected getChangesByProject(
+    lookup: LookupByPath<RushConfigurationProject>,
+    changedFiles: Map<string, IFileDiffStatus>
+  ): Map<RushConfigurationProject, Map<string, IFileDiffStatus>> {
+    return lookup.groupByChild(changedFiles);
   }
 
   private async _getDataAsync(terminal: ITerminal): Promise<IRawRepoState> {
