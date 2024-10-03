@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LookupByPath } from './LookupByPath';
+import { LookupByPath } from '../LookupByPath';
 
 describe(LookupByPath.iteratePathSegments.name, () => {
   it('returns empty for an empty string', () => {
@@ -141,5 +141,94 @@ describe(LookupByPath.prototype.findLongestPrefixMatch.name, () => {
     expect(tree.findLongestPrefixMatch('barbar/baz')).toEqual({ value: 2, index: 6 });
     expect(tree.findLongestPrefixMatch('baz/foo')).toEqual({ value: 3, index: 3 });
     expect(tree.findLongestPrefixMatch('foo/foo')).toEqual({ value: 1, index: 3 });
+  });
+});
+
+describe(LookupByPath.prototype.groupByChild.name, () => {
+  const lookup: LookupByPath<string> = new LookupByPath([
+    ['foo', 'foo'],
+    ['foo/bar', 'bar'],
+    ['foo/bar/baz', 'baz']
+  ]);
+
+  it('returns empty map for empty input', () => {
+    expect(lookup.groupByChild(new Map())).toEqual(new Map());
+  });
+
+  it('groups items by the closest group that contains the file path', () => {
+    const infoByPath: Map<string, string> = new Map([
+      ['foo', 'foo'],
+      ['foo/bar', 'bar'],
+      ['foo/bar/baz', 'baz'],
+      ['foo/bar/baz/qux', 'qux'],
+      ['foo/bar/baz/qux/quux', 'quux']
+    ]);
+
+    const expected: Map<string, Map<string, string>> = new Map([
+      ['foo', new Map([['foo', 'foo']])],
+      ['bar', new Map([['foo/bar', 'bar']])],
+      [
+        'baz',
+        new Map([
+          ['foo/bar/baz', 'baz'],
+          ['foo/bar/baz/qux', 'qux'],
+          ['foo/bar/baz/qux/quux', 'quux']
+        ])
+      ]
+    ]);
+
+    expect(lookup.groupByChild(infoByPath)).toEqual(expected);
+  });
+
+  it('ignores items that do not exist in the lookup', () => {
+    const infoByPath: Map<string, string> = new Map([
+      ['foo', 'foo'],
+      ['foo/qux', 'qux'],
+      ['bar', 'bar'],
+      ['baz', 'baz']
+    ]);
+
+    const expected: Map<string, Map<string, string>> = new Map([
+      [
+        'foo',
+        new Map([
+          ['foo', 'foo'],
+          ['foo/qux', 'qux']
+        ])
+      ]
+    ]);
+
+    expect(lookup.groupByChild(infoByPath)).toEqual(expected);
+  });
+
+  it('ignores items that do not exist in the lookup when the lookup children are possibly falsy', () => {
+    const falsyLookup: LookupByPath<string> = new LookupByPath([
+      ['foo', 'foo'],
+      ['foo/bar', 'bar'],
+      ['foo/bar/baz', '']
+    ]);
+
+    const infoByPath: Map<string, string> = new Map([
+      ['foo', 'foo'],
+      ['foo/bar', 'bar'],
+      ['foo/bar/baz', 'baz'],
+      ['foo/bar/baz/qux', 'qux'],
+      ['foo/bar/baz/qux/quux', 'quux']
+    ]);
+
+    const expected: Map<string, Map<string, string>> = new Map([
+      ['foo', new Map([['foo', 'foo']])],
+      ['bar', new Map([['foo/bar', 'bar']])],
+      [
+        '',
+        new Map([
+          ['foo/bar/baz', 'baz'],
+          ['foo/bar/baz/qux', 'qux'],
+          ['foo/bar/baz/qux/quux', 'quux']
+        ])
+      ]
+    ]);
+
+    expect(falsyLookup.groupByChild(infoByPath)).toEqual(expected);
   });
 });

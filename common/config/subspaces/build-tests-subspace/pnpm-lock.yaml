@@ -6479,6 +6479,7 @@ packages:
     dependencies:
       '@rushstack/lookup-by-path': file:../../../libraries/lookup-by-path(@types/node@18.17.15)
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@18.17.15)
+      '@rushstack/package-deps-hash': file:../../../libraries/package-deps-hash(@types/node@18.17.15)
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@18.17.15)
       '@types/node-fetch': 2.6.2
       tapable: 2.2.1

@@ -247,6 +247,33 @@ export class LookupByPath<TItem> {
   }
 
   /**
+   * Groups the provided map of info by the nearest entry in the trie that contains the path. If the path
+   * is not found in the trie, the info is ignored.
+   *
+   * @returns The grouped info, grouped by the nearest entry in the trie that contains the path
+   *
+   * @param infoByPath - The info to be grouped, keyed by path
+   */
+  public groupByChild<TInfo>(infoByPath: Map<string, TInfo>): Map<TItem, Map<string, TInfo>> {
+    const groupedInfoByChild: Map<TItem, Map<string, TInfo>> = new Map();
+
+    for (const [path, info] of infoByPath) {
+      const child: TItem | undefined = this.findChildPath(path);
+      if (child === undefined) {
+        continue;
+      }
+      let groupedInfo: Map<string, TInfo> | undefined = groupedInfoByChild.get(child);
+      if (!groupedInfo) {
+        groupedInfo = new Map();
+        groupedInfoByChild.set(child, groupedInfo);
+      }
+      groupedInfo.set(path, info);
+    }
+
+    return groupedInfoByChild;
+  }
+
+  /**
    * Iterates through progressively longer prefixes of a given string and returns as soon
    * as the number of candidate items that match the prefix are 1 or 0.
    *

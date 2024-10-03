@@ -14,6 +14,7 @@ import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
+import { IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
 import { ITerminal } from '@rushstack/terminal';
@@ -1116,6 +1117,8 @@ export class ProjectChangeAnalyzer {
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
+    // (undocumented)
+    protected getChangesByProject(lookup: LookupByPath<RushConfigurationProject>, changedFiles: Map<string, IFileDiffStatus>): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
     // @internal
     _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal

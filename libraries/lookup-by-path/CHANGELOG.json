@@ -2,6 +2,18 @@
   "name": "@rushstack/lookup-by-path",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/lookup-by-path_v0.3.0",
+      "date": "Thu, 03 Oct 2024 15:11:00 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow for a map of file paths to arbitrary info to be grouped by the nearest entry in the LookupByPath trie"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.5",
       "tag": "@rushstack/lookup-by-path_v0.2.5",
       "date": "Wed, 02 Oct 2024 00:11:19 GMT",
