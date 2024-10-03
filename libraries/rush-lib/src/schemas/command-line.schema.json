@@ -218,7 +218,7 @@
                 },
                 "watchPhases": {
                   "title": "Watch Phases",
-                  "description": "List *exactly* the phases that should be run in watch mode for this command. If this property is specified and non-empty, after the phases defined in the \"phases\" property run, a file watcher will be started to watch projects for changes, and will run the phases listed in this property on changed projects.",
+                  "description": "List *exactly* the phases that should be run in watch mode for this command. If this property is specified and non-empty, after the phases defined in the \"phases\" property run, a file watcher will be started to watch projects for changes, and will run the phases listed in this property on changed projects. Rush will prefer scripts named \"${phaseName}:incremental\" over \"${phaseName}\" for every iteration after the first, so you can reuse the same phase name but define different scripts, e.g. to not clean on incremental runs.",
                   "type": "array",
                   "items": {
                     "type": "string"

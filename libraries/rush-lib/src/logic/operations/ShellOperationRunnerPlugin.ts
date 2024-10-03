@@ -31,7 +31,7 @@ function createShellOperations(
   operations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const { rushConfiguration } = context;
+  const { rushConfiguration, isInitial } = context;
 
   const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
     getCustomParameterValuesByPhase();
@@ -44,17 +44,27 @@ function createShellOperations(
       const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
 
       const displayName: string = getDisplayName(phase, project);
+      const { name: phaseName, shellCommand } = phase;
 
-      const rawCommandToRun: string | undefined = getScriptToRun(project, phase.name, phase.shellCommand);
+      const { scripts } = project.packageJson;
 
+      // This is the command that will be used to identify the cache entry for this operation
+      const commandForHash: string | undefined = shellCommand ?? scripts?.[phaseName];
+
+      // For execution of non-initial runs, prefer the `:incremental` script if it exists.
+      // However, the `shellCommand` value still takes precedence per the spec for that feature.
       const commandToRun: string | undefined =
-        rawCommandToRun !== undefined ? formatCommand(rawCommandToRun, customParameterValues) : undefined;
+        shellCommand ??
+        (!isInitial ? scripts?.[`${phaseName}:incremental`] : undefined) ??
+        scripts?.[phaseName];
 
       operation.runner = initializeShellOperationRunner({
         phase,
         project,
         displayName,
+        commandForHash,
         commandToRun,
+        customParameterValues,
         rushConfiguration
       });
     }
@@ -69,18 +79,28 @@ export function initializeShellOperationRunner(options: {
   displayName: string;
   rushConfiguration: RushConfiguration;
   commandToRun: string | undefined;
+  commandForHash?: string;
+  customParameterValues: ReadonlyArray<string>;
 }): IOperationRunner {
-  const { phase, project, rushConfiguration, commandToRun, displayName } = options;
+  const { phase, project, commandToRun: rawCommandToRun, displayName } = options;
 
-  if (commandToRun === undefined && phase.missingScriptBehavior === 'error') {
+  if (typeof rawCommandToRun !== 'string' && phase.missingScriptBehavior === 'error') {
     throw new Error(
       `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
     );
   }
 
-  if (commandToRun) {
+  if (rawCommandToRun) {
+    const { rushConfiguration, commandForHash: rawCommandForHash } = options;
+
+    const commandToRun: string = formatCommand(rawCommandToRun, options.customParameterValues);
+    const commandForHash: string = rawCommandForHash
+      ? formatCommand(rawCommandForHash, options.customParameterValues)
+      : commandToRun;
+
     return new ShellOperationRunner({
-      commandToRun: commandToRun || '',
+      commandToRun,
+      commandForHash,
       displayName,
       phase,
       rushConfiguration,
@@ -94,22 +114,6 @@ export function initializeShellOperationRunner(options: {
       silent: phase.missingScriptBehavior === 'silent'
     });
   }
-}
-
-export function getScriptToRun(
-  rushProject: RushConfigurationProject,
-  commandToRun: string,
-  shellCommand: string | undefined
-): string | undefined {
-  const { scripts } = rushProject.packageJson;
-
-  const rawCommand: string | undefined | null = shellCommand ?? scripts?.[commandToRun];
-
-  if (rawCommand === undefined || rawCommand === null) {
-    return undefined;
-  }
-
-  return rawCommand;
 }
 
 /**

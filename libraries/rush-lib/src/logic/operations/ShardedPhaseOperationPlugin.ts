@@ -13,10 +13,8 @@ import { NullOperationRunner } from './NullOperationRunner';
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import {
-  formatCommand,
   getCustomParameterValuesByPhase,
   getDisplayName,
-  getScriptToRun,
   initializeShellOperationRunner
 } from './ShellOperationRunnerPlugin';
 
@@ -129,11 +127,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         `--shard-count="${shards}"`
       ];
 
-      const rawCommandToRun: string | undefined = getScriptToRun(project, phase.name, phase.shellCommand);
-
-      const commandToRun: string | undefined = rawCommandToRun
-        ? formatCommand(rawCommandToRun, collatorParameters)
-        : undefined;
+      const { scripts } = project.packageJson;
+      const commandToRun: string | undefined = phase.shellCommand ?? scripts?.[phase.name];
 
       operation.logFilenameIdentifier = `${baseLogFilenameIdentifier}_collate`;
       operation.runner = initializeShellOperationRunner({
@@ -141,11 +136,12 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         project,
         displayName: collatorDisplayName,
         rushConfiguration,
-        commandToRun: commandToRun
+        commandToRun,
+        customParameterValues: collatorParameters
       });
 
       const shardOperationName: string = `${phase.name}:shard`;
-      const baseCommand: string | undefined = getScriptToRun(project, shardOperationName, undefined);
+      const baseCommand: string | undefined = scripts?.[shardOperationName];
       if (baseCommand === undefined) {
         throw new Error(
           `The project '${project.packageName}' does not define a '${phase.name}:shard' command in the 'scripts' section of its package.json`
@@ -205,14 +201,11 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
         const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}/${shards}`;
 
-        const shardedCommandToRun: string | undefined = baseCommand
-          ? formatCommand(baseCommand, shardedParameters)
-          : undefined;
-
         shardOperation.runner = initializeShellOperationRunner({
           phase,
           project,
-          commandToRun: shardedCommandToRun,
+          commandToRun: baseCommand,
+          customParameterValues: shardedParameters,
           displayName: shardDisplayName,
           rushConfiguration
         });

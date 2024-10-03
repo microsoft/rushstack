@@ -38,7 +38,11 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
         before: ShellOperationPluginName
       },
       async (operations: Set<Operation>, context: ICreateOperationsContext) => {
-        const { isWatch } = context;
+        const { isWatch, isInitial } = context;
+        if (!isWatch) {
+          return operations;
+        }
+
         currentContext = context;
 
         const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
@@ -51,12 +55,22 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
             continue;
           }
 
-          const rawScript: string | undefined = project.packageJson.scripts?.[`${phase.name}:ipc`];
+          const { scripts } = project.packageJson;
+          if (!scripts) {
+            continue;
+          }
+
+          const { name: phaseName } = phase;
+
+          const rawScript: string | undefined =
+            (!isInitial ? scripts[`${phaseName}:incremental:ipc`] : undefined) ?? scripts[`${phaseName}:ipc`];
+
           if (!rawScript) {
             continue;
           }
 
-          const commandToRun: string = formatCommand(rawScript, getCustomParameterValuesForPhase(phase));
+          const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
+          const commandToRun: string = formatCommand(rawScript, customParameterValues);
 
           const operationName: string = getDisplayName(phase, project);
           let maybeIpcOperationRunner: IPCOperationRunner | undefined = runnerCache.get(operationName);
@@ -66,7 +80,7 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
               project,
               name: operationName,
               shellCommand: commandToRun,
-              persist: isWatch,
+              persist: true,
               requestRun: (requestor?: string) => {
                 const operationState: IOperationExecutionResult | undefined =
                   operationStatesByRunner.get(ipcOperationRunner);
