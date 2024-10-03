@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lookup-by-path
 
-This log was last generated on Wed, 02 Oct 2024 00:11:19 GMT and should not be manually modified.
+This log was last generated on Thu, 03 Oct 2024 15:11:00 GMT and should not be manually modified.
+
+## 0.3.0
+Thu, 03 Oct 2024 15:11:00 GMT
+
+### Minor changes
+
+- Allow for a map of file paths to arbitrary info to be grouped by the nearest entry in the LookupByPath trie
 
 ## 0.2.5
 Wed, 02 Oct 2024 00:11:19 GMT
