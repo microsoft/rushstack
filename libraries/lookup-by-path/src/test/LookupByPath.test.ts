@@ -200,4 +200,35 @@ describe(LookupByPath.prototype.groupByChild.name, () => {
 
     expect(lookup.groupByChild(infoByPath)).toEqual(expected);
   });
+
+  it('ignores items that do not exist in the lookup when the lookup children are possibly falsy', () => {
+    const falsyLookup: LookupByPath<string> = new LookupByPath([
+      ['foo', 'foo'],
+      ['foo/bar', 'bar'],
+      ['foo/bar/baz', '']
+    ]);
+
+    const infoByPath: Map<string, string> = new Map([
+      ['foo', 'foo'],
+      ['foo/bar', 'bar'],
+      ['foo/bar/baz', 'baz'],
+      ['foo/bar/baz/qux', 'qux'],
+      ['foo/bar/baz/qux/quux', 'quux']
+    ]);
+
+    const expected: Map<string, Map<string, string>> = new Map([
+      ['foo', new Map([['foo', 'foo']])],
+      ['bar', new Map([['foo/bar', 'bar']])],
+      [
+        '',
+        new Map([
+          ['foo/bar/baz', 'baz'],
+          ['foo/bar/baz/qux', 'qux'],
+          ['foo/bar/baz/qux/quux', 'quux']
+        ])
+      ]
+    ]);
+
+    expect(falsyLookup.groupByChild(infoByPath)).toEqual(expected);
+  });
 });

@@ -255,22 +255,22 @@ export class LookupByPath<TItem> {
    * @param infoByPath - The info to be grouped, keyed by path
    */
   public groupByChild<TInfo>(infoByPath: Map<string, TInfo>): Map<TItem, Map<string, TInfo>> {
-    const groupedInfo: Map<TItem, Map<string, TInfo>> = new Map();
+    const groupedInfoByChild: Map<TItem, Map<string, TInfo>> = new Map();
 
     for (const [path, info] of infoByPath) {
-      const group: TItem | undefined = this.findChildPath(path);
-      if (!group) {
+      const child: TItem | undefined = this.findChildPath(path);
+      if (child === undefined) {
         continue;
       }
-      let groupInfo: Map<string, TInfo> | undefined = groupedInfo.get(group);
-      if (!groupInfo) {
-        groupInfo = new Map();
-        groupedInfo.set(group, groupInfo);
+      let groupedInfo: Map<string, TInfo> | undefined = groupedInfoByChild.get(child);
+      if (!groupedInfo) {
+        groupedInfo = new Map();
+        groupedInfoByChild.set(child, groupedInfo);
       }
-      groupInfo.set(path, info);
+      groupedInfo.set(path, info);
     }
 
-    return groupedInfo;
+    return groupedInfoByChild;
   }
 
   /**
