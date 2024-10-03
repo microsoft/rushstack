@@ -84,7 +84,7 @@ export function initializeShellOperationRunner(options: {
 }): IOperationRunner {
   const { phase, project, commandToRun: rawCommandToRun, displayName } = options;
 
-  if (rawCommandToRun === undefined && phase.missingScriptBehavior === 'error') {
+  if (typeof rawCommandToRun !== 'string' && phase.missingScriptBehavior === 'error') {
     throw new Error(
       `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
     );
