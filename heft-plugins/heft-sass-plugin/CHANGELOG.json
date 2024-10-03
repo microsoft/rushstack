@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.15.0",
+      "tag": "@rushstack/heft-sass-plugin_v0.15.0",
+      "date": "Thu, 03 Oct 2024 19:46:23 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add \"suppressDeprecations\" option to suppress specific SASS deprecation IDs. Add \"ignoreDeprecationsInDependencies\" option to ignore deprecation warnings from external SASS."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.24",
       "tag": "@rushstack/heft-sass-plugin_v0.14.24",
       "date": "Wed, 02 Oct 2024 00:11:19 GMT",
