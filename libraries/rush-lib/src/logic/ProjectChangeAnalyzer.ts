@@ -46,36 +46,6 @@ export interface IGetChangedProjectsOptions {
   enableFiltering: boolean;
 }
 
-/**
- * @beta
- */
-export interface IClusterFileInfoOptions<TItem, TGroup> {
-  lookup: LookupByPath<TGroup>;
-  infoByPath: ReadonlyMap<string, TItem>;
-}
-
-function clusterFileInfo<TItem, TGroup>(
-  options: IClusterFileInfoOptions<TItem, TGroup>
-): Map<TGroup, Map<string, TItem>> {
-  const { lookup, infoByPath } = options;
-  const clusteredFileInfo: Map<TGroup, Map<string, TItem>> = new Map();
-
-  for (const [file, diffStatus] of infoByPath) {
-    const group: TGroup | undefined = lookup.findChildPath(file);
-    if (!group) {
-      continue;
-    }
-    let groupInfo: Map<string, TItem> | undefined = clusteredFileInfo.get(group);
-    if (!groupInfo) {
-      groupInfo = new Map();
-      clusteredFileInfo.set(group, groupInfo);
-    }
-    groupInfo.set(file, diffStatus);
-  }
-
-  return clusteredFileInfo;
-}
-
 interface IGitState {
   gitPath: string;
   hashes: Map<string, string>;
@@ -266,7 +236,7 @@ export class ProjectChangeAnalyzer {
     const changesByProject: Map<
       RushConfigurationProject,
       Map<string, IFileDiffStatus>
-    > = this.getChangesByProject({ infoByPath: changedFiles, lookup });
+    > = this.getChangesByProject(lookup, changedFiles);
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
     if (enableFiltering) {
@@ -355,9 +325,10 @@ export class ProjectChangeAnalyzer {
   }
 
   protected getChangesByProject(
-    options: IClusterFileInfoOptions<IFileDiffStatus, RushConfigurationProject>
+    lookup: LookupByPath<RushConfigurationProject>,
+    changedFiles: Map<string, IFileDiffStatus>
   ): Map<RushConfigurationProject, Map<string, IFileDiffStatus>> {
-    return clusterFileInfo(options);
+    return lookup.groupByChild(changedFiles);
   }
 
   private async _getDataAsync(terminal: ITerminal): Promise<IRawRepoState> {

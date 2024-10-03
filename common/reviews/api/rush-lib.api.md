@@ -353,14 +353,6 @@ export interface ICloudBuildCacheProvider {
 }
 
 // @beta (undocumented)
-export interface IClusterFileInfoOptions<TItem, TGroup> {
-    // (undocumented)
-    infoByPath: ReadonlyMap<string, TItem>;
-    // (undocumented)
-    lookup: LookupByPath<TGroup>;
-}
-
-// @beta (undocumented)
 export interface ICobuildCompletedState {
     cacheId: string;
     // (undocumented)
@@ -1126,7 +1118,7 @@ export class ProjectChangeAnalyzer {
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // (undocumented)
-    protected getChangesByProject(options: IClusterFileInfoOptions<IFileDiffStatus, RushConfigurationProject>): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
+    protected getChangesByProject(lookup: LookupByPath<RushConfigurationProject>, changedFiles: Map<string, IFileDiffStatus>): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
     // @internal
     _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal
