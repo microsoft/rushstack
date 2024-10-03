@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 26 Sep 2024 22:59:11 GMT and should not be manually modified.
+This log was last generated on Thu, 03 Oct 2024 19:46:40 GMT and should not be manually modified.
+
+## 5.137.0
+Thu, 03 Oct 2024 19:46:40 GMT
+
+### Patches
+
+- Expose `getChangesByProject` to allow classes that extend ProjectChangeAnalyzer to override file change analysis
 
 ## 5.136.1
 Thu, 26 Sep 2024 22:59:11 GMT

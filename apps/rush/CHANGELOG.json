@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.137.0",
+      "tag": "@microsoft/rush_v5.137.0",
+      "date": "Thu, 03 Oct 2024 19:46:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Expose `getChangesByProject` to allow classes that extend ProjectChangeAnalyzer to override file change analysis"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.136.1",
       "tag": "@microsoft/rush_v5.136.1",
       "date": "Thu, 26 Sep 2024 22:59:11 GMT",

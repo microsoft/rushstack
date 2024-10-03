@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Wed, 02 Oct 2024 00:11:19 GMT and should not be manually modified.
+This log was last generated on Thu, 03 Oct 2024 19:46:23 GMT and should not be manually modified.
+
+## 0.15.0
+Thu, 03 Oct 2024 19:46:23 GMT
+
+### Minor changes
+
+- Add "suppressDeprecations" option to suppress specific SASS deprecation IDs. Add "ignoreDeprecationsInDependencies" option to ignore deprecation warnings from external SASS.
 
 ## 0.14.24
 Wed, 02 Oct 2024 00:11:19 GMT
