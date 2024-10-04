@@ -29,6 +29,10 @@ export interface IOperationExecutionResult {
    */
   readonly error: Error | undefined;
   /**
+   * If this operation is only present in the graph to maintain dependency relationships, this flag will be set to true.
+   */
+  readonly silent: boolean;
+  /**
    * Object tracking execution timing.
    */
   readonly stopwatch: IStopwatchResult;

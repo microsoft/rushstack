@@ -284,6 +284,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         } = record;
 
         if (
+          !operation.enabled ||
           !project ||
           !phase ||
           !runner?.cacheable ||
@@ -305,7 +306,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               buildCacheContext,
               buildCacheEnabled: buildCacheConfiguration?.buildCacheEnabled,
               rushProject: project,
-              logFilenameIdentifier: operationMetadataManager.logFilenameIdentifier,
+              logFilenameIdentifier: operation.logFilenameIdentifier,
               quietMode: record.quietMode,
               debugMode: record.debugMode
             });
@@ -378,7 +379,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
           const { error: errorLogPath } = getProjectLogFilePaths({
             project,
-            logFilenameIdentifier: operationMetadataManager.logFilenameIdentifier
+            logFilenameIdentifier: operation.logFilenameIdentifier
           });
           const restoreCacheAsync = async (
             // TODO: Investigate if `projectBuildCacheForRestore` is always the same instance as `projectBuildCache`
@@ -473,9 +474,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
         const { status, stopwatch, _operationMetadataManager: operationMetadataManager, operation } = record;
 
-        const { associatedProject: project, associatedPhase: phase, runner } = operation;
+        const { associatedProject: project, associatedPhase: phase, runner, enabled } = operation;
 
-        if (!project || !phase || !runner?.cacheable || !operationMetadataManager) {
+        if (!enabled || !project || !phase || !runner?.cacheable || !operationMetadataManager) {
           return;
         }
 
@@ -766,7 +767,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     quietMode: boolean;
     debugMode: boolean;
   }): Promise<ITerminal> {
-    const silent: boolean = record.runner.silent;
+    const silent: boolean = record.silent;
     if (silent) {
       const nullTerminalProvider: NullTerminalProvider = new NullTerminalProvider();
       return new Terminal(nullTerminalProvider);

@@ -202,6 +202,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     this._context.onOperationStatusChanged?.(this);
   }
 
+  public get silent(): boolean {
+    return !this.operation.enabled || this.runner.silent;
+  }
+
   /**
    * {@inheritdoc IOperationRunnerContext.runWithTerminalAsync}
    */
@@ -308,7 +312,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       if (earlyReturnStatus) {
         this.status = earlyReturnStatus;
       } else {
-        this.status = await this.runner.executeAsync(this);
+        // If the operation is disabled, skip the runner and directly mark as Skipped.
+        this.status = this.operation.enabled ? await this.runner.executeAsync(this) : OperationStatus.Skipped;
       }
       // Delegate global state reporting
       await onResult(this);

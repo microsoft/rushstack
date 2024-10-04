@@ -584,6 +584,7 @@ export interface IOperationExecutionResult {
     readonly metadataFolderPath: string | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly operation: Operation;
+    readonly silent: boolean;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
     readonly stopwatch: IStopwatchResult;
@@ -929,6 +930,7 @@ export class Operation {
     readonly consumers: ReadonlySet<Operation>;
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
+    enabled: boolean;
     get isNoOp(): boolean;
     logFilenameIdentifier: string;
     get name(): string | undefined;

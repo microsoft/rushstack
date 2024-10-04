@@ -15,10 +15,12 @@ export interface IOperationOptions {
    * The Rush phase associated with this Operation, if any
    */
   phase?: IPhase | undefined;
+
   /**
    * The Rush project associated with this Operation, if any
    */
   project?: RushConfigurationProject | undefined;
+
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
    * running the operation.
@@ -98,6 +100,13 @@ export class Operation {
    */
   public settings: IOperationSettings | undefined = undefined;
 
+  /**
+   * If set to false, this operation will be skipped during evaluation (return OperationStatus.Skipped).
+   * This is useful for plugins to alter the scope of the operation graph across executions,
+   * e.g. to enable or disable unit test execution, or to include or exclude dependencies.
+   */
+  public enabled: boolean;
+
   public constructor(options: IOperationOptions) {
     const { phase, project, runner, settings, logFilenameIdentifier } = options;
     this.associatedPhase = phase;
@@ -105,6 +114,7 @@ export class Operation {
     this.runner = runner;
     this.settings = settings;
     this.logFilenameIdentifier = logFilenameIdentifier;
+    this.enabled = true;
   }
 
   /**

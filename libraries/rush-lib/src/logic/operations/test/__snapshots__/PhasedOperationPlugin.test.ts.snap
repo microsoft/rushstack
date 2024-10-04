@@ -623,19 +623,19 @@ exports[`PhasedOperationPlugin handles filtered phases 1`] = `
 Array [
   Object {
     "dependencies": Array [
-      "a;_phase:no-deps",
+      "a (no-deps)",
     ],
     "name": "a (upstream-self)",
     "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:no-deps",
+    "name": "a (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
+      "b (no-deps)",
       "a (upstream-self)",
     ],
     "name": "b (upstream-self)",
@@ -643,12 +643,12 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "b;_phase:no-deps",
+    "name": "b (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "c;_phase:no-deps",
+      "c (no-deps)",
       "b (upstream-self)",
     ],
     "name": "c (upstream-self)",
@@ -656,12 +656,12 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "c;_phase:no-deps",
+    "name": "c (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "d;_phase:no-deps",
+      "d (no-deps)",
       "b (upstream-self)",
     ],
     "name": "d (upstream-self)",
@@ -669,12 +669,12 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "d;_phase:no-deps",
+    "name": "d (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "e;_phase:no-deps",
+      "e (no-deps)",
       "c (upstream-self)",
     ],
     "name": "e (upstream-self)",
@@ -682,12 +682,12 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "e;_phase:no-deps",
+    "name": "e (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "f;_phase:no-deps",
+      "f (no-deps)",
       "a (upstream-self)",
       "h (upstream-self)",
     ],
@@ -696,12 +696,12 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "f;_phase:no-deps",
+    "name": "f (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "h;_phase:no-deps",
+      "h (no-deps)",
       "a (upstream-self)",
     ],
     "name": "h (upstream-self)",
@@ -709,12 +709,12 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "h;_phase:no-deps",
+    "name": "h (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "g;_phase:no-deps",
+      "g (no-deps)",
       "a (upstream-self)",
     ],
     "name": "g (upstream-self)",
@@ -722,31 +722,31 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "g;_phase:no-deps",
+    "name": "g (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "i;_phase:no-deps",
+      "i (no-deps)",
     ],
     "name": "i (upstream-self)",
     "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "name": "i;_phase:no-deps",
+    "name": "i (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "j;_phase:no-deps",
+      "j (no-deps)",
     ],
     "name": "j (upstream-self)",
     "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "name": "j;_phase:no-deps",
+    "name": "j (no-deps)",
     "silent": true,
   },
 ]
@@ -769,48 +769,48 @@ Array [
   Object {
     "dependencies": Array [
       "b (upstream-3)",
-      "a;_phase:upstream-1-self-upstream",
-      "a;_phase:upstream-2-self",
+      "a (upstream-1-self-upstream)",
+      "a (upstream-2-self)",
     ],
     "name": "b (complex)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
+      "a (upstream-2)",
     ],
     "name": "b (upstream-3)",
     "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-2",
+    "name": "a (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-1-self-upstream",
+    "name": "a (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
+      "a (upstream-2)",
     ],
-    "name": "a;_phase:upstream-2-self",
+    "name": "a (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "c (upstream-3)",
-      "b;_phase:upstream-1-self-upstream",
-      "b;_phase:upstream-2-self",
+      "b (upstream-1-self-upstream)",
+      "b (upstream-2-self)",
     ],
     "name": "c (complex)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
     "name": "c (upstream-3)",
     "silent": false,
@@ -819,7 +819,7 @@ Array [
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "name": "b;_phase:upstream-2",
+    "name": "b (upstream-2)",
     "silent": true,
   },
   Object {
@@ -829,37 +829,37 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1-self",
+      "a (upstream-1-self)",
     ],
-    "name": "b;_phase:upstream-1-self-upstream",
+    "name": "b (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "name": "a;_phase:upstream-1-self",
+    "name": "a (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
-    "name": "b;_phase:upstream-2-self",
+    "name": "b (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "d (upstream-3)",
-      "b;_phase:upstream-1-self-upstream",
-      "b;_phase:upstream-2-self",
+      "b (upstream-1-self-upstream)",
+      "b (upstream-2-self)",
     ],
     "name": "d (complex)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
     "name": "d (upstream-3)",
     "silent": false,
@@ -867,15 +867,15 @@ Array [
   Object {
     "dependencies": Array [
       "e (upstream-3)",
-      "c;_phase:upstream-1-self-upstream",
-      "c;_phase:upstream-2-self",
+      "c (upstream-1-self-upstream)",
+      "c (upstream-2-self)",
     ],
     "name": "e (complex)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "c;_phase:upstream-2",
+      "c (upstream-2)",
     ],
     "name": "e (upstream-3)",
     "silent": false,
@@ -884,7 +884,7 @@ Array [
     "dependencies": Array [
       "b (upstream-1)",
     ],
-    "name": "c;_phase:upstream-2",
+    "name": "c (upstream-2)",
     "silent": true,
   },
   Object {
@@ -901,40 +901,40 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1-self",
+      "b (upstream-1-self)",
     ],
-    "name": "c;_phase:upstream-1-self-upstream",
+    "name": "c (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "b (upstream-1)",
     ],
-    "name": "b;_phase:upstream-1-self",
+    "name": "b (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "c;_phase:upstream-2",
+      "c (upstream-2)",
     ],
-    "name": "c;_phase:upstream-2-self",
+    "name": "c (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "f (upstream-3)",
-      "a;_phase:upstream-1-self-upstream",
-      "h;_phase:upstream-1-self-upstream",
-      "a;_phase:upstream-2-self",
-      "h;_phase:upstream-2-self",
+      "a (upstream-1-self-upstream)",
+      "h (upstream-1-self-upstream)",
+      "a (upstream-2-self)",
+      "h (upstream-2-self)",
     ],
     "name": "f (complex)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
-      "h;_phase:upstream-2",
+      "a (upstream-2)",
+      "h (upstream-2)",
     ],
     "name": "f (upstream-3)",
     "silent": false,
@@ -943,35 +943,35 @@ Array [
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "name": "h;_phase:upstream-2",
+    "name": "h (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1-self",
+      "a (upstream-1-self)",
     ],
-    "name": "h;_phase:upstream-1-self-upstream",
+    "name": "h (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "h;_phase:upstream-2",
+      "h (upstream-2)",
     ],
-    "name": "h;_phase:upstream-2-self",
+    "name": "h (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "g (upstream-3)",
-      "a;_phase:upstream-1-self-upstream",
-      "a;_phase:upstream-2-self",
+      "a (upstream-1-self-upstream)",
+      "a (upstream-2-self)",
     ],
     "name": "g (complex)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
+      "a (upstream-2)",
     ],
     "name": "g (upstream-3)",
     "silent": false,
@@ -979,15 +979,15 @@ Array [
   Object {
     "dependencies": Array [
       "h (upstream-3)",
-      "a;_phase:upstream-1-self-upstream",
-      "a;_phase:upstream-2-self",
+      "a (upstream-1-self-upstream)",
+      "a (upstream-2-self)",
     ],
     "name": "h (complex)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
+      "a (upstream-2)",
     ],
     "name": "h (upstream-3)",
     "silent": false,
@@ -1121,27 +1121,27 @@ exports[`PhasedOperationPlugin handles filtered phases on filtered projects 1`] 
 Array [
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1",
-      "h;_phase:upstream-1",
+      "a (upstream-1)",
+      "h (upstream-1)",
     ],
     "name": "f (upstream-2)",
     "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-1",
+    "name": "a (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:no-deps",
+      "a (no-deps)",
     ],
-    "name": "h;_phase:upstream-1",
+    "name": "h (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:no-deps",
+    "name": "a (no-deps)",
     "silent": true,
   },
   Object {
@@ -1151,16 +1151,16 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1",
+      "b (upstream-1)",
     ],
     "name": "c (upstream-2)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:no-deps",
+      "a (no-deps)",
     ],
-    "name": "b;_phase:upstream-1",
+    "name": "b (upstream-1)",
     "silent": true,
   },
 ]
@@ -1171,32 +1171,32 @@ Array [
   Object {
     "dependencies": Array [
       "f (upstream-3)",
-      "a;_phase:upstream-1-self-upstream",
-      "h;_phase:upstream-1-self-upstream",
-      "a;_phase:upstream-2-self",
-      "h;_phase:upstream-2-self",
+      "a (upstream-1-self-upstream)",
+      "h (upstream-1-self-upstream)",
+      "a (upstream-2-self)",
+      "h (upstream-2-self)",
     ],
     "name": "f (complex)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
-      "h;_phase:upstream-2",
+      "a (upstream-2)",
+      "h (upstream-2)",
     ],
     "name": "f (upstream-3)",
     "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-2",
+    "name": "a (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "name": "h;_phase:upstream-2",
+    "name": "h (upstream-2)",
     "silent": true,
   },
   Object {
@@ -1206,35 +1206,35 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-1-self-upstream",
+    "name": "a (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1-self",
+      "a (upstream-1-self)",
     ],
-    "name": "h;_phase:upstream-1-self-upstream",
+    "name": "h (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "name": "a;_phase:upstream-1-self",
+    "name": "a (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
+      "a (upstream-2)",
     ],
-    "name": "a;_phase:upstream-2-self",
+    "name": "a (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "h;_phase:upstream-2",
+      "h (upstream-2)",
     ],
-    "name": "h;_phase:upstream-2-self",
+    "name": "h (upstream-2-self)",
     "silent": true,
   },
   Object {
@@ -1252,15 +1252,15 @@ Array [
   Object {
     "dependencies": Array [
       "c (upstream-3)",
-      "b;_phase:upstream-1-self-upstream",
-      "b;_phase:upstream-2-self",
+      "b (upstream-1-self-upstream)",
+      "b (upstream-2-self)",
     ],
     "name": "c (complex)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
     "name": "c (upstream-3)",
     "silent": false,
@@ -1269,27 +1269,27 @@ Array [
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "name": "b;_phase:upstream-2",
+    "name": "b (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1-self",
+      "a (upstream-1-self)",
     ],
-    "name": "b;_phase:upstream-1-self-upstream",
+    "name": "b (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
-    "name": "b;_phase:upstream-2-self",
+    "name": "b (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
-      "h;_phase:no-deps",
+      "h (no-deps)",
     ],
     "name": "f (upstream-1)",
     "silent": false,
@@ -1301,19 +1301,19 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "h;_phase:no-deps",
+    "name": "h (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
+      "b (no-deps)",
     ],
     "name": "c (upstream-1)",
     "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "name": "b;_phase:no-deps",
+    "name": "b (no-deps)",
     "silent": true,
   },
   Object {
@@ -1339,52 +1339,52 @@ Array [
   Object {
     "dependencies": Array [
       "g (no-deps)",
-      "a;_phase:upstream-self",
+      "a (upstream-self)",
     ],
     "name": "g (upstream-self)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:no-deps",
+      "a (no-deps)",
     ],
-    "name": "a;_phase:upstream-self",
+    "name": "a (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:no-deps",
+    "name": "a (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:no-deps",
+      "a (no-deps)",
     ],
     "name": "g (upstream-1)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1",
+      "a (upstream-1)",
     ],
     "name": "g (upstream-2)",
     "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-1",
+    "name": "a (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
+      "a (upstream-2)",
     ],
     "name": "g (upstream-3)",
     "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-2",
+    "name": "a (upstream-2)",
     "silent": true,
   },
   Object {
@@ -1403,37 +1403,37 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1-self",
+      "a (upstream-1-self)",
     ],
     "name": "g (upstream-1-self-upstream)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1",
+      "a (upstream-1)",
     ],
-    "name": "a;_phase:upstream-1-self",
+    "name": "a (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "g (upstream-3)",
-      "a;_phase:upstream-1-self-upstream",
-      "a;_phase:upstream-2-self",
+      "a (upstream-1-self-upstream)",
+      "a (upstream-2-self)",
     ],
     "name": "g (complex)",
     "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-1-self-upstream",
+    "name": "a (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
+      "a (upstream-2)",
     ],
-    "name": "a;_phase:upstream-2-self",
+    "name": "a (upstream-2-self)",
     "silent": true,
   },
 ]
@@ -1460,7 +1460,7 @@ Array [
     "dependencies": Array [
       "f (no-deps)",
       "a (upstream-self)",
-      "h;_phase:upstream-self",
+      "h (upstream-self)",
     ],
     "name": "f (upstream-self)",
     "silent": false,
@@ -1474,42 +1474,42 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "h;_phase:no-deps",
+      "h (no-deps)",
       "a (upstream-self)",
     ],
-    "name": "h;_phase:upstream-self",
+    "name": "h (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "h;_phase:no-deps",
+    "name": "h (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "c (no-deps)",
-      "b;_phase:upstream-self",
+      "b (upstream-self)",
     ],
     "name": "c (upstream-self)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
+      "b (no-deps)",
       "a (upstream-self)",
     ],
-    "name": "b;_phase:upstream-self",
+    "name": "b (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "b;_phase:no-deps",
+    "name": "b (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
-      "h;_phase:no-deps",
+      "h (no-deps)",
     ],
     "name": "f (upstream-1)",
     "silent": false,
@@ -1521,7 +1521,7 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
+      "b (no-deps)",
     ],
     "name": "c (upstream-1)",
     "silent": false,
@@ -1529,7 +1529,7 @@ Array [
   Object {
     "dependencies": Array [
       "a (upstream-1)",
-      "h;_phase:upstream-1",
+      "h (upstream-1)",
     ],
     "name": "f (upstream-2)",
     "silent": false,
@@ -1538,7 +1538,7 @@ Array [
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "name": "h;_phase:upstream-1",
+    "name": "h (upstream-1)",
     "silent": true,
   },
   Object {
@@ -1548,7 +1548,7 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1",
+      "b (upstream-1)",
     ],
     "name": "c (upstream-2)",
     "silent": false,
@@ -1557,13 +1557,13 @@ Array [
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "name": "b;_phase:upstream-1",
+    "name": "b (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (upstream-2)",
-      "h;_phase:upstream-2",
+      "h (upstream-2)",
     ],
     "name": "f (upstream-3)",
     "silent": false,
@@ -1572,7 +1572,7 @@ Array [
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "name": "h;_phase:upstream-2",
+    "name": "h (upstream-2)",
     "silent": true,
   },
   Object {
@@ -1582,7 +1582,7 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
     "name": "c (upstream-3)",
     "silent": false,
@@ -1591,7 +1591,7 @@ Array [
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "name": "b;_phase:upstream-2",
+    "name": "b (upstream-2)",
     "silent": true,
   },
   Object {
@@ -1639,16 +1639,16 @@ Array [
   Object {
     "dependencies": Array [
       "a (upstream-1-self)",
-      "h;_phase:upstream-1-self",
+      "h (upstream-1-self)",
     ],
     "name": "f (upstream-1-self-upstream)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "h;_phase:upstream-1",
+      "h (upstream-1)",
     ],
-    "name": "h;_phase:upstream-1-self",
+    "name": "h (upstream-1-self)",
     "silent": true,
   },
   Object {
@@ -1658,25 +1658,25 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1-self",
+      "b (upstream-1-self)",
     ],
     "name": "c (upstream-1-self-upstream)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1",
+      "b (upstream-1)",
     ],
-    "name": "b;_phase:upstream-1-self",
+    "name": "b (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "f (upstream-3)",
       "a (upstream-1-self-upstream)",
-      "h;_phase:upstream-1-self-upstream",
+      "h (upstream-1-self-upstream)",
       "a (upstream-2-self)",
-      "h;_phase:upstream-2-self",
+      "h (upstream-2-self)",
     ],
     "name": "f (complex)",
     "silent": false,
@@ -1685,14 +1685,14 @@ Array [
     "dependencies": Array [
       "a (upstream-1-self)",
     ],
-    "name": "h;_phase:upstream-1-self-upstream",
+    "name": "h (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "h;_phase:upstream-2",
+      "h (upstream-2)",
     ],
-    "name": "h;_phase:upstream-2-self",
+    "name": "h (upstream-2-self)",
     "silent": true,
   },
   Object {
@@ -1705,8 +1705,8 @@ Array [
   Object {
     "dependencies": Array [
       "c (upstream-3)",
-      "b;_phase:upstream-1-self-upstream",
-      "b;_phase:upstream-2-self",
+      "b (upstream-1-self-upstream)",
+      "b (upstream-2-self)",
     ],
     "name": "c (complex)",
     "silent": false,
@@ -1715,14 +1715,14 @@ Array [
     "dependencies": Array [
       "a (upstream-1-self)",
     ],
-    "name": "b;_phase:upstream-1-self-upstream",
+    "name": "b (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
-    "name": "b;_phase:upstream-2-self",
+    "name": "b (upstream-2-self)",
     "silent": true,
   },
 ]
@@ -1732,32 +1732,32 @@ exports[`PhasedOperationPlugin handles some changed projects 1`] = `
 Array [
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:no-deps",
+    "name": "a (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "b;_phase:no-deps",
+    "name": "b (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "c;_phase:no-deps",
+    "name": "c (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "d;_phase:no-deps",
+    "name": "d (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "e;_phase:no-deps",
+    "name": "e (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "f;_phase:no-deps",
+    "name": "f (no-deps)",
     "silent": true,
   },
   Object {
@@ -1767,332 +1767,332 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "h;_phase:no-deps",
+    "name": "h (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "i;_phase:no-deps",
+    "name": "i (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "j;_phase:no-deps",
+    "name": "j (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:no-deps",
+      "a (no-deps)",
     ],
-    "name": "a;_phase:upstream-self",
+    "name": "a (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
-      "a;_phase:upstream-self",
+      "b (no-deps)",
+      "a (upstream-self)",
     ],
-    "name": "b;_phase:upstream-self",
+    "name": "b (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "c;_phase:no-deps",
-      "b;_phase:upstream-self",
+      "c (no-deps)",
+      "b (upstream-self)",
     ],
-    "name": "c;_phase:upstream-self",
+    "name": "c (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "d;_phase:no-deps",
-      "b;_phase:upstream-self",
+      "d (no-deps)",
+      "b (upstream-self)",
     ],
-    "name": "d;_phase:upstream-self",
+    "name": "d (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "e;_phase:no-deps",
-      "c;_phase:upstream-self",
+      "e (no-deps)",
+      "c (upstream-self)",
     ],
-    "name": "e;_phase:upstream-self",
+    "name": "e (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "f;_phase:no-deps",
-      "a;_phase:upstream-self",
-      "h;_phase:upstream-self",
+      "f (no-deps)",
+      "a (upstream-self)",
+      "h (upstream-self)",
     ],
-    "name": "f;_phase:upstream-self",
+    "name": "f (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "h;_phase:no-deps",
-      "a;_phase:upstream-self",
+      "h (no-deps)",
+      "a (upstream-self)",
     ],
-    "name": "h;_phase:upstream-self",
+    "name": "h (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "g (no-deps)",
-      "a;_phase:upstream-self",
+      "a (upstream-self)",
     ],
     "name": "g (upstream-self)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "i;_phase:no-deps",
+      "i (no-deps)",
     ],
-    "name": "i;_phase:upstream-self",
+    "name": "i (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "j;_phase:no-deps",
+      "j (no-deps)",
     ],
-    "name": "j;_phase:upstream-self",
+    "name": "j (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-1",
+    "name": "a (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:no-deps",
+      "a (no-deps)",
     ],
-    "name": "b;_phase:upstream-1",
+    "name": "b (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
+      "b (no-deps)",
     ],
-    "name": "c;_phase:upstream-1",
+    "name": "c (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
+      "b (no-deps)",
     ],
-    "name": "d;_phase:upstream-1",
+    "name": "d (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "c;_phase:no-deps",
+      "c (no-deps)",
     ],
-    "name": "e;_phase:upstream-1",
+    "name": "e (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:no-deps",
-      "h;_phase:no-deps",
+      "a (no-deps)",
+      "h (no-deps)",
     ],
-    "name": "f;_phase:upstream-1",
+    "name": "f (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:no-deps",
+      "a (no-deps)",
     ],
     "name": "g (upstream-1)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:no-deps",
+      "a (no-deps)",
     ],
-    "name": "h;_phase:upstream-1",
+    "name": "h (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "i;_phase:upstream-1",
+    "name": "i (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "j;_phase:upstream-1",
+    "name": "j (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-2",
+    "name": "a (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1",
+      "a (upstream-1)",
     ],
-    "name": "b;_phase:upstream-2",
+    "name": "b (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1",
+      "b (upstream-1)",
     ],
-    "name": "c;_phase:upstream-2",
+    "name": "c (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1",
+      "b (upstream-1)",
     ],
-    "name": "d;_phase:upstream-2",
+    "name": "d (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "c;_phase:upstream-1",
+      "c (upstream-1)",
     ],
-    "name": "e;_phase:upstream-2",
+    "name": "e (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1",
-      "h;_phase:upstream-1",
+      "a (upstream-1)",
+      "h (upstream-1)",
     ],
-    "name": "f;_phase:upstream-2",
+    "name": "f (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1",
+      "a (upstream-1)",
     ],
     "name": "g (upstream-2)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1",
+      "a (upstream-1)",
     ],
-    "name": "h;_phase:upstream-2",
+    "name": "h (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "i;_phase:upstream-2",
+    "name": "i (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "j;_phase:upstream-2",
+    "name": "j (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-3",
+    "name": "a (upstream-3)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
+      "a (upstream-2)",
     ],
-    "name": "b;_phase:upstream-3",
+    "name": "b (upstream-3)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
-    "name": "c;_phase:upstream-3",
+    "name": "c (upstream-3)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
-    "name": "d;_phase:upstream-3",
+    "name": "d (upstream-3)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "c;_phase:upstream-2",
+      "c (upstream-2)",
     ],
-    "name": "e;_phase:upstream-3",
+    "name": "e (upstream-3)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
-      "h;_phase:upstream-2",
+      "a (upstream-2)",
+      "h (upstream-2)",
     ],
-    "name": "f;_phase:upstream-3",
+    "name": "f (upstream-3)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
+      "a (upstream-2)",
     ],
     "name": "g (upstream-3)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
+      "a (upstream-2)",
     ],
-    "name": "h;_phase:upstream-3",
+    "name": "h (upstream-3)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "i;_phase:upstream-3",
+    "name": "i (upstream-3)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "j;_phase:upstream-3",
+    "name": "j (upstream-3)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1",
+      "a (upstream-1)",
     ],
-    "name": "a;_phase:upstream-1-self",
+    "name": "a (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1",
+      "b (upstream-1)",
     ],
-    "name": "b;_phase:upstream-1-self",
+    "name": "b (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "c;_phase:upstream-1",
+      "c (upstream-1)",
     ],
-    "name": "c;_phase:upstream-1-self",
+    "name": "c (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "d;_phase:upstream-1",
+      "d (upstream-1)",
     ],
-    "name": "d;_phase:upstream-1-self",
+    "name": "d (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "e;_phase:upstream-1",
+      "e (upstream-1)",
     ],
-    "name": "e;_phase:upstream-1-self",
+    "name": "e (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "f;_phase:upstream-1",
+      "f (upstream-1)",
     ],
-    "name": "f;_phase:upstream-1-self",
+    "name": "f (upstream-1-self)",
     "silent": true,
   },
   Object {
@@ -2104,65 +2104,65 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "h;_phase:upstream-1",
+      "h (upstream-1)",
     ],
-    "name": "h;_phase:upstream-1-self",
+    "name": "h (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "i;_phase:upstream-1",
+      "i (upstream-1)",
     ],
-    "name": "i;_phase:upstream-1-self",
+    "name": "i (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "j;_phase:upstream-1",
+      "j (upstream-1)",
     ],
-    "name": "j;_phase:upstream-1-self",
+    "name": "j (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-2",
+      "a (upstream-2)",
     ],
-    "name": "a;_phase:upstream-2-self",
+    "name": "a (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
-    "name": "b;_phase:upstream-2-self",
+    "name": "b (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "c;_phase:upstream-2",
+      "c (upstream-2)",
     ],
-    "name": "c;_phase:upstream-2-self",
+    "name": "c (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "d;_phase:upstream-2",
+      "d (upstream-2)",
     ],
-    "name": "d;_phase:upstream-2-self",
+    "name": "d (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "e;_phase:upstream-2",
+      "e (upstream-2)",
     ],
-    "name": "e;_phase:upstream-2-self",
+    "name": "e (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "f;_phase:upstream-2",
+      "f (upstream-2)",
     ],
-    "name": "f;_phase:upstream-2-self",
+    "name": "f (upstream-2-self)",
     "silent": true,
   },
   Object {
@@ -2174,174 +2174,174 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "h;_phase:upstream-2",
+      "h (upstream-2)",
     ],
-    "name": "h;_phase:upstream-2-self",
+    "name": "h (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "i;_phase:upstream-2",
+      "i (upstream-2)",
     ],
-    "name": "i;_phase:upstream-2-self",
+    "name": "i (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "j;_phase:upstream-2",
+      "j (upstream-2)",
     ],
-    "name": "j;_phase:upstream-2-self",
+    "name": "j (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "a;_phase:upstream-1-self-upstream",
+    "name": "a (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1-self",
+      "a (upstream-1-self)",
     ],
-    "name": "b;_phase:upstream-1-self-upstream",
+    "name": "b (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1-self",
+      "b (upstream-1-self)",
     ],
-    "name": "c;_phase:upstream-1-self-upstream",
+    "name": "c (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1-self",
+      "b (upstream-1-self)",
     ],
-    "name": "d;_phase:upstream-1-self-upstream",
+    "name": "d (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "c;_phase:upstream-1-self",
+      "c (upstream-1-self)",
     ],
-    "name": "e;_phase:upstream-1-self-upstream",
+    "name": "e (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1-self",
-      "h;_phase:upstream-1-self",
+      "a (upstream-1-self)",
+      "h (upstream-1-self)",
     ],
-    "name": "f;_phase:upstream-1-self-upstream",
+    "name": "f (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1-self",
+      "a (upstream-1-self)",
     ],
     "name": "g (upstream-1-self-upstream)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-1-self",
+      "a (upstream-1-self)",
     ],
-    "name": "h;_phase:upstream-1-self-upstream",
+    "name": "h (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "i;_phase:upstream-1-self-upstream",
+    "name": "i (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "j;_phase:upstream-1-self-upstream",
+    "name": "j (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "a;_phase:upstream-3",
+      "a (upstream-3)",
     ],
-    "name": "a;_phase:complex",
+    "name": "a (complex)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-3",
-      "a;_phase:upstream-1-self-upstream",
-      "a;_phase:upstream-2-self",
+      "b (upstream-3)",
+      "a (upstream-1-self-upstream)",
+      "a (upstream-2-self)",
     ],
-    "name": "b;_phase:complex",
+    "name": "b (complex)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "c;_phase:upstream-3",
-      "b;_phase:upstream-1-self-upstream",
-      "b;_phase:upstream-2-self",
+      "c (upstream-3)",
+      "b (upstream-1-self-upstream)",
+      "b (upstream-2-self)",
     ],
-    "name": "c;_phase:complex",
+    "name": "c (complex)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "d;_phase:upstream-3",
-      "b;_phase:upstream-1-self-upstream",
-      "b;_phase:upstream-2-self",
+      "d (upstream-3)",
+      "b (upstream-1-self-upstream)",
+      "b (upstream-2-self)",
     ],
-    "name": "d;_phase:complex",
+    "name": "d (complex)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "e;_phase:upstream-3",
-      "c;_phase:upstream-1-self-upstream",
-      "c;_phase:upstream-2-self",
+      "e (upstream-3)",
+      "c (upstream-1-self-upstream)",
+      "c (upstream-2-self)",
     ],
-    "name": "e;_phase:complex",
+    "name": "e (complex)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "f;_phase:upstream-3",
-      "a;_phase:upstream-1-self-upstream",
-      "h;_phase:upstream-1-self-upstream",
-      "a;_phase:upstream-2-self",
-      "h;_phase:upstream-2-self",
+      "f (upstream-3)",
+      "a (upstream-1-self-upstream)",
+      "h (upstream-1-self-upstream)",
+      "a (upstream-2-self)",
+      "h (upstream-2-self)",
     ],
-    "name": "f;_phase:complex",
+    "name": "f (complex)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "g (upstream-3)",
-      "a;_phase:upstream-1-self-upstream",
-      "a;_phase:upstream-2-self",
+      "a (upstream-1-self-upstream)",
+      "a (upstream-2-self)",
     ],
     "name": "g (complex)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "h;_phase:upstream-3",
-      "a;_phase:upstream-1-self-upstream",
-      "a;_phase:upstream-2-self",
+      "h (upstream-3)",
+      "a (upstream-1-self-upstream)",
+      "a (upstream-2-self)",
     ],
-    "name": "h;_phase:complex",
+    "name": "h (complex)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "i;_phase:upstream-3",
+      "i (upstream-3)",
     ],
-    "name": "i;_phase:complex",
+    "name": "i (complex)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "j;_phase:upstream-3",
+      "j (upstream-3)",
     ],
-    "name": "j;_phase:complex",
+    "name": "j (complex)",
     "silent": true,
   },
 ]
@@ -2356,7 +2356,7 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "b;_phase:no-deps",
+    "name": "b (no-deps)",
     "silent": true,
   },
   Object {
@@ -2366,12 +2366,12 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "d;_phase:no-deps",
+    "name": "d (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "e;_phase:no-deps",
+    "name": "e (no-deps)",
     "silent": true,
   },
   Object {
@@ -2381,22 +2381,22 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "g;_phase:no-deps",
+    "name": "g (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "h;_phase:no-deps",
+    "name": "h (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "i;_phase:no-deps",
+    "name": "i (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "j;_phase:no-deps",
+    "name": "j (no-deps)",
     "silent": true,
   },
   Object {
@@ -2408,7 +2408,7 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
+      "b (no-deps)",
       "a (upstream-self)",
     ],
     "name": "b (upstream-self)",
@@ -2424,7 +2424,7 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "d;_phase:no-deps",
+      "d (no-deps)",
       "b (upstream-self)",
     ],
     "name": "d (upstream-self)",
@@ -2432,7 +2432,7 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "e;_phase:no-deps",
+      "e (no-deps)",
       "c (upstream-self)",
     ],
     "name": "e (upstream-self)",
@@ -2449,7 +2449,7 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "h;_phase:no-deps",
+      "h (no-deps)",
       "a (upstream-self)",
     ],
     "name": "h (upstream-self)",
@@ -2457,7 +2457,7 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "g;_phase:no-deps",
+      "g (no-deps)",
       "a (upstream-self)",
     ],
     "name": "g (upstream-self)",
@@ -2465,16 +2465,16 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "i;_phase:no-deps",
+      "i (no-deps)",
     ],
-    "name": "i;_phase:upstream-self",
+    "name": "i (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "j;_phase:no-deps",
+      "j (no-deps)",
     ],
-    "name": "j;_phase:upstream-self",
+    "name": "j (upstream-self)",
     "silent": true,
   },
   Object {
@@ -2491,16 +2491,16 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
+      "b (no-deps)",
     ],
     "name": "c (upstream-1)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
+      "b (no-deps)",
     ],
-    "name": "d;_phase:upstream-1",
+    "name": "d (upstream-1)",
     "silent": true,
   },
   Object {
@@ -2513,7 +2513,7 @@ Array [
   Object {
     "dependencies": Array [
       "a (no-deps)",
-      "h;_phase:no-deps",
+      "h (no-deps)",
     ],
     "name": "f (upstream-1)",
     "silent": false,
@@ -2534,12 +2534,12 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "i;_phase:upstream-1",
+    "name": "i (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "j;_phase:upstream-1",
+    "name": "j (upstream-1)",
     "silent": true,
   },
   Object {
@@ -2599,12 +2599,12 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "i;_phase:upstream-2",
+    "name": "i (upstream-2)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "j;_phase:upstream-2",
+    "name": "j (upstream-2)",
     "silent": true,
   },
   Object {
@@ -2664,12 +2664,12 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "i;_phase:upstream-3",
+    "name": "i (upstream-3)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "j;_phase:upstream-3",
+    "name": "j (upstream-3)",
     "silent": true,
   },
   Object {
@@ -2695,9 +2695,9 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "d;_phase:upstream-1",
+      "d (upstream-1)",
     ],
-    "name": "d;_phase:upstream-1-self",
+    "name": "d (upstream-1-self)",
     "silent": true,
   },
   Object {
@@ -2730,16 +2730,16 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "i;_phase:upstream-1",
+      "i (upstream-1)",
     ],
-    "name": "i;_phase:upstream-1-self",
+    "name": "i (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "j;_phase:upstream-1",
+      "j (upstream-1)",
     ],
-    "name": "j;_phase:upstream-1-self",
+    "name": "j (upstream-1-self)",
     "silent": true,
   },
   Object {
@@ -2800,16 +2800,16 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "i;_phase:upstream-2",
+      "i (upstream-2)",
     ],
-    "name": "i;_phase:upstream-2-self",
+    "name": "i (upstream-2-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "j;_phase:upstream-2",
+      "j (upstream-2)",
     ],
-    "name": "j;_phase:upstream-2-self",
+    "name": "j (upstream-2-self)",
     "silent": true,
   },
   Object {
@@ -2869,12 +2869,12 @@ Array [
   },
   Object {
     "dependencies": Array [],
-    "name": "i;_phase:upstream-1-self-upstream",
+    "name": "i (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "j;_phase:upstream-1-self-upstream",
+    "name": "j (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
@@ -2951,16 +2951,16 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "i;_phase:upstream-3",
+      "i (upstream-3)",
     ],
-    "name": "i;_phase:complex",
+    "name": "i (complex)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "j;_phase:upstream-3",
+      "j (upstream-3)",
     ],
-    "name": "j;_phase:complex",
+    "name": "j (complex)",
     "silent": true,
   },
 ]
@@ -2970,7 +2970,7 @@ exports[`PhasedOperationPlugin handles some changed projects within filtered pro
 Array [
   Object {
     "dependencies": Array [],
-    "name": "f;_phase:no-deps",
+    "name": "f (no-deps)",
     "silent": true,
   },
   Object {
@@ -2985,9 +2985,9 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "f;_phase:no-deps",
+      "f (no-deps)",
       "a (upstream-self)",
-      "h;_phase:upstream-self",
+      "h (upstream-self)",
     ],
     "name": "f (upstream-self)",
     "silent": false,
@@ -3001,42 +3001,42 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "h;_phase:no-deps",
+      "h (no-deps)",
       "a (upstream-self)",
     ],
-    "name": "h;_phase:upstream-self",
+    "name": "h (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "h;_phase:no-deps",
+    "name": "h (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "c (no-deps)",
-      "b;_phase:upstream-self",
+      "b (upstream-self)",
     ],
     "name": "c (upstream-self)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
+      "b (no-deps)",
       "a (upstream-self)",
     ],
-    "name": "b;_phase:upstream-self",
+    "name": "b (upstream-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "name": "b;_phase:no-deps",
+    "name": "b (no-deps)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
-      "h;_phase:no-deps",
+      "h (no-deps)",
     ],
     "name": "f (upstream-1)",
     "silent": false,
@@ -3048,7 +3048,7 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:no-deps",
+      "b (no-deps)",
     ],
     "name": "c (upstream-1)",
     "silent": false,
@@ -3056,7 +3056,7 @@ Array [
   Object {
     "dependencies": Array [
       "a (upstream-1)",
-      "h;_phase:upstream-1",
+      "h (upstream-1)",
     ],
     "name": "f (upstream-2)",
     "silent": false,
@@ -3065,7 +3065,7 @@ Array [
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "name": "h;_phase:upstream-1",
+    "name": "h (upstream-1)",
     "silent": true,
   },
   Object {
@@ -3075,7 +3075,7 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1",
+      "b (upstream-1)",
     ],
     "name": "c (upstream-2)",
     "silent": false,
@@ -3084,13 +3084,13 @@ Array [
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "name": "b;_phase:upstream-1",
+    "name": "b (upstream-1)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (upstream-2)",
-      "h;_phase:upstream-2",
+      "h (upstream-2)",
     ],
     "name": "f (upstream-3)",
     "silent": false,
@@ -3099,7 +3099,7 @@ Array [
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "name": "h;_phase:upstream-2",
+    "name": "h (upstream-2)",
     "silent": true,
   },
   Object {
@@ -3109,7 +3109,7 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
     "name": "c (upstream-3)",
     "silent": false,
@@ -3118,7 +3118,7 @@ Array [
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "name": "b;_phase:upstream-2",
+    "name": "b (upstream-2)",
     "silent": true,
   },
   Object {
@@ -3166,16 +3166,16 @@ Array [
   Object {
     "dependencies": Array [
       "a (upstream-1-self)",
-      "h;_phase:upstream-1-self",
+      "h (upstream-1-self)",
     ],
     "name": "f (upstream-1-self-upstream)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "h;_phase:upstream-1",
+      "h (upstream-1)",
     ],
-    "name": "h;_phase:upstream-1-self",
+    "name": "h (upstream-1-self)",
     "silent": true,
   },
   Object {
@@ -3185,25 +3185,25 @@ Array [
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1-self",
+      "b (upstream-1-self)",
     ],
     "name": "c (upstream-1-self-upstream)",
     "silent": false,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-1",
+      "b (upstream-1)",
     ],
-    "name": "b;_phase:upstream-1-self",
+    "name": "b (upstream-1-self)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
       "f (upstream-3)",
       "a (upstream-1-self-upstream)",
-      "h;_phase:upstream-1-self-upstream",
+      "h (upstream-1-self-upstream)",
       "a (upstream-2-self)",
-      "h;_phase:upstream-2-self",
+      "h (upstream-2-self)",
     ],
     "name": "f (complex)",
     "silent": false,
@@ -3212,14 +3212,14 @@ Array [
     "dependencies": Array [
       "a (upstream-1-self)",
     ],
-    "name": "h;_phase:upstream-1-self-upstream",
+    "name": "h (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "h;_phase:upstream-2",
+      "h (upstream-2)",
     ],
-    "name": "h;_phase:upstream-2-self",
+    "name": "h (upstream-2-self)",
     "silent": true,
   },
   Object {
@@ -3232,8 +3232,8 @@ Array [
   Object {
     "dependencies": Array [
       "c (upstream-3)",
-      "b;_phase:upstream-1-self-upstream",
-      "b;_phase:upstream-2-self",
+      "b (upstream-1-self-upstream)",
+      "b (upstream-2-self)",
     ],
     "name": "c (complex)",
     "silent": false,
@@ -3242,14 +3242,14 @@ Array [
     "dependencies": Array [
       "a (upstream-1-self)",
     ],
-    "name": "b;_phase:upstream-1-self-upstream",
+    "name": "b (upstream-1-self-upstream)",
     "silent": true,
   },
   Object {
     "dependencies": Array [
-      "b;_phase:upstream-2",
+      "b (upstream-2)",
     ],
-    "name": "b;_phase:upstream-2-self",
+    "name": "b (upstream-2-self)",
     "silent": true,
   },
 ]

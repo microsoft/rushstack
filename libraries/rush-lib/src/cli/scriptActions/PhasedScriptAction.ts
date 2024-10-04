@@ -38,7 +38,10 @@ import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperatio
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
-import type { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
+import type {
+  IExecutionResult,
+  IOperationExecutionResult
+} from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';
@@ -53,6 +56,7 @@ import type { ProjectWatcher } from '../../logic/ProjectWatcher';
 import { FlagFile } from '../../api/FlagFile';
 import { WeightedOperationPlugin } from '../../logic/operations/WeightedOperationPlugin';
 import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
+import { Selection } from '../../logic/Selection';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -472,10 +476,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         new PnpmSyncCopyOperationPlugin(terminal).apply(this.hooks);
       }
 
+      const relevantProjects: Set<RushConfigurationProject> =
+        Selection.expandAllDependencies(projectSelection);
+
       const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this
         ._runsBeforeInstall
         ? new Map()
-        : await RushProjectConfiguration.tryLoadForProjectsAsync(projectSelection, terminal);
+        : await RushProjectConfiguration.tryLoadForProjectsAsync(relevantProjects, terminal);
 
       const initialCreateOperationsContext: ICreateOperationsContext = {
         buildCacheConfiguration,
@@ -840,7 +847,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
 
     if (this.parser.telemetry) {
-      const operationResults: Record<string, ITelemetryOperationResult> = {};
+      const jsonOperationResults: Record<string, ITelemetryOperationResult> = {};
 
       const extraData: IPhasedCommandTelemetry = {
         // Fields preserved across the command invocation
@@ -861,6 +868,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       };
 
       if (result) {
+        const { operationResults } = result;
+
         const nonSilentDependenciesByOperation: Map<Operation, Set<string>> = new Map();
         function getNonSilentDependencies(operation: Operation): ReadonlySet<string> {
           let realDependencies: Set<string> | undefined = nonSilentDependenciesByOperation.get(operation);
@@ -868,7 +877,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
             realDependencies = new Set();
             nonSilentDependenciesByOperation.set(operation, realDependencies);
             for (const dependency of operation.dependencies) {
-              if (dependency.runner!.silent) {
+              const dependencyRecord: IOperationExecutionResult | undefined =
+                operationResults.get(dependency);
+              if (dependencyRecord?.silent) {
                 for (const deepDependency of getNonSilentDependencies(dependency)) {
                   realDependencies.add(deepDependency);
                 }
@@ -880,14 +891,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           return realDependencies;
         }
 
-        for (const [operation, operationResult] of result.operationResults) {
-          if (operation.runner?.silent) {
+        for (const [operation, operationResult] of operationResults) {
+          if (operationResult.silent) {
             // Architectural operation. Ignore.
             continue;
           }
 
           const { startTime, endTime } = operationResult.stopwatch;
-          operationResults[operation.name!] = {
+          jsonOperationResults[operation.name!] = {
             startTimestampMs: startTime,
             endTimestampMs: endTime,
             nonCachedDurationMs: operationResult.nonCachedDurationMs,
@@ -930,7 +941,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         durationInSeconds: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
         extraData,
-        operationResults
+        operationResults: jsonOperationResults
       };
 
       this.hooks.beforeLog.call(logEntry);
