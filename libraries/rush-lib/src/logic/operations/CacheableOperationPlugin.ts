@@ -88,6 +88,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
     const { allowWarningsInSuccessfulBuild, buildCacheConfiguration, cobuildConfiguration } = this._options;
 
+    const { cacheHashSalt } = buildCacheConfiguration;
+
     hooks.beforeExecuteOperations.tap(
       PLUGIN_NAME,
       (
@@ -142,6 +144,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           // This property is used to force cache bust when version changes, e.g. when fixing bugs in the content
           // of the build cache.
           hasher.update(`${RushConstants.buildCacheVersion}`);
+
+          if (cacheHashSalt !== undefined) {
+            // This allows repository owners to force a cache bust by changing the salt.
+            // A common use case is to invalidate the cache when adding/removing/updating rush plugins that alter the build output.
+            hasher.update(cacheHashSalt);
+          }
 
           for (const dependencyHash of dependencyHashes) {
             hasher.update(dependencyHash);

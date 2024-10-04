@@ -66,6 +66,7 @@ export class ApprovedPackagesPolicy {
 // @beta
 export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
+    readonly cacheHashSalt: string | undefined;
     cacheWriteEnabled: boolean;
     readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
     static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string;
