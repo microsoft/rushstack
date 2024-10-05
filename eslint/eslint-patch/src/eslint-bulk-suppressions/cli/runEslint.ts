@@ -35,7 +35,9 @@ export async function runEslintAsync(files: string[], mode: 'suppress' | 'prune'
 
   if (results.length > 0) {
     const stylishFormatter: ESLint.Formatter = await eslint.loadFormatter();
-    const formattedResults: string | Promise<string> = stylishFormatter.format(results);
+    const formattedResults: string | Promise<string> = await Promise.resolve(
+      stylishFormatter.format(results)
+    );
     console.log(formattedResults);
   }
 

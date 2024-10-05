@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import url from 'url';
+import url from 'node:url';
 
 import type * as TEslint from 'eslint';
 
@@ -112,11 +112,7 @@ interface IExtendedLintResult extends TEslint.ESLint.LintResult {
   suppressedMessages: TEslint.ESLint.LintResult['suppressedMessages'];
 }
 
-const sarifFiles: Map<string, ISarifFile> = new Map();
-const sarifResults: ISarifRepresentation[] = [];
-
 const internalErrorId: string = 'ESL0999';
-const toolConfigurationNotifications: ISarifRepresentation[] = [];
 
 /**
  * Converts ESLint results into a SARIF (Static Analysis Results Interchange Format) log.
@@ -134,6 +130,10 @@ const toolConfigurationNotifications: ISarifRepresentation[] = [];
  */
 export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFormatterOptions): ISarifLog {
   const { ignoreSuppressed, eslintVersion } = options;
+  const toolConfigurationNotifications: ISarifRepresentation[] = [];
+  const sarifFiles: Map<string, ISarifFile> = new Map();
+  const sarifResults: ISarifRepresentation[] = [];
+
   const sarifRun: ISarifRun = {
     tool: {
       driver: {
