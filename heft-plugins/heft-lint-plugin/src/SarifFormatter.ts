@@ -47,7 +47,7 @@ export interface ISarifLog {
   runs: ISarifRun[];
 }
 
-interface IRegion {
+export interface IRegion {
   startLine?: number;
   startColumn?: number;
   endLine?: number;
