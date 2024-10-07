@@ -10,7 +10,7 @@ export interface ISerifFormatterOptions {
   eslintVersion?: string;
 }
 
-interface ISarifRun {
+export interface ISarifRun {
   tool: {
     driver: {
       name: string;
@@ -19,7 +19,7 @@ interface ISarifRun {
       rules: IStaticAnalysisRules[];
     };
   };
-  artifacts?: string[];
+  artifacts?: ISarifFile[];
   results?: ISarifRepresentation[];
   invocations?: {
     toolConfigurationNotifications: ISarifRepresentation[];
@@ -27,13 +27,7 @@ interface ISarifRun {
   }[];
 }
 
-interface ISarifFile {
-  location: {
-    uri: string;
-  };
-}
-
-interface ISarifRepresentation {
+export interface ISarifRepresentation {
   level: string;
   message: {
     text: string;
@@ -46,13 +40,8 @@ interface ISarifRepresentation {
   suppressions?: ISuppressedAnalysis[];
 }
 
-interface ISuppressedAnalysis {
-  kind: string;
-  justification: string;
-}
-
 // Interface for the SARIF log structure
-interface ISarifLog {
+export interface ISarifLog {
   version: string;
   $schema: string;
   runs: ISarifRun[];
@@ -68,7 +57,7 @@ interface IRegion {
   };
 }
 
-interface IStaticAnalysisRules {
+export interface IStaticAnalysisRules {
   id: string;
   name?: string;
   shortDescription?: {
@@ -92,11 +81,22 @@ interface IStaticAnalysisRules {
   };
 }
 
-interface ISarifLocation {
+export interface ISarifFile {
+  location: {
+    uri: string;
+  };
+}
+
+export interface ISuppressedAnalysis {
+  kind: string;
+  justification: string;
+}
+
+export interface ISarifLocation {
   physicalLocation: ISarifPhysicalLocation;
 }
 
-interface ISarifPhysicalLocation {
+export interface ISarifPhysicalLocation {
   artifactLocation: {
     uri: string;
     index: number;
@@ -108,11 +108,7 @@ interface IMessage extends TEslint.Linter.LintMessage {
   suppressions?: ISuppressedAnalysis[];
 }
 
-interface IExtendedLintResult extends TEslint.ESLint.LintResult {
-  suppressedMessages: TEslint.ESLint.LintResult['suppressedMessages'];
-}
-
-const internalErrorId: string = 'ESL0999';
+const internalErrorId: 'ESL0999' = 'ESL0999';
 
 /**
  * Converts ESLint results into a SARIF (Static Analysis Results Interchange Format) log.
@@ -121,14 +117,17 @@ const internalErrorId: string = 'ESL0999';
  * relevant information such as errors, warnings, and suppressed messages, and
  * outputs a SARIF log which conforms to the SARIF v2.1.0 specification.
  *
- * @param results - An array of lint results (`IExtendedLintResult[]`) from ESLint that contains linting information,
+ * @param results - An array of lint results (`TEslint.ESLint.LintResult[]`) from ESLint that contains linting information,
  *                  such as file paths, messages, and suppression details.
  * @param options - An object (`ISerifFormatterOptions`) containing options for formatting:
  *                  - `ignoreSuppressed`: Boolean flag to decide whether to ignore suppressed messages.
  *                  - `eslintVersion`: Optional string to include the version of ESLint in the SARIF log.
  * @returns The SARIF log (`ISarifLog`) containing information about the linting results in SARIF format.
  */
-export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFormatterOptions): ISarifLog {
+export function formatAsSARIF(
+  results: TEslint.ESLint.LintResult[],
+  options: ISerifFormatterOptions
+): ISarifLog {
   const { ignoreSuppressed, eslintVersion } = options;
   const toolConfigurationNotifications: ISarifRepresentation[] = [];
   const sarifFiles: Map<string, ISarifFile> = new Map();
@@ -179,6 +178,13 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
       if (messages.length > 0) {
         for (const message of messages) {
           const level: string = message.fatal || message.severity === 2 ? 'error' : 'warning';
+          const physicalLocation: ISarifPhysicalLocation = {
+            artifactLocation: {
+              uri: fileUrl,
+              index: artifactIndex
+            }
+          };
+
           const sarifRepresentation: ISarifRepresentation = {
             level,
             message: {
@@ -186,12 +192,7 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
             },
             locations: [
               {
-                physicalLocation: {
-                  artifactLocation: {
-                    uri: fileUrl,
-                    index: artifactIndex
-                  }
-                }
+                physicalLocation
               }
             ]
           };
@@ -219,10 +220,7 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
             }
           }
 
-          const physicalLocation: ISarifPhysicalLocation = sarifRepresentation.locations[0].physicalLocation;
-
           if (message.line || message.column) {
-            physicalLocation.region = {};
             const { line, column, endLine, endColumn } = message;
             const region: IRegion = {
               startLine: line ? line : undefined,
@@ -234,7 +232,7 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
           }
 
           if (message.source) {
-            physicalLocation.region = physicalLocation.region || {};
+            physicalLocation.region ??= {};
             physicalLocation.region.snippet = {
               text: message.source
             };
@@ -250,9 +248,8 @@ export function formatAsSARIF(results: IExtendedLintResult[], options: ISerifFor
     }
   }
 
-  const sarifFileValues: string[] = Object.values(sarifFiles);
-  if (sarifFileValues.length > 0) {
-    sarifRun.artifacts = sarifFileValues;
+  if (sarifFiles.size > 0) {
+    sarifRun.artifacts = Array.from(sarifFiles.values());
   }
 
   sarifRun.results = sarifResults;

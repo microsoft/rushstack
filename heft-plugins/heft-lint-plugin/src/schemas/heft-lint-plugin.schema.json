@@ -15,7 +15,7 @@
 
     "sarifLogPath": {
       "title": "SARIF Log Path",
-      "description": "Provides the path of where SARIF log files should be created.",
+      "description": "If specified and using ESLint, a log describing the lint configuration and all messages (suppressed or not) will be emitted in the Static Analysis Results Interchange Format (https://sarifweb.azurewebsites.net/) at the provided path, relative to the package root.",
       "type": "string"
     }
   }
