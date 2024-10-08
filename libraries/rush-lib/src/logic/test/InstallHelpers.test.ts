@@ -46,6 +46,7 @@ describe('InstallHelpers', () => {
               }
             },
             neverBuiltDependencies: ['fsevents', 'level'],
+            ignoredOptionalDependencies: ['fabric'],
             pnpmFutureFeature: true
           }
         })
