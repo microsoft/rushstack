@@ -5,6 +5,7 @@ import * as crypto from 'crypto';
 import * as semver from 'semver';
 import type * as TTypescript from 'typescript';
 import type * as TEslint from 'eslint';
+import { ESLint } from 'eslint';
 import { performance } from 'perf_hooks';
 import { FileError, FileSystem } from '@rushstack/node-core-library';
 
@@ -232,11 +233,15 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
     const sarifLogPath: string | undefined = this._sarifLogPath;
     if (sarifLogPath) {
+      const eslint: ESLint = new ESLint();
+      const rulesMeta: TEslint.ESLint.LintResultData['rulesMeta'] =
+        eslint.getRulesMetaForResults(lintResults);
       const { formatEslintResultsAsSARIF } = await import('./SarifFormatter');
       const sarifString: string = JSON.stringify(
-        formatEslintResultsAsSARIF(lintResults, {
+        formatEslintResultsAsSARIF(lintResults, rulesMeta, {
           ignoreSuppressed: false,
-          eslintVersion: this._eslintPackage.ESLint.version
+          eslintVersion: this._eslintPackage.ESLint.version,
+          buildFolderPath: this._buildFolderPath
         }),
         undefined,
         2

@@ -31,7 +31,6 @@
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
     "@types/semver": "7.5.0",
-    "@types/jest": "29.2.5",
     "eslint": "~8.57.0",
     "tslint": "~5.20.1",
     "typescript": "~5.4.2"

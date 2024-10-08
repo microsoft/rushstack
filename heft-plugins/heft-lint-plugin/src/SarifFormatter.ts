@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-
-import url from 'node:url';
-
 import type * as TEslint from 'eslint';
+import path from 'node:path';
 
 export interface ISerifFormatterOptions {
   ignoreSuppressed: boolean;
   eslintVersion?: string;
+  buildFolderPath: string;
 }
 
 export interface ISarifRun {
@@ -34,6 +33,7 @@ export interface ISarifRepresentation {
   };
   locations: ISarifLocation[];
   ruleId?: string;
+  ruleIndex?: number;
   descriptor?: {
     id: string;
   };
@@ -99,9 +99,20 @@ export interface ISarifLocation {
 export interface ISarifPhysicalLocation {
   artifactLocation: {
     uri: string;
-    index: number;
+    index?: number;
   };
   region?: IRegion;
+}
+
+export interface ISarifRule {
+  id: string;
+  helpUri?: string;
+  shortDescription?: {
+    text: string;
+  };
+  properties?: {
+    category?: string;
+  };
 }
 
 interface IMessage extends TEslint.Linter.LintMessage {
@@ -128,12 +139,16 @@ const SARIF_INFORMATION_URI: 'http://json.schemastore.org/sarif-2.1.0-rtm.5' =
  */
 export function formatEslintResultsAsSARIF(
   results: TEslint.ESLint.LintResult[],
+  rulesMeta: TEslint.ESLint.LintResultData['rulesMeta'],
   options: ISerifFormatterOptions
 ): ISarifLog {
-  const { ignoreSuppressed, eslintVersion } = options;
+  const { ignoreSuppressed, eslintVersion, buildFolderPath } = options;
   const toolConfigurationNotifications: ISarifRepresentation[] = [];
   const sarifFiles: Map<string, ISarifFile> = new Map();
   const sarifResults: ISarifRepresentation[] = [];
+  const sarifArtifactIndices: Map<ISarifFile, number> = new Map();
+  const sarifRules: Map<string, ISarifRule> = new Map();
+  const sarifRuleIndices: Map<string, number> = new Map();
 
   const sarifRun: ISarifRun = {
     tool: {
@@ -153,11 +168,12 @@ export function formatEslintResultsAsSARIF(
   };
 
   let executionSuccessful: boolean = true;
+  let currentArtifactIndex: number = 0;
+  let currentRuleIndex: number = 0;
 
   for (const result of results) {
     const { filePath } = result;
-    const artifactIndex: number = sarifFiles.size;
-    const fileUrl: string = url.pathToFileURL(filePath).toString();
+    const fileUrl: string = path.relative(buildFolderPath, filePath).toString();
     let sarifFile: ISarifFile | undefined = sarifFiles.get(filePath);
 
     if (sarifFile === undefined) {
@@ -168,6 +184,8 @@ export function formatEslintResultsAsSARIF(
       };
       sarifFiles.set(filePath, sarifFile);
     }
+
+    sarifArtifactIndices.set(sarifFile, currentArtifactIndex++);
     const containsSuppressedMessages: boolean =
       result.suppressedMessages && result.suppressedMessages.length > 0;
     const messages: IMessage[] =
@@ -180,7 +198,7 @@ export function formatEslintResultsAsSARIF(
       const physicalLocation: ISarifPhysicalLocation = {
         artifactLocation: {
           uri: fileUrl,
-          index: artifactIndex
+          index: sarifArtifactIndices.get(sarifFile)
         }
       };
 
@@ -198,6 +216,45 @@ export function formatEslintResultsAsSARIF(
 
       if (message.ruleId) {
         sarifRepresentation.ruleId = message.ruleId;
+
+        if (rulesMeta && sarifRules.get(message.ruleId) === undefined) {
+          const meta: TEslint.Rule.RuleMetaData = rulesMeta[message.ruleId];
+
+          // An unknown ruleId will return null. This check prevents unit test failure.
+          if (meta) {
+            sarifRuleIndices.set(message.ruleId, currentRuleIndex++);
+
+            if (meta.docs) {
+              // Create a new entry in the rules dictionary.
+              const shortDescription: string = meta.docs.description ?? '';
+
+              const sarifRule: ISarifRule = {
+                id: message.ruleId,
+                helpUri: meta.docs.url,
+                properties: {
+                  category: meta.docs.category
+                },
+                shortDescription: {
+                  text: shortDescription
+                }
+              };
+              sarifRules.set(message.ruleId, sarifRule);
+              // Some rulesMetas do not have docs property
+            } else {
+              sarifRules.set(message.ruleId, {
+                id: message.ruleId,
+                helpUri: 'Please see details in message',
+                properties: {
+                  category: 'No category provided'
+                }
+              });
+            }
+          }
+        }
+
+        if (sarifRuleIndices.has(message.ruleId)) {
+          sarifRepresentation.ruleIndex = sarifRuleIndices.get(message.ruleId);
+        }
 
         if (containsSuppressedMessages && !ignoreSuppressed) {
           sarifRepresentation.suppressions = message.suppressions
@@ -243,6 +300,10 @@ export function formatEslintResultsAsSARIF(
         toolConfigurationNotifications.push(sarifRepresentation);
       }
     }
+  }
+
+  if (sarifRules.size > 0) {
+    sarifRun.tool.driver.rules = Array.from(sarifRules.values());
   }
 
   if (sarifFiles.size > 0) {

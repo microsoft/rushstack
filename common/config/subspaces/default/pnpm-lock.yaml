@@ -2764,9 +2764,6 @@ importers:
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
