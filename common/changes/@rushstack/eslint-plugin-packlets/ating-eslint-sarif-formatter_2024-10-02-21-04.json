@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/eslint-plugin-packlets",
-      "comment": "Upgraded @types/eslint to version 8.56.10",
+      "comment": "",
       "type": "none"
     }
   ],
