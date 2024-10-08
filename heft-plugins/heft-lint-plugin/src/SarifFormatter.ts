@@ -108,8 +108,10 @@ interface IMessage extends TEslint.Linter.LintMessage {
   suppressions?: ISuppressedAnalysis[];
 }
 
-const internalErrorId: 'ESL0999' = 'ESL0999';
-
+const INTERNAL_ERROR_ID: 'ESL0999' = 'ESL0999';
+const SARIF_VERSION: '2.1.0' = '2.1.0';
+const SARIF_INFORMATION_URI: 'http://json.schemastore.org/sarif-2.1.0-rtm.5' =
+  'http://json.schemastore.org/sarif-2.1.0-rtm.5';
 /**
  * Converts ESLint results into a SARIF (Static Analysis Results Interchange Format) log.
  *
@@ -117,14 +119,14 @@ const internalErrorId: 'ESL0999' = 'ESL0999';
  * relevant information such as errors, warnings, and suppressed messages, and
  * outputs a SARIF log which conforms to the SARIF v2.1.0 specification.
  *
- * @param results - An array of lint results (`TEslint.ESLint.LintResult[]`) from ESLint that contains linting information,
+ * @param results - An array of lint results from ESLint that contains linting information,
  *                  such as file paths, messages, and suppression details.
- * @param options - An object (`ISerifFormatterOptions`) containing options for formatting:
+ * @param options - An object containing options for formatting:
  *                  - `ignoreSuppressed`: Boolean flag to decide whether to ignore suppressed messages.
  *                  - `eslintVersion`: Optional string to include the version of ESLint in the SARIF log.
- * @returns The SARIF log (`ISarifLog`) containing information about the linting results in SARIF format.
+ * @returns The SARIF log containing information about the linting results in SARIF format.
  */
-export function formatAsSARIF(
+export function formatEslintResultsAsSARIF(
   results: TEslint.ESLint.LintResult[],
   options: ISerifFormatterOptions
 ): ISarifLog {
@@ -138,112 +140,107 @@ export function formatAsSARIF(
       driver: {
         name: 'ESLint',
         informationUri: 'https://eslint.org',
+        version: eslintVersion,
         rules: []
       }
     }
   };
 
   const sarifLog: ISarifLog = {
-    version: '2.1.0',
-    $schema: 'http://json.schemastore.org/sarif-2.1.0-rtm.5',
+    version: SARIF_VERSION,
+    $schema: SARIF_INFORMATION_URI,
     runs: [sarifRun]
   };
 
-  if (typeof eslintVersion !== undefined) {
-    sarifRun.tool.driver.version = eslintVersion;
-  }
   let executionSuccessful: boolean = true;
 
   for (const result of results) {
     const { filePath } = result;
+    const artifactIndex: number = sarifFiles.size;
+    const fileUrl: string = url.pathToFileURL(filePath).toString();
     let sarifFile: ISarifFile | undefined = sarifFiles.get(filePath);
-    if (sarifFile === undefined) {
-      const artifactIndex: number = sarifFiles.size;
-      const fileUrl: string = url.pathToFileURL(filePath).toString();
 
+    if (sarifFile === undefined) {
       sarifFile = {
         location: {
           uri: fileUrl
         }
       };
       sarifFiles.set(filePath, sarifFile);
+    }
+    const containsSuppressedMessages: boolean =
+      result.suppressedMessages && result.suppressedMessages.length > 0;
+    const messages: IMessage[] =
+      containsSuppressedMessages && !ignoreSuppressed
+        ? [...result.messages, ...result.suppressedMessages]
+        : result.messages;
 
-      const containsSuppressedMessages: boolean =
-        result.suppressedMessages && result.suppressedMessages.length > 0;
-      const messages: IMessage[] =
-        containsSuppressedMessages && !ignoreSuppressed
-          ? [...result.messages, ...result.suppressedMessages]
-          : result.messages;
-
-      if (messages.length > 0) {
-        for (const message of messages) {
-          const level: string = message.fatal || message.severity === 2 ? 'error' : 'warning';
-          const physicalLocation: ISarifPhysicalLocation = {
-            artifactLocation: {
-              uri: fileUrl,
-              index: artifactIndex
-            }
-          };
-
-          const sarifRepresentation: ISarifRepresentation = {
-            level,
-            message: {
-              text: message.message
-            },
-            locations: [
-              {
-                physicalLocation
-              }
-            ]
-          };
-
-          if (message.ruleId) {
-            sarifRepresentation.ruleId = message.ruleId;
-
-            if (containsSuppressedMessages && !ignoreSuppressed) {
-              sarifRepresentation.suppressions = message.suppressions
-                ? message.suppressions.map((suppression: ISuppressedAnalysis) => {
-                    return {
-                      kind: suppression.kind === 'directive' ? 'inSource' : 'external',
-                      justification: suppression.justification
-                    };
-                  })
-                : [];
-            }
-          } else {
-            sarifRepresentation.descriptor = {
-              id: internalErrorId
-            };
-
-            if (sarifRepresentation.level === 'error') {
-              executionSuccessful = false;
-            }
-          }
-
-          if (message.line || message.column) {
-            const { line, column, endLine, endColumn } = message;
-            const region: IRegion = {
-              startLine: line ? line : undefined,
-              startColumn: column ? column : undefined,
-              endLine: endLine ? endLine : undefined,
-              endColumn: endColumn ? endColumn : undefined
-            };
-            physicalLocation.region = region;
-          }
-
-          if (message.source) {
-            physicalLocation.region ??= {};
-            physicalLocation.region.snippet = {
-              text: message.source
-            };
-          }
-
-          if (message.ruleId) {
-            sarifResults.push(sarifRepresentation);
-          } else {
-            toolConfigurationNotifications.push(sarifRepresentation);
-          }
+    for (const message of messages) {
+      const level: string = message.fatal || message.severity === 2 ? 'error' : 'warning';
+      const physicalLocation: ISarifPhysicalLocation = {
+        artifactLocation: {
+          uri: fileUrl,
+          index: artifactIndex
         }
+      };
+
+      const sarifRepresentation: ISarifRepresentation = {
+        level,
+        message: {
+          text: message.message
+        },
+        locations: [
+          {
+            physicalLocation
+          }
+        ]
+      };
+
+      if (message.ruleId) {
+        sarifRepresentation.ruleId = message.ruleId;
+
+        if (containsSuppressedMessages && !ignoreSuppressed) {
+          sarifRepresentation.suppressions = message.suppressions
+            ? message.suppressions.map((suppression: ISuppressedAnalysis) => {
+                return {
+                  kind: suppression.kind === 'directive' ? 'inSource' : 'external',
+                  justification: suppression.justification
+                };
+              })
+            : [];
+        }
+      } else {
+        sarifRepresentation.descriptor = {
+          id: INTERNAL_ERROR_ID
+        };
+
+        if (sarifRepresentation.level === 'error') {
+          executionSuccessful = false;
+        }
+      }
+
+      if (message.line || message.column) {
+        const { line: startLine, column: startColumn, endLine, endColumn } = message;
+        const region: IRegion = {
+          startLine,
+          startColumn,
+          endLine,
+          endColumn
+        };
+        physicalLocation.region = region;
+      }
+
+      if (message.source) {
+        physicalLocation.region ??= {};
+        physicalLocation.region.snippet = {
+          text: message.source
+        };
+      }
+
+      if (message.ruleId) {
+        sarifResults.push(sarifRepresentation);
+      } else {
+        toolConfigurationNotifications.push(sarifRepresentation);
       }
     }
   }

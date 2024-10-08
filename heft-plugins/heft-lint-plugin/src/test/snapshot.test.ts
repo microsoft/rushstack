@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import { formatAsSARIF } from '../SarifFormatter';
+import { formatEslintResultsAsSARIF } from '../SarifFormatter';
 import type { ISerifFormatterOptions } from '../SarifFormatter';
 import type { ESLint } from 'eslint';
 
@@ -37,7 +37,7 @@ describe('formatAsSARIF', () => {
       eslintVersion: '7.32.0'
     };
 
-    const sarifLog = formatAsSARIF(mockLintResults, options);
+    const sarifLog = formatEslintResultsAsSARIF(mockLintResults, options);
 
     expect(sarifLog).toMatchSnapshot();
   });

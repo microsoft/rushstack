@@ -232,9 +232,9 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
     const sarifLogPath: string | undefined = this._sarifLogPath;
     if (sarifLogPath) {
-      const { formatAsSARIF } = await import('./SarifFormatter');
+      const { formatEslintResultsAsSARIF } = await import('./SarifFormatter');
       const sarifString: string = JSON.stringify(
-        formatAsSARIF(lintResults, {
+        formatEslintResultsAsSARIF(lintResults, {
           ignoreSuppressed: false,
           eslintVersion: this._eslintPackage.ESLint.version
         }),
