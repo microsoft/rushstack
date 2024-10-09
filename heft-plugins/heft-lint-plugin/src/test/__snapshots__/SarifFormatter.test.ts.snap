@@ -1,6 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`formatEslintResultsAsSARIF case with multiple issues in the same file 1`] = `
+exports[`formatEslintResultsAsSARIF case with no files 1`] = `
+Object {
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": Array [
+    Object {
+      "results": Array [],
+      "tool": Object {
+        "driver": Object {
+          "informationUri": "https://eslint.org",
+          "name": "ESLint",
+          "rules": Array [],
+          "version": "7.32.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;
+
+exports[`formatEslintResultsAsSARIF case with single issues in the same file 1`] = `
 Object {
   "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
   "runs": Array [
@@ -8,7 +28,7 @@ Object {
       "artifacts": Array [
         Object {
           "location": Object {
-            "uri": "src\\\\file1.ts",
+            "uri": "src/file1.ts",
           },
         },
       ],
@@ -20,7 +40,7 @@ Object {
               "physicalLocation": Object {
                 "artifactLocation": Object {
                   "index": 0,
-                  "uri": "src\\\\file1.ts",
+                  "uri": "src/file1.ts",
                 },
                 "region": Object {
                   "endColumn": 6,
@@ -66,26 +86,6 @@ Object {
 }
 `;
 
-exports[`formatEslintResultsAsSARIF case with no files 1`] = `
-Object {
-  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
-  "runs": Array [
-    Object {
-      "results": Array [],
-      "tool": Object {
-        "driver": Object {
-          "informationUri": "https://eslint.org",
-          "name": "ESLint",
-          "rules": Array [],
-          "version": "7.32.0",
-        },
-      },
-    },
-  ],
-  "version": "2.1.0",
-}
-`;
-
 exports[`formatEslintResultsAsSARIF should correctly format ESLint results into SARIF log 1`] = `
 Object {
   "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
@@ -94,7 +94,7 @@ Object {
       "artifacts": Array [
         Object {
           "location": Object {
-            "uri": "src\\\\file1.ts",
+            "uri": "src/file1.ts",
           },
         },
       ],
@@ -106,7 +106,7 @@ Object {
               "physicalLocation": Object {
                 "artifactLocation": Object {
                   "index": 0,
-                  "uri": "src\\\\file1.ts",
+                  "uri": "src/file1.ts",
                 },
                 "region": Object {
                   "endColumn": 6,
@@ -160,7 +160,7 @@ Object {
       "artifacts": Array [
         Object {
           "location": Object {
-            "uri": "src\\\\file3.ts",
+            "uri": "src/file3.ts",
           },
         },
       ],
@@ -187,7 +187,7 @@ Object {
       "artifacts": Array [
         Object {
           "location": Object {
-            "uri": "src\\\\file4.ts",
+            "uri": "src/file4.ts",
           },
         },
       ],
@@ -199,7 +199,7 @@ Object {
               "physicalLocation": Object {
                 "artifactLocation": Object {
                   "index": 0,
-                  "uri": "src\\\\file4.ts",
+                  "uri": "src/file4.ts",
                 },
                 "region": Object {
                   "endColumn": 9,
@@ -227,7 +227,7 @@ Object {
               "physicalLocation": Object {
                 "artifactLocation": Object {
                   "index": 0,
-                  "uri": "src\\\\file4.ts",
+                  "uri": "src/file4.ts",
                 },
                 "region": Object {
                   "endColumn": 16,
@@ -297,7 +297,7 @@ Object {
       "artifacts": Array [
         Object {
           "location": Object {
-            "uri": "src\\\\file4.ts",
+            "uri": "src/file4.ts",
           },
         },
       ],
@@ -309,7 +309,7 @@ Object {
               "physicalLocation": Object {
                 "artifactLocation": Object {
                   "index": 0,
-                  "uri": "src\\\\file4.ts",
+                  "uri": "src/file4.ts",
                 },
                 "region": Object {
                   "endColumn": 9,
@@ -363,7 +363,7 @@ Object {
       "artifacts": Array [
         Object {
           "location": Object {
-            "uri": "src\\\\file5.ts",
+            "uri": "src/file5.ts",
           },
         },
       ],
@@ -375,11 +375,11 @@ Object {
               "physicalLocation": Object {
                 "artifactLocation": Object {
                   "index": 0,
-                  "uri": "src\\\\file5.ts",
+                  "uri": "src/file5.ts",
                 },
                 "region": Object {
-                  "endColumn": 16,
-                  "endLine": 10,
+                  "endColumn": undefined,
+                  "endLine": undefined,
                   "snippet": Object {
                     "text": "console.log(\\"test\\");",
                   },
@@ -429,12 +429,12 @@ Object {
       "artifacts": Array [
         Object {
           "location": Object {
-            "uri": "src\\\\file1.ts",
+            "uri": "src/file1.ts",
           },
         },
         Object {
           "location": Object {
-            "uri": "src\\\\file2.ts",
+            "uri": "src/file2.ts",
           },
         },
       ],
@@ -446,7 +446,7 @@ Object {
               "physicalLocation": Object {
                 "artifactLocation": Object {
                   "index": 0,
-                  "uri": "src\\\\file1.ts",
+                  "uri": "src/file1.ts",
                 },
                 "region": Object {
                   "endColumn": 6,
@@ -472,7 +472,7 @@ Object {
               "physicalLocation": Object {
                 "artifactLocation": Object {
                   "index": 1,
-                  "uri": "src\\\\file2.ts",
+                  "uri": "src/file2.ts",
                 },
                 "region": Object {
                   "endColumn": 10,
@@ -526,7 +526,7 @@ Object {
       "artifacts": Array [
         Object {
           "location": Object {
-            "uri": "src\\\\file2.ts",
+            "uri": "src/file2.ts",
           },
         },
       ],
@@ -538,7 +538,7 @@ Object {
               "physicalLocation": Object {
                 "artifactLocation": Object {
                   "index": 0,
-                  "uri": "src\\\\file2.ts",
+                  "uri": "src/file2.ts",
                 },
                 "region": Object {
                   "endColumn": 11,
@@ -565,7 +565,7 @@ Object {
               "physicalLocation": Object {
                 "artifactLocation": Object {
                   "index": 0,
-                  "uri": "src\\\\file2.ts",
+                  "uri": "src/file2.ts",
                 },
                 "region": Object {
                   "endColumn": 16,

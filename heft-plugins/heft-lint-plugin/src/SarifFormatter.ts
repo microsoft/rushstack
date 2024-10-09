@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 import type * as TEslint from 'eslint';
 import path from 'node:path';
+import { Path } from '@rushstack/node-core-library';
 
 export interface ISerifFormatterOptions {
   ignoreSuppressed: boolean;
@@ -96,11 +97,13 @@ export interface ISarifLocation {
   physicalLocation: ISarifPhysicalLocation;
 }
 
+export interface ISarifArtifactLocation {
+  uri: string;
+  index?: number;
+}
+
 export interface ISarifPhysicalLocation {
-  artifactLocation: {
-    uri: string;
-    index?: number;
-  };
+  artifactLocation: ISarifArtifactLocation;
   region?: IRegion;
 }
 
@@ -132,11 +135,20 @@ const SARIF_INFORMATION_URI: 'http://json.schemastore.org/sarif-2.1.0-rtm.5' =
  *
  * @param results - An array of lint results from ESLint that contains linting information,
  *                  such as file paths, messages, and suppression details.
+ * @param rulesMeta - An object containing metadata about the ESLint rules that were applied during the linting session.
+ *                    The keys are the rule names, and the values are rule metadata objects
+ *                     that describe each rule. This metadata typically includes:
+ *                    - `docs`: Documentation about the rule.
+ *                    - `fixable`: Indicates whether the rule is fixable.
+ *                    - `messages`: Custom messages that the rule might output when triggered.
+ *                    - `schema`: The configuration schema for the rule.
+ *                    This metadata helps in providing more context about the rules when generating the SARIF log.
  * @param options - An object containing options for formatting:
  *                  - `ignoreSuppressed`: Boolean flag to decide whether to ignore suppressed messages.
  *                  - `eslintVersion`: Optional string to include the version of ESLint in the SARIF log.
  * @returns The SARIF log containing information about the linting results in SARIF format.
  */
+
 export function formatEslintResultsAsSARIF(
   results: TEslint.ESLint.LintResult[],
   rulesMeta: TEslint.ESLint.LintResultData['rulesMeta'],
@@ -144,10 +156,10 @@ export function formatEslintResultsAsSARIF(
 ): ISarifLog {
   const { ignoreSuppressed, eslintVersion, buildFolderPath } = options;
   const toolConfigurationNotifications: ISarifRepresentation[] = [];
-  const sarifFiles: Map<string, ISarifFile> = new Map();
+  const sarifFiles: ISarifFile[] = [];
   const sarifResults: ISarifRepresentation[] = [];
-  const sarifArtifactIndices: Map<ISarifFile, number> = new Map();
-  const sarifRules: Map<string, ISarifRule> = new Map();
+  const sarifArtifactIndices: Map<string, number> = new Map();
+  const sarifRules: ISarifRule[] = [];
   const sarifRuleIndices: Map<string, number> = new Map();
 
   const sarifRun: ISarifRun = {
@@ -173,19 +185,24 @@ export function formatEslintResultsAsSARIF(
 
   for (const result of results) {
     const { filePath } = result;
-    const fileUrl: string = path.relative(buildFolderPath, filePath).toString();
-    let sarifFile: ISarifFile | undefined = sarifFiles.get(filePath);
+    const fileUrl: string = Path.convertToSlashes(path.relative(buildFolderPath, filePath));
+    let sarifFileIndex: number | undefined = sarifArtifactIndices.get(fileUrl);
 
-    if (sarifFile === undefined) {
-      sarifFile = {
+    if (sarifFileIndex === undefined) {
+      sarifFileIndex = currentArtifactIndex++;
+      sarifArtifactIndices.set(fileUrl, sarifFileIndex);
+      sarifFiles.push({
         location: {
           uri: fileUrl
         }
-      };
-      sarifFiles.set(filePath, sarifFile);
+      });
     }
 
-    sarifArtifactIndices.set(sarifFile, currentArtifactIndex++);
+    const artifactLocation: ISarifArtifactLocation = {
+      uri: fileUrl,
+      index: sarifFileIndex
+    };
+
     const containsSuppressedMessages: boolean =
       result.suppressedMessages && result.suppressedMessages.length > 0;
     const messages: IMessage[] =
@@ -196,10 +213,7 @@ export function formatEslintResultsAsSARIF(
     for (const message of messages) {
       const level: string = message.fatal || message.severity === 2 ? 'error' : 'warning';
       const physicalLocation: ISarifPhysicalLocation = {
-        artifactLocation: {
-          uri: fileUrl,
-          index: sarifArtifactIndices.get(sarifFile)
-        }
+        artifactLocation
       };
 
       const sarifRepresentation: ISarifRepresentation = {
@@ -217,7 +231,7 @@ export function formatEslintResultsAsSARIF(
       if (message.ruleId) {
         sarifRepresentation.ruleId = message.ruleId;
 
-        if (rulesMeta && sarifRules.get(message.ruleId) === undefined) {
+        if (rulesMeta && sarifRuleIndices.get(message.ruleId) === undefined) {
           const meta: TEslint.Rule.RuleMetaData = rulesMeta[message.ruleId];
 
           // An unknown ruleId will return null. This check prevents unit test failure.
@@ -238,14 +252,16 @@ export function formatEslintResultsAsSARIF(
                   text: shortDescription
                 }
               };
-              sarifRules.set(message.ruleId, sarifRule);
+              sarifRules.push(sarifRule);
               // Some rulesMetas do not have docs property
             } else {
-              sarifRules.set(message.ruleId, {
+              sarifRules.push({
                 id: message.ruleId,
-                helpUri: 'Please see details in message',
                 properties: {
                   category: 'No category provided'
+                },
+                shortDescription: {
+                  text: 'Please see details in message'
                 }
               });
             }
@@ -276,7 +292,7 @@ export function formatEslintResultsAsSARIF(
         }
       }
 
-      if (message.line || message.column) {
+      if (message.line !== undefined || message.column !== undefined) {
         const { line: startLine, column: startColumn, endLine, endColumn } = message;
         const region: IRegion = {
           startLine,
@@ -302,12 +318,12 @@ export function formatEslintResultsAsSARIF(
     }
   }
 
-  if (sarifRules.size > 0) {
-    sarifRun.tool.driver.rules = Array.from(sarifRules.values());
+  if (sarifRules.length > 0) {
+    sarifRun.tool.driver.rules = sarifRules;
   }
 
-  if (sarifFiles.size > 0) {
-    sarifRun.artifacts = Array.from(sarifFiles.values());
+  if (sarifFiles.length > 0) {
+    sarifRun.artifacts = sarifFiles;
   }
 
   sarifRun.results = sarifResults;

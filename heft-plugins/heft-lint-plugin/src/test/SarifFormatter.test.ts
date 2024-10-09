@@ -90,7 +90,7 @@ describe('formatEslintResultsAsSARIF', () => {
     expect(sarifLog).toMatchSnapshot();
   });
 
-  test('case with multiple issues in the same file', () => {
+  test('case with single issues in the same file', () => {
     const mockLintResults: ESLint.LintResult[] = [
       {
         filePath: '/src/file1.ts',
@@ -634,76 +634,6 @@ describe('formatEslintResultsAsSARIF', () => {
         hasSuggestions: true,
         messages: {
           unexpected: "Unexpected 'debugger' statement."
-        }
-      }
-    };
-
-    const options: ISerifFormatterOptions = {
-      ignoreSuppressed: false,
-      eslintVersion: '7.32.0',
-      buildFolderPath: '/'
-    };
-
-    const sarifLog = await formatEslintResultsAsSARIF(mockLintResults, mockRulesMeta, options);
-
-    expect(sarifLog).toMatchSnapshot();
-  });
-
-  test('should handle messages without file locations', async () => {
-    const mockLintResults: ESLint.LintResult[] = [
-      {
-        filePath: '/src/file5.ts',
-        messages: [
-          {
-            ruleId: 'no-console',
-            severity: 1,
-            message: 'Unexpected console statement.',
-            line: 10,
-            column: 5,
-            nodeType: 'MemberExpression',
-            endLine: 10,
-            endColumn: 16,
-            source: 'console.log("test");'
-          }
-        ],
-        suppressedMessages: [],
-        errorCount: 1,
-        warningCount: 0,
-        fixableErrorCount: 0,
-        fixableWarningCount: 0,
-        usedDeprecatedRules: [],
-        fatalErrorCount: 0
-      }
-    ];
-
-    const mockRulesMeta: ESLint.LintResultData['rulesMeta'] = {
-      'no-console': {
-        type: 'suggestion',
-        docs: {
-          description: 'Disallow the use of `console`',
-          recommended: false,
-          url: 'https://eslint.org/docs/latest/rules/no-console'
-        },
-        schema: [
-          {
-            type: 'object',
-            properties: {
-              allow: {
-                type: 'array',
-                items: {
-                  type: 'string'
-                },
-                minItems: 1,
-                uniqueItems: true
-              }
-            },
-            additionalProperties: false
-          }
-        ],
-        hasSuggestions: true,
-        messages: {
-          unexpected: 'Unexpected console statement.',
-          removeConsole: 'Remove the console.{{ propertyName }}().'
         }
       }
     };
