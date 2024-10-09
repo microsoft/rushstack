@@ -2415,8 +2415,8 @@ importers:
         specifier: 2.6.31
         version: 2.6.31(@rushstack/heft@0.67.2)(@types/node@18.17.15)(supports-color@8.1.1)
       '@types/eslint':
-        specifier: 8.2.0
-        version: 8.2.0
+        specifier: 8.56.10
+        version: 8.56.10
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
@@ -2452,8 +2452,8 @@ importers:
         specifier: 2.6.31
         version: 2.6.31(@rushstack/heft@0.67.2)(@types/node@18.17.15)(supports-color@8.1.1)
       '@types/eslint':
-        specifier: 8.2.0
-        version: 8.2.0
+        specifier: 8.56.10
+        version: 8.56.10
       '@types/estree':
         specifier: 1.0.5
         version: 1.0.5
@@ -2498,8 +2498,8 @@ importers:
         specifier: 2.6.31
         version: 2.6.31(@rushstack/heft@0.67.2)(@types/node@18.17.15)(supports-color@8.1.1)
       '@types/eslint':
-        specifier: 8.2.0
-        version: 8.2.0
+        specifier: 8.56.10
+        version: 8.56.10
       '@types/estree':
         specifier: 1.0.5
         version: 1.0.5
@@ -2544,8 +2544,8 @@ importers:
         specifier: 2.6.31
         version: 2.6.31(@rushstack/heft@0.67.2)(@types/node@18.17.15)(supports-color@8.1.1)
       '@types/eslint':
-        specifier: 8.2.0
-        version: 8.2.0
+        specifier: 8.56.10
+        version: 8.56.10
       '@types/estree':
         specifier: 1.0.5
         version: 1.0.5
@@ -2759,8 +2759,8 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/terminal
       '@types/eslint':
-        specifier: 8.2.0
-        version: 8.2.0
+        specifier: 8.56.10
+        version: 8.56.10
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -9023,7 +9023,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 20.12.12
+      '@types/node': 17.0.41
       chalk: 4.1.2
       jest-message-util: 29.7.0
       jest-util: 29.7.0
@@ -12918,8 +12918,8 @@ packages:
     resolution: {integrity: sha512-XIpxU6Qdvp1ZE6Kr3yrkv1qgUab0fyf4mHYvW8N3Bx3PCsbN6or1q9/q72cv5jIFWolaGH08U9XyYoLLIykyKQ==}
     dev: true
 
-  /@types/eslint@8.2.0:
-    resolution: {integrity: sha512-74hbvsnc+7TEDa1z5YLSe4/q8hGYB3USNvCuzHUJrjPV6hXaq8IXcngCrHkuvFt0+8rFz7xYXrHgNayIX0UZvQ==}
+  /@types/eslint@8.56.10:
+    resolution: {integrity: sha512-Shavhk87gCtY2fhXDctcfS3e6FdxWkCx1iUZ9eEUbh7rTqlZT0/IzOkCOVt0fCjcFuZ9FPYfuezTBImfHCDBGQ==}
     dependencies:
       '@types/estree': 1.0.5
       '@types/json-schema': 7.0.15
@@ -21637,7 +21637,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 20.12.12
+      '@types/node': 17.0.41
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -21679,7 +21679,7 @@ packages:
     resolution: {integrity: sha512-KWYVV1c4i+jbMpaBC+U++4Va0cp8OisU185o73T1vo99hqi7w8tSJfUXYswwqqrjzwxa6KpRK54WhPvwf5w6PQ==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 20.12.12
+      '@types/node': 17.0.41
       merge-stream: 2.0.0
       supports-color: 7.2.0
     dev: true
@@ -21696,7 +21696,7 @@ packages:
     resolution: {integrity: sha512-eIz2msL/EzL9UFTFFx7jBTkeZfku0yUAyZZZmJ93H2TYEiroIx2PQjEXcwYtYl8zXCxb+PAmA2hLIt/6ZEkPHw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
-      '@types/node': 20.12.12
+      '@types/node': 17.0.41
       jest-util: 29.7.0
       merge-stream: 2.0.0
       supports-color: 8.1.1

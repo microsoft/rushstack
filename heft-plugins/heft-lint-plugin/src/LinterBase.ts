@@ -21,6 +21,7 @@ export interface ILinterBaseOptions {
   linterConfigFilePath: string;
   tsProgram: IExtendedProgram;
   fix?: boolean;
+  sarifLogPath?: string;
 }
 
 export interface IRunLinterOptions {
@@ -128,7 +129,7 @@ export abstract class LinterBase<TLintResult> {
     // Some of this code comes from here:
     // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
     // Modified to only lint files that have changed and that we care about
-    const lintFailures: TLintResult[] = [];
+    const lintResults: TLintResult[] = [];
     for (const sourceFile of options.tsProgram.getSourceFiles()) {
       const filePath: string = sourceFile.fileName;
       const relative: string | undefined = relativePaths.get(filePath);
@@ -147,12 +148,12 @@ export abstract class LinterBase<TLintResult> {
         options.changedFiles.has(sourceFile)
       ) {
         fileCount++;
-        const failures: TLintResult[] = await this.lintFileAsync(sourceFile);
-        if (failures.length === 0) {
+        const results: TLintResult[] = await this.lintFileAsync(sourceFile);
+        if (results.length === 0) {
           newNoFailureFileVersions.set(relative, version);
         } else {
-          for (const failure of failures) {
-            lintFailures.push(failure);
+          for (const result of results) {
+            lintResults.push(result);
           }
         }
       } else {
@@ -161,7 +162,7 @@ export abstract class LinterBase<TLintResult> {
     }
     //#endregion
 
-    await this.lintingFinishedAsync(lintFailures);
+    await this.lintingFinishedAsync(lintResults);
 
     if (!this._fix && this._fixesPossible) {
       this._terminal.writeWarningLine(

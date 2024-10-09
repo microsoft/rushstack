@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import path from 'node:path';
+
 import { FileSystem } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
@@ -28,6 +30,7 @@ const ESLINTRC_CJS_FILENAME: string = '.eslintrc.cjs';
 
 interface ILintPluginOptions {
   alwaysFix?: boolean;
+  sarifLogPath?: string;
 }
 
 interface ILintOptions {
@@ -35,6 +38,7 @@ interface ILintOptions {
   heftConfiguration: HeftConfiguration;
   tsProgram: IExtendedProgram;
   fix?: boolean;
+  sarifLogPath?: string;
   changedFiles?: ReadonlySet<IExtendedSourceFile>;
 }
 
@@ -67,6 +71,10 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         fix = false;
       }
 
+      const relativeSarifLogPath: string | undefined = pluginOptions?.sarifLogPath;
+      const sarifLogPath: string | undefined =
+        relativeSarifLogPath && path.resolve(heftConfiguration.buildFolderPath, relativeSarifLogPath);
+
       // Use the changed files hook to kick off linting asynchronously
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-typescript-plugin',
@@ -80,6 +88,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
                 taskSession,
                 heftConfiguration,
                 fix,
+                sarifLogPath,
                 tsProgram: changedFilesHookOptions.program as IExtendedProgram,
                 changedFiles: changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
               });
@@ -144,7 +153,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
   }
 
   private async _lintAsync(options: ILintOptions): Promise<void> {
-    const { taskSession, heftConfiguration, tsProgram, changedFiles, fix } = options;
+    const { taskSession, heftConfiguration, tsProgram, changedFiles, fix, sarifLogPath } = options;
 
     // Ensure that we have initialized. This promise is cached, so calling init
     // multiple times will only init once.
@@ -155,6 +164,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       const eslintLinter: Eslint = await Eslint.initializeAsync({
         tsProgram,
         fix,
+        sarifLogPath,
         scopedLogger: taskSession.logger,
         linterToolPath: this._eslintToolPath,
         linterConfigFilePath: this._eslintConfigFilePath,
