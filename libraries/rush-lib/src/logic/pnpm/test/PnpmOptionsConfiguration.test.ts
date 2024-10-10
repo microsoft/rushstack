@@ -69,4 +69,13 @@ describe(PnpmOptionsConfiguration.name, () => {
 
     expect(pnpmConfiguration.globalNeverBuiltDependencies).toEqual(['fsevents', 'level']);
   });
+
+  it('loads ignoredOptionalDependencies', () => {
+    const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+      `${__dirname}/jsonFiles/pnpm-config-ignoredOptionalDependencies.json`,
+      fakeCommonTempFolder
+    );
+
+    expect(pnpmConfiguration.globalIgnoredOptionalDependencies).toEqual(['fabric']);
+  });
 });

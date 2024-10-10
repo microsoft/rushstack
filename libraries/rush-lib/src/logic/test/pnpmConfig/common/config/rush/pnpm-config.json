@@ -13,6 +13,7 @@
     }
   },
   "globalNeverBuiltDependencies": ["fsevents", "level"],
+  "globalIgnoredOptionalDependencies": ["fabric"],
   "unsupportedPackageJsonSettings": {
     "pnpm": {
       "overrides": {
