@@ -7,5 +7,5 @@
  * @packageDocumentation
  */
 
-export type { IPrefixMatch } from './LookupByPath';
+export type { IPrefixMatch, IReadonlyLookupByPath } from './LookupByPath';
 export { LookupByPath } from './LookupByPath';

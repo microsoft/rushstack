@@ -33,6 +33,10 @@
           "type": "string",
           "description": "Setting this property overrides the cache entry ID. If this property is set, it must contain a [hash] token. It may also contain one of the following tokens: [projectName], [projectName:normalize], [phaseName], [phaseName:normalize], [phaseName:trimPrefix], [os], and [arch]."
         },
+        "cacheHashSalt": {
+          "type": "string",
+          "description": "An optional salt to inject during calculation of the cache key. This can be used to invalidate the cache for all projects when the salt changes."
+        },
         "azureBlobStorageConfiguration": {
           "type": "object",
           "additionalProperties": false,

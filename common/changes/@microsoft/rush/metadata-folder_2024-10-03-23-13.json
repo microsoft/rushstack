@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow rush plugins to extend build cache entries by writing additional files to the metadata folder. Expose the metadata folder path to plugins.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

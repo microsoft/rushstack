@@ -56,9 +56,6 @@ export class OperationMetadataManager {
   private readonly _logPath: string;
   private readonly _errorLogPath: string;
   private readonly _logChunksPath: string;
-  private readonly _relativeLogPath: string;
-  private readonly _relativeLogChunksPath: string;
-  private readonly _relativeErrorLogPath: string;
 
   public constructor(options: IOperationMetadataManagerOptions) {
     const {
@@ -77,12 +74,9 @@ export class OperationMetadataManager {
     });
 
     this._metadataFolderPath = metadataFolderPath;
-    this._relativeLogPath = `${metadataFolderPath}/all.log`;
-    this._relativeErrorLogPath = `${metadataFolderPath}/error.log`;
-    this._relativeLogChunksPath = `${metadataFolderPath}/log-chunks.jsonl`;
-    this._logPath = `${projectFolder}/${this._relativeLogPath}`;
-    this._errorLogPath = `${projectFolder}/${this._relativeErrorLogPath}`;
-    this._logChunksPath = `${projectFolder}/${this._relativeLogChunksPath}`;
+    this._logPath = `${projectFolder}/${metadataFolderPath}/all.log`;
+    this._errorLogPath = `${projectFolder}/${metadataFolderPath}/error.log`;
+    this._logChunksPath = `${projectFolder}/${metadataFolderPath}/log-chunks.jsonl`;
   }
 
   /**
@@ -92,13 +86,8 @@ export class OperationMetadataManager {
    * Example: `.rush/temp/operation/_phase_build/all.log`
    * Example: `.rush/temp/operation/_phase_build/error.log`
    */
-  public get relativeFilepaths(): string[] {
-    return [
-      this.stateFile.relativeFilepath,
-      this._relativeLogPath,
-      this._relativeErrorLogPath,
-      this._relativeLogChunksPath
-    ];
+  public get metadataFolderPath(): string {
+    return this._metadataFolderPath;
   }
 
   public async saveAsync({

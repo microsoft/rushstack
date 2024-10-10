@@ -52,7 +52,7 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
 
   const operationsByStatus: IOperationsByStatus = new Map();
   for (const record of operationResults) {
-    if (record[0].runner?.silent) {
+    if (record[1].silent) {
       // Don't report silenced operations
       continue;
     }

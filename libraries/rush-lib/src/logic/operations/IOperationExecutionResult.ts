@@ -29,6 +29,10 @@ export interface IOperationExecutionResult {
    */
   readonly error: Error | undefined;
   /**
+   * If this operation is only present in the graph to maintain dependency relationships, this flag will be set to true.
+   */
+  readonly silent: boolean;
+  /**
    * Object tracking execution timing.
    */
   readonly stopwatch: IStopwatchResult;
@@ -44,6 +48,10 @@ export interface IOperationExecutionResult {
    * The id of the runner which actually runs the building process in cobuild mode.
    */
   readonly cobuildRunnerId: string | undefined;
+  /**
+   * The relative path to the folder that contains operation metadata. This folder will be automatically included in cache entries.
+   */
+  readonly metadataFolderPath: string | undefined;
   /**
    * The paths to the log files, if applicable.
    */

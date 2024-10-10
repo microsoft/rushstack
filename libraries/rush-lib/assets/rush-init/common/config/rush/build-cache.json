@@ -35,6 +35,11 @@
   // "cacheEntryNamePattern": "[projectName:normalize]-[phaseName:normalize]-[hash]"
 
   /**
+   * (Optional) Salt to inject during calculation of the cache key. This can be used to invalidate the cache for all projects when the salt changes.
+   */
+  // "cacheHashSalt": "1",
+
+  /**
    * Use this configuration with "cacheProvider"="azure-blob-storage"
    */
   "azureBlobStorageConfiguration": {

@@ -28,6 +28,7 @@ import {
   type ILogFilePaths,
   initializeProjectLogFilesAsync
 } from './ProjectLogWritable';
+import type { IOperationExecutionResult } from './IOperationExecutionResult';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -42,7 +43,7 @@ export interface IOperationExecutionRecordContext {
  *
  * @internal
  */
-export class OperationExecutionRecord implements IOperationRunnerContext {
+export class OperationExecutionRecord implements IOperationRunnerContext, IOperationExecutionResult {
   /**
    * The associated operation.
    */
@@ -176,6 +177,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._operationMetadataManager?.stateFile.state?.cobuildRunnerId;
   }
 
+  public get metadataFolderPath(): string | undefined {
+    return this._operationMetadataManager?.metadataFolderPath;
+  }
+
   public get isTerminal(): boolean {
     return TERMINAL_STATUSES.has(this.status);
   }
@@ -195,6 +200,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     }
     this._status = newStatus;
     this._context.onOperationStatusChanged?.(this);
+  }
+
+  public get silent(): boolean {
+    return !this.operation.enabled || this.runner.silent;
   }
 
   /**
@@ -303,7 +312,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       if (earlyReturnStatus) {
         this.status = earlyReturnStatus;
       } else {
-        this.status = await this.runner.executeAsync(this);
+        // If the operation is disabled, skip the runner and directly mark as Skipped.
+        this.status = this.operation.enabled ? await this.runner.executeAsync(this) : OperationStatus.Skipped;
       }
       // Delegate global state reporting
       await onResult(this);

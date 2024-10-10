@@ -150,7 +150,7 @@ export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrin
   let workDuration: number = 0;
 
   for (const [operation, operationResult] of result.operationResults) {
-    if (operation.runner?.silent) {
+    if (operationResult.silent) {
       continue;
     }
 

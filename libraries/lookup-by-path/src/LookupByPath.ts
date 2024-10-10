@@ -47,6 +47,69 @@ export interface IPrefixMatch<TItem> {
 }
 
 /**
+ * The readonly component of `LookupByPath`, to simplify unit testing.
+ *
+ * @beta
+ */
+export interface IReadonlyLookupByPath<TItem> {
+  /**
+   * Searches for the item associated with `childPath`, or the nearest ancestor of that path that
+   * has an associated item.
+   *
+   * @returns the found item, or `undefined` if no item was found
+   *
+   * @example
+   * ```ts
+   * const trie = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
+   * trie.findChildPath('foo/baz'); // returns 1
+   * trie.findChildPath('foo/bar/baz'); // returns 2
+   * ```
+   */
+  findChildPath(childPath: string): TItem | undefined;
+
+  /**
+   * Searches for the item for which the recorded prefix is the longest matching prefix of `query`.
+   * Obtains both the item and the length of the matched prefix, so that the remainder of the path can be
+   * extracted.
+   *
+   * @returns the found item and the length of the matched prefix, or `undefined` if no item was found
+   *
+   * @example
+   * ```ts
+   * const trie = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
+   * trie.findLongestPrefixMatch('foo/baz'); // returns { item: 1, index: 3 }
+   * trie.findLongestPrefixMatch('foo/bar/baz'); // returns { item: 2, index: 7 }
+   * ```
+   */
+  findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
+
+  /**
+   * Searches for the item associated with `childPathSegments`, or the nearest ancestor of that path that
+   * has an associated item.
+   *
+   * @returns the found item, or `undefined` if no item was found
+   *
+   * @example
+   * ```ts
+   * const trie = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
+   * trie.findChildPathFromSegments(['foo', 'baz']); // returns 1
+   * trie.findChildPathFromSegments(['foo','bar', 'baz']); // returns 2
+   * ```
+   */
+  findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
+
+  /**
+   * Groups the provided map of info by the nearest entry in the trie that contains the path. If the path
+   * is not found in the trie, the info is ignored.
+   *
+   * @returns The grouped info, grouped by the nearest entry in the trie that contains the path
+   *
+   * @param infoByPath - The info to be grouped, keyed by path
+   */
+  groupByChild<TInfo>(infoByPath: Map<string, TInfo>): Map<TItem, Map<string, TInfo>>;
+}
+
+/**
  * This class is used to associate path-like-strings, such as those returned by `git` commands,
  * with entities that correspond with ancestor folders, such as Rush Projects or npm packages.
  *
@@ -66,7 +129,7 @@ export interface IPrefixMatch<TItem> {
  * ```
  * @beta
  */
-export class LookupByPath<TItem> {
+export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
   /**
    * The delimiter used to split paths
    */
@@ -178,52 +241,21 @@ export class LookupByPath<TItem> {
   }
 
   /**
-   * Searches for the item associated with `childPath`, or the nearest ancestor of that path that
-   * has an associated item.
-   *
-   * @returns the found item, or `undefined` if no item was found
-   *
-   * @example
-   * ```ts
-   * const trie = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
-   * trie.findChildPath('foo/baz'); // returns 1
-   * trie.findChildPath('foo/bar/baz'); // returns 2
-   * ```
+   * {@inheritdoc IReadonlyLookupByPath}
    */
   public findChildPath(childPath: string): TItem | undefined {
     return this.findChildPathFromSegments(LookupByPath.iteratePathSegments(childPath, this.delimiter));
   }
 
   /**
-   * Searches for the item for which the recorded prefix is the longest matching prefix of `query`.
-   * Obtains both the item and the length of the matched prefix, so that the remainder of the path can be
-   * extracted.
-   *
-   * @returns the found item and the length of the matched prefix, or `undefined` if no item was found
-   *
-   * @example
-   * ```ts
-   * const trie = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
-   * trie.findLongestPrefixMatch('foo/baz'); // returns { item: 1, index: 3 }
-   * trie.findLongestPrefixMatch('foo/bar/baz'); // returns { item: 2, index: 7 }
-   * ```
+   * {@inheritdoc IReadonlyLookupByPath}
    */
   public findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined {
     return this._findLongestPrefixMatch(LookupByPath._iteratePrefixes(query, this.delimiter));
   }
 
   /**
-   * Searches for the item associated with `childPathSegments`, or the nearest ancestor of that path that
-   * has an associated item.
-   *
-   * @returns the found item, or `undefined` if no item was found
-   *
-   * @example
-   * ```ts
-   * const trie = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
-   * trie.findChildPathFromSegments(['foo', 'baz']); // returns 1
-   * trie.findChildPathFromSegments(['foo','bar', 'baz']); // returns 2
-   * ```
+   * {@inheritdoc IReadonlyLookupByPath}
    */
   public findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined {
     let node: IPathTrieNode<TItem> = this._root;
@@ -247,12 +279,7 @@ export class LookupByPath<TItem> {
   }
 
   /**
-   * Groups the provided map of info by the nearest entry in the trie that contains the path. If the path
-   * is not found in the trie, the info is ignored.
-   *
-   * @returns The grouped info, grouped by the nearest entry in the trie that contains the path
-   *
-   * @param infoByPath - The info to be grouped, keyed by path
+   * {@inheritdoc IReadonlyLookupByPath}
    */
   public groupByChild<TInfo>(infoByPath: Map<string, TInfo>): Map<TItem, Map<string, TInfo>> {
     const groupedInfoByChild: Map<TItem, Map<string, TInfo>> = new Map();

@@ -7,10 +7,16 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
       return dir;
     },
     getRepoStateAsync(): ReadonlyMap<string, string> {
-      return new Map();
+      return new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']]);
     },
     getRepoChangesAsync(): ReadonlyMap<string, string> {
       return new Map();
+    },
+    getGitHashForFiles(filePaths: Iterable<string>): ReadonlyMap<string, string> {
+      return new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]));
+    },
+    hashFilesAsync(rootDirectory: string, filePaths: Iterable<string>): ReadonlyMap<string, string> {
+      return new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]));
     }
   };
 });

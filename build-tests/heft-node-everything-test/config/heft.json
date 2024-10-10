@@ -26,6 +26,16 @@
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-api-extractor-plugin"
           }
+        },
+        "metadata-test": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
+            "options": {
+              "scriptPath": "./lib/test-metadata.js"
+            }
+          }
         }
       }
     },

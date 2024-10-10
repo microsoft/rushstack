@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a new property `enabled` to `Operation` that when set to false, will cause the execution engine to immediately return `OperationStatus.Skipped` instead of invoking the runner. Use this property to disable operations that are not intended to be executed in the current pass, e.g. those that did not contain changes in the most recent watch iteration, or those excluded by `--only`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
