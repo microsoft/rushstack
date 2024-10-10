@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Wed, 02 Oct 2024 00:11:19 GMT and should not be manually modified.
+This log was last generated on Thu, 10 Oct 2024 00:11:51 GMT and should not be manually modified.
+
+## 0.5.0
+Thu, 10 Oct 2024 00:11:51 GMT
+
+### Minor changes
+
+- Add an option `sarifLogPath` that, when specified, will emit logs in the SARIF format: https://sarifweb.azurewebsites.net/. Note that this is only supported by ESLint.
 
 ## 0.4.6
 Wed, 02 Oct 2024 00:11:19 GMT

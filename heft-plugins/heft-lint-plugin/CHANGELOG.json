@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.0",
+      "date": "Thu, 10 Oct 2024 00:11:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an option `sarifLogPath` that, when specified, will emit logs in the SARIF format: https://sarifweb.azurewebsites.net/. Note that this is only supported by ESLint."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.6",
       "tag": "@rushstack/heft-lint-plugin_v0.4.6",
       "date": "Wed, 02 Oct 2024 00:11:19 GMT",
