@@ -155,9 +155,6 @@ importers:
       tapable:
         specifier: 1.1.3
         version: 1.1.3
-      true-case-path:
-        specifier: ~2.2.1
-        version: 2.2.1
       watchpack:
         specifier: 2.4.0
         version: 2.4.0
