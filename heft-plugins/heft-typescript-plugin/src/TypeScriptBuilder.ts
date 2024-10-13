@@ -111,7 +111,7 @@ const OLDEST_SUPPORTED_TS_MAJOR_VERSION: number = 2;
 const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
 
 const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 5;
-const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 4;
+const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 6;
 
 interface ITypeScriptTool {
   ts: ExtendedTypeScript;
@@ -1297,12 +1297,16 @@ export class TypeScriptBuilder {
   }
 }
 
+type BuilderProgramWithInternals = TTypescript.BuilderProgram & {
+  state?: { changedFilesSet: Set<string> };
+  getState(): { changedFilesSet: Set<string> };
+};
 function getFilesToTranspileFromBuilderProgram(
   builderProgram: TTypescript.BuilderProgram
 ): Map<string, string> {
-  const changedFilesSet: Set<string> = (
-    builderProgram as unknown as { getState(): { changedFilesSet: Set<string> } }
-  ).getState().changedFilesSet;
+  const program: BuilderProgramWithInternals = builderProgram as unknown as BuilderProgramWithInternals;
+  const changedFilesSet: Set<string> = (program.state ?? program.getState()).changedFilesSet;
+
   const filesToTranspile: Map<string, string> = new Map();
   for (const fileName of changedFilesSet) {
     const sourceFile: TTypescript.SourceFile | undefined = builderProgram.getSourceFile(fileName);
