@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Pass compilerOptions into getModeForUsageLocation",
+      "comment": "Fix a compatibility issue with usage of `getModeForUsageLocation` in TypeScript 5.6",
       "type": "patch"
     }
   ],
