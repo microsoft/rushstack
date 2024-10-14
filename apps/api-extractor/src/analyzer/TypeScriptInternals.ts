@@ -102,12 +102,13 @@ export class TypeScriptInternals {
    */
   public static getModeForUsageLocation(
     file: { impliedNodeFormat?: ts.SourceFile['impliedNodeFormat'] },
-    usage: ts.StringLiteralLike | undefined
+    usage: ts.StringLiteralLike,
+    compilerOptions: ts.CompilerOptions
   ): ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined {
     // Compiler internal:
     // https://github.com/microsoft/TypeScript/blob/v4.7.2/src/compiler/program.ts#L568
 
-    return (ts as any).getModeForUsageLocation?.(file, usage);
+    return ts.getModeForUsageLocation?.(file, usage, compilerOptions);
   }
 
   /**
