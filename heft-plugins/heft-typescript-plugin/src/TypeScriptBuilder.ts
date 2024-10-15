@@ -11,7 +11,11 @@ import { JsonFile, type IPackageJson, Path, FileError } from '@rushstack/node-co
 import type { ITerminal } from '@rushstack/terminal';
 import type { IScopedLogger } from '@rushstack/heft';
 
-import type { ExtendedTypeScript, IExtendedSolutionBuilder } from './internalTypings/TypeScriptInternals';
+import type {
+  ExtendedBuilderProgram,
+  ExtendedTypeScript,
+  IExtendedSolutionBuilder
+} from './internalTypings/TypeScriptInternals';
 import type { ITypeScriptConfigurationJson } from './TypeScriptPlugin';
 import type { PerformanceMeasurer } from './Performance';
 import type {
@@ -111,7 +115,7 @@ const OLDEST_SUPPORTED_TS_MAJOR_VERSION: number = 2;
 const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
 
 const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 5;
-const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 4;
+const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 6;
 
 interface ITypeScriptTool {
   ts: ExtendedTypeScript;
@@ -1300,9 +1304,10 @@ export class TypeScriptBuilder {
 function getFilesToTranspileFromBuilderProgram(
   builderProgram: TTypescript.BuilderProgram
 ): Map<string, string> {
-  const changedFilesSet: Set<string> = (
-    builderProgram as unknown as { getState(): { changedFilesSet: Set<string> } }
-  ).getState().changedFilesSet;
+  const program: ExtendedBuilderProgram = builderProgram as unknown as ExtendedBuilderProgram;
+  // getState was removed in Typescript 5.6, replaced with state
+  const changedFilesSet: Set<string> = (program.state ?? program.getState()).changedFilesSet;
+
   const filesToTranspile: Map<string, string> = new Map();
   for (const fileName of changedFilesSet) {
     const sourceFile: TTypescript.SourceFile | undefined = builderProgram.getSourceFile(fileName);
