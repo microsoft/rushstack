@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 13 Sep 2024 00:11:42 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Oct 2024 00:12:31 GMT and should not be manually modified.
+
+## 7.47.10
+Tue, 15 Oct 2024 00:12:31 GMT
+
+### Patches
+
+- Fix a compatibility issue with usage of `getModeForUsageLocation` in TypeScript 5.6
 
 ## 7.47.9
 Fri, 13 Sep 2024 00:11:42 GMT
