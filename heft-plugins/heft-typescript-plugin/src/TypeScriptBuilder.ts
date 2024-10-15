@@ -11,7 +11,11 @@ import { JsonFile, type IPackageJson, Path, FileError } from '@rushstack/node-co
 import type { ITerminal } from '@rushstack/terminal';
 import type { IScopedLogger } from '@rushstack/heft';
 
-import type { ExtendedTypeScript, IExtendedSolutionBuilder } from './internalTypings/TypeScriptInternals';
+import type {
+  ExtendedBuilderProgram,
+  ExtendedTypeScript,
+  IExtendedSolutionBuilder
+} from './internalTypings/TypeScriptInternals';
 import type { ITypeScriptConfigurationJson } from './TypeScriptPlugin';
 import type { PerformanceMeasurer } from './Performance';
 import type {
@@ -1297,14 +1301,11 @@ export class TypeScriptBuilder {
   }
 }
 
-type BuilderProgramWithInternals = TTypescript.BuilderProgram & {
-  state?: { changedFilesSet: Set<string> };
-  getState(): { changedFilesSet: Set<string> };
-};
 function getFilesToTranspileFromBuilderProgram(
   builderProgram: TTypescript.BuilderProgram
 ): Map<string, string> {
-  const program: BuilderProgramWithInternals = builderProgram as unknown as BuilderProgramWithInternals;
+  const program: ExtendedBuilderProgram = builderProgram as unknown as ExtendedBuilderProgram;
+  // getState was removed in Typescript 5.6, replaced with state
   const changedFilesSet: Set<string> = (program.state ?? program.getState()).changedFilesSet;
 
   const filesToTranspile: Map<string, string> = new Map();
