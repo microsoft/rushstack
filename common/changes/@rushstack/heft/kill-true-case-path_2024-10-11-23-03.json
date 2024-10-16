@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Remove usage of true-case-path in favor of manually adjusting the drive letter casing to avoid confusing file system tracing tools with unnecessary directory enumerations.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
