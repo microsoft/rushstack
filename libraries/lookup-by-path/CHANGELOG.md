@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lookup-by-path
 
-This log was last generated on Thu, 17 Oct 2024 08:35:06 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Oct 2024 20:25:42 GMT and should not be manually modified.
+
+## 0.4.0
+Thu, 17 Oct 2024 20:25:42 GMT
+
+### Minor changes
+
+- Add `IReadonlyLookupByPath` interface to help unit tests for functions that consume `LookupByPath`.
 
 ## 0.3.2
 Thu, 17 Oct 2024 08:35:06 GMT

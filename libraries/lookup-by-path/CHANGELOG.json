@@ -2,6 +2,18 @@
   "name": "@rushstack/lookup-by-path",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/lookup-by-path_v0.4.0",
+      "date": "Thu, 17 Oct 2024 20:25:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `IReadonlyLookupByPath` interface to help unit tests for functions that consume `LookupByPath`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.2",
       "tag": "@rushstack/lookup-by-path_v0.3.2",
       "date": "Thu, 17 Oct 2024 08:35:06 GMT",
