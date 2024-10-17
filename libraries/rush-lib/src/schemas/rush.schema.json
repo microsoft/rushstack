@@ -305,8 +305,12 @@
             "type": "string"
           },
           "installRemotely": {
-            "description": "Specifies the installation type: \"remote\" or \"workspace\". The default value is false.",
+            "description": "If true, then this project will be installed by NPM registry. The default value is true.",
             "type": "boolean"
+          },
+          "versionRange": {
+            "description": "Specifies the package version, using version range syntax.",
+            "type": "string"
           },
           "tags": {
             "description": "An optional set of custom tags that can be used to select this project. For example, adding \"my-custom-tag\" will allow this project to be selected by the command \"rush list --only tag:my-custom-tag\". The tag name must be one or more words separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits, \".\", and \"@\" characters.",

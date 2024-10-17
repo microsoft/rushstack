@@ -551,6 +551,86 @@ export class PackageJsonUpdater {
     }
   }
 
+  private async _getRemoteLatestVersionAsync(packageName: string): Promise<string> {
+    let selectedVersion: string | undefined;
+    this._terminal.writeLine(`Querying NPM registry for latest version of "${packageName}"...`);
+
+    let commandArgs: string[];
+    if (this._rushConfiguration.packageManager === 'yarn') {
+      commandArgs = ['info', packageName, 'dist-tags.latest', '--silent'];
+    } else {
+      commandArgs = ['view', `${packageName}@latest`, 'version'];
+    }
+
+    selectedVersion = (
+      await Utilities.executeCommandAndCaptureOutputAsync(
+        this._rushConfiguration.packageManagerToolFilename,
+        commandArgs,
+        this._rushConfiguration.commonTempFolder
+      )
+    ).trim();
+
+    this._terminal.writeLine();
+    this._terminal.writeLine(`Found latest version: ${Colorize.cyan(selectedVersion)}`);
+
+    return selectedVersion;
+  }
+
+  private async _getRemoteSpecifiedVersionAsync(
+    packageName: string,
+    initialSpec: string = 'latest'
+  ): Promise<string> {
+    let selectedVersion: string | undefined;
+    this._terminal.writeLine(`Querying registry for all versions of "${packageName}"...`);
+
+    let commandArgs: string[];
+    if (this._rushConfiguration.packageManager === 'yarn') {
+      commandArgs = ['info', packageName, 'versions', '--json'];
+    } else {
+      commandArgs = ['view', packageName, 'versions', '--json'];
+    }
+
+    const allVersions: string = await Utilities.executeCommandAndCaptureOutputAsync(
+      this._rushConfiguration.packageManagerToolFilename,
+      commandArgs,
+      this._rushConfiguration.commonTempFolder
+    );
+
+    let versionList: string[];
+    if (this._rushConfiguration.packageManager === 'yarn') {
+      versionList = JSON.parse(allVersions).data;
+    } else {
+      versionList = JSON.parse(allVersions);
+    }
+
+    this._terminal.writeLine(Colorize.gray(`Found ${versionList.length} available versions.`));
+
+    for (const version of versionList) {
+      if (semver.satisfies(version, initialSpec)) {
+        selectedVersion = initialSpec;
+        this._terminal.writeLine(`Found a version that satisfies ${initialSpec}: ${Colorize.cyan(version)}`);
+        break;
+      }
+    }
+
+    if (!selectedVersion) {
+      throw new Error(
+        `Unable to find a version of "${packageName}" that satisfies` +
+          ` the version specifier "${initialSpec}"`
+      );
+    }
+
+    return selectedVersion;
+  }
+
+  private async _getRemoteVersionAsync(packageName: string, initialSpec: string = 'latest'): Promise<string> {
+    if (initialSpec === 'latest') {
+      return this._getRemoteLatestVersionAsync(packageName);
+    }
+
+    return this._getRemoteSpecifiedVersionAsync(packageName, initialSpec);
+  }
+
   /**
    * Selects an appropriate version number for a particular package, given an optional initial SemVer spec.
    * If ensureConsistentVersions, tries to pick a version that will be consistent.
@@ -659,7 +739,9 @@ export class PackageJsonUpdater {
         if (semver.satisfies(version, initialSpec)) {
           // For workspaces, assume that specifying the exact version means you always want to consume
           // the local project. Otherwise, use the exact local package version
-          if (useWorkspaces && !localProject.installRemotely) {
+          if (localProject.installRemotely) {
+            selectedVersion = await this._getRemoteVersionAsync(packageName, initialSpec);
+          } else if (useWorkspaces) {
             selectedVersion = initialSpec === version ? '*' : initialSpec;
             selectedVersionPrefix = workspacePrefix;
           } else {
@@ -675,52 +757,26 @@ export class PackageJsonUpdater {
           );
         }
       } else {
-        this._terminal.writeLine(`Querying registry for all versions of "${packageName}"...`);
-
-        let commandArgs: string[];
-        if (this._rushConfiguration.packageManager === 'yarn') {
-          commandArgs = ['info', packageName, 'versions', '--json'];
-        } else {
-          commandArgs = ['view', packageName, 'versions', '--json'];
-        }
-
-        const allVersions: string = await Utilities.executeCommandAndCaptureOutputAsync(
-          this._rushConfiguration.packageManagerToolFilename,
-          commandArgs,
-          this._rushConfiguration.commonTempFolder
-        );
-
-        let versionList: string[];
-        if (this._rushConfiguration.packageManager === 'yarn') {
-          versionList = JSON.parse(allVersions).data;
-        } else {
-          versionList = JSON.parse(allVersions);
-        }
-
-        this._terminal.writeLine(Colorize.gray(`Found ${versionList.length} available versions.`));
-
-        for (const version of versionList) {
-          if (semver.satisfies(version, initialSpec)) {
-            selectedVersion = initialSpec;
-            this._terminal.writeLine(
-              `Found a version that satisfies ${initialSpec}: ${Colorize.cyan(version)}`
-            );
-            break;
-          }
-        }
-
-        if (!selectedVersion) {
-          throw new Error(
-            `Unable to find a version of "${packageName}" that satisfies` +
-              ` the version specifier "${initialSpec}"`
-          );
-        }
+        // if the package is not a project in the local repository, then we need to query the registry
+        // to find the latest version that satisfies the spec
+        selectedVersion = await this._getRemoteVersionAsync(packageName, initialSpec);
       }
     } else {
       if (localProject !== undefined) {
         // For workspaces, assume that no specified version range means you always want to consume
         // the local project. Otherwise, use the exact local package version
-        if (useWorkspaces && !localProject.installRemotely) {
+        if (localProject.installRemotely) {
+          selectedVersion = await this._getRemoteVersionAsync(packageName, localProject.versionRange);
+          this._terminal.writeLine(
+            Colorize.green('Assigning "') +
+              Colorize.cyan(selectedVersion) +
+              Colorize.green(
+                `" for "${packageName}" because it is the preferred version defined by ${RushConstants.rushJsonFilename}.`
+              )
+          );
+
+          return selectedVersion;
+        } else if (useWorkspaces) {
           selectedVersion = '*';
           selectedVersionPrefix = workspacePrefix;
         } else {
@@ -736,27 +792,10 @@ export class PackageJsonUpdater {
           this._terminal.writeLine();
         }
 
-        this._terminal.writeLine(`Querying NPM registry for latest version of "${packageName}"...`);
-
-        let commandArgs: string[];
-        if (this._rushConfiguration.packageManager === 'yarn') {
-          commandArgs = ['info', packageName, 'dist-tags.latest', '--silent'];
-        } else {
-          commandArgs = ['view', `${packageName}@latest`, 'version'];
-        }
-
-        selectedVersion = (
-          await Utilities.executeCommandAndCaptureOutputAsync(
-            this._rushConfiguration.packageManagerToolFilename,
-            commandArgs,
-            this._rushConfiguration.commonTempFolder
-          )
-        ).trim();
+        // if the package is not a project in the local repository with no spec defined, then we need to
+        // query the registry to find the latest version
+        selectedVersion = await this._getRemoteVersionAsync(packageName);
       }
-
-      this._terminal.writeLine();
-
-      this._terminal.writeLine(`Found latest version: ${Colorize.cyan(selectedVersion)}`);
     }
 
     this._terminal.writeLine();
