@@ -19,7 +19,7 @@ export interface IRequiredCommandLineChoiceParameter<TChoice extends string = st
  */
 export class CommandLineChoiceParameter<TChoice extends string = string> extends CommandLineParameterBase {
   /** {@inheritDoc ICommandLineChoiceDefinition.alternatives} */
-  public readonly alternatives: ReadonlyArray<TChoice>;
+  public readonly alternatives: ReadonlySet<TChoice>;
 
   /** {@inheritDoc ICommandLineStringDefinition.defaultValue} */
   public readonly defaultValue: TChoice | undefined;
@@ -27,7 +27,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
   private _value: TChoice | undefined = undefined;
 
   /** {@inheritDoc ICommandLineChoiceDefinition.completions} */
-  public readonly completions: (() => Promise<TChoice[]>) | undefined;
+  public readonly completions: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
 
   /** {@inheritDoc CommandLineParameter.kind} */
   public readonly kind: CommandLineParameterKind.Choice = -CommandLineParameterKind.Choice;
@@ -35,23 +35,25 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
   /** @internal */
   public constructor(definition: ICommandLineChoiceDefinition<TChoice>) {
     super(definition);
+    const { alternatives, defaultValue, completions } = definition;
 
-    if (definition.alternatives.length < 1) {
+    const alternativesSet: Set<TChoice> = alternatives instanceof Set ? alternatives : new Set(alternatives);
+    if (alternativesSet.size < 1) {
       throw new Error(
         `When defining a choice parameter, the alternatives list must contain at least one value.`
       );
     }
-    if (definition.defaultValue && definition.alternatives.indexOf(definition.defaultValue) === -1) {
+    if (defaultValue && !alternativesSet.has(defaultValue)) {
       throw new Error(
-        `The specified default value "${definition.defaultValue}"` +
-          ` is not one of the available options: ${definition.alternatives.toString()}`
+        `The specified default value "${defaultValue}"` +
+          ` is not one of the available options: ${alternatives.toString()}`
       );
     }
 
-    this.alternatives = definition.alternatives;
-    this.defaultValue = definition.defaultValue;
+    this.alternatives = alternativesSet;
+    this.defaultValue = defaultValue;
     this.validateDefaultValue(!!this.defaultValue);
-    this.completions = definition.completions;
+    this.completions = completions;
   }
 
   /**
@@ -72,8 +74,8 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
       // Try reading the environment variable
       const environmentValue: string | undefined = process.env[this.environmentVariable];
       if (environmentValue !== undefined && environmentValue !== '') {
-        if (!this.alternatives.includes(environmentValue as TChoice)) {
-          const choices: string = '"' + this.alternatives.join('", "') + '"';
+        if (!this.alternatives.has(environmentValue as TChoice)) {
+          const choices: string = '"' + Array.from(this.alternatives).join('", "') + '"';
           throw new Error(
             `Invalid value "${environmentValue}" for the environment variable` +
               ` ${this.environmentVariable}.  Valid choices are: ${choices}`

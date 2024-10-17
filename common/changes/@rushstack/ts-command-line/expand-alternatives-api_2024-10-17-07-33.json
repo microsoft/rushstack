@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "(BREAKING API CHANGE) Change the type of the `alternatives` property of `CommandLineChoiceParameter` and `CommandLineChoiceParameter` from an array to a `ReadonlySet`.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line"
+}
