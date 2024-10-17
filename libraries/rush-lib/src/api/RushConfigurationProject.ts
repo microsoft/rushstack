@@ -29,6 +29,8 @@ export interface IRushConfigurationProjectJson {
   publishFolder?: string;
   tags?: string[];
   subspaceName?: string;
+  installRemotely?: boolean;
+  versionRange?: string;
 }
 
 /**
@@ -56,6 +58,16 @@ export interface IRushConfigurationProjectOptions {
    * The containing subspace.
    */
   subspace: Subspace;
+
+  /**
+   * If specified, package will be downloaded by NPM registry.
+   */
+  installRemotely?: boolean;
+
+  /**
+   * If specified, it will be downloaded according to the NPM version range (ignored if installRemotely=false).
+   */
+  versionRange?: boolean;
 }
 
 /**
@@ -123,6 +135,23 @@ export class RushConfigurationProject {
    * This name must be one of the valid choices listed in RushConfiguration.reviewCategories.
    */
   public readonly reviewCategory: string | undefined;
+
+  /**
+   *
+   * Indicates how this project should be installed by rush add.
+   * Default value is "false".
+   *
+   * @beta
+   */
+  public readonly installRemotely: boolean = false;
+
+  /**
+   *
+   * Indicates which version should be installed by rush add. Ignored if installRemotely=false.
+   *
+   * @beta
+   */
+  public readonly versionRange: string | undefined;
 
   /**
    * A list of local projects that appear as devDependencies for this project, but cannot be
@@ -209,10 +238,17 @@ export class RushConfigurationProject {
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
     const { projectJson, rushConfiguration, tempProjectName, allowedProjectTags } = options;
-    const { packageName, projectFolder: projectRelativeFolder } = projectJson;
+    const {
+      packageName,
+      projectFolder: projectRelativeFolder,
+      installRemotely = false,
+      versionRange
+    } = projectJson;
     this.rushConfiguration = rushConfiguration;
     this.packageName = packageName;
     this.projectRelativeFolder = projectRelativeFolder;
+    this.installRemotely = installRemotely;
+    this.versionRange = versionRange;
 
     validateRelativePathField(projectRelativeFolder, 'projectFolder', rushConfiguration.rushJsonFile);
 

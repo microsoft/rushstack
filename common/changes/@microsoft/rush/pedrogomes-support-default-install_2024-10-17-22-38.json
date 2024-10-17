@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "added new project parameters: installRemotely and versionRange",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
