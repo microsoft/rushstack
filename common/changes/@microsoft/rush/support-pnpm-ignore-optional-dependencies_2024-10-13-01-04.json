@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "add support for pnpm ignoredOptionalDependencies",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
