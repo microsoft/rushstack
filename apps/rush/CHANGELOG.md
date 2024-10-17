@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 03 Oct 2024 22:31:07 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Oct 2024 20:37:39 GMT and should not be manually modified.
+
+## 5.139.0
+Thu, 17 Oct 2024 20:37:39 GMT
+
+### Updates
+
+- Allow rush plugins to extend build cache entries by writing additional files to the metadata folder. Expose the metadata folder path to plugins.
+- [CACHE BREAK] Alter the computation of build cache IDs to depend on the graph of operations in the build and therefore account for multiple phases, rather than only the declared dependencies. Ensure that `dependsOnEnvVars` and command line parameters that affect upstream phases impact the cache IDs of downstream operations.
+- (BREAKING CHANGE) Replace use of `ProjectChangeAnalyzer` in phased command hooks with a new `InputsSnapshot` data structure that is completely synchronous and does not perform any disk operations. Perform all disk operations and state computation prior to executing the build graph.
+- Add a new property `enabled` to `Operation` that when set to false, will cause the execution engine to immediately return `OperationStatus.Skipped` instead of invoking the runner. Use this property to disable operations that are not intended to be executed in the current pass, e.g. those that did not contain changes in the most recent watch iteration, or those excluded by `--only`.
+- Add an optional property `cacheHashSalt` to `build-cache.json` to allow repository maintainers to globally force a hash change in build cache entries.
 
 ## 5.138.0
 Thu, 03 Oct 2024 22:31:07 GMT
