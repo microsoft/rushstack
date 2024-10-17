@@ -343,7 +343,7 @@ export interface IBaseCommandLineDefinition {
 // @public
 export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
     argumentName: string;
-    completions?: (() => Promise<ReadonlyArray<string> | ReadonlySet<string>>) | undefined;
+    completions?: () => Promise<ReadonlyArray<string> | ReadonlySet<string>>;
 }
 
 // @public
@@ -356,14 +356,14 @@ export interface ICommandLineActionOptions {
 // @public
 export interface ICommandLineChoiceDefinition<TChoice extends string = string> extends IBaseCommandLineDefinition {
     alternatives: ReadonlyArray<TChoice> | ReadonlySet<TChoice>;
-    completions?: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
+    completions?: () => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>;
     defaultValue?: TChoice;
 }
 
 // @public
 export interface ICommandLineChoiceListDefinition<TChoice extends string = string> extends IBaseCommandLineDefinition {
     alternatives: ReadonlyArray<TChoice> | ReadonlySet<TChoice>;
-    completions?: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
+    completions?: () => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>;
 }
 
 // @public

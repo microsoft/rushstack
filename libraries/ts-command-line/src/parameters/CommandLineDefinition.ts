@@ -130,7 +130,7 @@ export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLine
    *
    * In a future release, this will be renamed to `getCompletionsAsync`
    */
-  completions?: (() => Promise<ReadonlyArray<string> | ReadonlySet<string>>) | undefined;
+  completions?: () => Promise<ReadonlyArray<string> | ReadonlySet<string>>;
 }
 
 /**
@@ -159,7 +159,7 @@ export interface ICommandLineChoiceDefinition<TChoice extends string = string>
    * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
    * is enabled.
    */
-  completions?: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
+  completions?: () => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>;
 }
 
 /**
@@ -182,7 +182,7 @@ export interface ICommandLineChoiceListDefinition<TChoice extends string = strin
    * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
    * is enabled.
    */
-  completions?: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
+  completions?: () => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>;
 }
 
 /**
