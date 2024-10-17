@@ -1,6 +1,14 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Fri, 13 Sep 2024 00:11:43 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Oct 2024 08:35:06 GMT and should not be manually modified.
+
+## 4.23.0
+Thu, 17 Oct 2024 08:35:06 GMT
+
+### Minor changes
+
+- Expand the `alternatives` and `completions` options of `CommandLineChoiceParameter` and `CommandLineChoiceListParameter` to allow readonly arrays and sets.
+- (BREAKING API CHANGE) Change the type of the `alternatives` property of `CommandLineChoiceParameter` and `CommandLineChoiceParameter` from an array to a `ReadonlySet`.
 
 ## 4.22.8
 Fri, 13 Sep 2024 00:11:43 GMT

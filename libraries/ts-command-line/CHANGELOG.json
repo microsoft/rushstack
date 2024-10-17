@@ -2,6 +2,21 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.23.0",
+      "tag": "@rushstack/ts-command-line_v4.23.0",
+      "date": "Thu, 17 Oct 2024 08:35:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expand the `alternatives` and `completions` options of `CommandLineChoiceParameter` and `CommandLineChoiceListParameter` to allow readonly arrays and sets."
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Change the type of the `alternatives` property of `CommandLineChoiceParameter` and `CommandLineChoiceParameter` from an array to a `ReadonlySet`."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.22.8",
       "tag": "@rushstack/ts-command-line_v4.22.8",
       "date": "Fri, 13 Sep 2024 00:11:43 GMT",

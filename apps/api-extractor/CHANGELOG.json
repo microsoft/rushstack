@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.47.11",
+      "tag": "@microsoft/api-extractor_v7.47.11",
+      "date": "Thu, 17 Oct 2024 08:35:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.47.10",
       "tag": "@microsoft/api-extractor_v7.47.10",
       "date": "Tue, 15 Oct 2024 00:12:31 GMT",
