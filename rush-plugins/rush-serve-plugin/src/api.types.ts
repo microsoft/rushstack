@@ -45,9 +45,16 @@ export interface IOperationInfo {
   phaseName: string;
 
   /**
+   * If false, this operation is disabled and will/did not execute during the current run.
+   * The status will be reported as `Skipped`.
+   */
+  enabled: boolean;
+
+  /**
    * If true, this operation is configured to be silent and is included for completeness.
    */
   silent: boolean;
+
   /**
    * If true, this operation is configured to be a noop and is included for graph completeness.
    */

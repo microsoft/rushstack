@@ -5,7 +5,6 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import type { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
 
@@ -18,15 +17,10 @@ interface ITestOptions {
 }
 
 describe(ProjectBuildCache.name, () => {
-  async function prepareSubject(options: Partial<ITestOptions>): Promise<ProjectBuildCache | undefined> {
+  function prepareSubject(options: Partial<ITestOptions>): ProjectBuildCache {
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-    const projectChangeAnalyzer = {
-      [ProjectChangeAnalyzer.prototype._tryGetProjectStateHashAsync.name]: async () => {
-        return 'state_hash';
-      }
-    } as unknown as ProjectChangeAnalyzer;
 
-    const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCacheAsync({
+    const subject: ProjectBuildCache = ProjectBuildCache.getProjectBuildCache({
       buildCacheConfiguration: {
         buildCacheEnabled: options.hasOwnProperty('enabled') ? options.enabled : true,
         getCacheEntryId: (opts: IGenerateCacheEntryIdOptions) =>
@@ -42,8 +36,9 @@ describe(ProjectBuildCache.name, () => {
         projectRelativeFolder: 'apps/acme-wizard',
         dependencyProjects: []
       } as unknown as RushConfigurationProject,
-      configHash: 'build',
-      projectChangeAnalyzer,
+      // Value from past tests, for consistency.
+      // The project build cache is not responsible for calculating this value.
+      operationStateHash: '1926f30e8ed24cb47be89aea39e7efd70fcda075',
       terminal,
       phaseName: 'build'
     });
@@ -51,9 +46,9 @@ describe(ProjectBuildCache.name, () => {
     return subject;
   }
 
-  describe(ProjectBuildCache.tryGetProjectBuildCacheAsync.name, () => {
-    it('returns a ProjectBuildCache with a calculated cacheId value', async () => {
-      const subject: ProjectBuildCache = (await prepareSubject({}))!;
+  describe(ProjectBuildCache.getProjectBuildCache.name, () => {
+    it('returns a ProjectBuildCache with a calculated cacheId value', () => {
+      const subject: ProjectBuildCache = prepareSubject({});
       expect(subject['_cacheId']).toMatchInlineSnapshot(
         `"acme-wizard/1926f30e8ed24cb47be89aea39e7efd70fcda075"`
       );

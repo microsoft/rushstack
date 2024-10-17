@@ -138,7 +138,7 @@ export class OperationExecutionManager {
       );
 
       executionRecords.set(operation, executionRecord);
-      if (!executionRecord.runner.silent) {
+      if (!executionRecord.silent) {
         // Only count non-silent operations
         totalOperations++;
       }
@@ -212,7 +212,7 @@ export class OperationExecutionManager {
       this._terminal.writeStdoutLine(`Selected ${totalOperations} operation${plural}:`);
       const nonSilentOperations: string[] = [];
       for (const record of this._executionRecords.values()) {
-        if (!record.runner.silent) {
+        if (!record.silent) {
           nonSilentOperations.push(record.name);
         }
       }
@@ -252,8 +252,8 @@ export class OperationExecutionManager {
 
     await Async.forEachAsync(
       this._executionQueue,
-      async (operation: OperationExecutionRecord) => {
-        await operation.executeAsync({
+      async (record: OperationExecutionRecord) => {
+        await record.executeAsync({
           onStart: onOperationStartAsync,
           onResult: onOperationCompleteAsync
         });
@@ -301,9 +301,7 @@ export class OperationExecutionManager {
    * Handles the result of the operation and propagates any relevant effects.
    */
   private _onOperationComplete(record: OperationExecutionRecord): void {
-    const { runner, name, status } = record;
-
-    const silent: boolean = runner.silent;
+    const { runner, name, status, silent } = record;
 
     switch (status) {
       /**
@@ -324,13 +322,13 @@ export class OperationExecutionManager {
             // Now that we have the concept of architectural no-ops, we could implement this by replacing
             // {blockedRecord.runner} with a no-op that sets status to Blocked and logs the blocking
             // operations. However, the existing behavior is a bit simpler, so keeping that for now.
-            if (!blockedRecord.runner.silent) {
+            if (!blockedRecord.silent) {
               terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
             }
             blockedRecord.status = OperationStatus.Blocked;
 
             this._executionQueue.complete(blockedRecord);
-            if (!blockedRecord.runner.silent) {
+            if (!blockedRecord.silent) {
               // Only increment the count if the operation is not silent to avoid confusing the user.
               // The displayed total is the count of non-silent operations.
               this._completedOperations++;

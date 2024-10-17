@@ -325,7 +325,7 @@ function tryEnableBuildStatusWebSocketServer(
    */
   function convertToOperationInfo(record: IOperationExecutionResult): IOperationInfo | undefined {
     const { operation } = record;
-    const { name, associatedPhase, associatedProject, runner } = operation;
+    const { name, associatedPhase, associatedProject, runner, enabled } = operation;
 
     if (!name || !associatedPhase || !associatedProject || !runner) {
       return;
@@ -338,7 +338,8 @@ function tryEnableBuildStatusWebSocketServer(
       packageName,
       phaseName: associatedPhase.name,
 
-      silent: !!runner.silent,
+      enabled,
+      silent: record.silent,
       noop: !!runner.isNoOp,
 
       status: readableStatusFromStatus[record.status],

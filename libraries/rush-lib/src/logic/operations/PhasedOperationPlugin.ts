@@ -5,8 +5,6 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import type { IPhase } from '../../api/CommandLineConfiguration';
 
 import { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
-import { NullOperationRunner } from './NullOperationRunner';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
@@ -55,15 +53,11 @@ function createOperations(
     }
   }
 
-  for (const [key, operation] of operations) {
+  for (const operation of operations.values()) {
     if (!operationsWithWork.has(operation)) {
       // This operation is in scope, but did not change since it was last executed by the current command.
       // However, we have no state tracking across executions, so treat as unknown.
-      operation.runner = new NullOperationRunner({
-        name: key,
-        result: OperationStatus.Skipped,
-        silent: true
-      });
+      operation.enabled = false;
     }
   }
 
@@ -91,12 +85,8 @@ function createOperations(
       });
 
       if (!phaseSelection.has(phase) || !projectSelection.has(project)) {
-        // Not in scope. Mark skipped because state is unknown.
-        operation.runner = new NullOperationRunner({
-          name: key,
-          result: OperationStatus.Skipped,
-          silent: true
-        });
+        // Not in scope. Mark disabled, which will report as OperationStatus.Skipped.
+        operation.enabled = false;
       } else if (changedProjects.has(project)) {
         operationsWithWork.add(operation);
       }

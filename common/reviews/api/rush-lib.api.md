@@ -66,6 +66,7 @@ export class ApprovedPackagesPolicy {
 // @beta
 export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
+    readonly cacheHashSalt: string | undefined;
     cacheWriteEnabled: boolean;
     readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
     static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string;
@@ -330,6 +331,9 @@ export class _FlagFile<TState extends JsonObject = JsonObject> {
 // @beta
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
+// @beta
+export type GetInputsSnapshotAsyncFn = () => Promise<IInputsSnapshot | undefined>;
+
 // @internal (undocumented)
 export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
     // (undocumented)
@@ -462,7 +466,7 @@ export interface IEnvironmentConfigurationInitializeOptions {
 
 // @alpha
 export interface IExecuteOperationsContext extends ICreateOperationsContext {
-    readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
+    readonly inputsSnapshot?: IInputsSnapshot;
 }
 
 // @alpha
@@ -521,6 +525,14 @@ export interface IGetChangedProjectsOptions {
 export interface IGlobalCommand extends IRushCommand {
 }
 
+// @beta
+export interface IInputsSnapshot {
+    getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string): string;
+    getTrackedFileHashesForOperation(project: IRushConfigurationProjectForSnapshot, operationName?: string): ReadonlyMap<string, string>;
+    readonly hashes: ReadonlyMap<string, string>;
+    readonly rootDirectory: string;
+}
+
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
@@ -570,8 +582,10 @@ export interface IOperationExecutionResult {
     readonly cobuildRunnerId: string | undefined;
     readonly error: Error | undefined;
     readonly logFilePaths: ILogFilePaths | undefined;
+    readonly metadataFolderPath: string | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly operation: Operation;
+    readonly silent: boolean;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
     readonly stopwatch: IStopwatchResult;
@@ -759,16 +773,6 @@ export interface IPnpmPeerDependencyRules {
 
 export { IPrefixMatch }
 
-// @internal (undocumented)
-export interface _IRawRepoState {
-    // (undocumented)
-    projectState: Map<RushConfigurationProject, Map<string, string>> | undefined;
-    // (undocumented)
-    rawHashes: Map<string, string>;
-    // (undocumented)
-    rootDir: string;
-}
-
 // @beta
 export interface IRushCommand {
     readonly actionName: string;
@@ -797,6 +801,9 @@ export interface IRushCommandLineSpec {
     // (undocumented)
     actions: IRushCommandLineAction[];
 }
+
+// @beta (undocumented)
+export type IRushConfigurationProjectForSnapshot = Pick<RushConfigurationProject, 'projectFolder' | 'projectRelativeFolder'>;
 
 // @alpha (undocumented)
 export interface IRushPhaseSharding {
@@ -924,6 +931,7 @@ export class Operation {
     readonly consumers: ReadonlySet<Operation>;
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
+    enabled: boolean;
     get isNoOp(): boolean;
     logFilenameIdentifier: string;
     get name(): string | undefined;
@@ -937,7 +945,7 @@ export class _OperationMetadataManager {
     constructor(options: _IOperationMetadataManagerOptions);
     // (undocumented)
     readonly logFilenameIdentifier: string;
-    get relativeFilepaths(): string[];
+    get metadataFolderPath(): string;
     // (undocumented)
     saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath, logChunksPath }: _IOperationMetadata): Promise<void>;
     // (undocumented)
@@ -1113,16 +1121,12 @@ export type PnpmStoreOptions = PnpmStoreLocation;
 export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
     // @internal (undocumented)
-    _ensureInitializedAsync(terminal: ITerminal): Promise<_IRawRepoState | undefined>;
-    // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // (undocumented)
     protected getChangesByProject(lookup: LookupByPath<RushConfigurationProject>, changedFiles: Map<string, IFileDiffStatus>): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
     // @internal
-    _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
-    // @internal
-    _tryGetProjectStateHashAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<string | undefined>;
+    _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
 
 // @public
