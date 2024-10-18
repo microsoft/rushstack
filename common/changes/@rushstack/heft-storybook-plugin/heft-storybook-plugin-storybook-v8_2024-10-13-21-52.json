@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "comment": "Add support for Storybook v8",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin"
+}

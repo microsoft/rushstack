@@ -57,7 +57,8 @@ enum StorybookBuildMode {
  */
 enum StorybookCliVersion {
   STORYBOOK7 = 'storybook7',
-  STORYBOOK6 = 'storybook6'
+  STORYBOOK6 = 'storybook6',
+  STORYBOOK8 = 'storybook8'
 }
 
 /**
@@ -179,6 +180,13 @@ const DEFAULT_STORYBOOK_CLI_CONFIG: Record<StorybookCliVersion, IStorybookCliCal
       watch: ['sb', 'dev'],
       build: ['sb', 'build']
     }
+  },
+  [StorybookCliVersion.STORYBOOK8]: {
+    packageName: 'storybook',
+    command: {
+      watch: ['sb', 'dev'],
+      build: ['sb', 'build']
+    }
   }
 };
 
@@ -186,6 +194,7 @@ const DEFAULT_STORYBOOK_CLI_CONFIG: Record<StorybookCliVersion, IStorybookCliCal
 export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPluginOptions> {
   private _logger!: IScopedLogger;
   private _isServeMode: boolean = false;
+  private _isTestMode: boolean = false;
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
@@ -198,6 +207,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     this._logger = taskSession.logger;
     const storybookParameter: CommandLineFlagParameter =
       taskSession.parameters.getFlagParameter('--storybook');
+    const storybookTestParameter: CommandLineFlagParameter =
+      taskSession.parameters.getFlagParameter('--storybook-test');
 
     const parseResult: IParsedPackageNameOrError = PackageName.tryParse(options.storykitPackageName);
     if (parseResult.error) {
@@ -206,6 +217,10 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
           ` plugin option is not a valid package name: ` +
           parseResult.error
       );
+    }
+
+    if (storybookTestParameter.value) {
+      this._isTestMode = true;
     }
 
     // Only tap if the --storybook flag is present.
@@ -266,6 +281,13 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     const buildMode: StorybookBuildMode = taskSession.parameters.watch
       ? StorybookBuildMode.WATCH
       : StorybookBuildMode.BUILD;
+
+    if (buildMode === StorybookBuildMode.WATCH && this._isTestMode) {
+      throw new Error('The --storybook-test flag is not supported in watch mode');
+    }
+    if (this._isTestMode && (storybookCliVersion === StorybookCliVersion.STORYBOOK6 || storybookCliVersion === StorybookCliVersion.STORYBOOK7)) {
+      throw new Error('The --storybook-test flag is not supported in storybook6 and storybook7');
+    }
 
     this._logger.terminal.writeVerboseLine(`Probing for "${storykitPackageName}"`);
     // Example: "/path/to/my-project/node_modules/my-storykit"
@@ -407,6 +429,9 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     }
     if (!verbose) {
       storybookArgs.push('--quiet');
+    }
+    if (this._isTestMode) {
+      storybookArgs.push('--test');
     }
 
     if (this._isServeMode) {
