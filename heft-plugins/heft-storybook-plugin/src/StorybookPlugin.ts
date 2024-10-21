@@ -56,8 +56,8 @@ enum StorybookBuildMode {
  * Storybook CLI versions
  */
 enum StorybookCliVersion {
-  STORYBOOK7 = 'storybook7',
   STORYBOOK6 = 'storybook6',
+  STORYBOOK7 = 'storybook7',
   STORYBOOK8 = 'storybook8'
 }
 
@@ -195,6 +195,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
   private _logger!: IScopedLogger;
   private _isServeMode: boolean = false;
   private _isTestMode: boolean = false;
+  private _storybookTestFlagName: '--storybook-test' = '--storybook-test';
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
@@ -207,8 +208,9 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     this._logger = taskSession.logger;
     const storybookParameter: CommandLineFlagParameter =
       taskSession.parameters.getFlagParameter('--storybook');
-    const storybookTestParameter: CommandLineFlagParameter =
-      taskSession.parameters.getFlagParameter('--storybook-test');
+    const storybookTestParameter: CommandLineFlagParameter = taskSession.parameters.getFlagParameter(
+      this._storybookTestFlagName
+    );
 
     const parseResult: IParsedPackageNameOrError = PackageName.tryParse(options.storykitPackageName);
     if (parseResult.error) {
@@ -283,10 +285,16 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       : StorybookBuildMode.BUILD;
 
     if (buildMode === StorybookBuildMode.WATCH && this._isTestMode) {
-      throw new Error('The --storybook-test flag is not supported in watch mode');
+      throw new Error(`The ${this._storybookTestFlagName} flag is not supported in watch mode`);
     }
-    if (this._isTestMode && (storybookCliVersion === StorybookCliVersion.STORYBOOK6 || storybookCliVersion === StorybookCliVersion.STORYBOOK7)) {
-      throw new Error('The --storybook-test flag is not supported in storybook6 and storybook7');
+    if (
+      this._isTestMode &&
+      (storybookCliVersion === StorybookCliVersion.STORYBOOK6 ||
+        storybookCliVersion === StorybookCliVersion.STORYBOOK7)
+    ) {
+      throw new Error(
+        `The ${this._storybookTestFlagName} flag is only supported in Storybook version 8 and above.`
+      );
     }
 
     this._logger.terminal.writeVerboseLine(`Probing for "${storykitPackageName}"`);
