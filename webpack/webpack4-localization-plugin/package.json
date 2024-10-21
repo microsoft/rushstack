@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack4-localization-plugin",
-  "version": "0.18.74",
+  "version": "0.18.75",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "lib/index.js",
   "typings": "dist/webpack4-localization-plugin.d.ts",
