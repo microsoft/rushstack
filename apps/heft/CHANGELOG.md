@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 17 Oct 2024 08:35:06 GMT and should not be manually modified.
+This log was last generated on Mon, 21 Oct 2024 18:50:09 GMT and should not be manually modified.
+
+## 0.68.5
+Mon, 21 Oct 2024 18:50:09 GMT
+
+### Patches
+
+- Remove usage of true-case-path in favor of manually adjusting the drive letter casing to avoid confusing file system tracing tools with unnecessary directory enumerations.
 
 ## 0.68.4
 Thu, 17 Oct 2024 08:35:06 GMT

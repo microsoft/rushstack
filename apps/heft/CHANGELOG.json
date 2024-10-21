@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.68.5",
+      "tag": "@rushstack/heft_v0.68.5",
+      "date": "Mon, 21 Oct 2024 18:50:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove usage of true-case-path in favor of manually adjusting the drive letter casing to avoid confusing file system tracing tools with unnecessary directory enumerations."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.68.4",
       "tag": "@rushstack/heft_v0.68.4",
       "date": "Thu, 17 Oct 2024 08:35:06 GMT",
