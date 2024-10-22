@@ -338,7 +338,8 @@ export class PackageExtractor {
       targetRootFolder,
       mainProjectName,
       overwriteExisting,
-      dependencyConfigurations
+      dependencyConfigurations,
+      linkCreation
     } = options;
 
     terminal.writeLine(Colorize.cyan(`Extracting to target folder:  ${targetRootFolder}`));
@@ -383,7 +384,21 @@ export class PackageExtractor {
     }
 
     await this._performExtractionAsync(options, state);
-    await state.assetHandler.finalizeAsync();
+    await state.assetHandler.finalizeAsync({
+      onAfterExtractSymlinksAsync: async () => {
+        // We need the symlinks to be created before attempting to create the bin links, since it requires
+        // the node_modules folder to be realized. While we're here, we may as well perform some specific
+        // link creation tasks and write the extractor-metadata.json file before the asset handler finalizes.
+        if (linkCreation === 'default') {
+          await this._makeBinLinksAsync(options, state);
+        } else if (linkCreation === 'script') {
+          await this._writeCreateLinksScriptAsync(options, state);
+        }
+
+        terminal.writeLine('Creating extractor-metadata.json');
+        await this._writeExtractorMetadataAsync(options, state);
+      }
+    });
   }
 
   private static _normalizeOptions(options: IExtractorOptions): IExtractorOptions {
@@ -423,7 +438,6 @@ export class PackageExtractor {
       sourceRootFolder,
       targetRootFolder,
       folderToCopy: additionalFolderToCopy,
-      linkCreation,
       createArchiveOnly
     } = options;
     const { projectConfigurationsByName, foldersToCopy } = state;
@@ -480,15 +494,6 @@ export class PackageExtractor {
       };
       await this._extractFolderAsync(additionalFolderPath, additionalFolderExtractorOptions, state);
     }
-
-    if (linkCreation === 'default') {
-      await this._makeBinLinksAsync(options, state);
-    } else if (linkCreation === 'script') {
-      await this._writeCreateLinksScriptAsync(options, state);
-    }
-
-    terminal.writeLine('Creating extractor-metadata.json');
-    await this._writeExtractorMetadataAsync(options, state);
   }
 
   /**
