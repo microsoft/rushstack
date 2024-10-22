@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.9.8",
+      "tag": "@rushstack/package-extractor_v0.9.8",
+      "date": "Tue, 22 Oct 2024 22:12:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the `node_modules/.bin` folder symlinks were not created for extracted packages when using the \"default\" link creation mode"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.7",
       "tag": "@rushstack/package-extractor_v0.9.7",
       "date": "Mon, 21 Oct 2024 18:50:10 GMT",
