@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "add support for pnpm ignoredOptionalDependencies",
+      "comment": "Add support for the `globalIgnoredOptionalDependencies` field in the `common/config/rush/pnpm-config.json` file to allow specifying optional dependencies that should be ignored by PNPM",
       "type": "none"
     }
   ],
