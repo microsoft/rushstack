@@ -38,6 +38,10 @@ export interface IAssetHandlerOptions extends IExtractorOptions {
   symlinkAnalyzer: SymlinkAnalyzer;
 }
 
+export interface IFinalizeOptions {
+  onAfterExtractSymlinksAsync: () => Promise<void>;
+}
+
 export class AssetHandler {
   private readonly _terminal: ITerminal;
   private readonly _sourceRootFolder: string;
@@ -148,7 +152,9 @@ export class AssetHandler {
     return [...this._includedAssetPaths];
   }
 
-  public async finalizeAsync(): Promise<void> {
+  public async finalizeAsync(options?: IFinalizeOptions): Promise<void> {
+    const { onAfterExtractSymlinksAsync } = options ?? {};
+
     if (this._isFinalized) {
       throw new Error('finalizeAsync() has already been called');
     }
@@ -160,6 +166,8 @@ export class AssetHandler {
         await this._extractSymlinkAsync(linkToCopy);
       });
     }
+
+    await onAfterExtractSymlinksAsync?.();
 
     if (this._archiveManager && this._archiveFilePath) {
       this._terminal.writeLine(`Creating archive at "${this._archiveFilePath}"`);
