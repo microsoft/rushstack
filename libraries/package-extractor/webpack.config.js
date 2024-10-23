@@ -30,11 +30,9 @@ module.exports = () => {
         maxLength: 6
       })
     ],
-    resolve: {
-      alias: {
-        // This is included by the 'mz' package which is a dependency of '@pnpm/link-bins' but is unused
-        'graceful-fs': false
-      }
-    }
+    ignoreWarnings: [
+      // This is included by the 'mz' package which is a dependency of '@pnpm/link-bins' but is unused
+      /Module not found: Error: Can't resolve 'graceful-fs'/
+    ]
   };
 };
