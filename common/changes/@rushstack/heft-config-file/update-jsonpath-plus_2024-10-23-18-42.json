@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Update the `jsonpath-plus` dependency to mitigate CVE-2024-21534.\"",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file"
+}
