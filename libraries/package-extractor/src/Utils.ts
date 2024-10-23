@@ -87,6 +87,7 @@ export async function makeBinLinksAsync(
           extractedProjectBinFolderPath
         );
         for (const binFolderItem of binFolderItems) {
+          terminal.writeVerboseLine(`Created .bin file: ${binFolderItem}`);
           binFilePaths.push(`${extractedProjectBinFolderPath}/${binFolderItem}`);
         }
       }

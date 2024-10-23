@@ -24,8 +24,8 @@ async function createLinksAsync(
     extractorMetadataObject.links,
     async (linkInfo) => {
       // Link to the relative path for symlinks
-      const newLinkPath: string = `${targetRootFolder}/${linkInfo.linkPath}`;
-      const linkTargetPath: string = `${targetRootFolder}/${linkInfo.targetPath}`;
+      const newLinkPath: string = path.join(targetRootFolder, linkInfo.linkPath);
+      const linkTargetPath: string = path.join(targetRootFolder, linkInfo.targetPath);
 
       // Make sure the containing folder exists
       await FileSystem.ensureFolderAsync(path.dirname(newLinkPath));
@@ -113,12 +113,14 @@ export class CreateLinksAction extends CommandLineAction {
     await createLinksAsync(this._terminal, targetRootFolder, extractorMetadataObject);
 
     if (realizeFiles) {
+      this._terminal.writeLine(`Realizing files for extraction at path "${targetRootFolder}"`);
       await realizeFilesAsync(this._terminal, targetRootFolder, extractorMetadataObject);
     }
 
     if (linkBins) {
+      this._terminal.writeLine(`Linking bins for extraction at path "${targetRootFolder}"`);
       const extractedProjectFolderPaths: string[] = extractorMetadataObject.projects.map(
-        (project: IProjectInfoJson) => path.resolve(targetRootFolder, project.path)
+        (project: IProjectInfoJson) => path.join(targetRootFolder, project.path)
       );
       await makeBinLinksAsync(this._terminal, extractedProjectFolderPaths);
     }
