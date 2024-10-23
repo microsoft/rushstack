@@ -11,7 +11,7 @@ module.exports = () => {
     devtool: 'source-map',
     entry: {
       [PathConstants.createLinksScriptFilename]: {
-        import: `${__dirname}/lib-esnext/scripts/create-links.js`,
+        import: `${__dirname}/lib-esnext/scripts/createLinks/start.js`,
         filename: `[name]`
       }
     },
@@ -29,6 +29,12 @@ module.exports = () => {
       new webpack.ids.DeterministicModuleIdsPlugin({
         maxLength: 6
       })
-    ]
+    ],
+    resolve: {
+      alias: {
+        // This is included by the 'mz' package which is a dependency of '@pnpm/link-bins' but is unused
+        'graceful-fs': false
+      }
+    }
   };
 };

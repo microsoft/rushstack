@@ -5,7 +5,6 @@ import * as path from 'path';
 import { type IMinimatch, Minimatch } from 'minimatch';
 import semver from 'semver';
 import npmPacklist from 'npm-packlist';
-import pnpmLinkBins from '@pnpm/link-bins';
 import ignore, { type Ignore } from 'ignore';
 import {
   Async,
@@ -20,7 +19,12 @@ import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyzer';
 import { AssetHandler } from './AssetHandler';
-import { matchesWithStar, remapSourcePathForTargetFolder, remapPathForExtractorMetadata } from './Utils';
+import {
+  matchesWithStar,
+  remapSourcePathForTargetFolder,
+  remapPathForExtractorMetadata,
+  makeBinLinksAsync
+} from './Utils';
 import { createLinksScriptFilename, scriptsFolderPath } from './PathConstants';
 
 // (@types/npm-packlist is missing this API)
@@ -932,43 +936,16 @@ export class PackageExtractor {
   private async _makeBinLinksAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
     const { terminal } = options;
 
-    const extractedProjectFolders: string[] = Array.from(state.projectConfigurationsByPath.keys()).filter(
-      (folderPath: string) => state.foldersToCopy.has(folderPath)
-    );
+    const extractedProjectFolderPaths: string[] = Array.from(state.projectConfigurationsByPath.keys())
+      .filter((folderPath: string) => state.foldersToCopy.has(folderPath))
+      .map((folderPath: string) => remapSourcePathForTargetFolder({ ...options, sourcePath: folderPath }));
 
-    await Async.forEachAsync(
-      extractedProjectFolders,
-      async (projectFolder: string) => {
-        const extractedProjectFolder: string = remapSourcePathForTargetFolder({
-          ...options,
-          sourcePath: projectFolder
-        });
-        const extractedProjectNodeModulesFolder: string = path.join(extractedProjectFolder, 'node_modules');
-        const extractedProjectBinFolder: string = path.join(extractedProjectNodeModulesFolder, '.bin');
-
-        const linkedBinPackageNames: string[] = await pnpmLinkBins(
-          extractedProjectNodeModulesFolder,
-          extractedProjectBinFolder,
-          {
-            warn: (msg: string) => terminal.writeLine(Colorize.yellow(msg))
-          }
-        );
-
-        if (linkedBinPackageNames.length) {
-          const binFolderItems: string[] =
-            await FileSystem.readFolderItemNamesAsync(extractedProjectBinFolder);
-          for (const binFolderItem of binFolderItems) {
-            const binFilePath: string = path.resolve(extractedProjectBinFolder, binFolderItem);
-            await state.assetHandler.includeAssetAsync({
-              targetFilePath: binFilePath
-            });
-          }
-        }
-      },
-      {
-        concurrency: 10
-      }
-    );
+    const binFilePaths: string[] = await makeBinLinksAsync(terminal, extractedProjectFolderPaths);
+    for (const binFilePath of binFilePaths) {
+      await state.assetHandler.includeAssetAsync({
+        targetFilePath: binFilePath
+      });
+    }
   }
 
   private async _writeCreateLinksScriptAsync(
