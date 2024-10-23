@@ -7,11 +7,12 @@ import type { ITerminal } from '@rushstack/terminal';
 import { CommandLineAction, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import type { IExtractorMetadataJson, IProjectInfoJson } from '../../../../PackageExtractor';
 import { makeBinLinksAsync } from '../../../../Utils';
-import { getExtractorMetadataAsync, getTargetRootFolder } from '../../utilities/CreateLinksUtilities';
+import { getExtractorMetadataAsync } from '../../utilities/CreateLinksUtilities';
 import {
-  MAX_CONCURRENCY,
+  TARGET_ROOT_FOLDER,
   REALIZE_FILES_PARAMETER_NAME,
-  LINK_BINS_PARAMETER_NAME
+  LINK_BINS_PARAMETER_NAME,
+  MAX_CONCURRENCY
 } from '../../utilities/constants';
 import { removeLinksAsync } from './RemoveLinksAction';
 
@@ -103,24 +104,23 @@ export class CreateLinksAction extends CommandLineAction {
   }
 
   protected async onExecute(): Promise<void> {
-    const targetRootFolder: string = getTargetRootFolder();
     const extractorMetadataObject: IExtractorMetadataJson = await getExtractorMetadataAsync();
     const realizeFiles: boolean = this._realizeFilesParameter.value;
     const linkBins: boolean = this._linkBinsParameter.value;
 
-    this._terminal.writeLine(`Creating links for extraction at path "${targetRootFolder}"`);
-    await removeLinksAsync(this._terminal, targetRootFolder, extractorMetadataObject);
-    await createLinksAsync(this._terminal, targetRootFolder, extractorMetadataObject);
+    this._terminal.writeLine(`Creating links for extraction at path "${TARGET_ROOT_FOLDER}"`);
+    await removeLinksAsync(this._terminal, TARGET_ROOT_FOLDER, extractorMetadataObject);
+    await createLinksAsync(this._terminal, TARGET_ROOT_FOLDER, extractorMetadataObject);
 
     if (realizeFiles) {
-      this._terminal.writeLine(`Realizing files for extraction at path "${targetRootFolder}"`);
-      await realizeFilesAsync(this._terminal, targetRootFolder, extractorMetadataObject);
+      this._terminal.writeLine(`Realizing files for extraction at path "${TARGET_ROOT_FOLDER}"`);
+      await realizeFilesAsync(this._terminal, TARGET_ROOT_FOLDER, extractorMetadataObject);
     }
 
     if (linkBins) {
-      this._terminal.writeLine(`Linking bins for extraction at path "${targetRootFolder}"`);
+      this._terminal.writeLine(`Linking bins for extraction at path "${TARGET_ROOT_FOLDER}"`);
       const extractedProjectFolderPaths: string[] = extractorMetadataObject.projects.map(
-        (project: IProjectInfoJson) => path.join(targetRootFolder, project.path)
+        (project: IProjectInfoJson) => path.join(TARGET_ROOT_FOLDER, project.path)
       );
       await makeBinLinksAsync(this._terminal, extractedProjectFolderPaths);
     }

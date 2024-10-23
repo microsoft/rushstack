@@ -6,8 +6,8 @@ import { Async, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 import type { IExtractorMetadataJson } from '../../../../PackageExtractor';
-import { getExtractorMetadataAsync, getTargetRootFolder } from '../../utilities/CreateLinksUtilities';
-import { MAX_CONCURRENCY } from '../../utilities/constants';
+import { getExtractorMetadataAsync } from '../../utilities/CreateLinksUtilities';
+import { TARGET_ROOT_FOLDER, MAX_CONCURRENCY } from '../../utilities/constants';
 
 export async function removeLinksAsync(
   terminal: ITerminal,
@@ -39,10 +39,9 @@ export class RemoveLinksAction extends CommandLineAction {
   }
 
   protected async onExecute(): Promise<void> {
-    const targetRootFolder: string = getTargetRootFolder();
     const extractorMetadataObject: IExtractorMetadataJson = await getExtractorMetadataAsync();
 
-    this._terminal.writeLine(`Removing links for extraction at path "${targetRootFolder}"`);
-    await removeLinksAsync(this._terminal, targetRootFolder, extractorMetadataObject);
+    this._terminal.writeLine(`Removing links for extraction at path "${TARGET_ROOT_FOLDER}"`);
+    await removeLinksAsync(this._terminal, TARGET_ROOT_FOLDER, extractorMetadataObject);
   }
 }
