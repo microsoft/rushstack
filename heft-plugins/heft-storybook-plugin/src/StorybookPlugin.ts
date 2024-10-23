@@ -523,6 +523,17 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     const originalArgv: string[] = process.argv;
     const node: string = originalArgv[0];
     process.argv = [node, command, ...args];
+    // npm_config_user_agent is used by Storybook to determine the package manager
+    // in a Rush monorepo it can't determine it automatically so it raises a benign error
+    // Storybook failed to check addon compatibility Error: Unable to find a usable package manager within NPM, PNPM, Yarn and Yarn 2
+    // hardcode it to NPM to suppress the error
+    //
+    // This only happens for dev server mode, not for build mode, so does not need to be in _invokeAsSubprocessAsync
+    //
+    // Storing the original env and restoring it like happens with argv does not seem to work
+    // At the time when storybook checks env.npm_config_user_agent it has been reset to undefined
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    process.env.npm_config_user_agent = 'npm';
 
     // invoke command synchronously
     require(command);
