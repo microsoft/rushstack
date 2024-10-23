@@ -24,7 +24,7 @@ export async function removeLinksAsync(
   );
 }
 
-export class RemoveAction extends CommandLineAction {
+export class RemoveLinksAction extends CommandLineAction {
   private _terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {

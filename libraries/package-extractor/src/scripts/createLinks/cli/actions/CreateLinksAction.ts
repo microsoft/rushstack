@@ -13,7 +13,7 @@ import {
   REALIZE_FILES_PARAMETER_NAME,
   LINK_BINS_PARAMETER_NAME
 } from '../../utilities/constants';
-import { removeLinksAsync } from './RemoveAction';
+import { removeLinksAsync } from './RemoveLinksAction';
 
 async function createLinksAsync(
   terminal: ITerminal,
@@ -77,7 +77,7 @@ async function realizeFilesAsync(
   );
 }
 
-export class CreateAction extends CommandLineAction {
+export class CreateLinksAction extends CommandLineAction {
   private _terminal: ITerminal;
   private _realizeFilesParameter: CommandLineFlagParameter;
   private _linkBinsParameter: CommandLineFlagParameter;

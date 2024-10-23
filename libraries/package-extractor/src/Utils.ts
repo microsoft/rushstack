@@ -71,11 +71,8 @@ export async function makeBinLinksAsync(
   await Async.forEachAsync(
     extractedProjectFolderPaths,
     async (extractedProjectFolderPath: string) => {
-      const extractedProjectNodeModulesFolderPath: string = path.join(
-        extractedProjectFolderPath,
-        'node_modules'
-      );
-      const extractedProjectBinFolderPath: string = path.join(extractedProjectNodeModulesFolderPath, '.bin');
+      const extractedProjectNodeModulesFolderPath: string = `${extractedProjectFolderPath}/node_modules`;
+      const extractedProjectBinFolderPath: string = `${extractedProjectNodeModulesFolderPath}/.bin`;
 
       const linkedBinPackageNames: string[] = await pnpmLinkBins(
         extractedProjectNodeModulesFolderPath,
@@ -90,7 +87,7 @@ export async function makeBinLinksAsync(
           extractedProjectBinFolderPath
         );
         for (const binFolderItem of binFolderItems) {
-          binFilePaths.push(path.resolve(extractedProjectBinFolderPath, binFolderItem));
+          binFilePaths.push(`${extractedProjectBinFolderPath}/${binFolderItem}`);
         }
       }
     },

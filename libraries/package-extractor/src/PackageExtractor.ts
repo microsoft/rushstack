@@ -25,7 +25,12 @@ import {
   remapPathForExtractorMetadata,
   makeBinLinksAsync
 } from './Utils';
-import { createLinksScriptFilename, scriptsFolderPath } from './PathConstants';
+import {
+  CREATE_LINKS_SCRIPT_FILENAME,
+  EXTRACTOR_METADATA_FILENAME,
+  SCRIPTS_FOLDER_PATH
+} from './PathConstants';
+import { MAX_CONCURRENCY } from './scripts/createLinks/utilities/constants';
 
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {
@@ -483,7 +488,7 @@ export class PackageExtractor {
         await this._extractFolderAsync(folderToCopy, options, state);
       },
       {
-        concurrency: 10
+        concurrency: MAX_CONCURRENCY
       }
     );
 
@@ -644,7 +649,7 @@ export class PackageExtractor {
         callback();
       },
       {
-        concurrency: 10
+        concurrency: MAX_CONCURRENCY
       }
     );
   }
@@ -803,7 +808,7 @@ export class PackageExtractor {
           }
         },
         {
-          concurrency: 10
+          concurrency: MAX_CONCURRENCY
         }
       );
     } else {
@@ -871,7 +876,7 @@ export class PackageExtractor {
           callback();
         },
         {
-          concurrency: 10
+          concurrency: MAX_CONCURRENCY
         }
       );
     }
@@ -888,14 +893,13 @@ export class PackageExtractor {
       options;
     const { projectConfigurationsByPath } = state;
 
-    const extractorMetadataFileName: string = 'extractor-metadata.json';
     const extractorMetadataFolderPath: string =
       linkCreation === 'script' && linkCreationScriptPath
         ? path.dirname(path.resolve(targetRootFolder, linkCreationScriptPath))
         : targetRootFolder;
     const extractorMetadataFilePath: string = path.join(
       extractorMetadataFolderPath,
-      extractorMetadataFileName
+      EXTRACTOR_METADATA_FILENAME
     );
     const extractorMetadataJson: IExtractorMetadataJson = {
       mainProjectName,
@@ -936,16 +940,23 @@ export class PackageExtractor {
   private async _makeBinLinksAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
     const { terminal } = options;
 
-    const extractedProjectFolderPaths: string[] = Array.from(state.projectConfigurationsByPath.keys())
-      .filter((folderPath: string) => state.foldersToCopy.has(folderPath))
-      .map((folderPath: string) => remapSourcePathForTargetFolder({ ...options, sourcePath: folderPath }));
+    const extractedProjectFolderPaths: string[] = [];
+    for (const folderPath of state.projectConfigurationsByPath.keys()) {
+      if (state.foldersToCopy.has(folderPath)) {
+        extractedProjectFolderPaths.push(
+          remapSourcePathForTargetFolder({ ...options, sourcePath: folderPath })
+        );
+      }
+    }
 
     const binFilePaths: string[] = await makeBinLinksAsync(terminal, extractedProjectFolderPaths);
-    for (const binFilePath of binFilePaths) {
-      await state.assetHandler.includeAssetAsync({
-        targetFilePath: binFilePath
-      });
-    }
+    await Async.forEachAsync(
+      binFilePaths,
+      (targetFilePath: string) => state.assetHandler.includeAssetAsync({ targetFilePath }),
+      {
+        concurrency: MAX_CONCURRENCY
+      }
+    );
   }
 
   private async _writeCreateLinksScriptAsync(
@@ -955,11 +966,11 @@ export class PackageExtractor {
     const { terminal, targetRootFolder, linkCreationScriptPath } = options;
     const { assetHandler } = state;
 
-    terminal.writeLine(`Creating ${createLinksScriptFilename}`);
-    const createLinksSourceFilePath: string = `${scriptsFolderPath}/${createLinksScriptFilename}`;
+    terminal.writeLine(`Creating ${CREATE_LINKS_SCRIPT_FILENAME}`);
+    const createLinksSourceFilePath: string = `${SCRIPTS_FOLDER_PATH}/${CREATE_LINKS_SCRIPT_FILENAME}`;
     const createLinksTargetFilePath: string = path.resolve(
       targetRootFolder,
-      linkCreationScriptPath || createLinksScriptFilename
+      linkCreationScriptPath || CREATE_LINKS_SCRIPT_FILENAME
     );
     let createLinksScriptContent: string = await FileSystem.readFileAsync(createLinksSourceFilePath);
     createLinksScriptContent = createLinksScriptContent.replace(

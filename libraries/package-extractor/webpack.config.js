@@ -2,7 +2,7 @@
 
 const webpack = require('webpack');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
-const PathConstants = require('./lib/PathConstants');
+const { CREATE_LINKS_SCRIPT_FILENAME, SCRIPTS_FOLDER_PATH } = require('./lib/PathConstants');
 
 module.exports = () => {
   return {
@@ -10,13 +10,13 @@ module.exports = () => {
     mode: 'development', // So the output isn't minified
     devtool: 'source-map',
     entry: {
-      [PathConstants.createLinksScriptFilename]: {
+      [CREATE_LINKS_SCRIPT_FILENAME]: {
         import: `${__dirname}/lib-esnext/scripts/createLinks/start.js`,
         filename: `[name]`
       }
     },
     output: {
-      path: PathConstants.scriptsFolderPath,
+      path: SCRIPTS_FOLDER_PATH,
       filename: '[name].js',
       chunkFilename: 'chunks/[name].js', // TODO: Don't allow any chunks to be created
       library: {

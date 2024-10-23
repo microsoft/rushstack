@@ -5,8 +5,8 @@ import { CommandLineParser } from '@rushstack/ts-command-line';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { CreateAction } from './actions/CreateAction';
-import { RemoveAction } from './actions/RemoveAction';
+import { CreateLinksAction } from './actions/CreateLinksAction';
+import { RemoveLinksAction } from './actions/RemoveLinksAction';
 
 export class CreateLinksCommandLineParser extends CommandLineParser {
   private readonly _terminal: ITerminal;
@@ -19,8 +19,8 @@ export class CreateLinksCommandLineParser extends CommandLineParser {
 
     this._terminal = terminal;
 
-    this.addAction(new CreateAction(this._terminal));
-    this.addAction(new RemoveAction(this._terminal));
+    this.addAction(new CreateLinksAction(this._terminal));
+    this.addAction(new RemoveLinksAction(this._terminal));
   }
 
   protected async onExecute(): Promise<void> {
