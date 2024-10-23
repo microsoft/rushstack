@@ -190,12 +190,13 @@ const DEFAULT_STORYBOOK_CLI_CONFIG: Record<StorybookCliVersion, IStorybookCliCal
   }
 };
 
+const STORYBOOK_TEST_FLAG_NAME: '--storybook-test' = '--storybook-test';
+
 /** @public */
 export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPluginOptions> {
   private _logger!: IScopedLogger;
   private _isServeMode: boolean = false;
   private _isTestMode: boolean = false;
-  private _storybookTestFlagName: '--storybook-test' = '--storybook-test';
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
@@ -208,9 +209,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     this._logger = taskSession.logger;
     const storybookParameter: CommandLineFlagParameter =
       taskSession.parameters.getFlagParameter('--storybook');
-    const storybookTestParameter: CommandLineFlagParameter = taskSession.parameters.getFlagParameter(
-      this._storybookTestFlagName
-    );
+    const storybookTestParameter: CommandLineFlagParameter =
+      taskSession.parameters.getFlagParameter(STORYBOOK_TEST_FLAG_NAME);
 
     const parseResult: IParsedPackageNameOrError = PackageName.tryParse(options.storykitPackageName);
     if (parseResult.error) {
@@ -285,7 +285,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       : StorybookBuildMode.BUILD;
 
     if (buildMode === StorybookBuildMode.WATCH && this._isTestMode) {
-      throw new Error(`The ${this._storybookTestFlagName} flag is not supported in watch mode`);
+      throw new Error(`The ${STORYBOOK_TEST_FLAG_NAME} flag is not supported in watch mode`);
     }
     if (
       this._isTestMode &&
@@ -293,7 +293,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
         storybookCliVersion === StorybookCliVersion.STORYBOOK7)
     ) {
       throw new Error(
-        `The ${this._storybookTestFlagName} flag is only supported in Storybook version 8 and above.`
+        `The ${STORYBOOK_TEST_FLAG_NAME} flag is only supported in Storybook version 8 and above.`
       );
     }
 
