@@ -5,6 +5,7 @@ import path from 'node:path';
 import pnpmLinkBins from '@pnpm/link-bins';
 import { Async, FileSystem, Path, Text } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
+import { MAX_CONCURRENCY } from './scripts/createLinks/utilities/constants';
 
 export function matchesWithStar(patternWithStar: string, input: string): boolean {
   // Map "@types/*" --> "^\@types\/.*$"
@@ -93,7 +94,7 @@ export async function makeBinLinksAsync(
       }
     },
     {
-      concurrency: 10
+      concurrency: MAX_CONCURRENCY
     }
   );
 
