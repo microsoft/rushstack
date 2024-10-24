@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.10.0",
+      "tag": "@rushstack/package-extractor_v0.10.0",
+      "date": "Thu, 24 Oct 2024 15:11:19 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add bin linking support when calling the create-links.js script with the \"--link-bins\" parameter"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.9",
       "tag": "@rushstack/package-extractor_v0.9.9",
       "date": "Thu, 24 Oct 2024 00:15:48 GMT",
