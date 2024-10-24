@@ -62,16 +62,9 @@ async function realizeFilesAsync(
       const filePath: string = `${targetRootFolder}/${relativeFilePath}`;
       const realFilePath: string = await FileSystem.getRealPathAsync(filePath);
       if (!Path.isEqual(realFilePath, filePath)) {
-        await FileSystem.deleteFileAsync(filePath);
-
-        // Hard links seem to cause build failures on Mac, so for all other operating
-        // systems we copy files.
         terminal.writeVerboseLine(`Realizing file at path "${filePath}"`);
-        if (process.platform === 'win32') {
-          await FileSystem.createHardLinkAsync({ newLinkPath: filePath, linkTargetPath: realFilePath });
-        } else {
-          await FileSystem.copyFileAsync({ sourcePath: realFilePath, destinationPath: filePath });
-        }
+        await FileSystem.deleteFileAsync(filePath);
+        await FileSystem.createHardLinkAsync({ newLinkPath: filePath, linkTargetPath: realFilePath });
       }
     },
     { concurrency: MAX_CONCURRENCY }
