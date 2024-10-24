@@ -62,6 +62,8 @@ async function realizeFilesAsync(
       const filePath: string = `${targetRootFolder}/${relativeFilePath}`;
       const realFilePath: string = await FileSystem.getRealPathAsync(filePath);
       if (!Path.isEqual(realFilePath, filePath)) {
+        // Delete the existing symlink and create a hardlink to the real file, since creating hardlinks
+        // is less overhead than copying the file.
         terminal.writeVerboseLine(`Realizing file at path "${filePath}"`);
         await FileSystem.deleteFileAsync(filePath);
         await FileSystem.createHardLinkAsync({ newLinkPath: filePath, linkTargetPath: realFilePath });
