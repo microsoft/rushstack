@@ -3247,6 +3247,9 @@ importers:
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../terminal
+      '@rushstack/ts-command-line':
+        specifier: workspace:*
+        version: link:../ts-command-line
       ignore:
         specifier: ~5.1.6
         version: 5.1.9

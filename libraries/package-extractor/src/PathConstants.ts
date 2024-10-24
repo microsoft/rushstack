@@ -3,6 +3,9 @@
 
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 
+export const CREATE_LINKS_SCRIPT_FILENAME: 'create-links.js' = 'create-links.js';
+
+export const EXTRACTOR_METADATA_FILENAME: 'extractor-metadata.json' = 'extractor-metadata.json';
+
 const packageExtractorFolderRootPath: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
-export const createLinksScriptFilename: 'create-links.js' = 'create-links.js';
-export const scriptsFolderPath: string = `${packageExtractorFolderRootPath}/dist/scripts`;
+export const SCRIPTS_FOLDER_PATH: string = `${packageExtractorFolderRootPath}/dist/scripts`;

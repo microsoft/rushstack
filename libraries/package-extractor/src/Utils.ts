@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
-import { Path, Text } from '@rushstack/node-core-library';
+import pnpmLinkBins from '@pnpm/link-bins';
+import { Async, FileSystem, Path, Text } from '@rushstack/node-core-library';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
+import { MAX_CONCURRENCY } from './scripts/createLinks/utilities/constants';
 
 export function matchesWithStar(patternWithStar: string, input: string): boolean {
   // Map "@types/*" --> "^\@types\/.*$"
@@ -53,4 +56,48 @@ export function remapPathForExtractorMetadata(folderPath: string, filePath: stri
     throw new Error(`Path "${filePath}" is not under "${folderPath}"`);
   }
   return Path.convertToSlashes(relativePath);
+}
+
+/**
+ * Creates the .bin files for the extracted projects and returns the paths to the created .bin files.
+ *
+ * @param terminal - The terminal to write to
+ * @param extractedProjectFolderPaths - The paths to the extracted projects
+ */
+export async function makeBinLinksAsync(
+  terminal: ITerminal,
+  extractedProjectFolderPaths: string[]
+): Promise<string[]> {
+  const binFilePaths: string[] = [];
+  await Async.forEachAsync(
+    extractedProjectFolderPaths,
+    async (extractedProjectFolderPath: string) => {
+      const extractedProjectNodeModulesFolderPath: string = `${extractedProjectFolderPath}/node_modules`;
+      const extractedProjectBinFolderPath: string = `${extractedProjectNodeModulesFolderPath}/.bin`;
+
+      const linkedBinPackageNames: string[] = await pnpmLinkBins(
+        extractedProjectNodeModulesFolderPath,
+        extractedProjectBinFolderPath,
+        {
+          warn: (msg: string) => terminal.writeLine(Colorize.yellow(msg))
+        }
+      );
+
+      if (linkedBinPackageNames.length) {
+        const binFolderItems: string[] = await FileSystem.readFolderItemNamesAsync(
+          extractedProjectBinFolderPath
+        );
+        for (const binFolderItem of binFolderItems) {
+          const binFilePath: string = `${extractedProjectBinFolderPath}/${binFolderItem}`;
+          terminal.writeVerboseLine(`Created .bin file: ${binFilePath}`);
+          binFilePaths.push(binFilePath);
+        }
+      }
+    },
+    {
+      concurrency: MAX_CONCURRENCY
+    }
+  );
+
+  return binFilePaths;
 }

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Add bin linking support when calling the create-links.js script with the \"--link-bins\" parameter",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor"
+}

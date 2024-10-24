@@ -5,7 +5,6 @@ import * as path from 'path';
 import { type IMinimatch, Minimatch } from 'minimatch';
 import semver from 'semver';
 import npmPacklist from 'npm-packlist';
-import pnpmLinkBins from '@pnpm/link-bins';
 import ignore, { type Ignore } from 'ignore';
 import {
   Async,
@@ -20,8 +19,18 @@ import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyzer';
 import { AssetHandler } from './AssetHandler';
-import { matchesWithStar, remapSourcePathForTargetFolder, remapPathForExtractorMetadata } from './Utils';
-import { createLinksScriptFilename, scriptsFolderPath } from './PathConstants';
+import {
+  matchesWithStar,
+  remapSourcePathForTargetFolder,
+  remapPathForExtractorMetadata,
+  makeBinLinksAsync
+} from './Utils';
+import {
+  CREATE_LINKS_SCRIPT_FILENAME,
+  EXTRACTOR_METADATA_FILENAME,
+  SCRIPTS_FOLDER_PATH
+} from './PathConstants';
+import { MAX_CONCURRENCY } from './scripts/createLinks/utilities/constants';
 
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {
@@ -479,7 +488,7 @@ export class PackageExtractor {
         await this._extractFolderAsync(folderToCopy, options, state);
       },
       {
-        concurrency: 10
+        concurrency: MAX_CONCURRENCY
       }
     );
 
@@ -640,7 +649,7 @@ export class PackageExtractor {
         callback();
       },
       {
-        concurrency: 10
+        concurrency: MAX_CONCURRENCY
       }
     );
   }
@@ -799,7 +808,7 @@ export class PackageExtractor {
           }
         },
         {
-          concurrency: 10
+          concurrency: MAX_CONCURRENCY
         }
       );
     } else {
@@ -867,7 +876,7 @@ export class PackageExtractor {
           callback();
         },
         {
-          concurrency: 10
+          concurrency: MAX_CONCURRENCY
         }
       );
     }
@@ -884,14 +893,13 @@ export class PackageExtractor {
       options;
     const { projectConfigurationsByPath } = state;
 
-    const extractorMetadataFileName: string = 'extractor-metadata.json';
     const extractorMetadataFolderPath: string =
       linkCreation === 'script' && linkCreationScriptPath
         ? path.dirname(path.resolve(targetRootFolder, linkCreationScriptPath))
         : targetRootFolder;
     const extractorMetadataFilePath: string = path.join(
       extractorMetadataFolderPath,
-      extractorMetadataFileName
+      EXTRACTOR_METADATA_FILENAME
     );
     const extractorMetadataJson: IExtractorMetadataJson = {
       mainProjectName,
@@ -932,41 +940,21 @@ export class PackageExtractor {
   private async _makeBinLinksAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
     const { terminal } = options;
 
-    const extractedProjectFolders: string[] = Array.from(state.projectConfigurationsByPath.keys()).filter(
-      (folderPath: string) => state.foldersToCopy.has(folderPath)
-    );
-
-    await Async.forEachAsync(
-      extractedProjectFolders,
-      async (projectFolder: string) => {
-        const extractedProjectFolder: string = remapSourcePathForTargetFolder({
-          ...options,
-          sourcePath: projectFolder
-        });
-        const extractedProjectNodeModulesFolder: string = path.join(extractedProjectFolder, 'node_modules');
-        const extractedProjectBinFolder: string = path.join(extractedProjectNodeModulesFolder, '.bin');
-
-        const linkedBinPackageNames: string[] = await pnpmLinkBins(
-          extractedProjectNodeModulesFolder,
-          extractedProjectBinFolder,
-          {
-            warn: (msg: string) => terminal.writeLine(Colorize.yellow(msg))
-          }
+    const extractedProjectFolderPaths: string[] = [];
+    for (const folderPath of state.projectConfigurationsByPath.keys()) {
+      if (state.foldersToCopy.has(folderPath)) {
+        extractedProjectFolderPaths.push(
+          remapSourcePathForTargetFolder({ ...options, sourcePath: folderPath })
         );
+      }
+    }
 
-        if (linkedBinPackageNames.length) {
-          const binFolderItems: string[] =
-            await FileSystem.readFolderItemNamesAsync(extractedProjectBinFolder);
-          for (const binFolderItem of binFolderItems) {
-            const binFilePath: string = path.resolve(extractedProjectBinFolder, binFolderItem);
-            await state.assetHandler.includeAssetAsync({
-              targetFilePath: binFilePath
-            });
-          }
-        }
-      },
+    const binFilePaths: string[] = await makeBinLinksAsync(terminal, extractedProjectFolderPaths);
+    await Async.forEachAsync(
+      binFilePaths,
+      (targetFilePath: string) => state.assetHandler.includeAssetAsync({ targetFilePath }),
       {
-        concurrency: 10
+        concurrency: MAX_CONCURRENCY
       }
     );
   }
@@ -978,11 +966,11 @@ export class PackageExtractor {
     const { terminal, targetRootFolder, linkCreationScriptPath } = options;
     const { assetHandler } = state;
 
-    terminal.writeLine(`Creating ${createLinksScriptFilename}`);
-    const createLinksSourceFilePath: string = `${scriptsFolderPath}/${createLinksScriptFilename}`;
+    terminal.writeLine(`Creating ${CREATE_LINKS_SCRIPT_FILENAME}`);
+    const createLinksSourceFilePath: string = `${SCRIPTS_FOLDER_PATH}/${CREATE_LINKS_SCRIPT_FILENAME}`;
     const createLinksTargetFilePath: string = path.resolve(
       targetRootFolder,
-      linkCreationScriptPath || createLinksScriptFilename
+      linkCreationScriptPath || CREATE_LINKS_SCRIPT_FILENAME
     );
     let createLinksScriptContent: string = await FileSystem.readFileAsync(createLinksSourceFilePath);
     createLinksScriptContent = createLinksScriptContent.replace(
