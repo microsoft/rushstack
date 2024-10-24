@@ -276,8 +276,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     options: IStorybookPluginOptions
   ): Promise<IRunStorybookOptions> {
     const { storykitPackageName, staticBuildOutputFolder } = options;
-    const storybookCliVersion: `${StorybookCliVersion}` =
-      options.cliCallingConvention ?? DEFAULT_STORYBOOK_VERSION;
+    const storybookCliVersion: `${StorybookCliVersion}` = this._getStorybookVersion(options);
     const storyBookCliConfig: IStorybookCliCallingConfig = DEFAULT_STORYBOOK_CLI_CONFIG[storybookCliVersion];
     const cliPackageName: string = options.cliPackageName ?? storyBookCliConfig.packageName;
     const buildMode: StorybookBuildMode = taskSession.parameters.watch
@@ -407,6 +406,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     let { workingDirectory, outputFolder } = runStorybookOptions;
     this._logger.terminal.writeLine('Running Storybook compilation');
     this._logger.terminal.writeVerboseLine(`Loading Storybook module "${resolvedModulePath}"`);
+    const storybookCliVersion: `${StorybookCliVersion}` = this._getStorybookVersion(options);
 
     /**
      * Support \'cwdPackageName\' option
@@ -445,7 +445,11 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     if (this._isServeMode) {
       // Instantiate storybook runner synchronously for incremental builds
       // this ensure that the process is not killed when heft watcher detects file changes
-      this._invokeSync(resolvedModulePath, storybookArgs);
+      this._invokeSync(
+        resolvedModulePath,
+        storybookArgs,
+        storybookCliVersion === StorybookCliVersion.STORYBOOK8
+      );
     } else {
       await this._invokeAsSubprocessAsync(resolvedModulePath, storybookArgs, workingDirectory);
     }
@@ -516,7 +520,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
    * @param args - storybook args
    * @param cwd - working directory
    */
-  private _invokeSync(command: string, args: string[]): void {
+  private _invokeSync(command: string, args: string[], patchNpmConfigUserAgent: boolean): void {
     this._logger.terminal.writeLine('Launching ' + command);
 
     // simulate storybook cli command
@@ -533,7 +537,9 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     // Storing the original env and restoring it like happens with argv does not seem to work
     // At the time when storybook checks env.npm_config_user_agent it has been reset to undefined
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    process.env.npm_config_user_agent = 'npm';
+    if (patchNpmConfigUserAgent) {
+      process.env.npm_config_user_agent = 'npm';
+    }
 
     // invoke command synchronously
     require(command);
@@ -542,5 +548,9 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     process.argv = originalArgv;
 
     this._logger.terminal.writeVerboseLine('Completed synchronous portion of launching startupModulePath');
+  }
+
+  private _getStorybookVersion(options: IStorybookPluginOptions): `${StorybookCliVersion}` {
+    return options.cliCallingConvention ?? DEFAULT_STORYBOOK_VERSION;
   }
 }
