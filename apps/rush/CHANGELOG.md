@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 17 Oct 2024 20:37:39 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Oct 2024 23:59:54 GMT and should not be manually modified.
+
+## 5.140.0
+Tue, 22 Oct 2024 23:59:54 GMT
+
+### Updates
+
+- Fix an issue when using `rush deploy` where the `node_modules/.bin` folder symlinks were not created for deployed packages when using the "default" link creation mode
+- Add support for the `globalIgnoredOptionalDependencies` field in the `common/config/rush/pnpm-config.json` file to allow specifying optional dependencies that should be ignored by PNPM
 
 ## 5.139.0
 Thu, 17 Oct 2024 20:37:39 GMT

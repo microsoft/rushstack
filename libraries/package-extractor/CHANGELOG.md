@@ -1,6 +1,18 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Mon, 21 Oct 2024 18:50:10 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Oct 2024 00:15:48 GMT and should not be manually modified.
+
+## 0.9.9
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.9.8
+Tue, 22 Oct 2024 22:12:40 GMT
+
+### Patches
+
+- Fix an issue where the `node_modules/.bin` folder symlinks were not created for extracted packages when using the "default" link creation mode
 
 ## 0.9.7
 Mon, 21 Oct 2024 18:50:10 GMT

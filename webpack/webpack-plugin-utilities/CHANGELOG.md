@@ -1,6 +1,11 @@
 # Change Log - @rushstack/webpack-plugin-utilities
 
-This log was last generated on Mon, 21 Oct 2024 18:50:10 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Oct 2024 00:15:48 GMT and should not be manually modified.
+
+## 0.4.57
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
 
 ## 0.4.56
 Mon, 21 Oct 2024 18:50:10 GMT

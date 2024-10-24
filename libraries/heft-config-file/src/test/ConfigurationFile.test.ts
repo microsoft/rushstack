@@ -804,7 +804,7 @@ describe(ConfigurationFile.name, () => {
           },
           {
             plugin: FileSystem.getRealPath(
-              nodeJsPath.resolve(projectRoot, 'node_modules', 'jsonpath-plus', 'dist', 'index-umd.js')
+              nodeJsPath.resolve(projectRoot, 'node_modules', 'jsonpath-plus', 'dist', 'index-node-cjs.cjs')
             )
           }
         ]
@@ -885,7 +885,7 @@ describe(ConfigurationFile.name, () => {
           },
           {
             plugin: await FileSystem.getRealPathAsync(
-              nodeJsPath.resolve(projectRoot, 'node_modules', 'jsonpath-plus', 'dist', 'index-umd.js')
+              nodeJsPath.resolve(projectRoot, 'node_modules', 'jsonpath-plus', 'dist', 'index-node-cjs.cjs')
             )
           }
         ]
@@ -968,7 +968,7 @@ describe(ConfigurationFile.name, () => {
           },
           {
             plugin: FileSystem.getRealPath(
-              nodeJsPath.resolve(projectRoot, 'node_modules', 'jsonpath-plus', 'dist', 'index-umd.js')
+              nodeJsPath.resolve(projectRoot, 'node_modules', 'jsonpath-plus', 'dist', 'index-node-cjs.cjs')
             )
           }
         ]
@@ -1049,7 +1049,7 @@ describe(ConfigurationFile.name, () => {
           },
           {
             plugin: await FileSystem.getRealPathAsync(
-              nodeJsPath.resolve(projectRoot, 'node_modules', 'jsonpath-plus', 'dist', 'index-umd.js')
+              nodeJsPath.resolve(projectRoot, 'node_modules', 'jsonpath-plus', 'dist', 'index-node-cjs.cjs')
             )
           }
         ]

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Fri, 13 Sep 2024 00:11:43 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Oct 2024 00:15:47 GMT and should not be manually modified.
+
+## 0.15.8
+Thu, 24 Oct 2024 00:15:47 GMT
+
+### Patches
+
+- Update the `jsonpath-plus` dependency to mitigate CVE-2024-21534."
 
 ## 0.15.7
 Fri, 13 Sep 2024 00:11:43 GMT
