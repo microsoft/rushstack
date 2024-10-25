@@ -1304,6 +1304,8 @@ export class RushConfigurationProject {
     // @deprecated
     get downstreamDependencyProjects(): string[];
     // @beta
+    readonly installRemotely: boolean;
+    // @beta
     get isMainProject(): boolean;
     // @deprecated
     get localDependencyProjects(): ReadonlyArray<RushConfigurationProject>;
@@ -1329,6 +1331,8 @@ export class RushConfigurationProject {
     get versionPolicy(): VersionPolicy | undefined;
     // @beta
     readonly versionPolicyName: string | undefined;
+    // @beta
+    readonly versionRange: string | undefined;
 }
 
 // @beta
