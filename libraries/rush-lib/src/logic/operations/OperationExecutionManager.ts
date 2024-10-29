@@ -289,10 +289,12 @@ export class OperationExecutionManager {
     if (message) {
       // This creates the writer, so don't do this until needed
       record.collatedWriter.terminal.writeStderrLine(message);
-      // Ensure that the error message, if present, shows up in the summary
+      // Ensure that the summary isn't blank if we have an error message
+      // If the summary already contains max lines of stderr, this will get dropped, so we hope those lines
+      // are more useful than the final exit code.
       record.stdioSummarizer.writeChunk({
         text: `${message}\n`,
-        kind: TerminalChunkKind.Stderr
+        kind: TerminalChunkKind.Stdout
       });
     }
   }
