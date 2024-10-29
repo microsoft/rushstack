@@ -148,11 +148,11 @@ export class LocalizationPlugin implements WebpackPluginInstance {
       GetChunkFilenameRuntimeModule.prototype.generate;
     GetChunkFilenameRuntimeModule.prototype.generate = function (
       this: runtime.GetChunkFilenameRuntimeModule
-    ) {
+    ): string | null {
       // `originalGenerate` will invoke `getAssetPath` to produce the async URL generator
       // Need to know the identity of the containing chunk to correctly produce the asset path expression
       chunkWithAsyncURLGenerator = this.chunk;
-      const result: string = originalGenerate.call(this);
+      const result: string | null = originalGenerate.call(this);
       // Unset after the call finishes because we are no longer generating async URL generators
       chunkWithAsyncURLGenerator = undefined;
       return result;
@@ -413,7 +413,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
 
             if (callback) {
               try {
-                callback(localizationStats);
+                callback(localizationStats, compilation);
               } catch (e) {
                 /* swallow errors from the callback */
               }

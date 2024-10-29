@@ -48,7 +48,7 @@ export class RushVersionSelector {
       if (installIsValid) {
         console.log('Another process performed the installation.');
       } else {
-        Utilities.installPackageInDirectory({
+        await Utilities.installPackageInDirectoryAsync({
           directory: expectedRushPath,
           packageName: isLegacyRushVersion ? '@microsoft/rush' : '@microsoft/rush-lib',
           version: version,

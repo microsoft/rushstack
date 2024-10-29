@@ -1,0 +1,622 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`formatEslintResultsAsSARIF case with no files 1`] = `
+Object {
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": Array [
+    Object {
+      "results": Array [],
+      "tool": Object {
+        "driver": Object {
+          "informationUri": "https://eslint.org",
+          "name": "ESLint",
+          "rules": Array [],
+          "version": "7.32.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;
+
+exports[`formatEslintResultsAsSARIF case with single issues in the same file 1`] = `
+Object {
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": Array [
+    Object {
+      "artifacts": Array [
+        Object {
+          "location": Object {
+            "uri": "src/file1.ts",
+          },
+        },
+      ],
+      "results": Array [
+        Object {
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 0,
+                  "uri": "src/file1.ts",
+                },
+                "region": Object {
+                  "endColumn": 6,
+                  "endLine": 10,
+                  "snippet": Object {
+                    "text": "const x = 1;",
+                  },
+                  "startColumn": 5,
+                  "startLine": 10,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "'x' is defined but never used.",
+          },
+          "ruleId": "no-unused-vars",
+          "ruleIndex": 0,
+        },
+      ],
+      "tool": Object {
+        "driver": Object {
+          "informationUri": "https://eslint.org",
+          "name": "ESLint",
+          "rules": Array [
+            Object {
+              "helpUri": "https://eslint.org/docs/latest/rules/no-unused-vars",
+              "id": "no-unused-vars",
+              "properties": Object {
+                "category": undefined,
+              },
+              "shortDescription": Object {
+                "text": "'x' is defined but never used.",
+              },
+            },
+          ],
+          "version": "7.32.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;
+
+exports[`formatEslintResultsAsSARIF should correctly format ESLint results into SARIF log 1`] = `
+Object {
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": Array [
+    Object {
+      "artifacts": Array [
+        Object {
+          "location": Object {
+            "uri": "src/file1.ts",
+          },
+        },
+      ],
+      "results": Array [
+        Object {
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 0,
+                  "uri": "src/file1.ts",
+                },
+                "region": Object {
+                  "endColumn": 6,
+                  "endLine": 10,
+                  "snippet": Object {
+                    "text": "const x = 1;",
+                  },
+                  "startColumn": 5,
+                  "startLine": 10,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "'x' is defined but never used.",
+          },
+          "ruleId": "no-unused-vars",
+          "ruleIndex": 0,
+        },
+      ],
+      "tool": Object {
+        "driver": Object {
+          "informationUri": "https://eslint.org",
+          "name": "ESLint",
+          "rules": Array [
+            Object {
+              "helpUri": "https://eslint.org/docs/latest/rules/no-unused-vars",
+              "id": "no-unused-vars",
+              "properties": Object {
+                "category": undefined,
+              },
+              "shortDescription": Object {
+                "text": "'x' is defined but never used.",
+              },
+            },
+          ],
+          "version": "7.32.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;
+
+exports[`formatEslintResultsAsSARIF should handle a file with no messages 1`] = `
+Object {
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": Array [
+    Object {
+      "artifacts": Array [
+        Object {
+          "location": Object {
+            "uri": "src/file3.ts",
+          },
+        },
+      ],
+      "results": Array [],
+      "tool": Object {
+        "driver": Object {
+          "informationUri": "https://eslint.org",
+          "name": "ESLint",
+          "rules": Array [],
+          "version": "7.32.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;
+
+exports[`formatEslintResultsAsSARIF should handle ignoreSuppressed: false with suppressed messages 1`] = `
+Object {
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": Array [
+    Object {
+      "artifacts": Array [
+        Object {
+          "location": Object {
+            "uri": "src/file4.ts",
+          },
+        },
+      ],
+      "results": Array [
+        Object {
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 0,
+                  "uri": "src/file4.ts",
+                },
+                "region": Object {
+                  "endColumn": 9,
+                  "endLine": 20,
+                  "snippet": Object {
+                    "text": "debugger;",
+                  },
+                  "startColumn": 1,
+                  "startLine": 20,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "Unexpected 'debugger' statement.",
+          },
+          "ruleId": "no-debugger",
+          "ruleIndex": 0,
+          "suppressions": Array [],
+        },
+        Object {
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 0,
+                  "uri": "src/file4.ts",
+                },
+                "region": Object {
+                  "endColumn": 16,
+                  "endLine": 10,
+                  "snippet": Object {
+                    "text": "console.log(\\"test\\");",
+                  },
+                  "startColumn": 5,
+                  "startLine": 10,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "Unexpected console statement.",
+          },
+          "ruleId": "no-console",
+          "ruleIndex": 1,
+          "suppressions": Array [
+            Object {
+              "justification": "rejected",
+              "kind": "external",
+            },
+          ],
+        },
+      ],
+      "tool": Object {
+        "driver": Object {
+          "informationUri": "https://eslint.org",
+          "name": "ESLint",
+          "rules": Array [
+            Object {
+              "helpUri": "https://eslint.org/docs/latest/rules/no-debugger",
+              "id": "no-debugger",
+              "properties": Object {
+                "category": undefined,
+              },
+              "shortDescription": Object {
+                "text": "Disallow the use of debugger",
+              },
+            },
+            Object {
+              "helpUri": "https://eslint.org/docs/latest/rules/no-console",
+              "id": "no-console",
+              "properties": Object {
+                "category": undefined,
+              },
+              "shortDescription": Object {
+                "text": "Disallow the use of \`console\`",
+              },
+            },
+          ],
+          "version": "7.32.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;
+
+exports[`formatEslintResultsAsSARIF should handle ignoreSuppressed: true with suppressed messages 1`] = `
+Object {
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": Array [
+    Object {
+      "artifacts": Array [
+        Object {
+          "location": Object {
+            "uri": "src/file4.ts",
+          },
+        },
+      ],
+      "results": Array [
+        Object {
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 0,
+                  "uri": "src/file4.ts",
+                },
+                "region": Object {
+                  "endColumn": 9,
+                  "endLine": 20,
+                  "snippet": Object {
+                    "text": "debugger;",
+                  },
+                  "startColumn": 1,
+                  "startLine": 20,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "Unexpected 'debugger' statement.",
+          },
+          "ruleId": "no-debugger",
+          "ruleIndex": 0,
+        },
+      ],
+      "tool": Object {
+        "driver": Object {
+          "informationUri": "https://eslint.org",
+          "name": "ESLint",
+          "rules": Array [
+            Object {
+              "helpUri": "https://eslint.org/docs/latest/rules/no-debugger",
+              "id": "no-debugger",
+              "properties": Object {
+                "category": undefined,
+              },
+              "shortDescription": Object {
+                "text": "Disallow the use of debugger",
+              },
+            },
+          ],
+          "version": "7.32.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;
+
+exports[`formatEslintResultsAsSARIF should handle messages without file locations 1`] = `
+Object {
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": Array [
+    Object {
+      "artifacts": Array [
+        Object {
+          "location": Object {
+            "uri": "src/file5.ts",
+          },
+        },
+      ],
+      "results": Array [
+        Object {
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 0,
+                  "uri": "src/file5.ts",
+                },
+                "region": Object {
+                  "endColumn": undefined,
+                  "endLine": undefined,
+                  "snippet": Object {
+                    "text": "console.log(\\"test\\");",
+                  },
+                  "startColumn": 5,
+                  "startLine": 10,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "Unexpected console statement.",
+          },
+          "ruleId": "no-console",
+          "ruleIndex": 0,
+        },
+      ],
+      "tool": Object {
+        "driver": Object {
+          "informationUri": "https://eslint.org",
+          "name": "ESLint",
+          "rules": Array [
+            Object {
+              "helpUri": "https://eslint.org/docs/latest/rules/no-console",
+              "id": "no-console",
+              "properties": Object {
+                "category": undefined,
+              },
+              "shortDescription": Object {
+                "text": "Disallow the use of \`console\`",
+              },
+            },
+          ],
+          "version": "7.32.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;
+
+exports[`formatEslintResultsAsSARIF should handle multiple files 1`] = `
+Object {
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": Array [
+    Object {
+      "artifacts": Array [
+        Object {
+          "location": Object {
+            "uri": "src/file1.ts",
+          },
+        },
+        Object {
+          "location": Object {
+            "uri": "src/file2.ts",
+          },
+        },
+      ],
+      "results": Array [
+        Object {
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 0,
+                  "uri": "src/file1.ts",
+                },
+                "region": Object {
+                  "endColumn": 6,
+                  "endLine": 10,
+                  "snippet": Object {
+                    "text": "const x = 1;",
+                  },
+                  "startColumn": 5,
+                  "startLine": 10,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "'x' is defined but never used.",
+          },
+          "ruleId": "no-unused-vars",
+        },
+        Object {
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 1,
+                  "uri": "src/file2.ts",
+                },
+                "region": Object {
+                  "endColumn": 10,
+                  "endLine": 15,
+                  "snippet": Object {
+                    "text": "if (a == b) { }",
+                  },
+                  "startColumn": 8,
+                  "startLine": 15,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "Expected '===' and instead saw '=='.",
+          },
+          "ruleId": "eqeqeq",
+          "ruleIndex": 0,
+        },
+      ],
+      "tool": Object {
+        "driver": Object {
+          "informationUri": "https://eslint.org",
+          "name": "ESLint",
+          "rules": Array [
+            Object {
+              "helpUri": "https://eslint.org/docs/latest/rules/eqeqeq",
+              "id": "eqeqeq",
+              "properties": Object {
+                "category": undefined,
+              },
+              "shortDescription": Object {
+                "text": "Require the use of === and !==",
+              },
+            },
+          ],
+          "version": "7.32.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;
+
+exports[`formatEslintResultsAsSARIF should handle multiple issues in the same file 1`] = `
+Object {
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": Array [
+    Object {
+      "artifacts": Array [
+        Object {
+          "location": Object {
+            "uri": "src/file2.ts",
+          },
+        },
+      ],
+      "results": Array [
+        Object {
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 0,
+                  "uri": "src/file2.ts",
+                },
+                "region": Object {
+                  "endColumn": 11,
+                  "endLine": 5,
+                  "snippet": Object {
+                    "text": "let x;",
+                  },
+                  "startColumn": 10,
+                  "startLine": 5,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "'x' is defined but never used.",
+          },
+          "ruleId": "no-unused-vars",
+          "ruleIndex": 0,
+        },
+        Object {
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "index": 0,
+                  "uri": "src/file2.ts",
+                },
+                "region": Object {
+                  "endColumn": 16,
+                  "endLine": 10,
+                  "snippet": Object {
+                    "text": "console.log(\\"test\\");",
+                  },
+                  "startColumn": 5,
+                  "startLine": 10,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "text": "Unexpected console statement.",
+          },
+          "ruleId": "no-console",
+          "ruleIndex": 1,
+        },
+      ],
+      "tool": Object {
+        "driver": Object {
+          "informationUri": "https://eslint.org",
+          "name": "ESLint",
+          "rules": Array [
+            Object {
+              "helpUri": "https://eslint.org/docs/latest/rules/no-unused-vars",
+              "id": "no-unused-vars",
+              "properties": Object {
+                "category": undefined,
+              },
+              "shortDescription": Object {
+                "text": "'x' is defined but never used.",
+              },
+            },
+            Object {
+              "helpUri": "https://eslint.org/docs/latest/rules/no-console",
+              "id": "no-console",
+              "properties": Object {
+                "category": undefined,
+              },
+              "shortDescription": Object {
+                "text": "Disallow the use of \`console\`",
+              },
+            },
+          ],
+          "version": "7.32.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;

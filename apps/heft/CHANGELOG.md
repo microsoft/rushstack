@@ -1,6 +1,120 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 29 May 2024 02:03:50 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Oct 2024 00:15:47 GMT and should not be manually modified.
+
+## 0.68.6
+Thu, 24 Oct 2024 00:15:47 GMT
+
+_Version update only_
+
+## 0.68.5
+Mon, 21 Oct 2024 18:50:09 GMT
+
+### Patches
+
+- Remove usage of true-case-path in favor of manually adjusting the drive letter casing to avoid confusing file system tracing tools with unnecessary directory enumerations.
+
+## 0.68.4
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.68.3
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.68.2
+Wed, 02 Oct 2024 00:11:19 GMT
+
+### Patches
+
+- Ensure `configHash` for file copy incremental cache file is portable.
+
+## 0.68.1
+Tue, 01 Oct 2024 00:11:28 GMT
+
+### Patches
+
+- Include all previous `inputFileVersions` in incremental copy files cache file during watch mode. Fix incorrect serialization of cache file for file copy.
+
+## 0.68.0
+Mon, 30 Sep 2024 15:12:19 GMT
+
+### Minor changes
+
+- Update file copy logic to use an incremental cache file in the temp directory for the current task to avoid unnecessary file writes.
+
+## 0.67.2
+Fri, 13 Sep 2024 00:11:42 GMT
+
+_Version update only_
+
+## 0.67.1
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.67.0
+Wed, 21 Aug 2024 05:43:04 GMT
+
+### Minor changes
+
+- Add a `slashNormalizedBuildFolderPath` property to `HeftConfiguration`.
+
+## 0.66.26
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.66.25
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.66.24
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.66.23
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.66.22
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.66.21
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.66.20
+Tue, 16 Jul 2024 00:36:21 GMT
+
+### Patches
+
+- Update schemas/templates/heft.json to reflect new settings
+
+## 0.66.19
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
+
+## 0.66.18
+Mon, 03 Jun 2024 23:43:15 GMT
+
+_Version update only_
+
+## 0.66.17
+Thu, 30 May 2024 00:13:05 GMT
+
+_Version update only_
 
 ## 0.66.16
 Wed, 29 May 2024 02:03:50 GMT

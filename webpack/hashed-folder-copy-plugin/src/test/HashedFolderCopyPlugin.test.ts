@@ -20,7 +20,7 @@ jest.mock(
   {}
 );
 
-import type { default as webpack, Stats } from 'webpack';
+import type { default as webpack, Stats, InputFileSystem, OutputFileSystem } from 'webpack';
 import type { Volume } from 'memfs/lib/volume';
 import type { FileSystem, FolderItem } from '@rushstack/node-core-library';
 
@@ -98,8 +98,8 @@ async function runTestAsync(inputFolderPath: string): Promise<void> {
     plugins: [new HashedFolderCopyPlugin()]
   });
 
-  compiler.inputFileSystem = memoryFileSystem;
-  compiler.outputFileSystem = memoryFileSystem;
+  compiler.inputFileSystem = memoryFileSystem as unknown as InputFileSystem;
+  compiler.outputFileSystem = memoryFileSystem as unknown as OutputFileSystem;
 
   const stats: Stats | undefined = await promisify(compiler.run.bind(compiler))();
   await promisify(compiler.close.bind(compiler));

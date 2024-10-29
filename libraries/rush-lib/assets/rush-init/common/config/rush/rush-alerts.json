@@ -1,0 +1,115 @@
+/**
+ * This configuration file manages the Rush alerts feature.
+ * More documentation is available on the Rush website: https://rushjs.io
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-alerts.schema.json",
+
+  /**
+   * Settings such as `startTime` and `endTime` will use this timezone.
+   * If omitted, the default timezone is UTC (`+00:00`).
+   */
+  "timezone": "-08:00",
+
+  /**
+   * An array of alert messages and conditions for triggering them.
+   */
+  "alerts": [
+    /*[BEGIN "DEMO"]*/
+    {
+      /**
+       * The alertId is used to identify the alert.
+       */
+      "alertId": "node-js",
+
+      /**
+       * When the alert is displayed, this title will appear at the top of the message box.
+       * It should be a single line of text, as concise as possible.
+       */
+      "title": "Node.js upgrade soon!",
+
+      /**
+       * When the alert is displayed, this text appears in the message box.  To make the
+       * JSON file more readable, if the text is longer than one line, you can instead provide
+       * an array of strings that will be concatenated.  Your text may contain newline characters,
+       * but generally this is unnecessary because word-wrapping is automatically applied.
+       */
+      "message": [
+        "This Thursday, we will complete the Node.js version upgrade.  Any pipelines that",
+        " still have not upgraded will be temporarily disabled."
+      ],
+
+      /**
+       * (OPTIONAL) To avoid spamming users, the `title` and `message` settings should be kept
+       * as concise as possible.  If you need to provide more detail, use this setting to
+       * print a hyperlink to a web page with further guidance.
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "detailsUrl": "https://contoso.com/team-wiki/2024-01-01-migration",
+
+      /**
+       * (OPTIONAL) If `startTime` is specified, then this alert will not be shown prior to
+       * that time.
+       *
+       * Keep in mind that the alert is not guaranteed to be shown at this time, or at all:
+       * Alerts are only displayed after a Rush command has triggered fetching of the
+       * latest rush-alerts.json configuration.  Also, display of alerts is throttled to
+       * avoid spamming the user with too many messages.  If you need to test your alert,
+       * set the environment variable `RUSH_ALERTS_DEBUG=1` to disable throttling.
+       *
+       * The `startTime` should be specified as `YYYY-MM-DD HH:MM` using 24 hour time format,
+       * or else `YYYY-MM-DD` in which case the time part will be `00:00` (start of that day).
+       * The time zone is obtained from the `timezone` setting above.
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "startTime": "2024-01-01 15:00",
+
+      /**
+       * (OPTIONAL) This alert will not be shown if the current time is later than `endTime`.
+       * The format is the same as `startTime`.
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "endTime": "2024-01-05",
+
+      /**
+       * (OPTIONAL) Specifies the maximum frequency at which this alert can be displayed within a defined time period.
+       * Options are:
+       *  "always" (default) - no limit on display frequency,
+       *  "monthly" - display up to once per month
+       *  "weekly" - display up to once per week
+       *  "daily" - display up to once per day
+       *  "hourly" - display up to once per hour
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "maximumDisplayInterval": "always",
+
+      /**
+       * (OPTIONAL) Determines the order in which this alert is shown relative to other alerts, based on urgency.
+       * Options are:
+       *  "high" - displayed first
+       *  "normal" (default) - standard urgency
+       *  "low" - least urgency
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "priority": "normal",
+
+      /**
+       * (OPTIONAL) The filename of a script that determines whether this alert can be shown,
+       * found in the "common/config/rush/alert-scripts" folder.  The script must define
+       * a CommonJS export named `canShowAlert` that returns a boolean value, for example:
+       *
+       * ```
+       * module.exports.canShowAlert = function () {
+       *   // (your logic goes here)
+       *   return true;
+       * }
+       * ```
+       *
+       * Rush will invoke this script with the working directory set to the monorepo root folder,
+       * with no guarantee that `rush install` has been run.  To ensure up-to-date alerts, Rush
+       * may fetch and checkout the "common/config/rush-alerts" folder in an unpredictable temporary
+       * path.  Therefore, your script should avoid importing dependencies from outside its folder,
+       * generally be kept as simple and reliable and quick as possible.  For more complex conditions,
+       * we suggest to design some other process that prepares a data file or environment variable
+       * that can be cheaply checked by your condition script.
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "conditionScript": "rush-alert-node-upgrade.js"
+    }
+    /*[END "DEMO"]*/
+  ]
+}

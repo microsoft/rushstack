@@ -73,7 +73,7 @@ interface IYamlReferences {
   uidTypeReferenceCounters: Map<string, number>;
 }
 
-const enum FlattenMode {
+enum FlattenMode {
   /** Include entries for nested namespaces and non-namespace children. */
   NestedNamespacesAndChildren,
   /** Include entries for nested namespaces only. */

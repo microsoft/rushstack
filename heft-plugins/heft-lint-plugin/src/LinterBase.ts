@@ -17,7 +17,11 @@ export interface ILinterBaseOptions {
    * The path where the linter state will be written to.
    */
   buildMetadataFolderPath: string;
+  linterToolPath: string;
   linterConfigFilePath: string;
+  tsProgram: IExtendedProgram;
+  fix?: boolean;
+  sarifLogPath?: string;
 }
 
 export interface IRunLinterOptions {
@@ -54,6 +58,9 @@ export abstract class LinterBase<TLintResult> {
   protected readonly _buildFolderPath: string;
   protected readonly _buildMetadataFolderPath: string;
   protected readonly _linterConfigFilePath: string;
+  protected readonly _fix: boolean;
+
+  protected _fixesPossible: boolean = false;
 
   private readonly _linterName: string;
 
@@ -64,6 +71,7 @@ export abstract class LinterBase<TLintResult> {
     this._buildMetadataFolderPath = options.buildMetadataFolderPath;
     this._linterConfigFilePath = options.linterConfigFilePath;
     this._linterName = linterName;
+    this._fix = options.fix || false;
   }
 
   public abstract printVersionHeader(): void;
@@ -71,8 +79,6 @@ export abstract class LinterBase<TLintResult> {
   public async performLintingAsync(options: IRunLinterOptions): Promise<void> {
     const startTime: number = performance.now();
     let fileCount: number = 0;
-
-    await this.initializeAsync(options.tsProgram);
 
     const commonDirectory: string = options.tsProgram.getCommonSourceDirectory();
 
@@ -123,7 +129,7 @@ export abstract class LinterBase<TLintResult> {
     // Some of this code comes from here:
     // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
     // Modified to only lint files that have changed and that we care about
-    const lintFailures: TLintResult[] = [];
+    const lintResults: TLintResult[] = [];
     for (const sourceFile of options.tsProgram.getSourceFiles()) {
       const filePath: string = sourceFile.fileName;
       const relative: string | undefined = relativePaths.get(filePath);
@@ -142,12 +148,12 @@ export abstract class LinterBase<TLintResult> {
         options.changedFiles.has(sourceFile)
       ) {
         fileCount++;
-        const failures: TLintResult[] = await this.lintFileAsync(sourceFile);
-        if (failures.length === 0) {
+        const results: TLintResult[] = await this.lintFileAsync(sourceFile);
+        if (results.length === 0) {
           newNoFailureFileVersions.set(relative, version);
         } else {
-          for (const failure of failures) {
-            lintFailures.push(failure);
+          for (const result of results) {
+            lintResults.push(result);
           }
         }
       } else {
@@ -156,7 +162,13 @@ export abstract class LinterBase<TLintResult> {
     }
     //#endregion
 
-    this.lintingFinished(lintFailures);
+    await this.lintingFinishedAsync(lintResults);
+
+    if (!this._fix && this._fixesPossible) {
+      this._terminal.writeWarningLine(
+        'The linter reported that fixes are possible. To apply fixes, run Heft with the "--fix" option.'
+      );
+    }
 
     const updatedTslintCacheData: ILinterCacheData = {
       cacheVersion: linterCacheVersion,
@@ -171,11 +183,9 @@ export abstract class LinterBase<TLintResult> {
 
   protected abstract getCacheVersionAsync(): Promise<string>;
 
-  protected abstract initializeAsync(tsProgram: IExtendedProgram): Promise<void>;
-
   protected abstract lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TLintResult[]>;
 
-  protected abstract lintingFinished(lintFailures: TLintResult[]): void;
+  protected abstract lintingFinishedAsync(lintFailures: TLintResult[]): Promise<void>;
 
   protected abstract isFileExcludedAsync(filePath: string): Promise<boolean>;
 }

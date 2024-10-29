@@ -164,8 +164,9 @@ export class ChangeAction extends BaseRushAction {
   }
 
   public async runAsync(): Promise<void> {
+    const targetBranch: string = await this._getTargetBranchAsync();
     // eslint-disable-next-line no-console
-    console.log(`The target branch is ${this._targetBranch}`);
+    console.log(`The target branch is ${targetBranch}`);
 
     if (this._verifyParameter.value) {
       const errors: string[] = [
@@ -197,11 +198,11 @@ export class ChangeAction extends BaseRushAction {
     const sortedProjectList: string[] = (await this._getChangedProjectNamesAsync()).sort();
     if (sortedProjectList.length === 0) {
       this._logNoChangeFileRequired();
-      this._warnUnstagedChanges();
+      await this._warnUnstagedChangesAsync();
       return;
     }
 
-    this._warnUnstagedChanges();
+    await this._warnUnstagedChangesAsync();
 
     const inquirer: typeof InquirerType = await import('inquirer');
     const promptModule: InquirerType.PromptModule = inquirer.createPromptModule();
@@ -277,7 +278,7 @@ export class ChangeAction extends BaseRushAction {
       interactiveMode = true;
 
       const existingChangeComments: Map<string, string[]> = ChangeFiles.getChangeComments(
-        this._getChangeFiles()
+        await this._getChangeFilesAsync()
       );
       changeFileData = await this._promptForChangeFileDataAsync(
         promptModule,
@@ -310,7 +311,7 @@ export class ChangeAction extends BaseRushAction {
     }
     if (this._commitChangesFlagParameter.value || this._commitChangesMessageStringParameter.value) {
       if (changefiles && changefiles.length !== 0) {
-        this._stageAndCommitGitChanges(
+        await this._stageAndCommitGitChangesAsync(
           changefiles,
           this._commitChangesMessageStringParameter.value ||
             this.rushConfiguration.gitChangefilesCommitMessage ||
@@ -340,15 +341,16 @@ export class ChangeAction extends BaseRushAction {
   private async _verifyAsync(): Promise<void> {
     const changedPackages: string[] = await this._getChangedProjectNamesAsync();
     if (changedPackages.length > 0) {
-      this._validateChangeFile(changedPackages);
+      await this._validateChangeFileAsync(changedPackages);
     } else {
       this._logNoChangeFileRequired();
     }
   }
 
-  private get _targetBranch(): string {
+  private async _getTargetBranchAsync(): Promise<string> {
     if (!this._targetBranchName) {
-      this._targetBranchName = this._targetBranchParameter.value || this._git.getRemoteDefaultBranch();
+      this._targetBranchName =
+        this._targetBranchParameter.value || (await this._git.getRemoteDefaultBranchAsync());
     }
 
     return this._targetBranchName;
@@ -358,7 +360,7 @@ export class ChangeAction extends BaseRushAction {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const changedProjects: Set<RushConfigurationProject> =
       await projectChangeAnalyzer.getChangedProjectsAsync({
-        targetBranchName: this._targetBranch,
+        targetBranchName: await this._getTargetBranchAsync(),
         terminal: this._terminal,
         shouldFetch: !this._noFetchParameter.value,
         // Lockfile evaluation will expand the set of projects that request change files
@@ -382,19 +384,28 @@ export class ChangeAction extends BaseRushAction {
     return Array.from(changedProjectNames);
   }
 
-  private _validateChangeFile(changedPackages: string[]): void {
-    const files: string[] = this._getChangeFiles();
+  private async _validateChangeFileAsync(changedPackages: string[]): Promise<void> {
+    const files: string[] = await this._getChangeFilesAsync();
     ChangeFiles.validate(files, changedPackages, this.rushConfiguration);
   }
 
-  private _getChangeFiles(): string[] {
+  private async _getChangeFilesAsync(): Promise<string[]> {
     const repoRoot: string = getRepoRoot(this.rushConfiguration.rushJsonFolder);
     const relativeChangesFolder: string = path.relative(repoRoot, this.rushConfiguration.changesFolder);
-    return this._git
-      .getChangedFiles(this._targetBranch, this._terminal, true, relativeChangesFolder)
-      .map((relativePath) => {
-        return path.join(repoRoot, relativePath);
-      });
+    const targetBranch: string = await this._getTargetBranchAsync();
+    const changedFiles: string[] = await this._git.getChangedFilesAsync(
+      targetBranch,
+      this._terminal,
+      true,
+      relativeChangesFolder
+    );
+
+    const result: string[] = [];
+    for (const changedFile of changedFiles) {
+      result.push(path.join(repoRoot, changedFile));
+    }
+
+    return result;
   }
 
   /**
@@ -630,9 +641,10 @@ export class ChangeAction extends BaseRushAction {
     return email;
   }
 
-  private _warnUnstagedChanges(): void {
+  private async _warnUnstagedChangesAsync(): Promise<void> {
     try {
-      if (this._git.hasUnstagedChanges()) {
+      const hasUnstagedChanges: boolean = await this._git.hasUnstagedChangesAsync();
+      if (hasUnstagedChanges) {
         // eslint-disable-next-line no-console
         console.log(
           '\n' +
@@ -738,14 +750,14 @@ export class ChangeAction extends BaseRushAction {
     console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
   }
 
-  private _stageAndCommitGitChanges(pattern: string[], message: string): void {
+  private async _stageAndCommitGitChangesAsync(pattern: string[], message: string): Promise<void> {
     try {
-      Utilities.executeCommand({
+      await Utilities.executeCommandAsync({
         command: 'git',
         args: ['add', ...pattern],
         workingDirectory: this.rushConfiguration.changesFolder
       });
-      Utilities.executeCommand({
+      await Utilities.executeCommandAsync({
         command: 'git',
         args: ['commit', ...pattern, '-m', message],
         workingDirectory: this.rushConfiguration.changesFolder

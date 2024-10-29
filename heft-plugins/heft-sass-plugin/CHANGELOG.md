@@ -1,6 +1,125 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Wed, 29 May 2024 02:03:50 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Oct 2024 00:15:48 GMT and should not be manually modified.
+
+## 0.15.4
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.15.3
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.15.2
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.15.1
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.15.0
+Thu, 03 Oct 2024 19:46:23 GMT
+
+### Minor changes
+
+- Add "suppressDeprecations" option to suppress specific SASS deprecation IDs. Add "ignoreDeprecationsInDependencies" option to ignore deprecation warnings from external SASS.
+
+## 0.14.24
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.14.23
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.14.22
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.14.21
+Sat, 28 Sep 2024 00:11:41 GMT
+
+_Version update only_
+
+## 0.14.20
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.14.19
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.14.18
+Mon, 26 Aug 2024 02:00:11 GMT
+
+_Version update only_
+
+## 0.14.17
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.14.16
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.14.15
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.14.14
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.14.13
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.14.12
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.14.11
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.14.10
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 0.14.9
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
+
+## 0.14.8
+Mon, 03 Jun 2024 23:43:15 GMT
+
+_Version update only_
+
+## 0.14.7
+Thu, 30 May 2024 00:13:05 GMT
+
+_Version update only_
 
 ## 0.14.6
 Wed, 29 May 2024 02:03:50 GMT

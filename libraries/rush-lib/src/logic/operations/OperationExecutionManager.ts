@@ -12,12 +12,7 @@ import {
 import { StreamCollator, type CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 
-import {
-  AsyncOperationQueue,
-  type IOperationIteratorResult,
-  type IOperationSortFunction,
-  UNASSIGNED_OPERATION
-} from './AsyncOperationQueue';
+import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { type IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
@@ -103,7 +98,12 @@ export class OperationExecutionManager {
     this._beforeExecuteOperation = beforeExecuteOperation;
     this._afterExecuteOperation = afterExecuteOperation;
     this._beforeExecuteOperations = beforeExecuteOperations;
-    this._onOperationStatusChanged = onOperationStatusChanged;
+    this._onOperationStatusChanged = (record: OperationExecutionRecord) => {
+      if (record.status === OperationStatus.Ready) {
+        this._executionQueue.assignOperations();
+      }
+      onOperationStatusChanged?.(record);
+    };
 
     // TERMINAL PIPELINE:
     //
@@ -124,7 +124,7 @@ export class OperationExecutionManager {
     // Convert the developer graph to the mutable execution graph
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
-      onOperationStatusChanged,
+      onOperationStatusChanged: this._onOperationStatusChanged,
       debugMode,
       quietMode
     };
@@ -138,7 +138,7 @@ export class OperationExecutionManager {
       );
 
       executionRecords.set(operation, executionRecord);
-      if (!executionRecord.runner.silent) {
+      if (!executionRecord.silent) {
         // Only count non-silent operations
         totalOperations++;
       }
@@ -212,7 +212,7 @@ export class OperationExecutionManager {
       this._terminal.writeStdoutLine(`Selected ${totalOperations} operation${plural}:`);
       const nonSilentOperations: string[] = [];
       for (const record of this._executionRecords.values()) {
-        if (!record.runner.silent) {
+        if (!record.silent) {
           nonSilentOperations.push(record.name);
         }
       }
@@ -252,30 +252,11 @@ export class OperationExecutionManager {
 
     await Async.forEachAsync(
       this._executionQueue,
-      async (operation: IOperationIteratorResult) => {
-        let record: OperationExecutionRecord | undefined;
-        /**
-         * If the operation is UNASSIGNED_OPERATION, it means that the queue is not able to assign a operation.
-         * This happens when some operations run remotely. So, we should try to get a remote executing operation
-         * from the queue manually here.
-         */
-        if (operation.status === UNASSIGNED_OPERATION) {
-          // Pause for a few time
-          await Async.sleepAsync(5000);
-          record = this._executionQueue.tryGetRemoteExecutingOperation();
-        } else {
-          record = operation;
-        }
-
-        if (!record) {
-          // Fail to assign a operation, start over again
-          return;
-        } else {
-          await record.executeAsync({
-            onStart: onOperationStartAsync,
-            onResult: onOperationCompleteAsync
-          });
-        }
+      async (record: OperationExecutionRecord) => {
+        await record.executeAsync({
+          onStart: onOperationStartAsync,
+          onResult: onOperationCompleteAsync
+        });
       },
       {
         concurrency: maxParallelism,
@@ -308,10 +289,12 @@ export class OperationExecutionManager {
     if (message) {
       // This creates the writer, so don't do this until needed
       record.collatedWriter.terminal.writeStderrLine(message);
-      // Ensure that the error message, if present, shows up in the summary
+      // Ensure that the summary isn't blank if we have an error message
+      // If the summary already contains max lines of stderr, this will get dropped, so we hope those lines
+      // are more useful than the final exit code.
       record.stdioSummarizer.writeChunk({
         text: `${message}\n`,
-        kind: TerminalChunkKind.Stderr
+        kind: TerminalChunkKind.Stdout
       });
     }
   }
@@ -320,9 +303,7 @@ export class OperationExecutionManager {
    * Handles the result of the operation and propagates any relevant effects.
    */
   private _onOperationComplete(record: OperationExecutionRecord): void {
-    const { runner, name, status } = record;
-
-    const silent: boolean = runner.silent;
+    const { runner, name, status, silent } = record;
 
     switch (status) {
       /**
@@ -343,13 +324,13 @@ export class OperationExecutionManager {
             // Now that we have the concept of architectural no-ops, we could implement this by replacing
             // {blockedRecord.runner} with a no-op that sets status to Blocked and logs the blocking
             // operations. However, the existing behavior is a bit simpler, so keeping that for now.
-            if (!blockedRecord.runner.silent) {
+            if (!blockedRecord.silent) {
               terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
             }
             blockedRecord.status = OperationStatus.Blocked;
 
             this._executionQueue.complete(blockedRecord);
-            if (!blockedRecord.runner.silent) {
+            if (!blockedRecord.silent) {
               // Only increment the count if the operation is not silent to avoid confusing the user.
               // The displayed total is the count of non-silent operations.
               this._completedOperations++;
@@ -421,11 +402,10 @@ export class OperationExecutionManager {
       }
     }
 
-    if (record.status !== OperationStatus.RemoteExecuting) {
+    if (record.isTerminal) {
       // If the operation was not remote, then we can notify queue that it is complete
       this._executionQueue.complete(record);
     } else {
-      // Attempt to requeue other operations if the operation was remote
       this._executionQueue.assignOperations();
     }
   }

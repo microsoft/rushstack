@@ -98,3 +98,14 @@ export interface IExtendedTypeScript {
 }
 
 export type ExtendedTypeScript = typeof TTypescript & IExtendedTypeScript;
+
+export type ExtendedBuilderProgram = TTypescript.BuilderProgram & {
+  /**
+   * Typescript 5.6+
+   */
+  state?: { changedFilesSet: Set<string> };
+  /**
+   * Typescript < 5.6
+   */
+  getState(): { changedFilesSet: Set<string> };
+};

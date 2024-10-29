@@ -65,7 +65,7 @@ function validateConfiguration(rushProjectConfiguration: RushProjectConfiguratio
       expect(terminalProvider.getOutput()).toMatchSnapshot('validation: terminal output');
       expect(terminalProvider.getErrorOutput()).toMatchSnapshot('validation: terminal error');
       expect(terminalProvider.getWarningOutput()).toMatchSnapshot('validation: terminal warning');
-      expect(terminalProvider.getVerbose()).toMatchSnapshot('validation: terminal verbose');
+      expect(terminalProvider.getVerboseOutput()).toMatchSnapshot('validation: terminal verbose');
     }
   }
 }
@@ -168,9 +168,8 @@ describe(RushProjectConfiguration.name, () => {
     });
 
     it('returns undefined if the operation is a no-op', async () => {
-      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
-        'test-project-c'
-      );
+      const config: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-c');
 
       if (!config) {
         throw new Error('Failed to load config');
@@ -181,9 +180,8 @@ describe(RushProjectConfiguration.name, () => {
     });
 
     it('returns reason if the operation is runnable', async () => {
-      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
-        'test-project-c'
-      );
+      const config: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-c');
 
       if (!config) {
         throw new Error('Failed to load config');

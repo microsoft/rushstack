@@ -117,8 +117,6 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): R
 
     const fileName: string = compilation.getAssetPath(filenameTemplate, data);
 
-    originInfo.related[locale] = fileName;
-
     const info: AssetInfo = {
       ...originInfo,
       locale
@@ -130,8 +128,15 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): R
     // If file already exists
     if (originName === fileName) {
       // This helper throws if the asset doesn't already exist
-      compilation.updateAsset(fileName, wrapped, info);
+      // Use the function form so that the object identity of `related` is preserved.
+      // Since we already read the original info, we don't need fancy merge logic.
+      compilation.updateAsset(fileName, wrapped, () => info);
     } else {
+      // If A.related points to B, B.related can't point to A or the stats emitter explodes
+      // So just strip the related object for the localized assets
+      info.related = undefined;
+      // We omit the `related` property that does a self-reference.
+      originInfo.related[locale] = fileName;
       // This helper throws if the asset already exists
       compilation.emitAsset(fileName, wrapped, info);
     }
@@ -228,19 +233,25 @@ function _reconstructLocalized(
 
         const escapedBackslash: string = element.escapedBackslash || '\\';
 
-        // Replace backslashes with the properly escaped backslash
-        BACKSLASH_REGEX.lastIndex = -1;
-        newValue = newValue.replace(BACKSLASH_REGEX, escapedBackslash);
-
-        // @todo: look into using JSON.parse(...) to get the escaping characters
-        const escapingCharacterSequence: string = escapedBackslash.slice(escapedBackslash.length / 2);
+        if (newValue.includes('\\')) {
+          // The vast majority of localized strings do not contain `\\`, so this check avoids an allocation.
+          // Replace backslashes with the properly escaped backslash
+          BACKSLASH_REGEX.lastIndex = -1;
+          newValue = newValue.replace(BACKSLASH_REGEX, escapedBackslash);
+        }
 
         // Ensure the the quotemark, apostrophe, tab, and newline characters are properly escaped
         ESCAPE_REGEX.lastIndex = -1;
-        newValue = newValue.replace(
-          ESCAPE_REGEX,
-          (match) => `${escapingCharacterSequence}${ESCAPE_MAP.get(match)}`
-        );
+        if (ESCAPE_REGEX.test(newValue)) {
+          // The majority of localized strings do not contain the characters that need to be escaped,
+          // so this check avoids an allocation.
+          // @todo: look into using JSON.parse(...) to get the escaping characters
+          const escapingCharacterSequence: string = escapedBackslash.slice(escapedBackslash.length / 2);
+          newValue = newValue.replace(
+            ESCAPE_REGEX,
+            (match) => `${escapingCharacterSequence}${ESCAPE_MAP.get(match)}`
+          );
+        }
 
         result.replace(element.start, element.end - 1, newValue);
         break;
@@ -305,9 +316,7 @@ function _parseStringToReconstructionSequence(
   const jsonStringifyFormatLocaleForFilenameFn: FormatLocaleForFilenameFn = (locale: string) =>
     JSON.stringify(formatLocaleForFilenameFn(locale));
 
-  let regexResult: RegExpExecArray | null;
-  PLACEHOLDER_REGEX.lastIndex = -1;
-  while ((regexResult = PLACEHOLDER_REGEX.exec(source))) {
+  for (const regexResult of source.matchAll(PLACEHOLDER_REGEX)) {
     const [placeholder, escapedBackslash, elementLabel, placeholderSerialNumber] = regexResult;
     const start: number = regexResult.index;
     const end: number = start + placeholder.length;

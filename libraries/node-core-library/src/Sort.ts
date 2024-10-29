@@ -231,4 +231,60 @@ export class Sort {
       set.add(item);
     }
   }
+
+  /**
+   * Sort the keys deeply given an object or an array.
+   *
+   * Doesn't handle cyclic reference.
+   *
+   * @param object - The object to be sorted
+   *
+   * @example
+   *
+   * ```ts
+   * console.log(Sort.sortKeys({ c: 3, b: 2, a: 1 })); // { a: 1, b: 2, c: 3}
+   * ```
+   */
+  public static sortKeys<T extends Partial<Record<string, unknown>> | unknown[]>(object: T): T {
+    if (!isPlainObject(object) && !Array.isArray(object)) {
+      throw new TypeError(`Expected object or array`);
+    }
+
+    return Array.isArray(object) ? (innerSortArray(object) as T) : (innerSortKeys(object) as T);
+  }
+}
+
+function isPlainObject(obj: unknown): obj is object {
+  return obj !== null && typeof obj === 'object';
+}
+
+function innerSortArray(arr: unknown[]): unknown[] {
+  const result: unknown[] = [];
+  for (const entry of arr) {
+    if (Array.isArray(entry)) {
+      result.push(innerSortArray(entry));
+    } else if (isPlainObject(entry)) {
+      result.push(innerSortKeys(entry));
+    } else {
+      result.push(entry);
+    }
+  }
+  return result;
+}
+
+function innerSortKeys(obj: Partial<Record<string, unknown>>): Partial<Record<string, unknown>> {
+  const result: Partial<Record<string, unknown>> = {};
+  const keys: string[] = Object.keys(obj).sort();
+  for (const key of keys) {
+    const value: unknown = obj[key];
+    if (Array.isArray(value)) {
+      result[key] = innerSortArray(value);
+    } else if (isPlainObject(value)) {
+      result[key] = innerSortKeys(value);
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result;
 }

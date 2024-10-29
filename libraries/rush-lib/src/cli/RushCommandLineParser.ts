@@ -8,7 +8,7 @@ import {
   type CommandLineFlagParameter,
   CommandLineHelper
 } from '@rushstack/ts-command-line';
-import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
+import { InternalError, AlreadyReportedError, Text } from '@rushstack/node-core-library';
 import {
   ConsoleTerminalProvider,
   Terminal,
@@ -46,6 +46,7 @@ import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
 import { VersionAction } from './actions/VersionAction';
 import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
 import { UpgradeInteractiveAction } from './actions/UpgradeInteractiveAction';
+import { AlertAction } from './actions/AlertAction';
 
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import type { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
@@ -58,6 +59,9 @@ import { type ICustomCommandLineConfigurationInfo, PluginManager } from '../plug
 import { RushSession } from '../pluginFramework/RushSession';
 import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
+import { InitSubspaceAction } from './actions/InitSubspaceAction';
+import { RushAlerts } from '../utilities/RushAlerts';
+import { InstallAutoinstallerAction } from './actions/InstallAutoinstallerAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -221,6 +225,42 @@ export class RushCommandLineParser extends CommandLineParser {
 
     try {
       await this._wrapOnExecuteAsync();
+
+      // TODO: rushConfiguration is typed as "!: RushConfiguration" here, but can sometimes be undefined
+      if (this.rushConfiguration) {
+        try {
+          const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+
+          if (experiments.rushAlerts) {
+            // TODO: Fix this
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const actionName: string = (this as any)
+              ._getArgumentParser()
+              .parseArgs(process.argv.slice(2)).action;
+
+            // only display alerts when certain specific actions are triggered
+            if (RushAlerts.alertTriggerActions.includes(actionName)) {
+              this._terminal.writeDebugLine('Checking Rush alerts...');
+              const rushAlerts: RushAlerts = await RushAlerts.loadFromConfigurationAsync(
+                this.rushConfiguration,
+                this._terminal
+              );
+              // Print out alerts if have after each successful command actions
+              await rushAlerts.printAlertsAsync();
+            }
+          }
+        } catch (error) {
+          if (error instanceof AlreadyReportedError) {
+            throw error;
+          }
+          // Generally the RushAlerts implementation should handle its own error reporting; if not,
+          // clarify the source, since the Rush Alerts behavior is nondeterministic and may not repro easily:
+          this._terminal.writeErrorLine(`\nAn unexpected error was encountered by the Rush alerts feature:`);
+          this._terminal.writeErrorLine(error.message);
+          throw new AlreadyReportedError();
+        }
+      }
+
       // If we make it here, everything went fine, so reset the exit code back to 0
       process.exitCode = 0;
     } catch (error) {
@@ -263,6 +303,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new InitAction(this));
       this.addAction(new InitAutoinstallerAction(this));
       this.addAction(new InitDeployAction(this));
+      this.addAction(new InitSubspaceAction(this));
       this.addAction(new InstallAction(this));
       this.addAction(new LinkAction(this));
       this.addAction(new ListAction(this));
@@ -273,10 +314,12 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new SetupAction(this));
       this.addAction(new UnlinkAction(this));
       this.addAction(new UpdateAction(this));
+      this.addAction(new InstallAutoinstallerAction(this));
       this.addAction(new UpdateAutoinstallerAction(this));
       this.addAction(new UpdateCloudCredentialsAction(this));
       this.addAction(new UpgradeInteractiveAction(this));
       this.addAction(new VersionAction(this));
+      this.addAction(new AlertAction(this));
 
       this._populateScriptActions();
     } catch (error) {
@@ -325,18 +368,6 @@ export class RushCommandLineParser extends CommandLineParser {
       }
 
       case RushConstants.phasedCommandKind: {
-        if (
-          !command.isSynthetic && // synthetic commands come from bulk commands
-          !this.rushConfiguration.experimentsConfiguration.configuration.phasedCommands
-        ) {
-          throw new Error(
-            `${RushConstants.commandLineFilename} defines a command "${command.name}" ` +
-              `that uses the "${RushConstants.phasedCommandKind}" command kind. To use this command kind, ` +
-              'the "phasedCommands" experiment must be enabled. Note that this feature is not complete ' +
-              'and will not work as expected.'
-          );
-        }
-
         this._addPhasedCommandLineConfigAction(commandLineConfiguration, command);
         break;
       }
@@ -427,8 +458,7 @@ export class RushCommandLineParser extends CommandLineParser {
       // The colors package will eat multi-newlines, which could break formatting
       // in user-specified messages and instructions, so we prefer to color each
       // line individually.
-      const message: string = PrintUtilities.wrapWords(prefix + error.message)
-        .split(/\r?\n/)
+      const message: string = Text.splitByNewLines(PrintUtilities.wrapWords(prefix + error.message))
         .map((line) => Colorize.red(line))
         .join('\n');
       // eslint-disable-next-line no-console

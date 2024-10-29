@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-export const enum LauncherAction {
+export enum LauncherAction {
   Snapshot = 'snapshot',
   Inspect = 'inspect'
 }

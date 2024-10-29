@@ -1,5 +1,6 @@
 // DO NOT MODIFY THIS FILE MANUALLY BUT DO COMMIT IT. It is generated and used by Rush.
 {
-  "pnpmShrinkwrapHash": "2d192cce065012928eac7bdc67598208df3fc0c9",
-  "preferredVersionsHash": "ce857ea0536b894ec8f346aaea08cfd85a5af648"
+  "pnpmShrinkwrapHash": "acf7c4f1de794be2d70dca29f989124eddfc541f",
+  "preferredVersionsHash": "ce857ea0536b894ec8f346aaea08cfd85a5af648",
+  "packageJsonInjectedDependenciesHash": "d8e3c0d28dcafaa568a71417fa3485ab58cbf829"
 }

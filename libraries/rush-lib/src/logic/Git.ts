@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as url from 'url';
 
 import { trueCasePathSync } from 'true-case-path';
-import { Executable, AlreadyReportedError, Path } from '@rushstack/node-core-library';
+import { Executable, AlreadyReportedError, Path, Async } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';
 
@@ -91,30 +91,18 @@ export class Git {
 
   /**
    * If a Git email address is configured and is nonempty, this returns it.
-   * Otherwise, undefined is returned.
-   */
-  public tryGetGitEmail(): string | undefined {
-    const emailResult: IResultOrError<string> = this._tryGetGitEmail();
-    if (emailResult.result !== undefined && emailResult.result.length > 0) {
-      return emailResult.result;
-    }
-    return undefined;
-  }
-
-  /**
-   * If a Git email address is configured and is nonempty, this returns it.
    * Otherwise, configuration instructions are printed to the console,
    * and AlreadyReportedError is thrown.
    */
-  public getGitEmail(): string {
+  public async getGitEmailAsync(): Promise<string> {
     // Determine the user's account
     // Ex: "bob@example.com"
-    const emailResult: IResultOrError<string> = this._tryGetGitEmail();
-    if (emailResult.error) {
+    const { error, result } = await this._tryGetGitEmailAsync();
+    if (error) {
       // eslint-disable-next-line no-console
       console.log(
         [
-          `Error: ${emailResult.error.message}`,
+          `Error: ${error.message}`,
           'Unable to determine your Git configuration using this command:',
           '',
           '    git config user.email',
@@ -123,8 +111,15 @@ export class Git {
       );
       throw new AlreadyReportedError();
     }
+    return this.validateGitEmail(result);
+  }
 
-    if (emailResult.result === undefined || emailResult.result.length === 0) {
+  /**
+   * If the Git email address is configured and non-empty, this returns it. Otherwise
+   * it prints an error message and throws.
+   */
+  public validateGitEmail(userEmail: string | undefined): string {
+    if (userEmail === undefined || userEmail.length === 0) {
       // eslint-disable-next-line no-console
       console.log(
         [
@@ -139,7 +134,7 @@ export class Git {
       throw new AlreadyReportedError();
     }
 
-    return emailResult.result;
+    return userEmail;
   }
 
   /**
@@ -154,7 +149,7 @@ export class Git {
     return undefined;
   }
 
-  public isHooksPathDefault(): boolean {
+  public async getIsHooksPathDefaultAsync(): Promise<boolean> {
     const repoInfo: gitInfo.GitRepoInfo | undefined = this.getGitInfo();
     if (!repoInfo?.commonGitDir) {
       // This should have never been called in a non-Git environment
@@ -167,7 +162,7 @@ export class Git {
       /* ignore errors from true-case-path */
     }
     const defaultHooksPath: string = path.resolve(commonGitDir, 'hooks');
-    const hooksResult: IResultOrError<string> = this._tryGetGitHooksPath();
+    const hooksResult: IResultOrError<string> = await this._tryGetGitHooksPathAsync();
     if (hooksResult.error) {
       // eslint-disable-next-line no-console
       console.log(
@@ -195,11 +190,13 @@ export class Git {
     return true;
   }
 
-  public getConfigHooksPath(): string {
+  public async getConfigHooksPathAsync(): Promise<string> {
     let configHooksPath: string = '';
     const gitPath: string = this.getGitPathOrThrow();
     try {
-      configHooksPath = this._executeGitCommandAndCaptureOutput(gitPath, ['config', 'core.hooksPath']).trim();
+      configHooksPath = (
+        await this._executeGitCommandAndCaptureOutputAsync(gitPath, ['config', 'core.hooksPath'])
+      ).trim();
     } catch (e) {
       // git config returns error code 1 if core.hooksPath is not set.
     }
@@ -228,14 +225,18 @@ export class Git {
     return this._gitInfo;
   }
 
-  public getMergeBase(targetBranch: string, terminal: ITerminal, shouldFetch: boolean = false): string {
+  public async getMergeBaseAsync(
+    targetBranch: string,
+    terminal: ITerminal,
+    shouldFetch: boolean = false
+  ): Promise<string> {
     if (shouldFetch) {
       this._fetchRemoteBranch(targetBranch, terminal);
     }
 
     const gitPath: string = this.getGitPathOrThrow();
     try {
-      const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+      const output: string = await this._executeGitCommandAndCaptureOutputAsync(gitPath, [
         '--no-optional-locks',
         'merge-base',
         '--',
@@ -256,9 +257,9 @@ export class Git {
     }
   }
 
-  public getBlobContent({ blobSpec, repositoryRoot }: IGetBlobOptions): string {
+  public async getBlobContentAsync({ blobSpec, repositoryRoot }: IGetBlobOptions): Promise<string> {
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = this._executeGitCommandAndCaptureOutput(
+    const output: string = await this._executeGitCommandAndCaptureOutputAsync(
       gitPath,
       ['cat-file', 'blob', blobSpec, '--'],
       repositoryRoot
@@ -274,18 +275,18 @@ export class Git {
    * those in the provided {@param targetBranch}. If a {@param pathPrefix} is provided,
    * this function only returns results under the that path.
    */
-  public getChangedFiles(
+  public async getChangedFilesAsync(
     targetBranch: string,
     terminal: ITerminal,
     skipFetch: boolean = false,
     pathPrefix?: string
-  ): string[] {
+  ): Promise<string[]> {
     if (!skipFetch) {
       this._fetchRemoteBranch(targetBranch, terminal);
     }
 
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+    const output: string = await this._executeGitCommandAndCaptureOutputAsync(gitPath, [
       'diff',
       `${targetBranch}...`,
       '--name-only',
@@ -318,11 +319,11 @@ export class Git {
    *
    * @param rushConfiguration - rush configuration
    */
-  public getRemoteDefaultBranch(): string {
+  public async getRemoteDefaultBranchAsync(): Promise<string> {
     const repositoryUrls: string[] = this._rushConfiguration.repositoryUrls;
     if (repositoryUrls.length > 0) {
       const gitPath: string = this.getGitPathOrThrow();
-      const output: string = this._executeGitCommandAndCaptureOutput(gitPath, ['remote']).trim();
+      const output: string = (await this._executeGitCommandAndCaptureOutputAsync(gitPath, ['remote'])).trim();
 
       const normalizedRepositoryUrls: Set<string> = new Set<string>();
       for (const repositoryUrl of repositoryUrls) {
@@ -330,28 +331,31 @@ export class Git {
         normalizedRepositoryUrls.add(Git.normalizeGitUrlForComparison(repositoryUrl).toUpperCase());
       }
 
-      const matchingRemotes: string[] = output.split('\n').filter((remoteName) => {
-        if (remoteName) {
-          const remoteUrl: string = this._executeGitCommandAndCaptureOutput(gitPath, [
-            'remote',
-            'get-url',
-            '--',
-            remoteName
-          ]).trim();
+      const matchingRemotes: string[] = [];
+      await Async.forEachAsync(
+        output.split('\n'),
+        async (remoteName) => {
+          if (remoteName) {
+            const remoteUrl: string = (
+              await this._executeGitCommandAndCaptureOutputAsync(gitPath, [
+                'remote',
+                'get-url',
+                '--',
+                remoteName
+              ])
+            ).trim();
 
-          if (!remoteUrl) {
-            return false;
+            if (remoteUrl) {
+              // Also apply toUpperCase() for a case-insensitive comparison
+              const normalizedRemoteUrl: string = Git.normalizeGitUrlForComparison(remoteUrl).toUpperCase();
+              if (normalizedRepositoryUrls.has(normalizedRemoteUrl)) {
+                matchingRemotes.push(remoteName);
+              }
+            }
           }
-
-          // Also apply toUpperCase() for a case-insensitive comparison
-          const normalizedRemoteUrl: string = Git.normalizeGitUrlForComparison(remoteUrl).toUpperCase();
-          if (normalizedRepositoryUrls.has(normalizedRemoteUrl)) {
-            return true;
-          }
-        }
-
-        return false;
-      });
+        },
+        { concurrency: 10 }
+      );
 
       if (matchingRemotes.length > 0) {
         if (matchingRemotes.length > 1) {
@@ -385,8 +389,8 @@ export class Git {
     }
   }
 
-  public hasUncommittedChanges(): boolean {
-    const gitStatusEntries: Iterable<IGitStatusEntry> = this.getGitStatus();
+  public async hasUncommittedChangesAsync(): Promise<boolean> {
+    const gitStatusEntries: Iterable<IGitStatusEntry> = await this.getGitStatusAsync();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const gitStatusEntry of gitStatusEntries) {
       // If there are any changes, return true. We only need to evaluate the first iterator entry
@@ -396,8 +400,8 @@ export class Git {
     return false;
   }
 
-  public hasUnstagedChanges(): boolean {
-    const gitStatusEntries: Iterable<IGitStatusEntry> = this.getGitStatus();
+  public async hasUnstagedChangesAsync(): Promise<boolean> {
+    const gitStatusEntries: Iterable<IGitStatusEntry> = await this.getGitStatusAsync();
     for (const gitStatusEntry of gitStatusEntries) {
       if (
         gitStatusEntry.kind === 'untracked' ||
@@ -413,9 +417,9 @@ export class Git {
   /**
    * The list of files changed but not committed
    */
-  public getUncommittedChanges(): ReadonlyArray<string> {
+  public async getUncommittedChangesAsync(): Promise<ReadonlyArray<string>> {
     const result: string[] = [];
-    const gitStatusEntries: Iterable<IGitStatusEntry> = this.getGitStatus();
+    const gitStatusEntries: Iterable<IGitStatusEntry> = await this.getGitStatusAsync();
     for (const gitStatusEntry of gitStatusEntries) {
       result.push(gitStatusEntry.path);
     }
@@ -427,10 +431,10 @@ export class Git {
     return this._rushConfiguration.gitTagSeparator || DEFAULT_GIT_TAG_SEPARATOR;
   }
 
-  public getGitStatus(): Iterable<IGitStatusEntry> {
+  public async getGitStatusAsync(): Promise<Iterable<IGitStatusEntry>> {
     const gitPath: string = this.getGitPathOrThrow();
     // See Git.test.ts for example output
-    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+    const output: string = await this._executeGitCommandAndCaptureOutputAsync(gitPath, [
       'status',
       '--porcelain=2',
       '--null',
@@ -509,12 +513,28 @@ export class Git {
     return result;
   }
 
-  private _tryGetGitEmail(): IResultOrError<string> {
+  /**
+   * This will throw errors only if we cannot find Git commandline.
+   * If git email didn't configure, this will return undefined; otherwise,
+   * returns user.email config
+   */
+  public async tryGetGitEmailAsync(): Promise<string | undefined> {
+    const { result } = await this._tryGetGitEmailAsync();
+    return result;
+  }
+
+  /**
+   * Returns an object containing either the result of the `git config user.email`
+   * command or an error.
+   */
+  private async _tryGetGitEmailAsync(): Promise<IResultOrError<string>> {
     if (this._gitEmailResult === undefined) {
       const gitPath: string = this.getGitPathOrThrow();
       try {
         this._gitEmailResult = {
-          result: this._executeGitCommandAndCaptureOutput(gitPath, ['config', 'user.email']).trim()
+          result: (
+            await this._executeGitCommandAndCaptureOutputAsync(gitPath, ['config', 'user.email'])
+          ).trim()
         };
       } catch (e) {
         this._gitEmailResult = {
@@ -526,16 +546,14 @@ export class Git {
     return this._gitEmailResult;
   }
 
-  private _tryGetGitHooksPath(): IResultOrError<string> {
+  private async _tryGetGitHooksPathAsync(): Promise<IResultOrError<string>> {
     if (this._gitHooksPath === undefined) {
       const gitPath: string = this.getGitPathOrThrow();
       try {
         this._gitHooksPath = {
-          result: this._executeGitCommandAndCaptureOutput(gitPath, [
-            'rev-parse',
-            '--git-path',
-            'hooks'
-          ]).trim()
+          result: (
+            await this._executeGitCommandAndCaptureOutputAsync(gitPath, ['rev-parse', '--git-path', 'hooks'])
+          ).trim()
         };
       } catch (e) {
         this._gitHooksPath = {
@@ -583,13 +601,13 @@ export class Git {
   /**
    * @internal
    */
-  public _executeGitCommandAndCaptureOutput(
+  public async _executeGitCommandAndCaptureOutputAsync(
     gitPath: string,
     args: string[],
     repositoryRoot: string = this._rushConfiguration.rushJsonFolder
-  ): string {
+  ): Promise<string> {
     try {
-      return Utilities.executeCommandAndCaptureOutput(gitPath, args, repositoryRoot);
+      return await Utilities.executeCommandAndCaptureOutputAsync(gitPath, args, repositoryRoot);
     } catch (e) {
       ensureGitMinimumVersion(gitPath);
       throw e;
@@ -599,19 +617,20 @@ export class Git {
    *
    * @param ref Given a ref which can be branch name, commit hash, tag name, etc, check if it is a commit hash
    */
-  public isRefACommit(ref: string): boolean {
+  public async determineIfRefIsACommitAsync(ref: string): Promise<boolean> {
     const gitPath: string = this.getGitPathOrThrow();
     try {
-      const output: string = this._executeGitCommandAndCaptureOutput(gitPath, ['rev-parse', '--verify', ref]);
+      const output: string = await this._executeGitCommandAndCaptureOutputAsync(gitPath, [
+        'rev-parse',
+        '--verify',
+        ref
+      ]);
       const result: string = output.trim();
 
-      if (result === ref) {
-        return true;
-      }
+      return result === ref;
     } catch (e) {
       // assume not a commit
       return false;
     }
-    return false;
   }
 }

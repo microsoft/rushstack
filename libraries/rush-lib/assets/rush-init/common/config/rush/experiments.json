@@ -50,12 +50,6 @@
   /*[LINE "HYPOTHETICAL"]*/ "buildSkipWithAllowWarningsInSuccessfulBuild": true,
 
   /**
-   * If true, the phased commands feature is enabled. To use this feature, create a "phased" command
-   * in common/config/rush/command-line.json.
-   */
-  /*[LINE "HYPOTHETICAL"]*/ "phasedCommands": true,
-
-  /**
    * If true, perform a clean install after when running `rush install` or `rush update` if the
    * `.npmrc` file has changed since the last install.
    */
@@ -88,10 +82,25 @@
    * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
    */
   /*[LINE "HYPOTHETICAL"]*/ "generateProjectImpactGraphDuringRushUpdate": true,
+
   /**
    * If true, when running in watch mode, Rush will check for phase scripts named `_phase:<name>:ipc` and run them instead
    * of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist
    * across invocations.
    */
-  /*[LINE "HYPOTHETICAL"]*/ "useIPCScriptsInWatchMode": true
+  /*[LINE "HYPOTHETICAL"]*/ "useIPCScriptsInWatchMode": true,
+
+  /**
+   * (UNDER DEVELOPMENT) The Rush alerts feature provides a way to send announcements to engineers
+   * working in the monorepo, by printing directly in the user's shell window when they invoke Rush commands.
+   * This ensures that important notices will be seen by anyone doing active development, since people often
+   * ignore normal discussion group messages or don't know to subscribe.
+   */
+   /*[LINE "HYPOTHETICAL"]*/ "rushAlerts": true,
+
+
+  /**
+   * When using cobuilds, this experiment allows uncacheable operations to benefit from cobuild orchestration without using the build cache.
+   */
+   /*[LINE "HYPOTHETICAL"]*/ "allowCobuildWithoutCache": true
 }

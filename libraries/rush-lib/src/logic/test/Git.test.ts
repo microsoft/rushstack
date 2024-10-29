@@ -35,24 +35,26 @@ describe(Git.name, () => {
     });
   });
 
-  describe(Git.prototype.getGitStatus.name, () => {
-    function getGitStatusEntriesForCommandOutput(outputSections: string[]): IGitStatusEntry[] {
+  describe(Git.prototype.getGitStatusAsync.name, () => {
+    async function getGitStatusEntriesForCommandOutputAsync(
+      outputSections: string[]
+    ): Promise<IGitStatusEntry[]> {
       const gitInstance: Git = new Git({ rushJsonFolder: '/repo/root' } as RushConfiguration);
       jest.spyOn(gitInstance, 'getGitPathOrThrow').mockReturnValue('/git/bin/path');
       jest
-        .spyOn(gitInstance, '_executeGitCommandAndCaptureOutput')
-        .mockImplementation((gitPath: string, args: string[]) => {
+        .spyOn(gitInstance, '_executeGitCommandAndCaptureOutputAsync')
+        .mockImplementation(async (gitPath: string, args: string[]) => {
           expect(gitPath).toEqual('/git/bin/path');
           expect(args).toEqual(['status', '--porcelain=2', '--null', '--ignored=no']);
           return outputSections.join('\0');
         });
 
-      return Array.from(gitInstance.getGitStatus());
+      return Array.from(await gitInstance.getGitStatusAsync());
     }
 
-    it('parses a git status', () => {
-      expect(
-        getGitStatusEntriesForCommandOutput([
+    it('parses a git status', async () => {
+      await expect(
+        getGitStatusEntriesForCommandOutputAsync([
           // Staged add
           '1 A. N... 000000 100644 100644 0000000000000000000000000000000000000000 a171a25d2c978ba071959f39dbeaa339fe84f768 path/a.ts',
           // Modifications, some staged and some unstaged
@@ -73,7 +75,7 @@ describe(Git.name, () => {
           '1 AM N... 000000 100644 100644 0000000000000000000000000000000000000000 9d9ab4adc79c591c0aa72f7fd29a008c80893e3e path/h.ts',
           ''
         ])
-      ).toMatchInlineSnapshot(`
+      ).resolves.toMatchInlineSnapshot(`
         Array [
           Object {
             "headFileMode": "000000",
@@ -183,39 +185,79 @@ describe(Git.name, () => {
       `);
     });
 
-    it('throws with invalid git output', () => {
-      expect(() =>
-        getGitStatusEntriesForCommandOutput(['1 A. N... 000000 100644 100644 000000000000000000'])
-      ).toThrowErrorMatchingInlineSnapshot(`"Unexpected end of git status output after position 31"`);
+    it('throws with invalid git output', async () => {
+      await expect(() =>
+        getGitStatusEntriesForCommandOutputAsync(['1 A. N... 000000 100644 100644 000000000000000000'])
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unexpected end of git status output after position 31"`);
     });
   });
 
-  describe(Git.prototype.isRefACommit.name, () => {
+  describe(Git.prototype.determineIfRefIsACommitAsync.name, () => {
     const commit = `d9bc1881959b9e44d846655521cd055fcf713f4d`;
-    function getMockedGitIsRefACommit(ref: string): boolean {
+    async function getMockedGitIsRefACommitAsync(ref: string): Promise<boolean> {
       const gitInstance: Git = new Git({ rushJsonFolder: '/repo/root' } as RushConfiguration);
       jest.spyOn(gitInstance, 'getGitPathOrThrow').mockReturnValue('/git/bin/path');
       jest
-        .spyOn(gitInstance, '_executeGitCommandAndCaptureOutput')
-        .mockImplementation((gitPath: string, args: string[]) => {
+        .spyOn(gitInstance, '_executeGitCommandAndCaptureOutputAsync')
+        .mockImplementation(async (gitPath: string, args: string[]) => {
           expect(gitPath).toEqual('/git/bin/path');
           expect(args).toEqual(['rev-parse', '--verify', ref]);
           return commit;
         });
-      return gitInstance.isRefACommit(ref);
+      return await gitInstance.determineIfRefIsACommitAsync(ref);
     }
 
-    it('Returns true for commit ref', () => {
-      expect(getMockedGitIsRefACommit(commit)).toBe(true);
+    it('Returns true for commit ref', async () => {
+      await expect(getMockedGitIsRefACommitAsync(commit)).resolves.toBe(true);
     });
-    it('Returns false for branch ref', () => {
-      expect(getMockedGitIsRefACommit('kenrick/skip-merge-base')).toBe(false);
+
+    it('Returns false for branch ref', async () => {
+      await expect(getMockedGitIsRefACommitAsync('kenrick/skip-merge-base')).resolves.toBe(false);
     });
-    it('Returns false for ref that is a tag', () => {
-      expect(getMockedGitIsRefACommit('testing-tag-v1.2.3')).toBe(false);
+
+    it('Returns false for ref that is a tag', async () => {
+      await expect(getMockedGitIsRefACommitAsync('testing-tag-v1.2.3')).resolves.toBe(false);
     });
-    it('Returns false for ref that is other string', () => {
-      expect(getMockedGitIsRefACommit('HEAD')).toBe(false);
+
+    it('Returns false for ref that is other string', async () => {
+      await expect(getMockedGitIsRefACommitAsync('HEAD')).resolves.toBe(false);
+    });
+  });
+
+  describe(Git.prototype.tryGetGitEmailAsync.name, () => {
+    async function getMockGitEmail(hasGitPath: boolean, output: string | Error): Promise<string | undefined> {
+      const gitInstance: Git = new Git({ rushJsonFolder: '/repo/root' } as RushConfiguration);
+      jest.spyOn(gitInstance, 'gitPath', 'get').mockImplementation(() => {
+        if (hasGitPath) return '/git/bin/path';
+        else return undefined;
+      });
+
+      jest
+        .spyOn(gitInstance, '_executeGitCommandAndCaptureOutputAsync')
+        .mockImplementation(async (gitPath: string, args: string[]) => {
+          expect(gitPath).toEqual('/git/bin/path');
+          expect(args).toEqual(['config', 'user.email']);
+          if (typeof output === 'string') return output;
+          else throw output;
+        });
+
+      return await gitInstance.tryGetGitEmailAsync();
+    }
+
+    it('Throw exception when cannot find git path', async () => {
+      await expect(getMockGitEmail(false, 'user@example.com')).rejects.toBeInstanceOf(Error);
+    });
+
+    it('Returns result when git user.email has been found', async () => {
+      await expect(getMockGitEmail(true, 'user@example.com')).resolves.toEqual('user@example.com');
+    });
+
+    it('Returns empty email when git user.email return empty string', async () => {
+      await expect(getMockGitEmail(true, '')).resolves.toEqual('');
+    });
+
+    it('Returns undefined when git user.email not configure', async () => {
+      await expect(getMockGitEmail(true, new Error('Email is missing'))).resolves.toEqual(undefined);
     });
   });
 });

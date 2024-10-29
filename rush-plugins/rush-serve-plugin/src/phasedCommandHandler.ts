@@ -25,8 +25,10 @@ import {
   type ICreateOperationsContext,
   type IOperationExecutionResult,
   OperationStatus,
-  type IExecutionResult
+  type IExecutionResult,
+  type ILogFilePaths
 } from '@rushstack/rush-sdk';
+import { getProjectLogFolders } from '@rushstack/rush-sdk/lib/logic/operations/ProjectLogWritable';
 import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { PLUGIN_NAME } from './constants';
@@ -41,7 +43,8 @@ import type {
   IWebSocketSyncEventMessage,
   ReadableOperationStatus,
   IWebSocketCommandMessage,
-  IRushSessionInfo
+  IRushSessionInfo,
+  ILogFileURLs
 } from './api.types';
 
 export interface IPhasedCommandHandlerOptions {
@@ -49,6 +52,7 @@ export interface IPhasedCommandHandlerOptions {
   rushConfiguration: RushConfiguration;
   command: IPhasedCommand;
   portParameterLongName: string | undefined;
+  logServePath: string | undefined;
   globalRoutingRules: IRoutingRule[];
   buildStatusWebSocketPath: string | undefined;
 }
@@ -153,11 +157,32 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
 
       const serveConfig: RushServeConfiguration = new RushServeConfiguration();
 
-      const routingRules: Iterable<IRoutingRule> = await serveConfig.loadProjectConfigsAsync(
+      const routingRules: IRoutingRule[] = await serveConfig.loadProjectConfigsAsync(
         selectedProjects,
         logger.terminal,
         globalRoutingRules
       );
+
+      const { logServePath } = options;
+      if (logServePath) {
+        for (const project of selectedProjects) {
+          const projectLogServePath: string = getLogServePathForProject(logServePath, project.packageName);
+
+          routingRules.push({
+            type: 'folder',
+            diskPath: getProjectLogFolders(project.projectFolder).textFolder,
+            servePath: projectLogServePath,
+            immutable: false
+          });
+
+          routingRules.push({
+            type: 'folder',
+            diskPath: getProjectLogFolders(project.projectFolder).jsonlFolder,
+            servePath: projectLogServePath,
+            immutable: false
+          });
+        }
+      }
 
       const fileRoutingRules: Map<string, IRoutingRule> = new Map();
 
@@ -265,7 +290,6 @@ function tryEnableBuildStatusWebSocketServer(
     [OperationStatus.Ready]: 'Ready',
     [OperationStatus.Queued]: 'Queued',
     [OperationStatus.Executing]: 'Executing',
-    [OperationStatus.RemoteExecuting]: 'RemoteExecuting',
     [OperationStatus.Success]: 'Success',
     [OperationStatus.SuccessWithWarning]: 'SuccessWithWarning',
     [OperationStatus.Skipped]: 'Skipped',
@@ -275,28 +299,54 @@ function tryEnableBuildStatusWebSocketServer(
     [OperationStatus.NoOp]: 'NoOp'
   };
 
+  const { logServePath } = options;
+
+  function convertToLogFileUrls(
+    logFilePaths: ILogFilePaths | undefined,
+    packageName: string
+  ): ILogFileURLs | undefined {
+    if (!logFilePaths || !logServePath) {
+      return;
+    }
+
+    const projectLogServePath: string = getLogServePathForProject(logServePath, packageName);
+
+    const logFileUrls: ILogFileURLs = {
+      text: `${projectLogServePath}${logFilePaths.text.slice(logFilePaths.textFolder.length)}`,
+      error: `${projectLogServePath}${logFilePaths.error.slice(logFilePaths.textFolder.length)}`,
+      jsonl: `${projectLogServePath}${logFilePaths.jsonl.slice(logFilePaths.jsonlFolder.length)}`
+    };
+
+    return logFileUrls;
+  }
+
   /**
    * Maps the internal Rush record down to a subset that is JSON-friendly and human readable.
    */
   function convertToOperationInfo(record: IOperationExecutionResult): IOperationInfo | undefined {
     const { operation } = record;
-    const { name, associatedPhase, associatedProject, runner } = operation;
+    const { name, associatedPhase, associatedProject, runner, enabled } = operation;
 
     if (!name || !associatedPhase || !associatedProject || !runner) {
       return;
     }
 
+    const { packageName } = associatedProject;
+
     return {
       name,
-      packageName: associatedProject.packageName,
+      packageName,
       phaseName: associatedPhase.name,
 
-      silent: !!runner.silent,
+      enabled,
+      silent: record.silent,
       noop: !!runner.isNoOp,
 
       status: readableStatusFromStatus[record.status],
       startTime: record.stopwatch.startTime,
-      endTime: record.stopwatch.endTime
+      endTime: record.stopwatch.endTime,
+
+      logFileURLs: convertToLogFileUrls(record.logFilePaths, packageName)
     };
   }
 
@@ -357,8 +407,10 @@ function tryEnableBuildStatusWebSocketServer(
 
   hooks.afterExecuteOperations.tap(PLUGIN_NAME, (result: IExecutionResult): void => {
     buildStatus = readableStatusFromStatus[result.status];
+    const infos: IOperationInfo[] = convertToOperationInfoArray(result.operationResults.values() ?? []);
     const afterExecuteMessage: IWebSocketAfterExecuteEventMessage = {
       event: 'after-execute',
+      operations: infos,
       status: buildStatus
     };
     sendWebSocketMessage(afterExecuteMessage);
@@ -435,4 +487,8 @@ function getRepositoryIdentifier(rushConfiguration: RushConfiguration): string {
   }
 
   return `${os.hostname()} - ${rushConfiguration.rushJsonFolder}`;
+}
+
+function getLogServePathForProject(logServePath: string, packageName: string): string {
+  return `${logServePath}/${packageName}`;
 }

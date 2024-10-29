@@ -2,6 +2,98 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.9.0",
+      "tag": "@rushstack/node-core-library_v5.9.0",
+      "date": "Fri, 13 Sep 2024 00:11:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `Sort.sortKeys` function for sorting keys in an object"
+          },
+          {
+            "comment": "Rename `LockFile.acquire` to `Lockfile.acquireAsync`."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue where attempting to acquire multiple `LockFile`s at the same time on POSIX would cause the second to immediately be acquired without releasing the first."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.8.0",
+      "tag": "@rushstack/node-core-library_v5.8.0",
+      "date": "Tue, 10 Sep 2024 20:08:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `customFormats` option to `JsonSchema`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.7.0",
+      "tag": "@rushstack/node-core-library_v5.7.0",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a `Text.splitByNewLines` function."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.6.0",
+      "tag": "@rushstack/node-core-library_v5.6.0",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `ignoreSchemaField` option to the `JsonSchema.validateObject` options to ignore `$schema` properties and add an options object argument to `JsonSchema.validateObjectWithCallback` with the same `ignoreSchemaField` option."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.1",
+      "tag": "@rushstack/node-core-library_v5.5.1",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.0",
+      "tag": "@rushstack/node-core-library_v5.5.0",
+      "date": "Tue, 16 Jul 2024 00:36:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for the `jsonSyntax` option to the `JsonFile.save`, `JsonFile.saveAsync`, and `JsonFile.stringify` functions."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.1",
+      "tag": "@rushstack/node-core-library_v5.4.1",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing `type` modifiers on type-only exports."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.4.0",
       "tag": "@rushstack/node-core-library_v5.4.0",
       "date": "Wed, 29 May 2024 02:03:50 GMT",

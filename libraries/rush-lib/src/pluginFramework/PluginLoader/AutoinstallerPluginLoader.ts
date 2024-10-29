@@ -2,7 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, JsonFile, type JsonObject, type JsonSchema } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  JsonFile,
+  PosixModeBits,
+  type JsonObject,
+  type JsonSchema
+} from '@rushstack/node-core-library';
 
 import type { IRushPluginConfiguration } from '../../api/RushPluginsConfiguration';
 import { Autoinstaller } from '../../logic/Autoinstaller';
@@ -60,10 +66,17 @@ export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfi
       AutoinstallerPluginLoader._jsonSchema
     );
 
+    const destinationManifestPath: string = this._getManifestPath();
     FileSystem.copyFile({
       sourcePath: manifestPath,
-      destinationPath: this._getManifestPath()
+      destinationPath: destinationManifestPath
     });
+    // Make permission consistent since it will be committed to Git
+    FileSystem.changePosixModeBits(
+      destinationManifestPath,
+      // eslint-disable-next-line no-bitwise
+      PosixModeBits.AllRead | PosixModeBits.UserWrite
+    );
 
     const pluginManifest: IRushPluginManifest | undefined = manifest.plugins.find(
       (item) => item.pluginName === pluginName
@@ -83,10 +96,17 @@ export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfi
             ` ${commandLineJsonFilePath} that does not exist.`
         );
       }
+      const destinationCommandLineJsonFilePath: string = this._getCommandLineJsonFilePath();
       FileSystem.copyFile({
         sourcePath: commandLineJsonFullFilePath,
-        destinationPath: this._getCommandLineJsonFilePath()
+        destinationPath: destinationCommandLineJsonFilePath
       });
+      // Make permission consistent since it will be committed to Git
+      FileSystem.changePosixModeBits(
+        destinationCommandLineJsonFilePath,
+        // eslint-disable-next-line no-bitwise
+        PosixModeBits.AllRead | PosixModeBits.UserWrite
+      );
     }
   }
 

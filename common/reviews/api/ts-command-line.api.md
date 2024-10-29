@@ -37,10 +37,10 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
 export class CommandLineChoiceListParameter<TChoice extends string = string> extends CommandLineParameter {
     // @internal
     constructor(definition: ICommandLineChoiceListDefinition<TChoice>);
-    readonly alternatives: ReadonlyArray<TChoice>;
+    readonly alternatives: ReadonlySet<TChoice>;
     // @override
     appendToArgList(argList: string[]): void;
-    readonly completions: (() => Promise<TChoice[]>) | undefined;
+    readonly completions: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
     readonly kind: CommandLineParameterKind.ChoiceList;
     // @internal
     _setValue(data: unknown): void;
@@ -51,10 +51,10 @@ export class CommandLineChoiceListParameter<TChoice extends string = string> ext
 export class CommandLineChoiceParameter<TChoice extends string = string> extends CommandLineParameter {
     // @internal
     constructor(definition: ICommandLineChoiceDefinition<TChoice>);
-    readonly alternatives: ReadonlyArray<TChoice>;
+    readonly alternatives: ReadonlySet<TChoice>;
     // @override
     appendToArgList(argList: string[]): void;
-    readonly completions: (() => Promise<TChoice[]>) | undefined;
+    readonly completions: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
     readonly defaultValue: TChoice | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
@@ -65,7 +65,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
 }
 
 // @public
-export const enum CommandLineConstants {
+export enum CommandLineConstants {
     TabCompletionActionName = "tab-complete"
 }
 
@@ -246,7 +246,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
     // @internal
     constructor(definition: IBaseCommandLineDefinitionWithArgument);
     readonly argumentName: string;
-    readonly completions: (() => Promise<string[]>) | undefined;
+    readonly completions: (() => Promise<ReadonlyArray<string> | ReadonlySet<string>>) | undefined;
 }
 
 // @public
@@ -343,7 +343,7 @@ export interface IBaseCommandLineDefinition {
 // @public
 export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
     argumentName: string;
-    completions?: () => Promise<string[]>;
+    completions?: () => Promise<ReadonlyArray<string> | ReadonlySet<string>>;
 }
 
 // @public
@@ -355,15 +355,15 @@ export interface ICommandLineActionOptions {
 
 // @public
 export interface ICommandLineChoiceDefinition<TChoice extends string = string> extends IBaseCommandLineDefinition {
-    alternatives: TChoice[];
-    completions?: () => Promise<TChoice[]>;
+    alternatives: ReadonlyArray<TChoice> | ReadonlySet<TChoice>;
+    completions?: () => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>;
     defaultValue?: TChoice;
 }
 
 // @public
 export interface ICommandLineChoiceListDefinition<TChoice extends string = string> extends IBaseCommandLineDefinition {
-    alternatives: TChoice[];
-    completions?: () => Promise<TChoice[]>;
+    alternatives: ReadonlyArray<TChoice> | ReadonlySet<TChoice>;
+    completions?: () => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>;
 }
 
 // @public

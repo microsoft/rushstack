@@ -8,6 +8,23 @@ import type { OperationStatus } from '@rushstack/rush-sdk';
  */
 export type ReadableOperationStatus = keyof typeof OperationStatus;
 
+export interface ILogFileURLs {
+  /**
+   * The relative URL to the merged (interleaved stdout and stderr) text log.
+   */
+  text: string;
+
+  /**
+   * The relative URL to the stderr log file.
+   */
+  error: string;
+
+  /**
+   * The relative URL to the JSONL log file.
+   */
+  jsonl: string;
+}
+
 /**
  * Information about an operation in the graph.
  */
@@ -28,9 +45,16 @@ export interface IOperationInfo {
   phaseName: string;
 
   /**
+   * If false, this operation is disabled and will/did not execute during the current run.
+   * The status will be reported as `Skipped`.
+   */
+  enabled: boolean;
+
+  /**
    * If true, this operation is configured to be silent and is included for completeness.
    */
   silent: boolean;
+
   /**
    * If true, this operation is configured to be a noop and is included for graph completeness.
    */
@@ -40,6 +64,11 @@ export interface IOperationInfo {
    * The current status of the operation. This value is in PascalCase and is the key of the corresponding `OperationStatus` constant.
    */
   status: ReadableOperationStatus;
+
+  /**
+   * The URLs to the log files, if applicable.
+   */
+  logFileURLs: ILogFileURLs | undefined;
 
   /**
    * The start time of the operation, if it has started, in milliseconds. Not wall clock time.
@@ -80,6 +109,7 @@ export interface IWebSocketBeforeExecuteEventMessage {
  */
 export interface IWebSocketAfterExecuteEventMessage {
   event: 'after-execute';
+  operations: IOperationInfo[];
   status: ReadableOperationStatus;
 }
 

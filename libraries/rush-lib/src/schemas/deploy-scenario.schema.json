@@ -14,9 +14,9 @@
       "description": "The \"rush deploy\" command prepares a deployment folder, starting from the main project and collecting all of its dependencies (both NPM packages and other Rush projects).  The main project is specified using the \"--project\" parameter.  The \"deploymentProjectNames\" setting lists the allowable choices for the \"--project\" parameter; this documents the intended deployments for your monorepo and helps validate that \"rush deploy\" is invoked correctly.  If there is only one item in the \"deploymentProjectNames\" array, then \"--project\" can be omitted.  The names should be complete package names as declared in rush.json.\n\nIf the main project should include other unrelated Rush projects, add it to the \"projectSettings\" section, and then specify those projects in the \"additionalProjectsToInclude\" list.",
       "type": "array",
       "items": {
-        "type": "string",
-        "minItems": 1
-      }
+        "type": "string"
+      },
+      "minItems": 1
     },
 
     "includeDevDependencies": {

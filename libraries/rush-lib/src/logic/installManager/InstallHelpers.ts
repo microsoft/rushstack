@@ -28,6 +28,7 @@ interface ICommonPackageJson extends IPackageJson {
     packageExtensions?: typeof PnpmOptionsConfiguration.prototype.globalPackageExtensions;
     peerDependencyRules?: typeof PnpmOptionsConfiguration.prototype.globalPeerDependencyRules;
     neverBuiltDependencies?: typeof PnpmOptionsConfiguration.prototype.globalNeverBuiltDependencies;
+    ignoredOptionalDependencies?: typeof PnpmOptionsConfiguration.prototype.globalIgnoredOptionalDependencies;
     allowedDeprecatedVersions?: typeof PnpmOptionsConfiguration.prototype.globalAllowedDeprecatedVersions;
     patchedDependencies?: typeof PnpmOptionsConfiguration.prototype.globalPatchedDependencies;
   };
@@ -69,6 +70,10 @@ export class InstallHelpers {
         commonPackageJson.pnpm.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
       }
 
+      if (pnpmOptions.globalIgnoredOptionalDependencies) {
+        commonPackageJson.pnpm.ignoredOptionalDependencies = pnpmOptions.globalIgnoredOptionalDependencies;
+      }
+
       if (pnpmOptions.globalAllowedDeprecatedVersions) {
         commonPackageJson.pnpm.allowedDeprecatedVersions = pnpmOptions.globalAllowedDeprecatedVersions;
       }
@@ -90,7 +95,7 @@ export class InstallHelpers {
 
     // Example: "C:\MyRepo\common\temp\package.json"
     const commonPackageJsonFilename: string = path.join(
-      subspace.getSubspaceTempFolder(),
+      subspace.getSubspaceTempFolderPath(),
       FileConstants.PackageJson
     );
 
@@ -167,7 +172,7 @@ export class InstallHelpers {
 
     logIfConsoleOutputIsNotRestricted(`Trying to acquire lock for ${packageManagerAndVersion}`);
 
-    const lock: LockFile = await LockFile.acquire(rushUserFolder, packageManagerAndVersion);
+    const lock: LockFile = await LockFile.acquireAsync(rushUserFolder, packageManagerAndVersion);
 
     logIfConsoleOutputIsNotRestricted(`Acquired lock for ${packageManagerAndVersion}`);
 
@@ -177,7 +182,7 @@ export class InstallHelpers {
       );
 
       // note that this will remove the last-install flag from the directory
-      Utilities.installPackageInDirectory({
+      await Utilities.installPackageInDirectoryAsync({
         directory: packageManagerToolFolder,
         packageName: packageManager,
         version: rushConfiguration.packageManagerToolVersion,

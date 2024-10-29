@@ -24,7 +24,7 @@ import { LastInstallFlag } from '../api/LastInstallFlag';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import type { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
-interface IAutoinstallerOptions {
+export interface IAutoinstallerOptions {
   autoinstallerName: string;
   rushConfiguration: RushConfiguration;
   rushGlobalFolder: RushGlobalFolder;
@@ -101,7 +101,7 @@ export class Autoinstaller {
 
     this._logIfConsoleOutputIsNotRestricted(`Acquiring lock for "${relativePathForLogs}" folder...`);
 
-    const lock: LockFile = await LockFile.acquire(autoinstallerFullPath, 'autoinstaller');
+    const lock: LockFile = await LockFile.acquireAsync(autoinstallerFullPath, 'autoinstaller');
 
     try {
       // Example: .../common/autoinstallers/my-task/.rush/temp
@@ -144,7 +144,7 @@ export class Autoinstaller {
           `Installing dependencies under ${autoinstallerFullPath}...\n`
         );
 
-        Utilities.executeCommand({
+        await Utilities.executeCommandAsync({
           command: this._rushConfiguration.packageManagerToolFilename,
           args: ['install', '--frozen-lockfile'],
           workingDirectory: autoinstallerFullPath,
@@ -225,7 +225,7 @@ export class Autoinstaller {
       targetNpmrcFolder: this.folderFullPath
     });
 
-    Utilities.executeCommand({
+    await Utilities.executeCommandAsync({
       command: this._rushConfiguration.packageManagerToolFilename,
       args: ['install'],
       workingDirectory: this.folderFullPath,
@@ -236,7 +236,7 @@ export class Autoinstaller {
 
     if (this._rushConfiguration.packageManager === 'npm') {
       this._logIfConsoleOutputIsNotRestricted(Colorize.bold('Running "npm shrinkwrap"...'));
-      Utilities.executeCommand({
+      await Utilities.executeCommandAsync({
         command: this._rushConfiguration.packageManagerToolFilename,
         args: ['shrinkwrap'],
         workingDirectory: this.folderFullPath,

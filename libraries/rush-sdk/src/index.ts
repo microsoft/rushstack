@@ -10,6 +10,7 @@ import {
   Executable
 } from '@rushstack/node-core-library';
 import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
+import { RushGlobalFolder } from '@microsoft/rush-lib/lib-esnext/api/RushGlobalFolder';
 import type { SpawnSyncReturns } from 'child_process';
 import {
   RUSH_LIB_NAME,
@@ -21,7 +22,9 @@ import {
   sdkContext
 } from './helpers';
 
-const verboseEnabled: boolean = typeof process !== 'undefined' && process.env.RUSH_SDK_DEBUG === '1';
+const verboseEnabled: boolean =
+  typeof process !== 'undefined' &&
+  (process.env.RUSH_SDK_DEBUG === '1' || process.env._RUSH_SDK_DEBUG === '1');
 const terminal: Terminal = new Terminal(
   new ConsoleTerminalProvider({
     verboseEnabled
@@ -31,6 +34,7 @@ const terminal: Terminal = new Terminal(
 declare const global: typeof globalThis & {
   ___rush___rushLibModule?: RushLibModuleType;
   ___rush___rushLibModuleFromEnvironment?: RushLibModuleType;
+  ___rush___rushLibModuleFromRushGlobalFolder?: RushLibModuleType;
   ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
 };
 
@@ -42,6 +46,7 @@ if (sdkContext.rushLibModule === undefined) {
   sdkContext.rushLibModule =
     global.___rush___rushLibModule ||
     global.___rush___rushLibModuleFromEnvironment ||
+    global.___rush___rushLibModuleFromRushGlobalFolder ||
     global.___rush___rushLibModuleFromInstallAndRunRush;
 }
 
@@ -111,7 +116,8 @@ if (sdkContext.rushLibModule === undefined) {
 }
 
 // SCENARIO 4:  A standalone tool or script depends on "rush-sdk", and is meant to be used inside a monorepo folder.
-// In this case, we can use install-run-rush.js to obtain the appropriate rush-lib version for the monorepo.
+// In this case, we can first load the rush-lib version in rush global folder. If the expected version is not installed,
+// using install-run-rush.js to obtain the appropriate rush-lib version for the monorepo.
 if (sdkContext.rushLibModule === undefined) {
   try {
     const rushJsonPath: string | undefined = tryFindRushJsonLocation(process.cwd());
@@ -126,51 +132,67 @@ if (sdkContext.rushLibModule === undefined) {
     const rushJson: JsonObject = JsonFile.load(rushJsonPath);
     const { rushVersion } = rushJson;
 
-    const installRunNodeModuleFolder: string = path.join(
-      monorepoRoot,
-      `common/temp/install-run/@microsoft+rush@${rushVersion}`
-    );
-
     try {
-      // First, try to load the version of "rush-lib" that was installed by install-run-rush.js
-      terminal.writeVerboseLine(`Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush`);
-      sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
-    } catch (e1) {
-      let installAndRunRushStderrContent: string = '';
-      try {
-        const installAndRunRushJSPath: string = path.join(monorepoRoot, 'common/scripts/install-run-rush.js');
-
-        terminal.writeLine('The Rush engine has not been installed yet. Invoking install-run-rush.js...');
-
-        const installAndRunRushProcess: SpawnSyncReturns<string> = Executable.spawnSync(
-          'node',
-          [installAndRunRushJSPath, '--help'],
-          {
-            stdio: 'pipe'
-          }
-        );
-
-        installAndRunRushStderrContent = installAndRunRushProcess.stderr;
-        if (installAndRunRushProcess.status !== 0) {
-          throw new Error(`The ${RUSH_LIB_NAME} package failed to install`);
-        }
-
-        // Retry to load "rush-lib" after install-run-rush run
-        terminal.writeVerboseLine(
-          `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`
-        );
-        sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
-      } catch (e2) {
-        // eslint-disable-next-line no-console
-        console.error(`${installAndRunRushStderrContent}`);
-        throw new Error(`The ${RUSH_LIB_NAME} package failed to load`);
-      }
+      terminal.writeVerboseLine(`Try to load ${RUSH_LIB_NAME} from rush global folder`);
+      const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
+      // The path needs to keep align with the logic inside RushVersionSelector
+      const expectedGlobalRushInstalledFolder: string = `${rushGlobalFolder.nodeSpecificPath}/rush-${rushVersion}`;
+      terminal.writeVerboseLine(
+        `The expected global rush installed folder is "${expectedGlobalRushInstalledFolder}"`
+      );
+      sdkContext.rushLibModule = requireRushLibUnderFolderPath(expectedGlobalRushInstalledFolder);
+    } catch (e) {
+      terminal.writeVerboseLine(`Failed to load ${RUSH_LIB_NAME} from rush global folder: ${e.message}`);
     }
 
     if (sdkContext.rushLibModule !== undefined) {
       // to track which scenario is active and how it got initialized.
-      global.___rush___rushLibModuleFromInstallAndRunRush = sdkContext.rushLibModule;
-      terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} installed by install-run-rush`);
+      global.___rush___rushLibModuleFromRushGlobalFolder = sdkContext.rushLibModule;
+      terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} installed from rush global folder`);
+    } else {
+      const installRunNodeModuleFolder: string = `${monorepoRoot}/common/temp/install-run/@microsoft+rush@${rushVersion}`;
+
+      try {
+        // First, try to load the version of "rush-lib" that was installed by install-run-rush.js
+        terminal.writeVerboseLine(`Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush`);
+        sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
+      } catch (e1) {
+        let installAndRunRushStderrContent: string = '';
+        try {
+          const installAndRunRushJSPath: string = `${monorepoRoot}/common/scripts/install-run-rush.js`;
+
+          terminal.writeLine('The Rush engine has not been installed yet. Invoking install-run-rush.js...');
+
+          const installAndRunRushProcess: SpawnSyncReturns<string> = Executable.spawnSync(
+            'node',
+            [installAndRunRushJSPath, '--help'],
+            {
+              stdio: 'pipe'
+            }
+          );
+
+          installAndRunRushStderrContent = installAndRunRushProcess.stderr;
+          if (installAndRunRushProcess.status !== 0) {
+            throw new Error(`The ${RUSH_LIB_NAME} package failed to install`);
+          }
+
+          // Retry to load "rush-lib" after install-run-rush run
+          terminal.writeVerboseLine(
+            `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`
+          );
+          sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
+        } catch (e2) {
+          // eslint-disable-next-line no-console
+          console.error(`${installAndRunRushStderrContent}`);
+          throw new Error(`The ${RUSH_LIB_NAME} package failed to load`);
+        }
+      }
+
+      if (sdkContext.rushLibModule !== undefined) {
+        // to track which scenario is active and how it got initialized.
+        global.___rush___rushLibModuleFromInstallAndRunRush = sdkContext.rushLibModule;
+        terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} installed by install-run-rush`);
+      }
     }
   } catch (e) {
     // no-catch

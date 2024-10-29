@@ -65,15 +65,9 @@ export interface IRushPhaseSharding {
   outputFolderArgumentFormat?: string;
 
   /**
-   * Configuration for the shard operation. All other configuration applies to the collator operation.
+   * @deprecated Create a separate operation settings object for the shard operation settings with the name `{operationName}:shard`.
    */
-  shardOperationSettings?: {
-    /**
-     * How many concurrency units this operation should take up during execution. The maximum concurrent units is
-     *  determined by the -p flag.
-     */
-    weight?: number;
-  };
+  shardOperationSettings?: unknown;
 }
 
 /**
@@ -140,6 +134,11 @@ export interface IOperationSettings {
    *  determined by the -p flag.
    */
   weight?: number;
+
+  /**
+   * If true, this operation can use cobuilds for orchestration without restoring build cache entries.
+   */
+  allowCobuildWithoutCache?: boolean;
 }
 
 interface IOldRushProjectJson {
@@ -392,6 +391,32 @@ export class RushProjectConfiguration {
   }
 
   /**
+   * Source of truth for whether a project is unable to use the build cache for a given phase.
+   * As some operations may not have a rush-project.json file defined at all, but may be no-op operations
+   *  we'll want to ignore those completely.
+   */
+  public static getCacheDisabledReasonForProject(options: {
+    projectConfiguration: RushProjectConfiguration | undefined;
+    trackedFileNames: Iterable<string>;
+    phaseName: string;
+    isNoOp: boolean;
+  }): string | undefined {
+    const { projectConfiguration, trackedFileNames, phaseName, isNoOp } = options;
+    if (isNoOp) {
+      return undefined;
+    }
+
+    if (!projectConfiguration) {
+      return (
+        `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
+        'or one provided by a rig, so it does not support caching.'
+      );
+    }
+
+    return projectConfiguration.getCacheDisabledReason(trackedFileNames, phaseName, isNoOp);
+  }
+
+  /**
    * Loads the rush-project.json data for the specified project.
    */
   public static async tryLoadForProjectAsync(
@@ -557,6 +582,14 @@ export class RushProjectConfiguration {
           terminal.writeErrorLine(errorMessage);
         } else {
           operationSettingsByOperationName.set(operationName, operationSettings);
+        }
+      }
+
+      for (const [operationName, operationSettings] of operationSettingsByOperationName) {
+        if (operationSettings.sharding?.shardOperationSettings) {
+          terminal.writeWarningLine(
+            `DEPRECATED: The "sharding.shardOperationSettings" field is deprecated. Please create a new operation, '${operationName}:shard' to track shard operation settings.`
+          );
         }
       }
     }

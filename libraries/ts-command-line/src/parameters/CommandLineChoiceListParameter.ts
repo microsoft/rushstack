@@ -13,12 +13,12 @@ export class CommandLineChoiceListParameter<
   TChoice extends string = string
 > extends CommandLineParameterBase {
   /** {@inheritDoc ICommandLineChoiceListDefinition.alternatives} */
-  public readonly alternatives: ReadonlyArray<TChoice>;
+  public readonly alternatives: ReadonlySet<TChoice>;
 
   private _values: TChoice[] = [];
 
   /** {@inheritDoc ICommandLineChoiceListDefinition.completions} */
-  public readonly completions: (() => Promise<TChoice[]>) | undefined;
+  public readonly completions: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
 
   /** {@inheritDoc CommandLineParameter.kind} */
   public readonly kind: CommandLineParameterKind.ChoiceList = CommandLineParameterKind.ChoiceList;
@@ -26,15 +26,17 @@ export class CommandLineChoiceListParameter<
   /** @internal */
   public constructor(definition: ICommandLineChoiceListDefinition<TChoice>) {
     super(definition);
+    const { alternatives, completions } = definition;
 
-    if (definition.alternatives.length < 1) {
+    const alternativesSet: Set<TChoice> = alternatives instanceof Set ? alternatives : new Set(alternatives);
+    if (alternativesSet.size < 1) {
       throw new Error(
         `When defining a choice list parameter, the alternatives list must contain at least one value.`
       );
     }
 
-    this.alternatives = definition.alternatives;
-    this.completions = definition.completions;
+    this.alternatives = alternativesSet;
+    this.completions = completions;
   }
 
   /**
@@ -60,8 +62,8 @@ export class CommandLineChoiceListParameter<
       const values: string[] | undefined = EnvironmentVariableParser.parseAsList(this.environmentVariable);
       if (values) {
         for (const value of values) {
-          if (!this.alternatives.includes(value as TChoice)) {
-            const choices: string = '"' + this.alternatives.join('", "') + '"';
+          if (!this.alternatives.has(value as TChoice)) {
+            const choices: string = '"' + Array.from(this.alternatives).join('", "') + '"';
             throw new Error(
               `Invalid value "${value}" for the environment variable` +
                 ` ${this.environmentVariable}.  Valid choices are: ${choices}`

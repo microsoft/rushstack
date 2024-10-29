@@ -8,7 +8,7 @@ import type { ITerminal } from '@rushstack/terminal';
 import { Constants } from '../utilities/Constants';
 import {
   getFileSelectionSpecifierPathsAsync,
-  normalizeFileSelectionSpecifier,
+  asAbsoluteFileSelectionSpecifier,
   type IFileSelectionSpecifier
 } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
@@ -43,11 +43,14 @@ async function _getPathsToDeleteAsync(
   await Async.forEachAsync(
     deleteOperations,
     async (deleteOperation: IDeleteOperation) => {
-      normalizeFileSelectionSpecifier(rootFolderPath, deleteOperation);
+      const absoluteSpecifier: IDeleteOperation = asAbsoluteFileSelectionSpecifier(
+        rootFolderPath,
+        deleteOperation
+      );
 
       // Glob the files under the source path and add them to the set of files to delete
       const sourcePaths: Map<string, fs.Dirent> = await getFileSelectionSpecifierPathsAsync({
-        fileGlobSpecifier: deleteOperation,
+        fileGlobSpecifier: absoluteSpecifier,
         includeFolders: true
       });
       for (const [sourcePath, dirent] of sourcePaths) {

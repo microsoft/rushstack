@@ -2,8 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import schemaJson from '../schemas/experiments.schema.json';
+
+const GRADUATED_EXPERIMENTS: Set<string> = new Set(['phasedCommands']);
 
 /**
  * This interface represents the raw experiments.json file which allows repo
@@ -56,12 +59,6 @@ export interface IExperimentsJson {
   buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
 
   /**
-   * If true, the phased commands feature is enabled. To use this feature, create a "phased" command
-   * in common/config/rush/command-line.json.
-   */
-  phasedCommands?: boolean;
-
-  /**
    * If true, perform a clean install after when running `rush install` or `rush update` if the
    * `.npmrc` file has changed since the last install.
    */
@@ -101,7 +98,24 @@ export interface IExperimentsJson {
    * across invocations.
    */
   useIPCScriptsInWatchMode?: boolean;
+
+  /**
+   * (UNDER DEVELOPMENT) The Rush alerts feature provides a way to send announcements to engineers
+   * working in the monorepo, by printing directly in the user's shell window when they invoke Rush commands.
+   * This ensures that important notices will be seen by anyone doing active development, since people often
+   * ignore normal discussion group messages or don't know to subscribe.
+   */
+  rushAlerts?: boolean;
+
+  /**
+   * Allow cobuilds without using the build cache to store previous execution info. When setting up
+   *  distributed builds, Rush will allow uncacheable projects to still leverage the cobuild feature.
+   * This is useful when you want to speed up operations that can't (or shouldn't) be cached.
+   */
+  allowCobuildWithoutCache?: boolean;
 }
+
+const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
 /**
  * Use this class to load the "common/config/rush/experiments.json" config file.
@@ -109,10 +123,6 @@ export interface IExperimentsJson {
  * @public
  */
 export class ExperimentsConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
-  private _jsonFileName: string;
-
   /**
    * Get the experiments configuration.
    * @beta
@@ -122,14 +132,27 @@ export class ExperimentsConfiguration {
   /**
    * @internal
    */
-  public constructor(jsonFileName: string) {
-    this._jsonFileName = jsonFileName;
-    this.configuration = {};
+  public constructor(jsonFilePath: string) {
+    try {
+      this.configuration = JsonFile.loadAndValidate(jsonFilePath, _EXPERIMENTS_JSON_SCHEMA);
+    } catch (e) {
+      if (FileSystem.isNotExistError(e)) {
+        this.configuration = {};
+      } else {
+        throw e;
+      }
+    }
 
-    if (!FileSystem.exists(this._jsonFileName)) {
-      this.configuration = {};
-    } else {
-      this.configuration = JsonFile.loadAndValidate(this._jsonFileName, ExperimentsConfiguration._jsonSchema);
+    for (const experimentName of Object.getOwnPropertyNames(this.configuration)) {
+      if (GRADUATED_EXPERIMENTS.has(experimentName)) {
+        // eslint-disable-next-line no-console
+        console.log(
+          Colorize.yellow(
+            `The experiment "${experimentName}" has graduated to a standard feature. Remove this experiment from ` +
+              `"${jsonFilePath}".`
+          )
+        );
+      }
     }
   }
 }

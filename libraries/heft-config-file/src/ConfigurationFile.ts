@@ -298,6 +298,7 @@ export class ConfigurationFile<TConfigurationFile> {
     return this.__schema;
   }
 
+  private readonly _configCache: Map<string, TConfigurationFile> = new Map();
   private readonly _configPromiseCache: Map<string, Promise<TConfigurationFile>> = new Map();
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
@@ -320,6 +321,25 @@ export class ConfigurationFile<TConfigurationFile> {
    * `extends` properties and handling rigged configuration files. Will throw an error if a configuration
    * file cannot be found in the rig or project config folder.
    */
+  public loadConfigurationFileForProject(
+    terminal: ITerminal,
+    projectPath: string,
+    rigConfig?: IRigConfig
+  ): TConfigurationFile {
+    const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
+    return this._loadConfigurationFileInnerWithCache(
+      terminal,
+      projectConfigurationFilePath,
+      new Set<string>(),
+      rigConfig
+    );
+  }
+
+  /**
+   * Find and return a configuration file for the specified project, automatically resolving
+   * `extends` properties and handling rigged configuration files. Will throw an error if a configuration
+   * file cannot be found in the rig or project config folder.
+   */
   public async loadConfigurationFileForProjectAsync(
     terminal: ITerminal,
     projectPath: string,
@@ -332,6 +352,25 @@ export class ConfigurationFile<TConfigurationFile> {
       new Set<string>(),
       rigConfig
     );
+  }
+
+  /**
+   * This function is identical to {@link ConfigurationFile.loadConfigurationFileForProject}, except
+   * that it returns `undefined` instead of throwing an error if the configuration file cannot be found.
+   */
+  public tryLoadConfigurationFileForProject(
+    terminal: ITerminal,
+    projectPath: string,
+    rigConfig?: IRigConfig
+  ): TConfigurationFile | undefined {
+    try {
+      return this.loadConfigurationFileForProject(terminal, projectPath, rigConfig);
+    } catch (e) {
+      if (FileSystem.isNotExistError(e as Error)) {
+        return undefined;
+      }
+      throw e;
+    }
   }
 
   /**
@@ -391,28 +430,12 @@ export class ConfigurationFile<TConfigurationFile> {
     }
   }
 
-  private async _loadConfigurationFileInnerWithCacheAsync(
+  private _loadConfigurationFileInnerWithCache(
     terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
     rigConfig: IRigConfig | undefined
-  ): Promise<TConfigurationFile> {
-    let cacheEntryPromise: Promise<TConfigurationFile> | undefined = this._configPromiseCache.get(
-      resolvedConfigurationFilePath
-    );
-    if (!cacheEntryPromise) {
-      cacheEntryPromise = this._loadConfigurationFileInnerAsync(
-        terminal,
-        resolvedConfigurationFilePath,
-        visitedConfigurationFilePaths,
-        rigConfig
-      );
-      this._configPromiseCache.set(resolvedConfigurationFilePath, cacheEntryPromise);
-    }
-
-    // We check for loops after caching a promise for this config file, but before attempting
-    // to resolve the promise. We can't handle loop detection in the `InnerAsync` function, because
-    // we could end up waiting for a cached promise (like A -> B -> A) that never resolves.
+  ): TConfigurationFile {
     if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
       const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
         resolvedConfigurationFilePath
@@ -424,7 +447,182 @@ export class ConfigurationFile<TConfigurationFile> {
     }
     visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
 
+    let cacheEntry: TConfigurationFile | undefined = this._configCache.get(resolvedConfigurationFilePath);
+    if (!cacheEntry) {
+      cacheEntry = this._loadConfigurationFileInner(
+        terminal,
+        resolvedConfigurationFilePath,
+        visitedConfigurationFilePaths,
+        rigConfig
+      );
+      this._configCache.set(resolvedConfigurationFilePath, cacheEntry);
+    }
+
+    return cacheEntry;
+  }
+
+  private async _loadConfigurationFileInnerWithCacheAsync(
+    terminal: ITerminal,
+    resolvedConfigurationFilePath: string,
+    visitedConfigurationFilePaths: Set<string>,
+    rigConfig: IRigConfig | undefined
+  ): Promise<TConfigurationFile> {
+    if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
+      const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
+        resolvedConfigurationFilePath
+      );
+      throw new Error(
+        'A loop has been detected in the "extends" properties of configuration file at ' +
+          `"${resolvedConfigurationFilePathForLogging}".`
+      );
+    }
+    visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
+
+    let cacheEntryPromise: Promise<TConfigurationFile> | undefined = this._configPromiseCache.get(
+      resolvedConfigurationFilePath
+    );
+    if (!cacheEntryPromise) {
+      cacheEntryPromise = this._loadConfigurationFileInnerAsync(
+        terminal,
+        resolvedConfigurationFilePath,
+        visitedConfigurationFilePaths,
+        rigConfig
+      ).then((value: TConfigurationFile) => {
+        this._configCache.set(resolvedConfigurationFilePath, value);
+        return value;
+      });
+      this._configPromiseCache.set(resolvedConfigurationFilePath, cacheEntryPromise);
+    }
+
     return await cacheEntryPromise;
+  }
+
+  private _parseAndResolveConfigurationFile(
+    fileText: string,
+    resolvedConfigurationFilePath: string,
+    resolvedConfigurationFilePathForLogging: string
+  ): IConfigurationJson & TConfigurationFile {
+    let configurationJson: IConfigurationJson & TConfigurationFile;
+    try {
+      configurationJson = JsonFile.parseString(fileText);
+    } catch (e) {
+      throw new Error(`In config file "${resolvedConfigurationFilePathForLogging}": ${e}`);
+    }
+
+    this._annotateProperties(resolvedConfigurationFilePath, configurationJson);
+
+    for (const [jsonPath, metadata] of Object.entries(this._jsonPathMetadata)) {
+      JSONPath({
+        path: jsonPath,
+        json: configurationJson,
+        callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
+          const resolvedPath: string = this._resolvePathProperty(
+            {
+              propertyName: fullPayload.path,
+              propertyValue: fullPayload.value,
+              configurationFilePath: resolvedConfigurationFilePath,
+              configurationFile: configurationJson
+            },
+            metadata
+          );
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (fullPayload.parent as any)[fullPayload.parentProperty] = resolvedPath;
+        },
+        otherTypeCallback: () => {
+          throw new Error('@other() tags are not supported');
+        }
+      });
+    }
+
+    return configurationJson;
+  }
+
+  // NOTE: Internal calls to load a configuration file should use `_loadConfigurationFileInnerWithCache`.
+  // Don't call this function directly, as it does not provide config file loop detection,
+  // and you won't get the advantage of queueing up for a config file that is already loading.
+  private _loadConfigurationFileInner(
+    terminal: ITerminal,
+    resolvedConfigurationFilePath: string,
+    visitedConfigurationFilePaths: Set<string>,
+    rigConfig: IRigConfig | undefined
+  ): TConfigurationFile {
+    const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
+      resolvedConfigurationFilePath
+    );
+
+    let fileText: string;
+    try {
+      fileText = FileSystem.readFile(resolvedConfigurationFilePath);
+    } catch (e) {
+      if (FileSystem.isNotExistError(e as Error)) {
+        if (rigConfig) {
+          terminal.writeDebugLine(
+            `Config file "${resolvedConfigurationFilePathForLogging}" does not exist. Attempting to load via rig.`
+          );
+          const rigResult: TConfigurationFile | undefined = this._tryLoadConfigurationFileInRig(
+            terminal,
+            rigConfig,
+            visitedConfigurationFilePaths
+          );
+          if (rigResult) {
+            return rigResult;
+          }
+        } else {
+          terminal.writeDebugLine(
+            `Configuration file "${resolvedConfigurationFilePathForLogging}" not found.`
+          );
+        }
+
+        (e as Error).message = `File does not exist: ${resolvedConfigurationFilePathForLogging}`;
+      }
+
+      throw e;
+    }
+
+    const configurationJson: IConfigurationJson & TConfigurationFile = this._parseAndResolveConfigurationFile(
+      fileText,
+      resolvedConfigurationFilePath,
+      resolvedConfigurationFilePathForLogging
+    );
+
+    let parentConfiguration: TConfigurationFile | undefined;
+    if (configurationJson.extends) {
+      try {
+        const resolvedParentConfigPath: string = Import.resolveModule({
+          modulePath: configurationJson.extends,
+          baseFolderPath: nodeJsPath.dirname(resolvedConfigurationFilePath)
+        });
+        parentConfiguration = this._loadConfigurationFileInnerWithCache(
+          terminal,
+          resolvedParentConfigPath,
+          visitedConfigurationFilePaths,
+          undefined
+        );
+      } catch (e) {
+        if (FileSystem.isNotExistError(e as Error)) {
+          throw new Error(
+            `In file "${resolvedConfigurationFilePathForLogging}", file referenced in "extends" property ` +
+              `("${configurationJson.extends}") cannot be resolved.`
+          );
+        } else {
+          throw e;
+        }
+      }
+    }
+
+    const result: Partial<TConfigurationFile> = this._mergeConfigurationFiles(
+      parentConfiguration || {},
+      configurationJson,
+      resolvedConfigurationFilePath
+    );
+    try {
+      this._schema.validateObject(result, resolvedConfigurationFilePathForLogging);
+    } catch (e) {
+      throw new Error(`Resolved configuration object does not match schema: ${e}`);
+    }
+
+    // If the schema validates, we can assume that the configuration file is complete.
+    return result as TConfigurationFile;
   }
 
   // NOTE: Internal calls to load a configuration file should use `_loadConfigurationFileInnerWithCacheAsync`.
@@ -469,37 +667,11 @@ export class ConfigurationFile<TConfigurationFile> {
       throw e;
     }
 
-    let configurationJson: IConfigurationJson & TConfigurationFile;
-    try {
-      configurationJson = await JsonFile.parseString(fileText);
-    } catch (e) {
-      throw new Error(`In config file "${resolvedConfigurationFilePathForLogging}": ${e}`);
-    }
-
-    this._annotateProperties(resolvedConfigurationFilePath, configurationJson);
-
-    for (const [jsonPath, metadata] of Object.entries(this._jsonPathMetadata)) {
-      JSONPath({
-        path: jsonPath,
-        json: configurationJson,
-        callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
-          const resolvedPath: string = this._resolvePathProperty(
-            {
-              propertyName: fullPayload.path,
-              propertyValue: fullPayload.value,
-              configurationFilePath: resolvedConfigurationFilePath,
-              configurationFile: configurationJson
-            },
-            metadata
-          );
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (fullPayload.parent as any)[fullPayload.parentProperty] = resolvedPath;
-        },
-        otherTypeCallback: () => {
-          throw new Error('@other() tags are not supported');
-        }
-      });
-    }
+    const configurationJson: IConfigurationJson & TConfigurationFile = this._parseAndResolveConfigurationFile(
+      fileText,
+      resolvedConfigurationFilePath,
+      resolvedConfigurationFilePathForLogging
+    );
 
     let parentConfiguration: TConfigurationFile | undefined;
     if (configurationJson.extends) {
@@ -539,6 +711,41 @@ export class ConfigurationFile<TConfigurationFile> {
 
     // If the schema validates, we can assume that the configuration file is complete.
     return result as TConfigurationFile;
+  }
+
+  private _tryLoadConfigurationFileInRig(
+    terminal: ITerminal,
+    rigConfig: IRigConfig,
+    visitedConfigurationFilePaths: Set<string>
+  ): TConfigurationFile | undefined {
+    if (rigConfig.rigFound) {
+      const rigProfileFolder: string = rigConfig.getResolvedProfileFolder();
+      try {
+        return this._loadConfigurationFileInnerWithCache(
+          terminal,
+          nodeJsPath.resolve(rigProfileFolder, this.projectRelativeFilePath),
+          visitedConfigurationFilePaths,
+          undefined
+        );
+      } catch (e) {
+        // Ignore cases where a configuration file doesn't exist in a rig
+        if (!FileSystem.isNotExistError(e as Error)) {
+          throw e;
+        } else {
+          terminal.writeDebugLine(
+            `Configuration file "${
+              this.projectRelativeFilePath
+            }" not found in rig ("${ConfigurationFile._formatPathForLogging(rigProfileFolder)}")`
+          );
+        }
+      }
+    } else {
+      terminal.writeDebugLine(
+        `No rig found for "${ConfigurationFile._formatPathForLogging(rigConfig.projectFolderPath)}"`
+      );
+    }
+
+    return undefined;
   }
 
   private async _tryLoadConfigurationFileInRigAsync(

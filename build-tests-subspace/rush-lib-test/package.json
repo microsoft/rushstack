@@ -17,10 +17,15 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node": "18.17.15",
-    "local-node-rig": "workspace:*"
+    "eslint": "~8.57.0",
+    "local-node-rig": "workspace:*",
+    "typescript": "~5.4.2"
   },
   "dependenciesMeta": {
     "@microsoft/rush-lib": {
+      "injected": true
+    },
+    "@rushstack/eslint-config": {
       "injected": true
     },
     "@rushstack/terminal": {

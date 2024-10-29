@@ -50,6 +50,21 @@
   // "implicitlyPreferredVersions": false,
 
   /**
+   * If you would like the version specifiers for your dependencies to be consistent, then
+   * uncomment this line. This is effectively similar to running "rush check" before any
+   * of the following commands:
+   *
+   *   rush install, rush update, rush link, rush version, rush publish
+   *
+   * In some cases you may want this turned on, but need to allow certain packages to use a different
+   * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
+   * section of the common-versions.json.
+   *
+   * In the case that subspaces is enabled, this setting will take effect at a subspace level.
+   */
+  "ensureConsistentVersions": true,
+
+  /**
    * The "rush check" command can be used to enforce that every project in the repo must specify
    * the same SemVer range for a given dependency.  However, sometimes exceptions are needed.
    * The allowedAlternativeVersions table allows you to list other SemVer ranges that will be
@@ -60,12 +75,15 @@
    * This design avoids unnecessary churn in this file.
    */
   "allowedAlternativeVersions": {
+    "@typescript-eslint/parser": [
+      "~6.19.0" // Used by build-tests/eslint-7(-*)-test / build-tests/eslint-bulk-suppressions-test-legacy
+    ],
     "eslint": [
       "7.7.0", // Used by build-tests/eslint-7-7-test
       "7.11.0", // Used by build-tests/eslint-7-11-test
       "~7.30.0", // Used by build-tests/eslint-7-test
-      "8.6.0", // Used by build-tests/eslint-bulk-suppressions-test
-      "~8.23.1" // Used by build-tests/eslint-bulk-suppressions-test
+      "8.6.0", // Used by build-tests/eslint-bulk-suppressions-test-legacy
+      "8.23.1" // Used by build-tests/eslint-bulk-suppressions-test-legacy
     ],
     /**
      * For example, allow some projects to use an older TypeScript compiler
@@ -102,6 +120,7 @@
     "terser-webpack-plugin": ["~3.0.8"],
     "terser": ["~4.8.0"],
     "webpack": ["~4.47.0"],
+    "webpack-dev-server": ["~4.9.3"],
     "@types/node": [
       // These versions are used by testing projects
       "ts2.9",
@@ -113,6 +132,10 @@
       "ts2.9",
       "ts3.9",
       "ts4.9"
+    ],
+    "@rushstack/eslint-config": [
+      // This is used by the ESLint 7 build tests
+      "3.7.1"
     ]
   }
 }

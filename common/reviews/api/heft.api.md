@@ -53,6 +53,7 @@ export class HeftConfiguration {
     get projectPackageJson(): IPackageJson;
     get rigConfig(): IRigConfig;
     get rigPackageResolver(): IRigPackageResolver;
+    get slashNormalizedBuildFolderPath(): string;
     get tempFolderPath(): string;
     get terminalProvider(): ITerminalProvider;
 }

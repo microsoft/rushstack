@@ -163,6 +163,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-localization-typings-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
@@ -200,6 +204,10 @@
     },
     {
       "name": "@rushstack/lockfile-explorer-web",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/lookup-by-path",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -243,6 +251,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@rushstack/rush-resolver-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-sdk",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
@@ -281,6 +293,10 @@
     {
       "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/webpack-workspace-resolve-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/webpack4-localization-plugin",
@@ -348,7 +364,7 @@
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "allowedCategories": [ "libraries", "vscode-extensions" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@typescript-eslint/parser",
@@ -862,7 +878,6 @@
       "name": "tslint",
       "allowedCategories": [ "libraries", "tests" ]
     },
-
     {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]

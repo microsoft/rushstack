@@ -10,7 +10,10 @@ import {
   type Syntax,
   type Exception,
   compileStringAsync,
-  type CanonicalizeContext
+  type CanonicalizeContext,
+  deprecations,
+  type Deprecations,
+  type DeprecationOrId
 } from 'sass-embedded';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
@@ -79,6 +82,16 @@ export interface ISassConfiguration {
    * A list of file paths relative to the "src" folder that should be excluded from typings generation.
    */
   excludeFiles?: string[];
+
+  /**
+   * If set, deprecation warnings from dependencies will be suppressed.
+   */
+  ignoreDeprecationsInDependencies?: boolean;
+
+  /**
+   * A list of deprecation codes to silence.  This is useful for suppressing warnings from deprecated Sass features that are used in the project and known not to be a problem.
+   */
+  silenceDeprecations?: readonly string[];
 }
 
 /**
@@ -118,7 +131,9 @@ export class SassProcessor extends StringValuesTypingsGenerator {
       excludeFiles,
       secondaryGeneratedTsFolders,
       importIncludePaths,
-      preserveSCSSExtension = false
+      preserveSCSSExtension = false,
+      ignoreDeprecationsInDependencies = false,
+      silenceDeprecations = []
     } = sassConfiguration;
 
     const getCssPaths: ((relativePath: string) => string[]) | undefined = cssOutputFolders
@@ -150,6 +165,13 @@ export class SassProcessor extends StringValuesTypingsGenerator {
       }
     }
 
+    const deprecationsToSilence: DeprecationOrId[] = Array.from(silenceDeprecations, (deprecation) => {
+      if (!Object.prototype.hasOwnProperty.call(deprecations, deprecation)) {
+        throw new Error(`Unknown deprecation code: ${deprecation}`);
+      }
+      return deprecation as keyof Deprecations;
+    });
+
     super({
       srcFolder,
       generatedTsFolder,
@@ -175,7 +197,9 @@ export class SassProcessor extends StringValuesTypingsGenerator {
           fileContents,
           filePath,
           buildFolder,
-          importIncludePaths
+          importIncludePaths,
+          ignoreDeprecationsInDependencies,
+          deprecationsToSilence
         );
 
         let classMap: IClassMap = {};
@@ -233,7 +257,9 @@ export class SassProcessor extends StringValuesTypingsGenerator {
     fileContents: string,
     filePath: string,
     buildFolder: string,
-    importIncludePaths: string[] | undefined
+    importIncludePaths: string[] | undefined,
+    ignoreDeprecationsInDependencies: boolean,
+    silenceDeprecations: DeprecationOrId[]
   ): Promise<string> {
     let result: CompileResult;
     const nodeModulesUrl: URL = pathToFileURL(`${buildFolder}/node_modules/`);
@@ -275,7 +301,9 @@ export class SassProcessor extends StringValuesTypingsGenerator {
         loadPaths: importIncludePaths
           ? importIncludePaths
           : [`${buildFolder}/node_modules`, `${buildFolder}/src`],
-        syntax: determineSyntaxFromFilePath(filePath)
+        syntax: determineSyntaxFromFilePath(filePath),
+        quietDeps: ignoreDeprecationsInDependencies,
+        silenceDeprecations
       });
     } catch (err) {
       const typedError: Exception = err;

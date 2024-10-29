@@ -1,8 +1,8 @@
-import { string1 } from './strings1.loc.json';
-import * as strings3 from './strings3.loc.json';
-import * as strings5 from './strings5.resx';
+import strings1 from './strings1.loc.json';
+import strings3 from './strings3.resjson';
+import strings5 from './strings5.resx';
 
-console.log(string1);
+console.log(strings1.string1);
 
 console.log(strings3.string2);
 /*! Preserved comment */

@@ -1,6 +1,113 @@
 # Change Log - @rushstack/heft-webpack4-plugin
 
-This log was last generated on Wed, 29 May 2024 02:03:50 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Oct 2024 00:15:48 GMT and should not be manually modified.
+
+## 0.10.74
+Thu, 24 Oct 2024 00:15:47 GMT
+
+_Version update only_
+
+## 0.10.73
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.10.72
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.10.71
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.10.70
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.10.69
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.10.68
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.10.67
+Sat, 21 Sep 2024 00:10:27 GMT
+
+_Version update only_
+
+## 0.10.66
+Fri, 13 Sep 2024 00:11:42 GMT
+
+_Version update only_
+
+## 0.10.65
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.10.64
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.10.63
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.10.62
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.10.61
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.10.60
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.10.59
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.10.58
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.10.57
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
+
+## 0.10.56
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
+
+## 0.10.55
+Mon, 03 Jun 2024 23:43:15 GMT
+
+_Version update only_
+
+## 0.10.54
+Thu, 30 May 2024 00:13:05 GMT
+
+_Version update only_
 
 ## 0.10.53
 Wed, 29 May 2024 02:03:50 GMT

@@ -422,10 +422,7 @@
         }
       } catch (e) {
         throw new Error(
-          `Error building local installation folder (${path__WEBPACK_IMPORTED_MODULE_3__.join(
-            baseFolder,
-            ...pathSegments
-          )}): ${e}`
+          `Error building local installation folder (${path__WEBPACK_IMPORTED_MODULE_3__.join(baseFolder, ...pathSegments)}): ${e}`
         );
       }
       return joinedPath;

@@ -1,6 +1,108 @@
 # Change Log - @rushstack/rundown
 
-This log was last generated on Wed, 29 May 2024 02:03:51 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Oct 2024 00:15:48 GMT and should not be manually modified.
+
+## 1.1.73
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 1.1.72
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 1.1.71
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 1.1.70
+Tue, 15 Oct 2024 00:12:32 GMT
+
+_Version update only_
+
+## 1.1.69
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 1.1.68
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 1.1.67
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 1.1.66
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 1.1.65
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 1.1.64
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 1.1.63
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 1.1.62
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 1.1.61
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 1.1.60
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 1.1.59
+Wed, 17 Jul 2024 06:55:10 GMT
+
+_Version update only_
+
+## 1.1.58
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 1.1.57
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 1.1.56
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
+
+## 1.1.55
+Mon, 03 Jun 2024 23:43:15 GMT
+
+_Version update only_
+
+## 1.1.54
+Thu, 30 May 2024 00:13:05 GMT
+
+_Version update only_
 
 ## 1.1.53
 Wed, 29 May 2024 02:03:51 GMT

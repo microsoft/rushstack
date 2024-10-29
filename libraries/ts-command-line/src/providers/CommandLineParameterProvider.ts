@@ -835,11 +835,11 @@ export abstract class CommandLineParameterProvider {
     let type: string | undefined;
     switch (kind) {
       case CommandLineParameterKind.Choice: {
-        choices = parameter.alternatives as string[];
+        choices = Array.from(parameter.alternatives);
         break;
       }
       case CommandLineParameterKind.ChoiceList: {
-        choices = parameter.alternatives as string[];
+        choices = Array.from(parameter.alternatives);
         action = 'append';
         break;
       }

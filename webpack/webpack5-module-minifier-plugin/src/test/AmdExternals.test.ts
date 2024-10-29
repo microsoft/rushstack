@@ -4,7 +4,7 @@
 jest.disableAutomock();
 import { promisify } from 'util';
 
-import webpack, { type Stats } from 'webpack';
+import webpack, { type Stats, type InputFileSystem, type OutputFileSystem } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
 import { type IModuleMinifier, LocalMinifier } from '@rushstack/module-minifier';
@@ -56,8 +56,8 @@ async function amdExternalsTest(minifier: IModuleMinifier): Promise<void> {
     plugins: [minifierPlugin, metadataPlugin]
   });
 
-  compiler.inputFileSystem = memoryFileSystem;
-  compiler.outputFileSystem = memoryFileSystem;
+  compiler.inputFileSystem = memoryFileSystem as unknown as InputFileSystem;
+  compiler.outputFileSystem = memoryFileSystem as unknown as OutputFileSystem;
 
   const stats: Stats | undefined = await promisify(compiler.run.bind(compiler))();
   await promisify(compiler.close.bind(compiler));

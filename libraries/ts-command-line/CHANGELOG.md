@@ -1,6 +1,65 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Wed, 29 May 2024 02:03:51 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Oct 2024 08:35:06 GMT and should not be manually modified.
+
+## 4.23.0
+Thu, 17 Oct 2024 08:35:06 GMT
+
+### Minor changes
+
+- Expand the `alternatives` and `completions` options of `CommandLineChoiceParameter` and `CommandLineChoiceListParameter` to allow readonly arrays and sets.
+- (BREAKING API CHANGE) Change the type of the `alternatives` property of `CommandLineChoiceParameter` and `CommandLineChoiceParameter` from an array to a `ReadonlySet`.
+
+## 4.22.8
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 4.22.7
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 4.22.6
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 4.22.5
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 4.22.4
+Fri, 02 Aug 2024 17:26:42 GMT
+
+### Patches
+
+- Remove @internal so that subclasses can call _getArgumentParser
+
+## 4.22.3
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 4.22.2
+Wed, 17 Jul 2024 06:55:10 GMT
+
+_Version update only_
+
+## 4.22.1
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
+
+## 4.22.0
+Thu, 30 May 2024 00:13:05 GMT
+
+### Minor changes
+
+- Eliminate a const enum from the public API.
 
 ## 4.21.5
 Wed, 29 May 2024 02:03:51 GMT

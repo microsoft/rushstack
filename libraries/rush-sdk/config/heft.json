@@ -9,7 +9,7 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["lib-shim"] }],
+      "cleanFiles": [{ "includeGlobs": ["lib-shim", "lib-esnext"] }],
 
       "tasksByName": {
         "copy-rush-lib-types": {
@@ -32,13 +32,20 @@
           "taskDependencies": ["copy-rush-lib-types"]
         },
 
+        "webpack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack5-plugin"
+          }
+        },
+
         "generate-stubs": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft",
             "pluginName": "run-script-plugin",
             "options": {
-              "scriptPath": "./lib-shim/generate-stubs.js"
+              "scriptPath": "./lib-commonjs/generate-stubs.js"
             }
           }
         }

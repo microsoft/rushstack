@@ -20,67 +20,63 @@ exports[`LocalizationPlugin Handles localized compilation with no async chunks (
 
 exports[`LocalizationPlugin Handles localized compilation with no async chunks (unminified): Content 1`] = `
 Object {
-  "/release/localization-stats.json": "{\\"entrypoints\\":{\\"main\\":{\\"localizedAssets\\":{\\"default\\":\\"main-default-fc50d2a48e11f2b086ea.js\\",\\"LOCALE2\\":\\"main-LOCALE2-a314aaef0a110988940c.js\\",\\"LOCALE1\\":\\"main-LOCALE1-5ebe1f1f7b993dda2dc3.js\\",\\"qps-ploc\\":\\"main-qps-ploc-7e43fa8e6919d74fccb9.js\\"}}},\\"namedChunkGroups\\":{}}",
-  "/release/main-LOCALE1-5ebe1f1f7b993dda2dc3.js": "/******/ (() => { // webpackBootstrap
+  "/release/localization-stats.json": "{\\"entrypoints\\":{\\"main\\":{\\"localizedAssets\\":{\\"default\\":\\"main-default-d7e97cf591a7391fb602.js\\",\\"LOCALE2\\":\\"main-LOCALE2-41498f590539983b4243.js\\",\\"LOCALE1\\":\\"main-LOCALE1-f13c9f8d1301f4e49d62.js\\",\\"qps-ploc\\":\\"main-qps-ploc-1086de10c00dc424a3f9.js\\"}}},\\"namedChunkGroups\\":{}}",
+  "/release/main-LOCALE1-f13c9f8d1301f4e49d62.js": "/******/ (() => { // webpackBootstrap
 /******/ 	\\"use strict\\";
-var __webpack_exports__ = {};
 
-;// CONCATENATED MODULE: ./a/strings1.resjson
+;// ./a/strings1.resjson
 const strings = {\\"test\\":\\"blah\\\\r\\\\n\\\\t\\\\\\\\\\\\u0027\\\\u0022\\"};
 /* harmony default export */ const strings1_resjson = (strings);
-;// CONCATENATED MODULE: ./a/strings2.resjson
+;// ./a/strings2.resjson
 const strings2_resjson_strings = {\\"another\\":\\"something else\\"};
 /* harmony default export */ const strings2_resjson = (strings2_resjson_strings);
-;// CONCATENATED MODULE: ./a/entry.js
+;// ./a/entry.js
   console.log(strings1_resjson.test, strings2_resjson.another);
 /******/ })()
 ;",
-  "/release/main-LOCALE1-5ebe1f1f7b993dda2dc3.js.map": "{\\"version\\":3,\\"file\\":\\"main-LOCALE1-5ebe1f1f7b993dda2dc3.js\\",\\"mappings\\":\\";;;;;AAAA,iBAAiB,QAAQ,wBAA6D;AACtF,uDAAe,OAAO,E;;ACDtB,MAAM,wBAAO,IAAI,WAAW,cAA6D;AACzF,uDAAe,wBAAO,E;;ACDoB,CAA2C,CAAC,YAAY,qBAAa,EAAE,wBAAgB,E\\",\\"sources\\":[\\"source:///./a/strings1.resjson\\",\\"source:///./a/strings2.resjson\\",\\"source:///./a/entry.js\\"],\\"sourcesContent\\":[\\"const strings = {\\\\\\"test\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_0\\\\\\"};\\\\nexport default strings;\\",\\"const strings = {\\\\\\"another\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_1\\\\\\"};\\\\nexport default strings;\\",\\"import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);\\"],\\"names\\":[],\\"sourceRoot\\":\\"\\"}",
-  "/release/main-LOCALE2-a314aaef0a110988940c.js": "/******/ (() => { // webpackBootstrap
+  "/release/main-LOCALE1-f13c9f8d1301f4e49d62.js.map": "{\\"version\\":3,\\"file\\":\\"main-LOCALE1-f13c9f8d1301f4e49d62.js\\",\\"mappings\\":\\";;;;AAAA,iBAAiB,QAAQ,wBAA6D;AACtF,uDAAe,OAAO,E;;ACDtB,MAAM,wBAAO,IAAI,WAAW,cAA6D;AACzF,uDAAe,wBAAO,E;;ACDoB,CAA2C,CAAC,YAAY,gBAAQ,OAAO,gBAAQ,U\\",\\"sources\\":[\\"source:///./a/strings1.resjson\\",\\"source:///./a/strings2.resjson\\",\\"source:///./a/entry.js\\"],\\"sourcesContent\\":[\\"const strings = {\\\\\\"test\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_0\\\\\\"};\\\\nexport default strings;\\",\\"const strings = {\\\\\\"another\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_1\\\\\\"};\\\\nexport default strings;\\",\\"import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);\\"],\\"names\\":[],\\"sourceRoot\\":\\"\\"}",
+  "/release/main-LOCALE2-41498f590539983b4243.js": "/******/ (() => { // webpackBootstrap
 /******/ 	\\"use strict\\";
-var __webpack_exports__ = {};
 
-;// CONCATENATED MODULE: ./a/strings1.resjson
+;// ./a/strings1.resjson
 const strings = {\\"test\\":\\"return:\\\\r,newline:\\\\n,tab:\\\\t,backslash:\\\\\\\\,apos:\\\\u0027,quote:\\\\u0022\\"};
 /* harmony default export */ const strings1_resjson = (strings);
-;// CONCATENATED MODULE: ./a/strings2.resjson
+;// ./a/strings2.resjson
 const strings2_resjson_strings = {\\"another\\":\\"something else\\"};
 /* harmony default export */ const strings2_resjson = (strings2_resjson_strings);
-;// CONCATENATED MODULE: ./a/entry.js
+;// ./a/entry.js
   console.log(strings1_resjson.test, strings2_resjson.another);
 /******/ })()
 ;",
-  "/release/main-LOCALE2-a314aaef0a110988940c.js.map": "{\\"version\\":3,\\"file\\":\\"main-LOCALE2-a314aaef0a110988940c.js\\",\\"mappings\\":\\";;;;;AAAA,iBAAiB,QAAQ,iEAA6D;AACtF,uDAAe,OAAO,E;;ACDtB,MAAM,wBAAO,IAAI,WAAW,cAA6D;AACzF,uDAAe,wBAAO,E;;ACDoB,CAA2C,CAAC,YAAY,qBAAa,EAAE,wBAAgB,E\\",\\"sources\\":[\\"source:///./a/strings1.resjson\\",\\"source:///./a/strings2.resjson\\",\\"source:///./a/entry.js\\"],\\"sourcesContent\\":[\\"const strings = {\\\\\\"test\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_0\\\\\\"};\\\\nexport default strings;\\",\\"const strings = {\\\\\\"another\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_1\\\\\\"};\\\\nexport default strings;\\",\\"import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);\\"],\\"names\\":[],\\"sourceRoot\\":\\"\\"}",
-  "/release/main-default-fc50d2a48e11f2b086ea.js": "/******/ (() => { // webpackBootstrap
+  "/release/main-LOCALE2-41498f590539983b4243.js.map": "{\\"version\\":3,\\"file\\":\\"main-LOCALE2-41498f590539983b4243.js\\",\\"mappings\\":\\";;;;AAAA,iBAAiB,QAAQ,iEAA6D;AACtF,uDAAe,OAAO,E;;ACDtB,MAAM,wBAAO,IAAI,WAAW,cAA6D;AACzF,uDAAe,wBAAO,E;;ACDoB,CAA2C,CAAC,YAAY,gBAAQ,OAAO,gBAAQ,U\\",\\"sources\\":[\\"source:///./a/strings1.resjson\\",\\"source:///./a/strings2.resjson\\",\\"source:///./a/entry.js\\"],\\"sourcesContent\\":[\\"const strings = {\\\\\\"test\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_0\\\\\\"};\\\\nexport default strings;\\",\\"const strings = {\\\\\\"another\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_1\\\\\\"};\\\\nexport default strings;\\",\\"import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);\\"],\\"names\\":[],\\"sourceRoot\\":\\"\\"}",
+  "/release/main-default-d7e97cf591a7391fb602.js": "/******/ (() => { // webpackBootstrap
 /******/ 	\\"use strict\\";
-var __webpack_exports__ = {};
 
-;// CONCATENATED MODULE: ./a/strings1.resjson
+;// ./a/strings1.resjson
 const strings = {\\"test\\":\\"test\\"};
 /* harmony default export */ const strings1_resjson = (strings);
-;// CONCATENATED MODULE: ./a/strings2.resjson
+;// ./a/strings2.resjson
 const strings2_resjson_strings = {\\"another\\":\\"another\\"};
 /* harmony default export */ const strings2_resjson = (strings2_resjson_strings);
-;// CONCATENATED MODULE: ./a/entry.js
+;// ./a/entry.js
   console.log(strings1_resjson.test, strings2_resjson.another);
 /******/ })()
 ;",
-  "/release/main-default-fc50d2a48e11f2b086ea.js.map": "{\\"version\\":3,\\"file\\":\\"main-default-fc50d2a48e11f2b086ea.js\\",\\"mappings\\":\\";;;;;AAAA,iBAAiB,QAAQ,IAA6D;AACtF,uDAAe,OAAO,E;;ACDtB,MAAM,wBAAO,IAAI,WAAW,OAA6D;AACzF,uDAAe,wBAAO,E;;ACDoB,CAA2C,CAAC,YAAY,qBAAa,EAAE,wBAAgB,E\\",\\"sources\\":[\\"source:///./a/strings1.resjson\\",\\"source:///./a/strings2.resjson\\",\\"source:///./a/entry.js\\"],\\"sourcesContent\\":[\\"const strings = {\\\\\\"test\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_0\\\\\\"};\\\\nexport default strings;\\",\\"const strings = {\\\\\\"another\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_1\\\\\\"};\\\\nexport default strings;\\",\\"import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);\\"],\\"names\\":[],\\"sourceRoot\\":\\"\\"}",
-  "/release/main-qps-ploc-7e43fa8e6919d74fccb9.js": "/******/ (() => { // webpackBootstrap
+  "/release/main-default-d7e97cf591a7391fb602.js.map": "{\\"version\\":3,\\"file\\":\\"main-default-d7e97cf591a7391fb602.js\\",\\"mappings\\":\\";;;;AAAA,iBAAiB,QAAQ,IAA6D;AACtF,uDAAe,OAAO,E;;ACDtB,MAAM,wBAAO,IAAI,WAAW,OAA6D;AACzF,uDAAe,wBAAO,E;;ACDoB,CAA2C,CAAC,YAAY,gBAAQ,OAAO,gBAAQ,U\\",\\"sources\\":[\\"source:///./a/strings1.resjson\\",\\"source:///./a/strings2.resjson\\",\\"source:///./a/entry.js\\"],\\"sourcesContent\\":[\\"const strings = {\\\\\\"test\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_0\\\\\\"};\\\\nexport default strings;\\",\\"const strings = {\\\\\\"another\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_1\\\\\\"};\\\\nexport default strings;\\",\\"import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);\\"],\\"names\\":[],\\"sourceRoot\\":\\"\\"}",
+  "/release/main-qps-ploc-1086de10c00dc424a3f9.js": "/******/ (() => { // webpackBootstrap
 /******/ 	\\"use strict\\";
-var __webpack_exports__ = {};
 
-;// CONCATENATED MODULE: ./a/strings1.resjson
+;// ./a/strings1.resjson
 const strings = {\\"test\\":\\"!--ƀĺàĥ\\\\r\\\\n\\\\t\\\\\\\\\\\\u0027\\\\u0022-|-\\"};
 /* harmony default export */ const strings1_resjson = (strings);
-;// CONCATENATED MODULE: ./a/strings2.resjson
+;// ./a/strings2.resjson
 const strings2_resjson_strings = {\\"another\\":\\"!--śōmēţĥĩńĝ ēĺśē-|-\\"};
 /* harmony default export */ const strings2_resjson = (strings2_resjson_strings);
-;// CONCATENATED MODULE: ./a/entry.js
+;// ./a/entry.js
   console.log(strings1_resjson.test, strings2_resjson.another);
 /******/ })()
 ;",
-  "/release/main-qps-ploc-7e43fa8e6919d74fccb9.js.map": "{\\"version\\":3,\\"file\\":\\"main-qps-ploc-7e43fa8e6919d74fccb9.js\\",\\"mappings\\":\\";;;;;AAAA,iBAAiB,QAAQ,8BAA6D;AACtF,uDAAe,OAAO,E;;ACDtB,MAAM,wBAAO,IAAI,WAAW,oBAA6D;AACzF,uDAAe,wBAAO,E;;ACDoB,CAA2C,CAAC,YAAY,qBAAa,EAAE,wBAAgB,E\\",\\"sources\\":[\\"source:///./a/strings1.resjson\\",\\"source:///./a/strings2.resjson\\",\\"source:///./a/entry.js\\"],\\"sourcesContent\\":[\\"const strings = {\\\\\\"test\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_0\\\\\\"};\\\\nexport default strings;\\",\\"const strings = {\\\\\\"another\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_1\\\\\\"};\\\\nexport default strings;\\",\\"import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);\\"],\\"names\\":[],\\"sourceRoot\\":\\"\\"}",
+  "/release/main-qps-ploc-1086de10c00dc424a3f9.js.map": "{\\"version\\":3,\\"file\\":\\"main-qps-ploc-1086de10c00dc424a3f9.js\\",\\"mappings\\":\\";;;;AAAA,iBAAiB,QAAQ,8BAA6D;AACtF,uDAAe,OAAO,E;;ACDtB,MAAM,wBAAO,IAAI,WAAW,oBAA6D;AACzF,uDAAe,wBAAO,E;;ACDoB,CAA2C,CAAC,YAAY,gBAAQ,OAAO,gBAAQ,U\\",\\"sources\\":[\\"source:///./a/strings1.resjson\\",\\"source:///./a/strings2.resjson\\",\\"source:///./a/entry.js\\"],\\"sourcesContent\\":[\\"const strings = {\\\\\\"test\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_0\\\\\\"};\\\\nexport default strings;\\",\\"const strings = {\\\\\\"another\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_1\\\\\\"};\\\\nexport default strings;\\",\\"import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);\\"],\\"names\\":[],\\"sourceRoot\\":\\"\\"}",
 }
 `;
 

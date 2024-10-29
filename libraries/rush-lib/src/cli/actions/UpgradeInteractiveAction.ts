@@ -1,16 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
 import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
 import type * as InteractiveUpgraderType from '../../logic/InteractiveUpgrader';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class UpgradeInteractiveAction extends BaseRushAction {
   private _makeConsistentFlag: CommandLineFlagParameter;
   private _skipUpdateFlag: CommandLineFlagParameter;
+  private readonly _variantParameter: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
@@ -42,6 +44,8 @@ export class UpgradeInteractiveAction extends BaseRushAction {
       description:
         'If specified, the "rush update" command will not be run after updating the package.json files.'
     });
+
+    this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
   }
 
   public async runAsync(): Promise<void> {
@@ -58,17 +62,24 @@ export class UpgradeInteractiveAction extends BaseRushAction {
       this.rushConfiguration
     );
 
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      true
+    );
     const shouldMakeConsistent: boolean =
-      this.rushConfiguration.ensureConsistentVersions || this._makeConsistentFlag.value;
+      this.rushConfiguration.defaultSubspace.shouldEnsureConsistentVersions(variant) ||
+      this._makeConsistentFlag.value;
 
     const { projects, depsToUpgrade } = await interactiveUpgrader.upgradeAsync();
 
     await packageJsonUpdater.doRushUpgradeAsync({
-      projects: projects,
+      projects,
       packagesToAdd: depsToUpgrade.packages,
       updateOtherPackages: shouldMakeConsistent,
       skipUpdate: this._skipUpdateFlag.value,
-      debugInstall: this.parser.isDebug
+      debugInstall: this.parser.isDebug,
+      variant
     });
   }
 }

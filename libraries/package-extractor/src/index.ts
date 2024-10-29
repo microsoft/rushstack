@@ -3,6 +3,7 @@
 
 export {
   PackageExtractor,
+  type LinkCreationMode,
   type IExtractorOptions,
   type IExtractorProjectConfiguration,
   type IExtractorDependencyConfiguration,

@@ -95,16 +95,16 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    await PolicyValidator.validatePolicyAsync(
-      this.rushConfiguration,
-      this.rushConfiguration.defaultSubspace,
-      {
+    const currentlyInstalledVariant: string | undefined =
+      await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
+    for (const subspace of this.rushConfiguration.subspaces) {
+      await PolicyValidator.validatePolicyAsync(this.rushConfiguration, subspace, currentlyInstalledVariant, {
         bypassPolicyAllowed: true,
         bypassPolicy: this._bypassPolicy.value
-      }
-    );
+      });
+    }
     const git: Git = new Git(this.rushConfiguration);
-    const userEmail: string = git.getGitEmail();
+    const userEmail: string = await git.getGitEmailAsync();
 
     this._validateInput();
     const versionManagerModule: typeof VersionManagerType = await import(
@@ -130,7 +130,7 @@ export class VersionAction extends BaseRushAction {
       if (updatedPackages.size > 0) {
         // eslint-disable-next-line no-console
         console.log(`${updatedPackages.size} packages are getting updated.`);
-        this._gitProcess(tempBranch, this._targetBranch.value);
+        await this._gitProcessAsync(tempBranch, this._targetBranch.value, currentlyInstalledVariant);
       }
     } else if (this._bumpVersion.value) {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
@@ -140,7 +140,7 @@ export class VersionAction extends BaseRushAction {
         this._prereleaseIdentifier.value,
         true
       );
-      this._gitProcess(tempBranch, this._targetBranch.value);
+      await this._gitProcessAsync(tempBranch, this._targetBranch.value, currentlyInstalledVariant);
     }
   }
 
@@ -207,37 +207,47 @@ export class VersionAction extends BaseRushAction {
     }
   }
 
-  private _validateResult(): void {
+  private _validateResult(variant: string | undefined): void {
     // Load the config from file to avoid using inconsistent in-memory data.
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
       this.rushConfiguration.rushJsonFile
     );
 
-    // Respect the `ensureConsistentVersions` field in rush.json
-    if (!rushConfig.ensureConsistentVersions) {
-      return;
-    }
+    // Validate result of all subspaces
+    for (const subspace of rushConfig.subspaces) {
+      // Respect the `ensureConsistentVersions` field in rush.json
+      if (!subspace.shouldEnsureConsistentVersions) {
+        return;
+      }
 
-    const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig);
-    if (mismatchFinder.numberOfMismatches) {
-      throw new Error(
-        'Unable to finish version bump because inconsistencies were encountered. ' +
-          'Run "rush check" to find more details.'
-      );
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig, {
+        subspace,
+        variant
+      });
+      if (mismatchFinder.numberOfMismatches) {
+        throw new Error(
+          'Unable to finish version bump because inconsistencies were encountered. ' +
+            'Run "rush check" to find more details.'
+        );
+      }
     }
   }
 
-  private _gitProcess(tempBranch: string, targetBranch: string | undefined): void {
+  private async _gitProcessAsync(
+    tempBranch: string,
+    targetBranch: string | undefined,
+    variant: string | undefined
+  ): Promise<void> {
     // Validate the result before commit.
-    this._validateResult();
+    this._validateResult(variant);
 
     const git: Git = new Git(this.rushConfiguration);
     const publishGit: PublishGit = new PublishGit(git, targetBranch);
 
     // Make changes in temp branch.
-    publishGit.checkout(tempBranch, true);
+    await publishGit.checkoutAsync(tempBranch, true);
 
-    const uncommittedChanges: ReadonlyArray<string> = git.getUncommittedChanges();
+    const uncommittedChanges: ReadonlyArray<string> = await git.getUncommittedChangesAsync();
 
     // Stage, commit, and push the changes to remote temp branch.
     // Need to commit the change log updates in its own commit
@@ -246,10 +256,10 @@ export class VersionAction extends BaseRushAction {
     });
 
     if (changeLogUpdated) {
-      publishGit.addChanges('.', this.rushConfiguration.changesFolder);
-      publishGit.addChanges(':/**/CHANGELOG.json');
-      publishGit.addChanges(':/**/CHANGELOG.md');
-      publishGit.commit(
+      await publishGit.addChangesAsync('.', this.rushConfiguration.changesFolder);
+      await publishGit.addChangesAsync(':/**/CHANGELOG.json');
+      await publishGit.addChangesAsync(':/**/CHANGELOG.md');
+      await publishGit.commitAsync(
         this.rushConfiguration.gitChangeLogUpdateCommitMessage || DEFAULT_CHANGELOG_UPDATE_MESSAGE,
         !this._ignoreGitHooksParameter.value
       );
@@ -261,29 +271,29 @@ export class VersionAction extends BaseRushAction {
     });
 
     if (packageJsonUpdated) {
-      publishGit.addChanges(this.rushConfiguration.versionPolicyConfigurationFilePath);
-      publishGit.addChanges(':/**/package.json');
-      publishGit.commit(
+      await publishGit.addChangesAsync(this.rushConfiguration.versionPolicyConfigurationFilePath);
+      await publishGit.addChangesAsync(':/**/package.json');
+      await publishGit.commitAsync(
         this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE,
         !this._ignoreGitHooksParameter.value
       );
     }
 
     if (changeLogUpdated || packageJsonUpdated) {
-      publishGit.push(tempBranch, !this._ignoreGitHooksParameter.value);
+      await publishGit.pushAsync(tempBranch, !this._ignoreGitHooksParameter.value);
 
       // Now merge to target branch.
-      publishGit.fetch();
-      publishGit.checkout(targetBranch);
-      publishGit.pull(!this._ignoreGitHooksParameter.value);
-      publishGit.merge(tempBranch, !this._ignoreGitHooksParameter.value);
-      publishGit.push(targetBranch, !this._ignoreGitHooksParameter.value);
-      publishGit.deleteBranch(tempBranch, true, !this._ignoreGitHooksParameter.value);
+      await publishGit.fetchAsync();
+      await publishGit.checkoutAsync(targetBranch);
+      await publishGit.pullAsync(!this._ignoreGitHooksParameter.value);
+      await publishGit.mergeAsync(tempBranch, !this._ignoreGitHooksParameter.value);
+      await publishGit.pushAsync(targetBranch, !this._ignoreGitHooksParameter.value);
+      await publishGit.deleteBranchAsync(tempBranch, true, !this._ignoreGitHooksParameter.value);
     } else {
       // skip commits
-      publishGit.fetch();
-      publishGit.checkout(targetBranch);
-      publishGit.deleteBranch(tempBranch, false, !this._ignoreGitHooksParameter.value);
+      await publishGit.fetchAsync();
+      await publishGit.checkoutAsync(targetBranch);
+      await publishGit.deleteBranchAsync(tempBranch, false, !this._ignoreGitHooksParameter.value);
     }
   }
 }

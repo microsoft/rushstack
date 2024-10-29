@@ -2,6 +2,149 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.23.0",
+      "tag": "@rushstack/ts-command-line_v4.23.0",
+      "date": "Thu, 17 Oct 2024 08:35:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expand the `alternatives` and `completions` options of `CommandLineChoiceParameter` and `CommandLineChoiceListParameter` to allow readonly arrays and sets."
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Change the type of the `alternatives` property of `CommandLineChoiceParameter` and `CommandLineChoiceParameter` from an array to a `ReadonlySet`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.22.8",
+      "tag": "@rushstack/ts-command-line_v4.22.8",
+      "date": "Fri, 13 Sep 2024 00:11:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.22.7",
+      "tag": "@rushstack/ts-command-line_v4.22.7",
+      "date": "Tue, 10 Sep 2024 20:08:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.22.6",
+      "tag": "@rushstack/ts-command-line_v4.22.6",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a README typo."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.22.5",
+      "tag": "@rushstack/ts-command-line_v4.22.5",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.22.4",
+      "tag": "@rushstack/ts-command-line_v4.22.4",
+      "date": "Fri, 02 Aug 2024 17:26:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove @internal so that subclasses can call _getArgumentParser"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.22.3",
+      "tag": "@rushstack/ts-command-line_v4.22.3",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.22.2",
+      "tag": "@rushstack/ts-command-line_v4.22.2",
+      "date": "Wed, 17 Jul 2024 06:55:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.22.1",
+      "tag": "@rushstack/ts-command-line_v4.22.1",
+      "date": "Tue, 16 Jul 2024 00:36:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the `CommandLineParser` error reporting to handle `AlreadyReportedError` from `@rushstack/node-core-library`"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.22.0",
+      "tag": "@rushstack/ts-command-line_v4.22.0",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Eliminate a const enum from the public API."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.21.5",
       "tag": "@rushstack/ts-command-line_v4.21.5",
       "date": "Wed, 29 May 2024 02:03:51 GMT",

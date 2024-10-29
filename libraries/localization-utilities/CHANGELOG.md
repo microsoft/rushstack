@@ -1,6 +1,134 @@
 # Change Log - @rushstack/localization-utilities
 
-This log was last generated on Wed, 29 May 2024 02:03:50 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Oct 2024 00:15:48 GMT and should not be manually modified.
+
+## 0.12.10
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.12.9
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.12.8
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.12.7
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.12.6
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.12.5
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.12.4
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.12.3
+Sat, 28 Sep 2024 00:11:41 GMT
+
+_Version update only_
+
+## 0.12.2
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.12.1
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.12.0
+Mon, 26 Aug 2024 02:00:11 GMT
+
+### Minor changes
+
+- Add a `valueDocumentationComment` option to `exportAsDefault` that allows a documentation comment to be generated for the exported value.
+- Rename the `documentationComment` property in the `exportAsDefault` value to `interfaceDocumentationComment`.
+
+## 0.11.1
+Wed, 21 Aug 2024 16:24:51 GMT
+
+### Patches
+
+- Fix an issue where `inferDefaultExportInterfaceNameFromFilename` did not apply.
+
+## 0.11.0
+Wed, 21 Aug 2024 05:43:04 GMT
+
+### Minor changes
+
+- Expand the typings generator to take a richer set of options for default exports. See `exportAsDefault` in @rushstack/typings-generator's `StringValuesTypingsGenerator`. Also included is another property in `exportAsDefault`: `inferInterfaceNameFromFilename`.
+
+## 0.10.0
+Mon, 12 Aug 2024 22:16:04 GMT
+
+### Minor changes
+
+- Update the schema for `.loc.json` files to allow string names that include the `$` character.
+
+## 0.9.62
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.9.61
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.9.60
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.9.59
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.9.58
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.9.57
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 0.9.56
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
+
+## 0.9.55
+Mon, 03 Jun 2024 23:43:15 GMT
+
+_Version update only_
+
+## 0.9.54
+Thu, 30 May 2024 00:13:05 GMT
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
 
 ## 0.9.53
 Wed, 29 May 2024 02:03:50 GMT

@@ -931,8 +931,7 @@ export class ExtractorConfig {
             );
           }
 
-          const suffixIndex: number = apiReportConfig.reportFileName.indexOf(reportFileNameSuffix);
-          if (suffixIndex < 0) {
+          if (!apiReportConfig.reportFileName.endsWith(reportFileNameSuffix)) {
             // `.api.md` extension was not specified. Use provided file name base as is.
             reportFileNameBase = apiReportConfig.reportFileName;
           } else {
@@ -941,7 +940,7 @@ export class ExtractorConfig {
             // that ends with the `.api.md` extension specially, by stripping it out.
             // This should be removed in version 8, possibly replaced with an explicit error to help users
             // migrate their configs.
-            reportFileNameBase = apiReportConfig.reportFileName.slice(0, suffixIndex);
+            reportFileNameBase = apiReportConfig.reportFileName.slice(0, -reportFileNameSuffix.length);
           }
         } else {
           // Default value

@@ -24,7 +24,7 @@
   "devDependencies": {
     "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "webpack": "~5.82.1"
+    "webpack": "~5.95.0"
   },
   "sideEffects": false,
   "dependencies": {

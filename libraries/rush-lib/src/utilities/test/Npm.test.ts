@@ -11,7 +11,7 @@ describe(Npm.name, () => {
   let stub: jest.SpyInstance;
 
   beforeEach(() => {
-    stub = jest.spyOn(Utilities, 'executeCommandAndCaptureOutput');
+    stub = jest.spyOn(Utilities, 'executeCommandAndCaptureOutputAsync');
   });
 
   afterEach(() => {
@@ -19,7 +19,7 @@ describe(Npm.name, () => {
     stub.mockRestore();
   });
 
-  it('publishedVersions gets versions when package time is available.', () => {
+  it('publishedVersions gets versions when package time is available.', async () => {
     const json: string = `{
       "modified": "2017-03-30T18:37:27.757Z",
       "created": "2017-01-03T20:28:10.342Z",
@@ -28,9 +28,9 @@ describe(Npm.name, () => {
       "1.4.1": "2017-01-09T19:22:00.488Z",
       "2.4.0-alpha.1": "2017-03-30T18:37:27.757Z"
     }`;
-    stub.mockImplementationOnce(() => json);
+    stub.mockImplementationOnce(() => Promise.resolve(json));
 
-    const versions: string[] = Npm.publishedVersions(packageName, __dirname, process.env);
+    const versions: string[] = await Npm.getPublishedVersionsAsync(packageName, __dirname, process.env);
 
     expect(stub).toHaveBeenCalledWith(
       'npm',
@@ -44,17 +44,17 @@ describe(Npm.name, () => {
     expect(versions).toMatchObject(['0.0.0', '1.4.0', '1.4.1', '2.4.0-alpha.1']);
   });
 
-  it('publishedVersions gets versions when package time is not available', () => {
+  it('publishedVersions gets versions when package time is not available', async () => {
     const json: string = `[
       "0.0.0",
       "1.4.0",
       "1.4.1",
       "2.4.0-alpha.1"
     ]`;
-    stub.mockImplementationOnce(() => '');
-    stub.mockImplementationOnce(() => json);
+    stub.mockImplementationOnce(() => Promise.resolve(''));
+    stub.mockImplementationOnce(() => Promise.resolve(json));
 
-    const versions: string[] = Npm.publishedVersions(packageName, __dirname, process.env);
+    const versions: string[] = await Npm.getPublishedVersionsAsync(packageName, __dirname, process.env);
 
     expect(stub).toHaveBeenCalledWith(
       'npm',

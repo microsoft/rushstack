@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ConsoleTerminalProvider, Terminal, type ITerminal } from '@rushstack/terminal';
-import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
+import type { ITerminal } from '@rushstack/terminal';
+import type {
+  CommandLineFlagParameter,
+  CommandLineStringListParameter,
+  CommandLineStringParameter
+} from '@rushstack/ts-command-line';
 
 import { BaseAddAndRemoveAction } from './BaseAddAndRemoveAction';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
@@ -11,12 +15,13 @@ import type {
   IPackageForRushRemove,
   IPackageJsonUpdaterRushRemoveOptions
 } from '../../logic/PackageJsonUpdaterTypes';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class RemoveAction extends BaseAddAndRemoveAction {
   protected readonly _allFlag: CommandLineFlagParameter;
   protected readonly _packageNameList: CommandLineStringListParameter;
-  private _terminalProvider: ConsoleTerminalProvider;
-  private _terminal: ITerminal;
+  private readonly _variantParameter: CommandLineStringParameter;
+  private readonly _terminal: ITerminal;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string = [
@@ -30,8 +35,8 @@ export class RemoveAction extends BaseAddAndRemoveAction {
       safeForSimultaneousRushProcesses: false,
       parser
     });
-    this._terminalProvider = new ConsoleTerminalProvider();
-    this._terminal = new Terminal(this._terminalProvider);
+
+    this._terminal = parser.terminal;
 
     this._packageNameList = this.defineStringListParameter({
       parameterLongName: '--package',
@@ -46,9 +51,10 @@ export class RemoveAction extends BaseAddAndRemoveAction {
       parameterLongName: '--all',
       description: 'If specified, the dependency will be removed from all projects that declare it.'
     });
+    this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
   }
 
-  public getUpdateOptions(): IPackageJsonUpdaterRushRemoveOptions {
+  public async getUpdateOptionsAsync(): Promise<IPackageJsonUpdaterRushRemoveOptions> {
     const projects: RushConfigurationProject[] = super.getProjects();
 
     const packagesToRemove: IPackageForRushRemove[] = [];
@@ -69,7 +75,7 @@ export class RemoveAction extends BaseAddAndRemoveAction {
           !project.packageJsonEditor.tryGetDevDependency(packageName)
         ) {
           this._terminal.writeLine(
-            `The project "${project.packageName}" do not have ${packageName} in package.json.`
+            `The project "${project.packageName}" does not have "${packageName}" in package.json.`
           );
         }
       }
@@ -77,12 +83,19 @@ export class RemoveAction extends BaseAddAndRemoveAction {
       packagesToRemove.push({ packageName });
     }
 
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      true
+    );
+
     return {
       projects: projects,
       packagesToUpdate: packagesToRemove,
       skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
-      actionName: this.actionName
+      actionName: this.actionName,
+      variant
     };
   }
 }

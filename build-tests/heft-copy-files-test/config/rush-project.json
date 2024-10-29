@@ -13,7 +13,8 @@
         "out-images2",
         "out-images3",
         "out-images4",
-        "out-images5"
+        "out-images5",
+        "temp/build"
       ]
     }
   ]

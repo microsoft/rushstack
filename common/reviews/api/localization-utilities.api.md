@@ -4,6 +4,7 @@
 
 ```ts
 
+import { IExportAsDefaultOptions } from '@rushstack/typings-generator';
 import type { ITerminal } from '@rushstack/terminal';
 import { ITypingsGeneratorBaseOptions } from '@rushstack/typings-generator';
 import { NewlineKind } from '@rushstack/node-core-library';
@@ -14,6 +15,11 @@ export function getPseudolocalizer(options: IPseudolocaleOptions): (str: string)
 
 // @public (undocumented)
 export type IgnoreStringFunction = (filePath: string, stringName: string) => boolean;
+
+// @public (undocumented)
+export interface IInferInterfaceNameExportAsDefaultOptions extends Omit<IExportAsDefaultOptions, 'interfaceName'> {
+    inferInterfaceNameFromFilename?: boolean;
+}
 
 // @public (undocumented)
 export interface ILocalizationFile {
@@ -79,13 +85,13 @@ export interface IPseudolocaleOptions {
 // @public (undocumented)
 export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
     // (undocumented)
-    exportAsDefault?: boolean;
+    exportAsDefault?: boolean | IExportAsDefaultOptions | IInferInterfaceNameExportAsDefaultOptions;
     // (undocumented)
     ignoreMissingResxComments?: boolean | undefined;
     // (undocumented)
     ignoreString?: IgnoreStringFunction;
     // (undocumented)
-    processComment?: (comment: string | undefined, resxFilePath: string, stringName: string) => string | undefined;
+    processComment?: (comment: string | undefined, relativeFilePath: string, stringName: string) => string | undefined;
     // (undocumented)
     resxNewlineNormalization?: NewlineKind | undefined;
 }

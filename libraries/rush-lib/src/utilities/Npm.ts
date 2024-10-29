@@ -5,15 +5,15 @@ import { Utilities } from './Utilities';
 import * as semver from 'semver';
 
 export class Npm {
-  public static publishedVersions(
+  public static async getPublishedVersionsAsync(
     packageName: string,
     cwd: string,
     env: { [key: string]: string | undefined },
     extraArgs: string[] = []
-  ): string[] {
+  ): Promise<string[]> {
     const versions: string[] = [];
     try {
-      const packageTime: string = Utilities.executeCommandAndCaptureOutput(
+      const packageTime: string = await Utilities.executeCommandAndCaptureOutputAsync(
         'npm',
         ['view', packageName, 'time', '--json', ...extraArgs],
         cwd,
@@ -30,7 +30,7 @@ export class Npm {
         // eslint-disable-next-line no-console
         console.log(`Package ${packageName} time value does not exist. Fall back to versions.`);
         // time property does not exist. It happens sometimes. Fall back to versions.
-        const packageVersions: string = Utilities.executeCommandAndCaptureOutput(
+        const packageVersions: string = await Utilities.executeCommandAndCaptureOutputAsync(
           'npm',
           ['view', packageName, 'versions', '--json', ...extraArgs],
           cwd,
@@ -50,8 +50,9 @@ export class Npm {
           console.log(`No version is found for ${packageName}`);
         }
       }
-    } catch (error) {
-      if ((error as Error).message.indexOf('npm ERR! 404') >= 0) {
+    } catch (e) {
+      const error: Error = e;
+      if (['E404', 'npm ERR! 404'].some((check) => error.message.indexOf(check))) {
         // eslint-disable-next-line no-console
         console.log(`Package ${packageName} does not exist in the registry.`);
       } else {

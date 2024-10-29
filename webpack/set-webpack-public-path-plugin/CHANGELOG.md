@@ -1,6 +1,112 @@
 # Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Wed, 29 May 2024 02:03:51 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Oct 2024 00:15:48 GMT and should not be manually modified.
+
+## 5.1.57
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 5.1.56
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 5.1.55
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 5.1.54
+Tue, 15 Oct 2024 00:12:32 GMT
+
+_Version update only_
+
+## 5.1.53
+Wed, 02 Oct 2024 00:11:19 GMT
+
+### Patches
+
+- Ensure compatibility with webpack 5.95.0
+
+## 5.1.52
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 5.1.51
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 5.1.50
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 5.1.49
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 5.1.48
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 5.1.47
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 5.1.46
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 5.1.45
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 5.1.44
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 5.1.43
+Wed, 17 Jul 2024 06:55:10 GMT
+
+_Version update only_
+
+## 5.1.42
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 5.1.41
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 5.1.40
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
+
+## 5.1.39
+Mon, 03 Jun 2024 23:43:15 GMT
+
+_Version update only_
+
+## 5.1.38
+Thu, 30 May 2024 00:13:05 GMT
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
 
 ## 5.1.37
 Wed, 29 May 2024 02:03:51 GMT

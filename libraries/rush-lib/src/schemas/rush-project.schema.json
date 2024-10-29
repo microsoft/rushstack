@@ -93,14 +93,8 @@
               },
               "shardOperationSettings": {
                 "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "weight": {
-                    "description": "The number of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag.",
-                    "type": "integer",
-                    "minimum": 0
-                  }
-                }
+                "description": "DEPRECATED. Use a separate operationSettings entry with {this operation's name}:shard as the name, ex _phase:build would have a separate operation _phase:build:shard to manage per-shard settings.",
+                "additionalProperties": true
               }
             }
           },
@@ -108,6 +102,10 @@
             "description": "The number of concurrency units that this operation should take up. The maximum concurrency units is determined by the -p flag.",
             "type": "integer",
             "minimum": 0
+          },
+          "allowCobuildWithoutCache": {
+            "type": "boolean",
+            "description": "If true, this operation will not need to use the build cache to leverage cobuilds"
           }
         }
       }

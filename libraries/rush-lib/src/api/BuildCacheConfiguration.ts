@@ -39,9 +39,13 @@ export interface IBaseBuildCacheJson {
    * - `[arch]`
    * @privateRemarks
    * NOTE: If you update this comment, make sure to update build-cache.json in the "rush init" template.
-   * The token parser is in CachEntryId.ts
+   * The token parser is in CacheEntryId.ts
    */
   cacheEntryNamePattern?: string;
+  /**
+   * An optional salt to inject during calculation of the cache key. This can be used to invalidate the cache for all projects when the salt changes.
+   */
+  cacheHashSalt?: string;
 }
 
 /**
@@ -102,6 +106,10 @@ export class BuildCacheConfiguration {
    * The provider for interacting with the cloud build cache, if configured.
    */
   public readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
+  /**
+   * An optional salt to inject during calculation of the cache key. This can be used to invalidate the cache for all projects when the salt changes.
+   */
+  public readonly cacheHashSalt: string | undefined;
 
   private constructor({
     getCacheEntryId,
@@ -120,6 +128,7 @@ export class BuildCacheConfiguration {
       rushConfiguration: rushConfiguration
     });
     this.cloudCacheProvider = cloudCacheProvider;
+    this.cacheHashSalt = buildCacheJson.cacheHashSalt;
   }
 
   /**

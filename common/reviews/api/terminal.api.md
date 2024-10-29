@@ -335,7 +335,9 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     getDebugOutput(options?: IStringBufferOutputOptions): string;
     getErrorOutput(options?: IStringBufferOutputOptions): string;
     getOutput(options?: IStringBufferOutputOptions): string;
+    // @deprecated (undocumented)
     getVerbose(options?: IStringBufferOutputOptions): string;
+    getVerboseOutput(options?: IStringBufferOutputOptions): string;
     getWarningOutput(options?: IStringBufferOutputOptions): string;
     get supportsColor(): boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
@@ -359,7 +361,7 @@ export class Terminal implements ITerminal {
 }
 
 // @public
-export const enum TerminalChunkKind {
+export enum TerminalChunkKind {
     Stderr = "E",
     Stdout = "O"
 }

@@ -64,12 +64,16 @@
       "description": "Rush normally prints a warning if it detects a pre-LTS Node.js version. If you are testing pre-LTS versions in preparation for supporting the first LTS version, you can use this setting to disable Rush's warning.",
       "type": "boolean"
     },
+    "suppressRushIsPublicVersionCheck": {
+      "description": "Rush normally prints a warning if it detects that the current version is not one published to the public npmjs.org registry. If you need to block calls to the npm registry, you can use this setting to disable Rush's check.",
+      "type": "boolean"
+    },
     "projectFolderMinDepth": {
       "description": "The minimum folder depth for the projectFolder field.  The default value is 1, i.e. no slashes in the path name.",
       "type": "number"
     },
     "ensureConsistentVersions": {
-      "description": "If true, consistent version specifiers for dependencies will be enforced (i.e. \"rush check\" is run before some commands).",
+      "description": "If true, consistent version specifiers for dependencies will be enforced (i.e. \"rush check\" is run before some commands). Used when property is not defined in common-versions.json.",
       "type": "boolean"
     },
     "hotfixChangeEnabled": {
@@ -186,7 +190,7 @@
           "type": "string"
         },
         "changefilesCommitMessage": {
-          "description": "The commit message to use when commiting change files made by \"rush change\". Defaults to \"Rush change\"",
+          "description": "The commit message to use when committing change files made by \"rush change\". Defaults to \"Rush change\"",
           "type": "string"
         },
         "tagSeparator": {
@@ -197,8 +201,22 @@
       "additionalProperties": false
     },
     "variants": {
-      "description": "DEPRECATED",
-      "type": "array"
+      "description": "Defines the list of installation variants for this repository. For more details about this feature, see this article: https://rushjs.io/pages/advanced/installation_variants/",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "variantName": {
+            "description": "The name of the variant. Maps to common/rush/variants/{name} under the repository root.",
+            "type": "string"
+          },
+          "description": {
+            "description": "",
+            "type": "string"
+          }
+        },
+        "required": ["variantName", "description"]
+      }
     },
     "repository": {
       "description": "The repository location",

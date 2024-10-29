@@ -16,15 +16,16 @@ export interface IPolicyValidatorOptions {
 export async function validatePolicyAsync(
   rushConfiguration: RushConfiguration,
   subspace: Subspace,
+  variant: string | undefined,
   options: IPolicyValidatorOptions
 ): Promise<void> {
   if (!options.bypassPolicy) {
-    GitEmailPolicy.validate(rushConfiguration, options);
+    await GitEmailPolicy.validateAsync(rushConfiguration, options);
     await EnvironmentPolicy.validateAsync(rushConfiguration, options);
     if (!options.allowShrinkwrapUpdates) {
       // Don't validate the shrinkwrap if updates are allowed, as it's likely to change
       // It also may have merge conflict markers, which PNPM can gracefully handle, but the validator cannot
-      ShrinkwrapFilePolicy.validate(rushConfiguration, subspace, options);
+      ShrinkwrapFilePolicy.validate(rushConfiguration, subspace, variant, options);
     }
   }
 }

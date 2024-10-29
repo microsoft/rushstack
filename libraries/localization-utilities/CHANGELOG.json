@@ -2,6 +2,415 @@
   "name": "@rushstack/localization-utilities",
   "entries": [
     {
+      "version": "0.12.10",
+      "tag": "@rushstack/localization-utilities_v0.12.10",
+      "date": "Thu, 24 Oct 2024 00:15:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.9",
+      "tag": "@rushstack/localization-utilities_v0.12.9",
+      "date": "Mon, 21 Oct 2024 18:50:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.8",
+      "tag": "@rushstack/localization-utilities_v0.12.8",
+      "date": "Thu, 17 Oct 2024 08:35:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.7",
+      "tag": "@rushstack/localization-utilities_v0.12.7",
+      "date": "Tue, 15 Oct 2024 00:12:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.6",
+      "tag": "@rushstack/localization-utilities_v0.12.6",
+      "date": "Wed, 02 Oct 2024 00:11:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.5",
+      "tag": "@rushstack/localization-utilities_v0.12.5",
+      "date": "Tue, 01 Oct 2024 00:11:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.4",
+      "tag": "@rushstack/localization-utilities_v0.12.4",
+      "date": "Mon, 30 Sep 2024 15:12:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.3",
+      "tag": "@rushstack/localization-utilities_v0.12.3",
+      "date": "Sat, 28 Sep 2024 00:11:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.2",
+      "tag": "@rushstack/localization-utilities_v0.12.2",
+      "date": "Fri, 13 Sep 2024 00:11:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.1",
+      "tag": "@rushstack/localization-utilities_v0.12.1",
+      "date": "Tue, 10 Sep 2024 20:08:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.0",
+      "tag": "@rushstack/localization-utilities_v0.12.0",
+      "date": "Mon, 26 Aug 2024 02:00:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `valueDocumentationComment` option to `exportAsDefault` that allows a documentation comment to be generated for the exported value."
+          },
+          {
+            "comment": "Rename the `documentationComment` property in the `exportAsDefault` value to `interfaceDocumentationComment`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.1",
+      "tag": "@rushstack/localization-utilities_v0.11.1",
+      "date": "Wed, 21 Aug 2024 16:24:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where `inferDefaultExportInterfaceNameFromFilename` did not apply."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.0",
+      "tag": "@rushstack/localization-utilities_v0.11.0",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expand the typings generator to take a richer set of options for default exports. See `exportAsDefault` in @rushstack/typings-generator's `StringValuesTypingsGenerator`. Also included is another property in `exportAsDefault`: `inferInterfaceNameFromFilename`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.0",
+      "tag": "@rushstack/localization-utilities_v0.10.0",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update the schema for `.loc.json` files to allow string names that include the `$` character."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.12.63`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.62",
+      "tag": "@rushstack/localization-utilities_v0.9.62",
+      "date": "Fri, 02 Aug 2024 17:26:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.12.62`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.61",
+      "tag": "@rushstack/localization-utilities_v0.9.61",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.12.61`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.60",
+      "tag": "@rushstack/localization-utilities_v0.9.60",
+      "date": "Wed, 24 Jul 2024 00:12:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.12.60`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.59",
+      "tag": "@rushstack/localization-utilities_v0.9.59",
+      "date": "Wed, 17 Jul 2024 06:55:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.12.59`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.58",
+      "tag": "@rushstack/localization-utilities_v0.9.58",
+      "date": "Wed, 17 Jul 2024 00:11:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.12.58`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.57",
+      "tag": "@rushstack/localization-utilities_v0.9.57",
+      "date": "Tue, 16 Jul 2024 00:36:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.12.57`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.56",
+      "tag": "@rushstack/localization-utilities_v0.9.56",
+      "date": "Thu, 27 Jun 2024 21:01:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.12.56`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.55",
+      "tag": "@rushstack/localization-utilities_v0.9.55",
+      "date": "Mon, 03 Jun 2024 23:43:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.12.55`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.54",
+      "tag": "@rushstack/localization-utilities_v0.9.54",
+      "date": "Thu, 30 May 2024 00:13:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing `type` modifiers on type-only exports."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.12.54`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.17`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.53",
       "tag": "@rushstack/localization-utilities_v0.9.53",
       "date": "Wed, 29 May 2024 02:03:50 GMT",

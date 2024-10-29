@@ -52,11 +52,15 @@ export type IPnpmVersionSpecifier = IPnpmV7VersionSpecifier | IPnpmV8VersionSpec
 export interface IPnpmShrinkwrapDependencyYaml {
   /** Information about the resolved package */
   resolution?: {
+    /** The directory this package should clone, for injected dependencies */
+    directory?: string;
     /** The hash of the tarball, to ensure archive integrity */
-    integrity: string;
-    /** The name of the tarball, if this was from a TGX file */
+    integrity?: string;
+    /** The name of the tarball, if this was from a TGZ file */
     tarball?: string;
   };
+  /** The list of bundled dependencies in this package */
+  bundledDependencies?: ReadonlyArray<string>;
   /** The list of dependencies and the resolved version */
   dependencies?: Record<string, IPnpmVersionSpecifier>;
   /** The list of optional dependencies and the resolved version */
@@ -68,6 +72,16 @@ export interface IPnpmShrinkwrapDependencyYaml {
    * https://github.com/yarnpkg/rfcs/blob/master/accepted/0000-optional-peer-dependencies.md
    */
   peerDependenciesMeta?: Record<string, IPeerDependenciesMetaYaml>;
+  /** The name of the package, if the package is a local tarball */
+  name?: string;
+  /** If this is an optional dependency */
+  optional?: boolean;
+  /** The values of process.platform supported by this package */
+  os?: readonly string[];
+  /** The values of process.arch supported by this package */
+  cpu?: readonly string[];
+  /** The libc runtimes supported by this package */
+  libc?: readonly string[];
 }
 
 export interface IPnpmShrinkwrapImporterYaml {
@@ -134,6 +148,8 @@ export interface IPnpmShrinkwrapYaml {
   specifiers: Record<string, string>;
   /** The list of override version number for dependencies */
   overrides?: { [dependency: string]: string };
+  /** The checksum of package extensions fields for extending dependencies */
+  packageExtensionsChecksum?: string;
 }
 
 export interface ILoadFromFileOptions {
@@ -261,6 +277,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly specifiers: ReadonlyMap<string, string>;
   public readonly packages: ReadonlyMap<string, IPnpmShrinkwrapDependencyYaml>;
   public readonly overrides: ReadonlyMap<string, string>;
+  public readonly packageExtensionsChecksum: undefined | string;
 
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
   private readonly _integrities: Map<string, Map<string, string>>;
@@ -290,6 +307,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     this.specifiers = new Map(Object.entries(shrinkwrapJson.specifiers || {}));
     this.packages = new Map(Object.entries(shrinkwrapJson.packages || {}));
     this.overrides = new Map(Object.entries(shrinkwrapJson.overrides || {}));
+    this.packageExtensionsChecksum = shrinkwrapJson.packageExtensionsChecksum;
 
     // Importers only exist in workspaces
     this.isWorkspaceCompatible = this.importers.size > 0;
@@ -346,7 +364,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _disallowInsecureSha1(
     customTipsConfiguration: CustomTipsConfiguration,
     exemptPackageVersions: Record<string, string[]>,
-    terminal: ITerminal
+    terminal: ITerminal,
+    subspaceName: string
   ): boolean {
     const exemptPackageList: Map<string, boolean> = new Map();
     for (const [pkgName, versions] of Object.entries(exemptPackageVersions)) {
@@ -361,8 +380,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         !exemptPackageList.has(this._parseDependencyPath(pkgName))
       ) {
         terminal.writeErrorLine(
-          'Error: An integrity field with "sha1" was found in pnpm-lock.yaml;' +
-            ' this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n'
+          'Error: An integrity field with "sha1" was detected in the pnpm-lock.yaml file located in subspace ' +
+            `${subspaceName}; this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n`
         );
 
         customTipsConfiguration._showErrorTip(terminal, CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1);
@@ -388,7 +407,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       const isError: boolean = this._disallowInsecureSha1(
         rushConfiguration.customTipsConfiguration,
         pnpmLockfilePolicies.disallowInsecureSha1.exemptPackageVersions,
-        terminal
+        terminal,
+        subspace.subspaceName
       );
       if (isError) {
         invalidPoliciesCount += 1;
@@ -711,7 +731,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const orphanedProjectPaths: string[] = [];
     for (const importerKey of this.getImporterKeys()) {
       // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
-      const rushProjectPath: string = path.resolve(subspace.getSubspaceTempFolder(), importerKey);
+      const rushProjectPath: string = path.resolve(subspace.getSubspaceTempFolderPath(), importerKey);
       if (!rushConfiguration.tryGetProjectForPath(rushProjectPath)) {
         orphanedProjectPaths.push(rushProjectPath);
       }
@@ -789,10 +809,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
-    subspace: Subspace
+    subspace: Subspace,
+    variant: string | undefined
   ): Promise<boolean> {
     const importerKey: string = this.getImporterKeyByPath(
-      subspace.getSubspaceTempFolder(),
+      subspace.getSubspaceTempFolderPath(),
       project.projectFolder
     );
 
@@ -808,7 +829,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (!this._pnpmfileConfiguration) {
       this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
         project.rushConfiguration,
-        subspace
+        subspace,
+        variant
       );
     }
 
@@ -818,7 +840,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (project.rushConfiguration.subspacesFeatureEnabled) {
       // Get the pnpmfile
       const subspacePnpmfilePath: string = path.join(
-        subspace.getSubspaceTempFolder(),
+        subspace.getSubspaceTempFolderPath(),
         RushConstants.pnpmfileGlobalFilename
       );
 
@@ -870,7 +892,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
     // found versions much simpler.
-    const { dependencyList, devDependencyList } = PackageJsonEditor.fromObject(
+    const { dependencyList, devDependencyList, dependencyMetaList } = PackageJsonEditor.fromObject(
       this._pnpmfileConfiguration.transform(transformedPackageJson),
       project.packageJsonEditor.filePath
     );
@@ -958,6 +980,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       );
       const importerDependencies: Set<string> = new Set(Object.keys(importer.dependencies ?? {}));
       const importerDevDependencies: Set<string> = new Set(Object.keys(importer.devDependencies ?? {}));
+      const importerDependenciesMeta: Set<string> = new Set(Object.keys(importer.dependenciesMeta ?? {}));
 
       for (const { dependencyType, name, version } of allDependencies) {
         let isOptional: boolean = false;
@@ -1017,11 +1040,18 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         }
       }
 
+      for (const { name, injected } of dependencyMetaList) {
+        if (importer.dependenciesMeta?.[name]?.injected === injected) {
+          importerDependenciesMeta.delete(name);
+        }
+      }
+
       // Finally, validate that all values in the importer are also present in the dependency list.
       if (
         importerOptionalDependencies.size > 0 ||
         importerDependencies.size > 0 ||
-        importerDevDependencies.size > 0
+        importerDevDependencies.size > 0 ||
+        importerDependenciesMeta.size > 0
       ) {
         return true;
       }

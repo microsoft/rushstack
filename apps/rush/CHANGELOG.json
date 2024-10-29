@@ -2,6 +2,627 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.140.0",
+      "tag": "@microsoft/rush_v5.140.0",
+      "date": "Tue, 22 Oct 2024 23:59:54 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue when using `rush deploy` where the `node_modules/.bin` folder symlinks were not created for deployed packages when using the \"default\" link creation mode"
+          },
+          {
+            "comment": "Add support for the `globalIgnoredOptionalDependencies` field in the `common/config/rush/pnpm-config.json` file to allow specifying optional dependencies that should be ignored by PNPM"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.139.0",
+      "tag": "@microsoft/rush_v5.139.0",
+      "date": "Thu, 17 Oct 2024 20:37:39 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow rush plugins to extend build cache entries by writing additional files to the metadata folder. Expose the metadata folder path to plugins."
+          },
+          {
+            "comment": "[CACHE BREAK] Alter the computation of build cache IDs to depend on the graph of operations in the build and therefore account for multiple phases, rather than only the declared dependencies. Ensure that `dependsOnEnvVars` and command line parameters that affect upstream phases impact the cache IDs of downstream operations."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Replace use of `ProjectChangeAnalyzer` in phased command hooks with a new `InputsSnapshot` data structure that is completely synchronous and does not perform any disk operations. Perform all disk operations and state computation prior to executing the build graph."
+          },
+          {
+            "comment": "Add a new property `enabled` to `Operation` that when set to false, will cause the execution engine to immediately return `OperationStatus.Skipped` instead of invoking the runner. Use this property to disable operations that are not intended to be executed in the current pass, e.g. those that did not contain changes in the most recent watch iteration, or those excluded by `--only`."
+          },
+          {
+            "comment": "Add an optional property `cacheHashSalt` to `build-cache.json` to allow repository maintainers to globally force a hash change in build cache entries."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.138.0",
+      "tag": "@microsoft/rush_v5.138.0",
+      "date": "Thu, 03 Oct 2024 22:31:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Changes the behavior of phased commands in watch mode to, when running a phase `_phase:<name>` in all iterations after the first, prefer a script entry named `_phase:<name>:incremental` if such a script exists. The build cache will expect the outputs from the corresponding `_phase:<name>` script (with otherwise the same inputs) to be equivalent when looking for a cache hit."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.137.0",
+      "tag": "@microsoft/rush_v5.137.0",
+      "date": "Thu, 03 Oct 2024 19:46:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Expose `getChangesByProject` to allow classes that extend ProjectChangeAnalyzer to override file change analysis"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.136.1",
+      "tag": "@microsoft/rush_v5.136.1",
+      "date": "Thu, 26 Sep 2024 22:59:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the `--variant` parameter was missing from a phased command when the command's `alwaysInstall` property was set to `true`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.136.0",
+      "tag": "@microsoft/rush_v5.136.0",
+      "date": "Thu, 26 Sep 2024 21:48:00 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bring back the Variants feature that was removed in https://github.com/microsoft/rushstack/pull/4538."
+          },
+          {
+            "comment": "Bump express dependency to 4.20.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.135.0",
+      "tag": "@microsoft/rush_v5.135.0",
+      "date": "Fri, 20 Sep 2024 20:23:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a bug that caused rush-resolver-cache-plugin to crash on Windows."
+          },
+          {
+            "comment": "Make individual Rush log files available via the rush-serve-plugin server at the relative URL specified by \"logServePath\" option. Annotate operations sent over the WebSocket with the URLs of their log files."
+          },
+          {
+            "comment": "Adds a new experiment 'allowCobuildWithoutCache' for cobuilds to allow uncacheable operations to benefit from cobuild orchestration without using the build cache."
+          },
+          {
+            "comment": "Deprecate the `sharding.shardOperationSettings` property in the project `config/rush-project.json` in favor of an `operationSettings` entry for an operation with a suffix of `:shard`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.134.0",
+      "tag": "@microsoft/rush_v5.134.0",
+      "date": "Fri, 13 Sep 2024 01:02:46 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Always update shrinkwrap when `globalPackageExtensions` in `common/config/rush/pnpm-config.json` has been changed."
+          },
+          {
+            "comment": "Pass the initialized credentials cache to `AzureAuthenticationBase._getCredentialFromTokenAsync` in `@rushstack/rush-azure-storage-build-cache-plugin`."
+          },
+          {
+            "comment": "Support the `rush-pnpm patch-remove` command."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.133.4",
+      "tag": "@microsoft/rush_v5.133.4",
+      "date": "Sat, 07 Sep 2024 00:18:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Mark `AzureAuthenticationBase._credentialCacheId` as protected in `@rushstack/rush-azure-storage-build-cache-plugin`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.133.3",
+      "tag": "@microsoft/rush_v5.133.3",
+      "date": "Thu, 29 Aug 2024 22:49:36 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix Windows compatibility for `@rushstack/rush-resolver-cache-plugin`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.133.2",
+      "tag": "@microsoft/rush_v5.133.2",
+      "date": "Wed, 28 Aug 2024 20:46:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where running `rush install --resolution-only` followed by `rush install` would not actually install modules."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.133.1",
+      "tag": "@microsoft/rush_v5.133.1",
+      "date": "Wed, 28 Aug 2024 18:19:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "In rush-resolver-cache-plugin, include the base path in the resolver cache file."
+          },
+          {
+            "comment": "Support `bundledDependencies` in rush-resolver-cache-plugin."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.133.0",
+      "tag": "@microsoft/rush_v5.133.0",
+      "date": "Fri, 23 Aug 2024 00:40:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Always update shrinkwrap when globalOverrides has been changed"
+          },
+          {
+            "comment": "Add `afterInstall` plugin hook, which runs after any install finishes."
+          },
+          {
+            "comment": "Add rush.json option \"suppressRushIsPublicVersionCheck\" to allow suppressing hardcoded calls to the npmjs.org registry."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.132.0",
+      "tag": "@microsoft/rush_v5.132.0",
+      "date": "Wed, 21 Aug 2024 16:25:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new `rush install-autoinstaller` command that ensures that the specified autoinstaller is installed."
+          },
+          {
+            "comment": "Emit an error if a `workspace:` specifier is used in a dependency that is listed in `decoupledLocalDependencies`."
+          },
+          {
+            "comment": "Add support for `--resolution-only` to `rush install` to enforce strict peer dependency resolution."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.131.5",
+      "tag": "@microsoft/rush_v5.131.5",
+      "date": "Mon, 19 Aug 2024 20:03:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where PreferredVersions are ignored when a project contains an overlapping dependency entry (https://github.com/microsoft/rushstack/issues/3205)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.131.4",
+      "tag": "@microsoft/rush_v5.131.4",
+      "date": "Sun, 11 Aug 2024 05:02:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Revert a breaking change in Rush 5.131.3 where pnpm patches were moved from `common/pnpm-patches` to `common/config/rush/pnpm-patches`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.131.3",
+      "tag": "@microsoft/rush_v5.131.3",
+      "date": "Sat, 10 Aug 2024 02:27:14 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush-pnpm patch-commit` would not correctly resolve patch files when the subspaces feature is enabled."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.131.2",
+      "tag": "@microsoft/rush_v5.131.2",
+      "date": "Thu, 08 Aug 2024 23:38:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Include a missing dependency in `@rushstack/rush-sdk`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.131.1",
+      "tag": "@microsoft/rush_v5.131.1",
+      "date": "Thu, 08 Aug 2024 22:08:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush-sdk can't be bundled by a consuming package."
+          },
+          {
+            "comment": "Extract LookupByPath to @rushstack/lookup-by-path and load it from there."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.131.0",
+      "tag": "@microsoft/rush_v5.131.0",
+      "date": "Fri, 02 Aug 2024 17:26:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve Rush alerts with a new \"rush alert\" command and snooze feature"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.130.3",
+      "tag": "@microsoft/rush_v5.130.3",
+      "date": "Wed, 31 Jul 2024 23:30:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Rush does not detect an outdated lockfile if the `dependenciesMeta` `package.json` field is edited."
+          },
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          },
+          {
+            "comment": "Fix a bug that caused the build cache to close its terminal writer before execution on error."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.130.2",
+      "tag": "@microsoft/rush_v5.130.2",
+      "date": "Fri, 19 Jul 2024 03:41:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush-pnpm patch-commit` did not work correctly when subspaces are enabled."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.130.1",
+      "tag": "@microsoft/rush_v5.130.1",
+      "date": "Wed, 17 Jul 2024 07:37:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent regression for `rush init`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.130.0",
+      "tag": "@microsoft/rush_v5.130.0",
+      "date": "Wed, 17 Jul 2024 06:55:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Initial implementation of Rush alerts feature"
+          },
+          {
+            "comment": "Adjusts how cobuilt operations are added and requeued to the operation graph. Removes the 'RemoteExecuting' status."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.7",
+      "tag": "@microsoft/rush_v5.129.7",
+      "date": "Tue, 16 Jul 2024 04:16:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Upgrade pnpm-sync-lib to fix an edge case when handling node_modules folder"
+          },
+          {
+            "comment": "Don't interrupt the installation process if the user hasn't enabled the inject dependencies feature."
+          },
+          {
+            "comment": "Improve `@rushtack/rush-sdk` and make it reuse `@microsoft/rush-lib` from rush global folder"
+          },
+          {
+            "comment": "Remove the trailing slash in the `.DS_Store/` line in the `.gitignore` file generated by `rush init`. `.DS_Store` is a file, not a folder."
+          },
+          {
+            "comment": "Support deep references to internal Apis"
+          },
+          {
+            "comment": "Fix an issue where `rush add` would ignore the `ensureConsistentVersions` option if that option was set in `rush.json` instead of in `common/config/rush/common-versions.json`."
+          },
+          {
+            "comment": "Fix an issue where running `rush add` in a project can generate a `package.json` file that uses JSON5 syntax. Package managers expect strict JSON."
+          },
+          {
+            "comment": "fix spelling of \"committing\" in rush.json init template and schema"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.6",
+      "tag": "@microsoft/rush_v5.129.6",
+      "date": "Thu, 27 Jun 2024 00:44:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an edge case for workspace peer dependencies when calculating packageJsonInjectedDependenciesHash to improve its accuracy "
+          },
+          {
+            "comment": "Update a URL in the `.pnpmfile.cjs` generated by `rush init`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.5",
+      "tag": "@microsoft/rush_v5.129.5",
+      "date": "Tue, 25 Jun 2024 20:13:29 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Don't include package.json version field when calculating packageJsonInjectedDependenciesHash"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.4",
+      "tag": "@microsoft/rush_v5.129.4",
+      "date": "Mon, 24 Jun 2024 23:49:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Normalize the file permissions (644) for Rush plugin files that are committed to Git"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.3",
+      "tag": "@microsoft/rush_v5.129.3",
+      "date": "Fri, 21 Jun 2024 00:15:54 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed an issue where DependencyAnalyzer caches the same analysis for all subspaces"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.2",
+      "tag": "@microsoft/rush_v5.129.2",
+      "date": "Wed, 19 Jun 2024 23:59:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the `rush pnpm ...` command always terminates with an exit code of 1."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.1",
+      "tag": "@microsoft/rush_v5.129.1",
+      "date": "Wed, 19 Jun 2024 04:20:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add logic to remove outdated .pnpm-sync.json files during rush install or update"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.129.0",
+      "tag": "@microsoft/rush_v5.129.0",
+      "date": "Wed, 19 Jun 2024 03:31:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new `init-subspace` command to initialize a new subspace."
+          },
+          {
+            "comment": "Move the `ensureConsistentVersions` setting from `rush.json` to `common/config/rush/common-versions.json`, or to `common/config/rush/<subspace>/common-versions.json` if subspaces are enabled."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.128.5",
+      "tag": "@microsoft/rush_v5.128.5",
+      "date": "Tue, 18 Jun 2024 04:02:54 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a key collision for cobuild clustering for operations that share the same phase name."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.128.4",
+      "tag": "@microsoft/rush_v5.128.4",
+      "date": "Mon, 17 Jun 2024 23:22:49 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump the `@azure/identity` package to `~4.2.1` to mitigate GHSA-m5vv-6r4h-3vj9."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.128.3",
+      "tag": "@microsoft/rush_v5.128.3",
+      "date": "Mon, 17 Jun 2024 20:46:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed an issue where the --make-consistent flag would affect projects outside the current subspace."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.128.2",
+      "tag": "@microsoft/rush_v5.128.2",
+      "date": "Mon, 17 Jun 2024 17:08:00 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush-pnpm patch is not working for the subspace scenario"
+          },
+          {
+            "comment": "Fix an issue where rush update can not detect package.json changes in other subspaces for the injected installation case"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.128.1",
+      "tag": "@microsoft/rush_v5.128.1",
+      "date": "Wed, 12 Jun 2024 20:07:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where running `rush install` in a subspace with only a `--from` selector is treated as selecting all projects."
+          },
+          {
+            "comment": "Fix an issue where not published packages are not correctly identified as not published when querying a package feed under certain versions of NPM."
+          },
+          {
+            "comment": "Fix an issue where selection syntax (like `--to` or `--from`) misses project dependencies declared using workspace alias syntax (i.e. - `workspace:alias@1.2.3`)."
+          },
+          {
+            "comment": "Fix an issue where an error is thrown if a Git email address isn't configured and email validation isn't configured in `rush.json` via `allowedEmailRegExps`."
+          },
+          {
+            "comment": "Display the name of the subspace when an error is emitted because a dependency hash uses the SHA1 algorithm and the \"disallowInsecureSha1\" option is enabled."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.128.0",
+      "tag": "@microsoft/rush_v5.128.0",
+      "date": "Fri, 07 Jun 2024 22:59:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Graduate the `phasedCommands` experiment to a standard feature."
+          },
+          {
+            "comment": "Improve `rush init` template for `.gitignore`"
+          },
+          {
+            "comment": "Remove an unnecessary condition in the logic for skipping operations when build cache is disabled."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.127.1",
+      "tag": "@microsoft/rush_v5.127.1",
+      "date": "Thu, 06 Jun 2024 03:05:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove the second instance of the project name from the project operation filenames in `<projectFolder>/rush-logs`. This restores the log filenames to their format before Rush 5.125.0."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.127.0",
+      "tag": "@microsoft/rush_v5.127.0",
+      "date": "Tue, 04 Jun 2024 00:44:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixes build cache no-op and sharded operation clustering."
+          },
+          {
+            "comment": "Updated common-veresions.json schema with ensureConsistentVersions property"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.126.0",
+      "tag": "@microsoft/rush_v5.126.0",
+      "date": "Mon, 03 Jun 2024 02:49:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixes a string schema validation warning message when running `rush deploy`."
+          },
+          {
+            "comment": "Update the functionality that runs external lifecycle processes to be async."
+          },
+          {
+            "comment": "Move logs into the project `rush-logs` folder regardless of whether or not the `\"phasedCommands\"` experiment is enabled."
+          },
+          {
+            "comment": "Update the `nodeSupportedVersionRange` in the `rush init` template to the LTS and current Node versions."
+          },
+          {
+            "comment": "Update the `pnpmVersion` in the `rush init` template to the latest version of pnpm 8."
+          },
+          {
+            "comment": "Update the `.gitignore` in the `rush init` template to include some common toolchain output files and folders."
+          },
+          {
+            "comment": "Include missing `type` modifiers on type-only exports."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.125.1",
       "tag": "@microsoft/rush_v5.125.1",
       "date": "Wed, 29 May 2024 05:39:54 GMT",

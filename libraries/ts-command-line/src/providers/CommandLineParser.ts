@@ -13,6 +13,7 @@ import {
 } from './CommandLineParameterProvider';
 import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError';
 import { TabCompleteAction } from './TabCompletionAction';
+import { TypeUuid, uuidAlreadyReportedError } from '../TypeUuidLite';
 
 /**
  * Options for the {@link CommandLineParser} constructor.
@@ -166,6 +167,11 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         }
         if (!process.exitCode) {
           process.exitCode = err.exitCode;
+        }
+      } else if (TypeUuid.isInstanceOf(err, uuidAlreadyReportedError)) {
+        //  AlreadyReportedError
+        if (!process.exitCode) {
+          process.exitCode = 1;
         }
       } else {
         let message: string = ((err as Error).message || 'An unknown error occurred').trim();

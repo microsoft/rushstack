@@ -1,6 +1,148 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Wed, 29 May 2024 02:03:51 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Oct 2024 00:15:48 GMT and should not be manually modified.
+
+## 0.11.17
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.11.16
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.11.15
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.11.14
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.11.13
+Wed, 02 Oct 2024 00:11:19 GMT
+
+### Patches
+
+- Ensure compatibility with webpack 5.95.0
+
+## 0.11.12
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.11.11
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.11.10
+Sat, 28 Sep 2024 00:11:41 GMT
+
+_Version update only_
+
+## 0.11.9
+Tue, 24 Sep 2024 00:11:19 GMT
+
+### Patches
+
+- Fix circular references between localized assets' "related" properties. This caused emitting of the webpack stats object to fail.
+
+## 0.11.8
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.11.7
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.11.6
+Mon, 26 Aug 2024 02:00:11 GMT
+
+_Version update only_
+
+## 0.11.5
+Wed, 21 Aug 2024 16:24:51 GMT
+
+_Version update only_
+
+## 0.11.4
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.11.3
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.11.2
+Wed, 07 Aug 2024 00:11:51 GMT
+
+### Patches
+
+- Improve performance of localized asset reconstruction.
+
+## 0.11.1
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.11.0
+Wed, 31 Jul 2024 00:10:53 GMT
+
+### Minor changes
+
+- Include webpack compilation in localizationStats callback.
+
+## 0.10.21
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.10.20
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.10.19
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.10.18
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.10.17
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 0.10.16
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
+
+## 0.10.15
+Mon, 03 Jun 2024 23:43:15 GMT
+
+_Version update only_
+
+## 0.10.14
+Thu, 30 May 2024 00:13:05 GMT
+
+### Patches
+
+- Include missing `type` modifiers on type-only exports.
 
 ## 0.10.13
 Wed, 29 May 2024 02:03:51 GMT
