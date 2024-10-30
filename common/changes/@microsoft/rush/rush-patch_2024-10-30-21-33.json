@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update the `jsonpath-plus` indirect dependency to mitigate CVE-2024-21534.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
