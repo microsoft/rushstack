@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.140.1",
+      "tag": "@microsoft/rush_v5.140.1",
+      "date": "Wed, 30 Oct 2024 21:50:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update the `jsonpath-plus` indirect dependency to mitigate CVE-2024-21534."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.140.0",
       "tag": "@microsoft/rush_v5.140.0",
       "date": "Tue, 22 Oct 2024 23:59:54 GMT",

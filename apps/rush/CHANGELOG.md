@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 22 Oct 2024 23:59:54 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Oct 2024 21:50:51 GMT and should not be manually modified.
+
+## 5.140.1
+Wed, 30 Oct 2024 21:50:51 GMT
+
+### Updates
+
+- Update the `jsonpath-plus` indirect dependency to mitigate CVE-2024-21534.
 
 ## 5.140.0
 Tue, 22 Oct 2024 23:59:54 GMT
