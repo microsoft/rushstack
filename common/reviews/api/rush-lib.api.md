@@ -1005,11 +1005,13 @@ export class PackageJsonDependency {
 
 // @public (undocumented)
 export class PackageJsonDependencyMeta {
-    constructor(name: string, injected: boolean, onChange: () => void);
+    constructor(name: string, sourceData: object, onChange: () => void);
     // (undocumented)
     get injected(): boolean;
     // (undocumented)
     readonly name: string;
+    // (undocumented)
+    get sourceData(): object;
 }
 
 // @public (undocumented)

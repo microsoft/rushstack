@@ -325,9 +325,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       if (dependencyMetaList.length !== 0) {
         const dependenciesMeta: IDependenciesMetaTable = {};
         for (const dependencyMeta of dependencyMetaList) {
-          dependenciesMeta[dependencyMeta.name] = {
-            injected: dependencyMeta.injected
-          };
+          dependenciesMeta[dependencyMeta.name] = dependencyMeta.sourceData;
         }
 
         // get the relative path from common temp folder to package folder, to align with the value in pnpm-lock.yaml

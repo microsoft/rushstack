@@ -50,19 +50,23 @@ export class PackageJsonDependency {
  * @public
  */
 export class PackageJsonDependencyMeta {
-  private _injected: boolean;
+  private _sourceData: object;
   private _onChange: () => void;
 
   public readonly name: string;
 
-  public constructor(name: string, injected: boolean, onChange: () => void) {
+  public constructor(name: string, sourceData: object, onChange: () => void) {
     this.name = name;
-    this._injected = injected;
+    this._sourceData = sourceData;
     this._onChange = onChange;
   }
 
+  public get sourceData(): object {
+    return this._sourceData;
+  }
+
   public get injected(): boolean {
-    return this._injected;
+    return (this._sourceData as { injected?: boolean }).injected ?? false;
   }
 }
 
@@ -107,7 +111,7 @@ export class PackageJsonEditor {
     const devDependencies: { [key: string]: string } = data.devDependencies || {};
     const resolutions: { [key: string]: string } = data.resolutions || {};
 
-    const dependenciesMeta: { [key: string]: { [key: string]: boolean } } = data.dependenciesMeta || {};
+    const dependenciesMeta: { [key: string]: object } = data.dependenciesMeta || {};
 
     const _onChange: () => void = this._onChange.bind(this);
 
@@ -183,7 +187,7 @@ export class PackageJsonEditor {
       Object.keys(dependenciesMeta || {}).forEach((packageName: string) => {
         this._dependenciesMeta.set(
           packageName,
-          new PackageJsonDependencyMeta(packageName, dependenciesMeta[packageName].injected, _onChange)
+          new PackageJsonDependencyMeta(packageName, dependenciesMeta[packageName], _onChange)
         );
       });
 
