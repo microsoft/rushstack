@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where incremental building (with LegacySkipPlugin) would not work when no-op operations were present in the process",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
