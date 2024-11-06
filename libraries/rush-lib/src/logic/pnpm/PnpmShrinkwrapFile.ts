@@ -32,15 +32,14 @@ import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
 import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
 import type { Subspace } from '../../api/Subspace';
 import { CustomTipId, type CustomTipsConfiguration } from '../../api/CustomTipsConfiguration';
+import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
 export interface IPeerDependenciesMetaYaml {
   optional?: boolean;
 }
-export interface IDependenciesMetaYaml {
-  injected?: boolean;
-}
+export type IDependenciesMetaYaml = object;
 
 export type IPnpmV7VersionSpecifier = string;
 export interface IPnpmV8VersionSpecifier {
@@ -1040,8 +1039,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         }
       }
 
-      for (const { name, injected } of dependencyMetaList) {
-        if (importer.dependenciesMeta?.[name]?.injected === injected) {
+      for (const { name, sourceData } of dependencyMetaList) {
+        if (objectsAreDeepEqual(importer.dependenciesMeta?.[name], sourceData)) {
           importerDependenciesMeta.delete(name);
         }
       }
