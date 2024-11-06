@@ -79,7 +79,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
           const { operation } = record;
           const { associatedProject, runner, logFilenameIdentifier } = operation;
           if (!associatedProject || !runner) {
-            return;
+            continue;
           }
 
           if (!runner.cacheable) {
@@ -88,7 +88,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
               packageDeps: undefined,
               packageDepsPath: ''
             });
-            return;
+            continue;
           }
 
           const packageDepsFilename: string = `package-deps_${logFilenameIdentifier}.json`;
@@ -109,7 +109,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
             if (!fileHashes) {
               logGitWarning = true;
-              return;
+              continue;
             }
 
             const files: Record<string, string> = {};
