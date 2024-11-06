@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where usage of custom fields in dependenciesMeta caused rush install to think that shrinkwrap file is outdated",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
