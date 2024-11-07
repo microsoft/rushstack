@@ -47,7 +47,7 @@ export abstract class AzureAuthenticationBase {
     tryGetCachedCredentialAsync(options: ITryGetCachedCredentialOptionsLogWarning): Promise<ICredentialCacheEntry | undefined>;
     // (undocumented)
     updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
-    updateCachedCredentialInteractiveAsync(terminal: ITerminal, onlyIfExistingCredentialExpiresAfter?: Date): Promise<void>;
+    updateCachedCredentialInteractiveAsync(terminal: ITerminal, onlyIfExistingCredentialExpiresBefore?: Date): Promise<void>;
 }
 
 // @public (undocumented)

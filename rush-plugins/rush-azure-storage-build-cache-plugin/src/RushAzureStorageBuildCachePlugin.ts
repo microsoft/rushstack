@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
-import type { AzureEnvironmentName } from './AzureAuthenticationBase';
+import type { AzureEnvironmentName, LoginFlowType } from './AzureAuthenticationBase';
 
 const PLUGIN_NAME: string = 'AzureStorageBuildCachePlugin';
 
@@ -26,6 +26,12 @@ interface IAzureBlobStorageConfigurationJson {
   azureEnvironment?: AzureEnvironmentName;
 
   /**
+   * Login flow to use for interactive authentication.
+   * @defaultValue 'AdoCodespacesAuth' if on GitHub Codespaces, 'InteractiveBrowser' otherwise
+   */
+  readonly loginFlow?: LoginFlowType;
+
+  /**
    * An optional prefix for cache item blob names.
    */
   blobPrefix?: string;
@@ -34,6 +40,11 @@ interface IAzureBlobStorageConfigurationJson {
    * If set to true, allow writing to the cache. Defaults to false.
    */
   isCacheWriteAllowed?: boolean;
+
+  /**
+   * If set to true, reading the cache requires authentication. Defaults to false.
+   */
+  readRequiresAuthentication?: boolean;
 }
 
 /**
@@ -55,7 +66,9 @@ export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
           storageContainerName: azureBlobStorageConfiguration.storageContainerName,
           azureEnvironment: azureBlobStorageConfiguration.azureEnvironment,
           blobPrefix: azureBlobStorageConfiguration.blobPrefix,
-          isCacheWriteAllowed: !!azureBlobStorageConfiguration.isCacheWriteAllowed
+          loginFlow: azureBlobStorageConfiguration.loginFlow,
+          isCacheWriteAllowed: !!azureBlobStorageConfiguration.isCacheWriteAllowed,
+          readRequiresAuthentication: !!azureBlobStorageConfiguration.readRequiresAuthentication
         });
       });
     });
