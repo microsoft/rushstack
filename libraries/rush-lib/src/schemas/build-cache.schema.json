@@ -148,7 +148,7 @@
           "properties": {
             "cacheProvider": {
               "type": "string",
-              "pattern": "^(?:(?!azure-blob-storage|amazon-s3|http).)*$"
+              "pattern": "^(?:(?!local-only|azure-blob-storage|amazon-s3|http).)*$"
             }
           }
         },
