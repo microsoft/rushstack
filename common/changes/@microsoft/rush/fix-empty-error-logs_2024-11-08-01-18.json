@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where empty error logs were created for operations that did not write to standard error.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

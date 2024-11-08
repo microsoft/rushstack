@@ -148,7 +148,7 @@ export class SplitLogFileWritable extends TerminalWritable {
     this.errorLogPath = errorLogPath;
 
     this._logWriter = FileWriter.open(logPath);
-    this._errorLogWriter = FileWriter.open(errorLogPath);
+    this._errorLogWriter = undefined;
   }
 
   // Override writeChunk function to throw custom error
