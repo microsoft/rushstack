@@ -41,9 +41,9 @@
       "description": "If set to true, allow writing to the cache. Defaults to false."
     },
 
-    "isAnonymousReadAllowed": {
+    "readRequiresAuthentication": {
       "type": "boolean",
-      "description": "If set to true, the cache can be read without authentication. Defaults to false."
+      "description": "If set to true, reading the cache requires authentication. Defaults to false."
     }
   }
 }
