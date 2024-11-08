@@ -158,6 +158,16 @@
           "properties": {
             "cacheProvider": {
               "type": "string",
+              "enum": ["local-only"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "cacheProvider": {
+              "type": "string",
               "enum": ["azure-blob-storage"]
             },
             "azureBlobStorageConfiguration": {
