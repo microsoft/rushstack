@@ -260,8 +260,7 @@ function writeDetailedSummary(
     if (shouldPrintLogFilePaths) {
       if (operationResult.status === OperationStatus.Failure && operationResult.logFilePaths !== undefined) {
         terminal.writeLine('');
-        terminal.writeLine(Colorize.gray(`stdout: ${operationResult.logFilePaths.text}`));
-        terminal.writeLine(Colorize.gray(`stderr: ${operationResult.logFilePaths.error}`));
+        terminal.writeLine(Colorize.gray(`log file: ${operationResult.logFilePaths.text}`));
       }
     }
 
