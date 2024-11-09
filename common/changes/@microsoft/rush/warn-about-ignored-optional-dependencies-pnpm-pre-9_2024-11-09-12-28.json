@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add warning when using globalIgnoredOptionalDependencies in < pnpm 9.0.0",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
