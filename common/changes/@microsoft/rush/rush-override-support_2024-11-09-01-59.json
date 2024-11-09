@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for overriding rush with custom installation path through common/temp/.rush-override file",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
