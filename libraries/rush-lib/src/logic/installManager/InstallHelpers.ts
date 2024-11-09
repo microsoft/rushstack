@@ -21,6 +21,7 @@ import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration'
 import { merge } from '../../utilities/objectUtilities';
 import type { Subspace } from '../../api/Subspace';
 import { RushConstants } from '../RushConstants';
+import * as semver from 'semver';
 
 interface ICommonPackageJson extends IPackageJson {
   pnpm?: {
@@ -71,6 +72,18 @@ export class InstallHelpers {
       }
 
       if (pnpmOptions.globalIgnoredOptionalDependencies) {
+        if (rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined && semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '9.0.0')) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            Colorize.yellow(
+              `Your version of pnpm ${rushConfiguration.rushConfigurationJson.pnpmVersion} ` +
+                `doesn't support "globalIgnoredOptionalDependencies. Please consider upgrading the ` +
+                `"pnpmVersion" setting in ${RushConstants.rushJsonFilename} to 9.0.0 or higher ` +
+                Colorize.bold('(please note that pnpm 9+ is not officially supported yet at the moment)')
+            )
+          );
+        }
+
         commonPackageJson.pnpm.ignoredOptionalDependencies = pnpmOptions.globalIgnoredOptionalDependencies;
       }
 
