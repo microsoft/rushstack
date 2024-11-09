@@ -18,10 +18,12 @@ const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVer
   alreadyReportedNodeTooNewError: false
 });
 
+import * as path from 'path';
+import * as fs from 'fs';
 import * as os from 'os';
 import * as semver from 'semver';
 
-import { Text, PackageJsonLookup } from '@rushstack/node-core-library';
+import { Text, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
 import { Colorize, ConsoleTerminalProvider, type ITerminalProvider } from '@rushstack/terminal';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
@@ -36,11 +38,67 @@ const configuration: MinimalRushConfiguration | undefined =
 
 const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
-let rushVersionToLoad: string | undefined = undefined;
+let rushVersionToLoadInfo: {
+  version: string;
+  path?: string;
+} | undefined = undefined;
+
+let overrideInfo: {
+  version: string;
+  path: string;
+} | undefined = undefined;
+
+if (configuration) {
+  const rushOverrideFilePath: string = path.join(
+    path.dirname(configuration.rushJsonFilename),
+    rushLib.RushConstants.commonFolderName,
+    rushLib.RushConstants.rushTempFolderName,
+    '.rush-override'
+  );
+
+  if (fs.existsSync(rushOverrideFilePath)) {
+    const overridePath: string = fs.readFileSync(rushOverrideFilePath, 'utf8').trim();
+    const overridePackageJson: IPackageJson | undefined = PackageJsonLookup.instance.tryLoadPackageJsonFor(overridePath);
+
+    if (overridePackageJson === undefined) {
+      console.log(Colorize.red(`Cannot use common/temp/.rush-override file as it doesn't point to valid Rush package`));
+      console.log(``);
+      console.log(Colorize.red(`If you're unfamiliar with this file, you can safely delete it`));
+      process.exit(1);
+    }
+
+    const overrideVersion: string = overridePackageJson.version;
+
+    const lines: string[] = [];
+    lines.push(
+      `*********************************************************************`,
+      `* WARNING! THE "common/temp/.rush-override" FILE IS PRESENT.        *`,
+      `*                                                                   *`,
+      `* You are using Rush@${overrideVersion} from .rush-override${Text.padEnd('', 26-overrideVersion.length)} *`
+    );
+
+    lines.push(`* The rush.json configuration asks for:   ${Text.padEnd(configuration.rushVersion, 25)} *`);
+
+    lines.push(
+      `*                                                                   *`,
+      `* To restore the normal behavior, delete common/temp/.rush-override *`,
+      `*********************************************************************`
+    );
+
+    console.error(lines.map((line) => Colorize.black(Colorize.yellowBackground(line))).join(os.EOL));
+
+    overrideInfo = {
+      version: overrideVersion,
+      path: overridePath,
+    };
+  }
+}
 
 const previewVersion: string | undefined = process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
 
-if (previewVersion) {
+if (overrideInfo) {
+  rushVersionToLoadInfo = overrideInfo;
+} else if (previewVersion) {
   if (!semver.valid(previewVersion, false)) {
     console.error(
       Colorize.red(`Invalid value for RUSH_PREVIEW_VERSION environment variable: "${previewVersion}"`)
@@ -48,7 +106,9 @@ if (previewVersion) {
     process.exit(1);
   }
 
-  rushVersionToLoad = previewVersion;
+  rushVersionToLoadInfo = {
+    version: previewVersion,
+  };
 
   const lines: string[] = [];
   lines.push(
@@ -71,12 +131,14 @@ if (previewVersion) {
 
   console.error(lines.map((line) => Colorize.black(Colorize.yellowBackground(line))).join(os.EOL));
 } else if (configuration) {
-  rushVersionToLoad = configuration.rushVersion;
+  rushVersionToLoadInfo = {
+    version: configuration.rushVersion,
+  };
 }
 
 // If we are previewing an older Rush that doesn't understand the RUSH_PREVIEW_VERSION variable,
 // then unset it.
-if (rushVersionToLoad && semver.lt(rushVersionToLoad, '5.0.0-dev.18')) {
+if (rushVersionToLoadInfo && semver.lt(rushVersionToLoadInfo.version, '5.0.0-dev.18')) {
   delete process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
 }
 
@@ -89,10 +151,10 @@ const launchOptions: rushLib.ILaunchOptions = { isManaged, alreadyReportedNodeTo
 
 // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
 // install it
-if (rushVersionToLoad && rushVersionToLoad !== currentPackageVersion) {
+if (rushVersionToLoadInfo && rushVersionToLoadInfo.version !== currentPackageVersion) {
   const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageVersion);
   versionSelector
-    .ensureRushVersionInstalledAsync(rushVersionToLoad, configuration, launchOptions)
+    .ensureRushVersionInstalledAsync(rushVersionToLoadInfo.version, rushVersionToLoadInfo.path, configuration, launchOptions)
     .catch((error: Error) => {
       console.log(Colorize.red('Error: ' + error.message));
     });

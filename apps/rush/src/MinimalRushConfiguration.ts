@@ -18,10 +18,12 @@ interface IMinimalRushConfigurationJson {
  * decide which version of Rush should be installed/used.
  */
 export class MinimalRushConfiguration {
+  private _rushJsonFilename: string;
   private _rushVersion: string;
   private _commonRushConfigFolder: string;
 
   private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson, rushJsonFilename: string) {
+    this._rushJsonFilename = rushJsonFilename;
     this._rushVersion =
       minimalRushConfigurationJson.rushVersion || minimalRushConfigurationJson.rushMinimumVersion;
     this._commonRushConfigFolder = path.join(
@@ -50,6 +52,10 @@ export class MinimalRushConfiguration {
     } catch (e) {
       return undefined;
     }
+  }
+
+  public get rushJsonFilename(): string {
+    return this._rushJsonFilename;
   }
 
   /**
