@@ -86,6 +86,7 @@ export {
   PackageJsonEditor,
   PackageJsonDependency,
   DependencyType,
+  type IPackageJsonDependencyMetaSourceData,
   PackageJsonDependencyMeta
 } from './api/PackageJsonEditor';
 

@@ -684,6 +684,14 @@ export interface _IOperationStateJson {
     nonCachedDurationMs: number;
 }
 
+// @public (undocumented)
+export interface IPackageJsonDependencyMetaSourceData {
+    // (undocumented)
+    [key: string]: unknown;
+    // (undocumented)
+    injected?: boolean;
+}
+
 // @public
 export interface IPackageManagerOptionsJsonBase {
     environmentVariables?: IConfigurationEnvironment;
@@ -1005,13 +1013,13 @@ export class PackageJsonDependency {
 
 // @public (undocumented)
 export class PackageJsonDependencyMeta {
-    constructor(name: string, sourceData: object, onChange: () => void);
+    constructor(name: string, sourceData: IPackageJsonDependencyMetaSourceData, onChange: () => void);
     // (undocumented)
     get injected(): boolean;
     // (undocumented)
     readonly name: string;
     // (undocumented)
-    get sourceData(): object;
+    get sourceData(): IPackageJsonDependencyMetaSourceData;
 }
 
 // @public (undocumented)

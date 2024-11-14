@@ -68,6 +68,7 @@ export interface IPeerDependenciesMetaTable {
 export interface IDependenciesMetaTable {
   [dependencyName: string]: {
     injected?: boolean;
+    [key: string]: unknown;
   };
 }
 

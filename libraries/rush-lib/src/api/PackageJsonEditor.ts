@@ -19,6 +19,14 @@ export enum DependencyType {
 /**
  * @public
  */
+export interface IPackageJsonDependencyMetaSourceData {
+  injected?: boolean;
+  [key: string]: unknown;
+}
+
+/**
+ * @public
+ */
 export class PackageJsonDependency {
   private _version: string;
   private _onChange: () => void;
@@ -50,23 +58,23 @@ export class PackageJsonDependency {
  * @public
  */
 export class PackageJsonDependencyMeta {
-  private _sourceData: object;
+  private _sourceData: IPackageJsonDependencyMetaSourceData;
   private _onChange: () => void;
 
   public readonly name: string;
 
-  public constructor(name: string, sourceData: object, onChange: () => void) {
+  public constructor(name: string, sourceData: IPackageJsonDependencyMetaSourceData, onChange: () => void) {
     this.name = name;
     this._sourceData = sourceData;
     this._onChange = onChange;
   }
 
-  public get sourceData(): object {
+  public get sourceData(): IPackageJsonDependencyMetaSourceData {
     return this._sourceData;
   }
 
   public get injected(): boolean {
-    return (this._sourceData as { injected?: boolean }).injected ?? false;
+    return this._sourceData.injected ?? false;
   }
 }
 
@@ -111,7 +119,8 @@ export class PackageJsonEditor {
     const devDependencies: { [key: string]: string } = data.devDependencies || {};
     const resolutions: { [key: string]: string } = data.resolutions || {};
 
-    const dependenciesMeta: { [key: string]: object } = data.dependenciesMeta || {};
+    const dependenciesMeta: { [key: string]: IPackageJsonDependencyMetaSourceData } =
+      data.dependenciesMeta || {};
 
     const _onChange: () => void = this._onChange.bind(this);
 

@@ -23,7 +23,12 @@ import type { IShrinkwrapFilePolicyValidatorOptions } from '../policy/Shrinkwrap
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
 import type { IExperimentsJson } from '../../api/ExperimentsConfiguration';
-import { DependencyType, type PackageJsonDependency, PackageJsonEditor } from '../../api/PackageJsonEditor';
+import {
+  DependencyType,
+  type PackageJsonDependency,
+  type IPackageJsonDependencyMetaSourceData,
+  PackageJsonEditor
+} from '../../api/PackageJsonEditor';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
@@ -39,10 +44,7 @@ const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 export interface IPeerDependenciesMetaYaml {
   optional?: boolean;
 }
-export interface IDependenciesMetaYaml {
-  injected?: boolean;
-  [key: string]?: unknown;
-}
+export type IDependenciesMetaYaml = IPackageJsonDependencyMetaSourceData;
 
 export type IPnpmV7VersionSpecifier = string;
 export interface IPnpmV8VersionSpecifier {
