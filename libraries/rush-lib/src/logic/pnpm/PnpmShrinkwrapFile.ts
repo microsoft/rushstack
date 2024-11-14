@@ -39,7 +39,10 @@ const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 export interface IPeerDependenciesMetaYaml {
   optional?: boolean;
 }
-export type IDependenciesMetaYaml = object;
+export interface IDependenciesMetaYaml {
+  injected?: boolean;
+  [key: string]?: unknown;
+}
 
 export type IPnpmV7VersionSpecifier = string;
 export interface IPnpmV8VersionSpecifier {
