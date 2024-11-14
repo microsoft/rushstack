@@ -76,10 +76,9 @@ export class InstallHelpers {
           // eslint-disable-next-line no-console
           console.warn(
             Colorize.yellow(
-              `Your version of pnpm ${rushConfiguration.rushConfigurationJson.pnpmVersion} ` +
-                `doesn't support "globalIgnoredOptionalDependencies". Please consider upgrading the ` +
-                `"pnpmVersion" setting in ${RushConstants.rushJsonFilename} to 9.0.0 or higher ` +
-                Colorize.bold('(please note that pnpm 9+ is not officially supported yet at the moment)')
+              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+                `doesn't support the "globalIgnoredOptionalDependencies" field in ${RushConstants.<whatever this is>}/${RushConstants.<pnpm-config.json constant>}. ` +
+                `Remove this field or upgrade to pnpm 9.`
             )
           );
         }
