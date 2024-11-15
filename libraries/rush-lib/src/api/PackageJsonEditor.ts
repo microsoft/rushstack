@@ -193,10 +193,10 @@ export class PackageJsonEditor {
         );
       });
 
-      Object.keys(dependenciesMeta || {}).forEach((packageName: string) => {
+      Object.entries(dependenciesMeta || {}).forEach(([packageName, dependencyMeta]: [string, IPackageJsonDependencyMetaSourceData]) => {
         this._dependenciesMeta.set(
           packageName,
-          new PackageJsonDependencyMeta(packageName, dependenciesMeta[packageName], _onChange)
+          new PackageJsonDependencyMeta(packageName, dependencyMeta, _onChange)
         );
       });
 
