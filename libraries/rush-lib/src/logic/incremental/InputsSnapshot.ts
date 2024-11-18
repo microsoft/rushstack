@@ -122,7 +122,9 @@ const { hashDelimiter } = RushConstants;
  */
 export interface IInputsSnapshot {
   /**
-   * The raw hashes of all tracked files in the repository.
+   * The raw hashes of the files relevant to the projects we care about are stored.
+   * (e.g. when running `rush build`, the hashes of all tracked files in the repository are stored)
+   * (e.g. when running `rush build --only`, only the hashes of files under the specified project are stored)
    */
   readonly hashes: ReadonlyMap<string, string>;
 
