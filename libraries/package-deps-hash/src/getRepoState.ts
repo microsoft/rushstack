@@ -364,7 +364,8 @@ export async function hashFilesAsync(
 export async function getRepoStateAsync(
   rootDirectory: string,
   additionalRelativePathsToHash?: string[],
-  gitPath?: string
+  gitPath?: string,
+  filterPath?: string[]
 ): Promise<Map<string, string>> {
   const statePromise: Promise<IGitTreeState> = spawnGitAsync(
     gitPath,
@@ -378,7 +379,8 @@ export async function getRepoStateAsync(
       '--full-name',
       // As of last commit
       'HEAD',
-      '--'
+      '--',
+      ...(filterPath ? filterPath : [])
     ]),
     rootDirectory
   ).then(parseGitLsTree);
@@ -396,7 +398,8 @@ export async function getRepoStateAsync(
       '--ignore-submodules',
       // Don't compare against the remote
       '--no-ahead-behind',
-      '--'
+      '--',
+      ...(filterPath ? filterPath : [])
     ]),
     rootDirectory
   ).then(parseGitStatus);

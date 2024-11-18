@@ -546,6 +546,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     } = options;
 
     const { projectConfigurations } = initialCreateOperationsContext;
+    const { projectSelection } = initialCreateOperationsContext;
 
     const operations: Set<Operation> = await this.hooks.createOperations.promise(
       new Set(),
@@ -558,7 +559,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const getInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined =
-      await analyzer._tryGetSnapshotProviderAsync(projectConfigurations, terminal);
+      await analyzer._tryGetSnapshotProviderAsync(projectConfigurations, terminal, projectSelection);
     const initialSnapshot: IInputsSnapshot | undefined = await getInputsSnapshotAsync?.();
 
     repoStateStopwatch.stop();

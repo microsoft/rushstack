@@ -201,7 +201,8 @@ export class ProjectChangeAnalyzer {
    */
   public async _tryGetSnapshotProviderAsync(
     projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>,
-    terminal: ITerminal
+    terminal: ITerminal,
+    projectSelection?: ReadonlySet<RushConfigurationProject>
   ): Promise<GetInputsSnapshotAsyncFn | undefined> {
     try {
       const gitPath: string = this._git.getGitPathOrThrow();
@@ -295,10 +296,12 @@ export class ProjectChangeAnalyzer {
       const lookupByPath: IReadonlyLookupByPath<RushConfigurationProject> =
         this._rushConfiguration.getProjectLookupForRoot(rootDirectory);
 
+      const filterPath: string[] = Array.from(projectSelection ?? []).map((project) => project.projectFolder);
+
       return async function tryGetSnapshotAsync(): Promise<IInputsSnapshot | undefined> {
         try {
           const [hashes, additionalFiles] = await Promise.all([
-            getRepoStateAsync(rootDirectory, additionalRelativePathsToHash, gitPath),
+            getRepoStateAsync(rootDirectory, additionalRelativePathsToHash, gitPath, filterPath),
             getAdditionalFilesFromRushProjectConfigurationAsync(
               additionalGlobs,
               lookupByPath,
