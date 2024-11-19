@@ -2,6 +2,33 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.141.0",
+      "tag": "@microsoft/rush_v5.141.0",
+      "date": "Tue, 19 Nov 2024 06:38:33 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Adds two new properties to the configuration for `rush-azure-storage-build-cache-plugin`: `loginFlow` selects the flow to use for interactive authentication to Entra ID, and `readRequiresAuthentication` specifies that a SAS token is required for read and therefore expired authentication is always fatal."
+          },
+          {
+            "comment": "Adds a new `wasExecutedOnThisMachine` property to operation telemetry events, to simplify reporting about cobuilt operations."
+          },
+          {
+            "comment": "Fix an issue where empty error logs were created for operations that did not write to standard error."
+          },
+          {
+            "comment": "Fix an issue where incremental building (with LegacySkipPlugin) would not work when no-op operations were present in the process"
+          },
+          {
+            "comment": "Fix lack of \"local-only\" option for cacheProvider in build-cache.schema.json"
+          },
+          {
+            "comment": "Fix an issue where if an Operation wrote all logs to stdout, then exited with a non-zero exit code, only the non-zero exit code would show up in the summary."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.140.1",
       "tag": "@microsoft/rush_v5.140.1",
       "date": "Wed, 30 Oct 2024 21:50:51 GMT",
