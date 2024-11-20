@@ -103,6 +103,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/lockfile.types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@redis/client",
       "allowedCategories": [ "libraries" ]
     },

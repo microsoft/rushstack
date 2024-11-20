@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Support pnpm lockfile v9, which is used by default starting in pnpm v9.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

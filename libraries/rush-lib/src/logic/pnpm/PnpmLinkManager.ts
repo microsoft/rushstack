@@ -229,7 +229,8 @@ export class PnpmLinkManager extends BaseLinkManager {
     const pathToLocalInstallation: string = await this._getPathToLocalInstallationAsync(
       tarballEntry,
       absolutePathToTgzFile,
-      folderNameSuffix
+      folderNameSuffix,
+      tempProjectDependencyKey
     );
 
     const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
@@ -289,7 +290,8 @@ export class PnpmLinkManager extends BaseLinkManager {
   private async _getPathToLocalInstallationAsync(
     tarballEntry: string,
     absolutePathToTgzFile: string,
-    folderSuffix: string
+    folderSuffix: string,
+    tempProjectDependencyKey: string
   ): Promise<string> {
     if (this._pnpmVersion.major === 6) {
       // PNPM 6 changed formatting to replace all ':' and '/' chars with '+'. Additionally, folder names > 120
@@ -319,8 +321,22 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderName,
         RushConstants.nodeModulesFolderName
       );
-    } else if (this._pnpmVersion.major >= 8) {
+    } else if (this._pnpmVersion.major >= 9) {
       const { depPathToFilename } = await import('@pnpm/dependency-path');
+
+      // project@file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
+      // The second parameter is max length of virtual store dir, default is 120 https://pnpm.io/next/npmrc#virtual-store-dir-max-length
+      // TODO Read virtual-store-dir-max-length from .npmrc
+      const folderName: string = depPathToFilename(tempProjectDependencyKey, 120);
+      return path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        '.pnpm',
+        folderName,
+        RushConstants.nodeModulesFolderName
+      );
+    } else if (this._pnpmVersion.major >= 8) {
+      const { depPathToFilename } = await import('@pnpm/dependency-path-lockfile-pre-v9');
       // PNPM 8 changed the local path format again and the hashing algorithm, and
       // is now using the scoped '@pnpm/dependency-path' package
       // See https://github.com/pnpm/pnpm/releases/tag/v8.0.0
