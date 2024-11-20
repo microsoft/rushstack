@@ -882,6 +882,17 @@ packages:
     dependencies:
       rfc4648: 1.5.3
 
+  /@pnpm/crypto.base32-hash@3.0.1:
+    resolution: {integrity: sha512-DM4RR/tvB7tMb2FekL0Q97A5PCXNyEC+6ht8SaufAUFSJNxeozqHw9PHTZR03mzjziPzNQLOld0pNINBX3srtw==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/crypto.polyfill': 1.0.0
+      rfc4648: 1.5.3
+
+  /@pnpm/crypto.polyfill@1.0.0:
+    resolution: {integrity: sha512-WbmsqqcUXKKaAF77ox1TQbpZiaQcr26myuMUu+WjUtoWYgD3VP6iKYEvSx35SZ6G2L316lu+pv+40A2GbWJc1w==}
+    engines: {node: '>=18.12'}
+
   /@pnpm/dependency-path@2.1.8:
     resolution: {integrity: sha512-ywBaTjy0iSEF7lH3DlF8UXrdL2bw4AQFV2tTOeNeY7wc1W5CE+RHSJhf9MXBYcZPesqGRrPiU7Pimj3l05L9VA==}
     engines: {node: '>=16.14'}
@@ -889,7 +900,15 @@ packages:
       '@pnpm/crypto.base32-hash': 2.0.0
       '@pnpm/types': 9.4.2
       encode-registry: 3.0.1
-      semver: 7.5.4
+      semver: 7.6.3
+
+  /@pnpm/dependency-path@5.1.7:
+    resolution: {integrity: sha512-MKCyaTy1r9fhBXAnhDZNBVgo6ThPnicwJEG203FDp7pGhD7NruS/FhBI+uMd7GNsK3D7aIFCDAgbWpNTXn/eWw==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/crypto.base32-hash': 3.0.1
+      '@pnpm/types': 12.2.0
+      semver: 7.6.3
 
   /@pnpm/error@1.4.0:
     resolution: {integrity: sha512-vxkRrkneBPVmP23kyjnYwVOtipwlSl6UfL+h+Xa3TrABJTz5rYBXemlTsU5BzST8U4pD7YDkTb3SQu+MMuIDKA==}
@@ -913,6 +932,14 @@ packages:
       p-settle: 4.1.1
       ramda: 0.27.2
 
+  /@pnpm/lockfile.types@1.0.3:
+    resolution: {integrity: sha512-A7vUWktnhDkrIs+WmXm7AdffJVyVYJpQUEouya/DYhB+Y+tQ3BXjZ6CV0KybqLgI/8AZErgCJqFxA0GJH6QDjA==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/patching.types': 1.0.0
+      '@pnpm/types': 12.2.0
+    dev: false
+
   /@pnpm/package-bins@4.1.0:
     resolution: {integrity: sha512-57/ioGYLBbVRR80Ux9/q2i3y8Q+uQADc3c+Yse8jr/60YLOi3jcWz13e2Jy+ANYtZI258Qc5wk2X077rp0Ly/Q==}
     engines: {node: '>=10.16'}
@@ -920,6 +947,11 @@ packages:
       '@pnpm/types': 6.4.0
       fast-glob: 3.3.2
       is-subdir: 1.2.0
+
+  /@pnpm/patching.types@1.0.0:
+    resolution: {integrity: sha512-juCdQCC1USqLcOhVPl1tYReoTO9YH4fTullMnFXXcmpsDM7Dkn3tzuOQKC3oPoJ2ozv+0EeWWMtMGqn2+IM3pQ==}
+    engines: {node: '>=18.12'}
+    dev: false
 
   /@pnpm/read-modules-dir@2.0.3:
     resolution: {integrity: sha512-i9OgRvSlxrTS9a2oXokhDxvQzDtfqtsooJ9jaGoHkznue5aFCTSrNZFQ6M18o8hC03QWfnxaKi0BtOvNkKu2+A==}
@@ -952,6 +984,10 @@ packages:
       read-yaml-file: 2.1.0
       sort-keys: 4.2.0
       strip-bom: 4.0.0
+
+  /@pnpm/types@12.2.0:
+    resolution: {integrity: sha512-5RtwWhX39j89/Tmyv2QSlpiNjErA357T/8r1Dkg+2lD3P7RuS7Xi2tChvmOC3VlezEFNcWnEGCOeKoGRkDuqFA==}
+    engines: {node: '>=18.12'}
 
   /@pnpm/types@6.4.0:
     resolution: {integrity: sha512-nco4+4sZqNHn60Y4VE/fbtlShCBqipyUO+nKRPvDHqLrecMW9pzHWMVRxk4nrMRoeowj3q0rX3GYRBa8lsHTAg==}
@@ -2306,7 +2342,7 @@ packages:
       require-package-name: 2.0.1
       resolve: 1.22.8
       resolve-from: 5.0.0
-      semver: 7.5.4
+      semver: 7.6.3
       yargs: 16.2.0
     transitivePeerDependencies:
       - supports-color
@@ -4812,7 +4848,7 @@ packages:
       got: 11.8.6
       registry-auth-token: 4.2.2
       registry-url: 5.1.0
-      semver: 7.5.4
+      semver: 7.6.3
 
   /pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
@@ -5285,7 +5321,6 @@ packages:
     resolution: {integrity: sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A==}
     engines: {node: '>=10'}
     hasBin: true
-    dev: true
 
   /set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
@@ -5835,7 +5870,7 @@ packages:
       is-yarn-global: 0.3.0
       latest-version: 5.1.0
       pupa: 2.1.1
-      semver: 7.5.4
+      semver: 7.6.3
       semver-diff: 3.1.1
       xdg-basedir: 4.0.0
 
@@ -6469,7 +6504,8 @@ packages:
     name: '@microsoft/rush-lib'
     engines: {node: '>=5.6.0'}
     dependencies:
-      '@pnpm/dependency-path': 2.1.8
+      '@pnpm/dependency-path': 5.1.7
+      '@pnpm/dependency-path-lockfile-pre-v9': /@pnpm/dependency-path@2.1.8
       '@pnpm/link-bins': 5.3.25
       '@rushstack/heft-config-file': file:../../../libraries/heft-config-file(@types/node@18.17.15)
       '@rushstack/lookup-by-path': file:../../../libraries/lookup-by-path(@types/node@18.17.15)
@@ -6515,6 +6551,7 @@ packages:
     id: file:../../../libraries/rush-sdk
     name: '@rushstack/rush-sdk'
     dependencies:
+      '@pnpm/lockfile.types': 1.0.3
       '@rushstack/lookup-by-path': file:../../../libraries/lookup-by-path(@types/node@18.17.15)
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@18.17.15)
       '@rushstack/package-deps-hash': file:../../../libraries/package-deps-hash(@types/node@18.17.15)
