@@ -93,6 +93,7 @@ export {
   type IPathFormatFileLocationOptions,
   type IPathFormatConciselyOptions
 } from './Path';
+export { RealNodeModulePathResolver, type IRealNodeModulePathResolverOptions } from './RealNodeModulePath';
 export { Encoding, Text, NewlineKind, type IReadLinesFromIterableOptions } from './Text';
 export { Sort } from './Sort';
 export {
