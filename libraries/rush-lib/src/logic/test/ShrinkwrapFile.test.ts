@@ -6,7 +6,11 @@ import { JsonFile } from '@rushstack/node-core-library';
 
 import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
-import { parsePnpmDependencyKey, PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
+import {
+  parsePnpmDependencyKey,
+  PnpmShrinkwrapFile,
+  ShrinkwrapFileMajorVersion
+} from '../pnpm/PnpmShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { NpmShrinkwrapFile } from '../npm/NpmShrinkwrapFile';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -73,12 +77,28 @@ describe(PnpmShrinkwrapFile.name, () => {
             '@rush-temp/project1'
           )
         ).toEqual(false);
-        expect(
-          shrinkwrapFile.tryEnsureCompatibleDependency(
-            new DependencySpecifier('@scope/testDep', '>=2.0.0 <3.0.0'),
-            '@rush-temp/project3'
-          )
-        ).toEqual(true);
+
+        if (
+          shrinkwrapFile instanceof PnpmShrinkwrapFile &&
+          shrinkwrapFile.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9
+        ) {
+          expect(
+            shrinkwrapFile.tryEnsureCompatibleDependency(
+              new DependencySpecifier(
+                '@scope/testDep',
+                'https://github.com/jonschlinkert/pad-left/tarball/2.1.0'
+              ),
+              '@rush-temp/project3'
+            )
+          ).toEqual(true);
+        } else {
+          expect(
+            shrinkwrapFile.tryEnsureCompatibleDependency(
+              new DependencySpecifier('@scope/testDep', '>=2.0.0 <3.0.0'),
+              '@rush-temp/project3'
+            )
+          ).toEqual(true);
+        }
       });
 
       it('extracts temp projects successfully', () => {
@@ -119,6 +139,15 @@ describe(PnpmShrinkwrapFile.name, () => {
       );
       const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
+      validateNonWorkspaceLockfile(shrinkwrapFile);
+    });
+
+    describe('V9 lockfile', () => {
+      const filename: string = path.resolve(
+        __dirname,
+        '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v9.yaml'
+      );
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
       validateNonWorkspaceLockfile(shrinkwrapFile);
     });
   });
@@ -177,6 +206,17 @@ describe(PnpmShrinkwrapFile.name, () => {
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v5.3.yaml'
       );
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+
+      validateWorkspaceLockfile(shrinkwrapFile);
+    });
+
+    describe('V9 lockfile', () => {
+      const filename: string = path.resolve(
+        __dirname,
+        '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v9.yaml'
+      );
+
       const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
       validateWorkspaceLockfile(shrinkwrapFile);
