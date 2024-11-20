@@ -189,9 +189,9 @@ importers:
       '@microsoft/rush-lib':
         specifier: workspace:*
         version: link:../../libraries/rush-lib
-      '@pnpm/dependency-path':
-        specifier: ~2.1.2
-        version: 2.1.8
+      '@pnpm/dependency-path-lockfile-pre-v9':
+        specifier: npm:@pnpm/dependency-path@~2.1.2
+        version: /@pnpm/dependency-path@2.1.8
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
@@ -3328,8 +3328,11 @@ importers:
   ../../../libraries/rush-lib:
     dependencies:
       '@pnpm/dependency-path':
-        specifier: ~2.1.2
-        version: 2.1.8
+        specifier: ~5.1.7
+        version: 5.1.7
+      '@pnpm/dependency-path-lockfile-pre-v9':
+        specifier: npm:@pnpm/dependency-path@~2.1.2
+        version: /@pnpm/dependency-path@2.1.8
       '@pnpm/link-bins':
         specifier: ~5.3.7
         version: 5.3.25
@@ -3439,6 +3442,9 @@ importers:
         specifier: ~8.3.2
         version: 8.3.2
     devDependencies:
+      '@pnpm/lockfile.types':
+        specifier: ~1.0.3
+        version: 1.0.3
       '@pnpm/logger':
         specifier: 4.0.0
         version: 4.0.0
@@ -3499,6 +3505,9 @@ importers:
 
   ../../../libraries/rush-sdk:
     dependencies:
+      '@pnpm/lockfile.types':
+        specifier: ~1.0.3
+        version: 1.0.3
       '@rushstack/lookup-by-path':
         specifier: workspace:*
         version: link:../lookup-by-path
@@ -9732,6 +9741,19 @@ packages:
       rfc4648: 1.5.3
     dev: false
 
+  /@pnpm/crypto.base32-hash@3.0.1:
+    resolution: {integrity: sha512-DM4RR/tvB7tMb2FekL0Q97A5PCXNyEC+6ht8SaufAUFSJNxeozqHw9PHTZR03mzjziPzNQLOld0pNINBX3srtw==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/crypto.polyfill': 1.0.0
+      rfc4648: 1.5.3
+    dev: false
+
+  /@pnpm/crypto.polyfill@1.0.0:
+    resolution: {integrity: sha512-WbmsqqcUXKKaAF77ox1TQbpZiaQcr26myuMUu+WjUtoWYgD3VP6iKYEvSx35SZ6G2L316lu+pv+40A2GbWJc1w==}
+    engines: {node: '>=18.12'}
+    dev: false
+
   /@pnpm/dependency-path@2.1.8:
     resolution: {integrity: sha512-ywBaTjy0iSEF7lH3DlF8UXrdL2bw4AQFV2tTOeNeY7wc1W5CE+RHSJhf9MXBYcZPesqGRrPiU7Pimj3l05L9VA==}
     engines: {node: '>=16.14'}
@@ -9740,6 +9762,15 @@ packages:
       '@pnpm/types': 9.4.2
       encode-registry: 3.0.1
       semver: 7.5.4
+    dev: false
+
+  /@pnpm/dependency-path@5.1.7:
+    resolution: {integrity: sha512-MKCyaTy1r9fhBXAnhDZNBVgo6ThPnicwJEG203FDp7pGhD7NruS/FhBI+uMd7GNsK3D7aIFCDAgbWpNTXn/eWw==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/crypto.base32-hash': 3.0.1
+      '@pnpm/types': 12.2.0
+      semver: 7.6.3
     dev: false
 
   /@pnpm/error@1.4.0:
@@ -9773,6 +9804,13 @@ packages:
       '@pnpm/types': 9.4.2
     dev: true
 
+  /@pnpm/lockfile.types@1.0.3:
+    resolution: {integrity: sha512-A7vUWktnhDkrIs+WmXm7AdffJVyVYJpQUEouya/DYhB+Y+tQ3BXjZ6CV0KybqLgI/8AZErgCJqFxA0GJH6QDjA==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/patching.types': 1.0.0
+      '@pnpm/types': 12.2.0
+
   /@pnpm/logger@4.0.0:
     resolution: {integrity: sha512-SIShw+k556e7S7tLZFVSIHjCdiVog1qWzcKW2RbLEHPItdisAFVNIe34kYd9fMSswTlSRLS/qRjw3ZblzWmJ9Q==}
     engines: {node: '>=12.17'}
@@ -9789,6 +9827,10 @@ packages:
       fast-glob: 3.3.2
       is-subdir: 1.2.0
     dev: false
+
+  /@pnpm/patching.types@1.0.0:
+    resolution: {integrity: sha512-juCdQCC1USqLcOhVPl1tYReoTO9YH4fTullMnFXXcmpsDM7Dkn3tzuOQKC3oPoJ2ozv+0EeWWMtMGqn2+IM3pQ==}
+    engines: {node: '>=18.12'}
 
   /@pnpm/read-modules-dir@2.0.3:
     resolution: {integrity: sha512-i9OgRvSlxrTS9a2oXokhDxvQzDtfqtsooJ9jaGoHkznue5aFCTSrNZFQ6M18o8hC03QWfnxaKi0BtOvNkKu2+A==}
@@ -9824,6 +9866,10 @@ packages:
       sort-keys: 4.2.0
       strip-bom: 4.0.0
     dev: false
+
+  /@pnpm/types@12.2.0:
+    resolution: {integrity: sha512-5RtwWhX39j89/Tmyv2QSlpiNjErA357T/8r1Dkg+2lD3P7RuS7Xi2tChvmOC3VlezEFNcWnEGCOeKoGRkDuqFA==}
+    engines: {node: '>=18.12'}
 
   /@pnpm/types@6.4.0:
     resolution: {integrity: sha512-nco4+4sZqNHn60Y4VE/fbtlShCBqipyUO+nKRPvDHqLrecMW9pzHWMVRxk4nrMRoeowj3q0rX3GYRBa8lsHTAg==}

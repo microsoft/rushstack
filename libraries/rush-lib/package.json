@@ -29,7 +29,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@pnpm/dependency-path": "~2.1.2",
+    "@pnpm/dependency-path-lockfile-pre-v9": "npm:@pnpm/dependency-path@~2.1.2",
+    "@pnpm/dependency-path": "~5.1.7",
     "@pnpm/link-bins": "~5.3.7",
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/lookup-by-path": "workspace:*",
@@ -68,6 +69,7 @@
     "pnpm-sync-lib": "0.2.9"
   },
   "devDependencies": {
+    "@pnpm/lockfile.types": "~1.0.3",
     "@pnpm/logger": "4.0.0",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
