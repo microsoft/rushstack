@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Add \"onlyResolveSymlinksInNodeModules\" option to improve performance for typical repository layouts.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin"
+}

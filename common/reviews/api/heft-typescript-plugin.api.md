@@ -55,6 +55,7 @@ export interface ITypeScriptConfigurationJson {
     buildProjectReferences?: boolean;
     emitCjsExtensionForCommonJS?: boolean | undefined;
     emitMjsExtensionForESModule?: boolean | undefined;
+    onlyResolveSymlinksInNodeModules?: boolean;
     // (undocumented)
     project?: string;
     staticAssetsToCopy?: IStaticAssetsCopyConfiguration;

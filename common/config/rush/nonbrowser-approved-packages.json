@@ -231,6 +231,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/real-node-module-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rig-package",
       "allowedCategories": [ "libraries" ]
     },
