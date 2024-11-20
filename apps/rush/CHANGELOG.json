@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.141.1",
+      "tag": "@microsoft/rush_v5.141.1",
+      "date": "Wed, 20 Nov 2024 00:24:34 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update schema for build-cache.json to include recent updates to the @rushstack/rush-azure-storage-build-cache-plugin."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.141.0",
       "tag": "@microsoft/rush_v5.141.0",
       "date": "Tue, 19 Nov 2024 06:38:33 GMT",

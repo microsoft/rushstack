@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 19 Nov 2024 06:38:33 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Nov 2024 00:24:34 GMT and should not be manually modified.
+
+## 5.141.1
+Wed, 20 Nov 2024 00:24:34 GMT
+
+### Updates
+
+- Update schema for build-cache.json to include recent updates to the @rushstack/rush-azure-storage-build-cache-plugin.
 
 ## 5.141.0
 Tue, 19 Nov 2024 06:38:33 GMT
