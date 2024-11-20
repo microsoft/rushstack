@@ -68,7 +68,17 @@
     /**
      * If set to true, allow writing to the cache. Defaults to false.
      */
-    // "isCacheWriteAllowed": true
+    // "isCacheWriteAllowed": true,
+
+    /**
+     * The Entra ID login flow to use. Defaults to 'AdoCodespacesAuth' on GitHub Codespaces, 'InteractiveBrowser' otherwise.
+     */
+    // "loginFlow": "InteractiveBrowser",
+
+    /**
+     * If set to true, reading the cache requires authentication. Defaults to false.
+     */
+    // "readRequiresAuthentication": true
   },
 
   /**
