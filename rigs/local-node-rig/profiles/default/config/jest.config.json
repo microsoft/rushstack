@@ -20,5 +20,7 @@
         "titleTemplate": "{title} ({filepath})"
       }
     ]
-  ]
+  ],
+
+  "resolver": "@rushstack/heft-jest-plugin/lib/exports/jest-node-modules-symlink-resolver.js"
 }
