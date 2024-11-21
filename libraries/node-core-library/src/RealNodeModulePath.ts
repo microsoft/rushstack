@@ -142,15 +142,11 @@ export class RealNodeModulePathResolver {
       return cached;
     }
 
-    try {
+    // On Windows, calling `readlink` on a directory throws an EUNKOWN, not EINVAL, so just pay the cost
+    // of an lstat call.
+    const stat: fs.Stats | undefined = fs.lstatSync(link);
+    if (stat.isSymbolicLink()) {
       return this._readlinkSync(link, 'utf8');
-    } catch (err) {
-      // EISDIR and EINVAL both indicate the input is not a symbolic link
-      if (err.code !== 'EISDIR' && err.code !== 'EINVAL') {
-        throw err;
-      }
     }
-
-    return;
   }
 }
