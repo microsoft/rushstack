@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Add `RealNodeModulePathResolver` class to get equivalent behavior to `realpath` with fewer system calls (and therefore higher performance) in the typical scenario where the only symlinks in the repository are inside of `node_modules` folders and are links to package folders.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

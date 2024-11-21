@@ -37,6 +37,11 @@
       }
     },
 
+    "onlyResolveSymlinksInNodeModules": {
+      "description": "If true, the TypeScript compiler will only resolve symlinks to their targets if the links are in a node_modules folder. This significantly reduces file system operations in typical usage.",
+      "type": "boolean"
+    },
+
     "emitCjsExtensionForCommonJS": {
       "description": "If true, emit CommonJS module output to the folder specified in the tsconfig \"outDir\" compiler option with the .cjs extension alongside (or instead of, if TSConfig specifies CommonJS) the default compilation output.",
       "type": "boolean"
