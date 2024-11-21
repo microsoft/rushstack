@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
+import * as nodeFs from 'fs';
 import * as nodePath from 'path';
 
 /**
@@ -9,7 +9,7 @@ import * as nodePath from 'path';
  * @public
  */
 export interface IRealNodeModulePathResolverOptions {
-  readlinkSync: typeof fs.readlinkSync;
+  fs: Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>;
   path: Pick<typeof nodePath, 'isAbsolute' | 'normalize' | 'resolve' | 'sep'>;
 }
 
@@ -38,18 +38,18 @@ export class RealNodeModulePathResolver {
   public readonly realNodeModulePath: (input: string) => string;
 
   private readonly _cache: Map<string, string>;
-  private readonly _readlinkSync: (path: string, encoding: 'utf8') => string;
+  private readonly _fs: IRealNodeModulePathResolverOptions['fs'];
 
   public constructor(
     options: IRealNodeModulePathResolverOptions = {
-      readlinkSync: fs.readlinkSync,
+      fs: nodeFs,
       path: nodePath
     }
   ) {
     const cache: Map<string, string> = (this._cache = new Map());
-    const { path, readlinkSync } = options;
+    const { path, fs } = options;
     const { sep: pathSeparator } = path;
-    this._readlinkSync = readlinkSync;
+    this._fs = fs;
 
     const nodeModulesToken: string = `${pathSeparator}node_modules${pathSeparator}`;
 
@@ -144,9 +144,9 @@ export class RealNodeModulePathResolver {
 
     // On Windows, calling `readlink` on a directory throws an EUNKOWN, not EINVAL, so just pay the cost
     // of an lstat call.
-    const stat: fs.Stats | undefined = fs.lstatSync(link);
+    const stat: nodeFs.Stats | undefined = this._fs.lstatSync(link);
     if (stat.isSymbolicLink()) {
-      return this._readlinkSync(link, 'utf8');
+      return this._fs.readlinkSync(link, 'utf8');
     }
   }
 }

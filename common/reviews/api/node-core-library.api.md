@@ -7,7 +7,7 @@
 /// <reference types="node" />
 
 import * as child_process from 'child_process';
-import * as fs from 'fs';
+import * as nodeFs from 'fs';
 import * as nodePath from 'path';
 
 // @public
@@ -214,7 +214,7 @@ export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPat
 export type FileSystemCopyFilesFilter = (sourcePath: string, destinationPath: string) => boolean;
 
 // @public
-export type FileSystemStats = fs.Stats;
+export type FileSystemStats = nodeFs.Stats;
 
 // @public
 export class FileWriter {
@@ -232,7 +232,7 @@ export const FolderConstants: {
 };
 
 // @public
-export type FolderItem = fs.Dirent;
+export type FolderItem = nodeFs.Dirent;
 
 // @public
 export interface IAsyncParallelismOptions {
@@ -609,9 +609,9 @@ export interface IReadLinesFromIterableOptions {
 // @public
 export interface IRealNodeModulePathResolverOptions {
     // (undocumented)
-    path: Pick<typeof nodePath, 'isAbsolute' | 'normalize' | 'resolve' | 'sep'>;
+    fs: Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>;
     // (undocumented)
-    readlinkSync: typeof fs.readlinkSync;
+    path: Pick<typeof nodePath, 'isAbsolute' | 'normalize' | 'resolve' | 'sep'>;
 }
 
 // @public (undocumented)
