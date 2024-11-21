@@ -7,9 +7,8 @@
 /// <reference types="node" />
 
 import * as child_process from 'child_process';
-import * as fs from 'node:fs';
-import * as fs_2 from 'fs';
-import * as nodePath from 'node:path';
+import * as fs from 'fs';
+import * as nodePath from 'path';
 
 // @public
 export enum AlreadyExistsBehavior {
@@ -215,7 +214,7 @@ export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPat
 export type FileSystemCopyFilesFilter = (sourcePath: string, destinationPath: string) => boolean;
 
 // @public
-export type FileSystemStats = fs_2.Stats;
+export type FileSystemStats = fs.Stats;
 
 // @public
 export class FileWriter {
@@ -233,7 +232,7 @@ export const FolderConstants: {
 };
 
 // @public
-export type FolderItem = fs_2.Dirent;
+export type FolderItem = fs.Dirent;
 
 // @public
 export interface IAsyncParallelismOptions {
