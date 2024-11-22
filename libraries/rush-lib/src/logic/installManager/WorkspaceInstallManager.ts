@@ -42,6 +42,7 @@ import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { FlagFile } from '../../api/FlagFile';
 import { Stopwatch } from '../../utilities/Stopwatch';
+import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -372,8 +373,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Check if overrides and globalOverrides are the same
+    const repoPnpmConfiguration: PnpmOptionsConfiguration = this.rushConfiguration.pnpmOptions;
+    const subspacePnpmConfiguration: PnpmOptionsConfiguration | undefined = subspace.getPnpmOptions();
+
+    const mergedGlobalOverrides: Record<string, string> = {
+      ...(repoPnpmConfiguration.globalOverrides ?? {}),
+      ...(subspacePnpmConfiguration?.globalOverrides ?? {})
+    };
+
     const overridesAreEqual: boolean = objectsAreDeepEqual<Record<string, string>>(
-      this.rushConfiguration.pnpmOptions.globalOverrides ?? {},
+      mergedGlobalOverrides,
       shrinkwrapFile?.overrides ? Object.fromEntries(shrinkwrapFile?.overrides) : {}
     );
 
