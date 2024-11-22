@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Thu, 24 Oct 2024 00:15:48 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Nov 2024 01:10:43 GMT and should not be manually modified.
+
+## 0.13.0
+Fri, 22 Nov 2024 01:10:43 GMT
+
+### Minor changes
+
+- Add a custom resolver that only resolves symlinks that are within node_modules.
 
 ## 0.12.18
 Thu, 24 Oct 2024 00:15:48 GMT
