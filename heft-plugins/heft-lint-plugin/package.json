@@ -25,7 +25,7 @@
     "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@rushstack/heft-node-rig": "2.6.31",
+    "@rushstack/heft-node-rig": "2.6.41",
     "@rushstack/terminal": "workspace:*",
     "@types/eslint": "8.56.10",
     "@types/heft-jest": "1.0.1",
