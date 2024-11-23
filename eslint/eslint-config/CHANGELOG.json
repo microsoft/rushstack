@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "4.1.0",
+      "tag": "@rushstack/eslint-config_v4.1.0",
+      "date": "Sat, 23 Nov 2024 01:18:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update TSDoc dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.2",
       "tag": "@rushstack/eslint-config_v4.0.2",
       "date": "Thu, 19 Sep 2024 00:11:08 GMT",

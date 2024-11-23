@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Fri, 22 Nov 2024 01:10:43 GMT and should not be manually modified.
+This log was last generated on Sat, 23 Nov 2024 01:18:55 GMT and should not be manually modified.
+
+## 0.13.1
+Sat, 23 Nov 2024 01:18:55 GMT
+
+### Patches
+
+- Fix a bug in `jest-node-modules-symlink-resolver` with respect to evaluating paths that don't exist. Expected behavior in that situation is to return the input path.
 
 ## 0.13.0
 Fri, 22 Nov 2024 01:10:43 GMT
