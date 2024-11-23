@@ -296,7 +296,14 @@ export class ProjectChangeAnalyzer {
       const lookupByPath: IReadonlyLookupByPath<RushConfigurationProject> =
         this._rushConfiguration.getProjectLookupForRoot(rootDirectory);
 
-      const filterPath: string[] = Array.from(projectSelection ?? []).map((project) => project.projectFolder);
+      let filterPath: string[] = [];
+
+      if (
+        projectSelection &&
+        this._rushConfiguration.experimentsConfiguration.configuration.enableSubpathScan
+      ) {
+        filterPath = Array.from(projectSelection).map(({ projectFolder }) => projectFolder);
+      }
 
       return async function tryGetSnapshotAsync(): Promise<IInputsSnapshot | undefined> {
         try {
