@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Consider subspace pnpm globalOverrides during installation",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
