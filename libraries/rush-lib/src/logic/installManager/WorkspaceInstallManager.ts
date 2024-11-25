@@ -373,16 +373,13 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Check if overrides and globalOverrides are the same
-    const repoPnpmConfiguration: PnpmOptionsConfiguration = this.rushConfiguration.pnpmOptions;
     const subspacePnpmConfiguration: PnpmOptionsConfiguration | undefined = subspace.getPnpmOptions();
-
-    const mergedGlobalOverrides: Record<string, string> = {
-      ...(repoPnpmConfiguration.globalOverrides ?? {}),
-      ...(subspacePnpmConfiguration?.globalOverrides ?? {})
-    };
+    const globalOverrides: Record<string, string> | undefined = subspacePnpmConfiguration
+      ? subspacePnpmConfiguration.globalOverrides
+      : this.rushConfiguration.pnpmOptions.globalOverrides;
 
     const overridesAreEqual: boolean = objectsAreDeepEqual<Record<string, string>>(
-      mergedGlobalOverrides,
+      globalOverrides ?? {},
       shrinkwrapFile?.overrides ? Object.fromEntries(shrinkwrapFile?.overrides) : {}
     );
 
