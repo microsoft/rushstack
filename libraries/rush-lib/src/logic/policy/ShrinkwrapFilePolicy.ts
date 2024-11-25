@@ -25,7 +25,6 @@ export function validate(
   console.log('Validating package manager shrinkwrap file.\n');
   const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
     rushConfiguration.packageManager,
-    rushConfiguration.packageManagerOptions,
     subspace.getCommittedShrinkwrapFilePath(variant)
   );
 

@@ -255,7 +255,6 @@ export abstract class BaseInstallManager {
         const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilePath(variant);
         const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
           this.rushConfiguration.packageManager,
-          this.rushConfiguration.packageManagerOptions,
           committedShrinkwrapFileName
         );
         shrinkwrapFile?.validateShrinkwrapAfterUpdate(this.rushConfiguration, subspace, this._terminal);
@@ -464,7 +463,6 @@ export abstract class BaseInstallManager {
       try {
         shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
           this.rushConfiguration.packageManager,
-          this.rushConfiguration.packageManagerOptions,
           committedShrinkwrapFileName
         );
       } catch (ex) {

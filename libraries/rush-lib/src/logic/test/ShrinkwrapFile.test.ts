@@ -13,7 +13,7 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 
 describe(NpmShrinkwrapFile.name, () => {
   const filename: string = `${__dirname}/shrinkwrapFile/npm-shrinkwrap.json`;
-  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', {}, filename)!;
+  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', filename)!;
 
   it('verifies root-level dependency', () => {
     expect(shrinkwrapFile.hasCompatibleTopLevelDependency(new DependencySpecifier('q', '~1.5.0'))).toEqual(
@@ -97,11 +97,7 @@ describe(PnpmShrinkwrapFile.name, () => {
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v5.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
-        'pnpm',
-        {},
-        filename
-      )!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
       validateNonWorkspaceLockfile(shrinkwrapFile);
     });
@@ -111,11 +107,7 @@ describe(PnpmShrinkwrapFile.name, () => {
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v5.3.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
-        'pnpm',
-        {},
-        filename
-      )!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
       validateNonWorkspaceLockfile(shrinkwrapFile);
     });
@@ -125,11 +117,7 @@ describe(PnpmShrinkwrapFile.name, () => {
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v6.1.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
-        'pnpm',
-        {},
-        filename
-      )!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
       validateNonWorkspaceLockfile(shrinkwrapFile);
     });
@@ -179,11 +167,7 @@ describe(PnpmShrinkwrapFile.name, () => {
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v5.3.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
-        'pnpm',
-        {},
-        filename
-      )!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
       validateWorkspaceLockfile(shrinkwrapFile);
     });
@@ -193,11 +177,7 @@ describe(PnpmShrinkwrapFile.name, () => {
         __dirname,
         '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v5.3.yaml'
       );
-      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
-        'pnpm',
-        {},
-        filename
-      )!;
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
       validateWorkspaceLockfile(shrinkwrapFile);
     });
