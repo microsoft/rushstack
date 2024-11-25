@@ -1044,9 +1044,6 @@ importers:
       api-extractor-lib5-test:
         specifier: workspace:*
         version: link:../api-extractor-lib5-test
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig

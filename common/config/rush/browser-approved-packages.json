@@ -15,10 +15,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/rush-sdk",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@radix-ui/colors",
       "allowedCategories": [ "libraries" ]
     },
@@ -53,10 +49,6 @@
     {
       "name": "axios",
       "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "colors",
-      "allowedCategories": [ "tests" ]
     },
     {
       "name": "dependency-path",
