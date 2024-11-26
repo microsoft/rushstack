@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { type IPackageJson, FileConstants, FileSystem } from '@rushstack/node-core-library';
 import * as path from 'path';
 import * as semver from 'semver';
-import { type IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from './RushConfiguration';
-import type { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
-import type { PackageJsonEditor } from './PackageJsonEditor';
-import { RushConstants } from '../logic/RushConstants';
-import { PackageNameParsers } from './PackageNameParsers';
 import { DependencySpecifier, DependencySpecifierType } from '../logic/DependencySpecifier';
+import { RushConstants } from '../logic/RushConstants';
+import type { PackageJsonEditor } from './PackageJsonEditor';
+import { PackageNameParsers } from './PackageNameParsers';
+import type { RushConfiguration } from './RushConfiguration';
 import { SaveCallbackPackageJsonEditor } from './SaveCallbackPackageJsonEditor';
 import type { Subspace } from './Subspace';
+import type { LockStepVersionPolicy, VersionPolicy } from './VersionPolicy';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -29,6 +29,8 @@ export interface IRushConfigurationProjectJson {
   publishFolder?: string;
   tags?: string[];
   subspaceName?: string;
+  installRemotely?: boolean;
+  versionRange?: string;
 }
 
 /**
@@ -56,6 +58,16 @@ export interface IRushConfigurationProjectOptions {
    * The containing subspace.
    */
   subspace: Subspace;
+
+  /**
+   * If specified, package will be downloaded by NPM registry.
+   */
+  installRemotely?: boolean;
+
+  /**
+   * If specified, it will be downloaded according to the NPM version range (ignored if installRemotely=false).
+   */
+  versionRange?: boolean;
 }
 
 /**
@@ -123,6 +135,23 @@ export class RushConfigurationProject {
    * This name must be one of the valid choices listed in RushConfiguration.reviewCategories.
    */
   public readonly reviewCategory: string | undefined;
+
+  /**
+   *
+   * Indicates how this project should be installed by rush add.
+   * Default value is "true".
+   *
+   * @beta
+   */
+  public readonly installRemotely: boolean = true;
+
+  /**
+   *
+   * Indicates which version should be installed by rush add. Ignored if installRemotely=false.
+   *
+   * @beta
+   */
+  public readonly versionRange: string | undefined;
 
   /**
    * A list of local projects that appear as devDependencies for this project, but cannot be
@@ -209,10 +238,17 @@ export class RushConfigurationProject {
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
     const { projectJson, rushConfiguration, tempProjectName, allowedProjectTags } = options;
-    const { packageName, projectFolder: projectRelativeFolder } = projectJson;
+    const {
+      packageName,
+      projectFolder: projectRelativeFolder,
+      installRemotely = true,
+      versionRange
+    } = projectJson;
     this.rushConfiguration = rushConfiguration;
     this.packageName = packageName;
     this.projectRelativeFolder = projectRelativeFolder;
+    this.installRemotely = installRemotely;
+    this.versionRange = versionRange;
 
     validateRelativePathField(projectRelativeFolder, 'projectFolder', rushConfiguration.rushJsonFile);
 
