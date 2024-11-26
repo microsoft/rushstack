@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix install all projects of all subspaces in a monorepo",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
