@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix install all projects of all subspaces in a monorepo",
+      "comment": "Fix an issue where filtered installs neglected to install dependencies from other subspaces",
       "type": "none"
     }
   ],
