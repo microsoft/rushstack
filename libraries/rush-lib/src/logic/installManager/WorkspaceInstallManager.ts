@@ -42,6 +42,7 @@ import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { FlagFile } from '../../api/FlagFile';
 import { Stopwatch } from '../../utilities/Stopwatch';
+import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -372,8 +373,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Check if overrides and globalOverrides are the same
+    const pnpmOptions: PnpmOptionsConfiguration =
+      subspace.getPnpmOptions() || this.rushConfiguration.pnpmOptions;
+
     const overridesAreEqual: boolean = objectsAreDeepEqual<Record<string, string>>(
-      this.rushConfiguration.pnpmOptions.globalOverrides ?? {},
+      pnpmOptions.globalOverrides ?? {},
       shrinkwrapFile?.overrides ? Object.fromEntries(shrinkwrapFile?.overrides) : {}
     );
 
@@ -384,7 +388,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // Check if packageExtensionsChecksum matches globalPackageExtension's hash
     const packageExtensionsChecksum: string | undefined = this._getPackageExtensionChecksum(
-      this.rushConfiguration.pnpmOptions.globalPackageExtensions
+      pnpmOptions.globalPackageExtensions
     );
     const packageExtensionsChecksumAreEqual: boolean =
       packageExtensionsChecksum === shrinkwrapFile?.packageExtensionsChecksum;
@@ -633,7 +637,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // projects with dependencies, a lockfile won't be generated.
     const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
       this.rushConfiguration.packageManager,
-      this.rushConfiguration.pnpmOptions,
       subspace.getTempShrinkwrapFilename()
     );
 

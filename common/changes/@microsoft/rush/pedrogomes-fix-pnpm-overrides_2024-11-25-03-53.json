@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where Rush sometimes incorrectly reported \"The overrides settings doesn't match the current shrinkwrap\" when using subspaces",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
