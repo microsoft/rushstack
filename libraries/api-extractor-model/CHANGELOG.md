@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Fri, 13 Sep 2024 00:11:43 GMT and should not be manually modified.
+This log was last generated on Sat, 23 Nov 2024 01:18:55 GMT and should not be manually modified.
+
+## 7.30.0
+Sat, 23 Nov 2024 01:18:55 GMT
+
+### Minor changes
+
+- Update TSDoc dependencies.
+
+## 7.29.9
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
 
 ## 7.29.8
 Fri, 13 Sep 2024 00:11:43 GMT

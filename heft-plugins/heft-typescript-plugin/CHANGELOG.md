@@ -1,6 +1,18 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Thu, 24 Oct 2024 00:15:48 GMT and should not be manually modified.
+This log was last generated on Sat, 23 Nov 2024 01:18:55 GMT and should not be manually modified.
+
+## 0.6.1
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.6.0
+Fri, 22 Nov 2024 01:10:43 GMT
+
+### Minor changes
+
+- Add "onlyResolveSymlinksInNodeModules" option to improve performance for typical repository layouts.
 
 ## 0.5.35
 Thu, 24 Oct 2024 00:15:48 GMT

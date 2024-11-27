@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Thu, 19 Sep 2024 00:11:08 GMT and should not be manually modified.
+This log was last generated on Sat, 23 Nov 2024 01:18:55 GMT and should not be manually modified.
+
+## 4.1.0
+Sat, 23 Nov 2024 01:18:55 GMT
+
+### Minor changes
+
+- Update TSDoc dependencies.
 
 ## 4.0.2
 Thu, 19 Sep 2024 00:11:08 GMT

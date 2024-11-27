@@ -78,6 +78,12 @@ export interface ITypeScriptConfigurationJson {
    */
   useTranspilerWorker?: boolean;
 
+  /**
+   * If true, the TypeScript compiler will only resolve symlinks to their targets if the links are in a node_modules folder.
+   * This significantly reduces file system operations in typical usage.
+   */
+  onlyResolveSymlinksInNodeModules?: boolean;
+
   /*
    * Specifies the tsconfig.json file that will be used for compilation. Equivalent to the "project" argument for the 'tsc' and 'tslint' command line tools.
    *
@@ -364,6 +370,8 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       buildProjectReferences: typeScriptConfigurationJson?.buildProjectReferences,
 
       useTranspilerWorker: typeScriptConfigurationJson?.useTranspilerWorker,
+
+      onlyResolveSymlinksInNodeModules: typeScriptConfigurationJson?.onlyResolveSymlinksInNodeModules,
 
       tsconfigPath: getTsconfigFilePath(heftConfiguration, typeScriptConfigurationJson),
       additionalModuleKindsToEmit: typeScriptConfigurationJson?.additionalModuleKindsToEmit,

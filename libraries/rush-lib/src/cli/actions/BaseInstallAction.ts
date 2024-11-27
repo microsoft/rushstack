@@ -244,6 +244,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
           console.log(Colorize.green(`Installing for subspace: ${subspace.subspaceName}`));
           let installManagerOptionsForInstall: IInstallManagerOptions;
           if (subspaceInstallationData) {
+            // This will install the selected of projects in the subspace
             const { selectedProjects, pnpmFilterArgumentValues } = subspaceInstallationData;
             installManagerOptionsForInstall = {
               ...installManagerOptions,
@@ -262,8 +263,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
               subspace
             };
           } else {
+            // This will install all projects in the subspace
             installManagerOptionsForInstall = {
               ...installManagerOptions,
+              pnpmFilterArgumentValues: [],
               subspace
             };
           }

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 13 Sep 2024 00:11:42 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Nov 2024 01:10:43 GMT and should not be manually modified.
+
+## 5.10.0
+Fri, 22 Nov 2024 01:10:43 GMT
+
+### Minor changes
+
+- Add `RealNodeModulePathResolver` class to get equivalent behavior to `realpath` with fewer system calls (and therefore higher performance) in the typical scenario where the only symlinks in the repository are inside of `node_modules` folders and are links to package folders.
 
 ## 5.9.0
 Fri, 13 Sep 2024 00:11:42 GMT

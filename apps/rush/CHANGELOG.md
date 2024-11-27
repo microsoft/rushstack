@@ -1,6 +1,32 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 30 Oct 2024 21:50:51 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Nov 2024 03:27:26 GMT and should not be manually modified.
+
+## 5.141.2
+Wed, 27 Nov 2024 03:27:26 GMT
+
+### Updates
+
+- Fix an issue where filtered installs neglected to install dependencies from other subspaces
+
+## 5.141.1
+Wed, 20 Nov 2024 00:24:34 GMT
+
+### Updates
+
+- Update schema for build-cache.json to include recent updates to the @rushstack/rush-azure-storage-build-cache-plugin.
+
+## 5.141.0
+Tue, 19 Nov 2024 06:38:33 GMT
+
+### Updates
+
+- Adds two new properties to the configuration for `rush-azure-storage-build-cache-plugin`: `loginFlow` selects the flow to use for interactive authentication to Entra ID, and `readRequiresAuthentication` specifies that a SAS token is required for read and therefore expired authentication is always fatal.
+- Adds a new `wasExecutedOnThisMachine` property to operation telemetry events, to simplify reporting about cobuilt operations.
+- Fix an issue where empty error logs were created for operations that did not write to standard error.
+- Fix an issue where incremental building (with LegacySkipPlugin) would not work when no-op operations were present in the process
+- Fix lack of "local-only" option for cacheProvider in build-cache.schema.json
+- Fix an issue where if an Operation wrote all logs to stdout, then exited with a non-zero exit code, only the non-zero exit code would show up in the summary.
 
 ## 5.140.1
 Wed, 30 Oct 2024 21:50:51 GMT
