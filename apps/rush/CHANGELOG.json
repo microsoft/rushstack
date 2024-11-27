@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.141.2",
+      "tag": "@microsoft/rush_v5.141.2",
+      "date": "Wed, 27 Nov 2024 03:27:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where filtered installs neglected to install dependencies from other subspaces"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.141.1",
       "tag": "@microsoft/rush_v5.141.1",
       "date": "Wed, 20 Nov 2024 00:24:34 GMT",

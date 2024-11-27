@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 20 Nov 2024 00:24:34 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Nov 2024 03:27:26 GMT and should not be manually modified.
+
+## 5.141.2
+Wed, 27 Nov 2024 03:27:26 GMT
+
+### Updates
+
+- Fix an issue where filtered installs neglected to install dependencies from other subspaces
 
 ## 5.141.1
 Wed, 20 Nov 2024 00:24:34 GMT
