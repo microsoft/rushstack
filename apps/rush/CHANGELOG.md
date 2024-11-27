@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 27 Nov 2024 03:27:26 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Nov 2024 07:16:50 GMT and should not be manually modified.
+
+## 5.141.3
+Wed, 27 Nov 2024 07:16:50 GMT
+
+### Updates
+
+- Fix an issue where Rush sometimes incorrectly reported "The overrides settings doesn't match the current shrinkwrap" when using subspaces
+- Fix an issue where Rush sometimes incorrectly reported "The package extension hash doesn't match the current shrinkwrap." when using subspaces
 
 ## 5.141.2
 Wed, 27 Nov 2024 03:27:26 GMT

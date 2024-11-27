@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.141.3",
+      "tag": "@microsoft/rush_v5.141.3",
+      "date": "Wed, 27 Nov 2024 07:16:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Rush sometimes incorrectly reported \"The overrides settings doesn't match the current shrinkwrap\" when using subspaces"
+          },
+          {
+            "comment": "Fix an issue where Rush sometimes incorrectly reported \"The package extension hash doesn't match the current shrinkwrap.\" when using subspaces"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.141.2",
       "tag": "@microsoft/rush_v5.141.2",
       "date": "Wed, 27 Nov 2024 03:27:26 GMT",
