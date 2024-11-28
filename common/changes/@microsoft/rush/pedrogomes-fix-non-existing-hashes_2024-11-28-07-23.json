@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where Rush sometimes incorrectly reported \"fatal: could not open 'packages/xxx/.rush/temp/shrinkwrap-deps.json' for reading: No such file or directory\" when using subspaces",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

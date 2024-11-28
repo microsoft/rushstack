@@ -257,25 +257,23 @@ export class ProjectChangeAnalyzer {
       const additionalRelativePathsToHash: string[] = [];
       const globalAdditionalFiles: string[] = [];
       if (rushConfiguration.packageManager === 'pnpm') {
-        const absoluteFilePathsToCheck: string[] = [];
-
-        for (const project of rushConfiguration.projects) {
+        await Async.forEachAsync(rushConfiguration.projects, async (project: RushConfigurationProject) => {
           const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(project);
-          absoluteFilePathsToCheck.push(projectShrinkwrapFilePath);
-          const relativeProjectShrinkwrapFilePath: string = Path.convertToSlashes(
-            path.relative(rootDirectory, projectShrinkwrapFilePath)
-          );
+          if (!(await FileSystem.existsAsync(projectShrinkwrapFilePath))) {
+            if (rushConfiguration.subspacesFeatureEnabled) {
+              return;
+            }
 
-          additionalRelativePathsToHash.push(relativeProjectShrinkwrapFilePath);
-        }
-
-        await Async.forEachAsync(absoluteFilePathsToCheck, async (filePath: string) => {
-          if (!rushConfiguration.subspacesFeatureEnabled && !(await FileSystem.existsAsync(filePath))) {
             throw new Error(
-              `A project dependency file (${filePath}) is missing. You may need to run ` +
+              `A project dependency file (${projectShrinkwrapFilePath}) is missing. You may need to run ` +
                 '"rush install" or "rush update".'
             );
           }
+
+          const relativeProjectShrinkwrapFilePath: string = Path.convertToSlashes(
+            path.relative(rootDirectory, projectShrinkwrapFilePath)
+          );
+          additionalRelativePathsToHash.push(relativeProjectShrinkwrapFilePath);
         });
       } else {
         // Add the shrinkwrap file to every project's dependencies
