@@ -75,11 +75,10 @@ export class Subspace {
   public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
     if (!this._cachedPnpmOptionsInitialized) {
       // Calculate these outside the try/catch block since their error messages shouldn't be annotated:
-      const subspaceConfigFolder: string = this.getSubspaceConfigFolderPath();
       const subspaceTempFolder: string = this.getSubspaceTempFolderPath();
       try {
         this._cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-          `${subspaceConfigFolder}/${RushConstants.pnpmConfigFilename}`,
+          this.getPnpmConfigFilePath(),
           subspaceTempFolder
         );
         this._cachedPnpmOptionsInitialized = true;
@@ -303,8 +302,8 @@ export class Subspace {
    * Example: `C:\MyRepo\common\subspaces\my-subspace\pnpm-config.json`
    * @beta
    */
-  public getPnpmConfigFilePath(variant?: string): string {
-    return this.getVariantDependentSubspaceConfigFolderPath(variant) + '/' + RushConstants.pnpmConfigFilename;
+  public getPnpmConfigFilePath(): string {
+    return this.getSubspaceConfigFolderPath() + '/' + RushConstants.pnpmConfigFilename;
   }
 
   /**

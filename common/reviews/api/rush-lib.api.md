@@ -1499,7 +1499,7 @@ export class Subspace {
     // @beta
     getPackageJsonInjectedDependenciesHash(variant?: string): string | undefined;
     // @beta
-    getPnpmConfigFilePath(variant?: string): string;
+    getPnpmConfigFilePath(): string;
     // @beta
     getPnpmfilePath(variant?: string): string;
     // @beta
