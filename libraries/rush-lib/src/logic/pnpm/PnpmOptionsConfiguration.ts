@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { JsonFile, type JsonObject, JsonSchema } from '@rushstack/node-core-library';
+import { NonProjectConfigurationFile } from '@rushstack/heft-config-file';
+import { ConsoleTerminalProvider, ITerminal, Terminal } from '@rushstack/terminal';
 
 import {
   type IPackageManagerOptionsJsonBase,
@@ -434,9 +436,16 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     jsonFilename: string,
     commonTempFolder: string
   ): PnpmOptionsConfiguration {
-    const pnpmOptionJson: IPnpmOptionsJson = JsonFile.loadAndValidate(
-      jsonFilename,
-      PnpmOptionsConfiguration._jsonSchema
+    // TODO: plumb through the terminal
+    const terminal: ITerminal = new Terminal(new ConsoleTerminalProvider());
+
+    const pnpmOptionsConfigFile: NonProjectConfigurationFile<IPnpmOptionsJson> =
+      new NonProjectConfigurationFile({
+        jsonSchemaObject: PnpmOptionsConfiguration._jsonSchema
+      });
+    const pnpmOptionJson: IPnpmOptionsJson = pnpmOptionsConfigFile.loadConfigurationFile(
+      terminal,
+      jsonFilename
     );
     return new PnpmOptionsConfiguration(pnpmOptionJson || {}, commonTempFolder, jsonFilename);
   }
