@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.141.4",
+      "tag": "@microsoft/rush_v5.141.4",
+      "date": "Mon, 02 Dec 2024 20:40:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Rush sometimes incorrectly reported \"fatal: could not open 'packages/xxx/.rush/temp/shrinkwrap-deps.json' for reading: No such file or directory\" when using subspaces"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.141.3",
       "tag": "@microsoft/rush_v5.141.3",
       "date": "Wed, 27 Nov 2024 07:16:50 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 27 Nov 2024 07:16:50 GMT and should not be manually modified.
+This log was last generated on Mon, 02 Dec 2024 20:40:41 GMT and should not be manually modified.
+
+## 5.141.4
+Mon, 02 Dec 2024 20:40:41 GMT
+
+### Updates
+
+- Fix an issue where Rush sometimes incorrectly reported "fatal: could not open 'packages/xxx/.rush/temp/shrinkwrap-deps.json' for reading: No such file or directory" when using subspaces
 
 ## 5.141.3
 Wed, 27 Nov 2024 07:16:50 GMT
