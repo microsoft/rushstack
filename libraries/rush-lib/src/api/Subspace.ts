@@ -206,7 +206,6 @@ export class Subspace {
    * - Lockfiles: (i.e. - `pnpm-lock.yaml`, `npm-shrinkwrap.json`, `yarn.lock`, etc)
    * - 'common-versions.json'
    * - 'pnpmfile.js'/'.pnpmfile.cjs'
-   * - 'pnpm-config.js'
    */
   public getVariantDependentSubspaceConfigFolderPath(variant: string | undefined): string {
     const subspaceConfigFolderPath: string = this.getSubspaceConfigFolderPath();
