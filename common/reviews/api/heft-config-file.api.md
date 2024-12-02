@@ -4,47 +4,61 @@
 
 ```ts
 
-import type { IRigConfig } from '@rushstack/rig-package';
+import { IRigConfig } from '@rushstack/rig-package';
 import type { ITerminal } from '@rushstack/terminal';
 
 // @beta (undocumented)
-export class ConfigurationFile<TConfigurationFile> {
-    constructor(options: IConfigurationFileOptions<TConfigurationFile>);
-    // @internal (undocumented)
-    static _formatPathForLogging: (path: string) => string;
-    getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
-    getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue | undefined;
+export class ConfigurationFile<TConfigurationFile> extends ConfigurationFileBase<TConfigurationFile, IProjectConfigurationFileOptions> {
+    constructor(options: IConfigurationFileOptions<TConfigurationFile, IProjectConfigurationFileOptions>);
     loadConfigurationFileForProject(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): TConfigurationFile;
     loadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile>;
     readonly projectRelativeFilePath: string;
     tryLoadConfigurationFileForProject(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): TConfigurationFile | undefined;
     tryLoadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile | undefined>;
+    // (undocumented)
+    protected _tryLoadConfigurationFileInRig(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): TConfigurationFile | undefined;
+    // (undocumented)
+    protected _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
 }
 
 // @beta (undocumented)
-export type IConfigurationFileOptions<TConfigurationFile> = IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile> | IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile>;
+export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions extends {}> {
+    constructor(options: IConfigurationFileOptions<TConfigurationFile, TExtraOptions>);
+    // @internal (undocumented)
+    static _formatPathForLogging: (path: string) => string;
+    getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
+    getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue | undefined;
+    // (undocumented)
+    protected _loadConfigurationFileInnerWithCache(terminal: ITerminal, resolvedConfigurationFilePath: string, visitedConfigurationFilePaths: Set<string>, rigConfig: IRigConfig | undefined): TConfigurationFile;
+    // (undocumented)
+    protected _loadConfigurationFileInnerWithCacheAsync(terminal: ITerminal, resolvedConfigurationFilePath: string, visitedConfigurationFilePaths: Set<string>, rigConfig: IRigConfig | undefined): Promise<TConfigurationFile>;
+    // (undocumented)
+    protected abstract _tryLoadConfigurationFileInRig(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): TConfigurationFile | undefined;
+    // (undocumented)
+    protected abstract _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
+}
+
+// @beta (undocumented)
+export type IConfigurationFileOptions<TConfigurationFile, TExtraOptions extends object> = IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile, TExtraOptions> | IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile, TExtraOptions>;
 
 // @beta (undocumented)
 export interface IConfigurationFileOptionsBase<TConfigurationFile> {
     jsonPathMetadata?: IJsonPathsMetadata<TConfigurationFile>;
-    projectRelativeFilePath: string;
     propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
     propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
 }
 
 // @beta (undocumented)
-export interface IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile> extends IConfigurationFileOptionsBase<TConfigurationFile> {
-    // (undocumented)
-    jsonSchemaObject?: never;
+export type IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile, TExtraOptions extends {}> = IConfigurationFileOptionsBase<TConfigurationFile> & TExtraOptions & {
     jsonSchemaPath: string;
-}
+    jsonSchemaObject?: never;
+};
 
 // @beta (undocumented)
-export interface IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile> extends IConfigurationFileOptionsBase<TConfigurationFile> {
+export type IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile, TExtraOptions extends {}> = IConfigurationFileOptionsBase<TConfigurationFile> & TExtraOptions & {
     jsonSchemaObject: object;
-    // (undocumented)
     jsonSchemaPath?: never;
-}
+};
 
 // @beta
 export interface ICustomJsonPathMetadata<TConfigurationFile> {
@@ -96,6 +110,11 @@ export interface IOriginalValueOptions<TParentProperty> {
 }
 
 // @beta (undocumented)
+export interface IProjectConfigurationFileOptions {
+    projectRelativeFilePath: string;
+}
+
+// @beta (undocumented)
 export type IPropertiesInheritance<TConfigurationFile> = {
     [propertyName in keyof TConfigurationFile]?: IPropertyInheritance<InheritanceType.append | InheritanceType.merge | InheritanceType.replace> | ICustomPropertyInheritance<TConfigurationFile[propertyName]>;
 };
@@ -112,6 +131,18 @@ export interface IPropertyInheritanceDefaults {
     array?: IPropertyInheritance<InheritanceType.append | InheritanceType.replace>;
     // (undocumented)
     object?: IPropertyInheritance<InheritanceType.merge | InheritanceType.replace>;
+}
+
+// @beta (undocumented)
+export class NonProjectConfigurationFile<TConfigurationFile> extends ConfigurationFileBase<TConfigurationFile, {}> {
+    loadConfigurationFile(terminal: ITerminal, filePath: string): TConfigurationFile;
+    loadConfigurationFileAsync(terminal: ITerminal, filePath: string): Promise<TConfigurationFile>;
+    tryLoadConfigurationFile(terminal: ITerminal, filePath: string): TConfigurationFile | undefined;
+    tryLoadConfigurationFileAsync(terminal: ITerminal, filePath: string): Promise<TConfigurationFile | undefined>;
+    // (undocumented)
+    protected _tryLoadConfigurationFileInRig(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): TConfigurationFile | undefined;
+    // (undocumented)
+    protected _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
 }
 
 // @beta (undocumented)

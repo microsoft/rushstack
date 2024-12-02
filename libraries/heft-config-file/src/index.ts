@@ -9,7 +9,7 @@
  */
 
 export {
-  ConfigurationFile,
+  ConfigurationFileBase,
   type IConfigurationFileOptionsBase,
   type IConfigurationFileOptionsWithJsonSchemaFilePath,
   type IConfigurationFileOptionsWithJsonSchemaObject,
@@ -27,4 +27,11 @@ export {
   type IPropertyInheritanceDefaults,
   PathResolutionMethod,
   type PropertyInheritanceCustomFunction
-} from './ConfigurationFile';
+} from './ConfigurationFileBase';
+
+export {
+  // TODO: REname this export to `ProjectConfigurationFile` in the next major version bump
+  ProjectConfigurationFile as ConfigurationFile,
+  type IProjectConfigurationFileOptions
+} from './ProjectConfigurationFile';
+export { NonProjectConfigurationFile } from './NonProjectConfigurationFile';
