@@ -4,7 +4,7 @@
 
 ```ts
 
-import { IRigConfig } from '@rushstack/rig-package';
+import type { IRigConfig } from '@rushstack/rig-package';
 import type { ITerminal } from '@rushstack/terminal';
 
 // @beta (undocumented)
