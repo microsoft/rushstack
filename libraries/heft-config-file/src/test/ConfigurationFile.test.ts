@@ -1,16 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint-disable max-lines */
+
 import * as nodeJsPath from 'path';
 import { FileSystem, JsonFile, Path, Text } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { RigConfig } from '@rushstack/rig-package';
 
 import { ProjectConfigurationFile } from '../ProjectConfigurationFile';
-import { PathResolutionMethod, InheritanceType } from '../ConfigurationFileBase';
+import { PathResolutionMethod, InheritanceType, ConfigurationFileBase } from '../ConfigurationFileBase';
 import { NonProjectConfigurationFile } from '../NonProjectConfigurationFile';
 
-describe(ProjectConfigurationFile.name, () => {
+describe('ConfigurationFile', () => {
   const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
   let terminalProvider: StringBufferTerminalProvider;
   let terminal: Terminal;
@@ -18,7 +20,7 @@ describe(ProjectConfigurationFile.name, () => {
   beforeEach(() => {
     const formatPathForLogging: (path: string) => string = (path: string) =>
       `<project root>/${Path.convertToSlashes(nodeJsPath.relative(projectRoot, path))}`;
-    jest.spyOn(ProjectConfigurationFile, '_formatPathForLogging').mockImplementation(formatPathForLogging);
+    jest.spyOn(ConfigurationFileBase, '_formatPathForLogging').mockImplementation(formatPathForLogging);
     jest.spyOn(JsonFile, '_formatPathForError').mockImplementation(formatPathForLogging);
 
     terminalProvider = new StringBufferTerminalProvider(false);

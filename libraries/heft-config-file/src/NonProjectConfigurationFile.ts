@@ -3,9 +3,9 @@
 
 import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
+import type { IRigConfig } from '@rushstack/rig-package';
 
 import { ConfigurationFileBase } from './ConfigurationFileBase';
-import { IRigConfig } from '@rushstack/rig-package';
 
 /**
  * @beta

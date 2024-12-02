@@ -6,7 +6,7 @@ import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { IRigConfig } from '@rushstack/rig-package';
 
-import { ConfigurationFileBase, IConfigurationFileOptions } from './ConfigurationFileBase';
+import { ConfigurationFileBase, type IConfigurationFileOptions } from './ConfigurationFileBase';
 
 /**
  * @beta
