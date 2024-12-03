@@ -29,9 +29,20 @@ export {
   type PropertyInheritanceCustomFunction
 } from './ConfigurationFileBase';
 
-export {
-  // TODO: REname this export to `ProjectConfigurationFile` in the next major version bump
-  ProjectConfigurationFile as ConfigurationFile,
-  type IProjectConfigurationFileOptions
-} from './ProjectConfigurationFile';
+import { ProjectConfigurationFile } from './ProjectConfigurationFile';
+
+/**
+ * @deprecated Use {@link ProjectConfigurationFile} instead.
+ * @beta
+ */
+export const ConfigurationFile: typeof ProjectConfigurationFile = ProjectConfigurationFile;
+
+/**
+ * @deprecated Use {@link ProjectConfigurationFile} instead.
+ * @beta
+ */
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export type ConfigurationFile<TConfigurationFile> = ProjectConfigurationFile<TConfigurationFile>;
+
+export { ProjectConfigurationFile, type IProjectConfigurationFileOptions } from './ProjectConfigurationFile';
 export { NonProjectConfigurationFile } from './NonProjectConfigurationFile';

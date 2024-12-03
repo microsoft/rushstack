@@ -74,7 +74,7 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
   }
 
   /**
-   * This function is identical to {@link ConfigurationFile.loadConfigurationFileForProject}, except
+   * This function is identical to {@link ProjectConfigurationFile.loadConfigurationFileForProject}, except
    * that it returns `undefined` instead of throwing an error if the configuration file cannot be found.
    */
   public tryLoadConfigurationFileForProject(
@@ -93,7 +93,7 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
   }
 
   /**
-   * This function is identical to {@link ConfigurationFile.loadConfigurationFileForProjectAsync}, except
+   * This function is identical to {@link ProjectConfigurationFile.loadConfigurationFileForProjectAsync}, except
    * that it returns `undefined` instead of throwing an error if the configuration file cannot be found.
    */
   public async tryLoadConfigurationFileForProjectAsync(

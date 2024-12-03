@@ -7,19 +7,11 @@
 import type { IRigConfig } from '@rushstack/rig-package';
 import type { ITerminal } from '@rushstack/terminal';
 
-// @beta (undocumented)
-export class ConfigurationFile<TConfigurationFile> extends ConfigurationFileBase<TConfigurationFile, IProjectConfigurationFileOptions> {
-    constructor(options: IConfigurationFileOptions<TConfigurationFile, IProjectConfigurationFileOptions>);
-    loadConfigurationFileForProject(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): TConfigurationFile;
-    loadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile>;
-    readonly projectRelativeFilePath: string;
-    tryLoadConfigurationFileForProject(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): TConfigurationFile | undefined;
-    tryLoadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile | undefined>;
-    // (undocumented)
-    protected _tryLoadConfigurationFileInRig(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): TConfigurationFile | undefined;
-    // (undocumented)
-    protected _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
-}
+// @beta @deprecated (undocumented)
+export const ConfigurationFile: typeof ProjectConfigurationFile;
+
+// @beta @deprecated (undocumented)
+export type ConfigurationFile<TConfigurationFile> = ProjectConfigurationFile<TConfigurationFile>;
 
 // @beta (undocumented)
 export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions extends {}> {
@@ -153,6 +145,20 @@ export enum PathResolutionMethod {
     nodeResolve = "nodeResolve",
     resolvePathRelativeToConfigurationFile = "resolvePathRelativeToConfigurationFile",
     resolvePathRelativeToProjectRoot = "resolvePathRelativeToProjectRoot"
+}
+
+// @beta (undocumented)
+export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationFileBase<TConfigurationFile, IProjectConfigurationFileOptions> {
+    constructor(options: IConfigurationFileOptions<TConfigurationFile, IProjectConfigurationFileOptions>);
+    loadConfigurationFileForProject(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): TConfigurationFile;
+    loadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile>;
+    readonly projectRelativeFilePath: string;
+    tryLoadConfigurationFileForProject(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): TConfigurationFile | undefined;
+    tryLoadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile | undefined>;
+    // (undocumented)
+    protected _tryLoadConfigurationFileInRig(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): TConfigurationFile | undefined;
+    // (undocumented)
+    protected _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
 }
 
 // @beta (undocumented)

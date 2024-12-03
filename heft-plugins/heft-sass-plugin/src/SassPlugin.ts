@@ -10,7 +10,7 @@ import type {
   IHeftTaskRunIncrementalHookOptions,
   IWatchedFileState
 } from '@rushstack/heft';
-import { ConfigurationFile } from '@rushstack/heft-config-file';
+import { ProjectConfigurationFile } from '@rushstack/heft-config-file';
 
 import { type ISassConfiguration, SassProcessor } from './SassProcessor';
 import sassConfigSchema from './schemas/heft-sass-plugin.schema.json';
@@ -21,7 +21,7 @@ const PLUGIN_NAME: 'sass-plugin' = 'sass-plugin';
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
 export default class SassPlugin implements IHeftPlugin {
-  private static _sassConfigurationLoader: ConfigurationFile<ISassConfigurationJson> | undefined;
+  private static _sassConfigurationLoader: ProjectConfigurationFile<ISassConfigurationJson> | undefined;
   private _sassConfiguration: ISassConfiguration | undefined;
   private _sassProcessor: SassProcessor | undefined;
 
@@ -105,7 +105,7 @@ export default class SassPlugin implements IHeftPlugin {
   ): Promise<ISassConfiguration> {
     if (!this._sassConfiguration) {
       if (!SassPlugin._sassConfigurationLoader) {
-        SassPlugin._sassConfigurationLoader = new ConfigurationFile({
+        SassPlugin._sassConfigurationLoader = new ProjectConfigurationFile({
           projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
           jsonSchemaObject: sassConfigSchema
         });

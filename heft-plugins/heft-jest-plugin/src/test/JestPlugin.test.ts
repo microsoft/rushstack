@@ -4,7 +4,7 @@
 import * as path from 'path';
 import type { Config } from '@jest/types';
 import type { IHeftTaskSession, HeftConfiguration, CommandLineParameter } from '@rushstack/heft';
-import type { ConfigurationFile } from '@rushstack/heft-config-file';
+import type { ProjectConfigurationFile } from '@rushstack/heft-config-file';
 import { Import, JsonFile } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
@@ -74,7 +74,7 @@ describe('JestConfigLoader', () => {
     // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
     // means that we don't run on the built test assets directly
     const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project1');
-    const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
+    const loader: ProjectConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
     );
@@ -161,7 +161,7 @@ describe('JestConfigLoader', () => {
     // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
     // means that we don't run on the built test assets directly
     const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project2');
-    const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
+    const loader: ProjectConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
     );

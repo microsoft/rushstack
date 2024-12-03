@@ -7,7 +7,7 @@ import type * as TTypescript from 'typescript';
 import { SyncHook } from 'tapable';
 import { FileSystem, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
+import { ProjectConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -127,7 +127,7 @@ export interface ITypeScriptPluginAccessor {
   readonly onChangedFilesHook: SyncHook<IChangedFilesHookOptions>;
 }
 
-let _typeScriptConfigurationFileLoader: ConfigurationFile<ITypeScriptConfigurationJson> | undefined;
+let _typeScriptConfigurationFileLoader: ProjectConfigurationFile<ITypeScriptConfigurationJson> | undefined;
 const _typeScriptConfigurationFilePromiseCache: Map<
   string,
   Promise<ITypeScriptConfigurationJson | undefined>
@@ -149,7 +149,7 @@ export async function loadTypeScriptConfigurationFileAsync(
   if (!typescriptConfigurationFilePromise) {
     // Ensure that the file loader has been initialized.
     if (!_typeScriptConfigurationFileLoader) {
-      _typeScriptConfigurationFileLoader = new ConfigurationFile<ITypeScriptConfigurationJson>({
+      _typeScriptConfigurationFileLoader = new ProjectConfigurationFile<ITypeScriptConfigurationJson>({
         projectRelativeFilePath: 'config/typescript.json',
         jsonSchemaObject: typescriptConfigSchema,
         propertyInheritance: {
@@ -173,7 +173,7 @@ export async function loadTypeScriptConfigurationFileAsync(
   return await typescriptConfigurationFilePromise;
 }
 
-let _partialTsconfigFileLoader: ConfigurationFile<IPartialTsconfig> | undefined;
+let _partialTsconfigFileLoader: ProjectConfigurationFile<IPartialTsconfig> | undefined;
 const _partialTsconfigFilePromiseCache: Map<string, Promise<IPartialTsconfig | undefined>> = new Map();
 
 function getTsconfigFilePath(
@@ -213,7 +213,7 @@ export async function loadPartialTsconfigFileAsync(
     } else {
       // Ensure that the file loader has been initialized.
       if (!_partialTsconfigFileLoader) {
-        _partialTsconfigFileLoader = new ConfigurationFile<IPartialTsconfig>({
+        _partialTsconfigFileLoader = new ProjectConfigurationFile<IPartialTsconfig>({
           projectRelativeFilePath: typeScriptConfigurationJson?.project || 'tsconfig.json',
           jsonSchemaObject: anythingSchema,
           propertyInheritance: {
