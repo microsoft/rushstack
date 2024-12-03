@@ -81,7 +81,8 @@ export class InstallHelpers {
             Colorize.yellow(
               `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
                 `doesn't support the "globalIgnoredOptionalDependencies" field in ` +
-                `${rushConfiguration.commonRushConfigFolder}. Remove this field or upgrade to pnpm 9.`
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                'Remove this field or upgrade to pnpm 9.'
             )
           );
         }
