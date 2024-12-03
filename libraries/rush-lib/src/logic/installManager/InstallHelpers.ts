@@ -72,13 +72,16 @@ export class InstallHelpers {
       }
 
       if (pnpmOptions.globalIgnoredOptionalDependencies) {
-        if (rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined && semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '9.0.0')) {
+        if (
+          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '9.0.0')
+        ) {
           // eslint-disable-next-line no-console
           console.warn(
             Colorize.yellow(
               `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
-                `doesn't support the "globalIgnoredOptionalDependencies" field in ${RushConstants.<whatever this is>}/${RushConstants.<pnpm-config.json constant>}. ` +
-                `Remove this field or upgrade to pnpm 9.`
+                `doesn't support the "globalIgnoredOptionalDependencies" field in ` +
+                `${rushConfiguration.commonRushConfigFolder}. Remove this field or upgrade to pnpm 9.`
             )
           );
         }
