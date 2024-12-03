@@ -46,3 +46,5 @@ export type ConfigurationFile<TConfigurationFile> = ProjectConfigurationFile<TCo
 
 export { ProjectConfigurationFile, type IProjectConfigurationFileOptions } from './ProjectConfigurationFile';
 export { NonProjectConfigurationFile } from './NonProjectConfigurationFile';
+
+export * as TestUtilities from './TestUtilities';

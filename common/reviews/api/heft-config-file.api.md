@@ -164,4 +164,13 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
 // @beta (undocumented)
 export type PropertyInheritanceCustomFunction<TObject> = (currentObject: TObject, parentObject: TObject) => TObject;
 
+// @beta
+function stripAnnotations<TObject>(obj: TObject): TObject;
+
+declare namespace TestUtilities {
+    export {
+        stripAnnotations
+    }
+}
+
 ```

@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { InstallHelpers } from '../installManager/InstallHelpers';
-import { RushConfiguration } from '../../api/RushConfiguration';
 import { type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import { TestUtilities } from '@rushstack/heft-config-file';
+
+import { InstallHelpers } from '../installManager/InstallHelpers';
+import { RushConfiguration } from '../../api/RushConfiguration';
 
 describe('InstallHelpers', () => {
   describe('generateCommonPackageJson', () => {
@@ -48,7 +50,7 @@ describe('InstallHelpers', () => {
         terminal
       );
       const packageJson: IPackageJson = mockJsonFileSave.mock.calls[0][0];
-      expect(packageJson).toEqual(
+      expect(TestUtilities.stripAnnotations(packageJson)).toEqual(
         expect.objectContaining({
           pnpm: {
             overrides: {

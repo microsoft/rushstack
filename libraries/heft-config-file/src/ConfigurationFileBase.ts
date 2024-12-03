@@ -74,9 +74,11 @@ export enum PathResolutionMethod {
 }
 
 const CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX: RegExp = /^\$([^\.]+)\.inheritanceType$/;
-const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol('configuration-file-field-annotation');
+export const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol(
+  'configuration-file-field-annotation'
+);
 
-interface IAnnotatedField<TField> {
+export interface IAnnotatedField<TField> {
   [CONFIGURATION_FILE_FIELD_ANNOTATION]: IConfigurationFileFieldAnnotation<TField>;
 }
 
