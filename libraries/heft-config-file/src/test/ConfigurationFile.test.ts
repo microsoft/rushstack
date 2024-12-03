@@ -201,7 +201,7 @@ describe('ConfigurationFile', () => {
 
         expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
         expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
-          nodeJsPath.resolve(__dirname, projectRelativeFilePath)
+          `${__dirname}/${projectRelativeFilePath}`
         );
         expect(
           configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
@@ -219,7 +219,7 @@ describe('ConfigurationFile', () => {
 
         expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
         expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
-          nodeJsPath.resolve(__dirname, projectRelativeFilePath)
+          `${__dirname}/${projectRelativeFilePath}`
         );
         expect(
           configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
