@@ -9,7 +9,7 @@ import {
   JsonFile,
   LockFile
 } from '@rushstack/node-core-library';
-import { Colorize, ITerminal } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { LastInstallFlag } from '../../api/LastInstallFlag';
 import type { PackageManagerName } from '../../api/packageManager/PackageManager';
