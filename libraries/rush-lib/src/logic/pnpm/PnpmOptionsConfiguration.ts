@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, type JsonObject, JsonSchema } from '@rushstack/node-core-library';
+import { JsonFile, type JsonObject } from '@rushstack/node-core-library';
 import { NonProjectConfigurationFile } from '@rushstack/heft-config-file';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
