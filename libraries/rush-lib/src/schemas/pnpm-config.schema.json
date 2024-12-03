@@ -146,7 +146,7 @@
     },
 
     "globalIgnoredOptionalDependencies": {
-      "description": "This field allows you to skip the installation of specific optional dependencies. The listed packages will be treated as if they are not present in the dependency tree during installation, meaning they will not be installed even if required by other packages.",
+      "description": "This field allows you to skip the installation of specific optional dependencies. The listed packages will be treated as if they are not present in the dependency tree during installation, meaning they will not be installed even if required by other packages.\n\n(SUPPORTED ONLY IN PNPM 9.0.0 AND NEWER)\n\nPNPM documentation: https://pnpm.io/package_json#pnpmalloweddeprecatedversions",
       "type": "array",
       "items": {
         "description": "Specify the package name of the optional dependency to be ignored.",

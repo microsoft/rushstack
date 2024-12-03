@@ -9,7 +9,7 @@ import {
   JsonFile,
   LockFile
 } from '@rushstack/node-core-library';
-import { Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { LastInstallFlag } from '../../api/LastInstallFlag';
 import type { PackageManagerName } from '../../api/packageManager/PackageManager';
@@ -21,6 +21,7 @@ import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration'
 import { merge } from '../../utilities/objectUtilities';
 import type { Subspace } from '../../api/Subspace';
 import { RushConstants } from '../RushConstants';
+import * as semver from 'semver';
 
 interface ICommonPackageJson extends IPackageJson {
   pnpm?: {
@@ -38,7 +39,8 @@ export class InstallHelpers {
   public static generateCommonPackageJson(
     rushConfiguration: RushConfiguration,
     subspace: Subspace,
-    dependencies: Map<string, string> = new Map<string, string>()
+    dependencies: Map<string, string> = new Map<string, string>(),
+    terminal: ITerminal
   ): void {
     const commonPackageJson: ICommonPackageJson = {
       dependencies: {},
@@ -71,6 +73,20 @@ export class InstallHelpers {
       }
 
       if (pnpmOptions.globalIgnoredOptionalDependencies) {
+        if (
+          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '9.0.0')
+        ) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+                `doesn't support the "globalIgnoredOptionalDependencies" field in ` +
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                'Remove this field or upgrade to pnpm 9.'
+            )
+          );
+        }
+
         commonPackageJson.pnpm.ignoredOptionalDependencies = pnpmOptions.globalIgnoredOptionalDependencies;
       }
 
