@@ -7,11 +7,6 @@ import * as fetch from 'node-fetch';
 import type * as http from 'http';
 import { Import } from '@rushstack/node-core-library';
 
-// ===================================================================================================================
-// AS A TEMPORARY WORKAROUND, THIS FILE WAS COPY+PASTED INTO THE "rush-amazon-s3-build-cache-plugin" PROJECT.
-// See that copy for notes.
-// ===================================================================================================================
-
 const createHttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);
 
 /**
@@ -22,10 +17,17 @@ export type WebClientResponse = fetch.Response;
 /**
  * For use with {@link WebClient}.
  */
+export type WebClientHeaders = fetch.Headers;
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WebClientHeaders: typeof fetch.Headers = fetch.Headers;
+
+/**
+ * For use with {@link WebClient}.
+ */
 export interface IWebFetchOptionsBase {
   timeoutMs?: number;
-  verb?: 'GET' | 'PUT';
-  headers?: fetch.Headers;
+  headers?: WebClientHeaders | Record<string, string>;
+  redirect?: fetch.RequestInit['redirect'];
 }
 
 /**
@@ -38,8 +40,8 @@ export interface IGetFetchOptions extends IWebFetchOptionsBase {
 /**
  * For use with {@link WebClient}.
  */
-export interface IPutFetchOptions extends IWebFetchOptionsBase {
-  verb: 'PUT';
+export interface IFetchOptionsWithBody extends IWebFetchOptionsBase {
+  verb: 'PUT' | 'POST' | 'PATCH';
   body?: Buffer;
 }
 
@@ -56,6 +58,8 @@ export enum WebClientProxy {
  * A helper for issuing HTTP requests.
  */
 export class WebClient {
+  private static _requestFn: typeof fetch.default = fetch.default;
+
   public readonly standardHeaders: fetch.Headers = new fetch.Headers();
 
   public accept: string | undefined = '*/*';
@@ -63,12 +67,21 @@ export class WebClient {
 
   public proxy: WebClientProxy = WebClientProxy.Detect;
 
-  public constructor() {}
+  public static mockRequestFn(fn: typeof fetch.default): void {
+    WebClient._requestFn = fn;
+  }
 
-  public static mergeHeaders(target: fetch.Headers, source: fetch.Headers): void {
-    source.forEach((value, name) => {
+  public static resetMockRequestFn(): void {
+    WebClient._requestFn = fetch.default;
+  }
+
+  public static mergeHeaders(target: fetch.Headers, source: fetch.Headers | Record<string, string>): void {
+    const iterator: Iterable<[string, string]> =
+      'entries' in source && typeof source.entries === 'function' ? source.entries() : Object.entries(source);
+
+    for (const [name, value] of iterator) {
       target.set(name, value);
-    });
+    }
   }
 
   public addBasicAuthHeader(userName: string, password: string): void {
@@ -80,7 +93,7 @@ export class WebClient {
 
   public async fetchAsync(
     url: string,
-    options?: IGetFetchOptions | IPutFetchOptions
+    options?: IGetFetchOptions | IFetchOptionsWithBody
   ): Promise<WebClientResponse> {
     const headers: fetch.Headers = new fetch.Headers();
 
@@ -93,6 +106,7 @@ export class WebClient {
     if (this.userAgent) {
       headers.set('user-agent', this.userAgent);
     }
+
     if (this.accept) {
       headers.set('accept', this.accept);
     }
@@ -126,13 +140,14 @@ export class WebClient {
       method: options?.verb,
       headers: headers,
       agent: agent,
-      timeout: timeoutMs
+      timeout: timeoutMs,
+      redirect: options?.redirect
     };
-    const putOptions: IPutFetchOptions | undefined = options as IPutFetchOptions | undefined;
+    const putOptions: IFetchOptionsWithBody | undefined = options as IFetchOptionsWithBody | undefined;
     if (putOptions?.body) {
       requestInit.body = putOptions.body;
     }
 
-    return await fetch.default(url, requestInit);
+    return await WebClient._requestFn(url, requestInit);
   }
 }

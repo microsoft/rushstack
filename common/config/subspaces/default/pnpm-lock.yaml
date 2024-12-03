@@ -3999,9 +3999,6 @@ importers:
       https-proxy-agent:
         specifier: ~5.0.0
         version: 5.0.1
-      node-fetch:
-        specifier: 2.6.7
-        version: 2.6.7
     devDependencies:
       '@microsoft/rush-lib':
         specifier: workspace:*
@@ -4015,6 +4012,9 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
+      node-fetch:
+        specifier: 2.6.7
+        version: 2.6.7
 
   ../../../rush-plugins/rush-azure-storage-build-cache-plugin:
     dependencies:
@@ -4055,9 +4055,6 @@ importers:
       https-proxy-agent:
         specifier: ~5.0.0
         version: 5.0.1
-      node-fetch:
-        specifier: 2.6.7
-        version: 2.6.7
     devDependencies:
       '@microsoft/rush-lib':
         specifier: workspace:*
@@ -4068,9 +4065,6 @@ importers:
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../../libraries/terminal
-      '@types/node-fetch':
-        specifier: 2.6.2
-        version: 2.6.2
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig

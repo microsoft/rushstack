@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+jest.mock('@rushstack/rush-sdk/lib/utilities/WebClient', () => {
+  return jest.requireActual('@microsoft/rush-lib/lib/utilities/WebClient');
+});
+
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
+import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 import { Response, type ResponseInit } from 'node-fetch';
 
 import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from '../AmazonS3BuildCacheProvider';
 import { AmazonS3Client } from '../AmazonS3Client';
-import { WebClient } from '../WebClient';
 import type { IAmazonS3Credentials } from '../AmazonS3Credentials';
 
 const webClient = new WebClient();

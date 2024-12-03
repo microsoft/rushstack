@@ -22,13 +22,13 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "https-proxy-agent": "~5.0.0",
-    "node-fetch": "2.6.7"
+    "https-proxy-agent": "~5.0.0"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@types/node-fetch": "2.6.2",
     "local-node-rig": "workspace:*",
-    "@types/node-fetch": "2.6.2"
+    "node-fetch": "2.6.7"
   }
 }

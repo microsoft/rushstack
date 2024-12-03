@@ -4,10 +4,15 @@
 import { Async } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import * as crypto from 'crypto';
-import * as fetch from 'node-fetch';
+import {
+  type IGetFetchOptions,
+  type IFetchOptionsWithBody,
+  type WebClientResponse,
+  type WebClient,
+  WebClientHeaders
+} from '@rushstack/rush-sdk/lib/utilities/WebClient';
 
 import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from './AmazonS3BuildCacheProvider';
-import type { IGetFetchOptions, IPutFetchOptions, WebClient } from './WebClient';
 import { type IAmazonS3Credentials, fromRushEnv } from './AmazonS3Credentials';
 
 const CONTENT_HASH_HEADER_NAME: 'x-amz-content-sha256' = 'x-amz-content-sha256';
@@ -113,7 +118,7 @@ export class AmazonS3Client {
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {
     this._writeDebugLine('Reading object from S3');
     return await this._sendCacheRequestWithRetriesAsync(async () => {
-      const response: fetch.Response = await this._makeRequestAsync('GET', objectName);
+      const response: WebClientResponse = await this._makeRequestAsync('GET', objectName);
       if (response.ok) {
         return {
           hasNetworkError: false,
@@ -158,7 +163,7 @@ export class AmazonS3Client {
     }
 
     await this._sendCacheRequestWithRetriesAsync(async () => {
-      const response: fetch.Response = await this._makeRequestAsync('PUT', objectName, objectBuffer);
+      const response: WebClientResponse = await this._makeRequestAsync('PUT', objectName, objectBuffer);
       if (!response.ok) {
         return {
           hasNetworkError: true,
@@ -194,10 +199,10 @@ export class AmazonS3Client {
     verb: 'GET' | 'PUT',
     objectName: string,
     body?: Buffer
-  ): Promise<fetch.Response> {
+  ): Promise<WebClientResponse> {
     const isoDateString: IIsoDateString = this._getIsoDateString();
     const bodyHash: string = this._getSha256(body);
-    const headers: fetch.Headers = new fetch.Headers();
+    const headers: WebClientHeaders = new WebClientHeaders();
     headers.set(DATE_HEADER_NAME, isoDateString.dateTime);
     headers.set(CONTENT_HASH_HEADER_NAME, bodyHash);
 
@@ -293,12 +298,12 @@ export class AmazonS3Client {
       }
     }
 
-    const webFetchOptions: IGetFetchOptions | IPutFetchOptions = {
+    const webFetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
       verb,
       headers
     };
     if (verb === 'PUT') {
-      (webFetchOptions as IPutFetchOptions).body = body;
+      (webFetchOptions as IFetchOptionsWithBody).body = body;
     }
 
     const url: string = `${this._s3Endpoint}${canonicalUri}`;
@@ -310,7 +315,7 @@ export class AmazonS3Client {
       this._writeDebugLine(Colorize.cyan(`\t${name}: ${value}`));
     });
 
-    const response: fetch.Response = await this._webClient.fetchAsync(url, webFetchOptions);
+    const response: WebClientResponse = await this._webClient.fetchAsync(url, webFetchOptions);
 
     return response;
   }
@@ -351,7 +356,7 @@ export class AmazonS3Client {
     };
   }
 
-  private async _safeReadResponseTextAsync(response: fetch.Response): Promise<string | undefined> {
+  private async _safeReadResponseTextAsync(response: WebClientResponse): Promise<string | undefined> {
     try {
       return await response.text();
     } catch (err) {
@@ -360,7 +365,7 @@ export class AmazonS3Client {
     return undefined;
   }
 
-  private async _getS3ErrorAsync(response: fetch.Response): Promise<Error> {
+  private async _getS3ErrorAsync(response: WebClientResponse): Promise<Error> {
     const text: string | undefined = await this._safeReadResponseTextAsync(response);
     return new Error(
       `Amazon S3 responded with status code ${response.status} (${response.statusText})${
