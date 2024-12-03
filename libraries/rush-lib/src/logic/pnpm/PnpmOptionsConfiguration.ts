@@ -3,7 +3,7 @@
 
 import { JsonFile, type JsonObject, JsonSchema } from '@rushstack/node-core-library';
 import { NonProjectConfigurationFile } from '@rushstack/heft-config-file';
-import { ConsoleTerminalProvider, ITerminal, Terminal } from '@rushstack/terminal';
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import {
   type IPackageManagerOptionsJsonBase,
@@ -437,7 +437,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     commonTempFolder: string
   ): PnpmOptionsConfiguration {
     // TODO: plumb through the terminal
-    const terminal: ITerminal = new Terminal(new ConsoleTerminalProvider());
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 
     const pnpmOptionsConfigFile: NonProjectConfigurationFile<IPnpmOptionsJson> =
       new NonProjectConfigurationFile({
