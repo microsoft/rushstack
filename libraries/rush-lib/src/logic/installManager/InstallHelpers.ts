@@ -9,7 +9,7 @@ import {
   JsonFile,
   LockFile
 } from '@rushstack/node-core-library';
-import { Colorize } from '@rushstack/terminal';
+import { Colorize, ITerminal } from '@rushstack/terminal';
 
 import { LastInstallFlag } from '../../api/LastInstallFlag';
 import type { PackageManagerName } from '../../api/packageManager/PackageManager';
@@ -39,7 +39,8 @@ export class InstallHelpers {
   public static generateCommonPackageJson(
     rushConfiguration: RushConfiguration,
     subspace: Subspace,
-    dependencies: Map<string, string> = new Map<string, string>()
+    dependencies: Map<string, string> = new Map<string, string>(),
+    terminal: ITerminal
   ): void {
     const commonPackageJson: ICommonPackageJson = {
       dependencies: {},
@@ -76,8 +77,7 @@ export class InstallHelpers {
           rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
           semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '9.0.0')
         ) {
-          // eslint-disable-next-line no-console
-          console.warn(
+          terminal.writeWarningLine(
             Colorize.yellow(
               `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
                 `doesn't support the "globalIgnoredOptionalDependencies" field in ` +

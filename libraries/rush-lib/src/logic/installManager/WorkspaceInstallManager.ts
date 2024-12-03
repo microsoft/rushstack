@@ -395,7 +395,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined);
+    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined, this._terminal);
 
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
     // since "rush install" will consider this timestamp

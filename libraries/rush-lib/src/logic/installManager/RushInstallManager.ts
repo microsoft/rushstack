@@ -379,7 +379,8 @@ export class RushInstallManager extends BaseInstallManager {
     InstallHelpers.generateCommonPackageJson(
       this.rushConfiguration,
       this.rushConfiguration.defaultSubspace,
-      commonDependencies
+      commonDependencies,
+      this._terminal
     );
 
     stopwatch.stop();
