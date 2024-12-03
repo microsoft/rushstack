@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Fri, 22 Nov 2024 01:10:43 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Dec 2024 16:11:07 GMT and should not be manually modified.
+
+## 0.16.0
+Tue, 03 Dec 2024 16:11:07 GMT
+
+### Minor changes
+
+- Add a new `NonProjectConfigurationFile` class that is designed to load absolute-pathed configuration files without rig support.
+- Rename `ConfigurationFile` to `ProjectConfigurationFile` and mark `ConfigurationFile` as `@deprecated`.
 
 ## 0.15.9
 Fri, 22 Nov 2024 01:10:43 GMT

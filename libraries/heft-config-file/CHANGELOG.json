@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.16.0",
+      "tag": "@rushstack/heft-config-file_v0.16.0",
+      "date": "Tue, 03 Dec 2024 16:11:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new `NonProjectConfigurationFile` class that is designed to load absolute-pathed configuration files without rig support."
+          },
+          {
+            "comment": "Rename `ConfigurationFile` to `ProjectConfigurationFile` and mark `ConfigurationFile` as `@deprecated`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.9",
       "tag": "@rushstack/heft-config-file_v0.15.9",
       "date": "Fri, 22 Nov 2024 01:10:43 GMT",
