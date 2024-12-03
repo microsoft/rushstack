@@ -163,8 +163,6 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
  * @public
  */
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   private readonly _json: JsonObject;
   private _globalPatchedDependencies: Record<string, string> | undefined;
 
@@ -441,7 +439,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
 
     const pnpmOptionsConfigFile: NonProjectConfigurationFile<IPnpmOptionsJson> =
       new NonProjectConfigurationFile({
-        jsonSchemaObject: PnpmOptionsConfiguration._jsonSchema
+        jsonSchemaObject: schemaJson
       });
     const pnpmOptionJson: IPnpmOptionsJson = pnpmOptionsConfigFile.loadConfigurationFile(
       terminal,
