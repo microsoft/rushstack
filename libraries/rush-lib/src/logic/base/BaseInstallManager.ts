@@ -399,7 +399,7 @@ export abstract class BaseInstallManager {
     potentiallyChangedFiles.push(subspace.getCommonVersionsFilePath(variant));
 
     // Add pnpm-config.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(subspace.getPnpmConfigFilePath(variant));
+    potentiallyChangedFiles.push(subspace.getPnpmConfigFilePath());
 
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // If the repo is using pnpmfile.js, consider that also

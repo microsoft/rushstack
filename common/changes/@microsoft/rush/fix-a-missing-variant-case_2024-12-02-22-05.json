@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the ability to skip `rush install` may be incorrectly calculated when using the variants feature.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

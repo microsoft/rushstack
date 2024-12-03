@@ -75,11 +75,10 @@ export class Subspace {
   public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
     if (!this._cachedPnpmOptionsInitialized) {
       // Calculate these outside the try/catch block since their error messages shouldn't be annotated:
-      const subspaceConfigFolder: string = this.getSubspaceConfigFolderPath();
       const subspaceTempFolder: string = this.getSubspaceTempFolderPath();
       try {
         this._cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-          `${subspaceConfigFolder}/${RushConstants.pnpmConfigFilename}`,
+          this.getPnpmConfigFilePath(),
           subspaceTempFolder
         );
         this._cachedPnpmOptionsInitialized = true;
@@ -207,7 +206,6 @@ export class Subspace {
    * - Lockfiles: (i.e. - `pnpm-lock.yaml`, `npm-shrinkwrap.json`, `yarn.lock`, etc)
    * - 'common-versions.json'
    * - 'pnpmfile.js'/'.pnpmfile.cjs'
-   * - 'pnpm-config.js'
    */
   public getVariantDependentSubspaceConfigFolderPath(variant: string | undefined): string {
     const subspaceConfigFolderPath: string = this.getSubspaceConfigFolderPath();
@@ -303,8 +301,8 @@ export class Subspace {
    * Example: `C:\MyRepo\common\subspaces\my-subspace\pnpm-config.json`
    * @beta
    */
-  public getPnpmConfigFilePath(variant?: string): string {
-    return this.getVariantDependentSubspaceConfigFolderPath(variant) + '/' + RushConstants.pnpmConfigFilename;
+  public getPnpmConfigFilePath(): string {
+    return this.getSubspaceConfigFolderPath() + '/' + RushConstants.pnpmConfigFilename;
   }
 
   /**
