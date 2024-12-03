@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.142.0",
+      "tag": "@microsoft/rush_v5.142.0",
+      "date": "Tue, 03 Dec 2024 23:42:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the ability to skip `rush install` may be incorrectly calculated when using the variants feature."
+          },
+          {
+            "comment": "Add support for an `\"extends\"` property in the `common/config/rush/pnpm-config.json` and `common/config/subspace/*/pnpm-config.json` files."
+          },
+          {
+            "comment": "Add warning when the `globalIgnoredOptionalDependencies` property is specified in `common/config/rush/pnpm-config.json` and the repo is configured to use pnpm <9.0.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.141.4",
       "tag": "@microsoft/rush_v5.141.4",
       "date": "Mon, 02 Dec 2024 20:40:41 GMT",

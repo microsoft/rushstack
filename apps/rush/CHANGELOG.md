@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 02 Dec 2024 20:40:41 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Dec 2024 23:42:22 GMT and should not be manually modified.
+
+## 5.142.0
+Tue, 03 Dec 2024 23:42:22 GMT
+
+### Updates
+
+- Fix an issue where the ability to skip `rush install` may be incorrectly calculated when using the variants feature.
+- Add support for an `"extends"` property in the `common/config/rush/pnpm-config.json` and `common/config/subspace/*/pnpm-config.json` files.
+- Add warning when the `globalIgnoredOptionalDependencies` property is specified in `common/config/rush/pnpm-config.json` and the repo is configured to use pnpm <9.0.0.
 
 ## 5.141.4
 Mon, 02 Dec 2024 20:40:41 GMT
