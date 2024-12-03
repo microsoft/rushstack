@@ -3,7 +3,7 @@
 
 import { AlreadyReportedError, Async, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
+import { ProjectConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
 import type { RushConfigurationProject } from './RushConfigurationProject';
@@ -147,8 +147,8 @@ interface IOldRushProjectJson {
   buildCacheOptions?: unknown;
 }
 
-const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
-  new ConfigurationFile<IRushProjectJson>({
+const RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IRushProjectJson> =
+  new ProjectConfigurationFile<IRushProjectJson>({
     projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
     jsonSchemaObject: schemaJson,
     propertyInheritance: {
@@ -230,8 +230,8 @@ const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
     }
   });
 
-const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IOldRushProjectJson> =
-  new ConfigurationFile<IOldRushProjectJson>({
+const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IOldRushProjectJson> =
+  new ProjectConfigurationFile<IOldRushProjectJson>({
     projectRelativeFilePath: RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath,
     jsonSchemaObject: anythingSchemaJson
   });

@@ -74,9 +74,11 @@ export enum PathResolutionMethod {
 }
 
 const CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX: RegExp = /^\$([^\.]+)\.inheritanceType$/;
-const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol('configuration-file-field-annotation');
+export const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol(
+  'configuration-file-field-annotation'
+);
 
-interface IAnnotatedField<TField> {
+export interface IAnnotatedField<TField> {
   [CONFIGURATION_FILE_FIELD_ANNOTATION]: IConfigurationFileFieldAnnotation<TField>;
 }
 
@@ -209,11 +211,6 @@ export interface IJsonPathsMetadata<TConfigurationFile> {
  */
 export interface IConfigurationFileOptionsBase<TConfigurationFile> {
   /**
-   * A project root-relative path to the configuration file that should be loaded.
-   */
-  projectRelativeFilePath: string;
-
-  /**
    * Use this property to specify how JSON nodes are postprocessed.
    */
   jsonPathMetadata?: IJsonPathsMetadata<TConfigurationFile>;
@@ -234,33 +231,39 @@ export interface IConfigurationFileOptionsBase<TConfigurationFile> {
 /**
  * @beta
  */
-export interface IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile>
-  extends IConfigurationFileOptionsBase<TConfigurationFile> {
-  /**
-   * The path to the schema for the configuration file.
-   */
-  jsonSchemaPath: string;
-  jsonSchemaObject?: never;
-}
+export type IConfigurationFileOptionsWithJsonSchemaFilePath<
+  TConfigurationFile,
+  TExtraOptions extends {}
+> = IConfigurationFileOptionsBase<TConfigurationFile> &
+  TExtraOptions & {
+    /**
+     * The path to the schema for the configuration file.
+     */
+    jsonSchemaPath: string;
+    jsonSchemaObject?: never;
+  };
 
 /**
  * @beta
  */
-export interface IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile>
-  extends IConfigurationFileOptionsBase<TConfigurationFile> {
-  /**
-   * The schema for the configuration file.
-   */
-  jsonSchemaObject: object;
-  jsonSchemaPath?: never;
-}
+export type IConfigurationFileOptionsWithJsonSchemaObject<
+  TConfigurationFile,
+  TExtraOptions extends {}
+> = IConfigurationFileOptionsBase<TConfigurationFile> &
+  TExtraOptions & {
+    /**
+     * The schema for the configuration file.
+     */
+    jsonSchemaObject: object;
+    jsonSchemaPath?: never;
+  };
 
 /**
  * @beta
  */
-export type IConfigurationFileOptions<TConfigurationFile> =
-  | IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile>
-  | IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile>;
+export type IConfigurationFileOptions<TConfigurationFile, TExtraOptions extends object> =
+  | IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile, TExtraOptions>
+  | IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile, TExtraOptions>;
 
 interface IJsonPathCallbackObject {
   path: string;
@@ -280,11 +283,8 @@ export interface IOriginalValueOptions<TParentProperty> {
 /**
  * @beta
  */
-export class ConfigurationFile<TConfigurationFile> {
+export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions extends {}> {
   private readonly _getSchema: () => JsonSchema;
-
-  /** {@inheritDoc IConfigurationFileOptionsBase.projectRelativeFilePath} */
-  public readonly projectRelativeFilePath: string;
 
   private readonly _jsonPathMetadata: IJsonPathsMetadata<TConfigurationFile>;
   private readonly _propertyInheritanceTypes: IPropertiesInheritance<TConfigurationFile>;
@@ -302,9 +302,7 @@ export class ConfigurationFile<TConfigurationFile> {
   private readonly _configPromiseCache: Map<string, Promise<TConfigurationFile>> = new Map();
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
-  public constructor(options: IConfigurationFileOptions<TConfigurationFile>) {
-    this.projectRelativeFilePath = options.projectRelativeFilePath;
-
+  public constructor(options: IConfigurationFileOptions<TConfigurationFile, TExtraOptions>) {
     if (options.jsonSchemaObject) {
       this._getSchema = () => JsonSchema.fromLoadedObject(options.jsonSchemaObject);
     } else {
@@ -314,82 +312,6 @@ export class ConfigurationFile<TConfigurationFile> {
     this._jsonPathMetadata = options.jsonPathMetadata || {};
     this._propertyInheritanceTypes = options.propertyInheritance || {};
     this._defaultPropertyInheritance = options.propertyInheritanceDefaults || {};
-  }
-
-  /**
-   * Find and return a configuration file for the specified project, automatically resolving
-   * `extends` properties and handling rigged configuration files. Will throw an error if a configuration
-   * file cannot be found in the rig or project config folder.
-   */
-  public loadConfigurationFileForProject(
-    terminal: ITerminal,
-    projectPath: string,
-    rigConfig?: IRigConfig
-  ): TConfigurationFile {
-    const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
-    return this._loadConfigurationFileInnerWithCache(
-      terminal,
-      projectConfigurationFilePath,
-      new Set<string>(),
-      rigConfig
-    );
-  }
-
-  /**
-   * Find and return a configuration file for the specified project, automatically resolving
-   * `extends` properties and handling rigged configuration files. Will throw an error if a configuration
-   * file cannot be found in the rig or project config folder.
-   */
-  public async loadConfigurationFileForProjectAsync(
-    terminal: ITerminal,
-    projectPath: string,
-    rigConfig?: IRigConfig
-  ): Promise<TConfigurationFile> {
-    const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
-    return await this._loadConfigurationFileInnerWithCacheAsync(
-      terminal,
-      projectConfigurationFilePath,
-      new Set<string>(),
-      rigConfig
-    );
-  }
-
-  /**
-   * This function is identical to {@link ConfigurationFile.loadConfigurationFileForProject}, except
-   * that it returns `undefined` instead of throwing an error if the configuration file cannot be found.
-   */
-  public tryLoadConfigurationFileForProject(
-    terminal: ITerminal,
-    projectPath: string,
-    rigConfig?: IRigConfig
-  ): TConfigurationFile | undefined {
-    try {
-      return this.loadConfigurationFileForProject(terminal, projectPath, rigConfig);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e as Error)) {
-        return undefined;
-      }
-      throw e;
-    }
-  }
-
-  /**
-   * This function is identical to {@link ConfigurationFile.loadConfigurationFileForProjectAsync}, except
-   * that it returns `undefined` instead of throwing an error if the configuration file cannot be found.
-   */
-  public async tryLoadConfigurationFileForProjectAsync(
-    terminal: ITerminal,
-    projectPath: string,
-    rigConfig?: IRigConfig
-  ): Promise<TConfigurationFile | undefined> {
-    try {
-      return await this.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e as Error)) {
-        return undefined;
-      }
-      throw e;
-    }
   }
 
   /**
@@ -430,14 +352,14 @@ export class ConfigurationFile<TConfigurationFile> {
     }
   }
 
-  private _loadConfigurationFileInnerWithCache(
+  protected _loadConfigurationFileInnerWithCache(
     terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
     rigConfig: IRigConfig | undefined
   ): TConfigurationFile {
     if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
-      const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
+      const resolvedConfigurationFilePathForLogging: string = ConfigurationFileBase._formatPathForLogging(
         resolvedConfigurationFilePath
       );
       throw new Error(
@@ -461,14 +383,14 @@ export class ConfigurationFile<TConfigurationFile> {
     return cacheEntry;
   }
 
-  private async _loadConfigurationFileInnerWithCacheAsync(
+  protected async _loadConfigurationFileInnerWithCacheAsync(
     terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
     rigConfig: IRigConfig | undefined
   ): Promise<TConfigurationFile> {
     if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
-      const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
+      const resolvedConfigurationFilePathForLogging: string = ConfigurationFileBase._formatPathForLogging(
         resolvedConfigurationFilePath
       );
       throw new Error(
@@ -496,6 +418,18 @@ export class ConfigurationFile<TConfigurationFile> {
 
     return await cacheEntryPromise;
   }
+
+  protected abstract _tryLoadConfigurationFileInRig(
+    terminal: ITerminal,
+    rigConfig: IRigConfig,
+    visitedConfigurationFilePaths: Set<string>
+  ): TConfigurationFile | undefined;
+
+  protected abstract _tryLoadConfigurationFileInRigAsync(
+    terminal: ITerminal,
+    rigConfig: IRigConfig,
+    visitedConfigurationFilePaths: Set<string>
+  ): Promise<TConfigurationFile | undefined>;
 
   private _parseAndResolveConfigurationFile(
     fileText: string,
@@ -546,7 +480,7 @@ export class ConfigurationFile<TConfigurationFile> {
     visitedConfigurationFilePaths: Set<string>,
     rigConfig: IRigConfig | undefined
   ): TConfigurationFile {
-    const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
+    const resolvedConfigurationFilePathForLogging: string = ConfigurationFileBase._formatPathForLogging(
       resolvedConfigurationFilePath
     );
 
@@ -634,7 +568,7 @@ export class ConfigurationFile<TConfigurationFile> {
     visitedConfigurationFilePaths: Set<string>,
     rigConfig: IRigConfig | undefined
   ): Promise<TConfigurationFile> {
-    const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
+    const resolvedConfigurationFilePathForLogging: string = ConfigurationFileBase._formatPathForLogging(
       resolvedConfigurationFilePath
     );
 
@@ -713,76 +647,6 @@ export class ConfigurationFile<TConfigurationFile> {
     return result as TConfigurationFile;
   }
 
-  private _tryLoadConfigurationFileInRig(
-    terminal: ITerminal,
-    rigConfig: IRigConfig,
-    visitedConfigurationFilePaths: Set<string>
-  ): TConfigurationFile | undefined {
-    if (rigConfig.rigFound) {
-      const rigProfileFolder: string = rigConfig.getResolvedProfileFolder();
-      try {
-        return this._loadConfigurationFileInnerWithCache(
-          terminal,
-          nodeJsPath.resolve(rigProfileFolder, this.projectRelativeFilePath),
-          visitedConfigurationFilePaths,
-          undefined
-        );
-      } catch (e) {
-        // Ignore cases where a configuration file doesn't exist in a rig
-        if (!FileSystem.isNotExistError(e as Error)) {
-          throw e;
-        } else {
-          terminal.writeDebugLine(
-            `Configuration file "${
-              this.projectRelativeFilePath
-            }" not found in rig ("${ConfigurationFile._formatPathForLogging(rigProfileFolder)}")`
-          );
-        }
-      }
-    } else {
-      terminal.writeDebugLine(
-        `No rig found for "${ConfigurationFile._formatPathForLogging(rigConfig.projectFolderPath)}"`
-      );
-    }
-
-    return undefined;
-  }
-
-  private async _tryLoadConfigurationFileInRigAsync(
-    terminal: ITerminal,
-    rigConfig: IRigConfig,
-    visitedConfigurationFilePaths: Set<string>
-  ): Promise<TConfigurationFile | undefined> {
-    if (rigConfig.rigFound) {
-      const rigProfileFolder: string = await rigConfig.getResolvedProfileFolderAsync();
-      try {
-        return await this._loadConfigurationFileInnerWithCacheAsync(
-          terminal,
-          nodeJsPath.resolve(rigProfileFolder, this.projectRelativeFilePath),
-          visitedConfigurationFilePaths,
-          undefined
-        );
-      } catch (e) {
-        // Ignore cases where a configuration file doesn't exist in a rig
-        if (!FileSystem.isNotExistError(e as Error)) {
-          throw e;
-        } else {
-          terminal.writeDebugLine(
-            `Configuration file "${
-              this.projectRelativeFilePath
-            }" not found in rig ("${ConfigurationFile._formatPathForLogging(rigProfileFolder)}")`
-          );
-        }
-      }
-    } else {
-      terminal.writeDebugLine(
-        `No rig found for "${ConfigurationFile._formatPathForLogging(rigConfig.projectFolderPath)}"`
-      );
-    }
-
-    return undefined;
-  }
-
   private _annotateProperties<TObject>(resolvedConfigurationFilePath: string, obj: TObject): void {
     if (!obj) {
       return;
@@ -830,7 +694,7 @@ export class ConfigurationFile<TConfigurationFile> {
           this._packageJsonLookup.tryGetPackageFolderFor(configurationFilePath);
         if (!packageRoot) {
           throw new Error(
-            `Could not find a package root for path "${ConfigurationFile._formatPathForLogging(
+            `Could not find a package root for path "${ConfigurationFileBase._formatPathForLogging(
               configurationFilePath
             )}"`
           );
@@ -1120,9 +984,5 @@ export class ConfigurationFile<TConfigurationFile> {
     }
 
     return result;
-  }
-
-  private _getConfigurationFilePathForProject(projectPath: string): string {
-    return nodeJsPath.resolve(projectPath, this.projectRelativeFilePath);
   }
 }

@@ -10,6 +10,11 @@
       "type": "string"
     },
 
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from. This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
     "useWorkspaces": {
       "description": "If true, then `rush install` and `rush update` will use the PNPM workspaces feature to perform the install, instead of the old model where Rush generated the symlinks for each projects's node_modules folder. This option is strongly recommended. The default value is false.",
       "type": "boolean"

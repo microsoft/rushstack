@@ -24,7 +24,7 @@ import type {
   CommandLineStringListParameter
 } from '@rushstack/heft';
 import {
-  ConfigurationFile,
+  ProjectConfigurationFile,
   type ICustomJsonPathMetadata,
   type IJsonPathMetadataResolverOptions,
   InheritanceType,
@@ -139,7 +139,7 @@ interface IPendingTestRun {
  * @internal
  */
 export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
-  private static _jestConfigurationFileLoader: ConfigurationFile<IHeftJestConfiguration> | undefined;
+  private static _jestConfigurationFileLoader: ProjectConfigurationFile<IHeftJestConfiguration> | undefined;
 
   private _jestPromise: Promise<unknown> | undefined;
   private _pendingTestRuns: Set<IPendingTestRun> = new Set();
@@ -677,7 +677,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   public static _getJestConfigurationLoader(
     buildFolder: string,
     projectRelativeFilePath: string
-  ): ConfigurationFile<IHeftJestConfiguration> {
+  ): ProjectConfigurationFile<IHeftJestConfiguration> {
     if (!JestPlugin._jestConfigurationFileLoader) {
       // By default, ConfigurationFile will replace all objects, so we need to provide merge functions for these
       const shallowObjectInheritanceFunc: <T extends Record<string, unknown> | undefined>(
@@ -722,7 +722,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
           resolveAsModule: true
         });
 
-      JestPlugin._jestConfigurationFileLoader = new ConfigurationFile<IHeftJestConfiguration>({
+      JestPlugin._jestConfigurationFileLoader = new ProjectConfigurationFile<IHeftJestConfiguration>({
         projectRelativeFilePath: projectRelativeFilePath,
         // Bypass Jest configuration validation
         jsonSchemaObject: anythingSchema,

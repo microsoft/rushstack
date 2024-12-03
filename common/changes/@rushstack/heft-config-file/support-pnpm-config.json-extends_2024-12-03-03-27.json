@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Rename `ConfigurationFile` to `ProjectConfigurationFile` and mark `ConfigurationFile` as `@deprecated`.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file"
+}

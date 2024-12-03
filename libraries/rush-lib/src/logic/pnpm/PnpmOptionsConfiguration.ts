@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, type JsonObject, JsonSchema } from '@rushstack/node-core-library';
+import { JsonFile, type JsonObject } from '@rushstack/node-core-library';
+import { NonProjectConfigurationFile } from '@rushstack/heft-config-file';
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import {
   type IPackageManagerOptionsJsonBase,
@@ -161,8 +163,6 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
  * @public
  */
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   private readonly _json: JsonObject;
   private _globalPatchedDependencies: Record<string, string> | undefined;
 
@@ -434,9 +434,16 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     jsonFilename: string,
     commonTempFolder: string
   ): PnpmOptionsConfiguration {
-    const pnpmOptionJson: IPnpmOptionsJson = JsonFile.loadAndValidate(
-      jsonFilename,
-      PnpmOptionsConfiguration._jsonSchema
+    // TODO: plumb through the terminal
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+
+    const pnpmOptionsConfigFile: NonProjectConfigurationFile<IPnpmOptionsJson> =
+      new NonProjectConfigurationFile({
+        jsonSchemaObject: schemaJson
+      });
+    const pnpmOptionJson: IPnpmOptionsJson = pnpmOptionsConfigFile.loadConfigurationFile(
+      terminal,
+      jsonFilename
     );
     return new PnpmOptionsConfiguration(pnpmOptionJson || {}, commonTempFolder, jsonFilename);
   }

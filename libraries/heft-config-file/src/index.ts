@@ -9,7 +9,7 @@
  */
 
 export {
-  ConfigurationFile,
+  ConfigurationFileBase,
   type IConfigurationFileOptionsBase,
   type IConfigurationFileOptionsWithJsonSchemaFilePath,
   type IConfigurationFileOptionsWithJsonSchemaObject,
@@ -27,4 +27,24 @@ export {
   type IPropertyInheritanceDefaults,
   PathResolutionMethod,
   type PropertyInheritanceCustomFunction
-} from './ConfigurationFile';
+} from './ConfigurationFileBase';
+
+import { ProjectConfigurationFile } from './ProjectConfigurationFile';
+
+/**
+ * @deprecated Use {@link ProjectConfigurationFile} instead.
+ * @beta
+ */
+export const ConfigurationFile: typeof ProjectConfigurationFile = ProjectConfigurationFile;
+
+/**
+ * @deprecated Use {@link ProjectConfigurationFile} instead.
+ * @beta
+ */
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export type ConfigurationFile<TConfigurationFile> = ProjectConfigurationFile<TConfigurationFile>;
+
+export { ProjectConfigurationFile, type IProjectConfigurationFileOptions } from './ProjectConfigurationFile';
+export { NonProjectConfigurationFile } from './NonProjectConfigurationFile';
+
+export * as TestUtilities from './TestUtilities';
