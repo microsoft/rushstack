@@ -143,9 +143,9 @@ export class WebClient {
       timeout: timeoutMs,
       redirect: options?.redirect
     };
-    const putOptions: IFetchOptionsWithBody | undefined = options as IFetchOptionsWithBody | undefined;
-    if (putOptions?.body) {
-      requestInit.body = putOptions.body;
+    const optionsWithBody: IFetchOptionsWithBody | undefined = options as IFetchOptionsWithBody | undefined;
+    if (optionsWithBody?.body) {
+      requestInit.body = optionsWithBody.body;
     }
 
     return await WebClient._requestFn(url, requestInit);
