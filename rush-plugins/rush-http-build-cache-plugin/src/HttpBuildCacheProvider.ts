@@ -10,7 +10,7 @@ import {
   type RushSession,
   EnvironmentConfiguration
 } from '@rushstack/rush-sdk';
-import fetch, { type BodyInit, type Response } from 'node-fetch';
+import { WebClient, type WebClientResponse } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 import type { SpawnSyncReturns } from 'child_process';
 
 enum CredentialsOptions {
@@ -35,10 +35,15 @@ export interface IHttpBuildCacheTokenHandler {
 /**
  * @public
  */
+export type UploadMethod = 'PUT' | 'POST' | 'PATCH';
+
+/**
+ * @public
+ */
 export interface IHttpBuildCacheProviderOptions {
   url: string;
   tokenHandler?: IHttpBuildCacheTokenHandler;
-  uploadMethod?: string;
+  uploadMethod?: UploadMethod;
   minHttpRetryDelayMs?: number;
   headers?: Record<string, string>;
   cacheKeyPrefix?: string;
@@ -56,7 +61,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   private readonly _environmentCredential: string | undefined;
   private readonly _isCacheWriteAllowedByConfiguration: boolean;
   private readonly _url: URL;
-  private readonly _uploadMethod: string;
+  private readonly _uploadMethod: UploadMethod;
   private readonly _headers: Record<string, string>;
   private readonly _cacheKeyPrefix: string;
   private readonly _tokenHandler: IHttpBuildCacheTokenHandler | undefined;
@@ -210,8 +215,8 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   private async _makeHttpRequestAsync(options: {
     terminal: ITerminal;
     relUrl: string;
-    method: string;
-    body: BodyInit | undefined;
+    method: 'GET' | UploadMethod;
+    body: Buffer | undefined;
     warningText: string;
     readBody: boolean;
     maxAttempts: number;
@@ -237,11 +242,13 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     terminal.writeDebugLine(`[http-build-cache] request: ${method} ${url} ${bodyLength} bytes`);
 
-    const response: Response = await fetch(url, {
-      method: method,
+    const webClient: WebClient = new WebClient();
+    const response: WebClientResponse = await webClient.fetchAsync(url, {
+      verb: method,
       headers: headers,
       body: body,
-      redirect: 'follow'
+      redirect: 'follow',
+      timeoutMs: 0 // Use the default timeout
     });
 
     if (!response.ok) {
@@ -342,7 +349,11 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     }
   }
 
-  private _getFailureType(requestMethod: string, response: Response, isRedirect: boolean): FailureType {
+  private _getFailureType(
+    requestMethod: string,
+    response: WebClientResponse,
+    isRedirect: boolean
+  ): FailureType {
     if (response.ok) {
       return FailureType.None;
     }
@@ -392,7 +403,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   private _reportFailure(
     terminal: ITerminal,
     requestMethod: string,
-    response: Response,
+    response: WebClientResponse,
     isRedirect: boolean,
     message: string
   ): void {
