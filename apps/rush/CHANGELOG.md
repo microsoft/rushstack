@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 03 Dec 2024 23:42:22 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Dec 2024 03:07:08 GMT and should not be manually modified.
+
+## 5.143.0
+Wed, 04 Dec 2024 03:07:08 GMT
+
+### Updates
+
+- Remove the `node-fetch` dependency from @rushstack/rush-amazon-s3-build-cache-plugin.
+- (BREAKING API CHANGE) Remove the exported `WebClient` API from @rushstack/rush-amazon-s3-build-cache-plugin.
 
 ## 5.142.0
 Tue, 03 Dec 2024 23:42:22 GMT

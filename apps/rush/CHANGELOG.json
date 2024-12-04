@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.143.0",
+      "tag": "@microsoft/rush_v5.143.0",
+      "date": "Wed, 04 Dec 2024 03:07:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove the `node-fetch` dependency from @rushstack/rush-amazon-s3-build-cache-plugin."
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Remove the exported `WebClient` API from @rushstack/rush-amazon-s3-build-cache-plugin."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.142.0",
       "tag": "@microsoft/rush_v5.142.0",
       "date": "Tue, 03 Dec 2024 23:42:22 GMT",
