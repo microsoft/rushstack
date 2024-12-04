@@ -27,8 +27,6 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/node-fetch": "2.6.2",
-    "local-node-rig": "workspace:*",
-    "node-fetch": "2.6.7"
+    "local-node-rig": "workspace:*"
   }
 }

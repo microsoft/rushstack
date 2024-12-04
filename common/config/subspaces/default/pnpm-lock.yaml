@@ -4009,9 +4009,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@types/node-fetch':
-        specifier: 2.6.2
-        version: 2.6.2
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig

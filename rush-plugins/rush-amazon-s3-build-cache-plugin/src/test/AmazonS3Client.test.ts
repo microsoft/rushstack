@@ -7,7 +7,6 @@ jest.mock('@rushstack/rush-sdk/lib/utilities/WebClient', () => {
 
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
-import { Response, type ResponseInit } from 'node-fetch';
 
 import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from '../AmazonS3BuildCacheProvider';
 import { AmazonS3Client } from '../AmazonS3Client';
@@ -223,7 +222,8 @@ describe(AmazonS3Client.name, () => {
   describe('Making requests', () => {
     interface IResponseOptions {
       body?: string;
-      responseInit: ResponseInit;
+      status: number;
+      statusText?: string;
     }
 
     let realDate: typeof Date;
@@ -253,9 +253,14 @@ describe(AmazonS3Client.name, () => {
       response: IResponseOptions,
       testOptions: ITestOptions
     ): Promise<TResponse> {
-      const spy: jest.SpyInstance = jest
-        .spyOn(WebClient.prototype, 'fetchAsync')
-        .mockReturnValue(Promise.resolve(new Response(response.body, response.responseInit)));
+      const spy: jest.SpyInstance = jest.spyOn(WebClient.prototype, 'fetchAsync').mockReturnValue(
+        Promise.resolve({
+          buffer: response.body ? async () => Buffer.from(response.body || '') : undefined,
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.status >= 200 && response.status < 300
+        }) as unknown as ReturnType<typeof WebClient.prototype.fetchAsync>
+      );
 
       const s3Client: AmazonS3Client = new AmazonS3Client(credentials, options, webClient, terminal);
       let result: TResponse;
@@ -325,9 +330,7 @@ describe(AmazonS3Client.name, () => {
             'abc123',
             {
               body: expectedContents,
-              responseInit: {
-                status: 200
-              }
+              status: 200
             },
             {
               shouldRetry: false
@@ -346,9 +349,7 @@ describe(AmazonS3Client.name, () => {
             'abc123',
             {
               body: expectedContents,
-              responseInit: {
-                status: 200
-              }
+              status: 200
             },
             { shouldRetry: false }
           );
@@ -362,10 +363,8 @@ describe(AmazonS3Client.name, () => {
             DUMMY_OPTIONS,
             'abc123',
             {
-              responseInit: {
-                status: 404,
-                statusText: 'Not Found'
-              }
+              status: 404,
+              statusText: 'Not Found'
             },
             {
               shouldRetry: false
@@ -383,10 +382,8 @@ describe(AmazonS3Client.name, () => {
                 DUMMY_OPTIONS,
                 'abc123',
                 {
-                  responseInit: {
-                    status: 500,
-                    statusText: 'Server Error'
-                  }
+                  status: 500,
+                  statusText: 'Server Error'
                 },
                 {
                   shouldRetry: true
@@ -411,10 +408,8 @@ describe(AmazonS3Client.name, () => {
                   DUMMY_OPTIONS,
                   'abc123',
                   {
-                    responseInit: {
-                      status: 400,
-                      statusText: 'Bad Request'
-                    }
+                    status: 400,
+                    statusText: 'Bad Request'
                   },
                   {
                     shouldRetry: false
@@ -435,10 +430,8 @@ describe(AmazonS3Client.name, () => {
                   DUMMY_OPTIONS,
                   'abc123',
                   {
-                    responseInit: {
-                      status: 401,
-                      statusText: 'Unauthorized'
-                    }
+                    status: 401,
+                    statusText: 'Unauthorized'
                   },
                   {
                     shouldRetry: false
@@ -469,10 +462,8 @@ describe(AmazonS3Client.name, () => {
                 return await s3Client.getObjectAsync('abc123');
               },
               {
-                responseInit: {
-                  status: code,
-                  statusText: 'Unauthorized'
-                }
+                status: code,
+                statusText: 'Unauthorized'
               },
               {
                 shouldRetry: false
@@ -501,10 +492,8 @@ describe(AmazonS3Client.name, () => {
                 DUMMY_OPTIONS,
                 'abc123',
                 {
-                  responseInit: {
-                    status: 403,
-                    statusText: 'Unauthorized'
-                  }
+                  status: 403,
+                  statusText: 'Unauthorized'
                 },
                 {
                   shouldRetry: false
@@ -568,9 +557,7 @@ describe(AmazonS3Client.name, () => {
             'abc123',
             'abc123-contents',
             {
-              responseInit: {
-                status: 200
-              }
+              status: 200
             },
             { shouldRetry: false }
           );
@@ -583,9 +570,7 @@ describe(AmazonS3Client.name, () => {
             'abc123',
             'abc123-contents',
             {
-              responseInit: {
-                status: 200
-              }
+              status: 200
             },
             { shouldRetry: false }
           );
@@ -600,10 +585,8 @@ describe(AmazonS3Client.name, () => {
                 'abc123',
                 'abc123-contents',
                 {
-                  responseInit: {
-                    status: 500,
-                    statusText: 'Server Error'
-                  }
+                  status: 500,
+                  statusText: 'Server Error'
                 },
                 { shouldRetry: true }
               )
