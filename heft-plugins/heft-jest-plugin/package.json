@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@jest/types": "29.5.0",
-    "@rushstack/heft-node-rig": "2.6.41",
+    "@rushstack/heft-node-rig": "2.6.43",
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
