@@ -1163,8 +1163,7 @@
       "packageName": "repo-toolbox",
       "projectFolder": "repo-scripts/repo-toolbox",
       "reviewCategory": "libraries",
-      "shouldPublish": false,
-      "decoupledLocalDependencies": ["@microsoft/rush-lib"]
+      "shouldPublish": false
     },
 
     // "rigs" folder (alphabetical order)

@@ -10,7 +10,7 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
-    "@microsoft/rush-lib": "5.143.0-pr5009.0",
+    "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
