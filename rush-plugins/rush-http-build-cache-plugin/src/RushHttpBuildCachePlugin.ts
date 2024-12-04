@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
-import type { IHttpBuildCacheProviderOptions } from './HttpBuildCacheProvider';
+import type { IHttpBuildCacheProviderOptions, UploadMethod } from './HttpBuildCacheProvider';
 
 const PLUGIN_NAME: string = 'HttpBuildCachePlugin';
 
@@ -18,7 +18,7 @@ export interface IRushHttpBuildCachePluginConfig {
   /**
    * The HTTP method to use when writing to the cache (defaults to PUT).
    */
-  uploadMethod?: string;
+  uploadMethod?: UploadMethod;
 
   /**
    * An optional set of HTTP headers to pass to the cache server.
