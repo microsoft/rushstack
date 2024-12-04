@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.144.0",
+      "tag": "@microsoft/rush_v5.144.0",
+      "date": "Wed, 04 Dec 2024 19:32:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove the `node-fetch` dependency from `@rushstack/rush-http-build-cache-plugin`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.143.0",
       "tag": "@microsoft/rush_v5.143.0",
       "date": "Wed, 04 Dec 2024 03:07:08 GMT",

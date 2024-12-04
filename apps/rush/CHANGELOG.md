@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 04 Dec 2024 03:07:08 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Dec 2024 19:32:23 GMT and should not be manually modified.
+
+## 5.144.0
+Wed, 04 Dec 2024 19:32:23 GMT
+
+### Updates
+
+- Remove the `node-fetch` dependency from `@rushstack/rush-http-build-cache-plugin`.
 
 ## 5.143.0
 Wed, 04 Dec 2024 03:07:08 GMT
