@@ -2184,11 +2184,10 @@ importers:
         version: link:../../libraries/node-core-library
 
   ../../../build-tests/rush-amazon-s3-build-cache-plugin-integration-test:
-    dependencies:
-      '@rushstack/terminal':
-        specifier: workspace:*
-        version: link:../../libraries/terminal
     devDependencies:
+      '@microsoft/rush-lib':
+        specifier: workspace:*
+        version: link:../../libraries/rush-lib
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
@@ -2198,6 +2197,9 @@ importers:
       '@rushstack/rush-amazon-s3-build-cache-plugin':
         specifier: workspace:*
         version: link:../../rush-plugins/rush-amazon-s3-build-cache-plugin
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/http-proxy':
         specifier: ~1.17.8
         version: 1.17.14
