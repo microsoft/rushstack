@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING API CHANGE) Remove the exported `WebClient` API from @rushstack/rush-amazon-s3-build-cache-plugin.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

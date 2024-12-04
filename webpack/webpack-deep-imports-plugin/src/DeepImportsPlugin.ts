@@ -144,6 +144,7 @@ export class DeepImportsPlugin extends DllPlugin {
         interface ILibModuleDescriptor {
           libPathWithoutExtension: string;
           moduleId: string | number | null;
+          secondaryChunkId: string | undefined;
         }
 
         const pathsToIgnoreWithoutExtension: Set<string> = this._pathsToIgnoreWithoutExtensions;
@@ -152,8 +153,8 @@ export class DeepImportsPlugin extends DllPlugin {
         const encounteredLibPaths: Set<string> = new Set();
         for (const runtimeChunk of runtimeChunks) {
           const libModules: ILibModuleDescriptor[] = [];
-          for (const initialChunk of runtimeChunk.getAllInitialChunks()) {
-            for (const runtimeChunkModule of compilation.chunkGraph.getChunkModules(initialChunk)) {
+          function processChunks(chunk: Chunk, secondaryChunkId: string | undefined): void {
+            for (const runtimeChunkModule of compilation.chunkGraph.getChunkModules(chunk)) {
               if (runtimeChunkModule.type === 'javascript/auto') {
                 const modulePath: string | undefined = (runtimeChunkModule as NormalModule)?.resource;
                 if (modulePath?.startsWith(resolvedLibInFolder) && modulePath.endsWith(JS_EXTENSION)) {
@@ -166,7 +167,8 @@ export class DeepImportsPlugin extends DllPlugin {
                     if (!encounteredLibPaths.has(relativePathWithoutExtension)) {
                       libModules.push({
                         libPathWithoutExtension: relativePathWithoutExtension,
-                        moduleId: compilation.chunkGraph.getModuleId(runtimeChunkModule)
+                        moduleId: compilation.chunkGraph.getModuleId(runtimeChunkModule),
+                        secondaryChunkId
                       });
 
                       encounteredLibPaths.add(relativePathWithoutExtension);
@@ -174,6 +176,16 @@ export class DeepImportsPlugin extends DllPlugin {
                   }
                 }
               }
+            }
+          }
+
+          for (const initialChunk of runtimeChunk.getAllInitialChunks()) {
+            processChunks(initialChunk, undefined);
+          }
+
+          for (const secondaryChunk of runtimeChunk.getAllAsyncChunks()) {
+            if (secondaryChunk.id) {
+              processChunks(secondaryChunk, String(secondaryChunk.id));
             }
           }
 
@@ -219,12 +231,22 @@ export class DeepImportsPlugin extends DllPlugin {
 
           await Async.forEachAsync(
             libModules,
-            async ({ libPathWithoutExtension, moduleId }) => {
+            async ({ libPathWithoutExtension, moduleId, secondaryChunkId }) => {
               const depth: number = countSlashes(libPathWithoutExtension);
               const requirePath: string = '../'.repeat(depth) + libOutFolderRelativeOutputPath;
-              const moduleText: string = [
-                `module.exports = require(${JSON.stringify(requirePath)})(${JSON.stringify(moduleId)});`
-              ].join('\n');
+              let moduleText: string;
+              if (secondaryChunkId) {
+                moduleText = [
+                  `const runtimeChunkRequire = require(${JSON.stringify(requirePath)});`,
+                  `// Ensure the chunk containing the module is loaded`,
+                  `runtimeChunkRequire.f.require(${JSON.stringify(secondaryChunkId)});`,
+                  `module.exports = runtimeChunkRequire(${JSON.stringify(moduleId)});`
+                ].join('\n');
+              } else {
+                moduleText = [
+                  `module.exports = require(${JSON.stringify(requirePath)})(${JSON.stringify(moduleId)});`
+                ].join('\n');
+              }
 
               compilation.emitAsset(
                 `${outputPathRelativeLibOutFolder}/${libPathWithoutExtension}${JS_EXTENSION}`,
