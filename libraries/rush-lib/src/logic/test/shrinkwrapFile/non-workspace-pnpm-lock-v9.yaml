@@ -1,0 +1,196 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@pnpm/dependency-path':
+        specifier: ^5.1.7
+        version: 5.1.7
+      '@pnpm/lockfile.utils':
+        specifier: ^1.0.4
+        version: 1.0.4
+      '@rush-temp/project1':
+        specifier: file:./projects/project1
+        version: project1@file:projects/project1
+      '@rush-temp/project2':
+        specifier: file:./projects/project2
+        version: project2@file:projects/project2
+      '@rush-temp/project3':
+        specifier: file:./projects/project3
+        version: project3@file:projects/project3
+      pad-left:
+        specifier: 1.0.0
+        version: 1.0.0
+
+packages:
+
+  '@pnpm/crypto.base32-hash@3.0.1':
+    resolution: {integrity: sha512-DM4RR/tvB7tMb2FekL0Q97A5PCXNyEC+6ht8SaufAUFSJNxeozqHw9PHTZR03mzjziPzNQLOld0pNINBX3srtw==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/crypto.polyfill@1.0.0':
+    resolution: {integrity: sha512-WbmsqqcUXKKaAF77ox1TQbpZiaQcr26myuMUu+WjUtoWYgD3VP6iKYEvSx35SZ6G2L316lu+pv+40A2GbWJc1w==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/dependency-path@5.1.7':
+    resolution: {integrity: sha512-MKCyaTy1r9fhBXAnhDZNBVgo6ThPnicwJEG203FDp7pGhD7NruS/FhBI+uMd7GNsK3D7aIFCDAgbWpNTXn/eWw==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/lockfile.types@1.0.3':
+    resolution: {integrity: sha512-A7vUWktnhDkrIs+WmXm7AdffJVyVYJpQUEouya/DYhB+Y+tQ3BXjZ6CV0KybqLgI/8AZErgCJqFxA0GJH6QDjA==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/lockfile.utils@1.0.4':
+    resolution: {integrity: sha512-ptHO2muziYyNCwpsuaPtaRgKiHMrE/lkGI4nqbHnRWWgfdJbTeL1tq+b/EUsxjlKlJ/a9Q4z2C+t38g+9bhTJg==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/patching.types@1.0.0':
+    resolution: {integrity: sha512-juCdQCC1USqLcOhVPl1tYReoTO9YH4fTullMnFXXcmpsDM7Dkn3tzuOQKC3oPoJ2ozv+0EeWWMtMGqn2+IM3pQ==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/pick-fetcher@3.0.0':
+    resolution: {integrity: sha512-2eisylRAU/jeuxFEPnS1gjLZKJGbYc4QEtEW6MVUYjO4Xi+2ttkSm7825S0J5IPpUIvln8HYPCUS0eQWSfpOaQ==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/ramda@0.28.1':
+    resolution: {integrity: sha512-zcAG+lvU0fMziNeGXpPyCyCJYp5ZVrPElEE4t14jAmViaihohocZ+dDkcRIyAomox8pQsuZnv1EyHR+pOhmUWw==}
+
+  '@pnpm/resolver-base@13.0.4':
+    resolution: {integrity: sha512-d6GtsaXDN1VmVdeB6ohrhwGwQfvYpEX/XkBZyRT0Hp772WabWVfaulvicwdh/8o7Rpzy7IV/2hKnDpodUY00lw==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/types@12.2.0':
+    resolution: {integrity: sha512-5RtwWhX39j89/Tmyv2QSlpiNjErA357T/8r1Dkg+2lD3P7RuS7Xi2tChvmOC3VlezEFNcWnEGCOeKoGRkDuqFA==}
+    engines: {node: '>=18.12'}
+
+  get-npm-tarball-url@2.1.0:
+    resolution: {integrity: sha512-ro+DiMu5DXgRBabqXupW38h7WPZ9+Ad8UjwhvsmmN8w1sU7ab0nzAXvVZ4kqYg57OrqomRtJvepX5/xvFKNtjA==}
+    engines: {node: '>=12.17'}
+
+  jquery@1.12.3:
+    resolution: {integrity: sha512-FzM42/Ew+Hb8ha2OlhHRBLgWIZS32gZ0+NvWTf+ZvVvGaIlJkOiXQyb7VBjv4L6fJfmTrRf3EsAmbfsHDhfemw==}
+
+  jquery@2.2.4:
+    resolution: {integrity: sha512-lBHj60ezci2u1v2FqnZIraShGgEXq35qCzMv4lITyHGppTnA13rwR0MgwyNJh9TnDs3aXUvd1xjAotfraMHX/Q==}
+
+  pad-left@1.0.0:
+    resolution: {integrity: sha512-VIgD7DviaDL6QCj+jEU1jpjXlu0z/sl4yzAmFLmM7YvM3ZRKLaxZAe+sZ1hKHeYUeI4zoZHfMetDpazu/uAwsw==}
+    engines: {node: '>=0.10.0'}
+
+  pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0:
+    resolution: {tarball: https://github.com/jonschlinkert/pad-left/tarball/2.1.0}
+    version: 2.1.0
+    engines: {node: '>=0.10.0'}
+
+  project1@file:projects/project1:
+    resolution: {directory: projects/project1, type: directory}
+
+  project2@file:projects/project2:
+    resolution: {directory: projects/project2, type: directory}
+
+  project3@file:projects/project3:
+    resolution: {directory: projects/project3, type: directory}
+
+  q@1.5.1:
+    resolution: {integrity: sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==}
+    engines: {node: '>=0.6.0', teleport: '>=0.2.0'}
+    deprecated: |-
+      You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+
+      (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
+
+  repeat-string@1.6.1:
+    resolution: {integrity: sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==}
+    engines: {node: '>=0.10'}
+
+  rfc4648@1.5.3:
+    resolution: {integrity: sha512-MjOWxM065+WswwnmNONOT+bD1nXzY9Km6u3kzvnx8F8/HXGZdz3T6e6vZJ8Q/RIMUSp/nxqjH3GwvJDy8ijeQQ==}
+
+  semver@7.6.3:
+    resolution: {integrity: sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+snapshots:
+
+  '@pnpm/crypto.base32-hash@3.0.1':
+    dependencies:
+      '@pnpm/crypto.polyfill': 1.0.0
+      rfc4648: 1.5.3
+
+  '@pnpm/crypto.polyfill@1.0.0': {}
+
+  '@pnpm/dependency-path@5.1.7':
+    dependencies:
+      '@pnpm/crypto.base32-hash': 3.0.1
+      '@pnpm/types': 12.2.0
+      semver: 7.6.3
+
+  '@pnpm/lockfile.types@1.0.3':
+    dependencies:
+      '@pnpm/patching.types': 1.0.0
+      '@pnpm/types': 12.2.0
+
+  '@pnpm/lockfile.utils@1.0.4':
+    dependencies:
+      '@pnpm/dependency-path': 5.1.7
+      '@pnpm/lockfile.types': 1.0.3
+      '@pnpm/pick-fetcher': 3.0.0
+      '@pnpm/resolver-base': 13.0.4
+      '@pnpm/types': 12.2.0
+      get-npm-tarball-url: 2.1.0
+      ramda: '@pnpm/ramda@0.28.1'
+
+  '@pnpm/patching.types@1.0.0': {}
+
+  '@pnpm/pick-fetcher@3.0.0': {}
+
+  '@pnpm/ramda@0.28.1': {}
+
+  '@pnpm/resolver-base@13.0.4':
+    dependencies:
+      '@pnpm/types': 12.2.0
+
+  '@pnpm/types@12.2.0': {}
+
+  get-npm-tarball-url@2.1.0: {}
+
+  jquery@1.12.3: {}
+
+  jquery@2.2.4: {}
+
+  pad-left@1.0.0:
+    dependencies:
+      repeat-string: 1.6.1
+
+  pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0:
+    dependencies:
+      repeat-string: 1.6.1
+
+  project1@file:projects/project1:
+    dependencies:
+      jquery: 1.12.3
+      pad-left: 1.0.0
+
+  project2@file:projects/project2:
+    dependencies:
+      jquery: 2.2.4
+      q: 1.5.1
+
+  project3@file:projects/project3:
+    dependencies:
+      '@scope/testDep': pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0
+      q: 1.5.1
+
+  q@1.5.1: {}
+
+  repeat-string@1.6.1: {}
+
+  rfc4648@1.5.3: {}
+
+  semver@7.6.3: {}
