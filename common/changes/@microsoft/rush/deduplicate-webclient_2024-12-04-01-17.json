@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Remove the `node-fetch` dependency from @rushstack/rush-amazon-s3-build-cache-plugin.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
