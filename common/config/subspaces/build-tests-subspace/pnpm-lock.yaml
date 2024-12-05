@@ -6507,7 +6507,6 @@ packages:
       uuid: 8.3.2
     transitivePeerDependencies:
       - '@types/node'
-      - encoding
       - supports-color
 
   file:../../../libraries/rush-sdk(@types/node@18.17.15):

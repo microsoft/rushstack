@@ -10,7 +10,7 @@ import {
   type RushSession,
   EnvironmentConfiguration
 } from '@rushstack/rush-sdk';
-import { WebClient, type WebClientResponse } from '@rushstack/rush-sdk/lib/utilities/WebClient';
+import { WebClient, type IWebClientResponse } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 import type { SpawnSyncReturns } from 'child_process';
 
 enum CredentialsOptions {
@@ -243,7 +243,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     terminal.writeDebugLine(`[http-build-cache] request: ${method} ${url} ${bodyLength} bytes`);
 
     const webClient: WebClient = new WebClient();
-    const response: WebClientResponse = await webClient.fetchAsync(url, {
+    const response: IWebClientResponse = await webClient.fetchAsync(url, {
       verb: method,
       headers: headers,
       body: body,
@@ -286,7 +286,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       return false;
     }
 
-    const result: Buffer | boolean = readBody ? Buffer.from(await response.arrayBuffer()) : true;
+    const result: Buffer | boolean = readBody ? await response.getBufferAsync() : true;
 
     terminal.writeDebugLine(
       `[http-build-cache] actual response: ${response.status} ${url} ${
@@ -351,7 +351,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
   private _getFailureType(
     requestMethod: string,
-    response: WebClientResponse,
+    response: IWebClientResponse,
     isRedirect: boolean
   ): FailureType {
     if (response.ok) {
@@ -403,7 +403,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   private _reportFailure(
     terminal: ITerminal,
     requestMethod: string,
-    response: WebClientResponse,
+    response: IWebClientResponse,
     isRedirect: boolean,
     message: string
   ): void {

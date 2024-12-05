@@ -3,8 +3,10 @@
 
 import * as os from 'os';
 import * as process from 'process';
-import * as fetch from 'node-fetch';
 import type * as http from 'http';
+import { request as httpRequest, type IncomingMessage } from 'node:http';
+import { request as httpsRequest, type RequestOptions } from 'node:https';
+import type { Socket } from 'node:net';
 import { Import } from '@rushstack/node-core-library';
 
 const createHttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);
@@ -12,22 +14,23 @@ const createHttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('h
 /**
  * For use with {@link WebClient}.
  */
-export type WebClientResponse = fetch.Response;
-
-/**
- * For use with {@link WebClient}.
- */
-export type WebClientHeaders = fetch.Headers;
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const WebClientHeaders: typeof fetch.Headers = fetch.Headers;
+export interface IWebClientResponse {
+  ok: boolean;
+  status: number;
+  statusText?: string;
+  redirected: boolean;
+  getTextAsync: () => Promise<string>;
+  getJsonAsync: <TJson>() => Promise<TJson>;
+  getBufferAsync: () => Promise<Buffer>;
+}
 
 /**
  * For use with {@link WebClient}.
  */
 export interface IWebFetchOptionsBase {
   timeoutMs?: number;
-  headers?: WebClientHeaders | Record<string, string>;
-  redirect?: fetch.RequestInit['redirect'];
+  headers?: Record<string, string>;
+  redirect?: 'follow' | 'error' | 'manual';
 }
 
 /**
@@ -53,49 +56,125 @@ export enum WebClientProxy {
   Detect,
   Fiddler
 }
+export interface IRequestOptions extends RequestOptions, Pick<IFetchOptionsWithBody, 'body' | 'redirect'> {}
+
+export type FetchFn = (
+  url: string,
+  options: IRequestOptions,
+  isRedirect?: boolean
+) => Promise<IWebClientResponse>;
+
+const makeRequestAsync: FetchFn = async (
+  url: string,
+  options: IRequestOptions,
+  redirected: boolean = false
+) => {
+  const { body, redirect } = options;
+
+  return await new Promise(
+    (resolve: (result: IWebClientResponse) => void, reject: (error: Error) => void) => {
+      const parsedUrl: URL = typeof url === 'string' ? new URL(url) : url;
+      const requestFunction: typeof httpRequest | typeof httpsRequest =
+        parsedUrl.protocol === 'https:' ? httpsRequest : httpRequest;
+
+      requestFunction(url, options, (response: IncomingMessage) => {
+        const responseBuffers: (Buffer | Uint8Array)[] = [];
+        response.on('data', (chunk: string | Buffer | Uint8Array) => {
+          responseBuffers.push(Buffer.from(chunk));
+        });
+        response.on('end', () => {
+          // Handle retries by calling the method recursively with the redirect URL
+          const statusCode: number | undefined = response.statusCode;
+          if (statusCode === 301 || statusCode === 302) {
+            switch (redirect) {
+              case 'follow': {
+                const redirectUrl: string | string[] | undefined = response.headers.location;
+                if (redirectUrl) {
+                  makeRequestAsync(redirectUrl, options, true).then(resolve).catch(reject);
+                } else {
+                  reject(
+                    new Error(`Received status code ${response.statusCode} with no location header: ${url}`)
+                  );
+                }
+
+                break;
+              }
+              case 'error':
+                reject(new Error(`Received status code ${response.statusCode}: ${url}`));
+                return;
+            }
+          }
+
+          const responseData: Buffer = Buffer.concat(responseBuffers);
+          // const result: WebClientResponse = { response, responseData };
+          const status: number = response.statusCode || 0;
+          const statusText: string | undefined = response.statusMessage;
+          const result: IWebClientResponse = {
+            ok: status >= 200 && status < 300,
+            status,
+            statusText,
+            redirected,
+            getTextAsync: async () => responseData.toString(),
+            getJsonAsync: async () => JSON.parse(responseData.toString()),
+            getBufferAsync: async () => responseData
+          };
+          resolve(result);
+        });
+      })
+        .on('socket', (socket: Socket) => {
+          socket.on('error', (error: Error) => {
+            reject(error);
+          });
+        })
+        .on('error', (error: Error) => {
+          reject(error);
+        })
+        .end(body);
+    }
+  );
+};
+
+export const AUTHORIZATION_HEADER_NAME: 'Authorization' = 'Authorization';
+const ACCEPT_HEADER_NAME: 'accept' = 'accept';
+const USER_AGENT_HEADER_NAME: 'user-agent' = 'user-agent';
 
 /**
  * A helper for issuing HTTP requests.
  */
 export class WebClient {
-  private static _requestFn: typeof fetch.default = fetch.default;
+  private static _requestFn: FetchFn = makeRequestAsync;
 
-  public readonly standardHeaders: fetch.Headers = new fetch.Headers();
+  public readonly standardHeaders: Record<string, string> = {};
 
   public accept: string | undefined = '*/*';
   public userAgent: string | undefined = `rush node/${process.version} ${os.platform()} ${os.arch()}`;
 
   public proxy: WebClientProxy = WebClientProxy.Detect;
 
-  public static mockRequestFn(fn: typeof fetch.default): void {
+  public static mockRequestFn(fn: FetchFn): void {
     WebClient._requestFn = fn;
   }
 
   public static resetMockRequestFn(): void {
-    WebClient._requestFn = fetch.default;
+    WebClient._requestFn = makeRequestAsync;
   }
 
-  public static mergeHeaders(target: fetch.Headers, source: fetch.Headers | Record<string, string>): void {
-    const iterator: Iterable<[string, string]> =
-      'entries' in source && typeof source.entries === 'function' ? source.entries() : Object.entries(source);
-
-    for (const [name, value] of iterator) {
-      target.set(name, value);
+  public static mergeHeaders(target: Record<string, string>, source: Record<string, string>): void {
+    for (const [name, value] of Object.entries(source)) {
+      target[name] = value;
     }
   }
 
   public addBasicAuthHeader(userName: string, password: string): void {
-    this.standardHeaders.set(
-      'Authorization',
-      'Basic ' + Buffer.from(userName + ':' + password).toString('base64')
-    );
+    this.standardHeaders[AUTHORIZATION_HEADER_NAME] =
+      'Basic ' + Buffer.from(userName + ':' + password).toString('base64');
   }
 
   public async fetchAsync(
     url: string,
     options?: IGetFetchOptions | IFetchOptionsWithBody
-  ): Promise<WebClientResponse> {
-    const headers: fetch.Headers = new fetch.Headers();
+  ): Promise<IWebClientResponse> {
+    const headers: Record<string, string> = {};
 
     WebClient.mergeHeaders(headers, this.standardHeaders);
 
@@ -104,11 +183,11 @@ export class WebClient {
     }
 
     if (this.userAgent) {
-      headers.set('user-agent', this.userAgent);
+      headers[USER_AGENT_HEADER_NAME] = this.userAgent;
     }
 
     if (this.accept) {
-      headers.set('accept', this.accept);
+      headers[ACCEPT_HEADER_NAME] = this.accept;
     }
 
     let proxyUrl: string = '';
@@ -136,10 +215,10 @@ export class WebClient {
     }
 
     const timeoutMs: number = options?.timeoutMs !== undefined ? options.timeoutMs : 15 * 1000; // 15 seconds
-    const requestInit: fetch.RequestInit = {
+    const requestInit: IRequestOptions = {
       method: options?.verb,
-      headers: headers,
-      agent: agent,
+      headers,
+      agent,
       timeout: timeoutMs,
       redirect: options?.redirect
     };
