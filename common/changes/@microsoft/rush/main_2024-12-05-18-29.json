@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Remove the dependency on node-fetch.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

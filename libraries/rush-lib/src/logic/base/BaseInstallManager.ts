@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type * as fetch from 'node-fetch';
 import * as os from 'os';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -48,7 +47,7 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import * as PolicyValidator from '../policy/PolicyValidator';
-import type { WebClient as WebClientType, WebClientResponse } from '../../utilities/WebClient';
+import type { WebClient as WebClientType, IWebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
@@ -1066,12 +1065,13 @@ ${gitLfsHookHandling}
     webClient.userAgent = `pnpm/? npm/? node/${process.version} ${os.platform()} ${os.arch()}`;
     webClient.accept = 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*';
 
-    const response: WebClientResponse = await webClient.fetchAsync(queryUrl);
+    const response: IWebClientResponse = await webClient.fetchAsync(queryUrl);
     if (!response.ok) {
       throw new Error('Failed to query');
     }
 
-    const data: { versions: { [version: string]: { dist: { tarball: string } } } } = await response.json();
+    const data: { versions: { [version: string]: { dist: { tarball: string } } } } =
+      await response.getJsonAsync();
     let url: string;
     try {
       if (!data.versions[Rush.version]) {
@@ -1090,7 +1090,7 @@ ${gitLfsHookHandling}
     // Make sure the tarball wasn't deleted from the CDN
     webClient.accept = '*/*';
 
-    const response2: fetch.Response = await webClient.fetchAsync(url);
+    const response2: IWebClientResponse = await webClient.fetchAsync(url);
 
     if (!response2.ok) {
       if (response2.status === 404) {

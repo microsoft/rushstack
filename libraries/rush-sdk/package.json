@@ -42,7 +42,6 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "@types/node-fetch": "2.6.2",
     "tapable": "2.2.1"
   },
   "devDependencies": {
