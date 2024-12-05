@@ -6,18 +6,10 @@ exports[`AmazonS3Client Making requests Getting an object With credentials Can g
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -28,18 +20,10 @@ exports[`AmazonS3Client Making requests Getting an object With credentials Can g
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=fa88dc2c0877d83d442298fd51281eeffa1196436397832a794b89a079302d71",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=fa88dc2c0877d83d442298fd51281eeffa1196436397832a794b89a079302d71",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -50,18 +34,10 @@ exports[`AmazonS3Client Making requests Getting an object With credentials Handl
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -74,18 +50,10 @@ exports[`AmazonS3Client Making requests Getting an object With credentials Handl
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -96,18 +64,10 @@ exports[`AmazonS3Client Making requests Getting an object With credentials Handl
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -120,21 +80,11 @@ exports[`AmazonS3Client Making requests Getting an object With credentials inclu
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
-        ],
-        "X-Amz-Security-Token": Array [
-          "sessionToken",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
+      "X-Amz-Security-Token": "sessionToken",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -145,21 +95,11 @@ exports[`AmazonS3Client Making requests Getting an object With credentials inclu
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=c3e1597c716ad0146d1a0eca844194b3120f8d8f07cf0a2c402f0b4f2148de12",
-        ],
-        "X-Amz-Security-Token": Array [
-          "sessionToken",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=c3e1597c716ad0146d1a0eca844194b3120f8d8f07cf0a2c402f0b4f2148de12",
+      "X-Amz-Security-Token": "sessionToken",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -170,21 +110,11 @@ exports[`AmazonS3Client Making requests Getting an object With credentials inclu
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
-        ],
-        "X-Amz-Security-Token": Array [
-          "sessionToken",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
+      "X-Amz-Security-Token": "sessionToken",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -197,21 +127,11 @@ exports[`AmazonS3Client Making requests Getting an object With credentials inclu
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
-        ],
-        "X-Amz-Security-Token": Array [
-          "sessionToken",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
+      "X-Amz-Security-Token": "sessionToken",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -222,21 +142,11 @@ exports[`AmazonS3Client Making requests Getting an object With credentials inclu
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
-        ],
-        "X-Amz-Security-Token": Array [
-          "sessionToken",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
+      "X-Amz-Security-Token": "sessionToken",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -249,21 +159,11 @@ exports[`AmazonS3Client Making requests Getting an object With credentials inclu
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
-        ],
-        "X-Amz-Security-Token": Array [
-          "sessionToken",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
+      "X-Amz-Security-Token": "sessionToken",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -276,21 +176,11 @@ exports[`AmazonS3Client Making requests Getting an object With credentials inclu
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
-        ],
-        "X-Amz-Security-Token": Array [
-          "sessionToken",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
+      "X-Amz-Security-Token": "sessionToken",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -303,18 +193,10 @@ exports[`AmazonS3Client Making requests Getting an object With credentials shoul
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -327,18 +209,10 @@ exports[`AmazonS3Client Making requests Getting an object With credentials shoul
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
-        ],
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -351,15 +225,9 @@ exports[`AmazonS3Client Making requests Getting an object Without credentials Ca
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -370,15 +238,9 @@ exports[`AmazonS3Client Making requests Getting an object Without credentials Ca
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -389,15 +251,9 @@ exports[`AmazonS3Client Making requests Getting an object Without credentials Ha
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -408,15 +264,9 @@ exports[`AmazonS3Client Making requests Getting an object Without credentials Ha
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -429,15 +279,9 @@ exports[`AmazonS3Client Making requests Getting an object Without credentials Ha
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -448,15 +292,9 @@ exports[`AmazonS3Client Making requests Getting an object Without credentials Ha
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -467,15 +305,9 @@ exports[`AmazonS3Client Making requests Getting an object Without credentials Ha
 Array [
   "http://localhost:9000/abc123",
   Object {
-    "headers": Headers {
-      Symbol(map): Object {
-        "x-amz-content-sha256": Array [
-          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "GET",
   },
@@ -508,18 +340,10 @@ Array [
       ],
       "type": "Buffer",
     },
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=1255739559ef86e1cc1e733fa9e13aa4990c6f1fb1ae821653540d401c48c5e1",
-        ],
-        "x-amz-content-sha256": Array [
-          "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=1255739559ef86e1cc1e733fa9e13aa4990c6f1fb1ae821653540d401c48c5e1",
+      "x-amz-content-sha256": "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "PUT",
   },
@@ -552,18 +376,10 @@ Array [
       ],
       "type": "Buffer",
     },
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=1255739559ef86e1cc1e733fa9e13aa4990c6f1fb1ae821653540d401c48c5e1",
-        ],
-        "x-amz-content-sha256": Array [
-          "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=1255739559ef86e1cc1e733fa9e13aa4990c6f1fb1ae821653540d401c48c5e1",
+      "x-amz-content-sha256": "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "PUT",
   },
@@ -594,18 +410,10 @@ Array [
       ],
       "type": "Buffer",
     },
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=66e311b6c1987dd62cb3bfec416b9129c966d1d15075d1ebf852433062bf4281",
-        ],
-        "x-amz-content-sha256": Array [
-          "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=66e311b6c1987dd62cb3bfec416b9129c966d1d15075d1ebf852433062bf4281",
+      "x-amz-content-sha256": "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "PUT",
   },
@@ -636,21 +444,11 @@ Array [
       ],
       "type": "Buffer",
     },
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=0ed8d55f5a3265d967092faf7e3ca7acd08ff3566651dc7c7363d60118c11528",
-        ],
-        "X-Amz-Security-Token": Array [
-          "sessionToken",
-        ],
-        "x-amz-content-sha256": Array [
-          "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=0ed8d55f5a3265d967092faf7e3ca7acd08ff3566651dc7c7363d60118c11528",
+      "X-Amz-Security-Token": "sessionToken",
+      "x-amz-content-sha256": "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "PUT",
   },
@@ -683,21 +481,11 @@ Array [
       ],
       "type": "Buffer",
     },
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=0ed8d55f5a3265d967092faf7e3ca7acd08ff3566651dc7c7363d60118c11528",
-        ],
-        "X-Amz-Security-Token": Array [
-          "sessionToken",
-        ],
-        "x-amz-content-sha256": Array [
-          "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=0ed8d55f5a3265d967092faf7e3ca7acd08ff3566651dc7c7363d60118c11528",
+      "X-Amz-Security-Token": "sessionToken",
+      "x-amz-content-sha256": "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "PUT",
   },
@@ -728,21 +516,11 @@ Array [
       ],
       "type": "Buffer",
     },
-    "headers": Headers {
-      Symbol(map): Object {
-        "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=8e2cd7b6241780b51b1d15f428c43179d389b106be9a572e0def4cad6a5ba1e5",
-        ],
-        "X-Amz-Security-Token": Array [
-          "sessionToken",
-        ],
-        "x-amz-content-sha256": Array [
-          "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
-        ],
-        "x-amz-date": Array [
-          "20200418T123242Z",
-        ],
-      },
+    "headers": Object {
+      "Authorization": "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=8e2cd7b6241780b51b1d15f428c43179d389b106be9a572e0def4cad6a5ba1e5",
+      "X-Amz-Security-Token": "sessionToken",
+      "x-amz-content-sha256": "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
+      "x-amz-date": "20200418T123242Z",
     },
     "verb": "PUT",
   },

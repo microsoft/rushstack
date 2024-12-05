@@ -17,7 +17,7 @@ import { PrintUtilities, Colorize, ConsoleTerminalProvider, Terminal } from '@ru
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { type IArtifactoryPackageRegistryJson, ArtifactoryConfiguration } from './ArtifactoryConfiguration';
-import type { WebClient as WebClientType, WebClientResponse } from '../../utilities/WebClient';
+import type { WebClient as WebClientType, IWebClientResponse } from '../../utilities/WebClient';
 import { TerminalInput } from './TerminalInput';
 
 interface IArtifactoryCustomizableMessages {
@@ -300,7 +300,7 @@ export class SetupPackageRegistry {
     // our token.
     queryUrl += `auth/.npm`;
 
-    let response: WebClientResponse;
+    let response: IWebClientResponse;
     try {
       response = await webClient.fetchAsync(queryUrl);
     } catch (e) {
@@ -324,7 +324,7 @@ export class SetupPackageRegistry {
     //   //your-company.jfrog.io/your-artifacts/api/npm/npm-private/:username=your.name@your-company.com
     //   //your-company.jfrog.io/your-artifacts/api/npm/npm-private/:email=your.name@your-company.com
     //   //your-company.jfrog.io/your-artifacts/api/npm/npm-private/:always-auth=true
-    const responseText: string = await response.text();
+    const responseText: string = await response.getTextAsync();
     const responseLines: string[] = Text.convertToLf(responseText).trim().split('\n');
     if (responseLines.length < 2 || !responseLines[0].startsWith('@.npm:')) {
       throw new Error('Unexpected response from Artifactory');

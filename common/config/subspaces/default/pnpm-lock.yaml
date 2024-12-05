@@ -3362,9 +3362,6 @@ importers:
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../ts-command-line
-      '@types/node-fetch':
-        specifier: 2.6.2
-        version: 2.6.2
       '@yarnpkg/lockfile':
         specifier: ~1.0.2
         version: 1.0.2
@@ -3401,9 +3398,6 @@ importers:
       js-yaml:
         specifier: ~3.13.1
         version: 3.13.1
-      node-fetch:
-        specifier: 2.6.7
-        version: 2.6.7
       npm-check:
         specifier: ~6.0.1
         version: 6.0.1
@@ -3513,9 +3507,6 @@ importers:
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../terminal
-      '@types/node-fetch':
-        specifier: 2.6.2
-        version: 2.6.2
       tapable:
         specifier: 2.2.1
         version: 2.2.1
