@@ -106,7 +106,6 @@ const makeRequestAsync: FetchFn = async (
           }
 
           const responseData: Buffer = Buffer.concat(responseBuffers);
-          // const result: WebClientResponse = { response, responseData };
           const status: number = response.statusCode || 0;
           const statusText: string | undefined = response.statusMessage;
           const result: IWebClientResponse = {
