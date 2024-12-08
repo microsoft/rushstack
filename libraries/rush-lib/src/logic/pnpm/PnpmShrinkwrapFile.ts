@@ -23,7 +23,12 @@ import type { IShrinkwrapFilePolicyValidatorOptions } from '../policy/Shrinkwrap
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
 import type { IExperimentsJson } from '../../api/ExperimentsConfiguration';
-import { DependencyType, type PackageJsonDependency, PackageJsonEditor } from '../../api/PackageJsonEditor';
+import {
+  DependencyType,
+  type PackageJsonDependency,
+  type IPackageJsonDependencyMetaSourceData,
+  PackageJsonEditor
+} from '../../api/PackageJsonEditor';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
@@ -32,15 +37,14 @@ import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
 import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
 import type { Subspace } from '../../api/Subspace';
 import { CustomTipId, type CustomTipsConfiguration } from '../../api/CustomTipsConfiguration';
+import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
 export interface IPeerDependenciesMetaYaml {
   optional?: boolean;
 }
-export interface IDependenciesMetaYaml {
-  injected?: boolean;
-}
+export type IDependenciesMetaYaml = IPackageJsonDependencyMetaSourceData;
 
 export type IPnpmV7VersionSpecifier = string;
 export interface IPnpmV8VersionSpecifier {
@@ -1040,8 +1044,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         }
       }
 
-      for (const { name, injected } of dependencyMetaList) {
-        if (importer.dependenciesMeta?.[name]?.injected === injected) {
+      for (const { name, sourceData } of dependencyMetaList) {
+        if (objectsAreDeepEqual(importer.dependenciesMeta?.[name], sourceData)) {
           importerDependenciesMeta.delete(name);
         }
       }

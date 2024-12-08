@@ -245,6 +245,7 @@ export interface IDependenciesMetaTable {
     // (undocumented)
     [dependencyName: string]: {
         injected?: boolean;
+        [key: string]: unknown;
     };
 }
 

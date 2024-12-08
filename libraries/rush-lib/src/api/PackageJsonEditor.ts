@@ -19,6 +19,14 @@ export enum DependencyType {
 /**
  * @public
  */
+export interface IPackageJsonDependencyMetaSourceData {
+  injected?: boolean;
+  [key: string]: unknown;
+}
+
+/**
+ * @public
+ */
 export class PackageJsonDependency {
   private _version: string;
   private _onChange: () => void;
@@ -50,19 +58,23 @@ export class PackageJsonDependency {
  * @public
  */
 export class PackageJsonDependencyMeta {
-  private _injected: boolean;
+  private _sourceData: IPackageJsonDependencyMetaSourceData;
   private _onChange: () => void;
 
   public readonly name: string;
 
-  public constructor(name: string, injected: boolean, onChange: () => void) {
+  public constructor(name: string, sourceData: IPackageJsonDependencyMetaSourceData, onChange: () => void) {
     this.name = name;
-    this._injected = injected;
+    this._sourceData = sourceData;
     this._onChange = onChange;
   }
 
+  public get sourceData(): IPackageJsonDependencyMetaSourceData {
+    return this._sourceData;
+  }
+
   public get injected(): boolean {
-    return this._injected;
+    return this._sourceData.injected ?? false;
   }
 }
 
@@ -107,7 +119,8 @@ export class PackageJsonEditor {
     const devDependencies: { [key: string]: string } = data.devDependencies || {};
     const resolutions: { [key: string]: string } = data.resolutions || {};
 
-    const dependenciesMeta: { [key: string]: { [key: string]: boolean } } = data.dependenciesMeta || {};
+    const dependenciesMeta: { [key: string]: IPackageJsonDependencyMetaSourceData } =
+      data.dependenciesMeta || {};
 
     const _onChange: () => void = this._onChange.bind(this);
 
@@ -180,10 +193,10 @@ export class PackageJsonEditor {
         );
       });
 
-      Object.keys(dependenciesMeta || {}).forEach((packageName: string) => {
+      Object.entries(dependenciesMeta || {}).forEach(([packageName, dependencyMeta]: [string, IPackageJsonDependencyMetaSourceData]) => {
         this._dependenciesMeta.set(
           packageName,
-          new PackageJsonDependencyMeta(packageName, dependenciesMeta[packageName].injected, _onChange)
+          new PackageJsonDependencyMeta(packageName, dependencyMeta, _onChange)
         );
       });
 
