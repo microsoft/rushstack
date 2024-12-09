@@ -265,6 +265,7 @@ describe(AmazonS3Client.name, () => {
           getJsonAsync: body
             ? () => Promise.resolve(JSON.parse(body))
             : () => Promise.reject(new Error('No body provided')),
+          headers: {},
           status: response.status,
           statusText: response.statusText,
           ok: response.status >= 200 && response.status < 300,
