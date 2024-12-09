@@ -164,13 +164,13 @@ const makeRequestAsync: FetchFn = async (
                 if (!noAcceptEncoding && !noDecode && encodings !== undefined) {
                   const zlib: typeof import('zlib') = await import('zlib');
                   if (!Array.isArray(encodings)) {
-                    encodings = [encodings];
+                    encodings = encodings.split(',');
                   }
 
                   let buffer: Buffer = responseData;
                   for (const encoding of encodings) {
                     let decompressFn: (buffer: Buffer, callback: import('zlib').CompressCallback) => void;
-                    switch (encoding) {
+                    switch (encoding.trim()) {
                       case DEFLATE_ENCODING: {
                         decompressFn = zlib.inflate.bind(zlib);
                         break;
