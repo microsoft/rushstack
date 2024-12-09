@@ -10,12 +10,7 @@ describe(WebClient.name, () => {
       const source: Record<string, string> = { header2: 'value2' };
 
       WebClient.mergeHeaders(target, source);
-      expect(target).toMatchInlineSnapshot(`
-Object {
-  "header1": "value1",
-  "header2": "value2",
-}
-`);
+      expect(target).toMatchSnapshot();
     });
 
     it('should handle an empty source', () => {
@@ -23,11 +18,7 @@ Object {
       const source: Record<string, string> = {};
 
       WebClient.mergeHeaders(target, source);
-      expect(target).toMatchInlineSnapshot(`
-Object {
-  "header1": "value1",
-}
-`);
+      expect(target).toMatchSnapshot();
     });
 
     it('should handle an empty target', () => {
@@ -35,11 +26,7 @@ Object {
       const source: Record<string, string> = { header2: 'value2' };
 
       WebClient.mergeHeaders(target, source);
-      expect(target).toMatchInlineSnapshot(`
-Object {
-  "header2": "value2",
-}
-`);
+      expect(target).toMatchSnapshot();
     });
 
     it('should handle both empty', () => {
@@ -47,7 +34,7 @@ Object {
       const source: Record<string, string> = {};
 
       WebClient.mergeHeaders(target, source);
-      expect(target).toMatchInlineSnapshot(`Object {}`);
+      expect(target).toMatchSnapshot();
     });
 
     it('should handle overwriting values', () => {
@@ -55,23 +42,14 @@ Object {
       const source: Record<string, string> = { header1: 'value2' };
 
       WebClient.mergeHeaders(target, source);
-      expect(target).toMatchInlineSnapshot(`
-Object {
-  "header1": "value2",
-}
-`);
+      expect(target).toMatchSnapshot();
     });
 
     it('should handle a JS object as the source', () => {
       const target: Record<string, string> = { header1: 'value1' };
 
       WebClient.mergeHeaders(target, { header2: 'value2' });
-      expect(target).toMatchInlineSnapshot(`
-Object {
-  "header1": "value1",
-  "header2": "value2",
-}
-`);
+      expect(target).toMatchSnapshot();
     });
   });
 });

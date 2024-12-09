@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WebClient mergeHeaders should handle a JS object as the source 1`] = `
+Object {
+  "header1": "value1",
+  "header2": "value2",
+}
+`;
+
+exports[`WebClient mergeHeaders should handle an empty source 1`] = `
+Object {
+  "header1": "value1",
+}
+`;
+
+exports[`WebClient mergeHeaders should handle an empty target 1`] = `
+Object {
+  "header2": "value2",
+}
+`;
+
+exports[`WebClient mergeHeaders should handle both empty 1`] = `Object {}`;
+
+exports[`WebClient mergeHeaders should handle overwriting values 1`] = `
+Object {
+  "header1": "value2",
+}
+`;
+
+exports[`WebClient mergeHeaders should merge headers 1`] = `
+Object {
+  "header1": "value1",
+  "header2": "value2",
+}
+`;
