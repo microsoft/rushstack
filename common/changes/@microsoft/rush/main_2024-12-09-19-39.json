@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Bump `jsonpath-plus` to `~10.2.0`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

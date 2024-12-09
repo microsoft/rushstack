@@ -24,7 +24,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "jsonpath-plus": "~10.1.0"
+    "jsonpath-plus": "~10.2.0"
   },
   "devDependencies": {
     "local-eslint-config": "workspace:*",
