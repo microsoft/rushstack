@@ -123,6 +123,7 @@ const makeRequestAsync: FetchFn = async (
             getTextAsync: async () => {
               if (bodyString === undefined) {
                 const buffer: Buffer = await result.getBufferAsync();
+                // eslint-disable-next-line require-atomic-updates
                 bodyString = buffer.toString();
               }
 
@@ -130,6 +131,7 @@ const makeRequestAsync: FetchFn = async (
             },
             getJsonAsync: async <TJson>() => {
               if (bodyJson === undefined) {
+                // eslint-disable-next-line require-atomic-updates
                 bodyJson = await result.getTextAsync();
               }
 
@@ -178,6 +180,7 @@ const makeRequestAsync: FetchFn = async (
                     }
                   }
 
+                  // eslint-disable-next-line require-atomic-updates
                   decodedBuffer = buffer;
                 } else {
                   decodedBuffer = responseData;
