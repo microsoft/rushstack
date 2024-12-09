@@ -7,7 +7,7 @@ import type * as http from 'http';
 import { request as httpRequest, type IncomingMessage } from 'node:http';
 import { request as httpsRequest, type RequestOptions } from 'node:https';
 import type { Socket } from 'node:net';
-import { Import } from '@rushstack/node-core-library';
+import { Import, LegacyAdapters } from '@rushstack/node-core-library';
 
 const createHttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);
 
@@ -19,6 +19,7 @@ export interface IWebClientResponse {
   status: number;
   statusText?: string;
   redirected: boolean;
+  headers: Record<string, string | string[] | undefined>;
   getTextAsync: () => Promise<string>;
   getJsonAsync: <TJson>() => Promise<TJson>;
   getBufferAsync: () => Promise<Buffer>;
@@ -108,16 +109,21 @@ const makeRequestAsync: FetchFn = async (
           const responseData: Buffer = Buffer.concat(responseBuffers);
           const status: number = response.statusCode || 0;
           const statusText: string | undefined = response.statusMessage;
+          const headers: Record<string, string | string[] | undefined> = response.headers;
+
           let bodyString: string | undefined;
           let bodyJson: unknown | undefined;
+          let decodedBuffer: Buffer | undefined;
           const result: IWebClientResponse = {
             ok: status >= 200 && status < 300,
             status,
             statusText,
             redirected,
+            headers,
             getTextAsync: async () => {
               if (bodyString === undefined) {
-                bodyString = responseData.toString();
+                const buffer: Buffer = await result.getBufferAsync();
+                bodyString = buffer.toString();
               }
 
               return bodyString;
@@ -129,7 +135,57 @@ const makeRequestAsync: FetchFn = async (
 
               return bodyJson as TJson;
             },
-            getBufferAsync: async () => responseData
+            getBufferAsync: async () => {
+              // Determine if the buffer is compressed and decode it if necessary
+              if (decodedBuffer === undefined) {
+                let encodings: string | string[] | undefined = headers['content-encoding'];
+                if (encodings !== undefined) {
+                  const zlib: typeof import('zlib') = await import('zlib');
+                  if (!Array.isArray(encodings)) {
+                    encodings = [encodings];
+                  }
+
+                  let buffer: Buffer = responseData;
+                  for (const encoding of encodings) {
+                    switch (encoding) {
+                      case 'deflate': {
+                        buffer = await LegacyAdapters.convertCallbackToPromise(
+                          zlib.inflate.bind(zlib),
+                          buffer
+                        );
+                        break;
+                      }
+
+                      case 'gzip': {
+                        buffer = await LegacyAdapters.convertCallbackToPromise(
+                          zlib.gunzip.bind(zlib),
+                          buffer
+                        );
+                        break;
+                      }
+
+                      case 'br': {
+                        buffer = await LegacyAdapters.convertCallbackToPromise(
+                          zlib.brotliDecompress.bind(zlib),
+                          buffer
+                        );
+                        break;
+                      }
+
+                      default: {
+                        throw new Error(`Unsupported content-encoding: ${encodings}`);
+                      }
+                    }
+                  }
+
+                  decodedBuffer = buffer;
+                } else {
+                  decodedBuffer = responseData;
+                }
+              }
+
+              return decodedBuffer;
+            }
           };
           resolve(result);
         });
