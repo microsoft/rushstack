@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.16.1",
+      "tag": "@rushstack/heft-config-file_v0.16.1",
+      "date": "Mon, 09 Dec 2024 20:31:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump `jsonpath-plus` to `~10.2.0`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.16.0",
       "tag": "@rushstack/heft-config-file_v0.16.0",
       "date": "Tue, 03 Dec 2024 16:11:07 GMT",

@@ -1,6 +1,11 @@
 # Change Log - @rushstack/rundown
 
-This log was last generated on Tue, 03 Dec 2024 16:11:08 GMT and should not be manually modified.
+This log was last generated on Mon, 09 Dec 2024 20:31:43 GMT and should not be manually modified.
+
+## 1.1.77
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
 
 ## 1.1.76
 Tue, 03 Dec 2024 16:11:08 GMT

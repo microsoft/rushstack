@@ -2,6 +2,21 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.6.33",
+      "tag": "@rushstack/module-minifier_v0.6.33",
+      "date": "Mon, 09 Dec 2024 20:31:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.78`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.32",
       "tag": "@rushstack/module-minifier_v0.6.32",
       "date": "Tue, 03 Dec 2024 16:11:08 GMT",

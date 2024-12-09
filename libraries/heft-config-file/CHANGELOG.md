@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Tue, 03 Dec 2024 16:11:07 GMT and should not be manually modified.
+This log was last generated on Mon, 09 Dec 2024 20:31:43 GMT and should not be manually modified.
+
+## 0.16.1
+Mon, 09 Dec 2024 20:31:43 GMT
+
+### Patches
+
+- Bump `jsonpath-plus` to `~10.2.0`.
 
 ## 0.16.0
 Tue, 03 Dec 2024 16:11:07 GMT
