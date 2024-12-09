@@ -253,13 +253,24 @@ describe(AmazonS3Client.name, () => {
       response: IResponseOptions,
       testOptions: ITestOptions
     ): Promise<TResponse> {
+      const body: string | undefined = response.body;
       const spy: jest.SpyInstance = jest.spyOn(WebClient.prototype, 'fetchAsync').mockReturnValue(
         Promise.resolve({
-          buffer: response.body ? async () => Buffer.from(response.body || '') : undefined,
+          getBufferAsync: body
+            ? () => Promise.resolve(Buffer.from(body))
+            : () => Promise.reject(new Error('No body provided')),
+          getTextAsync: body
+            ? () => Promise.resolve(body)
+            : () => Promise.reject(new Error('No body provided')),
+          getJsonAsync: body
+            ? () => Promise.resolve(JSON.parse(body))
+            : () => Promise.reject(new Error('No body provided')),
+          headers: {},
           status: response.status,
           statusText: response.statusText,
-          ok: response.status >= 200 && response.status < 300
-        }) as unknown as ReturnType<typeof WebClient.prototype.fetchAsync>
+          ok: response.status >= 200 && response.status < 300,
+          redirected: false
+        })
       );
 
       const s3Client: AmazonS3Client = new AmazonS3Client(credentials, options, webClient, terminal);
