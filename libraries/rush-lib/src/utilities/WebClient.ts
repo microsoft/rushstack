@@ -33,11 +33,7 @@ export interface IWebFetchOptionsBase {
   headers?: Record<string, string>;
   redirect?: 'follow' | 'error' | 'manual';
   /**
-   * If true, the request will not include an Accept-Encoding header, and the response will not be decoded.
-   */
-  noAcceptEncoding?: boolean;
-  /**
-   * If true, the response will not be decoded, but the Accept-Encoding header will still be sent.
+   * If true, the response will not be decoded if a Content-Encoding header is present.
    */
   noDecode?: boolean;
 }
@@ -67,7 +63,7 @@ export enum WebClientProxy {
 }
 export interface IRequestOptions
   extends RequestOptions,
-    Pick<IFetchOptionsWithBody, 'body' | 'redirect' | 'noAcceptEncoding' | 'noDecode'> {}
+    Pick<IFetchOptionsWithBody, 'body' | 'redirect' | 'noDecode'> {}
 
 export type FetchFn = (
   url: string,
@@ -81,7 +77,6 @@ const BROTLI_ENCODING: 'br' = 'br';
 export const AUTHORIZATION_HEADER_NAME: 'Authorization' = 'Authorization';
 const ACCEPT_HEADER_NAME: 'accept' = 'accept';
 const USER_AGENT_HEADER_NAME: 'user-agent' = 'user-agent';
-const ACCEPT_ENCODING_HEADER_NAME: 'accept-encoding' = 'accept-encoding';
 const CONTENT_ENCODING_HEADER_NAME: 'content-encoding' = 'content-encoding';
 
 const makeRequestAsync: FetchFn = async (
@@ -89,7 +84,7 @@ const makeRequestAsync: FetchFn = async (
   options: IRequestOptions,
   redirected: boolean = false
 ) => {
-  const { body, redirect, noAcceptEncoding, noDecode } = options;
+  const { body, redirect, noDecode } = options;
 
   return await new Promise(
     (resolve: (result: IWebClientResponse) => void, reject: (error: Error) => void) => {
@@ -161,7 +156,7 @@ const makeRequestAsync: FetchFn = async (
               // Determine if the buffer is compressed and decode it if necessary
               if (decodedBuffer === undefined) {
                 let encodings: string | string[] | undefined = headers[CONTENT_ENCODING_HEADER_NAME];
-                if (!noAcceptEncoding && !noDecode && encodings !== undefined) {
+                if (!noDecode && encodings !== undefined) {
                   const zlib: typeof import('zlib') = await import('zlib');
                   if (!Array.isArray(encodings)) {
                     encodings = encodings.split(',');
@@ -259,7 +254,6 @@ export class WebClient {
       verb,
       redirect,
       body,
-      noAcceptEncoding,
       noDecode
     } = (options as IFetchOptionsWithBody | undefined) ?? {};
 
@@ -277,10 +271,6 @@ export class WebClient {
 
     if (this.accept) {
       headers[ACCEPT_HEADER_NAME] = this.accept;
-    }
-
-    if (!noAcceptEncoding) {
-      headers[ACCEPT_ENCODING_HEADER_NAME] = [DEFLATE_ENCODING, GZIP_ENCODING, BROTLI_ENCODING].join(', ');
     }
 
     let proxyUrl: string = '';
@@ -314,8 +304,7 @@ export class WebClient {
       timeout: timeoutMs,
       redirect,
       body,
-      noDecode,
-      noAcceptEncoding
+      noDecode
     };
 
     return await WebClient._requestFn(url, requestInit);
