@@ -150,8 +150,9 @@ const makeRequestAsync: FetchFn = async (
             },
             getJsonAsync: async <TJson>() => {
               if (bodyJson === undefined) {
+                const text: string = await result.getTextAsync();
                 // eslint-disable-next-line require-atomic-updates
-                bodyJson = await result.getTextAsync();
+                bodyJson = JSON.parse(text);
               }
 
               return bodyJson as TJson;
