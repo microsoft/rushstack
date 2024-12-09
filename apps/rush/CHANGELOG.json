@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.144.1",
+      "tag": "@microsoft/rush_v5.144.1",
+      "date": "Mon, 09 Dec 2024 20:32:01 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump `jsonpath-plus` to `~10.2.0`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.144.0",
       "tag": "@microsoft/rush_v5.144.0",
       "date": "Wed, 04 Dec 2024 19:32:23 GMT",

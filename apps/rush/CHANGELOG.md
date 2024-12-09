@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 04 Dec 2024 19:32:23 GMT and should not be manually modified.
+This log was last generated on Mon, 09 Dec 2024 20:32:01 GMT and should not be manually modified.
+
+## 5.144.1
+Mon, 09 Dec 2024 20:32:01 GMT
+
+### Updates
+
+- Bump `jsonpath-plus` to `~10.2.0`.
 
 ## 5.144.0
 Wed, 04 Dec 2024 19:32:23 GMT
