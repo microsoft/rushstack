@@ -32,6 +32,14 @@ export interface IWebFetchOptionsBase {
   timeoutMs?: number;
   headers?: Record<string, string>;
   redirect?: 'follow' | 'error' | 'manual';
+  /**
+   * If true, the request will not include an Accept-Encoding header, and the response will not be decoded.
+   */
+  noAcceptEncoding?: boolean;
+  /**
+   * If true, the response will not be decoded, but the Accept-Encoding header will still be sent.
+   */
+  noDecode?: boolean;
 }
 
 /**
@@ -57,7 +65,9 @@ export enum WebClientProxy {
   Detect,
   Fiddler
 }
-export interface IRequestOptions extends RequestOptions, Pick<IFetchOptionsWithBody, 'body' | 'redirect'> {}
+export interface IRequestOptions
+  extends RequestOptions,
+    Pick<IFetchOptionsWithBody, 'body' | 'redirect' | 'noAcceptEncoding' | 'noDecode'> {}
 
 export type FetchFn = (
   url: string,
@@ -65,12 +75,21 @@ export type FetchFn = (
   isRedirect?: boolean
 ) => Promise<IWebClientResponse>;
 
+const DEFLATE_ENCODING: 'deflate' = 'deflate';
+const GZIP_ENCODING: 'gzip' = 'gzip';
+const BROTLI_ENCODING: 'br' = 'br';
+export const AUTHORIZATION_HEADER_NAME: 'Authorization' = 'Authorization';
+const ACCEPT_HEADER_NAME: 'accept' = 'accept';
+const USER_AGENT_HEADER_NAME: 'user-agent' = 'user-agent';
+const ACCEPT_ENCODING_HEADER_NAME: 'accept-encoding' = 'accept-encoding';
+const CONTENT_ENCODING_HEADER_NAME: 'content-encoding' = 'content-encoding';
+
 const makeRequestAsync: FetchFn = async (
   url: string,
   options: IRequestOptions,
   redirected: boolean = false
 ) => {
-  const { body, redirect } = options;
+  const { body, redirect, noAcceptEncoding, noDecode } = options;
 
   return await new Promise(
     (resolve: (result: IWebClientResponse) => void, reject: (error: Error) => void) => {
@@ -140,8 +159,8 @@ const makeRequestAsync: FetchFn = async (
             getBufferAsync: async () => {
               // Determine if the buffer is compressed and decode it if necessary
               if (decodedBuffer === undefined) {
-                let encodings: string | string[] | undefined = headers['content-encoding'];
-                if (encodings !== undefined) {
+                let encodings: string | string[] | undefined = headers[CONTENT_ENCODING_HEADER_NAME];
+                if (!noAcceptEncoding && !noDecode && encodings !== undefined) {
                   const zlib: typeof import('zlib') = await import('zlib');
                   if (!Array.isArray(encodings)) {
                     encodings = [encodings];
@@ -149,35 +168,26 @@ const makeRequestAsync: FetchFn = async (
 
                   let buffer: Buffer = responseData;
                   for (const encoding of encodings) {
+                    let decompressFn: (buffer: Buffer, callback: import('zlib').CompressCallback) => void;
                     switch (encoding) {
-                      case 'deflate': {
-                        buffer = await LegacyAdapters.convertCallbackToPromise(
-                          zlib.inflate.bind(zlib),
-                          buffer
-                        );
+                      case DEFLATE_ENCODING: {
+                        decompressFn = zlib.inflate.bind(zlib);
                         break;
                       }
-
-                      case 'gzip': {
-                        buffer = await LegacyAdapters.convertCallbackToPromise(
-                          zlib.gunzip.bind(zlib),
-                          buffer
-                        );
+                      case GZIP_ENCODING: {
+                        decompressFn = zlib.gunzip.bind(zlib);
                         break;
                       }
-
-                      case 'br': {
-                        buffer = await LegacyAdapters.convertCallbackToPromise(
-                          zlib.brotliDecompress.bind(zlib),
-                          buffer
-                        );
+                      case BROTLI_ENCODING: {
+                        decompressFn = zlib.brotliDecompress.bind(zlib);
                         break;
                       }
-
                       default: {
                         throw new Error(`Unsupported content-encoding: ${encodings}`);
                       }
                     }
+
+                    buffer = await LegacyAdapters.convertCallbackToPromise(decompressFn, buffer);
                   }
 
                   // eslint-disable-next-line require-atomic-updates
@@ -205,10 +215,6 @@ const makeRequestAsync: FetchFn = async (
     }
   );
 };
-
-export const AUTHORIZATION_HEADER_NAME: 'Authorization' = 'Authorization';
-const ACCEPT_HEADER_NAME: 'accept' = 'accept';
-const USER_AGENT_HEADER_NAME: 'user-agent' = 'user-agent';
 
 /**
  * A helper for issuing HTTP requests.
@@ -246,12 +252,22 @@ export class WebClient {
     url: string,
     options?: IGetFetchOptions | IFetchOptionsWithBody
   ): Promise<IWebClientResponse> {
+    const {
+      headers: optionsHeaders,
+      timeoutMs = 15 * 1000,
+      verb,
+      redirect,
+      body,
+      noAcceptEncoding,
+      noDecode
+    } = (options as IFetchOptionsWithBody | undefined) ?? {};
+
     const headers: Record<string, string> = {};
 
     WebClient.mergeHeaders(headers, this.standardHeaders);
 
-    if (options?.headers) {
-      WebClient.mergeHeaders(headers, options.headers);
+    if (optionsHeaders) {
+      WebClient.mergeHeaders(headers, optionsHeaders);
     }
 
     if (this.userAgent) {
@@ -260,6 +276,10 @@ export class WebClient {
 
     if (this.accept) {
       headers[ACCEPT_HEADER_NAME] = this.accept;
+    }
+
+    if (!noAcceptEncoding) {
+      headers[ACCEPT_ENCODING_HEADER_NAME] = [DEFLATE_ENCODING, GZIP_ENCODING, BROTLI_ENCODING].join(', ');
     }
 
     let proxyUrl: string = '';
@@ -286,18 +306,16 @@ export class WebClient {
       agent = createHttpsProxyAgent(proxyUrl);
     }
 
-    const timeoutMs: number = options?.timeoutMs !== undefined ? options.timeoutMs : 15 * 1000; // 15 seconds
     const requestInit: IRequestOptions = {
-      method: options?.verb,
+      method: verb,
       headers,
       agent,
       timeout: timeoutMs,
-      redirect: options?.redirect
+      redirect,
+      body,
+      noDecode,
+      noAcceptEncoding
     };
-    const optionsWithBody: IFetchOptionsWithBody | undefined = options as IFetchOptionsWithBody | undefined;
-    if (optionsWithBody?.body) {
-      requestInit.body = optionsWithBody.body;
-    }
 
     return await WebClient._requestFn(url, requestInit);
   }
