@@ -108,13 +108,27 @@ const makeRequestAsync: FetchFn = async (
           const responseData: Buffer = Buffer.concat(responseBuffers);
           const status: number = response.statusCode || 0;
           const statusText: string | undefined = response.statusMessage;
+          let bodyString: string | undefined;
+          let bodyJson: unknown | undefined;
           const result: IWebClientResponse = {
             ok: status >= 200 && status < 300,
             status,
             statusText,
             redirected,
-            getTextAsync: async () => responseData.toString(),
-            getJsonAsync: async () => JSON.parse(responseData.toString()),
+            getTextAsync: async () => {
+              if (bodyString === undefined) {
+                bodyString = responseData.toString();
+              }
+
+              return bodyString;
+            },
+            getJsonAsync: async <TJson>() => {
+              if (bodyJson === undefined) {
+                bodyJson = await result.getTextAsync();
+              }
+
+              return bodyJson as TJson;
+            },
             getBufferAsync: async () => responseData
           };
           resolve(result);
