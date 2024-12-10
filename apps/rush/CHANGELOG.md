@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 10 Dec 2024 05:14:11 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Dec 2024 21:23:18 GMT and should not be manually modified.
+
+## 5.146.0
+Tue, 10 Dec 2024 21:23:18 GMT
+
+### Updates
+
+- Support fallback syntax in `.npmrc` files if the package manager is PNPM. See https://pnpm.io/npmrc
+- Add an `.isPnpm` property to `RushConfiguration` that is set to true if the package manager for the Rush repo is PNPM.
+- Support pnpm lockfile v9, which is used by default starting in pnpm v9.
 
 ## 5.145.0
 Tue, 10 Dec 2024 05:14:11 GMT

@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.146.0",
+      "tag": "@microsoft/rush_v5.146.0",
+      "date": "Tue, 10 Dec 2024 21:23:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Support fallback syntax in `.npmrc` files if the package manager is PNPM. See https://pnpm.io/npmrc"
+          },
+          {
+            "comment": "Add an `.isPnpm` property to `RushConfiguration` that is set to true if the package manager for the Rush repo is PNPM."
+          },
+          {
+            "comment": "Support pnpm lockfile v9, which is used by default starting in pnpm v9."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.145.0",
       "tag": "@microsoft/rush_v5.145.0",
       "date": "Tue, 10 Dec 2024 05:14:11 GMT",
