@@ -99,3 +99,53 @@ Array [
   ],
 ]
 `;
+
+exports[`PnpmShrinkwrapFile workspace V9 lockfile verifies project dependencies: project1 1`] = `
+Array [
+  Array [
+    Object {
+      "../../project1": "../../project1:6yFTI2g+Ny0Au80xpo6zIY61TCNDUuLUd6EgLlbOBtc=:",
+      "jquery@1.12.3": "sha512-FzM42/Ew+Hb8ha2OlhHRBLgWIZS32gZ0+NvWTf+ZvVvGaIlJkOiXQyb7VBjv4L6fJfmTrRf3EsAmbfsHDhfemw==",
+      "pad-left@1.0.2": "sha512-saxSV1EYAytuZDtQYEwi0DPzooG6aN18xyHrnJtzwjVwmMauzkEecd7hynVJGolNGk1Pl9tltmZqfze4TZTCxg==",
+      "repeat-string@1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+    },
+    "project1/.rush/temp/shrinkwrap-deps.json",
+    Object {
+      "ensureFolderExists": true,
+    },
+  ],
+]
+`;
+
+exports[`PnpmShrinkwrapFile workspace V9 lockfile verifies project dependencies: project2 1`] = `
+Array [
+  Array [
+    Object {
+      "../../project2": "../../project2:l6v/HWUhScMI0m4k6D5qHiCOFj3Z0GoIFJEcp4I63w0=:",
+      "jquery@2.2.4": "sha512-lBHj60ezci2u1v2FqnZIraShGgEXq35qCzMv4lITyHGppTnA13rwR0MgwyNJh9TnDs3aXUvd1xjAotfraMHX/Q==",
+      "q@1.5.0": "sha512-VVMcd+HnuWZalHPycK7CsbVJ+sSrrrnCvHcW38YJVK9Tywnb5DUWJjONi81bLUj7aqDjIXnePxBl5t1r/F/ncg==",
+    },
+    "project2/.rush/temp/shrinkwrap-deps.json",
+    Object {
+      "ensureFolderExists": true,
+    },
+  ],
+]
+`;
+
+exports[`PnpmShrinkwrapFile workspace V9 lockfile verifies project dependencies: project3 1`] = `
+Array [
+  Array [
+    Object {
+      "../../project3": "../../project3:vMoje8cXfsHYOc6EXbxEw/qyBGXGUL1RApmNfwl7oA8=:",
+      "pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0": "pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0:bKrL+SvVYubL0HwTq/GOOXq1d05LTQ+HGqlXabzGEAU=:",
+      "q@1.5.0": "sha512-VVMcd+HnuWZalHPycK7CsbVJ+sSrrrnCvHcW38YJVK9Tywnb5DUWJjONi81bLUj7aqDjIXnePxBl5t1r/F/ncg==",
+      "repeat-string@1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+    },
+    "project3/.rush/temp/shrinkwrap-deps.json",
+    Object {
+      "ensureFolderExists": true,
+    },
+  ],
+]
+`;

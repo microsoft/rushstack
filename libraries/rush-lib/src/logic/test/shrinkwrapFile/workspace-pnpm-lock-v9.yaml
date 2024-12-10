@@ -1,0 +1,83 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .: {}
+
+  ../../project1:
+    dependencies:
+      jquery:
+        specifier: 1.12.3
+        version: 1.12.3
+      pad-left:
+        specifier: ^1.0.0
+        version: 1.0.2
+
+  ../../project2:
+    dependencies:
+      jquery:
+        specifier: 2.2.4
+        version: 2.2.4
+      q:
+        specifier: ~1.5.0
+        version: 1.5.0
+
+  ../../project3:
+    dependencies:
+      '@scope/testDep':
+        specifier: https://github.com/jonschlinkert/pad-left/tarball/2.1.0
+        version: pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0
+      q:
+        specifier: 1.5.0
+        version: 1.5.0
+
+packages:
+
+  jquery@1.12.3:
+    resolution: {integrity: sha512-FzM42/Ew+Hb8ha2OlhHRBLgWIZS32gZ0+NvWTf+ZvVvGaIlJkOiXQyb7VBjv4L6fJfmTrRf3EsAmbfsHDhfemw==}
+
+  jquery@2.2.4:
+    resolution: {integrity: sha512-lBHj60ezci2u1v2FqnZIraShGgEXq35qCzMv4lITyHGppTnA13rwR0MgwyNJh9TnDs3aXUvd1xjAotfraMHX/Q==}
+
+  pad-left@1.0.2:
+    resolution: {integrity: sha512-saxSV1EYAytuZDtQYEwi0DPzooG6aN18xyHrnJtzwjVwmMauzkEecd7hynVJGolNGk1Pl9tltmZqfze4TZTCxg==}
+    engines: {node: '>=0.10.0'}
+
+  pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0:
+    resolution: {tarball: https://github.com/jonschlinkert/pad-left/tarball/2.1.0}
+    version: 2.1.0
+    engines: {node: '>=0.10.0'}
+
+  q@1.5.0:
+    resolution: {integrity: sha512-VVMcd+HnuWZalHPycK7CsbVJ+sSrrrnCvHcW38YJVK9Tywnb5DUWJjONi81bLUj7aqDjIXnePxBl5t1r/F/ncg==}
+    engines: {node: '>=0.6.0', teleport: '>=0.2.0'}
+    deprecated: |-
+      You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+
+      (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
+
+  repeat-string@1.6.1:
+    resolution: {integrity: sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==}
+    engines: {node: '>=0.10'}
+
+snapshots:
+
+  jquery@1.12.3: {}
+
+  jquery@2.2.4: {}
+
+  pad-left@1.0.2:
+    dependencies:
+      repeat-string: 1.6.1
+
+  pad-left@https://github.com/jonschlinkert/pad-left/tarball/2.1.0:
+    dependencies:
+      repeat-string: 1.6.1
+
+  q@1.5.0: {}
+
+  repeat-string@1.6.1: {}
