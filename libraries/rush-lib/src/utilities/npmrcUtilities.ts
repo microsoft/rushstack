@@ -22,27 +22,11 @@ export interface ILogger {
 // create a global _combinedNpmrc for cache purpose
 const _combinedNpmrcMap: Map<string, string> = new Map();
 
-function _trimNpmrcFile(options: {
-  sourceNpmrcPath: string;
-  linesToPrepend?: string[];
-  linesToAppend?: string[];
-}): string {
-  const { sourceNpmrcPath, linesToPrepend, linesToAppend } = options;
-  const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
-  if (combinedNpmrcFromCache !== undefined) {
-    return combinedNpmrcFromCache;
-  }
-  let npmrcFileLines: string[] = [];
-  if (linesToPrepend) {
-    npmrcFileLines.push(...linesToPrepend);
-  }
-  if (fs.existsSync(sourceNpmrcPath)) {
-    npmrcFileLines.push(...fs.readFileSync(sourceNpmrcPath).toString().split('\n'));
-  }
-  if (linesToAppend) {
-    npmrcFileLines.push(...linesToAppend);
-  }
-  npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
+export function addMissingEnvPrefix(line: string): string {
+  return '; MISSING ENVIRONMENT VARIABLE: ' + line
+}
+
+export function trimNpmrcFileLines(npmrcFileLines: string[], env: NodeJS.ProcessEnv): string[] {
   const resultLines: string[] = [];
 
   // This finds environment variable tokens that look like "${VAR_NAME}"
@@ -66,11 +50,30 @@ function _trimNpmrcFile(options: {
       const environmentVariables: string[] | null = line.match(expansionRegExp);
       if (environmentVariables) {
         for (const token of environmentVariables) {
-          // Remove the leading "${" and the trailing "}" from the token
-          const environmentVariableName: string = token.substring(2, token.length - 1);
+          /**
+           * Remove the leading "${" and the trailing "}" from the token
+           *
+           * ${nameString}                  -> nameString
+           * ${nameString-fallbackString}   -> name-fallbackString
+           * ${nameString:-fallbackString}  -> name:-fallbackString
+           */
+          const nameWithFallback: string = token.substring(2, token.length - 1);
 
-          // Is the environment variable defined?
-          if (!process.env[environmentVariableName]) {
+          /**
+           * Get the environment variable name and fallback value.
+           *
+           *                                name          fallback
+           * nameString                 ->  nameString    undefined
+           * nameString-fallbackString  ->  nameString    fallbackString
+           * nameString:-fallbackString ->  nameString    fallbackString
+           */
+          const matched: string[] | null = nameWithFallback.match(/^([^:-]+)(?:\:?-(.+))?$/);
+          // matched: [originStr, variableName, fallback]
+          const name: string = matched?.[1] ?? nameWithFallback;
+          const fallback: string | undefined = matched?.[2];
+
+          // Is the environment variable and fallback value defined.
+          if (!env[name] && !fallback) {
             // No, so trim this line
             lineShouldBeTrimmed = true;
             break;
@@ -82,11 +85,37 @@ function _trimNpmrcFile(options: {
     if (lineShouldBeTrimmed) {
       // Example output:
       // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
-      resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+      resultLines.push(addMissingEnvPrefix(line));
     } else {
       resultLines.push(line);
     }
   }
+  return resultLines;
+}
+
+function _trimNpmrcFile(options: {
+  sourceNpmrcPath: string;
+  linesToPrepend?: string[];
+  linesToAppend?: string[];
+}): string {
+  const { sourceNpmrcPath, linesToPrepend, linesToAppend } = options;
+  const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
+  if (combinedNpmrcFromCache !== undefined) {
+    return combinedNpmrcFromCache;
+  }
+  let npmrcFileLines: string[] = [];
+  if (linesToPrepend) {
+    npmrcFileLines.push(...linesToPrepend);
+  }
+  if (fs.existsSync(sourceNpmrcPath)) {
+    npmrcFileLines.push(...fs.readFileSync(sourceNpmrcPath).toString().split('\n'));
+  }
+  if (linesToAppend) {
+    npmrcFileLines.push(...linesToAppend);
+  }
+  npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
+
+  const resultLines: string[] = trimNpmrcFileLines(npmrcFileLines, process.env);
 
   const combinedNpmrc: string = resultLines.join('\n');
 
