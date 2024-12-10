@@ -69,7 +69,7 @@
 			"type": "node",
 			"request": "attach",
 			"port": 9229,
-      "outFiles": [],
+			"outFiles": [],
 		},
 		{
 			"name": "Launch Rush Extension",
