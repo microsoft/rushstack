@@ -25,8 +25,8 @@ jobs:
           - NodeVersion: 18.18.x
             NodeVersionDisplayName: 18
             OS: windows-latest
-          - NodeVersion: 20.18.x
-            NodeVersionDisplayName: 20
+          - NodeVersion: 22.12.x
+            NodeVersionDisplayName: 22
             OS: windows-latest
     name: Node.js v${{ matrix.NodeVersionDisplayName }} (${{ matrix.OS }})
     runs-on: ${{ matrix.OS }}
