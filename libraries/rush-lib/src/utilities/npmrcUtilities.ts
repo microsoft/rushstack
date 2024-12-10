@@ -22,8 +22,40 @@ export interface ILogger {
 // create a global _combinedNpmrc for cache purpose
 const _combinedNpmrcMap: Map<string, string> = new Map();
 
+function _trimNpmrcFile(options: {
+  sourceNpmrcPath: string;
+  linesToPrepend?: string[];
+  linesToAppend?: string[];
+}): string {
+  const { sourceNpmrcPath, linesToPrepend, linesToAppend } = options;
+  const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
+  if (combinedNpmrcFromCache !== undefined) {
+    return combinedNpmrcFromCache;
+  }
+  let npmrcFileLines: string[] = [];
+  if (linesToPrepend) {
+    npmrcFileLines.push(...linesToPrepend);
+  }
+  if (fs.existsSync(sourceNpmrcPath)) {
+    npmrcFileLines.push(...fs.readFileSync(sourceNpmrcPath).toString().split('\n'));
+  }
+  if (linesToAppend) {
+    npmrcFileLines.push(...linesToAppend);
+  }
+  npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
+
+  const resultLines: string[] = trimNpmrcFileLines(npmrcFileLines, process.env);
+
+  const combinedNpmrc: string = resultLines.join('\n');
+
+  //save the cache
+  _combinedNpmrcMap.set(sourceNpmrcPath, combinedNpmrc);
+
+  return combinedNpmrc;
+}
+
 export function addMissingEnvPrefix(line: string): string {
-  return '; MISSING ENVIRONMENT VARIABLE: ' + line
+  return '; MISSING ENVIRONMENT VARIABLE: ' + line;
 }
 
 export function trimNpmrcFileLines(npmrcFileLines: string[], env: NodeJS.ProcessEnv): string[] {
@@ -91,38 +123,6 @@ export function trimNpmrcFileLines(npmrcFileLines: string[], env: NodeJS.Process
     }
   }
   return resultLines;
-}
-
-function _trimNpmrcFile(options: {
-  sourceNpmrcPath: string;
-  linesToPrepend?: string[];
-  linesToAppend?: string[];
-}): string {
-  const { sourceNpmrcPath, linesToPrepend, linesToAppend } = options;
-  const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
-  if (combinedNpmrcFromCache !== undefined) {
-    return combinedNpmrcFromCache;
-  }
-  let npmrcFileLines: string[] = [];
-  if (linesToPrepend) {
-    npmrcFileLines.push(...linesToPrepend);
-  }
-  if (fs.existsSync(sourceNpmrcPath)) {
-    npmrcFileLines.push(...fs.readFileSync(sourceNpmrcPath).toString().split('\n'));
-  }
-  if (linesToAppend) {
-    npmrcFileLines.push(...linesToAppend);
-  }
-  npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
-
-  const resultLines: string[] = trimNpmrcFileLines(npmrcFileLines, process.env);
-
-  const combinedNpmrc: string = resultLines.join('\n');
-
-  //save the cache
-  _combinedNpmrcMap.set(sourceNpmrcPath, combinedNpmrc);
-
-  return combinedNpmrc;
 }
 
 /**
