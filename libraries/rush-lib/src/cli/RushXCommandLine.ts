@@ -224,7 +224,7 @@ export class RushXCommandLine {
     });
     const terminal: ITerminal = new Terminal(terminalProvider);
 
-    if (rushConfiguration?.packageManager === 'pnpm' && rushConfiguration?.experimentsConfiguration) {
+    if (rushConfiguration?.isPnpm && rushConfiguration?.experimentsConfiguration) {
       const { configuration: experiments } = rushConfiguration?.experimentsConfiguration;
 
       if (experiments?.usePnpmSyncForInjectedDependencies) {

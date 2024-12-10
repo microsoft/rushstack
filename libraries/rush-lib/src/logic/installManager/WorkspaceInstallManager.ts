@@ -431,7 +431,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     const potentiallyChangedFiles: string[] = [];
 
-    if (this.rushConfiguration.packageManager === 'pnpm') {
+    if (this.rushConfiguration.isPnpm) {
       // Add workspace file. This file is only modified when workspace packages change.
       const pnpmWorkspaceFilename: string = path.join(
         subspace.getSubspaceTempFolderPath(),
@@ -568,7 +568,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           },
           this.options.maxInstallAttempts,
           () => {
-            if (this.rushConfiguration.packageManager === 'pnpm') {
+            if (this.rushConfiguration.isPnpm) {
               this._terminal.writeWarningLine(`Deleting the "node_modules" folder`);
               this.installRecycler.moveFolder(commonNodeModulesFolder);
 
@@ -649,10 +649,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         },
         { concurrency: 10 }
       );
-    } else if (
-      this.rushConfiguration.packageManager === 'pnpm' &&
-      this.rushConfiguration.pnpmOptions?.useWorkspaces
-    ) {
+    } else if (this.rushConfiguration.isPnpm && this.rushConfiguration.pnpmOptions?.useWorkspaces) {
       // If we're in PNPM workspace mode and PNPM didn't create a shrinkwrap file,
       // there are no dependencies. Generate empty shrinkwrap files for all projects.
       await Async.forEachAsync(
@@ -749,7 +746,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     super.pushConfigurationArgs(args, options, subspace);
 
     // Add workspace-specific args
-    if (this.rushConfiguration.packageManager === 'pnpm') {
+    if (this.rushConfiguration.isPnpm) {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
 

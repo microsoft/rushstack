@@ -40,7 +40,7 @@ export class SetupChecks {
 
   private static _validate(rushConfiguration: RushConfiguration): string | undefined {
     // Check for outdated tools
-    if (rushConfiguration.packageManager === 'pnpm') {
+    if (rushConfiguration.isPnpm) {
       if (semver.lt(rushConfiguration.packageManagerToolVersion, MINIMUM_SUPPORTED_PNPM_VERSION)) {
         return (
           `The ${RushConstants.rushJsonFilename} file requests PNPM version ` +

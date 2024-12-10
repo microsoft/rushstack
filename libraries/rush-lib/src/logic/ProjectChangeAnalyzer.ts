@@ -149,9 +149,7 @@ export class ProjectChangeAnalyzer {
           return new Set(rushConfiguration.projects);
         }
 
-        const { packageManager } = rushConfiguration;
-
-        if (packageManager === 'pnpm') {
+        if (rushConfiguration.isPnpm) {
           const currentShrinkwrap: PnpmShrinkwrapFile | undefined =
             PnpmShrinkwrapFile.loadFromFile(fullShrinkwrapPath);
 
@@ -256,7 +254,7 @@ export class ProjectChangeAnalyzer {
       // Include project shrinkwrap files as part of the computation
       const additionalRelativePathsToHash: string[] = [];
       const globalAdditionalFiles: string[] = [];
-      if (rushConfiguration.packageManager === 'pnpm') {
+      if (rushConfiguration.isPnpm) {
         await Async.forEachAsync(rushConfiguration.projects, async (project: RushConfigurationProject) => {
           const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(project);
           if (!(await FileSystem.existsAsync(projectShrinkwrapFilePath))) {

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add an `.isPnpm` property to `RushConfiguration` that is set to true if the package manager for the Rush repo is PNPM.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

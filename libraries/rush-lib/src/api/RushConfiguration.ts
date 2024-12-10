@@ -252,6 +252,11 @@ export class RushConfiguration {
   public readonly packageManager!: PackageManagerName;
 
   /**
+   * If true, the repository is using PNPM as its package manager.
+   */
+  public readonly isPnpm!: boolean;
+
+  /**
    * {@inheritdoc PackageManager}
    *
    * @privateremarks
@@ -698,16 +703,20 @@ export class RushConfiguration {
     // TODO: Add an actual "packageManager" field in rush.json
     const packageManagerFields: string[] = [];
 
+    this.isPnpm = false;
     if (rushConfigurationJson.npmVersion) {
       this.packageManager = 'npm';
       this.packageManagerOptions = this.npmOptions;
       packageManagerFields.push('npmVersion');
     }
+
     if (rushConfigurationJson.pnpmVersion) {
       this.packageManager = 'pnpm';
+      this.isPnpm = true;
       this.packageManagerOptions = this.pnpmOptions;
       packageManagerFields.push('pnpmVersion');
     }
+
     if (rushConfigurationJson.yarnVersion) {
       this.packageManager = 'yarn';
       this.packageManagerOptions = this.yarnOptions;

@@ -159,7 +159,7 @@ export class DeployAction extends BaseRushAction {
     }
 
     const projects: RushConfigurationProject[] = this.rushConfiguration.projects;
-    if (this.rushConfiguration.packageManager === 'pnpm') {
+    if (this.rushConfiguration.isPnpm) {
       const currentlyInstalledVariant: string | undefined =
         await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
       for (const project of projects) {
