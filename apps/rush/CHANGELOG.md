@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 09 Dec 2024 20:32:01 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Dec 2024 05:14:11 GMT and should not be manually modified.
+
+## 5.145.0
+Tue, 10 Dec 2024 05:14:11 GMT
+
+### Updates
+
+- Upgrade `@azure/identity` and `@azure/storage-blob`.
+- Add support for Node 22.
+- Remove the dependency on node-fetch.
 
 ## 5.144.1
 Mon, 09 Dec 2024 20:32:01 GMT

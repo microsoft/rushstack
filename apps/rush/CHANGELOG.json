@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.145.0",
+      "tag": "@microsoft/rush_v5.145.0",
+      "date": "Tue, 10 Dec 2024 05:14:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Upgrade `@azure/identity` and `@azure/storage-blob`."
+          },
+          {
+            "comment": "Add support for Node 22."
+          },
+          {
+            "comment": "Remove the dependency on node-fetch."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.144.1",
       "tag": "@microsoft/rush_v5.144.1",
       "date": "Mon, 09 Dec 2024 20:32:01 GMT",
