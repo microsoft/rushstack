@@ -122,6 +122,7 @@ export function trimNpmrcFileLines(npmrcFileLines: string[], env: NodeJS.Process
       resultLines.push(line);
     }
   }
+
   return resultLines;
 }
 
