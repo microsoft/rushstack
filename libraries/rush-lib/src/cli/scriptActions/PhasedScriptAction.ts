@@ -466,10 +466,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       }
 
       const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
-      if (
-        this.rushConfiguration?.packageManager === 'pnpm' &&
-        experiments?.usePnpmSyncForInjectedDependencies
-      ) {
+      if (this.rushConfiguration?.isPnpm && experiments?.usePnpmSyncForInjectedDependencies) {
         const { PnpmSyncCopyOperationPlugin } = await import(
           '../../logic/operations/PnpmSyncCopyOperationPlugin'
         );

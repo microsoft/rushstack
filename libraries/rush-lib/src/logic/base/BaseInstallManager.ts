@@ -282,7 +282,7 @@ export abstract class BaseInstallManager {
     const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
     // if usePnpmSyncForInjectedDependencies is true
     // the pnpm-sync will generate the pnpm-sync.json based on lockfile
-    if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
+    if (this.rushConfiguration.isPnpm && experiments?.usePnpmSyncForInjectedDependencies) {
       const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
       const dotPnpmFolder: string = `${subspace.getSubspaceTempFolderPath()}/node_modules/.pnpm`;
 
@@ -400,7 +400,7 @@ export abstract class BaseInstallManager {
     // Add pnpm-config.json file to the potentially changed files list.
     potentiallyChangedFiles.push(subspace.getPnpmConfigFilePath());
 
-    if (this.rushConfiguration.packageManager === 'pnpm') {
+    if (this.rushConfiguration.isPnpm) {
       // If the repo is using pnpmfile.js, consider that also
       const pnpmFileFilePath: string = subspace.getPnpmfilePath(variant);
       const pnpmFileExists: boolean = await FileSystem.existsAsync(pnpmFileFilePath);
@@ -535,7 +535,8 @@ export abstract class BaseInstallManager {
       sourceNpmrcFolder: subspace.getSubspaceConfigFolderPath(),
       targetNpmrcFolder: subspace.getSubspaceTempFolderPath(),
       linesToPrepend: extraNpmrcLines,
-      createIfMissing: this.rushConfiguration.subspacesFeatureEnabled
+      createIfMissing: this.rushConfiguration.subspacesFeatureEnabled,
+      supportEnvVarFallbackSyntax: this.rushConfiguration.isPnpm
     });
     this._syncNpmrcAlreadyCalled = true;
 
@@ -543,7 +544,7 @@ export abstract class BaseInstallManager {
       ? crypto.createHash('sha1').update(npmrcText).digest('hex')
       : undefined;
 
-    if (this.rushConfiguration.packageManager === 'pnpm') {
+    if (this.rushConfiguration.isPnpm) {
       // Copy the committed patches folder if using pnpm
       const commonTempPnpmPatchesFolder: string = `${subspace.getSubspaceTempFolderPath()}/${
         RushConstants.pnpmPatchesFolderName
@@ -598,7 +599,7 @@ export abstract class BaseInstallManager {
 
     // Shim support for pnpmfile in.
     // Additionally when in workspaces, the shim implements support for common versions.
-    if (this.rushConfiguration.packageManager === 'pnpm') {
+    if (this.rushConfiguration.isPnpm) {
       await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(
         this.rushConfiguration,
         subspace.getSubspaceTempFolderPath(),
@@ -836,7 +837,7 @@ ${gitLfsHookHandling}
       if (collectLogFile) {
         args.push('--verbose');
       }
-    } else if (this.rushConfiguration.packageManager === 'pnpm') {
+    } else if (this.rushConfiguration.isPnpm) {
       // Only explicitly define the store path if `pnpmStore` is using the default, or has been set to
       // 'local'.  If `pnpmStore` = 'global', then allow PNPM to use the system's default
       // path.  In all cases, this will be overridden by RUSH_PNPM_STORE_PATH
@@ -911,7 +912,8 @@ ${gitLfsHookHandling}
       */
       const isAutoInstallPeersInNpmrc: boolean = isVariableSetInNpmrcFile(
         subspace.getSubspaceConfigFolderPath(),
-        'auto-install-peers'
+        'auto-install-peers',
+        this.rushConfiguration.isPnpm
       );
 
       let autoInstallPeers: boolean | undefined = this.rushConfiguration.pnpmOptions.autoInstallPeers;
@@ -939,7 +941,8 @@ ${gitLfsHookHandling}
       */
       const isResolutionModeInNpmrc: boolean = isVariableSetInNpmrcFile(
         subspace.getSubspaceConfigFolderPath(),
-        'resolution-mode'
+        'resolution-mode',
+        this.rushConfiguration.isPnpm
       );
 
       let resolutionMode: PnpmResolutionMode | undefined = this.rushConfiguration.pnpmOptions.resolutionMode;
@@ -1116,7 +1119,7 @@ ${gitLfsHookHandling}
       // Otherwise delete the temporary file
       FileSystem.deleteFile(subspace.getTempShrinkwrapFilename());
 
-      if (this.rushConfiguration.packageManager === 'pnpm') {
+      if (this.rushConfiguration.isPnpm) {
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
         //
         // When "rush update --full" is run, Rush deletes "common/temp/pnpm-lock.yaml"

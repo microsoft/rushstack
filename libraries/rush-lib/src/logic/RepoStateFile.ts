@@ -162,7 +162,7 @@ export class RepoStateFile {
 
     // Only support saving the pnpm shrinkwrap hash if it was enabled
     const preventShrinkwrapChanges: boolean =
-      rushConfiguration.packageManager === 'pnpm' &&
+      rushConfiguration.isPnpm &&
       rushConfiguration.pnpmOptions &&
       rushConfiguration.pnpmOptions.preventManualShrinkwrapChanges;
     if (preventShrinkwrapChanges) {
@@ -200,7 +200,7 @@ export class RepoStateFile {
       this._modified = true;
     }
 
-    if (rushConfiguration.packageManager === 'pnpm' && rushConfiguration.subspacesFeatureEnabled) {
+    if (rushConfiguration.isPnpm && rushConfiguration.subspacesFeatureEnabled) {
       const packageJsonInjectedDependenciesHash: string | undefined =
         subspace.getPackageJsonInjectedDependenciesHash(variant);
 

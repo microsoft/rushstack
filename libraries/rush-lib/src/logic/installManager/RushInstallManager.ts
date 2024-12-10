@@ -332,7 +332,7 @@ export class RushInstallManager extends BaseInstallManager {
       // with the shrinkwrap file, since these will cause install to fail.
       if (
         shrinkwrapFile &&
-        this.rushConfiguration.packageManager === 'pnpm' &&
+        this.rushConfiguration.isPnpm &&
         this.rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall
       ) {
         const pnpmShrinkwrapFile: PnpmShrinkwrapFile = shrinkwrapFile as PnpmShrinkwrapFile;
@@ -361,7 +361,7 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // Remove the workspace file if it exists
-    if (this.rushConfiguration.packageManager === 'pnpm') {
+    if (this.rushConfiguration.isPnpm) {
       const workspaceFilePath: string = path.join(
         this.rushConfiguration.commonTempFolder,
         'pnpm-workspace.yaml'
@@ -622,7 +622,7 @@ export class RushInstallManager extends BaseInstallManager {
       },
       this.options.maxInstallAttempts,
       () => {
-        if (this.rushConfiguration.packageManager === 'pnpm') {
+        if (this.rushConfiguration.isPnpm) {
           // eslint-disable-next-line no-console
           console.log(Colorize.yellow(`Deleting the "node_modules" folder`));
           this.installRecycler.moveFolder(commonNodeModulesFolder);

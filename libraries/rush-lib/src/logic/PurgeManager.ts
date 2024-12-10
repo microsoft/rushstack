@@ -88,7 +88,7 @@ export class PurgeManager {
     );
 
     if (
-      this._rushConfiguration.packageManager === 'pnpm' &&
+      this._rushConfiguration.isPnpm &&
       this._rushConfiguration.pnpmOptions.pnpmStore === 'global' &&
       this._rushConfiguration.pnpmOptions.pnpmStorePath
     ) {

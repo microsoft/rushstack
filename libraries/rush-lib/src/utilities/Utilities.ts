@@ -531,7 +531,8 @@ export class Utilities {
     if (commonRushConfigFolder) {
       Utilities.syncNpmrc({
         sourceNpmrcFolder: commonRushConfigFolder,
-        targetNpmrcFolder: directory
+        targetNpmrcFolder: directory,
+        supportEnvVarFallbackSyntax: false
       });
     }
 

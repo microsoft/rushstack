@@ -50,7 +50,7 @@ export class InstallHelpers {
       version: '0.0.0'
     };
 
-    if (rushConfiguration.packageManager === 'pnpm') {
+    if (rushConfiguration.isPnpm) {
       const pnpmOptions: PnpmOptionsConfiguration =
         subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
       if (!commonPackageJson.pnpm) {
@@ -132,7 +132,7 @@ export class InstallHelpers {
       if (rushConfiguration.npmOptions && rushConfiguration.npmOptions.environmentVariables) {
         configurationEnvironment = rushConfiguration.npmOptions.environmentVariables;
       }
-    } else if (rushConfiguration.packageManager === 'pnpm') {
+    } else if (rushConfiguration.isPnpm) {
       if (rushConfiguration.pnpmOptions && rushConfiguration.pnpmOptions.environmentVariables) {
         configurationEnvironment = rushConfiguration.pnpmOptions.environmentVariables;
       }
