@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Support fallback syntax in .npmrc file",
+      "comment": "Support fallback syntax in `.npmrc` files if the package manager is PNPM. See https://pnpm.io/npmrc",
       "type": "none"
     }
   ],
