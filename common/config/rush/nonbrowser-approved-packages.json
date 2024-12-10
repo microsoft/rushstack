@@ -787,6 +787,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "punycode",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "read-package-tree",
       "allowedCategories": [ "libraries" ]
     },

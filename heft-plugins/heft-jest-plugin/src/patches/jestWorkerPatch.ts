@@ -28,19 +28,23 @@ import { Import, FileSystem } from '@rushstack/node-core-library';
 // the IPC message is not received from the child process before the timeout elapses.  The mitigation is to
 // increase the delay.  (Jest itself seems to be a significant contributor to machine load, so perhaps reducing
 // Jest's parallelism could also help.)
+//
+// This patch also injects the "punycode" module into the Node.js module cache in Node >=22. JSDom has indirect
+// dependencies on this module, which is marked as deprecated in Node >=22.
 
 interface IBaseWorkerPoolModule {
   default: unknown;
 }
 
-// Follow the NPM dependency chain to find the module path for BaseWorkerPool.js
-// heft --> @jest/core --> @jest/reporters --> jest-worker
-
 const PATCHED_FORCE_EXIT_DELAY: number = 7000; // 7 seconds
 const patchName: string = path.basename(__filename);
+const PUNYCODE_MODULE_NAME: 'punycode' = 'punycode';
 
 function applyPatch(): void {
   try {
+    // Follow the NPM dependency chain to find the module path for BaseWorkerPool.js
+    // heft-jest-plugin --> @jest/core --> @jest/reporters --> jest-worker
+
     let contextFolder: string = __dirname;
     // Resolve the "@jest/core" package relative to Heft
     contextFolder = Import.resolvePackage({ packageName: '@jest/core', baseFolderPath: contextFolder });
@@ -130,6 +134,25 @@ function applyPatch(): void {
     console.error();
 
     throw e;
+  }
+
+  const nodeMajorVersion: number = parseInt(process.versions.node, 10);
+  if (nodeMajorVersion >= 22) {
+    // Inject punycode into Node module cache for Node 22 and higher
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const punycode: unknown = require('punycode/punycode');
+    require.cache[PUNYCODE_MODULE_NAME] = {
+      id: PUNYCODE_MODULE_NAME,
+      path: PUNYCODE_MODULE_NAME,
+      exports: punycode,
+      isPreloading: false,
+      require,
+      filename: PUNYCODE_MODULE_NAME,
+      loaded: true,
+      parent: undefined,
+      children: [],
+      paths: []
+    };
   }
 }
 

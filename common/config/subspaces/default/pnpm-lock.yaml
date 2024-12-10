@@ -2695,6 +2695,9 @@ importers:
       lodash:
         specifier: ~4.17.15
         version: 4.17.21
+      punycode:
+        specifier: ~2.3.1
+        version: 2.3.1
     devDependencies:
       '@jest/types':
         specifier: 29.5.0
