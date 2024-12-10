@@ -12,14 +12,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - NodeVersion: 18.18.x
+          - NodeVersion: 18.20.x
             NodeVersionDisplayName: 18
             OS: ubuntu-latest
-          - NodeVersion: 20.9.x
+          - NodeVersion: 20.18.x
             NodeVersionDisplayName: 20
             OS: ubuntu-latest
-          - NodeVersion: 18.18.x
-            NodeVersionDisplayName: 18
+          - NodeVersion: 22.12.x
+            NodeVersionDisplayName: 22
+            OS: ubuntu-latest
+          - NodeVersion: 20.18.x
+            NodeVersionDisplayName: 20
             OS: windows-latest
     name: Node.js v${{ matrix.NodeVersionDisplayName }} (${{ matrix.OS }})
     runs-on: ${{ matrix.OS }}
