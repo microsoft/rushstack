@@ -137,7 +137,8 @@ export class Autoinstaller {
         // Copy: .../common/autoinstallers/my-task/.npmrc
         Utilities.syncNpmrc({
           sourceNpmrcFolder: this._rushConfiguration.commonRushConfigFolder,
-          targetNpmrcFolder: autoinstallerFullPath
+          targetNpmrcFolder: autoinstallerFullPath,
+          supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm
         });
 
         this._logIfConsoleOutputIsNotRestricted(
@@ -222,7 +223,8 @@ export class Autoinstaller {
 
     Utilities.syncNpmrc({
       sourceNpmrcFolder: this._rushConfiguration.commonRushConfigFolder,
-      targetNpmrcFolder: this.folderFullPath
+      targetNpmrcFolder: this.folderFullPath,
+      supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm
     });
 
     await Utilities.executeCommandAsync({

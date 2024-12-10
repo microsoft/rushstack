@@ -239,7 +239,7 @@ export class PublishAction extends BaseRushAction {
 
     this._validate();
 
-    this._addNpmPublishHome();
+    this._addNpmPublishHome(this.rushConfiguration.isPnpm);
 
     const git: Git = new Git(this.rushConfiguration);
     const publishGit: PublishGit = new PublishGit(git, this._targetBranch.value);
@@ -582,7 +582,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _addNpmPublishHome(): void {
+  private _addNpmPublishHome(supportEnvVarFallbackSyntax: boolean): void {
     // Create "common\temp\publish-home" folder, if it doesn't exist
     Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
 
@@ -590,7 +590,8 @@ export class PublishAction extends BaseRushAction {
     Utilities.syncNpmrc({
       sourceNpmrcFolder: this.rushConfiguration.commonRushConfigFolder,
       targetNpmrcFolder: this._targetNpmrcPublishFolder,
-      useNpmrcPublish: true
+      useNpmrcPublish: true,
+      supportEnvVarFallbackSyntax
     });
   }
 

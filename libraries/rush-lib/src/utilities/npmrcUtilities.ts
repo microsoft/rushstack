@@ -22,12 +22,13 @@ export interface ILogger {
 // create a global _combinedNpmrc for cache purpose
 const _combinedNpmrcMap: Map<string, string> = new Map();
 
-function _trimNpmrcFile(options: {
-  sourceNpmrcPath: string;
-  linesToPrepend?: string[];
-  linesToAppend?: string[];
-}): string {
-  const { sourceNpmrcPath, linesToPrepend, linesToAppend } = options;
+function _trimNpmrcFile(
+  options: Pick<
+    INpmrcTrimOptions,
+    'sourceNpmrcPath' | 'linesToAppend' | 'linesToPrepend' | 'supportEnvVarFallbackSyntax'
+  >
+): string {
+  const { sourceNpmrcPath, linesToPrepend, linesToAppend, supportEnvVarFallbackSyntax } = options;
   const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
   if (combinedNpmrcFromCache !== undefined) {
     return combinedNpmrcFromCache;
@@ -48,7 +49,7 @@ function _trimNpmrcFile(options: {
 
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
 
-  const resultLines: string[] = trimNpmrcFileLines(npmrcFileLines, process.env);
+  const resultLines: string[] = trimNpmrcFileLines(npmrcFileLines, process.env, supportEnvVarFallbackSyntax);
 
   const combinedNpmrc: string = resultLines.join('\n');
 
@@ -58,7 +59,18 @@ function _trimNpmrcFile(options: {
   return combinedNpmrc;
 }
 
-export function trimNpmrcFileLines(npmrcFileLines: string[], env: NodeJS.ProcessEnv): string[] {
+/**
+ *
+ * @param npmrcFileLines The npmrc file's lines
+ * @param env The environment variables object
+ * @param supportEnvVarFallbackSyntax Whether to support fallback values in the form of `${VAR_NAME:-fallback}`
+ * @returns
+ */
+export function trimNpmrcFileLines(
+  npmrcFileLines: string[],
+  env: NodeJS.ProcessEnv,
+  supportEnvVarFallbackSyntax: boolean
+): string[] {
   const resultLines: string[] = [];
 
   // This finds environment variable tokens that look like "${VAR_NAME}"
@@ -91,18 +103,24 @@ export function trimNpmrcFileLines(npmrcFileLines: string[], env: NodeJS.Process
            */
           const nameWithFallback: string = token.substring(2, token.length - 1);
 
-          /**
-           * Get the environment variable name and fallback value.
-           *
-           *                                name          fallback
-           * nameString                 ->  nameString    undefined
-           * nameString-fallbackString  ->  nameString    fallbackString
-           * nameString:-fallbackString ->  nameString    fallbackString
-           */
-          const matched: string[] | null = nameWithFallback.match(/^([^:-]+)(?:\:?-(.+))?$/);
-          // matched: [originStr, variableName, fallback]
-          const environmentVariableName: string = matched?.[1] ?? nameWithFallback;
-          const fallback: string | undefined = matched?.[2];
+          let environmentVariableName: string;
+          let fallback: string | undefined;
+          if (supportEnvVarFallbackSyntax) {
+            /**
+             * Get the environment variable name and fallback value.
+             *
+             *                                name          fallback
+             * nameString                 ->  nameString    undefined
+             * nameString-fallbackString  ->  nameString    fallbackString
+             * nameString:-fallbackString ->  nameString    fallbackString
+             */
+            const matched: string[] | null = nameWithFallback.match(/^([^:-]+)(?:\:?-(.+))?$/);
+            // matched: [originStr, variableName, fallback]
+            environmentVariableName = matched?.[1] ?? nameWithFallback;
+            fallback = matched?.[2];
+          } else {
+            environmentVariableName = nameWithFallback;
+          }
 
           // Is the environment variable and fallback value defined.
           if (!env[environmentVariableName] && !fallback) {
@@ -146,18 +164,15 @@ interface INpmrcTrimOptions {
   logger: ILogger;
   linesToPrepend?: string[];
   linesToAppend?: string[];
+  supportEnvVarFallbackSyntax: boolean;
 }
 
 function _copyAndTrimNpmrcFile(options: INpmrcTrimOptions): string {
-  const { logger, sourceNpmrcPath, targetNpmrcPath, linesToPrepend, linesToAppend } = options;
+  const { logger, sourceNpmrcPath, targetNpmrcPath } = options;
   logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
   logger.info(`  --> "${targetNpmrcPath}"`);
 
-  const combinedNpmrc: string = _trimNpmrcFile({
-    sourceNpmrcPath,
-    linesToPrepend,
-    linesToAppend
-  });
+  const combinedNpmrc: string = _trimNpmrcFile(options);
 
   fs.writeFileSync(targetNpmrcPath, combinedNpmrc);
 
@@ -176,12 +191,14 @@ function _copyAndTrimNpmrcFile(options: INpmrcTrimOptions): string {
 export interface ISyncNpmrcOptions {
   sourceNpmrcFolder: string;
   targetNpmrcFolder: string;
+  supportEnvVarFallbackSyntax: boolean;
   useNpmrcPublish?: boolean;
   logger?: ILogger;
   linesToPrepend?: string[];
   linesToAppend?: string[];
   createIfMissing?: boolean;
 }
+
 export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
   const {
     sourceNpmrcFolder,
@@ -193,9 +210,7 @@ export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
       // eslint-disable-next-line no-console
       error: console.error
     },
-    createIfMissing = false,
-    linesToAppend,
-    linesToPrepend
+    createIfMissing = false
   } = options;
   const sourceNpmrcPath: string = path.join(
     sourceNpmrcFolder,
@@ -213,8 +228,7 @@ export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
         sourceNpmrcPath,
         targetNpmrcPath,
         logger,
-        linesToAppend,
-        linesToPrepend
+        ...options
       });
     } else if (fs.existsSync(targetNpmrcPath)) {
       // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
@@ -226,7 +240,11 @@ export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
   }
 }
 
-export function isVariableSetInNpmrcFile(sourceNpmrcFolder: string, variableKey: string): boolean {
+export function isVariableSetInNpmrcFile(
+  sourceNpmrcFolder: string,
+  variableKey: string,
+  supportEnvVarFallbackSyntax: boolean
+): boolean {
   const sourceNpmrcPath: string = `${sourceNpmrcFolder}/.npmrc`;
 
   //if .npmrc file does not exist, return false directly
@@ -234,7 +252,7 @@ export function isVariableSetInNpmrcFile(sourceNpmrcFolder: string, variableKey:
     return false;
   }
 
-  const trimmedNpmrcFile: string = _trimNpmrcFile({ sourceNpmrcPath });
+  const trimmedNpmrcFile: string = _trimNpmrcFile({ sourceNpmrcPath, supportEnvVarFallbackSyntax });
 
   const variableKeyRegExp: RegExp = new RegExp(`^${variableKey}=`, 'm');
   return trimmedNpmrcFile.match(variableKeyRegExp) !== null;

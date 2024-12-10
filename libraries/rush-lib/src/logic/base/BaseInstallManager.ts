@@ -536,7 +536,8 @@ export abstract class BaseInstallManager {
       sourceNpmrcFolder: subspace.getSubspaceConfigFolderPath(),
       targetNpmrcFolder: subspace.getSubspaceTempFolderPath(),
       linesToPrepend: extraNpmrcLines,
-      createIfMissing: this.rushConfiguration.subspacesFeatureEnabled
+      createIfMissing: this.rushConfiguration.subspacesFeatureEnabled,
+      supportEnvVarFallbackSyntax: this.rushConfiguration.isPnpm
     });
     this._syncNpmrcAlreadyCalled = true;
 
@@ -912,7 +913,8 @@ ${gitLfsHookHandling}
       */
       const isAutoInstallPeersInNpmrc: boolean = isVariableSetInNpmrcFile(
         subspace.getSubspaceConfigFolderPath(),
-        'auto-install-peers'
+        'auto-install-peers',
+        this.rushConfiguration.isPnpm
       );
 
       let autoInstallPeers: boolean | undefined = this.rushConfiguration.pnpmOptions.autoInstallPeers;
@@ -940,7 +942,8 @@ ${gitLfsHookHandling}
       */
       const isResolutionModeInNpmrc: boolean = isVariableSetInNpmrcFile(
         subspace.getSubspaceConfigFolderPath(),
-        'resolution-mode'
+        'resolution-mode',
+        this.rushConfiguration.isPnpm
       );
 
       let resolutionMode: PnpmResolutionMode | undefined = this.rushConfiguration.pnpmOptions.resolutionMode;

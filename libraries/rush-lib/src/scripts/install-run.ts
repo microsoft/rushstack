@@ -169,7 +169,8 @@ function _resolvePackageVersion(
       syncNpmrc({
         sourceNpmrcFolder,
         targetNpmrcFolder: rushTempFolder,
-        logger
+        logger,
+        supportEnvVarFallbackSyntax: false
       });
 
       const npmPath: string = getNpmPath();
@@ -433,7 +434,8 @@ export function installAndRun(
     syncNpmrc({
       sourceNpmrcFolder,
       targetNpmrcFolder: packageInstallFolder,
-      logger
+      logger,
+      supportEnvVarFallbackSyntax: false
     });
 
     _createPackageJson(packageInstallFolder, packageName, packageVersion);

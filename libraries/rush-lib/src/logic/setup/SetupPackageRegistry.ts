@@ -110,7 +110,8 @@ export class SetupPackageRegistry {
     if (!this._options.syncNpmrcAlreadyCalled) {
       Utilities.syncNpmrc({
         sourceNpmrcFolder: this.rushConfiguration.commonRushConfigFolder,
-        targetNpmrcFolder: this.rushConfiguration.commonTempFolder
+        targetNpmrcFolder: this.rushConfiguration.commonTempFolder,
+        supportEnvVarFallbackSyntax: this.rushConfiguration.isPnpm
       });
     }
 
