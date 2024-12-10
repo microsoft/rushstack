@@ -21,10 +21,6 @@ jobs:
           - NodeVersion: 22.12.x
             NodeVersionDisplayName: 22
             OS: ubuntu-latest
-            # TODO: Remove
-          - NodeVersion: 18.18.x
-            NodeVersionDisplayName: 18
-            OS: windows-latest
           - NodeVersion: 22.12.x
             NodeVersionDisplayName: 22
             OS: windows-latest
