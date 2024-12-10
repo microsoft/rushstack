@@ -30,8 +30,8 @@
     "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.68.9",
-    "@rushstack/heft-node-rig": "2.6.43",
+    "@rushstack/heft": "0.68.10",
+    "@rushstack/heft-node-rig": "2.6.44",
     "@types/eslint": "8.56.10",
     "@types/estree": "1.0.5",
     "@types/heft-jest": "1.0.1",

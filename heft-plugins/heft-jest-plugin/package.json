@@ -38,11 +38,12 @@
     "jest-config": "~29.5.0",
     "jest-resolve": "~29.5.0",
     "jest-snapshot": "~29.5.0",
-    "lodash": "~4.17.15"
+    "lodash": "~4.17.15",
+    "punycode": "~2.3.1"
   },
   "devDependencies": {
     "@jest/types": "29.5.0",
-    "@rushstack/heft-node-rig": "2.6.43",
+    "@rushstack/heft-node-rig": "2.6.44",
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",

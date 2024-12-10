@@ -346,14 +346,13 @@ describe(LockFile.name, () => {
 
         // create an open lockfile
         const resourceName: string = 'test';
-        const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
-        const lockFileHandle: FileWriter = FileWriter.open(lockFileName, { exclusive: true });
+        const lockFileHandle: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+        expect(lockFileHandle).toBeDefined();
 
         const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
-
         // this lock should be undefined since there is an existing lock
         expect(lock).toBeUndefined();
-        lockFileHandle.close();
+        lockFileHandle!.release();
       });
 
       test('can acquire and close a dirty lockfile', () => {

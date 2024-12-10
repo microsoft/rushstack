@@ -52,8 +52,8 @@
     "typescript": "5.4.2"
   },
   "devDependencies": {
-    "@rushstack/heft-node-rig": "2.6.43",
-    "@rushstack/heft": "0.68.9",
+    "@rushstack/heft-node-rig": "2.6.44",
+    "@rushstack/heft": "0.68.10",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "3.0.5",

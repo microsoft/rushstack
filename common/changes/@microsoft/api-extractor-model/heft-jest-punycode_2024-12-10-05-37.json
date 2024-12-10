@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model"
+}
