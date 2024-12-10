@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Mon, 09 Dec 2024 20:31:43 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Dec 2024 07:32:19 GMT and should not be manually modified.
+
+## 0.14.0
+Tue, 10 Dec 2024 07:32:19 GMT
+
+### Minor changes
+
+- Inject `punycode` into the NodeJS module cache in Node versions 22 and above to work around a deprecation warning.
 
 ## 0.13.3
 Mon, 09 Dec 2024 20:31:43 GMT
