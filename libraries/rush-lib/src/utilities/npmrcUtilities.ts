@@ -32,16 +32,20 @@ function _trimNpmrcFile(options: {
   if (combinedNpmrcFromCache !== undefined) {
     return combinedNpmrcFromCache;
   }
+
   let npmrcFileLines: string[] = [];
   if (linesToPrepend) {
     npmrcFileLines.push(...linesToPrepend);
   }
+
   if (fs.existsSync(sourceNpmrcPath)) {
     npmrcFileLines.push(...fs.readFileSync(sourceNpmrcPath).toString().split('\n'));
   }
+
   if (linesToAppend) {
     npmrcFileLines.push(...linesToAppend);
   }
+
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
 
   const resultLines: string[] = trimNpmrcFileLines(npmrcFileLines, process.env);
@@ -97,11 +101,11 @@ export function trimNpmrcFileLines(npmrcFileLines: string[], env: NodeJS.Process
            */
           const matched: string[] | null = nameWithFallback.match(/^([^:-]+)(?:\:?-(.+))?$/);
           // matched: [originStr, variableName, fallback]
-          const name: string = matched?.[1] ?? nameWithFallback;
+          const environmentVariableName: string = matched?.[1] ?? nameWithFallback;
           const fallback: string | undefined = matched?.[2];
 
           // Is the environment variable and fallback value defined.
-          if (!env[name] && !fallback) {
+          if (!env[environmentVariableName] && !fallback) {
             // No, so trim this line
             lineShouldBeTrimmed = true;
             break;
@@ -142,6 +146,7 @@ interface INpmrcTrimOptions {
   linesToPrepend?: string[];
   linesToAppend?: string[];
 }
+
 function _copyAndTrimNpmrcFile(options: INpmrcTrimOptions): string {
   const { logger, sourceNpmrcPath, targetNpmrcPath, linesToPrepend, linesToAppend } = options;
   logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
@@ -202,6 +207,7 @@ export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
       if (!fs.existsSync(targetNpmrcFolder)) {
         fs.mkdirSync(targetNpmrcFolder, { recursive: true });
       }
+
       return _copyAndTrimNpmrcFile({
         sourceNpmrcPath,
         targetNpmrcPath,
