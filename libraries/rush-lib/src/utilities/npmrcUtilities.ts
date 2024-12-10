@@ -54,10 +54,6 @@ function _trimNpmrcFile(options: {
   return combinedNpmrc;
 }
 
-export function addMissingEnvPrefix(line: string): string {
-  return '; MISSING ENVIRONMENT VARIABLE: ' + line;
-}
-
 export function trimNpmrcFileLines(npmrcFileLines: string[], env: NodeJS.ProcessEnv): string[] {
   const resultLines: string[] = [];
 
@@ -117,7 +113,7 @@ export function trimNpmrcFileLines(npmrcFileLines: string[], env: NodeJS.Process
     if (lineShouldBeTrimmed) {
       // Example output:
       // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
-      resultLines.push(addMissingEnvPrefix(line));
+      resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
     } else {
       resultLines.push(line);
     }
