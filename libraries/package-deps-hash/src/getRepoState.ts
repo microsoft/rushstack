@@ -380,7 +380,7 @@ export async function getRepoStateAsync(
       // As of last commit
       'HEAD',
       '--',
-      ...(filterPath ? filterPath : [])
+      ...(filterPath ?? [])
     ]),
     rootDirectory
   ).then(parseGitLsTree);
