@@ -399,7 +399,7 @@ export async function getRepoStateAsync(
       // Don't compare against the remote
       '--no-ahead-behind',
       '--',
-      ...(filterPath ? filterPath : [])
+      ...(filterPath ?? [])
     ]),
     rootDirectory
   ).then(parseGitStatus);
