@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "Add a new optional parameter `filterPath` to `getRepoStateAsync` that limits the scope of the git query to only the specified subpaths. This can significantly improve the performance of the function when only part of the full repo data is necessary.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash"
+}

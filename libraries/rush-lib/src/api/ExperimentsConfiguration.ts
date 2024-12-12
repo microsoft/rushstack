@@ -113,6 +113,12 @@ export interface IExperimentsJson {
    * This is useful when you want to speed up operations that can't (or shouldn't) be cached.
    */
   allowCobuildWithoutCache?: boolean;
+
+  /**
+   * By default, rush perform a full scan of the entire repository. For example, Rush runs `git status` to check for local file changes.
+   * When this toggle is enabled, Rush will only scan specific paths, significantly speeding up Git operations.
+   */
+  enableSubpathScan?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);

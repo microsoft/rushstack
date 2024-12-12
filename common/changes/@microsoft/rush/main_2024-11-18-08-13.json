@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a new experiment flag `enableSubpathScan` that, when invoking phased script commands with project selection parameters, such as `--to` or `--from`, only hashes files that are needed to compute the cache ids for the selected projects.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

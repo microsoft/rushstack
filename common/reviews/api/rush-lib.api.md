@@ -481,6 +481,7 @@ export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
+    enableSubpathScan?: boolean;
     forbidPhantomResolvableNodeModulesFolders?: boolean;
     generateProjectImpactGraphDuringRushUpdate?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
@@ -1129,7 +1130,7 @@ export class ProjectChangeAnalyzer {
     // (undocumented)
     protected getChangesByProject(lookup: LookupByPath<RushConfigurationProject>, changedFiles: Map<string, IFileDiffStatus>): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
     // @internal
-    _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal): Promise<GetInputsSnapshotAsyncFn | undefined>;
+    _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
 
 // @public
