@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.147.0",
+      "tag": "@microsoft/rush_v5.147.0",
+      "date": "Thu, 12 Dec 2024 01:37:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new experiment flag `enableSubpathScan` that, when invoking phased script commands with project selection parameters, such as `--to` or `--from`, only hashes files that are needed to compute the cache ids for the selected projects."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.146.0",
       "tag": "@microsoft/rush_v5.146.0",
       "date": "Tue, 10 Dec 2024 21:23:18 GMT",

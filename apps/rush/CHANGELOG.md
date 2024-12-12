@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 10 Dec 2024 21:23:18 GMT and should not be manually modified.
+This log was last generated on Thu, 12 Dec 2024 01:37:25 GMT and should not be manually modified.
+
+## 5.147.0
+Thu, 12 Dec 2024 01:37:25 GMT
+
+### Updates
+
+- Add a new experiment flag `enableSubpathScan` that, when invoking phased script commands with project selection parameters, such as `--to` or `--from`, only hashes files that are needed to compute the cache ids for the selected projects.
 
 ## 5.146.0
 Tue, 10 Dec 2024 21:23:18 GMT
