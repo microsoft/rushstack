@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Mon, 09 Dec 2024 20:31:43 GMT and should not be manually modified.
+This log was last generated on Thu, 12 Dec 2024 01:37:09 GMT and should not be manually modified.
+
+## 4.3.0
+Thu, 12 Dec 2024 01:37:09 GMT
+
+### Minor changes
+
+- Add a new optional parameter `filterPath` to `getRepoStateAsync` that limits the scope of the git query to only the specified subpaths. This can significantly improve the performance of the function when only part of the full repo data is necessary.
 
 ## 4.2.11
 Mon, 09 Dec 2024 20:31:43 GMT
