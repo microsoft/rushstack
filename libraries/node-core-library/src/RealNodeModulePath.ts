@@ -10,7 +10,7 @@ import * as nodePath from 'path';
  */
 export interface IRealNodeModulePathResolverOptions {
   fs: Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>;
-  path: Pick<typeof nodePath, 'isAbsolute' | 'normalize' | 'resolve' | 'sep'>;
+  path: Pick<typeof nodePath, 'format' | 'isAbsolute' | 'parse' | 'resolve' | 'sep'>;
 }
 
 /**
@@ -39,6 +39,7 @@ export class RealNodeModulePathResolver {
 
   private readonly _cache: Map<string, string>;
   private readonly _fs: IRealNodeModulePathResolverOptions['fs'];
+  private readonly _path: IRealNodeModulePathResolverOptions['path'];
 
   public constructor(
     options: IRealNodeModulePathResolverOptions = {
@@ -50,12 +51,13 @@ export class RealNodeModulePathResolver {
     const { path, fs } = options;
     const { sep: pathSeparator } = path;
     this._fs = fs;
+    this._path = path;
 
     const nodeModulesToken: string = `${pathSeparator}node_modules${pathSeparator}`;
-
-    const tryReadLink: (link: string) => string | undefined = this._tryReadLink.bind(this);
+    const self: this = this;
 
     function realNodeModulePathInternal(input: string): string {
+      input = self._normalizeTrailingSlash(input);
       // Find the last node_modules path segment
       const nodeModulesIndex: number = input.lastIndexOf(nodeModulesToken);
       if (nodeModulesIndex < 0) {
@@ -87,7 +89,7 @@ export class RealNodeModulePathResolver {
 
       const linkCandidate: string = input.slice(0, linkEnd);
       // Check if the link is a symlink
-      const linkTarget: string | undefined = tryReadLink(linkCandidate);
+      const linkTarget: string | undefined = self._tryReadLink(linkCandidate);
       if (linkTarget && path.isAbsolute(linkTarget)) {
         // Absolute path, combine the link target with any remaining path segments
         // Cache the resolution to avoid the readlink call in subsequent calls
@@ -118,7 +120,7 @@ export class RealNodeModulePathResolver {
     }
 
     this.realNodeModulePath = (input: string) => {
-      return realNodeModulePathInternal(path.normalize(input));
+      return realNodeModulePathInternal(path.format(path.parse(path.resolve(input))));
     };
   }
 
@@ -137,6 +139,8 @@ export class RealNodeModulePathResolver {
    * @returns The target of the symbolic link, or undefined if the input is not a symbolic link
    */
   private _tryReadLink(link: string): string | undefined {
+    link = this._normalizeTrailingSlash(link);
+
     const cached: string | undefined = this._cache.get(link);
     if (cached) {
       return cached;
@@ -146,7 +150,17 @@ export class RealNodeModulePathResolver {
     // of an lstat call.
     const stat: nodeFs.Stats | undefined = this._fs.lstatSync(link);
     if (stat.isSymbolicLink()) {
-      return this._fs.readlinkSync(link, 'utf8');
+      const result: string = this._normalizeTrailingSlash(this._fs.readlinkSync(link, 'utf8'));
+      return result;
     }
+  }
+
+  private _normalizeTrailingSlash(input: string): string {
+    const { _path: path } = this;
+    if (input.endsWith(path.sep)) {
+      // Logic to trim a path separator is complicated, so let the path APIs handle it.
+      return path.format(path.parse(input));
+    }
+    return input;
   }
 }
