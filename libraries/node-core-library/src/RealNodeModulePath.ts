@@ -10,7 +10,7 @@ import * as nodePath from 'path';
  */
 export interface IRealNodeModulePathResolverOptions {
   fs: Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>;
-  path: Pick<typeof nodePath, 'format' | 'isAbsolute' | 'parse' | 'resolve' | 'sep'>;
+  path: Pick<typeof nodePath, 'format' | 'isAbsolute' | 'join' | 'parse' | 'resolve' | 'sep'>;
 }
 
 /**
@@ -57,7 +57,6 @@ export class RealNodeModulePathResolver {
     const self: this = this;
 
     function realNodeModulePathInternal(input: string): string {
-      input = self._normalizeTrailingSlash(input);
       // Find the last node_modules path segment
       const nodeModulesIndex: number = input.lastIndexOf(nodeModulesToken);
       if (nodeModulesIndex < 0) {
@@ -75,7 +74,10 @@ export class RealNodeModulePathResolver {
         if (linkEnd < 0) {
           // Symlink missing, so see if anything before the last node_modules needs resolving,
           // and preserve the rest of the path
-          return `${realNodeModulePathInternal(input.slice(0, nodeModulesIndex))}${input.slice(nodeModulesIndex)}`;
+          return path.join(
+            realNodeModulePathInternal(input.slice(0, nodeModulesIndex)),
+            input.slice(nodeModulesIndex + 1)
+          );
         }
 
         linkStart = linkEnd;
@@ -95,7 +97,7 @@ export class RealNodeModulePathResolver {
         // Cache the resolution to avoid the readlink call in subsequent calls
         cache.set(linkCandidate, linkTarget);
         cache.set(linkTarget, linkTarget);
-        return `${linkTarget}${input.slice(linkEnd)}`;
+        return path.join(linkTarget, input.slice(linkEnd + 1));
       }
 
       // Relative path or does not exist
@@ -105,22 +107,23 @@ export class RealNodeModulePathResolver {
       if (linkTarget) {
         // Relative path in symbolic link. Should be resolved relative to real path of base path.
         const resolvedTarget: string = path.resolve(
-          `${realpathBeforeNodeModules}${input.slice(nodeModulesIndex, linkStart)}`,
+          realpathBeforeNodeModules,
+          input.slice(nodeModulesIndex + 1, linkStart),
           linkTarget
         );
         // Cache the result of the combined resolution to avoid the readlink call in subsequent calls
         cache.set(linkCandidate, resolvedTarget);
         cache.set(resolvedTarget, resolvedTarget);
-        return `${resolvedTarget}${input.slice(linkEnd)}`;
+        return path.join(resolvedTarget, input.slice(linkEnd + 1));
       }
 
       // No symlink, so just return the real path before the last node_modules combined with the
       // subsequent path segments
-      return `${realpathBeforeNodeModules}${input.slice(nodeModulesIndex)}`;
+      return path.join(realpathBeforeNodeModules, input.slice(nodeModulesIndex + 1));
     }
 
     this.realNodeModulePath = (input: string) => {
-      return realNodeModulePathInternal(path.format(path.parse(path.resolve(input))));
+      return realNodeModulePathInternal(this._normalizeTrailingSlash(path.resolve(input)));
     };
   }
 

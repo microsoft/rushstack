@@ -611,7 +611,7 @@ export interface IRealNodeModulePathResolverOptions {
     // (undocumented)
     fs: Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>;
     // (undocumented)
-    path: Pick<typeof nodePath, 'format' | 'isAbsolute' | 'parse' | 'resolve' | 'sep'>;
+    path: Pick<typeof nodePath, 'format' | 'isAbsolute' | 'join' | 'parse' | 'resolve' | 'sep'>;
 }
 
 // @public (undocumented)
