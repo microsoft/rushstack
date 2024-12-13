@@ -180,13 +180,18 @@ describe('realNodeModulePath', () => {
 
     it('should return the input path if it is absolute and does not contain node_modules', () => {
       for (const input of ['C:\\foo\\bar', 'C:\\']) {
-        mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => true } as unknown as fs.Stats);
-
         expect(realNodeModulePath(input)).toBe(input);
 
         expect(mocklstatSync).not.toHaveBeenCalled();
         expect(mockReadlinkSync).not.toHaveBeenCalled();
       }
+    });
+
+    it('should trim extra trailing separators from the root', () => {
+      expect(realNodeModulePath('C:////')).toBe('C:\\');
+
+      expect(mocklstatSync).not.toHaveBeenCalled();
+      expect(mockReadlinkSync).not.toHaveBeenCalled();
     });
 
     it('should return the normalized input path if it is absolute and does not contain node_modules', () => {
