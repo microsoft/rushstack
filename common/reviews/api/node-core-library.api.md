@@ -609,9 +609,9 @@ export interface IReadLinesFromIterableOptions {
 // @public
 export interface IRealNodeModulePathResolverOptions {
     // (undocumented)
-    fs: Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>;
+    fs?: Partial<Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>>;
     // (undocumented)
-    path: Pick<typeof nodePath, 'format' | 'isAbsolute' | 'join' | 'parse' | 'resolve' | 'sep'>;
+    path?: Partial<Pick<typeof nodePath, 'isAbsolute' | 'join' | 'resolve' | 'sep'>>;
 }
 
 // @public (undocumented)
@@ -845,7 +845,7 @@ export class ProtectableMap<K, V> {
 
 // @public
 export class RealNodeModulePathResolver {
-    constructor(options?: IRealNodeModulePathResolverOptions);
+    constructor(options: IRealNodeModulePathResolverOptions);
     clearCache(): void;
     readonly realNodeModulePath: (input: string) => string;
 }

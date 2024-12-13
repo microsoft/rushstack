@@ -9,8 +9,8 @@ import * as nodePath from 'path';
  * @public
  */
 export interface IRealNodeModulePathResolverOptions {
-  fs: Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>;
-  path: Pick<typeof nodePath, 'format' | 'isAbsolute' | 'join' | 'parse' | 'resolve' | 'sep'>;
+  fs?: Partial<Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>>;
+  path?: Partial<Pick<typeof nodePath, 'isAbsolute' | 'join' | 'resolve' | 'sep'>>;
 }
 
 /**
@@ -38,22 +38,32 @@ export class RealNodeModulePathResolver {
   public readonly realNodeModulePath: (input: string) => string;
 
   private readonly _cache: Map<string, string>;
-  private readonly _fs: IRealNodeModulePathResolverOptions['fs'];
-  private readonly _path: IRealNodeModulePathResolverOptions['path'];
+  private readonly _fs: Required<NonNullable<IRealNodeModulePathResolverOptions['fs']>>;
+  private readonly _path: Required<NonNullable<IRealNodeModulePathResolverOptions['path']>>;
 
-  public constructor(
-    options: IRealNodeModulePathResolverOptions = {
-      fs: nodeFs,
-      path: nodePath
-    }
-  ) {
+  public constructor(options: IRealNodeModulePathResolverOptions) {
+    const {
+      fs: { lstatSync = nodeFs.lstatSync, readlinkSync = nodeFs.readlinkSync } = nodeFs,
+      path: {
+        isAbsolute = nodePath.isAbsolute,
+        join = nodePath.join,
+        resolve = nodePath.resolve,
+        sep = nodePath.sep
+      } = nodePath
+    } = options ?? {};
     const cache: Map<string, string> = (this._cache = new Map());
-    const { path, fs } = options;
-    const { sep: pathSeparator } = path;
-    this._fs = fs;
-    this._path = path;
+    this._fs = {
+      lstatSync,
+      readlinkSync
+    };
+    this._path = {
+      isAbsolute,
+      join,
+      resolve,
+      sep
+    };
 
-    const nodeModulesToken: string = `${pathSeparator}node_modules${pathSeparator}`;
+    const nodeModulesToken: string = `${sep}node_modules${sep}`;
     const self: this = this;
 
     function realNodeModulePathInternal(input: string): string {
@@ -66,7 +76,7 @@ export class RealNodeModulePathResolver {
 
       // First assume that the next path segment after node_modules is a symlink
       let linkStart: number = nodeModulesIndex + nodeModulesToken.length - 1;
-      let linkEnd: number = input.indexOf(pathSeparator, linkStart + 1);
+      let linkEnd: number = input.indexOf(sep, linkStart + 1);
       // If the path segment starts with a '@', then it is a scoped package
       const isScoped: boolean = input.charAt(linkStart + 1) === '@';
       if (isScoped) {
@@ -74,14 +84,16 @@ export class RealNodeModulePathResolver {
         if (linkEnd < 0) {
           // Symlink missing, so see if anything before the last node_modules needs resolving,
           // and preserve the rest of the path
-          return path.join(
+          return join(
             realNodeModulePathInternal(input.slice(0, nodeModulesIndex)),
-            input.slice(nodeModulesIndex + 1)
+            input.slice(nodeModulesIndex + 1),
+            // Joining to `.` will clean up any extraneous trailing slashes
+            '.'
           );
         }
 
         linkStart = linkEnd;
-        linkEnd = input.indexOf(pathSeparator, linkStart + 1);
+        linkEnd = input.indexOf(sep, linkStart + 1);
       }
 
       // No trailing separator, so the link is the last path segment
@@ -92,12 +104,13 @@ export class RealNodeModulePathResolver {
       const linkCandidate: string = input.slice(0, linkEnd);
       // Check if the link is a symlink
       const linkTarget: string | undefined = self._tryReadLink(linkCandidate);
-      if (linkTarget && path.isAbsolute(linkTarget)) {
+      if (linkTarget && isAbsolute(linkTarget)) {
         // Absolute path, combine the link target with any remaining path segments
         // Cache the resolution to avoid the readlink call in subsequent calls
         cache.set(linkCandidate, linkTarget);
         cache.set(linkTarget, linkTarget);
-        return path.join(linkTarget, input.slice(linkEnd + 1));
+        // Joining to `.` will clean up any extraneous trailing slashes
+        return join(linkTarget, input.slice(linkEnd + 1), '.');
       }
 
       // Relative path or does not exist
@@ -106,7 +119,7 @@ export class RealNodeModulePathResolver {
       const realpathBeforeNodeModules: string = realNodeModulePathInternal(input.slice(0, nodeModulesIndex));
       if (linkTarget) {
         // Relative path in symbolic link. Should be resolved relative to real path of base path.
-        const resolvedTarget: string = path.resolve(
+        const resolvedTarget: string = resolve(
           realpathBeforeNodeModules,
           input.slice(nodeModulesIndex + 1, linkStart),
           linkTarget
@@ -114,16 +127,18 @@ export class RealNodeModulePathResolver {
         // Cache the result of the combined resolution to avoid the readlink call in subsequent calls
         cache.set(linkCandidate, resolvedTarget);
         cache.set(resolvedTarget, resolvedTarget);
-        return path.join(resolvedTarget, input.slice(linkEnd + 1));
+        // Joining to `.` will clean up any extraneous trailing slashes
+        return join(resolvedTarget, input.slice(linkEnd + 1), '.');
       }
 
       // No symlink, so just return the real path before the last node_modules combined with the
       // subsequent path segments
-      return path.join(realpathBeforeNodeModules, input.slice(nodeModulesIndex + 1));
+      // Joining to `.` will clean up any extraneous trailing slashes
+      return join(realpathBeforeNodeModules, input.slice(nodeModulesIndex + 1), '.');
     }
 
     this.realNodeModulePath = (input: string) => {
-      return realNodeModulePathInternal(this._normalizeTrailingSlash(path.resolve(input)));
+      return realNodeModulePathInternal(resolve(input));
     };
   }
 
@@ -142,8 +157,6 @@ export class RealNodeModulePathResolver {
    * @returns The target of the symbolic link, or undefined if the input is not a symbolic link
    */
   private _tryReadLink(link: string): string | undefined {
-    link = this._normalizeTrailingSlash(link);
-
     const cached: string | undefined = this._cache.get(link);
     if (cached) {
       return cached;
@@ -153,17 +166,9 @@ export class RealNodeModulePathResolver {
     // of an lstat call.
     const stat: nodeFs.Stats | undefined = this._fs.lstatSync(link);
     if (stat.isSymbolicLink()) {
-      const result: string = this._normalizeTrailingSlash(this._fs.readlinkSync(link, 'utf8'));
+      // path.join(x, '.') will trim trailing slashes, if applicable
+      const result: string = this._path.join(this._fs.readlinkSync(link, 'utf8'), '.');
       return result;
     }
-  }
-
-  private _normalizeTrailingSlash(input: string): string {
-    const { _path: path } = this;
-    if (input.endsWith(path.sep)) {
-      // Logic to trim a path separator is complicated, so let the path APIs handle it.
-      return path.format(path.parse(input));
-    }
-    return input;
   }
 }
