@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "When a no-op operation is not in scope, reflect its result as no-op instead of skipped, so that downstream operations can still write to the build cache.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
