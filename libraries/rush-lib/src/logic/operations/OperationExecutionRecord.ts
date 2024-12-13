@@ -313,7 +313,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         this.status = earlyReturnStatus;
       } else {
         // If the operation is disabled, skip the runner and directly mark as Skipped.
-        this.status = this.operation.enabled ? await this.runner.executeAsync(this) : OperationStatus.Skipped;
+        // However, if the operation is a NoOp, return NoOp so that cache entries can still be written.
+        this.status = this.operation.enabled
+          ? await this.runner.executeAsync(this)
+          : this.runner.isNoOp
+            ? OperationStatus.NoOp
+            : OperationStatus.Skipped;
       }
       // Delegate global state reporting
       await onResult(this);
