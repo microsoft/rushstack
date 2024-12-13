@@ -41,7 +41,7 @@ export class RealNodeModulePathResolver {
   private readonly _fs: Required<NonNullable<IRealNodeModulePathResolverOptions['fs']>>;
   private readonly _path: Required<NonNullable<IRealNodeModulePathResolverOptions['path']>>;
 
-  public constructor(options: IRealNodeModulePathResolverOptions) {
+  public constructor(options: IRealNodeModulePathResolverOptions = {}) {
     const {
       fs: { lstatSync = nodeFs.lstatSync, readlinkSync = nodeFs.readlinkSync } = nodeFs,
       path: {
@@ -50,7 +50,7 @@ export class RealNodeModulePathResolver {
         resolve = nodePath.resolve,
         sep = nodePath.sep
       } = nodePath
-    } = options ?? {};
+    } = options;
     const cache: Map<string, string> = (this._cache = new Map());
     this._fs = {
       lstatSync,

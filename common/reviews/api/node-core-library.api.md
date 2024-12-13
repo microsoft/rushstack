@@ -845,7 +845,7 @@ export class ProtectableMap<K, V> {
 
 // @public
 export class RealNodeModulePathResolver {
-    constructor(options: IRealNodeModulePathResolverOptions);
+    constructor(options?: IRealNodeModulePathResolverOptions);
     clearCache(): void;
     readonly realNodeModulePath: (input: string) => string;
 }
