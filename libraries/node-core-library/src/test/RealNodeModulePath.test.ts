@@ -194,11 +194,11 @@ describe('realNodeModulePath', () => {
       expect(mockReadlinkSync).not.toHaveBeenCalled();
     });
 
-    it('should return the normalized input path if it is absolute and does not contain node_modules', () => {
-      for (const input of ['C:/foo/bar', 'C:/']) {
+    it('should return the resolved input path if it is absolute and does not contain node_modules', () => {
+      for (const input of ['C:/foo/bar', 'C:/', 'ab', '../b/c/d']) {
         mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => true } as unknown as fs.Stats);
 
-        expect(realNodeModulePath(input)).toBe(path.win32.normalize(input));
+        expect(realNodeModulePath(input)).toBe(path.win32.resolve(input));
 
         expect(mocklstatSync).not.toHaveBeenCalled();
         expect(mockReadlinkSync).not.toHaveBeenCalled();
