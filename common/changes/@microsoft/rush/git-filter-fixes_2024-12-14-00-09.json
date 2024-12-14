@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue with the `enableSubpathScan` experiment where the set of returned hashes would result in incorrect build cache identifiers when using `--only`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -556,7 +556,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const getInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined =
-      await analyzer._tryGetSnapshotProviderAsync(projectConfigurations, terminal, projectSelection);
+      await analyzer._tryGetSnapshotProviderAsync(
+        projectConfigurations,
+        terminal,
+        // We need to include all dependencies, otherwise build cache id calculation will be incorrect
+        Selection.expandAllDependencies(projectSelection)
+      );
     const initialSnapshot: IInputsSnapshot | undefined = await getInputsSnapshotAsync?.();
 
     repoStateStopwatch.stop();
