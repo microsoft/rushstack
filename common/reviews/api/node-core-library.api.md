@@ -609,9 +609,9 @@ export interface IReadLinesFromIterableOptions {
 // @public
 export interface IRealNodeModulePathResolverOptions {
     // (undocumented)
-    fs: Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>;
+    fs?: Partial<Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>>;
     // (undocumented)
-    path: Pick<typeof nodePath, 'isAbsolute' | 'normalize' | 'resolve' | 'sep'>;
+    path?: Partial<Pick<typeof nodePath, 'isAbsolute' | 'join' | 'resolve' | 'sep'>>;
 }
 
 // @public (undocumented)

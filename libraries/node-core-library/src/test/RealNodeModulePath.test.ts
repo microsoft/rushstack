@@ -35,8 +35,8 @@ describe('realNodeModulePath', () => {
       resolver.clearCache();
     });
 
-    it('should return the input path if it does not contain node_modules', () => {
-      for (const input of ['/foo/bar', '/', 'ab', '../foo/bar/baz']) {
+    it('should return the input path if it is absolute and does not contain node_modules', () => {
+      for (const input of ['/foo/bar', '/']) {
         expect(realNodeModulePath(input)).toBe(input);
 
         expect(mocklstatSync).not.toHaveBeenCalled();
@@ -48,6 +48,16 @@ describe('realNodeModulePath', () => {
       mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => false } as unknown as fs.Stats);
 
       expect(realNodeModulePath('/foo/node_modules/foo')).toBe('/foo/node_modules/foo');
+
+      expect(mocklstatSync).toHaveBeenCalledWith('/foo/node_modules/foo');
+      expect(mocklstatSync).toHaveBeenCalledTimes(1);
+      expect(mockReadlinkSync).toHaveBeenCalledTimes(0);
+    });
+
+    it('should trim a trailing slash from the input path if it is not a symbolic link', () => {
+      mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => false } as unknown as fs.Stats);
+
+      expect(realNodeModulePath('/foo/node_modules/foo/')).toBe('/foo/node_modules/foo');
 
       expect(mocklstatSync).toHaveBeenCalledWith('/foo/node_modules/foo');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
@@ -66,12 +76,25 @@ describe('realNodeModulePath', () => {
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
     });
 
+    it('Should trim trailing slash from absolute link targets', () => {
+      mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => true } as unknown as fs.Stats);
+      mockReadlinkSync.mockReturnValueOnce('/link/target/');
+
+      expect(realNodeModulePath('/foo/node_modules/link/bar')).toBe('/link/target/bar');
+
+      expect(mocklstatSync).toHaveBeenCalledWith('/foo/node_modules/link');
+      expect(mocklstatSync).toHaveBeenCalledTimes(1);
+      expect(mockReadlinkSync).toHaveBeenCalledWith('/foo/node_modules/link', 'utf8');
+      expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
+    });
+
     it('Caches resolved symlinks', () => {
       mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => true } as unknown as fs.Stats);
       mockReadlinkSync.mockReturnValueOnce('/link/target');
 
       expect(realNodeModulePath('/foo/node_modules/link')).toBe('/link/target');
       expect(realNodeModulePath('/foo/node_modules/link/bar')).toBe('/link/target/bar');
+      expect(realNodeModulePath('/foo/node_modules/link/')).toBe('/link/target');
 
       expect(mocklstatSync).toHaveBeenCalledWith('/foo/node_modules/link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
@@ -155,10 +178,8 @@ describe('realNodeModulePath', () => {
       resolver.clearCache();
     });
 
-    it('should return the input path if it does not contain node_modules', () => {
-      for (const input of ['C:\\foo\\bar', 'C:\\', 'ab', '..\\foo\\bar\\baz']) {
-        mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => true } as unknown as fs.Stats);
-
+    it('should return the input path if it is absolute and does not contain node_modules', () => {
+      for (const input of ['C:\\foo\\bar', 'C:\\']) {
         expect(realNodeModulePath(input)).toBe(input);
 
         expect(mocklstatSync).not.toHaveBeenCalled();
@@ -166,11 +187,18 @@ describe('realNodeModulePath', () => {
       }
     });
 
-    it('should return the normalized input path if it does not contain node_modules', () => {
-      for (const input of ['C:/foo/bar', 'C:/', 'ab', '../foo/bar/baz']) {
+    it('should trim extra trailing separators from the root', () => {
+      expect(realNodeModulePath('C:////')).toBe('C:\\');
+
+      expect(mocklstatSync).not.toHaveBeenCalled();
+      expect(mockReadlinkSync).not.toHaveBeenCalled();
+    });
+
+    it('should return the resolved input path if it is absolute and does not contain node_modules', () => {
+      for (const input of ['C:/foo/bar', 'C:/', 'ab', '../b/c/d']) {
         mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => true } as unknown as fs.Stats);
 
-        expect(realNodeModulePath(input)).toBe(path.win32.normalize(input));
+        expect(realNodeModulePath(input)).toBe(path.win32.resolve(input));
 
         expect(mocklstatSync).not.toHaveBeenCalled();
         expect(mockReadlinkSync).not.toHaveBeenCalled();
@@ -187,11 +215,33 @@ describe('realNodeModulePath', () => {
       expect(mockReadlinkSync).toHaveBeenCalledTimes(0);
     });
 
+    it('Should trim a trailing path separator if the target is not a symbolic link', () => {
+      mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => false } as unknown as fs.Stats);
+
+      expect(realNodeModulePath('C:\\foo\\node_modules\\foo\\')).toBe('C:\\foo\\node_modules\\foo');
+
+      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\foo');
+      expect(mocklstatSync).toHaveBeenCalledTimes(1);
+      expect(mockReadlinkSync).toHaveBeenCalledTimes(0);
+    });
+
     it('Should handle absolute link targets', () => {
       mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => true } as unknown as fs.Stats);
       mockReadlinkSync.mockReturnValueOnce('C:\\link\\target');
 
-      expect(realNodeModulePath('C:\\foo\\node_modules\\link')).toBe('C:\\link\\target');
+      expect(realNodeModulePath('C:\\foo\\node_modules\\link\\relative')).toBe('C:\\link\\target\\relative');
+
+      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\link');
+      expect(mocklstatSync).toHaveBeenCalledTimes(1);
+      expect(mockReadlinkSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\link', 'utf8');
+      expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
+    });
+
+    it('Should trim a trailing path separator from an absolute link target', () => {
+      mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => true } as unknown as fs.Stats);
+      mockReadlinkSync.mockReturnValueOnce('C:\\link\\target\\');
+
+      expect(realNodeModulePath('C:\\foo\\node_modules\\link\\relative')).toBe('C:\\link\\target\\relative');
 
       expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
