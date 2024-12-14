@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 22 Nov 2024 01:10:43 GMT and should not be manually modified.
+This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+
+## 5.10.1
+Sat, 14 Dec 2024 01:11:07 GMT
+
+### Patches
+
+- Fix handling of trailing slashes and relative paths in RealNodeModulePath to match semantics of `fs.realpathSync.native`.
 
 ## 5.10.0
 Fri, 22 Nov 2024 01:10:43 GMT

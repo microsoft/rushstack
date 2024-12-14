@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.10.1",
+      "tag": "@rushstack/node-core-library_v5.10.1",
+      "date": "Sat, 14 Dec 2024 01:11:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix handling of trailing slashes and relative paths in RealNodeModulePath to match semantics of `fs.realpathSync.native`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.10.0",
       "tag": "@rushstack/node-core-library_v5.10.0",
       "date": "Fri, 22 Nov 2024 01:10:43 GMT",
