@@ -296,9 +296,10 @@ export class ProjectChangeAnalyzer {
 
       if (
         projectSelection &&
+        projectSelection.size > 0 &&
         this._rushConfiguration.experimentsConfiguration.configuration.enableSubpathScan
       ) {
-        filterPath = Array.from(projectSelection).map(({ projectFolder }) => projectFolder);
+        filterPath = Array.from(projectSelection, ({ projectFolder }) => projectFolder);
       }
 
       return async function tryGetSnapshotAsync(): Promise<IInputsSnapshot | undefined> {
