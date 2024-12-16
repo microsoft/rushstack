@@ -71,7 +71,7 @@ export class ScanAction extends BaseConfiglessRushAction {
     });
     this._projects = this.defineStringListParameter({
       parameterLongName: '--only',
-      parameterShortName: '-o',
+      parameterShortName: '-p',
       argumentName: 'PROJECT',
       description: 'Projects that need to be checked for phantom dependencies.'
     });
