@@ -31,7 +31,7 @@ export class ScanAction extends BaseConfiglessRushAction {
   private readonly _terminal: ITerminal;
   private readonly _jsonFlag: CommandLineFlagParameter;
   private readonly _allFlag: CommandLineFlagParameter;
-  private readonly _folders: CommandLineStringListParameter;
+  private readonly _projectFolderNamesParameter: CommandLineStringListParameter;
   private readonly _projects: CommandLineStringListParameter;
 
   public constructor(parser: RushCommandLineParser) {
