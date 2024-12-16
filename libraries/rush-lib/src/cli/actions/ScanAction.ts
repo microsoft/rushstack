@@ -62,7 +62,7 @@ export class ScanAction extends BaseConfiglessRushAction {
       description: 'If this flag is specified, output will list all detected dependencies.'
     });
     this._folders = this.defineStringListParameter({
-      parameterLongName: '--folder',
+      parameterLongName: '--project-folder-name',
       parameterShortName: '-f',
       argumentName: 'FOLDER',
       description:
