@@ -70,7 +70,7 @@ export class ScanAction extends BaseConfiglessRushAction {
         'Normally we can input all the folders under the project directory, excluding the ignored folders.'
     });
     this._projects = this.defineStringListParameter({
-      parameterLongName: '--only',
+      parameterLongName: '--project',
       parameterShortName: '-p',
       argumentName: 'PROJECT',
       description: 'Projects that need to be checked for phantom dependencies.'
