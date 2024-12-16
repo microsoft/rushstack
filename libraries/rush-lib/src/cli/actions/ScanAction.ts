@@ -61,7 +61,7 @@ export class ScanAction extends BaseConfiglessRushAction {
       parameterLongName: '--all',
       description: 'If this flag is specified, output will list all detected dependencies.'
     });
-    this._folders = this.defineStringListParameter({
+    this._projectFolderNamesParameter = this.defineStringListParameter({
       parameterLongName: '--project-folder-name',
       parameterShortName: '-f',
       argumentName: 'FOLDER',
@@ -239,13 +239,19 @@ export class ScanAction extends BaseConfiglessRushAction {
   private _getPackageJsonPathsFromProjects(projectNames: readonly string[]): string[] {
     const result: string[] = [];
     if (!this.rushConfiguration) {
-      throw new Error(``);
+      throw new Error(
+        `This project select parameter can only be performed in a Rush managed project.
+        To specify a project, you must be within a project directory managed by Rush.
+        Otherwise, please navigate into the project directory and execute the scan command.`
+      );
     }
     for (const projectName of projectNames) {
       const project: RushConfigurationProject | undefined =
         this.rushConfiguration.getProjectByName(projectName);
       if (!project) {
-        throw new Error(``);
+        throw new Error(
+          `The project name "${projectName}" is invalid. Please check the project name and ensure it is correctly specified.`
+        );
       }
       const packageJsonFilePath: string = path.join(project.projectFolder, FileConstants.PackageJson);
       result.push(packageJsonFilePath);
@@ -258,7 +264,9 @@ export class ScanAction extends BaseConfiglessRushAction {
       ? this._getPackageJsonPathsFromProjects(this._projects.values)
       : [path.resolve('./package.json')];
     const { default: glob } = await import('fast-glob');
-    const folders: readonly string[] = this._folders.values.length ? this._folders.values : ['src', 'lib'];
+    const folders: readonly string[] = this._projectFolderNamesParameter.values.length
+      ? this._projectFolderNamesParameter.values
+      : ['src', 'lib'];
 
     const output: Record<string, IScanResult> = {};
 
