@@ -150,9 +150,8 @@ export class WorkspaceLayoutCache {
 
       public get descriptionFileRoot(): string {
         if (!this._descriptionFileRoot) {
-          this._descriptionFileRoot = `${basePath}${
-            normalizeToPlatform?.(this._serialized.root) ?? this._serialized.root
-          }`;
+          const merged: string = `${basePath}${this._serialized.root}`;
+          this._descriptionFileRoot = normalizeToPlatform?.(merged) ?? merged;
         }
         return this._descriptionFileRoot;
       }
@@ -183,8 +182,14 @@ export class WorkspaceLayoutCache {
       const resolveContext: ResolveContext = new ResolveContext(serialized);
       resolveContexts.push(resolveContext);
 
-      const descriptionFileRoot: string = resolveContext.descriptionFileRoot;
-      contextLookup.setItem(descriptionFileRoot, resolveContext);
+      contextLookup.setItemFromSegments(
+        concat<string>(
+          // All paths in the cache file are platform-agnostic
+          LookupByPath.iteratePathSegments(basePath, '/'),
+          LookupByPath.iteratePathSegments(serialized.root, '/')
+        ),
+        resolveContext
+      );
 
       // Handle nested package.json files. These may modify some properties, but the dependency resolution
       // will match the original package root. Typically these are used to set the `type` field to `module`.
@@ -192,9 +197,11 @@ export class WorkspaceLayoutCache {
         for (const file of serialized.dirInfoFiles) {
           contextLookup.setItemFromSegments(
             concat<string>(
-              // Root is normalized to platform slashes
-              LookupByPath.iteratePathSegments(descriptionFileRoot, resolverPathSeparator),
-              // Subpaths are platform-agnostic
+              // All paths in the cache file are platform-agnostic
+              concat<string>(
+                LookupByPath.iteratePathSegments(basePath, '/'),
+                LookupByPath.iteratePathSegments(serialized.root, '/')
+              ),
               LookupByPath.iteratePathSegments(file, '/')
             ),
             resolveContext

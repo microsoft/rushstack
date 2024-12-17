@@ -56,7 +56,11 @@ export class KnownPackageDependenciesPlugin {
         let scope: IPrefixMatch<IResolveContext> | undefined =
           cache.contextForPackage.get(descriptionFileData);
         if (!scope) {
-          return callback(new Error(`Expected context for ${request.descriptionFileRoot}`));
+          scope = cache.contextLookup.findLongestPrefixMatch(path);
+          if (!scope) {
+            return callback(new Error(`Expected context for ${request.descriptionFileRoot}`));
+          }
+          cache.contextForPackage.set(descriptionFileData, scope);
         }
 
         let dependency: IPrefixMatch<IResolveContext> | undefined;

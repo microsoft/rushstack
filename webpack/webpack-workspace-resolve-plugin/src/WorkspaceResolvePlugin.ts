@@ -49,17 +49,22 @@ export class WorkspaceResolvePlugin implements WebpackPluginInstance {
         resolveOptions.plugins ??= [];
         resolveOptions.plugins.push(
           // Optimize identifying the package.json file for the issuer
-          new KnownDescriptionFilePlugin(cache, 'parsed-resolve', 'described-resolve'),
+          new KnownDescriptionFilePlugin(cache, 'before-parsed-resolve', 'described-resolve'),
           // Optimize locating the installed dependencies of the current package
-          new KnownPackageDependenciesPlugin(cache, 'raw-module', 'resolve-as-module'),
+          new KnownPackageDependenciesPlugin(cache, 'before-raw-module', 'resolve-as-module'),
           // Optimize loading the package.json file for the destination package (bare specifier)
-          new KnownDescriptionFilePlugin(cache, 'resolve-as-module', 'resolve-in-package'),
+          new KnownDescriptionFilePlugin(cache, 'before-resolve-as-module', 'resolve-in-package'),
           // Optimize loading the package.json file for the destination package (relative path)
-          new KnownDescriptionFilePlugin(cache, 'relative', 'described-relative'),
+          new KnownDescriptionFilePlugin(cache, 'before-relative', 'described-relative'),
           // Optimize locating and loading nested package.json for a directory
-          new KnownDescriptionFilePlugin(cache, 'undescribed-existing-directory', 'existing-directory', true),
+          new KnownDescriptionFilePlugin(
+            cache,
+            'before-undescribed-existing-directory',
+            'existing-directory',
+            true
+          ),
           // Optimize locating and loading nested package.json for a file
-          new KnownDescriptionFilePlugin(cache, 'undescribed-raw-file', 'raw-file')
+          new KnownDescriptionFilePlugin(cache, 'before-undescribed-raw-file', 'raw-file')
         );
 
         return resolveOptions;
