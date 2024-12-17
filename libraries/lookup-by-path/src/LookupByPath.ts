@@ -51,7 +51,7 @@ export interface IPrefixMatch<TItem> {
  *
  * @beta
  */
-export interface IReadonlyLookupByPath<TItem> {
+export interface IReadonlyLookupByPath<TItem> extends Iterable<[string, TItem]> {
   /**
    * Searches for the item associated with `childPath`, or the nearest ancestor of that path that
    * has an associated item.
@@ -65,7 +65,7 @@ export interface IReadonlyLookupByPath<TItem> {
    * trie.findChildPath('foo/bar/baz'); // returns 2
    * ```
    */
-  findChildPath(childPath: string): TItem | undefined;
+  findChildPath(childPath: string, delimiter?: string): TItem | undefined;
 
   /**
    * Searches for the item for which the recorded prefix is the longest matching prefix of `query`.
@@ -81,7 +81,7 @@ export interface IReadonlyLookupByPath<TItem> {
    * trie.findLongestPrefixMatch('foo/bar/baz'); // returns { item: 2, index: 7 }
    * ```
    */
-  findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
+  findLongestPrefixMatch(query: string, delimiter?: string): IPrefixMatch<TItem> | undefined;
 
   /**
    * Searches for the item associated with `childPathSegments`, or the nearest ancestor of that path that
@@ -99,6 +99,55 @@ export interface IReadonlyLookupByPath<TItem> {
   findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
 
   /**
+   * Determines if an entry exists exactly at the specified path.
+   *
+   * @returns `true` if an entry exists at the specified path, `false` otherwise
+   */
+  has(query: string, delimiter?: string): boolean;
+
+  /**
+   * Retrieves the entry that exists exactly at the specified path, if any.
+   *
+   * @returns The entry that exists exactly at the specified path, or `undefined` if no entry exists.
+   */
+  get(query: string, delimiter?: string): TItem | undefined;
+
+  /**
+   * Gets the number of entries in this trie.
+   *
+   * @returns The number of entries in this trie.
+   */
+  get size(): number;
+
+  /**
+   * Iterates over the entries in this trie.
+   *
+   * @param query - An optional query. If specified only entries that start with the query will be returned.
+   *
+   * @returns An iterator over the entries under the specified query (or the root if no query is specified).
+   * @remarks
+   * Keys in the returned iterator use the provided delimiter to join segments.
+   * Iteration order is not specified.
+   * @example
+   * ```ts
+   * const trie = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
+   * [...trie.entries(undefined, ',')); // returns [['foo', 1], ['foo,bar', 2]]
+   * ```
+   */
+  entries(query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
+  /**
+   * Iterates over the entries in this trie.
+   *
+   * @param query - An optional query. If specified only entries that start with the query will be returned.
+   *
+   * @returns An iterator over the entries under the specified query (or the root if no query is specified).
+   * @remarks
+   * Keys in the returned iterator use the provided delimiter to join segments.
+   * Iteration order is not specified.
+   */
+  [Symbol.iterator](query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
+
+  /**
    * Groups the provided map of info by the nearest entry in the trie that contains the path. If the path
    * is not found in the trie, the info is ignored.
    *
@@ -106,7 +155,7 @@ export interface IReadonlyLookupByPath<TItem> {
    *
    * @param infoByPath - The info to be grouped, keyed by path
    */
-  groupByChild<TInfo>(infoByPath: Map<string, TInfo>): Map<TItem, Map<string, TInfo>>;
+  groupByChild<TInfo>(infoByPath: Map<string, TInfo>, delimiter?: string): Map<TItem, Map<string, TInfo>>;
 }
 
 /**
@@ -138,6 +187,10 @@ export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
    * The root node of the trie, corresponding to the path ''
    */
   private readonly _root: IPathTrieNode<TItem>;
+  /**
+   * The number of entries in this trie.
+   */
+  private _size: number;
 
   /**
    * Constructs a new `LookupByPath`
@@ -151,6 +204,7 @@ export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
     };
 
     this.delimiter = delimiter ?? '/';
+    this._size = 0;
 
     if (entries) {
       for (const [path, item] of entries) {
@@ -202,13 +256,32 @@ export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
   }
 
   /**
+   * {@inheritdoc IReadonlyLookupByPath}
+   */
+  public get size(): number {
+    return this._size;
+  }
+
+  /**
+   * Deletes all entries from this `LookupByPath` instance.
+   *
+   * @returns this, for chained calls
+   */
+  public clear(): this {
+    this._root.value = undefined;
+    this._root.children = undefined;
+    this._size = 0;
+    return this;
+  }
+
+  /**
    * Associates the value with the specified serialized path.
    * If a value is already associated, will overwrite.
    *
    * @returns this, for chained calls
    */
-  public setItem(serializedPath: string, value: TItem): this {
-    return this.setItemFromSegments(LookupByPath.iteratePathSegments(serializedPath, this.delimiter), value);
+  public setItem(serializedPath: string, value: TItem, delimiter: string = this.delimiter): this {
+    return this.setItemFromSegments(LookupByPath.iteratePathSegments(serializedPath, delimiter), value);
   }
 
   /**
@@ -235,6 +308,9 @@ export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
       }
       node = child;
     }
+    if (node.value === undefined) {
+      this._size++;
+    }
     node.value = value;
 
     return this;
@@ -243,15 +319,18 @@ export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
   /**
    * {@inheritdoc IReadonlyLookupByPath}
    */
-  public findChildPath(childPath: string): TItem | undefined {
-    return this.findChildPathFromSegments(LookupByPath.iteratePathSegments(childPath, this.delimiter));
+  public findChildPath(childPath: string, delimiter: string = this.delimiter): TItem | undefined {
+    return this.findChildPathFromSegments(LookupByPath.iteratePathSegments(childPath, delimiter));
   }
 
   /**
    * {@inheritdoc IReadonlyLookupByPath}
    */
-  public findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined {
-    return this._findLongestPrefixMatch(LookupByPath._iteratePrefixes(query, this.delimiter));
+  public findLongestPrefixMatch(
+    query: string,
+    delimiter: string = this.delimiter
+  ): IPrefixMatch<TItem> | undefined {
+    return this._findLongestPrefixMatch(LookupByPath._iteratePrefixes(query, delimiter));
   }
 
   /**
@@ -281,11 +360,30 @@ export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
   /**
    * {@inheritdoc IReadonlyLookupByPath}
    */
-  public groupByChild<TInfo>(infoByPath: Map<string, TInfo>): Map<TItem, Map<string, TInfo>> {
+  public has(key: string, delimiter: string = this.delimiter): boolean {
+    const match: IPrefixMatch<TItem> | undefined = this.findLongestPrefixMatch(key, delimiter);
+    return match?.index === key.length;
+  }
+
+  /**
+   * {@inheritdoc IReadonlyLookupByPath}
+   */
+  public get(key: string, delimiter: string = this.delimiter): TItem | undefined {
+    const match: IPrefixMatch<TItem> | undefined = this.findLongestPrefixMatch(key, delimiter);
+    return match?.index === key.length ? match.value : undefined;
+  }
+
+  /**
+   * {@inheritdoc IReadonlyLookupByPath}
+   */
+  public groupByChild<TInfo>(
+    infoByPath: Map<string, TInfo>,
+    delimiter: string = this.delimiter
+  ): Map<TItem, Map<string, TInfo>> {
     const groupedInfoByChild: Map<TItem, Map<string, TInfo>> = new Map();
 
     for (const [path, info] of infoByPath) {
-      const child: TItem | undefined = this.findChildPath(path);
+      const child: TItem | undefined = this.findChildPath(path, delimiter);
       if (child === undefined) {
         continue;
       }
@@ -298,6 +396,45 @@ export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
     }
 
     return groupedInfoByChild;
+  }
+
+  /**
+   * {@inheritdoc IReadonlyLookupByPath}
+   */
+  public *entries(query?: string, delimiter: string = this.delimiter): IterableIterator<[string, TItem]> {
+    let root: IPathTrieNode<TItem> | undefined;
+    if (query) {
+      root = this._findNodeAtPrefix(query, delimiter);
+      if (!root) {
+        return;
+      }
+    } else {
+      root = this._root;
+    }
+
+    const stack: [string, IPathTrieNode<TItem>][] = [[query ?? '', root]];
+    while (stack.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const [prefix, node] = stack.pop()!;
+      if (node.value !== undefined) {
+        yield [prefix, node.value];
+      }
+      if (node.children) {
+        for (const [segment, child] of node.children) {
+          stack.push([prefix ? `${prefix}${delimiter}${segment}` : segment, child]);
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc IReadonlyLookupByPath}
+   */
+  public [Symbol.iterator](
+    query?: string,
+    delimiter: string = this.delimiter
+  ): IterableIterator<[string, TItem]> {
+    return this.entries(query, delimiter);
   }
 
   /**
@@ -339,5 +476,29 @@ export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
     }
 
     return best;
+  }
+
+  /**
+   * Finds the node at the specified path, or `undefined` if no node was found.
+   *
+   * @param query - The path to the node to search for
+   * @returns The trie node at the specified path, or `undefined` if no node was found
+   */
+  private _findNodeAtPrefix(
+    query: string,
+    delimiter: string = this.delimiter
+  ): IPathTrieNode<TItem> | undefined {
+    let node: IPathTrieNode<TItem> = this._root;
+    for (const { prefix } of LookupByPath._iteratePrefixes(query, delimiter)) {
+      if (!node.children) {
+        return undefined;
+      }
+      const child: IPathTrieNode<TItem> | undefined = node.children.get(prefix);
+      if (!child) {
+        return undefined;
+      }
+      node = child;
+    }
+    return node;
   }
 }
