@@ -2,6 +2,18 @@
   "name": "@rushstack/lookup-by-path",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@rushstack/lookup-by-path_v0.5.0",
+      "date": "Wed, 18 Dec 2024 01:11:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update all methods to accept optional override delimiters. Add `size`, `entries(), `get()`, `has()`, `removeItem()`. Make class iterable.\nExplicitly exclude `undefined` and `null` from the allowed types for the type parameter `TItem`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.7",
       "tag": "@rushstack/lookup-by-path_v0.4.7",
       "date": "Sat, 14 Dec 2024 01:11:07 GMT",

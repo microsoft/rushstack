@@ -1,6 +1,14 @@
 # Change Log - @rushstack/lookup-by-path
 
-This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Dec 2024 01:11:33 GMT and should not be manually modified.
+
+## 0.5.0
+Wed, 18 Dec 2024 01:11:33 GMT
+
+### Minor changes
+
+- Update all methods to accept optional override delimiters. Add `size`, `entries(), `get()`, `has()`, `removeItem()`. Make class iterable.
+Explicitly exclude `undefined` and `null` from the allowed types for the type parameter `TItem`.
 
 ## 0.4.7
 Sat, 14 Dec 2024 01:11:07 GMT

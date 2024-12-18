@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack-workspace-resolve-plugin
 
-This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Dec 2024 01:11:33 GMT and should not be manually modified.
+
+## 0.3.18
+Wed, 18 Dec 2024 01:11:33 GMT
+
+### Patches
+
+- Fix a bug with path handling on Windows. Tap hooks earlier to ensure that these plugins run before builtin behavior.
 
 ## 0.3.17
 Sat, 14 Dec 2024 01:11:07 GMT
