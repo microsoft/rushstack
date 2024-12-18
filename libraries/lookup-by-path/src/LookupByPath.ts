@@ -4,7 +4,7 @@
 /**
  * A node in the path trie used in LookupByPath
  */
-interface IPathTrieNode<TItem> {
+interface IPathTrieNode<TItem extends {} | null> {
   /**
    * The value that exactly matches the current relative path
    */
@@ -31,7 +31,7 @@ interface IPrefixEntry {
  *
  * @beta
  */
-export interface IPrefixMatch<TItem> {
+export interface IPrefixMatch<TItem extends {} | null> {
   /**
    * The item that matched the prefix
    */
@@ -51,7 +51,7 @@ export interface IPrefixMatch<TItem> {
  *
  * @beta
  */
-export interface IReadonlyLookupByPath<TItem> extends Iterable<[string, TItem]> {
+export interface IReadonlyLookupByPath<TItem extends {} | null> extends Iterable<[string, TItem]> {
   /**
    * Searches for the item associated with `childPath`, or the nearest ancestor of that path that
    * has an associated item.
@@ -178,7 +178,7 @@ export interface IReadonlyLookupByPath<TItem> extends Iterable<[string, TItem]> 
  * ```
  * @beta
  */
-export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
+export class LookupByPath<TItem extends {} | null> implements IReadonlyLookupByPath<TItem> {
   /**
    * The delimiter used to split paths
    */
@@ -282,6 +282,25 @@ export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
    */
   public setItem(serializedPath: string, value: TItem, delimiter: string = this.delimiter): this {
     return this.setItemFromSegments(LookupByPath.iteratePathSegments(serializedPath, delimiter), value);
+  }
+
+  /**
+   * Deletes an item if it exists.
+   * @param query - The path to the item to delete
+   * @param delimeter - Optional override delimeter for parsing the query
+   * @returns `true` if the item was found and deleted, `false` otherwise
+   * @remarks
+   * If the node has children with values, they will be retained.
+   */
+  public deleteItem(query: string, delimeter: string = this.delimiter): boolean {
+    const node: IPathTrieNode<TItem> | undefined = this._findNodeAtPrefix(query, delimeter);
+    if (node?.value !== undefined) {
+      node.value = undefined;
+      this._size--;
+      return true;
+    }
+
+    return false;
   }
 
   /**

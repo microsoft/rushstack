@@ -284,6 +284,81 @@ describe(LookupByPath.prototype.entries.name, () => {
   });
 });
 
+describe(LookupByPath.prototype.deleteItem.name, () => {
+  it('returns false for an empty tree', () => {
+    expect(new LookupByPath().deleteItem('foo')).toEqual(false);
+  });
+
+  it('deletes the matching node in a trivial tree', () => {
+    const tree = new LookupByPath([['foo', 1]]);
+    expect(tree.deleteItem('foo')).toEqual(true);
+    expect(tree.size).toEqual(0);
+    expect(tree.get('foo')).toEqual(undefined);
+  });
+
+  it('returns false for non-matching paths in a single-layer tree', () => {
+    const tree: LookupByPath<number> = new LookupByPath([
+      ['foo', 1],
+      ['bar', 2],
+      ['baz', 3]
+    ]);
+
+    expect(tree.deleteItem('buzz')).toEqual(false);
+    expect(tree.size).toEqual(3);
+  });
+
+  it('deletes the matching node in a single-layer tree', () => {
+    const tree: LookupByPath<number> = new LookupByPath([
+      ['foo', 1],
+      ['bar', 2],
+      ['baz', 3]
+    ]);
+
+    expect(tree.deleteItem('bar')).toEqual(true);
+    expect(tree.size).toEqual(2);
+    expect(tree.get('bar')).toEqual(undefined);
+  });
+
+  it('deletes the matching node in a multi-layer tree', () => {
+    const tree: LookupByPath<number> = new LookupByPath([
+      ['foo', 1],
+      ['foo/bar', 2],
+      ['foo/bar/baz', 3]
+    ]);
+
+    expect(tree.deleteItem('foo/bar')).toEqual(true);
+    expect(tree.size).toEqual(2);
+    expect(tree.get('foo/bar')).toEqual(undefined);
+    expect(tree.get('foo/bar/baz')).toEqual(3); // child nodes are retained
+  });
+
+  it('returns false for non-matching paths in a multi-layer tree', () => {
+    const tree: LookupByPath<number> = new LookupByPath([
+      ['foo', 1],
+      ['foo/bar', 2],
+      ['foo/bar/baz', 3]
+    ]);
+
+    expect(tree.deleteItem('foo/baz')).toEqual(false);
+    expect(tree.size).toEqual(3);
+  });
+
+  it('handles custom delimiters', () => {
+    const tree: LookupByPath<number> = new LookupByPath(
+      [
+        ['foo,bar', 1],
+        ['foo,bar,baz', 2]
+      ],
+      ','
+    );
+
+    expect(tree.deleteItem('foo\0bar', '\0')).toEqual(true);
+    expect(tree.size).toEqual(1);
+    expect(tree.get('foo\0bar', '\0')).toEqual(undefined);
+    expect(tree.get('foo\0bar\0baz', '\0')).toEqual(2); // child nodes are retained
+  });
+});
+
 describe(LookupByPath.prototype.findChildPath.name, () => {
   it('returns empty for an empty tree', () => {
     expect(new LookupByPath().findChildPath('foo')).toEqual(undefined);
