@@ -9,6 +9,7 @@ interface IPathTrieNode<TItem extends {}> {
    * The value that exactly matches the current relative path
    */
   value: TItem | undefined;
+
   /**
    * Child nodes by subfolder
    */
@@ -20,6 +21,7 @@ interface IPrefixEntry {
    * The prefix that was matched
    */
   prefix: string;
+
   /**
    * The index of the first character after the matched prefix
    */
@@ -36,10 +38,12 @@ export interface IPrefixMatch<TItem extends {}> {
    * The item that matched the prefix
    */
   value: TItem;
+
   /**
    * The index of the first character after the matched prefix
    */
   index: number;
+
   /**
    * The last match found (with a shorter prefix), if any
    */
@@ -135,6 +139,7 @@ export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[strin
    * ```
    */
   entries(query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
+
   /**
    * Iterates over the entries in this trie.
    *
@@ -183,10 +188,12 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
    * The delimiter used to split paths
    */
   public readonly delimiter: string;
+
   /**
    * The root node of the trie, corresponding to the path ''
    */
   private readonly _root: IPathTrieNode<TItem>;
+
   /**
    * The number of entries in this trie.
    */
