@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack-workspace-resolve-plugin",
+      "comment": "Fix a bug with path handling on Windows. Tap hooks earlier to ensure that these plugins run before builtin behavior.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack-workspace-resolve-plugin"
+}

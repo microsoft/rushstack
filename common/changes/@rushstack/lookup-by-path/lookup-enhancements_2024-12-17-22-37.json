@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lookup-by-path",
+      "comment": "Update all methods to accept optional override delimiters. Add `size`, `entries(), `get()`, `has()`, `removeItem()`. Make class iterable.\nExplicitly exclude `undefined` and `null` from the allowed types for the type parameter `TItem`.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/lookup-by-path"
+}

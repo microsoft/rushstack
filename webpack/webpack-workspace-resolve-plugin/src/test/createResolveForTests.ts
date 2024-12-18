@@ -35,7 +35,7 @@ export function createResolveForTests(
 
   const cache: WorkspaceLayoutCache = new WorkspaceLayoutCache({
     cacheData: {
-      basePath: `${separator}workspace${separator}`,
+      basePath: `/workspace/`,
       contexts: [
         {
           root: 'a',

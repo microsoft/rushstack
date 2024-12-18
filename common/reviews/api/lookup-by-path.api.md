@@ -5,31 +5,43 @@
 ```ts
 
 // @beta
-export interface IPrefixMatch<TItem> {
+export interface IPrefixMatch<TItem extends {}> {
     index: number;
     lastMatch?: IPrefixMatch<TItem>;
     value: TItem;
 }
 
 // @beta
-export interface IReadonlyLookupByPath<TItem> {
-    findChildPath(childPath: string): TItem | undefined;
+export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[string, TItem]> {
+    [Symbol.iterator](query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
+    entries(query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
+    findChildPath(childPath: string, delimiter?: string): TItem | undefined;
     findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
-    findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
-    groupByChild<TInfo>(infoByPath: Map<string, TInfo>): Map<TItem, Map<string, TInfo>>;
+    findLongestPrefixMatch(query: string, delimiter?: string): IPrefixMatch<TItem> | undefined;
+    get(query: string, delimiter?: string): TItem | undefined;
+    groupByChild<TInfo>(infoByPath: Map<string, TInfo>, delimiter?: string): Map<TItem, Map<string, TInfo>>;
+    has(query: string, delimiter?: string): boolean;
+    get size(): number;
 }
 
 // @beta
-export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
+export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TItem> {
+    [Symbol.iterator](query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
     constructor(entries?: Iterable<[string, TItem]>, delimiter?: string);
+    clear(): this;
+    deleteItem(query: string, delimeter?: string): boolean;
     readonly delimiter: string;
-    findChildPath(childPath: string): TItem | undefined;
+    entries(query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
+    findChildPath(childPath: string, delimiter?: string): TItem | undefined;
     findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
-    findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
-    groupByChild<TInfo>(infoByPath: Map<string, TInfo>): Map<TItem, Map<string, TInfo>>;
+    findLongestPrefixMatch(query: string, delimiter?: string): IPrefixMatch<TItem> | undefined;
+    get(key: string, delimiter?: string): TItem | undefined;
+    groupByChild<TInfo>(infoByPath: Map<string, TInfo>, delimiter?: string): Map<TItem, Map<string, TInfo>>;
+    has(key: string, delimiter?: string): boolean;
     static iteratePathSegments(serializedPath: string, delimiter?: string): Iterable<string>;
-    setItem(serializedPath: string, value: TItem): this;
+    setItem(serializedPath: string, value: TItem, delimiter?: string): this;
     setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this;
+    get size(): number;
 }
 
 ```
