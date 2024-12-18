@@ -72,6 +72,11 @@
     },
     {
       "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass.exampleSetGet",
+      "rule": "prefer-const"
+    },
+    {
+      "file": "src/index.ts",
       "scopeId": ".exampleArrowFunction",
       "rule": "@typescript-eslint/explicit-function-return-type"
     },
