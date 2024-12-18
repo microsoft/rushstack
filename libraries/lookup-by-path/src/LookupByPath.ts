@@ -4,7 +4,7 @@
 /**
  * A node in the path trie used in LookupByPath
  */
-interface IPathTrieNode<TItem extends {} | null> {
+interface IPathTrieNode<TItem extends {}> {
   /**
    * The value that exactly matches the current relative path
    */
@@ -31,7 +31,7 @@ interface IPrefixEntry {
  *
  * @beta
  */
-export interface IPrefixMatch<TItem extends {} | null> {
+export interface IPrefixMatch<TItem extends {}> {
   /**
    * The item that matched the prefix
    */
@@ -51,7 +51,7 @@ export interface IPrefixMatch<TItem extends {} | null> {
  *
  * @beta
  */
-export interface IReadonlyLookupByPath<TItem extends {} | null> extends Iterable<[string, TItem]> {
+export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[string, TItem]> {
   /**
    * Searches for the item associated with `childPath`, or the nearest ancestor of that path that
    * has an associated item.
@@ -178,7 +178,7 @@ export interface IReadonlyLookupByPath<TItem extends {} | null> extends Iterable
  * ```
  * @beta
  */
-export class LookupByPath<TItem extends {} | null> implements IReadonlyLookupByPath<TItem> {
+export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TItem> {
   /**
    * The delimiter used to split paths
    */

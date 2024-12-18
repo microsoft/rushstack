@@ -5,14 +5,14 @@
 ```ts
 
 // @beta
-export interface IPrefixMatch<TItem extends {} | null> {
+export interface IPrefixMatch<TItem extends {}> {
     index: number;
     lastMatch?: IPrefixMatch<TItem>;
     value: TItem;
 }
 
 // @beta
-export interface IReadonlyLookupByPath<TItem extends {} | null> extends Iterable<[string, TItem]> {
+export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[string, TItem]> {
     [Symbol.iterator](query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
     entries(query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
     findChildPath(childPath: string, delimiter?: string): TItem | undefined;
@@ -25,7 +25,7 @@ export interface IReadonlyLookupByPath<TItem extends {} | null> extends Iterable
 }
 
 // @beta
-export class LookupByPath<TItem extends {} | null> implements IReadonlyLookupByPath<TItem> {
+export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TItem> {
     [Symbol.iterator](query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
     constructor(entries?: Iterable<[string, TItem]>, delimiter?: string);
     clear(): this;
