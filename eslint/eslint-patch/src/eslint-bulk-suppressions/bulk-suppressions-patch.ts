@@ -63,10 +63,15 @@ export interface ITraverser {
   traverse(node: TSESTree.Node, options: ITraverseOptions): void;
 }
 
+export interface ITraverseMethods {
+  break(): void;
+  skip(): void;
+}
+
 export interface ITraverseOptions {
   visitorKeys: Record<string, string[]>;
-  enter(this: ITraverseOptions & { skip(): void }, node: TSESTree.Node): void;
-  leave(this: ITraverseOptions & { skip(): void }, node: TSESTree.Node): void;
+  enter(this: ITraverseOptions & ITraverseMethods, node: TSESTree.Node): void;
+  leave(this: ITraverseOptions & ITraverseMethods, node: TSESTree.Node): void;
 }
 
 interface ILinterInternalSlots {
@@ -244,23 +249,31 @@ function getScopeIdMap(
   let low: number = 0;
   let high: number = positions.length - 1;
 
-  const boundsStack: [number, number][] = [];
+  const max: number = positions[high];
+
+  const highStack: number[] = [];
 
   traverser.traverse(sourceCode.ast, {
     visitorKeys: sourceCode.visitorKeys,
     enter(node: TSESTree.Node): void {
-      boundsStack.push([low, high]);
-      if (node.range[0] > positions[high] || node.range[1] <= positions[low]) {
-        return this.skip();
+      const startInclusive: number = node.range[0];
+      if (startInclusive > max) {
+        // Future nodes irrelevant. We can break out of the traversal.
+        return this.break();
       }
 
-      let newLow: number = binarySearch(positions, node.range[0], low, high);
-      let newHigh: number = binarySearch(positions, node.range[1], low, high);
+      highStack.push(high);
+      const endInclusive: number = node.range[1] - 1;
+
+      let newLow: number = binarySearch(positions, startInclusive, low, high);
+      let newHigh: number = binarySearch(positions, endInclusive, low, high);
 
       if (newLow < 0) {
+        // Start point before the current minimum gets excluded
         newLow = ~newLow;
       }
       if (newHigh < 0) {
+        // End point above the current maximum gets excluded
         newHigh = ~newHigh - 1;
       }
 
@@ -281,12 +294,11 @@ function getScopeIdMap(
         }
       }
     },
-    leave(): void {
+    leave(node: TSESTree.Node): void {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const [oldLow, oldHigh] = boundsStack.pop()!;
-      low = oldLow;
+      const oldHigh: number = highStack.pop()!;
+      // Traversal has monotonically increasing positions, so no need to reduce low
       high = oldHigh;
-      // Do nothing
     }
   });
 
