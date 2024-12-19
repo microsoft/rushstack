@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/eslint-patch",
-      "comment": "Ensure that lint problems suppressed by eslint-bulk-suppressions are available in the `getSuppressedMessages()` function on the linter. Simplify patching of eslint by leveraging the `getLinterInternalSlots` unit test helper and walking the AST to get the node.",
-      "type": "minor"
+      "comment": "(BREAKING CHANGE) Fix incorrect calculation of scope ids in bulk suppressions. This will require recalculating the bulk suppressions file.\nEnsure that lint problems suppressed by eslint-bulk-suppressions are available in the `getSuppressedMessages()` function on the linter.\nSimplify patching of eslint by leveraging the `getLinterInternalSlots` unit test helper and walking the AST to get the node.\nOnly compute bulk suppressions information for lint problems that are not already suppressed inline.",
+      "type": "major"
     }
   ],
   "packageName": "@rushstack/eslint-patch"
