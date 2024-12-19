@@ -544,6 +544,7 @@
       "projectFolder": "build-tests/eslint-7-7-test",
       "reviewCategory": "tests",
       "shouldPublish": false,
+      "tags": ["eslint-tests"],
       "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
@@ -551,6 +552,7 @@
       "projectFolder": "build-tests/eslint-7-11-test",
       "reviewCategory": "tests",
       "shouldPublish": false,
+      "tags": ["eslint-tests"],
       "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
@@ -558,25 +560,29 @@
       "projectFolder": "build-tests/eslint-7-test",
       "reviewCategory": "tests",
       "shouldPublish": false,
+      "tags": ["eslint-tests"],
       "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-8-test",
       "projectFolder": "build-tests/eslint-8-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["eslint-tests"]
     },
     {
       "packageName": "eslint-bulk-suppressions-test",
       "projectFolder": "build-tests/eslint-bulk-suppressions-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["eslint-tests"]
     },
     {
       "packageName": "eslint-bulk-suppressions-test-legacy",
       "projectFolder": "build-tests/eslint-bulk-suppressions-test-legacy",
       "reviewCategory": "tests",
       "shouldPublish": false,
+      "tags": ["eslint-tests"],
       "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {

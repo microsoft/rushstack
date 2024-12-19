@@ -1,18 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import fs from 'fs';
-import os from 'os';
-import { eslintFolder, eslintPackageVersion } from '../_patch-base';
+import { eslintFolder } from '../_patch-base';
 import { ESLINT_BULK_DETECT_ENV_VAR_NAME } from './constants';
-import currentPackageJson from '../../package.json';
 
 interface IConfiguration {
   minCliVersion: string;
   cliEntryPoint: string;
 }
-
-const CURRENT_PACKAGE_VERSION: string = currentPackageJson.version;
 
 export function findAndConsoleLogPatchPathCli(): void {
   const eslintBulkDetectEnvVarValue: string | undefined = process.env[ESLINT_BULK_DETECT_ENV_VAR_NAME];
@@ -37,17 +32,18 @@ export function findAndConsoleLogPatchPathCli(): void {
   console.log(startDelimiter + JSON.stringify(configuration) + endDelimiter);
 }
 
-export function getPathToLinterJS(): string {
+export interface IPathsToPatch {
+  linterPath: string;
+  traverserPath: string;
+}
+
+export function getPathsToPatch(): IPathsToPatch {
   if (!eslintFolder) {
     throw new Error('Cannot find ESLint installation to patch.');
   }
 
-  return `${eslintFolder}/lib/linter/linter.js`;
-}
-
-export function ensurePathToGeneratedPatch(): string {
-  const patchesFolderPath: string = `${os.tmpdir()}/rushstack-eslint-bulk-${CURRENT_PACKAGE_VERSION}/patches`;
-  fs.mkdirSync(patchesFolderPath, { recursive: true });
-  const pathToGeneratedPatch: string = `${patchesFolderPath}/linter-patch-v${eslintPackageVersion}.js`;
-  return pathToGeneratedPatch;
+  return {
+    linterPath: `${eslintFolder}/lib/linter/linter.js`,
+    traverserPath: `${eslintFolder}/lib/shared/traverser.js`
+  };
 }
