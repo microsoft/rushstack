@@ -32,10 +32,18 @@ export function findAndConsoleLogPatchPathCli(): void {
   console.log(startDelimiter + JSON.stringify(configuration) + endDelimiter);
 }
 
-export function getPathToLinterJS(): string {
+export interface IPathsToPatch {
+  linterPath: string;
+  traverserPath: string;
+}
+
+export function getPathsToPatch(): IPathsToPatch {
   if (!eslintFolder) {
     throw new Error('Cannot find ESLint installation to patch.');
   }
 
-  return `${eslintFolder}/lib/linter/linter.js`;
+  return {
+    linterPath: `${eslintFolder}/lib/linter/linter.js`,
+    traverserPath: `${eslintFolder}/lib/shared/traverser.js`
+  };
 }

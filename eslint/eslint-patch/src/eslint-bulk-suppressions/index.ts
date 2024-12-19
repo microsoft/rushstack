@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { eslintFolder } from '../_patch-base';
-import { findAndConsoleLogPatchPathCli, getPathToLinterJS } from './path-utils';
-import { extendVerifyFunction } from './bulk-suppressions-patch';
+import { findAndConsoleLogPatchPathCli, getPathsToPatch } from './path-utils';
+import { extendVerifyFunction, type ITraverser } from './bulk-suppressions-patch';
 import { ESLINT_BULK_DETECT_ENV_VAR_NAME, ESLINT_BULK_ENABLE_ENV_VAR_NAME } from './constants';
 
 function apply(): void {
@@ -25,11 +25,12 @@ function apply(): void {
     return;
   }
 
-  const pathToLinterJS: string = getPathToLinterJS();
+  const { linterPath, traverserPath } = getPathsToPatch();
 
-  const { Linter, getLinterInternalSlots } = require(pathToLinterJS);
+  const { Linter, getLinterInternalSlots } = require(linterPath);
+  const Traverser: ITraverser = require(traverserPath);
   const { verify: originalVerify } = Linter.prototype;
-  Linter.prototype.verify = extendVerifyFunction(originalVerify, getLinterInternalSlots);
+  Linter.prototype.verify = extendVerifyFunction(originalVerify, getLinterInternalSlots, Traverser);
 }
 
 apply();

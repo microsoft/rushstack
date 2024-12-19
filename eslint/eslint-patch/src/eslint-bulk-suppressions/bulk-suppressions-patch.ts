@@ -55,6 +55,18 @@ interface ISourceCode {
   ast: TSESTree.Node;
   getNodeByRangeIndex(index: number): TSESTree.Node;
   getIndexFromLoc(loc: ILocation): number;
+  text: string;
+  visitorKeys: Record<string, string[]>;
+}
+
+export interface ITraverser {
+  traverse(node: TSESTree.Node, options: ITraverseOptions): void;
+}
+
+export interface ITraverseOptions {
+  visitorKeys: Record<string, string[]>;
+  enter(this: ITraverseOptions & { skip(): void }, node: TSESTree.Node): void;
+  leave(this: ITraverseOptions & { skip(): void }, node: TSESTree.Node): void;
 }
 
 interface ILinterInternalSlots {
@@ -87,24 +99,6 @@ function getNodeName(node: TSESTree.Node): string | undefined {
     return node.id.name;
   } else if (Guards.isTSTypeAliasDeclaration(node)) {
     return node.id.name;
-  }
-}
-
-type NodeWithParent = TSESTree.Node & { parent?: TSESTree.Node };
-
-function calculateScopeId(node: NodeWithParent | undefined): string {
-  const scopeIds: string[] = [];
-  for (let current: NodeWithParent | undefined = node; current; current = current.parent) {
-    const scopeIdForASTNode: string | undefined = getNodeName(current);
-    if (scopeIdForASTNode !== undefined) {
-      scopeIds.unshift(scopeIdForASTNode);
-    }
-  }
-
-  if (scopeIds.length === 0) {
-    return '.';
-  } else {
-    return '.' + scopeIds.join('.');
   }
 }
 
@@ -161,25 +155,12 @@ function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath:
 export function getBulkSuppression(params: {
   serializedSuppressions: Set<string>;
   fileRelativePath: string;
-  sourceCode: ISourceCode;
+  scopeId: string;
   problem: IProblem;
 }): IBulkSuppression | undefined {
-  const { fileRelativePath, serializedSuppressions, sourceCode, problem } = params;
+  const { fileRelativePath, serializedSuppressions, scopeId, problem } = params;
   const { ruleId: rule } = problem;
 
-  // Ideally we could get this without recrawling the AST, but the ESLint API doesn't provide a way to do that
-  const currentNode: TSESTree.Node =
-    typeof problem.line === 'number' && typeof problem.column === 'number'
-      ? sourceCode.getNodeByRangeIndex(
-          sourceCode.getIndexFromLoc({
-            line: problem.line,
-            column: problem.column - 1
-          })
-        )
-      : // We don't have valid position data, so use the AST root node.
-        sourceCode.ast;
-
-  const scopeId: string = calculateScopeId(currentNode);
   const suppression: ISuppression = { file: fileRelativePath, scopeId, rule };
 
   const serializedSuppression: string = serializeSuppression(suppression);
@@ -231,6 +212,87 @@ export function write(): void {
   }
 }
 
+function binarySearch(arr: number[], target: number, low: number, high: number): number {
+  while (low <= high) {
+    // eslint-disable-next-line no-bitwise
+    const mid: number = (low + high) >> 1;
+    const midVal: number = arr[mid];
+
+    if (midVal === target) {
+      return mid;
+    } else if (midVal < target) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  // eslint-disable-next-line no-bitwise
+  return ~low;
+}
+
+function getScopeIdMap(
+  traverser: ITraverser,
+  sourceCode: ISourceCode,
+  positions: number[]
+): Map<number, string> {
+  const scopeIdMap: Map<number, string> = new Map();
+  if (positions.length === 0) {
+    return scopeIdMap;
+  }
+
+  let low: number = 0;
+  let high: number = positions.length - 1;
+
+  const boundsStack: [number, number][] = [];
+
+  traverser.traverse(sourceCode.ast, {
+    visitorKeys: sourceCode.visitorKeys,
+    enter(node: TSESTree.Node): void {
+      boundsStack.push([low, high]);
+      if (node.range[0] > positions[high] || node.range[1] <= positions[low]) {
+        return this.skip();
+      }
+
+      let newLow: number = binarySearch(positions, node.range[0], low, high);
+      let newHigh: number = binarySearch(positions, node.range[1], low, high);
+
+      if (newLow < 0) {
+        newLow = ~newLow;
+      }
+      if (newHigh < 0) {
+        newHigh = ~newHigh - 1;
+      }
+
+      if (newLow > newHigh) {
+        return this.skip();
+      }
+
+      low = newLow;
+      high = newHigh;
+
+      const currentNodeName: string | undefined = getNodeName(node);
+      if (currentNodeName) {
+        const existingScopeId: string | undefined = scopeIdMap.get(positions[low]);
+        const newScopeId: string = `${existingScopeId ?? ''}.${currentNodeName}`;
+
+        for (let i: number = low; i <= high; i++) {
+          scopeIdMap.set(positions[i], newScopeId);
+        }
+      }
+    },
+    leave(): void {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const [oldLow, oldHigh] = boundsStack.pop()!;
+      low = oldLow;
+      high = oldHigh;
+      // Do nothing
+    }
+  });
+
+  return scopeIdMap;
+}
+
 /**
  * This returns a wrapped version of the "verify" function from ESLint's Linter class
  * that postprocesses rule violations that weren't suppressed by comments. This postprocessing
@@ -239,7 +301,8 @@ export function write(): void {
  */
 export function extendVerifyFunction(
   originalFn: (this: unknown, ...args: unknown[]) => IProblem[] | undefined,
-  getLinterInternalSlots: (linter: unknown) => ILinterInternalSlots
+  getLinterInternalSlots: (linter: unknown) => ILinterInternalSlots,
+  traverser: ITraverser
 ): (this: unknown, ...args: unknown[]) => IProblem[] | undefined {
   return function (this: unknown, ...args: unknown[]): IProblem[] | undefined {
     const problems: IProblem[] | undefined = originalFn.apply(this, args);
@@ -264,6 +327,20 @@ export function extendVerifyFunction(
 
     let { lastSuppressedMessages } = internalSlots;
 
+    const positions: number[] = [];
+    const problemToPositionMap: Map<IProblem, number> = new Map();
+    for (const problem of problems) {
+      const { line, column } = problem;
+      if (typeof line === 'number' && typeof column === 'number') {
+        const position: number = lastSourceCode.getIndexFromLoc({ line, column: column - 1 });
+        problemToPositionMap.set(problem, position);
+        positions.push(position);
+      }
+    }
+
+    positions.sort((x, y) => x - y);
+    const scopeIdMap: Map<number, string> = getScopeIdMap(traverser, lastSourceCode, positions);
+
     const normalizedFileAbsolutePath: string = filename.replace(/\\/g, '/');
     const eslintrcDirectory: string =
       findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFileAbsolutePath);
@@ -279,10 +356,13 @@ export function extendVerifyFunction(
     const filteredProblems: IProblem[] = [];
 
     for (const problem of problems) {
+      const position: number | undefined = problemToPositionMap.get(problem);
+      const scopeId: string = position === undefined ? '.' : scopeIdMap.get(position) ?? '.';
+
       const bulkSuppression: IBulkSuppression | undefined = getBulkSuppression({
         fileRelativePath,
         serializedSuppressions,
-        sourceCode: lastSourceCode,
+        scopeId,
         problem
       });
 
