@@ -6,11 +6,9 @@ import fs from 'fs';
 
 import * as Guards from './ast-guards';
 
-import { eslintFolder } from '../_patch-base';
 import {
-  ESLINT_BULK_ENABLE_ENV_VAR_NAME,
-  ESLINT_BULK_PRUNE_ENV_VAR_NAME,
-  ESLINT_BULK_SUPPRESS_ENV_VAR_NAME
+  ESLINT_BULK_SUPPRESS_ENV_VAR_NAME,
+  ESLINT_BULK_ESLINTRC_FOLDER_PATH_ENV_VAR_NAME
 } from './constants';
 import {
   getSuppressionsConfigForEslintrcFolderPath,
@@ -27,19 +25,41 @@ const ESLINTRC_FILENAMES: string[] = [
   // Several other filenames are allowed, but this patch requires that it be loaded via a JS config file,
   // so we only need to check for the JS-based filenames
 ];
-const SUPPRESSION_SYMBOL: unique symbol = Symbol('suppression');
 const ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE: string | undefined = process.env[ESLINT_BULK_SUPPRESS_ENV_VAR_NAME];
 const SUPPRESS_ALL_RULES: boolean = ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE === '*';
 const RULES_TO_SUPPRESS: Set<string> | undefined = ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE
   ? new Set(ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE.split(','))
   : undefined;
 
+interface IBulkSuppression {
+  suppression: ISuppression;
+  serializedSuppression: string;
+}
+
 interface IProblem {
-  [SUPPRESSION_SYMBOL]?: {
-    config: IBulkSuppressionsConfig;
-    suppression: ISuppression;
-    serializedSuppression: string;
-  };
+  line: number;
+  column: number;
+  ruleId: string;
+  suppressions?: {
+    kind: string;
+    justification: string;
+  }[];
+}
+
+interface ILocation {
+  line: number;
+  column: number;
+}
+
+interface ISourceCode {
+  ast: TSESTree.Node;
+  getNodeByRangeIndex(index: number): TSESTree.Node;
+  getIndexFromLoc(loc: ILocation): number;
+}
+
+interface ILinterInternalSlots {
+  lastSourceCode: ISourceCode | undefined;
+  lastSuppressedMessages: IProblem[] | undefined;
 }
 
 function getNodeName(node: TSESTree.Node): string | undefined {
@@ -91,6 +111,12 @@ function calculateScopeId(node: NodeWithParent | undefined): string {
 const eslintrcPathByFileOrFolderPath: Map<string, string> = new Map();
 
 function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath: string): string {
+  // Heft, for example, suppresses nested eslintrc files, so it can pass this environment variable to suppress
+  // searching for the eslintrc file completely.
+  let eslintrcFolderPath: string | undefined = process.env[ESLINT_BULK_ESLINTRC_FOLDER_PATH_ENV_VAR_NAME];
+  if (eslintrcFolderPath) {
+    return eslintrcFolderPath;
+  }
   const cachedFolderPathForFilePath: string | undefined =
     eslintrcPathByFileOrFolderPath.get(normalizedFilePath);
   if (cachedFolderPathForFilePath) {
@@ -102,7 +128,6 @@ function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath:
   );
 
   const pathsToCache: string[] = [normalizedFilePath];
-  let eslintrcFolderPath: string | undefined;
   findEslintrcFileLoop: for (
     let currentFolder: string = normalizedFileFolderPath;
     currentFolder; // 'something'.substring(0, -1) is ''
@@ -133,39 +158,47 @@ function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath:
   }
 }
 
-// One-line insert into the ruleContext report method to prematurely exit if the ESLint problem has been suppressed
-export function shouldBulkSuppress(params: {
-  filename: string;
-  currentNode: TSESTree.Node;
-  ruleId: string;
+export function getBulkSuppression(params: {
+  serializedSuppressions: Set<string>;
+  fileRelativePath: string;
+  sourceCode: ISourceCode;
   problem: IProblem;
-}): boolean {
-  // Use this ENV variable to turn off eslint-bulk-suppressions functionality, default behavior is on
-  if (process.env[ESLINT_BULK_ENABLE_ENV_VAR_NAME] === 'false') {
-    return false;
-  }
+}): IBulkSuppression | undefined {
+  const { fileRelativePath, serializedSuppressions, sourceCode, problem } = params;
+  const { ruleId: rule } = problem;
 
-  const { filename: fileAbsolutePath, currentNode, ruleId: rule, problem } = params;
-  const normalizedFileAbsolutePath: string = fileAbsolutePath.replace(/\\/g, '/');
-  const eslintrcDirectory: string =
-    findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFileAbsolutePath);
-  const fileRelativePath: string = normalizedFileAbsolutePath.substring(eslintrcDirectory.length + 1);
+  // Ideally we could get this without recrawling the AST, but the ESLint API doesn't provide a way to do that
+  const currentNode: TSESTree.Node =
+    typeof problem.line === 'number' && typeof problem.column === 'number'
+      ? sourceCode.getNodeByRangeIndex(
+          sourceCode.getIndexFromLoc({
+            line: problem.line,
+            column: problem.column - 1
+          })
+        )
+      : // We don't have valid position data, so use the AST root node.
+        sourceCode.ast;
+
   const scopeId: string = calculateScopeId(currentNode);
   const suppression: ISuppression = { file: fileRelativePath, scopeId, rule };
 
-  const config: IBulkSuppressionsConfig = getSuppressionsConfigForEslintrcFolderPath(eslintrcDirectory);
   const serializedSuppression: string = serializeSuppression(suppression);
-  const currentNodeIsSuppressed: boolean = config.serializedSuppressions.has(serializedSuppression);
+  const currentNodeIsSuppressed: boolean = serializedSuppressions.has(serializedSuppression);
 
   if (currentNodeIsSuppressed || SUPPRESS_ALL_RULES || RULES_TO_SUPPRESS?.has(suppression.rule)) {
-    problem[SUPPRESSION_SYMBOL] = {
+    // The suppressions object should already be empty, otherwise we shouldn't see this problem
+    problem.suppressions = [
+      {
+        kind: 'bulk',
+        justification: serializedSuppression
+      }
+    ];
+
+    return {
       suppression,
-      serializedSuppression,
-      config
+      serializedSuppression
     };
   }
-
-  return process.env[ESLINT_BULK_PRUNE_ENV_VAR_NAME] !== '1' && currentNodeIsSuppressed;
 }
 
 export function prune(): void {
@@ -198,35 +231,6 @@ export function write(): void {
   }
 }
 
-// utility function for linter-patch.js to make require statements that use relative paths in linter.js work in linter-patch.js
-export function requireFromPathToLinterJS(importPath: string): import('eslint').Linter {
-  if (!eslintFolder) {
-    return require(importPath);
-  }
-
-  const pathToLinterFolder: string = `${eslintFolder}/lib/linter`;
-  const moduleAbsolutePath: string = require.resolve(importPath, { paths: [pathToLinterFolder] });
-  return require(moduleAbsolutePath);
-}
-
-export function patchClass<T, U extends T>(originalClass: new () => T, patchedClass: new () => U): void {
-  // Get all the property names of the patched class prototype
-  const patchedProperties: string[] = Object.getOwnPropertyNames(patchedClass.prototype);
-
-  // Loop through all the properties
-  for (const prop of patchedProperties) {
-    // Override the property in the original class
-    originalClass.prototype[prop] = patchedClass.prototype[prop];
-  }
-
-  // Handle getters and setters
-  for (const [prop, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(patchedClass.prototype))) {
-    if (descriptor.get || descriptor.set) {
-      Object.defineProperty(originalClass.prototype, prop, descriptor);
-    }
-  }
-}
-
 /**
  * This returns a wrapped version of the "verify" function from ESLint's Linter class
  * that postprocesses rule violations that weren't suppressed by comments. This postprocessing
@@ -234,31 +238,75 @@ export function patchClass<T, U extends T>(originalClass: new () => T, patchedCl
  * by the "suppress" and "prune" commands.
  */
 export function extendVerifyFunction(
-  originalFn: (this: unknown, ...args: unknown[]) => IProblem[] | undefined
+  originalFn: (this: unknown, ...args: unknown[]) => IProblem[] | undefined,
+  getLinterInternalSlots: (linter: unknown) => ILinterInternalSlots
 ): (this: unknown, ...args: unknown[]) => IProblem[] | undefined {
   return function (this: unknown, ...args: unknown[]): IProblem[] | undefined {
     const problems: IProblem[] | undefined = originalFn.apply(this, args);
-    if (problems) {
-      for (const problem of problems) {
-        if (problem[SUPPRESSION_SYMBOL]) {
-          const {
-            serializedSuppression,
-            suppression,
-            config: {
-              newSerializedSuppressions,
-              jsonObject: { suppressions },
-              newJsonObject: { suppressions: newSuppressions }
-            }
-          } = problem[SUPPRESSION_SYMBOL];
-          if (!newSerializedSuppressions.has(serializedSuppression)) {
-            newSerializedSuppressions.add(serializedSuppression);
-            newSuppressions.push(suppression);
-            suppressions.push(suppression);
-          }
+    if (!problems) {
+      return problems;
+    }
+
+    const internalSlots: ILinterInternalSlots = getLinterInternalSlots(this);
+    const { lastSourceCode } = internalSlots;
+    if (!lastSourceCode) {
+      // We don't have a file for context, nothing we can do here.
+      return problems;
+    }
+
+    if (args.length < 3) {
+      throw new Error('Expected at least 3 arguments to Linter.prototype.verify');
+    }
+
+    const fileNameOrOptions: string | { filename: string } = args[2] as string | { filename: string };
+    const filename: string =
+      typeof fileNameOrOptions === 'string' ? fileNameOrOptions : fileNameOrOptions.filename;
+
+    let { lastSuppressedMessages } = internalSlots;
+
+    const normalizedFileAbsolutePath: string = filename.replace(/\\/g, '/');
+    const eslintrcDirectory: string =
+      findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFileAbsolutePath);
+    const fileRelativePath: string = normalizedFileAbsolutePath.substring(eslintrcDirectory.length + 1);
+    const config: IBulkSuppressionsConfig = getSuppressionsConfigForEslintrcFolderPath(eslintrcDirectory);
+    const {
+      newSerializedSuppressions,
+      serializedSuppressions,
+      jsonObject: { suppressions },
+      newJsonObject: { suppressions: newSuppressions }
+    } = config;
+
+    const filteredProblems: IProblem[] = [];
+
+    for (const problem of problems) {
+      const bulkSuppression: IBulkSuppression | undefined = getBulkSuppression({
+        fileRelativePath,
+        serializedSuppressions,
+        sourceCode: lastSourceCode,
+        problem
+      });
+
+      if (!bulkSuppression) {
+        filteredProblems.push(problem);
+        continue;
+      }
+
+      const { serializedSuppression, suppression } = bulkSuppression;
+
+      if (!newSerializedSuppressions.has(serializedSuppression)) {
+        newSerializedSuppressions.add(serializedSuppression);
+        newSuppressions.push(suppression);
+        suppressions.push(suppression);
+
+        if (!lastSuppressedMessages) {
+          lastSuppressedMessages = [];
+          internalSlots.lastSuppressedMessages = lastSuppressedMessages;
         }
+
+        lastSuppressedMessages.push(problem);
       }
     }
 
-    return problems;
+    return filteredProblems;
   };
 }

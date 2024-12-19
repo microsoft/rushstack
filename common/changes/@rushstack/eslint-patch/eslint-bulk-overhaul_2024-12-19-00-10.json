@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "Ensure that lint problems suppressed by eslint-bulk-suppressions are available in the `getSuppressedMessages()` function on the linter. Simplify patching of eslint by leveraging the `getLinterInternalSlots` unit test helper and walking the AST to get the node.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}
