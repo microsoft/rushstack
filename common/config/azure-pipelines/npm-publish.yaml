@@ -37,10 +37,10 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/build.yaml@self
 
-              - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
-                parameters:
-                  VersionPolicyName: noRush
-                  BranchName: $(SourceBranch)
+              # - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
+              #   parameters:
+              #     VersionPolicyName: noRush
+              #     BranchName: $(SourceBranch)
 
               - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
                 displayName: 'Prepublish workaround for rush-lib'
