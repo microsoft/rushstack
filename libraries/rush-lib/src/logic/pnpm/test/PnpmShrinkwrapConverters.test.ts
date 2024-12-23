@@ -38,4 +38,15 @@ describe(convertLockfileV9ToLockfileObject.name, () => {
       'pad-left': '^2.1.0'
     });
   });
+
+  it("no nullish values", () => {
+    const importers = new Map<string, ProjectSnapshot>(Object.entries(lockfile.importers || {}));
+
+    const currentPackage = importers.get('.');
+    const props = Object.keys(currentPackage || {});
+    expect(props).toContain('dependencies');
+    expect(props).toContain('specifiers');
+    expect(props).not.toContain('optionalDependencies');
+    expect(props).not.toContain('devDependencies');
+  });
 });

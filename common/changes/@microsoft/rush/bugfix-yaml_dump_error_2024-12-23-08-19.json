@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixed the issue where the lockfile object has an nullish value causing yaml.dump to report an error.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

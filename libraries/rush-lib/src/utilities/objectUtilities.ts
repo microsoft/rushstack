@@ -153,3 +153,18 @@ function isStrictComparable<T>(value: T): boolean {
     value === value && !(value !== null && value !== undefined && (type === 'object' || type === 'function'))
   );
 }
+
+/**
+ * Removes `undefined` and `null` properties from an object.
+ */
+export function removeNullishProps<T extends object>(obj: T): Partial<T> {
+  const result: Partial<T> = {};
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      if (obj[key] !== undefined && obj[key] !== null) {
+        result[key] = obj[key];
+      }
+    }
+  }
+  return result;
+}
