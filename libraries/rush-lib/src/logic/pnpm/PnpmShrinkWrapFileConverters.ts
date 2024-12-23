@@ -24,6 +24,7 @@ import type {
   ProjectSnapshot,
   ResolvedDependencies
 } from '@pnpm/lockfile.types';
+import { removeNullishProps } from '../../utilities/objectUtilities';
 
 type DepPath = string & { __brand: 'DepPath' };
 // eslint-disable-next-line @typescript-eslint/typedef
@@ -56,11 +57,13 @@ function revertProjectSnapshot(from: InlineSpecifiersProjectSnapshot): ProjectSn
     from.optionalDependencies == null ? from.optionalDependencies : moveSpecifiers(from.optionalDependencies);
 
   return {
-    ...from,
-    specifiers,
-    dependencies,
-    devDependencies,
-    optionalDependencies
+    ...removeNullishProps({
+      ...from,
+      dependencies,
+      devDependencies,
+      optionalDependencies
+    }),
+    specifiers
   };
 }
 
