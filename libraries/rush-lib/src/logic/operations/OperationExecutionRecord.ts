@@ -29,6 +29,12 @@ import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import { RushConstants } from '../RushConstants';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IEnvironment } from '../../utilities/Utilities';
+import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
+import {
+  getProjectLogFilePaths,
+  type ILogFilePaths,
+  initializeProjectLogFilesAsync
+} from './ProjectLogWritable';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -374,12 +380,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
             });
           }
         }
-      }
-      // Delegate global state reporting
-      await onResult(this);
-      if (this.status !== OperationStatus.RemoteExecuting) {
-        this._collatedWriter?.close();
-        this.stdioSummarizer.close();
       }
     }
   }
