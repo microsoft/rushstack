@@ -296,8 +296,8 @@ export class OperationExecutionManager {
     const status: OperationStatus = this._hasAnyFailures
       ? OperationStatus.Failure
       : this._hasAnyNonAllowedWarnings
-      ? OperationStatus.SuccessWithWarning
-      : OperationStatus.Success;
+        ? OperationStatus.SuccessWithWarning
+        : OperationStatus.Success;
 
     return {
       operationResults: this._executionRecords,
@@ -331,7 +331,7 @@ export class OperationExecutionManager {
   /**
    * Handles the result of the operation and propagates any relevant effects.
    */
-  private async _onOperationComplete(record: OperationExecutionRecord): Promise<void> {
+  private _onOperationComplete(record: OperationExecutionRecord): void {
     const { runner, name, status, silent } = record;
 
     switch (status) {
