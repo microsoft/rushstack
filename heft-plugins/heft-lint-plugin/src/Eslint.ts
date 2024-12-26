@@ -67,6 +67,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
     const {
       buildFolderPath,
+      disableLintConfigSearch,
       eslintPackage,
       linterConfigFilePath,
       tsProgram,
@@ -107,7 +108,9 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
       overrideConfigFile: linterConfigFilePath,
       // Override config takes precedence over overrideConfigFile
       overrideConfig,
-      fix: fixFn
+      fix: fixFn,
+      // If requested, disable the scan for .eslintrc files relative to linted files
+      useEslintrc: !disableLintConfigSearch
     });
     this._eslintTimings = eslintTimings;
   }
