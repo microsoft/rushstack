@@ -318,7 +318,10 @@ export function patchLinter(
         if (!newSerializedSuppressions.has(serializedSuppression)) {
           newSerializedSuppressions.add(serializedSuppression);
           newSuppressions.push(suppression);
-          suppressions.push(suppression);
+
+          if (!serializedSuppressions.has(serializedSuppression)) {
+            suppressions.push(suppression);
+          }
 
           if (!lastSuppressedMessages) {
             lastSuppressedMessages = [];
