@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "Ensure that lint problems suppressed by eslint-bulk-suppressions are available in the `getSuppressedMessages()` function on the linter. Defer evaluation of bulk suppressions until after inline suppressions.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}

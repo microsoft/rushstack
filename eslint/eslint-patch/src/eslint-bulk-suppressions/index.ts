@@ -3,7 +3,7 @@
 
 import { eslintFolder } from '../_patch-base';
 import { findAndConsoleLogPatchPathCli, getPathToLinterJS, ensurePathToGeneratedPatch } from './path-utils';
-import { patchClass, extendVerifyFunction } from './bulk-suppressions-patch';
+import { patchLinter } from './bulk-suppressions-patch';
 import { generatePatchedLinterJsFileIfDoesNotExist } from './generate-patched-file';
 import { ESLINT_BULK_DETECT_ENV_VAR_NAME, ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME } from './constants';
 
@@ -27,9 +27,9 @@ process.env[ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME] = require.resolve('./bulk-suppr
 
 const pathToGeneratedPatch: string = ensurePathToGeneratedPatch();
 generatePatchedLinterJsFileIfDoesNotExist(pathToLinterJS, pathToGeneratedPatch);
+
 const { Linter: LinterPatch } = require(pathToGeneratedPatch);
-LinterPatch.prototype.verify = extendVerifyFunction(LinterPatch.prototype.verify);
 
-const { Linter } = require(pathToLinterJS);
+const { Linter, getLinterInternalSlots } = require(pathToLinterJS);
 
-patchClass(Linter, LinterPatch);
+patchLinter(Linter, LinterPatch, getLinterInternalSlots);
