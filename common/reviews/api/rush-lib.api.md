@@ -931,6 +931,11 @@ export class Operation {
     addDependency(dependency: Operation): void;
     readonly associatedPhase: IPhase | undefined;
     readonly associatedProject: RushConfigurationProject | undefined;
+    // (undocumented)
+    calculateStateHash(options: {
+        inputsSnapshot: IInputsSnapshot;
+        buildCacheConfiguration: BuildCacheConfiguration;
+    }): string;
     readonly consumers: ReadonlySet<Operation>;
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
@@ -940,6 +945,8 @@ export class Operation {
     get name(): string | undefined;
     runner: IOperationRunner | undefined;
     settings: IOperationSettings | undefined;
+    // (undocumented)
+    get stateHash(): string;
     weight: number;
 }
 

@@ -13,33 +13,37 @@ import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import type { Operation } from '../operations/Operation';
 
-export interface IProjectBuildCacheOptions {
+export interface IOperationBuildCacheOptions {
   /**
    * The repo-wide configuration for the build cache.
    */
   buildCacheConfiguration: BuildCacheConfiguration;
   /**
-   * The project to be cached.
-   */
-  project: RushConfigurationProject;
-  /**
    * Value from rush-project.json
    */
   projectOutputFolderNames: ReadonlyArray<string>;
+  /**
+   * The terminal to use for logging.
+   */
+  terminal: ITerminal;
+}
+
+export type IProjectBuildCacheOptions = IOperationBuildCacheOptions & {
+  /**
+   * The project to be cached.
+   */
+  project: RushConfigurationProject;
   /**
    * The hash of all relevant inputs and configuration that uniquely identifies this execution.
    */
   operationStateHash: string;
   /**
-   * The terminal to use for logging.
-   */
-  terminal: ITerminal;
-  /**
    * The name of the phase that is being cached.
    */
   phaseName: string;
-}
+};
 
 interface IPathsToCache {
   filteredOutputFolderNames: string[];
@@ -92,6 +96,23 @@ export class ProjectBuildCache {
   public static getProjectBuildCache(options: IProjectBuildCacheOptions): ProjectBuildCache {
     const cacheId: string | undefined = ProjectBuildCache._getCacheId(options);
     return new ProjectBuildCache(cacheId, options);
+  }
+
+  public static forOperation(operation: Operation, options: IOperationBuildCacheOptions): ProjectBuildCache {
+    if (!operation.associatedProject) {
+      throw new InternalError('Operation must have an associated project');
+    }
+    if (!operation.associatedPhase) {
+      throw new InternalError('Operation must have an associated phase');
+    }
+    const buildCacheOptions: IProjectBuildCacheOptions = {
+      ...options,
+      project: operation.associatedProject,
+      phaseName: operation.associatedPhase.name,
+      operationStateHash: operation.stateHash
+    };
+    const cacheId: string | undefined = ProjectBuildCache._getCacheId(buildCacheOptions);
+    return new ProjectBuildCache(cacheId, buildCacheOptions);
   }
 
   public async tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean> {
