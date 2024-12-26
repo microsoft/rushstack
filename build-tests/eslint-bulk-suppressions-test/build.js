@@ -6,7 +6,8 @@ const { FileSystem, Executable, Text, Import } = require('@rushstack/node-core-l
 const path = require('path');
 const {
   ESLINT_PACKAGE_NAME_ENV_VAR_NAME,
-  ESLINT_BULK_ESLINTRC_FOLDER_PATH_ENV_VAR_NAME
+  ESLINT_BULK_ESLINTRC_FOLDER_PATH_ENV_VAR_NAME,
+  ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME
 } = require('@rushstack/eslint-patch/lib/eslint-bulk-suppressions/constants');
 
 const eslintBulkStartPath = Import.resolveModule({
@@ -74,7 +75,8 @@ for (const runFolderPath of RUN_FOLDER_PATHS) {
         environment: {
           ...process.env,
           PATH: shellPathWithEslint,
-          [ESLINT_PACKAGE_NAME_ENV_VAR_NAME]: eslintPackageName
+          [ESLINT_PACKAGE_NAME_ENV_VAR_NAME]: eslintPackageName,
+          [ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME]: 'true'
         }
       }
     );
