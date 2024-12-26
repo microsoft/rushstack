@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.147.1",
+      "tag": "@microsoft/rush_v5.147.1",
+      "date": "Thu, 26 Dec 2024 23:35:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue with the `enableSubpathScan` experiment where the set of returned hashes would result in incorrect build cache identifiers when using `--only`."
+          },
+          {
+            "comment": "When a no-op operation is not in scope, reflect its result as no-op instead of skipped, so that downstream operations can still write to the build cache."
+          },
+          {
+            "comment": "Allow injected dependencies without enabling subspaces."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.147.0",
       "tag": "@microsoft/rush_v5.147.0",
       "date": "Thu, 12 Dec 2024 01:37:25 GMT",
