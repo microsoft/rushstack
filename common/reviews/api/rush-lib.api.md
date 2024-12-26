@@ -586,11 +586,11 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 export interface IOperationExecutionResult {
     readonly cobuildRunnerId: string | undefined;
     readonly error: Error | undefined;
+    readonly executedOnThisAgent: boolean;
     getStateHash(): string;
     getStateHashComponents(): ReadonlyArray<string>;
     readonly logFilePaths: ILogFilePaths | undefined;
     readonly metadataFolderPath: string | undefined;
-    readonly executedOnThisAgent: boolean;
     readonly nonCachedDurationMs: number | undefined;
     readonly operation: Operation;
     readonly silent: boolean;
