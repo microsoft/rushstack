@@ -58,6 +58,7 @@ import { WeightedOperationPlugin } from '../../logic/operations/WeightedOperatio
 import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 import { Selection } from '../../logic/Selection';
 import { NodeDiagnosticDirPlugin } from '../../logic/operations/NodeDiagnosticDirPlugin';
+import type { IOperationStateJson } from '../../logic/operations/OperationStateFile';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -530,7 +531,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         debugMode: this.parser.isDebug,
         parallelism,
         changedProjectsOnly,
-        cobuildConfiguration,
         beforeExecuteOperationAsync: async (record: OperationExecutionRecord) => {
           return await this.hooks.beforeExecuteOperation.promise(record);
         },
@@ -769,8 +769,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       // On the initial invocation, this promise will return immediately with the full set of projects
-      const { changedProjects, inputsSnapshot: state } =
-        await projectWatcher.waitForChangeAsync(onWaitingForChanges);
+      const { changedProjects, inputsSnapshot: state } = await projectWatcher.waitForChangeAsync(
+        onWaitingForChanges
+      );
 
       if (stopwatch.state === StopwatchState.Stopped) {
         // Clear and reset the stopwatch so that we only report time from a single execution at a time
@@ -933,14 +934,20 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
             continue;
           }
 
+          const { _operationMetadataManager: operationMetadataManager } =
+            operationResult as OperationExecutionRecord;
+          const metadataState: IOperationStateJson | undefined = operationMetadataManager?.stateFile.state;
+
           const { startTime, endTime } = operationResult.stopwatch;
+          const wasExecutedOnThisMachine: boolean = cobuildConfiguration?.cobuildFeatureEnabled
+            ? metadataState?.cobuildContextId === cobuildConfiguration?.cobuildContextId &&
+              metadataState?.cobuildRunnerId === cobuildConfiguration?.cobuildRunnerId
+            : true;
           jsonOperationResults[operation.name!] = {
             startTimestampMs: startTime,
             endTimestampMs: endTime,
             nonCachedDurationMs: operationResult.nonCachedDurationMs,
-            wasExecutedOnThisMachine:
-              !operationResult.cobuildRunnerId ||
-              operationResult.cobuildRunnerId === cobuildConfiguration?.cobuildRunnerId,
+            wasExecutedOnThisMachine,
             result: operationResult.status,
             dependencies: Array.from(getNonSilentDependencies(operation)).sort()
           };
