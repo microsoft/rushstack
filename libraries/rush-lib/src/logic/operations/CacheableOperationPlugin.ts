@@ -106,7 +106,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           : undefined;
 
         for (const [operation, record] of recordByOperation) {
-          const stateHash: string = operation.calculateStateHash({
+          const stateHash: string = (record as OperationExecutionRecord).calculateStateHash({
             inputsSnapshot,
             buildCacheConfiguration
           });
@@ -261,7 +261,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             buildCacheContext,
             buildCacheConfiguration,
             terminal: buildCacheTerminal,
-            operation
+            record
           });
 
           // Try to acquire the cobuild lock
@@ -573,32 +573,33 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     buildCacheConfiguration,
     buildCacheContext,
     terminal,
-    operation
+    record
   }: {
     buildCacheContext: IOperationBuildCacheContext;
     buildCacheConfiguration: BuildCacheConfiguration | undefined;
     terminal: ITerminal;
-    operation: Operation;
+    record: OperationExecutionRecord;
   }): ProjectBuildCache | undefined {
     if (!buildCacheContext.operationBuildCache) {
       const { cacheDisabledReason } = buildCacheContext;
-      if (cacheDisabledReason && !operation.settings?.allowCobuildWithoutCache) {
+      if (cacheDisabledReason && !record.operation.settings?.allowCobuildWithoutCache) {
         terminal.writeVerboseLine(cacheDisabledReason);
         return;
       }
 
-      const { outputFolderNames } = buildCacheContext;
-      if (!outputFolderNames || !buildCacheConfiguration) {
+      if (!buildCacheConfiguration) {
         // Unreachable, since this will have set `cacheDisabledReason`.
         return;
       }
 
       // eslint-disable-next-line require-atomic-updates -- This is guaranteed to not be concurrent
-      buildCacheContext.operationBuildCache = ProjectBuildCache.forOperation(operation, {
-        projectOutputFolderNames: outputFolderNames,
-        buildCacheConfiguration,
-        terminal
-      });
+      buildCacheContext.operationBuildCache = ProjectBuildCache.forOperation(
+        record as OperationExecutionRecord,
+        {
+          buildCacheConfiguration,
+          terminal
+        }
+      );
     }
 
     return buildCacheContext.operationBuildCache;

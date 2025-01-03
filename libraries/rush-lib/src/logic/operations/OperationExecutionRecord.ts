@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+import * as crypto from 'crypto';
 
 import {
   type ITerminal,
@@ -29,6 +30,9 @@ import {
   initializeProjectLogFilesAsync
 } from './ProjectLogWritable';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import { RushConstants } from '../RushConstants';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -114,6 +118,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   private _collatedWriter: CollatedWriter | undefined = undefined;
   private _status: OperationStatus;
+  private _stateHash: string | undefined;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner, associatedPhase, associatedProject } = operation;
@@ -204,6 +209,15 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   public get silent(): boolean {
     return !this.operation.enabled || this.runner.silent;
+  }
+
+  public get stateHash(): string {
+    if (!this._stateHash) {
+      throw new Error(
+        'Operation state hash is not calculated yet, you must call `calculateStateHash` first.'
+      );
+    }
+    return this._stateHash;
   }
 
   /**
@@ -334,5 +348,61 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         this.stopwatch.stop();
       }
     }
+  }
+
+  public calculateStateHash(options: {
+    inputsSnapshot: IInputsSnapshot;
+    buildCacheConfiguration: BuildCacheConfiguration;
+  }): string {
+    if (this._stateHash) {
+      return this._stateHash;
+    }
+    const { inputsSnapshot, buildCacheConfiguration } = options;
+    const { cacheHashSalt } = buildCacheConfiguration;
+
+    // Examples of data in the config hash:
+    // - CLI parameters (ShellOperationRunner)
+    const configHash: string = this.runner.getConfigHash();
+
+    const { associatedProject, associatedPhase } = this;
+    // Examples of data in the local state hash:
+    // - Environment variables specified in `dependsOnEnvVars`
+    // - Git hashes of tracked files in the associated project
+    // - Git hash of the shrinkwrap file for the project
+    // - Git hashes of any files specified in `dependsOnAdditionalFiles` (must not be associated with a project)
+    const localStateHash: string | undefined =
+      associatedProject && inputsSnapshot.getOperationOwnStateHash(associatedProject, associatedPhase?.name);
+
+    // The final state hashes of operation dependencies are factored into the hash to ensure that any
+    // state changes in dependencies will invalidate the cache.
+    const dependencyHashes: string[] = Array.from(this.dependencies, (record) => {
+      return `${RushConstants.hashDelimiter}${record.name}=${record.calculateStateHash(options)}`;
+    }).sort();
+
+    const hasher: crypto.Hash = crypto.createHash('sha1');
+    // This property is used to force cache bust when version changes, e.g. when fixing bugs in the content
+    // of the build cache.
+    hasher.update(`${RushConstants.buildCacheVersion}`);
+
+    if (cacheHashSalt !== undefined) {
+      // This allows repository owners to force a cache bust by changing the salt.
+      // A common use case is to invalidate the cache when adding/removing/updating rush plugins that alter the build output.
+      hasher.update(cacheHashSalt);
+    }
+
+    for (const dependencyHash of dependencyHashes) {
+      hasher.update(dependencyHash);
+    }
+
+    if (localStateHash) {
+      hasher.update(`${RushConstants.hashDelimiter}${localStateHash}`);
+    }
+
+    hasher.update(`${RushConstants.hashDelimiter}${configHash}`);
+
+    const hash: string = hasher.digest('hex');
+    this._stateHash = hash;
+
+    return this.stateHash;
   }
 }

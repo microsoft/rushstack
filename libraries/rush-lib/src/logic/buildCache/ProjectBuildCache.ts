@@ -13,7 +13,7 @@ import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import type { Operation } from '../operations/Operation';
+import type { OperationExecutionRecord } from '../operations/OperationExecutionRecord';
 
 export interface IOperationBuildCacheOptions {
   /**
@@ -21,16 +21,16 @@ export interface IOperationBuildCacheOptions {
    */
   buildCacheConfiguration: BuildCacheConfiguration;
   /**
-   * Value from rush-project.json
-   */
-  projectOutputFolderNames: ReadonlyArray<string>;
-  /**
    * The terminal to use for logging.
    */
   terminal: ITerminal;
 }
 
 export type IProjectBuildCacheOptions = IOperationBuildCacheOptions & {
+  /**
+   * Value from rush-project.json
+   */
+  projectOutputFolderNames: ReadonlyArray<string>;
   /**
    * The project to be cached.
    */
@@ -98,17 +98,25 @@ export class ProjectBuildCache {
     return new ProjectBuildCache(cacheId, options);
   }
 
-  public static forOperation(operation: Operation, options: IOperationBuildCacheOptions): ProjectBuildCache {
+  public static forOperation(
+    operation: OperationExecutionRecord,
+    options: IOperationBuildCacheOptions
+  ): ProjectBuildCache {
     if (!operation.associatedProject) {
       throw new InternalError('Operation must have an associated project');
     }
     if (!operation.associatedPhase) {
       throw new InternalError('Operation must have an associated phase');
     }
+    const outputFolders: string[] = [...(operation.operation.settings?.outputFolderNames ?? [])];
+    if (operation.metadataFolderPath) {
+      outputFolders.push(operation.metadataFolderPath);
+    }
     const buildCacheOptions: IProjectBuildCacheOptions = {
       ...options,
       project: operation.associatedProject,
       phaseName: operation.associatedPhase.name,
+      projectOutputFolderNames: outputFolders,
       operationStateHash: operation.stateHash
     };
     const cacheId: string | undefined = ProjectBuildCache._getCacheId(buildCacheOptions);
