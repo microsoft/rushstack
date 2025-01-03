@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix the issue of accessing shouldEnsureConsistentVersions method incorrectly",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
