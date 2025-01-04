@@ -31,7 +31,6 @@ import {
 } from './ProjectLogWritable';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
-import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { RushConstants } from '../RushConstants';
 
 export interface IOperationExecutionRecordContext {
