@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as crypto from 'crypto';
+import * as path from 'path';
 import * as semver from 'semver';
 import type * as TTypescript from 'typescript';
 import type * as TEslint from 'eslint';
@@ -66,6 +67,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
     const {
       buildFolderPath,
+      disableLintConfigSearch,
       eslintPackage,
       linterConfigFilePath,
       tsProgram,
@@ -100,12 +102,15 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
       };
     }
 
+    process.env.ESLINT_BULK_ESLINTRC_FOLDER_PATH = path.dirname(linterConfigFilePath);
     this._linter = new eslintPackage.ESLint({
       cwd: buildFolderPath,
       overrideConfigFile: linterConfigFilePath,
       // Override config takes precedence over overrideConfigFile
       overrideConfig,
-      fix: fixFn
+      fix: fixFn,
+      // If requested, disable the scan for .eslintrc files relative to linted files
+      useEslintrc: !disableLintConfigSearch
     });
     this._eslintTimings = eslintTimings;
   }

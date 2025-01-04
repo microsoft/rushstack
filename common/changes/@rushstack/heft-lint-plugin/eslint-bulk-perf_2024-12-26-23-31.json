@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "comment": "Add a config option \"disableLintConfigSearch\" to turn off the linter's built-in scanning for config files relative to the linted files, and only use the config defined in the root of the current package.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-lint-plugin"
+}
