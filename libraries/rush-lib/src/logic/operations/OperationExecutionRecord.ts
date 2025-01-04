@@ -350,10 +350,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     }
   }
 
-  public calculateStateHash(options: {
-    inputsSnapshot: IInputsSnapshot;
-    buildCacheConfiguration: BuildCacheConfiguration;
-  }): string {
+  public calculateStateHash(options: { inputsSnapshot: IInputsSnapshot }): string {
     if (!this._stateHash) {
       const { inputsSnapshot } = options;
 

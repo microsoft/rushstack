@@ -107,8 +107,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
         for (const [operation, record] of recordByOperation) {
           const stateHash: string = (record as OperationExecutionRecord).calculateStateHash({
-            inputsSnapshot,
-            buildCacheConfiguration
+            inputsSnapshot
           });
           const { associatedProject, associatedPhase, runner, settings: operationSettings } = operation;
           if (!associatedProject || !associatedPhase || !runner) {
