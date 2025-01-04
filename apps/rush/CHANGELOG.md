@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 12 Dec 2024 01:37:25 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Dec 2024 23:35:27 GMT and should not be manually modified.
+
+## 5.147.1
+Thu, 26 Dec 2024 23:35:27 GMT
+
+### Updates
+
+- Fix an issue with the `enableSubpathScan` experiment where the set of returned hashes would result in incorrect build cache identifiers when using `--only`.
+- When a no-op operation is not in scope, reflect its result as no-op instead of skipped, so that downstream operations can still write to the build cache.
+- Allow injected dependencies without enabling subspaces.
 
 ## 5.147.0
 Thu, 12 Dec 2024 01:37:25 GMT
