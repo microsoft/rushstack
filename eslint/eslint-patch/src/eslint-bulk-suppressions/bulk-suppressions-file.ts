@@ -55,7 +55,7 @@ export function getSuppressionsConfigForEslintrcFolderPath(
     const suppressionsPath: string = `${eslintrcFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
     let rawJsonFile: string | undefined;
     try {
-      // Decoding during read hits an optimized fast path in NodeJS.
+      // Decoding during read hits an optimized fast path in NodeJS >= 22.
       rawJsonFile = fs.readFileSync(suppressionsPath, 'utf8');
     } catch (e) {
       throwIfAnythingOtherThanNotExistError(e);

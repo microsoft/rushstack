@@ -142,7 +142,9 @@ function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath:
   ) {
     const cachedEslintrcFolderPath: string | undefined = eslintrcPathByFileOrFolderPath.get(currentFolder);
     if (cachedEslintrcFolderPath) {
-      return cachedEslintrcFolderPath;
+      // Break instead of returning to ensure that the cache entries for intervening folders get updated.
+      eslintrcFolderPath = currentFolder;
+      break;
     }
 
     pathsToCache.push(currentFolder);
