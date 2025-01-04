@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Simplifies the process of going from operation to build cache ID.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "aramissennyeydd@users.noreply.github.com"
+}
