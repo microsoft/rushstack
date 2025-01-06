@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import fs from 'fs';
-import { VSCODE_PID_ENV_VAR_NAME } from './constants';
+import { VSCODE_PID_ENV_VAR_NAME, SUPPRESSIONS_JSON_FILENAME } from './constants';
 
 export interface ISuppression {
   file: string;
@@ -23,7 +23,6 @@ export interface IBulkSuppressionsJson {
 
 const IS_RUNNING_IN_VSCODE: boolean = process.env[VSCODE_PID_ENV_VAR_NAME] !== undefined;
 const TEN_SECONDS_MS: number = 10 * 1000;
-const SUPPRESSIONS_JSON_FILENAME: string = '.eslint-bulk-suppressions.json';
 
 function throwIfAnythingOtherThanNotExistError(e: NodeJS.ErrnoException): void | never {
   if (e?.code !== 'ENOENT') {
@@ -56,7 +55,8 @@ export function getSuppressionsConfigForEslintrcFolderPath(
     const suppressionsPath: string = `${eslintrcFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
     let rawJsonFile: string | undefined;
     try {
-      rawJsonFile = fs.readFileSync(suppressionsPath).toString();
+      // Decoding during read hits an optimized fast path in NodeJS >= 22.
+      rawJsonFile = fs.readFileSync(suppressionsPath, 'utf8');
     } catch (e) {
       throwIfAnythingOtherThanNotExistError(e);
     }

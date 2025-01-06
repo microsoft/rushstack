@@ -5,7 +5,9 @@
 const { FileSystem, Executable, Text, Import } = require('@rushstack/node-core-library');
 const path = require('path');
 const {
-  ESLINT_PACKAGE_NAME_ENV_VAR_NAME
+  ESLINT_PACKAGE_NAME_ENV_VAR_NAME,
+  ESLINT_BULK_ESLINTRC_FOLDER_PATH_ENV_VAR_NAME,
+  ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME
 } = require('@rushstack/eslint-patch/lib/eslint-bulk-suppressions/constants');
 
 const eslintBulkStartPath = Import.resolveModule({
@@ -65,7 +67,7 @@ for (const runFolderPath of RUN_FOLDER_PATHS) {
     );
     const shellPathWithEslint = `${dependencyBinFolder}${path.delimiter}${process.env['PATH']}`;
 
-    const executableResult = Executable.spawnSync(
+    const suppressResult = Executable.spawnSync(
       process.argv0,
       [eslintBulkStartPath, 'suppress', '--all', 'src'],
       {
@@ -73,17 +75,18 @@ for (const runFolderPath of RUN_FOLDER_PATHS) {
         environment: {
           ...process.env,
           PATH: shellPathWithEslint,
-          [ESLINT_PACKAGE_NAME_ENV_VAR_NAME]: eslintPackageName
+          [ESLINT_PACKAGE_NAME_ENV_VAR_NAME]: eslintPackageName,
+          [ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME]: 'true'
         }
       }
     );
 
-    if (executableResult.status !== 0) {
+    if (suppressResult.status !== 0) {
       console.error('The eslint-bulk-suppressions command failed.');
       console.error('STDOUT:');
-      console.error(executableResult.stdout.toString());
+      console.error(suppressResult.stdout.toString());
       console.error('STDERR:');
-      console.error(executableResult.stderr.toString());
+      console.error(suppressResult.stderr.toString());
       process.exit(1);
     }
 
@@ -93,6 +96,29 @@ for (const runFolderPath of RUN_FOLDER_PATHS) {
     } else {
       updateFilePaths.add(referenceSuppressionsJsonPath);
       FileSystem.writeFile(referenceSuppressionsJsonPath, newSuppressions);
+    }
+    const eslintLoggingMessage = `-- Running eslint@${eslintVersion} in ${runFolderPath} --`;
+    console.log(eslintLoggingMessage);
+
+    const eslintBinPath = path.resolve(__dirname, `node_modules/${eslintPackageName}/bin/eslint.js`);
+
+    const executableResult = Executable.spawnSync(process.argv0, [eslintBinPath, 'src'], {
+      currentWorkingDirectory: folderPath,
+      environment: {
+        ...process.env,
+        PATH: shellPathWithEslint,
+        [ESLINT_PACKAGE_NAME_ENV_VAR_NAME]: eslintPackageName,
+        [ESLINT_BULK_ESLINTRC_FOLDER_PATH_ENV_VAR_NAME]: folderPath
+      }
+    });
+
+    if (executableResult.status !== 0) {
+      console.error('The eslint command failed.');
+      console.error('STDOUT:');
+      console.error(executableResult.stdout.toString());
+      console.error('STDERR:');
+      console.error(executableResult.stderr.toString());
+      process.exit(1);
     }
 
     FileSystem.deleteFile(suppressionsJsonPath);

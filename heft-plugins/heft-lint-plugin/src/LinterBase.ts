@@ -17,6 +17,7 @@ export interface ILinterBaseOptions {
    * The path where the linter state will be written to.
    */
   buildMetadataFolderPath: string;
+  disableLintConfigSearch?: boolean;
   linterToolPath: string;
   linterConfigFilePath: string;
   tsProgram: IExtendedProgram;

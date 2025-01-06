@@ -50,63 +50,27 @@ export function generatePatchedLinterJsFileIfDoesNotExist(
     throw new Error('Unexpected end of input while looking for ' + JSON.stringify(marker));
   }
 
-  function scanUntilNewline(): string {
-    let output: string = '';
-
-    while (inputIndex < inputFile.length) {
-      const char: string = inputFile[inputIndex++];
-      output += char;
-      if (char === '\n') {
-        return output;
+  function scanUntilToken(token: string, required: boolean): string {
+    const tokenIndex: number = inputFile.indexOf(token, inputIndex);
+    if (tokenIndex < 0) {
+      if (required) {
+        throw new Error('Unexpected end of input while looking for new line');
+      } else {
+        return scanUntilEnd();
       }
     }
 
-    throw new Error('Unexpected end of input while looking for new line');
+    inputIndex = tokenIndex + token.length;
+    return inputFile.slice(inputIndex, tokenIndex);
+  }
+
+  function scanUntilNewline(): string {
+    return scanUntilToken('\n', true);
   }
 
   function scanUntilEnd(): string {
-    const output: string = inputFile.substring(inputIndex);
+    const output: string = inputFile.slice(inputIndex);
     inputIndex = inputFile.length;
-    return output;
-  }
-
-  /**
-   * Returns index of next public method
-   * @param fromIndex - index of inputFile to search if public method still exists
-   * @returns -1 if public method does not exist or index of next public method
-   */
-  function getIndexOfNextPublicMethod(fromIndex: number): number {
-    const rest: string = inputFile.substring(fromIndex);
-
-    const endOfClassIndex: number = rest.indexOf('\n}');
-
-    const markerForStartOfClassMethod: string = '\n     */\n    ';
-
-    const startOfClassMethodIndex: number = rest.indexOf(markerForStartOfClassMethod);
-
-    if (startOfClassMethodIndex === -1 || startOfClassMethodIndex > endOfClassIndex) {
-      return -1;
-    }
-
-    const afterMarkerIndex: number =
-      rest.indexOf(markerForStartOfClassMethod) + markerForStartOfClassMethod.length;
-
-    const isPublicMethod: boolean =
-      rest[afterMarkerIndex] !== '_' &&
-      rest[afterMarkerIndex] !== '#' &&
-      !rest.substring(afterMarkerIndex, rest.indexOf('\n', afterMarkerIndex)).includes('static') &&
-      !rest.substring(afterMarkerIndex, rest.indexOf('\n', afterMarkerIndex)).includes('constructor');
-
-    if (isPublicMethod) {
-      return fromIndex + afterMarkerIndex;
-    }
-
-    return getIndexOfNextPublicMethod(fromIndex + afterMarkerIndex);
-  }
-
-  function scanUntilIndex(indexToScanTo: number): string {
-    const output: string = inputFile.substring(inputIndex, indexToScanTo);
-    inputIndex = indexToScanTo;
     return output;
   }
 
@@ -193,7 +157,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   //    }
   //    const problem = reportTranslator(...args);
   //    // --- BEGIN MONKEY PATCH ---
-  //    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
+  //    bulkSuppressionsPatch.setAstNodeForProblem(problem, currentNode);
   //    // --- END MONKEY PATCH ---
   //
   //    if (problem.fix && !(rule.meta && rule.meta.fixable)) {
@@ -203,52 +167,27 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   outputFile += scanUntilMarker('const problem = reportTranslator(...args);');
   outputFile += `
                         // --- BEGIN MONKEY PATCH ---
-                        if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId, problem })) return;
+                        bulkSuppressionsPatch.setAstNodeForProblem(problem, currentNode);
                         // --- END MONKEY PATCH ---
 `;
 
   outputFile += scanUntilMarker('nodeQueue.forEach(traversalInfo => {');
   outputFile += scanUntilMarker('});');
   outputFile += scanUntilNewline();
-  outputFile += scanUntilMarker('class Linter {');
-  outputFile += scanUntilNewline();
-  outputFile += `
-    // --- BEGIN MONKEY PATCH ---
-    /**
-     * We intercept ESLint execution at the .eslintrc.js file, but unfortunately the Linter class is
-     * initialized before the .eslintrc.js file is executed. This means the internalSlotsMap that all
-     * the patched methods refer to is not initialized. This method checks if the internalSlotsMap is
-     * initialized, and if not, initializes it.
-     */
-    _conditionallyReinitialize({ cwd, configType } = {}) {
-        if (internalSlotsMap.get(this) === undefined) {
-            internalSlotsMap.set(this, {
-              cwd: normalizeCwd(cwd),
-              lastConfigArray: null,
-              lastSourceCode: null,
-              lastSuppressedMessages: [],
-              configType, // TODO: Remove after flat config conversion
-              parserMap: new Map([['espree', espree]]),
-              ruleMap: new Rules()
-            });
-
-            this.version = pkg.version;
-        }
+  outputFile += scanUntilMarker('const internalSlotsMap');
+  outputFile += ` = /* --- BEGIN MONKEY PATCH --- */{
+    get(key) {
+      return bulkSuppressionsPatch.getLinterInternalSlots(key);
+    },
+    set(key) {
+      // Do nothing; constructor is unused
     }
-    // --- END MONKEY PATCH ---
-`;
-
-  let indexOfNextPublicMethod: number = getIndexOfNextPublicMethod(inputIndex);
-  while (indexOfNextPublicMethod !== -1) {
-    outputFile += scanUntilIndex(indexOfNextPublicMethod);
-    outputFile += scanUntilNewline();
-    outputFile += `        // --- BEGIN MONKEY PATCH ---
-        this._conditionallyReinitialize();
-        // --- END MONKEY PATCH ---
-`;
-    indexOfNextPublicMethod = getIndexOfNextPublicMethod(inputIndex);
+  } /* --- END MONKEY PATCH --- */;`;
+  const newlineIndex: number = inputFile.indexOf('\n', inputIndex);
+  if (newlineIndex < 0) {
+    throw new Error('Unexpected end of input while looking for new line');
   }
-
+  inputIndex = newlineIndex;
   outputFile += scanUntilEnd();
 
   fs.writeFileSync(outputFilePath, outputFile);

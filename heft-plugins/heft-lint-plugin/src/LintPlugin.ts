@@ -30,6 +30,7 @@ const ESLINTRC_CJS_FILENAME: string = '.eslintrc.cjs';
 
 interface ILintPluginOptions {
   alwaysFix?: boolean;
+  disableLintConfigSearch?: boolean;
   sarifLogPath?: string;
 }
 
@@ -40,6 +41,7 @@ interface ILintOptions {
   fix?: boolean;
   sarifLogPath?: string;
   changedFiles?: ReadonlySet<IExtendedSourceFile>;
+  disableLintConfigSearch?: boolean;
 }
 
 export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
@@ -74,6 +76,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       const relativeSarifLogPath: string | undefined = pluginOptions?.sarifLogPath;
       const sarifLogPath: string | undefined =
         relativeSarifLogPath && path.resolve(heftConfiguration.buildFolderPath, relativeSarifLogPath);
+      const disableLintConfigSearch: boolean = pluginOptions?.disableLintConfigSearch || false;
 
       // Use the changed files hook to kick off linting asynchronously
       taskSession.requestAccessToPluginByName(
@@ -90,7 +93,8 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
                 fix,
                 sarifLogPath,
                 tsProgram: changedFilesHookOptions.program as IExtendedProgram,
-                changedFiles: changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
+                changedFiles: changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>,
+                disableLintConfigSearch
               });
               lintingPromise.catch(() => {
                 // Suppress unhandled promise rejection error
@@ -153,7 +157,15 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
   }
 
   private async _lintAsync(options: ILintOptions): Promise<void> {
-    const { taskSession, heftConfiguration, tsProgram, changedFiles, fix, sarifLogPath } = options;
+    const {
+      taskSession,
+      heftConfiguration,
+      tsProgram,
+      changedFiles,
+      fix,
+      sarifLogPath,
+      disableLintConfigSearch
+    } = options;
 
     // Ensure that we have initialized. This promise is cached, so calling init
     // multiple times will only init once.
@@ -169,7 +181,8 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         linterToolPath: this._eslintToolPath,
         linterConfigFilePath: this._eslintConfigFilePath,
         buildFolderPath: heftConfiguration.buildFolderPath,
-        buildMetadataFolderPath: taskSession.tempFolderPath
+        buildMetadataFolderPath: taskSession.tempFolderPath,
+        disableLintConfigSearch
       });
       linters.push(eslintLinter);
     }

@@ -13,6 +13,12 @@
       "type": "boolean"
     },
 
+    "disableLintConfigSearch": {
+      "title": "Disable ESLint Config Search",
+      "description": "If set to true and using ESLint, ESLint will not scan for configuration files in parent directories of the linted files.",
+      "type": "boolean"
+    },
+
     "sarifLogPath": {
       "title": "SARIF Log Path",
       "description": "If specified and using ESLint, a log describing the lint configuration and all messages (suppressed or not) will be emitted in the Static Analysis Results Interchange Format (https://sarifweb.azurewebsites.net/) at the provided path, relative to the project root.",
