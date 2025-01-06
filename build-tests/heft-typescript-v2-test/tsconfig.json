@@ -18,7 +18,10 @@
 
     "module": "commonjs",
     "target": "es2017",
-    "lib": ["es2017"]
+    "lib": ["es2017"],
+
+    // TODO: REVERT THIS AFTER WE UPGRADE heft-typescript-v2-test TO A NEWER VERSION
+    "skipLibCheck": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "lib"]
