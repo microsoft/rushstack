@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.147.2",
+      "tag": "@microsoft/rush_v5.147.2",
+      "date": "Mon, 06 Jan 2025 21:48:43 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue with evaluation of `shouldEnsureConsistentVersions` when the value is not constant across subspaces or variants."
+          },
+          {
+            "comment": "Fix an issue where the lockfile object has a nullish value causing yaml.dump to report an error."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.147.1",
       "tag": "@microsoft/rush_v5.147.1",
       "date": "Thu, 26 Dec 2024 23:35:27 GMT",
