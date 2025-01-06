@@ -97,7 +97,7 @@
       "~4.9.5",
 
       // API Extractor bundles a specific TypeScript version because it calls internal APIs
-      "5.4.2"
+      "5.7.2"
     ],
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
