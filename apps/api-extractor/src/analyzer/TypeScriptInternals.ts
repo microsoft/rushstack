@@ -101,12 +101,12 @@ export class TypeScriptInternals {
    * Gets the mode required for module resolution required with the addition of Node16/nodenext
    */
   public static getModeForUsageLocation(
-    file: { impliedNodeFormat?: ts.SourceFile['impliedNodeFormat'] },
+    file: ts.SourceFile,
     usage: ts.StringLiteralLike,
     compilerOptions: ts.CompilerOptions
   ): ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v4.7.2/src/compiler/program.ts#L568
+    // https://github.com/microsoft/TypeScript/blob/v5.7.2/src/compiler/program.ts#L940
 
     return ts.getModeForUsageLocation?.(file, usage, compilerOptions);
   }
