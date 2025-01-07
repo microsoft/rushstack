@@ -99,4 +99,11 @@
   //
   //   // "includeEmailInChangeFile": true
   // }
+  {
+    "policyName": "rush",
+    "definitionName": "lockStepVersion",
+    "version": "5.147.2",
+    "nextBump": "patch",
+    "mainProject": "@microsoft/rush"
+  }
 ]
