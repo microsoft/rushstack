@@ -38,7 +38,7 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
         ' Jest documentation here: https://jestjs.io/docs/en/es6-class-mocks',
       recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
-    } as TSESLint.RuleMetaDataDocs<Options>
+    } as TSESLint.RuleMetaDataDocs
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {

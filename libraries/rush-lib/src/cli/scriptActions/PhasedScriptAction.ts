@@ -11,6 +11,7 @@ import type {
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
+import type { Subspace } from '../../api/Subspace';
 import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
 import {
   PhasedCommandHooks,
@@ -37,12 +38,16 @@ import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperatio
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
-import type { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
+import type {
+  IExecutionResult,
+  IOperationExecutionResult
+} from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';
 import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
+import type { IInputsSnapshot, GetInputsSnapshotAsyncFn } from '../../logic/incremental/InputsSnapshot';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
 import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
@@ -50,6 +55,8 @@ import { ShardedPhasedOperationPlugin } from '../../logic/operations/ShardedPhas
 import type { ProjectWatcher } from '../../logic/ProjectWatcher';
 import { FlagFile } from '../../api/FlagFile';
 import { WeightedOperationPlugin } from '../../logic/operations/WeightedOperationPlugin';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
+import { Selection } from '../../logic/Selection';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -78,7 +85,8 @@ interface IInitialRunPhasesOptions {
 }
 
 interface IRunPhasesOptions extends IInitialRunPhasesOptions {
-  initialState: ProjectChangeAnalyzer;
+  getInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined;
+  initialSnapshot: IInputsSnapshot | undefined;
   executionManagerOptions: IOperationExecutionManagerOptions;
 }
 
@@ -143,6 +151,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _timelineParameter: CommandLineFlagParameter | undefined;
   private readonly _cobuildPlanParameter: CommandLineFlagParameter | undefined;
   private readonly _installParameter: CommandLineFlagParameter | undefined;
+  private readonly _variantParameter: CommandLineStringParameter | undefined;
   private readonly _noIPCParameter: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
@@ -259,6 +268,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       });
     }
 
+    if (this._alwaysInstall !== undefined) {
+      this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
+    }
+
     if (
       this._watchPhases.size > 0 &&
       this.rushConfiguration.experimentsConfiguration.configuration.useIPCScriptsInWatchMode
@@ -293,18 +306,30 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         '../../logic/installManager/doBasicInstallAsync'
       );
 
+      const variant: string | undefined = await getVariantAsync(
+        this._variantParameter,
+        this.rushConfiguration,
+        true
+      );
       await doBasicInstallAsync({
         terminal: this._terminal,
         rushConfiguration: this.rushConfiguration,
         rushGlobalFolder: this.rushGlobalFolder,
-        isDebug: this.parser.isDebug
+        isDebug: this.parser.isDebug,
+        variant,
+        beforeInstallAsync: (subspace: Subspace) =>
+          this.rushSession.hooks.beforeInstall.promise(this, subspace, variant),
+        afterInstallAsync: (subspace: Subspace) =>
+          this.rushSession.hooks.afterInstall.promise(this, subspace, variant),
+        // Eventually we may want to allow a subspace to be selected here
+        subspace: this.rushConfiguration.defaultSubspace
       });
     }
 
     if (!this._runsBeforeInstall) {
       // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are removed
       const lastLinkFlag: FlagFile = new FlagFile(
-        this.rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
+        this.rushConfiguration.defaultSubspace.getSubspaceTempFolderPath(),
         RushConstants.lastLinkFlagFilename,
         {}
       );
@@ -441,20 +466,20 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       }
 
       const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
-      if (
-        this.rushConfiguration?.packageManager === 'pnpm' &&
-        experiments?.usePnpmSyncForInjectedDependencies
-      ) {
+      if (this.rushConfiguration?.isPnpm && experiments?.usePnpmSyncForInjectedDependencies) {
         const { PnpmSyncCopyOperationPlugin } = await import(
           '../../logic/operations/PnpmSyncCopyOperationPlugin'
         );
         new PnpmSyncCopyOperationPlugin(terminal).apply(this.hooks);
       }
 
+      const relevantProjects: Set<RushConfigurationProject> =
+        Selection.expandAllDependencies(projectSelection);
+
       const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this
         ._runsBeforeInstall
         ? new Map()
-        : await RushProjectConfiguration.tryLoadForProjectsAsync(projectSelection, terminal);
+        : await RushProjectConfiguration.tryLoadForProjectsAsync(relevantProjects, terminal);
 
       const initialCreateOperationsContext: ICreateOperationsContext = {
         buildCacheConfiguration,
@@ -517,24 +542,35 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       terminal
     } = options;
 
+    const { projectConfigurations } = initialCreateOperationsContext;
+    const { projectSelection } = initialCreateOperationsContext;
+
     const operations: Set<Operation> = await this.hooks.createOperations.promise(
       new Set(),
       initialCreateOperationsContext
     );
 
-    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-
     terminal.write('Analyzing repo state... ');
     const repoStateStopwatch: Stopwatch = new Stopwatch();
     repoStateStopwatch.start();
-    await projectChangeAnalyzer._ensureInitializedAsync(terminal);
+
+    const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
+    const getInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined =
+      await analyzer._tryGetSnapshotProviderAsync(
+        projectConfigurations,
+        terminal,
+        // We need to include all dependencies, otherwise build cache id calculation will be incorrect
+        Selection.expandAllDependencies(projectSelection)
+      );
+    const initialSnapshot: IInputsSnapshot | undefined = await getInputsSnapshotAsync?.();
+
     repoStateStopwatch.stop();
     terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
     terminal.writeLine();
 
     const initialExecuteOperationsContext: IExecuteOperationsContext = {
       ...initialCreateOperationsContext,
-      projectChangeAnalyzer
+      inputsSnapshot: initialSnapshot
     };
 
     const executionManagerOptions: IOperationExecutionManagerOptions = {
@@ -558,7 +594,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     return {
       ...options,
       executionManagerOptions,
-      initialState: projectChangeAnalyzer
+      getInputsSnapshotAsync,
+      initialSnapshot
     };
   }
 
@@ -633,13 +670,26 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
    * 3) Goto (1)
    */
   private async _runWatchPhasesAsync(options: IRunPhasesOptions): Promise<void> {
-    const { initialState, initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } =
-      options;
+    const {
+      getInputsSnapshotAsync,
+      initialSnapshot,
+      initialCreateOperationsContext,
+      executionManagerOptions,
+      stopwatch,
+      terminal
+    } = options;
 
     const phaseOriginal: Set<IPhase> = new Set(this._watchPhases);
     const phaseSelection: Set<IPhase> = new Set(this._watchPhases);
 
     const { projectSelection: projectsToWatch } = initialCreateOperationsContext;
+
+    if (!getInputsSnapshotAsync || !initialSnapshot) {
+      terminal.writeErrorLine(
+        `Cannot watch for changes if the Rush repo is not in a Git repository, exiting.`
+      );
+      throw new AlreadyReportedError();
+    }
 
     // Use async import so that we don't pay the cost for sync builds
     const { ProjectWatcher } = await import(
@@ -647,12 +697,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       '../../logic/ProjectWatcher'
     );
 
-    const projectWatcher: ProjectWatcher = new ProjectWatcher({
+    const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
+      getInputsSnapshotAsync,
+      initialSnapshot,
       debounceMs: this._watchDebounceMs,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,
-      terminal,
-      initialState
+      terminal
     });
 
     // Ensure process.stdin allows interactivity before using TTY-only APIs
@@ -685,7 +736,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       // On the initial invocation, this promise will return immediately with the full set of projects
-      const { changedProjects, state } = await projectWatcher.waitForChangeAsync(onWaitingForChanges);
+      const { changedProjects, inputsSnapshot: state } =
+        await projectWatcher.waitForChangeAsync(onWaitingForChanges);
 
       if (stopwatch.state === StopwatchState.Stopped) {
         // Clear and reset the stopwatch so that we only report time from a single execution at a time
@@ -705,7 +757,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       const executeOperationsContext: IExecuteOperationsContext = {
         ...initialCreateOperationsContext,
         isInitial: false,
-        projectChangeAnalyzer: state,
+        inputsSnapshot: state,
         projectsInUnknownState: changedProjects,
         phaseOriginal,
         phaseSelection,
@@ -755,7 +807,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       executionManagerOptions
     );
 
-    const { isInitial, isWatch } = options.executeOperationsContext;
+    const { isInitial, isWatch, cobuildConfiguration } = options.executeOperationsContext;
 
     let success: boolean = false;
     let result: IExecutionResult | undefined;
@@ -798,7 +850,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
 
     if (this.parser.telemetry) {
-      const operationResults: Record<string, ITelemetryOperationResult> = {};
+      const jsonOperationResults: Record<string, ITelemetryOperationResult> = {};
 
       const extraData: IPhasedCommandTelemetry = {
         // Fields preserved across the command invocation
@@ -819,6 +871,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       };
 
       if (result) {
+        const { operationResults } = result;
+
         const nonSilentDependenciesByOperation: Map<Operation, Set<string>> = new Map();
         function getNonSilentDependencies(operation: Operation): ReadonlySet<string> {
           let realDependencies: Set<string> | undefined = nonSilentDependenciesByOperation.get(operation);
@@ -826,7 +880,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
             realDependencies = new Set();
             nonSilentDependenciesByOperation.set(operation, realDependencies);
             for (const dependency of operation.dependencies) {
-              if (dependency.runner!.silent) {
+              const dependencyRecord: IOperationExecutionResult | undefined =
+                operationResults.get(dependency);
+              if (dependencyRecord?.silent) {
                 for (const deepDependency of getNonSilentDependencies(dependency)) {
                   realDependencies.add(deepDependency);
                 }
@@ -838,17 +894,20 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           return realDependencies;
         }
 
-        for (const [operation, operationResult] of result.operationResults) {
-          if (operation.runner?.silent) {
+        for (const [operation, operationResult] of operationResults) {
+          if (operationResult.silent) {
             // Architectural operation. Ignore.
             continue;
           }
 
           const { startTime, endTime } = operationResult.stopwatch;
-          operationResults[operation.name!] = {
+          jsonOperationResults[operation.name!] = {
             startTimestampMs: startTime,
             endTimestampMs: endTime,
             nonCachedDurationMs: operationResult.nonCachedDurationMs,
+            wasExecutedOnThisMachine:
+              !operationResult.cobuildRunnerId ||
+              operationResult.cobuildRunnerId === cobuildConfiguration?.cobuildRunnerId,
             result: operationResult.status,
             dependencies: Array.from(getNonSilentDependencies(operation)).sort()
           };
@@ -888,7 +947,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         durationInSeconds: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
         extraData,
-        operationResults
+        operationResults: jsonOperationResults
       };
 
       this.hooks.beforeLog.call(logEntry);

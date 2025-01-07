@@ -3,5 +3,7 @@
 
   "cssOutputFolders": ["lib", "lib-commonjs"],
   "secondaryGeneratedTsFolders": ["lib"],
-  "excludeFiles": ["./ignored1.scss", "ignored2.scss"]
+  "excludeFiles": ["./ignored1.scss", "ignored2.scss"],
+
+  "silenceDeprecations": ["mixed-decls"]
 }

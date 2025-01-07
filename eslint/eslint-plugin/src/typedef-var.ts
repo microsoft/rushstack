@@ -26,7 +26,7 @@ const typedefVar: TSESLint.RuleModule<MessageIds, Options> = {
         'Supplements the "@typescript-eslint/typedef" rule by relaxing the requirements for local variables',
       recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
-    } as TSESLint.RuleMetaDataDocs<Options>
+    } as TSESLint.RuleMetaDataDocs
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {

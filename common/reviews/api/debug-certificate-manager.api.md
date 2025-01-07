@@ -9,7 +9,7 @@ import type { ITerminal } from '@rushstack/terminal';
 // @public
 export class CertificateManager {
     constructor();
-    ensureCertificateAsync(canGenerateNewCertificate: boolean, terminal: ITerminal, generationOptions?: ICertificateGenerationOptions): Promise<ICertificate>;
+    ensureCertificateAsync(canGenerateNewCertificate: boolean, terminal: ITerminal, options?: ICertificateGenerationOptions): Promise<ICertificate>;
     untrustCertificateAsync(terminal: ITerminal): Promise<boolean>;
 }
 
@@ -39,6 +39,7 @@ export interface ICertificate {
 
 // @public
 export interface ICertificateGenerationOptions {
+    skipCertificateTrust?: boolean;
     subjectAltNames?: ReadonlyArray<string>;
     subjectIPAddresses?: ReadonlyArray<string>;
     validityInDays?: number;

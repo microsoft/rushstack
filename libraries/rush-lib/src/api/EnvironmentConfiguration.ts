@@ -51,6 +51,14 @@ export const EnvironmentVariableNames = {
   RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: 'RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD',
 
   /**
+   * This variable selects a specific installation variant for Rush to use when installing
+   * and linking package dependencies.
+   * For more information, see the command-line help for the `--variant` parameter
+   * and this article:  https://rushjs.io/pages/advanced/installation_variants/
+   */
+  RUSH_VARIANT: 'RUSH_VARIANT',
+
+  /**
    * Specifies the maximum number of concurrent processes to launch during a build.
    * For more information, see the command-line help for the `--parallelism` parameter for "rush build".
    */
@@ -533,6 +541,7 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
+          case EnvironmentVariableNames.RUSH_VARIANT:
           case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
             // Handled by @microsoft/rush front end
             break;

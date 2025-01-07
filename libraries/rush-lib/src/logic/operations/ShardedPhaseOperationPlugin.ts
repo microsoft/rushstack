@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
@@ -12,10 +13,8 @@ import { NullOperationRunner } from './NullOperationRunner';
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import {
-  formatCommand,
   getCustomParameterValuesByPhase,
   getDisplayName,
-  getScriptToRun,
   initializeShellOperationRunner
 } from './ShellOperationRunnerPlugin';
 
@@ -45,7 +44,7 @@ export class ShardedPhasedOperationPlugin implements IPhasedCommandPlugin {
 }
 
 function spliceShards(existingOperations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
-  const { rushConfiguration } = context;
+  const { rushConfiguration, projectConfigurations } = context;
 
   const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
     getCustomParameterValuesByPhase();
@@ -58,7 +57,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       logFilenameIdentifier: baseLogFilenameIdentifier
     } = operation;
     if (phase && project && operationSettings?.sharding && !operation.runner) {
-      const { count: shards, shardOperationSettings } = operationSettings.sharding;
+      const { count: shards } = operationSettings.sharding;
 
       /**
        * A single operation to reduce the number of edges in the graph when creating shards.
@@ -128,11 +127,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         `--shard-count="${shards}"`
       ];
 
-      const rawCommandToRun: string | undefined = getScriptToRun(project, phase.name, phase.shellCommand);
-
-      const commandToRun: string | undefined = rawCommandToRun
-        ? formatCommand(rawCommandToRun, collatorParameters)
-        : undefined;
+      const { scripts } = project.packageJson;
+      const commandToRun: string | undefined = phase.shellCommand ?? scripts?.[phase.name];
 
       operation.logFilenameIdentifier = `${baseLogFilenameIdentifier}_collate`;
       operation.runner = initializeShellOperationRunner({
@@ -140,11 +136,12 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         project,
         displayName: collatorDisplayName,
         rushConfiguration,
-        commandToRun: commandToRun
+        commandToRun,
+        customParameterValues: collatorParameters
       });
 
       const shardOperationName: string = `${phase.name}:shard`;
-      const baseCommand: string | undefined = getScriptToRun(project, shardOperationName, undefined);
+      const baseCommand: string | undefined = scripts?.[shardOperationName];
       if (baseCommand === undefined) {
         throw new Error(
           `The project '${project.packageName}' does not define a '${phase.name}:shard' command in the 'scripts' section of its package.json`
@@ -165,11 +162,16 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         );
       }
 
+      const projectConfiguration: RushProjectConfiguration | undefined = projectConfigurations.get(project);
       for (let shard: number = 1; shard <= shards; shard++) {
         const outputDirectory: string = outputFolderWithTemplate.replace(
           TemplateStringRegexes.SHARD_INDEX,
           shard.toString()
         );
+
+        const shardOperationSettings: IOperationSettings =
+          projectConfiguration?.operationSettingsByOperationName.get(shardOperationName) ??
+          (operationSettings.sharding.shardOperationSettings as IOperationSettings);
 
         const shardOperation: Operation = new Operation({
           project,
@@ -199,14 +201,11 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
 
         const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}/${shards}`;
 
-        const shardedCommandToRun: string | undefined = baseCommand
-          ? formatCommand(baseCommand, shardedParameters)
-          : undefined;
-
         shardOperation.runner = initializeShellOperationRunner({
           phase,
           project,
-          commandToRun: shardedCommandToRun,
+          commandToRun: baseCommand,
+          customParameterValues: shardedParameters,
           displayName: shardDisplayName,
           rushConfiguration
         });

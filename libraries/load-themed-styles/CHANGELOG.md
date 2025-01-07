@@ -1,6 +1,123 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+
+## 2.0.154
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 2.0.153
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 2.0.152
+Tue, 03 Dec 2024 16:11:07 GMT
+
+_Version update only_
+
+## 2.0.151
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 2.0.150
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 2.0.149
+Thu, 24 Oct 2024 00:15:47 GMT
+
+_Version update only_
+
+## 2.0.148
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 2.0.147
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 2.0.146
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 2.0.145
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 2.0.144
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 2.0.143
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 2.0.142
+Fri, 13 Sep 2024 00:11:42 GMT
+
+_Version update only_
+
+## 2.0.141
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 2.0.140
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 2.0.139
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 2.0.138
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 2.0.137
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 2.0.136
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 2.0.135
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 2.0.134
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 2.0.133
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
+
+## 2.0.132
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 2.0.131
 Mon, 03 Jun 2024 23:43:15 GMT

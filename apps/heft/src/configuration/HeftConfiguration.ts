@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { type IPackageJson, PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
+import { type IPackageJson, PackageJsonLookup, InternalError, Path } from '@rushstack/node-core-library';
 import { Terminal, type ITerminalProvider, type ITerminal } from '@rushstack/terminal';
-import { trueCasePathSync } from 'true-case-path';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
 import { Constants } from '../utilities/Constants';
@@ -30,8 +29,8 @@ export interface IHeftConfigurationInitializationOptions {
  */
 export class HeftConfiguration {
   private _buildFolderPath!: string;
+  private _slashNormalizedBuildFolderPath: string | undefined;
   private _projectConfigFolderPath: string | undefined;
-  private _cacheFolderPath: string | undefined;
   private _tempFolderPath: string | undefined;
   private _rigConfig: IRigConfig | undefined;
   private _globalTerminal!: Terminal;
@@ -43,6 +42,17 @@ export class HeftConfiguration {
    */
   public get buildFolderPath(): string {
     return this._buildFolderPath;
+  }
+
+  /**
+   * {@link HeftConfiguration.buildFolderPath} with all path separators converted to forward slashes.
+   */
+  public get slashNormalizedBuildFolderPath(): string {
+    if (!this._slashNormalizedBuildFolderPath) {
+      this._slashNormalizedBuildFolderPath = Path.convertToSlashes(this.buildFolderPath);
+    }
+
+    return this._slashNormalizedBuildFolderPath;
   }
 
   /**
@@ -150,11 +160,12 @@ export class HeftConfiguration {
     );
     if (packageJsonPath) {
       let buildFolderPath: string = path.dirname(packageJsonPath);
-      // The CWD path's casing may be incorrect on a case-insensitive filesystem. Some tools, like Jest
-      // expect the casing of the project path to be correct and produce unexpected behavior when the casing
-      // isn't correct.
-      // This ensures the casing of the project folder is correct.
-      buildFolderPath = trueCasePathSync(buildFolderPath);
+      // On Windows it is possible for the drive letter in the CWD to be lowercase, but the normalized naming is uppercase
+      // Force it to always be uppercase for consistency.
+      buildFolderPath =
+        process.platform === 'win32'
+          ? buildFolderPath.charAt(0).toUpperCase() + buildFolderPath.slice(1)
+          : buildFolderPath;
       configuration._buildFolderPath = buildFolderPath;
     } else {
       throw new Error('No package.json file found. Are you in a project folder?');

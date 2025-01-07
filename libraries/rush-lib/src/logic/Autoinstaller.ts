@@ -24,7 +24,7 @@ import { LastInstallFlag } from '../api/LastInstallFlag';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import type { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
-interface IAutoinstallerOptions {
+export interface IAutoinstallerOptions {
   autoinstallerName: string;
   rushConfiguration: RushConfiguration;
   rushGlobalFolder: RushGlobalFolder;
@@ -101,7 +101,7 @@ export class Autoinstaller {
 
     this._logIfConsoleOutputIsNotRestricted(`Acquiring lock for "${relativePathForLogs}" folder...`);
 
-    const lock: LockFile = await LockFile.acquire(autoinstallerFullPath, 'autoinstaller');
+    const lock: LockFile = await LockFile.acquireAsync(autoinstallerFullPath, 'autoinstaller');
 
     try {
       // Example: .../common/autoinstallers/my-task/.rush/temp
@@ -137,7 +137,8 @@ export class Autoinstaller {
         // Copy: .../common/autoinstallers/my-task/.npmrc
         Utilities.syncNpmrc({
           sourceNpmrcFolder: this._rushConfiguration.commonRushConfigFolder,
-          targetNpmrcFolder: autoinstallerFullPath
+          targetNpmrcFolder: autoinstallerFullPath,
+          supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm
         });
 
         this._logIfConsoleOutputIsNotRestricted(
@@ -193,7 +194,7 @@ export class Autoinstaller {
       oldFileContents = FileSystem.readFile(this.shrinkwrapFilePath, { convertLineEndings: NewlineKind.Lf });
       this._logIfConsoleOutputIsNotRestricted('Deleting ' + this.shrinkwrapFilePath);
       await FileSystem.deleteFileAsync(this.shrinkwrapFilePath);
-      if (this._rushConfiguration.packageManager === 'pnpm') {
+      if (this._rushConfiguration.isPnpm) {
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
         //
         // When "rush update-autoinstaller" is run, Rush deletes "common/autoinstallers/my-task/pnpm-lock.yaml"
@@ -222,7 +223,8 @@ export class Autoinstaller {
 
     Utilities.syncNpmrc({
       sourceNpmrcFolder: this._rushConfiguration.commonRushConfigFolder,
-      targetNpmrcFolder: this.folderFullPath
+      targetNpmrcFolder: this.folderFullPath,
+      supportEnvVarFallbackSyntax: this._rushConfiguration.isPnpm
     });
 
     await Utilities.executeCommandAsync({

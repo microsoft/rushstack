@@ -69,3 +69,50 @@ test('Sort.sortSet', () => {
   Sort.sortSet(set);
   expect(Array.from(set)).toEqual(['aardvark', 'goose', 'zebra']);
 });
+
+describe('Sort.sortKeys', () => {
+  test('Simple object', () => {
+    const unsortedObj = { q: 0, p: 0, r: 0 };
+    const sortedObj = Sort.sortKeys(unsortedObj);
+
+    // Assert that it's not sorted in-place
+    expect(sortedObj).not.toBe(unsortedObj);
+
+    expect(Object.keys(unsortedObj)).toEqual(['q', 'p', 'r']);
+    expect(Object.keys(sortedObj)).toEqual(['p', 'q', 'r']);
+  });
+  test('Simple array with objects', () => {
+    const unsortedArr = [
+      { b: 1, a: 0 },
+      { y: 0, z: 1, x: 2 }
+    ];
+    const sortedArr = Sort.sortKeys(unsortedArr);
+
+    // Assert that it's not sorted in-place
+    expect(sortedArr).not.toBe(unsortedArr);
+
+    expect(Object.keys(unsortedArr[0])).toEqual(['b', 'a']);
+    expect(Object.keys(sortedArr[0])).toEqual(['a', 'b']);
+
+    expect(Object.keys(unsortedArr[1])).toEqual(['y', 'z', 'x']);
+    expect(Object.keys(sortedArr[1])).toEqual(['x', 'y', 'z']);
+  });
+  test('Nested objects', () => {
+    const unsortedDeepObj = { c: { q: 0, r: { a: 42 }, p: 2 }, b: { y: 0, z: 1, x: 2 }, a: 2 };
+    const sortedDeepObj = Sort.sortKeys(unsortedDeepObj);
+
+    expect(sortedDeepObj).not.toBe(unsortedDeepObj);
+
+    expect(Object.keys(unsortedDeepObj)).toEqual(['c', 'b', 'a']);
+    expect(Object.keys(sortedDeepObj)).toEqual(['a', 'b', 'c']);
+
+    expect(Object.keys(unsortedDeepObj.b)).toEqual(['y', 'z', 'x']);
+    expect(Object.keys(sortedDeepObj.b)).toEqual(['x', 'y', 'z']);
+
+    expect(Object.keys(unsortedDeepObj.c)).toEqual(['q', 'r', 'p']);
+    expect(Object.keys(sortedDeepObj.c)).toEqual(['p', 'q', 'r']);
+
+    expect(Object.keys(unsortedDeepObj.c.r)).toEqual(['a']);
+    expect(Object.keys(sortedDeepObj.c.r)).toEqual(['a']);
+  });
+});

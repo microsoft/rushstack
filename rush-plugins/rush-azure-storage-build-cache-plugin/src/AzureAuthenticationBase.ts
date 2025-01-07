@@ -131,7 +131,7 @@ export abstract class AzureAuthenticationBase {
   protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined>;
 
   private __credentialCacheId: string | undefined;
-  private get _credentialCacheId(): string {
+  protected get _credentialCacheId(): string {
     if (!this.__credentialCacheId) {
       const cacheIdParts: string[] = [
         this._credentialNameForCache,
@@ -146,9 +146,13 @@ export abstract class AzureAuthenticationBase {
   }
 
   public constructor(options: IAzureAuthenticationBaseOptions) {
-    this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
+    const {
+      azureEnvironment = 'AzurePublicCloud',
+      loginFlow = process.env.CODESPACES === 'true' ? 'AdoCodespacesAuth' : 'InteractiveBrowser'
+    } = options;
+    this._azureEnvironment = azureEnvironment;
     this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
-    this._loginFlow = options.loginFlow || 'DeviceCode';
+    this._loginFlow = loginFlow;
     this._failoverOrder = options.loginFlowFailover || {
       AdoCodespacesAuth: 'InteractiveBrowser',
       InteractiveBrowser: 'DeviceCode',
@@ -174,31 +178,35 @@ export abstract class AzureAuthenticationBase {
    * Launches an interactive flow to renew a cached credential.
    *
    * @param terminal - The terminal to log output to
-   * @param onlyIfExistingCredentialExpiresAfter - If specified, and a cached credential exists that is still valid
-   * after the date specified, no action will be taken.
+   * @param onlyIfExistingCredentialExpiresBefore - If specified, and a cached credential exists, action will only
+   * be taken if the cached credential expires before the specified date.
    */
   public async updateCachedCredentialInteractiveAsync(
     terminal: ITerminal,
-    onlyIfExistingCredentialExpiresAfter?: Date
+    onlyIfExistingCredentialExpiresBefore?: Date
   ): Promise<void> {
     await CredentialCache.usingAsync(
       {
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
-        if (onlyIfExistingCredentialExpiresAfter) {
+        if (onlyIfExistingCredentialExpiresBefore) {
           const existingCredentialExpiration: Date | undefined = credentialsCache.tryGetCacheEntry(
             this._credentialCacheId
           )?.expires;
           if (
             existingCredentialExpiration &&
-            existingCredentialExpiration > onlyIfExistingCredentialExpiresAfter
+            existingCredentialExpiration > onlyIfExistingCredentialExpiresBefore
           ) {
             return;
           }
         }
 
-        const credential: ICredentialResult = await this._getCredentialAsync(terminal, this._loginFlow);
+        const credential: ICredentialResult = await this._getCredentialAsync(
+          terminal,
+          this._loginFlow,
+          credentialsCache
+        );
         credentialsCache.setCacheEntry(this._credentialCacheId, {
           credential: credential.credentialString,
           expires: credential.expiresOn,
@@ -272,12 +280,14 @@ export abstract class AzureAuthenticationBase {
 
   protected abstract _getCredentialFromTokenAsync(
     terminal: ITerminal,
-    tokenCredential: TokenCredential
+    tokenCredential: TokenCredential,
+    credentialsCache: CredentialCache
   ): Promise<ICredentialResult>;
 
   private async _getCredentialAsync(
     terminal: ITerminal,
-    loginFlow: LoginFlowType
+    loginFlow: LoginFlowType,
+    credentialsCache: CredentialCache
   ): Promise<ICredentialResult> {
     const authorityHost: string | undefined = AzureAuthorityHosts[this._azureEnvironment];
     if (!authorityHost) {
@@ -319,13 +329,13 @@ export abstract class AzureAuthenticationBase {
     }
 
     try {
-      return await this._getCredentialFromTokenAsync(terminal, tokenCredential);
+      return await this._getCredentialFromTokenAsync(terminal, tokenCredential, credentialsCache);
     } catch (error) {
       terminal.writeVerbose(`Failed to get credentials with ${loginFlow}: ${error}`);
       const fallbackFlow: LoginFlowType | undefined = this._failoverOrder[loginFlow];
       if (fallbackFlow) {
         terminal.writeVerbose(`Falling back to ${fallbackFlow} login flow`);
-        return this._getCredentialAsync(terminal, fallbackFlow);
+        return this._getCredentialAsync(terminal, fallbackFlow, credentialsCache);
       } else {
         throw error;
       }

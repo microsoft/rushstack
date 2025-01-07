@@ -98,6 +98,27 @@ export interface IExperimentsJson {
    * across invocations.
    */
   useIPCScriptsInWatchMode?: boolean;
+
+  /**
+   * (UNDER DEVELOPMENT) The Rush alerts feature provides a way to send announcements to engineers
+   * working in the monorepo, by printing directly in the user's shell window when they invoke Rush commands.
+   * This ensures that important notices will be seen by anyone doing active development, since people often
+   * ignore normal discussion group messages or don't know to subscribe.
+   */
+  rushAlerts?: boolean;
+
+  /**
+   * Allow cobuilds without using the build cache to store previous execution info. When setting up
+   *  distributed builds, Rush will allow uncacheable projects to still leverage the cobuild feature.
+   * This is useful when you want to speed up operations that can't (or shouldn't) be cached.
+   */
+  allowCobuildWithoutCache?: boolean;
+
+  /**
+   * By default, rush perform a full scan of the entire repository. For example, Rush runs `git status` to check for local file changes.
+   * When this toggle is enabled, Rush will only scan specific paths, significantly speeding up Git operations.
+   */
+  enableSubpathScan?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);

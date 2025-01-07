@@ -2,14 +2,14 @@
 
 exports[`LocalizationPlugin Handles async localized and non-localized chunks (minified): Content 1`] = `
 Object {
-  "/release/chunks/async1-none-cae03d2626cc2ffa3508.js": "(self.webpackChunk=self.webpackChunk||[]).push([[515],{\\"./a/async1.js\\":()=>{console.log(\\"blah1\\")}}]);",
-  "/release/chunks/async2-none-a3af93683846f20fd06d.js": "(self.webpackChunk=self.webpackChunk||[]).push([[989],{\\"./a/async2.js\\":()=>{console.log(\\"blah2\\")}}]);",
-  "/release/chunks/asyncLoc1-LOCALE1-42ac7deedbceee724ebe.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[14],{\\"./a/asyncLoc1.js\\":(s,_,n)=>{n.r(_);var o=n(\\"./a/strings1.loc.json\\"),t=n(\\"./a/strings2.loc.json\\");console.log(o.Z.test,t.Z.another)},\\"./a/strings1.loc.json\\":(s,_,n)=>{n.d(_,{Z:()=>o});const o={test:\\"blah\\"}},\\"./a/strings2.loc.json\\":(s,_,n)=>{n.d(_,{Z:()=>o});const o={another:\\"something else\\"}}}]);",
-  "/release/chunks/asyncLoc1-LOCALE2-9569ed1013c7d99991f0.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[14],{\\"./a/asyncLoc1.js\\":(s,_,n)=>{n.r(_);var o=n(\\"./a/strings1.loc.json\\"),t=n(\\"./a/strings2.loc.json\\");console.log(o.Z.test,t.Z.another)},\\"./a/strings1.loc.json\\":(s,_,n)=>{n.d(_,{Z:()=>o});const o={test:\\"baz\\"}},\\"./a/strings2.loc.json\\":(s,_,n)=>{n.d(_,{Z:()=>o});const o={another:\\"some random translation\\"}}}]);",
-  "/release/chunks/asyncLoc2-LOCALE1-fbbf37c75a89cefa3a8b.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[5],{\\"./a/asyncLoc2.js\\":(s,_,n)=>{n.r(_);var o=n(\\"./a/strings1.loc.json\\"),t=n(\\"./a/strings2.loc.json\\");console.log(o.Z.test+t.Z.another)},\\"./a/strings1.loc.json\\":(s,_,n)=>{n.d(_,{Z:()=>o});const o={test:\\"blah\\"}},\\"./a/strings2.loc.json\\":(s,_,n)=>{n.d(_,{Z:()=>o});const o={another:\\"something else\\"}}}]);",
-  "/release/chunks/asyncLoc2-LOCALE2-6f7d6cb21f686f18a3de.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[5],{\\"./a/asyncLoc2.js\\":(s,_,n)=>{n.r(_);var o=n(\\"./a/strings1.loc.json\\"),t=n(\\"./a/strings2.loc.json\\");console.log(o.Z.test+t.Z.another)},\\"./a/strings1.loc.json\\":(s,_,n)=>{n.d(_,{Z:()=>o});const o={test:\\"baz\\"}},\\"./a/strings2.loc.json\\":(s,_,n)=>{n.d(_,{Z:()=>o});const o={another:\\"some random translation\\"}}}]);",
-  "/release/main-LOCALE1-db5fee2775538b16fa56.js": "(()=>{var e,r,t,n={},o={};function a(e){var r=o[e];if(void 0!==r)return r.exports;var t=o[e]={exports:{}};return n[e](t,t.exports,a),t.exports}a.m=n,r=Object.getPrototypeOf?e=>Object.getPrototypeOf(e):e=>e.__proto__,a.t=function(t,n){if(1&n&&(t=this(t)),8&n)return t;if(\\"object\\"==typeof t&&t){if(4&n&&t.__esModule)return t;if(16&n&&\\"function\\"==typeof t.then)return t}var o=Object.create(null);a.r(o);var i={};e=e||[null,r({}),r([]),r(r)];for(var c=2&n&&t;\\"object\\"==typeof c&&!~e.indexOf(c);c=r(c))Object.getOwnPropertyNames(c).forEach((e=>i[e]=()=>t[e]));return i.default=()=>t,a.d(o,i),o},a.d=(e,r)=>{for(var t in r)a.o(r,t)&&!a.o(e,t)&&Object.defineProperty(e,t,{enumerable:!0,get:r[t]})},a.f={},a.e=e=>Promise.all(Object.keys(a.f).reduce(((r,t)=>(a.f[t](e,r),r)),[])),a.u=e=>\\"chunks/\\"+{5:\\"asyncLoc2\\",14:\\"asyncLoc1\\",515:\\"async1\\",989:\\"async2\\"}[e]+\\"-\\"+({5:1,14:1}[e]?\\"LOCALE1\\":\\"none\\")+\\"-\\"+{5:\\"fbbf37c75a89cefa3a8b\\",14:\\"42ac7deedbceee724ebe\\",515:\\"cae03d2626cc2ffa3508\\",989:\\"a3af93683846f20fd06d\\"}[e]+\\".js\\",a.g=function(){if(\\"object\\"==typeof globalThis)return globalThis;try{return this||new Function(\\"return this\\")()}catch(e){if(\\"object\\"==typeof window)return window}}(),a.o=(e,r)=>Object.prototype.hasOwnProperty.call(e,r),t={},a.l=(e,r,n,o)=>{if(t[e])t[e].push(r);else{var i,c;if(void 0!==n)for(var s=document.getElementsByTagName(\\"script\\"),f=0;f<s.length;f++){var u=s[f];if(u.getAttribute(\\"src\\")==e){i=u;break}}i||(c=!0,(i=document.createElement(\\"script\\")).charset=\\"utf-8\\",i.timeout=120,a.nc&&i.setAttribute(\\"nonce\\",a.nc),i.src=e),t[e]=[r];var l=(r,n)=>{i.onerror=i.onload=null,clearTimeout(d);var o=t[e];if(delete t[e],i.parentNode&&i.parentNode.removeChild(i),o&&o.forEach((e=>e(n))),r)return r(n)},d=setTimeout(l.bind(null,void 0,{type:\\"timeout\\",target:i}),12e4);i.onerror=l.bind(null,i.onerror),i.onload=l.bind(null,i.onload),c&&document.head.appendChild(i)}},a.r=e=>{\\"undefined\\"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:\\"Module\\"}),Object.defineProperty(e,\\"__esModule\\",{value:!0})},(()=>{var e;a.g.importScripts&&(e=a.g.location+\\"\\");var r=a.g.document;if(!e&&r&&(r.currentScript&&(e=r.currentScript.src),!e)){var t=r.getElementsByTagName(\\"script\\");if(t.length)for(var n=t.length-1;n>-1&&!e;)e=t[n--].src}if(!e)throw new Error(\\"Automatic publicPath is not supported in this browser\\");e=e.replace(/#.*$/,\\"\\").replace(/\\\\?.*$/,\\"\\").replace(/\\\\/[^\\\\/]+$/,\\"/\\"),a.p=e})(),(()=>{var e={179:0};a.f.j=(r,t)=>{var n=a.o(e,r)?e[r]:void 0;if(0!==n)if(n)t.push(n[2]);else{var o=new Promise(((t,o)=>n=e[r]=[t,o]));t.push(n[2]=o);var i=a.p+a.u(r),c=new Error;a.l(i,(t=>{if(a.o(e,r)&&(0!==(n=e[r])&&(e[r]=void 0),n)){var o=t&&(\\"load\\"===t.type?\\"missing\\":t.type),i=t&&t.target&&t.target.src;c.message=\\"Loading chunk \\"+r+\\" failed.\\\\n(\\"+o+\\": \\"+i+\\")\\",c.name=\\"ChunkLoadError\\",c.type=o,c.request=i,n[1](c)}}),\\"chunk-\\"+r,r)}};var r=(r,t)=>{var n,o,[i,c,s]=t,f=0;if(i.some((r=>0!==e[r]))){for(n in c)a.o(c,n)&&(a.m[n]=c[n]);s&&s(a)}for(r&&r(t);f<i.length;f++)o=i[f],a.o(e,o)&&e[o]&&e[o][0](),e[o]=0},t=self.webpackChunk=self.webpackChunk||[];t.forEach(r.bind(null,0)),t.push=r.bind(null,t.push.bind(t))})(),a.e(14).then(a.bind(a,\\"./a/asyncLoc1.js\\")),a.e(5).then(a.bind(a,\\"./a/asyncLoc2.js\\")),a.e(515).then(a.t.bind(a,\\"./a/async1.js\\",23)),a.e(989).then(a.t.bind(a,\\"./a/async2.js\\",23))})();",
-  "/release/main-LOCALE2-e08dd16ea7f4a44191c3.js": "(()=>{var e,r,t,n={},o={};function a(e){var r=o[e];if(void 0!==r)return r.exports;var t=o[e]={exports:{}};return n[e](t,t.exports,a),t.exports}a.m=n,r=Object.getPrototypeOf?e=>Object.getPrototypeOf(e):e=>e.__proto__,a.t=function(t,n){if(1&n&&(t=this(t)),8&n)return t;if(\\"object\\"==typeof t&&t){if(4&n&&t.__esModule)return t;if(16&n&&\\"function\\"==typeof t.then)return t}var o=Object.create(null);a.r(o);var i={};e=e||[null,r({}),r([]),r(r)];for(var c=2&n&&t;\\"object\\"==typeof c&&!~e.indexOf(c);c=r(c))Object.getOwnPropertyNames(c).forEach((e=>i[e]=()=>t[e]));return i.default=()=>t,a.d(o,i),o},a.d=(e,r)=>{for(var t in r)a.o(r,t)&&!a.o(e,t)&&Object.defineProperty(e,t,{enumerable:!0,get:r[t]})},a.f={},a.e=e=>Promise.all(Object.keys(a.f).reduce(((r,t)=>(a.f[t](e,r),r)),[])),a.u=e=>\\"chunks/\\"+{5:\\"asyncLoc2\\",14:\\"asyncLoc1\\",515:\\"async1\\",989:\\"async2\\"}[e]+\\"-\\"+({5:1,14:1}[e]?\\"LOCALE2\\":\\"none\\")+\\"-\\"+{5:\\"6f7d6cb21f686f18a3de\\",14:\\"9569ed1013c7d99991f0\\",515:\\"cae03d2626cc2ffa3508\\",989:\\"a3af93683846f20fd06d\\"}[e]+\\".js\\",a.g=function(){if(\\"object\\"==typeof globalThis)return globalThis;try{return this||new Function(\\"return this\\")()}catch(e){if(\\"object\\"==typeof window)return window}}(),a.o=(e,r)=>Object.prototype.hasOwnProperty.call(e,r),t={},a.l=(e,r,n,o)=>{if(t[e])t[e].push(r);else{var i,c;if(void 0!==n)for(var s=document.getElementsByTagName(\\"script\\"),f=0;f<s.length;f++){var u=s[f];if(u.getAttribute(\\"src\\")==e){i=u;break}}i||(c=!0,(i=document.createElement(\\"script\\")).charset=\\"utf-8\\",i.timeout=120,a.nc&&i.setAttribute(\\"nonce\\",a.nc),i.src=e),t[e]=[r];var l=(r,n)=>{i.onerror=i.onload=null,clearTimeout(d);var o=t[e];if(delete t[e],i.parentNode&&i.parentNode.removeChild(i),o&&o.forEach((e=>e(n))),r)return r(n)},d=setTimeout(l.bind(null,void 0,{type:\\"timeout\\",target:i}),12e4);i.onerror=l.bind(null,i.onerror),i.onload=l.bind(null,i.onload),c&&document.head.appendChild(i)}},a.r=e=>{\\"undefined\\"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:\\"Module\\"}),Object.defineProperty(e,\\"__esModule\\",{value:!0})},(()=>{var e;a.g.importScripts&&(e=a.g.location+\\"\\");var r=a.g.document;if(!e&&r&&(r.currentScript&&(e=r.currentScript.src),!e)){var t=r.getElementsByTagName(\\"script\\");if(t.length)for(var n=t.length-1;n>-1&&!e;)e=t[n--].src}if(!e)throw new Error(\\"Automatic publicPath is not supported in this browser\\");e=e.replace(/#.*$/,\\"\\").replace(/\\\\?.*$/,\\"\\").replace(/\\\\/[^\\\\/]+$/,\\"/\\"),a.p=e})(),(()=>{var e={179:0};a.f.j=(r,t)=>{var n=a.o(e,r)?e[r]:void 0;if(0!==n)if(n)t.push(n[2]);else{var o=new Promise(((t,o)=>n=e[r]=[t,o]));t.push(n[2]=o);var i=a.p+a.u(r),c=new Error;a.l(i,(t=>{if(a.o(e,r)&&(0!==(n=e[r])&&(e[r]=void 0),n)){var o=t&&(\\"load\\"===t.type?\\"missing\\":t.type),i=t&&t.target&&t.target.src;c.message=\\"Loading chunk \\"+r+\\" failed.\\\\n(\\"+o+\\": \\"+i+\\")\\",c.name=\\"ChunkLoadError\\",c.type=o,c.request=i,n[1](c)}}),\\"chunk-\\"+r,r)}};var r=(r,t)=>{var n,o,[i,c,s]=t,f=0;if(i.some((r=>0!==e[r]))){for(n in c)a.o(c,n)&&(a.m[n]=c[n]);s&&s(a)}for(r&&r(t);f<i.length;f++)o=i[f],a.o(e,o)&&e[o]&&e[o][0](),e[o]=0},t=self.webpackChunk=self.webpackChunk||[];t.forEach(r.bind(null,0)),t.push=r.bind(null,t.push.bind(t))})(),a.e(14).then(a.bind(a,\\"./a/asyncLoc1.js\\")),a.e(5).then(a.bind(a,\\"./a/asyncLoc2.js\\")),a.e(515).then(a.t.bind(a,\\"./a/async1.js\\",23)),a.e(989).then(a.t.bind(a,\\"./a/async2.js\\",23))})();",
+  "/release/chunks/async1-none-dcecbe55134f94f9aee7.js": "(self.webpackChunk=self.webpackChunk||[]).push([[230],{\\"./a/async1.js\\":()=>{console.log(\\"blah1\\")}}]);",
+  "/release/chunks/async2-none-1b365930b3b55b3e7daf.js": "(self.webpackChunk=self.webpackChunk||[]).push([[421],{\\"./a/async2.js\\":()=>{console.log(\\"blah2\\")}}]);",
+  "/release/chunks/asyncLoc1-LOCALE1-11284a1030c0b96a0d4a.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[410],{\\"./a/asyncLoc1.js\\":(s,_,n)=>{n.r(_);var o=n(\\"./a/strings1.loc.json\\"),t=n(\\"./a/strings2.loc.json\\");console.log(o.A.test,t.A.another)},\\"./a/strings1.loc.json\\":(s,_,n)=>{n.d(_,{A:()=>o});const o={test:\\"blah\\"}},\\"./a/strings2.loc.json\\":(s,_,n)=>{n.d(_,{A:()=>o});const o={another:\\"something else\\"}}}]);",
+  "/release/chunks/asyncLoc1-LOCALE2-732c0329cde51769598f.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[410],{\\"./a/asyncLoc1.js\\":(s,_,n)=>{n.r(_);var o=n(\\"./a/strings1.loc.json\\"),t=n(\\"./a/strings2.loc.json\\");console.log(o.A.test,t.A.another)},\\"./a/strings1.loc.json\\":(s,_,n)=>{n.d(_,{A:()=>o});const o={test:\\"baz\\"}},\\"./a/strings2.loc.json\\":(s,_,n)=>{n.d(_,{A:()=>o});const o={another:\\"some random translation\\"}}}]);",
+  "/release/chunks/asyncLoc2-LOCALE1-0a0dcdf1f01e840045bb.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[17],{\\"./a/asyncLoc2.js\\":(s,_,n)=>{n.r(_);var o=n(\\"./a/strings1.loc.json\\"),t=n(\\"./a/strings2.loc.json\\");console.log(o.A.test+t.A.another)},\\"./a/strings1.loc.json\\":(s,_,n)=>{n.d(_,{A:()=>o});const o={test:\\"blah\\"}},\\"./a/strings2.loc.json\\":(s,_,n)=>{n.d(_,{A:()=>o});const o={another:\\"something else\\"}}}]);",
+  "/release/chunks/asyncLoc2-LOCALE2-b7bf7b922103768fdca2.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[17],{\\"./a/asyncLoc2.js\\":(s,_,n)=>{n.r(_);var o=n(\\"./a/strings1.loc.json\\"),t=n(\\"./a/strings2.loc.json\\");console.log(o.A.test+t.A.another)},\\"./a/strings1.loc.json\\":(s,_,n)=>{n.d(_,{A:()=>o});const o={test:\\"baz\\"}},\\"./a/strings2.loc.json\\":(s,_,n)=>{n.d(_,{A:()=>o});const o={another:\\"some random translation\\"}}}]);",
+  "/release/main-LOCALE1-13cabae54d71324e68b9.js": "(()=>{var e,t,r,n={},o={};function a(e){var t=o[e];if(void 0!==t)return t.exports;var r=o[e]={exports:{}};return n[e](r,r.exports,a),r.exports}a.m=n,t=Object.getPrototypeOf?e=>Object.getPrototypeOf(e):e=>e.__proto__,a.t=function(r,n){if(1&n&&(r=this(r)),8&n)return r;if(\\"object\\"==typeof r&&r){if(4&n&&r.__esModule)return r;if(16&n&&\\"function\\"==typeof r.then)return r}var o=Object.create(null);a.r(o);var i={};e=e||[null,t({}),t([]),t(t)];for(var c=2&n&&r;\\"object\\"==typeof c&&!~e.indexOf(c);c=t(c))Object.getOwnPropertyNames(c).forEach((e=>i[e]=()=>r[e]));return i.default=()=>r,a.d(o,i),o},a.d=(e,t)=>{for(var r in t)a.o(t,r)&&!a.o(e,r)&&Object.defineProperty(e,r,{enumerable:!0,get:t[r]})},a.f={},a.e=e=>Promise.all(Object.keys(a.f).reduce(((t,r)=>(a.f[r](e,t),t)),[])),a.u=e=>\\"chunks/\\"+{17:\\"asyncLoc2\\",230:\\"async1\\",410:\\"asyncLoc1\\",421:\\"async2\\"}[e]+\\"-\\"+({17:1,410:1}[e]?\\"LOCALE1\\":\\"none\\")+\\"-\\"+{17:\\"0a0dcdf1f01e840045bb\\",230:\\"dcecbe55134f94f9aee7\\",410:\\"11284a1030c0b96a0d4a\\",421:\\"1b365930b3b55b3e7daf\\"}[e]+\\".js\\",a.g=function(){if(\\"object\\"==typeof globalThis)return globalThis;try{return this||new Function(\\"return this\\")()}catch(e){if(\\"object\\"==typeof window)return window}}(),a.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),r={},a.l=(e,t,n,o)=>{if(r[e])r[e].push(t);else{var i,c;if(void 0!==n)for(var s=document.getElementsByTagName(\\"script\\"),f=0;f<s.length;f++){var u=s[f];if(u.getAttribute(\\"src\\")==e){i=u;break}}i||(c=!0,(i=document.createElement(\\"script\\")).charset=\\"utf-8\\",i.timeout=120,a.nc&&i.setAttribute(\\"nonce\\",a.nc),i.src=e),r[e]=[t];var l=(t,n)=>{i.onerror=i.onload=null,clearTimeout(d);var o=r[e];if(delete r[e],i.parentNode&&i.parentNode.removeChild(i),o&&o.forEach((e=>e(n))),t)return t(n)},d=setTimeout(l.bind(null,void 0,{type:\\"timeout\\",target:i}),12e4);i.onerror=l.bind(null,i.onerror),i.onload=l.bind(null,i.onload),c&&document.head.appendChild(i)}},a.r=e=>{\\"undefined\\"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:\\"Module\\"}),Object.defineProperty(e,\\"__esModule\\",{value:!0})},(()=>{var e;a.g.importScripts&&(e=a.g.location+\\"\\");var t=a.g.document;if(!e&&t&&(t.currentScript&&\\"SCRIPT\\"===t.currentScript.tagName.toUpperCase()&&(e=t.currentScript.src),!e)){var r=t.getElementsByTagName(\\"script\\");if(r.length)for(var n=r.length-1;n>-1&&(!e||!/^http(s?):/.test(e));)e=r[n--].src}if(!e)throw new Error(\\"Automatic publicPath is not supported in this browser\\");e=e.replace(/#.*$/,\\"\\").replace(/\\\\?.*$/,\\"\\").replace(/\\\\/[^\\\\/]+$/,\\"/\\"),a.p=e})(),(()=>{var e={792:0};a.f.j=(t,r)=>{var n=a.o(e,t)?e[t]:void 0;if(0!==n)if(n)r.push(n[2]);else{var o=new Promise(((r,o)=>n=e[t]=[r,o]));r.push(n[2]=o);var i=a.p+a.u(t),c=new Error;a.l(i,(r=>{if(a.o(e,t)&&(0!==(n=e[t])&&(e[t]=void 0),n)){var o=r&&(\\"load\\"===r.type?\\"missing\\":r.type),i=r&&r.target&&r.target.src;c.message=\\"Loading chunk \\"+t+\\" failed.\\\\n(\\"+o+\\": \\"+i+\\")\\",c.name=\\"ChunkLoadError\\",c.type=o,c.request=i,n[1](c)}}),\\"chunk-\\"+t,t)}};var t=(t,r)=>{var n,o,[i,c,s]=r,f=0;if(i.some((t=>0!==e[t]))){for(n in c)a.o(c,n)&&(a.m[n]=c[n]);s&&s(a)}for(t&&t(r);f<i.length;f++)o=i[f],a.o(e,o)&&e[o]&&e[o][0](),e[o]=0},r=self.webpackChunk=self.webpackChunk||[];r.forEach(t.bind(null,0)),r.push=t.bind(null,r.push.bind(r))})(),a.e(410).then(a.bind(a,\\"./a/asyncLoc1.js\\")),a.e(17).then(a.bind(a,\\"./a/asyncLoc2.js\\")),a.e(230).then(a.t.bind(a,\\"./a/async1.js\\",23)),a.e(421).then(a.t.bind(a,\\"./a/async2.js\\",23))})();",
+  "/release/main-LOCALE2-2a4fe7cefe163909da43.js": "(()=>{var e,t,r,n={},o={};function a(e){var t=o[e];if(void 0!==t)return t.exports;var r=o[e]={exports:{}};return n[e](r,r.exports,a),r.exports}a.m=n,t=Object.getPrototypeOf?e=>Object.getPrototypeOf(e):e=>e.__proto__,a.t=function(r,n){if(1&n&&(r=this(r)),8&n)return r;if(\\"object\\"==typeof r&&r){if(4&n&&r.__esModule)return r;if(16&n&&\\"function\\"==typeof r.then)return r}var o=Object.create(null);a.r(o);var i={};e=e||[null,t({}),t([]),t(t)];for(var c=2&n&&r;\\"object\\"==typeof c&&!~e.indexOf(c);c=t(c))Object.getOwnPropertyNames(c).forEach((e=>i[e]=()=>r[e]));return i.default=()=>r,a.d(o,i),o},a.d=(e,t)=>{for(var r in t)a.o(t,r)&&!a.o(e,r)&&Object.defineProperty(e,r,{enumerable:!0,get:t[r]})},a.f={},a.e=e=>Promise.all(Object.keys(a.f).reduce(((t,r)=>(a.f[r](e,t),t)),[])),a.u=e=>\\"chunks/\\"+{17:\\"asyncLoc2\\",230:\\"async1\\",410:\\"asyncLoc1\\",421:\\"async2\\"}[e]+\\"-\\"+({17:1,410:1}[e]?\\"LOCALE2\\":\\"none\\")+\\"-\\"+{17:\\"b7bf7b922103768fdca2\\",230:\\"dcecbe55134f94f9aee7\\",410:\\"732c0329cde51769598f\\",421:\\"1b365930b3b55b3e7daf\\"}[e]+\\".js\\",a.g=function(){if(\\"object\\"==typeof globalThis)return globalThis;try{return this||new Function(\\"return this\\")()}catch(e){if(\\"object\\"==typeof window)return window}}(),a.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),r={},a.l=(e,t,n,o)=>{if(r[e])r[e].push(t);else{var i,c;if(void 0!==n)for(var s=document.getElementsByTagName(\\"script\\"),f=0;f<s.length;f++){var u=s[f];if(u.getAttribute(\\"src\\")==e){i=u;break}}i||(c=!0,(i=document.createElement(\\"script\\")).charset=\\"utf-8\\",i.timeout=120,a.nc&&i.setAttribute(\\"nonce\\",a.nc),i.src=e),r[e]=[t];var l=(t,n)=>{i.onerror=i.onload=null,clearTimeout(d);var o=r[e];if(delete r[e],i.parentNode&&i.parentNode.removeChild(i),o&&o.forEach((e=>e(n))),t)return t(n)},d=setTimeout(l.bind(null,void 0,{type:\\"timeout\\",target:i}),12e4);i.onerror=l.bind(null,i.onerror),i.onload=l.bind(null,i.onload),c&&document.head.appendChild(i)}},a.r=e=>{\\"undefined\\"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:\\"Module\\"}),Object.defineProperty(e,\\"__esModule\\",{value:!0})},(()=>{var e;a.g.importScripts&&(e=a.g.location+\\"\\");var t=a.g.document;if(!e&&t&&(t.currentScript&&\\"SCRIPT\\"===t.currentScript.tagName.toUpperCase()&&(e=t.currentScript.src),!e)){var r=t.getElementsByTagName(\\"script\\");if(r.length)for(var n=r.length-1;n>-1&&(!e||!/^http(s?):/.test(e));)e=r[n--].src}if(!e)throw new Error(\\"Automatic publicPath is not supported in this browser\\");e=e.replace(/#.*$/,\\"\\").replace(/\\\\?.*$/,\\"\\").replace(/\\\\/[^\\\\/]+$/,\\"/\\"),a.p=e})(),(()=>{var e={792:0};a.f.j=(t,r)=>{var n=a.o(e,t)?e[t]:void 0;if(0!==n)if(n)r.push(n[2]);else{var o=new Promise(((r,o)=>n=e[t]=[r,o]));r.push(n[2]=o);var i=a.p+a.u(t),c=new Error;a.l(i,(r=>{if(a.o(e,t)&&(0!==(n=e[t])&&(e[t]=void 0),n)){var o=r&&(\\"load\\"===r.type?\\"missing\\":r.type),i=r&&r.target&&r.target.src;c.message=\\"Loading chunk \\"+t+\\" failed.\\\\n(\\"+o+\\": \\"+i+\\")\\",c.name=\\"ChunkLoadError\\",c.type=o,c.request=i,n[1](c)}}),\\"chunk-\\"+t,t)}};var t=(t,r)=>{var n,o,[i,c,s]=r,f=0;if(i.some((t=>0!==e[t]))){for(n in c)a.o(c,n)&&(a.m[n]=c[n]);s&&s(a)}for(t&&t(r);f<i.length;f++)o=i[f],a.o(e,o)&&e[o]&&e[o][0](),e[o]=0},r=self.webpackChunk=self.webpackChunk||[];r.forEach(t.bind(null,0)),r.push=t.bind(null,r.push.bind(r))})(),a.e(410).then(a.bind(a,\\"./a/asyncLoc1.js\\")),a.e(17).then(a.bind(a,\\"./a/asyncLoc2.js\\")),a.e(230).then(a.t.bind(a,\\"./a/async1.js\\",23)),a.e(421).then(a.t.bind(a,\\"./a/async2.js\\",23))})();",
 }
 `;
 
@@ -20,22 +20,22 @@ Object {
   "entrypoints": Object {
     "main": Object {
       "localizedAssets": Object {
-        "LOCALE1": "main-LOCALE1-db5fee2775538b16fa56.js",
-        "LOCALE2": "main-LOCALE2-e08dd16ea7f4a44191c3.js",
+        "LOCALE1": "main-LOCALE1-13cabae54d71324e68b9.js",
+        "LOCALE2": "main-LOCALE2-2a4fe7cefe163909da43.js",
       },
     },
   },
   "namedChunkGroups": Object {
     "asyncLoc1": Object {
       "localizedAssets": Object {
-        "LOCALE1": "chunks/asyncLoc1-LOCALE1-42ac7deedbceee724ebe.js",
-        "LOCALE2": "chunks/asyncLoc1-LOCALE2-9569ed1013c7d99991f0.js",
+        "LOCALE1": "chunks/asyncLoc1-LOCALE1-11284a1030c0b96a0d4a.js",
+        "LOCALE2": "chunks/asyncLoc1-LOCALE2-732c0329cde51769598f.js",
       },
     },
     "asyncLoc2": Object {
       "localizedAssets": Object {
-        "LOCALE1": "chunks/asyncLoc2-LOCALE1-fbbf37c75a89cefa3a8b.js",
-        "LOCALE2": "chunks/asyncLoc2-LOCALE2-6f7d6cb21f686f18a3de.js",
+        "LOCALE1": "chunks/asyncLoc2-LOCALE1-0a0dcdf1f01e840045bb.js",
+        "LOCALE2": "chunks/asyncLoc2-LOCALE2-b7bf7b922103768fdca2.js",
       },
     },
   },
@@ -46,7 +46,7 @@ exports[`LocalizationPlugin Handles async localized and non-localized chunks (mi
 
 exports[`LocalizationPlugin Handles async localized and non-localized chunks (unminified): Content 1`] = `
 Object {
-  "/release/chunks/async1-none-38a5bffea2da0af62512.js": "(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[515],{
+  "/release/chunks/async1-none-52f5e6bec29995fa1a9d.js": "(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[230],{
 
 /***/ \\"./a/async1.js\\":
 /***/ (() => {
@@ -56,7 +56,7 @@ console.log(\\"blah1\\");
 /***/ })
 
 }]);",
-  "/release/chunks/async2-none-c9e2b0fb2741b17cb7ae.js": "(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[989],{
+  "/release/chunks/async2-none-8e2ba6247847f697c0f1.js": "(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[421],{
 
 /***/ \\"./a/async2.js\\":
 /***/ (() => {
@@ -66,8 +66,8 @@ console.log(\\"blah2\\");
 /***/ })
 
 }]);",
-  "/release/chunks/asyncLoc1-LOCALE1-0e3f6d729d9a8d850e0d.js": "\\"use strict\\";
-(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[14],{
+  "/release/chunks/asyncLoc1-LOCALE1-3d4d60bb40f9e71ffd3d.js": "\\"use strict\\";
+(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[410],{
 
 /***/ \\"./a/asyncLoc1.js\\":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
@@ -75,7 +75,7 @@ console.log(\\"blah2\\");
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(\\"./a/strings1.loc.json\\");
 /* harmony import */ var _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(\\"./a/strings2.loc.json\\");
-  console.log(_strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__/* [\\"default\\"].test */ .Z.test, _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__/* [\\"default\\"].another */ .Z.another);
+  console.log(_strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__/* [\\"default\\"] */ .A.test, _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__/* [\\"default\\"] */ .A.another);
 
 /***/ }),
 
@@ -83,7 +83,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   \\"Z\\": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 const strings = {\\"test\\":\\"blah\\"};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (strings);
@@ -94,7 +94,7 @@ const strings = {\\"test\\":\\"blah\\"};
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   \\"Z\\": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 const strings = {\\"another\\":\\"something else\\"};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (strings);
@@ -102,8 +102,8 @@ const strings = {\\"another\\":\\"something else\\"};
 /***/ })
 
 }]);",
-  "/release/chunks/asyncLoc1-LOCALE2-2eebf33f2db768152544.js": "\\"use strict\\";
-(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[14],{
+  "/release/chunks/asyncLoc1-LOCALE2-f8f4279164ff7b99d24c.js": "\\"use strict\\";
+(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[410],{
 
 /***/ \\"./a/asyncLoc1.js\\":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
@@ -111,7 +111,7 @@ const strings = {\\"another\\":\\"something else\\"};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(\\"./a/strings1.loc.json\\");
 /* harmony import */ var _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(\\"./a/strings2.loc.json\\");
-  console.log(_strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__/* [\\"default\\"].test */ .Z.test, _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__/* [\\"default\\"].another */ .Z.another);
+  console.log(_strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__/* [\\"default\\"] */ .A.test, _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__/* [\\"default\\"] */ .A.another);
 
 /***/ }),
 
@@ -119,7 +119,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   \\"Z\\": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 const strings = {\\"test\\":\\"baz\\"};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (strings);
@@ -130,7 +130,7 @@ const strings = {\\"test\\":\\"baz\\"};
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   \\"Z\\": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 const strings = {\\"another\\":\\"some random translation\\"};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (strings);
@@ -138,8 +138,8 @@ const strings = {\\"another\\":\\"some random translation\\"};
 /***/ })
 
 }]);",
-  "/release/chunks/asyncLoc2-LOCALE1-862fa13951f910022c37.js": "\\"use strict\\";
-(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[5],{
+  "/release/chunks/asyncLoc2-LOCALE1-51577f6650bd547636e7.js": "\\"use strict\\";
+(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[17],{
 
 /***/ \\"./a/asyncLoc2.js\\":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
@@ -147,7 +147,7 @@ const strings = {\\"another\\":\\"some random translation\\"};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(\\"./a/strings1.loc.json\\");
 /* harmony import */ var _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(\\"./a/strings2.loc.json\\");
-  console.log(_strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__/* [\\"default\\"].test */ .Z.test + _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__/* [\\"default\\"].another */ .Z.another);
+  console.log(_strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__/* [\\"default\\"] */ .A.test + _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__/* [\\"default\\"] */ .A.another);
 
 /***/ }),
 
@@ -155,7 +155,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   \\"Z\\": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 const strings = {\\"test\\":\\"blah\\"};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (strings);
@@ -166,7 +166,7 @@ const strings = {\\"test\\":\\"blah\\"};
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   \\"Z\\": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 const strings = {\\"another\\":\\"something else\\"};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (strings);
@@ -174,8 +174,8 @@ const strings = {\\"another\\":\\"something else\\"};
 /***/ })
 
 }]);",
-  "/release/chunks/asyncLoc2-LOCALE2-c21e197905c17fe34ef7.js": "\\"use strict\\";
-(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[5],{
+  "/release/chunks/asyncLoc2-LOCALE2-19aa94fd15e03b9e60b1.js": "\\"use strict\\";
+(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[17],{
 
 /***/ \\"./a/asyncLoc2.js\\":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
@@ -183,7 +183,7 @@ const strings = {\\"another\\":\\"something else\\"};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(\\"./a/strings1.loc.json\\");
 /* harmony import */ var _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(\\"./a/strings2.loc.json\\");
-  console.log(_strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__/* [\\"default\\"].test */ .Z.test + _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__/* [\\"default\\"].another */ .Z.another);
+  console.log(_strings1_loc_json__WEBPACK_IMPORTED_MODULE_0__/* [\\"default\\"] */ .A.test + _strings2_loc_json__WEBPACK_IMPORTED_MODULE_1__/* [\\"default\\"] */ .A.another);
 
 /***/ }),
 
@@ -191,7 +191,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   \\"Z\\": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 const strings = {\\"test\\":\\"baz\\"};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (strings);
@@ -202,7 +202,7 @@ const strings = {\\"test\\":\\"baz\\"};
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   \\"Z\\": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 const strings = {\\"another\\":\\"some random translation\\"};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (strings);
@@ -210,7 +210,7 @@ const strings = {\\"another\\":\\"some random translation\\"};
 /***/ })
 
 }]);",
-  "/release/main-LOCALE1-8345e579c701b1d78cf4.js": "/******/ (() => { // webpackBootstrap
+  "/release/main-LOCALE1-8da16ffc2a7f76079fb5.js": "/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({});
 /************************************************************************/
 /******/ 	// The module cache
@@ -301,7 +301,7 @@ const strings = {\\"another\\":\\"some random translation\\"};
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return \\"chunks/\\" + {\\"5\\":\\"asyncLoc2\\",\\"14\\":\\"asyncLoc1\\",\\"515\\":\\"async1\\",\\"989\\":\\"async2\\"}[chunkId] + \\"-\\" + ({\\"5\\":1,\\"14\\":1}[chunkId]?\\"LOCALE1\\":\\"none\\") + \\"-\\" + {\\"5\\":\\"862fa13951f910022c37\\",\\"14\\":\\"0e3f6d729d9a8d850e0d\\",\\"515\\":\\"38a5bffea2da0af62512\\",\\"989\\":\\"c9e2b0fb2741b17cb7ae\\"}[chunkId] + \\".js\\";
+/******/ 			return \\"chunks/\\" + {\\"17\\":\\"asyncLoc2\\",\\"230\\":\\"async1\\",\\"410\\":\\"asyncLoc1\\",\\"421\\":\\"async2\\"}[chunkId] + \\"-\\" + ({\\"17\\":1,\\"410\\":1}[chunkId]?\\"LOCALE1\\":\\"none\\") + \\"-\\" + {\\"17\\":\\"51577f6650bd547636e7\\",\\"230\\":\\"52f5e6bec29995fa1a9d\\",\\"410\\":\\"3d4d60bb40f9e71ffd3d\\",\\"421\\":\\"8e2ba6247847f697c0f1\\"}[chunkId] + \\".js\\";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -347,6 +347,7 @@ const strings = {\\"another\\":\\"some random translation\\"};
 /******/ 					script.setAttribute(\\"nonce\\", __webpack_require__.nc);
 /******/ 				}
 /******/ 		
+/******/ 		
 /******/ 				script.src = url;
 /******/ 			}
 /******/ 			inProgress[url] = [done];
@@ -384,13 +385,13 @@ const strings = {\\"another\\":\\"some random translation\\"};
 /******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + \\"\\";
 /******/ 		var document = __webpack_require__.g.document;
 /******/ 		if (!scriptUrl && document) {
-/******/ 			if (document.currentScript)
+/******/ 			if (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT')
 /******/ 				scriptUrl = document.currentScript.src;
 /******/ 			if (!scriptUrl) {
 /******/ 				var scripts = document.getElementsByTagName(\\"script\\");
 /******/ 				if(scripts.length) {
 /******/ 					var i = scripts.length - 1;
-/******/ 					while (i > -1 && !scriptUrl) scriptUrl = scripts[i--].src;
+/******/ 					while (i > -1 && (!scriptUrl || !/^http(s?):/.test(scriptUrl))) scriptUrl = scripts[i--].src;
 /******/ 				}
 /******/ 			}
 /******/ 		}
@@ -409,7 +410,7 @@ const strings = {\\"another\\":\\"some random translation\\"};
 /******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
 /******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
 /******/ 		var installedChunks = {
-/******/ 			179: 0
+/******/ 			792: 0
 /******/ 		};
 /******/ 		
 /******/ 		__webpack_require__.f.j = (chunkId, promises) => {
@@ -493,10 +494,10 @@ const strings = {\\"another\\":\\"some random translation\\"};
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-__webpack_require__.e(/* import() | asyncLoc1 */ 14).then(__webpack_require__.bind(__webpack_require__, \\"./a/asyncLoc1.js\\"));__webpack_require__.e(/* import() | asyncLoc2 */ 5).then(__webpack_require__.bind(__webpack_require__, \\"./a/asyncLoc2.js\\"));__webpack_require__.e(/* import() | async1 */ 515).then(__webpack_require__.t.bind(__webpack_require__, \\"./a/async1.js\\", 23));__webpack_require__.e(/* import() | async2 */ 989).then(__webpack_require__.t.bind(__webpack_require__, \\"./a/async2.js\\", 23));
+__webpack_require__.e(/* import() | asyncLoc1 */ 410).then(__webpack_require__.bind(__webpack_require__, \\"./a/asyncLoc1.js\\"));__webpack_require__.e(/* import() | asyncLoc2 */ 17).then(__webpack_require__.bind(__webpack_require__, \\"./a/asyncLoc2.js\\"));__webpack_require__.e(/* import() | async1 */ 230).then(__webpack_require__.t.bind(__webpack_require__, \\"./a/async1.js\\", 23));__webpack_require__.e(/* import() | async2 */ 421).then(__webpack_require__.t.bind(__webpack_require__, \\"./a/async2.js\\", 23));
 /******/ })()
 ;",
-  "/release/main-LOCALE2-9f3e7cd89069987e6049.js": "/******/ (() => { // webpackBootstrap
+  "/release/main-LOCALE2-1b1eb8c4c78cd5114077.js": "/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({});
 /************************************************************************/
 /******/ 	// The module cache
@@ -587,7 +588,7 @@ __webpack_require__.e(/* import() | asyncLoc1 */ 14).then(__webpack_require__.bi
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return \\"chunks/\\" + {\\"5\\":\\"asyncLoc2\\",\\"14\\":\\"asyncLoc1\\",\\"515\\":\\"async1\\",\\"989\\":\\"async2\\"}[chunkId] + \\"-\\" + ({\\"5\\":1,\\"14\\":1}[chunkId]?\\"LOCALE2\\":\\"none\\") + \\"-\\" + {\\"5\\":\\"c21e197905c17fe34ef7\\",\\"14\\":\\"2eebf33f2db768152544\\",\\"515\\":\\"38a5bffea2da0af62512\\",\\"989\\":\\"c9e2b0fb2741b17cb7ae\\"}[chunkId] + \\".js\\";
+/******/ 			return \\"chunks/\\" + {\\"17\\":\\"asyncLoc2\\",\\"230\\":\\"async1\\",\\"410\\":\\"asyncLoc1\\",\\"421\\":\\"async2\\"}[chunkId] + \\"-\\" + ({\\"17\\":1,\\"410\\":1}[chunkId]?\\"LOCALE2\\":\\"none\\") + \\"-\\" + {\\"17\\":\\"19aa94fd15e03b9e60b1\\",\\"230\\":\\"52f5e6bec29995fa1a9d\\",\\"410\\":\\"f8f4279164ff7b99d24c\\",\\"421\\":\\"8e2ba6247847f697c0f1\\"}[chunkId] + \\".js\\";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -633,6 +634,7 @@ __webpack_require__.e(/* import() | asyncLoc1 */ 14).then(__webpack_require__.bi
 /******/ 					script.setAttribute(\\"nonce\\", __webpack_require__.nc);
 /******/ 				}
 /******/ 		
+/******/ 		
 /******/ 				script.src = url;
 /******/ 			}
 /******/ 			inProgress[url] = [done];
@@ -670,13 +672,13 @@ __webpack_require__.e(/* import() | asyncLoc1 */ 14).then(__webpack_require__.bi
 /******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + \\"\\";
 /******/ 		var document = __webpack_require__.g.document;
 /******/ 		if (!scriptUrl && document) {
-/******/ 			if (document.currentScript)
+/******/ 			if (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT')
 /******/ 				scriptUrl = document.currentScript.src;
 /******/ 			if (!scriptUrl) {
 /******/ 				var scripts = document.getElementsByTagName(\\"script\\");
 /******/ 				if(scripts.length) {
 /******/ 					var i = scripts.length - 1;
-/******/ 					while (i > -1 && !scriptUrl) scriptUrl = scripts[i--].src;
+/******/ 					while (i > -1 && (!scriptUrl || !/^http(s?):/.test(scriptUrl))) scriptUrl = scripts[i--].src;
 /******/ 				}
 /******/ 			}
 /******/ 		}
@@ -695,7 +697,7 @@ __webpack_require__.e(/* import() | asyncLoc1 */ 14).then(__webpack_require__.bi
 /******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
 /******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
 /******/ 		var installedChunks = {
-/******/ 			179: 0
+/******/ 			792: 0
 /******/ 		};
 /******/ 		
 /******/ 		__webpack_require__.f.j = (chunkId, promises) => {
@@ -779,7 +781,7 @@ __webpack_require__.e(/* import() | asyncLoc1 */ 14).then(__webpack_require__.bi
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-__webpack_require__.e(/* import() | asyncLoc1 */ 14).then(__webpack_require__.bind(__webpack_require__, \\"./a/asyncLoc1.js\\"));__webpack_require__.e(/* import() | asyncLoc2 */ 5).then(__webpack_require__.bind(__webpack_require__, \\"./a/asyncLoc2.js\\"));__webpack_require__.e(/* import() | async1 */ 515).then(__webpack_require__.t.bind(__webpack_require__, \\"./a/async1.js\\", 23));__webpack_require__.e(/* import() | async2 */ 989).then(__webpack_require__.t.bind(__webpack_require__, \\"./a/async2.js\\", 23));
+__webpack_require__.e(/* import() | asyncLoc1 */ 410).then(__webpack_require__.bind(__webpack_require__, \\"./a/asyncLoc1.js\\"));__webpack_require__.e(/* import() | asyncLoc2 */ 17).then(__webpack_require__.bind(__webpack_require__, \\"./a/asyncLoc2.js\\"));__webpack_require__.e(/* import() | async1 */ 230).then(__webpack_require__.t.bind(__webpack_require__, \\"./a/async1.js\\", 23));__webpack_require__.e(/* import() | async2 */ 421).then(__webpack_require__.t.bind(__webpack_require__, \\"./a/async2.js\\", 23));
 /******/ })()
 ;",
 }
@@ -792,22 +794,22 @@ Object {
   "entrypoints": Object {
     "main": Object {
       "localizedAssets": Object {
-        "LOCALE1": "main-LOCALE1-8345e579c701b1d78cf4.js",
-        "LOCALE2": "main-LOCALE2-9f3e7cd89069987e6049.js",
+        "LOCALE1": "main-LOCALE1-8da16ffc2a7f76079fb5.js",
+        "LOCALE2": "main-LOCALE2-1b1eb8c4c78cd5114077.js",
       },
     },
   },
   "namedChunkGroups": Object {
     "asyncLoc1": Object {
       "localizedAssets": Object {
-        "LOCALE1": "chunks/asyncLoc1-LOCALE1-0e3f6d729d9a8d850e0d.js",
-        "LOCALE2": "chunks/asyncLoc1-LOCALE2-2eebf33f2db768152544.js",
+        "LOCALE1": "chunks/asyncLoc1-LOCALE1-3d4d60bb40f9e71ffd3d.js",
+        "LOCALE2": "chunks/asyncLoc1-LOCALE2-f8f4279164ff7b99d24c.js",
       },
     },
     "asyncLoc2": Object {
       "localizedAssets": Object {
-        "LOCALE1": "chunks/asyncLoc2-LOCALE1-862fa13951f910022c37.js",
-        "LOCALE2": "chunks/asyncLoc2-LOCALE2-c21e197905c17fe34ef7.js",
+        "LOCALE1": "chunks/asyncLoc2-LOCALE1-51577f6650bd547636e7.js",
+        "LOCALE2": "chunks/asyncLoc2-LOCALE2-19aa94fd15e03b9e60b1.js",
       },
     },
   },

@@ -4,7 +4,7 @@
 import * as semver from 'semver';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { RushConstants } from '../../logic/RushConstants';
+import { RushConstants } from '../RushConstants';
 import { type DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import type { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import type { RushConfiguration } from '../../api/RushConfiguration';
@@ -154,12 +154,14 @@ export abstract class BaseShrinkwrapFile {
    * a given package.json. Returns true if any dependencies are not aligned with the shrinkwrap.
    *
    * @param project - the Rush project that is being validated against the shrinkwrap
+   * @param variant - the variant that is being validated
    *
    * @virtual
    */
   public abstract isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
-    subspace: Subspace
+    subspace: Subspace,
+    variant: string | undefined
   ): Promise<boolean>;
 
   /** @virtual */

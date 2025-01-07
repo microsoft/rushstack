@@ -36,6 +36,7 @@ build/Release/
 
 # Dependency directories
 node_modules/
+**/.storybook/node_modules
 jspm_packages/
 
 # TypeScript cache
@@ -86,7 +87,7 @@ jspm_packages/
 .pnp.*
 
 # OS X temporary files
-.DS_Store/
+.DS_Store
 
 # IntelliJ IDEA project files; if you want to commit IntelliJ settings, this recipe may be helpful:
 # https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore

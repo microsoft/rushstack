@@ -3,7 +3,7 @@
 
 import path from 'node:path';
 
-import { Async, FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
 import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { Operation } from './Operation';
@@ -66,19 +66,20 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
     const { terminal, changedProjectsOnly, isIncrementalBuildAllowed, allowWarningsInSuccessfulBuild } =
       this._options;
 
-    hooks.beforeExecuteOperations.tapPromise(
+    hooks.beforeExecuteOperations.tap(
       PLUGIN_NAME,
-      async (
+      (
         operations: ReadonlyMap<Operation, IOperationExecutionResult>,
-        { projectChangeAnalyzer }: IExecuteOperationsContext
-      ): Promise<void> => {
+        context: IExecuteOperationsContext
+      ): void => {
         let logGitWarning: boolean = false;
+        const { inputsSnapshot } = context;
 
-        await Async.forEachAsync(operations.values(), async (record: IOperationExecutionResult) => {
+        for (const record of operations.values()) {
           const { operation } = record;
           const { associatedProject, runner, logFilenameIdentifier } = operation;
           if (!associatedProject || !runner) {
-            return;
+            continue;
           }
 
           if (!runner.cacheable) {
@@ -87,7 +88,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
               packageDeps: undefined,
               packageDepsPath: ''
             });
-            return;
+            continue;
           }
 
           const packageDepsFilename: string = `package-deps_${logFilenameIdentifier}.json`;
@@ -100,12 +101,15 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
           let packageDeps: IProjectDeps | undefined;
 
           try {
-            const fileHashes: Map<string, string> | undefined =
-              await projectChangeAnalyzer._tryGetProjectDependenciesAsync(associatedProject, terminal);
+            const fileHashes: ReadonlyMap<string, string> | undefined =
+              inputsSnapshot?.getTrackedFileHashesForOperation(
+                associatedProject,
+                operation.associatedPhase?.name
+              );
 
             if (!fileHashes) {
               logGitWarning = true;
-              return;
+              continue;
             }
 
             const files: Record<string, string> = {};
@@ -134,7 +138,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
             packageDeps,
             allowSkip: isIncrementalBuildAllowed
           });
-        });
+        }
 
         if (logGitWarning) {
           // To test this code path:

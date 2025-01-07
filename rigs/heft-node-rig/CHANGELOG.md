@@ -1,6 +1,153 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Tue, 11 Jun 2024 00:21:28 GMT and should not be manually modified.
+This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+
+## 2.6.46
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 2.6.45
+Tue, 10 Dec 2024 07:32:19 GMT
+
+_Version update only_
+
+## 2.6.44
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 2.6.43
+Tue, 03 Dec 2024 16:11:08 GMT
+
+_Version update only_
+
+## 2.6.42
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 2.6.41
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 2.6.40
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 2.6.39
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 2.6.38
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 2.6.37
+Wed, 16 Oct 2024 00:11:20 GMT
+
+_Version update only_
+
+## 2.6.36
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 2.6.35
+Thu, 10 Oct 2024 00:11:51 GMT
+
+_Version update only_
+
+## 2.6.34
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 2.6.33
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 2.6.32
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 2.6.31
+Thu, 19 Sep 2024 00:11:08 GMT
+
+_Version update only_
+
+## 2.6.30
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 2.6.29
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 2.6.28
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 2.6.27
+Wed, 14 Aug 2024 22:37:32 GMT
+
+_Version update only_
+
+## 2.6.26
+Tue, 13 Aug 2024 18:17:05 GMT
+
+_Version update only_
+
+## 2.6.25
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 2.6.24
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 2.6.23
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 2.6.22
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 2.6.21
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 2.6.20
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 2.6.19
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
+
+## 2.6.18
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 2.6.17
 Tue, 11 Jun 2024 00:21:28 GMT

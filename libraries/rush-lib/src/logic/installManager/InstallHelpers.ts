@@ -9,7 +9,7 @@ import {
   JsonFile,
   LockFile
 } from '@rushstack/node-core-library';
-import { Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { LastInstallFlag } from '../../api/LastInstallFlag';
 import type { PackageManagerName } from '../../api/packageManager/PackageManager';
@@ -21,6 +21,7 @@ import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration'
 import { merge } from '../../utilities/objectUtilities';
 import type { Subspace } from '../../api/Subspace';
 import { RushConstants } from '../RushConstants';
+import * as semver from 'semver';
 
 interface ICommonPackageJson extends IPackageJson {
   pnpm?: {
@@ -28,6 +29,7 @@ interface ICommonPackageJson extends IPackageJson {
     packageExtensions?: typeof PnpmOptionsConfiguration.prototype.globalPackageExtensions;
     peerDependencyRules?: typeof PnpmOptionsConfiguration.prototype.globalPeerDependencyRules;
     neverBuiltDependencies?: typeof PnpmOptionsConfiguration.prototype.globalNeverBuiltDependencies;
+    ignoredOptionalDependencies?: typeof PnpmOptionsConfiguration.prototype.globalIgnoredOptionalDependencies;
     allowedDeprecatedVersions?: typeof PnpmOptionsConfiguration.prototype.globalAllowedDeprecatedVersions;
     patchedDependencies?: typeof PnpmOptionsConfiguration.prototype.globalPatchedDependencies;
   };
@@ -37,7 +39,8 @@ export class InstallHelpers {
   public static generateCommonPackageJson(
     rushConfiguration: RushConfiguration,
     subspace: Subspace,
-    dependencies: Map<string, string> = new Map<string, string>()
+    dependencies: Map<string, string> = new Map<string, string>(),
+    terminal: ITerminal
   ): void {
     const commonPackageJson: ICommonPackageJson = {
       dependencies: {},
@@ -47,7 +50,7 @@ export class InstallHelpers {
       version: '0.0.0'
     };
 
-    if (rushConfiguration.packageManager === 'pnpm') {
+    if (rushConfiguration.isPnpm) {
       const pnpmOptions: PnpmOptionsConfiguration =
         subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
       if (!commonPackageJson.pnpm) {
@@ -67,6 +70,24 @@ export class InstallHelpers {
 
       if (pnpmOptions.globalNeverBuiltDependencies) {
         commonPackageJson.pnpm.neverBuiltDependencies = pnpmOptions.globalNeverBuiltDependencies;
+      }
+
+      if (pnpmOptions.globalIgnoredOptionalDependencies) {
+        if (
+          rushConfiguration.rushConfigurationJson.pnpmVersion !== undefined &&
+          semver.lt(rushConfiguration.rushConfigurationJson.pnpmVersion, '9.0.0')
+        ) {
+          terminal.writeWarningLine(
+            Colorize.yellow(
+              `Your version of pnpm (${rushConfiguration.rushConfigurationJson.pnpmVersion}) ` +
+                `doesn't support the "globalIgnoredOptionalDependencies" field in ` +
+                `${rushConfiguration.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}. ` +
+                'Remove this field or upgrade to pnpm 9.'
+            )
+          );
+        }
+
+        commonPackageJson.pnpm.ignoredOptionalDependencies = pnpmOptions.globalIgnoredOptionalDependencies;
       }
 
       if (pnpmOptions.globalAllowedDeprecatedVersions) {
@@ -90,7 +111,7 @@ export class InstallHelpers {
 
     // Example: "C:\MyRepo\common\temp\package.json"
     const commonPackageJsonFilename: string = path.join(
-      subspace.getSubspaceTempFolder(),
+      subspace.getSubspaceTempFolderPath(),
       FileConstants.PackageJson
     );
 
@@ -111,7 +132,7 @@ export class InstallHelpers {
       if (rushConfiguration.npmOptions && rushConfiguration.npmOptions.environmentVariables) {
         configurationEnvironment = rushConfiguration.npmOptions.environmentVariables;
       }
-    } else if (rushConfiguration.packageManager === 'pnpm') {
+    } else if (rushConfiguration.isPnpm) {
       if (rushConfiguration.pnpmOptions && rushConfiguration.pnpmOptions.environmentVariables) {
         configurationEnvironment = rushConfiguration.pnpmOptions.environmentVariables;
       }
@@ -167,7 +188,7 @@ export class InstallHelpers {
 
     logIfConsoleOutputIsNotRestricted(`Trying to acquire lock for ${packageManagerAndVersion}`);
 
-    const lock: LockFile = await LockFile.acquire(rushUserFolder, packageManagerAndVersion);
+    const lock: LockFile = await LockFile.acquireAsync(rushUserFolder, packageManagerAndVersion);
 
     logIfConsoleOutputIsNotRestricted(`Acquired lock for ${packageManagerAndVersion}`);
 

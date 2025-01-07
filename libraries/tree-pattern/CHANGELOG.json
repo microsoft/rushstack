@@ -2,6 +2,18 @@
   "name": "@rushstack/tree-pattern",
   "entries": [
     {
+      "version": "0.3.4",
+      "tag": "@rushstack/tree-pattern_v0.3.4",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.3",
       "tag": "@rushstack/tree-pattern_v0.3.3",
       "date": "Sat, 17 Feb 2024 06:24:35 GMT",

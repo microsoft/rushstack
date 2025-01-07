@@ -1,16 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as parser from '@typescript-eslint/parser';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { typedefVar } from '../typedef-var';
 
 const ruleTester = new RuleTester({
-  parser: require.resolve('@typescript-eslint/parser'),
-  parserOptions: {
-    sourceType: 'module',
-    // Do not run under 'lib" folder
-    tsconfigRootDir: __dirname + '/../../src/test/fixtures',
-    project: './tsconfig.json'
+  languageOptions: {
+    parser,
+    parserOptions: {
+      sourceType: 'module',
+      // Do not run under 'lib" folder
+      tsconfigRootDir: __dirname + '/../../src/test/fixtures',
+      project: './tsconfig.json'
+    }
   }
 });
 

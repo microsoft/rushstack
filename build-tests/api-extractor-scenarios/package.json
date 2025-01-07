@@ -22,7 +22,6 @@
     "api-extractor-lib3-test": "workspace:*",
     "api-extractor-lib4-test": "workspace:*",
     "api-extractor-lib5-test": "workspace:*",
-    "colors": "~1.2.1",
     "local-node-rig": "workspace:*"
   },
   "peerDependencies": {

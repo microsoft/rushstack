@@ -19,6 +19,7 @@ export interface IOperationRunnerOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   commandToRun: string;
+  commandForHash: string;
   displayName: string;
   phase: IPhase;
   environment?: IEnvironment;
@@ -38,6 +39,7 @@ export class ShellOperationRunner implements IOperationRunner {
   public readonly warningsAreAllowed: boolean;
 
   private readonly _commandToRun: string;
+  private readonly _commandForHash: string;
 
   private readonly _rushProject: RushConfigurationProject;
   private readonly _rushConfiguration: RushConfiguration;
@@ -53,6 +55,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
     this._commandToRun = options.commandToRun;
+    this._commandForHash = options.commandForHash;
     this._environment = options.environment;
   }
 
@@ -65,7 +68,7 @@ export class ShellOperationRunner implements IOperationRunner {
   }
 
   public getConfigHash(): string {
-    return this._commandToRun;
+    return this._commandForHash;
   }
 
   private async _executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {

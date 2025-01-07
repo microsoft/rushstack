@@ -1,5 +1,47 @@
 # Upgrade notes for @microsoft/rush
 
+### Rush 5.135.0
+
+This release of Rush deprecates the `rush-project.json`'s `operationSettings.sharding.shardOperationSettings`
+option in favor of defining a separate operation with a `:shard` suffix. This will only affect projects that
+have opted into sharding and have custom sharded operation settings.
+
+To migrate,
+**`rush-project.json`** (OLD)
+```json
+{
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "sharding": {
+        "count": 4,
+        "shardOperationSettings": {
+          "weight": 4
+        }
+      },
+    }
+  ]
+}
+```
+
+**`rush-project.json`** (NEW)
+```json
+{
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "sharding": {
+        "count": 4,
+      },
+    },
+    {
+      "operationName": "_phase:build:shard", // note the suffix here
+      "weight": 4
+    }
+  ]
+}
+```
+
 ### Rush 5.60.0
 
 This release of Rush includes a breaking change for the experiment build cache feature. It only affects

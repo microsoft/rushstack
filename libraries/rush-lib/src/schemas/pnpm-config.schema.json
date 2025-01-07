@@ -10,6 +10,11 @@
       "type": "string"
     },
 
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from. This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
     "useWorkspaces": {
       "description": "If true, then `rush install` and `rush update` will use the PNPM workspaces feature to perform the install, instead of the old model where Rush generated the symlinks for each projects's node_modules folder. This option is strongly recommended. The default value is false.",
       "type": "boolean"
@@ -141,6 +146,15 @@
       "type": "array",
       "items": {
         "description": "Specify package name of the dependency",
+        "type": "string"
+      }
+    },
+
+    "globalIgnoredOptionalDependencies": {
+      "description": "This field allows you to skip the installation of specific optional dependencies. The listed packages will be treated as if they are not present in the dependency tree during installation, meaning they will not be installed even if required by other packages.\n\n(SUPPORTED ONLY IN PNPM 9.0.0 AND NEWER)\n\nPNPM documentation: https://pnpm.io/package_json#pnpmalloweddeprecatedversions",
+      "type": "array",
+      "items": {
+        "description": "Specify the package name of the optional dependency to be ignored.",
         "type": "string"
       }
     },

@@ -79,7 +79,6 @@ const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
   [OperationStatus.Ready]: '?',
   [OperationStatus.Queued]: '?',
   [OperationStatus.Executing]: '?',
-  [OperationStatus.RemoteExecuting]: '?',
   [OperationStatus.Success]: '#',
   [OperationStatus.SuccessWithWarning]: '!',
   [OperationStatus.Failure]: '!',
@@ -104,7 +103,6 @@ const TIMELINE_CHART_COLORIZER: Record<OperationStatus, (string: string) => stri
   [OperationStatus.Ready]: Colorize.yellow,
   [OperationStatus.Queued]: Colorize.yellow,
   [OperationStatus.Executing]: Colorize.yellow,
-  [OperationStatus.RemoteExecuting]: Colorize.yellow,
   [OperationStatus.Success]: Colorize.green,
   [OperationStatus.SuccessWithWarning]: Colorize.yellow,
   [OperationStatus.Failure]: Colorize.red,
@@ -152,7 +150,7 @@ export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrin
   let workDuration: number = 0;
 
   for (const [operation, operationResult] of result.operationResults) {
-    if (operation.runner?.silent) {
+    if (operationResult.silent) {
       continue;
     }
 

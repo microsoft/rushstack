@@ -7,11 +7,22 @@ import { Worker } from 'worker_threads';
 
 import * as semver from 'semver';
 import type * as TTypescript from 'typescript';
-import { JsonFile, type IPackageJson, Path, FileError } from '@rushstack/node-core-library';
+import {
+  JsonFile,
+  type IPackageJson,
+  Path,
+  FileError,
+  RealNodeModulePathResolver
+} from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { IScopedLogger } from '@rushstack/heft';
 
-import type { ExtendedTypeScript, IExtendedSolutionBuilder } from './internalTypings/TypeScriptInternals';
+import type {
+  ExtendedBuilderProgram,
+  ExtendedTypeScript,
+  IExtendedSolutionBuilder,
+  ITypeScriptNodeSystem
+} from './internalTypings/TypeScriptInternals';
 import type { ITypeScriptConfigurationJson } from './TypeScriptPlugin';
 import type { PerformanceMeasurer } from './Performance';
 import type {
@@ -111,7 +122,7 @@ const OLDEST_SUPPORTED_TS_MAJOR_VERSION: number = 2;
 const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
 
 const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 5;
-const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 4;
+const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 6;
 
 interface ITypeScriptTool {
   ts: ExtendedTypeScript;
@@ -310,13 +321,40 @@ export class TypeScriptBuilder {
         return timeout;
       };
 
+      let realpath: typeof ts.sys.realpath = ts.sys.realpath;
+      if (this._configuration.onlyResolveSymlinksInNodeModules) {
+        const resolver: RealNodeModulePathResolver = new RealNodeModulePathResolver();
+        realpath = resolver.realNodeModulePath;
+      }
+
+      const getCurrentDirectory: () => string = () => this._configuration.buildFolderPath;
+
       // Need to also update watchFile and watchDirectory
-      const system: TTypescript.System = {
+      const system: ITypeScriptNodeSystem = {
         ...ts.sys,
-        getCurrentDirectory: () => this._configuration.buildFolderPath,
+        realpath,
+        getCurrentDirectory,
         clearTimeout,
         setTimeout
       };
+
+      if (realpath && system.getAccessibleFileSystemEntries) {
+        const { getAccessibleFileSystemEntries } = system;
+        system.readDirectory = (folderPath, extensions, exclude, include, depth): string[] => {
+          return ts.matchFiles(
+            folderPath,
+            extensions,
+            exclude,
+            include,
+            ts.sys.useCaseSensitiveFileNames,
+            getCurrentDirectory(),
+            depth,
+            getAccessibleFileSystemEntries,
+            realpath,
+            ts.sys.directoryExists
+          );
+        };
+      }
 
       this._tool = {
         ts,
@@ -372,7 +410,7 @@ export class TypeScriptBuilder {
     if (!tool.solutionBuilder && !tool.watchProgram) {
       //#region CONFIGURE
       const { duration: configureDurationMs, tsconfig } = measureTsPerformance('Configure', () => {
-        const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
+        const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(tool);
         this._validateTsconfig(ts, _tsconfig);
 
         return {
@@ -426,7 +464,7 @@ export class TypeScriptBuilder {
       tsconfig,
       compilerHost
     } = measureTsPerformance('Configure', () => {
-      const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
+      const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(tool);
       this._validateTsconfig(ts, _tsconfig);
 
       const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(tool, _tsconfig);
@@ -553,7 +591,7 @@ export class TypeScriptBuilder {
     if (!tool.solutionBuilder) {
       //#region CONFIGURE
       const { duration: configureDurationMs, solutionBuilderHost } = measureSync('Configure', () => {
-        const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
+        const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(tool);
         this._validateTsconfig(ts, _tsconfig);
 
         const _solutionBuilderHost: TSolutionHost = this._buildSolutionBuilderHost(tool);
@@ -918,19 +956,21 @@ export class TypeScriptBuilder {
     return `${outFolderName}:${jsExtensionOverride || '.js'}`;
   }
 
-  private _loadTsconfig(ts: ExtendedTypeScript): TTypescript.ParsedCommandLine {
+  private _loadTsconfig(tool: ITypeScriptTool): TTypescript.ParsedCommandLine {
+    const { ts, system } = tool;
     const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
       this._configuration.tsconfigPath,
-      ts.sys.readFile
+      system.readFile
     );
 
     const currentFolder: string = path.dirname(this._configuration.tsconfigPath);
     const tsconfig: TTypescript.ParsedCommandLine = ts.parseJsonConfigFileContent(
       parsedConfigFile.config,
       {
-        fileExists: ts.sys.fileExists,
-        readFile: ts.sys.readFile,
-        readDirectory: ts.sys.readDirectory,
+        fileExists: system.fileExists,
+        readFile: system.readFile,
+        readDirectory: system.readDirectory,
+        realpath: system.realpath,
         useCaseSensitiveFileNames: true
       },
       currentFolder,
@@ -1050,11 +1090,11 @@ export class TypeScriptBuilder {
       // Do nothing
     };
 
-    const { ts } = tool;
+    const { ts, system } = tool;
 
     const solutionBuilderHost: TTypescript.SolutionBuilderHost<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> =
       ts.createSolutionBuilderHost(
-        ts.sys,
+        system,
         this._getCreateBuilderProgram(ts),
         tool.reportDiagnostic,
         reportSolutionBuilderStatus,
@@ -1086,7 +1126,11 @@ export class TypeScriptBuilder {
     if (tsconfig.options.incremental) {
       compilerHost = ts.createIncrementalCompilerHost(tsconfig.options, system);
     } else {
-      compilerHost = ts.createCompilerHost(tsconfig.options, undefined, system);
+      compilerHost = (ts.createCompilerHostWorker ?? ts.createCompilerHost)(
+        tsconfig.options,
+        undefined,
+        system
+      );
     }
 
     this._changeCompilerHostToUseCache(compilerHost, tool);
@@ -1300,9 +1344,10 @@ export class TypeScriptBuilder {
 function getFilesToTranspileFromBuilderProgram(
   builderProgram: TTypescript.BuilderProgram
 ): Map<string, string> {
-  const changedFilesSet: Set<string> = (
-    builderProgram as unknown as { getState(): { changedFilesSet: Set<string> } }
-  ).getState().changedFilesSet;
+  const program: ExtendedBuilderProgram = builderProgram as unknown as ExtendedBuilderProgram;
+  // getState was removed in Typescript 5.6, replaced with state
+  const changedFilesSet: Set<string> = (program.state ?? program.getState()).changedFilesSet;
+
   const filesToTranspile: Map<string, string> = new Map();
   for (const fileName of changedFilesSet) {
     const sourceFile: TTypescript.SourceFile | undefined = builderProgram.getSourceFile(fileName);

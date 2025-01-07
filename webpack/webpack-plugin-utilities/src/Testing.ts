@@ -6,7 +6,7 @@ import path from 'path';
 import type { StatsCompilation as WebpackStatsCompilation } from 'webpack';
 import webpackMerge from 'webpack-merge';
 
-import type { MultiStats, Stats, Configuration, Compiler, StatsError } from 'webpack';
+import type { MultiStats, Stats, Configuration, Compiler, StatsError, OutputFileSystem } from 'webpack';
 
 /**
  * @public
@@ -78,8 +78,11 @@ export async function getTestingWebpackCompilerAsync(
   const compilerOptions: Configuration = webpackMerge(_defaultWebpackConfig(entry), additionalConfig);
   const compiler: Compiler = webpackModule(compilerOptions);
 
-  compiler.outputFileSystem = memFs;
-  compiler.outputFileSystem.join = path.join.bind(path);
+  // The memFs Volume satisfies the interface contract, but the types aren't happy due to strict null checks
+  const outputFileSystem: OutputFileSystem = memFs as unknown as OutputFileSystem;
+  outputFileSystem.join = path.join.bind(path);
+
+  compiler.outputFileSystem = outputFileSystem;
 
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {

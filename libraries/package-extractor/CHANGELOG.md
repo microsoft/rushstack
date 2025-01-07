@@ -1,6 +1,156 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Fri, 07 Jun 2024 15:10:25 GMT and should not be manually modified.
+This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+
+## 0.10.5
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.10.4
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.10.3
+Tue, 03 Dec 2024 16:11:08 GMT
+
+_Version update only_
+
+## 0.10.2
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.10.1
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.10.0
+Thu, 24 Oct 2024 15:11:19 GMT
+
+### Minor changes
+
+- Add bin linking support when calling the create-links.js script with the "--link-bins" parameter
+
+## 0.9.9
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.9.8
+Tue, 22 Oct 2024 22:12:40 GMT
+
+### Patches
+
+- Fix an issue where the `node_modules/.bin` folder symlinks were not created for extracted packages when using the "default" link creation mode
+
+## 0.9.7
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.9.6
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.9.5
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.9.4
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.9.3
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.9.2
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.9.1
+Sat, 21 Sep 2024 00:10:27 GMT
+
+_Version update only_
+
+## 0.9.0
+Mon, 16 Sep 2024 02:09:00 GMT
+
+### Minor changes
+
+- Add a `files` field to the `extractor-metadata.json` file
+
+## 0.8.1
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.8.0
+Wed, 11 Sep 2024 19:54:47 GMT
+
+### Minor changes
+
+- Add the ability to change where the "create-links.js" file and the associated metadata file are generated when running in the "script" linkCreation mode
+
+## 0.7.26
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.7.25
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.7.24
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.7.23
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.7.22
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.7.21
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.7.20
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.7.19
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.7.18
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
+
+## 0.7.17
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.7.16
 Fri, 07 Jun 2024 15:10:25 GMT

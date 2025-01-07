@@ -1,0 +1,47 @@
+/**
+ * Defines configuration used by core Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  // TODO: Add comments
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs"] }],
+
+      "tasksByName": {
+        "loc-typings": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-localization-typings-plugin",
+            "options": {
+              "generatedTsFolder": "temp/loc-json-ts",
+              "exportAsDefault": {
+                "interfaceDocumentationComment": "This interface represents a JSON object that has been loaded from a localization file.",
+                "valueDocumentationComment": "@public",
+                "inferInterfaceNameFromFilename": true
+              }
+            }
+          }
+        },
+        "typescript": {
+          "taskDependencies": ["loc-typings"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-typescript-plugin"
+          }
+        },
+        "lint": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-lint-plugin"
+          }
+        },
+        "webpack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack4-plugin"
+          }
+        }
+      }
+    }
+  }
+}

@@ -31,6 +31,8 @@ import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTyp
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 import { Utilities } from '../utilities/Utilities';
 import type { Subspace } from '../api/Subspace';
+import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -135,7 +137,7 @@ export class RushPnpmCommandLineParser {
     const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
     this._subspace = subspace;
 
-    const workspaceFolder: string = subspace.getSubspaceTempFolder();
+    const workspaceFolder: string = subspace.getSubspaceTempFolderPath();
     const workspaceFilePath: string = path.join(workspaceFolder, 'pnpm-workspace.yaml');
 
     if (!FileSystem.exists(workspaceFilePath)) {
@@ -333,6 +335,22 @@ export class RushPnpmCommandLineParser {
           }
           break;
         }
+        case 'patch-remove': {
+          const semver: typeof import('semver') = await import('semver');
+          /**
+           * The "patch-remove" command was introduced in pnpm version 8.5.0
+           */
+          if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '8.5.0')) {
+            this._terminal.writeErrorLine(
+              PrintUtilities.wrapWords(
+                `Error: The "pnpm patch-remove" command is added after pnpm@8.5.0.` +
+                  ` Please update "pnpmVersion" >= 8.5.0 in ${RushConstants.rushJsonFilename} file and run "rush update" to use this command.`
+              ) + '\n'
+            );
+            throw new AlreadyReportedError();
+          }
+          break;
+        }
 
         // Known safe
         case 'audit':
@@ -374,7 +392,7 @@ export class RushPnpmCommandLineParser {
 
   private async _executeAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration = this._rushConfiguration;
-    const workspaceFolder: string = this._subspace.getSubspaceTempFolder();
+    const workspaceFolder: string = this._subspace.getSubspaceTempFolderPath();
     const pnpmEnvironmentMap: EnvironmentMap = new EnvironmentMap(process.env);
     pnpmEnvironmentMap.set('NPM_CONFIG_WORKSPACE_DIR', workspaceFolder);
 
@@ -442,22 +460,38 @@ export class RushPnpmCommandLineParser {
       return;
     }
 
-    const subspaceTempFolder: string = this._subspace.getSubspaceTempFolder();
+    const subspaceTempFolder: string = this._subspace.getSubspaceTempFolderPath();
 
     switch (commandName) {
+      case 'patch-remove':
       case 'patch-commit': {
+        // why need to throw error when pnpm-config.json not exists?
+        // 1. pnpm-config.json is required for `rush-pnpm patch-commit`. Rush writes the patched dependency to the pnpm-config.json when finishes.
+        // 2. we can not fallback to use Monorepo config folder (common/config/rush) due to that this command is intended to apply to input subspace only.
+        //    It will produce unexpected behavior if we use the fallback.
+        if (this._subspace.getPnpmOptions() === undefined) {
+          const subspaceConfigFolder: string = this._subspace.getSubspaceConfigFolderPath();
+          this._terminal.writeErrorLine(
+            `The "rush-pnpm patch-commit" command cannot proceed without a pnpm-config.json file.` +
+              `  Create one in this folder: ${subspaceConfigFolder}`
+          );
+          break;
+        }
+
         // Example: "C:\MyRepo\common\temp\package.json"
         const commonPackageJsonFilename: string = `${subspaceTempFolder}/${FileConstants.PackageJson}`;
         const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
         const newGlobalPatchedDependencies: Record<string, string> | undefined =
           commonPackageJson?.pnpm?.patchedDependencies;
+        const pnpmOptions: PnpmOptionsConfiguration | undefined = this._subspace.getPnpmOptions();
         const currentGlobalPatchedDependencies: Record<string, string> | undefined =
-          this._rushConfiguration.pnpmOptions.globalPatchedDependencies;
+          pnpmOptions?.globalPatchedDependencies;
 
         if (!objectsAreDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
           const commonTempPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
-          const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
-          // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
+          const rushPnpmPatchesFolder: string = this._subspace.getSubspacePnpmPatchesFolderPath();
+
+          // Copy (or delete) common\temp\subspace\patches\ --> common\config\pnpm-patches\ OR common\config\rush\pnpm-patches\
           if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
             FileSystem.ensureEmptyFolder(rushPnpmPatchesFolder);
             // eslint-disable-next-line no-console
@@ -477,14 +511,14 @@ export class RushPnpmCommandLineParser {
           }
 
           // Update patchedDependencies to pnpm configuration file
-          this._rushConfiguration.pnpmOptions.updateGlobalPatchedDependencies(newGlobalPatchedDependencies);
+          pnpmOptions?.updateGlobalPatchedDependencies(newGlobalPatchedDependencies);
 
           // Rerun installation to update
           await this._doRushUpdateAsync();
 
           this._terminal.writeWarningLine(
             `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the ` +
-              `"${RushConstants.commonFolderName}/${RushConstants.pnpmPatchesCommonFolderName}" folder.\n` +
+              `"${commonTempPnpmPatchesFolder}" folder.\n` +
               '  Please commit this change to Git.'
           );
         }
@@ -510,6 +544,7 @@ export class RushPnpmCommandLineParser {
       networkConcurrency: undefined,
       offline: false,
       collectLogFile: false,
+      variant: process.env[EnvironmentVariableNames.RUSH_VARIANT], // For `rush-pnpm`, only use the env var
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArgumentValues: [],
       selectedProjects: new Set(this._rushConfiguration.projects),

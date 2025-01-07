@@ -9,6 +9,16 @@ export interface IExtendedSolutionBuilder
   invalidateProject(configFilePath: string, mode: 0 | 1 | 2): void;
 }
 
+export interface ITypeScriptNodeSystem extends TTypescript.System {
+  /**
+   * https://github.com/microsoft/TypeScript/blob/d85767abfd83880cea17cea70f9913e9c4496dcc/src/compiler/sys.ts#L1438
+   */
+  getAccessibleFileSystemEntries?: (folderPath: string) => {
+    files: string[];
+    directories: string[];
+  };
+}
+
 export interface IExtendedTypeScript {
   /**
    * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/performance.ts#L3
@@ -59,6 +69,12 @@ export interface IExtendedTypeScript {
     system?: TTypescript.System
   ): TTypescript.CompilerHost;
 
+  createCompilerHostWorker(
+    options: TTypescript.CompilerOptions,
+    setParentNodes?: boolean,
+    system?: TTypescript.System
+  ): TTypescript.CompilerHost;
+
   /**
    * https://github.com/microsoft/TypeScript/blob/782c09d783e006a697b4ba6d1e7ec2f718ce8393/src/compiler/utilities.ts#L6540
    */
@@ -98,3 +114,14 @@ export interface IExtendedTypeScript {
 }
 
 export type ExtendedTypeScript = typeof TTypescript & IExtendedTypeScript;
+
+export type ExtendedBuilderProgram = TTypescript.BuilderProgram & {
+  /**
+   * Typescript 5.6+
+   */
+  state?: { changedFilesSet: Set<string> };
+  /**
+   * Typescript < 5.6
+   */
+  getState(): { changedFilesSet: Set<string> };
+};

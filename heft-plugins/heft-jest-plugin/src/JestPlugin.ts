@@ -24,7 +24,7 @@ import type {
   CommandLineStringListParameter
 } from '@rushstack/heft';
 import {
-  ConfigurationFile,
+  ProjectConfigurationFile,
   type ICustomJsonPathMetadata,
   type IJsonPathMetadataResolverOptions,
   InheritanceType,
@@ -122,11 +122,11 @@ const PLUGIN_NAME: 'jest-plugin' = 'jest-plugin';
 const PLUGIN_PACKAGE_NAME: '@rushstack/heft-jest-plugin' = '@rushstack/heft-jest-plugin';
 const PLUGIN_PACKAGE_FOLDER: string = path.resolve(__dirname, '..');
 const JEST_CONFIGURATION_LOCATION: 'config/jest.config.json' = `config/jest.config.json`;
+export const JEST_CONFIG_JSDOM_PACKAGE_NAME: 'jest-environment-jsdom' = 'jest-environment-jsdom';
 
 const ROOTDIR_TOKEN: '<rootDir>' = '<rootDir>';
 const CONFIGDIR_TOKEN: '<configDir>' = '<configDir>';
 const PACKAGE_CAPTUREGROUP: 'package' = 'package';
-//@ts-expect-error Named capturing groups are only available when targeting 'ES2018'
 const PACKAGEDIR_REGEX: RegExp = /^<packageDir:\s*(?<package>[^\s>]+)\s*>/;
 const JSONPATHPROPERTY_REGEX: RegExp = /^\$\['([^']+)'\]/;
 
@@ -140,7 +140,8 @@ interface IPendingTestRun {
  * @internal
  */
 export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
-  private static _jestConfigurationFileLoader: ConfigurationFile<IHeftJestConfiguration> | undefined;
+  private static _jestConfigurationFileLoader: ProjectConfigurationFile<IHeftJestConfiguration> | undefined;
+  private static _includedJestEnvironmentJsdomPath: string | undefined;
 
   private _jestPromise: Promise<unknown> | undefined;
   private _pendingTestRuns: Set<IPendingTestRun> = new Set();
@@ -678,7 +679,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   public static _getJestConfigurationLoader(
     buildFolder: string,
     projectRelativeFilePath: string
-  ): ConfigurationFile<IHeftJestConfiguration> {
+  ): ProjectConfigurationFile<IHeftJestConfiguration> {
     if (!JestPlugin._jestConfigurationFileLoader) {
       // By default, ConfigurationFile will replace all objects, so we need to provide merge functions for these
       const shallowObjectInheritanceFunc: <T extends Record<string, unknown> | undefined>(
@@ -723,7 +724,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
           resolveAsModule: true
         });
 
-      JestPlugin._jestConfigurationFileLoader = new ConfigurationFile<IHeftJestConfiguration>({
+      JestPlugin._jestConfigurationFileLoader = new ProjectConfigurationFile<IHeftJestConfiguration>({
         projectRelativeFilePath: projectRelativeFilePath,
         // Bypass Jest configuration validation
         jsonSchemaObject: anythingSchema,
@@ -981,27 +982,47 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
               filePath: propertyValue,
               requireResolveFunction
             });
+
           case 'testSequencer':
             return resolveSequencer(/*resolver:*/ undefined, {
               rootDir: configDir,
               filePath: propertyValue,
               requireResolveFunction
             });
+
           case 'testEnvironment':
-            return resolveTestEnvironment({
+            const testEnvironment: string = resolveTestEnvironment({
               rootDir: configDir,
               testEnvironment: propertyValue,
               requireResolveFunction
             });
+
+            if (propertyValue === JEST_CONFIG_JSDOM_PACKAGE_NAME) {
+              // If the testEnvironment is the included jest-environment-jsdom,
+              // redirect to the version that injects punycode for Node >= 22.
+              if (!JestPlugin._includedJestEnvironmentJsdomPath) {
+                JestPlugin._includedJestEnvironmentJsdomPath = require.resolve(
+                  JEST_CONFIG_JSDOM_PACKAGE_NAME
+                );
+              }
+
+              if (JestPlugin._includedJestEnvironmentJsdomPath === testEnvironment) {
+                return `${__dirname}/exports/patched-jest-environment-jsdom.js`;
+              }
+            }
+
+            return testEnvironment;
+
           case 'watchPlugins':
             return resolveWatchPlugin(/*resolver:*/ undefined, {
               rootDir: configDir,
               filePath: propertyValue,
               requireResolveFunction
             });
+
           case 'preset':
             // Do not allow use of presets and extends together, since that would create a
-            // confusing heirarchy.
+            // confusing hierarchy.
             if (
               configurationFile.preset &&
               (configurationFile as IHeftJestConfigurationWithExtends).extends
@@ -1039,6 +1060,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
             } else {
               return propertyValue;
             }
+
           default:
             // We know the value will be non-null since resolve will throw an error if it is null
             // and non-optional

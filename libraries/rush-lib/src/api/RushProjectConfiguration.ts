@@ -3,7 +3,7 @@
 
 import { AlreadyReportedError, Async, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
+import { ProjectConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
 import type { RushConfigurationProject } from './RushConfigurationProject';
@@ -65,15 +65,9 @@ export interface IRushPhaseSharding {
   outputFolderArgumentFormat?: string;
 
   /**
-   * Configuration for the shard operation. All other configuration applies to the collator operation.
+   * @deprecated Create a separate operation settings object for the shard operation settings with the name `{operationName}:shard`.
    */
-  shardOperationSettings?: {
-    /**
-     * How many concurrency units this operation should take up during execution. The maximum concurrent units is
-     *  determined by the -p flag.
-     */
-    weight?: number;
-  };
+  shardOperationSettings?: unknown;
 }
 
 /**
@@ -140,6 +134,11 @@ export interface IOperationSettings {
    *  determined by the -p flag.
    */
   weight?: number;
+
+  /**
+   * If true, this operation can use cobuilds for orchestration without restoring build cache entries.
+   */
+  allowCobuildWithoutCache?: boolean;
 }
 
 interface IOldRushProjectJson {
@@ -148,8 +147,8 @@ interface IOldRushProjectJson {
   buildCacheOptions?: unknown;
 }
 
-const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
-  new ConfigurationFile<IRushProjectJson>({
+const RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IRushProjectJson> =
+  new ProjectConfigurationFile<IRushProjectJson>({
     projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
     jsonSchemaObject: schemaJson,
     propertyInheritance: {
@@ -231,8 +230,8 @@ const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
     }
   });
 
-const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IOldRushProjectJson> =
-  new ConfigurationFile<IOldRushProjectJson>({
+const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IOldRushProjectJson> =
+  new ProjectConfigurationFile<IOldRushProjectJson>({
     projectRelativeFilePath: RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath,
     jsonSchemaObject: anythingSchemaJson
   });
@@ -583,6 +582,14 @@ export class RushProjectConfiguration {
           terminal.writeErrorLine(errorMessage);
         } else {
           operationSettingsByOperationName.set(operationName, operationSettings);
+        }
+      }
+
+      for (const [operationName, operationSettings] of operationSettingsByOperationName) {
+        if (operationSettings.sharding?.shardOperationSettings) {
+          terminal.writeWarningLine(
+            `DEPRECATED: The "sharding.shardOperationSettings" field is deprecated. Please create a new operation, '${operationName}:shard' to track shard operation settings.`
+          );
         }
       }
     }

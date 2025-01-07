@@ -1,0 +1,257 @@
+{
+  "name": "@rushstack/lookup-by-path",
+  "entries": [
+    {
+      "version": "0.5.0",
+      "tag": "@rushstack/lookup-by-path_v0.5.0",
+      "date": "Wed, 18 Dec 2024 01:11:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update all methods to accept optional override delimiters. Add `size`, `entries(), `get()`, `has()`, `removeItem()`. Make class iterable.\nExplicitly exclude `undefined` and `null` from the allowed types for the type parameter `TItem`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.7",
+      "tag": "@rushstack/lookup-by-path_v0.4.7",
+      "date": "Sat, 14 Dec 2024 01:11:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.6",
+      "tag": "@rushstack/lookup-by-path_v0.4.6",
+      "date": "Mon, 09 Dec 2024 20:31:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.5",
+      "tag": "@rushstack/lookup-by-path_v0.4.5",
+      "date": "Tue, 03 Dec 2024 16:11:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.4",
+      "tag": "@rushstack/lookup-by-path_v0.4.4",
+      "date": "Sat, 23 Nov 2024 01:18:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.3",
+      "tag": "@rushstack/lookup-by-path_v0.4.3",
+      "date": "Fri, 22 Nov 2024 01:10:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.2",
+      "tag": "@rushstack/lookup-by-path_v0.4.2",
+      "date": "Thu, 24 Oct 2024 00:15:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.1",
+      "tag": "@rushstack/lookup-by-path_v0.4.1",
+      "date": "Mon, 21 Oct 2024 18:50:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.0",
+      "tag": "@rushstack/lookup-by-path_v0.4.0",
+      "date": "Thu, 17 Oct 2024 20:25:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `IReadonlyLookupByPath` interface to help unit tests for functions that consume `LookupByPath`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.2",
+      "tag": "@rushstack/lookup-by-path_v0.3.2",
+      "date": "Thu, 17 Oct 2024 08:35:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.1",
+      "tag": "@rushstack/lookup-by-path_v0.3.1",
+      "date": "Tue, 15 Oct 2024 00:12:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@rushstack/lookup-by-path_v0.3.0",
+      "date": "Thu, 03 Oct 2024 15:11:00 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow for a map of file paths to arbitrary info to be grouped by the nearest entry in the LookupByPath trie"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.5",
+      "tag": "@rushstack/lookup-by-path_v0.2.5",
+      "date": "Wed, 02 Oct 2024 00:11:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.4",
+      "tag": "@rushstack/lookup-by-path_v0.2.4",
+      "date": "Tue, 01 Oct 2024 00:11:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.3",
+      "tag": "@rushstack/lookup-by-path_v0.2.3",
+      "date": "Mon, 30 Sep 2024 15:12:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@rushstack/lookup-by-path_v0.2.2",
+      "date": "Fri, 13 Sep 2024 00:11:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/lookup-by-path_v0.2.1",
+      "date": "Tue, 10 Sep 2024 20:08:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/lookup-by-path_v0.2.0",
+      "date": "Tue, 27 Aug 2024 15:12:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Return a linked list of matches in `findLongestPrefixMatch` in the event that multiple prefixes match. The head of the list is the most specific match."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/lookup-by-path_v0.1.2",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/lookup-by-path_v0.1.1",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/lookup-by-path_v0.1.0",
+      "date": "Thu, 08 Aug 2024 22:08:25 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Extract LookupByPath from @rushstack/rush-lib."
+          }
+        ]
+      }
+    }
+  ]
+}

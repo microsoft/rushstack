@@ -2,10 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import path from 'path';
+import type { ChildProcess } from 'child_process';
 
-import { FileSystem } from '@rushstack/node-core-library';
+import { Executable, FileSystem, Sort } from '@rushstack/node-core-library';
 import { Terminal, StringBufferTerminalProvider } from '@rushstack/terminal';
-import { PackageExtractor, type IExtractorProjectConfiguration } from '../PackageExtractor';
+import {
+  PackageExtractor,
+  type IExtractorProjectConfiguration,
+  type IExtractorMetadataJson
+} from '../PackageExtractor';
 
 // Do this work in the "temp/test.jest" directory since it gets cleaned on clean runs
 const extractorTargetFolder: string = path.resolve(__dirname, '..', '..', 'test-output');
@@ -463,5 +468,155 @@ describe(PackageExtractor.name, () => {
     // Validate project 2 files
     await expect(FileSystem.existsAsync(path.join(targetFolder, 'package.json'))).resolves.toBe(true);
     await expect(FileSystem.existsAsync(path.join(targetFolder, 'src', 'index.js'))).resolves.toBe(true);
+  });
+
+  it('should extract project with script linkCreation', async () => {
+    const targetFolder: string = path.join(extractorTargetFolder, 'extractor-output-10');
+
+    await expect(
+      packageExtractor.extractAsync({
+        mainProjectName: project1PackageName,
+        sourceRootFolder: repoRoot,
+        targetRootFolder: targetFolder,
+        overwriteExisting: true,
+        projectConfigurations: getDefaultProjectConfigurations(),
+        terminal,
+        includeNpmIgnoreFiles: true,
+        linkCreation: 'script',
+        includeDevDependencies: true
+      })
+    ).resolves.not.toThrow();
+
+    // Validate project 1 files
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))
+    ).resolves.toBe(true);
+
+    // Validate project 2 is not linked through node_modules
+    const project1NodeModulesPath: string = path.join(targetFolder, project1RelativePath, 'node_modules');
+    await expect(
+      FileSystem.existsAsync(path.join(project1NodeModulesPath, project2PackageName, 'src', 'index.js'))
+    ).resolves.toEqual(false);
+
+    // Validate project 3 is not linked through node_modules
+    await expect(
+      FileSystem.existsAsync(path.join(project1NodeModulesPath, project3PackageName, 'src', 'index.js'))
+    ).resolves.toEqual(false);
+
+    // Run the linkCreation script
+    const createLinksProcess: ChildProcess = Executable.spawn(process.argv0, [
+      path.join(targetFolder, 'create-links.js'),
+      'create'
+    ]);
+    await expect(
+      Executable.waitForExitAsync(createLinksProcess, { throwOnNonZeroExitCode: true })
+    ).resolves.not.toThrow();
+
+    // Validate project 2 is linked through node_modules
+    await expect(
+      FileSystem.getRealPathAsync(path.join(project1NodeModulesPath, project2PackageName, 'src', 'index.js'))
+    ).resolves.toEqual(path.join(targetFolder, project2RelativePath, 'src', 'index.js'));
+
+    // Validate project 3 is linked through node_modules
+    await expect(
+      FileSystem.getRealPathAsync(path.join(project1NodeModulesPath, project3PackageName, 'src', 'index.js'))
+    ).resolves.toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
+    await expect(
+      FileSystem.getRealPathAsync(
+        path.join(
+          project1NodeModulesPath,
+          project2PackageName,
+          'node_modules',
+          project3PackageName,
+          'src',
+          'index.js'
+        )
+      )
+    ).resolves.toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
+
+    const metadataFileContent: string = await FileSystem.readFileAsync(
+      `${targetFolder}/extractor-metadata.json`
+    );
+    const metadata: IExtractorMetadataJson = JSON.parse(metadataFileContent);
+    Sort.sortBy(metadata.files, (x) => x);
+    Sort.sortBy(metadata.links, (x) => x.linkPath);
+    Sort.sortBy(metadata.projects, (x) => x.path);
+    expect(metadata).toMatchSnapshot();
+  });
+
+  it('should extract project with script linkCreation and custom linkCreationScriptPath', async () => {
+    const targetFolder: string = path.join(extractorTargetFolder, 'extractor-output-11');
+    const linkCreationScriptPath: string = path.join(targetFolder, 'foo', 'bar', 'baz.js');
+
+    await expect(
+      packageExtractor.extractAsync({
+        mainProjectName: project1PackageName,
+        sourceRootFolder: repoRoot,
+        targetRootFolder: targetFolder,
+        overwriteExisting: true,
+        projectConfigurations: getDefaultProjectConfigurations(),
+        terminal,
+        includeNpmIgnoreFiles: true,
+        linkCreation: 'script',
+        linkCreationScriptPath,
+        includeDevDependencies: true
+      })
+    ).resolves.not.toThrow();
+
+    // Validate project 1 files
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))
+    ).resolves.toBe(true);
+
+    // Validate project 2 is not linked through node_modules
+    const project1NodeModulesPath: string = path.join(targetFolder, project1RelativePath, 'node_modules');
+    await expect(
+      FileSystem.existsAsync(path.join(project1NodeModulesPath, project2PackageName, 'src', 'index.js'))
+    ).resolves.toEqual(false);
+
+    // Validate project 3 is not linked through node_modules
+    await expect(
+      FileSystem.existsAsync(path.join(project1NodeModulesPath, project3PackageName, 'src', 'index.js'))
+    ).resolves.toEqual(false);
+
+    // Run the linkCreation script
+    const createLinksProcess: ChildProcess = Executable.spawn(process.argv0, [
+      linkCreationScriptPath,
+      'create'
+    ]);
+    await expect(
+      Executable.waitForExitAsync(createLinksProcess, { throwOnNonZeroExitCode: true })
+    ).resolves.not.toThrow();
+
+    // Validate project 2 is linked through node_modules
+    await expect(
+      FileSystem.getRealPathAsync(path.join(project1NodeModulesPath, project2PackageName, 'src', 'index.js'))
+    ).resolves.toEqual(path.join(targetFolder, project2RelativePath, 'src', 'index.js'));
+
+    // Validate project 3 is linked through node_modules
+    await expect(
+      FileSystem.getRealPathAsync(path.join(project1NodeModulesPath, project3PackageName, 'src', 'index.js'))
+    ).resolves.toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
+    await expect(
+      FileSystem.getRealPathAsync(
+        path.join(
+          project1NodeModulesPath,
+          project2PackageName,
+          'node_modules',
+          project3PackageName,
+          'src',
+          'index.js'
+        )
+      )
+    ).resolves.toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
+
+    const metadataFileContent: string = await FileSystem.readFileAsync(
+      `${path.dirname(linkCreationScriptPath)}/extractor-metadata.json`
+    );
+    const metadata: IExtractorMetadataJson = JSON.parse(metadataFileContent);
+    Sort.sortBy(metadata.files, (x) => x);
+    Sort.sortBy(metadata.links, (x) => x.linkPath);
+    Sort.sortBy(metadata.projects, (x) => x.path);
+    expect(metadata).toMatchSnapshot();
   });
 });

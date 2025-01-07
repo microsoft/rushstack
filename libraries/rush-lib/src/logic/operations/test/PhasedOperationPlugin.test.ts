@@ -30,7 +30,7 @@ interface ISerializedOperation {
 function serializeOperation(operation: Operation): ISerializedOperation {
   return {
     name: operation.name!,
-    silent: operation.runner!.silent,
+    silent: !operation.enabled || operation.runner!.silent,
     dependencies: Array.from(operation.dependencies, (dep: Operation) => dep.name!)
   };
 }

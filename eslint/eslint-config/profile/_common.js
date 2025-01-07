@@ -260,54 +260,10 @@ function buildRules(profile) {
           '@typescript-eslint/adjacent-overload-signatures': 'warn',
 
           // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-          //
-          // CONFIGURATION:     By default, these are banned: String, Boolean, Number, Object, Symbol
-          '@typescript-eslint/ban-types': [
-            'warn',
-            {
-              extendDefaults: false, // (the complete list is in this file)
-              types: {
-                String: {
-                  message: 'Use "string" instead',
-                  fixWith: 'string'
-                },
-                Boolean: {
-                  message: 'Use "boolean" instead',
-                  fixWith: 'boolean'
-                },
-                Number: {
-                  message: 'Use "number" instead',
-                  fixWith: 'number'
-                },
-                Object: {
-                  message: 'Use "object" instead, or else define a proper TypeScript type:'
-                },
-                Symbol: {
-                  message: 'Use "symbol" instead',
-                  fixWith: 'symbol'
-                },
-                Function: {
-                  message: [
-                    'The "Function" type accepts any function-like value.',
-                    'It provides no type safety when calling the function, which can be a common source of bugs.',
-                    'It also accepts things like class declarations, which will throw at runtime as they will not be called with "new".',
-                    'If you are expecting the function to accept certain arguments, you should explicitly define the function shape.'
-                  ].join('\n')
-                }
+          '@typescript-eslint/no-unsafe-function-type': 'warn',
 
-                // This is a good idea, but before enabling it we need to put some thought into the recommended
-                // coding practices; the default suggestions are too vague.
-                //
-                // '{}': {
-                //   message: [
-                //     '"{}" actually means "any non-nullish value".',
-                //     '- If you want a type meaning "any object", you probably want "Record<string, unknown>" instead.',
-                //     '- If you want a type meaning "any value", you probably want "unknown" instead.'
-                //   ].join('\n')
-                // }
-              }
-            }
-          ],
+          // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
+          '@typescript-eslint/no-wrapper-object-types': 'warn',
 
           // RATIONALE:         We require "x as number" instead of "<number>x" to avoid conflicts with JSX.
           '@typescript-eslint/consistent-type-assertions': 'warn',
@@ -433,7 +389,9 @@ function buildRules(profile) {
               // Unused function arguments often indicate a mistake in JavaScript code.  However in TypeScript code,
               // the compiler catches most of those mistakes, and unused arguments are fairly common for type signatures
               // that are overriding a base class method or implementing an interface.
-              args: 'none'
+              args: 'none',
+              // Unused error arguments are common and useful for inspection when a debugger is attached.
+              caughtErrors: 'none'
             }
           ],
 

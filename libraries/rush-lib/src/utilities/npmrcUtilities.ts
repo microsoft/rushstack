@@ -22,27 +22,55 @@ export interface ILogger {
 // create a global _combinedNpmrc for cache purpose
 const _combinedNpmrcMap: Map<string, string> = new Map();
 
-function _trimNpmrcFile(options: {
-  sourceNpmrcPath: string;
-  linesToPrepend?: string[];
-  linesToAppend?: string[];
-}): string {
-  const { sourceNpmrcPath, linesToPrepend, linesToAppend } = options;
+function _trimNpmrcFile(
+  options: Pick<
+    INpmrcTrimOptions,
+    'sourceNpmrcPath' | 'linesToAppend' | 'linesToPrepend' | 'supportEnvVarFallbackSyntax'
+  >
+): string {
+  const { sourceNpmrcPath, linesToPrepend, linesToAppend, supportEnvVarFallbackSyntax } = options;
   const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
   if (combinedNpmrcFromCache !== undefined) {
     return combinedNpmrcFromCache;
   }
+
   let npmrcFileLines: string[] = [];
   if (linesToPrepend) {
     npmrcFileLines.push(...linesToPrepend);
   }
+
   if (fs.existsSync(sourceNpmrcPath)) {
     npmrcFileLines.push(...fs.readFileSync(sourceNpmrcPath).toString().split('\n'));
   }
+
   if (linesToAppend) {
     npmrcFileLines.push(...linesToAppend);
   }
+
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
+
+  const resultLines: string[] = trimNpmrcFileLines(npmrcFileLines, process.env, supportEnvVarFallbackSyntax);
+
+  const combinedNpmrc: string = resultLines.join('\n');
+
+  //save the cache
+  _combinedNpmrcMap.set(sourceNpmrcPath, combinedNpmrc);
+
+  return combinedNpmrc;
+}
+
+/**
+ *
+ * @param npmrcFileLines The npmrc file's lines
+ * @param env The environment variables object
+ * @param supportEnvVarFallbackSyntax Whether to support fallback values in the form of `${VAR_NAME:-fallback}`
+ * @returns
+ */
+export function trimNpmrcFileLines(
+  npmrcFileLines: string[],
+  env: NodeJS.ProcessEnv,
+  supportEnvVarFallbackSyntax: boolean
+): string[] {
   const resultLines: string[] = [];
 
   // This finds environment variable tokens that look like "${VAR_NAME}"
@@ -66,11 +94,36 @@ function _trimNpmrcFile(options: {
       const environmentVariables: string[] | null = line.match(expansionRegExp);
       if (environmentVariables) {
         for (const token of environmentVariables) {
-          // Remove the leading "${" and the trailing "}" from the token
-          const environmentVariableName: string = token.substring(2, token.length - 1);
+          /**
+           * Remove the leading "${" and the trailing "}" from the token
+           *
+           * ${nameString}                  -> nameString
+           * ${nameString-fallbackString}   -> name-fallbackString
+           * ${nameString:-fallbackString}  -> name:-fallbackString
+           */
+          const nameWithFallback: string = token.substring(2, token.length - 1);
 
-          // Is the environment variable defined?
-          if (!process.env[environmentVariableName]) {
+          let environmentVariableName: string;
+          let fallback: string | undefined;
+          if (supportEnvVarFallbackSyntax) {
+            /**
+             * Get the environment variable name and fallback value.
+             *
+             *                                name          fallback
+             * nameString                 ->  nameString    undefined
+             * nameString-fallbackString  ->  nameString    fallbackString
+             * nameString:-fallbackString ->  nameString    fallbackString
+             */
+            const matched: string[] | null = nameWithFallback.match(/^([^:-]+)(?:\:?-(.+))?$/);
+            // matched: [originStr, variableName, fallback]
+            environmentVariableName = matched?.[1] ?? nameWithFallback;
+            fallback = matched?.[2];
+          } else {
+            environmentVariableName = nameWithFallback;
+          }
+
+          // Is the environment variable and fallback value defined.
+          if (!env[environmentVariableName] && !fallback) {
             // No, so trim this line
             lineShouldBeTrimmed = true;
             break;
@@ -88,12 +141,7 @@ function _trimNpmrcFile(options: {
     }
   }
 
-  const combinedNpmrc: string = resultLines.join('\n');
-
-  //save the cache
-  _combinedNpmrcMap.set(sourceNpmrcPath, combinedNpmrc);
-
-  return combinedNpmrc;
+  return resultLines;
 }
 
 /**
@@ -116,17 +164,15 @@ interface INpmrcTrimOptions {
   logger: ILogger;
   linesToPrepend?: string[];
   linesToAppend?: string[];
+  supportEnvVarFallbackSyntax: boolean;
 }
+
 function _copyAndTrimNpmrcFile(options: INpmrcTrimOptions): string {
-  const { logger, sourceNpmrcPath, targetNpmrcPath, linesToPrepend, linesToAppend } = options;
+  const { logger, sourceNpmrcPath, targetNpmrcPath } = options;
   logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
   logger.info(`  --> "${targetNpmrcPath}"`);
 
-  const combinedNpmrc: string = _trimNpmrcFile({
-    sourceNpmrcPath,
-    linesToPrepend,
-    linesToAppend
-  });
+  const combinedNpmrc: string = _trimNpmrcFile(options);
 
   fs.writeFileSync(targetNpmrcPath, combinedNpmrc);
 
@@ -145,12 +191,14 @@ function _copyAndTrimNpmrcFile(options: INpmrcTrimOptions): string {
 export interface ISyncNpmrcOptions {
   sourceNpmrcFolder: string;
   targetNpmrcFolder: string;
+  supportEnvVarFallbackSyntax: boolean;
   useNpmrcPublish?: boolean;
   logger?: ILogger;
   linesToPrepend?: string[];
   linesToAppend?: string[];
   createIfMissing?: boolean;
 }
+
 export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
   const {
     sourceNpmrcFolder,
@@ -162,9 +210,7 @@ export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
       // eslint-disable-next-line no-console
       error: console.error
     },
-    createIfMissing = false,
-    linesToAppend,
-    linesToPrepend
+    createIfMissing = false
   } = options;
   const sourceNpmrcPath: string = path.join(
     sourceNpmrcFolder,
@@ -177,12 +223,12 @@ export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
       if (!fs.existsSync(targetNpmrcFolder)) {
         fs.mkdirSync(targetNpmrcFolder, { recursive: true });
       }
+
       return _copyAndTrimNpmrcFile({
         sourceNpmrcPath,
         targetNpmrcPath,
         logger,
-        linesToAppend,
-        linesToPrepend
+        ...options
       });
     } else if (fs.existsSync(targetNpmrcPath)) {
       // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
@@ -194,7 +240,11 @@ export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
   }
 }
 
-export function isVariableSetInNpmrcFile(sourceNpmrcFolder: string, variableKey: string): boolean {
+export function isVariableSetInNpmrcFile(
+  sourceNpmrcFolder: string,
+  variableKey: string,
+  supportEnvVarFallbackSyntax: boolean
+): boolean {
   const sourceNpmrcPath: string = `${sourceNpmrcFolder}/.npmrc`;
 
   //if .npmrc file does not exist, return false directly
@@ -202,7 +252,7 @@ export function isVariableSetInNpmrcFile(sourceNpmrcFolder: string, variableKey:
     return false;
   }
 
-  const trimmedNpmrcFile: string = _trimNpmrcFile({ sourceNpmrcPath });
+  const trimmedNpmrcFile: string = _trimNpmrcFile({ sourceNpmrcPath, supportEnvVarFallbackSyntax });
 
   const variableKeyRegExp: RegExp = new RegExp(`^${variableKey}=`, 'm');
   return trimmedNpmrcFile.match(variableKeyRegExp) !== null;

@@ -13,14 +13,14 @@ describe('CLI', () => {
     const workingDir: string = '/';
     const startPath: string = path.resolve(__dirname, '../../../lib-commonjs/start.js');
 
-    await expect(async () => {
-      await Utilities.executeCommandAsync({
+    await expect(
+      Utilities.executeCommandAsync({
         command: 'node',
         args: [startPath],
         workingDirectory: workingDir,
         suppressOutput: true
-      });
-    }).not.toThrow();
+      })
+    ).resolves.not.toThrow();
   });
 
   it('rushx should pass args to scripts', async () => {

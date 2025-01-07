@@ -29,7 +29,7 @@
     // Preferring it avoids errors for indirect dependencies that request it as a peer dependency.
     // It's also the newest supported compiler, used by most build tests and used as the bundled compiler
     // engine for API Extractor.
-    "typescript": "~5.5.2",
+    "typescript": "~5.4.2",
 
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
     "eslint": "~8.57.0"
@@ -59,6 +59,8 @@
    * In some cases you may want this turned on, but need to allow certain packages to use a different
    * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
    * section of the common-versions.json.
+   *
+   * In the case that subspaces is enabled, this setting will take effect at a subspace level.
    */
   "ensureConsistentVersions": true,
 
@@ -73,16 +75,15 @@
    * This design avoids unnecessary churn in this file.
    */
   "allowedAlternativeVersions": {
+    "@typescript-eslint/parser": [
+      "~6.19.0" // Used by build-tests/eslint-7(-*)-test / build-tests/eslint-bulk-suppressions-test-legacy
+    ],
     "eslint": [
       "7.7.0", // Used by build-tests/eslint-7-7-test
       "7.11.0", // Used by build-tests/eslint-7-11-test
       "~7.30.0", // Used by build-tests/eslint-7-test
-      "8.6.0", // Used by build-tests/eslint-bulk-suppressions-test
-      "~8.23.1" // Used by build-tests/eslint-bulk-suppressions-test
-    ],
-    "@typescript-eslint/parser": [
-      "~6.19.0", // Used by build-tests/eslint-7-*-test
-      "~7.14.1"
+      "8.6.0", // Used by build-tests/eslint-bulk-suppressions-test-legacy
+      "8.23.1" // Used by build-tests/eslint-bulk-suppressions-test-legacy
     ],
     /**
      * For example, allow some projects to use an older TypeScript compiler
@@ -99,7 +100,7 @@
       "~4.9.5",
 
       // API Extractor bundles a specific TypeScript version because it calls internal APIs
-      "5.5.2"
+      "5.4.2"
     ],
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
@@ -119,6 +120,7 @@
     "terser-webpack-plugin": ["~3.0.8"],
     "terser": ["~4.8.0"],
     "webpack": ["~4.47.0"],
+    "webpack-dev-server": ["~4.9.3"],
     "@types/node": [
       // These versions are used by testing projects
       "ts2.9",
@@ -130,6 +132,10 @@
       "ts2.9",
       "ts3.9",
       "ts4.9"
+    ],
+    "@rushstack/eslint-config": [
+      // This is used by the ESLint 7 build tests
+      "3.7.1"
     ]
   }
 }

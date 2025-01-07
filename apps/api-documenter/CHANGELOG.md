@@ -1,6 +1,125 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+
+## 7.26.3
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 7.26.2
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 7.26.1
+Tue, 03 Dec 2024 16:11:07 GMT
+
+_Version update only_
+
+## 7.26.0
+Sat, 23 Nov 2024 01:18:55 GMT
+
+### Minor changes
+
+- Update TSDoc dependencies.
+
+## 7.25.22
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 7.25.21
+Thu, 24 Oct 2024 00:15:47 GMT
+
+_Version update only_
+
+## 7.25.20
+Mon, 21 Oct 2024 18:50:09 GMT
+
+_Version update only_
+
+## 7.25.19
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 7.25.18
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 7.25.17
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 7.25.16
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 7.25.15
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 7.25.14
+Fri, 13 Sep 2024 00:11:42 GMT
+
+_Version update only_
+
+## 7.25.13
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 7.25.12
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 7.25.11
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 7.25.10
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 7.25.9
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 7.25.8
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 7.25.7
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 7.25.6
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 7.25.5
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
+
+## 7.25.4
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 7.25.3
 Mon, 03 Jun 2024 23:43:15 GMT

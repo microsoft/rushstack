@@ -16,7 +16,7 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/node": "18.17.15",
     "eslint": "~8.57.0",
-    "typescript": "~5.5.2"
+    "typescript": "~5.4.2"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"

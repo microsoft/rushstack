@@ -1,6 +1,67 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+
+## 5.10.1
+Sat, 14 Dec 2024 01:11:07 GMT
+
+### Patches
+
+- Fix handling of trailing slashes and relative paths in RealNodeModulePath to match semantics of `fs.realpathSync.native`.
+
+## 5.10.0
+Fri, 22 Nov 2024 01:10:43 GMT
+
+### Minor changes
+
+- Add `RealNodeModulePathResolver` class to get equivalent behavior to `realpath` with fewer system calls (and therefore higher performance) in the typical scenario where the only symlinks in the repository are inside of `node_modules` folders and are links to package folders.
+
+## 5.9.0
+Fri, 13 Sep 2024 00:11:42 GMT
+
+### Minor changes
+
+- Add a `Sort.sortKeys` function for sorting keys in an object
+- Rename `LockFile.acquire` to `Lockfile.acquireAsync`.
+
+### Patches
+
+- Fix an issue where attempting to acquire multiple `LockFile`s at the same time on POSIX would cause the second to immediately be acquired without releasing the first.
+
+## 5.8.0
+Tue, 10 Sep 2024 20:08:11 GMT
+
+### Minor changes
+
+- Add a `customFormats` option to `JsonSchema`.
+
+## 5.7.0
+Wed, 21 Aug 2024 05:43:04 GMT
+
+### Minor changes
+
+- Introduce a `Text.splitByNewLines` function.
+
+## 5.6.0
+Mon, 12 Aug 2024 22:16:04 GMT
+
+### Minor changes
+
+- Add a `ignoreSchemaField` option to the `JsonSchema.validateObject` options to ignore `$schema` properties and add an options object argument to `JsonSchema.validateObjectWithCallback` with the same `ignoreSchemaField` option.
+
+## 5.5.1
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 5.5.0
+Tue, 16 Jul 2024 00:36:21 GMT
+
+### Minor changes
+
+- Add support for the `jsonSyntax` option to the `JsonFile.save`, `JsonFile.saveAsync`, and `JsonFile.stringify` functions.
 
 ## 5.4.1
 Thu, 30 May 2024 00:13:05 GMT

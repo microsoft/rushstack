@@ -28,7 +28,7 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
       description: 'Check for circular dependencies between packlets',
       recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets'
-    } as TSESLint.RuleMetaDataDocs<Options>
+    } as TSESLint.RuleMetaDataDocs
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {

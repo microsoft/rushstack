@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "exportAsDefault": {
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "interfaceDocumentationComment": {
+              "type": "string",
+              "description": "This value is placed in a documentation comment for the exported default interface."
+            },
+            "valueDocumentationComment": {
+              "type": "string",
+              "description": "This value is placed in a documentation comment for the exported value."
+            },
+            "interfaceName": {
+              "type": "string",
+              "description": "The interface name for the default wrapped export. Defaults to \"IExport\""
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "interfaceDocumentationComment": {
+              "type": "string",
+              "description": "This value is placed in a documentation comment for the exported default interface."
+            },
+            "valueDocumentationComment": {
+              "type": "string",
+              "description": "This value is placed in a documentation comment for the exported value."
+            },
+            "inferInterfaceNameFromFilename": {
+              "type": "boolean",
+              "description": "When set to true, the default export interface name will be inferred from the filename. This takes precedence over the interfaceName option."
+            }
+          }
+        }
+      ]
+    },
+
+    "srcFolder": {
+      "type": "string",
+      "description": "Source code root directory. Defaults to \"src/\"."
+    },
+
+    "generatedTsFolder": {
+      "type": "string",
+      "description": "Output directory for generated typings. Defaults to \"temp/loc-ts/\"."
+    },
+
+    "secondaryGeneratedTsFolders": {
+      "type": "array",
+      "description": "Additional folders, relative to the project root, where the generated typings should be emitted to.",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "stringNamesToIgnore": {
+      "type": "array",
+      "description": "An array of string names to ignore when generating typings.",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

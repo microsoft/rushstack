@@ -8,12 +8,12 @@
     {
       "file": "src/index.ts",
       "scopeId": ".ExampleClass",
-      "rule": "@typescript-eslint/ban-types"
+      "rule": "@typescript-eslint/explicit-member-accessibility"
     },
     {
       "file": "src/index.ts",
       "scopeId": ".ExampleClass",
-      "rule": "@typescript-eslint/explicit-member-accessibility"
+      "rule": "@typescript-eslint/no-wrapper-object-types"
     },
     {
       "file": "src/index.ts",
@@ -58,17 +58,17 @@
     {
       "file": "src/index.ts",
       "scopeId": ".exampleAnonymousClass.exampleSetGet",
-      "rule": "@typescript-eslint/ban-types"
-    },
-    {
-      "file": "src/index.ts",
-      "scopeId": ".exampleAnonymousClass.exampleSetGet",
       "rule": "@typescript-eslint/explicit-function-return-type"
     },
     {
       "file": "src/index.ts",
       "scopeId": ".exampleAnonymousClass.exampleSetGet",
       "rule": "@typescript-eslint/explicit-member-accessibility"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass.exampleSetGet",
+      "rule": "@typescript-eslint/no-wrapper-object-types"
     },
     {
       "file": "src/index.ts",
@@ -98,12 +98,12 @@
     {
       "file": "src/index.ts",
       "scopeId": ".exampleFunction",
-      "rule": "@typescript-eslint/ban-types"
+      "rule": "@typescript-eslint/explicit-function-return-type"
     },
     {
       "file": "src/index.ts",
       "scopeId": ".exampleFunction",
-      "rule": "@typescript-eslint/explicit-function-return-type"
+      "rule": "@typescript-eslint/no-wrapper-object-types"
     },
     {
       "file": "src/index.ts",

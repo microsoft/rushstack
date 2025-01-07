@@ -4,7 +4,7 @@
 import * as path from 'path';
 import type { ChildProcess, SpawnSyncReturns } from 'child_process';
 import { default as getGitRepoInfo, type GitRepoInfo as IGitRepoInfo } from 'git-repo-info';
-import { Executable, FileSystem, InternalError, Path } from '@rushstack/node-core-library';
+import { Executable, FileSystem, InternalError, Path, Text } from '@rushstack/node-core-library';
 import { default as ignore, type Ignore as IIgnoreMatcher } from 'ignore';
 
 // Matches lines starting with "#" and whitepace lines
@@ -282,7 +282,7 @@ export class GitUtilities {
 
     const foundIgnorePatterns: string[] = [];
     if (gitIgnoreContent) {
-      const gitIgnorePatterns: string[] = gitIgnoreContent.split(/\r?\n/g);
+      const gitIgnorePatterns: string[] = Text.splitByNewLines(gitIgnoreContent);
       for (const gitIgnorePattern of gitIgnorePatterns) {
         // Ignore whitespace-only lines and comments
         if (gitIgnorePattern.length === 0 || GITIGNORE_IGNORABLE_LINE_REGEX.test(gitIgnorePattern)) {

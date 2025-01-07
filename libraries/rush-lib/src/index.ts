@@ -6,6 +6,9 @@
  * @packageDocumentation
  */
 
+// For backwards compatibility
+export { LookupByPath as LookupByPath, type IPrefixMatch } from '@rushstack/lookup-by-path';
+
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
 export { RushConfiguration, type ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
@@ -88,7 +91,6 @@ export {
 
 export { RepoStateFile } from './logic/RepoStateFile';
 
-export { LookupByPath, type IPrefixMatch } from './logic/LookupByPath';
 export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';
@@ -119,11 +121,12 @@ export {
   CustomTipType
 } from './api/CustomTipsConfiguration';
 
-export {
-  ProjectChangeAnalyzer,
-  type IGetChangedProjectsOptions,
-  type IRawRepoState as _IRawRepoState
-} from './logic/ProjectChangeAnalyzer';
+export { ProjectChangeAnalyzer, type IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
+export type {
+  IInputsSnapshot,
+  GetInputsSnapshotAsyncFn as GetInputsSnapshotAsyncFn,
+  IRushConfigurationProjectForSnapshot
+} from './logic/incremental/InputsSnapshot';
 
 export type { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 export type {
@@ -132,6 +135,7 @@ export type {
 } from './logic/operations/IOperationExecutionResult';
 export { type IOperationOptions, Operation } from './logic/operations/Operation';
 export { OperationStatus } from './logic/operations/OperationStatus';
+export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 
 export {
   RushSession,

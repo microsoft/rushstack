@@ -1,6 +1,138 @@
 # Change Log - @rushstack/webpack4-localization-plugin
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+
+## 0.18.81
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.18.80
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.18.79
+Tue, 03 Dec 2024 16:11:08 GMT
+
+_Version update only_
+
+## 0.18.78
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.18.77
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.18.76
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.18.75
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.18.74
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.18.73
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.18.72
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.18.71
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.18.70
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.18.69
+Sat, 28 Sep 2024 00:11:41 GMT
+
+_Version update only_
+
+## 0.18.68
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.18.67
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.18.66
+Mon, 26 Aug 2024 02:00:11 GMT
+
+_Version update only_
+
+## 0.18.65
+Wed, 21 Aug 2024 16:24:51 GMT
+
+_Version update only_
+
+## 0.18.64
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.18.63
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.18.62
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.18.61
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.18.60
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.18.59
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.18.58
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.18.57
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 0.18.56
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.18.55
 Mon, 03 Jun 2024 23:43:15 GMT

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as semver from 'semver';
 import { FileSystem, Import, type IPackageJson, JsonFile, MapExtensions } from '@rushstack/node-core-library';
 
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
@@ -28,7 +29,8 @@ export class PnpmfileConfiguration {
 
   public static async initializeAsync(
     rushConfiguration: RushConfiguration,
-    subspace: Subspace
+    subspace: Subspace,
+    variant: string | undefined
   ): Promise<PnpmfileConfiguration> {
     if (rushConfiguration.packageManager !== 'pnpm') {
       throw new Error(
@@ -41,7 +43,8 @@ export class PnpmfileConfiguration {
       log: (message: string) => {},
       pnpmfileShimSettings: await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(
         rushConfiguration,
-        subspace
+        subspace,
+        variant
       )
     };
 
@@ -51,7 +54,8 @@ export class PnpmfileConfiguration {
   public static async writeCommonTempPnpmfileShimAsync(
     rushConfiguration: RushConfiguration,
     targetDir: string,
-    subspace: Subspace
+    subspace: Subspace,
+    variant: string | undefined
   ): Promise<void> {
     if (rushConfiguration.packageManager !== 'pnpm') {
       throw new Error(
@@ -71,7 +75,7 @@ export class PnpmfileConfiguration {
     });
 
     const pnpmfileShimSettings: IPnpmfileShimSettings =
-      await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(rushConfiguration, subspace);
+      await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(rushConfiguration, subspace, variant);
 
     // Write the settings file used by the shim
     await JsonFile.saveAsync(pnpmfileShimSettings, path.join(targetDir, 'pnpmfileSettings.json'), {
@@ -81,7 +85,8 @@ export class PnpmfileConfiguration {
 
   private static async _getPnpmfileShimSettingsAsync(
     rushConfiguration: RushConfiguration,
-    subspace: Subspace
+    subspace: Subspace,
+    variant: string | undefined
   ): Promise<IPnpmfileShimSettings> {
     let allPreferredVersions: { [dependencyName: string]: string } = {};
     let allowedAlternativeVersions: { [dependencyName: string]: readonly string[] } = {};
@@ -89,13 +94,18 @@ export class PnpmfileConfiguration {
 
     // Only workspaces shims in the common versions using pnpmfile
     if ((rushConfiguration.packageManagerOptions as PnpmOptionsConfiguration).useWorkspaces) {
-      const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions();
+      const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions(variant);
       const preferredVersions: Map<string, string> = new Map();
-      MapExtensions.mergeFromMap(preferredVersions, commonVersionsConfiguration.getAllPreferredVersions());
       MapExtensions.mergeFromMap(
         preferredVersions,
-        rushConfiguration.getImplicitlyPreferredVersions(subspace)
+        rushConfiguration.getImplicitlyPreferredVersions(subspace, variant)
       );
+      for (const [name, version] of commonVersionsConfiguration.getAllPreferredVersions()) {
+        // Use the most restrictive version range available
+        if (!preferredVersions.has(name) || semver.subset(version, preferredVersions.get(name)!)) {
+          preferredVersions.set(name, version);
+        }
+      }
       allPreferredVersions = MapExtensions.toObject(preferredVersions);
       allowedAlternativeVersions = MapExtensions.toObject(
         commonVersionsConfiguration.allowedAlternativeVersions
@@ -114,7 +124,7 @@ export class PnpmfileConfiguration {
     };
 
     // Use the provided path if available. Otherwise, use the default path.
-    const userPnpmfilePath: string | undefined = subspace.getPnpmfilePath();
+    const userPnpmfilePath: string | undefined = subspace.getPnpmfilePath(variant);
     if (userPnpmfilePath && FileSystem.exists(userPnpmfilePath)) {
       settings.userPnpmfilePath = userPnpmfilePath;
     }

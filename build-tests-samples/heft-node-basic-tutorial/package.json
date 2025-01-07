@@ -19,6 +19,6 @@
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
     "eslint": "~8.57.0",
-    "typescript": "~5.5.2"
+    "typescript": "~5.4.2"
   }
 }

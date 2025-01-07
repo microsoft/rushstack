@@ -8,8 +8,8 @@ require('local-node-rig/profiles/default/includes/eslint/patch/custom-config-pac
 
 module.exports = {
   extends: [
-    'local-node-rig/profiles/default/includes/eslint/profile/node-trusted-tool',
-    'local-node-rig/profiles/default/includes/eslint/mixins/friendly-locals'
+    '@rushstack/eslint-config/profile/node-trusted-tool',
+    '@rushstack/eslint-config/mixins/friendly-locals'
   ],
   parserOptions: { tsconfigRootDir: __dirname },
 

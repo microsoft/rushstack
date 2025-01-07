@@ -280,7 +280,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
   public readonly argumentName: string;
 
   /** {@inheritDoc IBaseCommandLineDefinitionWithArgument.completions} */
-  public readonly completions: (() => Promise<string[]>) | undefined;
+  public readonly completions: (() => Promise<ReadonlyArray<string> | ReadonlySet<string>>) | undefined;
 
   /** @internal */
   public constructor(definition: IBaseCommandLineDefinitionWithArgument) {

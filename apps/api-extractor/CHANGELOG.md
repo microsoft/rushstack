@@ -1,6 +1,84 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+
+## 7.48.1
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 7.48.0
+Sat, 23 Nov 2024 01:18:55 GMT
+
+### Minor changes
+
+- Update TSDoc dependencies.
+
+## 7.47.12
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 7.47.11
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 7.47.10
+Tue, 15 Oct 2024 00:12:31 GMT
+
+### Patches
+
+- Fix a compatibility issue with usage of `getModeForUsageLocation` in TypeScript 5.6
+
+## 7.47.9
+Fri, 13 Sep 2024 00:11:42 GMT
+
+_Version update only_
+
+## 7.47.8
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 7.47.7
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 7.47.6
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 7.47.5
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 7.47.4
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 7.47.3
+Wed, 24 Jul 2024 00:12:14 GMT
+
+### Patches
+
+- Fix an edge case when discarding the file extension from the "reportFileName" setting and improve its documentation
+
+## 7.47.2
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 7.47.1
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
 
 ## 7.47.0
 Mon, 03 Jun 2024 23:43:15 GMT

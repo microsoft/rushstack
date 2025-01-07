@@ -1,0 +1,341 @@
+{
+  "name": "@rushstack/webpack-workspace-resolve-plugin",
+  "entries": [
+    {
+      "version": "0.3.18",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.18",
+      "date": "Wed, 18 Dec 2024 01:11:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a bug with path handling on Windows. Tap hooks earlier to ensure that these plugins run before builtin behavior."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.17",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.17",
+      "date": "Sat, 14 Dec 2024 01:11:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.4.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.16",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.16",
+      "date": "Mon, 09 Dec 2024 20:31:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.4.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.15",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.15",
+      "date": "Tue, 03 Dec 2024 16:11:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.14",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.14",
+      "date": "Sat, 23 Nov 2024 01:18:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.4.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.13",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.13",
+      "date": "Fri, 22 Nov 2024 01:10:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.12",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.12",
+      "date": "Thu, 24 Oct 2024 00:15:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.11",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.11",
+      "date": "Mon, 21 Oct 2024 18:50:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.10",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.10",
+      "date": "Thu, 17 Oct 2024 20:25:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.9",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.9",
+      "date": "Thu, 17 Oct 2024 08:35:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.8",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.8",
+      "date": "Tue, 15 Oct 2024 00:12:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.7",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.7",
+      "date": "Thu, 03 Oct 2024 15:11:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.6",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.6",
+      "date": "Wed, 02 Oct 2024 00:11:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure compatibility with webpack 5.95.0"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.5",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.5",
+      "date": "Tue, 01 Oct 2024 00:11:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.4",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.4",
+      "date": "Mon, 30 Sep 2024 15:12:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.3",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.3",
+      "date": "Fri, 13 Sep 2024 00:11:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.2",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.2",
+      "date": "Tue, 10 Sep 2024 20:08:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.1",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.1",
+      "date": "Thu, 29 Aug 2024 00:11:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix description file resolution after cross-package import."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.0",
+      "date": "Wed, 28 Aug 2024 00:11:41 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expect the base path to be part of the resolver cache file."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.2.0",
+      "date": "Tue, 27 Aug 2024 15:12:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support hierarchical `node_modules` folders."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.1.2",
+      "date": "Mon, 26 Aug 2024 02:00:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix bug caused by mutating resolver request object."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.1.1",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.1.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.1.0",
+      "date": "Fri, 16 Aug 2024 00:11:49 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add plugin for more efficient import resolution in a monorepo with known structure. Optimizes lookup of the relevant `package.json` for a given path, and lookup of npm dependencies of the containing package."
+          }
+        ]
+      }
+    }
+  ]
+}

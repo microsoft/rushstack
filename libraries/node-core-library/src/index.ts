@@ -65,10 +65,12 @@ export {
 } from './JsonFile';
 export {
   type IJsonSchemaErrorInfo,
+  type IJsonSchemaCustomFormat,
   type IJsonSchemaFromFileOptions,
   type IJsonSchemaFromObjectOptions,
   type IJsonSchemaLoadOptions,
   type IJsonSchemaValidateOptions,
+  type IJsonSchemaValidateObjectWithOptions,
   JsonSchema,
   type JsonSchemaVersion
 } from './JsonSchema';
@@ -91,6 +93,7 @@ export {
   type IPathFormatFileLocationOptions,
   type IPathFormatConciselyOptions
 } from './Path';
+export { RealNodeModulePathResolver, type IRealNodeModulePathResolverOptions } from './RealNodeModulePath';
 export { Encoding, Text, NewlineKind, type IReadLinesFromIterableOptions } from './Text';
 export { Sort } from './Sort';
 export {

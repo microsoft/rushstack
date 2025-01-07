@@ -15,7 +15,6 @@ import type { IPhase } from '../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { Operation } from '../logic/operations/Operation';
-import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
 import type {
   IExecutionResult,
   IOperationExecutionResult
@@ -25,6 +24,7 @@ import type { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
 import type { ITelemetryData } from '../logic/Telemetry';
 import type { OperationStatus } from '../logic/operations/OperationStatus';
+import type { IInputsSnapshot } from '../logic/incremental/InputsSnapshot';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -77,7 +77,6 @@ export interface ICreateOperationsContext {
    * The set of phases selected for the current command execution.
    */
   readonly phaseSelection: ReadonlySet<IPhase>;
-
   /**
    * The set of Rush projects selected for the current command execution.
    */
@@ -109,11 +108,10 @@ export interface ICreateOperationsContext {
  */
 export interface IExecuteOperationsContext extends ICreateOperationsContext {
   /**
-   * The current state of the repository.
-   *
-   * Note that this is not defined during the initial operation creation.
+   * The current state of the repository, if available.
+   * Not part of the creation context to avoid the overhead of Git calls when initializing the graph.
    */
-  readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
+  readonly inputsSnapshot?: IInputsSnapshot;
 }
 
 /**

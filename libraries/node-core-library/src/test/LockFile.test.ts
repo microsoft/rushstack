@@ -99,6 +99,46 @@ describe(LockFile.name, () => {
     });
   });
 
+  it('supports two lockfiles in the same process', async () => {
+    const testFolder: string = `${libTestFolder}/6`;
+    await FileSystem.ensureEmptyFolderAsync(testFolder);
+
+    const resourceName: string = 'test1';
+
+    const lock1: LockFile = await LockFile.acquireAsync(testFolder, resourceName);
+    const lock2Promise: Promise<LockFile> = LockFile.acquireAsync(testFolder, resourceName);
+
+    let lock2Acquired: boolean = false;
+    lock2Promise
+      .then(() => {
+        lock2Acquired = true;
+      })
+      .catch(() => {
+        fail();
+      });
+
+    const lock1Exists: boolean = await FileSystem.existsAsync(lock1.filePath);
+    expect(lock1Exists).toEqual(true);
+    expect(lock1.isReleased).toEqual(false);
+    expect(lock2Acquired).toEqual(false);
+
+    lock1.release();
+
+    expect(lock1.isReleased).toEqual(true);
+
+    const lock2: LockFile = await lock2Promise;
+
+    const lock2Exists: boolean = await FileSystem.existsAsync(lock2.filePath);
+    expect(lock2Exists).toEqual(true);
+    expect(lock2.isReleased).toEqual(false);
+
+    expect(lock2Acquired).toEqual(true);
+
+    lock2.release();
+
+    expect(lock2.isReleased).toEqual(true);
+  });
+
   if (process.platform === 'darwin' || process.platform === 'linux') {
     describe('Linux and Mac', () => {
       describe(LockFile.getLockFilePath.name, () => {
@@ -171,6 +211,7 @@ describe(LockFile.name, () => {
         // this lock should be undefined since there is an existing lock
         expect(lock).toBeUndefined();
       });
+
       test('cannot acquire a lock if another valid lock exists with the same start time', () => {
         // ensure test folder is clean
         const testFolder: string = path.join(libTestFolder, '3');
@@ -235,7 +276,7 @@ describe(LockFile.name, () => {
         expect(deleteFileSpy).toHaveBeenNthCalledWith(1, otherPidLockFileName);
       });
 
-      test('doesn’t attempt deleting other process lockfile if it is released in the middle of acquiring process', () => {
+      test("doesn't attempt deleting other process lockfile if it is released in the middle of acquiring process", () => {
         // ensure test folder is clean
         const testFolder: string = path.join(libTestFolder, '5');
         FileSystem.ensureEmptyFolder(testFolder);
@@ -286,81 +327,82 @@ describe(LockFile.name, () => {
   }
 
   if (process.platform === 'win32') {
-    describe(LockFile.getLockFilePath.name, () => {
-      test("returns a resolved path that doesn't contain", () => {
-        expect(path.join(process.cwd(), `test.lock`)).toEqual(LockFile.getLockFilePath('./', 'test'));
+    describe('Windows', () => {
+      describe(LockFile.getLockFilePath.name, () => {
+        test("returns a resolved path that doesn't contain", () => {
+          expect(path.join(process.cwd(), `test.lock`)).toEqual(LockFile.getLockFilePath('./', 'test'));
+        });
+
+        test('ignores pid that is passed in', () => {
+          expect(path.join(process.cwd(), `test.lock`)).toEqual(LockFile.getLockFilePath('./', 'test', 99));
+        });
       });
 
-      test('ignores pid that is passed in', () => {
-        expect(path.join(process.cwd(), `test.lock`)).toEqual(LockFile.getLockFilePath('./', 'test', 99));
+      test('will not acquire if existing lock is there', () => {
+        // ensure test folder is clean
+        const testFolder: string = path.join(libTestFolder, '1');
+        FileSystem.deleteFolder(testFolder);
+        FileSystem.ensureFolder(testFolder);
+
+        // create an open lockfile
+        const resourceName: string = 'test';
+        const lockFileHandle: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+        expect(lockFileHandle).toBeDefined();
+
+        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+        // this lock should be undefined since there is an existing lock
+        expect(lock).toBeUndefined();
+        lockFileHandle!.release();
       });
-    });
 
-    test('will not acquire if existing lock is there', () => {
-      // ensure test folder is clean
-      const testFolder: string = path.join(libTestFolder, '1');
-      FileSystem.deleteFolder(testFolder);
-      FileSystem.ensureFolder(testFolder);
+      test('can acquire and close a dirty lockfile', () => {
+        // ensure test folder is clean
+        const testFolder: string = path.join(libTestFolder, '1');
+        FileSystem.ensureEmptyFolder(testFolder);
 
-      // create an open lockfile
-      const resourceName: string = 'test';
-      const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
-      const lockFileHandle: FileWriter = FileWriter.open(lockFileName, { exclusive: true });
+        // Create a lockfile that is still hanging around on disk,
+        const resourceName: string = 'test';
+        const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
+        FileWriter.open(lockFileName, { exclusive: true }).close();
 
-      const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
-      // this lock should be undefined since there is an existing lock
-      expect(lock).toBeUndefined();
-      lockFileHandle.close();
-    });
+        expect(lock).toBeDefined();
+        expect(lock!.dirtyWhenAcquired).toEqual(true);
+        expect(lock!.isReleased).toEqual(false);
+        expect(FileSystem.exists(lockFileName)).toEqual(true);
 
-    test('can acquire and close a dirty lockfile', () => {
-      // ensure test folder is clean
-      const testFolder: string = path.join(libTestFolder, '1');
-      FileSystem.ensureEmptyFolder(testFolder);
-
-      // Create a lockfile that is still hanging around on disk,
-      const resourceName: string = 'test';
-      const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
-      FileWriter.open(lockFileName, { exclusive: true }).close();
-
-      const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
-
-      expect(lock).toBeDefined();
-      expect(lock!.dirtyWhenAcquired).toEqual(true);
-      expect(lock!.isReleased).toEqual(false);
-      expect(FileSystem.exists(lockFileName)).toEqual(true);
-
-      // Ensure that we can release the "dirty" lockfile
-      lock!.release();
-      expect(FileSystem.exists(lockFileName)).toEqual(false);
-      expect(lock!.isReleased).toEqual(true);
-    });
-
-    test('can acquire and close a clean lockfile', () => {
-      // ensure test folder is clean
-      const testFolder: string = path.join(libTestFolder, '1');
-      FileSystem.ensureEmptyFolder(testFolder);
-
-      const resourceName: string = 'test';
-      const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
-      const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
-
-      // The lockfile should exist and be in a clean state
-      expect(lock).toBeDefined();
-      expect(lock!.dirtyWhenAcquired).toEqual(false);
-      expect(lock!.isReleased).toEqual(false);
-      expect(FileSystem.exists(lockFileName)).toEqual(true);
-
-      // Ensure that we can release the "clean" lockfile
-      lock!.release();
-      expect(FileSystem.exists(lockFileName)).toEqual(false);
-      expect(lock!.isReleased).toEqual(true);
-
-      // Ensure we cannot release the lockfile twice
-      expect(() => {
+        // Ensure that we can release the "dirty" lockfile
         lock!.release();
-      }).toThrow();
+        expect(FileSystem.exists(lockFileName)).toEqual(false);
+        expect(lock!.isReleased).toEqual(true);
+      });
+
+      test('can acquire and close a clean lockfile', () => {
+        // ensure test folder is clean
+        const testFolder: string = path.join(libTestFolder, '1');
+        FileSystem.ensureEmptyFolder(testFolder);
+
+        const resourceName: string = 'test';
+        const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
+        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+        // The lockfile should exist and be in a clean state
+        expect(lock).toBeDefined();
+        expect(lock!.dirtyWhenAcquired).toEqual(false);
+        expect(lock!.isReleased).toEqual(false);
+        expect(FileSystem.exists(lockFileName)).toEqual(true);
+
+        // Ensure that we can release the "clean" lockfile
+        lock!.release();
+        expect(FileSystem.exists(lockFileName)).toEqual(false);
+        expect(lock!.isReleased).toEqual(true);
+
+        // Ensure we cannot release the lockfile twice
+        expect(() => {
+          lock!.release();
+        }).toThrow();
+      });
     });
   }
 });

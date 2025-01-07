@@ -1,6 +1,128 @@
 # Change Log - @rushstack/heft-serverless-stack-plugin
 
-This log was last generated on Fri, 07 Jun 2024 15:10:25 GMT and should not be manually modified.
+This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+
+## 0.3.80
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.3.79
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.3.78
+Tue, 03 Dec 2024 16:11:07 GMT
+
+_Version update only_
+
+## 0.3.77
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.3.76
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.3.75
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.3.74
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.3.73
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.3.72
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.3.71
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.3.70
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.3.69
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.3.68
+Sat, 21 Sep 2024 00:10:27 GMT
+
+_Version update only_
+
+## 0.3.67
+Fri, 13 Sep 2024 00:11:42 GMT
+
+_Version update only_
+
+## 0.3.66
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.3.65
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.3.64
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.3.63
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.3.62
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.3.61
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.3.60
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.3.59
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.3.58
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
+
+## 0.3.57
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.3.56
 Fri, 07 Jun 2024 15:10:25 GMT

@@ -38,6 +38,11 @@ export interface IRushServePluginOptions {
   portParameterLongName?: string | undefined;
 
   /**
+   * The URL path at which to host Rush log files. If not specified, log files will not be served.
+   */
+  logServePath?: string | undefined;
+
+  /**
    * Routing rules for files that are associated with the entire workspace, rather than a single project (e.g. files output by Rush plugins).
    */
   globalRouting?: IGlobalRoutingRuleJson[];
@@ -52,12 +57,14 @@ export class RushServePlugin implements IRushPlugin {
   private readonly _phasedCommands: Set<string>;
   private readonly _portParameterLongName: string | undefined;
   private readonly _globalRoutingRules: IGlobalRoutingRuleJson[];
+  private readonly _logServePath: string | undefined;
   private readonly _buildStatusWebSocketPath: string | undefined;
 
   public constructor(options: IRushServePluginOptions) {
     this._phasedCommands = new Set(options.phasedCommands);
     this._portParameterLongName = options.portParameterLongName;
     this._globalRoutingRules = options.globalRouting ?? [];
+    this._logServePath = options.logServePath;
     this._buildStatusWebSocketPath = options.buildStatusWebSocketPath;
   }
 
@@ -84,6 +91,7 @@ export class RushServePlugin implements IRushPlugin {
         rushConfiguration,
         command,
         portParameterLongName: this._portParameterLongName,
+        logServePath: this._logServePath,
         globalRoutingRules,
         buildStatusWebSocketPath: this._buildStatusWebSocketPath
       });

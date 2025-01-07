@@ -1,6 +1,134 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Tue, 11 Jun 2024 00:21:28 GMT and should not be manually modified.
+This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+
+## 0.14.1
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.14.0
+Tue, 10 Dec 2024 07:32:19 GMT
+
+### Minor changes
+
+- Inject `punycode` into the NodeJS module cache in Node versions 22 and above to work around a deprecation warning.
+
+## 0.13.3
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.13.2
+Tue, 03 Dec 2024 16:11:07 GMT
+
+_Version update only_
+
+## 0.13.1
+Sat, 23 Nov 2024 01:18:55 GMT
+
+### Patches
+
+- Fix a bug in `jest-node-modules-symlink-resolver` with respect to evaluating paths that don't exist. Expected behavior in that situation is to return the input path.
+
+## 0.13.0
+Fri, 22 Nov 2024 01:10:43 GMT
+
+### Minor changes
+
+- Add a custom resolver that only resolves symlinks that are within node_modules.
+
+## 0.12.18
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.12.17
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.12.16
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.12.15
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.12.14
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.12.13
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.12.12
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.12.11
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.12.10
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.12.9
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.12.8
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.12.7
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.12.6
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.12.5
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.12.4
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.12.3
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.12.2
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 0.12.1
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.12.0
 Tue, 11 Jun 2024 00:21:28 GMT

@@ -119,4 +119,32 @@ describe(JsonSchema.name, () => {
       expect(errorDetails).toMatchSnapshot();
     });
   });
+
+  test('successfully applies custom formats', () => {
+    const schemaWithCustomFormat = JsonSchema.fromLoadedObject(
+      {
+        title: 'Test Custom Format',
+        type: 'object',
+        properties: {
+          exampleNumber: {
+            type: 'number',
+            format: 'uint8'
+          }
+        },
+        additionalProperties: false,
+        required: ['exampleNumber']
+      },
+      {
+        schemaVersion: 'draft-07',
+        customFormats: {
+          uint8: {
+            type: 'number',
+            validate: (data) => data >= 0 && data <= 255
+          }
+        }
+      }
+    );
+    expect(() => schemaWithCustomFormat.validateObject({ exampleNumber: 10 }, '')).not.toThrow();
+    expect(() => schemaWithCustomFormat.validateObject({ exampleNumber: 1000 }, '')).toThrow();
+  });
 });

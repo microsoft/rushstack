@@ -196,7 +196,10 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
         parser.hooks.program.tap(PLUGIN_NAME, (program: unknown, comments: Comment[]) => {
           const relevantComments: Comment[] = comments.filter(isLicenseComment);
           if (comments.length > 0) {
-            const module: Module = parser.state.module;
+            // Webpack's typings now restrict the properties on factoryMeta for unknown reasons
+            const module: { factoryMeta?: IFactoryMeta } = parser.state.module as unknown as {
+              factoryMeta?: IFactoryMeta;
+            };
             if (!module.factoryMeta) {
               module.factoryMeta = {
                 comments: relevantComments
@@ -316,7 +319,12 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
             return source;
           }
 
-          const id: string | number = compilation.chunkGraph.getModuleId(mod);
+          const id: string | number | null = compilation.chunkGraph.getModuleId(mod);
+
+          if (id === null) {
+            // This module has no id. Abandon per-module minification.
+            return source;
+          }
 
           const metadata: IModuleStats = getOrCreateMetadata(mod);
           const cachedResult: ISourceCacheEntry | undefined = sourceCache.get(source);

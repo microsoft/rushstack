@@ -1,6 +1,20 @@
 # Change Log - @rushstack/eslint-plugin-security
 
-This log was last generated on Sat, 17 Feb 2024 06:24:34 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Sep 2024 00:11:08 GMT and should not be manually modified.
+
+## 0.8.3
+Thu, 19 Sep 2024 00:11:08 GMT
+
+### Patches
+
+- Fix ESLint broken links
+
+## 0.8.2
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
 
 ## 0.8.1
 Sat, 17 Feb 2024 06:24:34 GMT

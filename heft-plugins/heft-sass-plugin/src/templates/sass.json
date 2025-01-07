@@ -71,5 +71,19 @@
    *
    * Default value: undefined
    */
-  // "excludeFiles": []
+  // "excludeFiles": [],
+
+  /**
+   * If set, deprecation warnings from dependencies will be suppressed.
+   *
+   * Default value: false
+   */
+  // "ignoreDeprecationsInDependencies": true,
+
+  /**
+   * If set, the specified deprecation warnings will be suppressed.
+   *
+   * Default value: []
+   */
+  // "silenceDeprecations": ["mixed-decls"]
 }

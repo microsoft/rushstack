@@ -103,6 +103,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/lockfile.types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@redis/client",
       "allowedCategories": [ "libraries" ]
     },
@@ -163,6 +167,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-localization-typings-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
@@ -203,6 +211,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/lookup-by-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/module-minifier",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -223,6 +235,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/real-node-module-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rig-package",
       "allowedCategories": [ "libraries" ]
     },
@@ -241,6 +257,10 @@
     {
       "name": "@rushstack/rush-redis-cobuild-plugin",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/rush-resolver-cache-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/rush-sdk",
@@ -281,6 +301,10 @@
     {
       "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/webpack-workspace-resolve-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/webpack4-localization-plugin",
@@ -348,7 +372,7 @@
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "allowedCategories": [ "libraries", "vscode-extensions" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@typescript-eslint/parser",
@@ -767,6 +791,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "punycode",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "read-package-tree",
       "allowedCategories": [ "libraries" ]
     },
@@ -862,7 +890,6 @@
       "name": "tslint",
       "allowedCategories": [ "libraries", "tests" ]
     },
-
     {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]

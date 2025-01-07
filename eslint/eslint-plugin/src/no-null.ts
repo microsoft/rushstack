@@ -19,7 +19,7 @@ const noNullRule: TSESLint.RuleModule<MessageIds, Options> = {
       description: 'Prevent usage of JavaScript\'s "null" keyword',
       recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
-    } as TSESLint.RuleMetaDataDocs<Options>
+    } as TSESLint.RuleMetaDataDocs
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
     return {

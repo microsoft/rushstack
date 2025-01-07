@@ -26,7 +26,7 @@ module.exports = {
       }
     }
 
-    const indexFileLines = ['/// <reference path="./npm-check-typings.d.ts" />', ''];
+    const indexFileLines = [];
     for await (const dtsPath of collectDtsPaths(`${rushLibPath}/lib`, '@microsoft/rush-lib/lib')) {
       indexFileLines.push(`import '${dtsPath}';`);
     }

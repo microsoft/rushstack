@@ -87,7 +87,7 @@ const _pnpmOnlyScripts: IScriptSpecifier[] = [
 ];
 
 const getScripts = (rushConfiguration: RushConfiguration): IScriptSpecifier[] => {
-  if (rushConfiguration.packageManager === 'pnpm') {
+  if (rushConfiguration.isPnpm) {
     return _scripts.concat(_pnpmOnlyScripts);
   }
 

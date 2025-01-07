@@ -40,13 +40,13 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
 
   public apply(hooks: PhasedCommandHooks): void {
     const terminal: ITerminal = this._terminal;
-    hooks.beforeExecuteOperations.tapPromise(PLUGIN_NAME, createBuildPlan);
+    hooks.beforeExecuteOperations.tap(PLUGIN_NAME, createBuildPlan);
 
-    async function createBuildPlan(
+    function createBuildPlan(
       recordByOperation: Map<Operation, IOperationExecutionResult>,
       context: IExecuteOperationsContext
-    ): Promise<void> {
-      const { projectConfigurations, projectChangeAnalyzer } = context;
+    ): void {
+      const { projectConfigurations, inputsSnapshot } = context;
       const disjointSet: DisjointSet<Operation> = new DisjointSet<Operation>();
       const operations: Operation[] = [...recordByOperation.keys()];
       for (const operation of operations) {
@@ -56,13 +56,14 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
         Operation,
         IBuildPlanOperationCacheContext
       >();
+
       for (const operation of operations) {
         const { associatedProject, associatedPhase } = operation;
         if (associatedProject && associatedPhase) {
           const projectConfiguration: RushProjectConfiguration | undefined =
             projectConfigurations.get(associatedProject);
-          const fileHashes: Map<string, string> | undefined =
-            await projectChangeAnalyzer._tryGetProjectDependenciesAsync(associatedProject, terminal);
+          const fileHashes: ReadonlyMap<string, string> | undefined =
+            inputsSnapshot?.getTrackedFileHashesForOperation(associatedProject, associatedPhase.name);
           if (!fileHashes) {
             continue;
           }

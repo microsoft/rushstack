@@ -6,11 +6,11 @@
 
 /// <reference types="node" />
 
-import * as fetch from 'node-fetch';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import { ITerminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { RushSession } from '@rushstack/rush-sdk';
+import { WebClient } from '@rushstack/rush-sdk/lib/utilities/WebClient';
 
 // @public
 export class AmazonS3Client {
@@ -61,22 +61,6 @@ export interface IAmazonS3Credentials {
     sessionToken: string | undefined;
 }
 
-// Warning: (ae-forgotten-export) The symbol "IWebFetchOptionsBase" needs to be exported by the entry point index.d.ts
-//
-// @public
-export interface IGetFetchOptions extends IWebFetchOptionsBase {
-    // (undocumented)
-    verb: 'GET' | never;
-}
-
-// @public
-export interface IPutFetchOptions extends IWebFetchOptionsBase {
-    // (undocumented)
-    body?: Buffer;
-    // (undocumented)
-    verb: 'PUT';
-}
-
 // @public (undocumented)
 class RushAmazonS3BuildCachePlugin implements IRushPlugin {
     // (undocumented)
@@ -85,30 +69,6 @@ class RushAmazonS3BuildCachePlugin implements IRushPlugin {
     pluginName: string;
 }
 export default RushAmazonS3BuildCachePlugin;
-
-// @public
-export class WebClient {
-    constructor();
-    // (undocumented)
-    accept: string | undefined;
-    // (undocumented)
-    addBasicAuthHeader(userName: string, password: string): void;
-    // (undocumented)
-    fetchAsync(url: string, options?: IGetFetchOptions | IPutFetchOptions): Promise<WebClientResponse>;
-    // (undocumented)
-    static mergeHeaders(target: fetch.Headers, source: fetch.Headers): void;
-    // Warning: (ae-forgotten-export) The symbol "WebClientProxy" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    proxy: WebClientProxy;
-    // (undocumented)
-    readonly standardHeaders: fetch.Headers;
-    // (undocumented)
-    userAgent: string | undefined;
-}
-
-// @public
-export type WebClientResponse = fetch.Response;
 
 // (No @packageDocumentation comment for this package)
 

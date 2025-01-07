@@ -223,9 +223,10 @@ export function updateAssetHashes({
                     compilation.renameAsset(jsAssetName, newJsFilename);
 
                     if (locale) {
-                      const filesForChunkName: Record<string, string> | undefined = filesByChunkName?.get(
-                        chunk.name
-                      );
+                      const filesForChunkName: Record<string, string> | undefined = chunk.name
+                        ? filesByChunkName?.get(chunk.name)
+                        : undefined;
+
                       if (filesForChunkName) {
                         filesForChunkName[locale] = newJsFilename;
                       }

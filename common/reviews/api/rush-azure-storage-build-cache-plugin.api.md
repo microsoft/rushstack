@@ -5,6 +5,7 @@
 ```ts
 
 import { AzureAuthorityHosts } from '@azure/identity';
+import { CredentialCache } from '@rushstack/rush-sdk';
 import { DeviceCodeCredentialOptions } from '@azure/identity';
 import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import { InteractiveBrowserCredentialNodeOptions } from '@azure/identity';
@@ -24,6 +25,8 @@ export abstract class AzureAuthenticationBase {
     // (undocumented)
     protected readonly _azureEnvironment: AzureEnvironmentName;
     // (undocumented)
+    protected get _credentialCacheId(): string;
+    // (undocumented)
     protected abstract readonly _credentialKindForLogging: string;
     // (undocumented)
     protected abstract readonly _credentialNameForCache: string;
@@ -35,7 +38,7 @@ export abstract class AzureAuthenticationBase {
     protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined>;
     protected abstract _getCacheIdParts(): string[];
     // (undocumented)
-    protected abstract _getCredentialFromTokenAsync(terminal: ITerminal, tokenCredential: TokenCredential): Promise<ICredentialResult>;
+    protected abstract _getCredentialFromTokenAsync(terminal: ITerminal, tokenCredential: TokenCredential, credentialsCache: CredentialCache): Promise<ICredentialResult>;
     // (undocumented)
     protected readonly _loginFlow: LoginFlowType;
     // (undocumented)
@@ -44,7 +47,7 @@ export abstract class AzureAuthenticationBase {
     tryGetCachedCredentialAsync(options: ITryGetCachedCredentialOptionsLogWarning): Promise<ICredentialCacheEntry | undefined>;
     // (undocumented)
     updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
-    updateCachedCredentialInteractiveAsync(terminal: ITerminal, onlyIfExistingCredentialExpiresAfter?: Date): Promise<void>;
+    updateCachedCredentialInteractiveAsync(terminal: ITerminal, onlyIfExistingCredentialExpiresBefore?: Date): Promise<void>;
 }
 
 // @public (undocumented)

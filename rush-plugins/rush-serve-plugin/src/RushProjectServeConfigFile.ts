@@ -3,7 +3,7 @@
 
 import path from 'path';
 
-import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
+import { ProjectConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { RigConfig } from '@rushstack/rig-package';
@@ -39,10 +39,10 @@ export interface IRoutingRule {
 }
 
 export class RushServeConfiguration {
-  private readonly _loader: ConfigurationFile<IRushProjectServeJson>;
+  private readonly _loader: ProjectConfigurationFile<IRushProjectServeJson>;
 
   public constructor() {
-    this._loader = new ConfigurationFile<IRushProjectServeJson>({
+    this._loader = new ProjectConfigurationFile<IRushProjectServeJson>({
       projectRelativeFilePath: 'config/rush-project-serve.json',
       jsonSchemaObject: rushProjectServeSchema,
       propertyInheritance: {
@@ -57,7 +57,7 @@ export class RushServeConfiguration {
     projects: Iterable<RushConfigurationProject>,
     terminal: ITerminal,
     workspaceRoutingRules: Iterable<IRoutingRule>
-  ): Promise<Iterable<IRoutingRule>> {
+  ): Promise<IRoutingRule[]> {
     const rules: IRoutingRule[] = Array.from(workspaceRoutingRules);
 
     await Async.forEachAsync(
