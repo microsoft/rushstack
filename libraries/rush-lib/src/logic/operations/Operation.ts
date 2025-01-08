@@ -107,8 +107,6 @@ export class Operation {
    */
   public enabled: boolean;
 
-  private _stateHash: string | undefined;
-
   public constructor(options: IOperationOptions) {
     const { phase, project, runner, settings, logFilenameIdentifier } = options;
     this.associatedPhase = phase;
