@@ -32,6 +32,7 @@ import {
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import { RushConstants } from '../RushConstants';
+import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -349,9 +350,15 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     }
   }
 
-  public calculateStateHash(options: { inputsSnapshot: IInputsSnapshot }): string {
+  public calculateStateHash(options: {
+    inputsSnapshot: IInputsSnapshot;
+    buildCacheConfiguration: BuildCacheConfiguration;
+  }): string {
     if (!this._stateHash) {
-      const { inputsSnapshot } = options;
+      const {
+        inputsSnapshot,
+        buildCacheConfiguration: { cacheHashSalt }
+      } = options;
 
       // Examples of data in the config hash:
       // - CLI parameters (ShellOperationRunner)
@@ -377,6 +384,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       // This property is used to force cache bust when version changes, e.g. when fixing bugs in the content
       // of the build cache.
       hasher.update(`${RushConstants.buildCacheVersion}`);
+
+      if (cacheHashSalt !== undefined) {
+        // This allows repository owners to force a cache bust by changing the salt.
+        // A common use case is to invalidate the cache when adding/removing/updating rush plugins that alter the build output.
+        hasher.update(cacheHashSalt);
+      }
 
       for (const dependencyHash of dependencyHashes) {
         hasher.update(dependencyHash);

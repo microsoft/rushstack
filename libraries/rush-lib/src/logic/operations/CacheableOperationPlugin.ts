@@ -107,22 +107,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
         for (const [operation, record] of recordByOperation) {
           const stateHash: string = (record as OperationExecutionRecord).calculateStateHash({
-            inputsSnapshot
+            inputsSnapshot,
+            buildCacheConfiguration
           });
           const { associatedProject, associatedPhase, runner, settings: operationSettings } = operation;
           if (!associatedProject || !associatedPhase || !runner) {
             return;
           }
-
-          const { cacheHashSalt } = buildCacheConfiguration;
-          const hasher: crypto.Hash = crypto.createHash('sha1');
-          hasher.update(stateHash);
-          if (cacheHashSalt !== undefined) {
-            // This allows repository owners to force a cache bust by changing the salt.
-            // A common use case is to invalidate the cache when adding/removing/updating rush plugins that alter the build output.
-            hasher.update(cacheHashSalt);
-          }
-          const finalStateHash: string = hasher.digest('hex');
 
           const { name: phaseName } = associatedPhase;
 
@@ -158,7 +149,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             isCacheReadAllowed: isIncrementalBuildAllowed,
             operationBuildCache: undefined,
             outputFolderNames,
-            stateHash: finalStateHash,
+            stateHash,
             cacheDisabledReason,
             cobuildLock: undefined,
             cobuildClusterId: undefined,
