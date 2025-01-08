@@ -1,6 +1,11 @@
 # Change Log - @rushstack/webpack-workspace-resolve-plugin
 
-This log was last generated on Wed, 18 Dec 2024 01:11:33 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Jan 2025 22:17:32 GMT and should not be manually modified.
+
+## 0.3.19
+Tue, 07 Jan 2025 22:17:32 GMT
+
+_Version update only_
 
 ## 0.3.18
 Wed, 18 Dec 2024 01:11:33 GMT

@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 26 Dec 2024 23:35:27 GMT and should not be manually modified.
+This log was last generated on Mon, 06 Jan 2025 21:48:43 GMT and should not be manually modified.
+
+## 5.147.2
+Mon, 06 Jan 2025 21:48:43 GMT
+
+### Updates
+
+- Fix an issue with evaluation of `shouldEnsureConsistentVersions` when the value is not constant across subspaces or variants.
+- Fix an issue where the lockfile object has a nullish value causing yaml.dump to report an error.
 
 ## 5.147.1
 Thu, 26 Dec 2024 23:35:27 GMT

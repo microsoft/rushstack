@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.49.0",
+      "tag": "@microsoft/api-extractor_v7.49.0",
+      "date": "Tue, 07 Jan 2025 22:17:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade the bundled compiler engine to TypeScript 5.7.2"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.48.1",
       "tag": "@microsoft/api-extractor_v7.48.1",
       "date": "Sat, 14 Dec 2024 01:11:07 GMT",

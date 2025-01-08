@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Sat, 27 Jul 2024 00:10:27 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Jan 2025 16:11:06 GMT and should not be manually modified.
+
+## 1.10.5
+Tue, 07 Jan 2025 16:11:06 GMT
+
+### Patches
+
+- Fix a performance issue when locating ".eslint-bulk-suppressions.json".
 
 ## 1.10.4
 Sat, 27 Jul 2024 00:10:27 GMT

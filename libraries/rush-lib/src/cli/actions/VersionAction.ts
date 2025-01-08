@@ -216,8 +216,8 @@ export class VersionAction extends BaseRushAction {
     // Validate result of all subspaces
     for (const subspace of rushConfig.subspaces) {
       // Respect the `ensureConsistentVersions` field in rush.json
-      if (!subspace.shouldEnsureConsistentVersions) {
-        return;
+      if (!subspace.shouldEnsureConsistentVersions(variant)) {
+        continue;
       }
 
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig, {

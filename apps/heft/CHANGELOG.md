@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Jan 2025 22:17:32 GMT and should not be manually modified.
+
+## 0.68.12
+Tue, 07 Jan 2025 22:17:32 GMT
+
+_Version update only_
 
 ## 0.68.11
 Sat, 14 Dec 2024 01:11:07 GMT

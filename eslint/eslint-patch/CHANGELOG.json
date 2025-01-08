@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.10.5",
+      "tag": "@rushstack/eslint-patch_v1.10.5",
+      "date": "Tue, 07 Jan 2025 16:11:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a performance issue when locating \".eslint-bulk-suppressions.json\"."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.4",
       "tag": "@rushstack/eslint-patch_v1.10.4",
       "date": "Sat, 27 Jul 2024 00:10:27 GMT",
