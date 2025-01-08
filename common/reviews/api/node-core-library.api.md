@@ -616,11 +616,8 @@ export interface IRealNodeModulePathResolverOptions {
 
 // @public (undocumented)
 export interface IRunWithRetriesOptions<TResult> {
-    // (undocumented)
-    action: () => Promise<TResult> | TResult;
-    // (undocumented)
+    action: (retryCount: number) => Promise<TResult> | TResult;
     maxRetries: number;
-    // (undocumented)
     retryDelayMs?: number;
 }
 
