@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where MaxListenersExceeded would get thrown when using the HTTP build cache plugin",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
