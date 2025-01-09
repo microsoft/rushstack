@@ -6,7 +6,6 @@ import * as process from 'process';
 import type * as http from 'http';
 import { request as httpRequest, type IncomingMessage } from 'node:http';
 import { request as httpsRequest, type RequestOptions } from 'node:https';
-import type { Socket } from 'node:net';
 import { Import, LegacyAdapters } from '@rushstack/node-core-library';
 
 const createHttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);
@@ -199,11 +198,6 @@ const makeRequestAsync: FetchFn = async (
           resolve(result);
         });
       })
-        .on('socket', (socket: Socket) => {
-          socket.on('error', (error: Error) => {
-            reject(error);
-          });
-        })
         .on('error', (error: Error) => {
           reject(error);
         })
