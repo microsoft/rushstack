@@ -199,11 +199,6 @@ const makeRequestAsync: FetchFn = async (
           resolve(result);
         });
       })
-        .on('socket', (socket: Socket) => {
-          socket.on('error', (error: Error) => {
-            reject(error);
-          });
-        })
         .on('error', (error: Error) => {
           reject(error);
         })
