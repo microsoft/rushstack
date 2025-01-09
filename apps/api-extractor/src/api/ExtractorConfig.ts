@@ -569,7 +569,7 @@ export class ExtractorConfig {
     let configObject: Partial<IConfigFile> = {};
 
     // Lodash merges array values by default, which is unintuitive for config files (and makes it impossible for derived configurations to overwrite arrays).
-    // For example, given a base config containing an array property with value ["foo", "bar"] and a derived config that specifies ["baz"], lodash will produce ["baz", "bar"].
+    // For example, given a base config containing an array property with value ["foo", "bar"] and a derived config that specifies ["baz"] for that property, lodash will produce ["baz", "bar"], which is unintuitive.
     // This customizer function ensures that arrays are always overwritten.
     const mergeCustomizer: lodash.MergeWithCustomizer = (objValue, srcValue) => {
       if (Array.isArray(srcValue)) {
