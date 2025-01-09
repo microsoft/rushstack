@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 14 Dec 2024 01:11:07 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+
+## 5.10.2
+Thu, 09 Jan 2025 01:10:10 GMT
+
+### Patches
+
+- Provide the `retryCount` parameter to actions executed using `Async.runWithRetriesAsync`
 
 ## 5.10.1
 Sat, 14 Dec 2024 01:11:07 GMT

@@ -1,6 +1,11 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Tue, 07 Jan 2025 22:17:32 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+
+## 4.3.3
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
 
 ## 4.3.2
 Tue, 07 Jan 2025 22:17:32 GMT

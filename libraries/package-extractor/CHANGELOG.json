@@ -2,6 +2,33 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.10.7",
+      "tag": "@rushstack/package-extractor_v0.10.7",
+      "date": "Thu, 09 Jan 2025 01:10:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.10.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.11.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.80`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.6",
       "tag": "@rushstack/package-extractor_v0.10.6",
       "date": "Tue, 07 Jan 2025 22:17:32 GMT",

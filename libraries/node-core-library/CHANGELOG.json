@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.10.2",
+      "tag": "@rushstack/node-core-library_v5.10.2",
+      "date": "Thu, 09 Jan 2025 01:10:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Provide the `retryCount` parameter to actions executed using `Async.runWithRetriesAsync`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.10.1",
       "tag": "@rushstack/node-core-library_v5.10.1",
       "date": "Sat, 14 Dec 2024 01:11:07 GMT",
