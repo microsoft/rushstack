@@ -119,6 +119,15 @@ export interface IExperimentsJson {
    * When this toggle is enabled, Rush will only scan specific paths, significantly speeding up Git operations.
    */
   enableSubpathScan?: boolean;
+
+  /**
+   * Rush has a policy that normally requires Rush projects to specify `workspace:*` in package.json when depending
+   * on other projects in the workspace, unless they are explicitly declared as `decoupledLocalDependencies`
+   * in rush.json.  Enabling this experiment will remove that requirement for dependencies belonging to a different
+   * subspace.  This is useful for large product groups who work in separate subspaces and generally prefer to consume
+   * each other's packages via the NPM registry.
+   */
+  exemptDecoupledDependenciesBetweenSubspaces?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);

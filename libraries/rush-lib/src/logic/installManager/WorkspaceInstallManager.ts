@@ -223,8 +223,18 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         const dependencySpecifier: DependencySpecifier = new DependencySpecifier(name, version);
 
         // Is there a locally built Rush project that could satisfy this dependency?
-        const referencedLocalProject: RushConfigurationProject | undefined =
+        let referencedLocalProject: RushConfigurationProject | undefined =
           this.rushConfiguration.getProjectByName(name);
+
+        // If we enable exemptDecoupledDependenciesBetweenSubspaces, it will only check dependencies within the subspace.
+        if (
+          this.rushConfiguration.experimentsConfiguration.configuration
+            .exemptDecoupledDependenciesBetweenSubspaces
+        ) {
+          if (referencedLocalProject && !subspace.contains(referencedLocalProject)) {
+            referencedLocalProject = undefined;
+          }
+        }
 
         // Validate that local projects are referenced with workspace notation. If not, and it is not a
         // cyclic dependency, then it needs to be updated to specify `workspace:*` explicitly. Currently only
@@ -248,9 +258,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             // eslint-disable-next-line no-console
             console.log(
               Colorize.red(
-                `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists ` +
-                  'within the workspace but cannot be fulfilled with the specified version range. Either ' +
-                  'specify a valid version range, or add the package as a cyclic dependency.'
+                `"${rushProject.packageName}" depends on package "${name}" (${version}) which belongs to ` +
+                  'the workspace but cannot be fulfilled with the specified version range. Either ' +
+                  'specify a valid version range, or add the package to "decoupledLocalDependencies" in rush.json.'
               )
             );
             throw new AlreadyReportedError();

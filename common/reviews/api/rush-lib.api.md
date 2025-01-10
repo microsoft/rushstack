@@ -482,6 +482,7 @@ export interface IExperimentsJson {
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
     enableSubpathScan?: boolean;
+    exemptDecoupledDependenciesBetweenSubspaces?: boolean;
     forbidPhantomResolvableNodeModulesFolders?: boolean;
     generateProjectImpactGraphDuringRushUpdate?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
