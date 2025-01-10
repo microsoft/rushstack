@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Simplifies the process of going from operation to build cache ID.",
+      "comment": "Improve some `rush-sdk` APIs to support future work on GitHub issue #3994",
       "type": "none",
       "packageName": "@microsoft/rush"
     }
