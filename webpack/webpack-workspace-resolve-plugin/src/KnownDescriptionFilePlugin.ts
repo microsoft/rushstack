@@ -96,12 +96,27 @@ export class KnownDescriptionFilePlugin {
           // Store the resolver context since a WeakMap lookup is cheaper than walking the tree again
           contextForPackage.set(descriptionFileData, match);
 
+          // Using the object literal is an order of magnitude faster, at least on node 18.19.1
           const obj: ResolveRequest = {
-            ...request,
-            descriptionFileRoot,
+            path: request.path,
+            context: request.context,
             descriptionFilePath,
+            descriptionFileRoot,
             descriptionFileData,
-            relativePath
+            relativePath,
+            ignoreSymlinks: request.ignoreSymlinks,
+            fullySpecified: request.fullySpecified,
+            __innerRequest: request.__innerRequest,
+            __innerRequest_request: request.__innerRequest_request,
+            __innerRequest_relativePath: request.__innerRequest_relativePath,
+
+            request: request.request,
+            query: request.query,
+            fragment: request.fragment,
+            module: request.module,
+            directory: request.directory,
+            file: request.file,
+            internal: request.internal
           };
 
           // Delegate to the resolver step at `target`.
