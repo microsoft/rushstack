@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.148.0",
+      "tag": "@microsoft/rush_v5.148.0",
+      "date": "Fri, 10 Jan 2025 02:36:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a configuration option to avoid manually configuring decoupledLocalDependencies across subspaces."
+          },
+          {
+            "comment": "Improve some `rush-sdk` APIs to support future work on GitHub issue #3994"
+          },
+          {
+            "comment": "Fix an issue where MaxListenersExceeded would get thrown when using the HTTP build cache plugin"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.147.2",
       "tag": "@microsoft/rush_v5.147.2",
       "date": "Mon, 06 Jan 2025 21:48:43 GMT",

@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 06 Jan 2025 21:48:43 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Jan 2025 02:36:20 GMT and should not be manually modified.
+
+## 5.148.0
+Fri, 10 Jan 2025 02:36:20 GMT
+
+### Updates
+
+- Add a configuration option to avoid manually configuring decoupledLocalDependencies across subspaces.
+- Improve some `rush-sdk` APIs to support future work on GitHub issue #3994
+- Fix an issue where MaxListenersExceeded would get thrown when using the HTTP build cache plugin
 
 ## 5.147.2
 Mon, 06 Jan 2025 21:48:43 GMT
