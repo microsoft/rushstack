@@ -20,7 +20,7 @@ export interface IWorkspaceResolvePluginOptions {
 
   /**
    * Which webpack resolvers to apply the plugin to.
-   * @default ['normal']
+   * @defaultValue ['normal', 'context', 'loader']
    */
   resolverNames?: Iterable<string>;
 }
@@ -36,7 +36,7 @@ export class WorkspaceResolvePlugin implements WebpackPluginInstance {
 
   public constructor(options: IWorkspaceResolvePluginOptions) {
     this._cache = options.cache;
-    this._resolverNames = new Set(options.resolverNames ?? ['normal']);
+    this._resolverNames = new Set(options.resolverNames ?? ['normal', 'context', 'loader']);
   }
 
   public apply(compiler: Compiler): void {
