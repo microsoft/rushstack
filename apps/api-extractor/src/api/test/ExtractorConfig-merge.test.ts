@@ -11,7 +11,7 @@ const testDataFolder: string = path.join(__dirname, 'test-data');
 describe(`${ExtractorConfig.name}.${ExtractorConfig.loadFile.name}`, () => {
   it('array properties completely override array properties in the base config', () => {
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
-      path.join(testDataFolder, 'override-array-properties/api-extractor.json')
+      path.join(testDataFolder, 'override-array-properties', 'api-extractor.json')
     );
     // Base config specifies: ["alpha", "beta", "public"]
     // Derived config specifies: ["complete"]
