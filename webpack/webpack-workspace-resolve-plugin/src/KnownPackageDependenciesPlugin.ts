@@ -80,16 +80,25 @@ export class KnownPackageDependenciesPlugin {
           (remainingPath.length > 1 && cache.normalizeToSlash?.(remainingPath)) || remainingPath;
         const { descriptionFileRoot } = dependency.value;
         const obj: ResolveRequest = {
-          ...request,
           path: descriptionFileRoot,
+          context: request.context,
+          descriptionFilePath: `${descriptionFileRoot}${cache.resolverPathSeparator}package.json`,
           descriptionFileRoot,
           descriptionFileData: undefined,
-          descriptionFilePath: `${descriptionFileRoot}${cache.resolverPathSeparator}package.json`,
-
-          relativePath: relativePath,
-          request: relativePath,
+          relativePath,
+          ignoreSymlinks: request.ignoreSymlinks,
           fullySpecified,
-          module: false
+          __innerRequest: request.__innerRequest,
+          __innerRequest_request: request.__innerRequest_request,
+          __innerRequest_relativePath: request.__innerRequest_relativePath,
+
+          request: relativePath,
+          query: request.query,
+          fragment: request.fragment,
+          module: false,
+          directory: request.directory,
+          file: request.file,
+          internal: request.internal
         };
         // eslint-disable-next-line @rushstack/no-new-null
         resolver.doResolve(target, obj, null, resolveContext, callback);

@@ -41,6 +41,7 @@ export interface IWorkspaceLayoutCacheOptions {
 // @beta
 export interface IWorkspaceResolvePluginOptions {
     cache: WorkspaceLayoutCache;
+    resolverNames?: Iterable<string>;
 }
 
 // @beta
@@ -58,7 +59,7 @@ export class WorkspaceLayoutCache {
 
 // @beta
 export class WorkspaceResolvePlugin implements WebpackPluginInstance {
-    constructor(cache: WorkspaceLayoutCache);
+    constructor(options: IWorkspaceResolvePluginOptions);
     // (undocumented)
     apply(compiler: Compiler): void;
 }
