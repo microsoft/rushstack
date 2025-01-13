@@ -43,6 +43,7 @@ projects:
       - cyclic-dep-explicit-1/**
     dependentProjects:
       - cyclic-dep-explicit-1
+      - cyclic-dep-explicit-2
   cyclic-dep-explicit-2:
     includedGlobs:
       - cyclic-dep-explicit-2/**
@@ -221,6 +222,7 @@ projects:
       - cyclic-dep-explicit-1/**
     dependentProjects:
       - cyclic-dep-explicit-1
+      - cyclic-dep-explicit-2
   cyclic-dep-explicit-2:
     includedGlobs:
       - cyclic-dep-explicit-2/**
