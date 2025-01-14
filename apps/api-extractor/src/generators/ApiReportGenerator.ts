@@ -558,34 +558,55 @@ export class ApiReportGenerator {
     if (!collector.isAncillaryDeclaration(astDeclaration)) {
       const footerParts: string[] = [];
       const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
+
+      // 1. Release tag (if present)
       if (!apiItemMetadata.releaseTagSameAsParent) {
         if (apiItemMetadata.effectiveReleaseTag !== ReleaseTag.None) {
           footerParts.push(ReleaseTag.getTagName(apiItemMetadata.effectiveReleaseTag));
         }
       }
 
-      if (apiItemMetadata.isSealed) {
-        footerParts.push('@sealed');
-      }
-
-      if (apiItemMetadata.isVirtual) {
-        footerParts.push('@virtual');
-      }
-
-      if (apiItemMetadata.isOverride) {
-        footerParts.push('@override');
-      }
-
-      if (apiItemMetadata.isEventProperty) {
-        footerParts.push('@eventProperty');
-      }
-
-      if (apiItemMetadata.tsdocComment) {
-        if (apiItemMetadata.tsdocComment.deprecatedBlock) {
-          footerParts.push('@deprecated');
+      // 2. Enumerate configured tags in the order they were specified
+      for (const tag of collector.extractorConfig.apiReportTagsToInclude) {
+        // Note that we check some tags specially.
+        switch (tag) {
+          case '@sealed':
+            if (apiItemMetadata.isSealed) {
+              footerParts.push(tag);
+            }
+            break;
+          case '@virtual':
+            if (apiItemMetadata.isVirtual) {
+              footerParts.push(tag);
+            }
+            break;
+          case '@override':
+            if (apiItemMetadata.isOverride) {
+              footerParts.push(tag);
+            }
+            break;
+          case '@eventProperty':
+            if (apiItemMetadata.isEventProperty) {
+              footerParts.push(tag);
+            }
+            break;
+          case '@deprecated':
+            if (apiItemMetadata.tsdocComment?.deprecatedBlock) {
+              footerParts.push(tag);
+            }
+            break;
+          default:
+            // If the tag was not handled specially, check if it is present in the metadata.
+            if (apiItemMetadata.tsdocComment?.customBlocks.some((block) => block.blockTag.tagName === tag)) {
+              footerParts.push(tag);
+            } else if (apiItemMetadata.tsdocComment?.modifierTagSet.hasTagName(tag)) {
+              footerParts.push(tag);
+            }
+            break;
         }
       }
 
+      // 3. If the item is undocumented, append notice at the end of the list
       if (apiItemMetadata.undocumented) {
         footerParts.push('(undocumented)');
 
