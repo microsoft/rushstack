@@ -36,13 +36,15 @@ export class DocBaseClass {
 export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 {
     // @internal
     constructor(name: string);
-    // (undocumented)
+    // @deprecated (undocumented)
     deprecatedExample(): void;
     exampleFunction(a: string, b: string): string;
     exampleFunction(x: number): number;
     genericWithConstraintAndDefault<T extends Constraint = DefaultType>(x: T): void;
     interestingEdgeCases(): void;
+    // @eventProperty
     malformedEvent: SystemEvent;
+    // @eventProperty
     readonly modifiedEvent: SystemEvent;
     protected static readonly multipleModifiersProperty: boolean;
     optionalParamFunction(x?: number): void;
@@ -115,7 +117,7 @@ export interface IDocInterface1 {
 
 // @public (undocumented)
 export interface IDocInterface2 extends IDocInterface1 {
-    // (undocumented)
+    // @deprecated (undocumented)
     deprecatedExample(): void;
 }
 
@@ -182,7 +184,7 @@ export namespace OuterNamespace {
     let nestedVariable: boolean;
 }
 
-// @public
+// @public @myCustomTag
 export class SystemEvent {
     addHandler(handler: () => void): void;
 }
