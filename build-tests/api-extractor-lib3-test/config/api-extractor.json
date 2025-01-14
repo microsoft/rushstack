@@ -1,10 +1,11 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+  "$schema": "../../../apps/api-extractor/src/schemas/api-extractor.schema.json",
 
   "mainEntryPointFilePath": "<projectFolder>/lib/index.d.ts",
 
   "apiReport": {
-    "enabled": true
+    "enabled": true,
+    "tagsToInclude": ["@customBlockTag", "@customModifierTag"]
   },
 
   "docModel": {

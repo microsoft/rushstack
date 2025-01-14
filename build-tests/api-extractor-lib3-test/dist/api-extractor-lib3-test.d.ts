@@ -11,8 +11,15 @@ import { Lib1Class } from 'api-extractor-lib1-test';
 
 export { Lib1Class }
 
-/** @public */
+/**
+ * @customModifierTag
+ * @public
+ */
 export declare class Lib3Class {
+    /**
+     * I am a documented property!
+     * @customBlockTag My docs include a custom block tag!
+     */
     prop: boolean;
 }
 
