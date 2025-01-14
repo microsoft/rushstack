@@ -1007,12 +1007,10 @@ export class ExtractorConfig {
           );
         }
 
-        if (apiReportConfig.tagsToReport !== undefined) {
-          tagsToReport = {
-            ...defaultTagsToReport,
-            ...apiReportConfig.tagsToReport
-          };
-        }
+        tagsToReport = {
+          ...defaultTagsToReport,
+          ...apiReportConfig.tagsToReport
+        };
       }
 
       let docModelEnabled: boolean = false;
