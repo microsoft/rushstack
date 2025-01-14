@@ -566,43 +566,45 @@ export class ApiReportGenerator {
         }
       }
 
-      // 2. Enumerate configured tags in the order they were specified
-      for (const tag of collector.extractorConfig.tagsToReport) {
-        // Note that we check some tags specially.
-        switch (tag) {
-          case '@sealed':
-            if (apiItemMetadata.isSealed) {
-              footerParts.push(tag);
-            }
-            break;
-          case '@virtual':
-            if (apiItemMetadata.isVirtual) {
-              footerParts.push(tag);
-            }
-            break;
-          case '@override':
-            if (apiItemMetadata.isOverride) {
-              footerParts.push(tag);
-            }
-            break;
-          case '@eventProperty':
-            if (apiItemMetadata.isEventProperty) {
-              footerParts.push(tag);
-            }
-            break;
-          case '@deprecated':
-            if (apiItemMetadata.tsdocComment?.deprecatedBlock) {
-              footerParts.push(tag);
-            }
-            break;
-          default:
-            // If the tag was not handled specially, check if it is present in the metadata.
-            if (apiItemMetadata.tsdocComment?.customBlocks.some((block) => block.blockTag.tagName === tag)) {
-              footerParts.push(tag);
-            } else if (apiItemMetadata.tsdocComment?.modifierTagSet.hasTagName(tag)) {
-              footerParts.push(tag);
-            }
-            break;
+      // 2. Enumerate configured tags, reporting standard system tags first and then other configured tags.
+      // Note that the ordering we handle the standard tags is important for backwards compatibility.
+      // Also note that we had special mechanisms for checking whether or not an item is documented with these tags,
+      // so they are checked specially.
+      const {
+        '@sealed': reportSealedTag,
+        '@virtual': reportVirtualTag,
+        '@override': reportOverrideTag,
+        '@eventProperty': reportEventPropertyTag,
+        '@deprecated': reportDeprecatedTag,
+        ...otherTagsToReport
+      } = collector.extractorConfig.tagsToReport;
+
+      // 2.a Check for standard tags and report those that are both configured and present in the metadata.
+      if (reportSealedTag && apiItemMetadata.isSealed) {
+        footerParts.push('@sealed');
+      }
+      if (reportVirtualTag && apiItemMetadata.isVirtual) {
+        footerParts.push('@virtual');
+      }
+      if (reportOverrideTag && apiItemMetadata.isOverride) {
+        footerParts.push('@override');
+      }
+      if (reportEventPropertyTag && apiItemMetadata.isEventProperty) {
+        footerParts.push('@eventProperty');
+      }
+      if (reportDeprecatedTag && apiItemMetadata.tsdocComment?.deprecatedBlock) {
+        footerParts.push('@deprecated');
+      }
+
+      // 2.b Check for other configured tags and report those that are present in the tsdoc metadata.
+      for (const [tag, reportTag] of Object.entries(otherTagsToReport)) {
+        if (reportTag) {
+          // If the tag was not handled specially, check if it is present in the metadata.
+          if (apiItemMetadata.tsdocComment?.customBlocks.some((block) => block.blockTag.tagName === tag)) {
+            footerParts.push(tag);
+          } else if (apiItemMetadata.tsdocComment?.modifierTagSet.hasTagName(tag)) {
+            footerParts.push(tag);
+          }
         }
       }
 

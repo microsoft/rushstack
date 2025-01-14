@@ -183,13 +183,13 @@ const defaultApiReportVariants: readonly ApiReportVariant[] = ['complete'];
  * Also note that the order of tags in this list is significant, as it determines the order of tags in the report.
  * Any changes to this list should be considered breaking.
  */
-const defaultTagsToReport: readonly string[] = [
-  '@sealed',
-  '@virtual',
-  '@override',
-  '@eventProperty',
-  '@deprecated'
-];
+const defaultTagsToReport: Readonly<Record<`@${string}`, boolean>> = {
+  '@sealed': true,
+  '@virtual': true,
+  '@override': true,
+  '@eventProperty': true,
+  '@deprecated': true
+};
 
 interface IExtractorConfigParameters {
   projectFolder: string;
@@ -205,7 +205,7 @@ interface IExtractorConfigParameters {
   reportFolder: string;
   reportTempFolder: string;
   apiReportIncludeForgottenExports: boolean;
-  tagsToReport: readonly string[];
+  tagsToReport: Readonly<Record<`@${string}`, boolean>>;
   docModelEnabled: boolean;
   apiJsonFilePath: string;
   docModelIncludeForgottenExports: boolean;
@@ -302,7 +302,7 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigApiReport.reportTempFolder} */
   public readonly reportTempFolder: string;
   /** {@inheritDoc IConfigApiReport.tagsToReport} */
-  public readonly tagsToReport: readonly string[];
+  public readonly tagsToReport: Readonly<Record<`@${string}`, boolean>>;
 
   /**
    * Gets the file path for the "complete" (default) report configuration, if one was specified.
@@ -938,7 +938,7 @@ export class ExtractorConfig {
       let reportFolder: string = tokenContext.projectFolder;
       let reportTempFolder: string = tokenContext.projectFolder;
       const reportConfigs: IExtractorConfigApiReport[] = [];
-      let tagsToReport: readonly string[] = defaultTagsToReport;
+      let tagsToReport: Record<`@${string}`, boolean> = {};
       if (apiReportEnabled) {
         // Undefined case checked above where we assign `apiReportEnabled`
         const apiReportConfig: IConfigApiReport = configObject.apiReport!;
@@ -1008,7 +1008,10 @@ export class ExtractorConfig {
         }
 
         if (apiReportConfig.tagsToReport !== undefined) {
-          tagsToReport = apiReportConfig.tagsToReport;
+          tagsToReport = {
+            ...defaultTagsToReport,
+            ...apiReportConfig.tagsToReport
+          };
         }
       }
 

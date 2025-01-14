@@ -10,7 +10,7 @@ export { Lib1Class }
 
 // @public @customModifierTag (undocumented)
 export class Lib3Class {
-    // @customBlockTag
+    // @override @customBlockTag
     prop: boolean;
 }
 

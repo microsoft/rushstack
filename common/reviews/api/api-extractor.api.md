@@ -87,7 +87,7 @@ export class ExtractorConfig {
     readonly reportTempFolder: string;
     readonly rollupEnabled: boolean;
     readonly skipLibCheck: boolean;
-    readonly tagsToReport: readonly string[];
+    readonly tagsToReport: Readonly<Record<`@${string}`, boolean>>;
     readonly testMode: boolean;
     static tryLoadForFolder(options: IExtractorConfigLoadForFolderOptions): IExtractorConfigPrepareOptions | undefined;
     readonly tsconfigFilePath: string;
@@ -187,7 +187,7 @@ export interface IConfigApiReport {
     reportFolder?: string;
     reportTempFolder?: string;
     reportVariants?: ApiReportVariant[];
-    tagsToReport?: string[];
+    tagsToReport?: Readonly<Record<`@${string}`, boolean>>;
 }
 
 // @public

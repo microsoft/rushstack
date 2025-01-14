@@ -5,7 +5,13 @@
 
   "apiReport": {
     "enabled": true,
-    "tagsToReport": ["@customBlockTag", "@customModifierTag"]
+    "tagsToReport": {
+      // Disable reporting of `@virtual`, which is reported by default
+      "@virtual": false,
+      // Enable reporting of our custom TSDoc tags.
+      "@customBlockTag": true,
+      "@customModifierTag": true
+    }
   },
 
   "docModel": {

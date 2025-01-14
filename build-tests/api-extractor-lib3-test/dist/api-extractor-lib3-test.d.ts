@@ -19,6 +19,7 @@ export declare class Lib3Class {
     /**
      * I am a documented property!
      * @customBlockTag My docs include a custom block tag!
+     * @virtual @override
      */
     prop: boolean;
 }

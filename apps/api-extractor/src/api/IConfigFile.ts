@@ -145,18 +145,16 @@ export interface IConfigApiReport {
    * items whose documentation contains them.
    *
    * @remarks
-   * Tag names must begin with \"@\".
+   * Tag names must begin with `@`.
    *
    * This list may include standard TSDoc tags as well as custom ones.
    * TODO: document requirements around custom tags.
    *
-   * Tags will appear in the order they are specified in this list.
-   *
    * Note that an item's release tag will always reported; this behavior cannot be overridden.
    *
-   * @defaultValue `["@sealed", "\@virtual", "@override", "@eventProperty", "@deprecated"]`
+   * @defaultValue `@sealed`, `@virtual`, `@override`, `@eventProperty`, `deprecated`
    */
-  tagsToReport?: string[];
+  tagsToReport?: Readonly<Record<`@${string}`, boolean>>;
 }
 
 /**
