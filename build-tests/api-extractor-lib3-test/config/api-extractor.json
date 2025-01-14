@@ -5,7 +5,7 @@
 
   "apiReport": {
     "enabled": true,
-    "tagsToInclude": ["@customBlockTag", "@customModifierTag"]
+    "tagsToReport": ["@customBlockTag", "@customModifierTag"]
   },
 
   "docModel": {

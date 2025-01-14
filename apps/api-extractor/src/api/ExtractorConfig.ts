@@ -176,14 +176,14 @@ export interface IExtractorConfigApiReport {
 const defaultApiReportVariants: readonly ApiReportVariant[] = ['complete'];
 
 /**
- * Default {@link IConfigApiReport.tagsToInclude}.
+ * Default {@link IConfigApiReport.tagsToReport}.
  *
  * @remarks
  * Note that this list is externally documented, and directly affects report output.
  * Also note that the order of tags in this list is significant, as it determines the order of tags in the report.
  * Any changes to this list should be considered breaking.
  */
-const defaultApiReportTags: readonly string[] = [
+const defaultTagsToReport: readonly string[] = [
   '@sealed',
   '@virtual',
   '@override',
@@ -205,7 +205,7 @@ interface IExtractorConfigParameters {
   reportFolder: string;
   reportTempFolder: string;
   apiReportIncludeForgottenExports: boolean;
-  apiReportTagsToInclude: readonly string[];
+  tagsToReport: readonly string[];
   docModelEnabled: boolean;
   apiJsonFilePath: string;
   docModelIncludeForgottenExports: boolean;
@@ -301,8 +301,8 @@ export class ExtractorConfig {
   public readonly reportFolder: string;
   /** {@inheritDoc IConfigApiReport.reportTempFolder} */
   public readonly reportTempFolder: string;
-  /** {@inheritDoc IConfigApiReport.tagsToInclude} */
-  public readonly apiReportTagsToInclude: readonly string[];
+  /** {@inheritDoc IConfigApiReport.tagsToReport} */
+  public readonly tagsToReport: readonly string[];
 
   /**
    * Gets the file path for the "complete" (default) report configuration, if one was specified.
@@ -393,7 +393,7 @@ export class ExtractorConfig {
     this.reportConfigs = parameters.reportConfigs;
     this.reportFolder = parameters.reportFolder;
     this.reportTempFolder = parameters.reportTempFolder;
-    this.apiReportTagsToInclude = parameters.apiReportTagsToInclude;
+    this.tagsToReport = parameters.tagsToReport;
     this.docModelEnabled = parameters.docModelEnabled;
     this.apiJsonFilePath = parameters.apiJsonFilePath;
     this.docModelIncludeForgottenExports = parameters.docModelIncludeForgottenExports;
@@ -938,7 +938,7 @@ export class ExtractorConfig {
       let reportFolder: string = tokenContext.projectFolder;
       let reportTempFolder: string = tokenContext.projectFolder;
       const reportConfigs: IExtractorConfigApiReport[] = [];
-      let apiReportTagsToInclude: readonly string[] = defaultApiReportTags;
+      let tagsToReport: readonly string[] = defaultTagsToReport;
       if (apiReportEnabled) {
         // Undefined case checked above where we assign `apiReportEnabled`
         const apiReportConfig: IConfigApiReport = configObject.apiReport!;
@@ -1007,8 +1007,8 @@ export class ExtractorConfig {
           );
         }
 
-        if (apiReportConfig.tagsToInclude !== undefined) {
-          apiReportTagsToInclude = apiReportConfig.tagsToInclude;
+        if (apiReportConfig.tagsToReport !== undefined) {
+          tagsToReport = apiReportConfig.tagsToReport;
         }
       }
 
@@ -1130,7 +1130,7 @@ export class ExtractorConfig {
         reportFolder,
         reportTempFolder,
         apiReportIncludeForgottenExports,
-        apiReportTagsToInclude,
+        tagsToReport,
         docModelEnabled,
         apiJsonFilePath,
         docModelIncludeForgottenExports,

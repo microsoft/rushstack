@@ -54,7 +54,6 @@ export class ExtractorConfig {
     readonly apiJsonFilePath: string;
     readonly apiReportEnabled: boolean;
     readonly apiReportIncludeForgottenExports: boolean;
-    readonly apiReportTagsToInclude: readonly string[];
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
@@ -88,6 +87,7 @@ export class ExtractorConfig {
     readonly reportTempFolder: string;
     readonly rollupEnabled: boolean;
     readonly skipLibCheck: boolean;
+    readonly tagsToReport: readonly string[];
     readonly testMode: boolean;
     static tryLoadForFolder(options: IExtractorConfigLoadForFolderOptions): IExtractorConfigPrepareOptions | undefined;
     readonly tsconfigFilePath: string;
@@ -187,7 +187,7 @@ export interface IConfigApiReport {
     reportFolder?: string;
     reportTempFolder?: string;
     reportVariants?: ApiReportVariant[];
-    tagsToInclude?: string[];
+    tagsToReport?: string[];
 }
 
 // @public

@@ -142,7 +142,7 @@ export interface IConfigApiReport {
 
   /**
    * Specifies a list of {@link https://tsdoc.org/ | TSDoc} tags that should be reported in the API report file for
-   * items whose documentation includes them.
+   * items whose documentation contains them.
    *
    * @remarks
    * Tag names must begin with \"@\".
@@ -156,7 +156,7 @@ export interface IConfigApiReport {
    *
    * @defaultValue `["@sealed", "\@virtual", "@override", "@eventProperty", "@deprecated"]`
    */
-  tagsToInclude?: string[];
+  tagsToReport?: string[];
 }
 
 /**

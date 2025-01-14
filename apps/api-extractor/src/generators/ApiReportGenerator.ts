@@ -567,7 +567,7 @@ export class ApiReportGenerator {
       }
 
       // 2. Enumerate configured tags in the order they were specified
-      for (const tag of collector.extractorConfig.apiReportTagsToInclude) {
+      for (const tag of collector.extractorConfig.tagsToReport) {
         // Note that we check some tags specially.
         switch (tag) {
           case '@sealed':
