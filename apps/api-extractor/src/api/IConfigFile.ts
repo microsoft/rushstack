@@ -141,12 +141,17 @@ export interface IConfigApiReport {
   includeForgottenExports?: boolean;
 
   /**
-   * Specifies a list of TSDoc tags that should be reported in the API report file for items whose documentation includes them.
+   * Specifies a list of {@link https://tsdoc.org/ | TSDoc} tags that should be reported in the API report file for
+   * items whose documentation includes them.
    *
    * @remarks
-   * This can be used to include standard TSDoc tags or custom ones.
-   * Specified tag names must begin with \"@\".
+   * Tag names must begin with \"@\".
+   *
+   * This list may include standard TSDoc tags as well as custom ones.
+   * TODO: document requirements around custom tags.
+   *
    * Tags will appear in the order they are specified in this list.
+   *
    * Note that an item's release tag will always reported; this behavior cannot be overridden.
    *
    * @defaultValue `["@sealed", "\@virtual", "@override", "@eventProperty", "@deprecated"]`
