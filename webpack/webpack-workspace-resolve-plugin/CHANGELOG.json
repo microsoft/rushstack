@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-workspace-resolve-plugin",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.4.0",
+      "date": "Tue, 14 Jan 2025 01:11:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Switch constructor to an options object. Add option to specify which webpack resolvers to apply the plugin to. Improve performance by using an object literal instead of the spread operator when updating the resolve request. Upgrade compilation target to not polyfill optional chaining."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.20",
       "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.3.20",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",
