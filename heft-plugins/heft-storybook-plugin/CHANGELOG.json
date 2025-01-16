@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@rushstack/heft-storybook-plugin_v0.8.0",
+      "date": "Thu, 16 Jan 2025 22:49:19 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for the `--docs` parameter."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.7",
       "tag": "@rushstack/heft-storybook-plugin_v0.7.7",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",
