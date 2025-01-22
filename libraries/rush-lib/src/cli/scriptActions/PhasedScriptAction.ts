@@ -195,13 +195,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           ' to specify a count that is equal to the number of CPU cores. If this parameter is omitted,' +
           ' then the default value depends on the operating system and number of CPU cores.'
       });
-      this._timelineParameter = this.defineFlagParameter({
-        parameterLongName: '--timeline',
-        description:
-          'After the build is complete, print additional statistics and CPU usage information,' +
-          ' including an ASCII chart of the start and stop times for each operation.'
-      });
     }
+    this._timelineParameter = this.defineFlagParameter({
+      parameterLongName: '--timeline',
+      description:
+        'After the build is complete, print additional statistics and CPU usage information,' +
+        ' including an ASCII chart of the start and stop times for each operation.'
+    });
     this._cobuildPlanParameter = this.defineFlagParameter({
       parameterLongName: '--log-cobuild-plan',
       description:

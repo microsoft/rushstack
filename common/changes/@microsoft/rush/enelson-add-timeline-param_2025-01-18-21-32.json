@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow --timeline option for all phased commands",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
