@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/worker-pool",
+      "comment": "Add a `workerResourceLimits` option to the `WorkerPool` constructor to control the available resources to the workers.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/worker-pool"
+}

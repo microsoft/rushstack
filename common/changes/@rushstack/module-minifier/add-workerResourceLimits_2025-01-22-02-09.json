@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier",
+      "comment": "Add a `workerResourceLimits` option to the `WorkerPoolMinifier` constructor to control the available resources to the workers.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier"
+}

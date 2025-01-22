@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Worker } from 'worker_threads';
+import { type ResourceLimits, Worker } from 'worker_threads';
 
 /**
  * Symbol to read the ID off of a worker
@@ -38,6 +38,11 @@ export interface IWorkerPoolOptions {
    * Absolute path to the worker script.
    */
   workerScriptPath: string;
+
+  /**
+   * Optional resource limits for the workers.
+   */
+  workerResourceLimits?: ResourceLimits;
 }
 
 /**
@@ -60,9 +65,18 @@ export class WorkerPool {
   private readonly _prepare: ((worker: Worker) => void) | undefined;
   private readonly _workerData: unknown;
   private readonly _workerScript: string;
+  private readonly _workerResourceLimits: ResourceLimits | undefined;
 
   public constructor(options: IWorkerPoolOptions) {
-    const { id, maxWorkers, onWorkerDestroyed, prepareWorker, workerData, workerScriptPath } = options;
+    const {
+      id,
+      maxWorkers,
+      onWorkerDestroyed,
+      prepareWorker,
+      workerData,
+      workerScriptPath,
+      workerResourceLimits
+    } = options;
 
     this.id = id;
     this.maxWorkers = maxWorkers;
@@ -77,6 +91,7 @@ export class WorkerPool {
     this._prepare = prepareWorker;
     this._workerData = workerData;
     this._workerScript = workerScriptPath;
+    this._workerResourceLimits = workerResourceLimits;
   }
 
   /**
@@ -193,7 +208,8 @@ export class WorkerPool {
       [WORKER_ID_SYMBOL]?: string;
     } = new Worker(this._workerScript, {
       eval: false,
-      workerData: this._workerData
+      workerData: this._workerData,
+      resourceLimits: this._workerResourceLimits
     });
 
     const id: string = `${this.id}#${++this._nextId}`;
