@@ -1,6 +1,13 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Jan 2025 03:03:47 GMT and should not be manually modified.
+
+## 0.7.0
+Wed, 22 Jan 2025 03:03:47 GMT
+
+### Minor changes
+
+- Add a `workerResourceLimits` option to the `WorkerPoolMinifier` constructor to control the available resources to the workers.
 
 ## 0.6.36
 Thu, 09 Jan 2025 01:10:10 GMT

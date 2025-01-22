@@ -2,6 +2,18 @@
   "name": "@rushstack/worker-pool",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@rushstack/worker-pool_v0.5.0",
+      "date": "Wed, 22 Jan 2025 03:03:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `workerResourceLimits` option to the `WorkerPool` constructor to control the available resources to the workers."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.81",
       "tag": "@rushstack/worker-pool_v0.4.81",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",
