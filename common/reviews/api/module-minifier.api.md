@@ -8,6 +8,7 @@
 
 import { MinifyOptions } from 'terser';
 import type { RawSourceMap } from 'source-map';
+import type { ResourceLimits } from 'worker_threads';
 import type * as WorkerThreads from 'worker_threads';
 
 // @public
@@ -79,6 +80,7 @@ export interface IWorkerPoolMinifierOptions {
     maxThreads?: number;
     terserOptions?: MinifyOptions;
     verbose?: boolean;
+    workerResourceLimits?: ResourceLimits;
 }
 
 // @public
