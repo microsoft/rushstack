@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix support for \"ensureConsistentVersions\" in common-versions.json when subspaces features is not enabled.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
