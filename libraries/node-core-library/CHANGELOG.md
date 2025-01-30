@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Jan 2025 01:11:42 GMT and should not be manually modified.
+
+## 5.11.0
+Thu, 30 Jan 2025 01:11:42 GMT
+
+### Minor changes
+
+- Update fs-extra to 11.3.0.
 
 ## 5.10.2
 Thu, 09 Jan 2025 01:10:10 GMT

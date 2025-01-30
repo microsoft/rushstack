@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.11.0",
+      "tag": "@rushstack/node-core-library_v5.11.0",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update fs-extra to 11.3.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.10.2",
       "tag": "@rushstack/node-core-library_v5.10.2",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",
