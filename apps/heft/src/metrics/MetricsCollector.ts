@@ -154,7 +154,9 @@ export class MetricsCollector {
       machineOs: process.platform,
       machineArch: process.arch,
       machineCores: cpus.length,
-      machineProcessor: cpus[0].model,
+      // The Node.js model is sometimes padded, for example:
+      // "AMD Ryzen 7 3700X 8-Core Processor
+      machineProcessor: cpus[0].model.trim(),
       machineTotalMemoryMB: os.totalmem(),
       commandParameters: parameters || {}
     };
