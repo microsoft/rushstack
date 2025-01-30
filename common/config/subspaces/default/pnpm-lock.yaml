@@ -863,8 +863,8 @@ importers:
         specifier: 18.17.15
         version: 18.17.15
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -899,8 +899,8 @@ importers:
         specifier: 18.17.15
         version: 18.17.15
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -917,8 +917,8 @@ importers:
         specifier: 18.17.15
         version: 18.17.15
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -929,8 +929,8 @@ importers:
         specifier: workspace:*
         version: link:../../apps/api-extractor
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~2.9.2
         version: 2.9.2
@@ -947,8 +947,8 @@ importers:
         specifier: 18.17.15
         version: 18.17.15
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -969,8 +969,8 @@ importers:
         specifier: 18.17.15
         version: 18.17.15
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -987,8 +987,8 @@ importers:
         specifier: 18.17.15
         version: 18.17.15
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -1005,8 +1005,8 @@ importers:
         specifier: 18.17.15
         version: 18.17.15
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -1070,8 +1070,8 @@ importers:
         specifier: 18.17.15
         version: 18.17.15
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -1095,8 +1095,8 @@ importers:
         specifier: 18.17.15
         version: 18.17.15
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -1113,8 +1113,8 @@ importers:
         specifier: workspace:*
         version: link:../api-extractor-test-02
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -1128,8 +1128,8 @@ importers:
         specifier: workspace:*
         version: link:../api-extractor-lib1-test
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -2341,8 +2341,8 @@ importers:
         specifier: 18.17.15
         version: 18.17.15
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       typescript:
         specifier: ~5.4.2
         version: 5.4.2
@@ -3157,8 +3157,8 @@ importers:
         specifier: ~3.0.1
         version: 3.0.1(ajv@8.13.0)
       fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
+        specifier: ~11.3.0
+        version: 11.3.0
       import-lazy:
         specifier: ~4.0.0
         version: 4.0.0
@@ -19460,6 +19460,14 @@ packages:
       universalify: 2.0.1
     dev: true
 
+  /fs-extra@11.3.0:
+    resolution: {integrity: sha512-Z4XaCL6dUDHfP/jT25jJKMmtxvuwbkrD1vNSMFlo9lNLY2c5FHYSQgHPRZUjAB26TpDEoW9HCOgplrdbaPV/ew==}
+    engines: {node: '>=14.14'}
+    dependencies:
+      graceful-fs: 4.2.11
+      jsonfile: 6.1.0
+      universalify: 2.0.1
+
   /fs-extra@7.0.1:
     resolution: {integrity: sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==}
     engines: {node: '>=6 <7 || >=8'}
@@ -22023,7 +22031,6 @@ packages:
       universalify: 2.0.1
     optionalDependencies:
       graceful-fs: 4.2.11
-    dev: true
 
   /jsonpath-plus@10.2.0:
     resolution: {integrity: sha512-T9V+8iNYKFL2n2rF+w02LBOT2JjDnTjioaNFrxRy0Bv1y/hNsqR/EBK7Ojy2ythRHwmz2cRIls+9JitQGZC/sw==}
@@ -27766,7 +27773,6 @@ packages:
   /universalify@2.0.1:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
     engines: {node: '>= 10.0.0'}
-    dev: true
 
   /unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}

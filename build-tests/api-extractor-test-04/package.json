@@ -12,7 +12,7 @@
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "api-extractor-lib1-test": "workspace:*",
-    "fs-extra": "~7.0.1",
+    "fs-extra": "~11.3.0",
     "typescript": "~5.4.2"
   }
 }
