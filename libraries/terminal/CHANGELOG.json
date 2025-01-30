@@ -2,6 +2,18 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.14.6",
+      "tag": "@rushstack/terminal_v0.14.6",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.11.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.5",
       "tag": "@rushstack/terminal_v0.14.5",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",

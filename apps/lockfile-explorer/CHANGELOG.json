@@ -2,6 +2,27 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.7.15",
+      "tag": "@rushstack/lockfile-explorer_v1.7.15",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.14",
       "tag": "@rushstack/lockfile-explorer_v1.7.14",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",

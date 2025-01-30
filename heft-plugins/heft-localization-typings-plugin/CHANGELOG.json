@@ -2,6 +2,24 @@
   "name": "@rushstack/heft-localization-typings-plugin",
   "entries": [
     {
+      "version": "0.2.18",
+      "tag": "@rushstack/heft-localization-typings-plugin_v0.2.18",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.12.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.13` to `0.68.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.17",
       "tag": "@rushstack/heft-localization-typings-plugin_v0.2.17",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",
