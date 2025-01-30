@@ -195,7 +195,7 @@ export class HeftActionRunner {
     this._terminal = options.terminal;
     this._metricsCollector = options.metricsCollector;
 
-    const numberOfCores: number = os.cpus().length;
+    const numberOfCores: number = os.availableParallelism?.() ?? os.cpus().length;
 
     // If an explicit parallelism number wasn't provided, then choose a sensible
     // default.

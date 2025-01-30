@@ -8,7 +8,7 @@ import type { TARGET_ROOT_SCRIPT_RELATIVE_PATH_TEMPLATE_STRING as TargetRootScri
 /**
  * The maximum number of concurrent operations to perform.
  */
-export const MAX_CONCURRENCY: number = os.cpus().length * 2;
+export const MAX_CONCURRENCY: number = (os.availableParallelism?.() ?? os.cpus().length) * 2;
 
 /**
  * The name of the action to create symlinks.

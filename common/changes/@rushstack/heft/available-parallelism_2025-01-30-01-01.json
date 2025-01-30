@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Prefer `os.availableParallelism()` to `os.cpus().length`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

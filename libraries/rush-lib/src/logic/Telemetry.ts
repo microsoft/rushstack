@@ -156,14 +156,15 @@ export class Telemetry {
     if (!this._enabled) {
       return;
     }
+    const cpus: os.CpuInfo[] = os.cpus();
     const data: ITelemetryData = {
       ...telemetryData,
       machineInfo: telemetryData.machineInfo || {
         machineArchitecture: os.arch(),
         // The Node.js model is sometimes padded, for example:
         // "AMD Ryzen 7 3700X 8-Core Processor             "
-        machineCpu: os.cpus()[0].model.trim(),
-        machineCores: os.cpus().length,
+        machineCpu: cpus[0].model.trim(),
+        machineCores: cpus.length,
         machineTotalMemoryMiB: Math.round(os.totalmem() / ONE_MEGABYTE_IN_BYTES),
         machineFreeMemoryMiB: Math.round(os.freemem() / ONE_MEGABYTE_IN_BYTES)
       },

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createHash } from 'crypto';
-import { cpus } from 'os';
+import os from 'os';
 import type { ResourceLimits } from 'worker_threads';
 
 import serialize from 'serialize-javascript';
@@ -24,7 +24,7 @@ import type {
 export interface IWorkerPoolMinifierOptions {
   /**
    * Maximum number of worker threads to use. Will never use more than there are modules to process.
-   * Defaults to os.cpus().length
+   * Defaults to os.availableParallelism()
    */
   maxThreads?: number;
   /**
@@ -62,7 +62,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
 
   public constructor(options: IWorkerPoolMinifierOptions) {
     const {
-      maxThreads = cpus().length,
+      maxThreads = os.availableParallelism?.() ?? os.cpus().length,
       terserOptions = {},
       verbose = false,
       workerResourceLimits

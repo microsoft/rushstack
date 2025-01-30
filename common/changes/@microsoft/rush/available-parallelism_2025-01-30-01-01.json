@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Prefer `os.availableParallelism()` to `os.cpus().length`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

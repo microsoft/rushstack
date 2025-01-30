@@ -143,6 +143,8 @@ export class MetricsCollector {
 
     const { taskTotalExecutionMs } = filledPerformanceData;
 
+    const cpus: os.CpuInfo[] = os.cpus();
+
     const metricData: IMetricsData = {
       command: command,
       encounteredError: filledPerformanceData.encounteredError,
@@ -151,8 +153,8 @@ export class MetricsCollector {
       totalUptimeMs: process.uptime() * 1000,
       machineOs: process.platform,
       machineArch: process.arch,
-      machineCores: os.cpus().length,
-      machineProcessor: os.cpus()[0].model,
+      machineCores: cpus.length,
+      machineProcessor: cpus[0].model,
       machineTotalMemoryMB: os.totalmem(),
       commandParameters: parameters || {}
     };
