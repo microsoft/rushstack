@@ -4,7 +4,7 @@ A Rush plugin that enables resource constraints on specific operations.
 
 This plugin is designed to accomplish two goals:
 
- 1. Provide a generic way to restrict the total parallelism of certain operations. For example, you may generally want all "build" and "test" operations to use as many possible cores as possible, but for a
+ 1. Provide a generic way to restrict the total parallelism of certain operations. For example, you may generally want all "build" and "test" operations to use as many cores as possible, but for a
  particular set of expensive projects, you only want to run up to 2 build phases at a time. Or, you may want to use up all 32 cores on a machine, but you want a maximum of 8 test processes at any given time.
 
  2. Provide a generic way to model a limited pool of resources -- perhaps just 1 local simulator is available for running tests, or only 3 physical devices of a certain type that can run tests for projects with a given tag. This goal is similar to the above, but not only do we want to limit the parallelism, we want to choose a _specific resource_ from the pool for each active operation, and pass that resource to the operation for it to use.
