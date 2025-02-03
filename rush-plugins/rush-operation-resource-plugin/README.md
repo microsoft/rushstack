@@ -11,7 +11,7 @@ This plugin is designed to accomplish two goals:
 
 ## Configuration
 
-To use the Operation Resource plugin, add it to your `rush-plugins` autoinstaller (see https://rushjs.io/pages/maintainer/using_rush_plugins/ for more information). Then, create the configuration `common/config/rush/rush-operation-resource-plugin.json`.
+To use the Operation Resource plugin, add it to your `rush-plugins` autoinstaller (see https://rushjs.io/pages/maintainer/using_rush_plugins/ for more information). Then, create the configuration file `common/config/rush-plugins/rush-operation-resource-plugin.json`.
 
 ### Use Case 1: Executing tests on connected Android devices
 
