@@ -1,0 +1,25 @@
+{
+  "constraints": [
+    {
+      "appliesTo": {
+        "phaseName": "_phase:build"
+      },
+      "useResource": {
+        "poolName": "rokuDevices",
+        "envVarName": "ROKU_RUNNER"
+      }
+    },
+    {
+      "appliesTo": {
+        "phaseName": "build",
+        "tagName": "donkey"
+      }
+    }
+  ],
+  "resourcePools": [
+    {
+      "poolName": "rokuDevices",
+      "resources": ["AAA", "BBB"]
+    }
+  ]
+}

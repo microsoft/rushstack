@@ -1,0 +1,8 @@
+{
+  "url": "http://localhost:5071/cache/",
+  "tokenHandler": {
+    "exec": "node",
+    "args": ["common/scripts/auth.js"]
+  },
+  "isCacheWriteAllowed": true
+}
