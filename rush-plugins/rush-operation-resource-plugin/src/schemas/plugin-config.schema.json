@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Configuration for Rush Operation Resource Plugin",
   "type": "object",
-  "required": ["url"],
+  "additionalProperties": false,
   "properties": {
     "resourceConstraints": {
       "type": "array",
