@@ -152,7 +152,7 @@ export interface IConfigApiReport {
    *
    * Note that an item's release tag will always reported; this behavior cannot be overridden.
    *
-   * @defaultValue `@sealed`, `@virtual`, `@override`, `@eventProperty`, `deprecated`
+   * @defaultValue `@sealed`, `@virtual`, `@override`, `@eventProperty`, `@deprecated`
    */
   tagsToReport?: Readonly<Record<`@${string}`, boolean>>;
 }
