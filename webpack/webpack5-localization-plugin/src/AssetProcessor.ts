@@ -233,7 +233,7 @@ export async function processNonLocalizedAssetCachedAsync(
 }
 
 export function processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptions): IProcessedAsset {
-  const { asset, fileName, compilation, formatLocaleForFilenameFn, hasUrlGenerator: hasJsonP } = options;
+  const { asset, fileName, compilation, formatLocaleForFilenameFn, hasUrlGenerator } = options;
 
   const { sources, WebpackError } = compilation.compiler.webpack;
 
@@ -244,7 +244,7 @@ export function processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptio
   const { info: originInfo } = asset;
   const locale: string = options.noStringsLocaleName;
 
-  if (hasJsonP) {
+  if (hasUrlGenerator) {
     const assetSource: string = cachedSource.source().toString();
     const parsedAsset: IParseResult = _parseStringToReconstructionSequence(
       options.plugin,
