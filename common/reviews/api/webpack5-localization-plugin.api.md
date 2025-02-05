@@ -125,8 +125,8 @@ export interface _IStringPlaceholder {
     locFilePath: string;
     stringName: string;
     suffix: string;
+    translations: ReadonlyMap<string, ReadonlyMap<string, string>>;
     value: string;
-    valuesByLocale: Map<string, string>;
 }
 
 // @public (undocumented)
@@ -147,8 +147,6 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     getPlaceholder(localizedFileKey: string, stringName: string): _IStringPlaceholder | undefined;
     // @internal (undocumented)
     readonly _options: ILocalizationPluginOptions;
-    // (undocumented)
-    readonly stringKeys: Map<string, _IStringPlaceholder>;
 }
 
 // @public (undocumented)

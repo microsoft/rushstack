@@ -196,9 +196,9 @@ export function updateAssetHashes({
                     );
 
                     const regexp: RegExp = new RegExp(
-                      Array.from(relevantHashReplacements.keys())
-                        .map((hashToReplace) => Text.escapeRegExp(hashToReplace))
-                        .join('|'),
+                      Array.from(relevantHashReplacements.keys(), (hashToReplace) =>
+                        Text.escapeRegExp(hashToReplace)
+                      ).join('|'),
                       'g'
                     );
                     let match: RegExpMatchArray | null;
@@ -210,7 +210,7 @@ export function updateAssetHashes({
                       replaceSource.replace(matchStart, matchEnd, replacement);
                     }
 
-                    assetSource = replaceSource;
+                    assetSource = new thisWebpack.sources.CachedSource(replaceSource);
                     compilation.updateAsset(jsAssetName, assetSource);
                   }
                 }

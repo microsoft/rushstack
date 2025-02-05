@@ -19,7 +19,6 @@ interface IDynamicReconstructionElement {
   kind: 'dynamic';
   start: number;
   end: number;
-  escapedBackslash: string;
   valueFn: (locale: string) => string;
 }
 
@@ -44,12 +43,14 @@ interface INonLocalizedReconstructionResult {
 export interface IProcessAssetOptionsBase {
   plugin: LocalizationPlugin;
   compilation: Compilation;
+  cache: ReturnType<Compilation['getCache']>;
   chunk: Chunk;
   asset: Asset;
 }
 
 export interface IProcessNonLocalizedAssetOptions extends IProcessAssetOptionsBase {
   fileName: string;
+  hasUrlGenerator: boolean;
   noStringsLocaleName: string;
   formatLocaleForFilenameFn: FormatLocaleForFilenameFn;
 }
@@ -58,6 +59,7 @@ export interface IProcessLocalizedAssetOptions extends IProcessAssetOptionsBase 
   locales: Set<string>;
   fillMissingTranslationStrings: boolean;
   defaultLocale: string;
+  passthroughLocaleName: string | undefined;
   filenameTemplate: Parameters<typeof Compilation.prototype.getAssetPath>[0];
   formatLocaleForFilenameFn: FormatLocaleForFilenameFn;
 }
@@ -68,16 +70,66 @@ export interface IProcessAssetResult {
 }
 
 export const PLACEHOLDER_REGEX: RegExp = new RegExp(
-  `${Constants.STRING_PLACEHOLDER_PREFIX}_(\\\\*)_([A-C])_([0-9a-f]+)`,
+  `${Constants.STRING_PLACEHOLDER_PREFIX}_([A-C])_(\\\\*)_([0-9a-f$]+)_`,
   'g'
 );
 
-export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): Record<string, string> {
+export interface IProcessedAsset {
+  filename: string;
+  source: sources.CachedSource;
+  info: AssetInfo;
+}
+
+export interface IProcessLocalizedAssetResult {
+  localizedFiles: Record<string, string>;
+  processedAssets: IProcessedAsset[];
+}
+
+type ItemCacheFacade = ReturnType<ReturnType<Compilation['getCache']>['getItemCache']>;
+
+export async function processLocalizedAssetCachedAsync(
+  options: IProcessLocalizedAssetOptions
+): Promise<Record<string, string>> {
+  const { compilation, asset, cache } = options;
+  const { source: originalSource } = asset;
+
+  type ETag = NonNullable<ReturnType<typeof cache.getLazyHashedEtag>>;
+  const eTag: ETag | null = cache.getLazyHashedEtag(originalSource);
+  const { name: originName } = asset;
+  const cacheItem: ItemCacheFacade = cache.getItemCache(originName, eTag);
+  let output: IProcessLocalizedAssetResult | undefined = await cacheItem.getPromise();
+
+  if (!output) {
+    output = processLocalizedAsset(options);
+    await cacheItem.storePromise(output);
+  }
+
+  for (const { filename, source, info } of output.processedAssets) {
+    if (originName === filename) {
+      // This helper throws if the asset doesn't already exist
+      // Use the function form so that the object identity of `related` is preserved.
+      // Since we already read the original info, we don't need fancy merge logic.
+      compilation.updateAsset(filename, source, () => info);
+    } else {
+      // This helper throws if the asset already exists
+      compilation.emitAsset(filename, source, info);
+    }
+  }
+
+  return output.localizedFiles;
+}
+
+export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): IProcessLocalizedAssetResult {
   const { compilation, asset, chunk, filenameTemplate, locales, formatLocaleForFilenameFn } = options;
 
   const { sources, WebpackError } = compilation.compiler.webpack;
 
-  const rawSource: sources.CachedSource = new sources.CachedSource(asset.source);
+  const { source: originalSource } = asset;
+
+  const rawSource: sources.CachedSource =
+    originalSource instanceof sources.CachedSource
+      ? originalSource
+      : new sources.CachedSource(originalSource);
   const assetSource: string = rawSource.source().toString();
 
   const parsedAsset: IParseResult = _parseStringToReconstructionSequence(
@@ -91,6 +143,8 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): R
   const localizedFiles: Record<string, string> = {};
   (chunk as ILocalizedWebpackChunk).localizedFiles = localizedFiles;
 
+  const processedAssets: IProcessedAsset[] = [];
+
   const { info: originInfo, name: originName } = asset;
   if (!originInfo.related) {
     originInfo.related = {};
@@ -101,7 +155,8 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): R
       new sources.ReplaceSource(rawSource, locale),
       parsedAsset.reconstructionSeries,
       locale,
-      options.fillMissingTranslationStrings ? options.defaultLocale : undefined
+      options.fillMissingTranslationStrings ? options.defaultLocale : undefined,
+      options.passthroughLocaleName
     );
 
     for (const issue of localeIssues) {
@@ -117,7 +172,7 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): R
 
     const fileName: string = compilation.getAssetPath(filenameTemplate, data);
 
-    const info: AssetInfo = {
+    const info: AssetInfo & { locale: string } = {
       ...originInfo,
       locale
     };
@@ -125,20 +180,19 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): R
     const wrapped: sources.CachedSource = new sources.CachedSource(localeResult);
     localizedFiles[locale] = fileName;
 
+    processedAssets.push({
+      filename: fileName,
+      source: wrapped,
+      info
+    });
+
     // If file already exists
-    if (originName === fileName) {
-      // This helper throws if the asset doesn't already exist
-      // Use the function form so that the object identity of `related` is preserved.
-      // Since we already read the original info, we don't need fancy merge logic.
-      compilation.updateAsset(fileName, wrapped, () => info);
-    } else {
+    if (originName !== fileName) {
       // If A.related points to B, B.related can't point to A or the stats emitter explodes
       // So just strip the related object for the localized assets
       info.related = undefined;
       // We omit the `related` property that does a self-reference.
       originInfo.related[locale] = fileName;
-      // This helper throws if the asset already exists
-      compilation.emitAsset(fileName, wrapped, info);
     }
   }
 
@@ -148,35 +202,78 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): R
     );
   }
 
-  return localizedFiles;
+  return {
+    localizedFiles,
+    processedAssets
+  };
 }
 
-export function processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptions): void {
-  const { asset, fileName, compilation, formatLocaleForFilenameFn } = options;
+export async function processNonLocalizedAssetCachedAsync(
+  options: IProcessNonLocalizedAssetOptions
+): Promise<void> {
+  const { compilation, asset, cache } = options;
+  const { source: originalSource } = asset;
+
+  type ETag = NonNullable<ReturnType<typeof cache.getLazyHashedEtag>>;
+  const eTag: ETag | null = cache.getLazyHashedEtag(originalSource);
+  const { name: originName } = asset;
+  const cacheItem: ItemCacheFacade = cache.getItemCache(originName, eTag);
+  let output: IProcessedAsset | undefined = await cacheItem.getPromise();
+
+  if (!output) {
+    output = processNonLocalizedAsset(options);
+    await cacheItem.storePromise(output);
+  }
+
+  const { filename, source, info } = output;
+  compilation.updateAsset(originName, source, info);
+  if (originName !== filename) {
+    compilation.renameAsset(originName, filename);
+  }
+}
+
+export function processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptions): IProcessedAsset {
+  const { asset, fileName, compilation, formatLocaleForFilenameFn, hasUrlGenerator } = options;
 
   const { sources, WebpackError } = compilation.compiler.webpack;
 
-  const rawSource: sources.CachedSource = new sources.CachedSource(asset.source);
-  const assetSource: string = rawSource.source().toString();
-
-  const parsedAsset: IParseResult = _parseStringToReconstructionSequence(
-    options.plugin,
-    assetSource,
-    formatLocaleForFilenameFn
-  );
+  const rawSource: sources.Source = asset.source;
+  let cachedSource: sources.CachedSource =
+    rawSource instanceof sources.CachedSource ? rawSource : new sources.CachedSource(rawSource);
 
   const { info: originInfo } = asset;
-  const { issues } = parsedAsset;
-
   const locale: string = options.noStringsLocaleName;
-  const { issues: localeIssues, result } = _reconstructNonLocalized(
-    new sources.ReplaceSource(rawSource, locale),
-    parsedAsset.reconstructionSeries,
-    locale
-  );
 
-  for (const issue of localeIssues) {
-    issues.push(issue);
+  if (hasUrlGenerator) {
+    const assetSource: string = cachedSource.source().toString();
+    const parsedAsset: IParseResult = _parseStringToReconstructionSequence(
+      options.plugin,
+      assetSource,
+      formatLocaleForFilenameFn
+    );
+
+    const { issues } = parsedAsset;
+
+    const { issues: localeIssues, result } = _reconstructNonLocalized(
+      new sources.ReplaceSource(cachedSource, locale),
+      parsedAsset.reconstructionSeries,
+      locale
+    );
+
+    for (const issue of localeIssues) {
+      issues.push(issue);
+    }
+
+    if (issues.length > 0) {
+      options.compilation.errors.push(
+        new WebpackError(`localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`)
+      );
+    }
+
+    cachedSource = new sources.CachedSource(result);
+  } else {
+    // Force the CachedSource to cache the concatenated *string*, so that the subsequent ask for the buffer is fast
+    cachedSource.source();
   }
 
   const info: AssetInfo = {
@@ -184,14 +281,11 @@ export function processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptio
     locale
   };
 
-  const wrapped: sources.CachedSource = new sources.CachedSource(result);
-  compilation.updateAsset(fileName, wrapped, info);
-
-  if (issues.length > 0) {
-    options.compilation.errors.push(
-      new WebpackError(`localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`)
-    );
-  }
+  return {
+    filename: fileName,
+    source: cachedSource,
+    info
+  };
 }
 
 const ESCAPE_MAP: Map<string, string> = new Map([
@@ -209,7 +303,8 @@ function _reconstructLocalized(
   result: sources.ReplaceSource,
   reconstructionSeries: IReconstructionElement[],
   locale: string,
-  fallbackLocale: string | undefined
+  fallbackLocale: string | undefined,
+  passthroughLocale: string | undefined
 ): ILocalizedReconstructionResult {
   const issues: string[] = [];
 
@@ -217,18 +312,19 @@ function _reconstructLocalized(
     switch (element.kind) {
       case 'localized': {
         const { data } = element;
-        let newValue: string | undefined = data.valuesByLocale.get(locale);
-        if (newValue === undefined) {
-          if (fallbackLocale) {
-            newValue = data.valuesByLocale.get(fallbackLocale)!;
-          } else {
-            issues.push(
-              `The string "${data.stringName}" in "${data.locFilePath}" is missing in ` +
-                `the locale ${locale}`
-            );
+        const { stringName, translations } = data;
+        let newValue: string | undefined =
+          locale === passthroughLocale ? stringName : translations.get(locale)?.get(stringName);
+        if (fallbackLocale && newValue === undefined) {
+          newValue = translations.get(fallbackLocale)?.get(stringName);
+        }
 
-            newValue = '-- MISSING STRING --';
-          }
+        if (newValue === undefined) {
+          issues.push(
+            `The string "${stringName}" in "${data.locFilePath}" is missing in the locale ${locale}`
+          );
+
+          newValue = '-- MISSING STRING --';
         }
 
         const escapedBackslash: string = element.escapedBackslash || '\\';
@@ -313,22 +409,28 @@ function _parseStringToReconstructionSequence(
   const issues: string[] = [];
   const reconstructionSeries: IReconstructionElement[] = [];
 
-  const jsonStringifyFormatLocaleForFilenameFn: FormatLocaleForFilenameFn = (locale: string) =>
-    JSON.stringify(formatLocaleForFilenameFn(locale));
+  let jsonStringifyFormatLocaleForFilenameFn: FormatLocaleForFilenameFn | undefined;
 
-  for (const regexResult of source.matchAll(PLACEHOLDER_REGEX)) {
-    const [placeholder, escapedBackslash, elementLabel, placeholderSerialNumber] = regexResult;
-    const start: number = regexResult.index;
-    const end: number = start + placeholder.length;
+  let index: number = source.indexOf(Constants.STRING_PLACEHOLDER_PREFIX);
+  const increment: number = Constants.STRING_PLACEHOLDER_PREFIX.length + 1;
+  while (index >= 0) {
+    const start: number = index;
+    const elementStart: number = index + increment;
+    const elementLabel: string = source.charAt(elementStart);
+    let end: number = elementStart + 2;
 
-    let localizedReconstructionElement: IReconstructionElement;
     switch (elementLabel) {
       case Constants.STRING_PLACEHOLDER_LABEL: {
-        const stringData: IStringPlaceholder | undefined =
-          plugin.getDataForSerialNumber(placeholderSerialNumber);
+        const backslashEnd: number = source.indexOf('_', end);
+        const escapedBackslash: string = source.slice(end, backslashEnd);
+        end = backslashEnd + 1;
+        const serialEnd: number = source.indexOf('_', end);
+        const serial: string = source.slice(end, serialEnd);
+        end = serialEnd + 1;
+
+        const stringData: IStringPlaceholder | undefined = plugin.getDataForSerialNumber(serial);
         if (!stringData) {
-          issues.push(`Missing placeholder ${placeholder}`);
-          continue;
+          issues.push(`Missing placeholder ${serial}`);
         } else {
           const localizedElement: ILocalizedReconstructionElement = {
             kind: 'localized',
@@ -337,41 +439,38 @@ function _parseStringToReconstructionSequence(
             escapedBackslash,
             data: stringData
           };
-          localizedReconstructionElement = localizedElement;
+          reconstructionSeries.push(localizedElement);
         }
         break;
       }
-
       case Constants.LOCALE_NAME_PLACEHOLDER_LABEL: {
         const dynamicElement: IDynamicReconstructionElement = {
           kind: 'dynamic',
           start,
           end,
-          escapedBackslash,
           valueFn: formatLocaleForFilenameFn
         };
-        localizedReconstructionElement = dynamicElement;
+        reconstructionSeries.push(dynamicElement);
         break;
       }
-
       case Constants.JSONP_PLACEHOLDER_LABEL: {
+        jsonStringifyFormatLocaleForFilenameFn ||= (locale: string) =>
+          JSON.stringify(formatLocaleForFilenameFn(locale));
         const dynamicElement: IDynamicReconstructionElement = {
           kind: 'dynamic',
           start,
           end,
-          escapedBackslash,
           valueFn: jsonStringifyFormatLocaleForFilenameFn
         };
-        localizedReconstructionElement = dynamicElement;
+        reconstructionSeries.push(dynamicElement);
         break;
       }
-
       default: {
-        throw new Error(`Unexpected label ${elementLabel}`);
+        throw new Error(`Unexpected label ${elementLabel} in pattern ${source.slice(start, end)}`);
       }
     }
 
-    reconstructionSeries.push(localizedReconstructionElement);
+    index = source.indexOf(Constants.STRING_PLACEHOLDER_PREFIX, end);
   }
 
   return {
