@@ -498,8 +498,8 @@ importers:
         specifier: 18.17.15
         version: 18.17.15
       aws-cdk-lib:
-        specifier: 2.80.0
-        version: 2.80.0(constructs@10.0.130)
+        specifier: 2.177.0
+        version: 2.177.0(constructs@10.0.130)
       constructs:
         specifier: ~10.0.98
         version: 10.0.130
@@ -4672,16 +4672,16 @@ packages:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
-  /@aws-cdk/asset-awscli-v1@2.2.202:
-    resolution: {integrity: sha512-JqlF0D4+EVugnG5dAsNZMqhu3HW7ehOXm5SDMxMbXNDMdsF0pxtQKNHRl52z1U9igsHmaFpUgSGjbhAJ+0JONg==}
+  /@aws-cdk/asset-awscli-v1@2.2.222:
+    resolution: {integrity: sha512-9qjd91FwBYmxjfF3ckieTKrmmvIBZdSe1Daf/hRGxAPnhtH9Fm5Y3Oi0dJD2tRw0ufyM6AbvX9zgejcTqXc+LQ==}
     dev: true
 
-  /@aws-cdk/asset-kubectl-v20@2.1.2:
-    resolution: {integrity: sha512-3M2tELJOxQv0apCIiuKQ4pAbncz9GuLwnKFqxifWfe77wuMxyTRPmxssYHs42ePqzap1LT6GDcPygGs+hHstLg==}
+  /@aws-cdk/asset-kubectl-v20@2.1.3:
+    resolution: {integrity: sha512-cDG1w3ieM6eOT9mTefRuTypk95+oyD7P5X/wRltwmYxU7nZc3+076YEVS6vrjDKr3ADYbfn0lDKpfB1FBtO9CQ==}
     dev: true
 
-  /@aws-cdk/asset-node-proxy-agent-v5@2.0.166:
-    resolution: {integrity: sha512-j0xnccpUQHXJKPgCwQcGGNu4lRiC1PptYfdxBIH1L4dRK91iBxtSQHESRQX+yB47oGLaF/WfNN/aF3WXwlhikg==}
+  /@aws-cdk/asset-node-proxy-agent-v6@2.1.0:
+    resolution: {integrity: sha512-7bY3J8GCVxLupn/kNmpPc5VJz8grx+4RKfnnJiO1LG+uxkZfANZG3RMHhE+qQxxwkyQ9/MfPtTpf748UhR425A==}
     dev: true
 
   /@aws-cdk/aws-apigatewayv2-alpha@2.50.0-alpha.0(aws-cdk-lib@2.50.0)(constructs@10.0.130):
@@ -4734,6 +4734,13 @@ packages:
       aws-cdk-lib: 2.50.0(constructs@10.0.130)
       constructs: 10.0.130
     dev: true
+
+  /@aws-cdk/cloud-assembly-schema@39.2.15:
+    resolution: {integrity: sha512-roeUKO5QR9JLnNEULg0RiS1ac6PZ9qsPaOcAJXCP0D1NLLECdxwwqJvLbhV91pCWrGTeWY5OhLtlL5OPS6Ycvg==}
+    dev: true
+    bundledDependencies:
+      - jsonschema
+      - semver
 
   /@aws-crypto/ie11-detection@3.0.0:
     resolution: {integrity: sha512-341lBBkiY1DfDNKai/wXM3aujNBkXR7tq1URPQDL9wi3AUbI80NR74uF1TXHMm7po1AcnFk8iu2S2IeU/+/A+Q==}
@@ -15204,6 +15211,31 @@ packages:
       - supports-color
     dev: false
 
+  /aws-cdk-lib@2.177.0(constructs@10.0.130):
+    resolution: {integrity: sha512-nTnHAwjZaPJ5gfJjtzE/MyK6q0a66nWthoJl7l8srucRb+I30dczhbbXor6QCdVpJaTRAEliMOMq23aglsAQbg==}
+    engines: {node: '>= 14.15.0'}
+    peerDependencies:
+      constructs: ^10.0.0
+    dependencies:
+      '@aws-cdk/asset-awscli-v1': 2.2.222
+      '@aws-cdk/asset-kubectl-v20': 2.1.3
+      '@aws-cdk/asset-node-proxy-agent-v6': 2.1.0
+      '@aws-cdk/cloud-assembly-schema': 39.2.15
+      constructs: 10.0.130
+    dev: true
+    bundledDependencies:
+      - '@balena/dockerignore'
+      - case
+      - fs-extra
+      - ignore
+      - jsonschema
+      - minimatch
+      - punycode
+      - semver
+      - table
+      - yaml
+      - mime-types
+
   /aws-cdk-lib@2.50.0(constructs@10.0.130):
     resolution: {integrity: sha512-deDbZTI7oyu3rqUyqjwhP6tnUO8MD70lE98yR65xiYty4yXBpsWKbeH3s1wNLpLAWS3hWJYyMtjZ4ZfC35NtVg==}
     engines: {node: '>= 14.15.0'}
@@ -15230,39 +15262,6 @@ packages:
       - minimatch
       - punycode
       - semver
-      - yaml
-
-  /aws-cdk-lib@2.80.0(constructs@10.0.130):
-    resolution: {integrity: sha512-PoqD3Yms5I0ajuTi071nTW/hpkH3XsdyZzn5gYsPv0qD7mqP3h6Qr+6RiGx+yQ1KcVFyxWdX15uK+DsC0KwvcQ==}
-    engines: {node: '>= 14.15.0'}
-    peerDependencies:
-      constructs: ^10.0.0
-    dependencies:
-      '@aws-cdk/asset-awscli-v1': 2.2.202
-      '@aws-cdk/asset-kubectl-v20': 2.1.2
-      '@aws-cdk/asset-node-proxy-agent-v5': 2.0.166
-      '@balena/dockerignore': 1.0.2
-      case: 1.6.3
-      constructs: 10.0.130
-      fs-extra: 11.2.0
-      ignore: 5.3.1
-      jsonschema: 1.4.1
-      minimatch: 3.1.2
-      punycode: 2.3.1
-      semver: 7.5.4
-      table: 6.8.1
-      yaml: 1.10.2
-    dev: true
-    bundledDependencies:
-      - '@balena/dockerignore'
-      - case
-      - fs-extra
-      - ignore
-      - jsonschema
-      - minimatch
-      - punycode
-      - semver
-      - table
       - yaml
 
   /aws-cdk@2.50.0:
@@ -19445,15 +19444,6 @@ packages:
   /fs-extra@10.1.0:
     resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
     engines: {node: '>=12'}
-    dependencies:
-      graceful-fs: 4.2.11
-      jsonfile: 6.1.0
-      universalify: 2.0.1
-    dev: true
-
-  /fs-extra@11.2.0:
-    resolution: {integrity: sha512-PmDi3uwK5nFuXh7XDTlVnS17xJS7vW36is2+w3xcv8SVxiB4NyATf4ctkVY5bkSjX0Y4nbvZCq1/EjtEyr9ktw==}
-    engines: {node: '>=14.14'}
     dependencies:
       graceful-fs: 4.2.11
       jsonfile: 6.1.0
