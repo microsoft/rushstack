@@ -321,7 +321,7 @@ function _reconstructLocalized(
 
         if (newValue === undefined) {
           issues.push(
-            `The string "${stringName}" in "${data.locFilePath}" is missing in ` + `the locale ${locale}`
+            `The string "${stringName}" in "${data.locFilePath}" is missing in the locale ${locale}`
           );
 
           newValue = '-- MISSING STRING --';
