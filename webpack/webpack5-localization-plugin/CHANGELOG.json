@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.12.0",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.12.0",
+      "date": "Thu, 06 Feb 2025 01:11:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Leverage webpack caching layer for localized and nonlocalized asset generation. Reduce unnecessary work."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.26",
       "tag": "@rushstack/webpack5-localization-plugin_v0.11.26",
       "date": "Thu, 30 Jan 2025 16:10:36 GMT",

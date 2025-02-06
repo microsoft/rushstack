@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Thu, 30 Jan 2025 16:10:36 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Feb 2025 01:11:16 GMT and should not be manually modified.
+
+## 0.12.0
+Thu, 06 Feb 2025 01:11:16 GMT
+
+### Minor changes
+
+- Leverage webpack caching layer for localized and nonlocalized asset generation. Reduce unnecessary work.
 
 ## 0.11.26
 Thu, 30 Jan 2025 16:10:36 GMT
