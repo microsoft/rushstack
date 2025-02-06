@@ -12,14 +12,14 @@
       "description": "If provided, this path will be used to load Jest configuration. Otherwise, Jest configuration will be loaded from \"<projectDir>/config/jest.config.json\".",
       "type": "string"
     },
-    "disableCodeCoverage": {
-      "title": "Disable Code Coverage",
-      "description": "Disable any configured code coverage. If code coverage is not configured, this parameter has no effect.",
-      "type": "boolean"
-    },
     "disableConfigurationModuleResolution": {
       "title": "Disable Configuration Module Resolution",
       "description": "If set to true, modules specified in the Jest configuration will be resolved using Jest default (rootDir-relative) resolution. Otherwise, modules will be resolved using Node module resolution.",
+      "type": "boolean"
+    },
+    "enableNodeEnvManagement": {
+      "title": "Enable management of the NODE_ENV variable",
+      "description": "If set to false, heft-jest-plugin will not set or unset the NODE_ENV variable. Otherwise, NODE_ENV will be set to `test` before execution and cleared after. If the NODE_ENV value is already set to a value that is not `test`, warning message appears.",
       "type": "boolean"
     }
   }
