@@ -9,7 +9,7 @@
   "properties": {
     "configurationPath": {
       "title": "Path to Jest configuration file",
-      "description": "If provided, this path will be used to load Jest configuration. Otherwise, Jest configuration will be loaded from \"jest.config.json\".",
+      "description": "If provided, this path will be used to load Jest configuration. Otherwise, Jest configuration will be loaded from \"<projectDir>/config/jest.config.json\".",
       "type": "string"
     },
     "disableCodeCoverage": {
@@ -20,56 +20,6 @@
     "disableConfigurationModuleResolution": {
       "title": "Disable Configuration Module Resolution",
       "description": "If set to true, modules specified in the Jest configuration will be resolved using Jest default (rootDir-relative) resolution. Otherwise, modules will be resolved using Node module resolution.",
-      "type": "boolean"
-    },
-    "enableNodeEnvManagement": {
-      "title": "Enable management of the NODE_ENV variable",
-      "description": "If set to false, heft-jest-plugin will not set or unset the NODE_ENV variable. Otherwise, NODE_ENV will be set to `test` before execution and cleared after. If the NODE_ENV value is already set to a value that is not `test`, warning message appears.",
-      "type": "boolean"
-    },
-    "findRelatedTests": {
-      "title": "Find tests related to file",
-      "description": "Find and run the tests that cover the source file that is specified. This corresponds to the \"--findRelatedTests\" parameter in Jest\"s documentation. This parameter is not compatible with watch mode.",
-      "type": "string"
-    },
-    "maxWorkers": {
-      "title": "Maximum number of worker processes",
-      "description": "Use this parameter to control maximum number of worker processes tests are allowed to use. This parameter is similar to the parameter noted in the Jest documentation, and can either be an integer representing the number of workers to spawn when running tests, or can be a string representing a percentage of the available CPUs on the machine to utilize. Example values: \"3\", \"25%\"",
-      "type": "string"
-    },
-    "passWithNoTests": {
-      "title": "Pass with no tests",
-      "description": "If set to false, Jest will fail if no tests are found.",
-      "type": "boolean"
-    },
-    "silent": {
-      "title": "Disable console output",
-      "description": "Prevent tests from printing messages through the console. This corresponds to the \"--silent\" parameter in Jest\"s documentation.",
-      "type": "boolean"
-    },
-    "testNamePattern": {
-      "title": "Test Name Pattern",
-      "description": "Run only tests with a name that matches a regular expression. On Windows you will need to use \"/\" instead of \"\\\". This corresponds to the \"--testNamePattern\" parameter in Jest\"s documentation.",
-      "type": "string"
-    },
-    "testPathIgnorePatterns": {
-      "title": "Test Path Ignore Patterns",
-      "description": "Avoid running tests with a source file path that matches one ore more regular expressions. On Windows you will need to use \"/\" instead of \"\\\". This corresponds to the \"--testPathIgnorePatterns\" parameter in Jest\"s documentation.",
-      "type": "string"
-    },
-    "testPathPattern": {
-      "title": "Test Path Pattern",
-      "description": "Run only tests with a source file path that matches a regular expression. On Windows you will need to use \"/\" instead of \"\\\". This corresponds to the \"--testPathPattern\" parameter in Jest\"s documentation.",
-      "type": "string"
-    },
-    "testTimeout": {
-      "title": "Test Timeout",
-      "description": "Change the default timeout for tests; if a test doesn\"t complete within this many milliseconds, it will fail. Individual tests can override the default. If unspecified, the default is normally 5000 ms. This corresponds to the \"--testTimeout\" parameter in Jest\"s documentation.",
-      "type": "number"
-    },
-    "updateSnapshots": {
-      "title": "Update Snapshots",
-      "description": "Update Jest snapshots while running the tests. This corresponds to the \"--updateSnapshots\" parameter in Jest.",
       "type": "boolean"
     }
   }
