@@ -437,6 +437,12 @@
       "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/cpu-profile-summarizer",
+      "projectFolder": "apps/cpu-profile-summarizer",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft",
       "projectFolder": "apps/heft",
       "reviewCategory": "libraries",

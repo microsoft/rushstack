@@ -1,0 +1,28 @@
+{
+  "name": "@rushstack/cpu-profile-summarizer",
+  "version": "0.0.0",
+  "description": "CLI tool for running analytics on multiple V8 .cpuprofile files",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/cpu-profile-summarizer"
+  },
+  "bin": {
+    "cpu-profile-summarizer": "./bin/cpu-profile-summarizer"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "node lib/start",
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "dependencies": {
+    "@rushstack/worker-pool": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "typescript": "~5.4.2"
+  }
+}
