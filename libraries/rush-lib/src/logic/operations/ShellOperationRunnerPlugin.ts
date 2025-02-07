@@ -15,7 +15,6 @@ import type {
 import type { Operation } from './Operation';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { IOperationRunner } from './IOperationRunner';
-import type { IEnvironment } from '../../utilities/Utilities';
 
 export const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 
