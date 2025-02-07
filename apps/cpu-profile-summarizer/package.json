@@ -18,6 +18,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
+    "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/worker-pool": "workspace:*"
   },
   "devDependencies": {
