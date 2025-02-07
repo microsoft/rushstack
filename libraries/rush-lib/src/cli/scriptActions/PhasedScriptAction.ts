@@ -507,6 +507,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         afterExecuteOperationAsync: async (record: OperationExecutionRecord) => {
           await this.hooks.afterExecuteOperation.promise(record);
         },
+        createEnvironmentForOperation: this.hooks.createEnvironmentForOperation.isUsed()
+          ? (record: OperationExecutionRecord) => {
+              return this.hooks.createEnvironmentForOperation.call({ ...process.env }, record);
+            }
+          : undefined,
         onOperationStatusChangedAsync: (record: OperationExecutionRecord) => {
           this.hooks.onOperationStatusChanged.call(record);
         }

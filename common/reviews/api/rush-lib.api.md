@@ -25,6 +25,7 @@ import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
+import { SyncWaterfallHook } from 'tapable';
 import { Terminal } from '@rushstack/terminal';
 
 // @public
@@ -644,6 +645,7 @@ export interface IOperationRunner {
 export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
     debugMode: boolean;
+    environment: IEnvironment | undefined;
     error?: Error;
     // @internal
     _operationMetadataManager?: _OperationMetadataManager;
@@ -1078,6 +1080,10 @@ export class PhasedCommandHooks {
     IExecuteOperationsContext
     ]>;
     readonly beforeLog: SyncHook<ITelemetryData, void>;
+    readonly createEnvironmentForOperation: SyncWaterfallHook<[
+    IEnvironment,
+    IOperationRunnerContext & IOperationExecutionResult
+    ]>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
     readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
     readonly shutdownAsync: AsyncParallelHook<void>;

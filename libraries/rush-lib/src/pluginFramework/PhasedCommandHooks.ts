@@ -6,7 +6,8 @@ import {
   AsyncSeriesBailHook,
   AsyncSeriesHook,
   AsyncSeriesWaterfallHook,
-  SyncHook
+  SyncHook,
+  SyncWaterfallHook
 } from 'tapable';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
@@ -25,6 +26,7 @@ import type { IOperationRunnerContext } from '../logic/operations/IOperationRunn
 import type { ITelemetryData } from '../logic/Telemetry';
 import type { OperationStatus } from '../logic/operations/OperationStatus';
 import type { IInputsSnapshot } from '../logic/incremental/InputsSnapshot';
+import type { IEnvironment } from '../utilities/Utilities';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -155,6 +157,14 @@ export class PhasedCommandHooks {
     [IOperationRunnerContext & IOperationExecutionResult],
     OperationStatus | undefined
   > = new AsyncSeriesBailHook(['runnerContext'], 'beforeExecuteOperation');
+
+  /**
+   * Hook invoked to define environment variables for an operation.
+   * May be invoked by the runner to get the environment for the operation.
+   */
+  public readonly createEnvironmentForOperation: SyncWaterfallHook<
+    [IEnvironment, IOperationRunnerContext & IOperationExecutionResult]
+  > = new SyncWaterfallHook(['environment', 'runnerContext'], 'createEnvironmentForOperation');
 
   /**
    * Hook invoked after executing a operation.
