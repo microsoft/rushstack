@@ -69,7 +69,7 @@ export class ShellOperationRunner implements IOperationRunner {
         let hasWarningOrError: boolean = false;
 
         // Run the operation
-        terminal.writeLine('Invoking: ' + this._commandToRun);
+        terminal.writeLine(`Invoking: ${this._commandToRun}`);
 
         const { rushConfiguration, projectFolder } = this._rushProject;
 

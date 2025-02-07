@@ -8,7 +8,6 @@ import { FileSystem } from '@rushstack/node-core-library';
 import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
 import type { IEnvironment } from '../../utilities/Utilities';
 import type { Operation } from './Operation';
-import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 
 const PLUGIN_NAME: 'NodeDiagnosticDirPlugin' = 'NodeDiagnosticDirPlugin';
@@ -44,32 +43,25 @@ export class NodeDiagnosticDirPlugin implements IPhasedCommandPlugin {
       return diagnosticDir;
     };
 
-    hooks.beforeExecuteOperation.tap(
+    hooks.createEnvironmentForOperation.tap(
       PLUGIN_NAME,
-      (operation: IOperationRunnerContext & IOperationExecutionResult): undefined => {
-        const diagnosticDir: string | undefined = getDiagnosticDir(operation.operation);
+      (env: IEnvironment, record: IOperationExecutionResult) => {
+        const diagnosticDir: string | undefined = getDiagnosticDir(record.operation);
         if (!diagnosticDir) {
-          return;
+          return env;
         }
 
         // Not all versions of NodeJS create the directory, so ensure it exists:
         FileSystem.ensureFolder(diagnosticDir);
-      }
-    );
 
-    hooks.createEnvironmentForOperation.tap(PLUGIN_NAME, (env: IEnvironment, operation: Operation) => {
-      const diagnosticDir: string | undefined = getDiagnosticDir(operation);
-      if (!diagnosticDir) {
+        const { NODE_OPTIONS } = env;
+
+        const diagnosticDirEnv: string = `--diagnostic-dir="${diagnosticDir}"`;
+
+        env.NODE_OPTIONS = NODE_OPTIONS ? `${NODE_OPTIONS} ${diagnosticDirEnv}` : diagnosticDirEnv;
+
         return env;
       }
-
-      const { NODE_OPTIONS } = env;
-
-      const diagnosticDirEnv: string = `--diagnostic-dir="${diagnosticDir}"`;
-
-      env.NODE_OPTIONS = NODE_OPTIONS ? `${NODE_OPTIONS} ${diagnosticDirEnv}` : diagnosticDirEnv;
-
-      return env;
-    });
+    );
   }
 }
