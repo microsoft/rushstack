@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Thu, 30 Jan 2025 16:10:36 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Feb 2025 01:10:49 GMT and should not be manually modified.
+
+## 0.14.6
+Fri, 07 Feb 2025 01:10:49 GMT
+
+### Patches
+
+- Extend heft-jest-plugin json schema to match HeftJestConfiguration
 
 ## 0.14.5
 Thu, 30 Jan 2025 16:10:36 GMT
