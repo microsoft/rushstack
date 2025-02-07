@@ -17,6 +17,7 @@ import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { type IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import type { IExecutionResult } from './IOperationExecutionResult';
+import type { IEnvironment } from '../../utilities/Utilities';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -27,6 +28,7 @@ export interface IOperationExecutionManagerOptions {
 
   beforeExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
   afterExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<void>;
+  createEnvironmentForOperation?: (operation: OperationExecutionRecord) => IEnvironment;
   onOperationStatusChangedAsync?: (record: OperationExecutionRecord) => void;
   beforeExecuteOperationsAsync?: (records: Map<Operation, OperationExecutionRecord>) => Promise<void>;
 }
@@ -70,6 +72,7 @@ export class OperationExecutionManager {
   private readonly _beforeExecuteOperations?: (
     records: Map<Operation, OperationExecutionRecord>
   ) => Promise<void>;
+  private readonly _createEnvironmentForOperation?: (operation: OperationExecutionRecord) => IEnvironment;
 
   // Variables for current status
   private _hasAnyFailures: boolean;
@@ -86,7 +89,8 @@ export class OperationExecutionManager {
       beforeExecuteOperationAsync: beforeExecuteOperation,
       afterExecuteOperationAsync: afterExecuteOperation,
       onOperationStatusChangedAsync: onOperationStatusChanged,
-      beforeExecuteOperationsAsync: beforeExecuteOperations
+      beforeExecuteOperationsAsync: beforeExecuteOperations,
+      createEnvironmentForOperation
     } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
@@ -98,6 +102,7 @@ export class OperationExecutionManager {
     this._beforeExecuteOperation = beforeExecuteOperation;
     this._afterExecuteOperation = afterExecuteOperation;
     this._beforeExecuteOperations = beforeExecuteOperations;
+    this._createEnvironmentForOperation = createEnvironmentForOperation;
     this._onOperationStatusChanged = (record: OperationExecutionRecord) => {
       if (record.status === OperationStatus.Ready) {
         this._executionQueue.assignOperations();
@@ -125,6 +130,7 @@ export class OperationExecutionManager {
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
       onOperationStatusChanged: this._onOperationStatusChanged,
+      createEnvironment: this._createEnvironmentForOperation,
       debugMode,
       quietMode
     };

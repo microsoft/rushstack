@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a new command line parameter `--node-diagnostic-dir=DIR` to phased commands that, when specified, tells all child build processes to write NodeJS diagnostics into `${DIR}/${packageName}/${phaseIdentifier}`. This is useful if `--cpu-prof` or `--heap-prof` are enabled, to avoid polluting workspace folders.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

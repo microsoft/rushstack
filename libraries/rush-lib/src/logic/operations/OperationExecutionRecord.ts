@@ -33,10 +33,12 @@ import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import { RushConstants } from '../RushConstants';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import type { IEnvironment } from '../../utilities/Utilities';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
   onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
 
   debugMode: boolean;
   quietMode: boolean;
@@ -180,6 +182,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   public get cobuildRunnerId(): string | undefined {
     // Lazy calculated because the state file is created/restored later on
     return this._operationMetadataManager?.stateFile.state?.cobuildRunnerId;
+  }
+
+  public get environment(): IEnvironment | undefined {
+    return this._context.createEnvironment?.(this);
   }
 
   public get metadataFolderPath(): string | undefined {

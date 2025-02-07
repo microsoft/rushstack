@@ -15,7 +15,6 @@ import { TerminalProviderSeverity, type ITerminal, type ITerminalProvider } from
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
@@ -26,7 +25,8 @@ export interface IIPCOperationRunnerOptions {
   phase: IPhase;
   project: RushConfigurationProject;
   name: string;
-  shellCommand: string;
+  commandToRun: string;
+  commandForHash: string;
   persist: boolean;
   requestRun: (requestor?: string) => void;
 }
@@ -53,9 +53,9 @@ export class IPCOperationRunner implements IOperationRunner {
   public readonly silent: boolean = false;
   public readonly warningsAreAllowed: boolean;
 
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _shellCommand: string;
-  private readonly _workingDirectory: string;
+  private readonly _rushProject: RushConfigurationProject;
+  private readonly _commandToRun: string;
+  private readonly _commandForHash: string;
   private readonly _persist: boolean;
   private readonly _requestRun: (requestor?: string) => void;
 
@@ -68,9 +68,10 @@ export class IPCOperationRunner implements IOperationRunner {
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild ||
       options.phase.allowWarningsOnSuccess ||
       false;
-    this._rushConfiguration = options.project.rushConfiguration;
-    this._shellCommand = options.shellCommand;
-    this._workingDirectory = options.project.projectFolder;
+    this._rushProject = options.project;
+    this._commandToRun = options.commandToRun;
+    this._commandForHash = options.commandForHash;
+
     this._persist = options.persist;
     this._requestRun = options.requestRun;
   }
@@ -81,18 +82,23 @@ export class IPCOperationRunner implements IOperationRunner {
         let isConnected: boolean = false;
         if (!this._ipcProcess || typeof this._ipcProcess.exitCode === 'number') {
           // Run the operation
-          terminal.writeLine('Invoking: ' + this._shellCommand);
+          terminal.writeLine('Invoking: ' + this._commandToRun);
 
-          this._ipcProcess = Utilities.executeLifecycleCommandAsync(this._shellCommand, {
-            rushConfiguration: this._rushConfiguration,
-            workingDirectory: this._workingDirectory,
-            initCwd: this._rushConfiguration.commonTempFolder,
+          const { rushConfiguration, projectFolder } = this._rushProject;
+
+          const { environment: initialEnvironment } = context;
+
+          this._ipcProcess = Utilities.executeLifecycleCommandAsync(this._commandToRun, {
+            rushConfiguration,
+            workingDirectory: projectFolder,
+            initCwd: rushConfiguration.commonTempFolder,
             handleOutput: true,
             environmentPathOptions: {
               includeProjectBin: true
             },
             ipc: true,
-            connectSubprocessTerminator: true
+            connectSubprocessTerminator: true,
+            initialEnvironment
           });
 
           let resolveReadyPromise!: () => void;
@@ -193,7 +199,7 @@ export class IPCOperationRunner implements IOperationRunner {
   }
 
   public getConfigHash(): string {
-    return this._shellCommand;
+    return this._commandForHash;
   }
 
   public async shutdownAsync(): Promise<void> {
