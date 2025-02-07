@@ -57,6 +57,7 @@ import { FlagFile } from '../../api/FlagFile';
 import { WeightedOperationPlugin } from '../../logic/operations/WeightedOperationPlugin';
 import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 import { Selection } from '../../logic/Selection';
+import { NodeDiagnosticDirPlugin } from '../../logic/operations/NodeDiagnosticDirPlugin';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -153,6 +154,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _installParameter: CommandLineFlagParameter | undefined;
   private readonly _variantParameter: CommandLineStringParameter | undefined;
   private readonly _noIPCParameter: CommandLineFlagParameter | undefined;
+  private readonly _nodeDiagnosticDirParameter: CommandLineStringParameter;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -284,6 +286,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       });
     }
 
+    this._nodeDiagnosticDirParameter = this.defineStringParameter({
+      parameterLongName: '--node-diagnostic-dir',
+      argumentName: 'DIRECTORY',
+      description:
+        'Specifies the directory where Node.js diagnostic reports will be written. ' +
+        'This directory will contain a subdirectory for each project and phase.'
+    });
+
     this.defineScriptParameters();
 
     for (const [{ associatedPhases }, tsCommandLineParameter] of this.customParameters) {
@@ -364,6 +374,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         '../../logic/operations/ConsoleTimelinePlugin'
       );
       new ConsoleTimelinePlugin(terminal).apply(this.hooks);
+    }
+
+    const diagnosticDir: string | undefined = this._nodeDiagnosticDirParameter.value;
+    if (diagnosticDir) {
+      new NodeDiagnosticDirPlugin({
+        diagnosticDir
+      }).apply(this.hooks);
     }
 
     // Enable the standard summary
