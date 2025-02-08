@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/cpu-profile-summarizer",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/cpu-profile-summarizer_v0.1.0",
+      "date": "Sat, 08 Feb 2025 01:10:27 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new command line tool for summarizing data across a collection of .cpuprofile files."
+          }
+        ]
+      }
+    }
+  ]
+}
