@@ -18,8 +18,11 @@ describe(GraphProcessor.name, () => {
   let emittedErrors: Error[];
   let emittedWarnings: Error[];
 
-  beforeEach(() => {
+  beforeAll(() => {
     exampleGraph = Array.from(graph.nodes).sort((a, b) => a.id.localeCompare(b.id));
+  });
+
+  beforeEach(() => {
     emittedErrors = [];
     emittedWarnings = [];
 
