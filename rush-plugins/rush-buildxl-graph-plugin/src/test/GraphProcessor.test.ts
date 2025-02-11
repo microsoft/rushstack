@@ -5,16 +5,16 @@ import type { IOperationRunner, Operation } from '@rushstack/rush-sdk';
 import type { ShellOperationRunner } from '@rushstack/rush-sdk/lib/logic/operations/ShellOperationRunner';
 import { Terminal, NoOpTerminalProvider } from '@rushstack/terminal';
 
-import { GraphParser, type IGraphNode } from '../GraphParser';
+import { GraphProcessor, type IGraphNode } from '../GraphProcessor';
 
 // to update the examples folder, run the following command from the project root:
 // export DEBUG_RUSH_BUILD_GRAPH="test" && rush build --production -t . --drop-graph ./src/examples/graph.json
 import graph from '../examples/graph.json';
 import debugGraph from '../examples/debug-graph.json';
 
-describe(GraphParser.name, () => {
+describe(GraphProcessor.name, () => {
   let exampleGraph: readonly IGraphNode[];
-  let graphParser: GraphParser;
+  let graphParser: GraphProcessor;
   let emittedErrors: Error[];
   let emittedWarnings: Error[];
 
@@ -24,7 +24,7 @@ describe(GraphParser.name, () => {
     emittedWarnings = [];
 
     const terminal: Terminal = new Terminal(new NoOpTerminalProvider());
-    graphParser = new GraphParser({
+    graphParser = new GraphProcessor({
       terminal,
       emitWarning: emittedWarnings.push.bind(emittedWarnings),
       emitError: emittedErrors.push.bind(emittedErrors)
@@ -65,7 +65,7 @@ describe(GraphParser.name, () => {
     expect(emittedWarnings).toEqual([]);
   });
 
-  describe(GraphParser.prototype.validateGraph.name, () => {
+  describe(GraphProcessor.prototype.validateGraph.name, () => {
     it('should validate graph.json', () => {
       const isValid: boolean = graphParser.validateGraph(exampleGraph);
       expect(isValid).toBe(true);

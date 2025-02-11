@@ -6,7 +6,7 @@ import type { ICreateOperationsContext, ILogger, Operation, RushConfiguration } 
 import { JsonFile } from '@rushstack/node-core-library';
 
 import type { IBuildXLRushGraph } from './DropBuildGraphPlugin';
-import { type IGraphNode, GraphParser } from './GraphParser';
+import { type IGraphNode, GraphProcessor } from './GraphProcessor';
 import { filterObjectForDebug, filterObjectForTesting } from './debugGraphFiltering';
 
 export interface IDropGraphOptions {
@@ -61,8 +61,8 @@ export async function dropGraphAsync(options: IDropGraphOptions): Promise<boolea
     }
   }
 
-  const graphParser: GraphParser = new GraphParser(logger);
-  const nodes: IGraphNode[] = graphParser.processOperations(operations);
+  const graphProcessor: GraphProcessor = new GraphProcessor(logger);
+  const nodes: IGraphNode[] = graphProcessor.processOperations(operations);
   const buildXLGraph: IBuildXLRushGraph = {
     nodes,
     repoSettings: {
@@ -71,5 +71,5 @@ export async function dropGraphAsync(options: IDropGraphOptions): Promise<boolea
   };
 
   await JsonFile.saveAsync(buildXLGraph, dropGraphPath, { ensureFolderExists: true });
-  return graphParser.validateGraph(buildXLGraph.nodes);
+  return graphProcessor.validateGraph(buildXLGraph.nodes);
 }

@@ -12,7 +12,7 @@ import {
 } from '@rushstack/rush-sdk';
 import { CommandLineParameterKind, type CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import type { IGraphNode } from './GraphParser';
+import type { IGraphNode } from './GraphProcessor';
 
 const PLUGIN_NAME: 'DropBuildGraphPlugin' = 'DropBuildGraphPlugin';
 

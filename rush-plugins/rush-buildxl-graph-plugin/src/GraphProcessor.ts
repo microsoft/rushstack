@@ -95,7 +95,7 @@ export function tryGetOperationId(operation: Partial<Operation>): string | undef
   return task && project ? `${project}#${task}` : undefined;
 }
 
-export class GraphParser {
+export class GraphProcessor {
   private readonly _logger: ILogger;
 
   public constructor(logger: ILogger) {
