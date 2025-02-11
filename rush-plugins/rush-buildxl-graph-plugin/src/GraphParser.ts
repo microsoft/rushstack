@@ -25,6 +25,8 @@ import { filterObjectForDebug } from './debugGraphFiltering';
  * }
  * ```
  *
+ * See https://github.com/microsoft/BuildXL/blob/adf025c1b96b8106984928df3e9c30c8331bc8d6/Public/Src/Tools/JavaScript/Tool.RushGraphBuilder/src/RushBuildPluginGraph.ts
+ *
  * @public
  */
 export interface IGraphNode {
