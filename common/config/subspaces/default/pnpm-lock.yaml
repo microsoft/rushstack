@@ -4073,6 +4073,9 @@ importers:
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../../libraries/terminal
+      '@rushstack/ts-command-line':
+        specifier: workspace:*
+        version: link:../../libraries/ts-command-line
     devDependencies:
       '@microsoft/rush-lib':
         specifier: workspace:*
@@ -4080,9 +4083,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/ts-command-line':
-        specifier: workspace:*
-        version: link:../../libraries/ts-command-line
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
