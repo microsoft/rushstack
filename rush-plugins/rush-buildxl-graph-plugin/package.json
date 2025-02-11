@@ -5,7 +5,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack",
-    "directory": "heft-plugins/heft-webpack5-plugin"
+    "directory": "rush-plugins/rush-buildxl-graph-plugin"
   },
   "homepage": "https://rushjs.io",
   "main": "lib/index.js",
@@ -20,7 +20,8 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
-    "@rushstack/terminal": "workspace:*"
+    "@rushstack/terminal": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
