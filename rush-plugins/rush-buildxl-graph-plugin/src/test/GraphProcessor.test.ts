@@ -12,6 +12,10 @@ import { GraphProcessor, type IGraphNode } from '../GraphProcessor';
 import graph from '../examples/graph.json';
 import debugGraph from '../examples/debug-graph.json';
 
+function sortGraphNodes(graphNodes: IGraphNode[]): IGraphNode[] {
+  return graphNodes.sort((a, b) => (a.id === b.id ? 0 : a.id < b.id ? -1 : 1));
+}
+
 describe(GraphProcessor.name, () => {
   let exampleGraph: readonly IGraphNode[];
   let graphParser: GraphProcessor;
@@ -19,7 +23,7 @@ describe(GraphProcessor.name, () => {
   let emittedWarnings: Error[];
 
   beforeAll(() => {
-    exampleGraph = Array.from(graph.nodes).sort((a, b) => a.id.localeCompare(b.id));
+    exampleGraph = sortGraphNodes(Array.from(graph.nodes));
   });
 
   beforeEach(() => {
@@ -39,7 +43,7 @@ describe(GraphProcessor.name, () => {
       new Set<Operation>(debugGraph.OperationMap as unknown as Operation[])
     );
 
-    prunedGraph = prunedGraph.sort((a, b) => a.id.localeCompare(b.id));
+    prunedGraph = sortGraphNodes(prunedGraph);
     expect(prunedGraph).toEqual(exampleGraph);
     expect(emittedErrors).toEqual([]);
     expect(emittedWarnings).toEqual([]);
