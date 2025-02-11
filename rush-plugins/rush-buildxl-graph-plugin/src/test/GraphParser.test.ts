@@ -55,12 +55,11 @@ describe(GraphParser.name, () => {
   });
 
   it('should fail if isNoOp mismatches a command', () => {
-    const operations: Set<Operation> = new Set(JSON.parse(JSON.stringify(debugGraph.OperationMap)));
-    const firstOperation: Operation | undefined = Array.from(operations)[0];
-    expect(firstOperation).toBeDefined();
-    (firstOperation!.runner as IOperationRunner & { isNoOp: boolean }).isNoOp = true;
-    (firstOperation!.runner as ShellOperationRunner & { commandToRun: string }).commandToRun =
+    const clonedOperationMap: Operation[] = JSON.parse(JSON.stringify(debugGraph.OperationMap));
+    (clonedOperationMap[0].runner as IOperationRunner & { isNoOp: boolean }).isNoOp = true;
+    (clonedOperationMap[0].runner as ShellOperationRunner & { commandToRun: string }).commandToRun =
       'echo "hello world"';
+    const operations: Set<Operation> = new Set(clonedOperationMap);
     graphParser.processOperations(operations);
     expect(emittedErrors).not.toEqual([]);
     expect(emittedWarnings).toEqual([]);
