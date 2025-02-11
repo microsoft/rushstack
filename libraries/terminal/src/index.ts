@@ -46,4 +46,5 @@ export {
   type IPrefixProxyTerminalProviderOptionsBase,
   type IStaticPrefixProxyTerminalProviderOptions
 } from './PrefixProxyTerminalProvider';
+export { NoOpTerminalProvider } from './NoOpTerminalProvider';
 export { TerminalStreamWritable, type ITerminalStreamWritableOptions } from './TerminalStreamWritable';
