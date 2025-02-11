@@ -4,9 +4,9 @@
 
 ```ts
 
-import type { IRushPlugin } from '@rushstack/rush-sdk';
-import type { RushConfiguration } from '@rushstack/rush-sdk';
-import type { RushSession } from '@rushstack/rush-sdk';
+import { IRushPlugin } from '@rushstack/rush-sdk';
+import { RushConfiguration } from '@rushstack/rush-sdk';
+import { RushSession } from '@rushstack/rush-sdk';
 
 // @public
 class DropBuildGraphPlugin implements IRushPlugin {
@@ -29,17 +29,11 @@ export interface IBuildXLRushGraph {
 
 // @public (undocumented)
 export interface IGraphNode {
-    // (undocumented)
     command: string;
-    // (undocumented)
     dependencies: string[];
-    // (undocumented)
     id: string;
-    // (undocumented)
     package: string;
-    // (undocumented)
     task: string;
-    // (undocumented)
     workingDirectory: string;
 }
 

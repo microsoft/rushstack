@@ -28,11 +28,43 @@ import { filterObjectForDebug } from './debugGraphFiltering';
  * @public
  */
 export interface IGraphNode {
+  /**
+   * The unique id of the Pip
+   *
+   * @example
+   * `@rushstack/node-core-library#_phase:build`
+   */
   id: string;
+
+  /**
+   * The command to run during the Pip
+   */
   command: string;
+
+  /**
+   * The working directory of the Pip
+   */
   workingDirectory: string;
+
+  /**
+   * The project name associated with the Pip
+   *
+   * @example
+   * `@rushstack/node-core-library`
+   */
   package: string;
+
+  /**
+   * The task name of the Pip
+   *
+   * @example
+   * `_phase:build`
+   */
   task: string;
+
+  /**
+   * The IDs of the dependencies of the Pip. These are the {@link IGraphNode.id} properties of other Pips.
+   */
   dependencies: string[];
 }
 
