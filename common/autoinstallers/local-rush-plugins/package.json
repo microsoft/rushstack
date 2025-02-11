@@ -1,8 +1,0 @@
-{
-  "name": "local-rush-plugins",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "@rushstack/rush-buildxl-graph-plugin-local": "link:../../../rush-plugins/rush-buildxl-graph-plugin/local-testing-wrapper"
-  }
-}

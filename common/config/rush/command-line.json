@@ -489,13 +489,6 @@
       "description": "Perform a production build, including minification and localization steps",
       "associatedPhases": ["_phase:build", "_phase:test"],
       "associatedCommands": ["build", "rebuild", "test", "retest"]
-    },
-    {
-      "longName": "--drop-graph",
-      "parameterKind": "string",
-      "argumentName": "PATH",
-      "description": "Drop the graph from the build output",
-      "associatedCommands": ["build", "rebuild", "test", "retest"]
     }
   ]
 }
