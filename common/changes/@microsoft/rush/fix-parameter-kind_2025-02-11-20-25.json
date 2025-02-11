@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the port parameter in `@rushstack/rush-serve-plugin` was allowed to be a string parameter.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
