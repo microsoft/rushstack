@@ -34,7 +34,8 @@ export class DropBuildGraphPlugin implements IRushPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(session: RushSession, rushConfiguration: RushConfiguration): void {
-    // TODO: Introduce an API to allow plugins to register command line options
+    // TODO: Introduce an API to allow plugins to register command line options for arbitrary, existing commands
+    // in a repo
     const dropIndex: number = process.argv.indexOf(DROP_GRAPH_FLAG_NAME);
     const dropGraphPath: string | undefined = dropIndex > -1 ? process.argv[dropIndex + 1] : undefined;
 
