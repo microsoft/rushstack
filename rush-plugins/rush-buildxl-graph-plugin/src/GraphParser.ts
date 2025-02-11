@@ -58,12 +58,7 @@ const REQUIRED_FIELDS: Array<keyof IGraphNodeInternal> = [
 export function tryGetOperationId(operation: Partial<Operation>): string | undefined {
   const task: string | undefined = operation.associatedPhase?.name;
   const project: string | undefined = operation.associatedProject?.packageName;
-  if (task && project) {
-    return `${project}#${task}`;
-  } else {
-    debugger;
-    return undefined;
-  }
+  return task && project ? `${project}#${task}` : undefined;
 }
 
 export class GraphParser {

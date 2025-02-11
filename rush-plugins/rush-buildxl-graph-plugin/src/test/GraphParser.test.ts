@@ -12,7 +12,7 @@ import { GraphParser, type IGraphNode } from '../GraphParser';
 import graph from '../examples/graph.json';
 import debugGraph from '../examples/debug-graph.json';
 
-describe('GraphParser', () => {
+describe(GraphParser.name, () => {
   let exampleGraph: readonly IGraphNode[];
   let graphParser: GraphParser;
   let emittedErrors: Error[];
@@ -66,7 +66,7 @@ describe('GraphParser', () => {
     expect(emittedWarnings).toEqual([]);
   });
 
-  describe('validateGraph', () => {
+  describe(GraphParser.prototype.validateGraph.name, () => {
     it('should validate graph.json', () => {
       const isValid: boolean = graphParser.validateGraph(exampleGraph);
       expect(isValid).toBe(true);
