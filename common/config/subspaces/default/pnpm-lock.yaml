@@ -3145,8 +3145,8 @@ importers:
         specifier: workspace:*
         version: link:../worker-pool
       serialize-javascript:
-        specifier: 6.0.0
-        version: 6.0.0
+        specifier: 6.0.2
+        version: 6.0.2
       source-map:
         specifier: ~0.7.3
         version: 0.7.4
@@ -16919,7 +16919,7 @@ packages:
       jest-worker: 27.5.1
       postcss: 8.4.36
       schema-utils: 4.2.0
-      serialize-javascript: 6.0.0
+      serialize-javascript: 6.0.2
       source-map: 0.6.1
       webpack: 5.95.0
     dev: false
@@ -26093,6 +26093,7 @@ packages:
     resolution: {integrity: sha512-Qr3TosvguFt8ePWqsvRfrKyQXIiW+nGbYpy8XK24NQHE83caxWt+mIymTT19DGFbNWNLfEwsrkSmN64lVWB9ag==}
     dependencies:
       randombytes: 2.1.0
+    dev: true
 
   /serialize-javascript@6.0.2:
     resolution: {integrity: sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==}
