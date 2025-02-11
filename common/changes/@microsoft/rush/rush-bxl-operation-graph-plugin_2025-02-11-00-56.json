@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Introduce a `@rushstack/rush-buildxl-graph-plugin` plugin package that generates a build graph file to be used with BuildXL.\"",
+      "comment": "",
       "type": "none"
     }
   ],
