@@ -1,7 +1,7 @@
 {
   "name": "@rushstack/rush-buildxl-graph-plugin",
   "version": "5.148.0",
-  "description": "Rush plugin for Azure storage cloud build cache",
+  "description": "Rush plugin for generating a BuildXL graph.",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack",
