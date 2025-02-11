@@ -1250,6 +1250,12 @@
       "versionPolicyName": "rush"
     },
     {
+      "packageName": "@rushstack/rush-buildxl-graph-plugin",
+      "projectFolder": "rush-plugins/rush-buildxl-graph-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@rushstack/rush-http-build-cache-plugin",
       "projectFolder": "rush-plugins/rush-http-build-cache-plugin",
       "reviewCategory": "libraries",

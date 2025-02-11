@@ -34,8 +34,8 @@ export class ShellOperationRunner implements IOperationRunner {
   public readonly silent: boolean = false;
   public readonly cacheable: boolean = true;
   public readonly warningsAreAllowed: boolean;
+  public readonly commandToRun: string;
 
-  private readonly _commandToRun: string;
   private readonly _commandForHash: string;
 
   private readonly _rushProject: RushConfigurationProject;
@@ -47,7 +47,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
     this._rushProject = options.rushProject;
-    this._commandToRun = options.commandToRun;
+    this.commandToRun = options.commandToRun;
     this._commandForHash = options.commandForHash;
   }
 
@@ -69,14 +69,14 @@ export class ShellOperationRunner implements IOperationRunner {
         let hasWarningOrError: boolean = false;
 
         // Run the operation
-        terminal.writeLine(`Invoking: ${this._commandToRun}`);
+        terminal.writeLine(`Invoking: ${this.commandToRun}`);
 
         const { rushConfiguration, projectFolder } = this._rushProject;
 
         const { environment: initialEnvironment } = context;
 
         const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
-          this._commandToRun,
+          this.commandToRun,
           {
             rushConfiguration: rushConfiguration,
             workingDirectory: projectFolder,
