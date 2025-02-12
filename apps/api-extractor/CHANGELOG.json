@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.50.0",
+      "tag": "@microsoft/api-extractor_v7.50.0",
+      "date": "Wed, 12 Feb 2025 01:10:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update merge behavior for derived configurations to allow overriding array properties"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.49.2",
       "tag": "@microsoft/api-extractor_v7.49.2",
       "date": "Thu, 30 Jan 2025 01:11:42 GMT",

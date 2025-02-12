@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 30 Jan 2025 01:11:42 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Feb 2025 01:10:52 GMT and should not be manually modified.
+
+## 7.50.0
+Wed, 12 Feb 2025 01:10:52 GMT
+
+### Minor changes
+
+- Update merge behavior for derived configurations to allow overriding array properties
 
 ## 7.49.2
 Thu, 30 Jan 2025 01:11:42 GMT

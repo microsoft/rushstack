@@ -1,6 +1,13 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Thu, 30 Jan 2025 16:10:36 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Feb 2025 01:10:52 GMT and should not be manually modified.
+
+## 0.7.3
+Wed, 12 Feb 2025 01:10:52 GMT
+
+### Patches
+
+- Bump the `serialize-javascript` dependency.
 
 ## 0.7.2
 Thu, 30 Jan 2025 16:10:36 GMT

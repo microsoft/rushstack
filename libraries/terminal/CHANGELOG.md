@@ -1,6 +1,13 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Thu, 30 Jan 2025 01:11:42 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Feb 2025 01:10:52 GMT and should not be manually modified.
+
+## 0.15.0
+Wed, 12 Feb 2025 01:10:52 GMT
+
+### Minor changes
+
+- Introduce a NoOpTerminalProvider.
 
 ## 0.14.6
 Thu, 30 Jan 2025 01:11:42 GMT

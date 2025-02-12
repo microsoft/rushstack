@@ -2,6 +2,18 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.15.0",
+      "tag": "@rushstack/terminal_v0.15.0",
+      "date": "Wed, 12 Feb 2025 01:10:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a NoOpTerminalProvider."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.6",
       "tag": "@rushstack/terminal_v0.14.6",
       "date": "Thu, 30 Jan 2025 01:11:42 GMT",
