@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 10 Jan 2025 02:36:20 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Feb 2025 04:07:30 GMT and should not be manually modified.
+
+## 5.149.0
+Wed, 12 Feb 2025 04:07:30 GMT
+
+### Updates
+
+- Prefer `os.availableParallelism()` to `os.cpus().length`.
+- Add a new command line parameter `--node-diagnostic-dir=DIR` to phased commands that, when specified, tells all child build processes to write NodeJS diagnostics into `${DIR}/${packageName}/${phaseIdentifier}`. This is useful if `--cpu-prof` or `--heap-prof` are enabled, to avoid polluting workspace folders.
+- Add a new phased command hook `createEnvironmentForOperation` that can be used to customize the environment variables passed to individual operation subprocesses. This may be used to, for example, customize `NODE_OPTIONS` to pass `--diagnostic-dir` or other such parameters.
+- Allow --timeline option for all phased commands
+- Fix support for "ensureConsistentVersions" in common-versions.json when subspaces features is not enabled.
+- Fix an issue where the port parameter in `@rushstack/rush-serve-plugin` was allowed to be a string parameter.
 
 ## 5.148.0
 Fri, 10 Jan 2025 02:36:20 GMT
