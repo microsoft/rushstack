@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Introduce a NoOpTerminalProvider.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}

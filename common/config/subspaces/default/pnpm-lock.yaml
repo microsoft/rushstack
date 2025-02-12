@@ -4062,6 +4062,31 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../rush-plugins/rush-buildxl-graph-plugin:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/rush-sdk':
+        specifier: workspace:*
+        version: link:../../libraries/rush-sdk
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      '@rushstack/ts-command-line':
+        specifier: workspace:*
+        version: link:../../libraries/ts-command-line
+    devDependencies:
+      '@microsoft/rush-lib':
+        specifier: workspace:*
+        version: link:../../libraries/rush-lib
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../rush-plugins/rush-http-build-cache-plugin:
     dependencies:
       '@rushstack/node-core-library':

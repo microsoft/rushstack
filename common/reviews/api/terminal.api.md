@@ -242,6 +242,13 @@ export class MockWritable extends TerminalWritable {
     reset(): void;
 }
 
+// @beta
+export class NoOpTerminalProvider implements ITerminalProvider {
+    get eolCharacter(): string;
+    get supportsColor(): boolean;
+    write(data: string, severity: TerminalProviderSeverity): void;
+}
+
 // @public
 export class NormalizeNewlinesTextRewriter extends TextRewriter {
     constructor(options: INormalizeNewlinesTextRewriterOptions);
