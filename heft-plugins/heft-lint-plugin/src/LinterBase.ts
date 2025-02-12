@@ -139,7 +139,9 @@ export abstract class LinterBase<TLintResult> {
       }
 
       // Compute the version from the source file content
-      const version: string = sourceFile.version || '';
+      const sourceCodeHash: Hash = createHash('sha1');
+      sourceCodeHash.update(sourceFile.text);
+      const version: string = sourceCodeHash.digest('base64');
       const cachedVersion: string = cachedNoFailureFileVersions.get(relative) || '';
       if (
         cachedVersion === '' ||
