@@ -20,6 +20,6 @@
     "eslint": "~8.57.0",
     "html-webpack-plugin": "~5.5.0",
     "typescript": "~5.7.3",
-    "webpack": "~5.95.0"
+    "webpack": "~5.98.0"
   }
 }
