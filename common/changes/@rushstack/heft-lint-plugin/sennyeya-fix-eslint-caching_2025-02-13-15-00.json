@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "comment": "Fix the cache only populating for incremental Typescript builds.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-lint-plugin"
+}
