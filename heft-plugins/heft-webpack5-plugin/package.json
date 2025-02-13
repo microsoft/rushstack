@@ -33,7 +33,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@types/watchpack": "2.4.0",
-    "webpack": "~5.95.0",
+    "webpack": "~5.98.0",
     "local-node-rig": "workspace:*"
   }
 }
