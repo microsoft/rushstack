@@ -30,7 +30,7 @@
     "source-map-loader": "~3.0.1",
     "tslint": "~5.20.1",
     "typescript": "~5.4.2",
-    "webpack": "~5.95.0",
+    "webpack": "~5.98.0",
     "@types/node": "18.17.15"
   }
 }
