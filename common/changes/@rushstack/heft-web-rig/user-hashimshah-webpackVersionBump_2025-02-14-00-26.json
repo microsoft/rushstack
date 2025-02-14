@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-web-rig",
-      "comment": "",
-      "type": "none"
+      "comment": "Bump Webpack to ~5.98.0.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-web-rig"
