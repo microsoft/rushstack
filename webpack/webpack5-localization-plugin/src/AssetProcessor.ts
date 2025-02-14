@@ -90,7 +90,7 @@ type ItemCacheFacade = ReturnType<ReturnType<Compilation['getCache']>['getItemCa
 export async function processLocalizedAssetCachedAsync(
   options: IProcessLocalizedAssetOptions
 ): Promise<Record<string, string>> {
-  const { compilation, asset, cache } = options;
+  const { compilation, asset, cache, chunk } = options;
   const { source: originalSource } = asset;
 
   type ETag = NonNullable<ReturnType<typeof cache.getLazyHashedEtag>>;
@@ -104,7 +104,11 @@ export async function processLocalizedAssetCachedAsync(
     await cacheItem.storePromise(output);
   }
 
-  for (const { filename, source, info } of output.processedAssets) {
+  const { localizedFiles, processedAssets } = output;
+
+  (chunk as ILocalizedWebpackChunk).localizedFiles = localizedFiles;
+
+  for (const { filename, source, info } of processedAssets) {
     if (originName === filename) {
       // This helper throws if the asset doesn't already exist
       // Use the function form so that the object identity of `related` is preserved.
@@ -116,7 +120,7 @@ export async function processLocalizedAssetCachedAsync(
     }
   }
 
-  return output.localizedFiles;
+  return localizedFiles;
 }
 
 export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): IProcessLocalizedAssetResult {
@@ -141,7 +145,6 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): I
   const { issues } = parsedAsset;
 
   const localizedFiles: Record<string, string> = {};
-  (chunk as ILocalizedWebpackChunk).localizedFiles = localizedFiles;
 
   const processedAssets: IProcessedAsset[] = [];
 
