@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.12.2",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.12.2",
+      "date": "Fri, 14 Feb 2025 23:17:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a bug where `chunk.localizedFiles` was not set in incremental rebuilds."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.1",
       "tag": "@rushstack/webpack5-localization-plugin_v0.12.1",
       "date": "Wed, 12 Feb 2025 01:10:52 GMT",

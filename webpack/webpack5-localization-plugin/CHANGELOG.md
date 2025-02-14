@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Wed, 12 Feb 2025 01:10:52 GMT and should not be manually modified.
+This log was last generated on Fri, 14 Feb 2025 23:17:26 GMT and should not be manually modified.
+
+## 0.12.2
+Fri, 14 Feb 2025 23:17:26 GMT
+
+### Patches
+
+- Fix a bug where `chunk.localizedFiles` was not set in incremental rebuilds.
 
 ## 0.12.1
 Wed, 12 Feb 2025 01:10:52 GMT
