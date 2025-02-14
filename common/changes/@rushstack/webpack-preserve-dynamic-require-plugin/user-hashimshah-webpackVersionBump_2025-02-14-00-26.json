@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
-      "comment": "update version",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin"
