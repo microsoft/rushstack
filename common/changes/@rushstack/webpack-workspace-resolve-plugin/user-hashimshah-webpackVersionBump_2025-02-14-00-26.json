@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/webpack-workspace-resolve-plugin",
-      "comment": "update version",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@rushstack/webpack-workspace-resolve-plugin"
