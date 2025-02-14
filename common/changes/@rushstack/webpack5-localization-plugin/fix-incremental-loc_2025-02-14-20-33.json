@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "comment": "Fix a bug where `chunk.localizedFiles` was not set in incremental rebuilds.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-localization-plugin"
+}
