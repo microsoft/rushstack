@@ -339,11 +339,6 @@ export class RushConstants {
   public static readonly rushAlertsConfigFilename: 'rush-alerts.json' = 'rush-alerts.json';
 
   /**
-   * The filename for the machine-generated file that tracks state for Rush alerts.
-   */
-  public static readonly rushAlertsStateFilename: 'rush-alerts-state.json' = 'rush-alerts-state.json';
-
-  /**
    * The filename for the file that tracks which variant is currently installed.
    */
   public static readonly currentVariantsFilename: 'current-variants.json' = 'current-variants.json';
