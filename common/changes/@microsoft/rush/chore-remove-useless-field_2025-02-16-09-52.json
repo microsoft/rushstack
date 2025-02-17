@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Remove the unused `RushConstants.rushAlertsStateFilename` property.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
