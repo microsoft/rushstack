@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Remove useless field \"rushAlertsStateFilename\"",
+      "comment": "Remove the unused `RushConstants.rushAlertsStateFilename` property.",
       "type": "none"
     }
   ],
