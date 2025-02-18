@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "skiplog",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor"
+}
