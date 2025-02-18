@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/hashed-folder-copy-plugin",
+      "comment": "skiplog",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/hashed-folder-copy-plugin"
+}
