@@ -31,7 +31,7 @@
     "@rushstack/webpack-plugin-utilities": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
-    "webpack": "~5.95.0",
+    "webpack": "~5.98.0",
     "memfs": "4.12.0"
   }
 }
