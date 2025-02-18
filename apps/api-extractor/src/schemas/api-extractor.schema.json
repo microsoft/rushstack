@@ -131,6 +131,14 @@
         "projectFolderUrl": {
           "description": "The base URL where the project's source code can be viewed on a website such as GitHub or Azure DevOps. This URL path corresponds to the `<projectFolder>` path on disk. This URL is concatenated with the file paths serialized to the doc model to produce URL file paths to individual API items. For example, if the `projectFolderUrl` is \"https://github.com/microsoft/rushstack/tree/main/apps/api-extractor\" and an API item's file path is \"api/ExtractorConfig.ts\", the full URL file path would be \"https://github.com/microsoft/rushstack/tree/main/apps/api-extractor/api/ExtractorConfig.js\". Can be omitted if you don't need source code links in your API documentation reference.",
           "type": "string"
+        },
+        "releaseTagsToTrim": {
+          "description": "Specifies a list of release tags that will be trimmed from the doc model. The default value is `[\"@internal\"]`.",
+          "type": "array",
+          "items": {
+            "enum": ["@internal", "@alpha", "@beta", "@public"]
+          },
+          "uniqueItems": true
         }
       },
       "required": ["enabled"],

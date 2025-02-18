@@ -10,6 +10,7 @@ import { IRigConfig } from '@rushstack/rig-package';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
+import { ReleaseTag as ReleaseTag_2 } from '@microsoft/api-extractor-model';
 import type * as tsdoc from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
@@ -56,7 +57,8 @@ export class ExtractorConfig {
     readonly apiReportIncludeForgottenExports: boolean;
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
-    readonly docModelEnabled: boolean;
+    // Warning: (ae-forgotten-export) The symbol "IApiModelGenerationOptions" needs to be exported by the entry point index.d.ts
+    readonly docModelGenerationOptions: IApiModelGenerationOptions | undefined;
     readonly docModelIncludeForgottenExports: boolean;
     readonly enumMemberOrder: EnumMemberOrder;
     static readonly FILENAME: 'api-extractor.json';
@@ -201,6 +203,7 @@ export interface IConfigDocModel {
     enabled: boolean;
     includeForgottenExports?: boolean;
     projectFolderUrl?: string;
+    releaseTagsToTrim?: ReleaseTag[];
 }
 
 // @public
@@ -294,5 +297,8 @@ export interface IExtractorMessagesConfig {
     extractorMessageReporting?: IConfigMessageReportingTable;
     tsdocMessageReporting?: IConfigMessageReportingTable;
 }
+
+// @public (undocumented)
+export type ReleaseTag = '@internal' | '@alpha' | '@beta' | '@public';
 
 ```

@@ -42,5 +42,6 @@ export type {
   IConfigMessageReportingRule,
   IConfigMessageReportingTable,
   IExtractorMessagesConfig,
-  IConfigFile
+  IConfigFile,
+  ReleaseTag
 } from './api/IConfigFile';
