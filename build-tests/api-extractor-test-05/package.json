@@ -1,0 +1,17 @@
+{
+  "name": "api-extractor-test-05",
+  "description": "Building this project is a regression test for api-extractor",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "typings": "dist/api-extractor-test-05.d.ts",
+  "scripts": {
+    "build": "node build.js",
+    "_phase:build": "node build.js"
+  },
+  "dependencies": {
+    "@microsoft/api-extractor": "workspace:*",
+    "fs-extra": "~11.3.0",
+    "typescript": "~5.4.2"
+  }
+}
