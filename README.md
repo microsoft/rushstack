@@ -152,6 +152,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/api-extractor-test-02](./build-tests/api-extractor-test-02/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-test-03](./build-tests/api-extractor-test-03/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-test-04](./build-tests/api-extractor-test-04/) | Building this project is a regression test for api-extractor |
+| [/build-tests/api-extractor-test-05](./build-tests/api-extractor-test-05/) | Building this project is a regression test for api-extractor |
 | [/build-tests/eslint-7-11-test](./build-tests/eslint-7-11-test/) | This project contains a build test to validate ESLint 7.11.0 compatibility with the latest version of @rushstack/eslint-config (and by extension, the ESLint plugin) |
 | [/build-tests/eslint-7-7-test](./build-tests/eslint-7-7-test/) | This project contains a build test to validate ESLint 7.7.0 compatibility with the latest version of @rushstack/eslint-config (and by extension, the ESLint plugin) |
 | [/build-tests/eslint-7-test](./build-tests/eslint-7-test/) | This project contains a build test to validate ESLint 7 compatibility with the latest version of @rushstack/eslint-config (and by extension, the ESLint plugin) |
