@@ -254,7 +254,7 @@ export class Extractor {
     const collector: Collector = new Collector({
       program: compilerState.program as ts.Program,
       messageRouter,
-      extractorConfig: extractorConfig,
+      extractorConfig,
       sourceMapper
     });
 
@@ -263,14 +263,14 @@ export class Extractor {
     DocCommentEnhancer.analyze(collector);
     ValidationEnhancer.analyze(collector);
 
-    const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector);
+    const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector, extractorConfig);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
 
     if (messageRouter.showDiagnostics) {
       messageRouter.logDiagnostic(''); // skip a line after any diagnostic messages
     }
 
-    if (extractorConfig.docModelEnabled) {
+    if (modelBuilder.docModelEnabled) {
       messageRouter.logVerbose(
         ConsoleMessageId.WritingDocModelFile,
         'Writing: ' + extractorConfig.apiJsonFilePath

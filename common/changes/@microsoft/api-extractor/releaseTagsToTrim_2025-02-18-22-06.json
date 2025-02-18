@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Add a `docModel.releaseTagsToTrim` property to `api-extractor.json` to specify which release tags should be trimmed when the doc model is produced.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
