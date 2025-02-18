@@ -142,6 +142,11 @@ export interface IConfigApiReport {
 }
 
 /**
+ * @public
+ */
+export type ReleaseTag = '@internal' | '@alpha' | '@beta' | '@public';
+
+/**
  * Configures how the doc model file (*.api.json) will be generated.
  *
  * @remarks
@@ -188,6 +193,13 @@ export interface IConfigDocModel {
    * Can be omitted if you don't need source code links in your API documentation reference.
    */
   projectFolderUrl?: string;
+
+  /**
+   * Specifies a list of release tags that will be trimmed from the doc model.
+   *
+   * @defaultValue `["@internal"]`
+   */
+  releaseTagsToTrim?: ReleaseTag[];
 }
 
 /**

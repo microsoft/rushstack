@@ -1153,6 +1153,18 @@ importers:
         specifier: ~5.4.2
         version: 5.4.2
 
+  ../../../build-tests/api-extractor-test-05:
+    dependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      fs-extra:
+        specifier: ~11.3.0
+        version: 11.3.0
+      typescript:
+        specifier: ~5.4.2
+        version: 5.4.2
+
   ../../../build-tests/eslint-7-11-test:
     devDependencies:
       '@rushstack/eslint-config':
