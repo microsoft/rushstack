@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/rush",
       "comment": "Bump `jsonpath-plus` to `~10.3.0`.",
-      "type": "patch"
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/rush"
