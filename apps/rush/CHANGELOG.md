@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 12 Feb 2025 04:07:30 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Feb 2025 18:54:06 GMT and should not be manually modified.
+
+## 5.149.1
+Wed, 19 Feb 2025 18:54:06 GMT
+
+### Updates
+
+- Remove the unused `RushConstants.rushAlertsStateFilename` property.
+- Bump `jsonpath-plus` to `~10.3.0`.
 
 ## 5.149.0
 Wed, 12 Feb 2025 04:07:30 GMT

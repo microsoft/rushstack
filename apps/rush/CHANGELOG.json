@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.149.1",
+      "tag": "@microsoft/rush_v5.149.1",
+      "date": "Wed, 19 Feb 2025 18:54:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove the unused `RushConstants.rushAlertsStateFilename` property."
+          },
+          {
+            "comment": "Bump `jsonpath-plus` to `~10.3.0`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.149.0",
       "tag": "@microsoft/rush_v5.149.0",
       "date": "Wed, 12 Feb 2025 04:07:30 GMT",
