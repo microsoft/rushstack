@@ -58,8 +58,7 @@ export class InitSubspaceAction extends BaseRushAction {
     }
 
     const subspaceConfigPath: string = `${this.rushConfiguration.commonFolder}/config/subspaces/${newSubspaceName}`;
-    const rushConfigPath: string = `${this.rushConfiguration.commonFolder}/config/rush`;
-    const assetsSubfolder: string = `${assetsFolderPath}/rush-init`;
+    const assetsSubfolder: string = `${assetsFolderPath}/rush-init/common/config`;
     const templateFilePaths: string[] = [
       '[dot]npmrc',
       '.pnpmfile.cjs',
@@ -71,9 +70,9 @@ export class InitSubspaceAction extends BaseRushAction {
     await Async.forEachAsync(
       templateFilePaths,
       async (templateFilePath) => {
-        let sourcePath: string = `${rushConfigPath}/${templateFilePath.replace('[dot]', '.')}`;
+        let sourcePath: string = `${assetsSubfolder}/subspaces/${templateFilePath}`;
         if (!FileSystem.exists(sourcePath)) {
-          sourcePath = `${assetsSubfolder}/common/config/rush/${templateFilePath}`;
+          sourcePath = `${assetsSubfolder}/rush/${templateFilePath}`;
         }
 
         const destinationPath: string = `${subspaceConfigPath}/${templateFilePath.replace('[dot]', '.')}`;
