@@ -3,6 +3,7 @@
 
   "compilerOptions": {
     "isolatedModules": true,
-    "types": ["heft-jest", "node"]
+    "types": ["heft-jest", "node"],
+    "target": "es2018"
   }
 }

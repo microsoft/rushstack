@@ -4,6 +4,7 @@
   "compilerOptions": {
     "isolatedModules": true,
     "types": ["node", "heft-jest"],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "target": "es2018"
   }
 }

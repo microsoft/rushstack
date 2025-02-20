@@ -53,6 +53,6 @@
     "jest-environment-node": "~29.5.0",
     "jest-watch-select-projects": "2.0.0",
     "local-eslint-config": "workspace:*",
-    "typescript": "~5.4.2"
+    "typescript": "~5.7.3"
   }
 }
