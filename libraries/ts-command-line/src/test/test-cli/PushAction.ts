@@ -5,14 +5,15 @@ import {
   type CommandLineFlagParameter,
   CommandLineAction,
   type IRequiredCommandLineChoiceParameter
-} from '@rushstack/ts-command-line';
+} from '../../index';
+
 import { BusinessLogic } from './BusinessLogic';
 
 type Protocol = 'ftp' | 'webdav' | 'scp';
 
 export class PushAction extends CommandLineAction {
-  private _force: CommandLineFlagParameter;
-  private _protocol: IRequiredCommandLineChoiceParameter<Protocol>;
+  private readonly _force: CommandLineFlagParameter;
+  private readonly _protocol: IRequiredCommandLineChoiceParameter<Protocol>;
 
   public constructor() {
     super({
@@ -20,15 +21,7 @@ export class PushAction extends CommandLineAction {
       summary: 'Pushes a widget to the service',
       documentation: 'Here we provide a longer description of how our action works.'
     });
-  }
 
-  protected onExecute(): Promise<void> {
-    // abstract
-    return BusinessLogic.doTheWorkAsync(this._force.value, this._protocol.value);
-  }
-
-  protected onDefineParameters(): void {
-    // abstract
     this._force = this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: '-f',
@@ -42,5 +35,10 @@ export class PushAction extends CommandLineAction {
       environmentVariable: 'WIDGET_PROTOCOL',
       defaultValue: 'scp'
     });
+  }
+
+  protected onExecute(): Promise<void> {
+    // abstract
+    return BusinessLogic.doTheWorkAsync(this._force.value, this._protocol.value);
   }
 }

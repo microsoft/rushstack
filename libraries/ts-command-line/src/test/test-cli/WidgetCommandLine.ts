@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineParser, CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { CommandLineParser, type CommandLineFlagParameter } from '../../index';
+
 import { PushAction } from './PushAction';
 import { RunAction } from './RunAction';
 import { BusinessLogic } from './BusinessLogic';
 
 export class WidgetCommandLine extends CommandLineParser {
-  private _verbose: CommandLineFlagParameter;
+  private readonly _verbose: CommandLineFlagParameter;
 
   public constructor() {
     super({
@@ -17,9 +18,7 @@ export class WidgetCommandLine extends CommandLineParser {
 
     this.addAction(new PushAction());
     this.addAction(new RunAction());
-  }
 
-  protected onDefineParameters(): void {
     // abstract
     this._verbose = this.defineFlagParameter({
       parameterLongName: '--verbose',

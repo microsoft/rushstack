@@ -4,4 +4,8 @@
 import { WidgetCommandLine } from './WidgetCommandLine';
 
 const commandLine: WidgetCommandLine = new WidgetCommandLine();
-commandLine.executeAsync();
+commandLine.executeAsync().catch((error: Error) => {
+  // eslint-disable-next-line no-console
+  console.error(error.message);
+  process.exitCode = 1;
+});

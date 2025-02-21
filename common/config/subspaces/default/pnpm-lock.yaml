@@ -2351,21 +2351,6 @@ importers:
         specifier: ~5.95.0
         version: 5.95.0
 
-  ../../../build-tests/ts-command-line-test:
-    devDependencies:
-      '@rushstack/ts-command-line':
-        specifier: workspace:*
-        version: link:../../libraries/ts-command-line
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
-
   ../../../eslint/eslint-bulk:
     devDependencies:
       '@rushstack/heft':
@@ -3712,6 +3697,9 @@ importers:
       '@rushstack/heft-node-rig':
         specifier: 2.6.48
         version: 2.6.48(@rushstack/heft@0.68.12)(@types/node@18.17.15)(supports-color@8.1.1)
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../node-core-library
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
