@@ -42,7 +42,7 @@ import type {
   ResolvedDependencies
 } from '@pnpm/lockfile.types';
 import { convertLockfileV9ToLockfileObject } from './PnpmShrinkWrapFileConverters';
-import { RushConnect } from '../../utilities/RushLink';
+import { RushConnect } from '../../utilities/RushConnect';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 

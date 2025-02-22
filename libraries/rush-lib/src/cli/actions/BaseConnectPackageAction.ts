@@ -1,7 +1,7 @@
 import { CommandLineStringListParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 import path from 'path';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConnect } from '../../utilities/RushLink';
+import { RushConnect } from '../../utilities/RushConnect';
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Async } from '@rushstack/node-core-library';
 
@@ -58,7 +58,7 @@ export abstract class BaseConnectPackageAction extends BaseRushAction {
       projectsToLink.add(currentPackage);
     }
 
-    Async.forEachAsync(projectsToLink, async (consumerPackage) => {
+    await Async.forEachAsync(projectsToLink, async (consumerPackage) => {
       await this.connectPackageAsync(consumerPackage, linkedPackagePath);
     });
   }

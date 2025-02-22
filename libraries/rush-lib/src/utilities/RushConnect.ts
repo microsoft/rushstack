@@ -189,7 +189,7 @@ export class RushConnect {
     );
 
     // For those package with "workspace" protocol, we should repeat the above process.
-    Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
+    await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
       const linkedWorkspacePackagePath = await FileSystem.getRealPathAsync(
         path.resolve(linkedPackageNodeModulesPath, workspaceDependency)
       );
@@ -230,7 +230,7 @@ export class RushConnect {
       newLinkPath: symlinkPath
     });
 
-    this._modifyAndSaveLinkState((linkState) => {
+    await this._modifyAndSaveLinkState((linkState) => {
       const sourceProjectLinks = linkState[consumerPackage.packageName] ?? [];
       sourceProjectLinks.push({
         linkedPackagePath,

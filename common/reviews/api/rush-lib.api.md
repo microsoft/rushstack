@@ -1360,7 +1360,6 @@ export class RushConstants {
     static readonly defaultMaxInstallAttempts: 1;
     static readonly defaultSubspaceName: 'default';
     static readonly defaultWatchDebounceMs: 1000;
-    static readonly dotPnpm: '.pnpm';
     static readonly experimentsFilename: 'experiments.json';
     static readonly globalCommandKind: 'global';
     static readonly hashDelimiter: '|';
@@ -1374,6 +1373,7 @@ export class RushConstants {
     // @deprecated
     static readonly pinnedVersionsFilename: 'pinned-versions.json';
     static readonly pnpmConfigFilename: 'pnpm-config.json';
+    static readonly pnpmDependenciesFolderName: '.pnpm';
     static readonly pnpmfileGlobalFilename: 'global-pnpmfile.cjs';
     static readonly pnpmfileV1Filename: 'pnpmfile.js';
     static readonly pnpmfileV6Filename: '.pnpmfile.cjs';
@@ -1388,7 +1388,6 @@ export class RushConstants {
     static readonly repoStateFilename: 'repo-state.json';
     static readonly rushAlertsConfigFilename: 'rush-alerts.json';
     static readonly rushJsonFilename: 'rush.json';
-    // (undocumented)
     static readonly rushLinkStateFilename: 'rush-link-state.json';
     static readonly rushLogsFolderName: 'rush-logs';
     static readonly rushPackageName: '@microsoft/rush';
