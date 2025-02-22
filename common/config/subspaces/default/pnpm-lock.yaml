@@ -902,69 +902,42 @@ importers:
 
   ../../../build-tests/api-extractor-d-cts-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-d-mts-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-lib1-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
       typescript:
         specifier: ~2.9.2
         version: 2.9.2
 
   ../../../build-tests/api-extractor-lib2-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-lib3-test:
     dependencies:
@@ -972,57 +945,30 @@ importers:
         specifier: workspace:*
         version: link:../api-extractor-lib1-test
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-lib4-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-lib5-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-scenarios:
     dependencies:
@@ -1076,21 +1022,12 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-test-02:
     dependencies:
@@ -1104,51 +1041,38 @@ importers:
         specifier: ~7.5.4
         version: 7.5.4
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-test-03:
-    devDependencies:
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+    dependencies:
       api-extractor-test-02:
         specifier: workspace:*
         version: link:../api-extractor-test-02
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-test-04:
     dependencies:
-      '@microsoft/api-extractor':
-        specifier: workspace:*
-        version: link:../../apps/api-extractor
       api-extractor-lib1-test:
         specifier: workspace:*
         version: link:../api-extractor-lib1-test
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/eslint-7-11-test:
     devDependencies:
@@ -19502,6 +19426,7 @@ packages:
       graceful-fs: 4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.1
+    dev: false
 
   /fs-extra@7.0.1:
     resolution: {integrity: sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==}

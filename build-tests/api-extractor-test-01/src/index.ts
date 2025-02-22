@@ -113,7 +113,7 @@ export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1';
 export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2';
 export { ForgottenExportConsumer3 } from './ForgottenExportConsumer3';
 
-export { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExport';
+export type { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExport';
 
 /**
  * Test the alias-following logic:  This class gets aliased twice before being
