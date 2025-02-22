@@ -878,6 +878,9 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
+      run-scenarios-helpers:
+        specifier: workspace:*
+        version: link:../run-scenarios-helpers
 
   ../../../build-tests/api-documenter-test:
     devDependencies:
@@ -1057,6 +1060,9 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
+      run-scenarios-helpers:
+        specifier: workspace:*
+        version: link:../run-scenarios-helpers
 
   ../../../build-tests/api-extractor-test-01:
     dependencies:
@@ -2192,6 +2198,22 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+
+  ../../../build-tests/run-scenarios-helpers:
+    dependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/rush-amazon-s3-build-cache-plugin-integration-test:
     devDependencies:
