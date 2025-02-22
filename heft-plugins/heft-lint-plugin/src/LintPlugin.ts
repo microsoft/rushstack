@@ -145,10 +145,13 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     // Locate the eslint linter if enabled
     this._eslintConfigFilePath = await this._resolveEslintConfigFilePathAsync(heftConfiguration);
     if (this._eslintConfigFilePath) {
+      logger.terminal.writeVerboseLine(`ESLint config file path: ${this._eslintConfigFilePath}`);
       this._eslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         'eslint',
         logger.terminal
       );
+    } else {
+      logger.terminal.writeVerboseLine('No ESLint config file found');
     }
   }
 
