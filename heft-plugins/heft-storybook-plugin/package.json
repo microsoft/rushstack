@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-storybook-plugin",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "description": "Heft plugin for supporting UI development using Storybook",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.68.17"
+    "@rushstack/heft": "^0.68.18"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
