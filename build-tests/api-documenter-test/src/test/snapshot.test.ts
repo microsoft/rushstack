@@ -5,7 +5,6 @@ import {
   Executable,
   FileSystem,
   type FolderItem,
-  Import,
   PackageJsonLookup
 } from '@rushstack/node-core-library';
 import process from 'process';
