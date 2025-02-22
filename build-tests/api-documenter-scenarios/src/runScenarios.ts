@@ -1,30 +1,36 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import child_process = require('child_process');
-import { AlreadyExistsBehavior, FileSystem, JsonFile } from '@rushstack/node-core-library';
+import type { IRunScriptOptions } from '@rushstack/heft';
+import { AlreadyExistsBehavior, Executable, FileSystem, JsonFile } from '@rushstack/node-core-library';
 import {
   Extractor,
   ExtractorConfig,
   CompilerState,
-  ExtractorResult,
-  ExtractorMessage,
+  type ExtractorResult,
+  type ExtractorMessage,
   ConsoleMessageId,
   ExtractorLogLevel
 } from '@microsoft/api-extractor';
+import type { ChildProcess } from 'node:child_process';
 
-export function runScenarios(buildConfigPath: string): void {
-  const buildConfig = JsonFile.load(buildConfigPath);
+const SCENARIO_FOLDER_NAMES: string[] = ['inheritedMembers'];
 
+export async function runAsync({
+  heftTaskSession: {
+    logger,
+    parameters: { production }
+  },
+  heftConfiguration: { buildFolderPath }
+}: IRunScriptOptions): Promise<void> {
   // Copy any .d.ts files into the "lib/" folder
-  FileSystem.copyFiles({
+  await FileSystem.copyFilesAsync({
     sourcePath: './src/',
     destinationPath: './lib/',
     alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite,
     filter: (sourcePath: string): boolean => {
       if (sourcePath.endsWith('.d.ts') || !sourcePath.endsWith('.ts')) {
-        // console.log('COPY ' + sourcePath);
+        logger.terminal.writeVerboseLine(`COPY ${sourcePath}`);
         return true;
       }
       return false;
@@ -33,17 +39,23 @@ export function runScenarios(buildConfigPath: string): void {
 
   const entryPoints: string[] = [];
 
-  for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
-    const entryPoint: string = path.resolve(`./lib/${scenarioFolderName}/index.d.ts`);
+  for (const scenarioFolderName of SCENARIO_FOLDER_NAMES) {
+    const entryPoint: string = `${buildFolderPath}/lib/${scenarioFolderName}/index.d.ts`;
     entryPoints.push(entryPoint);
 
-    const apiExtractorOverridesPath = path.resolve(
-      `./src/${scenarioFolderName}/config/api-extractor-overrides.json`
-    );
-    const apiExtractorJsonOverrides = FileSystem.exists(apiExtractorOverridesPath)
-      ? JsonFile.load(apiExtractorOverridesPath)
-      : {};
-    const apiExtractorJson = {
+    const apiExtractorOverridesPath: string = `${buildFolderPath}/src/${scenarioFolderName}/config/api-extractor-overrides.json`;
+    let apiExtractorJsonOverrides: {};
+    try {
+      apiExtractorJsonOverrides = await JsonFile.loadAsync(apiExtractorOverridesPath);
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      } else {
+        apiExtractorJsonOverrides = {};
+      }
+    }
+
+    const apiExtractorJson: {} = {
       $schema: 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json',
 
       mainEntryPointFilePath: entryPoint,
@@ -67,22 +79,21 @@ export function runScenarios(buildConfigPath: string): void {
       ...apiExtractorJsonOverrides
     };
 
-    const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
+    const apiExtractorJsonPath: string = `${buildFolderPath}/temp/configs/api-extractor-${scenarioFolderName}.json`;
 
-    JsonFile.save(apiExtractorJson, apiExtractorJsonPath, { ensureFolderExists: true });
+    await JsonFile.saveAsync(apiExtractorJson, apiExtractorJsonPath, { ensureFolderExists: true });
   }
 
-  const apiDocumenterJsonPath: string = `./config/api-documenter.json`;
+  const apiDocumenterJsonPath: string = `${buildFolderPath}/config/api-documenter.json`;
 
   let compilerState: CompilerState | undefined = undefined;
   let anyErrors: boolean = false;
-  process.exitCode = 1;
 
-  for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
-    console.log('Scenario: ' + scenarioFolderName);
+  for (const scenarioFolderName of SCENARIO_FOLDER_NAMES) {
+    logger.terminal.writeLine(`Scenario: ${scenarioFolderName}`);
 
-    // Run the API Extractor programmtically
-    const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
+    // Run the API Extractor programmatically
+    const apiExtractorJsonPath: string = `${buildFolderPath}/temp/configs/api-extractor-${scenarioFolderName}.json`;
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(apiExtractorJsonPath);
 
     if (!compilerState) {
@@ -116,39 +127,52 @@ export function runScenarios(buildConfigPath: string): void {
     // API Documenter will always look for a config file in the same place (it cannot be configured), so this script
     // manually overwrites the API documenter config for each scenario. This is in contrast to the separate config files
     // created when invoking API Extractor above.
-    const apiDocumenterOverridesPath = path.resolve(
-      `./src/${scenarioFolderName}/config/api-documenter-overrides.json`
-    );
-    const apiDocumenterJsonOverrides = FileSystem.exists(apiDocumenterOverridesPath)
-      ? JsonFile.load(apiDocumenterOverridesPath)
-      : {};
-    const apiDocumenterJson = {
+    const apiDocumenterOverridesPath: string = `${buildFolderPath}/src/${scenarioFolderName}/config/api-documenter-overrides.json`;
+    let apiDocumenterJsonOverrides: {};
+    try {
+      apiDocumenterJsonOverrides = await JsonFile.loadAsync(apiDocumenterOverridesPath);
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      } else {
+        apiDocumenterJsonOverrides = {};
+      }
+    }
+
+    const apiDocumenterJson: {} = {
       $schema: 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-documenter.schema.json',
       outputTarget: 'markdown',
       tableOfContents: {},
       ...apiDocumenterJsonOverrides
     };
 
-    JsonFile.save(apiDocumenterJson, apiDocumenterJsonPath, { ensureFolderExists: true });
+    await JsonFile.saveAsync(apiDocumenterJson, apiDocumenterJsonPath, { ensureFolderExists: true });
 
     // TODO: Ensure that the checked-in files are up-to-date
     // Run the API Documenter command-line
-    executeCommand(
-      'node node_modules/@microsoft/api-documenter/lib/start ' +
-        `generate --input-folder etc/${scenarioFolderName} --output-folder etc/${scenarioFolderName}/markdown`
+    const childProcess: ChildProcess = Executable.spawn(
+      process.argv0,
+      [
+        'node_modules/@microsoft/api-documenter/lib/start',
+        'generate',
+        `--input-folder`,
+        `etc/${scenarioFolderName}`,
+        '--output-folder',
+        `etc/${scenarioFolderName}/markdown`
+      ],
+      {
+        stdio: 'inherit'
+      }
     );
+
+    await Executable.waitForExitAsync(childProcess, { throwOnNonZeroExitCode: true, throwOnSignal: true });
   }
 
   // Delete the transient `api-documenter.json` file before completing, as it'll just be whatever the last scenario
   // was, and shouldn't be committed.
-  FileSystem.deleteFile(apiDocumenterJsonPath);
+  await FileSystem.deleteFileAsync(apiDocumenterJsonPath);
 
-  if (!anyErrors) {
-    process.exitCode = 0;
+  if (anyErrors) {
+    logger.emitError(new Error('API Extractor encountered errors'));
   }
-}
-
-function executeCommand(command) {
-  console.log('---> ' + command);
-  child_process.execSync(command, { stdio: 'inherit' });
 }

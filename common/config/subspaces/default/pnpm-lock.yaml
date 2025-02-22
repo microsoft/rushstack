@@ -869,24 +869,15 @@ importers:
       '@microsoft/api-extractor':
         specifier: workspace:*
         version: link:../../apps/api-extractor
-      '@microsoft/teams-js':
-        specifier: 1.3.0-beta.4
-        version: 1.3.0-beta.4
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-documenter-test:
     devDependencies:
