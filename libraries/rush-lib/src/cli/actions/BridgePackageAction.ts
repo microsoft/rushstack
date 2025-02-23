@@ -1,5 +1,8 @@
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import type { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseConnectPackageAction } from './BaseConnectPackageAction';
 
 export class BridgePackageAction extends BaseConnectPackageAction {
@@ -20,6 +23,6 @@ export class BridgePackageAction extends BaseConnectPackageAction {
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string
   ): Promise<void> {
-    await this._rushConnect.bridgePackage(consumerPackage, linkedPackagePath);
+    await this._rushConnect.bridgePackageAsync(consumerPackage, linkedPackagePath);
   }
 }

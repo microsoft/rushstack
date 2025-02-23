@@ -1,6 +1,9 @@
-import { CommandLineStringListParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import type { CommandLineStringListParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 import path from 'path';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConnect } from '../../utilities/RushConnect';
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Async } from '@rushstack/node-core-library';
@@ -38,28 +41,30 @@ export abstract class BaseConnectPackageAction extends BaseRushAction {
   ): Promise<void>;
 
   protected async runAsync(): Promise<void> {
-    const linkedPackagePath = path.resolve(this._pathParameter.value!);
-    const consumerPackage = this._projectList.values;
+    const linkedPackagePath: string = path.resolve(this._pathParameter.value!);
+    const consumerPackage: readonly string[] = this._projectList.values;
 
     const projectsToLink: Set<RushConfigurationProject> = new Set();
     if (consumerPackage.length > 0) {
       for (const projectName of consumerPackage) {
-        const sourceProject = this.rushConfiguration.getProjectByName(projectName);
+        const sourceProject: RushConfigurationProject | undefined =
+          this.rushConfiguration.getProjectByName(projectName);
         if (!sourceProject) {
           throw new Error(`The project "${projectName}" was not found in the "rush.json"`);
         }
         projectsToLink.add(sourceProject);
       }
     } else {
-      const currentPackage = this.rushConfiguration.tryGetProjectForPath(process.cwd());
+      const currentPackage: RushConfigurationProject | undefined =
+        this.rushConfiguration.tryGetProjectForPath(process.cwd());
       if (!currentPackage) {
         throw new Error(`No Rush project was found in the current working directory`);
       }
       projectsToLink.add(currentPackage);
     }
 
-    await Async.forEachAsync(projectsToLink, async (consumerPackage) => {
-      await this.connectPackageAsync(consumerPackage, linkedPackagePath);
+    await Async.forEachAsync(projectsToLink, async (projectToLink: RushConfigurationProject) => {
+      await this.connectPackageAsync(projectToLink, linkedPackagePath);
     });
   }
 }

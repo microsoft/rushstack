@@ -1,10 +1,20 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import path from 'path';
-import { Colorize, ConsoleTerminalProvider, ITerminal, Terminal } from '@rushstack/terminal';
-import { Async, FileConstants, FileSystem, INodePackageJson, JsonFile } from '@rushstack/node-core-library';
+import { Colorize, ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
+import {
+  Async,
+  FileConstants,
+  FileSystem,
+  type INodePackageJson,
+  JsonFile,
+  type IPackageJsonDependencyTable
+} from '@rushstack/node-core-library';
 import { depPathToFilename } from '@pnpm/dependency-path';
 
-import { RushConfiguration } from '../api/RushConfiguration';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { PackageExtractor } from '@rushstack/package-extractor';
 
@@ -27,7 +37,7 @@ export class RushConnect {
   private readonly _rushLinkStateFilePath: string;
   private readonly _rushLinkState: IRushLinkFileState | undefined;
 
-  constructor(options: IRushLinkOptions) {
+  public constructor(options: IRushLinkOptions) {
     this._terminal = new Terminal(new ConsoleTerminalProvider());
 
     this._rushConfiguration = options.rushConfiguration;
@@ -35,9 +45,9 @@ export class RushConnect {
     this._rushLinkState = options.rushLinkState;
   }
 
-  private async _hardLinkToLinkedPackage(sourcePath: string, targetFolder: string) {
+  private async _hardLinkToLinkedPackageAsync(sourcePath: string, targetFolder: string): Promise<void> {
     const npmPackFiles: string[] = await PackageExtractor.getPackageIncludedFilesAsync(sourcePath);
-    Async.forEachAsync(npmPackFiles, async (npmPackFile: string) => {
+    await Async.forEachAsync(npmPackFiles, async (npmPackFile: string) => {
       const copySourcePath: string = path.join(sourcePath, npmPackFile);
       const copyDestinationPath: string = path.join(targetFolder, npmPackFile);
       if (!(await FileSystem.existsAsync(copyDestinationPath))) {
@@ -51,8 +61,8 @@ export class RushConnect {
         // if exist in target folder, check if it still point to the source Inode number
         // in our copy implementation, we use hard link to copy files
         // so that, we can utilize the file inode info to determine the equality of two files
-        const sourceFileIno = (await FileSystem.getStatisticsAsync(copySourcePath)).ino;
-        const destinationFileIno = (await FileSystem.getStatisticsAsync(copyDestinationPath)).ino;
+        const sourceFileIno: number = (await FileSystem.getStatisticsAsync(copySourcePath)).ino;
+        const destinationFileIno: number = (await FileSystem.getStatisticsAsync(copyDestinationPath)).ino;
         if (sourceFileIno !== destinationFileIno) {
           await FileSystem.deleteFileAsync(copyDestinationPath);
           await FileSystem.createHardLinkAsync({
@@ -64,16 +74,16 @@ export class RushConnect {
     });
   }
 
-  private async _modifyAndSaveLinkState(cb: (linkState: IRushLinkFileState) => void): Promise<void> {
-    const linkState = this._rushLinkState ?? {};
+  private async _modifyAndSaveLinkStateAsync(cb: (linkState: IRushLinkFileState) => void): Promise<void> {
+    const linkState: IRushLinkFileState = this._rushLinkState ?? {};
     cb(linkState);
     await JsonFile.saveAsync(linkState, this._rushLinkStateFilePath);
   }
 
   public async isProjectDependencyLinkedAsync(project: RushConfigurationProject): Promise<boolean> {
-    const projectName = project.packageName;
+    const projectName: string = project.packageName;
     if (this._rushLinkState && this._rushLinkState[projectName].length > 0) {
-      this._modifyAndSaveLinkState((linkState) => {
+      await this._modifyAndSaveLinkStateAsync((linkState) => {
         delete linkState[projectName];
       });
       return true;
@@ -81,7 +91,13 @@ export class RushConnect {
     return false;
   }
 
-  private async _getLinkedPackageInfo(linkedPackagePath: string) {
+  private async _getLinkedPackageInfoAsync(linkedPackagePath: string): Promise<{
+    packageName: string;
+    linkedPackageNodeModulesPath: string;
+    externalDependencies: string[];
+    workspaceDependencies: string[];
+    peerDependencies: IPackageJsonDependencyTable;
+  }> {
     const linkedPackageJsonPath: string = path.resolve(linkedPackagePath, FileConstants.PackageJson);
 
     if (!(await FileSystem.existsAsync(linkedPackageJsonPath))) {
@@ -100,11 +116,10 @@ export class RushConnect {
     const [externalDependencies, workspaceDependencies] = Object.entries(dependencies).reduce(
       (prev, curr) => {
         const [packageName, protocol] = curr;
-        const [externalDependencies, workspaceDependencies] = prev;
         if (protocol.startsWith('workspace')) {
-          workspaceDependencies.push(packageName);
+          prev[1].push(packageName);
         } else {
-          externalDependencies.push(packageName);
+          prev[0].push(packageName);
         }
         return prev;
       },
@@ -119,7 +134,10 @@ export class RushConnect {
     };
   }
 
-  private _getConsumerPackageInfo(consumerPackage: RushConfigurationProject) {
+  private _getConsumerPackageInfo(consumerPackage: RushConfigurationProject): {
+    consumerPackageNodeModulesPath: string;
+    consumerPackageDotDependencyPath: string;
+  } {
     const consumerPackageNodeModulesPath: string = path.resolve(
       path.dirname(consumerPackage.projectFolder),
       RushConstants.nodeModulesFolderName
@@ -134,20 +152,23 @@ export class RushConnect {
     };
   }
 
-  public async bridgePackage(consumerPackage: RushConfigurationProject, linkedPackagePath: string) {
+  public async bridgePackageAsync(
+    consumerPackage: RushConfigurationProject,
+    linkedPackagePath: string
+  ): Promise<void> {
     const {
       peerDependencies: linkedPackagePeerDependencies,
       externalDependencies: linkedPackageDependencies,
       linkedPackageNodeModulesPath,
       packageName,
       workspaceDependencies
-    } = await this._getLinkedPackageInfo(linkedPackagePath);
+    } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
     const { consumerPackageNodeModulesPath, consumerPackageDotDependencyPath } =
       this._getConsumerPackageInfo(consumerPackage);
 
     // The path linked to the consumerPackage, in fact, the exact path name doesn't matter,
     // we only need to distinguish it from the path created by pnpm
-    const linkedPackageDestination = path.resolve(
+    const linkedPackageDestination: string = path.resolve(
       consumerPackageDotDependencyPath,
       depPathToFilename(`file:${linkedPackagePath}(${packageName})`, 120),
       RushConstants.nodeModulesFolderName
@@ -170,8 +191,8 @@ export class RushConnect {
 
     // Create a symbolic link to the dependencies of linkedPackage
     for (const dependencyName of linkedPackageDependencies) {
-      const linkedPackageDependencyPath = path.resolve(linkedPackageNodeModulesPath, dependencyName);
-      const linkedPackageDependencySourcePath =
+      const linkedPackageDependencyPath: string = path.resolve(linkedPackageNodeModulesPath, dependencyName);
+      const linkedPackageDependencySourcePath: string =
         await FileSystem.getRealPathAsync(linkedPackageDependencyPath);
       if (!(await FileSystem.existsAsync(linkedPackageDependencySourcePath))) {
         throw new Error(`Cannot find '${dependencyName}' in '${consumerPackage.packageName}'`);
@@ -183,22 +204,25 @@ export class RushConnect {
     }
 
     // Create hardlink to linkedPackage
-    await this._hardLinkToLinkedPackage(
+    await this._hardLinkToLinkedPackageAsync(
       linkedPackagePath,
       path.resolve(linkedPackageDestination, packageName)
     );
 
     // For those package with "workspace" protocol, we should repeat the above process.
     await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
-      const linkedWorkspacePackagePath = await FileSystem.getRealPathAsync(
+      const linkedWorkspacePackagePath: string = await FileSystem.getRealPathAsync(
         path.resolve(linkedPackageNodeModulesPath, workspaceDependency)
       );
-      await this.bridgePackage(consumerPackage, linkedWorkspacePackagePath);
+      await this.bridgePackageAsync(consumerPackage, linkedWorkspacePackagePath);
     });
   }
 
-  public async linkPackage(consumerPackage: RushConfigurationProject, linkedPackagePath: string) {
-    let { packageName: linkedPackageName } = await this._getLinkedPackageInfo(linkedPackagePath);
+  public async linkPackageAsync(
+    consumerPackage: RushConfigurationProject,
+    linkedPackagePath: string
+  ): Promise<void> {
+    let { packageName: linkedPackageName } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
 
     let sourceNodeModulesPath: string = path.resolve(
       path.dirname(consumerPackage.projectFolder),
@@ -230,8 +254,8 @@ export class RushConnect {
       newLinkPath: symlinkPath
     });
 
-    await this._modifyAndSaveLinkState((linkState) => {
-      const sourceProjectLinks = linkState[consumerPackage.packageName] ?? [];
+    await this._modifyAndSaveLinkStateAsync((linkState) => {
+      const sourceProjectLinks: IRushLinkFileState[number] = linkState[consumerPackage.packageName] ?? [];
       sourceProjectLinks.push({
         linkedPackagePath,
         linkedPackageName
@@ -247,7 +271,7 @@ export class RushConnect {
   }
 
   public static loadFromLinkStateFileAsync(rushConfiguration: RushConfiguration): RushConnect {
-    const rushLinkStateFilePath = path.join(
+    const rushLinkStateFilePath: string = path.join(
       rushConfiguration.commonTempFolder,
       RushConstants.rushLinkStateFilename
     );

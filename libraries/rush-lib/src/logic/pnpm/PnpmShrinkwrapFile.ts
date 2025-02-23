@@ -907,7 +907,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return true;
     }
 
-    const rushLink = RushConnect.loadFromLinkStateFileAsync(project.rushConfiguration);
+    const rushLink: RushConnect = RushConnect.loadFromLinkStateFileAsync(project.rushConfiguration);
     if (await rushLink.isProjectDependencyLinkedAsync(project)) {
       return true;
     }
