@@ -64,7 +64,7 @@ export abstract class BaseConnectPackageAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const rushConnect: RushConnect = RushConnect.loadFromLinkStateFileAsync(this.rushConfiguration);
+    const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
     const linkedPackagePath: string = path.resolve(this._pathParameter.value!);
     const projectsToLink: Set<RushConfigurationProject> = await this.getProjectsToLinkAsync();
 

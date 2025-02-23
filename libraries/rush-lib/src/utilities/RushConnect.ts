@@ -383,7 +383,7 @@ export class RushConnect {
     }
   }
 
-  public static loadFromLinkStateFileAsync(rushConfiguration: RushConfiguration): RushConnect {
+  public static loadFromLinkStateFile(rushConfiguration: RushConfiguration): RushConnect {
     const rushLinkStateFilePath: string = path.join(
       rushConfiguration.commonTempFolder,
       RushConstants.rushLinkStateFilename

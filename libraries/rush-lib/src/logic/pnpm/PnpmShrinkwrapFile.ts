@@ -42,7 +42,6 @@ import type {
   ResolvedDependencies
 } from '@pnpm/lockfile.types';
 import { convertLockfileV9ToLockfileObject } from './PnpmShrinkWrapFileConverters';
-import { RushConnect } from '../../utilities/RushConnect';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -904,11 +903,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
     if (!importer) {
-      return true;
-    }
-
-    const rushLink: RushConnect = RushConnect.loadFromLinkStateFileAsync(project.rushConfiguration);
-    if (await rushLink.isProjectDependencyLinkedAsync(project)) {
       return true;
     }
 
