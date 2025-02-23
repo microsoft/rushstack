@@ -38,33 +38,38 @@ export abstract class BaseConnectPackageAction extends BaseRushAction {
     rushConnect: RushConnect
   ): Promise<void>;
 
-  protected async runAsync(): Promise<void> {
-    const rushConnect = RushConnect.loadFromLinkStateFileAsync(this.rushConfiguration);
-
-    const linkedPackagePath: string = path.resolve(this._pathParameter.value!);
-    const consumerPackage: readonly string[] = this._projectList.values;
-
+  protected async getProjectsToLinkAsync(): Promise<Set<RushConfigurationProject>> {
     const projectsToLink: Set<RushConfigurationProject> = new Set();
-    if (consumerPackage.length > 0) {
-      for (const projectName of consumerPackage) {
-        const sourceProject: RushConfigurationProject | undefined =
+    const projectNames: readonly string[] = this._projectList.values;
+
+    if (projectNames.length > 0) {
+      for (const projectName of projectNames) {
+        const project: RushConfigurationProject | undefined =
           this.rushConfiguration.getProjectByName(projectName);
-        if (!sourceProject) {
+        if (!project) {
           throw new Error(`The project "${projectName}" was not found in the "rush.json"`);
         }
-        projectsToLink.add(sourceProject);
+        projectsToLink.add(project);
       }
     } else {
-      const currentPackage: RushConfigurationProject | undefined =
+      const currentProject: RushConfigurationProject | undefined =
         this.rushConfiguration.tryGetProjectForPath(process.cwd());
-      if (!currentPackage) {
+      if (!currentProject) {
         throw new Error(`No Rush project was found in the current working directory`);
       }
-      projectsToLink.add(currentPackage);
+      projectsToLink.add(currentProject);
     }
 
-    await Async.forEachAsync(projectsToLink, async (projectToLink: RushConfigurationProject) => {
-      await this.connectPackageAsync(projectToLink, linkedPackagePath, rushConnect);
+    return projectsToLink;
+  }
+
+  protected async runAsync(): Promise<void> {
+    const rushConnect: RushConnect = RushConnect.loadFromLinkStateFileAsync(this.rushConfiguration);
+    const linkedPackagePath: string = path.resolve(this._pathParameter.value!);
+    const projectsToLink: Set<RushConfigurationProject> = await this.getProjectsToLinkAsync();
+
+    await Async.forEachAsync(projectsToLink, async (project) => {
+      await this.connectPackageAsync(project, linkedPackagePath, rushConnect);
     });
   }
 }
