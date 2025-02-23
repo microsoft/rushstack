@@ -40,6 +40,11 @@ interface ILinkedPackageInfo {
   peerDependencies: IPackageJsonDependencyTable;
 }
 
+interface IConsumerPackageInfo {
+  consumerPackageNodeModulesPath: string;
+  consumerPackagePnpmDependenciesFolderPath: string;
+}
+
 interface IRushLinkOptions {
   rushLinkStateFilePath: string;
   rushLinkState: IRushLinkFileState | undefined;
@@ -141,21 +146,18 @@ export class RushConnect {
     };
   }
 
-  private _getConsumerPackageInfo(consumerPackage: RushConfigurationProject): {
-    consumerPackageNodeModulesPath: string;
-    consumerPackageDotDependencyPath: string;
-  } {
+  private _getConsumerPackageInfo(consumerPackage: RushConfigurationProject): IConsumerPackageInfo {
     const consumerPackageNodeModulesPath: string = path.resolve(
-      path.dirname(consumerPackage.projectFolder),
+      consumerPackage.projectFolder,
       RushConstants.nodeModulesFolderName
     );
-    const consumerPackageDotDependencyPath: string = path.resolve(
+    const consumerPackagePnpmDependenciesFolderPath: string = path.resolve(
       consumerPackage.subspace.getSubspaceTempFolderPath(),
       RushConstants.pnpmDependenciesFolderName
     );
     return {
       consumerPackageNodeModulesPath,
-      consumerPackageDotDependencyPath
+      consumerPackagePnpmDependenciesFolderPath
     };
   }
 
@@ -219,12 +221,12 @@ export class RushConnect {
         linkedPackageNodeModulesPath
       } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
 
-      const { consumerPackageNodeModulesPath, consumerPackageDotDependencyPath } =
+      const { consumerPackageNodeModulesPath, consumerPackagePnpmDependenciesFolderPath } =
         this._getConsumerPackageInfo(consumerPackage);
 
       // Generate unique destination path for linked package
       const linkedPackageDestination: string = path.resolve(
-        consumerPackageDotDependencyPath,
+        consumerPackagePnpmDependenciesFolderPath,
         depPathToFilename(`file:${linkedPackagePath}(${packageName})`, 120),
         RushConstants.nodeModulesFolderName
       );
@@ -254,7 +256,7 @@ export class RushConnect {
       // Record the link information between the consumer package and the linked package
       await this._modifyAndSaveLinkStateAsync((linkState) => {
         const consumerPackageLinks: IRushLinkFileState[number] = linkState[consumerPackage.packageName] ?? [];
-        const existingLinkIndex = consumerPackageLinks.findIndex(
+        const existingLinkIndex: number = consumerPackageLinks.findIndex(
           (link) => link.linkedPackageName === packageName
         );
 
@@ -270,6 +272,10 @@ export class RushConnect {
         linkState[consumerPackage.packageName] = consumerPackageLinks;
       });
 
+      this._terminal.writeLine(
+        Colorize.green(`Successfully bridge package "${packageName}" for "${consumerPackage.packageName}"`)
+      );
+
       // Handle workspace dependencies recursively
       await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
         const linkedWorkspacePackagePath: string = await FileSystem.getRealPathAsync(
@@ -277,10 +283,6 @@ export class RushConnect {
         );
         await this.bridgePackageAsync(consumerPackage, linkedWorkspacePackagePath);
       });
-
-      this._terminal.writeLine(
-        Colorize.green(`Successfully bridge package "${packageName}" for "${consumerPackage.packageName}"`)
-      );
     } catch (error) {
       if (error instanceof Error) {
         throw new RushConnectError(
@@ -295,7 +297,7 @@ export class RushConnect {
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string
   ): Promise<void> {
-    const consumerPackageName = consumerPackage.packageName;
+    const consumerPackageName: string = consumerPackage.packageName;
     try {
       const { packageName: linkedPackageName } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
 
@@ -333,7 +335,7 @@ export class RushConnect {
       // Record the link information between the consumer package and the linked package
       await this._modifyAndSaveLinkStateAsync((linkState) => {
         const consumerPackageLinks: IRushLinkFileState[number] = linkState[consumerPackageName] ?? [];
-        const existingLinkIndex = consumerPackageLinks.findIndex(
+        const existingLinkIndex: number = consumerPackageLinks.findIndex(
           (link) => link.linkedPackageName === linkedPackageName
         );
 
