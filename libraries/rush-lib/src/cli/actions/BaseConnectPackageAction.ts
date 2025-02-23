@@ -11,7 +11,6 @@ import { Async } from '@rushstack/node-core-library';
 export abstract class BaseConnectPackageAction extends BaseRushAction {
   protected readonly _projectList: CommandLineStringListParameter;
   protected readonly _pathParameter: CommandLineStringParameter;
-  protected readonly _rushConnect: RushConnect;
 
   protected constructor(options: IBaseRushActionOptions) {
     super(options);
@@ -31,16 +30,17 @@ export abstract class BaseConnectPackageAction extends BaseRushAction {
         'A list of Rush project names to connect to the external package. ' +
         'If not specified, uses the project in the current working directory.'
     });
-
-    this._rushConnect = RushConnect.loadFromLinkStateFileAsync(this.rushConfiguration);
   }
 
   protected abstract connectPackageAsync(
     consumerPackage: RushConfigurationProject,
-    linkedPackagePath: string
+    linkedPackagePath: string,
+    rushConnect: RushConnect
   ): Promise<void>;
 
   protected async runAsync(): Promise<void> {
+    const rushConnect = RushConnect.loadFromLinkStateFileAsync(this.rushConfiguration);
+
     const linkedPackagePath: string = path.resolve(this._pathParameter.value!);
     const consumerPackage: readonly string[] = this._projectList.values;
 
@@ -64,7 +64,7 @@ export abstract class BaseConnectPackageAction extends BaseRushAction {
     }
 
     await Async.forEachAsync(projectsToLink, async (projectToLink: RushConfigurationProject) => {
-      await this.connectPackageAsync(projectToLink, linkedPackagePath);
+      await this.connectPackageAsync(projectToLink, linkedPackagePath, rushConnect);
     });
   }
 }

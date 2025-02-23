@@ -4,6 +4,7 @@
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseConnectPackageAction } from './BaseConnectPackageAction';
+import type { RushConnect } from '../../utilities/RushConnect';
 
 export class LinkPackageAction extends BaseConnectPackageAction {
   public constructor(parser: RushCommandLineParser) {
@@ -21,8 +22,9 @@ export class LinkPackageAction extends BaseConnectPackageAction {
 
   public async connectPackageAsync(
     consumerPackage: RushConfigurationProject,
-    linkedPackagePath: string
+    linkedPackagePath: string,
+    rushConnect: RushConnect
   ): Promise<void> {
-    await this._rushConnect.linkPackageAsync(consumerPackage, linkedPackagePath);
+    await rushConnect.linkPackageAsync(consumerPackage, linkedPackagePath);
   }
 }

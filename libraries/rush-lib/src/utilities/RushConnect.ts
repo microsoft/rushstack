@@ -106,31 +106,31 @@ export class RushConnect {
 
     const {
       dependencies = {},
-      name,
+      name: packageName,
       peerDependencies = {}
     }: INodePackageJson = await JsonFile.loadAsync(linkedPackageJsonPath);
     const linkedPackageNodeModulesPath: string = path.resolve(
       linkedPackageJsonPath,
       RushConstants.nodeModulesFolderName
     );
-    const [externalDependencies, workspaceDependencies] = Object.entries(dependencies).reduce(
-      (prev, curr) => {
-        const [packageName, protocol] = curr;
-        if (protocol.startsWith('workspace')) {
-          prev[1].push(packageName);
-        } else {
-          prev[0].push(packageName);
-        }
-        return prev;
-      },
-      [[] as string[], [] as string[]]
-    );
+
+    const externalDependencies: string[] = [];
+    const workspaceDependencies: string[] = [];
+
+    for (const [name, protocol] of Object.entries(dependencies)) {
+      if (protocol.startsWith('workspace')) {
+        externalDependencies.push(name);
+      } else {
+        workspaceDependencies.push(name);
+      }
+    }
+
     return {
-      packageName: name,
+      packageName,
       linkedPackageNodeModulesPath,
       externalDependencies,
       workspaceDependencies,
-      peerDependencies: peerDependencies
+      peerDependencies
     };
   }
 
