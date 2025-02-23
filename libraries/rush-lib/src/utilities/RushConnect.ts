@@ -7,16 +7,23 @@ import {
   Async,
   FileConstants,
   FileSystem,
-  type INodePackageJson,
   JsonFile,
+  type INodePackageJson,
   type IPackageJsonDependencyTable
 } from '@rushstack/node-core-library';
 import { depPathToFilename } from '@pnpm/dependency-path';
+import { PackageExtractor } from '@rushstack/package-extractor';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
-import { PackageExtractor } from '@rushstack/package-extractor';
+
+class RushConnectError extends Error {
+  public constructor(message: string) {
+    super(message);
+    this.name = 'RushConnectError';
+  }
+}
 
 interface IRushLinkFileState {
   [consumerPackageName: string]: {
@@ -34,21 +41,18 @@ interface ILinkedPackageInfo {
 }
 
 interface IRushLinkOptions {
-  rushConfiguration: RushConfiguration;
   rushLinkStateFilePath: string;
   rushLinkState: IRushLinkFileState | undefined;
 }
 
 export class RushConnect {
   private readonly _terminal: ITerminal;
-  private readonly _rushConfiguration: RushConfiguration;
   private readonly _rushLinkStateFilePath: string;
   private readonly _rushLinkState: IRushLinkFileState | undefined;
 
   public constructor(options: IRushLinkOptions) {
     this._terminal = new Terminal(new ConsoleTerminalProvider());
 
-    this._rushConfiguration = options.rushConfiguration;
     this._rushLinkStateFilePath = options.rushLinkStateFilePath;
     this._rushLinkState = options.rushLinkState;
   }
@@ -176,117 +180,157 @@ export class RushConnect {
     );
   }
 
+  private async _handleExternalDependenciesAsync(
+    linkedPackageNodeModulesPath: string,
+    linkedPackageDestination: string,
+    externalDependencies: string[]
+  ): Promise<void> {
+    await Promise.all(
+      externalDependencies.map(async (dependencyName) => {
+        const linkedPackageDependencyPath: string = path.resolve(
+          linkedPackageNodeModulesPath,
+          dependencyName
+        );
+        const linkedPackageDependencySourcePath: string =
+          await FileSystem.getRealPathAsync(linkedPackageDependencyPath);
+
+        if (!(await FileSystem.existsAsync(linkedPackageDependencySourcePath))) {
+          throw new RushConnectError(`External dependency "${dependencyName}" not found`);
+        }
+
+        await FileSystem.createSymbolicLinkFolderAsync({
+          linkTargetPath: linkedPackageDependencySourcePath,
+          newLinkPath: path.resolve(linkedPackageDestination, dependencyName)
+        });
+      })
+    );
+  }
+
   public async bridgePackageAsync(
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string
   ): Promise<void> {
-    const {
-      packageName,
-      peerDependencies,
-      externalDependencies,
-      linkedPackageNodeModulesPath,
-      workspaceDependencies
-    } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
+    try {
+      const {
+        packageName,
+        peerDependencies,
+        externalDependencies,
+        workspaceDependencies,
+        linkedPackageNodeModulesPath
+      } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
 
-    const { consumerPackageNodeModulesPath, consumerPackageDotDependencyPath } =
-      this._getConsumerPackageInfo(consumerPackage);
+      const { consumerPackageNodeModulesPath, consumerPackageDotDependencyPath } =
+        this._getConsumerPackageInfo(consumerPackage);
 
-    // The path linked to the consumerPackage, in fact, the exact path name doesn't matter,
-    // we only need to distinguish it from the path created by pnpm
-    const linkedPackageDestination: string = path.resolve(
-      consumerPackageDotDependencyPath,
-      depPathToFilename(`file:${linkedPackagePath}(${packageName})`, 120),
-      RushConstants.nodeModulesFolderName
-    );
-
-    await FileSystem.ensureFolderAsync(linkedPackageDestination);
-
-    // handle peer dependencies
-    await this._handlePeerDependenciesAsync(
-      consumerPackageNodeModulesPath,
-      linkedPackageDestination,
-      peerDependencies
-    );
-
-    // Create a symbolic link to the dependencies of linkedPackage
-    for (const dependencyName of externalDependencies) {
-      const linkedPackageDependencyPath: string = path.resolve(linkedPackageNodeModulesPath, dependencyName);
-      const linkedPackageDependencySourcePath: string =
-        await FileSystem.getRealPathAsync(linkedPackageDependencyPath);
-      if (!(await FileSystem.existsAsync(linkedPackageDependencySourcePath))) {
-        throw new Error(`Cannot find '${dependencyName}' in '${consumerPackage.packageName}'`);
-      }
-      await FileSystem.createSymbolicLinkFolderAsync({
-        linkTargetPath: linkedPackageDependencySourcePath,
-        newLinkPath: path.resolve(linkedPackageDestination, dependencyName)
-      });
-    }
-
-    // Create hardlink to linkedPackage
-    await this._hardLinkToLinkedPackageAsync(
-      linkedPackagePath,
-      path.resolve(linkedPackageDestination, packageName)
-    );
-
-    // For those package with "workspace" protocol, we should repeat the above process.
-    await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
-      const linkedWorkspacePackagePath: string = await FileSystem.getRealPathAsync(
-        path.resolve(linkedPackageNodeModulesPath, workspaceDependency)
+      // Generate unique destination path for linked package
+      const linkedPackageDestination: string = path.resolve(
+        consumerPackageDotDependencyPath,
+        depPathToFilename(`file:${linkedPackagePath}(${packageName})`, 120),
+        RushConstants.nodeModulesFolderName
       );
-      await this.bridgePackageAsync(consumerPackage, linkedWorkspacePackagePath);
-    });
+
+      await FileSystem.ensureFolderAsync(linkedPackageDestination);
+
+      // Handle peer dependencies
+      await this._handlePeerDependenciesAsync(
+        consumerPackageNodeModulesPath,
+        linkedPackageDestination,
+        peerDependencies
+      );
+
+      // Handle external dependencies
+      await this._handleExternalDependenciesAsync(
+        linkedPackageNodeModulesPath,
+        linkedPackageDestination,
+        externalDependencies
+      );
+
+      // Create hardlink to linkedPackage
+      await this._hardLinkToLinkedPackageAsync(
+        linkedPackagePath,
+        path.resolve(linkedPackageDestination, packageName)
+      );
+
+      // Handle workspace dependencies recursively
+      await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
+        const linkedWorkspacePackagePath: string = await FileSystem.getRealPathAsync(
+          path.resolve(linkedPackageNodeModulesPath, workspaceDependency)
+        );
+        await this.bridgePackageAsync(consumerPackage, linkedWorkspacePackagePath);
+      });
+
+      this._terminal.writeLine(
+        Colorize.green(`Successfully bridge package "${packageName}" for "${consumerPackage.packageName}"`)
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new RushConnectError(
+          `Failed to bridge package "${linkedPackagePath}" to "${consumerPackage.packageName}": ${error.message}`
+        );
+      }
+      throw error;
+    }
   }
 
   public async linkPackageAsync(
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string
   ): Promise<void> {
-    let { packageName: linkedPackageName } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
+    try {
+      let { packageName: linkedPackageName } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
 
-    let sourceNodeModulesPath: string = path.resolve(
-      path.dirname(consumerPackage.projectFolder),
-      RushConstants.nodeModulesFolderName
-    );
-    if (linkedPackageName.includes('/')) {
-      const [scope, packageBaseName] = linkedPackageName.split('/');
-      sourceNodeModulesPath = path.resolve(sourceNodeModulesPath, scope);
-      linkedPackageName = packageBaseName;
-    }
+      let sourceNodeModulesPath: string = path.resolve(
+        path.dirname(consumerPackage.projectFolder),
+        RushConstants.nodeModulesFolderName
+      );
+      if (linkedPackageName.includes('/')) {
+        const [scope, packageBaseName] = linkedPackageName.split('/');
+        sourceNodeModulesPath = path.resolve(sourceNodeModulesPath, scope);
+        linkedPackageName = packageBaseName;
+      }
 
-    if (!(await FileSystem.existsAsync(sourceNodeModulesPath))) {
-      await FileSystem.ensureFolderAsync(sourceNodeModulesPath);
-    }
+      if (!(await FileSystem.existsAsync(sourceNodeModulesPath))) {
+        await FileSystem.ensureFolderAsync(sourceNodeModulesPath);
+      }
 
-    const symlinkPath: string = path.resolve(sourceNodeModulesPath, linkedPackageName);
+      const symlinkPath: string = path.resolve(sourceNodeModulesPath, linkedPackageName);
 
-    if (await FileSystem.existsAsync(symlinkPath)) {
+      if (await FileSystem.existsAsync(symlinkPath)) {
+        this._terminal.writeLine(
+          Colorize.yellow(
+            `Soft link already exists for '${linkedPackageName}' in '${RushConstants.nodeModulesFolderName}'. Deleting.`
+          )
+        );
+        await FileSystem.deleteFileAsync(symlinkPath);
+      }
+
+      await FileSystem.createSymbolicLinkFolderAsync({
+        linkTargetPath: linkedPackagePath,
+        newLinkPath: symlinkPath
+      });
+
+      await this._modifyAndSaveLinkStateAsync((linkState) => {
+        const sourceProjectLinks: IRushLinkFileState[number] = linkState[consumerPackage.packageName] ?? [];
+        sourceProjectLinks.push({
+          linkedPackagePath,
+          linkedPackageName
+        });
+        linkState[consumerPackage.packageName] = sourceProjectLinks;
+      });
+
       this._terminal.writeLine(
-        Colorize.yellow(
-          `Soft link already exists for '${linkedPackageName}' in '${RushConstants.nodeModulesFolderName}'. Deleting.`
+        Colorize.green(
+          `Successfully link package "${linkedPackageName}" for "${consumerPackage.packageName}"`
         )
       );
-      await FileSystem.deleteFileAsync(symlinkPath);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new RushConnectError(
+          `Failed to link package "${linkedPackagePath}" to "${consumerPackage.packageName}": ${error.message}`
+        );
+      }
+      throw error;
     }
-
-    await FileSystem.createSymbolicLinkFolderAsync({
-      linkTargetPath: linkedPackagePath,
-      newLinkPath: symlinkPath
-    });
-
-    await this._modifyAndSaveLinkStateAsync((linkState) => {
-      const sourceProjectLinks: IRushLinkFileState[number] = linkState[consumerPackage.packageName] ?? [];
-      sourceProjectLinks.push({
-        linkedPackagePath,
-        linkedPackageName
-      });
-      linkState[consumerPackage.packageName] = sourceProjectLinks;
-    });
-
-    this._terminal.writeLine(
-      Colorize.green(
-        `Successfully created a symbolic link for '${linkedPackageName}' in '${RushConstants.nodeModulesFolderName}'.`
-      )
-    );
   }
 
   public static loadFromLinkStateFileAsync(rushConfiguration: RushConfiguration): RushConnect {
@@ -306,7 +350,6 @@ export class RushConnect {
     }
     return new RushConnect({
       rushLinkStateFilePath,
-      rushConfiguration,
       rushLinkState
     });
   }
