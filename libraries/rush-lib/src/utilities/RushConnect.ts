@@ -4,6 +4,7 @@
 import path from 'path';
 import { Colorize, ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 import {
+  AlreadyExistsBehavior,
   Async,
   FileConstants,
   FileSystem,
@@ -25,10 +26,16 @@ class RushConnectError extends Error {
   }
 }
 
+enum LinkType {
+  LinkPackage = 'LinkPackage',
+  BridgePackage = 'BridgePackage'
+}
+
 interface IRushLinkFileState {
   [consumerPackageName: string]: {
     linkedPackagePath: string;
     linkedPackageName: string;
+    linkType: LinkType;
   }[];
 }
 
@@ -62,7 +69,11 @@ export class RushConnect {
     this._rushLinkState = options.rushLinkState;
   }
 
-  private async _hardLinkToLinkedPackageAsync(sourcePath: string, targetFolder: string): Promise<void> {
+  private async _hardLinkToLinkedPackageAsync(
+    sourcePath: string,
+    targetFolder: string,
+    consumerPackageNodeModulesPath: string
+  ): Promise<void> {
     const npmPackFiles: string[] = await PackageExtractor.getPackageIncludedFilesAsync(sourcePath);
     await Async.forEachAsync(npmPackFiles, async (npmPackFile: string) => {
       const copySourcePath: string = path.join(sourcePath, npmPackFile);
@@ -88,6 +99,12 @@ export class RushConnect {
           });
         }
       }
+    });
+    // Finally, create a symbolic link pointing to the directory.
+    await FileSystem.createSymbolicLinkFolderAsync({
+      linkTargetPath: targetFolder,
+      newLinkPath: consumerPackageNodeModulesPath,
+      alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
     });
   }
 
@@ -131,9 +148,9 @@ export class RushConnect {
 
     for (const [name, protocol] of Object.entries(dependencies)) {
       if (protocol.startsWith('workspace')) {
-        externalDependencies.push(name);
-      } else {
         workspaceDependencies.push(name);
+      } else {
+        externalDependencies.push(name);
       }
     }
 
@@ -153,6 +170,7 @@ export class RushConnect {
     );
     const consumerPackagePnpmDependenciesFolderPath: string = path.resolve(
       consumerPackage.subspace.getSubspaceTempFolderPath(),
+      RushConstants.nodeModulesFolderName,
       RushConstants.pnpmDependenciesFolderName
     );
     return {
@@ -173,10 +191,11 @@ export class RushConnect {
           throw new Error(`Cannot find "${peerDependency}"`);
         }
 
-        const symlinkTargetPath: string = await FileSystem.readLinkAsync(sourcePeerDependencyPath);
+        const symlinkTargetPath: string = await FileSystem.getRealPath(sourcePeerDependencyPath);
         await FileSystem.createSymbolicLinkFolderAsync({
           linkTargetPath: symlinkTargetPath,
-          newLinkPath: path.resolve(linkedPackageDestination, peerDependency)
+          newLinkPath: path.resolve(linkedPackageDestination, peerDependency),
+          alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
       })
     );
@@ -202,7 +221,8 @@ export class RushConnect {
 
         await FileSystem.createSymbolicLinkFolderAsync({
           linkTargetPath: linkedPackageDependencySourcePath,
-          newLinkPath: path.resolve(linkedPackageDestination, dependencyName)
+          newLinkPath: path.resolve(linkedPackageDestination, dependencyName),
+          alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
       })
     );
@@ -210,7 +230,8 @@ export class RushConnect {
 
   public async bridgePackageAsync(
     consumerPackage: RushConfigurationProject,
-    linkedPackagePath: string
+    linkedPackagePath: string,
+    parentPackageDestination?: string
   ): Promise<void> {
     try {
       const {
@@ -250,7 +271,8 @@ export class RushConnect {
       // Create hardlink to linkedPackage
       await this._hardLinkToLinkedPackageAsync(
         linkedPackagePath,
-        path.resolve(linkedPackageDestination, packageName)
+        path.resolve(linkedPackageDestination, packageName),
+        path.resolve(parentPackageDestination ?? consumerPackageNodeModulesPath, packageName)
       );
 
       // Record the link information between the consumer package and the linked package
@@ -262,10 +284,12 @@ export class RushConnect {
 
         if (existingLinkIndex >= 0) {
           consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
+          consumerPackageLinks[existingLinkIndex].linkType = LinkType.BridgePackage;
         } else {
           consumerPackageLinks.push({
             linkedPackagePath,
-            linkedPackageName: packageName
+            linkedPackageName: packageName,
+            linkType: LinkType.BridgePackage
           });
         }
 
@@ -281,7 +305,7 @@ export class RushConnect {
         const linkedWorkspacePackagePath: string = await FileSystem.getRealPathAsync(
           path.resolve(linkedPackageNodeModulesPath, workspaceDependency)
         );
-        await this.bridgePackageAsync(consumerPackage, linkedWorkspacePackagePath);
+        await this.bridgePackageAsync(consumerPackage, linkedWorkspacePackagePath, linkedPackageDestination);
       });
     } catch (error) {
       if (error instanceof Error) {
@@ -317,19 +341,12 @@ export class RushConnect {
       }
 
       const symlinkPath: string = path.resolve(sourceNodeModulesPath, packageBaseName);
-      if (await FileSystem.existsAsync(symlinkPath)) {
-        this._terminal.writeLine(
-          Colorize.yellow(
-            `Soft link already exists for "${linkedPackageName}" in "${RushConstants.nodeModulesFolderName}". Deleting...`
-          )
-        );
-        await FileSystem.deleteFileAsync(symlinkPath);
-      }
 
       // Create symlink to linkedPackage
       await FileSystem.createSymbolicLinkFolderAsync({
         linkTargetPath: linkedPackagePath,
-        newLinkPath: symlinkPath
+        newLinkPath: symlinkPath,
+        alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
       });
 
       // Record the link information between the consumer package and the linked package
@@ -341,10 +358,12 @@ export class RushConnect {
 
         if (existingLinkIndex >= 0) {
           consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
+          consumerPackageLinks[existingLinkIndex].linkType = LinkType.LinkPackage;
         } else {
           consumerPackageLinks.push({
             linkedPackagePath,
-            linkedPackageName
+            linkedPackageName,
+            linkType: LinkType.LinkPackage
           });
         }
 
