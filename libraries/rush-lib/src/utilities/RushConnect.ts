@@ -251,6 +251,25 @@ export class RushConnect {
         path.resolve(linkedPackageDestination, packageName)
       );
 
+      // Record the link information between the consumer package and the linked package
+      await this._modifyAndSaveLinkStateAsync((linkState) => {
+        const consumerPackageLinks: IRushLinkFileState[number] = linkState[consumerPackage.packageName] ?? [];
+        const existingLinkIndex = consumerPackageLinks.findIndex(
+          (link) => link.linkedPackageName === packageName
+        );
+
+        if (existingLinkIndex >= 0) {
+          consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
+        } else {
+          consumerPackageLinks.push({
+            linkedPackagePath,
+            linkedPackageName: packageName
+          });
+        }
+
+        linkState[consumerPackage.packageName] = consumerPackageLinks;
+      });
+
       // Handle workspace dependencies recursively
       await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
         const linkedWorkspacePackagePath: string = await FileSystem.getRealPathAsync(
@@ -276,57 +295,67 @@ export class RushConnect {
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string
   ): Promise<void> {
+    const consumerPackageName = consumerPackage.packageName;
     try {
-      let { packageName: linkedPackageName } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
+      const { packageName: linkedPackageName } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
+
+      const isScoped: boolean = linkedPackageName.includes('/');
+      const [scope, packageBaseName] = isScoped ? linkedPackageName.split('/') : [null, linkedPackageName];
 
       let sourceNodeModulesPath: string = path.resolve(
-        path.dirname(consumerPackage.projectFolder),
+        consumerPackage.projectFolder,
         RushConstants.nodeModulesFolderName
       );
-      if (linkedPackageName.includes('/')) {
-        const [scope, packageBaseName] = linkedPackageName.split('/');
-        sourceNodeModulesPath = path.resolve(sourceNodeModulesPath, scope);
-        linkedPackageName = packageBaseName;
+      if (isScoped) {
+        sourceNodeModulesPath = path.resolve(sourceNodeModulesPath, scope!);
       }
 
       if (!(await FileSystem.existsAsync(sourceNodeModulesPath))) {
         await FileSystem.ensureFolderAsync(sourceNodeModulesPath);
       }
 
-      const symlinkPath: string = path.resolve(sourceNodeModulesPath, linkedPackageName);
-
+      const symlinkPath: string = path.resolve(sourceNodeModulesPath, packageBaseName);
       if (await FileSystem.existsAsync(symlinkPath)) {
         this._terminal.writeLine(
           Colorize.yellow(
-            `Soft link already exists for '${linkedPackageName}' in '${RushConstants.nodeModulesFolderName}'. Deleting.`
+            `Soft link already exists for "${linkedPackageName}" in "${RushConstants.nodeModulesFolderName}". Deleting...`
           )
         );
         await FileSystem.deleteFileAsync(symlinkPath);
       }
 
+      // Create symlink to linkedPackage
       await FileSystem.createSymbolicLinkFolderAsync({
         linkTargetPath: linkedPackagePath,
         newLinkPath: symlinkPath
       });
 
+      // Record the link information between the consumer package and the linked package
       await this._modifyAndSaveLinkStateAsync((linkState) => {
-        const sourceProjectLinks: IRushLinkFileState[number] = linkState[consumerPackage.packageName] ?? [];
-        sourceProjectLinks.push({
-          linkedPackagePath,
-          linkedPackageName
-        });
-        linkState[consumerPackage.packageName] = sourceProjectLinks;
+        const consumerPackageLinks: IRushLinkFileState[number] = linkState[consumerPackageName] ?? [];
+        const existingLinkIndex = consumerPackageLinks.findIndex(
+          (link) => link.linkedPackageName === linkedPackageName
+        );
+
+        if (existingLinkIndex >= 0) {
+          consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
+        } else {
+          consumerPackageLinks.push({
+            linkedPackagePath,
+            linkedPackageName
+          });
+        }
+
+        linkState[consumerPackageName] = consumerPackageLinks;
       });
 
       this._terminal.writeLine(
-        Colorize.green(
-          `Successfully link package "${linkedPackageName}" for "${consumerPackage.packageName}"`
-        )
+        Colorize.green(`Successfully link package "${linkedPackageName}" for "${consumerPackageName}"`)
       );
     } catch (error) {
       if (error instanceof Error) {
         throw new RushConnectError(
-          `Failed to link package "${linkedPackagePath}" to "${consumerPackage.packageName}": ${error.message}`
+          `Failed to link package "${linkedPackagePath}" to "${consumerPackageName}": ${error.message}`
         );
       }
       throw error;
