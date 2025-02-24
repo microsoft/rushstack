@@ -97,6 +97,10 @@ export interface ICreateOperationsContext {
    */
   readonly rushConfiguration: RushConfiguration;
   /**
+   * If true, rush will automatically execute the dependent phases for a given phase.
+   */
+  readonly isIncludePhaseDeps: boolean;
+  /**
    * Marks an operation's result as invalid, potentially triggering a new build. Only applicable in watch mode.
    * @param operation - The operation to invalidate
    * @param reason - The reason for invalidating the operation

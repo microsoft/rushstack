@@ -155,6 +155,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _variantParameter: CommandLineStringParameter | undefined;
   private readonly _noIPCParameter: CommandLineFlagParameter | undefined;
   private readonly _nodeDiagnosticDirParameter: CommandLineStringParameter;
+  private readonly _includePhaseDeps: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -226,6 +227,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       parameterLongName: '--verbose',
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
+    });
+
+    this._includePhaseDeps = this.defineFlagParameter({
+      parameterLongName: '--include-phase-deps',
+      description:
+        'When executing a phase, automatically execute its dependent phases. For example, ' +
+        "if project A's test phase depends on the build phase, executing the test phase will automatically execute the build phase."
     });
 
     if (this._isIncrementalBuildAllowed) {
@@ -376,6 +384,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       new ConsoleTimelinePlugin(terminal).apply(this.hooks);
     }
 
+    const isIncludePhaseDeps: boolean = this._includePhaseDeps?.value ?? false;
+
     const diagnosticDir: string | undefined = this._nodeDiagnosticDirParameter.value;
     if (diagnosticDir) {
       new NodeDiagnosticDirPlugin({
@@ -508,6 +518,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         rushConfiguration: this.rushConfiguration,
         phaseOriginal: new Set(this._originalPhases),
         phaseSelection: new Set(this._initialPhases),
+        isIncludePhaseDeps,
         projectSelection,
         projectConfigurations,
         projectsInUnknownState: projectSelection

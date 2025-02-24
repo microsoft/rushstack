@@ -33,7 +33,8 @@ function createOperations(
     phaseOriginal,
     phaseSelection,
     projectSelection,
-    projectConfigurations
+    projectConfigurations,
+    isIncludePhaseDeps
   } = context;
   const operationsWithWork: Set<Operation> = new Set();
 
@@ -85,8 +86,12 @@ function createOperations(
       });
 
       if (!phaseSelection.has(phase) || !projectSelection.has(project)) {
-        // Not in scope. Mark disabled, which will report as OperationStatus.Skipped.
-        operation.enabled = false;
+        if (isIncludePhaseDeps) {
+          operationsWithWork.add(operation);
+        } else {
+          // Not in scope. Mark disabled, which will report as OperationStatus.Skipped.
+          operation.enabled = false;
+        }
       } else if (changedProjects.has(project)) {
         operationsWithWork.add(operation);
       }

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Balance the minimum number of tasks executed with the maximum level of parallel execution",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

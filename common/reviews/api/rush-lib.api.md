@@ -412,6 +412,7 @@ export interface ICreateOperationsContext {
     readonly cobuildConfiguration: CobuildConfiguration | undefined;
     readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
     readonly invalidateOperation?: ((operation: Operation, reason: string) => void) | undefined;
+    readonly isIncludePhaseDeps: boolean;
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
     readonly isWatch: boolean;
