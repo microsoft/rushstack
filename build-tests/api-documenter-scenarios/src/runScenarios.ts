@@ -3,28 +3,13 @@
 
 import type { IRunScriptOptions } from '@rushstack/heft';
 import type { ChildProcess } from 'node:child_process';
-import { AlreadyExistsBehavior, Executable, FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { Executable, FileSystem, JsonFile } from '@rushstack/node-core-library';
 import { runScenariosAsync } from 'run-scenarios-helpers';
 
 export async function runAsync(runScriptOptions: IRunScriptOptions): Promise<void> {
   const {
-    heftConfiguration: { buildFolderPath },
-    heftTaskSession: { logger }
+    heftConfiguration: { buildFolderPath }
   } = runScriptOptions;
-
-  // Copy any .d.ts files into the "lib/" folder
-  await FileSystem.copyFilesAsync({
-    sourcePath: './src/',
-    destinationPath: './lib/',
-    alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite,
-    filter: (sourcePath: string): boolean => {
-      if (sourcePath.endsWith('.d.ts') || !sourcePath.endsWith('.ts')) {
-        logger.terminal.writeVerboseLine(`COPY ${sourcePath}`);
-        return true;
-      }
-      return false;
-    }
-  });
 
   const apiDocumenterJsonPath: string = `${buildFolderPath}/config/api-documenter.json`;
 
