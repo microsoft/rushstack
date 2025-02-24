@@ -1237,6 +1237,14 @@ Object {
           "shortName": "-v",
         },
         Object {
+          "description": "When executing a phase, automatically execute its dependent phases. For example, if project A's test phase depends on the build phase, executing the test phase will automatically execute the build phase.",
+          "environmentVariable": undefined,
+          "kind": "Flag",
+          "longName": "--include-phase-deps",
+          "required": false,
+          "shortName": undefined,
+        },
+        Object {
           "description": "Skips execution of the \\"eventHooks\\" scripts defined in rush.json. Make sure you know what you are skipping.",
           "environmentVariable": undefined,
           "kind": "Flag",
@@ -1373,6 +1381,14 @@ Object {
           "longName": "--verbose",
           "required": false,
           "shortName": "-v",
+        },
+        Object {
+          "description": "When executing a phase, automatically execute its dependent phases. For example, if project A's test phase depends on the build phase, executing the test phase will automatically execute the build phase.",
+          "environmentVariable": undefined,
+          "kind": "Flag",
+          "longName": "--include-phase-deps",
+          "required": false,
+          "shortName": undefined,
         },
         Object {
           "description": "Normally the incremental build logic will rebuild changed projects as well as any projects that directly or indirectly depend on a changed project. Specify \\"--changed-projects-only\\" to ignore dependent projects, only rebuilding those projects whose files were changed. Note that this parameter is \\"unsafe\\"; it is up to the developer to ensure that the ignored projects are okay to ignore.",
@@ -1514,6 +1530,14 @@ Object {
           "longName": "--verbose",
           "required": false,
           "shortName": "-v",
+        },
+        Object {
+          "description": "When executing a phase, automatically execute its dependent phases. For example, if project A's test phase depends on the build phase, executing the test phase will automatically execute the build phase.",
+          "environmentVariable": undefined,
+          "kind": "Flag",
+          "longName": "--include-phase-deps",
+          "required": false,
+          "shortName": undefined,
         },
         Object {
           "description": "Skips execution of the \\"eventHooks\\" scripts defined in rush.json. Make sure you know what you are skipping.",
