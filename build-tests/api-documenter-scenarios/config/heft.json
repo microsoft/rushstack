@@ -6,22 +6,6 @@
   "phasesByName": {
     "build": {
       "tasksByName": {
-        "copy-dts": {
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft",
-            "pluginName": "copy-files-plugin",
-            "options": {
-              "copyOperations": [
-                {
-                  "sourcePath": "src",
-                  "destinationFolders": ["lib"],
-                  "includeGlobs": ["**/*.d.ts"]
-                }
-              ]
-            }
-          }
-        },
-
         "run-scenarios": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {
