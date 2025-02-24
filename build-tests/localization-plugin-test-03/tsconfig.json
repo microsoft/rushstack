@@ -1,23 +1,9 @@
 {
+  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true,
-    "inlineSources": true,
-    "jsx": "react",
-    "lib": ["es5", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable", "dom"],
     "module": "esnext",
     "moduleResolution": "node",
-    "noUnusedLocals": true,
-    "sourceMap": true,
-    "strictNullChecks": true,
-    "target": "es5",
-    "types": ["webpack-env"],
-
-    "outDir": "lib",
-    "rootDir": "src",
+    "incremental": false,
     "rootDirs": ["src", "temp/loc-json-ts"]
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  }
 }

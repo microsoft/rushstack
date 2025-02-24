@@ -15,22 +15,6 @@
       "cleanFiles": [{ "includeGlobs": ["dist-dev", "dist-prod", "lib", "temp"] }],
 
       "tasksByName": {
-        "loc-typings": {
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-localization-typings-plugin",
-            "options": {
-              "generatedTsFolder": "temp/loc-json-ts",
-              "exportAsDefault": {
-                "interfaceDocumentationComment": "This interface represents a JSON object that has been loaded from a localization file.",
-                "valueDocumentationComment": "@public",
-                "inferInterfaceNameFromFilename": true
-              }
-            }
-          }
-        },
-        "typescript": {
-          "taskDependencies": ["loc-typings"]
-        },
         "webpack": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {
