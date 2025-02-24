@@ -22,7 +22,8 @@
     "api-extractor-lib3-test": "workspace:*",
     "api-extractor-lib4-test": "workspace:*",
     "api-extractor-lib5-test": "workspace:*",
-    "local-node-rig": "workspace:*"
+    "local-node-rig": "workspace:*",
+    "run-scenarios-helpers": "workspace:*"
   },
   "peerDependencies": {
     "api-extractor-lib5-test": "workspace:*"

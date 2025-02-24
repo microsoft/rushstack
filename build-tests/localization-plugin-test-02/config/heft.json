@@ -4,10 +4,15 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
-  // TODO: Add comments
+  /**
+   * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
+   * settings to be shared across multiple projects.
+   */
+  "extends": "local-node-rig/profiles/default/config/heft.json",
+
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs"] }],
+      "cleanFiles": [{ "includeGlobs": ["dist-dev", "dist-prod", "lib", "temp"] }],
 
       "tasksByName": {
         "loc-typings": {
@@ -24,16 +29,7 @@
           }
         },
         "typescript": {
-          "taskDependencies": ["loc-typings"],
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-typescript-plugin"
-          }
-        },
-        "lint": {
-          "taskDependencies": ["typescript"],
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-lint-plugin"
-          }
+          "taskDependencies": ["loc-typings"]
         },
         "webpack": {
           "taskDependencies": ["typescript"],

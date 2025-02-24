@@ -6,8 +6,8 @@
   "main": "lib/index.js",
   "typings": "dist/api-extractor-test-02.d.ts",
   "scripts": {
-    "build": "node build.js",
-    "_phase:build": "node build.js"
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
     "@types/semver": "7.5.0",
@@ -15,9 +15,7 @@
     "semver": "~7.5.4"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "workspace:*",
-    "@types/node": "18.17.15",
-    "fs-extra": "~11.3.0",
-    "typescript": "~5.4.2"
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*"
   }
 }

@@ -612,7 +612,7 @@ importers:
         version: 5.4.2
       webpack:
         specifier: ~4.47.0
-        version: 4.47.0(webpack-cli@3.3.12)
+        version: 4.47.0
 
   ../../../build-tests-samples/heft-storybook-react-tutorial-app:
     dependencies:
@@ -700,7 +700,7 @@ importers:
         version: 5.4.2
       webpack:
         specifier: ~4.47.0
-        version: 4.47.0(webpack-cli@3.3.12)
+        version: 4.47.0
 
   ../../../build-tests-samples/heft-web-rig-app-tutorial:
     dependencies:
@@ -869,24 +869,18 @@ importers:
       '@microsoft/api-extractor':
         specifier: workspace:*
         version: link:../../apps/api-extractor
-      '@microsoft/teams-js':
-        specifier: 1.3.0-beta.4
-        version: 1.3.0-beta.4
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+      run-scenarios-helpers:
+        specifier: workspace:*
+        version: link:../run-scenarios-helpers
 
   ../../../build-tests/api-documenter-test:
     devDependencies:
@@ -908,69 +902,42 @@ importers:
 
   ../../../build-tests/api-extractor-d-cts-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-d-mts-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-lib1-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
       typescript:
         specifier: ~2.9.2
         version: 2.9.2
 
   ../../../build-tests/api-extractor-lib2-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-lib3-test:
     dependencies:
@@ -978,57 +945,30 @@ importers:
         specifier: workspace:*
         version: link:../api-extractor-lib1-test
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-lib4-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-lib5-test:
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-scenarios:
     dependencies:
@@ -1066,6 +1006,9 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
+      run-scenarios-helpers:
+        specifier: workspace:*
+        version: link:../run-scenarios-helpers
 
   ../../../build-tests/api-extractor-test-01:
     dependencies:
@@ -1079,21 +1022,12 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-test-02:
     dependencies:
@@ -1107,51 +1041,38 @@ importers:
         specifier: ~7.5.4
         version: 7.5.4
     devDependencies:
-      '@microsoft/api-extractor':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-test-03:
-    devDependencies:
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+    dependencies:
       api-extractor-test-02:
         specifier: workspace:*
         version: link:../api-extractor-test-02
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/api-extractor-test-04:
     dependencies:
-      '@microsoft/api-extractor':
-        specifier: workspace:*
-        version: link:../../apps/api-extractor
       api-extractor-lib1-test:
         specifier: workspace:*
         version: link:../api-extractor-lib1-test
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/eslint-7-11-test:
     devDependencies:
@@ -1761,7 +1682,7 @@ importers:
         version: 5.4.2
       webpack:
         specifier: ~4.47.0
-        version: 4.47.0(webpack-cli@3.3.12)
+        version: 4.47.0
 
   ../../../build-tests/heft-typescript-composite-test:
     devDependencies:
@@ -1971,7 +1892,7 @@ importers:
         version: 5.4.2
       webpack:
         specifier: ~4.47.0
-        version: 4.47.0(webpack-cli@3.3.12)
+        version: 4.47.0
 
   ../../../build-tests/heft-webpack5-everything-test:
     devDependencies:
@@ -2038,9 +1959,12 @@ importers:
 
   ../../../build-tests/localization-plugin-test-01:
     dependencies:
-      '@rushstack/node-core-library':
+      '@rushstack/heft':
         specifier: workspace:*
-        version: link:../../libraries/node-core-library
+        version: link:../../apps/heft
+      '@rushstack/heft-webpack4-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-webpack4-plugin
       '@rushstack/set-webpack-public-path-plugin':
         specifier: ^4.1.16
         version: 4.1.16(@types/node@18.17.15)(@types/webpack@4.41.32)(webpack@4.47.0)
@@ -2056,45 +1980,30 @@ importers:
       html-webpack-plugin:
         specifier: ~4.5.2
         version: 4.5.2(webpack@4.47.0)
-      ts-loader:
-        specifier: 6.0.0
-        version: 6.0.0(typescript@5.4.2)
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
       webpack:
         specifier: ~4.47.0
-        version: 4.47.0(webpack-cli@3.3.12)
+        version: 4.47.0
       webpack-bundle-analyzer:
         specifier: ~4.5.0
         version: 4.5.0
-      webpack-cli:
-        specifier: ~3.3.2
-        version: 3.3.12(webpack@4.47.0)
       webpack-dev-server:
         specifier: ~4.9.3
-        version: 4.9.3(webpack-cli@3.3.12)(webpack@4.47.0)
+        version: 4.9.3(@types/webpack@4.41.32)(webpack@4.47.0)
 
   ../../../build-tests/localization-plugin-test-02:
     dependencies:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-lint-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-localization-typings-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-localization-typings-plugin
-      '@rushstack/heft-typescript-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack4-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack4-plugin
-      '@rushstack/node-core-library':
-        specifier: workspace:*
-        version: link:../../libraries/node-core-library
       '@rushstack/set-webpack-public-path-plugin':
         specifier: ^4.1.16
         version: 4.1.16(@types/node@18.17.15)(@types/webpack@4.41.32)(webpack@4.47.0)
@@ -2113,27 +2022,30 @@ importers:
       html-webpack-plugin:
         specifier: ~4.5.2
         version: 4.5.2(webpack@4.47.0)
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
       lodash:
         specifier: ~4.17.15
         version: 4.17.21
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
       webpack:
         specifier: ~4.47.0
-        version: 4.47.0(webpack-cli@3.3.12)
+        version: 4.47.0
       webpack-bundle-analyzer:
         specifier: ~4.5.0
         version: 4.5.0
-      webpack-cli:
-        specifier: ~3.3.2
-        version: 3.3.12(webpack@4.47.0)
       webpack-dev-server:
         specifier: ~4.9.3
-        version: 4.9.3(webpack-cli@3.3.12)(webpack@4.47.0)
+        version: 4.9.3(@types/webpack@4.41.32)(webpack@4.47.0)
 
   ../../../build-tests/localization-plugin-test-03:
     dependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-webpack4-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-webpack4-plugin
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
@@ -2152,6 +2064,9 @@ importers:
       html-webpack-plugin:
         specifier: ~4.5.2
         version: 4.5.2(webpack@4.47.0)
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
       ts-loader:
         specifier: 6.0.0
         version: 6.0.0(typescript@5.4.2)
@@ -2160,16 +2075,13 @@ importers:
         version: 5.4.2
       webpack:
         specifier: ~4.47.0
-        version: 4.47.0(webpack-cli@3.3.12)
+        version: 4.47.0
       webpack-bundle-analyzer:
         specifier: ~4.5.0
         version: 4.5.0
-      webpack-cli:
-        specifier: ~3.3.2
-        version: 3.3.12(webpack@4.47.0)
       webpack-dev-server:
         specifier: ~4.9.3
-        version: 4.9.3(webpack-cli@3.3.12)(webpack@4.47.0)
+        version: 4.9.3(@types/webpack@4.41.32)(webpack@4.47.0)
 
   ../../../build-tests/package-extractor-test-01:
     dependencies:
@@ -2201,6 +2113,22 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+
+  ../../../build-tests/run-scenarios-helpers:
+    dependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../../build-tests/rush-amazon-s3-build-cache-plugin-integration-test:
     devDependencies:
@@ -2350,21 +2278,6 @@ importers:
       webpack:
         specifier: ~5.95.0
         version: 5.95.0
-
-  ../../../build-tests/ts-command-line-test:
-    devDependencies:
-      '@rushstack/ts-command-line':
-        specifier: workspace:*
-        version: link:../../libraries/ts-command-line
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      fs-extra:
-        specifier: ~11.3.0
-        version: 11.3.0
-      typescript:
-        specifier: ~5.4.2
-        version: 5.4.2
 
   ../../../eslint/eslint-bulk:
     devDependencies:
@@ -2970,7 +2883,7 @@ importers:
         version: link:../../rigs/local-node-rig
       webpack:
         specifier: ~4.47.0
-        version: 4.47.0(webpack-cli@3.3.12)
+        version: 4.47.0
 
   ../../../heft-plugins/heft-webpack5-plugin:
     dependencies:
@@ -3712,6 +3625,9 @@ importers:
       '@rushstack/heft-node-rig':
         specifier: 2.6.48
         version: 2.6.48(@rushstack/heft@0.68.12)(@types/node@18.17.15)(supports-color@8.1.1)
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../node-core-library
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -4587,7 +4503,7 @@ importers:
         version: link:../../rigs/local-node-rig
       webpack:
         specifier: ~4.47.0
-        version: 4.47.0(webpack-cli@3.3.12)
+        version: 4.47.0
 
   ../../../webpack/webpack4-module-minifier-plugin:
     dependencies:
@@ -4618,7 +4534,7 @@ importers:
         version: link:../../rigs/local-node-rig
       webpack:
         specifier: ~4.47.0
-        version: 4.47.0(webpack-cli@3.3.12)
+        version: 4.47.0
       webpack-sources:
         specifier: ~1.4.3
         version: 1.4.3
@@ -9803,7 +9719,7 @@ packages:
       react-refresh: 0.11.0
       schema-utils: 3.3.0
       source-map: 0.7.4
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /@pnpm/crypto.base32-hash@1.0.1:
@@ -11107,7 +11023,7 @@ packages:
     dependencies:
       '@types/webpack': 4.41.32
       memfs: 3.4.3
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
       webpack-merge: 5.8.0
 
   /@serverless-stack/aws-lambda-ric@2.0.13:
@@ -11815,7 +11731,7 @@ packages:
       remark-slug: 6.1.0
       ts-dedent: 2.2.0
       util-deprecate: 1.0.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     transitivePeerDependencies:
       - '@storybook/builder-webpack5'
       - '@storybook/manager-webpack5'
@@ -11874,7 +11790,7 @@ packages:
       react-dom: 17.0.2(react@17.0.2)
       regenerator-runtime: 0.13.11
       ts-dedent: 2.2.0
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     transitivePeerDependencies:
       - '@storybook/angular'
       - '@storybook/builder-webpack5'
@@ -12159,7 +12075,7 @@ packages:
       typescript: 5.4.2
       url-loader: 4.1.1(file-loader@6.2.0)(webpack@4.47.0)
       util-deprecate: 1.0.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
       webpack-dev-middleware: 3.7.3(@types/webpack@4.41.32)(webpack@4.47.0)
       webpack-filter-warnings-plugin: 1.2.1(webpack@4.47.0)
       webpack-hot-middleware: 2.26.1
@@ -12379,7 +12295,7 @@ packages:
       typescript: 5.4.2
       unfetch: 4.2.0
       util-deprecate: 1.0.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     transitivePeerDependencies:
       - '@types/react'
     dev: true
@@ -12445,7 +12361,7 @@ packages:
       ts-dedent: 2.2.0
       typescript: 5.4.2
       util-deprecate: 1.0.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     transitivePeerDependencies:
       - eslint
       - supports-color
@@ -12519,7 +12435,7 @@ packages:
       typescript: 5.4.2
       util-deprecate: 1.0.2
       watchpack: 2.4.0
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
       ws: 8.14.2
     transitivePeerDependencies:
       - '@types/react'
@@ -12552,7 +12468,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
       typescript: 5.4.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     transitivePeerDependencies:
       - '@storybook/manager-webpack5'
       - '@types/react'
@@ -12642,7 +12558,7 @@ packages:
       typescript: 5.4.2
       url-loader: 4.1.1(file-loader@6.2.0)(webpack@4.47.0)
       util-deprecate: 1.0.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
       webpack-dev-middleware: 3.7.3(@types/webpack@4.41.32)(webpack@4.47.0)
       webpack-virtual-modules: 0.2.2
     transitivePeerDependencies:
@@ -12713,7 +12629,7 @@ packages:
       react-docgen-typescript: 2.2.2(typescript@5.4.2)
       tslib: 2.3.1
       typescript: 5.4.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -12764,7 +12680,7 @@ packages:
       regenerator-runtime: 0.13.11
       ts-dedent: 2.2.0
       typescript: 5.4.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     transitivePeerDependencies:
       - '@storybook/builder-webpack5'
       - '@storybook/manager-webpack5'
@@ -15377,7 +15293,7 @@ packages:
       loader-utils: 2.0.4
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /babel-plugin-add-react-displayname@0.0.5:
@@ -16341,13 +16257,6 @@ packages:
     engines: {node: '>= 10'}
     dev: false
 
-  /cliui@5.0.0:
-    resolution: {integrity: sha512-PYeGSEmmHM6zvoef2w8TPzlrnNpXIjTipYK780YswmIP9vjxmd6Y2a3CB2Ks6/AU8NHjZugXvo8w3oWM2qnwXA==}
-    dependencies:
-      string-width: 3.1.0
-      strip-ansi: 5.2.0
-      wrap-ansi: 5.1.0
-
   /cliui@6.0.0:
     resolution: {integrity: sha512-t6wbgtoCXvAzst7QgXxJYqPt0usEfbgQdftEPbLL/cvv6HPE5VgvqCuAIDR0NgU52ds6rFwqrgakNLrHEjCbrQ==}
     dependencies:
@@ -16827,6 +16736,7 @@ packages:
       semver: 5.7.2
       shebang-command: 1.2.0
       which: 1.3.1
+    dev: true
 
   /cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
@@ -16883,7 +16793,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.1
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /css-loader@5.2.7(webpack@4.47.0):
@@ -16902,7 +16812,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /css-loader@6.6.0(webpack@5.95.0):
@@ -17371,6 +17281,7 @@ packages:
   /detect-file@1.0.0:
     resolution: {integrity: sha512-DtCOLG98P007x7wiiOmfI0fi3eIKyWiLTGJ2MDnVi/E04lWGbf+JzrRHMm0rgIIZJGtHpKpbVgLWHrv8xXpc3Q==}
     engines: {node: '>=0.10.0'}
+    dev: false
 
   /detect-indent@6.1.0:
     resolution: {integrity: sha512-reYkTUJAZb9gUuZ2RvVCNhVHdg62RHnJ7WJl8ftMi4diZ6NWlciOzQN88pUhSELEwflJht4oQDv0F0BMlwaYtA==}
@@ -17653,6 +17564,7 @@ packages:
 
   /emoji-regex@7.0.3:
     resolution: {integrity: sha512-CwBLREIQ7LvYFB0WyRvwhq5N5qPhc6PMjD6bYggFlI5YyDgl+0vxq5VHbMOFqLg7hfWzmu8T5Z1QofhmTIhItA==}
+    dev: true
 
   /emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -18930,6 +18842,7 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       homedir-polyfill: 1.0.3
+    dev: false
 
   /expect@29.7.0:
     resolution: {integrity: sha512-2Zks0hf1VLFYI1kbh0I5jP3KHHyCHpkfyHBzsSXRFgl/Bg9mWYfMW8oD+PdMPlEwy5HNsR9JutYy6pMeOh61nw==}
@@ -19191,7 +19104,7 @@ packages:
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 2.7.1
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /file-loader@6.2.0(webpack@4.47.0):
@@ -19202,7 +19115,7 @@ packages:
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /file-system-cache@1.1.0:
@@ -19301,15 +19214,6 @@ packages:
       micromatch: 4.0.5
       pkg-dir: 4.2.0
     dev: false
-
-  /findup-sync@3.0.0:
-    resolution: {integrity: sha512-YbffarhcicEhOrm4CtrwdKBdCuz576RLdhJDsIfvNtxUuhdRet1qZcsMjqbePtAseKdAnDyM/IyXbu7PRPRLYg==}
-    engines: {node: '>= 0.10'}
-    dependencies:
-      detect-file: 1.0.0
-      is-glob: 4.0.3
-      micromatch: 3.1.10
-      resolve-dir: 1.0.1
 
   /findup-sync@5.0.0:
     resolution: {integrity: sha512-MzwXju70AuyflbgeOhzvQWAvvQdo1XL0A9bVvlXsYcFEBM87WR4OakL4OfZq+QRmr+duJubio+UtNQCPsVESzQ==}
@@ -19433,7 +19337,7 @@ packages:
       semver: 7.5.4
       tapable: 1.1.3
       typescript: 5.4.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /form-data@3.0.1:
@@ -19501,6 +19405,7 @@ packages:
       graceful-fs: 4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.1
+    dev: false
 
   /fs-extra@7.0.1:
     resolution: {integrity: sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==}
@@ -19814,12 +19719,14 @@ packages:
       global-prefix: 1.0.2
       is-windows: 1.0.2
       resolve-dir: 1.0.1
+    dev: false
 
   /global-modules@2.0.0:
     resolution: {integrity: sha512-NGbfmJBp9x8IxyJSd1P+otYK8vonoJactOogrVfFRIAEY1ukil8RSKDz2Yo7wh1oihl51l/r6W4epkeKJHqL8A==}
     engines: {node: '>=6'}
     dependencies:
       global-prefix: 3.0.0
+    dev: false
 
   /global-prefix@1.0.2:
     resolution: {integrity: sha512-5lsx1NUDHtSjfg0eHlmYvZKv8/nVqX4ckFbM+FrGcQ+04KWcWFo9P5MxPZYSzUvyzmdTbI7Eix8Q4IbELDqzKg==}
@@ -19830,6 +19737,7 @@ packages:
       ini: 1.3.8
       is-windows: 1.0.2
       which: 1.3.1
+    dev: false
 
   /global-prefix@3.0.0:
     resolution: {integrity: sha512-awConJSVCHVGND6x3tmMaKcQvwXLhjdkmomy2W+Goaui8YPgYgXJZewhg3fWC+DlfqqQuWg8AwqjGTD2nAPVWg==}
@@ -19838,6 +19746,7 @@ packages:
       ini: 1.3.8
       kind-of: 6.0.3
       which: 1.3.1
+    dev: false
 
   /global@4.4.0:
     resolution: {integrity: sha512-wv/LAoHdRE3BeTGz53FAamhGlPLhlssK45usmGFThIi4XqnBmjKQ16u+RNbP7WvigRZDxUsM0J3gcQ5yicaL0w==}
@@ -20174,6 +20083,7 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       parse-passwd: 1.0.0
+    dev: false
 
   /hosted-git-info@2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==}
@@ -20255,7 +20165,7 @@ packages:
       pretty-error: 2.1.2
       tapable: 1.1.3
       util.promisify: 1.0.0
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
 
   /html-webpack-plugin@5.5.4(webpack@5.95.0):
     resolution: {integrity: sha512-3wNSaVVxdxcu0jd4FpQFoICdqgxs4zIQQvj+2yQKFfBOnLETQ6X5CDWdeasuGlSsooFlMkEioWDTqBv1wvw5Iw==}
@@ -20531,14 +20441,6 @@ packages:
     resolution: {integrity: sha512-rKtvo6a868b5Hu3heneU+L4yEQ4jYKLtjpnPeUdK7h0yzXGmyBTypknlkCvHFBqfX9YlorEiMM6Dnq/5atfHkw==}
     engines: {node: '>=8'}
 
-  /import-local@2.0.0:
-    resolution: {integrity: sha512-b6s04m3O+s3CGSbqDIyP4R6aAwAeYlVq9+WUWep6iHa8ETRf9yei1U48C5MmfJmV9AiLYYBKPMq/W+/WRpQmCQ==}
-    engines: {node: '>=6'}
-    hasBin: true
-    dependencies:
-      pkg-dir: 3.0.0
-      resolve-cwd: 2.0.0
-
   /import-local@3.1.0:
     resolution: {integrity: sha512-ASB07uLtnDs1o6EHjKpX34BKYDSqnFerfTOJL2HvMqF70LnxpjkzDB8J44oT9pu4AMPkQwf8jl6szgvNd2tRIg==}
     engines: {node: '>=8'}
@@ -20625,6 +20527,7 @@ packages:
   /interpret@1.4.0:
     resolution: {integrity: sha512-agE4QfB2Lkp9uICn7BAqoscw4SZP9kTE2hxiFI3jBPmXJfdqiahTbUuKGsMoN2GtqL9AxhYioAcVvgsb1HvRbA==}
     engines: {node: '>= 0.10'}
+    dev: true
 
   /interpret@2.2.0:
     resolution: {integrity: sha512-Ju0Bz/cEia55xDwUWEa8+olFpCiQoypjnQySseKtmjNrnps3P+xfpUmGr90T7yjlVJmOtybRvPXhKMbHr+fWnw==}
@@ -20840,6 +20743,7 @@ packages:
   /is-fullwidth-code-point@2.0.0:
     resolution: {integrity: sha512-VHskAKYM8RfSFXwee5t5cbN5PZeq1Wrh6qd5bkyiXIf6UQcN6w/A0eXM9r6t8d+GYOh+o6ZhiEnb88LN/Y8m2w==}
     engines: {node: '>=4'}
+    dev: true
 
   /is-fullwidth-code-point@3.0.0:
     resolution: {integrity: sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg==}
@@ -23153,6 +23057,7 @@ packages:
 
   /nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
+    dev: true
 
   /no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
@@ -23803,6 +23708,7 @@ packages:
   /parse-passwd@1.0.0:
     resolution: {integrity: sha512-1Y1A//QUXEZK7YKz+rD9WydcE1+EuPr6ZBgKecAB8tmoW6UFv0NREVJe1p+jRxtThkcbbKkfwIbWJe/IeE6m2Q==}
     engines: {node: '>=0.10.0'}
+    dev: false
 
   /parse-semver@1.1.1:
     resolution: {integrity: sha512-Eg1OuNntBMH0ojvEKSrvDSnwLmvVuUOSdylH/pSCPNMIspLlweJyIWXCE+k/5hm3cj/EBUYwmWkjhBALNP4LXQ==}
@@ -23862,6 +23768,7 @@ packages:
   /path-key@2.0.1:
     resolution: {integrity: sha512-fEHGKCSmUSDPv4uoj8AlD+joPlq3peND+HRYyxFz4KPw4z926S/b8rIuFs2FYJg3BwsxJf6A9/3eIdLaYC+9Dw==}
     engines: {node: '>=4'}
+    dev: true
 
   /path-key@3.1.1:
     resolution: {integrity: sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==}
@@ -24106,7 +24013,7 @@ packages:
       postcss: 8.4.36
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /postcss-loader@4.3.0(postcss@7.0.39)(webpack@4.47.0):
@@ -24122,7 +24029,7 @@ packages:
       postcss: 7.0.39
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /postcss-loader@6.2.1(postcss@8.4.36)(webpack@5.95.0):
@@ -24803,7 +24710,7 @@ packages:
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /rc-config-loader@4.1.3:
@@ -25469,6 +25376,7 @@ packages:
 
   /require-main-filename@2.0.0:
     resolution: {integrity: sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==}
+    dev: true
 
   /require-package-name@2.0.1:
     resolution: {integrity: sha512-uuoJ1hU/k6M0779t3VMVIYpb2VMJk05cehCaABFhXaibcbvfgR8wKiozLjVFSzJPmQMRqIcO0HMyTFqfV09V6Q==}
@@ -25484,12 +25392,6 @@ packages:
   /resolve-alpn@1.2.1:
     resolution: {integrity: sha512-0a1F4l73/ZFZOakJnQ3FvkJ2+gSTQWz/r2KE5OdDY0TxPm5h4GkqkWWfM47T7HsbnOtcJVEF4epCVy6u7Q3K+g==}
 
-  /resolve-cwd@2.0.0:
-    resolution: {integrity: sha512-ccu8zQTrzVr954472aUVPLEcB3YpKSYR3cg/3lo1okzobPBM+1INXBbBZlDbnI/hbEocnf8j0QVo43hQKrbchg==}
-    engines: {node: '>=4'}
-    dependencies:
-      resolve-from: 3.0.0
-
   /resolve-cwd@3.0.0:
     resolution: {integrity: sha512-OrZaX2Mb+rJCpH/6CpSqt9xFVpN++x01XnN2ie9g6P5/3xelLAkXWVADpdz1IHD/KFfEXyE6V0U01OQ3UO2rEg==}
     engines: {node: '>=8'}
@@ -25503,10 +25405,7 @@ packages:
     dependencies:
       expand-tilde: 2.0.2
       global-modules: 1.0.0
-
-  /resolve-from@3.0.0:
-    resolution: {integrity: sha512-GnlH6vxLymXJNMBo7XP1fJIzBFbdYt49CuTwmB/6N53t+kMPRMFKz783LlQ4tv28XoQfMWinAJX6WCGf2IlaIw==}
-    engines: {node: '>=4'}
+    dev: false
 
   /resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
@@ -26171,6 +26070,7 @@ packages:
 
   /set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
+    dev: true
 
   /set-cookie-parser@2.6.0:
     resolution: {integrity: sha512-RVnVQxTXuerk653XfuliOxBP81Sf0+qfQE73LIYKcyMYHG94AuH0kgrQpRDuTZnSmjpysHmzxJXKNfa6PjFhyQ==}
@@ -26242,6 +26142,7 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       shebang-regex: 1.0.0
+    dev: true
 
   /shebang-command@2.0.0:
     resolution: {integrity: sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==}
@@ -26252,6 +26153,7 @@ packages:
   /shebang-regex@1.0.0:
     resolution: {integrity: sha512-wpoSFAxys6b2a2wHZ1XpDSgD7N9iVjg29Ph9uV/uaP9Ex/KXlkTZTeddxDPSYQpgvzKLGJke2UU0AzoGCjNIvQ==}
     engines: {node: '>=0.10.0'}
+    dev: true
 
   /shebang-regex@3.0.0:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
@@ -26425,7 +26327,7 @@ packages:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
       source-map: 0.6.1
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
       whatwg-mimetype: 2.3.0
     dev: true
 
@@ -26681,6 +26583,7 @@ packages:
       emoji-regex: 7.0.3
       is-fullwidth-code-point: 2.0.0
       strip-ansi: 5.2.0
+    dev: true
 
   /string-width@4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
@@ -26832,7 +26735,7 @@ packages:
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 2.7.1
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /style-loader@2.0.0(webpack@4.47.0):
@@ -26843,7 +26746,7 @@ packages:
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /style-loader@3.3.4(webpack@5.95.0):
@@ -26887,12 +26790,6 @@ packages:
   /supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
     engines: {node: '>=4'}
-    dependencies:
-      has-flag: 3.0.0
-
-  /supports-color@6.1.0:
-    resolution: {integrity: sha512-qe1jfm1Mg7Nq/NSh6XE24gPXROEVsWHxC1LIx//XNlD9iw7YZQGjZNjYN7xGaEG6iKdA8EtNFW6R0gjnVXp+wQ==}
-    engines: {node: '>=6'}
     dependencies:
       has-flag: 3.0.0
 
@@ -27044,7 +26941,7 @@ packages:
       serialize-javascript: 4.0.0
       source-map: 0.6.1
       terser: 4.8.1
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
 
@@ -27062,7 +26959,7 @@ packages:
       serialize-javascript: 4.0.0
       source-map: 0.6.1
       terser: 4.8.1
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
       webpack-sources: 1.4.3
     dev: true
 
@@ -27080,7 +26977,7 @@ packages:
       serialize-javascript: 5.0.1
       source-map: 0.6.1
       terser: 5.29.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
       webpack-sources: 1.4.3
     dev: true
 
@@ -27915,7 +27812,7 @@ packages:
       loader-utils: 2.0.4
       mime-types: 2.1.35
       schema-utils: 3.3.0
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /url-loader@4.1.1(webpack@5.95.0):
@@ -28077,6 +27974,7 @@ packages:
 
   /v8-compile-cache@2.4.0:
     resolution: {integrity: sha512-ocyWc3bAHBB/guyqJQVI5o4BZkPhznPYUG2ea80Gond/BgNWpap8TOmLSeeQG7bnh2KMISxskdADG59j7zruhw==}
+    dev: true
 
   /v8-to-istanbul@9.2.0:
     resolution: {integrity: sha512-/EH/sDgxU2eGxajKdwLCDmQ4FWq+kpi3uCmBGpw1xJtnAxEjlD8j8PEiGWpCIMIs3ciNAgH0d3TTJiUkYzyZjA==}
@@ -28250,26 +28148,6 @@ packages:
       - bufferutil
       - utf-8-validate
 
-  /webpack-cli@3.3.12(webpack@4.47.0):
-    resolution: {integrity: sha512-NVWBaz9k839ZH/sinurM+HcDvJOTXwSjYp1ku+5XKeOC03z8v5QitnK/x+lAxGXFyhdayoIf/GOpv85z3/xPag==}
-    engines: {node: '>=6.11.5'}
-    hasBin: true
-    peerDependencies:
-      webpack: 4.x.x || ^4 || ^5
-    dependencies:
-      chalk: 2.4.2
-      cross-spawn: 6.0.5
-      enhanced-resolve: 4.5.0
-      findup-sync: 3.0.0
-      global-modules: 2.0.0
-      import-local: 2.0.0
-      interpret: 1.4.0
-      loader-utils: 1.4.2
-      supports-color: 6.1.0
-      v8-compile-cache: 2.4.0
-      webpack: 4.47.0(webpack-cli@3.3.12)
-      yargs: 13.3.2
-
   /webpack-dev-middleware@3.7.3(@types/webpack@4.41.32)(webpack@4.47.0):
     resolution: {integrity: sha512-djelc/zGiz9nZj/U7PTBi2ViorGJXEWo/3ltkPbDyxCXhhEXkW0ce99falaok4TPj+AsxLiXJR0EBOb0zh9fKQ==}
     engines: {node: '>= 6'}
@@ -28285,7 +28163,7 @@ packages:
       mime: 2.6.0
       mkdirp: 0.5.6
       range-parser: 1.2.1
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
       webpack-log: 2.0.0
     dev: true
 
@@ -28305,7 +28183,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.2.0
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: false
 
   /webpack-dev-middleware@7.4.2(webpack@5.95.0):
@@ -28373,61 +28251,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
-      webpack-dev-middleware: 5.3.3(@types/webpack@4.41.32)(webpack@4.47.0)
-      ws: 8.14.2
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - supports-color
-      - utf-8-validate
-    dev: false
-
-  /webpack-dev-server@4.9.3(webpack-cli@3.3.12)(webpack@4.47.0):
-    resolution: {integrity: sha512-3qp/eoboZG5/6QgiZ3llN8TUzkSpYg1Ko9khWX1h40MIEUNS2mDoIa8aXsPfskER+GbTvs/IJZ1QTBBhhuetSw==}
-    engines: {node: '>= 12.13.0'}
-    hasBin: true
-    peerDependencies:
-      '@types/webpack': ^4
-      webpack: ^4.37.0 || ^5.0.0 || ^4 || ^5
-      webpack-cli: '*'
-    peerDependenciesMeta:
-      '@types/webpack':
-        optional: true
-      webpack-cli:
-        optional: true
-    dependencies:
-      '@types/bonjour': 3.5.13
-      '@types/connect-history-api-fallback': 1.5.4
-      '@types/express': 4.17.21
-      '@types/express-serve-static-core': 4.17.43
-      '@types/serve-index': 1.9.4
-      '@types/serve-static': 1.15.5
-      '@types/sockjs': 0.3.36
-      '@types/ws': 8.5.5
-      ansi-html-community: 0.0.8
-      anymatch: 3.1.3
-      bonjour-service: 1.2.1
-      chokidar: 3.6.0
-      colorette: 2.0.20
-      compression: 1.7.4
-      connect-history-api-fallback: 2.0.0
-      default-gateway: 6.0.3
-      express: 4.20.0
-      graceful-fs: 4.2.11
-      html-entities: 2.5.2
-      http-proxy-middleware: 2.0.6
-      ipaddr.js: 2.1.0
-      open: 8.4.2
-      p-retry: 4.6.2
-      rimraf: 3.0.2
-      schema-utils: 4.2.0
-      selfsigned: 2.4.1
-      serve-index: 1.9.1
-      sockjs: 0.3.24
-      spdy: 4.0.2
-      webpack: 4.47.0(webpack-cli@3.3.12)
-      webpack-cli: 3.3.12(webpack@4.47.0)
+      webpack: 4.47.0
       webpack-dev-middleware: 5.3.3(@types/webpack@4.41.32)(webpack@4.47.0)
       ws: 8.14.2
     transitivePeerDependencies:
@@ -28497,7 +28321,7 @@ packages:
     peerDependencies:
       webpack: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^4 || ^5
     dependencies:
-      webpack: 4.47.0(webpack-cli@3.3.12)
+      webpack: 4.47.0
     dev: true
 
   /webpack-hot-middleware@2.26.1:
@@ -28539,7 +28363,7 @@ packages:
       debug: 3.2.7
     dev: true
 
-  /webpack@4.47.0(webpack-cli@3.3.12):
+  /webpack@4.47.0:
     resolution: {integrity: sha512-td7fYwgLSrky3fI1EuU5cneU4+pbH6GgOfuKNS1tNPcfdGinGELAqsb/BP4nnvZyKSG2i/xFGU7+n2PvZA8HJQ==}
     engines: {node: '>=6.11.5'}
     hasBin: true
@@ -28574,7 +28398,6 @@ packages:
       tapable: 1.1.3
       terser-webpack-plugin: 1.4.5(webpack@4.47.0)
       watchpack: 1.7.5
-      webpack-cli: 3.3.12(webpack@4.47.0)
       webpack-sources: 1.4.3
 
   /webpack@5.95.0:
@@ -28694,6 +28517,7 @@ packages:
 
   /which-module@2.0.1:
     resolution: {integrity: sha512-iBdZ57RDvnOR9AGBhML2vFZf7h8vmBjhoaZqODJBFWHVtKkDmKuHai3cx5PgVMrX5YDNp27AofYbAwctSS+vhQ==}
+    dev: true
 
   /which-pm@2.0.0:
     resolution: {integrity: sha512-Lhs9Pmyph0p5n5Z3mVnN0yWcbQYUAD7rbQUiMsQxOJ3T57k7RFe35SUwWMf7dsbDZks1uOmw4AecB/JMDj3v/w==}
@@ -28766,14 +28590,6 @@ packages:
   /workerpool@6.2.1:
     resolution: {integrity: sha512-ILEIE97kDZvF9Wb9f6h5aXK4swSlKGUcOEGiIYb2OOu/IrDU9iwj0fD//SsA6E5ibwJxpEvhullJY4Sl4GcpAw==}
     dev: true
-
-  /wrap-ansi@5.1.0:
-    resolution: {integrity: sha512-QC1/iN/2/RPVJ5jYK8BGttj5z83LmSKmvbvrXPNCLZSEb32KKVDJDl/MOt2N01qU2H/FkzEa9PKto1BqDjtd7Q==}
-    engines: {node: '>=6'}
-    dependencies:
-      ansi-styles: 3.2.1
-      string-width: 3.1.0
-      strip-ansi: 5.2.0
 
   /wrap-ansi@6.2.0:
     resolution: {integrity: sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==}
@@ -28958,12 +28774,6 @@ packages:
     hasBin: true
     dev: false
 
-  /yargs-parser@13.1.2:
-    resolution: {integrity: sha512-3lbsNRf/j+A4QuSZfDRA7HRSfWrzO0YjqTJd5kjAq37Zep1CEgaYmrH9Q3GwPiB9cHyd1Y1UwggGhJGoxipbzg==}
-    dependencies:
-      camelcase: 5.3.1
-      decamelize: 1.2.0
-
   /yargs-parser@18.1.3:
     resolution: {integrity: sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==}
     engines: {node: '>=6'}
@@ -28995,20 +28805,6 @@ packages:
       flat: 5.0.2
       is-plain-obj: 2.1.0
     dev: true
-
-  /yargs@13.3.2:
-    resolution: {integrity: sha512-AX3Zw5iPruN5ie6xGRIDgqkT+ZhnRlZMLMHAs8tg7nRruy2Nb+i5o9bwghAogtM08q1dpr2LVoS8KSTMYpWXUw==}
-    dependencies:
-      cliui: 5.0.0
-      find-up: 3.0.0
-      get-caller-file: 2.0.5
-      require-directory: 2.1.1
-      require-main-filename: 2.0.0
-      set-blocking: 2.0.0
-      string-width: 3.1.0
-      which-module: 2.0.1
-      y18n: 4.0.3
-      yargs-parser: 13.1.2
 
   /yargs@15.4.1:
     resolution: {integrity: sha512-aePbxDmcYW++PaqBsJ+HYUFwCdv4LVvdnhBy78E57PIor8/OVvhMrADFFEDh8DHDFRv/O9i3lPhsENjO7QX0+A==}

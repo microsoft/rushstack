@@ -14,5 +14,6 @@ export { Lib1Class } from 'api-extractor-lib1-test';
 
 /** @public */
 export class Lib3Class {
+  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   prop: boolean;
 }

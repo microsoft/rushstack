@@ -647,6 +647,12 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "run-scenarios-helpers",
+      "projectFolder": "build-tests/run-scenarios-helpers",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
 
     // "build-tests-samples" folder (alphabetical order)
     {
@@ -968,12 +974,6 @@
     {
       "packageName": "set-webpack-public-path-plugin-test",
       "projectFolder": "build-tests/set-webpack-public-path-plugin-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "ts-command-line-test",
-      "projectFolder": "build-tests/ts-command-line-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
