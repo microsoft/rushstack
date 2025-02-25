@@ -25,6 +25,7 @@ export interface ISubspacesConfigurationJson {
   splitWorkspaceCompatibility?: boolean;
   preventSelectingAllSubspaces?: boolean;
   subspaceNames: string[];
+  subspaceInitAssetsFolder?: string;
 }
 
 /**
@@ -60,11 +61,17 @@ export class SubspacesConfiguration {
    */
   public readonly subspaceNames: ReadonlySet<string>;
 
+  /**
+   * rush-init Subspace assets location used during `rush init-subspace`
+   */
+  public readonly subspaceInitAssetsFolder?: string;
+
   private constructor(configuration: Readonly<ISubspacesConfigurationJson>, subspaceJsonFilePath: string) {
     this.subspaceJsonFilePath = subspaceJsonFilePath;
     this.subspacesEnabled = configuration.subspacesEnabled;
     this.splitWorkspaceCompatibility = !!configuration.splitWorkspaceCompatibility;
     this.preventSelectingAllSubspaces = !!configuration.preventSelectingAllSubspaces;
+    this.subspaceInitAssetsFolder = configuration.subspaceInitAssetsFolder;
     const subspaceNames: Set<string> = new Set();
     for (const subspaceName of configuration.subspaceNames) {
       SubspacesConfiguration.requireValidSubspaceName(subspaceName, this.splitWorkspaceCompatibility);

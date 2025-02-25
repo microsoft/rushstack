@@ -12,6 +12,11 @@
   "subspacesEnabled": false,
 
   /**
+   * the starting assets folder relative to rush.json location you want to use when init a subspace
+   */
+  // "subspaceInitAssetsFolder": "",
+
+  /**
    * (DEPRECATED) This is a temporary workaround for migrating from an earlier prototype
    * of this feature: https://github.com/microsoft/rushstack/pull/3481
    * It allows subspaces with only one project to store their config files in the project folder.
