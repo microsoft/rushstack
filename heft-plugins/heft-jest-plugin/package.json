@@ -47,7 +47,7 @@
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
-    "@types/node": "18.17.15",
+    "@types/node": "20.17.19",
     "eslint": "~8.57.0",
     "jest-environment-jsdom": "~29.5.0",
     "jest-environment-node": "~29.5.0",

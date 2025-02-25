@@ -53,7 +53,7 @@
     "@rushstack/heft": "0.68.12",
     "@rushstack/heft-node-rig": "2.6.48",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "18.17.15",
+    "@types/node": "20.17.19",
     "@types/watchpack": "2.4.0",
     "typescript": "~5.4.2"
   }

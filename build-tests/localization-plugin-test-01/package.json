@@ -12,7 +12,7 @@
     "@rushstack/webpack4-localization-plugin": "workspace:*",
     "@rushstack/webpack4-module-minifier-plugin": "workspace:*",
     "@rushstack/set-webpack-public-path-plugin": "^4.1.16",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.8",
     "html-webpack-plugin": "~4.5.2",
     "webpack": "~4.47.0",
     "webpack-bundle-analyzer": "~4.5.0",

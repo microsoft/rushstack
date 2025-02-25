@@ -16,7 +16,7 @@
     "@rushstack/webpack4-localization-plugin": "workspace:*",
     "@rushstack/webpack4-module-minifier-plugin": "workspace:*",
     "@types/lodash": "4.14.116",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.8",
     "html-webpack-plugin": "~4.5.2",
     "lodash": "~4.17.15",
     "webpack-bundle-analyzer": "~4.5.0",

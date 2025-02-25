@@ -25,7 +25,7 @@
     "@serverless-stack/resources": "1.18.4",
     "@types/aws-lambda": "8.10.93",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "18.17.15",
+    "@types/node": "20.17.19",
     "aws-cdk-lib": "2.177.0",
     "constructs": "~10.0.98",
     "eslint": "~8.57.0",

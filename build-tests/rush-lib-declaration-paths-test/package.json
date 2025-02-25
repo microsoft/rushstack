@@ -14,6 +14,6 @@
     "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node": "18.17.15"
+    "@types/node": "20.17.19"
   }
 }
