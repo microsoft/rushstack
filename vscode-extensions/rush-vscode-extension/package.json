@@ -272,7 +272,7 @@
     "@types/glob": "7.1.1",
     "@types/mocha": "10.0.6",
     "@types/vscode": "^1.63.0",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.8",
     "@vscode/test-electron": "^1.6.2",
     "glob": "~7.0.5",
     "mocha": "^10.1.0",

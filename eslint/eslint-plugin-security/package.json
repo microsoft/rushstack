@@ -35,7 +35,7 @@
     "@types/eslint": "8.56.10",
     "@types/estree": "1.0.5",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "18.17.15",
+    "@types/node": "20.17.19",
     "@typescript-eslint/parser": "~8.1.0",
     "@typescript-eslint/rule-tester": "~8.1.0",
     "@typescript-eslint/typescript-estree": "~8.1.0",

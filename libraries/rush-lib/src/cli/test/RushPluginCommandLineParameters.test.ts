@@ -46,7 +46,7 @@ describe('PluginCommandLineParameters', () => {
 
   beforeEach(() => {
     // ts-command-line calls process.exit() which interferes with Jest
-    jest.spyOn(process, 'exit').mockImplementation((code?: number) => {
+    jest.spyOn(process, 'exit').mockImplementation((code) => {
       throw new Error(`Test code called process.exit(${code})`);
     });
 

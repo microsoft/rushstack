@@ -12,25 +12,25 @@
     "_phase:test:ipc": "heft run-watch --only test -- --clean"
   },
   "devDependencies": {
-    "local-eslint-config": "workspace:*",
-    "@rushstack/heft": "workspace:*",
     "@rushstack/heft-dev-cert-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@rushstack/module-minifier": "workspace:*",
-    "@rushstack/webpack5-module-minifier-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/webpack5-module-minifier-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/webpack-env": "1.18.0",
+    "@types/node": "20.17.19",
+    "@types/webpack-env": "1.18.8",
     "eslint": "~8.57.0",
     "html-webpack-plugin": "~5.5.0",
+    "local-eslint-config": "workspace:*",
     "source-map-loader": "~3.0.1",
     "tslint": "~5.20.1",
     "typescript": "~5.4.2",
-    "webpack": "~5.95.0",
-    "@types/node": "18.17.15"
+    "webpack": "~5.95.0"
   }
 }

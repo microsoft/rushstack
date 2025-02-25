@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/eslint-bulk"
+    }
+  ],
+  "packageName": "@rushstack/eslint-bulk",
+  "email": "iclanton@users.noreply.github.com"
+}

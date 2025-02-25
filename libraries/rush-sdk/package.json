@@ -54,7 +54,7 @@
     "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/semver": "7.5.0",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.8",
     "webpack": "~5.95.0"
   }
 }

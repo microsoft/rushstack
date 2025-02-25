@@ -24,7 +24,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/webpack-workspace-resolve-plugin": "workspace:*",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.8",
     "local-node-rig": "workspace:*"
   },
   "exports": {

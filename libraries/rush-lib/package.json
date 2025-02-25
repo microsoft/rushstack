@@ -85,7 +85,7 @@
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "6.1.6",
     "@types/uuid": "~8.3.4",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.8",
     "webpack": "~5.95.0"
   },
   "publishOnlyDependencies": {

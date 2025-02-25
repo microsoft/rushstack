@@ -174,7 +174,7 @@ export class TypingsGenerator<TFileContents = string> {
     await new Promise((resolve, reject): void => {
       const watcher: chokidar.FSWatcher = chokidar.watch(this.inputFileGlob, {
         cwd: this.sourceFolderPath,
-        ignored: this.ignoredFileGlobs
+        ignored: this.ignoredFileGlobs as string[] // `ignored` doesn't like the readonly array
       });
 
       const queue: Set<string> = new Set();

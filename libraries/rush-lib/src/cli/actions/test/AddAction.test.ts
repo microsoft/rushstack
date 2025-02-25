@@ -12,7 +12,7 @@ import { LockFile } from '@rushstack/node-core-library';
 describe(AddAction.name, () => {
   describe('basic "rush add" tests', () => {
     let doRushAddMock: jest.SpyInstance;
-    let oldExitCode: number | undefined;
+    let oldExitCode: number | string | undefined;
     let oldArgs: string[];
 
     beforeEach(() => {

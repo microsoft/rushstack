@@ -245,8 +245,9 @@ export class HeftCommandLineParser extends CommandLineParser {
       this.globalTerminal.writeErrorLine(error.stack!);
     }
 
-    if (!process.exitCode || process.exitCode > 0) {
-      process.exit(process.exitCode);
+    const exitCode: string | number | undefined = process.exitCode;
+    if (!exitCode || typeof exitCode !== 'number' || exitCode > 0) {
+      process.exit(exitCode);
     } else {
       process.exit(1);
     }
