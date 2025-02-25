@@ -102,7 +102,7 @@ export interface ICreateOperationsContext {
    * If the selection of projects was "unsafe" (i.e. missing some dependencies), this will add the
    * minimum number of phases required to make it safe.
    */
-  readonly isIncludePhaseDeps: boolean;
+  readonly includePhaseDeps: boolean;
   /**
    * Marks an operation's result as invalid, potentially triggering a new build. Only applicable in watch mode.
    * @param operation - The operation to invalidate

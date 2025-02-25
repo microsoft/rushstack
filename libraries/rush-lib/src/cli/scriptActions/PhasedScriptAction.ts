@@ -233,7 +233,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       parameterLongName: '--include-phase-deps',
       description:
         'If the selected projects are "unsafe" (missing some dependencies), add the minimal set of phase dependencies. For example, ' +
-        `"--from A" normally might include the "_phase:test" phase for A's dependencies, even though changes to A can't break those tests. Using "--impacted-by A --include-phase-deps" avoids that work by performing "_phase:test" only for downstream projects.`
+        `"--from A" normally might include the "_phase:test" phase for A's dependencies, even though changes to A can't break those tests. ` +
+        `Using "--impacted-by A --include-phase-deps" avoids that work by performing "_phase:test" only for downstream projects.`
     });
 
     if (this._isIncrementalBuildAllowed) {
@@ -384,7 +385,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       new ConsoleTimelinePlugin(terminal).apply(this.hooks);
     }
 
-    const isIncludePhaseDeps: boolean = this._includePhaseDeps?.value ?? false;
+    const includePhaseDeps: boolean = this._includePhaseDeps?.value ?? false;
 
     const diagnosticDir: string | undefined = this._nodeDiagnosticDirParameter.value;
     if (diagnosticDir) {
@@ -518,7 +519,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         rushConfiguration: this.rushConfiguration,
         phaseOriginal: new Set(this._originalPhases),
         phaseSelection: new Set(this._initialPhases),
-        isIncludePhaseDeps,
+        includePhaseDeps,
         projectSelection,
         projectConfigurations,
         projectsInUnknownState: projectSelection

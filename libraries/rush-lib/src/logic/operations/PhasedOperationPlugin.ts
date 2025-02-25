@@ -34,7 +34,7 @@ function createOperations(
     phaseSelection,
     projectSelection,
     projectConfigurations,
-    isIncludePhaseDeps
+    includePhaseDeps
   } = context;
   const operationsWithWork: Set<Operation> = new Set();
 
@@ -86,7 +86,7 @@ function createOperations(
       });
 
       if (!phaseSelection.has(phase) || !projectSelection.has(project)) {
-        if (isIncludePhaseDeps) {
+        if (includePhaseDeps) {
           operationsWithWork.add(operation);
         } else {
           // Not in scope. Mark disabled, which will report as OperationStatus.Skipped.

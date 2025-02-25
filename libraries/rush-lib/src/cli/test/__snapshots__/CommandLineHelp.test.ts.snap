@@ -270,10 +270,14 @@ Optional arguments:
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
-  --include-phase-deps  When executing a phase, automatically execute its 
-                        dependent phases. For example, if project A's test 
-                        phase depends on the build phase, executing the test 
-                        phase will automatically execute the build phase.
+  --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
+                        dependencies), add the minimal set of phase 
+                        dependencies. For example, \\"--from A\\" normally might 
+                        include the \\"_phase:test\\" phase for A's dependencies, 
+                        even though changes to A can't break those tests. 
+                        Using \\"--impacted-by A --include-phase-deps\\" avoids 
+                        that work by performing \\"_phase:test\\" only for 
+                        downstream projects.
   -c, --changed-projects-only
                         Normally the incremental build logic will rebuild 
                         changed projects as well as any projects that 
@@ -548,10 +552,14 @@ Optional arguments:
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
-  --include-phase-deps  When executing a phase, automatically execute its 
-                        dependent phases. For example, if project A's test 
-                        phase depends on the build phase, executing the test 
-                        phase will automatically execute the build phase.
+  --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
+                        dependencies), add the minimal set of phase 
+                        dependencies. For example, \\"--from A\\" normally might 
+                        include the \\"_phase:test\\" phase for A's dependencies, 
+                        even though changes to A can't break those tests. 
+                        Using \\"--impacted-by A --include-phase-deps\\" avoids 
+                        that work by performing \\"_phase:test\\" only for 
+                        downstream projects.
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
@@ -1160,10 +1168,14 @@ Optional arguments:
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
-  --include-phase-deps  When executing a phase, automatically execute its 
-                        dependent phases. For example, if project A's test 
-                        phase depends on the build phase, executing the test 
-                        phase will automatically execute the build phase.
+  --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
+                        dependencies), add the minimal set of phase 
+                        dependencies. For example, \\"--from A\\" normally might 
+                        include the \\"_phase:test\\" phase for A's dependencies, 
+                        even though changes to A can't break those tests. 
+                        Using \\"--impacted-by A --include-phase-deps\\" avoids 
+                        that work by performing \\"_phase:test\\" only for 
+                        downstream projects.
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
