@@ -4388,6 +4388,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
