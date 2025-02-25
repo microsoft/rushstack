@@ -232,8 +232,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._includePhaseDeps = this.defineFlagParameter({
       parameterLongName: '--include-phase-deps',
       description:
-        'When executing a phase, automatically execute its dependent phases. For example, ' +
-        "if project A's test phase depends on the build phase, executing the test phase will automatically execute the build phase."
+        'If the selected projects are "unsafe" (missing some dependencies), add the minimal set of phase dependencies. For example, ' +
+        `"--from A" normally might include the "_phase:test" phase for A's dependencies, even though changes to A can't break those tests. Using "--impacted-by A --include-phase-deps" avoids that work by performing "_phase:test" only for downstream projects.`
     });
 
     if (this._isIncrementalBuildAllowed) {
