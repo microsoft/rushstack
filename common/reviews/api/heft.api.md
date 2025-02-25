@@ -16,6 +16,7 @@ import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import * as fs from 'fs';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/terminal';
@@ -192,6 +193,7 @@ export interface IHeftTaskRunHookOptions {
 // @public
 export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
     readonly requestRun: () => void;
+    readonly watchFs: IWatchFileSystem;
     readonly watchGlobAsync: WatchGlobFn;
 }
 
@@ -235,6 +237,11 @@ export interface _IPerformanceData {
 }
 
 // @public
+export interface IReaddirOptions {
+    withFileTypes: true;
+}
+
+// @public
 export interface IRigPackageResolver {
     // (undocumented)
     resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string>;
@@ -272,6 +279,22 @@ export interface IWatchedFileState {
     changed: boolean;
 }
 
+// @public
+export interface IWatchFileSystem {
+    getStateAndTrack(filePath: string): IWatchedFileState;
+    getStateAndTrackAsync(filePath: string): Promise<IWatchedFileState>;
+    lstat(filePath: string, callback: StatCallback): void;
+    lstatSync(filePath: string): fs.Stats;
+    readdir(filePath: string, callback: ReaddirStringCallback): void;
+    // (undocumented)
+    readdir(filePath: string, options: IReaddirOptions, callback: ReaddirDirentCallback): void;
+    readdirSync(filePath: string): string[];
+    // (undocumented)
+    readdirSync(filePath: string, options: IReaddirOptions): fs.Dirent[];
+    stat(filePath: string, callback: StatCallback): void;
+    statSync(filePath: string): fs.Stats;
+}
+
 // @internal
 export class _MetricsCollector {
     recordAsync(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): Promise<void>;
@@ -279,6 +302,15 @@ export class _MetricsCollector {
     readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
     setStartTime(): void;
 }
+
+// @public
+export type ReaddirDirentCallback = (error: NodeJS.ErrnoException | null, files: fs.Dirent[]) => void;
+
+// @public
+export type ReaddirStringCallback = (error: NodeJS.ErrnoException | null, files: string[]) => void;
+
+// @public
+export type StatCallback = (error: NodeJS.ErrnoException | null, stats: fs.Stats) => void;
 
 // @public
 export type WatchGlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<Map<string, IWatchedFileState>>;
