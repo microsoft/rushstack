@@ -142,9 +142,10 @@ export interface IConfigApiReport {
 }
 
 /**
+ * The allowed release tags that can be used to mark API items.
  * @public
  */
-export type ReleaseTag = '@internal' | '@alpha' | '@beta' | '@public';
+export type ReleaseTagForTrim = '@internal' | '@alpha' | '@beta' | '@public';
 
 /**
  * Configures how the doc model file (*.api.json) will be generated.
@@ -199,7 +200,7 @@ export interface IConfigDocModel {
    *
    * @defaultValue `["@internal"]`
    */
-  releaseTagsToTrim?: ReleaseTag[];
+  releaseTagsToTrim?: ReleaseTagForTrim[];
 }
 
 /**

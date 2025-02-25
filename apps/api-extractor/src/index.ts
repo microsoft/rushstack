@@ -22,6 +22,8 @@ export {
   ExtractorConfig
 } from './api/ExtractorConfig';
 
+export type { IApiModelGenerationOptions } from './generators/ApiModelGenerator';
+
 export { ExtractorLogLevel } from './api/ExtractorLogLevel';
 
 export {
@@ -43,5 +45,5 @@ export type {
   IConfigMessageReportingTable,
   IExtractorMessagesConfig,
   IConfigFile,
-  ReleaseTag
+  ReleaseTagForTrim
 } from './api/IConfigFile';

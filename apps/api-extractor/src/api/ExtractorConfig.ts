@@ -308,6 +308,7 @@ export class ExtractorConfig {
 
   /**
    * If specified, the doc model is enabled and the specified options will be used.
+   * @beta
    */
   public readonly docModelGenerationOptions: IApiModelGenerationOptions | undefined;
   /** {@inheritDoc IConfigDocModel.apiJsonFilePath} */

@@ -56,7 +56,13 @@ interface IProcessAstEntityContext {
   parentApiItem: ApiItemContainerMixin;
 }
 
+/**
+ * @beta
+ */
 export interface IApiModelGenerationOptions {
+  /**
+   * The release tags to trim.
+   */
   releaseTagsToTrim: Set<ReleaseTag>;
 }
 
