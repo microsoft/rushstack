@@ -122,7 +122,7 @@ const OLDEST_SUPPORTED_TS_MAJOR_VERSION: number = 2;
 const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
 
 const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 5;
-const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 6;
+const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 7;
 
 interface ITypeScriptTool {
   ts: ExtendedTypeScript;
