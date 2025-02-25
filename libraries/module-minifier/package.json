@@ -23,8 +23,9 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
-    "@types/serialize-javascript": "5.0.2"
+    "@types/node": "20.17.19",
+    "@types/serialize-javascript": "5.0.2",
+    "local-node-rig": "workspace:*"
   },
   "peerDependencies": {
     "@types/node": "*"
