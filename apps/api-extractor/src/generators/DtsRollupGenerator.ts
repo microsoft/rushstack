@@ -20,7 +20,7 @@ import { IndentedWriter } from './IndentedWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 import type { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import type { AstModuleExportInfo } from '../analyzer/AstModule';
+import type { IAstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 import type { AstEntity } from '../analyzer/AstEntity';
 
@@ -153,7 +153,7 @@ export class DtsRollupGenerator {
       }
 
       if (astEntity instanceof AstNamespaceImport) {
-        const astModuleExportInfo: AstModuleExportInfo = astEntity.fetchAstModuleExportInfo(collector);
+        const astModuleExportInfo: IAstModuleExportInfo = astEntity.fetchAstModuleExportInfo(collector);
 
         if (entity.nameForEmit === undefined) {
           // This should never happen

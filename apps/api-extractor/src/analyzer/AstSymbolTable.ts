@@ -9,7 +9,7 @@ import { type PackageJsonLookup, InternalError } from '@rushstack/node-core-libr
 import { AstDeclaration } from './AstDeclaration';
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
-import type { AstModule, AstModuleExportInfo } from './AstModule';
+import type { AstModule, IAstModuleExportInfo } from './AstModule';
 import { PackageMetadataManager } from './PackageMetadataManager';
 import { ExportAnalyzer } from './ExportAnalyzer';
 import type { AstEntity } from './AstEntity';
@@ -124,7 +124,7 @@ export class AstSymbolTable {
   /**
    * This crawls the specified entry point and collects the full set of exported AstSymbols.
    */
-  public fetchAstModuleExportInfo(astModule: AstModule): AstModuleExportInfo {
+  public fetchAstModuleExportInfo(astModule: AstModule): IAstModuleExportInfo {
     return this._exportAnalyzer.fetchAstModuleExportInfo(astModule);
   }
 

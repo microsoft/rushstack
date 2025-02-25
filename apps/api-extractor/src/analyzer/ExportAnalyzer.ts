@@ -7,7 +7,7 @@ import { InternalError } from '@rushstack/node-core-library';
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { AstImport, type IAstImportOptions, AstImportKind } from './AstImport';
-import { AstModule, AstModuleExportInfo } from './AstModule';
+import { AstModule, type IAstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import type { IFetchAstSymbolOptions } from './AstSymbolTable';
@@ -237,15 +237,19 @@ export class ExportAnalyzer {
   /**
    * Implementation of {@link AstSymbolTable.fetchAstModuleExportInfo}.
    */
-  public fetchAstModuleExportInfo(entryPointAstModule: AstModule): AstModuleExportInfo {
+  public fetchAstModuleExportInfo(entryPointAstModule: AstModule): IAstModuleExportInfo {
     if (entryPointAstModule.isExternal) {
       throw new Error('fetchAstModuleExportInfo() is not supported for external modules');
     }
 
     if (entryPointAstModule.astModuleExportInfo === undefined) {
-      const astModuleExportInfo: AstModuleExportInfo = new AstModuleExportInfo();
+      const astModuleExportInfo: IAstModuleExportInfo = {
+        visitedAstModules: new Set<AstModule>(),
+        exportedLocalEntities: new Map<string, AstEntity>(),
+        starExportedExternalModules: new Set<AstModule>()
+      };
 
-      this._collectAllExportsRecursive(astModuleExportInfo, entryPointAstModule, new Set<AstModule>());
+      this._collectAllExportsRecursive(astModuleExportInfo, entryPointAstModule);
 
       entryPointAstModule.astModuleExportInfo = astModuleExportInfo;
     }
@@ -314,18 +318,15 @@ export class ExportAnalyzer {
     return this._importableAmbientSourceFiles.has(sourceFile);
   }
 
-  private _collectAllExportsRecursive(
-    astModuleExportInfo: AstModuleExportInfo,
-    astModule: AstModule,
-    visitedAstModules: Set<AstModule>
-  ): void {
+  private _collectAllExportsRecursive(astModuleExportInfo: IAstModuleExportInfo, astModule: AstModule): void {
+    const { visitedAstModules, starExportedExternalModules, exportedLocalEntities } = astModuleExportInfo;
     if (visitedAstModules.has(astModule)) {
       return;
     }
     visitedAstModules.add(astModule);
 
     if (astModule.isExternal) {
-      astModuleExportInfo.starExportedExternalModules.add(astModule);
+      starExportedExternalModules.add(astModule);
     } else {
       // Fetch each of the explicit exports for this module
       if (astModule.moduleSymbol.exports) {
@@ -337,7 +338,7 @@ export class ExportAnalyzer {
             default:
               // Don't collect the "export default" symbol unless this is the entry point module
               if (exportName !== ts.InternalSymbolName.Default || visitedAstModules.size === 1) {
-                if (!astModuleExportInfo.exportedLocalEntities.has(exportSymbol.name)) {
+                if (!exportedLocalEntities.has(exportSymbol.name)) {
                   const astEntity: AstEntity = this._getExportOfAstModule(exportSymbol.name, astModule);
 
                   if (astEntity instanceof AstSymbol && !astEntity.isExternal) {
@@ -348,7 +349,7 @@ export class ExportAnalyzer {
                     this._astSymbolTable.analyze(astEntity);
                   }
 
-                  astModuleExportInfo.exportedLocalEntities.set(exportSymbol.name, astEntity);
+                  exportedLocalEntities.set(exportSymbol.name, astEntity);
                 }
               }
               break;
@@ -357,7 +358,7 @@ export class ExportAnalyzer {
       }
 
       for (const starExportedModule of astModule.starExportedModules) {
-        this._collectAllExportsRecursive(astModuleExportInfo, starExportedModule, visitedAstModules);
+        this._collectAllExportsRecursive(astModuleExportInfo, starExportedModule);
       }
     }
   }

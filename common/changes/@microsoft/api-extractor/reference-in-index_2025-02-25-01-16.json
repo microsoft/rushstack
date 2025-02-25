@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Fix an issue where a triple-slash reference with `preserve=\"true\"` in an entrypoint file that only contains re-exports does not end up in the API report and API rollup.",
+      "comment": "Fix an issue where a triple-slash reference with `preserve=\"true\"` in a file that only contains re-exports does not end up in the API report and API rollup.",
       "type": "patch"
     }
   ],

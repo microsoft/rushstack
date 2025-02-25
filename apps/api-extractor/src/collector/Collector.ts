@@ -18,7 +18,7 @@ import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable } from '../analyzer/AstSymbolTable';
 import type { AstEntity } from '../analyzer/AstEntity';
-import type { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
+import type { AstModule, IAstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import type { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
@@ -289,7 +289,6 @@ export class Collector {
 
     // Build the entry point
     const entryPointSourceFile: ts.SourceFile = this.workingPackage.entryPointSourceFile;
-    this._collectReferenceDirectivesFromSourceFiles([entryPointSourceFile]);
 
     const astEntryPoint: AstModule =
       this.astSymbolTable.fetchAstModuleFromWorkingPackage(entryPointSourceFile);
@@ -314,12 +313,12 @@ export class Collector {
       this.workingPackage.tsdocComment = this.workingPackage.tsdocParserContext!.docComment;
     }
 
-    const astModuleExportInfo: AstModuleExportInfo =
+    const { exportedLocalEntities, starExportedExternalModules, visitedAstModules }: IAstModuleExportInfo =
       this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
 
     // Create a CollectorEntity for each top-level export.
     const processedAstEntities: AstEntity[] = [];
-    for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
+    for (const [exportName, astEntity] of exportedLocalEntities) {
       this._createCollectorEntity(astEntity, exportName);
       processedAstEntities.push(astEntity);
     }
@@ -334,9 +333,18 @@ export class Collector {
       }
     }
 
+    // Ensure references are collected from any intermediate files that
+    // only include exports
+    const visitedSourceFiles: Set<ts.SourceFile> = new Set();
+    for (const visitedAstModule of visitedAstModules) {
+      visitedSourceFiles.add(visitedAstModule.sourceFile);
+    }
+
+    this._collectReferenceDirectivesFromSourceFiles(visitedSourceFiles);
+
     this._makeUniqueNames();
 
-    for (const starExportedExternalModule of astModuleExportInfo.starExportedExternalModules) {
+    for (const starExportedExternalModule of starExportedExternalModules) {
       if (starExportedExternalModule.externalModulePath !== undefined) {
         this._starExportedExternalModulePaths.push(starExportedExternalModule.externalModulePath);
       }
@@ -540,7 +548,7 @@ export class Collector {
     }
 
     if (astEntity instanceof AstNamespaceImport) {
-      const astModuleExportInfo: AstModuleExportInfo = astEntity.fetchAstModuleExportInfo(this);
+      const astModuleExportInfo: IAstModuleExportInfo = astEntity.fetchAstModuleExportInfo(this);
       const parentEntity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
       if (!parentEntity) {
         // This should never happen, as we've already created entities for all AstNamespaceImports.
@@ -1006,7 +1014,7 @@ export class Collector {
     }
   }
 
-  private _collectReferenceDirectivesFromSourceFiles(sourceFiles: ts.SourceFile[]): void {
+  private _collectReferenceDirectivesFromSourceFiles(sourceFiles: Iterable<ts.SourceFile>): void {
     const seenFilenames: Set<string> = new Set<string>();
 
     for (const sourceFile of sourceFiles) {
