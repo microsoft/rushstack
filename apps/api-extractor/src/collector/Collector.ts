@@ -289,6 +289,7 @@ export class Collector {
 
     // Build the entry point
     const entryPointSourceFile: ts.SourceFile = this.workingPackage.entryPointSourceFile;
+    this._collectReferenceDirectivesFromSourceFiles([entryPointSourceFile]);
 
     const astEntryPoint: AstModule =
       this.astSymbolTable.fetchAstModuleFromWorkingPackage(entryPointSourceFile);

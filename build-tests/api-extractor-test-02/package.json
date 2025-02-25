@@ -12,10 +12,12 @@
   "dependencies": {
     "@types/semver": "7.5.0",
     "api-extractor-test-01": "workspace:*",
-    "semver": "~7.5.4"
+    "semver": "~7.5.4",
+    "@types/long": "4.0.0"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*"
+    "local-node-rig": "workspace:*",
+    "typescript": "5.7.3"
   }
 }

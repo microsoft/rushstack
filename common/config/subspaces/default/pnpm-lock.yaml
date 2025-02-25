@@ -1031,6 +1031,9 @@ importers:
 
   ../../../build-tests/api-extractor-test-02:
     dependencies:
+      '@types/long':
+        specifier: 4.0.0
+        version: 4.0.0
       '@types/semver':
         specifier: 7.5.0
         version: 7.5.0
@@ -1047,6 +1050,9 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
 
   ../../../build-tests/api-extractor-test-03:
     dependencies:
@@ -27516,7 +27522,6 @@ packages:
     resolution: {integrity: sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: false
 
   /uc.micro@1.0.6:
     resolution: {integrity: sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==}
