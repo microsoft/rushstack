@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/// <reference types="node" preserve="true" />
+
 /**
  * A library for writing scripts that interact with the {@link https://rushjs.io/ | Rush} tool.
  * @packageDocumentation
