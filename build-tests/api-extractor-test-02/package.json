@@ -10,10 +10,10 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
+    "@types/long": "4.0.0",
     "@types/semver": "7.5.0",
     "api-extractor-test-01": "workspace:*",
-    "semver": "~7.5.4",
-    "@types/long": "4.0.0"
+    "semver": "~7.5.4"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
