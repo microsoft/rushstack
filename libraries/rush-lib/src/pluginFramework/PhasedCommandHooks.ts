@@ -97,7 +97,10 @@ export interface ICreateOperationsContext {
    */
   readonly rushConfiguration: RushConfiguration;
   /**
-   * If true, rush will automatically execute the dependent phases for a given phase.
+   * If true, Rush will automatically include the dependent phases for the specified set of phases.
+   * @remarks
+   * If the selection of projects was "unsafe" (i.e. missing some dependencies), this will add the
+   * minimum number of phases required to make it safe.
    */
   readonly isIncludePhaseDeps: boolean;
   /**
