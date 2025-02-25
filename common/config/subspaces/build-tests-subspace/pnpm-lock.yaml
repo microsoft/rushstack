@@ -22,9 +22,6 @@ importers:
         specifier: file:../../libraries/terminal
         version: file:../../../libraries/terminal(@types/node@20.17.19)
     devDependencies:
-      '@rushstack/eslint-config':
-        specifier: file:../../eslint/eslint-config
-        version: file:../../../eslint/eslint-config(eslint@8.57.1)(typescript@5.7.3)
       '@rushstack/heft':
         specifier: file:../../apps/heft
         version: file:../../../apps/heft(@types/node@20.17.19)
@@ -37,9 +34,6 @@ importers:
       local-node-rig:
         specifier: file:../../rigs/local-node-rig
         version: file:../../../rigs/local-node-rig
-      typescript:
-        specifier: ~5.7.3
-        version: 5.7.3
     dependenciesMeta:
       '@microsoft/rush-lib':
         injected: true
@@ -61,9 +55,6 @@ importers:
       '@microsoft/rush-lib':
         specifier: file:../../libraries/rush-lib
         version: file:../../../libraries/rush-lib(@types/node@20.17.19)
-      '@rushstack/eslint-config':
-        specifier: file:../../eslint/eslint-config
-        version: file:../../../eslint/eslint-config(eslint@8.57.1)(typescript@5.7.3)
       '@rushstack/heft':
         specifier: file:../../apps/heft
         version: file:../../../apps/heft(@types/node@20.17.19)
@@ -76,9 +67,6 @@ importers:
       local-node-rig:
         specifier: file:../../rigs/local-node-rig
         version: file:../../../rigs/local-node-rig
-      typescript:
-        specifier: ~5.7.3
-        version: 5.7.3
     dependenciesMeta:
       '@microsoft/rush-lib':
         injected: true

@@ -135,9 +135,6 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
-      typescript:
-        specifier: ~5.7.3
-        version: 5.7.3
 
   ../../../apps/heft:
     dependencies:
@@ -735,9 +732,6 @@ importers:
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
-      typescript:
-        specifier: ~5.7.3
-        version: 5.7.3
 
   ../../../build-tests-samples/heft-web-rig-library-tutorial:
     dependencies:
@@ -769,9 +763,6 @@ importers:
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
-      typescript:
-        specifier: ~5.7.3
-        version: 5.7.3
 
   ../../../build-tests-samples/heft-webpack-basic-tutorial:
     dependencies:
@@ -1050,9 +1041,6 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
-      typescript:
-        specifier: ~5.7.3
-        version: 5.7.3
 
   ../../../build-tests/api-extractor-test-03:
     dependencies:
@@ -2174,18 +2162,12 @@ importers:
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
-      eslint:
-        specifier: ~8.57.0
-        version: 8.57.0(supports-color@8.1.1)
       http-proxy:
         specifier: ~1.18.1
         version: 1.18.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
-      typescript:
-        specifier: ~5.7.3
-        version: 5.7.3
 
   ../../../build-tests/rush-lib-declaration-paths-test:
     dependencies:
@@ -2248,18 +2230,12 @@ importers:
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
-      eslint:
-        specifier: ~8.57.0
-        version: 8.57.0(supports-color@8.1.1)
       http-proxy:
         specifier: ~1.18.1
         version: 1.18.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
-      typescript:
-        specifier: ~5.7.3
-        version: 5.7.3
 
   ../../../build-tests/set-webpack-public-path-plugin-test:
     devDependencies:
