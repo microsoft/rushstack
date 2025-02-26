@@ -28,7 +28,11 @@ import type {
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 import { watchGlobAsync, type IGlobOptions } from '../../plugins/FileGlobSpecifier';
-import { type IWatchedFileState, WatchFileSystemAdapter } from '../../utilities/WatchFileSystemAdapter';
+import {
+  type IWatchedFileState,
+  type IWatchFileSystem,
+  WatchFileSystemAdapter
+} from '../../utilities/WatchFileSystemAdapter';
 
 export interface ITaskOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
@@ -171,6 +175,9 @@ export class TaskOperationRunner implements IOperationRunner {
                       ...options,
                       fs: getWatchFileSystemAdapter()
                     });
+                  },
+                  get watchFs(): IWatchFileSystem {
+                    return getWatchFileSystemAdapter();
                   },
                   requestRun: requestRun!
                 };

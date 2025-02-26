@@ -45,7 +45,14 @@ export type { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin';
 
 export type { IFileSelectionSpecifier, IGlobOptions, GlobFn, WatchGlobFn } from './plugins/FileGlobSpecifier';
 
-export type { IWatchedFileState } from './utilities/WatchFileSystemAdapter';
+export type {
+  IWatchedFileState,
+  IWatchFileSystem,
+  ReaddirDirentCallback,
+  ReaddirStringCallback,
+  StatCallback,
+  IReaddirOptions
+} from './utilities/WatchFileSystemAdapter';
 
 export {
   type IHeftRecordMetricsHookOptions,
