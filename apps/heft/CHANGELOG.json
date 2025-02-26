@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.69.0",
+      "tag": "@rushstack/heft_v0.69.0",
+      "date": "Wed, 26 Feb 2025 16:11:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose `watchFs` on the incremental run options for tasks to give more flexibility when having Heft perform file watching than only invoking globs directly."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.68.18",
       "tag": "@rushstack/heft_v0.68.18",
       "date": "Sat, 22 Feb 2025 01:11:11 GMT",

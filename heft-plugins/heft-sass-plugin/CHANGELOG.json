@@ -2,6 +2,24 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.15.17",
+      "tag": "@rushstack/heft-sass-plugin_v0.15.17",
+      "date": "Wed, 26 Feb 2025 16:11:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.18` to `0.69.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.16",
       "tag": "@rushstack/heft-sass-plugin_v0.15.16",
       "date": "Sat, 22 Feb 2025 01:11:12 GMT",

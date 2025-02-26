@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 22 Feb 2025 01:11:11 GMT and should not be manually modified.
+This log was last generated on Wed, 26 Feb 2025 16:11:11 GMT and should not be manually modified.
+
+## 0.69.0
+Wed, 26 Feb 2025 16:11:11 GMT
+
+### Minor changes
+
+- Expose `watchFs` on the incremental run options for tasks to give more flexibility when having Heft perform file watching than only invoking globs directly.
 
 ## 0.68.18
 Sat, 22 Feb 2025 01:11:11 GMT
