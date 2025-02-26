@@ -1074,6 +1074,15 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../build-tests/api-extractor-test-05:
+    dependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../build-tests/eslint-7-11-test:
     devDependencies:
       '@rushstack/eslint-config':
