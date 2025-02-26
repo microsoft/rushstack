@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type {
-  ICreateOperationsContext,
-  IPhasedCommand,
-  IRushPlugin,
-  Operation,
-  RushConfiguration,
-  RushSession
+import {
+  RushConstants,
+  type ICreateOperationsContext,
+  type IPhasedCommand,
+  type IRushPlugin,
+  type Operation,
+  type RushConfiguration,
+  type RushSession
 } from '@rushstack/rush-sdk';
 import { CommandLineParameterKind, type CommandLineStringParameter } from '@rushstack/ts-command-line';
 
@@ -52,6 +53,7 @@ export class DropBuildGraphPlugin implements IRushPlugin {
 
   public apply(session: RushSession, rushConfiguration: RushConfiguration): void {
     async function handleCreateOperationsForCommandAsync(
+      commandName: string,
       operations: Set<Operation>,
       context: ICreateOperationsContext
     ): Promise<Set<Operation>> {
@@ -60,7 +62,14 @@ export class DropBuildGraphPlugin implements IRushPlugin {
       const dropGraphParameter: CommandLineStringParameter | undefined = context.customParameters.get(
         DROP_GRAPH_PARAMETER_LONG_NAME
       ) as CommandLineStringParameter;
-      if (dropGraphParameter && dropGraphParameter.kind !== CommandLineParameterKind.String) {
+      if (!dropGraphParameter) {
+        // TODO: Introduce an API to allow plugins to register command line options for arbitrary, existing commands
+        // in a repo
+        throw new Error(
+          `The ${DROP_GRAPH_PARAMETER_LONG_NAME} parameter needs to be defined in "${RushConstants.commandLineFilename}" ` +
+            `and associated with the action "${commandName}"`
+        );
+      } else if (dropGraphParameter.kind !== CommandLineParameterKind.String) {
         throw new Error(`The ${DROP_GRAPH_PARAMETER_LONG_NAME} parameter must be a string parameter`);
       }
 
@@ -93,7 +102,8 @@ export class DropBuildGraphPlugin implements IRushPlugin {
             name: PLUGIN_NAME,
             stage: Number.MAX_SAFE_INTEGER // Run this after other plugins have created all operations
           },
-          handleCreateOperationsForCommandAsync
+          async (operations: Set<Operation>, context: ICreateOperationsContext) =>
+            await handleCreateOperationsForCommandAsync(buildXLCommandName, operations, context)
         );
       });
     }
