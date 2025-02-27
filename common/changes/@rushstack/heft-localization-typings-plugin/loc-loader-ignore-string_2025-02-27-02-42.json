@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-localization-typings-plugin",
+      "comment": "Add option \"trimmedJsonOutputFolders\" to allow the plugin to output an object mapping the string names to untranslated strings as JSON in the specified folders. This allows bundlers and unit tests to operate on those strings without special handling.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-localization-typings-plugin"
+}

@@ -8,7 +8,7 @@ import {
   type IStringValueTyping,
   type ITypingsGeneratorBaseOptions
 } from '@rushstack/typings-generator';
-import type { NewlineKind } from '@rushstack/node-core-library';
+import { FileSystem, type NewlineKind } from '@rushstack/node-core-library';
 
 import type { IgnoreStringFunction, ILocalizationFile } from './interfaces';
 import { parseLocFile } from './LocFileParser';
@@ -29,14 +29,42 @@ export interface IInferInterfaceNameExportAsDefaultOptions
  * @public
  */
 export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
+  /**
+   * Options for configuring the default export.
+   */
   exportAsDefault?: boolean | IExportAsDefaultOptions | IInferInterfaceNameExportAsDefaultOptions;
 
+  /**
+   * Normalizes the line endings in .resx files to the specified kind.
+   */
   resxNewlineNormalization?: NewlineKind | undefined;
 
+  /**
+   * If specified, the generator will write trimmed .json files to the specified folders.
+   * The .json files will be written to the same relative path as the source file.
+   * For example, if the source file is "&lt;root&gt;/foo/bar.resx", and the output folder is "dist",
+   * the trimmed .json file will be written to "dist/foo/bar.resx.json".
+   */
+  trimmedJsonOutputFolders?: string[] | undefined;
+
+  /**
+   * If true, .resx files will not throw errors if comments are missing.
+   */
   ignoreMissingResxComments?: boolean | undefined;
 
+  /**
+   * Optionally, provide a function that will be called for each string. If the function returns `true`
+   * the string will not be included.
+   */
   ignoreString?: IgnoreStringFunction;
 
+  /**
+   * Processes the raw text of a comment.
+   * @param comment - The original text of the comment to process
+   * @param relativeFilePath - The relative file path
+   * @param stringName - The name of the string that the comment is for
+   * @returns The processed comment
+   */
   processComment?: (
     comment: string | undefined,
     relativeFilePath: string,
@@ -56,20 +84,40 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
       processComment,
       resxNewlineNormalization,
       ignoreMissingResxComments,
+      trimmedJsonOutputFolders,
       exportAsDefault
     } = options;
     const inferDefaultExportInterfaceNameFromFilename: boolean | undefined =
       typeof exportAsDefault === 'object'
         ? (exportAsDefault as IInferInterfaceNameExportAsDefaultOptions).inferInterfaceNameFromFilename
         : undefined;
+
+    const getJsonPaths: ((relativePath: string) => string[]) | undefined =
+      trimmedJsonOutputFolders && trimmedJsonOutputFolders.length > 0
+        ? (relativePath: string): string[] => {
+            const jsonRelativePath: string =
+              relativePath.endsWith('.json') || relativePath.endsWith('.resjson')
+                ? relativePath
+                : `${relativePath}.json`;
+
+            const jsonPaths: string[] = [];
+            for (const outputFolder of trimmedJsonOutputFolders) {
+              jsonPaths.push(`${outputFolder}/${jsonRelativePath}`);
+            }
+            return jsonPaths;
+          }
+        : undefined;
+
     super({
       ...options,
       fileExtensions: ['.resx', '.resx.json', '.loc.json', '.resjson'],
-      parseAndGenerateTypings: (
+      getAdditionalOutputFiles: getJsonPaths,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      parseAndGenerateTypings: async (
         content: string,
         filePath: string,
         relativeFilePath: string
-      ): IStringValueTypings => {
+      ): Promise<IStringValueTypings> => {
         const locFileData: ILocalizationFile = parseLocFile({
           filePath,
           content,
@@ -81,17 +129,31 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
 
         const typings: IStringValueTyping[] = [];
 
-        // eslint-disable-next-line guard-for-in
+        const json: Record<string, string> | undefined = trimmedJsonOutputFolders ? {} : undefined;
+
         for (const [stringName, value] of Object.entries(locFileData)) {
           let comment: string | undefined = value.comment;
           if (processComment) {
             comment = processComment(comment, relativeFilePath, stringName);
           }
 
+          if (json) {
+            json[stringName] = value.value;
+          }
+
           typings.push({
             exportName: stringName,
             comment
           });
+        }
+
+        if (getJsonPaths) {
+          const jsonBuffer: Buffer = Buffer.from(JSON.stringify(json), 'utf8');
+          for (const jsonFile of getJsonPaths(relativeFilePath)) {
+            await FileSystem.writeFileAsync(jsonFile, jsonBuffer, {
+              ensureFolderExists: true
+            });
+          }
         }
 
         if (inferDefaultExportInterfaceNameFromFilename) {

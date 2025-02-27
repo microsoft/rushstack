@@ -84,16 +84,12 @@ export interface IPseudolocaleOptions {
 
 // @public (undocumented)
 export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
-    // (undocumented)
     exportAsDefault?: boolean | IExportAsDefaultOptions | IInferInterfaceNameExportAsDefaultOptions;
-    // (undocumented)
     ignoreMissingResxComments?: boolean | undefined;
-    // (undocumented)
     ignoreString?: IgnoreStringFunction;
-    // (undocumented)
     processComment?: (comment: string | undefined, relativeFilePath: string, stringName: string) => string | undefined;
-    // (undocumented)
     resxNewlineNormalization?: NewlineKind | undefined;
+    trimmedJsonOutputFolders?: string[] | undefined;
 }
 
 // @public (undocumented)

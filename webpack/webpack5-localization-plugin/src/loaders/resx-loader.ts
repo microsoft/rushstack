@@ -19,7 +19,8 @@ const loader: LoaderDefinitionFunction<IResxLocLoaderOptions> = createLoader(
       filePath,
       terminal,
       resxNewlineNormalization: options.resxNewlineNormalization,
-      ignoreMissingResxComments: !options.ignoreMissingResxComments
+      ignoreMissingResxComments: !options.ignoreMissingResxComments,
+      ignoreString: options.ignoreString
     });
   }
 );
