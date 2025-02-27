@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Thu, 27 Feb 2025 01:10:39 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Feb 2025 16:10:47 GMT and should not be manually modified.
+
+## 0.13.0
+Thu, 27 Feb 2025 16:10:47 GMT
+
+### Minor changes
+
+- Support passing the `ignoreString` option to all loaders.
 
 ## 0.12.6
 Thu, 27 Feb 2025 01:10:39 GMT

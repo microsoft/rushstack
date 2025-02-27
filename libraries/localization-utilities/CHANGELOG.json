@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-utilities",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@rushstack/localization-utilities_v0.13.0",
+      "date": "Thu, 27 Feb 2025 16:10:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update `loc.json` format to allow keys to be mapped to raw strings. This is useful so that the file name can be preserved for a strings file that can be directly imported at runtime."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.24",
       "tag": "@rushstack/localization-utilities_v0.12.24",
       "date": "Thu, 27 Feb 2025 01:10:39 GMT",

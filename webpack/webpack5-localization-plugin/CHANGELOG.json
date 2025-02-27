@@ -2,6 +2,23 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.13.0",
+      "date": "Thu, 27 Feb 2025 16:10:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support passing the `ignoreString` option to all loaders."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.6",
       "tag": "@rushstack/webpack5-localization-plugin_v0.12.6",
       "date": "Thu, 27 Feb 2025 01:10:39 GMT",

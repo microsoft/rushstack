@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-localization-typings-plugin",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/heft-localization-typings-plugin_v0.3.0",
+      "date": "Thu, 27 Feb 2025 16:10:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add option \"trimmedJsonOutputFolders\" to allow the plugin to output an object mapping the string names to untranslated strings as JSON in the specified folders. This allows bundlers and unit tests to operate on those strings without special handling."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.24",
       "tag": "@rushstack/heft-localization-typings-plugin_v0.2.24",
       "date": "Thu, 27 Feb 2025 01:10:39 GMT",

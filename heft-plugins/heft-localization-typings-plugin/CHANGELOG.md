@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-localization-typings-plugin
 
-This log was last generated on Thu, 27 Feb 2025 01:10:39 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Feb 2025 16:10:47 GMT and should not be manually modified.
+
+## 0.3.0
+Thu, 27 Feb 2025 16:10:47 GMT
+
+### Minor changes
+
+- Add option "trimmedJsonOutputFolders" to allow the plugin to output an object mapping the string names to untranslated strings as JSON in the specified folders. This allows bundlers and unit tests to operate on those strings without special handling.
 
 ## 0.2.24
 Thu, 27 Feb 2025 01:10:39 GMT
