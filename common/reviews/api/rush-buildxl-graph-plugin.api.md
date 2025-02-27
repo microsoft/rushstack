@@ -10,6 +10,7 @@ import { RushSession } from '@rushstack/rush-sdk';
 
 // @public
 class DropBuildGraphPlugin implements IRushPlugin {
+    constructor(options: IDropGraphPluginOptions);
     // (undocumented)
     apply(session: RushSession, rushConfiguration: RushConfiguration): void;
     // (undocumented)
@@ -28,12 +29,18 @@ export interface IBuildXLRushGraph {
 }
 
 // @public (undocumented)
+export interface IDropGraphPluginOptions {
+    buildXLCommandNames: string[];
+}
+
+// @public (undocumented)
 export interface IGraphNode {
     command: string;
     dependencies: string[];
     id: string;
     package: string;
     task: string;
+    uncacheable?: true;
     workingDirectory: string;
 }
 
