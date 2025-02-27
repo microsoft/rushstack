@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 19 Feb 2025 18:54:06 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Feb 2025 17:41:59 GMT and should not be manually modified.
+
+## 5.150.0
+Thu, 27 Feb 2025 17:41:59 GMT
+
+### Updates
+
+- Add an `--include-phase-deps` switch that expands an unsafe project selection to include its phase dependencies
 
 ## 5.149.1
 Wed, 19 Feb 2025 18:54:06 GMT

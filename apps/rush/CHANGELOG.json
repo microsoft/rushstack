@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.150.0",
+      "tag": "@microsoft/rush_v5.150.0",
+      "date": "Thu, 27 Feb 2025 17:41:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add an `--include-phase-deps` switch that expands an unsafe project selection to include its phase dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.149.1",
       "tag": "@microsoft/rush_v5.149.1",
       "date": "Wed, 19 Feb 2025 18:54:06 GMT",
