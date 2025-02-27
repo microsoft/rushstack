@@ -155,6 +155,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _variantParameter: CommandLineStringParameter | undefined;
   private readonly _noIPCParameter: CommandLineFlagParameter | undefined;
   private readonly _nodeDiagnosticDirParameter: CommandLineStringParameter;
+  private readonly _includePhaseDeps: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -226,6 +227,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       parameterLongName: '--verbose',
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
+    });
+
+    this._includePhaseDeps = this.defineFlagParameter({
+      parameterLongName: '--include-phase-deps',
+      description:
+        'If the selected projects are "unsafe" (missing some dependencies), add the minimal set of phase dependencies. For example, ' +
+        `"--from A" normally might include the "_phase:test" phase for A's dependencies, even though changes to A can't break those tests. ` +
+        `Using "--impacted-by A --include-phase-deps" avoids that work by performing "_phase:test" only for downstream projects.`
     });
 
     if (this._isIncrementalBuildAllowed) {
@@ -376,6 +385,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       new ConsoleTimelinePlugin(terminal).apply(this.hooks);
     }
 
+    const includePhaseDeps: boolean = this._includePhaseDeps?.value ?? false;
+
     const diagnosticDir: string | undefined = this._nodeDiagnosticDirParameter.value;
     if (diagnosticDir) {
       new NodeDiagnosticDirPlugin({
@@ -508,6 +519,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         rushConfiguration: this.rushConfiguration,
         phaseOriginal: new Set(this._originalPhases),
         phaseSelection: new Set(this._initialPhases),
+        includePhaseDeps,
         projectSelection,
         projectConfigurations,
         projectsInUnknownState: projectSelection

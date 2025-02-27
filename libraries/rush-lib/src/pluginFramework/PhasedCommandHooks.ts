@@ -97,6 +97,13 @@ export interface ICreateOperationsContext {
    */
   readonly rushConfiguration: RushConfiguration;
   /**
+   * If true, Rush will automatically include the dependent phases for the specified set of phases.
+   * @remarks
+   * If the selection of projects was "unsafe" (i.e. missing some dependencies), this will add the
+   * minimum number of phases required to make it safe.
+   */
+  readonly includePhaseDeps: boolean;
+  /**
    * Marks an operation's result as invalid, potentially triggering a new build. Only applicable in watch mode.
    * @param operation - The operation to invalidate
    * @param reason - The reason for invalidating the operation
