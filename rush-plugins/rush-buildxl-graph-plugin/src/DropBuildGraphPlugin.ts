@@ -103,7 +103,7 @@ export class DropBuildGraphPlugin implements IRushPlugin {
             stage: Number.MAX_SAFE_INTEGER // Run this after other plugins have created all operations
           },
           async (operations: Set<Operation>, context: ICreateOperationsContext) =>
-            await handleCreateOperationsForCommandAsync(buildXLCommandName, operations, context)
+            await handleCreateOperationsForCommandAsync(command.actionName, operations, context)
         );
       });
     }
