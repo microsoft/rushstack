@@ -24,7 +24,9 @@
                 "interfaceDocumentationComment": "This interface represents a JSON object that has been loaded from a localization file.",
                 "valueDocumentationComment": "@public",
                 "inferInterfaceNameFromFilename": true
-              }
+              },
+              "stringNamesToIgnore": ["__IGNORED_STRING__"],
+              "trimmedJsonOutputFolders": ["temp/loc-raw"]
             }
           }
         },

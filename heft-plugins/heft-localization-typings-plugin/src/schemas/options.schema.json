@@ -53,6 +53,14 @@
       "description": "Source code root directory. Defaults to \"src/\"."
     },
 
+    "trimmedJsonOutputFolders": {
+      "type": "array",
+      "description": "Output folders, relative to the project root, where JSON files that have had comments and any ignored strings discarded should be emitted to.",
+      "items": {
+        "type": "string"
+      }
+    },
+
     "generatedTsFolder": {
       "type": "string",
       "description": "Output directory for generated typings. Defaults to \"temp/loc-ts/\"."

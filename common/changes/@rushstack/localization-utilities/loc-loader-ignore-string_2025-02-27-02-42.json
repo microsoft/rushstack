@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-utilities",
+      "comment": "Update `loc.json` format to allow keys to be mapped to raw strings. This is useful so that the file name can be preserved for a strings file that can be directly imported at runtime.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-utilities"
+}

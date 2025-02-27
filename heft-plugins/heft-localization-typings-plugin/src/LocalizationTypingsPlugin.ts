@@ -25,6 +25,13 @@ export interface ILocalizationTypingsPluginOptions {
   generatedTsFolder?: string;
 
   /**
+   * Folders, relative to the project root, where JSON files containing only the key/string pairs should be emitted to.
+   * These files will be emitted as `.resx.json`, `.loc.json`, or `.resjson`, depending on the input file extension.
+   * The intent is that bundlers can find these files and load them to receive the original untranslated strings.
+   */
+  trimmedJsonOutputFolders?: string[];
+
+  /**
    * Additional folders, relative to the project root, where the generated typings should be emitted to.
    */
   secondaryGeneratedTsFolders?: string[];
@@ -49,7 +56,8 @@ export default class LocalizationTypingsPlugin implements IHeftTaskPlugin<ILocal
       srcFolder,
       generatedTsFolder,
       stringNamesToIgnore,
-      secondaryGeneratedTsFolders: secondaryGeneratedTsFoldersFromOptions
+      secondaryGeneratedTsFolders: secondaryGeneratedTsFoldersFromOptions,
+      trimmedJsonOutputFolders: trimmedJsonOutputFoldersFromOptions
     } = options ?? {};
 
     let secondaryGeneratedTsFolders: string[] | undefined;
@@ -57,6 +65,14 @@ export default class LocalizationTypingsPlugin implements IHeftTaskPlugin<ILocal
       secondaryGeneratedTsFolders = [];
       for (const secondaryGeneratedTsFolder of secondaryGeneratedTsFoldersFromOptions) {
         secondaryGeneratedTsFolders.push(`${slashNormalizedBuildFolderPath}/${secondaryGeneratedTsFolder}`);
+      }
+    }
+
+    let trimmedJsonOutputFolders: string[] | undefined;
+    if (trimmedJsonOutputFoldersFromOptions) {
+      trimmedJsonOutputFolders = [];
+      for (const trimmedJsonOutputFolder of trimmedJsonOutputFoldersFromOptions) {
+        trimmedJsonOutputFolders.push(`${slashNormalizedBuildFolderPath}/${trimmedJsonOutputFolder}`);
       }
     }
 
