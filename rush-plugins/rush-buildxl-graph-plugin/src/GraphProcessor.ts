@@ -68,9 +68,14 @@ export interface IGraphNode {
    * The IDs of the dependencies of the Pip. These are the {@link IGraphNode.id} properties of other Pips.
    */
   dependencies: string[];
+
+  /**
+   * If true, the Pip is uncacheable
+   */
+  uncacheable?: true;
 }
 
-interface IGraphNodeInternal extends Readonly<Omit<IGraphNode, 'dependencies' | 'command'>> {
+interface IGraphNodeInternal extends Omit<IGraphNode, 'dependencies' | 'command'> {
   dependencies: ReadonlySet<string>;
   command: string | undefined;
 }
@@ -176,8 +181,10 @@ export class GraphProcessor {
         nonEmptyDependencies = new Set();
         nonEmptyDependenciesByOperation.set(node, nonEmptyDependencies);
         for (const dependencyID of node.dependencies) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           if (!inputNodeMap.get(dependencyID)!.command) {
             // If the dependency is empty, recursively inherit its non-empty dependencies
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             for (const deepDependency of getNonEmptyDependencies(inputNodeMap.get(dependencyID)!)) {
               nonEmptyDependencies.add(deepDependency);
             }
@@ -226,6 +233,10 @@ export class GraphProcessor {
       workingDirectory: operation.associatedProject?.projectFolder,
       command: (operation.runner as ShellOperationRunner | undefined)?.commandToRun
     };
+
+    if (operation.settings?.disableBuildCacheForOperation) {
+      node.uncacheable = true;
+    }
 
     const missingFields: (keyof IGraphNodeInternal)[] = [];
     for (const requiredField of REQUIRED_FIELDS) {

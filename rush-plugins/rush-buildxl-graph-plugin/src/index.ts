@@ -3,5 +3,6 @@
 
 export type { IBuildXLRushGraph } from './DropBuildGraphPlugin';
 export type { IGraphNode } from './GraphProcessor';
+export type { IDropGraphPluginOptions } from './DropBuildGraphPlugin';
 import { DropBuildGraphPlugin } from './DropBuildGraphPlugin';
 export default DropBuildGraphPlugin;
