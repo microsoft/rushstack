@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-localization-typings-plugin",
-  "version": "0.2.24",
+  "version": "0.3.0",
   "description": "Heft plugin for generating types for localization files.",
   "repository": {
     "type": "git",
