@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 22 Feb 2025 01:11:11 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Feb 2025 01:10:39 GMT and should not be manually modified.
+
+## 7.51.0
+Thu, 27 Feb 2025 01:10:39 GMT
+
+### Minor changes
+
+- Add a `docModel.releaseTagsToTrim` property to `api-extractor.json` to specify which release tags should be trimmed when the doc model is produced.
 
 ## 7.50.1
 Sat, 22 Feb 2025 01:11:11 GMT
