@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "suport users to provide their own assets when init a new subspace instead of always using the default one",
+      "comment": "Allow a monorepo to provide custom config file templates for the `rush init-subspace` command",
       "type": "none"
     }
   ],
