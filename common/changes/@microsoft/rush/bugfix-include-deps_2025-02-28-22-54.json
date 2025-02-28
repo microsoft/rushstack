@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a bug that included excess operations during watch mode builds in response to changes and when using `--include-phase-deps`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

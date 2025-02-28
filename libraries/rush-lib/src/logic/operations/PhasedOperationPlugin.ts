@@ -37,29 +37,61 @@ function createOperations(
     includePhaseDeps,
     isInitial
   } = context;
-  const operationsWithWork: Set<Operation> = new Set();
 
   const operations: Map<string, Operation> = new Map();
 
   // Create tasks for selected phases and projects
+  // This also creates the minimal set of dependencies needed
   for (const phase of phaseOriginal) {
     for (const project of projectSelection) {
       getOrCreateOperation(phase, project);
     }
   }
 
-  // Recursively expand all consumers in the `operationsWithWork` set.
+  // Grab all operations that were explicitly requested.
+  const operationsWithWork: Set<Operation> = new Set();
+  for (const operation of existingOperations) {
+    const { associatedPhase, associatedProject } = operation;
+    if (!associatedPhase || !associatedProject) {
+      // Fix this when these are required properties.
+      continue;
+    }
+
+    if (phaseSelection.has(associatedPhase) && changedProjects.has(associatedProject)) {
+      operationsWithWork.add(operation);
+    }
+  }
+
+  // Add all operations that are selected that depend on the explicitly requested operations.
+  // This will mostly be relevant during watch; in initial runs it should not add any new operations.
   for (const operation of operationsWithWork) {
     for (const consumer of operation.consumers) {
       operationsWithWork.add(consumer);
     }
   }
 
-  for (const operation of operations.values()) {
-    if (!operationsWithWork.has(operation)) {
-      // This operation is in scope, but did not change since it was last executed by the current command.
-      // However, we have no state tracking across executions, so treat as unknown.
-      operation.enabled = false;
+  if (includePhaseDeps && isInitial) {
+    // Add all operations that are dependencies of the operations already scheduled.
+    for (const operation of operationsWithWork) {
+      for (const dependency of operation.dependencies) {
+        operationsWithWork.add(dependency);
+      }
+    }
+  }
+
+  for (const operation of existingOperations) {
+    // Enable exactly the set of operations that are requested.
+    operation.enabled &&= operationsWithWork.has(operation);
+
+    if (!includePhaseDeps || !isInitial) {
+      const { associatedPhase, associatedProject } = operation;
+      if (!associatedPhase || !associatedProject) {
+        // Fix this when these are required properties.
+        continue;
+      }
+
+      // This filter makes the "unsafe" selections happen.
+      operation.enabled &&= phaseSelection.has(associatedPhase) && projectSelection.has(associatedProject);
     }
   }
 
@@ -85,17 +117,6 @@ function createOperations(
         settings: operationSettings,
         logFilenameIdentifier: logFilenameIdentifier
       });
-
-      if (!phaseSelection.has(phase) || !projectSelection.has(project)) {
-        if (includePhaseDeps && isInitial) {
-          operationsWithWork.add(operation);
-        } else {
-          // Not in scope. Mark disabled, which will report as OperationStatus.Skipped.
-          operation.enabled = false;
-        }
-      } else if (changedProjects.has(project)) {
-        operationsWithWork.add(operation);
-      }
 
       operations.set(key, operation);
       existingOperations.add(operation);
