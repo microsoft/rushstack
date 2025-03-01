@@ -2377,8 +2377,8 @@ importers:
         specifier: 8.56.10
         version: 8.56.10
       '@types/estree':
-        specifier: 1.0.5
-        version: 1.0.5
+        specifier: 1.0.6
+        version: 1.0.6
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -2423,8 +2423,8 @@ importers:
         specifier: 8.56.10
         version: 8.56.10
       '@types/estree':
-        specifier: 1.0.5
-        version: 1.0.5
+        specifier: 1.0.6
+        version: 1.0.6
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -2469,8 +2469,8 @@ importers:
         specifier: 8.56.10
         version: 8.56.10
       '@types/estree':
-        specifier: 1.0.5
-        version: 1.0.5
+        specifier: 1.0.6
+        version: 1.0.6
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -4293,8 +4293,8 @@ importers:
         specifier: workspace:*
         version: link:../../apps/heft
       '@types/estree':
-        specifier: 1.0.5
-        version: 1.0.5
+        specifier: 1.0.6
+        version: 1.0.6
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4600,8 +4600,8 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/worker-pool
       '@types/estree':
-        specifier: 1.0.5
-        version: 1.0.5
+        specifier: 1.0.6
+        version: 1.0.6
       '@types/tapable':
         specifier: 1.0.6
         version: 1.0.6
@@ -12978,7 +12978,7 @@ packages:
     resolution: {integrity: sha512-MzMFlSLBqNF2gcHWO0G1vP/YQyfvrxZ0bF+u7mzUdZ1/xK4A4sru+nraZz5i3iEIk1l1uyicaDVTB4QbbEkAYg==}
     dependencies:
       '@types/eslint': 8.56.10
-      '@types/estree': 1.0.5
+      '@types/estree': 1.0.6
 
   /@types/eslint@8.56.10:
     resolution: {integrity: sha512-Shavhk87gCtY2fhXDctcfS3e6FdxWkCx1iUZ9eEUbh7rTqlZT0/IzOkCOVt0fCjcFuZ9FPYfuezTBImfHCDBGQ==}
