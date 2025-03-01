@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 27 Feb 2025 01:10:39 GMT and should not be manually modified.
+This log was last generated on Sat, 01 Mar 2025 05:00:09 GMT and should not be manually modified.
+
+## 7.51.1
+Sat, 01 Mar 2025 05:00:09 GMT
+
+### Patches
+
+- Include triple-slash references marked with `preserve="true"` from files that only contain re-exports. There was a behavior change in TypeScript 5.5, where only triple-slash references that are explicitly marked with `preserve="true"` are emitted into declaration files. This change adds support for placing these references in files that only contain re-exports, like the API entrypoint file.
 
 ## 7.51.0
 Thu, 27 Feb 2025 01:10:39 GMT
