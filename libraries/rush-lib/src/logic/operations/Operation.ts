@@ -49,12 +49,12 @@ export interface IOperationOptions {
  */
 export class Operation {
   /**
-   * The Rush phase associated with this Operation, if any
+   * The Rush phase associated with this Operation
    */
   public readonly associatedPhase: IPhase;
 
   /**
-   * The Rush project associated with this Operation, if any
+   * The Rush project associated with this Operation
    */
   public readonly associatedProject: RushConfigurationProject;
 

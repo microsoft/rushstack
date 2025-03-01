@@ -645,7 +645,7 @@ export interface IOperationRunnerContext {
     environment: IEnvironment | undefined;
     error?: Error;
     // @internal
-    _operationMetadataManager?: _OperationMetadataManager;
+    _operationMetadataManager: _OperationMetadataManager;
     quietMode: boolean;
     runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, options: {
         createLogFile: boolean;
