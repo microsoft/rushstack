@@ -1016,7 +1016,7 @@ export class Collector {
   }
 
   private _collectReferenceDirectives(astEntity: AstEntity): void {
-    // Here, we're collecting reference directives from source files that contain
+    // Here, we're collecting reference directives from source files that contain extracted
     // definitions (i.e. - files that contain `export class ...`, `export interface ...`, ...).
     // These references may or may not include the `preserve="true" attribute. In TS < 5.5,
     // references that end up in .D.TS files may or may not be explicity written by the developer.
