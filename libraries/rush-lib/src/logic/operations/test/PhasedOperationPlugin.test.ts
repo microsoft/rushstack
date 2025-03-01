@@ -5,6 +5,7 @@ import path from 'path';
 import { JsonFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import {
   CommandLineConfiguration,
   type IPhase,
@@ -19,7 +20,6 @@ import {
   type ICreateOperationsContext,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
-import type { RushConfigurationProject } from '../../..';
 
 interface ISerializedOperation {
   name: string;
