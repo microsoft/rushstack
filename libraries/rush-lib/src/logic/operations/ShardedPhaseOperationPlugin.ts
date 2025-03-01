@@ -56,7 +56,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       settings: operationSettings,
       logFilenameIdentifier: baseLogFilenameIdentifier
     } = operation;
-    if (phase && project && operationSettings?.sharding && !operation.runner) {
+    if (operationSettings?.sharding && !operation.runner) {
       const { count: shards } = operationSettings.sharding;
 
       /**

@@ -32,7 +32,7 @@ export interface IOperationRunnerContext {
    *
    * @internal
    */
-  _operationMetadataManager?: OperationMetadataManager;
+  _operationMetadataManager: OperationMetadataManager;
   /**
    * Object used to track elapsed time.
    */

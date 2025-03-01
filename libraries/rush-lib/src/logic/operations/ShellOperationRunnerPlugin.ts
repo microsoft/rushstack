@@ -36,7 +36,7 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project } = operation;
 
-          if (phase && project && !operation.runner) {
+          if (!operation.runner) {
             // This is a shell command. In the future, may consider having a property on the initial operation
             // to specify a runner type requested in rush-project.json
             const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);

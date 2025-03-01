@@ -759,11 +759,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     function invalidateOperation(operation: Operation, reason: string): void {
       const { associatedProject } = operation;
-      if (associatedProject) {
-        // Since ProjectWatcher only tracks entire projects, widen the operation to its project
-        // Revisit when migrating to @rushstack/operation-graph and we have a long-lived operation graph
-        projectWatcher.invalidateProject(associatedProject, `${operation.name!} (${reason})`);
-      }
+      // Since ProjectWatcher only tracks entire projects, widen the operation to its project
+      // Revisit when migrating to @rushstack/operation-graph and we have a long-lived operation graph
+      projectWatcher.invalidateProject(associatedProject, `${operation.name!} (${reason})`);
     }
 
     // Loop until Ctrl+C

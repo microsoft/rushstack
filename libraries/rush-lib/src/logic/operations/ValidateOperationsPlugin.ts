@@ -36,7 +36,7 @@ export class ValidateOperationsPlugin implements IPhasedCommandPlugin {
   ): void {
     const phasesByProject: Map<RushConfigurationProject, Set<IPhase>> = new Map();
     for (const { associatedPhase, associatedProject, runner } of records.keys()) {
-      if (associatedProject && associatedPhase && !runner?.isNoOp) {
+      if (!runner?.isNoOp) {
         // Ignore operations that aren't associated with a project or phase, or that
         // use the NullOperationRunner (i.e. - the phase doesn't do anything)
         let projectPhases: Set<IPhase> | undefined = phasesByProject.get(associatedProject);

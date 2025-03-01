@@ -102,18 +102,13 @@ export class ProjectBuildCache {
     operation: OperationExecutionRecord,
     options: IOperationBuildCacheOptions
   ): ProjectBuildCache {
-    if (!operation.associatedProject) {
-      throw new InternalError('Operation must have an associated project');
-    }
-    if (!operation.associatedPhase) {
-      throw new InternalError('Operation must have an associated phase');
-    }
     const outputFolders: string[] = [...(operation.operation.settings?.outputFolderNames ?? [])];
     if (operation.metadataFolderPath) {
       outputFolders.push(operation.metadataFolderPath);
     }
     const buildCacheOptions: IProjectBuildCacheOptions = {
-      ...options,
+      buildCacheConfiguration: options.buildCacheConfiguration,
+      terminal: options.terminal,
       project: operation.associatedProject,
       phaseName: operation.associatedPhase.name,
       projectOutputFolderNames: outputFolders,

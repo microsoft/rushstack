@@ -19,16 +19,16 @@ const mockWritable: MockWritable = new MockWritable();
 const mockTerminal: Terminal = new Terminal(new CollatedTerminalProvider(new CollatedTerminal(mockWritable)));
 
 const operation = new Operation({
-  logFilenameIdentifier: 'identifier'
-});
-
-const manager: OperationMetadataManager = new OperationMetadataManager({
-  rushProject: {
+  logFilenameIdentifier: 'identifier',
+  project: {
     projectFolder: '/path/to/project'
   } as unknown as RushConfigurationProject,
   phase: {
     logFilenameIdentifier: 'identifier'
-  } as unknown as IPhase,
+  } as unknown as IPhase
+});
+
+const manager: OperationMetadataManager = new OperationMetadataManager({
   operation
 });
 

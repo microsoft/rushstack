@@ -51,7 +51,7 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project, runner } = operation;
 
-          if (runner || !phase || !project) {
+          if (runner) {
             continue;
           }
 

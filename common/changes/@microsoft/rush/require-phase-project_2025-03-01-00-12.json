@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(plugin-api) Guaranteed `operation.associatedPhase` and `operation.associatedProject` are not undefined.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

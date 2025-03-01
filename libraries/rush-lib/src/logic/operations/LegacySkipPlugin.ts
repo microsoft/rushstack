@@ -77,8 +77,8 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
         for (const record of operations.values()) {
           const { operation } = record;
-          const { associatedProject, runner, logFilenameIdentifier } = operation;
-          if (!associatedProject || !runner) {
+          const { associatedProject, associatedPhase, runner, logFilenameIdentifier } = operation;
+          if (!runner) {
             continue;
           }
 
@@ -102,10 +102,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
           try {
             const fileHashes: ReadonlyMap<string, string> | undefined =
-              inputsSnapshot?.getTrackedFileHashesForOperation(
-                associatedProject,
-                operation.associatedPhase?.name
-              );
+              inputsSnapshot?.getTrackedFileHashesForOperation(associatedProject, associatedPhase.name);
 
             if (!fileHashes) {
               logGitWarning = true;
@@ -205,7 +202,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
         }
 
         // TODO: Remove legacyDepsPath with the next major release of Rush
-        const legacyDepsPath: string = path.join(associatedProject!.projectFolder, 'package-deps.json');
+        const legacyDepsPath: string = path.join(associatedProject.projectFolder, 'package-deps.json');
 
         await Promise.all([
           // Delete the legacy package-deps.json

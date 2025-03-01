@@ -438,6 +438,16 @@ Array [
   },
   Object {
     "kind": "O",
+    "text": "BY PHASE:
+",
+  },
+  Object {
+    "kind": "O",
+    "text": "  [cyan]           phase[default] 0.2s
+",
+  },
+  Object {
+    "kind": "O",
     "text": "
 ",
   },
