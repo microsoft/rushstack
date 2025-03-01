@@ -15,7 +15,13 @@ import type {
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions,
   ICopyOperation,
-  IHeftTaskFileOperations
+  IHeftTaskFileOperations,
+  JsEmitKindsPluginName,
+  IJsEmitKindsPluginAccessor,
+  IJsEmitKind,
+  IScopedLogger,
+  ModuleKind,
+  ScriptTarget
 } from '@rushstack/heft';
 
 import { TypeScriptBuilder, type ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
@@ -103,6 +109,8 @@ export interface ITypeScriptConfigurationJson {
  */
 export interface IPartialTsconfigCompilerOptions {
   outDir?: string;
+  module?: keyof TTypescript.ModuleKind;
+  target?: keyof TTypescript.ScriptTarget;
 }
 
 /**
@@ -156,6 +164,11 @@ export async function loadTypeScriptConfigurationFileAsync(
           staticAssetsToCopy: {
             // When merging objects, arrays will be automatically appended
             inheritanceType: InheritanceType.merge
+          }
+        },
+        jsonPathMetadata: {
+          '$.additionalModuleKindsToEmit.*.outFolderName': {
+            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
           }
         }
       });
@@ -241,12 +254,30 @@ export async function loadPartialTsconfigFileAsync(
   return await partialTsconfigFilePromise;
 }
 
+interface ITypeScriptConfigurationJsonAndPartialTsconfigFile {
+  configJson: ITypeScriptConfigurationJson | undefined;
+  tsConfigFile: IPartialTsconfig | undefined;
+}
+
+const jsEmitKindsPluginName: JsEmitKindsPluginName = 'js-emit-kinds-plugin';
+
 export default class TypeScriptPlugin implements IHeftTaskPlugin {
   public accessor: ITypeScriptPluginAccessor = {
     onChangedFilesHook: new SyncHook<IChangedFilesHookOptions>(['changedFilesHookOptions'])
   };
 
+  private _jsEmitKindPluginAccessor: IJsEmitKindsPluginAccessor | undefined;
+  private _validatedEmitKinds: boolean = false;
+
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
+    taskSession.requestAccessToPluginByName<IJsEmitKindsPluginAccessor>(
+      '@rushstack/heft',
+      jsEmitKindsPluginName,
+      (accessor: IJsEmitKindsPluginAccessor) => {
+        this._jsEmitKindPluginAccessor = accessor;
+      }
+    );
+
     taskSession.hooks.registerFileOperations.tapPromise(
       PLUGIN_NAME,
       async (fileOperations: IHeftTaskFileOperations): Promise<IHeftTaskFileOperations> => {
@@ -295,8 +326,8 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<ICopyOperation[]> {
-    const typeScriptConfiguration: ITypeScriptConfigurationJson | undefined =
-      await loadTypeScriptConfigurationFileAsync(heftConfiguration, taskSession.logger.terminal);
+    const { configJson: typeScriptConfiguration, tsConfigFile: tsconfigFile } =
+      await this._loadAndValidateConfigAsync(taskSession, heftConfiguration);
 
     // We only care about the copy if static assets were specified.
     const copyOperations: ICopyOperation[] = [];
@@ -308,16 +339,13 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       const destinationFolderPaths: Set<string> = new Set<string>();
 
       // Add the output folder and all additional module kind output folders as destinations
-      const tsconfigOutDir: string | undefined = await this._getTsconfigOutDirAsync(
-        taskSession,
-        heftConfiguration,
-        typeScriptConfiguration
-      );
+      const tsconfigOutDir: string | undefined = tsconfigFile?.compilerOptions?.outDir;
       if (tsconfigOutDir) {
         destinationFolderPaths.add(tsconfigOutDir);
       }
+
       for (const emitModule of typeScriptConfiguration?.additionalModuleKindsToEmit || []) {
-        destinationFolderPaths.add(`${heftConfiguration.buildFolderPath}/${emitModule.outFolderName}`);
+        destinationFolderPaths.add(emitModule.outFolderName);
       }
 
       copyOperations.push({
@@ -330,6 +358,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         hardlink: false
       });
     }
+
     return copyOperations;
   }
 
@@ -339,14 +368,8 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
   ): Promise<TypeScriptBuilder | false> {
     const terminal: ITerminal = taskSession.logger.terminal;
 
-    const typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
-      await loadTypeScriptConfigurationFileAsync(heftConfiguration, terminal);
-
-    const partialTsconfigFile: IPartialTsconfig | undefined = await loadPartialTsconfigFileAsync(
-      heftConfiguration,
-      terminal,
-      typeScriptConfigurationJson
-    );
+    const { configJson: typeScriptConfigurationJson, tsConfigFile: partialTsconfigFile } =
+      await this._loadAndValidateConfigAsync(taskSession, heftConfiguration);
 
     if (!partialTsconfigFile) {
       // There is no tsconfig file, we can exit early
@@ -394,16 +417,105 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     return typeScriptBuilder;
   }
 
-  private async _getTsconfigOutDirAsync(
+  private async _loadAndValidateConfigAsync(
     taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
-    typeScriptConfiguration: ITypeScriptConfigurationJson | undefined
-  ): Promise<string | undefined> {
+    heftConfiguration: HeftConfiguration
+  ): Promise<ITypeScriptConfigurationJsonAndPartialTsconfigFile> {
+    const terminal: ITerminal = taskSession.logger.terminal;
+
+    const typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
+      await loadTypeScriptConfigurationFileAsync(heftConfiguration, terminal);
+
     const partialTsconfigFile: IPartialTsconfig | undefined = await loadPartialTsconfigFileAsync(
       heftConfiguration,
-      taskSession.logger.terminal,
-      typeScriptConfiguration
+      terminal,
+      typeScriptConfigurationJson
     );
-    return partialTsconfigFile?.compilerOptions?.outDir;
+
+    if (partialTsconfigFile) {
+      this._validateEmitKinds(taskSession.logger, typeScriptConfigurationJson, partialTsconfigFile);
+    }
+
+    return {
+      configJson: typeScriptConfigurationJson,
+      tsConfigFile: partialTsconfigFile
+    };
+  }
+
+  private _validateEmitKinds(
+    logger: IScopedLogger,
+    typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined,
+    partialTsconfigFile: IPartialTsconfig
+  ): void {
+    if (this._validatedEmitKinds) {
+      return;
+    }
+
+    this._validatedEmitKinds = true;
+
+    const locallyConfiguredOutputKinds: Map<string, IJsEmitKind> = new Map();
+    const { compilerOptions } = partialTsconfigFile;
+    let configuredTarget: ScriptTarget | undefined;
+    if (compilerOptions?.outDir) {
+      const { outDir, target = 'ES5' } = compilerOptions;
+
+      const { module = target === 'ES5' ? 'CommonJS' : 'ES2015' } = compilerOptions;
+
+      configuredTarget = target.toLowerCase() as ScriptTarget;
+
+      locallyConfiguredOutputKinds.set(outDir, {
+        outputFolder: outDir,
+        moduleKind: module.toLowerCase() as ModuleKind,
+        target: configuredTarget
+      });
+    }
+
+    if (typeScriptConfigurationJson) {
+      const { additionalModuleKindsToEmit } = typeScriptConfigurationJson;
+      if (additionalModuleKindsToEmit) {
+        for (const emitKind of additionalModuleKindsToEmit) {
+          locallyConfiguredOutputKinds.set(emitKind.outFolderName, {
+            outputFolder: emitKind.outFolderName,
+            moduleKind: emitKind.moduleKind as ModuleKind,
+            target: configuredTarget ?? 'esnext'
+          });
+        }
+      }
+    }
+
+    const jsEmitKindAccessor: IJsEmitKindsPluginAccessor | undefined = this._jsEmitKindPluginAccessor;
+    if (jsEmitKindAccessor) {
+      const { emitKinds: globalEmitKinds, taskName: emitKindTaskName } = jsEmitKindAccessor;
+      for (const [outputFolder, emitKind] of locallyConfiguredOutputKinds) {
+        const globalEmitKind: IJsEmitKind | undefined = globalEmitKinds.get(outputFolder);
+        if (!globalEmitKind) {
+          logger.emitWarning(
+            new Error(
+              `The TypeScript plugin is emitting "${emitKind.moduleKind}" modules targeting "${emitKind.target}" to the "${outputFolder}" folder, but this folder has not been registered globally. Please remove the entry in the "${emitKindTaskName}" task if it should not be emitted or add it to "config/typescript.json" if it should.`
+            )
+          );
+        } else if (
+          emitKind.moduleKind !== globalEmitKind.moduleKind ||
+          emitKind.target !== globalEmitKind.target
+        ) {
+          logger.emitWarning(
+            new Error(
+              `The TypeScript plugin is emitting "${emitKind.moduleKind}" modules targeting "${emitKind.target}" to the "${outputFolder}" folder, but this folder has been registered for emitting "${globalEmitKind.moduleKind}" modules targeting "${globalEmitKind.target}" in the "${emitKindTaskName}" task. Please update one of the plugin configurations.`
+            )
+          );
+        }
+      }
+
+      for (const [outputFolder, globalEmitKind] of globalEmitKinds) {
+        const emitKind: IJsEmitKind | undefined = locallyConfiguredOutputKinds.get(outputFolder);
+        if (!emitKind) {
+          logger.emitWarning(
+            new Error(
+              `Heft is configured to emit "${globalEmitKind.moduleKind}" modules targeting "${globalEmitKind.target}" to the "${outputFolder}" folder, but this folder is not configured in the TypeScript plugin. Please add the entry to the "${emitKindTaskName}" task if it should be emitted or remove it from "config/typescript.json" if it should not.`
+            )
+          );
+        }
+      }
+    }
   }
 }
