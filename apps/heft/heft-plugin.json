@@ -15,6 +15,11 @@
       "optionsSchema": "./lib/schemas/delete-files-options.schema.json"
     },
     {
+      "pluginName": "js-emit-kinds-plugin",
+      "entryPoint": "./lib/plugins/JsEmitKindsPlugin",
+      "optionsSchema": "./lib/schemas/js-emit-kinds-options.schema.json"
+    },
+    {
       "pluginName": "node-service-plugin",
       "entryPoint": "./lib/plugins/NodeServicePlugin",
       "parameterScope": "node-service",

@@ -41,6 +41,14 @@ export type { ICopyOperation, IIncrementalCopyOperation } from './plugins/CopyFi
 
 export type { IDeleteOperation } from './plugins/DeleteFilesPlugin';
 
+export type {
+  IJsEmitKindsPluginAccessor,
+  IJsEmitKind,
+  JsEmitKindsPluginName,
+  ModuleKind,
+  ScriptTarget
+} from './plugins/JsEmitKindsPlugin';
+
 export type { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin';
 
 export type { IFileSelectionSpecifier, IGlobOptions, GlobFn, WatchGlobFn } from './plugins/FileGlobSpecifier';
