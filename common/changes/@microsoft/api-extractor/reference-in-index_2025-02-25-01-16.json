@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Fix an issue where a triple-slash reference with `preserve=\"true\"` in a file that only contains re-exports does not end up in the API report and API rollup.",
+      "comment": "Include triple-slash references marked with `preserve=\"true\"` from files that only contain re-exports. There was a behavior change in TypeScript 5.5, where only triple-slash references that are explicitly marked with `preserve=\"true\"` are emitted into declaration files. This change adds support for placing these references in files that only contain re-exports, like the API entrypoint file.",
       "type": "patch"
     }
   ],
