@@ -18,7 +18,7 @@ import { IndentedWriter } from './IndentedWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import type { AstEntity } from '../analyzer/AstEntity';
-import type { AstModuleExportInfo } from '../analyzer/AstModule';
+import type { IAstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import type { ApiReportVariant } from '../api/IConfigFile';
@@ -153,7 +153,7 @@ export class ApiReportGenerator {
         }
 
         if (astEntity instanceof AstNamespaceImport) {
-          const astModuleExportInfo: AstModuleExportInfo = astEntity.fetchAstModuleExportInfo(collector);
+          const astModuleExportInfo: IAstModuleExportInfo = astEntity.fetchAstModuleExportInfo(collector);
 
           if (entity.nameForEmit === undefined) {
             // This should never happen
