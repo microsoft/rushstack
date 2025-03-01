@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack-embedded-dependencies-plugin",
+      "comment": "skiplog",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack-embedded-dependencies-plugin"
+}

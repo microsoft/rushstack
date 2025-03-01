@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "comment": "skiplog",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin-packlets"
+}

@@ -26,7 +26,7 @@
   "dependencies": {
     "@rushstack/worker-pool": "workspace:*",
     "@types/tapable": "1.0.6",
-    "@types/estree": "1.0.5",
+    "@types/estree": "1.0.6",
     "tapable": "2.2.1"
   },
   "devDependencies": {
@@ -35,7 +35,7 @@
     "@types/node": "20.17.19",
     "local-node-rig": "workspace:*",
     "memfs": "4.12.0",
-    "webpack": "~5.95.0"
+    "webpack": "~5.98.0"
   },
   "sideEffects": false,
   "peerDependenciesMeta": {
