@@ -42,16 +42,30 @@
 
     "cssOutputFolders": {
       "type": "array",
-      "description": "If specified, folders where compiled CSS files will be emitted to. They will be named by appending \".css\" to the source file name for ease of reference translation, unless \"preserveSCSSExtension\" is set.",
+      "description": "If specified, folders where compiled CSS files will be emitted to. They will be named by replacing \".scss\" or \".sass\" in the source file name with \".css\". If requested, JavaScript shims will be emitted to the same folder, named by appending \".js\" to the source file name.",
       "items": {
-        "type": "string",
-        "pattern": "[^\\\\]"
+        "oneOf": [
+          {
+            "type": "string",
+            "pattern": "[^\\\\]"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "folder": {
+                "type": "string",
+                "pattern": "[^\\\\]"
+              },
+              "shimType": {
+                "type": "string",
+                "enum": ["commonjs", "esm"]
+              }
+            },
+            "required": ["folder"]
+          }
+        ]
       }
-    },
-
-    "preserveSCSSExtension": {
-      "type": "boolean",
-      "description": "If set, when emitting compiled CSS from a file with a \".scss\" extension, the emitted CSS will have the extension \".scss\" instead of \".scss.css\"."
     },
 
     "fileExtensions": {
@@ -74,7 +88,7 @@
 
     "importIncludePaths": {
       "type": "array",
-      "description": "A list of paths used when resolving Sass imports.",
+      "description": "(DEPRECATED) Ignored.",
       "items": {
         "type": "string",
         "pattern": "[^\\\\]"

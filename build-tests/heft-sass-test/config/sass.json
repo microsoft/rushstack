@@ -1,9 +1,14 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-sass-plugin.schema.json",
 
-  "cssOutputFolders": ["lib", "lib-commonjs"],
+  "cssOutputFolders": [
+    { "folder": "lib", "shimType": "esm" },
+    { "folder": "lib-commonjs", "shimType": "commonjs" }
+  ],
   "secondaryGeneratedTsFolders": ["lib"],
   "excludeFiles": ["./ignored1.scss", "ignored2.scss"],
 
-  "silenceDeprecations": ["mixed-decls"]
+  "silenceDeprecations": ["mixed-decls", "import", "global-builtin", "color-functions"],
+
+  "convertLoadStylesToCssVariables": true
 }

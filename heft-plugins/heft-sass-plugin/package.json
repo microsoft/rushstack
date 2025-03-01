@@ -20,10 +20,9 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/typings-generator": "workspace:*",
-    "sass-embedded": "~1.77.8",
     "postcss": "~8.4.6",
-    "postcss-modules": "~6.0.0"
+    "postcss-modules": "~6.0.0",
+    "sass-embedded": "~1.85.1"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
