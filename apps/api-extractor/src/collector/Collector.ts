@@ -335,12 +335,14 @@ export class Collector {
 
     // Ensure references are collected from any intermediate files that
     // only include exports
-    const visitedSourceFiles: Set<ts.SourceFile> = new Set();
-    for (const visitedAstModule of visitedAstModules) {
-      visitedSourceFiles.add(visitedAstModule.sourceFile);
+    const nonExternalSourceFiles: Set<ts.SourceFile> = new Set();
+    for (const { sourceFile, isExternal } of visitedAstModules) {
+      if (!nonExternalSourceFiles.has(sourceFile) && !isExternal) {
+        nonExternalSourceFiles.add(sourceFile);
+      }
     }
 
-    this._collectReferenceDirectivesFromSourceFiles(visitedSourceFiles);
+    this._collectReferenceDirectivesFromSourceFiles(nonExternalSourceFiles);
 
     this._makeUniqueNames();
 
