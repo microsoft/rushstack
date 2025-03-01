@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-typescript-plugin",
   "entries": [
     {
+      "version": "0.6.15",
+      "tag": "@rushstack/heft-typescript-plugin_v0.6.15",
+      "date": "Sat, 01 Mar 2025 07:23:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for TypeScript 5.7."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.14",
       "tag": "@rushstack/heft-typescript-plugin_v0.6.14",
       "date": "Sat, 01 Mar 2025 05:00:09 GMT",

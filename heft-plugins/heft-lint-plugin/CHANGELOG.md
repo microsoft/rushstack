@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Sat, 01 Mar 2025 05:00:09 GMT and should not be manually modified.
+This log was last generated on Sat, 01 Mar 2025 07:23:16 GMT and should not be manually modified.
+
+## 0.5.22
+Sat, 01 Mar 2025 07:23:16 GMT
+
+_Version update only_
 
 ## 0.5.21
 Sat, 01 Mar 2025 05:00:09 GMT

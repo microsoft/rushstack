@@ -2,6 +2,29 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.26.0",
+      "tag": "@rushstack/heft-web-rig_v0.26.0",
+      "date": "Sat, 01 Mar 2025 07:23:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `typescript` dependency to `~5.7.3`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `4.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.5.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.6.15`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.25.26",
       "tag": "@rushstack/heft-web-rig_v0.25.26",
       "date": "Sat, 01 Mar 2025 05:00:09 GMT",

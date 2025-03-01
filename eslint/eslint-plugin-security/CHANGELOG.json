@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin-security",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@rushstack/eslint-plugin-security_v0.9.0",
+      "date": "Sat, 01 Mar 2025 07:23:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `@typescript-eslint/*` dependencies to `~8.24.0` to support newer versions of TypeScript."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.3",
       "tag": "@rushstack/eslint-plugin-security_v0.8.3",
       "date": "Thu, 19 Sep 2024 00:11:08 GMT",

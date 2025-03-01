@@ -2,6 +2,18 @@
   "name": "@rushstack/trace-import",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/trace-import_v0.4.0",
+      "date": "Sat, 01 Mar 2025 07:23:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `typescript` dependency to `~5.7.3`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.88",
       "tag": "@rushstack/trace-import_v0.3.88",
       "date": "Sat, 01 Mar 2025 05:00:09 GMT",
