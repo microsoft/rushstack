@@ -26,6 +26,7 @@
     "@rushstack/heft": "0.69.2",
     "@rushstack/heft-node-rig": "2.6.59",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "20.17.19"
+    "@types/node": "20.17.19",
+    "typescript": "~5.7.3"
   }
 }

@@ -31,16 +31,16 @@
     "@rushstack/eslint-plugin": "workspace:*",
     "@rushstack/eslint-plugin-packlets": "workspace:*",
     "@rushstack/eslint-plugin-security": "workspace:*",
-    "@typescript-eslint/eslint-plugin": "~8.1.0",
-    "@typescript-eslint/utils": "~8.1.0",
-    "@typescript-eslint/parser": "~8.1.0",
-    "@typescript-eslint/typescript-estree": "~8.1.0",
+    "@typescript-eslint/eslint-plugin": "~8.24.0",
+    "@typescript-eslint/utils": "~8.24.0",
+    "@typescript-eslint/parser": "~8.24.0",
+    "@typescript-eslint/typescript-estree": "~8.24.0",
     "eslint-plugin-promise": "~6.1.1",
     "eslint-plugin-react": "~7.33.2",
     "eslint-plugin-tsdoc": "~0.4.0"
   },
   "devDependencies": {
     "eslint": "~8.57.0",
-    "typescript": "~5.4.2"
+    "typescript": "~5.7.3"
   }
 }

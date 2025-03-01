@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/// <reference types="node" preserve="true" />
+
 import { RushAmazonS3BuildCachePlugin } from './RushAmazonS3BuildCachePlugin';
 
 export { type IAmazonS3Credentials } from './AmazonS3Credentials';

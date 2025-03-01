@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/// <reference path="../npm-check-typings.d.ts" preserve="true" />
+
 import npmCheck from 'npm-check';
 import type * as NpmCheck from 'npm-check';
 import { Colorize } from '@rushstack/terminal';

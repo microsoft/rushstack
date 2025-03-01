@@ -27,6 +27,7 @@
     "@types/node": "20.17.19",
     "@types/resolve": "1.20.2",
     "ajv": "~8.13.0",
-    "resolve": "~1.22.1"
+    "resolve": "~1.22.1",
+    "typescript": "~5.7.3"
   }
 }

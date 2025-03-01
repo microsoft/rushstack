@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "comment": "Bump the `@typescript-eslint/*` dependencies to `~8.24.0` to support newer versions of TypeScript.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin-packlets"
+}

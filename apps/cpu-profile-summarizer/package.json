@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
-    "typescript": "~5.4.2"
+    "local-node-rig": "workspace:*"
   }
 }

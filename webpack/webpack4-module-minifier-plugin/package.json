@@ -44,11 +44,12 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
-    "@types/webpack": "4.41.32",
+    "@types/node": "20.17.19",
     "@types/webpack-sources": "1.4.2",
-    "webpack": "~4.47.0",
-    "webpack-sources": "~1.4.3"
+    "@types/webpack": "4.41.32",
+    "local-node-rig": "workspace:*",
+    "webpack-sources": "~1.4.3",
+    "webpack": "~4.47.0"
   },
   "sideEffects": [
     "./lib/OverrideWebpackIdentifierAllocation"
