@@ -31,7 +31,7 @@
   ],
   "devDependencies": {
     "@rushstack/heft": "0.69.2",
-    "@rushstack/heft-node-rig": "2.6.59",
+    "@rushstack/heft-node-rig": "2.7.0",
     "@types/eslint": "8.56.10",
     "@types/node": "20.17.19",
     "@typescript-eslint/types": "~8.24.0",

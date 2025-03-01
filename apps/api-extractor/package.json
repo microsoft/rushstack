@@ -52,7 +52,7 @@
     "typescript": "5.7.3"
   },
   "devDependencies": {
-    "@rushstack/heft-node-rig": "2.6.59",
+    "@rushstack/heft-node-rig": "2.7.0",
     "@rushstack/heft": "0.69.2",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
