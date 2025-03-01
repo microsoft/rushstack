@@ -12,14 +12,14 @@ import type { IOperationSettings } from '../../api/RushProjectConfiguration';
  */
 export interface IOperationOptions {
   /**
-   * The Rush phase associated with this Operation, if any
+   * The Rush phase associated with this Operation
    */
-  phase?: IPhase | undefined;
+  phase: IPhase;
 
   /**
-   * The Rush project associated with this Operation, if any
+   * The Rush project associated with this Operation
    */
-  project?: RushConfigurationProject | undefined;
+  project: RushConfigurationProject;
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -51,12 +51,12 @@ export class Operation {
   /**
    * The Rush phase associated with this Operation, if any
    */
-  public readonly associatedPhase: IPhase | undefined;
+  public readonly associatedPhase: IPhase;
 
   /**
    * The Rush project associated with this Operation, if any
    */
-  public readonly associatedProject: RushConfigurationProject | undefined;
+  public readonly associatedProject: RushConfigurationProject;
 
   /**
    * A set of all operations which depend on this operation.

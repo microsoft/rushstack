@@ -38,22 +38,20 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
           return;
         }
 
-        if (project) {
-          const pnpmSyncJsonPath: string = `${project.projectFolder}/node_modules/.pnpm-sync.json`;
-          if (await FileSystem.exists(pnpmSyncJsonPath)) {
-            const { PackageExtractor } = await import(
-              /* webpackChunkName: 'PackageExtractor' */
-              '@rushstack/package-extractor'
-            );
-            await pnpmSyncCopyAsync({
-              pnpmSyncJsonPath,
-              ensureFolderAsync: FileSystem.ensureFolderAsync,
-              forEachAsyncWithConcurrency: Async.forEachAsync,
-              getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
-              logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
-                PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
-            });
-          }
+        const pnpmSyncJsonPath: string = `${project.projectFolder}/node_modules/.pnpm-sync.json`;
+        if (await FileSystem.exists(pnpmSyncJsonPath)) {
+          const { PackageExtractor } = await import(
+            /* webpackChunkName: 'PackageExtractor' */
+            '@rushstack/package-extractor'
+          );
+          await pnpmSyncCopyAsync({
+            pnpmSyncJsonPath,
+            ensureFolderAsync: FileSystem.ensureFolderAsync,
+            forEachAsyncWithConcurrency: Async.forEachAsync,
+            getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
+            logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
+              PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
+          });
         }
       }
     );

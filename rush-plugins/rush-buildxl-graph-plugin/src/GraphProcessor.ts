@@ -94,9 +94,11 @@ const REQUIRED_FIELDS: Array<keyof IGraphNodeInternal> = [
 /*
  * Try to get the operation id, return undefined if it fails
  */
-export function tryGetOperationId(operation: Partial<Operation>): string | undefined {
-  const task: string | undefined = operation.associatedPhase?.name;
-  const project: string | undefined = operation.associatedProject?.packageName;
+export function tryGetOperationId(
+  operation: Pick<Operation, 'associatedPhase' | 'associatedProject'>
+): string | undefined {
+  const task: string | undefined = operation.associatedPhase.name;
+  const project: string | undefined = operation.associatedProject.packageName;
   return task && project ? `${project}#${task}` : undefined;
 }
 

@@ -59,23 +59,22 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
 
       for (const operation of operations) {
         const { associatedProject, associatedPhase } = operation;
-        if (associatedProject && associatedPhase) {
-          const projectConfiguration: RushProjectConfiguration | undefined =
-            projectConfigurations.get(associatedProject);
-          const fileHashes: ReadonlyMap<string, string> | undefined =
-            inputsSnapshot?.getTrackedFileHashesForOperation(associatedProject, associatedPhase.name);
-          if (!fileHashes) {
-            continue;
-          }
-          const cacheDisabledReason: string | undefined =
-            RushProjectConfiguration.getCacheDisabledReasonForProject({
-              projectConfiguration,
-              trackedFileNames: fileHashes.keys(),
-              isNoOp: operation.isNoOp,
-              phaseName: associatedPhase.name
-            });
-          buildCacheByOperation.set(operation, { cacheDisabledReason });
+
+        const projectConfiguration: RushProjectConfiguration | undefined =
+          projectConfigurations.get(associatedProject);
+        const fileHashes: ReadonlyMap<string, string> | undefined =
+          inputsSnapshot?.getTrackedFileHashesForOperation(associatedProject, associatedPhase.name);
+        if (!fileHashes) {
+          continue;
         }
+        const cacheDisabledReason: string | undefined =
+          RushProjectConfiguration.getCacheDisabledReasonForProject({
+            projectConfiguration,
+            trackedFileNames: fileHashes.keys(),
+            isNoOp: operation.isNoOp,
+            phaseName: associatedPhase.name
+          });
+        buildCacheByOperation.set(operation, { cacheDisabledReason });
       }
       clusterOperations(disjointSet, buildCacheByOperation);
       const buildPlan: ICobuildPlan = createCobuildPlan(disjointSet, terminal, buildCacheByOperation);
@@ -323,7 +322,7 @@ function logCobuildBuildPlan(buildPlan: ICobuildPlan, terminal: ITerminal): void
     const dedupedOperations: Set<string> = new Set<string>();
     for (const operation of ops) {
       dedupedOperations.add(
-        `${operation.associatedProject?.packageName ?? ''} (${operation.associatedPhase?.name})`
+        `${operation.associatedProject.packageName ?? ''} (${operation.associatedPhase.name})`
       );
     }
     return [...dedupedOperations];

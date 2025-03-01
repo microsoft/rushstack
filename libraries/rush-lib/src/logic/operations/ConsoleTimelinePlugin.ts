@@ -181,9 +181,7 @@ export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrin
 
       const { associatedPhase } = operation;
 
-      if (associatedPhase) {
-        durationByPhase.set(associatedPhase, (durationByPhase.get(associatedPhase) || 0) + duration);
-      }
+      durationByPhase.set(associatedPhase, (durationByPhase.get(associatedPhase) || 0) + duration);
 
       data.push({
         startTime,

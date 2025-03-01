@@ -110,9 +110,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   });
 
   public readonly runner: IOperationRunner;
-  public readonly associatedPhase: IPhase | undefined;
-  public readonly associatedProject: RushConfigurationProject | undefined;
-  public readonly _operationMetadataManager: OperationMetadataManager | undefined;
+  public readonly associatedPhase: IPhase;
+  public readonly associatedProject: RushConfigurationProject;
+  public readonly _operationMetadataManager: OperationMetadataManager;
 
   public logFilePaths: ILogFilePaths | undefined;
 
@@ -127,7 +127,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
     if (!runner) {
       throw new InternalError(
-        `Operation for phase '${associatedPhase?.name}' and project '${associatedProject?.packageName}' has no runner.`
+        `Operation for phase '${associatedPhase.name}' and project '${associatedProject.packageName}' has no runner.`
       );
     }
 
@@ -137,14 +137,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     this.associatedProject = associatedProject;
     this.logFilePaths = undefined;
 
-    this._operationMetadataManager =
-      associatedPhase && associatedProject
-        ? new OperationMetadataManager({
-            phase: associatedPhase,
-            rushProject: associatedProject,
-            operation
-          })
-        : undefined;
+    this._operationMetadataManager = new OperationMetadataManager({
+      operation
+    });
 
     this._context = context;
     this._status = operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
@@ -236,16 +231,15 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       logFileSuffix: string;
     }
   ): Promise<T> {
-    const { associatedPhase, associatedProject, stdioSummarizer } = this;
+    const { associatedProject, stdioSummarizer } = this;
     const { createLogFile, logFileSuffix = '' } = options;
 
-    const logFilePaths: ILogFilePaths | undefined =
-      createLogFile && associatedProject && associatedPhase && this._operationMetadataManager
-        ? getProjectLogFilePaths({
-            project: associatedProject,
-            logFilenameIdentifier: `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`
-          })
-        : undefined;
+    const logFilePaths: ILogFilePaths | undefined = createLogFile
+      ? getProjectLogFilePaths({
+          project: associatedProject,
+          logFilenameIdentifier: `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`
+        })
+      : undefined;
     this.logFilePaths = logFilePaths;
 
     const projectLogWritable: TerminalWritable | undefined = logFilePaths
@@ -376,9 +370,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       // - Git hashes of tracked files in the associated project
       // - Git hash of the shrinkwrap file for the project
       // - Git hashes of any files specified in `dependsOnAdditionalFiles` (must not be associated with a project)
-      const localStateHash: string | undefined =
-        associatedProject &&
-        inputsSnapshot.getOperationOwnStateHash(associatedProject, associatedPhase?.name);
+      const localStateHash: string = inputsSnapshot.getOperationOwnStateHash(
+        associatedProject,
+        associatedPhase.name
+      );
 
       // The final state hashes of operation dependencies are factored into the hash to ensure that any
       // state changes in dependencies will invalidate the cache.
