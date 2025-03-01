@@ -100,6 +100,7 @@ export class Collector {
 
   private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
   private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
+  private readonly _collectReferenceDirectivesSeenFilenames: Set<string> = new Set<string>();
 
   // Used by getOverloadIndex()
   private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
@@ -1017,26 +1018,19 @@ export class Collector {
   }
 
   private _collectReferenceDirectivesFromSourceFiles(sourceFiles: Iterable<ts.SourceFile>): void {
-    const seenFilenames: Set<string> = new Set<string>();
-
     for (const sourceFile of sourceFiles) {
-      if (sourceFile && sourceFile.fileName) {
-        if (!seenFilenames.has(sourceFile.fileName)) {
-          seenFilenames.add(sourceFile.fileName);
+      if (sourceFile?.fileName) {
+        const { fileName, typeReferenceDirectives, libReferenceDirectives, text } = sourceFile;
+        if (!this._collectReferenceDirectivesSeenFilenames.has(fileName)) {
+          this._collectReferenceDirectivesSeenFilenames.add(fileName);
 
-          for (const typeReferenceDirective of sourceFile.typeReferenceDirectives) {
-            const name: string = sourceFile.text.substring(
-              typeReferenceDirective.pos,
-              typeReferenceDirective.end
-            );
+          for (const typeReferenceDirective of typeReferenceDirectives) {
+            const name: string = text.substring(typeReferenceDirective.pos, typeReferenceDirective.end);
             this._dtsTypeReferenceDirectives.add(name);
           }
 
-          for (const libReferenceDirective of sourceFile.libReferenceDirectives) {
-            const name: string = sourceFile.text.substring(
-              libReferenceDirective.pos,
-              libReferenceDirective.end
-            );
+          for (const libReferenceDirective of libReferenceDirectives) {
+            const name: string = text.substring(libReferenceDirective.pos, libReferenceDirective.end);
             this._dtsLibReferenceDirectives.add(name);
           }
         }
