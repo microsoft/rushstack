@@ -138,8 +138,15 @@ export abstract class LinterBase<TLintResult> {
         continue;
       }
 
-      // Compute the version from the source file content
-      const version: string = sourceFile.version || '';
+      // TypeScript only computes the version during an incremental build.
+      let version: string = sourceFile.version;
+      if (!version) {
+        // Compute the version from the source file content
+        const sourceCodeHash: Hash = createHash('sha1');
+        sourceCodeHash.update(sourceFile.text);
+        version = sourceCodeHash.digest('base64');
+      }
+
       const cachedVersion: string = cachedNoFailureFileVersions.get(relative) || '';
       if (
         cachedVersion === '' ||
