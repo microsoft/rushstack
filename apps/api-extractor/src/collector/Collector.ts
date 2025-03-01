@@ -100,7 +100,6 @@ export class Collector {
 
   private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
   private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
-  private readonly _collectReferenceDirectivesSeenFilenames: Set<string> = new Set<string>();
 
   // Used by getOverloadIndex()
   private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
@@ -343,7 +342,20 @@ export class Collector {
       }
     }
 
-    this._collectReferenceDirectivesFromSourceFiles(nonExternalSourceFiles);
+    // Here, we're collecting reference directives from all non-external source files
+    // that were encountered while looking for exports, but only those references that
+    // were explicitly written by the developer and marked with the `preserve="true"`
+    // attribute. In TS >= 5.5, only references that are explicitly authored and marked
+    // with `preserve="true"` are included in the output. See https://github.com/microsoft/TypeScript/pull/57681
+    //
+    // The `_collectReferenceDirectives` function pulls in all references in files that
+    // contain definitions, but does not examine files that only reexport from other
+    // files. Here, we're looking through files that were missed by `_collectReferenceDirectives`,
+    // but only collecting references that were explicitly marked with `preserve="true"`.
+    // It is intuitive for developers to include references that they explicitly want part of
+    // their public API in a file like the entrypoint, which is likely to only contain reexports,
+    // and this picks those up.
+    this._collectReferenceDirectivesFromSourceFiles(nonExternalSourceFiles, true);
 
     this._makeUniqueNames();
 
@@ -1004,37 +1016,82 @@ export class Collector {
   }
 
   private _collectReferenceDirectives(astEntity: AstEntity): void {
+    // Here, we're collecting reference directives from source files that contain
+    // definitions (i.e. - files that contain `export class ...`, `export interface ...`, ...).
+    // These references may or may not include the `preserve="true" attribute. In TS < 5.5,
+    // references that end up in .D.TS files may or may not be explicity written by the developer.
+    // In TS >= 5.5, only references that are explicitly authored and are marked with
+    // `preserve="true"` are included in the output. See https://github.com/microsoft/TypeScript/pull/57681
+    //
+    // The calls to `_collectReferenceDirectivesFromSourceFiles` in this function are
+    // preserving existing behavior, which is to include all reference directives
+    // regardless of whether they are explicitly authored or not, but only in files that
+    // contain definitions.
+
     if (astEntity instanceof AstSymbol) {
       const sourceFiles: ts.SourceFile[] = astEntity.astDeclarations.map((astDeclaration) =>
         astDeclaration.declaration.getSourceFile()
       );
-      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles);
+      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles, false);
     }
 
     if (astEntity instanceof AstNamespaceImport) {
       const sourceFiles: ts.SourceFile[] = [astEntity.astModule.sourceFile];
-      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles);
+      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles, false);
     }
   }
 
-  private _collectReferenceDirectivesFromSourceFiles(sourceFiles: Iterable<ts.SourceFile>): void {
+  private _collectReferenceDirectivesFromSourceFiles(
+    sourceFiles: Iterable<ts.SourceFile>,
+    onlyIncludeExplicitlyPreserved: boolean
+  ): void {
+    const seenFilenames: Set<string> = new Set<string>();
+
     for (const sourceFile of sourceFiles) {
       if (sourceFile?.fileName) {
-        const { fileName, typeReferenceDirectives, libReferenceDirectives, text } = sourceFile;
-        if (!this._collectReferenceDirectivesSeenFilenames.has(fileName)) {
-          this._collectReferenceDirectivesSeenFilenames.add(fileName);
+        const {
+          fileName,
+          typeReferenceDirectives,
+          libReferenceDirectives,
+          text: sourceFileText
+        } = sourceFile;
+        if (!seenFilenames.has(fileName)) {
+          seenFilenames.add(fileName);
 
           for (const typeReferenceDirective of typeReferenceDirectives) {
-            const name: string = text.substring(typeReferenceDirective.pos, typeReferenceDirective.end);
-            this._dtsTypeReferenceDirectives.add(name);
+            const name: string | undefined = this._getReferenceDirectiveFromSourceFile(
+              sourceFileText,
+              typeReferenceDirective,
+              onlyIncludeExplicitlyPreserved
+            );
+            if (name) {
+              this._dtsTypeReferenceDirectives.add(name);
+            }
           }
 
           for (const libReferenceDirective of libReferenceDirectives) {
-            const name: string = text.substring(libReferenceDirective.pos, libReferenceDirective.end);
-            this._dtsLibReferenceDirectives.add(name);
+            const reference: string | undefined = this._getReferenceDirectiveFromSourceFile(
+              sourceFileText,
+              libReferenceDirective,
+              onlyIncludeExplicitlyPreserved
+            );
+            if (reference) {
+              this._dtsLibReferenceDirectives.add(reference);
+            }
           }
         }
       }
+    }
+  }
+
+  private _getReferenceDirectiveFromSourceFile(
+    sourceFileText: string,
+    { pos, end, preserve }: ts.FileReference,
+    onlyIncludeExplicitlyPreserved: boolean
+  ): string | undefined {
+    const reference: string = sourceFileText.substring(pos, end);
+    if (preserve || !onlyIncludeExplicitlyPreserved) {
+      return reference;
     }
   }
 }
