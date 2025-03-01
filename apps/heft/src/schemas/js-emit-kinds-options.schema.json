@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "JS EmitKinds Heft Options",
+  "description": "Defines a configuration for emitting multiple formats of ECMAScript to separate folders.",
+  "type": "object",
+
+  "additionalProperties": false,
+  "required": ["emitKinds"],
+
+  "properties": {
+    "emitKinds": {
+      "type": "array",
+      "description": "An array of emit kinds that other plugins will use to determine where to write outputs.",
+
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["outputFolder", "moduleKind"],
+        "properties": {
+          "outputFolder": {
+            "title": "Output Folder",
+            "type": "string",
+            "description": "The folder to output to, relative to the project root.",
+            "pattern": "[^\\\\]"
+          },
+
+          "moduleKind": {
+            "title": "Module Kind",
+            "type": "string",
+            "description": "The module kind that files will conform to.",
+            "enum": ["commonjs", "amd", "umd", "system", "es2015", "esnext"]
+          },
+
+          "target": {
+            "title": "Target",
+            "type": "string",
+            "description": "The ECMAScript specification level that files will conform to.",
+            "enum": [
+              "es3",
+              "es5",
+              "es6",
+              "es2015",
+              "es2016",
+              "es2017",
+              "es2018",
+              "es2019",
+              "es2020",
+              "es2021",
+              "es2022",
+              "esnext"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

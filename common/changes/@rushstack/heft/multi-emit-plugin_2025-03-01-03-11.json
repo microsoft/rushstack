@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add a new core `js-emit-kinds-plugin` that can be used to tell other plugins about the output folders that contain JavaScript and which module format (e.g. \"commonjs\", \"esnext\", \"umd\") and target (e.g. \"es5\", \"es2020\", \"esnext\") they are expected to contain. This is useful for plugins that may need to generate JavaScript assets but which are not the main compiler, to ensure that the emitted files stay in sync.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

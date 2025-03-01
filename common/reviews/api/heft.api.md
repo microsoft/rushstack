@@ -213,6 +213,22 @@ export interface IIncrementalCopyOperation extends ICopyOperation {
     onlyIfChanged?: boolean;
 }
 
+// @public
+export interface IJsEmitKind {
+    // (undocumented)
+    moduleKind: ModuleKind;
+    // (undocumented)
+    outputFolder: string;
+    // (undocumented)
+    target: ScriptTarget;
+}
+
+// @public
+export interface IJsEmitKindsPluginAccessor {
+    emitKinds: ReadonlyMap<string, Readonly<IJsEmitKind>>;
+    taskName: string;
+}
+
 // @public (undocumented)
 export interface IMetricsData {
     bootDurationMs: number;
@@ -295,6 +311,9 @@ export interface IWatchFileSystem {
     statSync(filePath: string): fs.Stats;
 }
 
+// @public
+export type JsEmitKindsPluginName = 'js-emit-kinds-plugin';
+
 // @internal
 export class _MetricsCollector {
     recordAsync(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): Promise<void>;
@@ -304,10 +323,16 @@ export class _MetricsCollector {
 }
 
 // @public
+export type ModuleKind = 'amd' | 'commonjs' | 'es2015' | 'esnext' | 'system' | 'umd';
+
+// @public
 export type ReaddirDirentCallback = (error: NodeJS.ErrnoException | null, files: fs.Dirent[]) => void;
 
 // @public
 export type ReaddirStringCallback = (error: NodeJS.ErrnoException | null, files: string[]) => void;
+
+// @public
+export type ScriptTarget = 'es3' | 'es5' | 'es6' | 'es2015' | 'es2016' | 'es2017' | 'es2018' | 'es2019' | 'es2020' | 'es2021' | 'es2022' | 'esnext';
 
 // @public
 export type StatCallback = (error: NodeJS.ErrnoException | null, stats: fs.Stats) => void;

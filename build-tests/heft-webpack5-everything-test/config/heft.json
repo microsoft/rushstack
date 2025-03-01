@@ -10,6 +10,27 @@
       "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs"] }],
 
       "tasksByName": {
+        "configure-emit-kinds": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "js-emit-kinds-plugin",
+            "options": {
+              "emitKinds": [
+                {
+                  "outputFolder": "lib",
+                  "moduleKind": "esnext",
+                  "target": "es5"
+                },
+                {
+                  "outputFolder": "lib-commonjs",
+                  "moduleKind": "commonjs",
+                  "target": "es5"
+                }
+              ]
+            }
+          }
+        },
+
         "typescript": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-typescript-plugin"
