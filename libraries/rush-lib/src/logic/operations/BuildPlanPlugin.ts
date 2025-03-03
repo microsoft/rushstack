@@ -211,8 +211,8 @@ function generateCobuildPlanSummary(operations: Operation[], terminal: ITerminal
       `Plan @ Depth ${operationDepth} has ${numberOfNodes[operationDepth]} nodes and ${numberOfDependents} dependents:`
     );
     for (const operation of operationsAtDepth) {
-      if (!operation.runner?.isNoOp) {
-        terminal.writeLine(`- ${operation.runner?.name ?? 'unknown'}`);
+      if (operation.isNoOp !== true) {
+        terminal.writeLine(`- ${operation.name}`);
       }
     }
   }
@@ -225,7 +225,7 @@ function generateCobuildPlanSummary(operations: Operation[], terminal: ITerminal
 }
 
 function getName(op: Operation): string {
-  return op.runner?.name ?? 'unknown';
+  return op.name;
 }
 
 /**
@@ -321,9 +321,7 @@ function logCobuildBuildPlan(buildPlan: ICobuildPlan, terminal: ITerminal): void
   function dedupeShards(ops: Set<Operation>): string[] {
     const dedupedOperations: Set<string> = new Set<string>();
     for (const operation of ops) {
-      dedupedOperations.add(
-        `${operation.associatedProject.packageName ?? ''} (${operation.associatedPhase.name})`
-      );
+      dedupedOperations.add(`${operation.associatedProject.packageName} (${operation.associatedPhase.name})`);
     }
     return [...dedupedOperations];
   }
@@ -342,15 +340,12 @@ function logCobuildBuildPlan(buildPlan: ICobuildPlan, terminal: ITerminal): void
       terminal.writeLine(
         `- Clustered by: \n${[...allClusterDependencies]
           .filter((e) => buildCacheByOperation.get(e)?.cacheDisabledReason)
-          .map((e) => `  - (${e.runner?.name}) "${buildCacheByOperation.get(e)?.cacheDisabledReason ?? ''}"`)
+          .map((e) => `  - (${e.name}) "${buildCacheByOperation.get(e)?.cacheDisabledReason ?? ''}"`)
           .join('\n')}`
       );
     }
     terminal.writeLine(
-      `- Operations: ${Array.from(
-        cluster,
-        (e) => `${getName(e)}${e.runner?.isNoOp ? ' [SKIPPED]' : ''}`
-      ).join(', ')}`
+      `- Operations: ${Array.from(cluster, (e) => `${getName(e)}${e.isNoOp ? ' [SKIPPED]' : ''}`).join(', ')}`
     );
     terminal.writeLine('--------------------------------------------------');
   }

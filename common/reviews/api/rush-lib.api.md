@@ -937,7 +937,7 @@ export class Operation {
     enabled: boolean;
     get isNoOp(): boolean;
     logFilenameIdentifier: string;
-    get name(): string | undefined;
+    get name(): string;
     runner: IOperationRunner | undefined;
     settings: IOperationSettings | undefined;
     weight: number;

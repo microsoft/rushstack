@@ -120,15 +120,23 @@ export class Operation {
   /**
    * The name of this operation, for logging.
    */
-  public get name(): string | undefined {
-    return this.runner?.name;
+  public get name(): string {
+    const { runner } = this;
+    if (!runner) {
+      throw new Error(`Cannot get name of an Operation that does not yet have a runner.`);
+    }
+    return runner.name;
   }
 
   /**
    * If set to true, this operation is considered a no-op and can be considered always skipped for analysis purposes.
    */
   public get isNoOp(): boolean {
-    return !!this.runner?.isNoOp;
+    const { runner } = this;
+    if (!runner) {
+      throw new Error(`Cannot get isNoOp of an Operation that does not yet have a runner.`);
+    }
+    return !!runner.isNoOp;
   }
 
   /**

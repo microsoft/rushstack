@@ -29,9 +29,9 @@ interface ISerializedOperation {
 
 function serializeOperation(operation: Operation): ISerializedOperation {
   return {
-    name: operation.name!,
+    name: operation.name,
     silent: !operation.enabled || operation.runner!.silent,
-    dependencies: Array.from(operation.dependencies, (dep: Operation) => dep.name!)
+    dependencies: Array.from(operation.dependencies, (dep: Operation) => dep.name)
   };
 }
 

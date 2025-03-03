@@ -187,7 +187,7 @@ export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrin
         startTime,
         endTime,
         durationString,
-        name: operation.name!,
+        name: operation.name,
         status: operationResult.status,
         isExecuteByOtherCobuildRunner:
           !!operationResult.cobuildRunnerId &&

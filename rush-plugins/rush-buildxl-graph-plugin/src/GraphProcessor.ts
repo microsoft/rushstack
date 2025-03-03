@@ -5,8 +5,6 @@ import type { Operation, ILogger } from '@rushstack/rush-sdk';
 import type { ShellOperationRunner } from '@rushstack/rush-sdk/lib/logic/operations/ShellOperationRunner';
 import { Colorize } from '@rushstack/terminal';
 
-import { filterObjectForDebug } from './debugGraphFiltering';
-
 /**
  * @example
  * ```
@@ -94,12 +92,10 @@ const REQUIRED_FIELDS: Array<keyof IGraphNodeInternal> = [
 /*
  * Try to get the operation id, return undefined if it fails
  */
-export function tryGetOperationId(
-  operation: Pick<Operation, 'associatedPhase' | 'associatedProject'>
-): string | undefined {
-  const task: string | undefined = operation.associatedPhase.name;
-  const project: string | undefined = operation.associatedProject.packageName;
-  return task && project ? `${project}#${task}` : undefined;
+export function getOperationId(operation: Pick<Operation, 'associatedPhase' | 'associatedProject'>): string {
+  const task: string = operation.associatedPhase.name;
+  const project: string = operation.associatedProject.packageName;
+  return `${project}#${task}`;
 }
 
 export class GraphProcessor {
@@ -156,16 +152,10 @@ export class GraphProcessor {
   }
 
   /*
-   * Get the operation id, throw an error if it fails
+   * Get the operation id
    */
   public getOperationId(operation: Operation): string {
-    const result: string | undefined = tryGetOperationId(operation);
-    if (!result) {
-      throw new Error(
-        `Operation does not have a name: ${JSON.stringify(filterObjectForDebug(operation, 2), undefined, 2)}`
-      );
-    }
-
+    const result: string = getOperationId(operation);
     return result;
   }
 
@@ -227,13 +217,18 @@ export class GraphProcessor {
       }
     }
 
+    const { runner } = operation;
+    if (!runner) {
+      throw new Error(`Operation does not have a runner assigned`);
+    }
+
     const node: Partial<IGraphNodeInternal> = {
-      id: tryGetOperationId(operation),
-      task: operation.associatedPhase?.name,
-      package: operation.associatedProject?.packageName,
+      id: getOperationId(operation),
+      task: operation.associatedPhase.name,
+      package: operation.associatedProject.packageName,
       dependencies,
-      workingDirectory: operation.associatedProject?.projectFolder,
-      command: (operation.runner as ShellOperationRunner | undefined)?.commandToRun
+      workingDirectory: operation.associatedProject.projectFolder,
+      command: (runner as Partial<Pick<ShellOperationRunner, 'commandToRun'>>).commandToRun
     };
 
     if (operation.settings?.disableBuildCacheForOperation) {
@@ -254,7 +249,7 @@ export class GraphProcessor {
     }
 
     // the runner is a no-op if and only if the command is empty
-    if (!!operation.runner?.isNoOp !== !node.command) {
+    if (operation.isNoOp !== !node.command) {
       this._logger.emitError(
         new Error(`${node.id}: Operation runner isNoOp does not match commandToRun existence`)
       );
