@@ -20,14 +20,12 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     static _formatPathForLogging: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue | undefined;
+    // Warning: (ae-forgotten-export) The symbol "IOnFileNotFoundCallback" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    protected _loadConfigurationFileInnerWithCache(terminal: ITerminal, resolvedConfigurationFilePath: string, visitedConfigurationFilePaths: Set<string>, rigConfig: IRigConfig | undefined): TConfigurationFile;
+    protected _loadConfigurationFileInnerWithCache(terminal: ITerminal, resolvedConfigurationFilePath: string, projectFolderPath: string | undefined, onFileNotFound?: IOnFileNotFoundCallback): TConfigurationFile;
     // (undocumented)
-    protected _loadConfigurationFileInnerWithCacheAsync(terminal: ITerminal, resolvedConfigurationFilePath: string, visitedConfigurationFilePaths: Set<string>, rigConfig: IRigConfig | undefined): Promise<TConfigurationFile>;
-    // (undocumented)
-    protected abstract _tryLoadConfigurationFileInRig(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): TConfigurationFile | undefined;
-    // (undocumented)
-    protected abstract _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
+    protected _loadConfigurationFileInnerWithCacheAsync(terminal: ITerminal, resolvedConfigurationFilePath: string, projectFolderPath: string | undefined, onFileNotFound?: IOnFileNotFoundCallback): Promise<TConfigurationFile>;
 }
 
 // @beta
@@ -74,6 +72,7 @@ export type IJsonPathMetadata<T> = ICustomJsonPathMetadata<T> | INonCustomJsonPa
 export interface IJsonPathMetadataResolverOptions<TConfigurationFile> {
     configurationFile: Partial<TConfigurationFile>;
     configurationFilePath: string;
+    projectFolderPath?: string;
     propertyName: string;
     propertyValue: string;
 }
@@ -149,10 +148,6 @@ export class NonProjectConfigurationFile<TConfigurationFile> extends Configurati
     loadConfigurationFileAsync(terminal: ITerminal, filePath: string): Promise<TConfigurationFile>;
     tryLoadConfigurationFile(terminal: ITerminal, filePath: string): TConfigurationFile | undefined;
     tryLoadConfigurationFileAsync(terminal: ITerminal, filePath: string): Promise<TConfigurationFile | undefined>;
-    // (undocumented)
-    protected _tryLoadConfigurationFileInRig(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): TConfigurationFile | undefined;
-    // (undocumented)
-    protected _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
 }
 
 // @beta
@@ -185,10 +180,6 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
     readonly projectRelativeFilePath: string;
     tryLoadConfigurationFileForProject(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): TConfigurationFile | undefined;
     tryLoadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile | undefined>;
-    // (undocumented)
-    protected _tryLoadConfigurationFileInRig(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): TConfigurationFile | undefined;
-    // (undocumented)
-    protected _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
 }
 
 // @beta (undocumented)
