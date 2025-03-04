@@ -355,7 +355,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (/https?:/.test(version)) {
       return /@https?:/.test(version) ? version : `${name}@${version}`;
     } else if (/file:/.test(version)) {
-      return /@file:/.test(version)? version : `${name}@${version}`;
+      return /@file:/.test(version) ? version : `${name}@${version}`;
     }
 
     return dependencyPath.removeSuffix(version).includes('@', 1) ? version : `${name}@${version}`;
@@ -556,7 +556,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _convertLockfileV6DepPathToV5DepPath(newDepPath: string): string {
     if (!newDepPath.includes('@', 2) || newDepPath.startsWith('file:')) return newDepPath;
     const index: number = newDepPath.indexOf('@', newDepPath.indexOf('/@') + 2);
-    if (newDepPath.includes('(') && index > dependencyPathLockfilePreV9.indexOfPeersSuffix(newDepPath)) return newDepPath;
+    if (newDepPath.includes('(') && index > dependencyPathLockfilePreV9.indexOfPeersSuffix(newDepPath))
+      return newDepPath;
     return `${newDepPath.substring(0, index)}/${newDepPath.substring(index + 1)}`;
   }
 
@@ -570,7 +571,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (this.shrinkwrapFileMajorVersion >= 6) {
       depPath = this._convertLockfileV6DepPathToV5DepPath(packagePath);
     }
-    const pkgInfo: ReturnType<typeof dependencyPathLockfilePreV9.parse> = dependencyPathLockfilePreV9.parse(depPath);
+    const pkgInfo: ReturnType<typeof dependencyPathLockfilePreV9.parse> =
+      dependencyPathLockfilePreV9.parse(depPath);
     return this._getPackageId(pkgInfo.name as string, pkgInfo.version as string);
   }
 
@@ -1126,7 +1128,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
               let resolvedVersion: string = this.overrides.get(name) ?? version;
               // convert path in posix style, otherwise pnpm install will fail in subspace case
               resolvedVersion = Path.convertToSlashes(resolvedVersion);
-              if (specifierFromLockfile.specifier !== resolvedVersion && !isDevDepFallThrough && !isOptional) {
+              if (
+                specifierFromLockfile.specifier !== resolvedVersion &&
+                !isDevDepFallThrough &&
+                !isOptional
+              ) {
                 return true;
               }
             }
