@@ -2,7 +2,6 @@
   "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
   "compilerOptions": {
     "target": "ES2019",
-    "types": ["heft-jest", "node", "estree"],
-    "skipLibCheck": true
+    "types": ["heft-jest", "node", "estree"]
   }
 }
