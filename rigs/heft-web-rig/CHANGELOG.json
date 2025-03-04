@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.27.0",
+      "tag": "@rushstack/heft-web-rig_v0.27.0",
+      "date": "Tue, 04 Mar 2025 16:10:41 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump Webpack to ~5.98.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.26.0",
       "tag": "@rushstack/heft-web-rig_v0.26.0",
       "date": "Sat, 01 Mar 2025 07:23:16 GMT",
