@@ -251,8 +251,31 @@ function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRec
 export function loadTheme(theme: ITheme | undefined): void {
   _themeState.theme = theme;
 
+  try {
+    const { style } = document.body;
+    for (const key in theme) {
+      if (theme.hasOwnProperty(key)) {
+        style.setProperty(`--${key}`, theme[key]);
+      }
+    }
+  } catch (e) {
+    // Log but suppress error
+    console.error(e);
+  }
+
   // reload styles.
   reloadStyles();
+}
+
+/**
+ * Replaces theme tokens with CSS variable references.
+ * @param styles - Raw css text with theme tokens
+ * @returns A css string with theme tokens replaced with css variable references
+ */
+export function replaceTokensWithVariables(styles: string): string {
+  return styles.replace(_themeTokenRegex, (match: string, themeSlot: string, defaultValue: string) => {
+    return typeof defaultValue === 'string' ? `var(--${themeSlot}, ${defaultValue})` : `var(--${themeSlot})`;
+  });
 }
 
 /**
