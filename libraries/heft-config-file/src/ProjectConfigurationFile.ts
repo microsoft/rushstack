@@ -19,6 +19,15 @@ export interface IProjectConfigurationFileOptions {
 }
 
 /**
+ * Alias for the constructor type for {@link ProjectConfigurationFile}.
+ * @beta
+ */
+export type IProjectConfigurationFileSpecification<TConfigFile> = IConfigurationFileOptions<
+  TConfigFile,
+  IProjectConfigurationFileOptions
+>;
+
+/**
  * @beta
  */
 export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationFileBase<
@@ -28,9 +37,7 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
   /** {@inheritDoc IProjectConfigurationFileOptions.projectRelativeFilePath} */
   public readonly projectRelativeFilePath: string;
 
-  public constructor(
-    options: IConfigurationFileOptions<TConfigurationFile, IProjectConfigurationFileOptions>
-  ) {
+  public constructor(options: IProjectConfigurationFileSpecification<TConfigurationFile>) {
     super(options);
     this.projectRelativeFilePath = options.projectRelativeFilePath;
   }

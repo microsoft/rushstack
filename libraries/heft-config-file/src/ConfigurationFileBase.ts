@@ -11,67 +11,145 @@ interface IConfigurationJson {
   extends?: string;
 }
 
+/* eslint-disable @typescript-eslint/typedef,@typescript-eslint/no-redeclare,@typescript-eslint/no-namespace,@typescript-eslint/naming-convention */
+// This structure is used so that consumers can pass raw string literals and have it typecheck, without breaking existing callers.
 /**
  * @beta
+ *
+ * The set of possible mechanisms for merging properties from parent configuration files.
  */
-export enum InheritanceType {
+const InheritanceType = {
   /**
    * Append additional elements after elements from the parent file's property. Only applicable
    * for arrays.
    */
-  append = 'append',
+  append: 'append',
 
   /**
    * Perform a shallow merge of additional elements after elements from the parent file's property.
    * Only applicable for objects.
    */
-  merge = 'merge',
+  merge: 'merge',
 
   /**
    * Discard elements from the parent file's property
    */
-  replace = 'replace',
+  replace: 'replace',
 
   /**
    * Custom inheritance functionality
    */
-  custom = 'custom'
-}
-
+  custom: 'custom'
+} as const;
 /**
  * @beta
  */
-export enum PathResolutionMethod {
+type InheritanceType = (typeof InheritanceType)[keyof typeof InheritanceType];
+/**
+ * @beta
+ */
+declare namespace InheritanceType {
+  /**
+   * Append additional elements after elements from the parent file's property. Only applicable
+   * for arrays.
+   */
+  export type append = typeof InheritanceType.append;
+
+  /**
+   * Perform a shallow merge of additional elements after elements from the parent file's property.
+   * Only applicable for objects.
+   */
+  export type merge = typeof InheritanceType.merge;
+
+  /**
+   * Discard elements from the parent file's property
+   */
+  export type replace = typeof InheritanceType.replace;
+
+  /**
+   * Custom inheritance functionality
+   */
+  export type custom = typeof InheritanceType.custom;
+}
+export { InheritanceType };
+
+/**
+ * @beta
+ *
+ * The set of possible resolution methods for fields that refer to paths.
+ */
+const PathResolutionMethod = {
   /**
    * Resolve a path relative to the configuration file
    */
-  resolvePathRelativeToConfigurationFile = 'resolvePathRelativeToConfigurationFile',
+  resolvePathRelativeToConfigurationFile: 'resolvePathRelativeToConfigurationFile',
 
   /**
    * Resolve a path relative to the root of the project containing the configuration file
    */
-  resolvePathRelativeToProjectRoot = 'resolvePathRelativeToProjectRoot',
+  resolvePathRelativeToProjectRoot: 'resolvePathRelativeToProjectRoot',
 
   /**
    * Treat the property as a NodeJS-style require/import reference and resolve using standard
    * NodeJS filesystem resolution
    *
    * @deprecated
-   * Use {@link PathResolutionMethod.nodeResolve} instead
+   * Use {@link (PathResolutionMethod:variable).nodeResolve} instead
    */
-  NodeResolve = 'NodeResolve',
+  NodeResolve: 'NodeResolve',
 
   /**
    * Treat the property as a NodeJS-style require/import reference and resolve using standard
    * NodeJS filesystem resolution
    */
-  nodeResolve = 'nodeResolve',
+  nodeResolve: 'nodeResolve',
 
   /**
    * Resolve the property using a custom resolver.
    */
-  custom = 'custom'
+  custom: 'custom'
+} as const;
+/**
+ * @beta
+ */
+type PathResolutionMethod = (typeof PathResolutionMethod)[keyof typeof PathResolutionMethod];
+/**
+ * @beta
+ */
+declare namespace PathResolutionMethod {
+  /**
+   * Resolve a path relative to the configuration file
+   */
+  export type resolvePathRelativeToConfigurationFile =
+    typeof PathResolutionMethod.resolvePathRelativeToConfigurationFile;
+
+  /**
+   * Resolve a path relative to the root of the project containing the configuration file
+   */
+  export type resolvePathRelativeToProjectRoot = typeof PathResolutionMethod.resolvePathRelativeToProjectRoot;
+
+  /**
+   * Treat the property as a NodeJS-style require/import reference and resolve using standard
+   * NodeJS filesystem resolution
+   *
+   * @deprecated
+   * Use {@link (PathResolutionMethod:namespace).nodeResolve} instead
+   */
+  export type NodeResolve = typeof PathResolutionMethod.NodeResolve;
+
+  /**
+   * Treat the property as a NodeJS-style require/import reference and resolve using standard
+   * NodeJS filesystem resolution
+   */
+  export type nodeResolve = typeof PathResolutionMethod.nodeResolve;
+
+  /**
+   * Resolve the property using a custom resolver.
+   */
+  export type custom = typeof PathResolutionMethod.custom;
 }
+export { PathResolutionMethod };
+/* eslint-enable @typescript-eslint/typedef,@typescript-eslint/no-redeclare,@typescript-eslint/no-namespace,@typescript-eslint/naming-convention */
 
 const CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX: RegExp = /^\$([^\.]+)\.inheritanceType$/;
 export const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol(
@@ -207,6 +285,18 @@ export interface IJsonPathsMetadata<TConfigurationFile> {
 }
 
 /**
+ * A function to invoke after schema validation to validate the configuration file.
+ * This function log errors using the terminal and return false if the configuration file
+ * is invalid.
+ * @beta
+ */
+export type CustomValidationFunction<TConfigurationFile> = (
+  configurationFile: TConfigurationFile,
+  resolvedConfigurationFilePathForLogging: string,
+  terminal: ITerminal
+) => boolean;
+
+/**
  * @beta
  */
 export interface IConfigurationFileOptionsBase<TConfigurationFile> {
@@ -226,6 +316,14 @@ export interface IConfigurationFileOptionsBase<TConfigurationFile> {
    * configuration files.
    */
   propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
+
+  /**
+   * Use this property if you need to validate the configuration file in ways beyond what JSON schema can handle.
+   * This function will be invoked after JSON schema validation.
+   *
+   * The function should throw if the configuration file is invalid.
+   */
+  customValidationFunction?: CustomValidationFunction<TConfigurationFile>;
 }
 
 /**
@@ -289,6 +387,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
   private readonly _jsonPathMetadata: IJsonPathsMetadata<TConfigurationFile>;
   private readonly _propertyInheritanceTypes: IPropertiesInheritance<TConfigurationFile>;
   private readonly _defaultPropertyInheritance: IPropertyInheritanceDefaults;
+  private readonly _customValidationFunction: CustomValidationFunction<TConfigurationFile> | undefined;
   private __schema: JsonSchema | undefined;
   private get _schema(): JsonSchema {
     if (!this.__schema) {
@@ -312,6 +411,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     this._jsonPathMetadata = options.jsonPathMetadata || {};
     this._propertyInheritanceTypes = options.propertyInheritance || {};
     this._defaultPropertyInheritance = options.propertyInheritanceDefaults || {};
+    this._customValidationFunction = options.customValidationFunction;
   }
 
   /**
@@ -549,10 +649,23 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       configurationJson,
       resolvedConfigurationFilePath
     );
+
     try {
       this._schema.validateObject(result, resolvedConfigurationFilePathForLogging);
     } catch (e) {
       throw new Error(`Resolved configuration object does not match schema: ${e}`);
+    }
+
+    if (
+      this._customValidationFunction?.(
+        result as TConfigurationFile,
+        resolvedConfigurationFilePathForLogging,
+        terminal
+      ) === false
+    ) {
+      throw new Error(
+        `Resolved configuration file at "${resolvedConfigurationFilePathForLogging}" failed custom validation.`
+      );
     }
 
     // If the schema validates, we can assume that the configuration file is complete.
