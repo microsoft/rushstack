@@ -2,11 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import * as nodeJsPath from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { IRigConfig } from '@rushstack/rig-package';
 
-import { ConfigurationFileBase, type IConfigurationFileOptions } from './ConfigurationFileBase';
+import {
+  ConfigurationFileBase,
+  type IOnConfigurationFileNotFoundCallback,
+  type IConfigurationFileOptions
+} from './ConfigurationFileBase';
 
 /**
  * @beta
@@ -19,6 +23,15 @@ export interface IProjectConfigurationFileOptions {
 }
 
 /**
+ * Alias for the constructor type for {@link ProjectConfigurationFile}.
+ * @beta
+ */
+export type IProjectConfigurationFileSpecification<TConfigFile> = IConfigurationFileOptions<
+  TConfigFile,
+  IProjectConfigurationFileOptions
+>;
+
+/**
  * @beta
  */
 export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationFileBase<
@@ -28,9 +41,7 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
   /** {@inheritDoc IProjectConfigurationFileOptions.projectRelativeFilePath} */
   public readonly projectRelativeFilePath: string;
 
-  public constructor(
-    options: IConfigurationFileOptions<TConfigurationFile, IProjectConfigurationFileOptions>
-  ) {
+  public constructor(options: IProjectConfigurationFileSpecification<TConfigurationFile>) {
     super(options);
     this.projectRelativeFilePath = options.projectRelativeFilePath;
   }
@@ -49,8 +60,8 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
     return this._loadConfigurationFileInnerWithCache(
       terminal,
       projectConfigurationFilePath,
-      new Set<string>(),
-      rigConfig
+      PackageJsonLookup.instance.tryGetPackageFolderFor(projectPath),
+      this._getRigConfigFallback(terminal, rigConfig)
     );
   }
 
@@ -68,8 +79,8 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
     return await this._loadConfigurationFileInnerWithCacheAsync(
       terminal,
       projectConfigurationFilePath,
-      new Set<string>(),
-      rigConfig
+      PackageJsonLookup.instance.tryGetPackageFolderFor(projectPath),
+      this._getRigConfigFallback(terminal, rigConfig)
     );
   }
 
@@ -111,77 +122,28 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
     }
   }
 
-  protected _tryLoadConfigurationFileInRig(
-    terminal: ITerminal,
-    rigConfig: IRigConfig,
-    visitedConfigurationFilePaths: Set<string>
-  ): TConfigurationFile | undefined {
-    if (rigConfig.rigFound) {
-      const rigProfileFolder: string = rigConfig.getResolvedProfileFolder();
-      try {
-        return this._loadConfigurationFileInnerWithCache(
-          terminal,
-          nodeJsPath.resolve(rigProfileFolder, this.projectRelativeFilePath),
-          visitedConfigurationFilePaths,
-          undefined
-        );
-      } catch (e) {
-        // Ignore cases where a configuration file doesn't exist in a rig
-        if (!FileSystem.isNotExistError(e as Error)) {
-          throw e;
-        } else {
-          terminal.writeDebugLine(
-            `Configuration file "${
-              this.projectRelativeFilePath
-            }" not found in rig ("${ConfigurationFileBase._formatPathForLogging(rigProfileFolder)}")`
-          );
-        }
-      }
-    } else {
-      terminal.writeDebugLine(
-        `No rig found for "${ConfigurationFileBase._formatPathForLogging(rigConfig.projectFolderPath)}"`
-      );
-    }
-
-    return undefined;
-  }
-
-  protected async _tryLoadConfigurationFileInRigAsync(
-    terminal: ITerminal,
-    rigConfig: IRigConfig,
-    visitedConfigurationFilePaths: Set<string>
-  ): Promise<TConfigurationFile | undefined> {
-    if (rigConfig.rigFound) {
-      const rigProfileFolder: string = await rigConfig.getResolvedProfileFolderAsync();
-      try {
-        return await this._loadConfigurationFileInnerWithCacheAsync(
-          terminal,
-          nodeJsPath.resolve(rigProfileFolder, this.projectRelativeFilePath),
-          visitedConfigurationFilePaths,
-          undefined
-        );
-      } catch (e) {
-        // Ignore cases where a configuration file doesn't exist in a rig
-        if (!FileSystem.isNotExistError(e as Error)) {
-          throw e;
-        } else {
-          terminal.writeDebugLine(
-            `Configuration file "${
-              this.projectRelativeFilePath
-            }" not found in rig ("${ConfigurationFileBase._formatPathForLogging(rigProfileFolder)}")`
-          );
-        }
-      }
-    } else {
-      terminal.writeDebugLine(
-        `No rig found for "${ConfigurationFileBase._formatPathForLogging(rigConfig.projectFolderPath)}"`
-      );
-    }
-
-    return undefined;
-  }
-
   private _getConfigurationFilePathForProject(projectPath: string): string {
     return nodeJsPath.resolve(projectPath, this.projectRelativeFilePath);
+  }
+
+  private _getRigConfigFallback(
+    terminal: ITerminal,
+    rigConfig: IRigConfig | undefined
+  ): IOnConfigurationFileNotFoundCallback | undefined {
+    return rigConfig
+      ? (resolvedConfigurationFilePathForLogging: string) => {
+          if (rigConfig.rigFound) {
+            const rigProfileFolder: string = rigConfig.getResolvedProfileFolder();
+            terminal.writeDebugLine(
+              `Configuration file "${resolvedConfigurationFilePathForLogging}" does not exist. Attempting to load via rig ("${ConfigurationFileBase._formatPathForLogging(rigProfileFolder)}").`
+            );
+            return nodeJsPath.resolve(rigProfileFolder, this.projectRelativeFilePath);
+          } else {
+            terminal.writeDebugLine(
+              `No rig found for "${ConfigurationFileBase._formatPathForLogging(rigConfig.projectFolderPath)}"`
+            );
+          }
+        }
+      : undefined;
   }
 }
