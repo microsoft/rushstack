@@ -36,7 +36,11 @@ export interface IPartialTsconfig {
 // @beta (undocumented)
 export interface IPartialTsconfigCompilerOptions {
     // (undocumented)
+    module?: keyof TTypescript.ModuleKind;
+    // (undocumented)
     outDir?: string;
+    // (undocumented)
+    target?: keyof TTypescript.ScriptTarget;
 }
 
 // @beta (undocumented)

@@ -15,7 +15,13 @@ import type {
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions,
   ICopyOperation,
-  IHeftTaskFileOperations
+  IHeftTaskFileOperations,
+  IScopedLogger,
+  IProjectConfigurationFileSpecification,
+  IJavaScriptEmitKindsConfigurationJson,
+  IJavaScriptEmitKind,
+  JavaScriptTarget,
+  JavaScriptModuleKind
 } from '@rushstack/heft';
 
 import { TypeScriptBuilder, type ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
@@ -103,6 +109,8 @@ export interface ITypeScriptConfigurationJson {
  */
 export interface IPartialTsconfigCompilerOptions {
   outDir?: string;
+  module?: keyof TTypescript.ModuleKind;
+  target?: keyof TTypescript.ScriptTarget;
 }
 
 /**
@@ -127,11 +135,21 @@ export interface ITypeScriptPluginAccessor {
   readonly onChangedFilesHook: SyncHook<IChangedFilesHookOptions>;
 }
 
-let _typeScriptConfigurationFileLoader: ProjectConfigurationFile<ITypeScriptConfigurationJson> | undefined;
-const _typeScriptConfigurationFilePromiseCache: Map<
-  string,
-  Promise<ITypeScriptConfigurationJson | undefined>
-> = new Map();
+const TYPESCRIPT_LOADER_CONFIG: IProjectConfigurationFileSpecification<ITypeScriptConfigurationJson> = {
+  projectRelativeFilePath: 'config/typescript.json',
+  jsonSchemaObject: typescriptConfigSchema,
+  propertyInheritance: {
+    staticAssetsToCopy: {
+      // When merging objects, arrays will be automatically appended
+      inheritanceType: InheritanceType.merge
+    }
+  },
+  jsonPathMetadata: {
+    '$.additionalModuleKindsToEmit.*.outFolderName': {
+      pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+    }
+  }
+};
 
 /**
  * @beta
@@ -140,37 +158,10 @@ export async function loadTypeScriptConfigurationFileAsync(
   heftConfiguration: HeftConfiguration,
   terminal: ITerminal
 ): Promise<ITypeScriptConfigurationJson | undefined> {
-  const buildFolderPath: string = heftConfiguration.buildFolderPath;
-
-  // Check the cache first
-  let typescriptConfigurationFilePromise: Promise<ITypeScriptConfigurationJson | undefined> | undefined =
-    _typeScriptConfigurationFilePromiseCache.get(buildFolderPath);
-
-  if (!typescriptConfigurationFilePromise) {
-    // Ensure that the file loader has been initialized.
-    if (!_typeScriptConfigurationFileLoader) {
-      _typeScriptConfigurationFileLoader = new ProjectConfigurationFile<ITypeScriptConfigurationJson>({
-        projectRelativeFilePath: 'config/typescript.json',
-        jsonSchemaObject: typescriptConfigSchema,
-        propertyInheritance: {
-          staticAssetsToCopy: {
-            // When merging objects, arrays will be automatically appended
-            inheritanceType: InheritanceType.merge
-          }
-        }
-      });
-    }
-
-    typescriptConfigurationFilePromise =
-      _typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
-        terminal,
-        buildFolderPath,
-        heftConfiguration.rigConfig
-      );
-    _typeScriptConfigurationFilePromiseCache.set(buildFolderPath, typescriptConfigurationFilePromise);
-  }
-
-  return await typescriptConfigurationFilePromise;
+  return await heftConfiguration.tryLoadProjectConfigurationFileAsync<ITypeScriptConfigurationJson>(
+    TYPESCRIPT_LOADER_CONFIG,
+    terminal
+  );
 }
 
 let _partialTsconfigFileLoader: ProjectConfigurationFile<IPartialTsconfig> | undefined;
@@ -241,10 +232,17 @@ export async function loadPartialTsconfigFileAsync(
   return await partialTsconfigFilePromise;
 }
 
+interface ITypeScriptConfigurationJsonAndPartialTsconfigFile {
+  configJson: ITypeScriptConfigurationJson | undefined;
+  tsConfigFile: IPartialTsconfig | undefined;
+}
+
 export default class TypeScriptPlugin implements IHeftTaskPlugin {
   public accessor: ITypeScriptPluginAccessor = {
     onChangedFilesHook: new SyncHook<IChangedFilesHookOptions>(['changedFilesHookOptions'])
   };
+
+  private _validatedEmitKinds: boolean = false;
 
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     taskSession.hooks.registerFileOperations.tapPromise(
@@ -295,8 +293,8 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<ICopyOperation[]> {
-    const typeScriptConfiguration: ITypeScriptConfigurationJson | undefined =
-      await loadTypeScriptConfigurationFileAsync(heftConfiguration, taskSession.logger.terminal);
+    const { configJson: typeScriptConfiguration, tsConfigFile: tsconfigFile } =
+      await this._loadAndValidateConfigAsync(taskSession, heftConfiguration);
 
     // We only care about the copy if static assets were specified.
     const copyOperations: ICopyOperation[] = [];
@@ -308,16 +306,13 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       const destinationFolderPaths: Set<string> = new Set<string>();
 
       // Add the output folder and all additional module kind output folders as destinations
-      const tsconfigOutDir: string | undefined = await this._getTsconfigOutDirAsync(
-        taskSession,
-        heftConfiguration,
-        typeScriptConfiguration
-      );
+      const tsconfigOutDir: string | undefined = tsconfigFile?.compilerOptions?.outDir;
       if (tsconfigOutDir) {
         destinationFolderPaths.add(tsconfigOutDir);
       }
+
       for (const emitModule of typeScriptConfiguration?.additionalModuleKindsToEmit || []) {
-        destinationFolderPaths.add(`${heftConfiguration.buildFolderPath}/${emitModule.outFolderName}`);
+        destinationFolderPaths.add(emitModule.outFolderName);
       }
 
       copyOperations.push({
@@ -330,6 +325,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         hardlink: false
       });
     }
+
     return copyOperations;
   }
 
@@ -339,14 +335,8 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
   ): Promise<TypeScriptBuilder | false> {
     const terminal: ITerminal = taskSession.logger.terminal;
 
-    const typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
-      await loadTypeScriptConfigurationFileAsync(heftConfiguration, terminal);
-
-    const partialTsconfigFile: IPartialTsconfig | undefined = await loadPartialTsconfigFileAsync(
-      heftConfiguration,
-      terminal,
-      typeScriptConfigurationJson
-    );
+    const { configJson: typeScriptConfigurationJson, tsConfigFile: partialTsconfigFile } =
+      await this._loadAndValidateConfigAsync(taskSession, heftConfiguration);
 
     if (!partialTsconfigFile) {
       // There is no tsconfig file, we can exit early
@@ -394,16 +384,122 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     return typeScriptBuilder;
   }
 
-  private async _getTsconfigOutDirAsync(
+  private async _loadAndValidateConfigAsync(
     taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
-    typeScriptConfiguration: ITypeScriptConfigurationJson | undefined
-  ): Promise<string | undefined> {
+    heftConfiguration: HeftConfiguration
+  ): Promise<ITypeScriptConfigurationJsonAndPartialTsconfigFile> {
+    const terminal: ITerminal = taskSession.logger.terminal;
+
+    const typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
+      await loadTypeScriptConfigurationFileAsync(heftConfiguration, terminal);
+
     const partialTsconfigFile: IPartialTsconfig | undefined = await loadPartialTsconfigFileAsync(
       heftConfiguration,
-      taskSession.logger.terminal,
-      typeScriptConfiguration
+      terminal,
+      typeScriptConfigurationJson
     );
-    return partialTsconfigFile?.compilerOptions?.outDir;
+
+    if (partialTsconfigFile) {
+      await this._validateEmitKindsAsync(
+        heftConfiguration,
+        taskSession.logger,
+        typeScriptConfigurationJson,
+        partialTsconfigFile
+      );
+    }
+
+    return {
+      configJson: typeScriptConfigurationJson,
+      tsConfigFile: partialTsconfigFile
+    };
+  }
+
+  private async _validateEmitKindsAsync(
+    heftConfiguration: HeftConfiguration,
+    logger: IScopedLogger,
+    typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined,
+    partialTsconfigFile: IPartialTsconfig
+  ): Promise<void> {
+    if (this._validatedEmitKinds) {
+      return;
+    }
+
+    this._validatedEmitKinds = true;
+
+    const locallyConfiguredOutputKinds: Map<string, IJavaScriptEmitKind> = new Map();
+    const { compilerOptions } = partialTsconfigFile;
+    let configuredTarget: JavaScriptTarget | undefined;
+    if (compilerOptions?.outDir) {
+      const { outDir, target = 'ES5' } = compilerOptions;
+
+      const { module = target === 'ES5' ? 'CommonJS' : 'ES2015' } = compilerOptions;
+
+      configuredTarget = target.toLowerCase() as JavaScriptTarget;
+
+      locallyConfiguredOutputKinds.set(outDir, {
+        outputFolder: outDir,
+        moduleKind: module.toLowerCase() as JavaScriptModuleKind,
+        target: configuredTarget
+      });
+    }
+
+    if (typeScriptConfigurationJson) {
+      const { additionalModuleKindsToEmit } = typeScriptConfigurationJson;
+      if (additionalModuleKindsToEmit) {
+        for (const emitKind of additionalModuleKindsToEmit) {
+          locallyConfiguredOutputKinds.set(emitKind.outFolderName, {
+            outputFolder: emitKind.outFolderName,
+            moduleKind: emitKind.moduleKind as JavaScriptModuleKind,
+            target: configuredTarget ?? 'esnext'
+          });
+        }
+      }
+    }
+
+    const { JavaScriptEmitKinds } = heftConfiguration.wellKnownConfigurationFiles;
+    const javascriptEmitKindsConfiguration: IJavaScriptEmitKindsConfigurationJson | undefined =
+      await heftConfiguration.tryLoadProjectConfigurationFileAsync(JavaScriptEmitKinds, logger.terminal);
+
+    if (javascriptEmitKindsConfiguration) {
+      const { projectRelativeFilePath: globalConfigPath } = JavaScriptEmitKinds;
+      const { projectRelativeFilePath: typescriptConfigPath } = TYPESCRIPT_LOADER_CONFIG;
+
+      const { emitKinds: globalEmitKinds } = javascriptEmitKindsConfiguration;
+      const globalEmitKindMap: Map<string, IJavaScriptEmitKind> = new Map();
+      for (const globalEmitKind of globalEmitKinds) {
+        const { outputFolder } = globalEmitKind;
+        const emitKind: IJavaScriptEmitKind | undefined = locallyConfiguredOutputKinds.get(outputFolder);
+        if (!emitKind) {
+          logger.emitWarning(
+            new Error(
+              `The configuration at "${globalConfigPath}" says to emit "${globalEmitKind.moduleKind}" modules targeting "${globalEmitKind.target}" to the "${outputFolder}" folder, but this folder is not configured in the TypeScript plugin. Please add the entry to "${typescriptConfigPath}" if it should be emitted or remove it from "${globalConfigPath}" if it should not.`
+            )
+          );
+          continue;
+        }
+
+        globalEmitKindMap.set(outputFolder, globalEmitKind);
+      }
+
+      for (const [outputFolder, emitKind] of locallyConfiguredOutputKinds) {
+        const globalEmitKind: IJavaScriptEmitKind | undefined = globalEmitKindMap.get(outputFolder);
+        if (!globalEmitKind) {
+          logger.emitWarning(
+            new Error(
+              `The TypeScript plugin is emitting "${emitKind.moduleKind}" modules targeting "${emitKind.target}" to the "${outputFolder}" folder, but this folder has not been registered in the global config at "${globalConfigPath}". Please remove the entry from "${typescriptConfigPath}" task if it should not be emitted or add it to "${globalConfigPath}" if it should.`
+            )
+          );
+        } else if (
+          emitKind.moduleKind !== globalEmitKind.moduleKind ||
+          emitKind.target !== globalEmitKind.target
+        ) {
+          logger.emitWarning(
+            new Error(
+              `The TypeScript plugin is emitting "${emitKind.moduleKind}" modules targeting "${emitKind.target}" to the "${outputFolder}" folder, but this folder has been registered for emitting "${globalEmitKind.moduleKind}" modules targeting "${globalEmitKind.target}" in "${globalConfigPath}". Please update one of the config files.`
+            )
+          );
+        }
+      }
+    }
   }
 }
