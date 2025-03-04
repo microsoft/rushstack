@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Fix an issue with `PathResolutionMethod.resolvePathRelativeToProjectRoot` when extending files across packages.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file"
+}

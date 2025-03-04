@@ -21,20 +21,20 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue | undefined;
     // (undocumented)
-    protected _loadConfigurationFileInnerWithCache(terminal: ITerminal, resolvedConfigurationFilePath: string, visitedConfigurationFilePaths: Set<string>, rigConfig: IRigConfig | undefined): TConfigurationFile;
+    protected _loadConfigurationFileInnerWithCache(terminal: ITerminal, resolvedConfigurationFilePath: string, projectFolderPath: string | undefined, onConfigurationFileNotFound?: IOnConfigurationFileNotFoundCallback): TConfigurationFile;
     // (undocumented)
-    protected _loadConfigurationFileInnerWithCacheAsync(terminal: ITerminal, resolvedConfigurationFilePath: string, visitedConfigurationFilePaths: Set<string>, rigConfig: IRigConfig | undefined): Promise<TConfigurationFile>;
-    // (undocumented)
-    protected abstract _tryLoadConfigurationFileInRig(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): TConfigurationFile | undefined;
-    // (undocumented)
-    protected abstract _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
+    protected _loadConfigurationFileInnerWithCacheAsync(terminal: ITerminal, resolvedConfigurationFilePath: string, projectFolderPath: string | undefined, onFileNotFound?: IOnConfigurationFileNotFoundCallback): Promise<TConfigurationFile>;
 }
+
+// @beta
+export type CustomValidationFunction<TConfigurationFile> = (configurationFile: TConfigurationFile, resolvedConfigurationFilePathForLogging: string, terminal: ITerminal) => boolean;
 
 // @beta (undocumented)
 export type IConfigurationFileOptions<TConfigurationFile, TExtraOptions extends object> = IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile, TExtraOptions> | IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile, TExtraOptions>;
 
 // @beta (undocumented)
 export interface IConfigurationFileOptionsBase<TConfigurationFile> {
+    customValidationFunction?: CustomValidationFunction<TConfigurationFile>;
     jsonPathMetadata?: IJsonPathsMetadata<TConfigurationFile>;
     propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
     propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
@@ -70,6 +70,7 @@ export type IJsonPathMetadata<T> = ICustomJsonPathMetadata<T> | INonCustomJsonPa
 export interface IJsonPathMetadataResolverOptions<TConfigurationFile> {
     configurationFile: Partial<TConfigurationFile>;
     configurationFilePath: string;
+    projectFolderPath?: string;
     propertyName: string;
     propertyValue: string;
 }
@@ -80,18 +81,32 @@ export interface IJsonPathsMetadata<TConfigurationFile> {
     [jsonPath: string]: IJsonPathMetadata<TConfigurationFile>;
 }
 
+// @beta
+export const InheritanceType: {
+    readonly append: "append";
+    readonly merge: "merge";
+    readonly replace: "replace";
+    readonly custom: "custom";
+};
+
 // @beta (undocumented)
-export enum InheritanceType {
-    append = "append",
-    custom = "custom",
-    merge = "merge",
-    replace = "replace"
+export type InheritanceType = (typeof InheritanceType)[keyof typeof InheritanceType];
+
+// @beta (undocumented)
+export namespace InheritanceType {
+    export type append = typeof InheritanceType.append;
+    export type custom = typeof InheritanceType.custom;
+    export type merge = typeof InheritanceType.merge;
+    export type replace = typeof InheritanceType.replace;
 }
 
 // @beta
 export interface INonCustomJsonPathMetadata {
     pathResolutionMethod?: PathResolutionMethod.NodeResolve | PathResolutionMethod.nodeResolve | PathResolutionMethod.resolvePathRelativeToConfigurationFile | PathResolutionMethod.resolvePathRelativeToProjectRoot;
 }
+
+// @beta
+export type IOnConfigurationFileNotFoundCallback = (resolvedConfigurationFilePathForLogging: string) => string | undefined;
 
 // @beta (undocumented)
 export interface IOriginalValueOptions<TParentProperty> {
@@ -105,6 +120,9 @@ export interface IOriginalValueOptions<TParentProperty> {
 export interface IProjectConfigurationFileOptions {
     projectRelativeFilePath: string;
 }
+
+// @beta
+export type IProjectConfigurationFileSpecification<TConfigFile> = IConfigurationFileOptions<TConfigFile, IProjectConfigurationFileOptions>;
 
 // @beta (undocumented)
 export type IPropertiesInheritance<TConfigurationFile> = {
@@ -131,34 +149,38 @@ export class NonProjectConfigurationFile<TConfigurationFile> extends Configurati
     loadConfigurationFileAsync(terminal: ITerminal, filePath: string): Promise<TConfigurationFile>;
     tryLoadConfigurationFile(terminal: ITerminal, filePath: string): TConfigurationFile | undefined;
     tryLoadConfigurationFileAsync(terminal: ITerminal, filePath: string): Promise<TConfigurationFile | undefined>;
-    // (undocumented)
-    protected _tryLoadConfigurationFileInRig(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): TConfigurationFile | undefined;
-    // (undocumented)
-    protected _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
 }
 
+// @beta
+export const PathResolutionMethod: {
+    readonly resolvePathRelativeToConfigurationFile: "resolvePathRelativeToConfigurationFile";
+    readonly resolvePathRelativeToProjectRoot: "resolvePathRelativeToProjectRoot";
+    readonly NodeResolve: "NodeResolve";
+    readonly nodeResolve: "nodeResolve";
+    readonly custom: "custom";
+};
+
 // @beta (undocumented)
-export enum PathResolutionMethod {
-    custom = "custom",
+export type PathResolutionMethod = (typeof PathResolutionMethod)[keyof typeof PathResolutionMethod];
+
+// @beta (undocumented)
+export namespace PathResolutionMethod {
+    export type custom = typeof PathResolutionMethod.custom;
     // @deprecated
-    NodeResolve = "NodeResolve",
-    nodeResolve = "nodeResolve",
-    resolvePathRelativeToConfigurationFile = "resolvePathRelativeToConfigurationFile",
-    resolvePathRelativeToProjectRoot = "resolvePathRelativeToProjectRoot"
+    export type NodeResolve = typeof PathResolutionMethod.NodeResolve;
+    export type nodeResolve = typeof PathResolutionMethod.nodeResolve;
+    export type resolvePathRelativeToConfigurationFile = typeof PathResolutionMethod.resolvePathRelativeToConfigurationFile;
+    export type resolvePathRelativeToProjectRoot = typeof PathResolutionMethod.resolvePathRelativeToProjectRoot;
 }
 
 // @beta (undocumented)
 export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationFileBase<TConfigurationFile, IProjectConfigurationFileOptions> {
-    constructor(options: IConfigurationFileOptions<TConfigurationFile, IProjectConfigurationFileOptions>);
+    constructor(options: IProjectConfigurationFileSpecification<TConfigurationFile>);
     loadConfigurationFileForProject(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): TConfigurationFile;
     loadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile>;
     readonly projectRelativeFilePath: string;
     tryLoadConfigurationFileForProject(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): TConfigurationFile | undefined;
     tryLoadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile | undefined>;
-    // (undocumented)
-    protected _tryLoadConfigurationFileInRig(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): TConfigurationFile | undefined;
-    // (undocumented)
-    protected _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
 }
 
 // @beta (undocumented)
