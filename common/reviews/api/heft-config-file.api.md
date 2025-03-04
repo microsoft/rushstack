@@ -30,11 +30,15 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     protected abstract _tryLoadConfigurationFileInRigAsync(terminal: ITerminal, rigConfig: IRigConfig, visitedConfigurationFilePaths: Set<string>): Promise<TConfigurationFile | undefined>;
 }
 
+// @beta
+export type CustomValidationFunction<TConfigurationFile> = (configurationFile: TConfigurationFile, resolvedConfigurationFilePathForLogging: string, terminal: ITerminal) => boolean;
+
 // @beta (undocumented)
 export type IConfigurationFileOptions<TConfigurationFile, TExtraOptions extends object> = IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile, TExtraOptions> | IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile, TExtraOptions>;
 
 // @beta (undocumented)
 export interface IConfigurationFileOptionsBase<TConfigurationFile> {
+    customValidationFunction?: CustomValidationFunction<TConfigurationFile>;
     jsonPathMetadata?: IJsonPathsMetadata<TConfigurationFile>;
     propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
     propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
@@ -106,6 +110,9 @@ export interface IProjectConfigurationFileOptions {
     projectRelativeFilePath: string;
 }
 
+// @beta
+export type IProjectConfigurationFileSpecification<TConfigFile> = IConfigurationFileOptions<TConfigFile, IProjectConfigurationFileOptions>;
+
 // @beta (undocumented)
 export type IPropertiesInheritance<TConfigurationFile> = {
     [propertyName in keyof TConfigurationFile]?: IPropertyInheritance<InheritanceType.append | InheritanceType.merge | InheritanceType.replace> | ICustomPropertyInheritance<TConfigurationFile[propertyName]>;
@@ -149,7 +156,7 @@ export enum PathResolutionMethod {
 
 // @beta (undocumented)
 export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationFileBase<TConfigurationFile, IProjectConfigurationFileOptions> {
-    constructor(options: IConfigurationFileOptions<TConfigurationFile, IProjectConfigurationFileOptions>);
+    constructor(options: IProjectConfigurationFileSpecification<TConfigurationFile>);
     loadConfigurationFileForProject(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): TConfigurationFile;
     loadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile>;
     readonly projectRelativeFilePath: string;

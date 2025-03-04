@@ -207,6 +207,18 @@ export interface IJsonPathsMetadata<TConfigurationFile> {
 }
 
 /**
+ * A function to invoke after schema validation to validate the configuration file.
+ * This function log errors using the terminal and return false if the configuration file
+ * is invalid.
+ * @beta
+ */
+export type CustomValidationFunction<TConfigurationFile> = (
+  configurationFile: TConfigurationFile,
+  resolvedConfigurationFilePathForLogging: string,
+  terminal: ITerminal
+) => boolean;
+
+/**
  * @beta
  */
 export interface IConfigurationFileOptionsBase<TConfigurationFile> {
@@ -226,6 +238,14 @@ export interface IConfigurationFileOptionsBase<TConfigurationFile> {
    * configuration files.
    */
   propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
+
+  /**
+   * Use this property if you need to validate the configuration file in ways beyond what JSON schema can handle.
+   * This function will be invoked after JSON schema validation.
+   *
+   * The function should throw if the configuration file is invalid.
+   */
+  customValidationFunction?: CustomValidationFunction<TConfigurationFile>;
 }
 
 /**
@@ -289,6 +309,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
   private readonly _jsonPathMetadata: IJsonPathsMetadata<TConfigurationFile>;
   private readonly _propertyInheritanceTypes: IPropertiesInheritance<TConfigurationFile>;
   private readonly _defaultPropertyInheritance: IPropertyInheritanceDefaults;
+  private readonly _customValidationFunction: CustomValidationFunction<TConfigurationFile> | undefined;
   private __schema: JsonSchema | undefined;
   private get _schema(): JsonSchema {
     if (!this.__schema) {
@@ -312,6 +333,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     this._jsonPathMetadata = options.jsonPathMetadata || {};
     this._propertyInheritanceTypes = options.propertyInheritance || {};
     this._defaultPropertyInheritance = options.propertyInheritanceDefaults || {};
+    this._customValidationFunction = options.customValidationFunction;
   }
 
   /**
@@ -549,10 +571,23 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       configurationJson,
       resolvedConfigurationFilePath
     );
+
     try {
       this._schema.validateObject(result, resolvedConfigurationFilePathForLogging);
     } catch (e) {
       throw new Error(`Resolved configuration object does not match schema: ${e}`);
+    }
+
+    if (
+      this._customValidationFunction?.(
+        result as TConfigurationFile,
+        resolvedConfigurationFilePathForLogging,
+        terminal
+      ) === false
+    ) {
+      throw new Error(
+        `Resolved configuration file at "${resolvedConfigurationFilePathForLogging}" failed custom validation.`
+      );
     }
 
     // If the schema validates, we can assume that the configuration file is complete.
