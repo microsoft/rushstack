@@ -10,6 +10,7 @@
 
 export {
   ConfigurationFileBase,
+  type CustomValidationFunction,
   type IConfigurationFileOptionsBase,
   type IConfigurationFileOptionsWithJsonSchemaFilePath,
   type IConfigurationFileOptionsWithJsonSchemaObject,
@@ -21,6 +22,7 @@ export {
   type IJsonPathsMetadata,
   InheritanceType,
   type INonCustomJsonPathMetadata,
+  type IOnConfigurationFileNotFoundCallback,
   type IOriginalValueOptions,
   type IPropertiesInheritance,
   type IPropertyInheritance,
@@ -44,7 +46,11 @@ export const ConfigurationFile: typeof ProjectConfigurationFile = ProjectConfigu
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type ConfigurationFile<TConfigurationFile> = ProjectConfigurationFile<TConfigurationFile>;
 
-export { ProjectConfigurationFile, type IProjectConfigurationFileOptions } from './ProjectConfigurationFile';
+export {
+  ProjectConfigurationFile,
+  type IProjectConfigurationFileOptions,
+  type IProjectConfigurationFileSpecification
+} from './ProjectConfigurationFile';
 export { NonProjectConfigurationFile } from './NonProjectConfigurationFile';
 
 export * as TestUtilities from './TestUtilities';
