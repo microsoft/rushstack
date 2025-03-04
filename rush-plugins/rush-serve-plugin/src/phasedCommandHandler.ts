@@ -325,7 +325,7 @@ function tryEnableBuildStatusWebSocketServer(
     const { operation } = record;
     const { name, associatedPhase, associatedProject, runner, enabled } = operation;
 
-    if (!name || !associatedPhase || !associatedProject || !runner) {
+    if (!name || !runner) {
       return;
     }
 

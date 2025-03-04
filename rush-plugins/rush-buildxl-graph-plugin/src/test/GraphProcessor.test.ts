@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IOperationRunner, Operation } from '@rushstack/rush-sdk';
-import type { ShellOperationRunner } from '@rushstack/rush-sdk/lib/logic/operations/ShellOperationRunner';
+import { type IOperationRunner, Operation } from '@rushstack/rush-sdk';
 import { Terminal, NoOpTerminalProvider } from '@rushstack/terminal';
 
 import { GraphProcessor, type IGraphNode } from '../GraphProcessor';
@@ -14,6 +13,16 @@ import debugGraph from '../examples/debug-graph.json';
 
 function sortGraphNodes(graphNodes: IGraphNode[]): IGraphNode[] {
   return graphNodes.sort((a, b) => (a.id === b.id ? 0 : a.id < b.id ? -1 : 1));
+}
+
+function getDebugOperationMap(): Operation[] {
+  const cloned: typeof debugGraph.OperationMap = JSON.parse(JSON.stringify(debugGraph.OperationMap));
+
+  return cloned.map((op) => {
+    // Operation has getters
+    Object.setPrototypeOf(op, Operation.prototype);
+    return op as unknown as Operation;
+  });
 }
 
 describe(GraphProcessor.name, () => {
@@ -39,9 +48,7 @@ describe(GraphProcessor.name, () => {
   });
 
   it('should process debug-graph.json into graph.json', () => {
-    let prunedGraph: IGraphNode[] = graphParser.processOperations(
-      new Set<Operation>(debugGraph.OperationMap as unknown as Operation[])
-    );
+    let prunedGraph: IGraphNode[] = graphParser.processOperations(new Set<Operation>(getDebugOperationMap()));
 
     prunedGraph = sortGraphNodes(prunedGraph);
     expect(prunedGraph).toEqual(exampleGraph);
@@ -50,7 +57,7 @@ describe(GraphProcessor.name, () => {
   });
 
   it('should fail if the input schema is invalid', () => {
-    const clonedOperationMap: Operation[] = JSON.parse(JSON.stringify(debugGraph.OperationMap));
+    const clonedOperationMap: Operation[] = getDebugOperationMap();
     (clonedOperationMap[0].dependencies as unknown as Operation[]).push({
       incorrectPhase: { name: 'incorrectPhase' },
       incorrectProject: { packageName: 'incorrectProject' }
@@ -62,10 +69,13 @@ describe(GraphProcessor.name, () => {
   });
 
   it('should fail if isNoOp mismatches a command', () => {
-    const clonedOperationMap: Operation[] = JSON.parse(JSON.stringify(debugGraph.OperationMap));
-    (clonedOperationMap[0].runner as IOperationRunner & { isNoOp: boolean }).isNoOp = true;
-    (clonedOperationMap[0].runner as ShellOperationRunner & { commandToRun: string }).commandToRun =
-      'echo "hello world"';
+    const clonedOperationMap: Operation[] = getDebugOperationMap();
+    const runner: IOperationRunner | undefined = clonedOperationMap[0].runner;
+    if (!runner) {
+      throw new Error('runner is undefined');
+    }
+    (runner as IOperationRunner & { isNoOp: boolean }).isNoOp = true;
+    (runner as IOperationRunner & { commandToRun?: string }).commandToRun = 'echo "hello world"';
     const operations: Set<Operation> = new Set(clonedOperationMap);
     graphParser.processOperations(operations);
     expect(emittedErrors).not.toEqual([]);

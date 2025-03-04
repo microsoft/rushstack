@@ -1,15 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GraphProcessor should fail if the input schema is invalid 1`] = `
-"Operation does not have a name: {
-  \\"incorrectPhase\\": {
-    \\"name\\": \\"incorrectPhase\\"
-  },
-  \\"incorrectProject\\": {
-    \\"packageName\\": \\"incorrectProject\\"
-  }
-}"
-`;
+exports[`GraphProcessor should fail if the input schema is invalid 1`] = `"Cannot read properties of undefined (reading 'name')"`;
 
 exports[`GraphProcessor validateGraph should fail to validate when command is empty 1`] = `
 Array [

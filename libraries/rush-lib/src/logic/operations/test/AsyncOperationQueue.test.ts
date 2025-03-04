@@ -6,6 +6,8 @@ import { type IOperationExecutionRecordContext, OperationExecutionRecord } from 
 import { MockOperationRunner } from './MockOperationRunner';
 import { AsyncOperationQueue, type IOperationSortFunction } from '../AsyncOperationQueue';
 import { OperationStatus } from '../OperationStatus';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
+import type { IPhase } from '../../../api/CommandLineConfiguration';
 
 function addDependency(consumer: OperationExecutionRecord, dependency: OperationExecutionRecord): void {
   consumer.dependencies.add(dependency);
@@ -17,11 +19,37 @@ function nullSort(a: OperationExecutionRecord, b: OperationExecutionRecord): num
   return 0;
 }
 
+const mockPhase: IPhase = {
+  name: 'phase',
+  allowWarningsOnSuccess: false,
+  associatedParameters: new Set(),
+  dependencies: {
+    self: new Set(),
+    upstream: new Set()
+  },
+  isSynthetic: false,
+  logFilenameIdentifier: 'phase',
+  missingScriptBehavior: 'silent'
+};
+const projectsByName: Map<string, RushConfigurationProject> = new Map();
+function getOrCreateProject(name: string): RushConfigurationProject {
+  let project: RushConfigurationProject | undefined = projectsByName.get(name);
+  if (!project) {
+    project = {
+      packageName: name
+    } as unknown as RushConfigurationProject;
+    projectsByName.set(name, project);
+  }
+  return project;
+}
+
 function createRecord(name: string): OperationExecutionRecord {
   return new OperationExecutionRecord(
     new Operation({
       runner: new MockOperationRunner(name),
-      logFilenameIdentifier: 'operation'
+      logFilenameIdentifier: 'operation',
+      phase: mockPhase,
+      project: getOrCreateProject(name)
     }),
     {} as unknown as IOperationExecutionRecordContext
   );

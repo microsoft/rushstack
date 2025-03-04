@@ -19,6 +19,8 @@ import { Terminal } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable, PrintUtilities } from '@rushstack/terminal';
 
+import type { IPhase } from '../../../api/CommandLineConfiguration';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import {
   OperationExecutionManager,
   type IOperationExecutionManagerOptions
@@ -45,13 +47,39 @@ mockGetTimeInMs.mockImplementation(() => {
 const mockWritable: MockWritable = new MockWritable();
 const mockTerminal: Terminal = new Terminal(new CollatedTerminalProvider(new CollatedTerminal(mockWritable)));
 
+const mockPhase: IPhase = {
+  name: 'phase',
+  allowWarningsOnSuccess: false,
+  associatedParameters: new Set(),
+  dependencies: {
+    self: new Set(),
+    upstream: new Set()
+  },
+  isSynthetic: false,
+  logFilenameIdentifier: 'phase',
+  missingScriptBehavior: 'silent'
+};
+const projectsByName: Map<string, RushConfigurationProject> = new Map();
+function getOrCreateProject(name: string): RushConfigurationProject {
+  let project: RushConfigurationProject | undefined = projectsByName.get(name);
+  if (!project) {
+    project = {
+      packageName: name
+    } as unknown as RushConfigurationProject;
+    projectsByName.set(name, project);
+  }
+  return project;
+}
+
 function createExecutionManager(
   executionManagerOptions: IOperationExecutionManagerOptions,
   operationRunner: IOperationRunner
 ): OperationExecutionManager {
   const operation: Operation = new Operation({
     runner: operationRunner,
-    logFilenameIdentifier: 'operation'
+    logFilenameIdentifier: 'operation',
+    phase: mockPhase,
+    project: getOrCreateProject('project')
   });
 
   return new OperationExecutionManager(new Set([operation]), executionManagerOptions);
@@ -133,6 +161,8 @@ describe(OperationExecutionManager.name, () => {
         runner: new MockOperationRunner('fail', async () => {
           return OperationStatus.Failure;
         }),
+        phase: mockPhase,
+        project: getOrCreateProject('fail'),
         logFilenameIdentifier: 'fail'
       });
 
@@ -140,6 +170,8 @@ describe(OperationExecutionManager.name, () => {
 
       const blockedOperation = new Operation({
         runner: new MockOperationRunner('blocked', blockedRunFn),
+        phase: mockPhase,
+        project: getOrCreateProject('blocked'),
         logFilenameIdentifier: 'blocked'
       });
 

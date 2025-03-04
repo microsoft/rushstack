@@ -14,8 +14,6 @@ import {
 import { OperationStateFile } from './OperationStateFile';
 import { RushConstants } from '../RushConstants';
 
-import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
 import type { Operation } from './Operation';
 
@@ -23,8 +21,6 @@ import type { Operation } from './Operation';
  * @internal
  */
 export interface IOperationMetadataManagerOptions {
-  rushProject: RushConfigurationProject;
-  phase: IPhase;
   operation: Operation;
 }
 
@@ -59,10 +55,9 @@ export class OperationMetadataManager {
 
   public constructor(options: IOperationMetadataManagerOptions) {
     const {
-      rushProject,
-      operation: { logFilenameIdentifier }
+      operation: { logFilenameIdentifier, associatedProject }
     } = options;
-    const { projectFolder } = rushProject;
+    const { projectFolder } = associatedProject;
 
     this.logFilenameIdentifier = logFilenameIdentifier;
 

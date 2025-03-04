@@ -615,17 +615,13 @@ export interface _IOperationMetadata {
 export interface _IOperationMetadataManagerOptions {
     // (undocumented)
     operation: Operation;
-    // (undocumented)
-    phase: IPhase;
-    // (undocumented)
-    rushProject: RushConfigurationProject;
 }
 
 // @alpha
 export interface IOperationOptions {
     logFilenameIdentifier: string;
-    phase?: IPhase | undefined;
-    project?: RushConfigurationProject | undefined;
+    phase: IPhase;
+    project: RushConfigurationProject;
     runner?: IOperationRunner | undefined;
     settings?: IOperationSettings | undefined;
 }
@@ -649,7 +645,7 @@ export interface IOperationRunnerContext {
     environment: IEnvironment | undefined;
     error?: Error;
     // @internal
-    _operationMetadataManager?: _OperationMetadataManager;
+    _operationMetadataManager: _OperationMetadataManager;
     quietMode: boolean;
     runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, options: {
         createLogFile: boolean;
@@ -933,15 +929,15 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
 export class Operation {
     constructor(options: IOperationOptions);
     addDependency(dependency: Operation): void;
-    readonly associatedPhase: IPhase | undefined;
-    readonly associatedProject: RushConfigurationProject | undefined;
+    readonly associatedPhase: IPhase;
+    readonly associatedProject: RushConfigurationProject;
     readonly consumers: ReadonlySet<Operation>;
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
     enabled: boolean;
     get isNoOp(): boolean;
     logFilenameIdentifier: string;
-    get name(): string | undefined;
+    get name(): string;
     runner: IOperationRunner | undefined;
     settings: IOperationSettings | undefined;
     weight: number;

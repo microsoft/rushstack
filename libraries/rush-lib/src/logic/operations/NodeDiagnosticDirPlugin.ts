@@ -30,10 +30,6 @@ export class NodeDiagnosticDirPlugin implements IPhasedCommandPlugin {
     const getDiagnosticDir = (operation: Operation): string | undefined => {
       const { associatedProject } = operation;
 
-      if (!associatedProject) {
-        return;
-      }
-
       const diagnosticDir: string = path.resolve(
         this._diagnosticsDir,
         associatedProject.packageName,

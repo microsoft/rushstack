@@ -23,7 +23,7 @@ export interface IShellOperationRunnerOptions {
 }
 
 /**
- * An `IOperationRunner` subclass that performs an operation via a shell command.
+ * An `IOperationRunner` implementation that performs an operation via a shell command.
  * Currently contains the build cache logic, pending extraction as separate operations.
  * Supports skipping an operation if allowed and it is already up-to-date.
  */
@@ -35,6 +35,10 @@ export class ShellOperationRunner implements IOperationRunner {
   public readonly cacheable: boolean = true;
   public readonly warningsAreAllowed: boolean;
   public readonly commandToRun: string;
+  /**
+   * The creator is expected to use a different runner if the command is known to be a noop.
+   */
+  public readonly isNoOp: boolean = false;
 
   private readonly _commandForHash: string;
 
