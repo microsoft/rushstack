@@ -18,7 +18,6 @@
     "@rushstack/heft": "0.71.2"
   },
   "dependencies": {
-    "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "semver": "~7.5.4"
   },

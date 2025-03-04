@@ -7,9 +7,9 @@ import type {
   IHeftTaskRunHookOptions,
   IHeftTaskSession,
   HeftConfiguration,
-  IHeftTaskRunIncrementalHookOptions
+  IHeftTaskRunIncrementalHookOptions,
+  ConfigurationFile
 } from '@rushstack/heft';
-import { ProjectConfigurationFile } from '@rushstack/heft-config-file';
 
 import { ApiExtractorRunner } from './ApiExtractorRunner';
 import apiExtractorConfigSchema from './schemas/api-extractor-task.schema.json';
@@ -22,6 +22,12 @@ const TASK_CONFIG_RELATIVE_PATH: string = './config/api-extractor-task.json';
 const EXTRACTOR_CONFIG_FILENAME: typeof TApiExtractor.ExtractorConfig.FILENAME = 'api-extractor.json';
 const LEGACY_EXTRACTOR_CONFIG_RELATIVE_PATH: string = `./${EXTRACTOR_CONFIG_FILENAME}`;
 const EXTRACTOR_CONFIG_RELATIVE_PATH: string = `./config/${EXTRACTOR_CONFIG_FILENAME}`;
+
+const API_EXTRACTOR_CONFIG_SPECIFICATION: ConfigurationFile.IProjectConfigurationFileSpecification<IApiExtractorTaskConfiguration> =
+  {
+    projectRelativeFilePath: TASK_CONFIG_RELATIVE_PATH,
+    jsonSchemaObject: apiExtractorConfigSchema
+  };
 
 export interface IApiExtractorConfigurationResult {
   apiExtractorPackage: typeof TApiExtractor;
@@ -50,9 +56,6 @@ export interface IApiExtractorTaskConfiguration {
 export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   private _apiExtractor: typeof TApiExtractor | undefined;
   private _apiExtractorConfigurationFilePath: string | undefined | typeof UNINITIALIZED = UNINITIALIZED;
-  private _apiExtractorTaskConfigurationFileLoader:
-    | ProjectConfigurationFile<IApiExtractorTaskConfiguration>
-    | undefined;
   private _printedWatchWarning: boolean = false;
 
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
@@ -151,25 +154,6 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     return this._apiExtractor;
   }
 
-  private async _getApiExtractorTaskConfigurationAsync(
-    taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration
-  ): Promise<IApiExtractorTaskConfiguration | undefined> {
-    if (!this._apiExtractorTaskConfigurationFileLoader) {
-      this._apiExtractorTaskConfigurationFileLoader =
-        new ProjectConfigurationFile<IApiExtractorTaskConfiguration>({
-          projectRelativeFilePath: TASK_CONFIG_RELATIVE_PATH,
-          jsonSchemaObject: apiExtractorConfigSchema
-        });
-    }
-
-    return await this._apiExtractorTaskConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
-      taskSession.logger.terminal,
-      heftConfiguration.buildFolderPath,
-      heftConfiguration.rigConfig
-    );
-  }
-
   private async _runApiExtractorAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
@@ -178,7 +162,10 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     apiExtractorConfiguration: TApiExtractor.ExtractorConfig
   ): Promise<void> {
     const apiExtractorTaskConfiguration: IApiExtractorTaskConfiguration | undefined =
-      await this._getApiExtractorTaskConfigurationAsync(taskSession, heftConfiguration);
+      await heftConfiguration.tryLoadProjectConfigurationFileAsync(
+        API_EXTRACTOR_CONFIG_SPECIFICATION,
+        taskSession.logger.terminal
+      );
 
     if (runOptions.requestRun) {
       if (!apiExtractorTaskConfiguration?.runInWatchMode) {
