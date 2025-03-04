@@ -16,11 +16,26 @@ import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { CustomValidationFunction } from '@rushstack/heft-config-file';
 import * as fs from 'fs';
+import { ICustomJsonPathMetadata } from '@rushstack/heft-config-file';
+import { ICustomPropertyInheritance } from '@rushstack/heft-config-file';
+import { IJsonPathMetadata } from '@rushstack/heft-config-file';
+import { IJsonPathMetadataResolverOptions } from '@rushstack/heft-config-file';
+import { IJsonPathsMetadata } from '@rushstack/heft-config-file';
+import { InheritanceType } from '@rushstack/heft-config-file';
+import { INonCustomJsonPathMetadata } from '@rushstack/heft-config-file';
+import { IOriginalValueOptions } from '@rushstack/heft-config-file';
 import { IPackageJson } from '@rushstack/node-core-library';
+import { IProjectConfigurationFileSpecification } from '@rushstack/heft-config-file';
+import { IPropertiesInheritance } from '@rushstack/heft-config-file';
+import { IPropertyInheritance } from '@rushstack/heft-config-file';
+import { IPropertyInheritanceDefaults } from '@rushstack/heft-config-file';
 import { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
+import { PathResolutionMethod } from '@rushstack/heft-config-file';
+import { PropertyInheritanceCustomFunction } from '@rushstack/heft-config-file';
 
 export { CommandLineChoiceListParameter }
 
@@ -37,6 +52,27 @@ export { CommandLineParameter }
 export { CommandLineStringListParameter }
 
 export { CommandLineStringParameter }
+
+declare namespace ConfigurationFile {
+    export {
+        CustomValidationFunction,
+        ICustomJsonPathMetadata,
+        ICustomPropertyInheritance,
+        IJsonPathMetadata,
+        IJsonPathMetadataResolverOptions,
+        IJsonPathsMetadata,
+        INonCustomJsonPathMetadata,
+        IOriginalValueOptions,
+        IProjectConfigurationFileSpecification,
+        IPropertiesInheritance,
+        IPropertyInheritance,
+        IPropertyInheritanceDefaults,
+        InheritanceType,
+        PathResolutionMethod,
+        PropertyInheritanceCustomFunction
+    }
+}
+export { ConfigurationFile }
 
 // @public
 export type GlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<string[]>;
@@ -58,6 +94,8 @@ export class HeftConfiguration {
     get slashNormalizedBuildFolderPath(): string;
     get tempFolderPath(): string;
     readonly terminalProvider: ITerminalProvider;
+    tryLoadProjectConfigurationFile<TConfigFile>(options: IProjectConfigurationFileSpecification<TConfigFile>, terminal: ITerminal): TConfigFile | undefined;
+    tryLoadProjectConfigurationFileAsync<TConfigFile>(options: IProjectConfigurationFileSpecification<TConfigFile>, terminal: ITerminal): Promise<TConfigFile | undefined>;
 }
 
 // @public
