@@ -17,10 +17,14 @@ import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import * as fs from 'fs';
+import { IConfigurationFileOptions } from '@rushstack/heft-config-file';
 import { IPackageJson } from '@rushstack/node-core-library';
+import { IProjectConfigurationFileOptions } from '@rushstack/heft-config-file';
+import { IProjectConfigurationFileSpecification } from '@rushstack/heft-config-file';
 import { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
+import { ProjectConfigurationFile } from '@rushstack/heft-config-file';
 
 export { CommandLineChoiceListParameter }
 
@@ -57,6 +61,9 @@ export class HeftConfiguration {
     get slashNormalizedBuildFolderPath(): string;
     get tempFolderPath(): string;
     get terminalProvider(): ITerminalProvider;
+    tryLoadProjectConfigurationFileAsync<TConfigFile>(options: IProjectConfigurationFileSpecification<TConfigFile>, terminal: ITerminal): Promise<TConfigFile | undefined>;
+    // Warning: (ae-forgotten-export) The symbol "wellKnown" needs to be exported by the entry point index.d.ts
+    get wellKnownConfigurationFiles(): Readonly<typeof wellKnown>;
 }
 
 // @public
@@ -213,6 +220,22 @@ export interface IIncrementalCopyOperation extends ICopyOperation {
     onlyIfChanged?: boolean;
 }
 
+// @public
+export interface IJavaScriptEmitKind {
+    // (undocumented)
+    moduleKind: JavaScriptModuleKind;
+    // (undocumented)
+    outputFolder: string;
+    // (undocumented)
+    target: JavaScriptTarget;
+}
+
+// @public
+export interface IJavaScriptEmitKindsConfigurationJson {
+    // (undocumented)
+    emitKinds: IJavaScriptEmitKind[];
+}
+
 // @public (undocumented)
 export interface IMetricsData {
     bootDurationMs: number;
@@ -235,6 +258,8 @@ export interface _IPerformanceData {
     // (undocumented)
     taskTotalExecutionMs: number;
 }
+
+export { IProjectConfigurationFileSpecification }
 
 // @public
 export interface IReaddirOptions {
@@ -295,6 +320,12 @@ export interface IWatchFileSystem {
     statSync(filePath: string): fs.Stats;
 }
 
+// @public
+export type JavaScriptModuleKind = 'amd' | 'commonjs' | 'es2015' | 'esnext' | 'system' | 'umd';
+
+// @public
+export type JavaScriptTarget = 'es3' | 'es5' | 'es6' | 'es2015' | 'es2016' | 'es2017' | 'es2018' | 'es2019' | 'es2020' | 'es2021' | 'es2022' | 'esnext';
+
 // @internal
 export class _MetricsCollector {
     recordAsync(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): Promise<void>;
@@ -302,6 +333,8 @@ export class _MetricsCollector {
     readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
     setStartTime(): void;
 }
+
+export { ProjectConfigurationFile }
 
 // @public
 export type ReaddirDirentCallback = (error: NodeJS.ErrnoException | null, files: fs.Dirent[]) => void;

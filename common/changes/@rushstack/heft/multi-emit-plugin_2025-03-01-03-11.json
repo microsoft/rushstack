@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add a method `tryLoadProjectConfigurationFileAsync<TConfigFile>(options, terminal)` to `HeftConfiguration`. Add a property `wellKnownConfigurationFiles` to provide access to configuration files that may be used across many plugins, the first example of which is `JavaScriptEmitKinds`, describing a file at `config/javascript-emit-kinds.json` that specifies one or more output folders for compiled JavaScript in differing formats.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

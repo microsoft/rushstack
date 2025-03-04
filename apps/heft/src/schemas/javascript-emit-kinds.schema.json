@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "JavaScript Emit Kinds Configuration",
+  "description": "Defines a configuration for emitting multiple formats of ECMAScript to separate folders.",
+  "type": "object",
+
+  "additionalProperties": false,
+  "required": ["emitKinds"],
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
+    "emitKinds": {
+      "type": "array",
+      "description": "An mapping from the relative output folder to emit kind that other plugins will use to determine where to write outputs.",
+
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["outputFolder", "moduleKind"],
+        "properties": {
+          "outputFolder": {
+            "title": "Output Folder",
+            "type": "string",
+            "description": "The folder to output to, relative to the project root.",
+            "pattern": "[^\\\\]"
+          },
+
+          "moduleKind": {
+            "title": "Module Kind",
+            "type": "string",
+            "description": "The module kind that files will conform to. Tells tools how imports and exports are handled.",
+            "enum": ["commonjs", "amd", "umd", "system", "es2015", "esnext"]
+          },
+
+          "target": {
+            "title": "Target",
+            "type": "string",
+            "description": "The ECMAScript specification level that files will conform to. Tells tools what syntax is available. Defaults to \"ES5\".",
+            "enum": [
+              "es3",
+              "es5",
+              "es6",
+              "es2015",
+              "es2016",
+              "es2017",
+              "es2018",
+              "es2019",
+              "es2020",
+              "es2021",
+              "es2022",
+              "esnext"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

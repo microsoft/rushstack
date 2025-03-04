@@ -11,10 +11,22 @@
  * @packageDocumentation
  */
 
+export type {
+  ProjectConfigurationFile,
+  IProjectConfigurationFileSpecification
+} from '@rushstack/heft-config-file';
+
 export {
   HeftConfiguration,
   type IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
+
+export type {
+  IJavaScriptEmitKind,
+  IJavaScriptEmitKindsConfigurationJson,
+  JavaScriptModuleKind,
+  JavaScriptTarget
+} from './configuration/wellKnown/JavaScriptEmitKinds';
 
 export type { IRigPackageResolver } from './configuration/RigPackageResolver';
 
