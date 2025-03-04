@@ -11,6 +11,9 @@
  * @packageDocumentation
  */
 
+import type * as ConfigurationFile from './configuration/types';
+export type { ConfigurationFile };
+
 export {
   HeftConfiguration,
   type IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
