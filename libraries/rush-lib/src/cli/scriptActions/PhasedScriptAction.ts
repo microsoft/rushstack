@@ -768,8 +768,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       // On the initial invocation, this promise will return immediately with the full set of projects
-      const { changedProjects, inputsSnapshot: state } =
-        await projectWatcher.waitForChangeAsync(onWaitingForChanges);
+      const { changedProjects, inputsSnapshot: state } = await projectWatcher.waitForChangeAsync(
+        onWaitingForChanges
+      );
 
       if (stopwatch.state === StopwatchState.Stopped) {
         // Clear and reset the stopwatch so that we only report time from a single execution at a time
@@ -839,7 +840,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       executionManagerOptions
     );
 
-    const { isInitial, isWatch, cobuildConfiguration } = options.executeOperationsContext;
+    const { isInitial, isWatch } = options.executeOperationsContext;
 
     let success: boolean = false;
     let result: IExecutionResult | undefined;
@@ -932,14 +933,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
             continue;
           }
 
+          const { _operationMetadataManager: operationMetadataManager } =
+            operationResult as OperationExecutionRecord;
+
           const { startTime, endTime } = operationResult.stopwatch;
           jsonOperationResults[operation.name!] = {
             startTimestampMs: startTime,
             endTimestampMs: endTime,
             nonCachedDurationMs: operationResult.nonCachedDurationMs,
-            wasExecutedOnThisMachine:
-              !operationResult.cobuildRunnerId ||
-              operationResult.cobuildRunnerId === cobuildConfiguration?.cobuildRunnerId,
+            wasExecutedOnThisMachine: operationMetadataManager?.wasCobuilt ?? false,
             result: operationResult.status,
             dependencies: Array.from(getNonSilentDependencies(operation)).sort()
           };
