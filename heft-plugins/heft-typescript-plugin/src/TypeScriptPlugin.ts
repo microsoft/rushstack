@@ -16,7 +16,7 @@ import type {
   IHeftTaskRunIncrementalHookOptions,
   ICopyOperation,
   IHeftTaskFileOperations,
-  IProjectConfigurationFileSpecification
+  ConfigurationFile
 } from '@rushstack/heft';
 
 import { TypeScriptBuilder, type ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
@@ -128,21 +128,22 @@ export interface ITypeScriptPluginAccessor {
   readonly onChangedFilesHook: SyncHook<IChangedFilesHookOptions>;
 }
 
-const TYPESCRIPT_LOADER_CONFIG: IProjectConfigurationFileSpecification<ITypeScriptConfigurationJson> = {
-  projectRelativeFilePath: 'config/typescript.json',
-  jsonSchemaObject: typescriptConfigSchema,
-  propertyInheritance: {
-    staticAssetsToCopy: {
-      // When merging objects, arrays will be automatically appended
-      inheritanceType: InheritanceType.merge
+const TYPESCRIPT_LOADER_CONFIG: ConfigurationFile.IProjectConfigurationFileSpecification<ITypeScriptConfigurationJson> =
+  {
+    projectRelativeFilePath: 'config/typescript.json',
+    jsonSchemaObject: typescriptConfigSchema,
+    propertyInheritance: {
+      staticAssetsToCopy: {
+        // When merging objects, arrays will be automatically appended
+        inheritanceType: InheritanceType.merge
+      }
+    },
+    jsonPathMetadata: {
+      '$.additionalModuleKindsToEmit.*.outFolderName': {
+        pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+      }
     }
-  },
-  jsonPathMetadata: {
-    '$.additionalModuleKindsToEmit.*.outFolderName': {
-      pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-    }
-  }
-};
+  };
 
 /**
  * @beta
