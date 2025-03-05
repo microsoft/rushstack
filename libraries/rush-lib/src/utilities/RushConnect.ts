@@ -14,10 +14,12 @@ import {
 } from '@rushstack/node-core-library';
 import { depPathToFilename } from '@pnpm/dependency-path';
 import { PackageExtractor } from '@rushstack/package-extractor';
+import { writePnpmSyncFileAsync, pnpmSyncCopyAsync, type ILogMessageCallbackOptions } from 'pnpm-sync-lib';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
+import { PnpmSyncUtilities } from './PnpmSyncUtilities';
 
 class RushConnectError extends Error {
   public constructor(message: string) {
@@ -231,6 +233,7 @@ export class RushConnect {
   public async bridgePackageAsync(
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string,
+    replace: boolean,
     parentPackageDestination?: string
   ): Promise<void> {
     try {
@@ -245,68 +248,102 @@ export class RushConnect {
       const { consumerPackageNodeModulesPath, consumerPackagePnpmDependenciesFolderPath } =
         this._getConsumerPackageInfo(consumerPackage);
 
-      // Generate unique destination path for linked package
-      const linkedPackageDestination: string = path.resolve(
-        consumerPackagePnpmDependenciesFolderPath,
-        depPathToFilename(`file:${linkedPackagePath}(${packageName})`, 120),
-        RushConstants.nodeModulesFolderName
-      );
-
-      await FileSystem.ensureFolderAsync(linkedPackageDestination);
-
-      // Handle peer dependencies
-      await this._handlePeerDependenciesAsync(
-        consumerPackageNodeModulesPath,
-        linkedPackageDestination,
-        peerDependencies
-      );
-
-      // Handle external dependencies
-      await this._handleExternalDependenciesAsync(
-        linkedPackageNodeModulesPath,
-        linkedPackageDestination,
-        externalDependencies
-      );
-
-      // Create hardlink to linkedPackage
-      await this._hardLinkToLinkedPackageAsync(
-        linkedPackagePath,
-        path.resolve(linkedPackageDestination, packageName),
-        path.resolve(parentPackageDestination ?? consumerPackageNodeModulesPath, packageName)
-      );
-
-      // Record the link information between the consumer package and the linked package
-      await this._modifyAndSaveLinkStateAsync((linkState) => {
-        const consumerPackageLinks: IRushLinkFileState[number] = linkState[consumerPackage.packageName] ?? [];
-        const existingLinkIndex: number = consumerPackageLinks.findIndex(
-          (link) => link.linkedPackageName === packageName
+      if (replace) {
+        if (!(await FileSystem.existsAsync(path.resolve(consumerPackageNodeModulesPath, packageName)))) {
+          throw new Error(`Cannot find ${packageName} under ${consumerPackageNodeModulesPath}`);
+        }
+        const sourcePath: string = await FileSystem.getRealPath(
+          path.resolve(consumerPackageNodeModulesPath, packageName)
+        );
+        const logMessageCallback = (logMessageOptions: ILogMessageCallbackOptions): void =>
+          PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal);
+        await writePnpmSyncFileAsync({
+          projectFolder: linkedPackagePath,
+          targetFolderSet: new Set([sourcePath]),
+          logMessageCallback
+        });
+        const pnpmSyncJsonPath: string = path.resolve(
+          linkedPackagePath,
+          RushConstants.nodeModulesFolderName,
+          '.pnpm-sync.json'
+        );
+        await pnpmSyncCopyAsync({
+          pnpmSyncJsonPath,
+          ensureFolderAsync: FileSystem.ensureFolderAsync,
+          forEachAsyncWithConcurrency: Async.forEachAsync,
+          getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
+          logMessageCallback
+        });
+      } else {
+        // Generate unique destination path for linked package
+        const linkedPackageDestination: string = path.resolve(
+          consumerPackagePnpmDependenciesFolderPath,
+          depPathToFilename(`file:${linkedPackagePath}(${packageName})`, 120),
+          RushConstants.nodeModulesFolderName
         );
 
-        if (existingLinkIndex >= 0) {
-          consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
-          consumerPackageLinks[existingLinkIndex].linkType = LinkType.BridgePackage;
-        } else {
-          consumerPackageLinks.push({
-            linkedPackagePath,
-            linkedPackageName: packageName,
-            linkType: LinkType.BridgePackage
-          });
-        }
+        await FileSystem.ensureFolderAsync(linkedPackageDestination);
 
-        linkState[consumerPackage.packageName] = consumerPackageLinks;
-      });
+        // Handle peer dependencies
+        await this._handlePeerDependenciesAsync(
+          consumerPackageNodeModulesPath,
+          linkedPackageDestination,
+          peerDependencies
+        );
+
+        // Handle external dependencies
+        await this._handleExternalDependenciesAsync(
+          linkedPackageNodeModulesPath,
+          linkedPackageDestination,
+          externalDependencies
+        );
+
+        // Create hardlink to linkedPackage
+        await this._hardLinkToLinkedPackageAsync(
+          linkedPackagePath,
+          path.resolve(linkedPackageDestination, packageName),
+          path.resolve(parentPackageDestination ?? consumerPackageNodeModulesPath, packageName)
+        );
+
+        // Record the link information between the consumer package and the linked package
+        await this._modifyAndSaveLinkStateAsync((linkState) => {
+          const consumerPackageLinks: IRushLinkFileState[number] =
+            linkState[consumerPackage.packageName] ?? [];
+          const existingLinkIndex: number = consumerPackageLinks.findIndex(
+            (link) => link.linkedPackageName === packageName
+          );
+
+          if (existingLinkIndex >= 0) {
+            consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
+            consumerPackageLinks[existingLinkIndex].linkType = LinkType.BridgePackage;
+          } else {
+            consumerPackageLinks.push({
+              linkedPackagePath,
+              linkedPackageName: packageName,
+              linkType: LinkType.BridgePackage
+            });
+          }
+
+          linkState[consumerPackage.packageName] = consumerPackageLinks;
+        });
+
+        // Handle workspace dependencies recursively
+        await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
+          const linkedWorkspacePackagePath: string = await FileSystem.getRealPathAsync(
+            path.resolve(linkedPackageNodeModulesPath, workspaceDependency)
+          );
+          await this.bridgePackageAsync(
+            consumerPackage,
+            linkedWorkspacePackagePath,
+            replace,
+            linkedPackageDestination
+          );
+        });
+      }
 
       this._terminal.writeLine(
         Colorize.green(`Successfully bridge package "${packageName}" for "${consumerPackage.packageName}"`)
       );
-
-      // Handle workspace dependencies recursively
-      await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
-        const linkedWorkspacePackagePath: string = await FileSystem.getRealPathAsync(
-          path.resolve(linkedPackageNodeModulesPath, workspaceDependency)
-        );
-        await this.bridgePackageAsync(consumerPackage, linkedWorkspacePackagePath, linkedPackageDestination);
-      });
     } catch (error) {
       if (error instanceof Error) {
         throw new RushConnectError(
