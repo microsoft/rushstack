@@ -1008,7 +1008,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
             startTimestampMs: startTime,
             endTimestampMs: endTime,
             nonCachedDurationMs: operationResult.nonCachedDurationMs,
-            wasExecutedOnThisMachine: operationMetadataManager?.wasCobuilt ?? false,
+            wasExecutedOnThisMachine: operationMetadataManager?.wasCobuilt !== true,
             result: operationResult.status,
             dependencies: Array.from(getNonSilentDependencies(operation)).sort()
           };
