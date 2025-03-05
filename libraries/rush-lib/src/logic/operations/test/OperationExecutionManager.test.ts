@@ -36,8 +36,6 @@ import { MockOperationRunner } from './MockOperationRunner';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
 import type { CobuildConfiguration } from '../../../api/CobuildConfiguration';
-import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { OperationStateFile } from '../OperationStateFile';
 
 const mockGetTimeInMs: jest.Mock = jest.fn();
