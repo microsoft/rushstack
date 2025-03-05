@@ -176,9 +176,8 @@ export function _printTimeline({ terminal, result }: IPrintTimelineParameters): 
       }
       const wasCobuilt: boolean = !!operationMetadataManager?.wasCobuilt;
       if (
-        operationResult.status !== OperationStatus.FromCache &&
-        operationMetadataManager &&
         wasCobuilt &&
+        operationResult.status !== OperationStatus.FromCache &&
         operationResult.nonCachedDurationMs
       ) {
         duration.cached = stopwatch.duration;
@@ -204,16 +203,18 @@ export function _printTimeline({ terminal, result }: IPrintTimelineParameters): 
       const { associatedPhase } = operation;
 
       if (associatedPhase) {
-        const previousDuration: ICachedDuration = durationByPhase.get(associatedPhase) ?? {
-          cached: undefined,
-          uncached: 0
-        };
-        const cachedDuration: number | undefined =
-          duration.cached !== undefined
-            ? duration.cached + (previousDuration.cached ?? 0)
-            : previousDuration.cached;
-        const uncachedDuration: number = duration.uncached + previousDuration.uncached;
-        durationByPhase.set(associatedPhase, { cached: cachedDuration, uncached: uncachedDuration });
+        let durationRecord: ICachedDuration = durationByPhase.get(associatedPhase);
+        if (!durationRecord) {
+          durationRecord = {
+            cached: undefined,
+            uncached: 0
+          };
+          durationByPhase.set(associatedPhase, durationRecord);
+        }
+        if (duration.cached !== undefined) {
+          durationRecord.cached = (durationRecord.cached ?? 0) + duration.cached;
+        }
+        durationRecord.uncached += duration.uncached;
       }
 
       data.push({
@@ -341,9 +342,8 @@ export function _printTimeline({ terminal, result }: IPrintTimelineParameters): 
     }
 
     for (const [phase, duration] of durationByPhase.entries()) {
-      const durationString: string = duration.cached
-        ? `${duration.uncached.toFixed(1)}s, from cache: ${duration.cached.toFixed(1)}s`
-        : `${duration.uncached.toFixed(1)}s`;
+      const cachedDurationString: string = duration.cached ? `, from cache: ${duration.cached.toFixed(1)}s` : '';
+      const durationString: string = `${duration.uncached.toFixed(1)}s${cachedDurationString}`;
       terminal.writeLine(`  ${Colorize.cyan(phase.name.padStart(maxPhaseName))} ${durationString}`);
     }
   }

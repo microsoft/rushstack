@@ -24,16 +24,16 @@ import { OperationMetadataManager } from './OperationMetadataManager';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
-import { RushConstants } from '../RushConstants';
-import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import type { IEnvironment } from '../../utilities/Utilities';
 import {
   getProjectLogFilePaths,
   type ILogFilePaths,
   initializeProjectLogFilesAsync
 } from './ProjectLogWritable';
+import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import { RushConstants } from '../RushConstants';
+import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import type { IEnvironment } from '../../utilities/Utilities';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
