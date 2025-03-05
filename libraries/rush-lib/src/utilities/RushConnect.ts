@@ -305,28 +305,6 @@ export class RushConnect {
           path.resolve(parentPackageDestination ?? consumerPackageNodeModulesPath, packageName)
         );
 
-        // Record the link information between the consumer package and the linked package
-        await this._modifyAndSaveLinkStateAsync((linkState) => {
-          const consumerPackageLinks: IRushLinkFileState[number] =
-            linkState[consumerPackage.packageName] ?? [];
-          const existingLinkIndex: number = consumerPackageLinks.findIndex(
-            (link) => link.linkedPackageName === packageName
-          );
-
-          if (existingLinkIndex >= 0) {
-            consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
-            consumerPackageLinks[existingLinkIndex].linkType = LinkType.BridgePackage;
-          } else {
-            consumerPackageLinks.push({
-              linkedPackagePath,
-              linkedPackageName: packageName,
-              linkType: LinkType.BridgePackage
-            });
-          }
-
-          linkState[consumerPackage.packageName] = consumerPackageLinks;
-        });
-
         // Handle workspace dependencies recursively
         await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
           const linkedWorkspacePackagePath: string = await FileSystem.getRealPathAsync(
@@ -340,6 +318,27 @@ export class RushConnect {
           );
         });
       }
+
+      // Record the link information between the consumer package and the linked package
+      await this._modifyAndSaveLinkStateAsync((linkState) => {
+        const consumerPackageLinks: IRushLinkFileState[number] = linkState[consumerPackage.packageName] ?? [];
+        const existingLinkIndex: number = consumerPackageLinks.findIndex(
+          (link) => link.linkedPackageName === packageName
+        );
+
+        if (existingLinkIndex >= 0) {
+          consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
+          consumerPackageLinks[existingLinkIndex].linkType = LinkType.BridgePackage;
+        } else {
+          consumerPackageLinks.push({
+            linkedPackagePath,
+            linkedPackageName: packageName,
+            linkType: LinkType.BridgePackage
+          });
+        }
+
+        linkState[consumerPackage.packageName] = consumerPackageLinks;
+      });
 
       this._terminal.writeLine(
         Colorize.green(`Successfully bridge package "${packageName}" for "${consumerPackage.packageName}"`)
