@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Leverage Heft's new `tryLoadProjectConfigurationFileAsync` method.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin"
+}

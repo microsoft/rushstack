@@ -4,6 +4,10 @@
 import * as path from 'path';
 import { type IPackageJson, PackageJsonLookup, InternalError, Path } from '@rushstack/node-core-library';
 import { Terminal, type ITerminalProvider, type ITerminal } from '@rushstack/terminal';
+import {
+  type IProjectConfigurationFileSpecification,
+  ProjectConfigurationFile
+} from '@rushstack/heft-config-file';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
 import { Constants } from '../utilities/Constants';
@@ -22,6 +26,40 @@ export interface IHeftConfigurationInitializationOptions {
    * Terminal instance to facilitate logging.
    */
   terminalProvider: ITerminalProvider;
+}
+
+interface IProjectConfigurationFileEntry<TConfigFile> {
+  options: IProjectConfigurationFileSpecification<TConfigFile>;
+  loader: ProjectConfigurationFile<TConfigFile>;
+}
+
+const projectConfigurationFileRegistry: Map<string, IProjectConfigurationFileEntry<unknown>> = new Map();
+function getAndValidateProjectConfigurationFileEntry<TConfigFile>(
+  options: IProjectConfigurationFileSpecification<TConfigFile>
+): IProjectConfigurationFileEntry<TConfigFile> {
+  let entry: IProjectConfigurationFileEntry<TConfigFile> | undefined = projectConfigurationFileRegistry.get(
+    options.projectRelativeFilePath
+  ) as IProjectConfigurationFileEntry<TConfigFile> | undefined;
+
+  if (!entry) {
+    entry = {
+      options: Object.freeze(options),
+      loader: new ProjectConfigurationFile<TConfigFile>(options)
+    };
+  } else if (options !== entry.options) {
+    throw new Error(
+      `The project configuration file for ${options.projectRelativeFilePath} has already been loaded with different options. Please ensure that options object used to load the configuration file is the same referenced object in all calls.`
+    );
+  }
+
+  return entry;
+}
+/**
+ * For unit test usage.
+ * @internal
+ */
+export function _clearProjectConfigurationFileRegistry(): void {
+  projectConfigurationFileRegistry.clear();
 }
 
 /**
@@ -147,6 +185,34 @@ export class HeftConfiguration {
         projectFolderPath: this._buildFolderPath
       });
     }
+  }
+
+  /**
+   * Attempts to load a riggable project configuration file using blocking, synchronous I/O.
+   * @param options - The options for the configuration file loader from `@rushstack/heft-config-file`. If invoking this function multiple times for the same file, reuse the same object.
+   * @param terminal - The terminal to log messages during configuration file loading.
+   * @returns The configuration file, or undefined if it could not be loaded.
+   */
+  public tryLoadProjectConfigurationFile<TConfigFile>(
+    options: IProjectConfigurationFileSpecification<TConfigFile>,
+    terminal: ITerminal
+  ): TConfigFile | undefined {
+    const { loader } = getAndValidateProjectConfigurationFileEntry(options);
+    return loader.tryLoadConfigurationFileForProject(terminal, this._buildFolderPath, this._rigConfig);
+  }
+
+  /**
+   * Attempts to load a riggable project configuration file using asynchronous I/O.
+   * @param options - The options for the configuration file loader from `@rushstack/heft-config-file`. If invoking this function multiple times for the same file, reuse the same object.
+   * @param terminal - The terminal to log messages during configuration file loading.
+   * @returns A promise that resolves to the configuration file, or undefined if it could not be loaded.
+   */
+  public async tryLoadProjectConfigurationFileAsync<TConfigFile>(
+    options: IProjectConfigurationFileSpecification<TConfigFile>,
+    terminal: ITerminal
+  ): Promise<TConfigFile | undefined> {
+    const { loader } = getAndValidateProjectConfigurationFileEntry(options);
+    return loader.tryLoadConfigurationFileForProjectAsync(terminal, this._buildFolderPath, this._rigConfig);
   }
 
   /**

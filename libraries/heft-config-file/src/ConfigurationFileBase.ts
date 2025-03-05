@@ -3,75 +3,152 @@
 
 import * as nodeJsPath from 'path';
 import { JSONPath } from 'jsonpath-plus';
-import { JsonSchema, JsonFile, PackageJsonLookup, Import, FileSystem } from '@rushstack/node-core-library';
+import { JsonSchema, JsonFile, Import, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import type { IRigConfig } from '@rushstack/rig-package';
 
 interface IConfigurationJson {
   extends?: string;
 }
 
+/* eslint-disable @typescript-eslint/typedef,@typescript-eslint/no-redeclare,@typescript-eslint/no-namespace,@typescript-eslint/naming-convention */
+// This structure is used so that consumers can pass raw string literals and have it typecheck, without breaking existing callers.
 /**
  * @beta
+ *
+ * The set of possible mechanisms for merging properties from parent configuration files.
  */
-export enum InheritanceType {
+const InheritanceType = {
   /**
    * Append additional elements after elements from the parent file's property. Only applicable
    * for arrays.
    */
-  append = 'append',
+  append: 'append',
 
   /**
    * Perform a shallow merge of additional elements after elements from the parent file's property.
    * Only applicable for objects.
    */
-  merge = 'merge',
+  merge: 'merge',
 
   /**
    * Discard elements from the parent file's property
    */
-  replace = 'replace',
+  replace: 'replace',
 
   /**
    * Custom inheritance functionality
    */
-  custom = 'custom'
-}
-
+  custom: 'custom'
+} as const;
 /**
  * @beta
  */
-export enum PathResolutionMethod {
+type InheritanceType = (typeof InheritanceType)[keyof typeof InheritanceType];
+/**
+ * @beta
+ */
+declare namespace InheritanceType {
+  /**
+   * Append additional elements after elements from the parent file's property. Only applicable
+   * for arrays.
+   */
+  export type append = typeof InheritanceType.append;
+
+  /**
+   * Perform a shallow merge of additional elements after elements from the parent file's property.
+   * Only applicable for objects.
+   */
+  export type merge = typeof InheritanceType.merge;
+
+  /**
+   * Discard elements from the parent file's property
+   */
+  export type replace = typeof InheritanceType.replace;
+
+  /**
+   * Custom inheritance functionality
+   */
+  export type custom = typeof InheritanceType.custom;
+}
+export { InheritanceType };
+
+/**
+ * @beta
+ *
+ * The set of possible resolution methods for fields that refer to paths.
+ */
+const PathResolutionMethod = {
   /**
    * Resolve a path relative to the configuration file
    */
-  resolvePathRelativeToConfigurationFile = 'resolvePathRelativeToConfigurationFile',
+  resolvePathRelativeToConfigurationFile: 'resolvePathRelativeToConfigurationFile',
 
   /**
    * Resolve a path relative to the root of the project containing the configuration file
    */
-  resolvePathRelativeToProjectRoot = 'resolvePathRelativeToProjectRoot',
+  resolvePathRelativeToProjectRoot: 'resolvePathRelativeToProjectRoot',
 
   /**
    * Treat the property as a NodeJS-style require/import reference and resolve using standard
    * NodeJS filesystem resolution
    *
    * @deprecated
-   * Use {@link PathResolutionMethod.nodeResolve} instead
+   * Use {@link (PathResolutionMethod:variable).nodeResolve} instead
    */
-  NodeResolve = 'NodeResolve',
+  NodeResolve: 'NodeResolve',
 
   /**
    * Treat the property as a NodeJS-style require/import reference and resolve using standard
    * NodeJS filesystem resolution
    */
-  nodeResolve = 'nodeResolve',
+  nodeResolve: 'nodeResolve',
 
   /**
    * Resolve the property using a custom resolver.
    */
-  custom = 'custom'
+  custom: 'custom'
+} as const;
+/**
+ * @beta
+ */
+type PathResolutionMethod = (typeof PathResolutionMethod)[keyof typeof PathResolutionMethod];
+/**
+ * @beta
+ */
+declare namespace PathResolutionMethod {
+  /**
+   * Resolve a path relative to the configuration file
+   */
+  export type resolvePathRelativeToConfigurationFile =
+    typeof PathResolutionMethod.resolvePathRelativeToConfigurationFile;
+
+  /**
+   * Resolve a path relative to the root of the project containing the configuration file
+   */
+  export type resolvePathRelativeToProjectRoot = typeof PathResolutionMethod.resolvePathRelativeToProjectRoot;
+
+  /**
+   * Treat the property as a NodeJS-style require/import reference and resolve using standard
+   * NodeJS filesystem resolution
+   *
+   * @deprecated
+   * Use {@link (PathResolutionMethod:namespace).nodeResolve} instead
+   */
+  export type NodeResolve = typeof PathResolutionMethod.NodeResolve;
+
+  /**
+   * Treat the property as a NodeJS-style require/import reference and resolve using standard
+   * NodeJS filesystem resolution
+   */
+  export type nodeResolve = typeof PathResolutionMethod.nodeResolve;
+
+  /**
+   * Resolve the property using a custom resolver.
+   */
+  export type custom = typeof PathResolutionMethod.custom;
 }
+export { PathResolutionMethod };
+/* eslint-enable @typescript-eslint/typedef,@typescript-eslint/no-redeclare,@typescript-eslint/no-namespace,@typescript-eslint/naming-convention */
 
 const CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX: RegExp = /^\$([^\.]+)\.inheritanceType$/;
 export const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol(
@@ -109,6 +186,10 @@ export interface IJsonPathMetadataResolverOptions<TConfigurationFile> {
    * The configuration file the property was obtained from.
    */
   configurationFile: Partial<TConfigurationFile>;
+  /**
+   * If this is a project configuration file, the root folder of the project.
+   */
+  projectFolderPath?: string;
 }
 
 /**
@@ -207,6 +288,18 @@ export interface IJsonPathsMetadata<TConfigurationFile> {
 }
 
 /**
+ * A function to invoke after schema validation to validate the configuration file.
+ * This function log errors using the terminal and return false if the configuration file
+ * is invalid.
+ * @beta
+ */
+export type CustomValidationFunction<TConfigurationFile> = (
+  configurationFile: TConfigurationFile,
+  resolvedConfigurationFilePathForLogging: string,
+  terminal: ITerminal
+) => boolean;
+
+/**
  * @beta
  */
 export interface IConfigurationFileOptionsBase<TConfigurationFile> {
@@ -226,6 +319,14 @@ export interface IConfigurationFileOptionsBase<TConfigurationFile> {
    * configuration files.
    */
   propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
+
+  /**
+   * Use this property if you need to validate the configuration file in ways beyond what JSON schema can handle.
+   * This function will be invoked after JSON schema validation.
+   *
+   * The function should throw if the configuration file is invalid.
+   */
+  customValidationFunction?: CustomValidationFunction<TConfigurationFile>;
 }
 
 /**
@@ -280,15 +381,25 @@ export interface IOriginalValueOptions<TParentProperty> {
   propertyName: keyof TParentProperty;
 }
 
+interface IConfigurationFileCacheEntry<TConfigFile> {
+  resolvedConfigurationFilePath: string;
+  resolvedConfigurationFilePathForLogging: string;
+  parent?: IConfigurationFileCacheEntry<TConfigFile>;
+  configurationFile: TConfigFile & IConfigurationJson;
+}
+
+export type IOnFileNotFoundCallback = (resolvedConfigurationFilePathForLogging: string) => string | undefined;
+
 /**
  * @beta
  */
 export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions extends {}> {
   private readonly _getSchema: () => JsonSchema;
 
-  private readonly _jsonPathMetadata: IJsonPathsMetadata<TConfigurationFile>;
+  private readonly _jsonPathMetadata: readonly [string, IJsonPathMetadata<TConfigurationFile>][];
   private readonly _propertyInheritanceTypes: IPropertiesInheritance<TConfigurationFile>;
   private readonly _defaultPropertyInheritance: IPropertyInheritanceDefaults;
+  private readonly _customValidationFunction: CustomValidationFunction<TConfigurationFile> | undefined;
   private __schema: JsonSchema | undefined;
   private get _schema(): JsonSchema {
     if (!this.__schema) {
@@ -298,9 +409,11 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     return this.__schema;
   }
 
-  private readonly _configCache: Map<string, TConfigurationFile> = new Map();
-  private readonly _configPromiseCache: Map<string, Promise<TConfigurationFile>> = new Map();
-  private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+  private readonly _configCache: Map<string, IConfigurationFileCacheEntry<TConfigurationFile>> = new Map();
+  private readonly _configPromiseCache: Map<
+    string,
+    Promise<IConfigurationFileCacheEntry<TConfigurationFile>>
+  > = new Map();
 
   public constructor(options: IConfigurationFileOptions<TConfigurationFile, TExtraOptions>) {
     if (options.jsonSchemaObject) {
@@ -309,9 +422,10 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       this._getSchema = () => JsonSchema.fromFile(options.jsonSchemaPath);
     }
 
-    this._jsonPathMetadata = options.jsonPathMetadata || {};
+    this._jsonPathMetadata = Object.entries(options.jsonPathMetadata || {});
     this._propertyInheritanceTypes = options.propertyInheritance || {};
     this._defaultPropertyInheritance = options.propertyInheritanceDefaults || {};
+    this._customValidationFunction = options.customValidationFunction;
   }
 
   /**
@@ -342,22 +456,69 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
   public getPropertyOriginalValue<TParentProperty extends object, TValue>(
     options: IOriginalValueOptions<TParentProperty>
   ): TValue | undefined {
-    const annotation: IConfigurationFileFieldAnnotation<TParentProperty> | undefined =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (options.parentObject as any)[CONFIGURATION_FILE_FIELD_ANNOTATION];
-    if (annotation && annotation.originalValues.hasOwnProperty(options.propertyName)) {
+    const {
+      [CONFIGURATION_FILE_FIELD_ANNOTATION]: annotation
+    }: { [CONFIGURATION_FILE_FIELD_ANNOTATION]?: IConfigurationFileFieldAnnotation<TParentProperty> } =
+      options.parentObject;
+    if (annotation?.originalValues.hasOwnProperty(options.propertyName)) {
       return annotation.originalValues[options.propertyName] as TValue;
-    } else {
-      return undefined;
     }
   }
 
   protected _loadConfigurationFileInnerWithCache(
     terminal: ITerminal,
     resolvedConfigurationFilePath: string,
-    visitedConfigurationFilePaths: Set<string>,
-    rigConfig: IRigConfig | undefined
+    projectFolderPath: string | undefined,
+    onFileNotFound?: IOnFileNotFoundCallback
   ): TConfigurationFile {
+    const visitedConfigurationFilePaths: Set<string> = new Set<string>();
+    const cacheEntry: IConfigurationFileCacheEntry<TConfigurationFile> =
+      this._loadConfigurationFileEntryWithCache(
+        terminal,
+        resolvedConfigurationFilePath,
+        visitedConfigurationFilePaths,
+        onFileNotFound
+      );
+
+    const result: TConfigurationFile = this._finalizeConfigurationFile(
+      cacheEntry,
+      projectFolderPath,
+      terminal
+    );
+
+    return result;
+  }
+
+  protected async _loadConfigurationFileInnerWithCacheAsync(
+    terminal: ITerminal,
+    resolvedConfigurationFilePath: string,
+    projectFolderPath: string | undefined,
+    onFileNotFound?: IOnFileNotFoundCallback
+  ): Promise<TConfigurationFile> {
+    const visitedConfigurationFilePaths: Set<string> = new Set<string>();
+    const cacheEntry: IConfigurationFileCacheEntry<TConfigurationFile> =
+      await this._loadConfigurationFileEntryWithCacheAsync(
+        terminal,
+        resolvedConfigurationFilePath,
+        visitedConfigurationFilePaths,
+        onFileNotFound
+      );
+
+    const result: TConfigurationFile = this._finalizeConfigurationFile(
+      cacheEntry,
+      projectFolderPath,
+      terminal
+    );
+
+    return result;
+  }
+
+  private _loadConfigurationFileEntryWithCache(
+    terminal: ITerminal,
+    resolvedConfigurationFilePath: string,
+    visitedConfigurationFilePaths: Set<string>,
+    onFileNotFound?: IOnFileNotFoundCallback
+  ): IConfigurationFileCacheEntry<TConfigurationFile> {
     if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
       const resolvedConfigurationFilePathForLogging: string = ConfigurationFileBase._formatPathForLogging(
         resolvedConfigurationFilePath
@@ -369,13 +530,15 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     }
     visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
 
-    let cacheEntry: TConfigurationFile | undefined = this._configCache.get(resolvedConfigurationFilePath);
+    let cacheEntry: IConfigurationFileCacheEntry<TConfigurationFile> | undefined = this._configCache.get(
+      resolvedConfigurationFilePath
+    );
     if (!cacheEntry) {
-      cacheEntry = this._loadConfigurationFileInner(
+      cacheEntry = this._loadConfigurationFileEntry(
         terminal,
         resolvedConfigurationFilePath,
         visitedConfigurationFilePaths,
-        rigConfig
+        onFileNotFound
       );
       this._configCache.set(resolvedConfigurationFilePath, cacheEntry);
     }
@@ -383,12 +546,12 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     return cacheEntry;
   }
 
-  protected async _loadConfigurationFileInnerWithCacheAsync(
+  private async _loadConfigurationFileEntryWithCacheAsync(
     terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
-    rigConfig: IRigConfig | undefined
-  ): Promise<TConfigurationFile> {
+    onFileNotFound?: IOnFileNotFoundCallback
+  ): Promise<IConfigurationFileCacheEntry<TConfigurationFile>> {
     if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
       const resolvedConfigurationFilePathForLogging: string = ConfigurationFileBase._formatPathForLogging(
         resolvedConfigurationFilePath
@@ -400,16 +563,15 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     }
     visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
 
-    let cacheEntryPromise: Promise<TConfigurationFile> | undefined = this._configPromiseCache.get(
-      resolvedConfigurationFilePath
-    );
+    let cacheEntryPromise: Promise<IConfigurationFileCacheEntry<TConfigurationFile>> | undefined =
+      this._configPromiseCache.get(resolvedConfigurationFilePath);
     if (!cacheEntryPromise) {
-      cacheEntryPromise = this._loadConfigurationFileInnerAsync(
+      cacheEntryPromise = this._loadConfigurationFileEntryAsync(
         terminal,
         resolvedConfigurationFilePath,
         visitedConfigurationFilePaths,
-        rigConfig
-      ).then((value: TConfigurationFile) => {
+        onFileNotFound
+      ).then((value: IConfigurationFileCacheEntry<TConfigurationFile>) => {
         this._configCache.set(resolvedConfigurationFilePath, value);
         return value;
       });
@@ -419,21 +581,14 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     return await cacheEntryPromise;
   }
 
-  protected abstract _tryLoadConfigurationFileInRig(
-    terminal: ITerminal,
-    rigConfig: IRigConfig,
-    visitedConfigurationFilePaths: Set<string>
-  ): TConfigurationFile | undefined;
-
-  protected abstract _tryLoadConfigurationFileInRigAsync(
-    terminal: ITerminal,
-    rigConfig: IRigConfig,
-    visitedConfigurationFilePaths: Set<string>
-  ): Promise<TConfigurationFile | undefined>;
-
-  private _parseAndResolveConfigurationFile(
+  /**
+   * Parses the raw JSON-with-comments text of the configuration file.
+   * @param fileText - The text of the configuration file
+   * @param resolvedConfigurationFilePathForLogging - The path to the configuration file, formatted for logs
+   * @returns The parsed configuration file
+   */
+  private _parseConfigurationFile(
     fileText: string,
-    resolvedConfigurationFilePath: string,
     resolvedConfigurationFilePathForLogging: string
   ): IConfigurationJson & TConfigurationFile {
     let configurationJson: IConfigurationJson & TConfigurationFile;
@@ -443,24 +598,42 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       throw new Error(`In config file "${resolvedConfigurationFilePathForLogging}": ${e}`);
     }
 
-    this._annotateProperties(resolvedConfigurationFilePath, configurationJson);
+    return configurationJson;
+  }
 
-    for (const [jsonPath, metadata] of Object.entries(this._jsonPathMetadata)) {
+  /**
+   * Resolves all path properties and annotates properties with their original values.
+   * @param entry - The cache entry for the loaded configuration file
+   * @param projectFolderPath - The project folder path, if applicable
+   * @returns The configuration file with all path properties resolved
+   */
+  private _contextualizeConfigurationFile(
+    entry: IConfigurationFileCacheEntry<TConfigurationFile>,
+    projectFolderPath: string | undefined
+  ): IConfigurationJson & TConfigurationFile {
+    // Deep copy the configuration file because different callers might contextualize properties differently.
+    const result: IConfigurationJson & TConfigurationFile = structuredClone(entry.configurationFile);
+
+    const { resolvedConfigurationFilePath } = entry;
+
+    this._annotateProperties(resolvedConfigurationFilePath, result);
+
+    for (const [jsonPath, metadata] of this._jsonPathMetadata) {
       JSONPath({
         path: jsonPath,
-        json: configurationJson,
+        json: result,
         callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
           const resolvedPath: string = this._resolvePathProperty(
             {
               propertyName: fullPayload.path,
               propertyValue: fullPayload.value,
               configurationFilePath: resolvedConfigurationFilePath,
-              configurationFile: configurationJson
+              configurationFile: result,
+              projectFolderPath
             },
             metadata
           );
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (fullPayload.parent as any)[fullPayload.parentProperty] = resolvedPath;
+          (fullPayload.parent as Record<string, string>)[fullPayload.parentProperty] = resolvedPath;
         },
         otherTypeCallback: () => {
           throw new Error('@other() tags are not supported');
@@ -468,18 +641,88 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       });
     }
 
-    return configurationJson;
+    return result;
+  }
+
+  /**
+   * Resolves all path properties and merges parent properties.
+   * @param entry - The cache entry for the loaded configuration file
+   * @param projectFolderPath - The project folder path, if applicable
+   * @returns The flattened, unvalidated configuration file, with path properties resolved
+   */
+  private _contextualizeAndFlattenConfigurationFile(
+    entry: IConfigurationFileCacheEntry<TConfigurationFile>,
+    projectFolderPath: string | undefined
+  ): Partial<TConfigurationFile> {
+    const { parent, resolvedConfigurationFilePath } = entry;
+    const parentConfig: TConfigurationFile | {} = parent
+      ? this._contextualizeAndFlattenConfigurationFile(parent, projectFolderPath)
+      : {};
+
+    const currentConfig: IConfigurationJson & TConfigurationFile = this._contextualizeConfigurationFile(
+      entry,
+      projectFolderPath
+    );
+
+    const result: Partial<TConfigurationFile> = this._mergeConfigurationFiles(
+      parentConfig,
+      currentConfig,
+      resolvedConfigurationFilePath
+    );
+
+    return result;
+  }
+
+  /**
+   * Resolves all path properties, merges parent properties, and validates the configuration file.
+   * @param entry - The cache entry for the loaded configuration file
+   * @param projectFolderPath - The project folder path, if applicable
+   * @param terminal - The terminal to log validation messages to
+   * @returns The finalized configuration file
+   */
+  private _finalizeConfigurationFile(
+    entry: IConfigurationFileCacheEntry<TConfigurationFile>,
+    projectFolderPath: string | undefined,
+    terminal: ITerminal
+  ): TConfigurationFile {
+    const { resolvedConfigurationFilePathForLogging } = entry;
+
+    const result: Partial<TConfigurationFile> = this._contextualizeAndFlattenConfigurationFile(
+      entry,
+      projectFolderPath
+    );
+
+    try {
+      this._schema.validateObject(result, resolvedConfigurationFilePathForLogging);
+    } catch (e) {
+      throw new Error(`Resolved configuration object does not match schema: ${e}`);
+    }
+
+    if (
+      this._customValidationFunction?.(
+        result as TConfigurationFile,
+        resolvedConfigurationFilePathForLogging,
+        terminal
+      ) === false
+    ) {
+      throw new Error(
+        `Resolved configuration file at "${resolvedConfigurationFilePathForLogging}" failed custom validation.`
+      );
+    }
+
+    // If the schema validates, we can assume that the configuration file is complete.
+    return result as TConfigurationFile;
   }
 
   // NOTE: Internal calls to load a configuration file should use `_loadConfigurationFileInnerWithCache`.
   // Don't call this function directly, as it does not provide config file loop detection,
   // and you won't get the advantage of queueing up for a config file that is already loading.
-  private _loadConfigurationFileInner(
+  private _loadConfigurationFileEntry(
     terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
-    rigConfig: IRigConfig | undefined
-  ): TConfigurationFile {
+    fileNotFoundFallback?: IOnFileNotFoundCallback
+  ): IConfigurationFileCacheEntry<TConfigurationFile> {
     const resolvedConfigurationFilePathForLogging: string = ConfigurationFileBase._formatPathForLogging(
       resolvedConfigurationFilePath
     );
@@ -489,48 +732,39 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       fileText = FileSystem.readFile(resolvedConfigurationFilePath);
     } catch (e) {
       if (FileSystem.isNotExistError(e as Error)) {
-        if (rigConfig) {
-          terminal.writeDebugLine(
-            `Config file "${resolvedConfigurationFilePathForLogging}" does not exist. Attempting to load via rig.`
-          );
-          const rigResult: TConfigurationFile | undefined = this._tryLoadConfigurationFileInRig(
+        const fallbackPath: string | undefined = fileNotFoundFallback?.(
+          resolvedConfigurationFilePathForLogging
+        );
+        if (fallbackPath) {
+          return this._loadConfigurationFileEntryWithCache(
             terminal,
-            rigConfig,
+            fallbackPath,
             visitedConfigurationFilePaths
-          );
-          if (rigResult) {
-            return rigResult;
-          }
-        } else {
-          terminal.writeDebugLine(
-            `Configuration file "${resolvedConfigurationFilePathForLogging}" not found.`
           );
         }
 
+        terminal.writeDebugLine(`Configuration file "${resolvedConfigurationFilePathForLogging}" not found.`);
         (e as Error).message = `File does not exist: ${resolvedConfigurationFilePathForLogging}`;
       }
 
       throw e;
     }
-
-    const configurationJson: IConfigurationJson & TConfigurationFile = this._parseAndResolveConfigurationFile(
+    const configurationJson: IConfigurationJson & TConfigurationFile = this._parseConfigurationFile(
       fileText,
-      resolvedConfigurationFilePath,
       resolvedConfigurationFilePathForLogging
     );
 
-    let parentConfiguration: TConfigurationFile | undefined;
+    let parentConfiguration: IConfigurationFileCacheEntry<TConfigurationFile> | undefined;
     if (configurationJson.extends) {
       try {
         const resolvedParentConfigPath: string = Import.resolveModule({
           modulePath: configurationJson.extends,
           baseFolderPath: nodeJsPath.dirname(resolvedConfigurationFilePath)
         });
-        parentConfiguration = this._loadConfigurationFileInnerWithCache(
+        parentConfiguration = this._loadConfigurationFileEntryWithCache(
           terminal,
           resolvedParentConfigPath,
-          visitedConfigurationFilePaths,
-          undefined
+          visitedConfigurationFilePaths
         );
       } catch (e) {
         if (FileSystem.isNotExistError(e as Error)) {
@@ -544,81 +778,66 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       }
     }
 
-    const result: Partial<TConfigurationFile> = this._mergeConfigurationFiles(
-      parentConfiguration || {},
-      configurationJson,
-      resolvedConfigurationFilePath
-    );
-    try {
-      this._schema.validateObject(result, resolvedConfigurationFilePathForLogging);
-    } catch (e) {
-      throw new Error(`Resolved configuration object does not match schema: ${e}`);
-    }
-
-    // If the schema validates, we can assume that the configuration file is complete.
-    return result as TConfigurationFile;
+    const result: IConfigurationFileCacheEntry<TConfigurationFile> = {
+      configurationFile: configurationJson,
+      resolvedConfigurationFilePath,
+      resolvedConfigurationFilePathForLogging,
+      parent: parentConfiguration
+    };
+    return result;
   }
 
   // NOTE: Internal calls to load a configuration file should use `_loadConfigurationFileInnerWithCacheAsync`.
   // Don't call this function directly, as it does not provide config file loop detection,
   // and you won't get the advantage of queueing up for a config file that is already loading.
-  private async _loadConfigurationFileInnerAsync(
+  private async _loadConfigurationFileEntryAsync(
     terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
-    rigConfig: IRigConfig | undefined
-  ): Promise<TConfigurationFile> {
+    fileNotFoundFallback?: IOnFileNotFoundCallback
+  ): Promise<IConfigurationFileCacheEntry<TConfigurationFile>> {
     const resolvedConfigurationFilePathForLogging: string = ConfigurationFileBase._formatPathForLogging(
       resolvedConfigurationFilePath
     );
 
     let fileText: string;
     try {
-      fileText = await FileSystem.readFileAsync(resolvedConfigurationFilePath);
+      fileText = FileSystem.readFile(resolvedConfigurationFilePath);
     } catch (e) {
       if (FileSystem.isNotExistError(e as Error)) {
-        if (rigConfig) {
-          terminal.writeDebugLine(
-            `Config file "${resolvedConfigurationFilePathForLogging}" does not exist. Attempting to load via rig.`
-          );
-          const rigResult: TConfigurationFile | undefined = await this._tryLoadConfigurationFileInRigAsync(
+        const fallbackPath: string | undefined = fileNotFoundFallback?.(
+          resolvedConfigurationFilePathForLogging
+        );
+        if (fallbackPath) {
+          return this._loadConfigurationFileEntryWithCacheAsync(
             terminal,
-            rigConfig,
+            fallbackPath,
             visitedConfigurationFilePaths
-          );
-          if (rigResult) {
-            return rigResult;
-          }
-        } else {
-          terminal.writeDebugLine(
-            `Configuration file "${resolvedConfigurationFilePathForLogging}" not found.`
           );
         }
 
+        terminal.writeDebugLine(`Configuration file "${resolvedConfigurationFilePathForLogging}" not found.`);
         (e as Error).message = `File does not exist: ${resolvedConfigurationFilePathForLogging}`;
       }
 
       throw e;
     }
-
-    const configurationJson: IConfigurationJson & TConfigurationFile = this._parseAndResolveConfigurationFile(
+    const configurationJson: IConfigurationJson & TConfigurationFile = this._parseConfigurationFile(
       fileText,
-      resolvedConfigurationFilePath,
       resolvedConfigurationFilePathForLogging
     );
 
-    let parentConfiguration: TConfigurationFile | undefined;
+    let parentConfiguration: IConfigurationFileCacheEntry<TConfigurationFile> | undefined;
     if (configurationJson.extends) {
       try {
         const resolvedParentConfigPath: string = Import.resolveModule({
           modulePath: configurationJson.extends,
           baseFolderPath: nodeJsPath.dirname(resolvedConfigurationFilePath)
         });
-        parentConfiguration = await this._loadConfigurationFileInnerWithCacheAsync(
+        parentConfiguration = await this._loadConfigurationFileEntryWithCacheAsync(
           terminal,
           resolvedParentConfigPath,
-          visitedConfigurationFilePaths,
-          undefined
+          visitedConfigurationFilePaths
         );
       } catch (e) {
         if (FileSystem.isNotExistError(e as Error)) {
@@ -632,45 +851,32 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       }
     }
 
-    const result: Partial<TConfigurationFile> = this._mergeConfigurationFiles(
-      parentConfiguration || {},
-      configurationJson,
-      resolvedConfigurationFilePath
-    );
-    try {
-      this._schema.validateObject(result, resolvedConfigurationFilePathForLogging);
-    } catch (e) {
-      throw new Error(`Resolved configuration object does not match schema: ${e}`);
-    }
-
-    // If the schema validates, we can assume that the configuration file is complete.
-    return result as TConfigurationFile;
+    const result: IConfigurationFileCacheEntry<TConfigurationFile> = {
+      configurationFile: configurationJson,
+      resolvedConfigurationFilePath,
+      resolvedConfigurationFilePathForLogging,
+      parent: parentConfiguration
+    };
+    return result;
   }
 
-  private _annotateProperties<TObject>(resolvedConfigurationFilePath: string, obj: TObject): void {
-    if (!obj) {
+  private _annotateProperties<TObject>(resolvedConfigurationFilePath: string, root: TObject): void {
+    if (!root) {
       return;
     }
 
-    if (typeof obj === 'object') {
-      this._annotateProperty(resolvedConfigurationFilePath, obj);
+    const queue: Set<TObject> = new Set([root]);
+    for (const obj of queue) {
+      if (obj && typeof obj === 'object') {
+        (obj as unknown as IAnnotatedField<TObject>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
+          configurationFilePath: resolvedConfigurationFilePath,
+          originalValues: { ...obj }
+        };
 
-      for (const objValue of Object.values(obj)) {
-        this._annotateProperties(resolvedConfigurationFilePath, objValue);
+        for (const objValue of Object.values(obj)) {
+          queue.add(objValue as TObject);
+        }
       }
-    }
-  }
-
-  private _annotateProperty<TObject>(resolvedConfigurationFilePath: string, obj: TObject): void {
-    if (!obj) {
-      return;
-    }
-
-    if (typeof obj === 'object') {
-      (obj as unknown as IAnnotatedField<TObject>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
-        configurationFilePath: resolvedConfigurationFilePath,
-        originalValues: { ...obj }
-      };
     }
   }
 
@@ -678,7 +884,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     resolverOptions: IJsonPathMetadataResolverOptions<TConfigurationFile>,
     metadata: IJsonPathMetadata<TConfigurationFile>
   ): string {
-    const { propertyValue, configurationFilePath } = resolverOptions;
+    const { propertyValue, configurationFilePath, projectFolderPath } = resolverOptions;
     const resolutionMethod: PathResolutionMethod | undefined = metadata.pathResolutionMethod;
     if (resolutionMethod === undefined) {
       return propertyValue;
@@ -690,8 +896,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       }
 
       case PathResolutionMethod.resolvePathRelativeToProjectRoot: {
-        const packageRoot: string | undefined =
-          this._packageJsonLookup.tryGetPackageFolderFor(configurationFilePath);
+        const packageRoot: string | undefined = projectFolderPath;
         if (!packageRoot) {
           throw new Error(
             `Could not find a package root for path "${ConfigurationFileBase._formatPathForLogging(
