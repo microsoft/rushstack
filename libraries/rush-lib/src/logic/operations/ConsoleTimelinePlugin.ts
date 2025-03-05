@@ -203,7 +203,7 @@ export function _printTimeline({ terminal, result }: IPrintTimelineParameters): 
       const { associatedPhase } = operation;
 
       if (associatedPhase) {
-        let durationRecord: ICachedDuration = durationByPhase.get(associatedPhase);
+        let durationRecord: ICachedDuration | undefined = durationByPhase.get(associatedPhase);
         if (!durationRecord) {
           durationRecord = {
             cached: undefined,
@@ -342,7 +342,9 @@ export function _printTimeline({ terminal, result }: IPrintTimelineParameters): 
     }
 
     for (const [phase, duration] of durationByPhase.entries()) {
-      const cachedDurationString: string = duration.cached ? `, from cache: ${duration.cached.toFixed(1)}s` : '';
+      const cachedDurationString: string = duration.cached
+        ? `, from cache: ${duration.cached.toFixed(1)}s`
+        : '';
       const durationString: string = `${duration.uncached.toFixed(1)}s${cachedDurationString}`;
       terminal.writeLine(`  ${Colorize.cyan(phase.name.padStart(maxPhaseName))} ${durationString}`);
     }
