@@ -27,6 +27,8 @@
   "dependencies": {
     "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@swc/core": "1.7.10"
+    "@swc/core": "1.7.10",
+    "@types/tapable": "1.0.6",
+    "tapable": "1.1.3"
   }
 }

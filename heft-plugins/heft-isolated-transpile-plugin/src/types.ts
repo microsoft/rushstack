@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { _TTypeScript as TTypeScript } from '@rushstack/heft-typescript-plugin';
+import type { ModuleKind, ScriptTarget } from './SwcIsolatedTranspilePlugin';
 
 export interface IProjectOptions {
   buildFolder: string;
@@ -9,8 +9,8 @@ export interface IProjectOptions {
 
 export interface IEmitKind {
   outDir: string;
-  formatOverride: keyof typeof TTypeScript.ModuleKind;
-  targetOverride: keyof typeof TTypeScript.ScriptTarget;
+  formatOverride: ModuleKind;
+  targetOverride: ScriptTarget;
 }
 
 export interface ISwcIsolatedTranspileOptions {

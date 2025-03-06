@@ -2600,6 +2600,12 @@ importers:
       '@swc/core':
         specifier: 1.7.10
         version: 1.7.10
+      '@types/tapable':
+        specifier: 1.0.6
+        version: 1.0.6
+      tapable:
+        specifier: 1.1.3
+        version: 1.1.3
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*

@@ -14,6 +14,15 @@ import {
   type _TTypeScript as TTypeScript,
   _getTsconfigFilePath as getTsconfigFilePath
 } from '@rushstack/heft-typescript-plugin';
+import type {
+  Config,
+  JscTarget,
+  ModuleConfig,
+  Options as SwcOptions,
+  ParserConfig,
+  ReactConfig
+} from '@swc/core';
+import { SyncWaterfallHook } from 'tapable';
 
 import type {
   ISwcIsolatedTranspileOptions,
@@ -23,9 +32,12 @@ import type {
   IEmitKind
 } from './types';
 
-import type { Config, JscTarget, ModuleConfig, Options, ParserConfig, ReactConfig } from '@swc/core';
+/**
+ * @public
+ */
+export type ModuleKind = keyof typeof TTypeScript.ModuleKind;
 
-const TSC_TO_SWC_MODULE_MAP: Record<keyof typeof TTypeScript.ModuleKind, ModuleConfig['type'] | undefined> = {
+const TSC_TO_SWC_MODULE_MAP: Record<ModuleKind, ModuleConfig['type'] | undefined> = {
   CommonJS: 'commonjs',
   ES2015: 'es6',
   ES2020: 'es6',
@@ -40,7 +52,12 @@ const TSC_TO_SWC_MODULE_MAP: Record<keyof typeof TTypeScript.ModuleKind, ModuleC
   Preserve: undefined
 };
 
-const TSC_TO_SWC_TARGET_MAP: Record<keyof typeof TTypeScript.ScriptTarget, JscTarget | undefined> = {
+/**
+ * @public
+ */
+export type ScriptTarget = keyof typeof TTypeScript.ScriptTarget;
+
+const TSC_TO_SWC_TARGET_MAP: Record<ScriptTarget, JscTarget | undefined> = {
   ES2015: 'es2015',
   ES2016: 'es2016',
   ES2017: 'es2017',
@@ -60,7 +77,38 @@ const TSC_TO_SWC_TARGET_MAP: Record<keyof typeof TTypeScript.ScriptTarget, JscTa
 
 const PLUGIN_NAME: 'swc-isolated-transpile-plugin' = 'swc-isolated-transpile-plugin';
 
+/**
+ * @beta
+ */
+export interface ISwcIsolatedTranspilePluginAccessor {
+  hooks: {
+    /**
+     * This hook will get called for each module kind and script target that that will be emitted.
+     *
+     * @internalRemarks
+     * In the future, consider replacing this with a HookMap.
+     */
+    getSwcOptions: SyncWaterfallHook<SwcOptions, ModuleKind, ScriptTarget>;
+  };
+}
+
+/**
+ * @public
+ */
 export default class SwcIsolatedTranspilePlugin implements IHeftTaskPlugin<ISwcIsolatedTranspileOptions> {
+  /**
+   * @beta
+   */
+  public accessor: ISwcIsolatedTranspilePluginAccessor;
+
+  public constructor() {
+    this.accessor = {
+      hooks: {
+        getSwcOptions: new SyncWaterfallHook(['swcOptions', 'format', 'target'])
+      }
+    };
+  }
+
   public apply(
     heftSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
@@ -69,7 +117,7 @@ export default class SwcIsolatedTranspilePlugin implements IHeftTaskPlugin<ISwcI
     heftSession.hooks.run.tapPromise(PLUGIN_NAME, async () => {
       const { logger } = heftSession;
 
-      await transpileProjectAsync(heftConfiguration, pluginOptions, logger);
+      await transpileProjectAsync(heftConfiguration, pluginOptions, logger, this.accessor);
     });
   }
 }
@@ -77,7 +125,8 @@ export default class SwcIsolatedTranspilePlugin implements IHeftTaskPlugin<ISwcI
 async function transpileProjectAsync(
   heftConfiguration: HeftConfiguration,
   pluginOptions: ISwcIsolatedTranspileOptions,
-  logger: IScopedLogger
+  logger: IScopedLogger,
+  { hooks: { getSwcOptions: getSwcOptionsHook } }: ISwcIsolatedTranspilePluginAccessor
 ): Promise<void> {
   const { buildFolderPath } = heftConfiguration;
   const { emitKinds = [] } = pluginOptions;
@@ -130,7 +179,7 @@ async function transpileProjectAsync(
     tsx: Buffer;
   }
 
-  function getOptionsBufferByExtension({
+  function getOptionsBufferForFormatAndTarget({
     formatOverride,
     targetOverride
   }: IEmitKind): IOptionsBufferByExtension {
@@ -177,7 +226,7 @@ async function transpileProjectAsync(
           }
         : undefined;
 
-    const options: Options = {
+    let options: SwcOptions = {
       cwd: buildFolderPath,
       root: srcDir,
       rootMode: 'root',
@@ -207,6 +256,10 @@ async function transpileProjectAsync(
       }
     };
 
+    if (getSwcOptionsHook.isUsed()) {
+      options = getSwcOptionsHook.call(options, formatOverride, targetOverride);
+    }
+
     logger.terminal.writeVerboseLine(`Transpile options: ${JSON.stringify(options, undefined, 2)}}`);
     logger.terminal.writeDebugLine(`Transpile options: ${options}`);
 
@@ -226,11 +279,10 @@ async function transpileProjectAsync(
     };
   }
 
-  const outputOptions: Map<string, IOptionsBufferByExtension> = new Map(
-    emitKinds.map((emitKind) => {
-      return [emitKind.outDir, getOptionsBufferByExtension(emitKind)];
-    })
-  );
+  const outputOptions: Map<string, IOptionsBufferByExtension> = new Map();
+  for (const emitKind of emitKinds) {
+    outputOptions.set(emitKind.outDir, getOptionsBufferForFormatAndTarget(emitKind));
+  }
 
   const tasks: ITransformTask[] = [];
 
