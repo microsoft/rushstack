@@ -60,7 +60,7 @@ const TSC_TO_SWC_TARGET_MAP: Record<keyof typeof TTypeScript.ScriptTarget, JscTa
 
 const PLUGIN_NAME: 'swc-isolated-transpile-plugin' = 'swc-isolated-transpile-plugin';
 
-export default class SWCIsolatedTranspilePlugin implements IHeftTaskPlugin<ISwcIsolatedTranspileOptions> {
+export default class SwcIsolatedTranspilePlugin implements IHeftTaskPlugin<ISwcIsolatedTranspileOptions> {
   public apply(
     heftSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
