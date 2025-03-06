@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.5.23",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.23",
+      "date": "Thu, 06 Mar 2025 01:10:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the cache is only populated for incremental TypeScript builds."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.22",
       "tag": "@rushstack/heft-lint-plugin_v0.5.22",
       "date": "Sat, 01 Mar 2025 07:23:16 GMT",

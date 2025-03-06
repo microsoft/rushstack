@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Sat, 01 Mar 2025 07:23:16 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Mar 2025 01:10:42 GMT and should not be manually modified.
+
+## 0.5.23
+Thu, 06 Mar 2025 01:10:42 GMT
+
+### Patches
+
+- Fix an issue where the cache is only populated for incremental TypeScript builds.
 
 ## 0.5.22
 Sat, 01 Mar 2025 07:23:16 GMT
