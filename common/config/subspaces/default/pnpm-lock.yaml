@@ -2589,7 +2589,7 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
-  ../../../heft-plugins/heft-isolated-transpile-plugin:
+  ../../../heft-plugins/heft-isolated-typescript-transpile-plugin:
     dependencies:
       '@rushstack/lookup-by-path':
         specifier: workspace:*

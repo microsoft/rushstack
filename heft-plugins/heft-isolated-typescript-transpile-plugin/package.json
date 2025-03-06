@@ -1,11 +1,11 @@
 {
-  "name": "@rushstack/heft-isolated-transpile-plugin",
+  "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
   "version": "0.0.0",
   "description": "Heft plugin for transpiling with SWC",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "heft-plugins/heft-isolated-transpile-plugin"
+    "directory": "heft-plugins/heft-isolated-typescript-transpile-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "license": "MIT",
