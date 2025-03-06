@@ -16,12 +16,13 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.69.2"
+    "@rushstack/heft": "^0.69.2",
+    "@rushstack/heft-typescript-plugin": "workspace:^"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "typescript": "~5.8.2",
-    "local-node-rig": "workspace:*"
+    "local-node-rig": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*"
   },
   "dependencies": {
     "@rushstack/lookup-by-path": "workspace:*",

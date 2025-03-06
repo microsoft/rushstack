@@ -5,10 +5,15 @@ import { availableParallelism } from 'node:os';
 import path from 'node:path';
 import { Worker } from 'node:worker_threads';
 
-import * as ts from 'typescript';
 import { Path } from '@rushstack/node-core-library';
 import type { HeftConfiguration, IHeftTaskPlugin, IHeftTaskSession, IScopedLogger } from '@rushstack/heft';
 import { LookupByPath } from '@rushstack/lookup-by-path';
+import {
+  _loadTypeScriptToolAsync as loadTypeScriptToolAsync,
+  _loadTsconfig as loadTsconfig,
+  type _TTypeScript as TTypeScript,
+  _getTsconfigFilePath as getTsconfigFilePath
+} from '@rushstack/heft-typescript-plugin';
 
 import type {
   ISwcIsolatedTranspileOptions,
@@ -17,11 +22,10 @@ import type {
   ITransformTask,
   IEmitKind
 } from './types';
-import { loadTsconfig, type TExtendedTypeScript } from './readTsConfig';
 
 import type { Config, JscTarget, ModuleConfig, Options, ParserConfig, ReactConfig } from '@swc/core';
 
-const TSC_TO_SWC_MODULE_MAP: Record<keyof typeof ts.ModuleKind, ModuleConfig['type'] | undefined> = {
+const TSC_TO_SWC_MODULE_MAP: Record<keyof typeof TTypeScript.ModuleKind, ModuleConfig['type'] | undefined> = {
   CommonJS: 'commonjs',
   ES2015: 'es6',
   ES2020: 'es6',
@@ -36,7 +40,7 @@ const TSC_TO_SWC_MODULE_MAP: Record<keyof typeof ts.ModuleKind, ModuleConfig['ty
   Preserve: undefined
 };
 
-const TSC_TO_SWC_TARGET_MAP: Record<keyof typeof ts.ScriptTarget, JscTarget | undefined> = {
+const TSC_TO_SWC_TARGET_MAP: Record<keyof typeof TTypeScript.ScriptTarget, JscTarget | undefined> = {
   ES2015: 'es2015',
   ES2016: 'es2016',
   ES2017: 'es2017',
@@ -78,14 +82,16 @@ async function transpileProjectAsync(
   const { buildFolderPath } = heftConfiguration;
   const { emitKinds = [] } = pluginOptions;
 
-  const tsconfig: ts.ParsedCommandLine | undefined = loadTsconfig(
-    ts as TExtendedTypeScript,
-    { buildFolder: buildFolderPath },
-    pluginOptions,
-    logger
-  );
+  const { tool } = await loadTypeScriptToolAsync({
+    terminal: logger.terminal,
+    heftConfiguration
+  });
+  const { ts } = tool;
 
-  if (!tsconfig) {
+  const tsconfigPath: string = getTsconfigFilePath(heftConfiguration, pluginOptions.tsConfigPath);
+  const parsedTsConfig: TTypeScript.ParsedCommandLine | undefined = loadTsconfig({ tool, tsconfigPath });
+
+  if (!parsedTsConfig) {
     logger.terminal.writeLine('tsconfig.json not found. Skipping parse and transpile for this project.');
     return;
   }
@@ -96,8 +102,6 @@ async function transpileProjectAsync(
         'point "tsConfigPath" at a nonexistent file.'
     );
   }
-
-  const parsedTsConfig: ts.ParsedCommandLine = tsconfig;
 
   logger.terminal.writeDebugLine('Loaded tsconfig', JSON.stringify(parsedTsConfig, undefined, 2));
 

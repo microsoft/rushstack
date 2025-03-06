@@ -2604,12 +2604,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/heft-typescript-plugin':
+        specifier: workspace:*
+        version: link:../heft-typescript-plugin
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
-      typescript:
-        specifier: ~5.8.2
-        version: 5.8.2
 
   ../../../heft-plugins/heft-jest-plugin:
     dependencies:
