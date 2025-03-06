@@ -367,6 +367,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@swc/core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@tsconfig/node14",
       "allowedCategories": [ "tests" ]
     },

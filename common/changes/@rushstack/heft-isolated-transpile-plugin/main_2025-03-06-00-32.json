@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-isolated-transpile-plugin",
+      "comment": "Initial release.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-isolated-transpile-plugin"
+}
