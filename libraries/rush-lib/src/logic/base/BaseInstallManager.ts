@@ -194,10 +194,10 @@ export abstract class BaseInstallManager {
       statePropertiesToIgnore: optionsToIgnore
     }));
 
-    const rushLink: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
+    const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
     const isNodeModulesOverWritten: boolean = (
       await Promise.all(
-        subspace.getProjects().map((project) => rushLink.isProjectDependencyLinkedAsync(project))
+        subspace.getProjects().map((project) => rushConnect.isProjectDependencyLinkedAsync(project))
       )
     ).includes(true);
 
