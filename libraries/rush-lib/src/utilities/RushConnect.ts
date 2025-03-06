@@ -110,9 +110,11 @@ export class RushConnect {
     });
   }
 
-  private async _modifyAndSaveLinkStateAsync(cb: (linkState: IRushLinkFileState) => void): Promise<void> {
+  private async _modifyAndSaveLinkStateAsync(
+    cb: (linkState: IRushLinkFileState) => Promise<void> | void
+  ): Promise<void> {
     const linkState: IRushLinkFileState = this._rushLinkState ?? {};
-    cb(linkState);
+    await Promise.resolve(cb(linkState));
     await JsonFile.saveAsync(linkState, this._rushLinkStateFilePath);
   }
 
@@ -122,9 +124,23 @@ export class RushConnect {
       return false;
     }
 
-    await this._modifyAndSaveLinkStateAsync((linkState) => {
+    const logMessageCallback = (logMessageOptions: ILogMessageCallbackOptions): void => {
+      PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal);
+    };
+
+    await this._modifyAndSaveLinkStateAsync(async (linkState) => {
+      const rushLinkFileState: IRushLinkFileState[number] = linkState[projectName] ?? [];
+      await Async.forEachAsync(rushLinkFileState, async ({ linkedPackagePath }) => {
+        await pnpmSyncUpdateFileAsync({
+          sourceProjectFolder: linkedPackagePath,
+          targetFolders: [],
+          lockfileId: project.subspace.subspaceName,
+          logMessageCallback
+        });
+      });
       delete linkState[projectName];
     });
+
     return true;
   }
 
@@ -252,14 +268,17 @@ export class RushConnect {
         if (!(await FileSystem.existsAsync(path.resolve(consumerPackageNodeModulesPath, packageName)))) {
           throw new Error(`Cannot find ${packageName} under ${consumerPackageNodeModulesPath}`);
         }
+
+        const logMessageCallback = (logMessageOptions: ILogMessageCallbackOptions): void => {
+          PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal);
+        };
         const sourcePath: string = await FileSystem.getRealPath(
           path.resolve(consumerPackageNodeModulesPath, packageName)
         );
-        const logMessageCallback = (logMessageOptions: ILogMessageCallbackOptions): void =>
-          PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal);
         await pnpmSyncUpdateFileAsync({
           sourceProjectFolder: linkedPackagePath,
           targetFolders: [sourcePath],
+          lockfileId: consumerPackage.subspace.subspaceName,
           logMessageCallback
         });
         const pnpmSyncJsonPath: string = path.resolve(
