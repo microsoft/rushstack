@@ -3,22 +3,23 @@
 
 import { availableParallelism } from 'node:os';
 import path from 'node:path';
-import { type ChildProcess, fork } from 'node:child_process';
-import type * as ts from 'typescript';
+import { Worker } from 'node:worker_threads';
+
+import * as ts from 'typescript';
 import { Path } from '@rushstack/node-core-library';
 import type { HeftConfiguration, IHeftTaskPlugin, IHeftTaskSession, IScopedLogger } from '@rushstack/heft';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 
 import type {
-  ISwcIsolatedTranspileOptions as ISwcIsolatedTranspileOptions,
+  ISwcIsolatedTranspileOptions,
+  IWorkerData,
   IWorkerResult,
   ITransformTask,
-  IEmitKind,
-  ITransformModulesRequestMessage
+  IEmitKind
 } from './types';
 import { loadTsconfig, type TExtendedTypeScript } from './readTsConfig';
 
-import type { Config, JscTarget, ModuleConfig, Options, ParserConfig } from '@swc/core';
+import type { Config, JscTarget, ModuleConfig, Options, ParserConfig, ReactConfig } from '@swc/core';
 
 const TSC_TO_SWC_MODULE_MAP: Record<keyof typeof ts.ModuleKind, ModuleConfig['type'] | undefined> = {
   CommonJS: 'commonjs',
@@ -91,8 +92,8 @@ async function transpileProjectAsync(
 
   if (emitKinds.length < 1) {
     throw new Error(
-      'One or more emit kinds must be specified in the plugin options. To disable SWC transpilation' +
-        ', point "tsConfigPath" at a nonexistent file.'
+      'One or more emit kinds must be specified in the plugin options. To disable SWC transpilation, ' +
+        'point "tsConfigPath" at a nonexistent file.'
     );
   }
 
@@ -100,37 +101,35 @@ async function transpileProjectAsync(
 
   logger.terminal.writeDebugLine('Loaded tsconfig', JSON.stringify(parsedTsConfig, undefined, 2));
 
-  const {
-    fileNames: filesFromTsConfig,
-    options: { sourceMap, sourceRoot, experimentalDecorators, inlineSourceMap, useDefineForClassFields }
-  } = parsedTsConfig;
+  const { fileNames: filesFromTsConfig, options: tsConfigOptions } = parsedTsConfig;
+
+  const { sourceMap, sourceRoot, experimentalDecorators, inlineSourceMap, useDefineForClassFields } =
+    tsConfigOptions;
 
   const rootDirsPaths: LookupByPath<number> = new LookupByPath(
-    (parsedTsConfig.options.rootDirs ?? []).map((rd) => [rd, rd.length])
+    (tsConfigOptions.rootDirs ?? []).map((rd) => [rd, rd.length])
   );
 
-  const sourceFilePaths: string[] = [];
-  for (const filePath of filesFromTsConfig) {
-    if (!filePath.endsWith('.d.ts')) {
-      sourceFilePaths.push(filePath);
-    }
-  }
+  const sourceFilePaths: string[] = filesFromTsConfig.filter((filePath) => !filePath.endsWith('.d.ts'));
 
   logger.terminal.writeVerboseLine('Reading Config');
 
   const srcDir: string = Path.convertToSlashes(
-    path.resolve(buildFolderPath, parsedTsConfig.options.rootDir ?? 'src')
+    path.resolve(buildFolderPath, tsConfigOptions.rootDir ?? 'src')
   );
 
   const sourceMaps: Config['sourceMaps'] = inlineSourceMap ? 'inline' : sourceMap;
   const externalSourceMaps: boolean = sourceMaps === true;
 
-  interface IOptionsByExtension {
-    ts: string;
-    tsx: string;
+  interface IOptionsBufferByExtension {
+    ts: Buffer;
+    tsx: Buffer;
   }
 
-  function getOptionsByExtension({ formatOverride, targetOverride }: IEmitKind): IOptionsByExtension {
+  function getOptionsBufferByExtension({
+    formatOverride,
+    targetOverride
+  }: IEmitKind): IOptionsBufferByExtension {
     const format: ModuleConfig['type'] | undefined =
       formatOverride !== undefined ? TSC_TO_SWC_MODULE_MAP[formatOverride] : undefined;
     if (format === undefined) {
@@ -149,7 +148,7 @@ async function transpileProjectAsync(
 
     const moduleConfig: ModuleConfig = {
       type: format,
-      noInterop: parsedTsConfig.options.esModuleInterop === false
+      noInterop: tsConfigOptions.esModuleInterop === false
     };
 
     const parser: ParserConfig = {
@@ -158,6 +157,21 @@ async function transpileProjectAsync(
       dynamicImport: true,
       tsx: false
     };
+
+    // https://github.com/swc-project/swc-node/blob/e6cd8b83d1ce76a0abf770f52425704e5d2872c6/packages/register/read-default-tsconfig.ts#L131C7-L139C20
+    const react: Partial<ReactConfig> | undefined =
+      tsConfigOptions.jsxFactory ??
+      tsConfigOptions.jsxFragmentFactory ??
+      tsConfigOptions.jsx ??
+      tsConfigOptions.jsxImportSource
+        ? {
+            pragma: tsConfigOptions.jsxFactory,
+            pragmaFrag: tsConfigOptions.jsxFragmentFactory,
+            importSource: tsConfigOptions.jsxImportSource ?? 'react',
+            runtime: (tsConfigOptions.jsx ?? 0) >= ts.JsxEmit.ReactJSX ? 'automatic' : 'classic',
+            useBuiltins: true
+          }
+        : undefined;
 
     const options: Options = {
       cwd: buildFolderPath,
@@ -174,42 +188,48 @@ async function transpileProjectAsync(
       module: moduleConfig,
       jsc: {
         target,
-        externalHelpers: parsedTsConfig.options.importHelpers,
+        externalHelpers: tsConfigOptions.importHelpers,
         parser,
         transform: {
           legacyDecorator: experimentalDecorators,
-          react: {},
-          useDefineForClassFields
+          react,
+          useDefineForClassFields,
+          // This property is not included in the types, but is what makes swc-jest work
+          // @ts-ignore
+          hidden: {
+            jest: format === 'commonjs'
+          }
         }
       }
     };
 
     logger.terminal.writeVerboseLine(`Transpile options: ${JSON.stringify(options, undefined, 2)}}`);
-    logger.terminal.writeDebugLine(`Tranpile options: ${options}`);
+    logger.terminal.writeDebugLine(`Transpile options: ${options}`);
 
     const tsOptions: string = JSON.stringify(options);
+    const tsOptionsBuffer: Buffer = Buffer.from(new SharedArrayBuffer(Buffer.byteLength(tsOptions, 'utf8')));
+    tsOptionsBuffer.write(tsOptions);
     parser.tsx = true;
     const tsxOptions: string = JSON.stringify(options);
+    const tsxOptionsBuffer: Buffer = Buffer.from(
+      new SharedArrayBuffer(Buffer.byteLength(tsxOptions, 'utf8'))
+    );
+    tsxOptionsBuffer.write(tsxOptions);
 
     return {
-      ts: tsOptions,
-      tsx: tsxOptions
+      ts: tsOptionsBuffer,
+      tsx: tsxOptionsBuffer
     };
   }
 
-  const outputOptions: Map<string, IOptionsByExtension> = new Map(
+  const outputOptions: Map<string, IOptionsBufferByExtension> = new Map(
     emitKinds.map((emitKind) => {
-      return [emitKind.outDir, getOptionsByExtension(emitKind)];
+      return [emitKind.outDir, getOptionsBufferByExtension(emitKind)];
     })
   );
 
   const tasks: ITransformTask[] = [];
-  const requestMessage: ITransformModulesRequestMessage = {
-    tasks,
-    options: []
-  };
 
-  const indexForOptions: Map<string, number> = new Map();
   for (const srcFilePath of sourceFilePaths) {
     const rootPrefixLength: number | undefined = rootDirsPaths.findChildPath(srcFilePath);
 
@@ -226,16 +246,10 @@ async function transpileProjectAsync(
       const jsFilePath: string = `${outputPrefix}${relativeJsFilePath}`;
       const mapFilePath: string | undefined = externalSourceMaps ? `${jsFilePath}.map` : undefined;
 
-      const options: string = tsx ? optionsByExtension.tsx : optionsByExtension.ts;
-      let optionsIndex: number | undefined = indexForOptions.get(options);
-      if (optionsIndex === undefined) {
-        optionsIndex = requestMessage.options.push(options) - 1;
-        indexForOptions.set(options, optionsIndex);
-      }
       const item: ITransformTask = {
         srcFilePath,
         relativeSrcFilePath,
-        optionsIndex,
+        options: tsx ? optionsByExtension.tsx : optionsByExtension.ts,
         jsFilePath,
         mapFilePath
       };
@@ -247,33 +261,31 @@ async function transpileProjectAsync(
   logger.terminal.writeLine(`Transpiling ${tasks.length} files...`);
 
   const result: IWorkerResult = await new Promise((resolve, reject) => {
+    const workerData: IWorkerData = {
+      buildFolderPath,
+      concurrency: Math.min(4, tasks.length, availableParallelism())
+    };
+
     const workerPath: string = require.resolve('./TranspileWorker.js');
-    const concurrency: number = Math.min(4, tasks.length, availableParallelism());
-
-    // Due to https://github.com/rust-lang/rust/issues/91979 using worker_threads is not recommended for swc & napi-rs,
-    // so we use child_process.fork instead.
-    const childProcess: ChildProcess = fork(workerPath, [buildFolderPath, `${concurrency}`]);
-
-    childProcess.once('message', (message) => {
-      // Shut down the worker.
-      childProcess.send(false);
-      // Node IPC messages are deserialized automatically.
-      resolve(message as IWorkerResult);
+    const worker: Worker = new Worker(workerPath, {
+      workerData
     });
 
-    childProcess.once('error', (error: Error) => {
-      reject(error);
+    worker.once('message', (message) => {
+      // shut down the worker.
+      worker.postMessage(false);
+      resolve(message);
     });
 
-    childProcess.once('close', (closeExitCode: number, closeSignal: NodeJS.Signals | null) => {
-      if (closeSignal) {
-        reject(new Error(`Child process exited with signal: ${closeSignal}`));
-      } else if (closeExitCode !== 0) {
-        reject(new Error(`Child process exited with code: ${closeExitCode}`));
+    worker.once('error', reject);
+
+    worker.once('exit', (code: number) => {
+      if (code !== 0) {
+        reject(new Error(`Transpiler worker exited with code ${code}`));
       }
     });
 
-    childProcess.send(requestMessage);
+    worker.postMessage(tasks);
   });
 
   const { errors, timings: transformTimes, durationMs } = result;
