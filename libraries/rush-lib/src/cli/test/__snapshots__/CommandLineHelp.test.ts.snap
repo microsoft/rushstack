@@ -64,6 +64,10 @@ Positional arguments:
     version             Manage package versions in the repo.
     alert               (EXPERIMENTAL) View and manage Rush alerts for the 
                         repository
+    bridge-package      Enable access to another package under the current 
+                        package.
+    link-package        Enable access to another package under the current 
+                        package.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
@@ -146,6 +150,27 @@ Optional arguments:
                         Temporarily suspend the specified alert for one week
   --forever             Combined with \\"--snooze\\", causes that alert to be 
                         suspended permanently
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: bridge-package 1`] = `
+"usage: rush bridge-package [-h] --path PATH [--project PROJECT] [-r]
+
+Using “rush bridge-package” allows the target package to be accessed from the 
+current package. Compared to \\"rush link-package\\", \\"rush bridge-package\\" is 
+designed to address the issues caused by \\"peerDependencies\\", making it closer 
+to the pattern of installing third-party dependencies.
+
+Optional arguments:
+  -h, --help         Show this help message and exit.
+  --path PATH        The filesystem path to the external package to be 
+                     connected
+  --project PROJECT  A list of Rush project names to connect to the external 
+                     package. If not specified, uses the project in the 
+                     current working directory.
+  -r, --replace      Replace will directly replace the output, which requires 
+                     you to have installed the package under the specified 
+                     package in advance.
 "
 `;
 
@@ -828,6 +853,24 @@ Optional arguments:
   -h, --help   Show this help message and exit.
   -f, --force  Deletes and recreates all links, even if the filesystem state 
                seems to indicate that this is unnecessary.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: link-package 1`] = `
+"usage: rush link-package [-h] --path PATH [--project PROJECT]
+
+Using \\"rush link-package\\" will create a symbolic link of the target package 
+in the \\"node_modules\\" folder of the current package, allowing access to the 
+target package from the current package. However, it cannot resolve the issue 
+of multiple instances caused by \\"peerDependencies\\".
+
+Optional arguments:
+  -h, --help         Show this help message and exit.
+  --path PATH        The filesystem path to the external package to be 
+                     connected
+  --project PROJECT  A list of Rush project names to connect to the external 
+                     package. If not specified, uses the project in the 
+                     current working directory.
 "
 `;
 

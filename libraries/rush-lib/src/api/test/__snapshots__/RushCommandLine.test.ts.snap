@@ -1138,6 +1138,56 @@ Object {
       ],
     },
     Object {
+      "actionName": "bridge-package",
+      "parameters": Array [
+        Object {
+          "description": "The filesystem path to the external package to be connected",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--path",
+          "required": true,
+          "shortName": undefined,
+        },
+        Object {
+          "description": "A list of Rush project names to connect to the external package. If not specified, uses the project in the current working directory.",
+          "environmentVariable": undefined,
+          "kind": "StringList",
+          "longName": "--project",
+          "required": false,
+          "shortName": undefined,
+        },
+        Object {
+          "description": "Replace will directly replace the output, which requires you to have installed the package under the specified package in advance.",
+          "environmentVariable": undefined,
+          "kind": "Flag",
+          "longName": "--replace",
+          "required": false,
+          "shortName": "-r",
+        },
+      ],
+    },
+    Object {
+      "actionName": "link-package",
+      "parameters": Array [
+        Object {
+          "description": "The filesystem path to the external package to be connected",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--path",
+          "required": true,
+          "shortName": undefined,
+        },
+        Object {
+          "description": "A list of Rush project names to connect to the external package. If not specified, uses the project in the current working directory.",
+          "environmentVariable": undefined,
+          "kind": "StringList",
+          "longName": "--project",
+          "required": false,
+          "shortName": undefined,
+        },
+      ],
+    },
+    Object {
       "actionName": "import-strings",
       "parameters": Array [
         Object {

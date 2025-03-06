@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "An improved alternative to \"rush-pnpm link\"",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
