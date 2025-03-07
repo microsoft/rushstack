@@ -74,39 +74,28 @@ export class RushConnect {
   private async _hardLinkToLinkedPackageAsync(
     sourcePath: string,
     targetFolder: string,
-    consumerPackageNodeModulesPath: string
+    lockfileId: string
   ): Promise<void> {
-    const npmPackFiles: string[] = await PackageExtractor.getPackageIncludedFilesAsync(sourcePath);
-    await Async.forEachAsync(npmPackFiles, async (npmPackFile: string) => {
-      const copySourcePath: string = path.join(sourcePath, npmPackFile);
-      const copyDestinationPath: string = path.join(targetFolder, npmPackFile);
-      if (!(await FileSystem.existsAsync(copyDestinationPath))) {
-        // if not exist in target folder, we just copy it
-        await FileSystem.ensureFolderAsync(path.dirname(copyDestinationPath));
-        await FileSystem.createHardLinkAsync({
-          linkTargetPath: copySourcePath,
-          newLinkPath: copyDestinationPath
-        });
-      } else {
-        // if exist in target folder, check if it still point to the source Inode number
-        // in our copy implementation, we use hard link to copy files
-        // so that, we can utilize the file inode info to determine the equality of two files
-        const sourceFileIno: number = (await FileSystem.getStatisticsAsync(copySourcePath)).ino;
-        const destinationFileIno: number = (await FileSystem.getStatisticsAsync(copyDestinationPath)).ino;
-        if (sourceFileIno !== destinationFileIno) {
-          await FileSystem.deleteFileAsync(copyDestinationPath);
-          await FileSystem.createHardLinkAsync({
-            linkTargetPath: copySourcePath,
-            newLinkPath: copyDestinationPath
-          });
-        }
-      }
+    const logMessageCallback = (logMessageOptions: ILogMessageCallbackOptions): void => {
+      PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal);
+    };
+    await pnpmSyncUpdateFileAsync({
+      sourceProjectFolder: sourcePath,
+      targetFolders: [targetFolder],
+      lockfileId,
+      logMessageCallback
     });
-    // Finally, create a symbolic link pointing to the directory.
-    await FileSystem.createSymbolicLinkFolderAsync({
-      linkTargetPath: targetFolder,
-      newLinkPath: consumerPackageNodeModulesPath,
-      alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
+    const pnpmSyncJsonPath: string = path.resolve(
+      sourcePath,
+      RushConstants.nodeModulesFolderName,
+      '.pnpm-sync.json'
+    );
+    await pnpmSyncCopyAsync({
+      pnpmSyncJsonPath,
+      ensureFolderAsync: FileSystem.ensureFolderAsync,
+      forEachAsyncWithConcurrency: Async.forEachAsync,
+      getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
+      logMessageCallback
     });
   }
 
@@ -209,7 +198,7 @@ export class RushConnect {
           throw new Error(`Cannot find "${peerDependency}"`);
         }
 
-        const symlinkTargetPath: string = await FileSystem.getRealPath(sourcePeerDependencyPath);
+        const symlinkTargetPath: string = await FileSystem.getRealPathAsync(sourcePeerDependencyPath);
         await FileSystem.createSymbolicLinkFolderAsync({
           linkTargetPath: symlinkTargetPath,
           newLinkPath: path.resolve(linkedPackageDestination, peerDependency),
@@ -268,31 +257,14 @@ export class RushConnect {
         if (!(await FileSystem.existsAsync(path.resolve(consumerPackageNodeModulesPath, packageName)))) {
           throw new Error(`Cannot find ${packageName} under ${consumerPackageNodeModulesPath}`);
         }
-
-        const logMessageCallback = (logMessageOptions: ILogMessageCallbackOptions): void => {
-          PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal);
-        };
-        const sourcePath: string = await FileSystem.getRealPath(
+        const sourcePath: string = await FileSystem.getRealPathAsync(
           path.resolve(consumerPackageNodeModulesPath, packageName)
         );
-        await pnpmSyncUpdateFileAsync({
-          sourceProjectFolder: linkedPackagePath,
-          targetFolders: [sourcePath],
-          lockfileId: consumerPackage.subspace.subspaceName,
-          logMessageCallback
-        });
-        const pnpmSyncJsonPath: string = path.resolve(
+        await this._hardLinkToLinkedPackageAsync(
           linkedPackagePath,
-          RushConstants.nodeModulesFolderName,
-          '.pnpm-sync.json'
+          sourcePath,
+          consumerPackage.subspace.subspaceName
         );
-        await pnpmSyncCopyAsync({
-          pnpmSyncJsonPath,
-          ensureFolderAsync: FileSystem.ensureFolderAsync,
-          forEachAsyncWithConcurrency: Async.forEachAsync,
-          getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
-          logMessageCallback
-        });
       } else {
         // Generate unique destination path for linked package
         const linkedPackageDestination: string = path.resolve(
@@ -321,8 +293,15 @@ export class RushConnect {
         await this._hardLinkToLinkedPackageAsync(
           linkedPackagePath,
           path.resolve(linkedPackageDestination, packageName),
-          path.resolve(parentPackageDestination ?? consumerPackageNodeModulesPath, packageName)
+          consumerPackage.subspace.subspaceName
         );
+
+        // Create a symbolic link pointing to the directory.
+        await FileSystem.createSymbolicLinkFolderAsync({
+          linkTargetPath: path.resolve(linkedPackageDestination, packageName),
+          newLinkPath: path.resolve(parentPackageDestination ?? consumerPackageNodeModulesPath, packageName),
+          alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
+        });
 
         // Handle workspace dependencies recursively
         await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
