@@ -61,7 +61,7 @@ export class InitSubspaceAction extends BaseRushAction {
     const subspaceConfigPath: string = `${this.rushConfiguration.commonFolder}/config/subspaces/${newSubspaceName}`;
     const defaultAssetsSubfolder: string = `${assetsFolderPath}/rush-init`;
     const userDefinedAssetsFolder: string | undefined = subspacesConfiguration.subspaceInitAssetsFolder
-      ? path.join(this.rushConfiguration.rushJsonFolder, subspacesConfiguration.subspaceInitAssetsFolder)
+      ? `${this.rushConfiguration.rushJsonFolder}/${subspacesConfiguration.subspaceInitAssetsFolder}`
       : undefined;
     const templateFilePaths: string[] = [
       '[dot]npmrc',
