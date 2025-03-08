@@ -106,7 +106,7 @@ export class TypeScriptInternals {
     compilerOptions: ts.CompilerOptions
   ): ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.7.2/src/compiler/program.ts#L940
+    // https://github.com/microsoft/TypeScript/blob/v5.8.2/src/compiler/program.ts#L931
 
     return ts.getModeForUsageLocation?.(file, usage, compilerOptions);
   }
