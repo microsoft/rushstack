@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import {
   JsonFile,
   JsonSchema,
@@ -140,11 +139,12 @@ export class BuildCacheConfiguration {
     rushConfiguration: RushConfiguration,
     rushSession: RushSession
   ): Promise<BuildCacheConfiguration | undefined> {
-    const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
-    if (!FileSystem.exists(jsonFilePath)) {
-      return undefined;
-    }
-    return await BuildCacheConfiguration._loadAsync(jsonFilePath, terminal, rushConfiguration, rushSession);
+    const { buildCacheConfiguration } = await BuildCacheConfiguration._tryLoadInternalAsync(
+      terminal,
+      rushConfiguration,
+      rushSession
+    );
+    return buildCacheConfiguration;
   }
 
   /**
@@ -156,21 +156,19 @@ export class BuildCacheConfiguration {
     rushConfiguration: RushConfiguration,
     rushSession: RushSession
   ): Promise<BuildCacheConfiguration> {
-    const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
-    if (!FileSystem.exists(jsonFilePath)) {
+    const { buildCacheConfiguration, jsonFilePath } = await BuildCacheConfiguration._tryLoadInternalAsync(
+      terminal,
+      rushConfiguration,
+      rushSession
+    );
+
+    if (!buildCacheConfiguration) {
       terminal.writeErrorLine(
         `The build cache feature is not enabled. This config file is missing:\n` + jsonFilePath
       );
       terminal.writeLine(`\nThe Rush website documentation has instructions for enabling the build cache.`);
       throw new AlreadyReportedError();
     }
-
-    const buildCacheConfiguration: BuildCacheConfiguration = await BuildCacheConfiguration._loadAsync(
-      jsonFilePath,
-      terminal,
-      rushConfiguration,
-      rushSession
-    );
 
     if (!buildCacheConfiguration.buildCacheEnabled) {
       terminal.writeErrorLine(
@@ -179,6 +177,7 @@ export class BuildCacheConfiguration {
       );
       throw new AlreadyReportedError();
     }
+
     return buildCacheConfiguration;
   }
 
@@ -186,7 +185,18 @@ export class BuildCacheConfiguration {
    * Gets the absolute path to the build-cache.json file in the specified rush workspace.
    */
   public static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string {
-    return path.resolve(rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename);
+    return `${rushConfiguration.commonRushConfigFolder}/${RushConstants.buildCacheFilename}`;
+  }
+
+  private static async _tryLoadInternalAsync(
+    terminal: ITerminal,
+    rushConfiguration: RushConfiguration,
+    rushSession: RushSession
+  ): Promise<{ buildCacheConfiguration: BuildCacheConfiguration | undefined; jsonFilePath: string }> {
+    const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
+    const buildCacheConfiguration: BuildCacheConfiguration | undefined =
+      await BuildCacheConfiguration._loadAsync(jsonFilePath, terminal, rushConfiguration, rushSession);
+    return { buildCacheConfiguration, jsonFilePath };
   }
 
   private static async _loadAsync(
@@ -194,13 +204,19 @@ export class BuildCacheConfiguration {
     terminal: ITerminal,
     rushConfiguration: RushConfiguration,
     rushSession: RushSession
-  ): Promise<BuildCacheConfiguration> {
-    const buildCacheJson: IBuildCacheJson = await JsonFile.loadAndValidateAsync(
-      jsonFilePath,
-      BuildCacheConfiguration._jsonSchema
-    );
-    const rushUserConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
+  ): Promise<BuildCacheConfiguration | undefined> {
+    let buildCacheJson: IBuildCacheJson;
+    try {
+      buildCacheJson = await JsonFile.loadAndValidateAsync(jsonFilePath, BuildCacheConfiguration._jsonSchema);
+    } catch (e) {
+      if (FileSystem.isNotExistError(e)) {
+        throw e;
+      } else {
+        return undefined;
+      }
+    }
 
+    const rushUserConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
     let getCacheEntryId: GetCacheEntryIdFunction;
     try {
       getCacheEntryId = CacheEntryId.parsePattern(buildCacheJson.cacheEntryNamePattern);
