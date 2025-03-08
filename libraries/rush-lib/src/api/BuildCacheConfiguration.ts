@@ -17,7 +17,7 @@ import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuil
 import { RushConstants } from '../logic/RushConstants';
 import type { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
 import { RushUserConfiguration } from './RushUserConfiguration';
-import { EnvironmentConfiguration } from './EnvironmentConfiguration';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from './EnvironmentConfiguration';
 import {
   CacheEntryId,
   type IGenerateCacheEntryIdOptions,
@@ -82,14 +82,14 @@ interface IBuildCacheConfigurationOptions {
   cloudCacheProvider: ICloudBuildCacheProvider | undefined;
 }
 
+const BUILD_CACHE_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * Use this class to load and save the "common/config/rush/build-cache.json" config file.
  * This file provides configuration options for cached project build output.
  * @beta
  */
 export class BuildCacheConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   /**
    * Indicates whether the build cache feature is enabled.
    * Typically it is enabled in the build-cache.json config file.
@@ -212,13 +212,22 @@ export class BuildCacheConfiguration {
     rushSession: RushSession
   ): Promise<BuildCacheConfiguration | undefined> {
     let buildCacheJson: IBuildCacheJson;
-    try {
-      buildCacheJson = await JsonFile.loadAndValidateAsync(jsonFilePath, BuildCacheConfiguration._jsonSchema);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
-        throw e;
-      } else {
-        return undefined;
+    const buildCacheOverrideJson: string | undefined = EnvironmentConfiguration.buildCacheOverrideJson;
+    if (buildCacheOverrideJson !== undefined) {
+      buildCacheJson = JsonFile.parseString(buildCacheOverrideJson);
+      BUILD_CACHE_JSON_SCHEMA.validateObject(
+        buildCacheJson,
+        `${EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON} environment variable`
+      );
+    } else {
+      try {
+        buildCacheJson = await JsonFile.loadAndValidateAsync(jsonFilePath, BUILD_CACHE_JSON_SCHEMA);
+      } catch (e) {
+        if (FileSystem.isNotExistError(e)) {
+          throw e;
+        } else {
+          return undefined;
+        }
       }
     }
 

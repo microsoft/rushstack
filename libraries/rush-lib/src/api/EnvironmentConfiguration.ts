@@ -145,6 +145,15 @@ export const EnvironmentVariableNames = {
   RUSH_BUILD_CACHE_WRITE_ALLOWED: 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
 
   /**
+   * Set this environment variable to a JSON string to override the build cache configuration that normally lives
+   * at `common/config/rush/build-cache.json`.
+   *
+   * This is useful for testing purposes, or for OSS repos that are have a local-only cache, but can have
+   * a different cache configuration in CI/CD pipelines.
+   */
+  RUSH_BUILD_CACHE_OVERRIDE_JSON: 'RUSH_BUILD_CACHE_OVERRIDE_JSON',
+
+  /**
    * Setting this environment variable opts into running with cobuilds. The context id should be the same across
    * multiple VMs, but changed when it is a new round of cobuilds.
    *
@@ -249,6 +258,8 @@ export class EnvironmentConfiguration {
   private static _buildCacheEnabled: boolean | undefined;
 
   private static _buildCacheWriteAllowed: boolean | undefined;
+
+  private static _buildCacheOverrideJson: string | undefined;
 
   private static _cobuildContextId: string | undefined;
 
@@ -358,6 +369,15 @@ export class EnvironmentConfiguration {
   public static get buildCacheWriteAllowed(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._buildCacheWriteAllowed;
+  }
+
+  /**
+   * If set, overrides the build cache configuration that normally lives at `common/config/rush/build-cache.json`.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON}
+   */
+  public static get buildCacheOverrideJson(): string | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._buildCacheOverrideJson;
   }
 
   /**
@@ -514,6 +534,11 @@ export class EnvironmentConfiguration {
                 EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED,
                 value
               );
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON: {
+            EnvironmentConfiguration._buildCacheOverrideJson = value;
             break;
           }
 
