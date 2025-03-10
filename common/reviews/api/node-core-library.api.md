@@ -612,6 +612,7 @@ export interface IRealNodeModulePathResolverOptions {
     fs?: Partial<Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>>;
     // (undocumented)
     path?: Partial<Pick<typeof nodePath, 'isAbsolute' | 'join' | 'resolve' | 'sep'>>;
+    throwIfNoEntry?: boolean;
 }
 
 // @public (undocumented)
