@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Use `tryLoadProjectConfigurationFileAsync` API to remove direct dependency on `@rushstack/heft-config-file`.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin"
+}
