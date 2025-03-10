@@ -46,6 +46,7 @@
     "builtin-modules": "~3.1.0",
     "cli-table": "~0.3.1",
     "dependency-path": "~9.2.8",
+    "dotenv": "~16.4.7",
     "fast-glob": "~3.3.1",
     "figures": "3.0.0",
     "git-repo-info": "~2.1.0",
@@ -56,6 +57,7 @@
     "js-yaml": "~3.13.1",
     "npm-check": "~6.0.1",
     "npm-package-arg": "~6.1.0",
+    "pnpm-sync-lib": "0.3.2",
     "read-package-tree": "~5.1.5",
     "rxjs": "~6.6.7",
     "semver": "~7.5.4",
@@ -64,8 +66,7 @@
     "tapable": "2.2.1",
     "tar": "~6.2.1",
     "true-case-path": "~2.2.1",
-    "uuid": "~8.3.2",
-    "pnpm-sync-lib": "0.3.2"
+    "uuid": "~8.3.2"
   },
   "devDependencies": {
     "@pnpm/lockfile.types": "~1.0.3",

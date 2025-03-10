@@ -261,6 +261,13 @@ export class EnvironmentConfiguration {
   private static _tarBinaryPath: string | undefined;
 
   /**
+   * If true, the environment configuration has been validated and initialized.
+   */
+  public static get hasBeenValidated(): boolean {
+    return EnvironmentConfiguration._hasBeenValidated;
+  }
+
+  /**
    * An override for the common/temp folder path.
    */
   public static get rushTempFolderOverride(): string | undefined {
