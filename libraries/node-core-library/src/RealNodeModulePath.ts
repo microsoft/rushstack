@@ -169,7 +169,7 @@ export class RealNodeModulePathResolver {
    */
   private _tryReadLink(link: string): string | undefined {
     const cached: string | false | undefined = this._cache.get(link);
-    if (cached) {
+    if (cached !== undefined) {
       return cached || undefined;
     }
 
