@@ -3,13 +3,12 @@
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname } from 'node:path';
-import { type MessagePort, parentPort, workerData } from 'node:worker_threads';
 
 import { Async } from '@rushstack/node-core-library/lib/Async';
 import type { Output } from '@swc/core';
 import { transformFile } from '@swc/core/binding';
 
-import type { IWorkerData, IWorkerResult, ITransformTask } from './types';
+import type { IWorkerResult, ITransformTask, ITransformModulesRequestMessage } from './types';
 
 interface ISourceMap {
   version: 3;
@@ -20,24 +19,22 @@ interface ISourceMap {
   mappings: string;
 }
 
-if (!parentPort || !workerData) {
-  throw new Error(`Expected to be run in a worker!`);
+const [buildFolderPath, concurrency] = process.argv.slice(-2);
+
+if (!buildFolderPath) {
+  throw new Error(`buildFolderPath argument not provided to child_process`);
 }
 
-const definedParentPort: MessagePort = parentPort;
-
-const { buildFolderPath, concurrency }: IWorkerData = workerData;
-
-definedParentPort.on('message', handleMessageAsync);
-
-async function handleMessageAsync(message: ITransformTask[] | false): Promise<void> {
+const handleMessageAsync = async (message: ITransformModulesRequestMessage | false): Promise<void> => {
   if (!message) {
-    definedParentPort.off('message', handleMessageAsync);
+    process.off('message', handleMessageAsync);
     return;
   }
 
   const groupStart: number = performance.now();
-  const tasks: ITransformTask[] = message;
+  const { tasks, options } = message;
+
+  const optionsBuffers: Buffer[] = options.map((option) => Buffer.from(option));
 
   const timings: [string, number][] = [];
   const errors: [string, string][] = [];
@@ -60,14 +57,14 @@ async function handleMessageAsync(message: ITransformTask[] | false): Promise<vo
   await Async.forEachAsync(
     tasks,
     async (task: ITransformTask) => {
-      const { srcFilePath, relativeSrcFilePath, options, jsFilePath, mapFilePath } = task;
+      const { srcFilePath, relativeSrcFilePath, optionsIndex, jsFilePath, mapFilePath } = task;
 
       let result: Output | undefined;
 
       const start: number = performance.now();
 
       try {
-        result = await transformFile(srcFilePath, true, options);
+        result = await transformFile(srcFilePath, true, optionsBuffers[optionsIndex]);
       } catch (error) {
         errors.push([jsFilePath, error.stack ?? error.toString()]);
         return;
@@ -93,7 +90,7 @@ async function handleMessageAsync(message: ITransformTask[] | false): Promise<vo
       }
     },
     {
-      concurrency
+      concurrency: parseInt(concurrency, 10)
     }
   );
   const groupEnd: number = performance.now();
@@ -104,5 +101,10 @@ async function handleMessageAsync(message: ITransformTask[] | false): Promise<vo
     durationMs: groupEnd - groupStart
   };
 
-  definedParentPort.postMessage(result);
-}
+  if (!process.send) {
+    throw new Error(`process.send is not available in process`);
+  }
+  process.send(result);
+};
+
+process.on('message', handleMessageAsync);

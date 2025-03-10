@@ -3,7 +3,7 @@
 
 import { availableParallelism } from 'node:os';
 import path from 'node:path';
-import { Worker } from 'node:worker_threads';
+import { type ChildProcess, fork } from 'node:child_process';
 
 import { Path } from '@rushstack/node-core-library';
 import type { HeftConfiguration, IHeftTaskPlugin, IHeftTaskSession, IScopedLogger } from '@rushstack/heft';
@@ -26,10 +26,10 @@ import { SyncWaterfallHook } from 'tapable';
 
 import type {
   ISwcIsolatedTranspileOptions,
-  IWorkerData,
   IWorkerResult,
   ITransformTask,
-  IEmitKind
+  IEmitKind,
+  ITransformModulesRequestMessage
 } from './types';
 
 /**
@@ -155,7 +155,6 @@ async function transpileProjectAsync(
   logger.terminal.writeDebugLine('Loaded tsconfig', JSON.stringify(parsedTsConfig, undefined, 2));
 
   const { fileNames: filesFromTsConfig, options: tsConfigOptions } = parsedTsConfig;
-
   const { sourceMap, sourceRoot, experimentalDecorators, inlineSourceMap, useDefineForClassFields } =
     tsConfigOptions;
 
@@ -174,15 +173,12 @@ async function transpileProjectAsync(
   const sourceMaps: Config['sourceMaps'] = inlineSourceMap ? 'inline' : sourceMap;
   const externalSourceMaps: boolean = sourceMaps === true;
 
-  interface IOptionsBufferByExtension {
-    ts: Buffer;
-    tsx: Buffer;
+  interface IOptionsByExtension {
+    ts: string;
+    tsx: string;
   }
 
-  function getOptionsBufferForFormatAndTarget({
-    formatOverride,
-    targetOverride
-  }: IEmitKind): IOptionsBufferByExtension {
+  function getOptionsByExtension({ formatOverride, targetOverride }: IEmitKind): IOptionsByExtension {
     const format: ModuleConfig['type'] | undefined =
       formatOverride !== undefined ? TSC_TO_SWC_MODULE_MAP[formatOverride] : undefined;
     if (format === undefined) {
@@ -264,28 +260,27 @@ async function transpileProjectAsync(
     logger.terminal.writeDebugLine(`Transpile options: ${options}`);
 
     const tsOptions: string = JSON.stringify(options);
-    const tsOptionsBuffer: Buffer = Buffer.from(new SharedArrayBuffer(Buffer.byteLength(tsOptions, 'utf8')));
-    tsOptionsBuffer.write(tsOptions);
     parser.tsx = true;
     const tsxOptions: string = JSON.stringify(options);
-    const tsxOptionsBuffer: Buffer = Buffer.from(
-      new SharedArrayBuffer(Buffer.byteLength(tsxOptions, 'utf8'))
-    );
-    tsxOptionsBuffer.write(tsxOptions);
 
     return {
-      ts: tsOptionsBuffer,
-      tsx: tsxOptionsBuffer
+      ts: tsOptions,
+      tsx: tsxOptions
     };
   }
 
-  const outputOptions: Map<string, IOptionsBufferByExtension> = new Map();
+  const outputOptions: Map<string, IOptionsByExtension> = new Map();
   for (const emitKind of emitKinds) {
-    outputOptions.set(emitKind.outDir, getOptionsBufferForFormatAndTarget(emitKind));
+    outputOptions.set(emitKind.outDir, getOptionsByExtension(emitKind));
   }
 
   const tasks: ITransformTask[] = [];
+  const requestMessage: ITransformModulesRequestMessage = {
+    tasks,
+    options: []
+  };
 
+  const indexForOptions: Map<string, number> = new Map();
   for (const srcFilePath of sourceFilePaths) {
     const rootPrefixLength: number | undefined = rootDirsPaths.findChildPath(srcFilePath);
 
@@ -302,10 +297,16 @@ async function transpileProjectAsync(
       const jsFilePath: string = `${outputPrefix}${relativeJsFilePath}`;
       const mapFilePath: string | undefined = externalSourceMaps ? `${jsFilePath}.map` : undefined;
 
+      const options: string = tsx ? optionsByExtension.tsx : optionsByExtension.ts;
+      let optionsIndex: number | undefined = indexForOptions.get(options);
+      if (optionsIndex === undefined) {
+        optionsIndex = requestMessage.options.push(options) - 1;
+        indexForOptions.set(options, optionsIndex);
+      }
       const item: ITransformTask = {
         srcFilePath,
         relativeSrcFilePath,
-        options: tsx ? optionsByExtension.tsx : optionsByExtension.ts,
+        optionsIndex,
         jsFilePath,
         mapFilePath
       };
@@ -317,31 +318,33 @@ async function transpileProjectAsync(
   logger.terminal.writeLine(`Transpiling ${tasks.length} files...`);
 
   const result: IWorkerResult = await new Promise((resolve, reject) => {
-    const workerData: IWorkerData = {
-      buildFolderPath,
-      concurrency: Math.min(4, tasks.length, availableParallelism())
-    };
-
     const workerPath: string = require.resolve('./TranspileWorker.js');
-    const worker: Worker = new Worker(workerPath, {
-      workerData
+    const concurrency: number = Math.min(4, tasks.length, availableParallelism());
+
+    // Due to https://github.com/rust-lang/rust/issues/91979 using worker_threads is not recommended for swc & napi-rs,
+    // so we use child_process.fork instead.
+    const childProcess: ChildProcess = fork(workerPath, [buildFolderPath, `${concurrency}`]);
+
+    childProcess.once('message', (message) => {
+      // Shut down the worker.
+      childProcess.send(false);
+      // Node IPC messages are deserialized automatically.
+      resolve(message as IWorkerResult);
     });
 
-    worker.once('message', (message) => {
-      // shut down the worker.
-      worker.postMessage(false);
-      resolve(message);
+    childProcess.once('error', (error: Error) => {
+      reject(error);
     });
 
-    worker.once('error', reject);
-
-    worker.once('exit', (code: number) => {
-      if (code !== 0) {
-        reject(new Error(`Transpiler worker exited with code ${code}`));
+    childProcess.once('close', (closeExitCode: number, closeSignal: NodeJS.Signals | null) => {
+      if (closeSignal) {
+        reject(new Error(`Child process exited with signal: ${closeSignal}`));
+      } else if (closeExitCode !== 0) {
+        reject(new Error(`Child process exited with code: ${closeExitCode}`));
       }
     });
 
-    worker.postMessage(tasks);
+    childProcess.send(requestMessage);
   });
 
   const { errors, timings: transformTimes, durationMs } = result;

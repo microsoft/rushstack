@@ -32,7 +32,12 @@ export interface IWorkerResult {
 export interface ITransformTask {
   srcFilePath: string;
   relativeSrcFilePath: string;
-  options: Buffer;
+  optionsIndex: number;
   jsFilePath: string;
   mapFilePath: string | undefined;
+}
+
+export interface ITransformModulesRequestMessage {
+  options: string[];
+  tasks: ITransformTask[];
 }
