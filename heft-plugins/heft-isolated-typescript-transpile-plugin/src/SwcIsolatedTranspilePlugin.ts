@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { availableParallelism } from 'node:os';
 import path from 'node:path';
 import { type ChildProcess, fork } from 'node:child_process';
 
@@ -319,7 +318,7 @@ async function transpileProjectAsync(
 
   const result: IWorkerResult = await new Promise((resolve, reject) => {
     const workerPath: string = require.resolve('./TranspileWorker.js');
-    const concurrency: number = Math.min(4, tasks.length, availableParallelism());
+    const concurrency: number = Math.min(4, tasks.length, heftConfiguration.numberOfCores);
 
     // Due to https://github.com/rust-lang/rust/issues/91979 using worker_threads is not recommended for swc & napi-rs,
     // so we use child_process.fork instead.

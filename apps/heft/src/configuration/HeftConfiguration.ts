@@ -22,27 +22,31 @@ export interface IHeftConfigurationInitializationOptions {
    * Terminal instance to facilitate logging.
    */
   terminalProvider: ITerminalProvider;
+
+  /**
+   * The number of CPU cores available to the process. This is used to determine how many tasks can be run in parallel.
+   */
+  numberOfCores: number;
+}
+
+interface IHeftConfigurationOptions extends IHeftConfigurationInitializationOptions {
+  buildFolderPath: string;
 }
 
 /**
  * @public
  */
 export class HeftConfiguration {
-  private _buildFolderPath!: string;
   private _slashNormalizedBuildFolderPath: string | undefined;
   private _projectConfigFolderPath: string | undefined;
   private _tempFolderPath: string | undefined;
   private _rigConfig: IRigConfig | undefined;
-  private _globalTerminal!: Terminal;
-  private _terminalProvider!: ITerminalProvider;
-  private _rigPackageResolver!: RigPackageResolver;
+  private _rigPackageResolver: RigPackageResolver | undefined;
 
   /**
    * Project build folder path. This is the folder containing the project's package.json file.
    */
-  public get buildFolderPath(): string {
-    return this._buildFolderPath;
-  }
+  public readonly buildFolderPath: string;
 
   /**
    * {@link HeftConfiguration.buildFolderPath} with all path separators converted to forward slashes.
@@ -75,7 +79,7 @@ export class HeftConfiguration {
    */
   public get tempFolderPath(): string {
     if (!this._tempFolderPath) {
-      this._tempFolderPath = path.join(this._buildFolderPath, Constants.tempFolderName);
+      this._tempFolderPath = path.join(this.buildFolderPath, Constants.tempFolderName);
     }
 
     return this._tempFolderPath;
@@ -104,22 +108,19 @@ export class HeftConfiguration {
         rigConfig: this.rigConfig
       });
     }
+
     return this._rigPackageResolver;
   }
 
   /**
    * Terminal instance to facilitate logging.
    */
-  public get globalTerminal(): ITerminal {
-    return this._globalTerminal;
-  }
+  public readonly globalTerminal: ITerminal;
 
   /**
    * Terminal provider for the provided terminal.
    */
-  public get terminalProvider(): ITerminalProvider {
-    return this._terminalProvider;
-  }
+  public readonly terminalProvider: ITerminalProvider;
 
   /**
    * The Heft tool's package.json
@@ -135,7 +136,18 @@ export class HeftConfiguration {
     return PackageJsonLookup.instance.tryLoadPackageJsonFor(this.buildFolderPath)!;
   }
 
-  private constructor() {}
+  /**
+   * The number of CPU cores available to the process. This can be used to determine how many tasks can be run
+   * in parallel.
+   */
+  public readonly numberOfCores: number;
+
+  private constructor({ terminalProvider, buildFolderPath, numberOfCores }: IHeftConfigurationOptions) {
+    this.buildFolderPath = buildFolderPath;
+    this.terminalProvider = terminalProvider;
+    this.numberOfCores = numberOfCores;
+    this.globalTerminal = new Terminal(terminalProvider);
+  }
 
   /**
    * Performs the search for rig.json and initializes the `HeftConfiguration.rigConfig` object.
@@ -144,7 +156,7 @@ export class HeftConfiguration {
   public async _checkForRigAsync(): Promise<void> {
     if (!this._rigConfig) {
       this._rigConfig = await RigConfig.loadForProjectFolderAsync({
-        projectFolderPath: this._buildFolderPath
+        projectFolderPath: this.buildFolderPath
       });
     }
   }
@@ -153,26 +165,26 @@ export class HeftConfiguration {
    * @internal
    */
   public static initialize(options: IHeftConfigurationInitializationOptions): HeftConfiguration {
-    const configuration: HeftConfiguration = new HeftConfiguration();
-
     const packageJsonPath: string | undefined = PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(
       options.cwd
     );
+    let buildFolderPath: string;
     if (packageJsonPath) {
-      let buildFolderPath: string = path.dirname(packageJsonPath);
+      buildFolderPath = path.dirname(packageJsonPath);
       // On Windows it is possible for the drive letter in the CWD to be lowercase, but the normalized naming is uppercase
       // Force it to always be uppercase for consistency.
       buildFolderPath =
         process.platform === 'win32'
           ? buildFolderPath.charAt(0).toUpperCase() + buildFolderPath.slice(1)
           : buildFolderPath;
-      configuration._buildFolderPath = buildFolderPath;
     } else {
       throw new Error('No package.json file found. Are you in a project folder?');
     }
 
-    configuration._terminalProvider = options.terminalProvider;
-    configuration._globalTerminal = new Terminal(options.terminalProvider);
+    const configuration: HeftConfiguration = new HeftConfiguration({
+      ...options,
+      buildFolderPath
+    });
     return configuration;
   }
 }
