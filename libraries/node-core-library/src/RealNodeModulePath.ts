@@ -12,9 +12,10 @@ export interface IRealNodeModulePathResolverOptions {
   fs?: Partial<Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>>;
   path?: Partial<Pick<typeof nodePath, 'isAbsolute' | 'join' | 'resolve' | 'sep'>>;
   /**
-   * If set to false, the resolver will not throw if part of the path does not exist.
+   * If set to true, the resolver will not throw if part of the path does not exist.
+   * @defaultValue false
    */
-  throwIfNoEntry?: boolean;
+  ignoreMissingPaths?: boolean;
 }
 
 /**
@@ -56,7 +57,7 @@ export class RealNodeModulePathResolver {
         resolve = nodePath.resolve,
         sep = nodePath.sep
       } = nodePath,
-      throwIfNoEntry = true
+      ignoreMissingPaths = false
     } = options;
     const cache: Map<string, string> = (this._cache = new Map());
     this._errorCache = new Map();
@@ -71,7 +72,7 @@ export class RealNodeModulePathResolver {
       sep
     };
     this._lstatOptions = {
-      throwIfNoEntry
+      throwIfNoEntry: !ignoreMissingPaths
     };
 
     const nodeModulesToken: string = `${sep}node_modules${sep}`;
