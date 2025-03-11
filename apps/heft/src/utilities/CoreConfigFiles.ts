@@ -104,9 +104,7 @@ export class CoreConfigFiles {
           return Import.resolvePackage({
             packageName: propertyValue,
             baseFolderPath: configurationFileDirectory,
-            allowSelfReference: true,
-            // Use the built-in Node.js resolver so we share the cache
-            useNodeJSResolver: true
+            allowSelfReference: true
           });
         }
       };
