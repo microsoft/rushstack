@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.11.0",
+      "tag": "@rushstack/eslint-patch_v1.11.0",
+      "date": "Tue, 11 Mar 2025 02:12:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `@typescript-eslint/*` packages to add support for TypeScript 5.8."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.5",
       "tag": "@rushstack/eslint-patch_v1.10.5",
       "date": "Tue, 07 Jan 2025 16:11:06 GMT",

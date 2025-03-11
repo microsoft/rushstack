@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-plugin-security",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "An ESLint plugin providing rules that identify common security vulnerabilities for browser applications, Node.js tools, and Node.js services",
   "license": "MIT",
   "repository": {
@@ -23,24 +23,24 @@
   },
   "dependencies": {
     "@rushstack/tree-pattern": "workspace:*",
-    "@typescript-eslint/utils": "~8.24.0"
+    "@typescript-eslint/utils": "~8.26.1"
   },
   "peerDependencies": {
     "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "~3.0.0",
-    "@rushstack/heft": "0.69.2",
-    "@rushstack/heft-node-rig": "2.7.0",
+    "@rushstack/heft": "0.70.0",
+    "@rushstack/heft-node-rig": "2.8.0",
     "@types/eslint": "8.56.10",
     "@types/estree": "1.0.6",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",
-    "@typescript-eslint/parser": "~8.24.0",
-    "@typescript-eslint/rule-tester": "~8.24.0",
-    "@typescript-eslint/typescript-estree": "~8.24.0",
+    "@typescript-eslint/parser": "~8.26.1",
+    "@typescript-eslint/rule-tester": "~8.26.1",
+    "@typescript-eslint/typescript-estree": "~8.26.1",
     "eslint": "~8.57.0",
     "eslint-plugin-header": "~3.1.1",
-    "typescript": "~5.7.3"
+    "typescript": "~5.8.2"
   }
 }

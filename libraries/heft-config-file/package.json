@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-config-file",
-  "version": "0.16.6",
+  "version": "0.16.7",
   "description": "Configuration file loader for @rushstack/heft",
   "repository": {
     "type": "git",
@@ -28,8 +28,8 @@
   },
   "devDependencies": {
     "local-eslint-config": "workspace:*",
-    "@rushstack/heft": "0.69.2",
-    "@rushstack/heft-node-rig": "2.7.0",
+    "@rushstack/heft": "0.70.0",
+    "@rushstack/heft-node-rig": "2.8.0",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19"
   }

@@ -1,6 +1,18 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Thu, 06 Mar 2025 01:10:42 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Mar 2025 02:12:33 GMT and should not be manually modified.
+
+## 2.8.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Bump TypeScript to ~5.8.2.
+
+## 2.7.2
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
 
 ## 2.7.1
 Thu, 06 Mar 2025 01:10:42 GMT

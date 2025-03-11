@@ -44,7 +44,8 @@
     },
     "./api": {
       "types": "./lib/api.types.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {

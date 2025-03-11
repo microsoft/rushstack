@@ -2,6 +2,51 @@
   "name": "@rushstack/heft-api-extractor-plugin",
   "entries": [
     {
+      "version": "0.3.73",
+      "tag": "@rushstack/heft-api-extractor-plugin_v0.3.73",
+      "date": "Tue, 11 Mar 2025 02:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.16.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.69.3` to `0.70.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.72",
+      "tag": "@rushstack/heft-api-extractor-plugin_v0.3.72",
+      "date": "Tue, 11 Mar 2025 00:11:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.69.2` to `0.69.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.71",
       "tag": "@rushstack/heft-api-extractor-plugin_v0.3.71",
       "date": "Sat, 01 Mar 2025 05:00:09 GMT",

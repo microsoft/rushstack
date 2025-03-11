@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 01 Mar 2025 05:00:09 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Mar 2025 02:12:34 GMT and should not be manually modified.
+
+## 7.52.1
+Tue, 11 Mar 2025 02:12:34 GMT
+
+_Version update only_
+
+## 7.52.0
+Tue, 11 Mar 2025 00:11:25 GMT
+
+### Minor changes
+
+- Upgrade the bundled compiler engine to TypeScript 5.8.2
 
 ## 7.51.1
 Sat, 01 Mar 2025 05:00:09 GMT

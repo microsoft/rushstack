@@ -6,7 +6,15 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["ambientTypes.d.ts"] }],
+      "cleanFiles": [
+        {
+          "includeGlobs": [
+            // TODO: Remove eventually. This file used to be created, but isn't anymore.
+            // However, it may still exist on some local clones.
+            "ambientTypes.d.ts"
+          ]
+        }
+      ],
 
       "tasksByName": {
         "copy-ambient-types": {
@@ -18,7 +26,7 @@
                 {
                   "sourcePath": "./src",
                   "includeGlobs": ["ambientTypes.d.ts"],
-                  "destinationFolders": ["."]
+                  "destinationFolders": ["dist"]
                 }
               ]
             }

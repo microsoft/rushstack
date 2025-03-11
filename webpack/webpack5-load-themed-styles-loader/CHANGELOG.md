@@ -1,6 +1,16 @@
 # Change Log - @microsoft/webpack5-load-themed-styles-loader
 
-This log was last generated on Sat, 01 Mar 2025 05:00:09 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Mar 2025 02:12:33 GMT and should not be manually modified.
+
+## 0.2.90
+Tue, 11 Mar 2025 02:12:33 GMT
+
+_Version update only_
+
+## 0.2.89
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
 
 ## 0.2.88
 Sat, 01 Mar 2025 05:00:09 GMT

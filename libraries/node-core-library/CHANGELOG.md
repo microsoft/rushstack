@@ -1,6 +1,18 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 30 Jan 2025 01:11:42 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Mar 2025 02:12:33 GMT and should not be manually modified.
+
+## 5.12.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Add `useNodeJSResolver` option to `Import.resolvePackage` to rely on the built-in `require.resolve` and share its cache.
+- In `RealNodeModulePathResolver`, add the option to configure to throw or not throw for non-existent paths.
+
+### Patches
+
+- In `RealNodeModulePathResolver`, add negative caching when a path segment that might be a symbolic link is not.
 
 ## 5.11.0
 Thu, 30 Jan 2025 01:11:42 GMT

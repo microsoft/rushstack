@@ -11,6 +11,11 @@ import * as nodePath from 'path';
 export interface IRealNodeModulePathResolverOptions {
   fs?: Partial<Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>>;
   path?: Partial<Pick<typeof nodePath, 'isAbsolute' | 'join' | 'resolve' | 'sep'>>;
+  /**
+   * If set to true, the resolver will not throw if part of the path does not exist.
+   * @defaultValue false
+   */
+  ignoreMissingPaths?: boolean;
 }
 
 /**
@@ -37,9 +42,11 @@ export class RealNodeModulePathResolver {
    */
   public readonly realNodeModulePath: (input: string) => string;
 
-  private readonly _cache: Map<string, string>;
+  private readonly _cache: Map<string, string | false>;
+  private readonly _errorCache: Map<string, Error>;
   private readonly _fs: Required<NonNullable<IRealNodeModulePathResolverOptions['fs']>>;
   private readonly _path: Required<NonNullable<IRealNodeModulePathResolverOptions['path']>>;
+  private readonly _lstatOptions: Pick<nodeFs.StatSyncOptions, 'throwIfNoEntry'>;
 
   public constructor(options: IRealNodeModulePathResolverOptions = {}) {
     const {
@@ -49,9 +56,11 @@ export class RealNodeModulePathResolver {
         join = nodePath.join,
         resolve = nodePath.resolve,
         sep = nodePath.sep
-      } = nodePath
+      } = nodePath,
+      ignoreMissingPaths = false
     } = options;
     const cache: Map<string, string> = (this._cache = new Map());
+    this._errorCache = new Map();
     this._fs = {
       lstatSync,
       readlinkSync
@@ -61,6 +70,9 @@ export class RealNodeModulePathResolver {
       join,
       resolve,
       sep
+    };
+    this._lstatOptions = {
+      throwIfNoEntry: !ignoreMissingPaths
     };
 
     const nodeModulesToken: string = `${sep}node_modules${sep}`;
@@ -157,18 +169,31 @@ export class RealNodeModulePathResolver {
    * @returns The target of the symbolic link, or undefined if the input is not a symbolic link
    */
   private _tryReadLink(link: string): string | undefined {
-    const cached: string | undefined = this._cache.get(link);
-    if (cached) {
-      return cached;
+    const cached: string | false | undefined = this._cache.get(link);
+    if (cached !== undefined) {
+      return cached || undefined;
+    }
+
+    const cachedError: Error | undefined = this._errorCache.get(link);
+    if (cachedError) {
+      // Fill the properties but fix the stack trace.
+      throw Object.assign(new Error(cachedError.message), cachedError);
     }
 
     // On Windows, calling `readlink` on a directory throws an EUNKOWN, not EINVAL, so just pay the cost
     // of an lstat call.
-    const stat: nodeFs.Stats | undefined = this._fs.lstatSync(link);
-    if (stat.isSymbolicLink()) {
-      // path.join(x, '.') will trim trailing slashes, if applicable
-      const result: string = this._path.join(this._fs.readlinkSync(link, 'utf8'), '.');
-      return result;
+    try {
+      const stat: nodeFs.Stats | undefined = this._fs.lstatSync(link, this._lstatOptions);
+      if (stat?.isSymbolicLink()) {
+        // path.join(x, '.') will trim trailing slashes, if applicable
+        const result: string = this._path.join(this._fs.readlinkSync(link, 'utf8'), '.');
+        return result;
+      }
+
+      // Ensure we cache that this was not a symbolic link.
+      this._cache.set(link, false);
+    } catch (err) {
+      this._errorCache.set(link, err as Error);
     }
   }
 }

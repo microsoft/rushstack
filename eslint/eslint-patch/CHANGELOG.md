@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Tue, 07 Jan 2025 16:11:06 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Mar 2025 02:12:33 GMT and should not be manually modified.
+
+## 1.11.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Bump the `@typescript-eslint/*` packages to add support for TypeScript 5.8.
 
 ## 1.10.5
 Tue, 07 Jan 2025 16:11:06 GMT
