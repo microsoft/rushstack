@@ -43,6 +43,7 @@ const TSC_TO_SWC_MODULE_MAP: Record<ModuleKind, ModuleConfig['type'] | undefined
   ES2022: 'es6',
   ESNext: 'es6',
   Node16: 'nodenext',
+  Node18: 'nodenext',
   NodeNext: 'nodenext',
   AMD: 'amd',
   None: undefined,
