@@ -398,6 +398,7 @@ export interface IImportResolvePackageAsyncOptions extends IImportResolveAsyncOp
 // @public
 export interface IImportResolvePackageOptions extends IImportResolveOptions {
     packageName: string;
+    useNodeJSResolver?: boolean;
 }
 
 // @public
