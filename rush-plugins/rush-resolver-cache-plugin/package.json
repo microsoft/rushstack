@@ -31,7 +31,8 @@
     ".": {
       "require": "./lib/index.js",
       "types": "./dist/rush-resolver-cache-plugin.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
