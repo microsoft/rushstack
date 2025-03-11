@@ -207,7 +207,7 @@ export class BuildCacheConfiguration {
   ): Promise<BuildCacheConfiguration | undefined> {
     let buildCacheJson: IBuildCacheJson;
     const buildCacheOverrideJson: string | undefined = EnvironmentConfiguration.buildCacheOverrideJson;
-    if (buildCacheOverrideJson !== undefined) {
+    if (buildCacheOverrideJson) {
       buildCacheJson = JsonFile.parseString(buildCacheOverrideJson);
       BUILD_CACHE_JSON_SCHEMA.validateObject(
         buildCacheJson,
@@ -217,7 +217,7 @@ export class BuildCacheConfiguration {
       try {
         buildCacheJson = await JsonFile.loadAndValidateAsync(jsonFilePath, BUILD_CACHE_JSON_SCHEMA);
       } catch (e) {
-        if (FileSystem.isNotExistError(e)) {
+        if (!FileSystem.isNotExistError(e)) {
           throw e;
         } else {
           return undefined;
