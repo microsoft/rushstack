@@ -102,6 +102,19 @@ describe('realNodeModulePath', () => {
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
     });
 
+    it('Caches not-symlinks', () => {
+      mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => false } as unknown as fs.Stats);
+      mockReadlinkSync.mockReturnValueOnce('/link/target');
+
+      expect(realNodeModulePath('/foo/node_modules/.pnpm')).toBe('/foo/node_modules/.pnpm');
+      expect(realNodeModulePath('/foo/node_modules/.pnpm')).toBe('/foo/node_modules/.pnpm');
+      expect(realNodeModulePath('/foo/node_modules/.pnpm')).toBe('/foo/node_modules/.pnpm');
+
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('/foo/node_modules/.pnpm');
+      expect(mocklstatSync).toHaveBeenCalledTimes(1);
+      expect(mockReadlinkSync).toHaveBeenCalledTimes(0);
+    });
+
     it('Should stop after a single absolute link target', () => {
       mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => true } as unknown as fs.Stats);
       mockReadlinkSync.mockReturnValueOnce('/link/target');
