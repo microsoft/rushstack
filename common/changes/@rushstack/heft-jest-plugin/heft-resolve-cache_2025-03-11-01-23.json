@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Use `useNodeJSResolver: true` in `Import.resolvePackage` calls.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}

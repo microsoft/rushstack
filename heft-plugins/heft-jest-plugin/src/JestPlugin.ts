@@ -949,7 +949,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
             const resolvedPackagePath: string =
               packageName === PLUGIN_PACKAGE_NAME
                 ? PLUGIN_PACKAGE_FOLDER
-                : Import.resolvePackage({ baseFolderPath: configDir, packageName });
+                : Import.resolvePackage({ baseFolderPath: configDir, packageName, useNodeJSResolver: true });
             // First entry is the entire match
             const restOfPath: string = path.normalize(
               './' + propertyValue.slice(packageDirMatches[0].length)
