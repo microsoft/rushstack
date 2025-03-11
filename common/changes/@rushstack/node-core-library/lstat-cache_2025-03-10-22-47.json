@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "In `RealNodeModulePathResolver`, add negative caching when a path segment that might be a symbolic link is not.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

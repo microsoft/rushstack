@@ -49,7 +49,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('/foo/node_modules/foo')).toBe('/foo/node_modules/foo');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('/foo/node_modules/foo');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('/foo/node_modules/foo');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledTimes(0);
     });
@@ -59,7 +59,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('/foo/node_modules/foo/')).toBe('/foo/node_modules/foo');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('/foo/node_modules/foo');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('/foo/node_modules/foo');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledTimes(0);
     });
@@ -70,7 +70,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('/foo/node_modules/link')).toBe('/link/target');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('/foo/node_modules/link');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('/foo/node_modules/link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledWith('/foo/node_modules/link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
@@ -82,7 +82,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('/foo/node_modules/link/bar')).toBe('/link/target/bar');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('/foo/node_modules/link');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('/foo/node_modules/link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledWith('/foo/node_modules/link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
@@ -96,10 +96,23 @@ describe('realNodeModulePath', () => {
       expect(realNodeModulePath('/foo/node_modules/link/bar')).toBe('/link/target/bar');
       expect(realNodeModulePath('/foo/node_modules/link/')).toBe('/link/target');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('/foo/node_modules/link');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('/foo/node_modules/link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledWith('/foo/node_modules/link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
+    });
+
+    it('Caches not-symlinks', () => {
+      mocklstatSync.mockReturnValueOnce({ isSymbolicLink: () => false } as unknown as fs.Stats);
+      mockReadlinkSync.mockReturnValueOnce('/link/target');
+
+      expect(realNodeModulePath('/foo/node_modules/.pnpm')).toBe('/foo/node_modules/.pnpm');
+      expect(realNodeModulePath('/foo/node_modules/.pnpm')).toBe('/foo/node_modules/.pnpm');
+      expect(realNodeModulePath('/foo/node_modules/.pnpm')).toBe('/foo/node_modules/.pnpm');
+
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('/foo/node_modules/.pnpm');
+      expect(mocklstatSync).toHaveBeenCalledTimes(1);
+      expect(mockReadlinkSync).toHaveBeenCalledTimes(0);
     });
 
     it('Should stop after a single absolute link target', () => {
@@ -108,7 +121,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('/node_modules/foo/node_modules/link')).toBe('/link/target');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('/node_modules/foo/node_modules/link');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('/node_modules/foo/node_modules/link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledWith('/node_modules/foo/node_modules/link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
@@ -120,7 +133,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('/foo/node_modules/link')).toBe('/link/target');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('/foo/node_modules/link');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('/foo/node_modules/link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledWith('/foo/node_modules/link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
@@ -136,8 +149,8 @@ describe('realNodeModulePath', () => {
         '/other/root/link/4/5/6'
       );
 
-      expect(mocklstatSync).toHaveBeenCalledWith('/foo/1/2/3/node_modules/bar/node_modules/link');
-      expect(mocklstatSync).toHaveBeenCalledWith('/foo/1/2/3/node_modules/bar');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('/foo/1/2/3/node_modules/bar/node_modules/link');
+      expect(mocklstatSync.mock.calls[1][0]).toEqual('/foo/1/2/3/node_modules/bar');
       expect(mocklstatSync).toHaveBeenCalledTimes(2);
       expect(mockReadlinkSync).toHaveBeenCalledWith('/foo/1/2/3/node_modules/bar/node_modules/link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledWith('/foo/1/2/3/node_modules/bar', 'utf8');
@@ -158,8 +171,8 @@ describe('realNodeModulePath', () => {
       );
       expect(realNodeModulePath('/foo/1/2/3/node_modules/bar/a/b')).toBe('/other/root/bar/a/b');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('/foo/1/2/3/node_modules/bar/node_modules/link');
-      expect(mocklstatSync).toHaveBeenCalledWith('/foo/1/2/3/node_modules/bar');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('/foo/1/2/3/node_modules/bar/node_modules/link');
+      expect(mocklstatSync.mock.calls[1][0]).toEqual('/foo/1/2/3/node_modules/bar');
       expect(mocklstatSync).toHaveBeenCalledTimes(2);
       expect(mockReadlinkSync).toHaveBeenCalledWith('/foo/1/2/3/node_modules/bar/node_modules/link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledWith('/foo/1/2/3/node_modules/bar', 'utf8');
@@ -210,7 +223,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('C:\\foo\\node_modules\\foo')).toBe('C:\\foo\\node_modules\\foo');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\foo');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('C:\\foo\\node_modules\\foo');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledTimes(0);
     });
@@ -220,7 +233,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('C:\\foo\\node_modules\\foo\\')).toBe('C:\\foo\\node_modules\\foo');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\foo');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('C:\\foo\\node_modules\\foo');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledTimes(0);
     });
@@ -231,7 +244,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('C:\\foo\\node_modules\\link\\relative')).toBe('C:\\link\\target\\relative');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\link');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('C:\\foo\\node_modules\\link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
@@ -243,7 +256,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('C:\\foo\\node_modules\\link\\relative')).toBe('C:\\link\\target\\relative');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\link');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('C:\\foo\\node_modules\\link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
@@ -255,7 +268,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('C:\\foo\\node_modules\\link')).toBe('C:\\link\\target');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\link');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('C:\\foo\\node_modules\\link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
@@ -267,7 +280,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('C:\\node_modules\\foo\\node_modules\\link')).toBe('D:\\link\\target');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('C:\\node_modules\\foo\\node_modules\\link');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('C:\\node_modules\\foo\\node_modules\\link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledWith('C:\\node_modules\\foo\\node_modules\\link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
@@ -279,7 +292,7 @@ describe('realNodeModulePath', () => {
 
       expect(realNodeModulePath('C:\\foo\\node_modules\\link')).toBe('C:\\link\\target');
 
-      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\link');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual('C:\\foo\\node_modules\\link');
       expect(mocklstatSync).toHaveBeenCalledTimes(1);
       expect(mockReadlinkSync).toHaveBeenCalledWith('C:\\foo\\node_modules\\link', 'utf8');
       expect(mockReadlinkSync).toHaveBeenCalledTimes(1);
@@ -295,8 +308,10 @@ describe('realNodeModulePath', () => {
         'D:\\other\\root\\link\\4\\5\\6'
       );
 
-      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\1\\2\\3\\node_modules\\bar\\node_modules\\link');
-      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\1\\2\\3\\node_modules\\bar');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual(
+        'C:\\foo\\1\\2\\3\\node_modules\\bar\\node_modules\\link'
+      );
+      expect(mocklstatSync.mock.calls[1][0]).toEqual('C:\\foo\\1\\2\\3\\node_modules\\bar');
       expect(mocklstatSync).toHaveBeenCalledTimes(2);
       expect(mockReadlinkSync).toHaveBeenCalledWith(
         'C:\\foo\\1\\2\\3\\node_modules\\bar\\node_modules\\link',
@@ -322,8 +337,10 @@ describe('realNodeModulePath', () => {
         'D:\\other\\root\\bar\\a\\b'
       );
 
-      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\1\\2\\3\\node_modules\\bar\\node_modules\\link');
-      expect(mocklstatSync).toHaveBeenCalledWith('C:\\foo\\1\\2\\3\\node_modules\\bar');
+      expect(mocklstatSync.mock.calls[0][0]).toEqual(
+        'C:\\foo\\1\\2\\3\\node_modules\\bar\\node_modules\\link'
+      );
+      expect(mocklstatSync.mock.calls[1][0]).toEqual('C:\\foo\\1\\2\\3\\node_modules\\bar');
       expect(mocklstatSync).toHaveBeenCalledTimes(2);
       expect(mockReadlinkSync).toHaveBeenCalledWith(
         'C:\\foo\\1\\2\\3\\node_modules\\bar\\node_modules\\link',

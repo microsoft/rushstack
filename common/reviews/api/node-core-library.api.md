@@ -610,6 +610,7 @@ export interface IReadLinesFromIterableOptions {
 export interface IRealNodeModulePathResolverOptions {
     // (undocumented)
     fs?: Partial<Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>>;
+    ignoreMissingPaths?: boolean;
     // (undocumented)
     path?: Partial<Pick<typeof nodePath, 'isAbsolute' | 'join' | 'resolve' | 'sep'>>;
 }
