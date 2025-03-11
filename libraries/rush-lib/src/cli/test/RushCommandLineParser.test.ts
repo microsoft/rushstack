@@ -27,6 +27,7 @@ import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import { getCommandLineParserInstanceAsync } from './TestUtils';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 function pathEquals(actual: string, expected: string): void {
   expect(Path.convertToSlashes(actual)).toEqual(Path.convertToSlashes(expected));
@@ -40,6 +41,7 @@ describe('RushCommandLineParser', () => {
   describe('execute', () => {
     afterEach(() => {
       jest.clearAllMocks();
+      EnvironmentConfiguration.reset();
     });
 
     describe('in basic repo', () => {
