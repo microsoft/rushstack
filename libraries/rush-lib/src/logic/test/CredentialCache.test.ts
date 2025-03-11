@@ -5,7 +5,7 @@ import { LockFile, Async, FileSystem } from '@rushstack/node-core-library';
 import { RushUserConfiguration } from '../../api/RushUserConfiguration';
 import { CredentialCache } from '../CredentialCache';
 
-const FAKE_RUSH_USER_FOLDER: string = '~/.rush-user';
+const FAKE_RUSH_USER_FOLDER: string = 'temp/.test-rush-user';
 const FAKE_CREDENTIALS_CACHE_FILE: string = `${FAKE_RUSH_USER_FOLDER}/credentials.json`;
 
 describe(CredentialCache.name, () => {
