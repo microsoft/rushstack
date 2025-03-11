@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 11 Mar 2025 00:11:25 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Mar 2025 02:12:33 GMT and should not be manually modified.
+
+## 0.70.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Use `useNodeJSResolver: true` in `Import.resolvePackage` calls.
 
 ## 0.69.3
 Tue, 11 Mar 2025 00:11:25 GMT

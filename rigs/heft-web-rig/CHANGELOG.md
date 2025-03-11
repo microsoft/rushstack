@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Tue, 11 Mar 2025 00:11:25 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Mar 2025 02:12:33 GMT and should not be manually modified.
+
+## 0.28.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Bump TypeScript to ~5.8.2.
 
 ## 0.27.2
 Tue, 11 Mar 2025 00:11:25 GMT

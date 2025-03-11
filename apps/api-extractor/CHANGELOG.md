@@ -1,6 +1,11 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 11 Mar 2025 00:11:25 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Mar 2025 02:12:34 GMT and should not be manually modified.
+
+## 7.52.1
+Tue, 11 Mar 2025 02:12:34 GMT
+
+_Version update only_
 
 ## 7.52.0
 Tue, 11 Mar 2025 00:11:25 GMT

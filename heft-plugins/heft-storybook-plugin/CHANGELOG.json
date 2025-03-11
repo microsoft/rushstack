@@ -2,6 +2,38 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@rushstack/heft-storybook-plugin_v0.9.0",
+      "date": "Tue, 11 Mar 2025 02:12:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Use `useNodeJSResolver: true` in `Import.resolvePackage` calls."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.91`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.11.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.69.3` to `0.70.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.9",
       "tag": "@rushstack/heft-storybook-plugin_v0.8.9",
       "date": "Tue, 11 Mar 2025 00:11:25 GMT",
