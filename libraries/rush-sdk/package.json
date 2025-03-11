@@ -22,7 +22,8 @@
     "./lib/*": {
       "types": "./lib/*.d.ts",
       "default": "./lib/*.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {

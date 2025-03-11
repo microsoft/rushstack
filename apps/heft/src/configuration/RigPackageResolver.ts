@@ -85,9 +85,7 @@ export class RigPackageResolver implements IRigPackageResolver {
       try {
         const resolvedPackageFolder: string = Import.resolvePackage({
           packageName: toolPackageName,
-          baseFolderPath: this._buildFolder,
-          // Use the built-in Node.js resolver so we share the cache
-          useNodeJSResolver: true
+          baseFolderPath: this._buildFolder
         });
         terminal.writeVerboseLine(
           `Resolved ${JSON.stringify(toolPackageName)} as a direct devDependency of the project.`
@@ -119,9 +117,7 @@ export class RigPackageResolver implements IRigPackageResolver {
         try {
           const resolvedPackageFolder: string = Import.resolvePackage({
             packageName: toolPackageName,
-            baseFolderPath: path.dirname(rigPackageJsonPath),
-            // Use the built-in Node.js resolver so we share the cache
-            useNodeJSResolver: true
+            baseFolderPath: path.dirname(rigPackageJsonPath)
           });
           terminal.writeVerboseLine(
             `Resolved ${JSON.stringify(toolPackageName)} as a dependency of the ` +
@@ -142,9 +138,7 @@ export class RigPackageResolver implements IRigPackageResolver {
     try {
       const resolvedPackageFolder: string = Import.resolvePackage({
         packageName: toolPackageName,
-        baseFolderPath: this._buildFolder,
-        // Use the built-in Node.js resolver so we share the cache
-        useNodeJSResolver: true
+        baseFolderPath: this._buildFolder
       });
       terminal.writeVerboseLine(
         `Resolved ${JSON.stringify(toolPackageName)} from "${resolvedPackageFolder}".`
