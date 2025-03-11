@@ -461,7 +461,7 @@ describe('RushCommandLineParser', () => {
       });
     });
 
-    describe.only('in repo plugin with conflict build command', () => {
+    describe('in repo plugin with conflict build command', () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'pluginWithConflictBuildCommandRepo';
 
@@ -473,7 +473,7 @@ describe('RushCommandLineParser', () => {
       });
     });
 
-    describe.only("in repo plugin with conflict rebuild command'", () => {
+    describe("in repo plugin with conflict rebuild command'", () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'pluginWithConflictRebuildCommandRepo';
 
