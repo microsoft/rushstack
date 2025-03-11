@@ -3,11 +3,13 @@
 
 import '../../test/mockRushCommandLineParser';
 
+import { LockFile } from '@rushstack/node-core-library';
+
 import { PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
 import type { IPackageJsonUpdaterRushAddOptions } from '../../../logic/PackageJsonUpdaterTypes';
 import { RushCommandLineParser } from '../../RushCommandLineParser';
 import { AddAction } from '../AddAction';
-import { LockFile } from '@rushstack/node-core-library';
+import { EnvironmentConfiguration } from '../../../api/EnvironmentConfiguration';
 
 describe(AddAction.name, () => {
   describe('basic "rush add" tests', () => {
@@ -32,6 +34,7 @@ describe(AddAction.name, () => {
       jest.clearAllMocks();
       process.exitCode = oldExitCode;
       process.argv = oldArgs;
+      EnvironmentConfiguration.reset();
     });
 
     describe("'add' action", () => {

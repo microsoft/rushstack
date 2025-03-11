@@ -136,7 +136,7 @@ export class RushCommandLineParser extends CommandLineParser {
       });
 
       if (EnvironmentConfiguration.hasBeenValidated) {
-        terminal.writeWarningLine(
+        throw new Error(
           `The ${EnvironmentConfiguration.name} was initialized before .env files were loaded. Rush environment ` +
             'variables may have unexpected values.'
         );

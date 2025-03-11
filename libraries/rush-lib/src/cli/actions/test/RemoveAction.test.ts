@@ -3,13 +3,15 @@
 
 import '../../test/mockRushCommandLineParser';
 
+import { LockFile } from '@rushstack/node-core-library';
+
 import { PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
 import type { IPackageJsonUpdaterRushRemoveOptions } from '../../../logic/PackageJsonUpdaterTypes';
 import { RushCommandLineParser } from '../../RushCommandLineParser';
 import { RemoveAction } from '../RemoveAction';
 import { VersionMismatchFinderProject } from '../../../logic/versionMismatch/VersionMismatchFinderProject';
 import { DependencyType } from '../../../api/PackageJsonEditor';
-import { LockFile } from '@rushstack/node-core-library';
+import { EnvironmentConfiguration } from '../../../api/EnvironmentConfiguration';
 
 describe(RemoveAction.name, () => {
   describe('basic "rush remove" tests', () => {
@@ -36,6 +38,7 @@ describe(RemoveAction.name, () => {
       jest.clearAllMocks();
       process.exitCode = oldExitCode;
       process.argv = oldArgs;
+      EnvironmentConfiguration.reset();
     });
 
     describe("'remove' action", () => {
