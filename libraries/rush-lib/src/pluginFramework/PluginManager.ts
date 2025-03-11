@@ -72,7 +72,8 @@ export class PluginManager {
           pluginName: builtInPluginName,
           pluginPackageFolder: Import.resolvePackage({
             packageName: pluginPackageName,
-            baseFolderPath: __dirname
+            baseFolderPath: __dirname,
+            useNodeJSResolver: true
           })
         });
       }

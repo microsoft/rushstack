@@ -314,7 +314,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     try {
       storykitFolderPath = Import.resolvePackage({
         packageName: storykitPackageName,
-        baseFolderPath: heftConfiguration.buildFolderPath
+        baseFolderPath: heftConfiguration.buildFolderPath,
+        useNodeJSResolver: true
       });
     } catch (ex) {
       throw new Error(`The ${taskSession.taskName} task cannot start: ` + (ex as Error).message);
@@ -328,7 +329,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     try {
       storyBookCliPackage = Import.resolvePackage({
         packageName: cliPackageName,
-        baseFolderPath: storykitFolderPath
+        baseFolderPath: storykitFolderPath,
+        useNodeJSResolver: true
       });
     } catch (ex) {
       throw new Error(`The ${taskSession.taskName} task cannot start: ` + (ex as Error).message);

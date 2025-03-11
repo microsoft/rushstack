@@ -43,13 +43,22 @@ function applyPatch(): void {
   try {
     let contextFolder: string = __dirname;
     // Resolve the "@jest/core" package relative to Heft
-    contextFolder = Import.resolvePackage({ packageName: '@jest/core', baseFolderPath: contextFolder });
+    contextFolder = Import.resolvePackage({
+      packageName: '@jest/core',
+      baseFolderPath: contextFolder,
+      useNodeJSResolver: true
+    });
     // Resolve the "@jest/reporters" package relative to "@jest/core"
-    contextFolder = Import.resolvePackage({ packageName: '@jest/reporters', baseFolderPath: contextFolder });
+    contextFolder = Import.resolvePackage({
+      packageName: '@jest/reporters',
+      baseFolderPath: contextFolder,
+      useNodeJSResolver: true
+    });
     // Resolve the "jest-worker" package relative to "@jest/reporters"
     const jestWorkerFolder: string = Import.resolvePackage({
       packageName: 'jest-worker',
-      baseFolderPath: contextFolder
+      baseFolderPath: contextFolder,
+      useNodeJSResolver: true
     });
 
     const baseWorkerPoolPath: string = path.join(jestWorkerFolder, 'build/base/BaseWorkerPool.js');
