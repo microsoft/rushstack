@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/trace-import",
+      "comment": "Bump the TypeScript dependency to ~5.8.2.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/trace-import"
+}

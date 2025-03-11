@@ -21,6 +21,6 @@
     "@types/node": "20.17.19",
     "@types/tapable": "1.0.6",
     "eslint": "~8.57.0",
-    "typescript": "~5.7.3"
+    "typescript": "~5.8.2"
   }
 }

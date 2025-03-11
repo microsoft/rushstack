@@ -9,12 +9,12 @@
   },
   "devDependencies": {
     "eslint": "~8.57.0",
-    "typescript": "~5.7.3"
+    "typescript": "~5.8.2"
   },
   "dependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/eslint-patch": "workspace:*",
-    "@typescript-eslint/parser": "~8.24.0",
+    "@typescript-eslint/parser": "~8.26.1",
     "eslint-plugin-deprecation": "2.0.0",
     "eslint-plugin-header": "~3.1.1",
     "eslint-plugin-import": "2.25.4",

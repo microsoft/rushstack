@@ -204,7 +204,17 @@
 
     // TODO: Remove once https://github.com/dylang/npm-check/issues/499
     // has been closed and a new version of `npm-check` is published.
-    "package-json": "^7"
+    "package-json": "^7",
+
+    // TODO: Remove when decoupled local dependencies are updated.
+    "@rushstack/heft-node-rig@2.7.0>typescript": "~5.8.2",
+    "@rushstack/eslint-config@4.2.0>@typescript-eslint/eslint-plugin": "~8.26.1",
+    "@rushstack/eslint-config@4.2.0>@typescript-eslint/utils": "~8.26.1",
+    "@rushstack/eslint-config@4.2.0>@typescript-eslint/parser": "~8.26.1",
+    "@rushstack/eslint-config@4.2.0>@typescript-eslint/typescript-estree": "~8.26.1",
+    "@rushstack/eslint-plugin@0.17.0>@typescript-eslint/utils": "~8.26.1",
+    "@rushstack/eslint-plugin-packlets@0.10.0>@typescript-eslint/utils": "~8.26.1",
+    "@rushstack/eslint-plugin-security@0.9.0>@typescript-eslint/utils": "~8.26.1"
   },
 
   /**
@@ -409,36 +419,6 @@
         "@types/webpack": {
           "optional": true
         }
-      }
-    },
-
-    // TODO: Remove after an updated version of heft-node-rig is pulled in
-    "@rushstack/heft-node-rig@2.6.48": {
-      "dependencies": {
-        "typescript": "~5.7.3"
-      }
-    },
-    "@rushstack/eslint-config@4.1.1": {
-      "dependencies": {
-        "@typescript-eslint/eslint-plugin": "~8.24.0",
-        "@typescript-eslint/utils": "~8.24.0",
-        "@typescript-eslint/parser": "~8.24.0",
-        "@typescript-eslint/typescript-estree": "~8.24.0"
-      }
-    },
-    "@rushstack/eslint-plugin@0.16.1": {
-      "dependencies": {
-        "@typescript-eslint/utils": "~8.24.0"
-      }
-    },
-    "@rushstack/eslint-plugin-packlets@0.9.2": {
-      "dependencies": {
-        "@typescript-eslint/utils": "~8.24.0"
-      }
-    },
-    "@rushstack/eslint-plugin-security@0.8.3": {
-      "dependencies": {
-        "@typescript-eslint/utils": "~8.24.0"
       }
     }
   },
