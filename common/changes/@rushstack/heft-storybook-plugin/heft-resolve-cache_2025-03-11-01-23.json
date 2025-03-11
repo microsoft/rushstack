@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "comment": "Use `useNodeJSResolver: true` in `Import.resolvePackage` calls.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin"
+}
