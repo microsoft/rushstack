@@ -598,7 +598,7 @@ export class CommandLineConfiguration {
     cycleFreePhases.add(phase);
   }
 
-  private static _mergeCommandLineJson(commandLineJson: ICommandLineJson): void {
+  private static _applyBuildCommandDefaults(commandLineJson: ICommandLineJson): void {
     // merge commands specified in command-line.json and default (re)build settings
     // Ensure both build commands are included and preserve any other commands specified
     if (commandLineJson?.commands) {
@@ -653,7 +653,7 @@ export class CommandLineConfiguration {
     }
 
     if (commandLineJson) {
-      this._mergeCommandLineJson(commandLineJson);
+      this._applyBuildCommandDefaults(commandLineJson);
       const hasBuildCommand: boolean = !!commandLineJson.commands?.some(
         (command) => command.name === RushConstants.buildCommandName
       );
@@ -691,7 +691,7 @@ export class CommandLineConfiguration {
       // merge commands specified in command-line.json and default (re)build settings
       // Ensure both build commands are included and preserve any other commands specified
       if (commandLineJson?.commands) {
-        this._mergeCommandLineJson(commandLineJson);
+        this._applyBuildCommandDefaults(commandLineJson);
 
         CommandLineConfiguration._jsonSchema.validateObject(commandLineJson, jsonFilePath);
       }

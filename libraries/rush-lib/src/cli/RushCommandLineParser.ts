@@ -85,7 +85,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private readonly _rushOptions: IRushCommandLineParserOptions;
   private readonly _terminalProvider: ConsoleTerminalProvider;
   private readonly _terminal: Terminal;
-  private readonly _includeDefaultBuildOnDefaultCommandLineConfig: boolean;
+  private readonly _autocreateBuildCommand: boolean;
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
@@ -154,14 +154,12 @@ export class RushCommandLineParser extends CommandLineParser {
     const pluginCommandLineConfigurations: ICustomCommandLineConfigurationInfo[] =
       this.pluginManager.tryGetCustomCommandLineConfigurationInfos();
 
-    const hasBuildCommandInPlugin: boolean = pluginCommandLineConfigurations.some(
-      (x) =>
-        x.commandLineConfiguration.commands.has(RushConstants.buildCommandName) ||
-        x.commandLineConfiguration.commands.has(RushConstants.rebuildCommandName)
+    const hasBuildCommandInPlugin: boolean = pluginCommandLineConfigurations.some((x) =>
+      x.commandLineConfiguration.commands.has(RushConstants.buildCommandName)
     );
 
-    // If the plugin has a build command, we don't need to add the default build command.
-    this._includeDefaultBuildOnDefaultCommandLineConfig = !hasBuildCommandInPlugin;
+    // If the plugin has a build command, we don't need to autocreate the default build command.
+    this._autocreateBuildCommand = !hasBuildCommandInPlugin;
 
     this._populateActions();
 
@@ -352,7 +350,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     // If a build action is already added by a plugin, we don't want to add a default "build" script
-    const doNotIncludeDefaultBuildCommands: boolean = !this._includeDefaultBuildOnDefaultCommandLineConfig;
+    const doNotIncludeDefaultBuildCommands: boolean = !this._autocreateBuildCommand;
 
     const commandLineConfiguration: CommandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(
       commandLineConfigFilePath,
