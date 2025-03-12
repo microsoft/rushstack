@@ -19,7 +19,8 @@ import type {
   ModuleConfig,
   Options as SwcOptions,
   ParserConfig,
-  ReactConfig
+  ReactConfig,
+  TransformConfig
 } from '@swc/core';
 import { SyncWaterfallHook } from 'tapable';
 
@@ -244,11 +245,10 @@ async function transpileProjectAsync(
           react,
           useDefineForClassFields,
           // This property is not included in the types, but is what makes swc-jest work
-          // @ts-ignore
           hidden: {
             jest: format === 'commonjs'
           }
-        }
+        } as TransformConfig
       }
     };
 
