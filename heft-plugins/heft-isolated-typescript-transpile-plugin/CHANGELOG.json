@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.0",
+      "date": "Wed, 12 Mar 2025 23:12:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release."
+          }
+        ]
+      }
+    }
+  ]
+}
