@@ -43,20 +43,21 @@ export type GlobFn = (pattern: string | string[], options?: IGlobOptions | undef
 
 // @public (undocumented)
 export class HeftConfiguration {
-    get buildFolderPath(): string;
+    readonly buildFolderPath: string;
     // @internal
     _checkForRigAsync(): Promise<void>;
-    get globalTerminal(): ITerminal;
+    readonly globalTerminal: ITerminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
+    readonly numberOfCores: number;
     get projectConfigFolderPath(): string;
     get projectPackageJson(): IPackageJson;
     get rigConfig(): IRigConfig;
     get rigPackageResolver(): IRigPackageResolver;
     get slashNormalizedBuildFolderPath(): string;
     get tempFolderPath(): string;
-    get terminalProvider(): ITerminalProvider;
+    readonly terminalProvider: ITerminalProvider;
 }
 
 // @public
@@ -89,6 +90,7 @@ export interface IGlobOptions {
 // @internal (undocumented)
 export interface _IHeftConfigurationInitializationOptions {
     cwd: string;
+    numberOfCores: number;
     terminalProvider: ITerminalProvider;
 }
 

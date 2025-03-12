@@ -6,15 +6,37 @@
 
 import type { HeftConfiguration } from '@rushstack/heft';
 import type { ITerminal } from '@rushstack/terminal';
+import semver from 'semver';
 import { SyncHook } from 'tapable';
-import type * as TTypescript from 'typescript';
+import type * as _TTypeScript from 'typescript';
+
+// @internal (undocumented)
+export function _getTsconfigFilePath(heftConfiguration: HeftConfiguration, tsconfigRelativePath: string | undefined): string;
+
+// @internal (undocumented)
+export interface _IBaseTypeScriptTool<TSystem extends _TTypeScript.System = _TTypeScript.System> {
+    // (undocumented)
+    system: TSystem;
+    // Warning: (ae-forgotten-export) The symbol "ExtendedTypeScript" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    ts: ExtendedTypeScript;
+    // (undocumented)
+    typeScriptToolPath: string;
+}
 
 // @beta (undocumented)
 export interface IChangedFilesHookOptions {
     // (undocumented)
-    changedFiles?: ReadonlySet<TTypescript.SourceFile>;
+    changedFiles?: ReadonlySet<_TTypeScript.SourceFile>;
     // (undocumented)
-    program: TTypescript.Program;
+    program: _TTypeScript.Program;
+}
+
+// @internal (undocumented)
+export interface _ICompilerCapabilities {
+    incrementalProgram: boolean;
+    solutionBuilder: boolean;
 }
 
 // @beta (undocumented)
@@ -25,6 +47,40 @@ export interface IEmitModuleKind {
     moduleKind: 'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext';
     // (undocumented)
     outFolderName: string;
+}
+
+// @internal (undocumented)
+export interface _ILoadedTypeScriptTool {
+    // (undocumented)
+    capabilities: _ICompilerCapabilities;
+    // (undocumented)
+    tool: _IBaseTypeScriptTool;
+    // (undocumented)
+    typescriptParsedVersion: semver.SemVer;
+    // (undocumented)
+    typescriptVersion: string;
+}
+
+// @internal (undocumented)
+export interface _ILoadTsconfigOptions {
+    // (undocumented)
+    tool: _IBaseTypeScriptTool;
+    // (undocumented)
+    tsCacheFilePath?: string;
+    // (undocumented)
+    tsconfigPath: string;
+}
+
+// @internal (undocumented)
+export interface _ILoadTypeScriptToolOptions {
+    // (undocumented)
+    buildProjectReferences?: boolean;
+    // (undocumented)
+    heftConfiguration: HeftConfiguration;
+    // (undocumented)
+    onlyResolveSymlinksInNodeModules?: boolean;
+    // (undocumented)
+    terminal: ITerminal;
 }
 
 // @beta (undocumented)
@@ -71,8 +127,16 @@ export interface ITypeScriptPluginAccessor {
 // @beta (undocumented)
 export function loadPartialTsconfigFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal, typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined): Promise<IPartialTsconfig | undefined>;
 
+// @internal (undocumented)
+export function _loadTsconfig(options: _ILoadTsconfigOptions): _TTypeScript.ParsedCommandLine;
+
 // @beta (undocumented)
 export function loadTypeScriptConfigurationFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal): Promise<ITypeScriptConfigurationJson | undefined>;
+
+// @internal (undocumented)
+export function _loadTypeScriptToolAsync(options: _ILoadTypeScriptToolOptions): Promise<_ILoadedTypeScriptTool>;
+
+export { _TTypeScript }
 
 // @public
 export const TypeScriptPluginName: 'typescript-plugin';

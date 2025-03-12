@@ -194,6 +194,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/rush-redis-cobuild-plugin-integration-test](./build-tests/rush-redis-cobuild-plugin-integration-test/) | Tests connecting to an redis server |
 | [/build-tests/set-webpack-public-path-plugin-test](./build-tests/set-webpack-public-path-plugin-test/) | Building this project tests the set-webpack-public-path-plugin |
 | [/eslint/local-eslint-config](./eslint/local-eslint-config/) | An ESLint configuration consumed projects inside the rushstack repo. |
+| [/heft-plugins/heft-isolated-typescript-transpile-plugin](./heft-plugins/heft-isolated-typescript-transpile-plugin/) | Heft plugin for transpiling TypeScript with SWC |
 | [/libraries/rush-themed-ui](./libraries/rush-themed-ui/) | Rush Component Library: a set of themed components for rush projects |
 | [/libraries/rushell](./libraries/rushell/) | Execute shell commands using a consistent syntax on every platform |
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |

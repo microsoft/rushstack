@@ -9,6 +9,9 @@ export interface IExtendedSolutionBuilder
   invalidateProject(configFilePath: string, mode: 0 | 1 | 2): void;
 }
 
+/**
+ * @internal
+ */
 export interface ITypeScriptNodeSystem extends TTypescript.System {
   /**
    * https://github.com/microsoft/TypeScript/blob/d85767abfd83880cea17cea70f9913e9c4496dcc/src/compiler/sys.ts#L1438
@@ -19,6 +22,9 @@ export interface ITypeScriptNodeSystem extends TTypescript.System {
   };
 }
 
+/**
+ * @internal
+ */
 export interface IExtendedTypeScript {
   /**
    * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/performance.ts#L3

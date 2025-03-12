@@ -5,7 +5,7 @@ import * as path from 'path';
 
 import type * as TTypescript from 'typescript';
 import { SyncHook } from 'tapable';
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { ProjectConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
 import type {
@@ -21,6 +21,7 @@ import type {
 import { TypeScriptBuilder, type ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import anythingSchema from './schemas/anything.schema.json';
 import typescriptConfigSchema from './schemas/typescript.schema.json';
+import { getTsconfigFilePath } from './tsconfigLoader';
 
 /**
  * The name of the plugin, as specified in heft-plugin.json
@@ -176,16 +177,6 @@ export async function loadTypeScriptConfigurationFileAsync(
 let _partialTsconfigFileLoader: ProjectConfigurationFile<IPartialTsconfig> | undefined;
 const _partialTsconfigFilePromiseCache: Map<string, Promise<IPartialTsconfig | undefined>> = new Map();
 
-function getTsconfigFilePath(
-  heftConfiguration: HeftConfiguration,
-  typeScriptConfigurationJson?: ITypeScriptConfigurationJson
-): string {
-  return Path.convertToSlashes(
-    // Use path.resolve because the path can start with `./` or `../`
-    path.resolve(heftConfiguration.buildFolderPath, typeScriptConfigurationJson?.project || './tsconfig.json')
-  );
-}
-
 /**
  * @beta
  */
@@ -205,7 +196,10 @@ export async function loadPartialTsconfigFileAsync(
     // advantage of the extends functionality that ConfigurationFile provides. So we'll
     // check to see if the file exists and exit early if not.
 
-    const tsconfigFilePath: string = getTsconfigFilePath(heftConfiguration, typeScriptConfigurationJson);
+    const tsconfigFilePath: string = getTsconfigFilePath(
+      heftConfiguration,
+      typeScriptConfigurationJson?.project
+    );
     terminal.writeVerboseLine(`Looking for tsconfig at ${tsconfigFilePath}`);
     const tsconfigExists: boolean = await FileSystem.existsAsync(tsconfigFilePath);
     if (!tsconfigExists) {
@@ -354,18 +348,13 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       return false;
     }
 
-    const typeScriptToolPath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
-      'typescript',
-      terminal
-    );
-
     // Build out the configuration
     const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
       buildFolderPath: heftConfiguration.buildFolderPath,
       // Build metadata is just another build output, but we put it in the temp folder because it will
       // usually be discarded when published.
       buildMetadataFolderPath: taskSession.tempFolderPath,
-      typeScriptToolPath: typeScriptToolPath,
+      heftConfiguration,
 
       buildProjectReferences: typeScriptConfigurationJson?.buildProjectReferences,
 
@@ -373,7 +362,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
 
       onlyResolveSymlinksInNodeModules: typeScriptConfigurationJson?.onlyResolveSymlinksInNodeModules,
 
-      tsconfigPath: getTsconfigFilePath(heftConfiguration, typeScriptConfigurationJson),
+      tsconfigPath: getTsconfigFilePath(heftConfiguration, typeScriptConfigurationJson?.project),
       additionalModuleKindsToEmit: typeScriptConfigurationJson?.additionalModuleKindsToEmit,
       emitCjsExtensionForCommonJS: !!typeScriptConfigurationJson?.emitCjsExtensionForCommonJS,
       emitMjsExtensionForESModule: !!typeScriptConfigurationJson?.emitMjsExtensionForESModule,

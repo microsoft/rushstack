@@ -1000,6 +1000,13 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-isolated-typescript-transpile-plugin",
+      "projectFolder": "heft-plugins/heft-isolated-typescript-transpile-plugin",
+      "reviewCategory": "libraries"
+      // For now
+      // "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-jest-plugin",
       "projectFolder": "heft-plugins/heft-jest-plugin",
       "reviewCategory": "libraries",
