@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 12 Mar 2025 00:11:31 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Mar 2025 22:41:36 GMT and should not be manually modified.
+
+## 0.71.0
+Wed, 12 Mar 2025 22:41:36 GMT
+
+### Minor changes
+
+- Add a `numberOfCores` property to `HeftConfiguration`.
 
 ## 0.70.1
 Wed, 12 Mar 2025 00:11:31 GMT

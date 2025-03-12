@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.71.0",
+      "tag": "@rushstack/heft_v0.71.0",
+      "date": "Wed, 12 Mar 2025 22:41:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `numberOfCores` property to `HeftConfiguration`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.70.1",
       "tag": "@rushstack/heft_v0.70.1",
       "date": "Wed, 12 Mar 2025 00:11:31 GMT",
