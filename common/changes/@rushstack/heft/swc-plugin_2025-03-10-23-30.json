@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Add a `HeftConfiguration` property to `HeftConfiguration`.",
+      "comment": "Add a `numberOfCores` property to `HeftConfiguration`.",
       "type": "minor"
     }
   ],
