@@ -2,6 +2,18 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "4.1.92",
+      "tag": "@rushstack/stream-collator_v4.1.92",
+      "date": "Wed, 12 Mar 2025 00:11:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.91",
       "tag": "@rushstack/stream-collator_v4.1.91",
       "date": "Tue, 11 Mar 2025 02:12:34 GMT",

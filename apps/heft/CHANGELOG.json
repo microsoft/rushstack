@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.70.1",
+      "tag": "@rushstack/heft_v0.70.1",
+      "date": "Wed, 12 Mar 2025 00:11:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Revert `useNodeJSResolver: true` to deal with plugins that have an `exports` field that doesn't contain `./package.json`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.70.0",
       "tag": "@rushstack/heft_v0.70.0",
       "date": "Tue, 11 Mar 2025 02:12:33 GMT",

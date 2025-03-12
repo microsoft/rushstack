@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 11 Mar 2025 02:12:33 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Mar 2025 00:11:31 GMT and should not be manually modified.
+
+## 0.70.1
+Wed, 12 Mar 2025 00:11:31 GMT
+
+### Patches
+
+- Revert `useNodeJSResolver: true` to deal with plugins that have an `exports` field that doesn't contain `./package.json`.
 
 ## 0.70.0
 Tue, 11 Mar 2025 02:12:33 GMT
