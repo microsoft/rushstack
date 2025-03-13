@@ -159,9 +159,16 @@ async function transpileProjectAsync(
   const { sourceMap, sourceRoot, experimentalDecorators, inlineSourceMap, useDefineForClassFields } =
     tsConfigOptions;
 
-  const rootDirsPaths: LookupByPath<number> = new LookupByPath(
-    (tsConfigOptions.rootDirs ?? []).map((rd) => [rd, rd.length])
-  );
+  const rootDirs: Set<string> = new Set(tsConfigOptions.rootDirs);
+  if (tsConfigOptions.rootDir) {
+    rootDirs.add(tsConfigOptions.rootDir);
+  }
+
+  const lookUpByPathEntries: [string, number][] = [];
+  for (const rootDir of rootDirs) {
+    lookUpByPathEntries.push([rootDir, rootDir.length]);
+  }
+  const rootDirsPaths: LookupByPath<number> = new LookupByPath(lookUpByPathEntries);
 
   const sourceFilePaths: string[] = filesFromTsConfig.filter((filePath) => !filePath.endsWith('.d.ts'));
 
