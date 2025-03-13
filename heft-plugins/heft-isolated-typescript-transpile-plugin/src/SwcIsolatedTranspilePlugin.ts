@@ -376,17 +376,21 @@ function printTiming(logger: IScopedLogger, times: [string, number][], descripto
     return y[1] - x[1];
   });
 
-  logger.terminal.writeVerboseLine(`${descriptor} ${times.length} files at `, `${process.uptime()}`);
-  logger.terminal.writeVerboseLine(`Slowest files:`);
-  for (let i: number = 0, len: number = Math.min(times.length, 10); i < len; i++) {
-    const [fileName, time] = times[i];
+  const timesCount: number = times.length;
+  logger.terminal.writeVerboseLine(`${descriptor} ${timesCount} files at ${process.uptime()}`);
+  if (timesCount > 0) {
+    logger.terminal.writeVerboseLine(`Slowest files:`);
+    for (let i: number = 0, len: number = Math.min(timesCount, 10); i < len; i++) {
+      const [fileName, time] = times[i];
 
-    logger.terminal.writeVerboseLine(`- ${fileName}: ${time.toFixed(2)}ms`);
+      logger.terminal.writeVerboseLine(`- ${fileName}: ${time.toFixed(2)}ms`);
+    }
+
+    const medianIndex: number = timesCount >> 1;
+    const [medianFileName, medianTime] = times[medianIndex];
+
+    logger.terminal.writeVerboseLine(`Median: (${medianFileName}): ${medianTime.toFixed(2)}ms`);
   }
-  const medianIndex: number = times.length >> 1;
-  const [medianFileName, medianTime] = times[medianIndex];
-
-  logger.terminal.writeVerboseLine(`Median: (${medianFileName}): ${medianTime.toFixed(2)}ms`);
 }
 
 function endsWithCharacterX(filePath: string): boolean {
