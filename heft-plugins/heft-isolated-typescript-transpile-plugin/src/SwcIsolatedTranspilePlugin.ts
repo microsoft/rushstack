@@ -164,11 +164,10 @@ async function transpileProjectAsync(
     rootDirs.add(tsConfigOptions.rootDir);
   }
 
-  const lookUpByPathEntries: [string, number][] = [];
+  const rootDirsPaths: LookupByPath<number> = new LookupByPath();
   for (const rootDir of rootDirs) {
-    lookUpByPathEntries.push([rootDir, rootDir.length]);
+    rootDirsPaths.setItem(rootDir, rootDir.length);
   }
-  const rootDirsPaths: LookupByPath<number> = new LookupByPath(lookUpByPathEntries);
 
   const sourceFilePaths: string[] = filesFromTsConfig.filter((filePath) => !filePath.endsWith('.d.ts'));
 
