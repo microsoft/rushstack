@@ -159,9 +159,15 @@ async function transpileProjectAsync(
   const { sourceMap, sourceRoot, experimentalDecorators, inlineSourceMap, useDefineForClassFields } =
     tsConfigOptions;
 
-  const rootDirsPaths: LookupByPath<number> = new LookupByPath(
-    (tsConfigOptions.rootDirs ?? []).map((rd) => [rd, rd.length])
-  );
+  const rootDirs: Set<string> = new Set(tsConfigOptions.rootDirs);
+  if (tsConfigOptions.rootDir) {
+    rootDirs.add(tsConfigOptions.rootDir);
+  }
+
+  const rootDirsPaths: LookupByPath<number> = new LookupByPath();
+  for (const rootDir of rootDirs) {
+    rootDirsPaths.setItem(rootDir, rootDir.length);
+  }
 
   const sourceFilePaths: string[] = filesFromTsConfig.filter((filePath) => !filePath.endsWith('.d.ts'));
 
@@ -231,7 +237,8 @@ async function transpileProjectAsync(
       swcrc: false,
       minify: false,
 
-      inputSourceMap: false,
+      sourceMaps: externalSourceMaps,
+      inputSourceMap: true,
       sourceRoot,
       isModule: true,
 
@@ -296,6 +303,10 @@ async function transpileProjectAsync(
     for (const [outputPrefix, optionsByExtension] of outputOptions) {
       const jsFilePath: string = `${outputPrefix}${relativeJsFilePath}`;
       const mapFilePath: string | undefined = externalSourceMaps ? `${jsFilePath}.map` : undefined;
+      const absoluteMapFilePath: string = `${buildFolderPath}${mapFilePath}`;
+      const relativeMapSrcFilePath: string = Path.convertToSlashes(
+        path.relative(path.dirname(absoluteMapFilePath), srcFilePath)
+      );
 
       const options: string = tsx ? optionsByExtension.tsx : optionsByExtension.ts;
       let optionsIndex: number | undefined = indexForOptions.get(options);
@@ -305,7 +316,7 @@ async function transpileProjectAsync(
       }
       const item: ITransformTask = {
         srcFilePath,
-        relativeSrcFilePath,
+        relativeSrcFilePath: relativeMapSrcFilePath,
         optionsIndex,
         jsFilePath,
         mapFilePath
@@ -369,17 +380,21 @@ function printTiming(logger: IScopedLogger, times: [string, number][], descripto
     return y[1] - x[1];
   });
 
-  logger.terminal.writeVerboseLine(`${descriptor} ${times.length} files at `, `${process.uptime()}`);
-  logger.terminal.writeVerboseLine(`Slowest files:`);
-  for (let i: number = 0, len: number = Math.min(times.length, 10); i < len; i++) {
-    const [fileName, time] = times[i];
+  const timesCount: number = times.length;
+  logger.terminal.writeVerboseLine(`${descriptor} ${timesCount} files at ${process.uptime()}`);
+  if (timesCount > 0) {
+    logger.terminal.writeVerboseLine(`Slowest files:`);
+    for (let i: number = 0, len: number = Math.min(timesCount, 10); i < len; i++) {
+      const [fileName, time] = times[i];
 
-    logger.terminal.writeVerboseLine(`- ${fileName}: ${time.toFixed(2)}ms`);
+      logger.terminal.writeVerboseLine(`- ${fileName}: ${time.toFixed(2)}ms`);
+    }
+
+    const medianIndex: number = timesCount >> 1;
+    const [medianFileName, medianTime] = times[medianIndex];
+
+    logger.terminal.writeVerboseLine(`Median: (${medianFileName}): ${medianTime.toFixed(2)}ms`);
   }
-  const medianIndex: number = times.length >> 1;
-  const [medianFileName, medianTime] = times[medianIndex];
-
-  logger.terminal.writeVerboseLine(`Median: (${medianFileName}): ${medianTime.toFixed(2)}ms`);
 }
 
 function endsWithCharacterX(filePath: string): boolean {
