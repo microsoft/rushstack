@@ -1,0 +1,6 @@
+{
+  "name": "rush-build-command-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {}
+}

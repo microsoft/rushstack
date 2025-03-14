@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../../../../../../../schemas/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "bulk",
+      "name": "build",
+      "summary": "Override build command summary in plugin",
+      "enableParallelism": true,
+      "allowWarningsInSuccessfulBuild": true
+    }
+  ]
+}

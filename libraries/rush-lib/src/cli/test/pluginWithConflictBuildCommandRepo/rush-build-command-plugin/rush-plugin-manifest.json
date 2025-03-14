@@ -1,0 +1,8 @@
+{
+  "plugins": [
+    {
+      "pluginName": "rush-build-command-plugin",
+      "description": "Rush plugin for testing build command in plugin command-line.json"
+    }
+  ]
+}

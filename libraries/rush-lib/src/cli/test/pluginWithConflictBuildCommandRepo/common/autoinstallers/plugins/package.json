@@ -1,0 +1,8 @@
+{
+  "name": "plugins",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "rush-build-command-plugin": "file: ../../../rush-build-command-plugin"
+  }
+}

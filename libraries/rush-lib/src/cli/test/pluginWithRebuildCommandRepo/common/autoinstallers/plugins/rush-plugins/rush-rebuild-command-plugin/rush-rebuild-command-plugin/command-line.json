@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../../../../../../../schemas/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "bulk",
+      "name": "rebuild",
+      "summary": "Override rebuild command summary in plugin",
+      "enableParallelism": true,
+      "allowWarningsInSuccessfulBuild": true
+    }
+  ]
+}
