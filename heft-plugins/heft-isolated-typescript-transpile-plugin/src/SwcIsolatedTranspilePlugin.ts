@@ -237,7 +237,8 @@ async function transpileProjectAsync(
       swcrc: false,
       minify: false,
 
-      inputSourceMap: false,
+      sourceMaps: externalSourceMaps,
+      inputSourceMap: true,
       sourceRoot,
       isModule: true,
 
@@ -302,6 +303,10 @@ async function transpileProjectAsync(
     for (const [outputPrefix, optionsByExtension] of outputOptions) {
       const jsFilePath: string = `${outputPrefix}${relativeJsFilePath}`;
       const mapFilePath: string | undefined = externalSourceMaps ? `${jsFilePath}.map` : undefined;
+      const absoluteMapFilePath: string = `${buildFolderPath}${mapFilePath}`;
+      const relativeMapSrcFilePath: string = Path.convertToSlashes(
+        path.relative(path.dirname(absoluteMapFilePath), srcFilePath)
+      );
 
       const options: string = tsx ? optionsByExtension.tsx : optionsByExtension.ts;
       let optionsIndex: number | undefined = indexForOptions.get(options);
@@ -311,7 +316,7 @@ async function transpileProjectAsync(
       }
       const item: ITransformTask = {
         srcFilePath,
-        relativeSrcFilePath,
+        relativeSrcFilePath: relativeMapSrcFilePath,
         optionsIndex,
         jsFilePath,
         mapFilePath
