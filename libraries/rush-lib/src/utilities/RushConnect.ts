@@ -16,6 +16,7 @@ import { type DependencyPath, depPathToFilename } from '@pnpm/dependency-path';
 import { PackageExtractor } from '@rushstack/package-extractor';
 import { pnpmSyncUpdateFileAsync, pnpmSyncCopyAsync, type ILogMessageCallbackOptions } from 'pnpm-sync-lib';
 import { parse } from '@pnpm/dependency-path';
+import * as semver from 'semver';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
@@ -242,20 +243,26 @@ export class RushConnect {
   private async _parsePackageVersionAsync(
     consumerPackagePnpmDependenciesFolderPath: string,
     packageName: string,
-    packageVersion: string
+    versionRange: string
   ): Promise<string | undefined> {
     const subDirectories: string[] = await FileSystem.readFolderItemNamesAsync(
       consumerPackagePnpmDependenciesFolderPath
     );
     for (const dirName of subDirectories) {
-      const parsedDep: DependencyPath = parse(dirName);
-      if (parsedDep && parsedDep.name === packageName && parsedDep.version === packageVersion) {
-        return path.resolve(
+      const parsedDependency: DependencyPath = parse(dirName);
+      if (parsedDependency && parsedDependency.name === packageName) {
+        const packageSourcePath: string = path.resolve(
           consumerPackagePnpmDependenciesFolderPath,
           dirName,
           RushConstants.nodeModulesFolderName,
           packageName
         );
+        const { version } = await JsonFile.loadAsync(
+          path.resolve(packageSourcePath, FileConstants.PackageJson)
+        );
+        if (semver.satisfies(version, versionRange)) {
+          return packageSourcePath;
+        }
       }
     }
     return undefined;
