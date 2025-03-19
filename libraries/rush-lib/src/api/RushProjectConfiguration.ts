@@ -12,6 +12,7 @@ import type { IPhase } from './CommandLineConfiguration';
 import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
 import schemaJson from '../schemas/rush-project.schema.json';
 import anythingSchemaJson from '../schemas/rush-project.schema.json';
+import { RushConnect } from '../utilities/RushConnect';
 
 /**
  * Describes the file structure for the `<project root>/config/rush-project.json` config file.
@@ -345,6 +346,12 @@ export class RushProjectConfiguration {
     phaseName: string,
     isNoOp: boolean
   ): string | undefined {
+    const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.project.rushConfiguration);
+    const subspaceNameList: string[] = Object.keys(rushConnect.rushLinkState ?? {});
+    if (subspaceNameList.includes(this.project.subspace.subspaceName)) {
+      return 'Caching has been disabled for this project because it is a linked package.';
+    }
+
     // Skip no-op operations as they won't have any output/cacheable things.
     if (isNoOp) {
       return undefined;

@@ -61,15 +61,16 @@ interface IRushLinkOptions {
 }
 
 export class RushConnect {
+  public readonly rushLinkState: IRushLinkFileState | undefined;
+
   private readonly _terminal: ITerminal;
   private readonly _rushLinkStateFilePath: string;
-  private readonly _rushLinkState: IRushLinkFileState | undefined;
 
   public constructor(options: IRushLinkOptions) {
     this._terminal = new Terminal(new ConsoleTerminalProvider());
 
     this._rushLinkStateFilePath = options.rushLinkStateFilePath;
-    this._rushLinkState = options.rushLinkState;
+    this.rushLinkState = options.rushLinkState;
   }
 
   private async _hardLinkToLinkedPackageAsync(
@@ -103,13 +104,13 @@ export class RushConnect {
   private async _modifyAndSaveLinkStateAsync(
     cb: (linkState: IRushLinkFileState) => Promise<void> | void
   ): Promise<void> {
-    const linkState: IRushLinkFileState = this._rushLinkState ?? {};
+    const linkState: IRushLinkFileState = this.rushLinkState ?? {};
     await Promise.resolve(cb(linkState));
     await JsonFile.saveAsync(linkState, this._rushLinkStateFilePath);
   }
 
   public async isSubspaceDependencyLinkedAsync(subspaceName: string): Promise<boolean> {
-    if (!this._rushLinkState || !this._rushLinkState[subspaceName]?.length) {
+    if (!this.rushLinkState || !this.rushLinkState[subspaceName]?.length) {
       return false;
     }
 
