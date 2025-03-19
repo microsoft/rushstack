@@ -480,7 +480,7 @@ describe('RushCommandLineParser', () => {
         await expect(async () => {
           await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
         }).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"command-line.json defines a parameter \\"--no-color\\" that is associated with a command \\"build\\" that does not exist or does not support custom parameters."`
+          `"command-line.json defines a parameter \\"--no-color\\" that is associated with a command \\"build\\" that is not defined in this file."`
         );
       });
     });

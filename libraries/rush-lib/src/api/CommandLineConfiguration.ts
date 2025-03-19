@@ -526,8 +526,8 @@ export class CommandLineConfiguration {
             if (!associatedCommand) {
               throw new Error(
                 `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
-                  `that is associated with a command "${associatedCommandName}" that does not exist or does ` +
-                  'not support custom parameters.'
+                  `that is associated with a command "${associatedCommandName}" that is not defined in ` +
+                  'this file.'
               );
             } else {
               associatedCommand.associatedParameters.add(normalizedParameter);
