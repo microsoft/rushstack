@@ -154,7 +154,9 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: bridge-package 1`] = `
-"usage: rush bridge-package [-h] --path PATH [--project PROJECT] [-r]
+"usage: rush bridge-package [-h] --path PATH [--project PROJECT]
+                           [--version VERSION]
+                           
 
 Using “rush bridge-package” allows the target package to be accessed from the 
 current package. Compared to \\"rush link-package\\", \\"rush bridge-package\\" is 
@@ -168,9 +170,9 @@ Optional arguments:
   --project PROJECT  A list of Rush project names to connect to the external 
                      package. If not specified, uses the project in the 
                      current working directory.
-  -r, --replace      Replace will directly replace the output, which requires 
-                     you to have installed the package under the specified 
-                     package in advance.
+  --version VERSION  It will directly replace the output for the specified 
+                     version of the package, which requires you to have that 
+                     package installed under the specified name in advance.
 "
 `;
 

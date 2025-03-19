@@ -5,10 +5,10 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseConnectPackageAction } from './BaseConnectPackageAction';
 import type { RushConnect } from '../../utilities/RushConnect';
-import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 export class BridgePackageAction extends BaseConnectPackageAction {
-  private readonly _replace: CommandLineFlagParameter;
+  private readonly _version: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -22,11 +22,11 @@ export class BridgePackageAction extends BaseConnectPackageAction {
       parser
     });
 
-    this._replace = this.defineFlagParameter({
-      parameterLongName: '--replace',
-      parameterShortName: '-r',
+    this._version = this.defineStringParameter({
+      parameterLongName: '--version',
+      argumentName: 'VERSION',
       description:
-        'Replace will directly replace the output, which requires you to have installed the package under the specified package in advance.'
+        'It will directly replace the output for the specified version of the package, which requires you to have that package installed under the specified name in advance.'
     });
   }
 
@@ -35,7 +35,7 @@ export class BridgePackageAction extends BaseConnectPackageAction {
     linkedPackagePath: string,
     rushConnect: RushConnect
   ): Promise<void> {
-    const replace: boolean = this._replace.value;
-    await rushConnect.bridgePackageAsync(consumerPackage, linkedPackagePath, replace);
+    const version: string | undefined = this._version.value;
+    await rushConnect.bridgePackageAsync(consumerPackage, linkedPackagePath, version);
   }
 }
