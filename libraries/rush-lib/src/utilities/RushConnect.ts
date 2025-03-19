@@ -243,7 +243,7 @@ export class RushConnect {
     consumerPackagePnpmDependenciesFolderPath: string,
     packageName: string,
     packageVersion: string
-  ) {
+  ): Promise<string | undefined> {
     const subDirectories: string[] = await FileSystem.readFolderItemNamesAsync(
       consumerPackagePnpmDependenciesFolderPath
     );
