@@ -195,11 +195,9 @@ export abstract class BaseInstallManager {
     }));
 
     const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
-    const isNodeModulesOverWritten: boolean = (
-      await Promise.all(
-        subspace.getProjects().map((project) => rushConnect.isProjectDependencyLinkedAsync(project))
-      )
-    ).includes(true);
+    const isNodeModulesOverWritten: boolean = await rushConnect.isSubspaceDependencyLinkedAsync(
+      subspace.subspaceName
+    );
 
     // Allow us to defer the file read until we need it
     const canSkipInstallAsync: () => Promise<boolean> = async () => {

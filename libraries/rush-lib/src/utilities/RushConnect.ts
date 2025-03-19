@@ -34,7 +34,7 @@ enum LinkType {
 }
 
 interface IRushLinkFileState {
-  [consumerPackageName: string]: {
+  [subspaceName: string]: {
     linkedPackagePath: string;
     linkedPackageName: string;
     linkType: LinkType;
@@ -52,6 +52,7 @@ interface ILinkedPackageInfo {
 interface IConsumerPackageInfo {
   consumerPackageNodeModulesPath: string;
   consumerPackagePnpmDependenciesFolderPath: string;
+  consumerSubspaceName: string;
 }
 
 interface IRushLinkOptions {
@@ -107,9 +108,8 @@ export class RushConnect {
     await JsonFile.saveAsync(linkState, this._rushLinkStateFilePath);
   }
 
-  public async isProjectDependencyLinkedAsync(project: RushConfigurationProject): Promise<boolean> {
-    const projectName: string = project.packageName;
-    if (!this._rushLinkState || !this._rushLinkState[projectName]?.length) {
+  public async isSubspaceDependencyLinkedAsync(subspaceName: string): Promise<boolean> {
+    if (!this._rushLinkState || !this._rushLinkState[subspaceName]?.length) {
       return false;
     }
 
@@ -118,16 +118,16 @@ export class RushConnect {
     };
 
     await this._modifyAndSaveLinkStateAsync(async (linkState) => {
-      const rushLinkFileState: IRushLinkFileState[number] = linkState[projectName] ?? [];
+      const rushLinkFileState: IRushLinkFileState[number] = linkState[subspaceName] ?? [];
       await Async.forEachAsync(rushLinkFileState, async ({ linkedPackagePath }) => {
         await pnpmSyncUpdateFileAsync({
           sourceProjectFolder: linkedPackagePath,
           targetFolders: [],
-          lockfileId: project.subspace.subspaceName,
+          lockfileId: subspaceName,
           logMessageCallback
         });
       });
-      delete linkState[projectName];
+      delete linkState[subspaceName];
     });
 
     return true;
@@ -171,6 +171,7 @@ export class RushConnect {
   }
 
   private _getConsumerPackageInfo(consumerPackage: RushConfigurationProject): IConsumerPackageInfo {
+    const consumerSubspaceName: string = consumerPackage.subspace.subspaceName;
     const consumerPackageNodeModulesPath: string = path.resolve(
       consumerPackage.projectFolder,
       RushConstants.nodeModulesFolderName
@@ -182,6 +183,7 @@ export class RushConnect {
     );
     return {
       consumerPackageNodeModulesPath,
+      consumerSubspaceName,
       consumerPackagePnpmDependenciesFolderPath
     };
   }
@@ -250,8 +252,11 @@ export class RushConnect {
         linkedPackageNodeModulesPath
       } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
 
-      const { consumerPackageNodeModulesPath, consumerPackagePnpmDependenciesFolderPath } =
-        this._getConsumerPackageInfo(consumerPackage);
+      const {
+        consumerPackageNodeModulesPath,
+        consumerPackagePnpmDependenciesFolderPath,
+        consumerSubspaceName
+      } = this._getConsumerPackageInfo(consumerPackage);
 
       if (replace) {
         if (!(await FileSystem.existsAsync(path.resolve(consumerPackageNodeModulesPath, packageName)))) {
@@ -260,11 +265,7 @@ export class RushConnect {
         const sourcePath: string = await FileSystem.getRealPathAsync(
           path.resolve(consumerPackageNodeModulesPath, packageName)
         );
-        await this._hardLinkToLinkedPackageAsync(
-          linkedPackagePath,
-          sourcePath,
-          consumerPackage.subspace.subspaceName
-        );
+        await this._hardLinkToLinkedPackageAsync(linkedPackagePath, sourcePath, consumerSubspaceName);
       } else {
         // Generate unique destination path for linked package
         const linkedPackageDestination: string = path.resolve(
@@ -293,7 +294,7 @@ export class RushConnect {
         await this._hardLinkToLinkedPackageAsync(
           linkedPackagePath,
           path.resolve(linkedPackageDestination, packageName),
-          consumerPackage.subspace.subspaceName
+          consumerSubspaceName
         );
 
         // Create a symbolic link pointing to the directory.
@@ -319,7 +320,7 @@ export class RushConnect {
 
       // Record the link information between the consumer package and the linked package
       await this._modifyAndSaveLinkStateAsync((linkState) => {
-        const consumerPackageLinks: IRushLinkFileState[number] = linkState[consumerPackage.packageName] ?? [];
+        const consumerPackageLinks: IRushLinkFileState[number] = linkState[consumerSubspaceName] ?? [];
         const existingLinkIndex: number = consumerPackageLinks.findIndex(
           (link) => link.linkedPackageName === packageName
         );
@@ -335,7 +336,7 @@ export class RushConnect {
           });
         }
 
-        linkState[consumerPackage.packageName] = consumerPackageLinks;
+        linkState[consumerSubspaceName] = consumerPackageLinks;
       });
 
       this._terminal.writeLine(
@@ -385,7 +386,8 @@ export class RushConnect {
 
       // Record the link information between the consumer package and the linked package
       await this._modifyAndSaveLinkStateAsync((linkState) => {
-        const consumerPackageLinks: IRushLinkFileState[number] = linkState[consumerPackageName] ?? [];
+        const subspaceName: string = consumerPackage.subspace.subspaceName;
+        const consumerPackageLinks: IRushLinkFileState[number] = linkState[subspaceName] ?? [];
         const existingLinkIndex: number = consumerPackageLinks.findIndex(
           (link) => link.linkedPackageName === linkedPackageName
         );
@@ -401,7 +403,7 @@ export class RushConnect {
           });
         }
 
-        linkState[consumerPackageName] = consumerPackageLinks;
+        linkState[subspaceName] = consumerPackageLinks;
       });
 
       this._terminal.writeLine(
