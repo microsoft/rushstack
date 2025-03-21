@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add ChainedCredential to AzureAuthenticationBase to handle auth failover. Add support for developer tools credentials.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
