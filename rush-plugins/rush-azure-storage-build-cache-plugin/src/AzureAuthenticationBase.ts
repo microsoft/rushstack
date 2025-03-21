@@ -18,6 +18,7 @@ import { CredentialCache } from '@rushstack/rush-sdk';
 import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import { PrintUtilities } from '@rushstack/terminal';
 import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';
+import { ChainedCredential } from './ChainedCredential';
 
 /**
  * @public
@@ -80,7 +81,7 @@ export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 /**
  * @public
  */
-export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth';
+export type LoginFlowType = 'ChainedCredential' | 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth';
 
 /**
  * @public
@@ -88,22 +89,10 @@ export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespaces
 export interface IAzureAuthenticationBaseOptions {
   azureEnvironment?: AzureEnvironmentName;
   credentialUpdateCommandForLogging?: string | undefined;
-  loginFlow?: LoginFlowType;
   /**
-   * A map to define the failover order for login flows. When a login flow fails to get a credential,
-   * the next login flow in the map will be attempted. If the login flow fails and there is no next
-   * login flow, the error will be thrown.
-   *
-   * @defaultValue
-   * ```json
-   * {
-   *   "AdoCodespacesAuth": "InteractiveBrowser",
-   *   "InteractiveBrowser": "DeviceCode",
-   *   "DeviceCode": null
-   * }
-   * ```
+   * @defaultValue 'ChainedCredential'
    */
-  loginFlowFailover?: Record<LoginFlowType, LoginFlowType | undefined>;
+  loginFlow?: LoginFlowType;
 }
 
 /**
@@ -128,7 +117,6 @@ export abstract class AzureAuthenticationBase {
 
   protected readonly _azureEnvironment: AzureEnvironmentName;
   protected readonly _loginFlow: LoginFlowType;
-  protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined>;
 
   private __credentialCacheId: string | undefined;
   protected get _credentialCacheId(): string {
@@ -146,18 +134,10 @@ export abstract class AzureAuthenticationBase {
   }
 
   public constructor(options: IAzureAuthenticationBaseOptions) {
-    const {
-      azureEnvironment = 'AzurePublicCloud',
-      loginFlow = process.env.CODESPACES === 'true' ? 'AdoCodespacesAuth' : 'InteractiveBrowser'
-    } = options;
+    const { azureEnvironment = 'AzurePublicCloud', loginFlow = 'ChainedCredential' } = options;
     this._azureEnvironment = azureEnvironment;
     this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
     this._loginFlow = loginFlow;
-    this._failoverOrder = options.loginFlowFailover || {
-      AdoCodespacesAuth: 'InteractiveBrowser',
-      InteractiveBrowser: 'DeviceCode',
-      DeviceCode: undefined
-    };
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
@@ -306,6 +286,10 @@ export abstract class AzureAuthenticationBase {
     };
 
     switch (loginFlow) {
+      case 'ChainedCredential': {
+        tokenCredential = new ChainedCredential({ authorityHost });
+        break;
+      }
       case 'AdoCodespacesAuth': {
         tokenCredential = new AdoCodespacesAuthCredential();
         break;
@@ -332,13 +316,7 @@ export abstract class AzureAuthenticationBase {
       return await this._getCredentialFromTokenAsync(terminal, tokenCredential, credentialsCache);
     } catch (error) {
       terminal.writeVerbose(`Failed to get credentials with ${loginFlow}: ${error}`);
-      const fallbackFlow: LoginFlowType | undefined = this._failoverOrder[loginFlow];
-      if (fallbackFlow) {
-        terminal.writeVerbose(`Falling back to ${fallbackFlow} login flow`);
-        return this._getCredentialAsync(terminal, fallbackFlow, credentialsCache);
-      } else {
-        throw error;
-      }
+      throw error;
     }
   }
 }
