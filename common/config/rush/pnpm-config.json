@@ -410,6 +410,12 @@
           "optional": true
         }
       }
+    },
+
+    "@rspack/core": {
+      "peerDependencies": {
+        "webpack-dev-server": "^5.0.4"
+      }
     }
   },
 

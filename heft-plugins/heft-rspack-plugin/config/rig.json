@@ -3,5 +3,5 @@
   // Documentation for this system: https://www.npmjs.com/package/@rushstack/rig-package
   "$schema": "https://developer.microsoft.com/json-schemas/rig-package/rig.schema.json",
 
-  "rigPackageName": "@rushstack/heft-node-rig"
+  "rigPackageName": "local-node-rig"
 }
