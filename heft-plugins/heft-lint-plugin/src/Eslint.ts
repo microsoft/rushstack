@@ -178,7 +178,12 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
     const trimmedLintResults: TEslint.ESLint.LintResult[] = [];
     for (const lintResult of lintResults) {
-      if (lintResult.messages.length > 0 || lintResult.warningCount > 0 || lintResult.errorCount > 0) {
+      if (
+        lintResult.messages.length > 0 ||
+        lintResult.warningCount > 0 ||
+        lintResult.errorCount > 0 ||
+        fixMessages.length > 0
+      ) {
         trimmedLintResults.push(lintResult);
       }
     }
