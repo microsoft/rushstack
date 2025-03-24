@@ -801,13 +801,13 @@ export class FileSystem {
    */
   public static writeBuffersToFile(
     filePath: string,
-    contents: ReadonlyArray<Uint8Array>,
+    contents: ReadonlyArray<NodeJS.ArrayBufferView>,
     options?: IFileSystemWriteBinaryFileOptions
   ): void {
     FileSystem._wrapException(() => {
       // Need a mutable copy of the iterable to handle incomplete writes,
       // since writev() doesn't take an argument for where to start writing.
-      const toCopy: Uint8Array[] = [...contents];
+      const toCopy: NodeJS.ArrayBufferView[] = [...contents];
 
       let fd: number | undefined;
       try {
@@ -832,7 +832,12 @@ export class FileSystem {
             const bytesInCurrentBuffer: number = toCopy[buffersWritten].byteLength;
             if (bytesWritten < bytesInCurrentBuffer) {
               // This buffer was partially written.
-              toCopy[buffersWritten] = toCopy[buffersWritten].subarray(bytesWritten);
+              const currentToCopy: NodeJS.ArrayBufferView = toCopy[buffersWritten];
+              toCopy[buffersWritten] = new Uint8Array(
+                currentToCopy.buffer,
+                currentToCopy.byteOffset + bytesWritten,
+                currentToCopy.byteLength - bytesWritten
+              );
               break;
             }
             bytesWritten -= bytesInCurrentBuffer;
@@ -891,13 +896,13 @@ export class FileSystem {
    */
   public static async writeBuffersToFileAsync(
     filePath: string,
-    contents: ReadonlyArray<Uint8Array>,
+    contents: ReadonlyArray<NodeJS.ArrayBufferView>,
     options?: IFileSystemWriteBinaryFileOptions
   ): Promise<void> {
     await FileSystem._wrapExceptionAsync(async () => {
       // Need a mutable copy of the iterable to handle incomplete writes,
       // since writev() doesn't take an argument for where to start writing.
-      const toCopy: Uint8Array[] = [...contents];
+      const toCopy: NodeJS.ArrayBufferView[] = [...contents];
 
       let handle: fsPromises.FileHandle | undefined;
       try {
@@ -922,7 +927,12 @@ export class FileSystem {
             const bytesInCurrentBuffer: number = toCopy[buffersWritten].byteLength;
             if (bytesWritten < bytesInCurrentBuffer) {
               // This buffer was partially written.
-              toCopy[buffersWritten] = toCopy[buffersWritten].subarray(bytesWritten);
+              const currentToCopy: NodeJS.ArrayBufferView = toCopy[buffersWritten];
+              toCopy[buffersWritten] = new Uint8Array(
+                currentToCopy.buffer,
+                currentToCopy.byteOffset + bytesWritten,
+                currentToCopy.byteLength - bytesWritten
+              );
               break;
             }
             bytesWritten -= bytesInCurrentBuffer;
