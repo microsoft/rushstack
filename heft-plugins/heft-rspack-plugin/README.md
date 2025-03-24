@@ -1,6 +1,6 @@
 # @rushstack/heft-rspack-plugin
 
-This is a Heft plugin for using RSPack during the "bundle" stage.
+This is a Heft plugin for using Rspack during the "bundle" stage.
 
 ## Links
 

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "rspack-plugin",
+      "entryPoint": "./lib/RspackPlugin",
+      "optionsSchema": "./lib/schemas/heft-rspack-plugin.schema.json",
+
+      "parameterScope": "rspack",
+      "parameters": [
+        {
+          "longName": "--serve",
+          "parameterKind": "flag",
+          "description": "Start a local web server for testing purposes using webpack-dev-server.  This parameter is only available when running in watch mode."
+        }
+      ]
+    }
+  ]
+}

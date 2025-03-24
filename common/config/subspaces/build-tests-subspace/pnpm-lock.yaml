@@ -13,7 +13,7 @@ overrides:
   '@rushstack/eslint-plugin@0.20.0>@typescript-eslint/utils': ~8.46.0
   '@rushstack/heft-node-rig@2.10.1>eslint': ~9.37.0
 
-packageExtensionsChecksum: e59cfa9a35183eeeb6f2ac48c9ddd4b2
+packageExtensionsChecksum: 52f2427ae44b3da2019a3be8c1ee40b0
 
 importers:
 
