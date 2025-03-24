@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as nodeJsPath from 'node:path';
-import { default as fs, promises as fsPromises } from 'node:fs';
-
+import * as nodeJsPath from 'path';
+import fs, { promises as fsPromises } from 'fs';
 import * as fsx from 'fs-extra';
 
 import { Text, type NewlineKind, Encoding } from './Text';

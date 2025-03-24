@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import * as child_process from 'child_process';
+import fs from 'fs';
 import * as nodeFs from 'fs';
 import * as nodePath from 'path';
 
@@ -214,7 +215,7 @@ export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPat
 export type FileSystemCopyFilesFilter = (sourcePath: string, destinationPath: string) => boolean;
 
 // @public
-export type FileSystemStats = nodeFs.Stats;
+export type FileSystemStats = fs.Stats;
 
 // @public
 export class FileWriter {
@@ -232,7 +233,7 @@ export const FolderConstants: {
 };
 
 // @public
-export type FolderItem = nodeFs.Dirent;
+export type FolderItem = fs.Dirent;
 
 // @public
 export interface IAsyncParallelismOptions {
