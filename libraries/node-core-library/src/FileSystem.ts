@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as nodeJsPath from 'path';
-import fs, { promises as fsPromises } from 'fs';
+import * as fs from 'fs';
+import * as fsPromises from 'fs/promises';
 import * as fsx from 'fs-extra';
 
 import { Text, type NewlineKind, Encoding } from './Text';
