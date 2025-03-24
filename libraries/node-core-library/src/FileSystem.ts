@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as nodeJsPath from 'path';
-import * as fs from 'fs';
+import * as nodeJsPath from 'node:path';
+import { default as fs, promises as fsPromises } from 'node:fs';
+
 import * as fsx from 'fs-extra';
 
 import { Text, type NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
-import { LegacyAdapters } from './LegacyAdapters';
 
 /**
  * An alias for the Node.js `fs.Stats` object.
@@ -684,11 +684,7 @@ export class FileSystem {
         ...options
       };
 
-      const folderEntries: FolderItem[] = await LegacyAdapters.convertCallbackToPromise(
-        fs.readdir,
-        folderPath,
-        { withFileTypes: true }
-      );
+      const folderEntries: FolderItem[] = await fsPromises.readdir(folderPath, { withFileTypes: true });
       if (options.absolutePaths) {
         return folderEntries.map((folderEntry) => {
           folderEntry.name = nodeJsPath.resolve(folderPath, folderEntry.name);
@@ -904,9 +900,9 @@ export class FileSystem {
       // since writev() doesn't take an argument for where to start writing.
       const toCopy: Uint8Array[] = [...contents];
 
-      let handle: fs.promises.FileHandle | undefined;
+      let handle: fsPromises.FileHandle | undefined;
       try {
-        handle = await fs.promises.open(filePath, 'w');
+        handle = await fsPromises.open(filePath, 'w');
       } catch (error) {
         if (!options?.ensureFolderExists || !FileSystem.isNotExistError(error as Error)) {
           throw error;
@@ -914,7 +910,7 @@ export class FileSystem {
 
         const folderPath: string = nodeJsPath.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
-        handle = await fs.promises.open(filePath, 'w');
+        handle = await fsPromises.open(filePath, 'w');
       }
 
       try {
