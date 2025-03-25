@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 27 Feb 2025 17:41:59 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 16:58:46 GMT and should not be manually modified.
+
+## 5.151.0
+Tue, 25 Mar 2025 16:58:46 GMT
+
+### Updates
+
+- Fix an issue where `--include-phase-deps` and watch mode sometimes included operations that were not required
+- Fix an issue where build/rebuild can not be defined in a rush plugin command line configuration
+- Use `useNodeJSResolver: true` in `Import.resolvePackage` calls.
+- Add missing `./package.json` export; revert `useNodeJSResolver: true`.
+- (plugin-api) Guaranteed `operation.associatedPhase` and `operation.associatedProject` are not undefined.
 
 ## 5.150.0
 Thu, 27 Feb 2025 17:41:59 GMT
