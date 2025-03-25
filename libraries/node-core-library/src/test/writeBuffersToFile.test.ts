@@ -18,20 +18,17 @@ jest.mock('fs-extra', () => {
     writevSync
   };
 });
+jest.mock('fs/promises', () => {
+  return {
+    open: openHandle
+  };
+});
 jest.mock('../Text', () => {
   return {
     Encoding: {
       Utf8: 'utf8'
     }
   };
-});
-
-import fs from 'node:fs';
-
-jest.spyOn(fs, 'promises', 'get').mockImplementation(() => {
-  return {
-    open: openHandle
-  } as unknown as typeof fs.promises;
 });
 
 describe('FileSystem', () => {
