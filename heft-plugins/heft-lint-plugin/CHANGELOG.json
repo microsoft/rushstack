@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.5.28",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.28",
+      "date": "Tue, 25 Mar 2025 00:12:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the `--fix` argument when the file only contains fixable issues."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.27",
       "tag": "@rushstack/heft-lint-plugin_v0.5.27",
       "date": "Wed, 12 Mar 2025 22:41:36 GMT",
