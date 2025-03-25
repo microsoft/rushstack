@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 11 Mar 2025 02:12:33 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:15 GMT and should not be manually modified.
+
+## 5.13.0
+Tue, 25 Mar 2025 15:11:15 GMT
+
+### Minor changes
+
+- Expand `FileSystem.writeBuffersToFile` and `FileSystem.writeBuffersToFileAsync` to take more kinds of buffers.
 
 ## 5.12.0
 Tue, 11 Mar 2025 02:12:33 GMT
