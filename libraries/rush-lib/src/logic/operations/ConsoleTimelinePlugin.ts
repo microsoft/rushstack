@@ -13,6 +13,7 @@ import type {
 import type { IExecutionResult } from './IOperationExecutionResult';
 import { OperationStatus } from './OperationStatus';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
+import type { OperationExecutionRecord } from './OperationExecutionRecord';
 
 const PLUGIN_NAME: 'ConsoleTimelinePlugin' = 'ConsoleTimelinePlugin';
 
@@ -127,20 +128,25 @@ interface ITimelineRecord {
 export interface IPrintTimelineParameters {
   terminal: ITerminal;
   result: IExecutionResult;
-  cobuildConfiguration: CobuildConfiguration | undefined;
+  cobuildConfiguration?: CobuildConfiguration;
+}
+
+interface ICachedDuration {
+  cached?: number;
+  uncached: number;
 }
 
 /**
  * Print a more detailed timeline and analysis of CPU usage for the build.
  * @internal
  */
-export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrintTimelineParameters): void {
+export function _printTimeline({ terminal, result }: IPrintTimelineParameters): void {
   //
   // Gather the operation records we'll be displaying. Do some inline max()
   // finding to reduce the number of times we need to loop through operations.
   //
 
-  const durationByPhase: Map<IPhase, number> = new Map();
+  const durationByPhase: Map<IPhase, ICachedDuration> = new Map();
 
   const data: ITimelineRecord[] = [];
   let longestNameLength: number = 0;
@@ -155,17 +161,33 @@ export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrin
     }
 
     const { stopwatch } = operationResult;
+    const { _operationMetadataManager: operationMetadataManager } =
+      operationResult as OperationExecutionRecord;
 
-    const { startTime, endTime } = stopwatch;
+    let { startTime } = stopwatch;
+    const { endTime } = stopwatch;
+
+    const duration: ICachedDuration = { cached: undefined, uncached: stopwatch.duration };
 
     if (startTime && endTime) {
       const nameLength: number = operation.name?.length || 0;
       if (nameLength > longestNameLength) {
         longestNameLength = nameLength;
       }
+      const wasCobuilt: boolean = !!operationMetadataManager?.wasCobuilt;
+      if (
+        wasCobuilt &&
+        operationResult.status !== OperationStatus.FromCache &&
+        operationResult.nonCachedDurationMs
+      ) {
+        duration.cached = stopwatch.duration;
+        startTime = Math.max(0, endTime - operationResult.nonCachedDurationMs);
+        duration.uncached = (endTime - startTime) / 1000;
+      }
 
-      const { duration } = stopwatch;
-      const durationString: string = duration.toFixed(1);
+      workDuration += stopwatch.duration;
+
+      const durationString: string = duration.uncached.toFixed(1);
       const durationLength: number = durationString.length;
       if (durationLength > longestDurationLength) {
         longestDurationLength = durationLength;
@@ -177,11 +199,23 @@ export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrin
       if (startTime < allStart) {
         allStart = startTime;
       }
-      workDuration += duration;
 
       const { associatedPhase } = operation;
 
-      durationByPhase.set(associatedPhase, (durationByPhase.get(associatedPhase) || 0) + duration);
+      if (associatedPhase) {
+        let durationRecord: ICachedDuration | undefined = durationByPhase.get(associatedPhase);
+        if (!durationRecord) {
+          durationRecord = {
+            cached: undefined,
+            uncached: 0
+          };
+          durationByPhase.set(associatedPhase, durationRecord);
+        }
+        if (duration.cached !== undefined) {
+          durationRecord.cached = (durationRecord.cached ?? 0) + duration.cached;
+        }
+        durationRecord.uncached += duration.uncached;
+      }
 
       data.push({
         startTime,
@@ -189,9 +223,7 @@ export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrin
         durationString,
         name: operation.name,
         status: operationResult.status,
-        isExecuteByOtherCobuildRunner:
-          !!operationResult.cobuildRunnerId &&
-          operationResult.cobuildRunnerId !== cobuildConfiguration?.cobuildRunnerId
+        isExecuteByOtherCobuildRunner: wasCobuilt
       });
     }
   }
@@ -310,7 +342,11 @@ export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrin
     }
 
     for (const [phase, duration] of durationByPhase.entries()) {
-      terminal.writeLine(`  ${Colorize.cyan(phase.name.padStart(maxPhaseName))} ${duration.toFixed(1)}s`);
+      const cachedDurationString: string = duration.cached
+        ? `, from cache: ${duration.cached.toFixed(1)}s`
+        : '';
+      const durationString: string = `${duration.uncached.toFixed(1)}s${cachedDurationString}`;
+      terminal.writeLine(`  ${Colorize.cyan(phase.name.padStart(maxPhaseName))} ${durationString}`);
     }
   }
 
