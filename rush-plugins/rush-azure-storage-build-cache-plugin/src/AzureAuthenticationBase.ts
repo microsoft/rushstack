@@ -328,6 +328,7 @@ export abstract class AzureAuthenticationBase {
     const credentials: TokenCredential[] = [];
 
     let _loginFlow: string | undefined = loginFlow;
+    const loginFlowsSeen: Set<string> = new Set([loginFlow]);
     while (_loginFlow !== undefined) {
       switch (_loginFlow) {
         case 'AdoCodespacesAuth': {
@@ -373,6 +374,15 @@ export abstract class AzureAuthenticationBase {
       }
 
       _loginFlow = this._failoverOrder?.[_loginFlow as LoginFlowType];
+      if (_loginFlow) {
+        if (loginFlowsSeen.has(_loginFlow)) {
+          // Prevent infinite loop
+          terminal.writeWarningLine('AzureAuthenticationBase: Circular loginFlowFailover detected');
+          _loginFlow = undefined;
+        } else {
+          loginFlowsSeen.add(_loginFlow);
+        }
+      }
     }
     tokenCredential = new ChainedTokenCredential(...credentials);
 
