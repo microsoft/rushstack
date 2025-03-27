@@ -8,6 +8,15 @@ import type { IOperationExecutionResult } from './IOperationExecutionResult';
 
 const PLUGIN_NAME: 'DebugHashesPlugin' = 'DebugHashesPlugin';
 
+function sortOperationEntriesByName(
+  a: [Operation, IOperationExecutionResult],
+  b: [Operation, IOperationExecutionResult]
+): number {
+  const aName: string = a[0].name;
+  const bName: string = b[0].name;
+  return aName === bName ? 0 : aName < bName ? -1 : 1;
+}
+
 export class DebugHashesPlugin implements IPhasedCommandPlugin {
   private readonly _terminal: ITerminal;
 
@@ -21,7 +30,10 @@ export class DebugHashesPlugin implements IPhasedCommandPlugin {
       (operations: Map<Operation, IOperationExecutionResult>) => {
         const terminal: ITerminal = this._terminal;
         terminal.writeLine(Colorize.blue(`===== Begin Hash Computation =====`));
-        for (const [operation, record] of operations) {
+
+        const sortedOperations: [Operation, IOperationExecutionResult][] =
+          Array.from(operations).sort(sortOperationEntriesByName);
+        for (const [operation, record] of sortedOperations) {
           terminal.writeLine(Colorize.cyan(`--- ${operation.name} ---`));
           record.getStateHashComponents().forEach((component) => {
             terminal.writeLine(component);
