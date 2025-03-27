@@ -326,35 +326,38 @@ export abstract class AzureAuthenticationBase {
       authorityHost
     };
 
-    const options = { authorityHost } as TokenCredentialOptions;
-    const priority = new Set([loginFlow]);
+    const deviceCodeCredentialOptions: DeviceCodeCredentialOptions = {
+      ...this._additionalDeviceCodeCredentialOptions,
+      ...interactiveCredentialOptions,
+      userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
+        PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
+      }
+    };
+
+    const options: TokenCredentialOptions = { authorityHost };
+    const priority: Set<LoginFlowType> = new Set([loginFlow]);
     for (const credType of priority) {
-      const next = this._failoverOrder?.[credType];
+      const next: LoginFlowType | undefined = this._failoverOrder?.[credType];
       if (next) {
         priority.add(next);
       }
     }
 
-    const additionalDeviceCodeOptions = this._additionalDeviceCodeCredentialOptions;
     const knownCredentialTypes: Record<
       LoginFlowType,
       new (options: TokenCredentialOptions) => TokenCredential
     > = {
       DeviceCode: class extends DeviceCodeCredential {
-        new(options: DeviceCodeCredentialOptions) {
+        public new(credentialOptions: DeviceCodeCredentialOptions): DeviceCodeCredential {
           return new DeviceCodeCredential({
-            ...additionalDeviceCodeOptions,
-            ...interactiveCredentialOptions,
-            userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
-              PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
-            },
-            ...options
+            ...deviceCodeCredentialOptions,
+            ...credentialOptions
           });
         }
       },
       InteractiveBrowser: class extends InteractiveBrowserCredential {
-        new(options: InteractiveBrowserCredentialNodeOptions) {
-          return new InteractiveBrowserCredential({ ...interactiveCredentialOptions, ...options });
+        public new(credentialOptions: InteractiveBrowserCredentialNodeOptions): InteractiveBrowserCredential {
+          return new InteractiveBrowserCredential({ ...interactiveCredentialOptions, ...credentialOptions });
         }
       },
       AdoCodespacesAuth: AdoCodespacesAuthCredential,
@@ -369,7 +372,7 @@ export abstract class AzureAuthenticationBase {
       (credType) => new knownCredentialTypes[credType](options)
     );
 
-    const tokenCredential = new ChainedTokenCredential(...credentials);
+    const tokenCredential: TokenCredential = new ChainedTokenCredential(...credentials);
 
     try {
       return await this._getCredentialFromTokenAsync(terminal, tokenCredential, credentialsCache);
