@@ -1,0 +1,17 @@
+// If no command-line.json file defines "rush build" and "rush rebuild", then normally Rush's default
+// definitions are applied as if they were defined in common/config/rush/command-line.json,
+// and therefore the corresponding phases must be in that file as well.  But because the line below
+// customizes "rush build" in this plugin, then the defaults are applied here, and as a result the
+// corresponding phases must also be defined by this plugin.
+{
+  "$schema": "../../../../../../../../../schemas/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "bulk",
+      "name": "build",
+      "summary": "Override build command summary in plugin",
+      "enableParallelism": true,
+      "allowWarningsInSuccessfulBuild": true
+    }
+  ]
+}

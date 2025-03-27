@@ -456,27 +456,28 @@ export class CommandLineConfiguration {
         buildCommandOriginalPhases = buildCommand.originalPhases;
         this.commands.set(buildCommand.name, buildCommand);
       }
+    }
 
-      if (!this.commands.has(RushConstants.rebuildCommandName)) {
-        // If a rebuild command was not specified in the config file, add the default rebuild command
-        if (!buildCommandPhases || !buildCommandOriginalPhases) {
-          throw new Error(`Phases for the "${RushConstants.buildCommandName}" were not found.`);
-        }
-
-        const rebuildCommand: IPhasedCommandConfig = {
-          ...DEFAULT_REBUILD_COMMAND_JSON,
-          commandKind: RushConstants.phasedCommandKind,
-          isSynthetic: true,
-          phases: buildCommandPhases,
-          disableBuildCache: DEFAULT_REBUILD_COMMAND_JSON.disableBuildCache,
-          associatedParameters: buildCommand.associatedParameters, // rebuild should share build's parameters in this case,
-          originalPhases: buildCommandOriginalPhases,
-          watchPhases: new Set(),
-          alwaysWatch: false,
-          alwaysInstall: undefined
-        };
-        this.commands.set(rebuildCommand.name, rebuildCommand);
+    const buildCommand: Command | undefined = this.commands.get(RushConstants.buildCommandName);
+    if (buildCommand && !this.commands.has(RushConstants.rebuildCommandName)) {
+      // If a rebuild command was not specified in the config file, add the default rebuild command
+      if (!buildCommandPhases || !buildCommandOriginalPhases) {
+        throw new Error(`Phases for the "${RushConstants.buildCommandName}" were not found.`);
       }
+
+      const rebuildCommand: IPhasedCommandConfig = {
+        ...DEFAULT_REBUILD_COMMAND_JSON,
+        commandKind: RushConstants.phasedCommandKind,
+        isSynthetic: true,
+        phases: buildCommandPhases,
+        disableBuildCache: DEFAULT_REBUILD_COMMAND_JSON.disableBuildCache,
+        associatedParameters: buildCommand.associatedParameters, // rebuild should share build's parameters in this case,
+        originalPhases: buildCommandOriginalPhases,
+        watchPhases: new Set(),
+        alwaysWatch: false,
+        alwaysInstall: undefined
+      };
+      this.commands.set(rebuildCommand.name, rebuildCommand);
     }
 
     const parametersJson: ICommandLineJson['parameters'] = commandLineJson?.parameters;
@@ -525,8 +526,8 @@ export class CommandLineConfiguration {
             if (!associatedCommand) {
               throw new Error(
                 `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
-                  `that is associated with a command "${associatedCommandName}" that does not exist or does ` +
-                  'not support custom parameters.'
+                  `that is associated with a command "${associatedCommandName}" that is not defined in ` +
+                  'this file.'
               );
             } else {
               associatedCommand.associatedParameters.add(normalizedParameter);
@@ -597,6 +598,42 @@ export class CommandLineConfiguration {
     cycleFreePhases.add(phase);
   }
 
+  private static _applyBuildCommandDefaults(commandLineJson: ICommandLineJson): void {
+    // merge commands specified in command-line.json and default (re)build settings
+    // Ensure both build commands are included and preserve any other commands specified
+    if (commandLineJson?.commands) {
+      for (let i: number = 0; i < commandLineJson.commands.length; i++) {
+        const command: CommandJson = commandLineJson.commands[i];
+
+        // Determine if we have a set of default parameters
+        let commandDefaultDefinition: CommandJson | {} = {};
+        switch (command.commandKind) {
+          case RushConstants.phasedCommandKind:
+          case RushConstants.bulkCommandKind: {
+            switch (command.name) {
+              case RushConstants.buildCommandName: {
+                commandDefaultDefinition = DEFAULT_BUILD_COMMAND_JSON;
+                break;
+              }
+
+              case RushConstants.rebuildCommandName: {
+                commandDefaultDefinition = DEFAULT_REBUILD_COMMAND_JSON;
+                break;
+              }
+            }
+            break;
+          }
+        }
+
+        // Merge the default parameters into the repo-specified parameters
+        commandLineJson.commands[i] = {
+          ...commandDefaultDefinition,
+          ...command
+        };
+      }
+    }
+  }
+
   /**
    * Load the command-line.json configuration file from the specified path. Note that this
    * does not include the default build settings. This option is intended to be used to load
@@ -616,7 +653,17 @@ export class CommandLineConfiguration {
     }
 
     if (commandLineJson) {
-      return new CommandLineConfiguration(commandLineJson, { doNotIncludeDefaultBuildCommands: true });
+      this._applyBuildCommandDefaults(commandLineJson);
+      const hasBuildCommand: boolean = !!commandLineJson.commands?.some(
+        (command) => command.name === RushConstants.buildCommandName
+      );
+      const hasRebuildCommand: boolean = !!commandLineJson.commands?.some(
+        (command) => command.name === RushConstants.rebuildCommandName
+      );
+
+      return new CommandLineConfiguration(commandLineJson, {
+        doNotIncludeDefaultBuildCommands: !(hasBuildCommand || hasRebuildCommand)
+      });
     } else {
       return undefined;
     }
@@ -627,7 +674,10 @@ export class CommandLineConfiguration {
    * settings.  If the file does not exist, then a default instance is returned.
    * If the file contains errors, then an exception is thrown.
    */
-  public static loadFromFileOrDefault(jsonFilePath?: string): CommandLineConfiguration {
+  public static loadFromFileOrDefault(
+    jsonFilePath?: string,
+    doNotIncludeDefaultBuildCommands?: boolean
+  ): CommandLineConfiguration {
     let commandLineJson: ICommandLineJson | undefined = undefined;
     if (jsonFilePath) {
       try {
@@ -641,41 +691,13 @@ export class CommandLineConfiguration {
       // merge commands specified in command-line.json and default (re)build settings
       // Ensure both build commands are included and preserve any other commands specified
       if (commandLineJson?.commands) {
-        for (let i: number = 0; i < commandLineJson.commands.length; i++) {
-          const command: CommandJson = commandLineJson.commands[i];
-
-          // Determine if we have a set of default parameters
-          let commandDefaultDefinition: CommandJson | {} = {};
-          switch (command.commandKind) {
-            case RushConstants.phasedCommandKind:
-            case RushConstants.bulkCommandKind: {
-              switch (command.name) {
-                case RushConstants.buildCommandName: {
-                  commandDefaultDefinition = DEFAULT_BUILD_COMMAND_JSON;
-                  break;
-                }
-
-                case RushConstants.rebuildCommandName: {
-                  commandDefaultDefinition = DEFAULT_REBUILD_COMMAND_JSON;
-                  break;
-                }
-              }
-              break;
-            }
-          }
-
-          // Merge the default parameters into the repo-specified parameters
-          commandLineJson.commands[i] = {
-            ...commandDefaultDefinition,
-            ...command
-          };
-        }
+        this._applyBuildCommandDefaults(commandLineJson);
 
         CommandLineConfiguration._jsonSchema.validateObject(commandLineJson, jsonFilePath);
       }
     }
 
-    return new CommandLineConfiguration(commandLineJson, { doNotIncludeDefaultBuildCommands: false });
+    return new CommandLineConfiguration(commandLineJson, { doNotIncludeDefaultBuildCommands });
   }
 
   public prependAdditionalPathFolder(pathFolder: string): void {
