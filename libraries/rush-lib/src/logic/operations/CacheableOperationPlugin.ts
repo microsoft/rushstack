@@ -31,7 +31,6 @@ import type {
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
@@ -47,8 +46,6 @@ export interface IProjectDeps {
 export interface IOperationBuildCacheContext {
   isCacheWriteAllowed: boolean;
   isCacheReadAllowed: boolean;
-
-  stateHash: string;
 
   operationBuildCache: ProjectBuildCache | undefined;
   cacheDisabledReason: string | undefined;
@@ -106,10 +103,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           : undefined;
 
         for (const [operation, record] of recordByOperation) {
-          const stateHash: string = (record as OperationExecutionRecord).calculateStateHash({
-            inputsSnapshot,
-            buildCacheConfiguration
-          });
           const { associatedProject, associatedPhase, runner, settings: operationSettings } = operation;
           if (!runner) {
             return;
@@ -149,7 +142,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             isCacheReadAllowed: isIncrementalBuildAllowed,
             operationBuildCache: undefined,
             outputFolderNames,
-            stateHash,
             cacheDisabledReason,
             cobuildLock: undefined,
             cobuildClusterId: undefined,
@@ -269,8 +261,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 buildCacheConfiguration,
                 cobuildConfiguration,
                 buildCacheContext,
-                rushProject: project,
-                phase,
+                record,
                 terminal: buildCacheTerminal
               });
               if (projectBuildCache) {
@@ -594,45 +585,43 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   }
 
   // Get a ProjectBuildCache only cache/restore log files
-  private async _tryGetLogOnlyProjectBuildCacheAsync({
-    buildCacheContext,
-    rushProject,
-    terminal,
-    buildCacheConfiguration,
-    cobuildConfiguration,
-    phase
-  }: {
+  private async _tryGetLogOnlyProjectBuildCacheAsync(options: {
     buildCacheContext: IOperationBuildCacheContext;
     buildCacheConfiguration: BuildCacheConfiguration | undefined;
     cobuildConfiguration: CobuildConfiguration;
-    rushProject: RushConfigurationProject;
-    phase: IPhase;
+    record: IOperationRunnerContext & IOperationExecutionResult;
     terminal: ITerminal;
   }): Promise<ProjectBuildCache | undefined> {
+    const { buildCacheContext, buildCacheConfiguration, cobuildConfiguration, record, terminal } = options;
+
     if (!buildCacheConfiguration?.buildCacheEnabled) {
       return;
     }
 
-    const { outputFolderNames, stateHash } = buildCacheContext;
+    const { outputFolderNames } = buildCacheContext;
 
     const hasher: crypto.Hash = crypto.createHash('sha1');
-    hasher.update(stateHash);
+    hasher.update(record.getStateHash());
 
     if (cobuildConfiguration.cobuildContextId) {
-      hasher.update(`\ncobuildContextId=${cobuildConfiguration.cobuildContextId}`);
+      hasher.update(
+        `${RushConstants.hashDelimiter}cobuildContextId=${cobuildConfiguration.cobuildContextId}`
+      );
     }
 
-    hasher.update(`\nlogFilesOnly=1`);
+    hasher.update(`${RushConstants.hashDelimiter}logFilesOnly=1`);
 
     const operationStateHash: string = hasher.digest('hex');
 
+    const { associatedPhase, associatedProject } = record.operation;
+
     const projectBuildCache: ProjectBuildCache = ProjectBuildCache.getProjectBuildCache({
-      project: rushProject,
+      project: associatedProject,
       projectOutputFolderNames: outputFolderNames,
       buildCacheConfiguration,
       terminal,
       operationStateHash,
-      phaseName: phase.name
+      phaseName: associatedPhase.name
     });
 
     // eslint-disable-next-line require-atomic-updates -- This is guaranteed to not be concurrent

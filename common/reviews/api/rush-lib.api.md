@@ -585,6 +585,8 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 export interface IOperationExecutionResult {
     readonly cobuildRunnerId: string | undefined;
     readonly error: Error | undefined;
+    getStateHash(): string;
+    getStateHashComponents(): ReadonlyArray<string>;
     readonly logFilePaths: ILogFilePaths | undefined;
     readonly metadataFolderPath: string | undefined;
     readonly nonCachedDurationMs: number | undefined;

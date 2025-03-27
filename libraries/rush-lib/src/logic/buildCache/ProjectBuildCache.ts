@@ -112,7 +112,7 @@ export class ProjectBuildCache {
       project: operation.associatedProject,
       phaseName: operation.associatedPhase.name,
       projectOutputFolderNames: outputFolders,
-      operationStateHash: operation.stateHash
+      operationStateHash: operation.getStateHash()
     };
     const cacheId: string | undefined = ProjectBuildCache._getCacheId(buildCacheOptions);
     return new ProjectBuildCache(cacheId, buildCacheOptions);
