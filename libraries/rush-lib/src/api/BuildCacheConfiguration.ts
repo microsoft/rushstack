@@ -219,6 +219,9 @@ export class BuildCacheConfiguration {
 
     const { cacheHashSalt = '', cacheProvider } = buildCacheJson;
     const salt: string = `${RushConstants.buildCacheVersion}${cacheHashSalt ? `${RushConstants.hashDelimiter}${cacheHashSalt}` : ''}`;
+    // Extend the cache entry id with to salt the hash
+    // This facilitates forcing cache invalidation either when the build cache version changes (new version of Rush)
+    // or when the user-side salt changes (need to purge bad cache entries, plugins including additional files)
     const getCacheEntryId: GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions): string => {
       const saltedHash: string = createHash('sha1')
         .update(salt)
