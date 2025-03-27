@@ -26,8 +26,9 @@ export class DebugHashesPlugin implements IPhasedCommandPlugin {
           record.getStateHashComponents().forEach((component) => {
             terminal.writeLine(component);
           });
-          terminal.writeLine();
           terminal.writeLine(Colorize.green(`Result: ${record.getStateHash()}`));
+          // Add a blank line between operations to visually separate them
+          terminal.writeLine();
         }
         terminal.writeLine(Colorize.blue(`===== End Hash Computation =====`));
       }
