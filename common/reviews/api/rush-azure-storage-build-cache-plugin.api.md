@@ -35,7 +35,7 @@ export abstract class AzureAuthenticationBase {
     // (undocumented)
     deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
     // (undocumented)
-    protected readonly _failoverOrder: Record<Exclude<LoginFlowType, 'ChainedCredential'>, LoginFlowType | undefined> | undefined;
+    protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined> | undefined;
     protected abstract _getCacheIdParts(): string[];
     // (undocumented)
     protected abstract _getCredentialFromTokenAsync(terminal: ITerminal, tokenCredential: TokenCredential, credentialsCache: CredentialCache): Promise<ICredentialResult>;

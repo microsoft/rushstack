@@ -145,9 +145,7 @@ export abstract class AzureAuthenticationBase {
 
   protected readonly _azureEnvironment: AzureEnvironmentName;
   protected readonly _loginFlow: LoginFlowType;
-  protected readonly _failoverOrder:
-    | Record<Exclude<LoginFlowType, 'ChainedCredential'>, LoginFlowType | undefined>
-    | undefined;
+  protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined> | undefined;
 
   private __credentialCacheId: string | undefined;
   protected get _credentialCacheId(): string {
