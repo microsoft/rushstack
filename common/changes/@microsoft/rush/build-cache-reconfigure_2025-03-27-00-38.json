@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a new CLI flag `--debug-build-cache-ids` to help with root causing unexpected cache misses.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

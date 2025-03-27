@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash } from 'node:crypto';
 import * as path from 'path';
+
 import {
   JsonFile,
   JsonSchema,
@@ -17,7 +19,11 @@ import { RushConstants } from '../logic/RushConstants';
 import type { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
 import { RushUserConfiguration } from './RushUserConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
-import { CacheEntryId, type GetCacheEntryIdFunction } from '../logic/buildCache/CacheEntryId';
+import {
+  CacheEntryId,
+  type IGenerateCacheEntryIdOptions,
+  type GetCacheEntryIdFunction
+} from '../logic/buildCache/CacheEntryId';
 import type { CloudBuildCacheProviderFactory, RushSession } from '../pluginFramework/RushSession';
 import schemaJson from '../schemas/build-cache.schema.json';
 
@@ -201,9 +207,9 @@ export class BuildCacheConfiguration {
     );
     const rushUserConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
 
-    let getCacheEntryId: GetCacheEntryIdFunction;
+    let innerGetCacheEntryId: GetCacheEntryIdFunction;
     try {
-      getCacheEntryId = CacheEntryId.parsePattern(buildCacheJson.cacheEntryNamePattern);
+      innerGetCacheEntryId = CacheEntryId.parsePattern(buildCacheJson.cacheEntryNamePattern);
     } catch (e) {
       terminal.writeErrorLine(
         `Error parsing cache entry name pattern "${buildCacheJson.cacheEntryNamePattern}": ${e}`
@@ -211,13 +217,28 @@ export class BuildCacheConfiguration {
       throw new AlreadyReportedError();
     }
 
+    const { cacheHashSalt = '', cacheProvider } = buildCacheJson;
+    const salt: string = `${RushConstants.buildCacheVersion}${cacheHashSalt ? `${RushConstants.hashDelimiter}${cacheHashSalt}` : ''}`;
+    const getCacheEntryId: GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions): string => {
+      const saltedHash: string = createHash('sha1')
+        .update(salt)
+        .update(options.projectStateHash)
+        .digest('hex');
+
+      return innerGetCacheEntryId({
+        phaseName: options.phaseName,
+        projectName: options.projectName,
+        projectStateHash: saltedHash
+      });
+    };
+
     let cloudCacheProvider: ICloudBuildCacheProvider | undefined;
     // Don't configure a cloud cache provider if local-only
-    if (buildCacheJson.cacheProvider !== 'local-only') {
+    if (cacheProvider !== 'local-only') {
       const cloudCacheProviderFactory: CloudBuildCacheProviderFactory | undefined =
-        rushSession.getCloudBuildCacheProviderFactory(buildCacheJson.cacheProvider);
+        rushSession.getCloudBuildCacheProviderFactory(cacheProvider);
       if (!cloudCacheProviderFactory) {
-        throw new Error(`Unexpected cache provider: ${buildCacheJson.cacheProvider}`);
+        throw new Error(`Unexpected cache provider: ${cacheProvider}`);
       }
       cloudCacheProvider = await cloudCacheProviderFactory(buildCacheJson as ICloudBuildCacheJson);
     }

@@ -18,12 +18,13 @@ import { OperationStatus } from './OperationStatus';
 import { type IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import type { IExecutionResult } from './IOperationExecutionResult';
 import type { IEnvironment } from '../../utilities/Utilities';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
   debugMode: boolean;
   parallelism: number;
-  changedProjectsOnly: boolean;
+  inputsSnapshot?: IInputsSnapshot;
   destination?: TerminalWritable;
 
   beforeExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
@@ -52,7 +53,6 @@ const prioritySort: IOperationSortFunction = (
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class OperationExecutionManager {
-  private readonly _changedProjectsOnly: boolean;
   private readonly _executionRecords: Map<Operation, OperationExecutionRecord>;
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
@@ -85,7 +85,7 @@ export class OperationExecutionManager {
       quietMode,
       debugMode,
       parallelism,
-      changedProjectsOnly,
+      inputsSnapshot,
       beforeExecuteOperationAsync: beforeExecuteOperation,
       afterExecuteOperationAsync: afterExecuteOperation,
       onOperationStatusChangedAsync: onOperationStatusChanged,
@@ -96,7 +96,6 @@ export class OperationExecutionManager {
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
-    this._changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
 
     this._beforeExecuteOperation = beforeExecuteOperation;
@@ -131,6 +130,7 @@ export class OperationExecutionManager {
       streamCollator: this._streamCollator,
       onOperationStatusChanged: this._onOperationStatusChanged,
       createEnvironment: this._createEnvironmentForOperation,
+      inputsSnapshot,
       debugMode,
       quietMode
     };
@@ -151,16 +151,23 @@ export class OperationExecutionManager {
     }
     this._totalOperations = totalOperations;
 
-    for (const [operation, consumer] of executionRecords) {
+    for (const [operation, record] of executionRecords) {
       for (const dependency of operation.dependencies) {
         const dependencyRecord: OperationExecutionRecord | undefined = executionRecords.get(dependency);
         if (!dependencyRecord) {
           throw new Error(
-            `Operation "${consumer.name}" declares a dependency on operation "${dependency.name}" that is not in the set of operations to execute.`
+            `Operation "${record.name}" declares a dependency on operation "${dependency.name}" that is not in the set of operations to execute.`
           );
         }
-        consumer.dependencies.add(dependencyRecord);
-        dependencyRecord.consumers.add(consumer);
+        record.dependencies.add(dependencyRecord);
+        dependencyRecord.consumers.add(record);
+      }
+    }
+
+    // Ensure we compute the compute the state hashes for all operations before the runtime graph potentially mutates.
+    if (inputsSnapshot) {
+      for (const record of executionRecords.values()) {
+        record.getStateHash();
       }
     }
 

@@ -156,7 +156,8 @@ exports[`CommandLineHelp prints the help for each action: build 1`] = `
                   [--to-version-policy VERSION_POLICY_NAME]
                   [--from-version-policy VERSION_POLICY_NAME] [-v]
                   [--include-phase-deps] [-c] [--ignore-hooks]
-                  [--node-diagnostic-dir DIRECTORY] [-s] [-m]
+                  [--node-diagnostic-dir DIRECTORY] [--debug-build-cache-ids]
+                  [-s] [-m]
                   
 
 This command is similar to \\"rush rebuild\\", except that \\"rush build\\" performs 
@@ -294,6 +295,10 @@ Optional arguments:
                         Specifies the directory where Node.js diagnostic 
                         reports will be written. This directory will contain 
                         a subdirectory for each project and phase.
+  --debug-build-cache-ids
+                        Logs information about the components of the build 
+                        cache ids for individual operations. This is useful 
+                        for debugging the incremental build logic.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
@@ -447,6 +452,7 @@ exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
                            [--from-version-policy VERSION_POLICY_NAME] [-v]
                            [--include-phase-deps] [--ignore-hooks]
                            [--node-diagnostic-dir DIRECTORY]
+                           [--debug-build-cache-ids]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -567,6 +573,10 @@ Optional arguments:
                         Specifies the directory where Node.js diagnostic 
                         reports will be written. This directory will contain 
                         a subdirectory for each project and phase.
+  --debug-build-cache-ids
+                        Logs information about the components of the build 
+                        cache ids for individual operations. This is useful 
+                        for debugging the incremental build logic.
   --locale {en-us,fr-fr,es-es,zh-cn}
                         Selects a single instead of the default locale 
                         (en-us) for non-ship builds or all locales for ship 
@@ -1057,7 +1067,8 @@ exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME] [-v]
                     [--include-phase-deps] [--ignore-hooks]
-                    [--node-diagnostic-dir DIRECTORY] [-s] [-m]
+                    [--node-diagnostic-dir DIRECTORY]
+                    [--debug-build-cache-ids] [-s] [-m]
                     
 
 This command assumes that the package.json file for each project contains a 
@@ -1183,6 +1194,10 @@ Optional arguments:
                         Specifies the directory where Node.js diagnostic 
                         reports will be written. This directory will contain 
                         a subdirectory for each project and phase.
+  --debug-build-cache-ids
+                        Logs information about the components of the build 
+                        cache ids for individual operations. This is useful 
+                        for debugging the incremental build logic.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 

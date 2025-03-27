@@ -100,7 +100,6 @@ describe(OperationExecutionManager.name, () => {
         quietMode: false,
         debugMode: false,
         parallelism: 1,
-        changedProjectsOnly: false,
         destination: mockWritable
       };
     });
@@ -183,7 +182,6 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
-          changedProjectsOnly: false,
           destination: mockWritable
         }
       );
@@ -204,7 +202,6 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
-          changedProjectsOnly: false,
           destination: mockWritable
         };
       });
@@ -241,7 +238,6 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
-          changedProjectsOnly: false,
           destination: mockWritable
         };
       });

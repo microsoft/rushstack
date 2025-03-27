@@ -127,7 +127,12 @@ describe(BuildPlanPlugin.name, () => {
       operations.forEach((operation) => {
         operationMap.set(
           operation,
-          new OperationExecutionRecord(operation, { debugMode: false, quietMode: true, streamCollator })
+          new OperationExecutionRecord(operation, {
+            debugMode: false,
+            quietMode: true,
+            streamCollator,
+            inputsSnapshot: undefined
+          })
         );
       });
 
