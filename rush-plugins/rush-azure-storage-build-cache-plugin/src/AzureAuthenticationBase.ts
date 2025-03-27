@@ -110,9 +110,13 @@ export interface IAzureAuthenticationBaseOptions {
    * @defaultValue
    * ```json
    * {
-   *   "AdoCodespacesAuth": "InteractiveBrowser",
+   *   "AdoCodespacesAuth": "VisualStudioCode",
+   *   "VisualStudioCode": "AzureCli",
+   *   "AzureCli": "AzureDeveloperCli",
+   *   "AzureDeveloperCli": "AzurePowerShell",
+   *   "AzurePowerShell": "InteractiveBrowser",
    *   "InteractiveBrowser": "DeviceCode",
-   *   "DeviceCode": null
+   *   "DeviceCode": undefined
    * }
    * ```
    */
@@ -313,8 +317,6 @@ export abstract class AzureAuthenticationBase {
       throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
     }
 
-    let tokenCredential: TokenCredential;
-
     const interactiveCredentialOptions: (
       | InteractiveBrowserCredentialNodeOptions
       | InteractiveBrowserCredentialInBrowserOptions
@@ -325,66 +327,49 @@ export abstract class AzureAuthenticationBase {
     };
 
     const options = { authorityHost } as TokenCredentialOptions;
-    const credentials: TokenCredential[] = [];
-
-    let _loginFlow: string | undefined = loginFlow;
-    const loginFlowsSeen: Set<string> = new Set([loginFlow]);
-    while (_loginFlow !== undefined) {
-      switch (_loginFlow) {
-        case 'AdoCodespacesAuth': {
-          credentials.push(new AdoCodespacesAuthCredential());
-          break;
-        }
-        case 'VisualStudioCode': {
-          credentials.push(new VisualStudioCodeCredential(options));
-          break;
-        }
-        case 'AzureCli': {
-          credentials.push(new AzureCliCredential(options));
-          break;
-        }
-        case 'AzureDeveloperCli': {
-          credentials.push(new AzureDeveloperCliCredential(options));
-          break;
-        }
-        case 'AzurePowerShell': {
-          credentials.push(new AzurePowerShellCredential(options));
-          break;
-        }
-        case 'InteractiveBrowser': {
-          credentials.push(new InteractiveBrowserCredential(interactiveCredentialOptions));
-          break;
-        }
-        case 'DeviceCode': {
-          credentials.push(
-            new DeviceCodeCredential({
-              ...this._additionalDeviceCodeCredentialOptions,
-              ...interactiveCredentialOptions,
-              userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
-                PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
-              }
-            })
-          );
-          break;
-        }
-        default: {
-          _loginFlow = undefined;
-          break;
-        }
-      }
-
-      _loginFlow = this._failoverOrder?.[_loginFlow as LoginFlowType];
-      if (_loginFlow) {
-        if (loginFlowsSeen.has(_loginFlow)) {
-          // Prevent infinite loop
-          terminal.writeWarningLine('AzureAuthenticationBase: Circular loginFlowFailover detected');
-          _loginFlow = undefined;
-        } else {
-          loginFlowsSeen.add(_loginFlow);
-        }
+    const priority = new Set([loginFlow]);
+    for (const credType of priority) {
+      const next = this._failoverOrder?.[credType];
+      if (next) {
+        priority.add(next);
       }
     }
-    tokenCredential = new ChainedTokenCredential(...credentials);
+
+    const additionalDeviceCodeOptions = this._additionalDeviceCodeCredentialOptions;
+    const knownCredentialTypes: Record<
+      LoginFlowType,
+      new (options: TokenCredentialOptions) => TokenCredential
+    > = {
+      DeviceCode: class extends DeviceCodeCredential {
+        new(options: DeviceCodeCredentialOptions) {
+          return new DeviceCodeCredential({
+            ...additionalDeviceCodeOptions,
+            ...interactiveCredentialOptions,
+            userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
+              PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
+            },
+            ...options
+          });
+        }
+      },
+      InteractiveBrowser: class extends InteractiveBrowserCredential {
+        new(options: InteractiveBrowserCredentialNodeOptions) {
+          return new InteractiveBrowserCredential({ ...interactiveCredentialOptions, ...options });
+        }
+      },
+      AdoCodespacesAuth: AdoCodespacesAuthCredential,
+      VisualStudioCode: VisualStudioCodeCredential,
+      AzureCli: AzureCliCredential,
+      AzureDeveloperCli: AzureDeveloperCliCredential,
+      AzurePowerShell: AzurePowerShellCredential
+    };
+
+    const credentials: TokenCredential[] = Array.from(
+      priority,
+      (credType) => new knownCredentialTypes[credType](options)
+    );
+
+    const tokenCredential = new ChainedTokenCredential(...credentials);
 
     try {
       return await this._getCredentialFromTokenAsync(terminal, tokenCredential, credentialsCache);
