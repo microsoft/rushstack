@@ -13,11 +13,15 @@ export class BridgePackageAction extends BaseConnectPackageAction {
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'bridge-package',
-      summary: 'Enable access to another package under the current package.',
+      summary: '(EXPERIMENTAL) Simulate installation of a locally built project, affecting many projects.',
       documentation:
-        'Using “rush bridge-package” allows the target package to be accessed from the current package. ' +
-        'Compared to "rush link-package", "rush bridge-package" is designed to address the issues ' +
-        'caused by "peerDependencies", making it closer to the pattern of installing third-party dependencies.',
+        'This command enables you to test a locally built project by simulating its installation under the Rush' +
+        ' workspace node_modules folders.  Unlike "pnpm link" and "npm link", this command updates all installation' +
+        ' doppelgangers for the specified version range, potentially affecting multiple projects across the' +
+        ' workspace, as well as their indirect dependencies. The symlink is not reflected in pnpm-lock.yaml, and ' +
+        " ignores the local project's own package.json dependencies, preserving whatever the lockfile installed." +
+        '  The symlink will be cleared when you next run "rush install" or "rush update".' +
+        '  Compare with the "rush link-package" command, which affects only the consuming project.',
       safeForSimultaneousRushProcesses: true,
       parser
     });

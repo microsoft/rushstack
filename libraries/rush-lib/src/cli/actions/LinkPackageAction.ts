@@ -10,11 +10,16 @@ export class LinkPackageAction extends BaseConnectPackageAction {
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'link-package',
-      summary: 'Enable access to another package under the current package.',
+      summary:
+        '(EXPERIMENTAL) Simulate installation of a locally built project, affecting specific projects.',
       documentation:
-        'Using "rush link-package" will create a symbolic link of the target package in the "node_modules" folder ' +
-        'of the current package, allowing access to the target package from the current package. ' +
-        'However, it cannot resolve the issue of multiple instances caused by "peerDependencies".',
+        'This command enables you to test a locally built project by creating a symlink under a consuming' +
+        ' project\'s node_modules folder to simulate installation.  The implementation is similar to "pnpm link"' +
+        ' and "npm link", but better integrated with Rush features.  Like those commands, the symlink is' +
+        ' not reflected in pnpm-lock.yaml, affects the consuming project only, and has the same limitations as' +
+        ' "workspace:*".' +
+        '  The symlink will be cleared when you next run "rush install" or "rush update".' +
+        '  Compare with the "rush bridge-package" command, which affects multiple projects and indirect dependencies.',
       safeForSimultaneousRushProcesses: true,
       parser
     });

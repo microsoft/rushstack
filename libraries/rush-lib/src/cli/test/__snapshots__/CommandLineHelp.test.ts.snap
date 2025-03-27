@@ -64,10 +64,10 @@ Positional arguments:
     version             Manage package versions in the repo.
     alert               (EXPERIMENTAL) View and manage Rush alerts for the 
                         repository
-    bridge-package      Enable access to another package under the current 
-                        package.
-    link-package        Enable access to another package under the current 
-                        package.
+    bridge-package      (EXPERIMENTAL) Simulate installation of a locally 
+                        built project, affecting many projects.
+    link-package        (EXPERIMENTAL) Simulate installation of a locally 
+                        built project, affecting specific projects.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
@@ -158,15 +158,21 @@ exports[`CommandLineHelp prints the help for each action: bridge-package 1`] = `
                            [--version VERSION]
                            
 
-Using “rush bridge-package” allows the target package to be accessed from the 
-current package. Compared to \\"rush link-package\\", \\"rush bridge-package\\" is 
-designed to address the issues caused by \\"peerDependencies\\", making it closer 
-to the pattern of installing third-party dependencies.
+This command enables you to test a locally built project by simulating its 
+installation under the Rush workspace node_modules folders. Unlike \\"pnpm 
+link\\" and \\"npm link\\", this command updates all installation doppelgangers for 
+the specified version range, potentially affecting multiple projects across 
+the workspace, as well as their indirect dependencies. The symlink is not 
+reflected in pnpm-lock.yaml, and ignores the local project's own package.json 
+dependencies, preserving whatever the lockfile installed. The symlink will be 
+cleared when you next run \\"rush install\\" or \\"rush update\\". Compare with the 
+\\"rush link-package\\" command, which affects only the consuming project.
 
 Optional arguments:
   -h, --help         Show this help message and exit.
-  --path PATH        The filesystem path to the external package to be 
-                     connected
+  --path PATH        The folder path of a locally built project, whose 
+                     installation will be simulated using node_modules 
+                     symlinks. This folder will be the target of the symlinks.
   --project PROJECT  A list of Rush project names to connect to the external 
                      package. If not specified, uses the project in the 
                      current working directory.
@@ -861,15 +867,21 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: link-package 1`] = `
 "usage: rush link-package [-h] --path PATH [--project PROJECT]
 
-Using \\"rush link-package\\" will create a symbolic link of the target package 
-in the \\"node_modules\\" folder of the current package, allowing access to the 
-target package from the current package. However, it cannot resolve the issue 
-of multiple instances caused by \\"peerDependencies\\".
+This command enables you to test a locally built project by creating a 
+symlink under a consuming project's node_modules folder to simulate 
+installation. The implementation is similar to \\"pnpm link\\" and \\"npm link\\", 
+but better integrated with Rush features. Like those commands, the symlink is 
+not reflected in pnpm-lock.yaml, affects the consuming project only, and has 
+the same limitations as \\"workspace:*\\". The symlink will be cleared when you 
+next run \\"rush install\\" or \\"rush update\\". Compare with the \\"rush 
+bridge-package\\" command, which affects multiple projects and indirect 
+dependencies.
 
 Optional arguments:
   -h, --help         Show this help message and exit.
-  --path PATH        The filesystem path to the external package to be 
-                     connected
+  --path PATH        The folder path of a locally built project, whose 
+                     installation will be simulated using node_modules 
+                     symlinks. This folder will be the target of the symlinks.
   --project PROJECT  A list of Rush project names to connect to the external 
                      package. If not specified, uses the project in the 
                      current working directory.

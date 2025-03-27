@@ -19,7 +19,9 @@ export abstract class BaseConnectPackageAction extends BaseRushAction {
       parameterLongName: '--path',
       argumentName: 'PATH',
       required: true,
-      description: 'The filesystem path to the external package to be connected'
+      description:
+        'The folder path of a locally built project, whose installation will be simulated using node_modules' +
+        ' symlinks.  This folder will be the target of the symlinks.'
     });
 
     this._projectList = this.defineStringListParameter({

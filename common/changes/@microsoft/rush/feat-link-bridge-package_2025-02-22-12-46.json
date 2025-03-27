@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "An improved alternative to \"rush-pnpm link\"",
+      "comment": "(EXPERIMENTAL) Add new commands `rush link-package` and `rush bridge-package`",
       "type": "none"
     }
   ],

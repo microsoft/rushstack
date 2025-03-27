@@ -1141,7 +1141,7 @@ Object {
       "actionName": "bridge-package",
       "parameters": Array [
         Object {
-          "description": "The filesystem path to the external package to be connected",
+          "description": "The folder path of a locally built project, whose installation will be simulated using node_modules symlinks.  This folder will be the target of the symlinks.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--path",
@@ -1170,7 +1170,7 @@ Object {
       "actionName": "link-package",
       "parameters": Array [
         Object {
-          "description": "The filesystem path to the external package to be connected",
+          "description": "The folder path of a locally built project, whose installation will be simulated using node_modules symlinks.  This folder will be the target of the symlinks.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--path",
