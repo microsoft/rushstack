@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Sort all operations lexicographically by name for reporting purposes.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

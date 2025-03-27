@@ -47,6 +47,18 @@ const prioritySort: IOperationSortFunction = (
 };
 
 /**
+ * Sorts operations lexicographically by their name.
+ * @param a - The first operation to compare
+ * @param b - The second operation to compare
+ * @returns A comparison result: -1 if a < b, 0 if a === b, 1 if a > b
+ */
+function sortOperationsByName(a: Operation, b: Operation): number {
+  const aName: string = a.name;
+  const bName: string = b.name;
+  return aName === bName ? 0 : aName < bName ? -1 : 1;
+}
+
+/**
  * A class which manages the execution of a set of tasks with interdependencies.
  * Initially, and at the end of each task execution, all unblocked tasks
  * are added to a ready queue which is then executed. This is done continually until all
@@ -135,9 +147,12 @@ export class OperationExecutionManager {
       quietMode
     };
 
+    // Sort the operations by name to ensure consistency and readability.
+    const sortedOperations: Operation[] = Array.from(operations).sort(sortOperationsByName);
+
     let totalOperations: number = 0;
     const executionRecords: Map<Operation, OperationExecutionRecord> = (this._executionRecords = new Map());
-    for (const operation of operations) {
+    for (const operation of sortedOperations) {
       const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(
         operation,
         executionRecordContext
