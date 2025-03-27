@@ -9,16 +9,21 @@ import {
   type InteractiveBrowserCredentialInBrowserOptions,
   InteractiveBrowserCredential,
   type InteractiveBrowserCredentialNodeOptions,
-  type TokenCredential
+  type TokenCredential,
+  ChainedTokenCredential,
+  VisualStudioCodeCredential,
+  AzureCliCredential,
+  AzureDeveloperCliCredential,
+  AzurePowerShellCredential
 } from '@azure/identity';
+import type { TokenCredentialOptions } from '@azure/identity';
+import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';
 import type { ITerminal } from '@rushstack/terminal';
 import { CredentialCache } from '@rushstack/rush-sdk';
 // Use a separate import line so the .d.ts file ends up with an `import type { ... }`
 // See https://github.com/microsoft/rushstack/issues/3432
 import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import { PrintUtilities } from '@rushstack/terminal';
-import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';
-import { ChainedCredential } from './ChainedCredential';
 
 /**
  * @public
@@ -81,7 +86,14 @@ export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 /**
  * @public
  */
-export type LoginFlowType = 'ChainedCredential' | 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth';
+export type LoginFlowType =
+  | 'DeviceCode'
+  | 'InteractiveBrowser'
+  | 'AdoCodespacesAuth'
+  | 'VisualStudioCode'
+  | 'AzureCli'
+  | 'AzureDeveloperCli'
+  | 'AzurePowerShell';
 
 /**
  * @public
@@ -89,14 +101,11 @@ export type LoginFlowType = 'ChainedCredential' | 'DeviceCode' | 'InteractiveBro
 export interface IAzureAuthenticationBaseOptions {
   azureEnvironment?: AzureEnvironmentName;
   credentialUpdateCommandForLogging?: string | undefined;
-  /**
-   * @defaultValue 'ChainedCredential'
-   */
   loginFlow?: LoginFlowType;
   /**
    * A map to define the failover order for login flows. When a login flow fails to get a credential,
    * the next login flow in the map will be attempted. If the login flow fails and there is no next
-   * login flow, the error will be thrown. This option is disabled when loginFlow is `ChainedCredential`.
+   * login flow, the error will be thrown.
    *
    * @defaultValue
    * ```json
@@ -152,18 +161,22 @@ export abstract class AzureAuthenticationBase {
   }
 
   public constructor(options: IAzureAuthenticationBaseOptions) {
-    const { azureEnvironment = 'AzurePublicCloud', loginFlow = 'ChainedCredential' } = options;
+    const {
+      azureEnvironment = 'AzurePublicCloud',
+      loginFlow = process.env.CODESPACES === 'true' ? 'AdoCodespacesAuth' : 'VisualStudioCode'
+    } = options;
     this._azureEnvironment = azureEnvironment;
     this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
     this._loginFlow = loginFlow;
-    this._failoverOrder =
-      loginFlow !== 'ChainedCredential' && options.loginFlowFailover
-        ? {
-            AdoCodespacesAuth: 'InteractiveBrowser',
-            InteractiveBrowser: 'DeviceCode',
-            DeviceCode: undefined
-          }
-        : undefined;
+    this._failoverOrder = options.loginFlowFailover || {
+      AdoCodespacesAuth: 'VisualStudioCode',
+      VisualStudioCode: 'AzureCli',
+      AzureCli: 'AzureDeveloperCli',
+      AzureDeveloperCli: 'AzurePowerShell',
+      AzurePowerShell: 'InteractiveBrowser',
+      InteractiveBrowser: 'DeviceCode',
+      DeviceCode: undefined
+    };
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
@@ -311,47 +324,63 @@ export abstract class AzureAuthenticationBase {
       authorityHost
     };
 
-    switch (loginFlow) {
-      case 'ChainedCredential': {
-        tokenCredential = new ChainedCredential({ authorityHost });
-        break;
+    const options = { authorityHost } as TokenCredentialOptions;
+    const credentials: TokenCredential[] = [];
+
+    let _loginFlow: string | undefined = loginFlow;
+    while (_loginFlow !== undefined) {
+      switch (_loginFlow) {
+        case 'AdoCodespacesAuth': {
+          credentials.push(new AdoCodespacesAuthCredential());
+          break;
+        }
+        case 'VisualStudioCode': {
+          credentials.push(new VisualStudioCodeCredential(options));
+          break;
+        }
+        case 'AzureCli': {
+          credentials.push(new AzureCliCredential(options));
+          break;
+        }
+        case 'AzureDeveloperCli': {
+          credentials.push(new AzureDeveloperCliCredential(options));
+          break;
+        }
+        case 'AzurePowerShell': {
+          credentials.push(new AzurePowerShellCredential(options));
+          break;
+        }
+        case 'InteractiveBrowser': {
+          credentials.push(new InteractiveBrowserCredential(interactiveCredentialOptions));
+          break;
+        }
+        case 'DeviceCode': {
+          credentials.push(
+            new DeviceCodeCredential({
+              ...this._additionalDeviceCodeCredentialOptions,
+              ...interactiveCredentialOptions,
+              userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
+                PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
+              }
+            })
+          );
+          break;
+        }
+        default: {
+          _loginFlow = undefined;
+          break;
+        }
       }
-      case 'AdoCodespacesAuth': {
-        tokenCredential = new AdoCodespacesAuthCredential();
-        break;
-      }
-      case 'InteractiveBrowser': {
-        tokenCredential = new InteractiveBrowserCredential(interactiveCredentialOptions);
-        break;
-      }
-      case 'DeviceCode': {
-        tokenCredential = new DeviceCodeCredential({
-          ...interactiveCredentialOptions,
-          userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
-            PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
-          }
-        });
-        break;
-      }
-      default: {
-        throw new Error(`Unsupported login flow: ${loginFlow}`);
-      }
+
+      _loginFlow = this._failoverOrder?.[_loginFlow as LoginFlowType];
     }
+    tokenCredential = new ChainedTokenCredential(...credentials);
 
     try {
       return await this._getCredentialFromTokenAsync(terminal, tokenCredential, credentialsCache);
     } catch (error) {
       terminal.writeVerbose(`Failed to get credentials with ${loginFlow}: ${error}`);
-      if (loginFlow === 'ChainedCredential') {
-        throw error;
-      }
-      const fallbackFlow: LoginFlowType | undefined = this._failoverOrder?.[loginFlow];
-      if (fallbackFlow) {
-        terminal.writeVerbose(`Falling back to ${fallbackFlow} login flow`);
-        return this._getCredentialAsync(terminal, fallbackFlow, credentialsCache);
-      } else {
-        throw error;
-      }
+      throw error;
     }
   }
 }

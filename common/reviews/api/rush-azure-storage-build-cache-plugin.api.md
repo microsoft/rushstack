@@ -133,7 +133,7 @@ export interface ITryGetCachedCredentialOptionsThrow extends ITryGetCachedCreden
 }
 
 // @public (undocumented)
-export type LoginFlowType = 'ChainedCredential' | 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth';
+export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth' | 'VisualStudioCode' | 'AzureCli' | 'AzureDeveloperCli' | 'AzurePowerShell';
 
 // @public (undocumented)
 class RushAzureStorageBuildCachePlugin implements IRushPlugin {
