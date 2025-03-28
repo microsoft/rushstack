@@ -1,6 +1,81 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:15 GMT and should not be manually modified.
+
+## 0.71.1
+Tue, 25 Mar 2025 15:11:15 GMT
+
+_Version update only_
+
+## 0.71.0
+Wed, 12 Mar 2025 22:41:36 GMT
+
+### Minor changes
+
+- Add a `numberOfCores` property to `HeftConfiguration`.
+
+## 0.70.1
+Wed, 12 Mar 2025 00:11:31 GMT
+
+### Patches
+
+- Revert `useNodeJSResolver: true` to deal with plugins that have an `exports` field that doesn't contain `./package.json`.
+
+## 0.70.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Use `useNodeJSResolver: true` in `Import.resolvePackage` calls.
+
+## 0.69.3
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.69.2
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.69.1
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.69.0
+Wed, 26 Feb 2025 16:11:11 GMT
+
+### Minor changes
+
+- Expose `watchFs` on the incremental run options for tasks to give more flexibility when having Heft perform file watching than only invoking globs directly.
+
+## 0.68.18
+Sat, 22 Feb 2025 01:11:11 GMT
+
+_Version update only_
+
+## 0.68.17
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.68.16
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.68.15
+Thu, 30 Jan 2025 16:10:36 GMT
+
+### Patches
+
+- Prefer `os.availableParallelism()` to `os.cpus().length`.
+
+## 0.68.14
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
 
 ## 0.68.13
 Thu, 09 Jan 2025 01:10:10 GMT

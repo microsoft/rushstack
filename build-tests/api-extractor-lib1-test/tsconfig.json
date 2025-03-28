@@ -1,3 +1,4 @@
+// This project is using TypeScript 2, so we can't extend from the rig
 {
   "compilerOptions": {
     "target": "es6",

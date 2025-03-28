@@ -2,6 +2,309 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.5.29",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.29",
+      "date": "Tue, 25 Mar 2025 15:11:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.8.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.71.0` to `0.71.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.28",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.28",
+      "date": "Tue, 25 Mar 2025 00:12:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the `--fix` argument when the file only contains fixable issues."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.27",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.27",
+      "date": "Wed, 12 Mar 2025 22:41:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.70.1` to `0.71.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.26",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.26",
+      "date": "Wed, 12 Mar 2025 00:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.7.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.70.0` to `0.70.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.25",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.25",
+      "date": "Tue, 11 Mar 2025 02:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.69.3` to `0.70.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.24",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.24",
+      "date": "Tue, 11 Mar 2025 00:11:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.6.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.69.2` to `0.69.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.23",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.23",
+      "date": "Thu, 06 Mar 2025 01:10:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the cache is only populated for incremental TypeScript builds."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.22",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.22",
+      "date": "Sat, 01 Mar 2025 07:23:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.6.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.21",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.21",
+      "date": "Sat, 01 Mar 2025 05:00:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.6.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.69.1` to `0.69.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.20",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.20",
+      "date": "Thu, 27 Feb 2025 01:10:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.6.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.69.0` to `0.69.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.19",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.19",
+      "date": "Wed, 26 Feb 2025 16:11:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.6.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.68.18` to `0.69.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.18",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.18",
+      "date": "Tue, 25 Feb 2025 01:11:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add verbose logging around finding the lint config file."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.17",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.17",
+      "date": "Sat, 22 Feb 2025 01:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.6.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.68.17` to `0.68.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.16",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.16",
+      "date": "Wed, 19 Feb 2025 18:53:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.6.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.68.16` to `0.68.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.15",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.15",
+      "date": "Wed, 12 Feb 2025 01:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.6.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.68.15` to `0.68.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.14",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.14",
+      "date": "Thu, 30 Jan 2025 16:10:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.6.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.68.14` to `0.68.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.13",
+      "tag": "@rushstack/heft-lint-plugin_v0.5.13",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.6.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.68.13` to `0.68.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.12",
       "tag": "@rushstack/heft-lint-plugin_v0.5.12",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",

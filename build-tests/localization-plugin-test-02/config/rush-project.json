@@ -1,10 +1,12 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-project.schema.json",
 
+  "extends": "local-node-rig/profiles/default/config/rush-project.json",
+
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": ["lib", "dist-dev", "dist-prod"]
+      "outputFolderNames": ["dist-dev", "dist-prod"]
     }
   ]
 }

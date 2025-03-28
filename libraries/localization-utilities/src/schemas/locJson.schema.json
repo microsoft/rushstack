@@ -4,17 +4,24 @@
 
   "patternProperties": {
     "^[A-Za-z_$][0-9A-Za-z_$]*$": {
-      "type": "object",
-      "properties": {
-        "value": {
-          "type": "string"
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "string"
+            },
+            "comment": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["value"]
         },
-        "comment": {
+        {
           "type": "string"
         }
-      },
-      "additionalProperties": false,
-      "required": ["value"]
+      ]
     }
   },
   "additionalProperties": false,

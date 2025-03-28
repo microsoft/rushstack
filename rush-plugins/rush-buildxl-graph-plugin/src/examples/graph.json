@@ -1,0 +1,503 @@
+{
+  "nodes": [
+    {
+      "id": "@rushstack/rush-buildxl-graph-plugin#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/rush-buildxl-graph-plugin",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/rush-sdk#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@rushstack/ts-command-line#_phase:build",
+        "@microsoft/rush-lib#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft-api-extractor-plugin#_phase:build",
+        "@rushstack/heft-jest-plugin#_phase:build",
+        "@rushstack/heft-lint-plugin#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build"
+      ],
+      "workingDirectory": "/repo/rush-plugins/rush-buildxl-graph-plugin",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/node-core-library#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/node-core-library",
+      "dependencies": [
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/node-core-library",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/eslint-patch#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/eslint-patch",
+      "dependencies": [],
+      "workingDirectory": "/repo/eslint/eslint-patch",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/eslint-plugin#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/eslint-plugin",
+      "dependencies": ["@rushstack/tree-pattern#_phase:build"],
+      "workingDirectory": "/repo/eslint/eslint-plugin",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/tree-pattern#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/tree-pattern",
+      "dependencies": [],
+      "workingDirectory": "/repo/libraries/tree-pattern",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/eslint-plugin-packlets#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/eslint-plugin-packlets",
+      "dependencies": ["@rushstack/tree-pattern#_phase:build"],
+      "workingDirectory": "/repo/eslint/eslint-plugin-packlets",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/eslint-plugin-security#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/eslint-plugin-security",
+      "dependencies": ["@rushstack/tree-pattern#_phase:build"],
+      "workingDirectory": "/repo/eslint/eslint-plugin-security",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/rush-sdk#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/rush-sdk",
+      "dependencies": [
+        "@rushstack/lookup-by-path#_phase:build",
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/package-deps-hash#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@microsoft/rush-lib#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft-api-extractor-plugin#_phase:build",
+        "@rushstack/heft-jest-plugin#_phase:build",
+        "@rushstack/heft-lint-plugin#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build",
+        "@rushstack/heft-webpack5-plugin#_phase:build",
+        "@rushstack/stream-collator#_phase:build",
+        "@rushstack/ts-command-line#_phase:build",
+        "@rushstack/webpack-preserve-dynamic-require-plugin#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/rush-sdk",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/lookup-by-path#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/lookup-by-path",
+      "dependencies": [
+        "@rushstack/heft#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft-api-extractor-plugin#_phase:build",
+        "@rushstack/heft-jest-plugin#_phase:build",
+        "@rushstack/heft-lint-plugin#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/lookup-by-path",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/heft#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/heft",
+      "dependencies": [
+        "@rushstack/heft-config-file#_phase:build",
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/operation-graph#_phase:build",
+        "@rushstack/rig-package#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@rushstack/ts-command-line#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build"
+      ],
+      "workingDirectory": "/repo/apps/heft",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/heft-config-file#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/heft-config-file",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/rig-package#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/heft-config-file",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/rig-package#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/rig-package",
+      "dependencies": [
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/rig-package",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/terminal#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/terminal",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/terminal",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/operation-graph#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/operation-graph",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/operation-graph",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/ts-command-line#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/ts-command-line",
+      "dependencies": [
+        "@rushstack/terminal#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/ts-command-line",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@microsoft/api-extractor#_phase:build",
+      "task": "_phase:build",
+      "package": "@microsoft/api-extractor",
+      "dependencies": [
+        "@microsoft/api-extractor-model#_phase:build",
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/rig-package#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@rushstack/ts-command-line#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build"
+      ],
+      "workingDirectory": "/repo/apps/api-extractor",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@microsoft/api-extractor-model#_phase:build",
+      "task": "_phase:build",
+      "package": "@microsoft/api-extractor-model",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/api-extractor-model",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/heft-api-extractor-plugin#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/heft-api-extractor-plugin",
+      "dependencies": [
+        "@rushstack/heft-config-file#_phase:build",
+        "@rushstack/node-core-library#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@rushstack/terminal#_phase:build"
+      ],
+      "workingDirectory": "/repo/heft-plugins/heft-api-extractor-plugin",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/heft-jest-plugin#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/heft-jest-plugin",
+      "dependencies": [
+        "@rushstack/heft-config-file#_phase:build",
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build"
+      ],
+      "workingDirectory": "/repo/heft-plugins/heft-jest-plugin",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/heft-lint-plugin#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/heft-lint-plugin",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build",
+        "@rushstack/terminal#_phase:build"
+      ],
+      "workingDirectory": "/repo/heft-plugins/heft-lint-plugin",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/heft-typescript-plugin#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/heft-typescript-plugin",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/heft-config-file#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@rushstack/terminal#_phase:build"
+      ],
+      "workingDirectory": "/repo/heft-plugins/heft-typescript-plugin",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/package-deps-hash#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/package-deps-hash",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft-api-extractor-plugin#_phase:build",
+        "@rushstack/heft-jest-plugin#_phase:build",
+        "@rushstack/heft-lint-plugin#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/package-deps-hash",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@microsoft/rush-lib#_phase:build",
+      "task": "_phase:build",
+      "package": "@microsoft/rush-lib",
+      "dependencies": [
+        "@rushstack/heft-config-file#_phase:build",
+        "@rushstack/lookup-by-path#_phase:build",
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/package-deps-hash#_phase:build",
+        "@rushstack/package-extractor#_phase:build",
+        "@rushstack/rig-package#_phase:build",
+        "@rushstack/stream-collator#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@rushstack/ts-command-line#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft-api-extractor-plugin#_phase:build",
+        "@rushstack/heft-jest-plugin#_phase:build",
+        "@rushstack/heft-lint-plugin#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@rushstack/heft-webpack5-plugin#_phase:build",
+        "@rushstack/operation-graph#_phase:build",
+        "@rushstack/webpack-deep-imports-plugin#_phase:build",
+        "@rushstack/webpack-preserve-dynamic-require-plugin#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/rush-lib",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/package-extractor#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/package-extractor",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@rushstack/ts-command-line#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft-api-extractor-plugin#_phase:build",
+        "@rushstack/heft-jest-plugin#_phase:build",
+        "@rushstack/heft-lint-plugin#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@rushstack/heft-webpack5-plugin#_phase:build",
+        "@rushstack/webpack-preserve-dynamic-require-plugin#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/package-extractor",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/heft-webpack5-plugin#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/heft-webpack5-plugin",
+      "dependencies": [
+        "@rushstack/debug-certificate-manager#_phase:build",
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft-api-extractor-plugin#_phase:build",
+        "@rushstack/heft-jest-plugin#_phase:build",
+        "@rushstack/heft-lint-plugin#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build"
+      ],
+      "workingDirectory": "/repo/heft-plugins/heft-webpack5-plugin",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/debug-certificate-manager#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/debug-certificate-manager",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft-api-extractor-plugin#_phase:build",
+        "@rushstack/heft-jest-plugin#_phase:build",
+        "@rushstack/heft-lint-plugin#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/debug-certificate-manager",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/webpack-preserve-dynamic-require-plugin#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/webpack-preserve-dynamic-require-plugin",
+      "dependencies": [
+        "@rushstack/heft#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft-api-extractor-plugin#_phase:build",
+        "@rushstack/heft-jest-plugin#_phase:build",
+        "@rushstack/heft-lint-plugin#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build"
+      ],
+      "workingDirectory": "/repo/webpack/preserve-dynamic-require-plugin",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/stream-collator#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/stream-collator",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@rushstack/terminal#_phase:build",
+        "@rushstack/heft#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft-api-extractor-plugin#_phase:build",
+        "@rushstack/heft-jest-plugin#_phase:build",
+        "@rushstack/heft-lint-plugin#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build"
+      ],
+      "workingDirectory": "/repo/libraries/stream-collator",
+      "command": "heft run --only build -- --clean --production"
+    },
+    {
+      "id": "@rushstack/webpack-deep-imports-plugin#_phase:build",
+      "task": "_phase:build",
+      "package": "@rushstack/webpack-deep-imports-plugin",
+      "dependencies": [
+        "@rushstack/node-core-library#_phase:build",
+        "@microsoft/api-extractor#_phase:build",
+        "@rushstack/eslint-patch#_phase:build",
+        "@rushstack/eslint-plugin#_phase:build",
+        "@rushstack/eslint-plugin-packlets#_phase:build",
+        "@rushstack/eslint-plugin-security#_phase:build",
+        "@rushstack/heft-api-extractor-plugin#_phase:build",
+        "@rushstack/heft-jest-plugin#_phase:build",
+        "@rushstack/heft-lint-plugin#_phase:build",
+        "@rushstack/heft-typescript-plugin#_phase:build",
+        "@rushstack/heft#_phase:build"
+      ],
+      "workingDirectory": "/repo/webpack/webpack-deep-imports-plugin",
+      "command": "heft run --only build -- --clean --production"
+    }
+  ],
+  "repoSettings": {
+    "commonTempFolder": "/repo/common/temp"
+  }
+}

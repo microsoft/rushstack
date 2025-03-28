@@ -190,10 +190,10 @@ export function isNormalObjectProperty(node: TSESTree.Node): node is INormalObje
   return isProperty(node) && (isIdentifier(node.key) || isPrivateIdentifier(node.key));
 }
 
-export interface INormalVariableDeclarator extends TSESTree.VariableDeclarator {
+export type INormalVariableDeclarator = TSESTree.LetOrConstOrVarDeclaration & {
   id: TSESTree.Identifier;
   init: TSESTree.Expression;
-}
+};
 
 export function isNormalVariableDeclarator(node: TSESTree.Node): node is INormalVariableDeclarator {
   return isVariableDeclarator(node) && isIdentifier(node.id) && node.init !== null;
@@ -209,9 +209,9 @@ export function isNormalAssignmentPatternWithAnonymousExpressionAssigned(
   return isNormalAssignmentPattern(node) && isNormalAnonymousExpression(node.right);
 }
 
-export interface INormalVariableDeclaratorWithAnonymousExpressionAssigned extends INormalVariableDeclarator {
+export type INormalVariableDeclaratorWithAnonymousExpressionAssigned = INormalVariableDeclarator & {
   init: NormalAnonymousExpression;
-}
+};
 
 export function isNormalVariableDeclaratorWithAnonymousExpressionAssigned(
   node: TSESTree.Node

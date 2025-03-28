@@ -1,6 +1,80 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:15 GMT and should not be manually modified.
+
+## 0.9.3
+Tue, 25 Mar 2025 15:11:15 GMT
+
+_Version update only_
+
+## 0.9.2
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 0.9.1
+Wed, 12 Mar 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.9.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Use `useNodeJSResolver: true` in `Import.resolvePackage` calls.
+
+## 0.8.9
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.8.8
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.8.7
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.8.6
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 0.8.5
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.8.4
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.8.3
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.8.2
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 0.8.1
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.8.0
+Thu, 16 Jan 2025 22:49:19 GMT
+
+### Minor changes
+
+- Add support for the `--docs` parameter.
 
 ## 0.7.7
 Thu, 09 Jan 2025 01:10:10 GMT

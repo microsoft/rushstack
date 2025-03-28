@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.147.2",
+  "rushVersion": "5.150.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -437,6 +437,12 @@
       "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/cpu-profile-summarizer",
+      "projectFolder": "apps/cpu-profile-summarizer",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft",
       "projectFolder": "apps/heft",
       "reviewCategory": "libraries",
@@ -578,6 +584,13 @@
       "tags": ["api-extractor-tests"]
     },
     {
+      "packageName": "api-extractor-test-05",
+      "projectFolder": "build-tests/api-extractor-test-05",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
+    },
+    {
       "packageName": "eslint-7-7-test",
       "projectFolder": "build-tests/eslint-7-7-test",
       "reviewCategory": "tests",
@@ -638,6 +651,12 @@
     {
       "packageName": "package-extractor-test-04",
       "projectFolder": "build-tests/package-extractor-test-04",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "run-scenarios-helpers",
+      "projectFolder": "build-tests/run-scenarios-helpers",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -965,12 +984,6 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-    {
-      "packageName": "ts-command-line-test",
-      "projectFolder": "build-tests/ts-command-line-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
 
     // "heft-plugins" folder (alphabetical order)
     {
@@ -983,6 +996,12 @@
     {
       "packageName": "@rushstack/heft-dev-cert-plugin",
       "projectFolder": "heft-plugins/heft-dev-cert-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-isolated-typescript-transpile-plugin",
+      "projectFolder": "heft-plugins/heft-isolated-typescript-transpile-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -1242,6 +1261,13 @@
       "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
+    },
+    {
+      "packageName": "@rushstack/rush-buildxl-graph-plugin",
+      "projectFolder": "rush-plugins/rush-buildxl-graph-plugin",
+      "reviewCategory": "libraries"
+      // For now
+      // "versionPolicyName": "rush"
     },
     {
       "packageName": "@rushstack/rush-http-build-cache-plugin",

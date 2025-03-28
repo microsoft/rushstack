@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.148.0",
+  "version": "5.151.0",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
@@ -22,7 +22,8 @@
     "./lib/*": {
       "types": "./lib/*.d.ts",
       "default": "./lib/*.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
@@ -54,7 +55,7 @@
     "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/semver": "7.5.0",
-    "@types/webpack-env": "1.18.0",
-    "webpack": "~5.95.0"
+    "@types/webpack-env": "1.18.8",
+    "webpack": "~5.98.0"
   }
 }

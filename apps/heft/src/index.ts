@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/// <reference types="node" preserve="true" />
+
 /**
  * Heft is a config-driven toolchain that invokes other popular tools such
  * as TypeScript, ESLint, Jest, Webpack, and API Extractor. You can use it to build
@@ -45,7 +47,14 @@ export type { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin';
 
 export type { IFileSelectionSpecifier, IGlobOptions, GlobFn, WatchGlobFn } from './plugins/FileGlobSpecifier';
 
-export type { IWatchedFileState } from './utilities/WatchFileSystemAdapter';
+export type {
+  IWatchedFileState,
+  IWatchFileSystem,
+  ReaddirDirentCallback,
+  ReaddirStringCallback,
+  StatCallback,
+  IReaddirOptions
+} from './utilities/WatchFileSystemAdapter';
 
 export {
   type IHeftRecordMetricsHookOptions,

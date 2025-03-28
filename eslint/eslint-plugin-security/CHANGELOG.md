@@ -1,6 +1,20 @@
 # Change Log - @rushstack/eslint-plugin-security
 
-This log was last generated on Thu, 19 Sep 2024 00:11:08 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Mar 2025 02:12:33 GMT and should not be manually modified.
+
+## 0.10.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Bump the `@typescript-eslint/*` packages to add support for TypeScript 5.8.
+
+## 0.9.0
+Sat, 01 Mar 2025 07:23:16 GMT
+
+### Minor changes
+
+- Bump the `@typescript-eslint/*` dependencies to `~8.24.0` to support newer versions of TypeScript.
 
 ## 0.8.3
 Thu, 19 Sep 2024 00:11:08 GMT

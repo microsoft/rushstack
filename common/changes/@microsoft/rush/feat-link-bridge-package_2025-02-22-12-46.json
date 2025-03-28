@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(EXPERIMENTAL) Add new commands `rush link-package` and `rush bridge-package`",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

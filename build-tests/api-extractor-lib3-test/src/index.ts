@@ -22,5 +22,6 @@ export class Lib3Class {
    * @customBlockTag My docs include a custom block tag!
    * @virtual @override
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   prop: boolean;
 }

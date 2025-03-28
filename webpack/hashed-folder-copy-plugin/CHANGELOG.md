@@ -1,6 +1,77 @@
 # Change Log - @rushstack/hashed-folder-copy-plugin
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:16 GMT and should not be manually modified.
+
+## 1.1.4
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 1.1.3
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 1.1.2
+Wed, 12 Mar 2025 00:11:31 GMT
+
+### Patches
+
+- Add missing `./package.json` export.
+
+## 1.1.1
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Patches
+
+- Re-include the `main` and `typings` `package.json` fields.
+
+## 1.1.0
+Tue, 11 Mar 2025 00:11:25 GMT
+
+### Minor changes
+
+- Move the `ambientTypes.d.ts` file to `dist` and use the `exports` and `typesVersions` fields in `package.json` to maintain `@rushstack/hashed-folder-copy-plugin/ambientTypes` references.
+
+## 1.0.80
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 1.0.79
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 1.0.78
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 1.0.77
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 1.0.76
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 1.0.75
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 1.0.74
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 1.0.73
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
 
 ## 1.0.72
 Thu, 09 Jan 2025 01:10:10 GMT

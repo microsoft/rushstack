@@ -16,10 +16,10 @@
     "@rushstack/module-minifier": "workspace:*",
     "@rushstack/set-webpack-public-path-plugin": "workspace:*",
     "@rushstack/webpack5-module-minifier-plugin": "workspace:*",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.8",
     "eslint": "~8.57.0",
     "html-webpack-plugin": "~5.5.0",
-    "typescript": "~5.4.2",
-    "webpack": "~5.95.0"
+    "typescript": "~5.8.2",
+    "webpack": "~5.98.0"
   }
 }

@@ -2,6 +2,84 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.151.0",
+      "tag": "@microsoft/rush_v5.151.0",
+      "date": "Tue, 25 Mar 2025 16:58:46 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `--include-phase-deps` and watch mode sometimes included operations that were not required"
+          },
+          {
+            "comment": "Fix an issue where build/rebuild can not be defined in a rush plugin command line configuration"
+          },
+          {
+            "comment": "Use `useNodeJSResolver: true` in `Import.resolvePackage` calls."
+          },
+          {
+            "comment": "Add missing `./package.json` export; revert `useNodeJSResolver: true`."
+          },
+          {
+            "comment": "(plugin-api) Guaranteed `operation.associatedPhase` and `operation.associatedProject` are not undefined."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.150.0",
+      "tag": "@microsoft/rush_v5.150.0",
+      "date": "Thu, 27 Feb 2025 17:41:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add an `--include-phase-deps` switch that expands an unsafe project selection to include its phase dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.149.1",
+      "tag": "@microsoft/rush_v5.149.1",
+      "date": "Wed, 19 Feb 2025 18:54:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove the unused `RushConstants.rushAlertsStateFilename` property."
+          },
+          {
+            "comment": "Bump `jsonpath-plus` to `~10.3.0`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.149.0",
+      "tag": "@microsoft/rush_v5.149.0",
+      "date": "Wed, 12 Feb 2025 04:07:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Prefer `os.availableParallelism()` to `os.cpus().length`."
+          },
+          {
+            "comment": "Add a new command line parameter `--node-diagnostic-dir=DIR` to phased commands that, when specified, tells all child build processes to write NodeJS diagnostics into `${DIR}/${packageName}/${phaseIdentifier}`. This is useful if `--cpu-prof` or `--heap-prof` are enabled, to avoid polluting workspace folders."
+          },
+          {
+            "comment": "Add a new phased command hook `createEnvironmentForOperation` that can be used to customize the environment variables passed to individual operation subprocesses. This may be used to, for example, customize `NODE_OPTIONS` to pass `--diagnostic-dir` or other such parameters."
+          },
+          {
+            "comment": "Allow --timeline option for all phased commands"
+          },
+          {
+            "comment": "Fix support for \"ensureConsistentVersions\" in common-versions.json when subspaces features is not enabled."
+          },
+          {
+            "comment": "Fix an issue where the port parameter in `@rushstack/rush-serve-plugin` was allowed to be a string parameter."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.148.0",
       "tag": "@microsoft/rush_v5.148.0",
       "date": "Fri, 10 Jan 2025 02:36:20 GMT",

@@ -4,14 +4,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "node build.js",
-    "_phase:build": "node build.js"
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "dependencies": {
+    "api-extractor-test-02": "workspace:*"
   },
   "devDependencies": {
-    "@types/jest": "29.2.5",
-    "@types/node": "18.17.15",
-    "api-extractor-test-02": "workspace:*",
-    "fs-extra": "~7.0.1",
-    "typescript": "~5.4.2"
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*"
   }
 }

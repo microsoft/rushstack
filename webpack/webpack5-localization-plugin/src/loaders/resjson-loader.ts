@@ -10,7 +10,8 @@ const loader: LoaderDefinitionFunction<IBaseLocLoaderOptions> = createLoader(
   (content: string, filePath: string, context: LoaderContext<IBaseLocLoaderOptions>) => {
     return parseResJson({
       content,
-      filePath
+      filePath,
+      ignoreString: context.getOptions().ignoreString
     });
   }
 );

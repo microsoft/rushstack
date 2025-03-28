@@ -1,6 +1,100 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:16 GMT and should not be manually modified.
+
+## 2.8.4
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 2.8.3
+Tue, 25 Mar 2025 00:12:04 GMT
+
+_Version update only_
+
+## 2.8.2
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 2.8.1
+Wed, 12 Mar 2025 00:11:32 GMT
+
+_Version update only_
+
+## 2.8.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Bump TypeScript to ~5.8.2.
+
+## 2.7.2
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 2.7.1
+Thu, 06 Mar 2025 01:10:42 GMT
+
+_Version update only_
+
+## 2.7.0
+Sat, 01 Mar 2025 07:23:16 GMT
+
+### Minor changes
+
+- Bump the `typescript` dependency to `~5.7.3`.
+
+## 2.6.59
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 2.6.58
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 2.6.57
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 2.6.56
+Tue, 25 Feb 2025 01:11:55 GMT
+
+_Version update only_
+
+## 2.6.55
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 2.6.54
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 2.6.53
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 2.6.52
+Fri, 07 Feb 2025 01:10:49 GMT
+
+_Version update only_
+
+## 2.6.51
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 2.6.50
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
 
 ## 2.6.49
 Thu, 09 Jan 2025 01:10:10 GMT

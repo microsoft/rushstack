@@ -7,6 +7,7 @@ import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { OperationStatus } from './OperationStatus';
 import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
+import type { IEnvironment } from '../../utilities/Utilities';
 
 /**
  * Information passed to the executing `IOperationRunner`
@@ -31,7 +32,7 @@ export interface IOperationRunnerContext {
    *
    * @internal
    */
-  _operationMetadataManager?: OperationMetadataManager;
+  _operationMetadataManager: OperationMetadataManager;
   /**
    * Object used to track elapsed time.
    */
@@ -43,6 +44,12 @@ export interface IOperationRunnerContext {
    * 'failure'.
    */
   status: OperationStatus;
+
+  /**
+   * The environment in which the operation is being executed.
+   * A return value of `undefined` indicates that it should inherit the environment from the parent process.
+   */
+  environment: IEnvironment | undefined;
 
   /**
    * Error which occurred while executing this operation, this is stored in case we need

@@ -56,6 +56,18 @@ export interface IOperationExecutionResult {
    * The paths to the log files, if applicable.
    */
   readonly logFilePaths: ILogFilePaths | undefined;
+
+  /**
+   * Gets the hash of the state of all registered inputs to this operation.
+   * Calling this method will throw if Git is not available.
+   */
+  getStateHash(): string;
+
+  /**
+   * Gets the components of the state hash. This is useful for debugging purposes.
+   * Calling this method will throw if Git is not available.
+   */
+  getStateHashComponents(): ReadonlyArray<string>;
 }
 
 /**

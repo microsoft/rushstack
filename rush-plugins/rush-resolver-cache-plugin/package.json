@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-resolver-cache-plugin",
-  "version": "5.148.0",
+  "version": "5.151.0",
   "description": "A Rush plugin that generates a resolver cache file after successful install.",
   "license": "MIT",
   "repository": {
@@ -24,14 +24,15 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/webpack-workspace-resolve-plugin": "workspace:*",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.8",
     "local-node-rig": "workspace:*"
   },
   "exports": {
     ".": {
       "require": "./lib/index.js",
       "types": "./dist/rush-resolver-cache-plugin.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {

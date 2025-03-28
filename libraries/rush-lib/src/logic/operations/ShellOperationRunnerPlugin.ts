@@ -23,54 +23,55 @@ export const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPl
  */
 export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.createOperations.tap(PLUGIN_NAME, createShellOperations);
+    hooks.createOperations.tap(
+      PLUGIN_NAME,
+      function createShellOperations(
+        operations: Set<Operation>,
+        context: ICreateOperationsContext
+      ): Set<Operation> {
+        const { rushConfiguration, isInitial } = context;
+
+        const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
+          getCustomParameterValuesByPhase();
+        for (const operation of operations) {
+          const { associatedPhase: phase, associatedProject: project } = operation;
+
+          if (!operation.runner) {
+            // This is a shell command. In the future, may consider having a property on the initial operation
+            // to specify a runner type requested in rush-project.json
+            const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
+
+            const displayName: string = getDisplayName(phase, project);
+            const { name: phaseName, shellCommand } = phase;
+
+            const { scripts } = project.packageJson;
+
+            // This is the command that will be used to identify the cache entry for this operation
+            const commandForHash: string | undefined = shellCommand ?? scripts?.[phaseName];
+
+            // For execution of non-initial runs, prefer the `:incremental` script if it exists.
+            // However, the `shellCommand` value still takes precedence per the spec for that feature.
+            const commandToRun: string | undefined =
+              shellCommand ??
+              (!isInitial ? scripts?.[`${phaseName}:incremental`] : undefined) ??
+              scripts?.[phaseName];
+
+            operation.runner = initializeShellOperationRunner({
+              phase,
+              project,
+              displayName,
+              commandForHash,
+              commandToRun,
+              customParameterValues,
+              rushConfiguration
+            });
+          }
+        }
+
+        return operations;
+      }
+    );
   }
-}
-
-function createShellOperations(
-  operations: Set<Operation>,
-  context: ICreateOperationsContext
-): Set<Operation> {
-  const { rushConfiguration, isInitial } = context;
-
-  const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
-    getCustomParameterValuesByPhase();
-  for (const operation of operations) {
-    const { associatedPhase: phase, associatedProject: project } = operation;
-
-    if (phase && project && !operation.runner) {
-      // This is a shell command. In the future, may consider having a property on the initial operation
-      // to specify a runner type requested in rush-project.json
-      const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
-
-      const displayName: string = getDisplayName(phase, project);
-      const { name: phaseName, shellCommand } = phase;
-
-      const { scripts } = project.packageJson;
-
-      // This is the command that will be used to identify the cache entry for this operation
-      const commandForHash: string | undefined = shellCommand ?? scripts?.[phaseName];
-
-      // For execution of non-initial runs, prefer the `:incremental` script if it exists.
-      // However, the `shellCommand` value still takes precedence per the spec for that feature.
-      const commandToRun: string | undefined =
-        shellCommand ??
-        (!isInitial ? scripts?.[`${phaseName}:incremental`] : undefined) ??
-        scripts?.[phaseName];
-
-      operation.runner = initializeShellOperationRunner({
-        phase,
-        project,
-        displayName,
-        commandForHash,
-        commandToRun,
-        customParameterValues,
-        rushConfiguration
-      });
-    }
-  }
-
-  return operations;
 }
 
 export function initializeShellOperationRunner(options: {
@@ -91,11 +92,11 @@ export function initializeShellOperationRunner(options: {
   }
 
   if (rawCommandToRun) {
-    const { rushConfiguration, commandForHash: rawCommandForHash } = options;
+    const { commandForHash: rawCommandForHash, customParameterValues } = options;
 
-    const commandToRun: string = formatCommand(rawCommandToRun, options.customParameterValues);
+    const commandToRun: string = formatCommand(rawCommandToRun, customParameterValues);
     const commandForHash: string = rawCommandForHash
-      ? formatCommand(rawCommandForHash, options.customParameterValues)
+      ? formatCommand(rawCommandForHash, customParameterValues)
       : commandToRun;
 
     return new ShellOperationRunner({
@@ -103,7 +104,6 @@ export function initializeShellOperationRunner(options: {
       commandForHash,
       displayName,
       phase,
-      rushConfiguration,
       rushProject: project
     });
   } else {

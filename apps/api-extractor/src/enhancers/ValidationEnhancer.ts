@@ -13,7 +13,7 @@ import type { CollectorEntity } from '../collector/CollectorEntity';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import type { AstModuleExportInfo } from '../analyzer/AstModule';
+import type { IAstModuleExportInfo } from '../analyzer/AstModule';
 import type { AstEntity } from '../analyzer/AstEntity';
 
 export class ValidationEnhancer {
@@ -47,7 +47,7 @@ export class ValidationEnhancer {
         // A namespace created using "import * as ___ from ___"
         const astNamespaceImport: AstNamespaceImport = entity.astEntity;
 
-        const astModuleExportInfo: AstModuleExportInfo =
+        const astModuleExportInfo: IAstModuleExportInfo =
           astNamespaceImport.fetchAstModuleExportInfo(collector);
 
         for (const namespaceMemberAstEntity of astModuleExportInfo.exportedLocalEntities.values()) {

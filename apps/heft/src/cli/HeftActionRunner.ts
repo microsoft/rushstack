@@ -188,14 +188,16 @@ export class HeftActionRunner {
   private readonly _parallelism: number;
 
   public constructor(options: IHeftActionRunnerOptions) {
-    this._action = options.action;
-    this._internalHeftSession = options.internalHeftSession;
-    this._heftConfiguration = options.heftConfiguration;
-    this._loggingManager = options.loggingManager;
-    this._terminal = options.terminal;
-    this._metricsCollector = options.metricsCollector;
+    const { action, internalHeftSession, heftConfiguration, loggingManager, terminal, metricsCollector } =
+      options;
+    this._action = action;
+    this._internalHeftSession = internalHeftSession;
+    this._heftConfiguration = heftConfiguration;
+    this._loggingManager = loggingManager;
+    this._terminal = terminal;
+    this._metricsCollector = metricsCollector;
 
-    const numberOfCores: number = os.cpus().length;
+    const numberOfCores: number = heftConfiguration.numberOfCores;
 
     // If an explicit parallelism number wasn't provided, then choose a sensible
     // default.

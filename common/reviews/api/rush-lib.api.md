@@ -25,6 +25,7 @@ import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
+import { SyncWaterfallHook } from 'tapable';
 import { Terminal } from '@rushstack/terminal';
 
 // @public
@@ -410,6 +411,7 @@ export interface ICreateOperationsContext {
     readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
     readonly cobuildConfiguration: CobuildConfiguration | undefined;
     readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
+    readonly includePhaseDeps: boolean;
     readonly invalidateOperation?: ((operation: Operation, reason: string) => void) | undefined;
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
@@ -583,6 +585,8 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 export interface IOperationExecutionResult {
     readonly cobuildRunnerId: string | undefined;
     readonly error: Error | undefined;
+    getStateHash(): string;
+    getStateHashComponents(): ReadonlyArray<string>;
     readonly logFilePaths: ILogFilePaths | undefined;
     readonly metadataFolderPath: string | undefined;
     readonly nonCachedDurationMs: number | undefined;
@@ -613,17 +617,13 @@ export interface _IOperationMetadata {
 export interface _IOperationMetadataManagerOptions {
     // (undocumented)
     operation: Operation;
-    // (undocumented)
-    phase: IPhase;
-    // (undocumented)
-    rushProject: RushConfigurationProject;
 }
 
 // @alpha
 export interface IOperationOptions {
     logFilenameIdentifier: string;
-    phase?: IPhase | undefined;
-    project?: RushConfigurationProject | undefined;
+    phase: IPhase;
+    project: RushConfigurationProject;
     runner?: IOperationRunner | undefined;
     settings?: IOperationSettings | undefined;
 }
@@ -644,9 +644,10 @@ export interface IOperationRunner {
 export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
     debugMode: boolean;
+    environment: IEnvironment | undefined;
     error?: Error;
     // @internal
-    _operationMetadataManager?: _OperationMetadataManager;
+    _operationMetadataManager: _OperationMetadataManager;
     quietMode: boolean;
     runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, options: {
         createLogFile: boolean;
@@ -930,15 +931,15 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
 export class Operation {
     constructor(options: IOperationOptions);
     addDependency(dependency: Operation): void;
-    readonly associatedPhase: IPhase | undefined;
-    readonly associatedProject: RushConfigurationProject | undefined;
+    readonly associatedPhase: IPhase;
+    readonly associatedProject: RushConfigurationProject;
     readonly consumers: ReadonlySet<Operation>;
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
     enabled: boolean;
     get isNoOp(): boolean;
     logFilenameIdentifier: string;
-    get name(): string | undefined;
+    get name(): string;
     runner: IOperationRunner | undefined;
     settings: IOperationSettings | undefined;
     weight: number;
@@ -1078,6 +1079,10 @@ export class PhasedCommandHooks {
     IExecuteOperationsContext
     ]>;
     readonly beforeLog: SyncHook<ITelemetryData, void>;
+    readonly createEnvironmentForOperation: SyncWaterfallHook<[
+    IEnvironment,
+    IOperationRunnerContext & IOperationExecutionResult
+    ]>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
     readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
     readonly shutdownAsync: AsyncParallelHook<void>;
@@ -1367,6 +1372,7 @@ export class RushConstants {
     // @deprecated
     static readonly pinnedVersionsFilename: 'pinned-versions.json';
     static readonly pnpmConfigFilename: 'pnpm-config.json';
+    static readonly pnpmDependenciesFolderName: '.pnpm';
     static readonly pnpmfileGlobalFilename: 'global-pnpmfile.cjs';
     static readonly pnpmfileV1Filename: 'pnpmfile.js';
     static readonly pnpmfileV6Filename: '.pnpmfile.cjs';
@@ -1380,8 +1386,8 @@ export class RushConstants {
     static readonly rebuildCommandName: 'rebuild';
     static readonly repoStateFilename: 'repo-state.json';
     static readonly rushAlertsConfigFilename: 'rush-alerts.json';
-    static readonly rushAlertsStateFilename: 'rush-alerts-state.json';
     static readonly rushJsonFilename: 'rush.json';
+    static readonly rushLinkStateFilename: 'rush-link-state.json';
     static readonly rushLogsFolderName: 'rush-logs';
     static readonly rushPackageName: '@microsoft/rush';
     static readonly rushPluginManifestFilename: 'rush-plugin-manifest.json';

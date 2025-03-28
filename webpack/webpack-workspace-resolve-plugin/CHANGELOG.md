@@ -1,6 +1,78 @@
 # Change Log - @rushstack/webpack-workspace-resolve-plugin
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:16 GMT and should not be manually modified.
+
+## 0.4.13
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 0.4.12
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 0.4.11
+Wed, 12 Mar 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.4.10
+Tue, 11 Mar 2025 02:12:34 GMT
+
+_Version update only_
+
+## 0.4.9
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.4.8
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.4.7
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.4.6
+Wed, 26 Feb 2025 16:11:12 GMT
+
+_Version update only_
+
+## 0.4.5
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.4.4
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.4.3
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.4.2
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 0.4.1
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.4.0
+Tue, 14 Jan 2025 01:11:21 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Switch constructor to an options object. Add option to specify which webpack resolvers to apply the plugin to. Improve performance by using an object literal instead of the spread operator when updating the resolve request. Upgrade compilation target to not polyfill optional chaining.
 
 ## 0.3.20
 Thu, 09 Jan 2025 01:10:10 GMT

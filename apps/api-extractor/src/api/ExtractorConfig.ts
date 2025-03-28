@@ -17,6 +17,9 @@ import {
   NewlineKind
 } from '@rushstack/node-core-library';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
+import { EnumMemberOrder, ReleaseTag } from '@microsoft/api-extractor-model';
+import { TSDocConfiguration } from '@microsoft/tsdoc';
+import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
 import type {
   ApiReportVariant,
@@ -26,9 +29,7 @@ import type {
 } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
-import { EnumMemberOrder } from '@microsoft/api-extractor-model';
-import { TSDocConfiguration } from '@microsoft/tsdoc';
-import { TSDocConfigFile } from '@microsoft/tsdoc-config';
+import type { IApiModelGenerationOptions } from '../generators/ApiModelGenerator';
 
 import apiExtractorSchema from '../schemas/api-extractor.schema.json';
 
@@ -206,7 +207,7 @@ interface IExtractorConfigParameters {
   reportTempFolder: string;
   apiReportIncludeForgottenExports: boolean;
   tagsToReport: Readonly<Record<`@${string}`, boolean>>;
-  docModelEnabled: boolean;
+  docModelGenerationOptions: IApiModelGenerationOptions | undefined;
   apiJsonFilePath: string;
   docModelIncludeForgottenExports: boolean;
   projectFolderUrl: string | undefined;
@@ -327,8 +328,11 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigApiReport.includeForgottenExports} */
   public readonly apiReportIncludeForgottenExports: boolean;
 
-  /** {@inheritDoc IConfigDocModel.enabled} */
-  public readonly docModelEnabled: boolean;
+  /**
+   * If specified, the doc model is enabled and the specified options will be used.
+   * @beta
+   */
+  public readonly docModelGenerationOptions: IApiModelGenerationOptions | undefined;
   /** {@inheritDoc IConfigDocModel.apiJsonFilePath} */
   public readonly apiJsonFilePath: string;
   /** {@inheritDoc IConfigDocModel.includeForgottenExports} */
@@ -379,39 +383,72 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigFile.enumMemberOrder} */
   public readonly enumMemberOrder: EnumMemberOrder;
 
-  private constructor(parameters: IExtractorConfigParameters) {
-    this.projectFolder = parameters.projectFolder;
-    this.packageJson = parameters.packageJson;
-    this.packageFolder = parameters.packageFolder;
-    this.mainEntryPointFilePath = parameters.mainEntryPointFilePath;
-    this.bundledPackages = parameters.bundledPackages;
-    this.tsconfigFilePath = parameters.tsconfigFilePath;
-    this.overrideTsconfig = parameters.overrideTsconfig;
-    this.skipLibCheck = parameters.skipLibCheck;
-    this.apiReportEnabled = parameters.apiReportEnabled;
-    this.apiReportIncludeForgottenExports = parameters.apiReportIncludeForgottenExports;
-    this.reportConfigs = parameters.reportConfigs;
-    this.reportFolder = parameters.reportFolder;
-    this.reportTempFolder = parameters.reportTempFolder;
-    this.tagsToReport = parameters.tagsToReport;
-    this.docModelEnabled = parameters.docModelEnabled;
-    this.apiJsonFilePath = parameters.apiJsonFilePath;
-    this.docModelIncludeForgottenExports = parameters.docModelIncludeForgottenExports;
-    this.projectFolderUrl = parameters.projectFolderUrl;
-    this.rollupEnabled = parameters.rollupEnabled;
-    this.untrimmedFilePath = parameters.untrimmedFilePath;
-    this.alphaTrimmedFilePath = parameters.alphaTrimmedFilePath;
-    this.betaTrimmedFilePath = parameters.betaTrimmedFilePath;
-    this.publicTrimmedFilePath = parameters.publicTrimmedFilePath;
-    this.omitTrimmingComments = parameters.omitTrimmingComments;
-    this.tsdocMetadataEnabled = parameters.tsdocMetadataEnabled;
-    this.tsdocMetadataFilePath = parameters.tsdocMetadataFilePath;
-    this.tsdocConfigFile = parameters.tsdocConfigFile;
-    this.tsdocConfiguration = parameters.tsdocConfiguration;
-    this.newlineKind = parameters.newlineKind;
-    this.messages = parameters.messages;
-    this.testMode = parameters.testMode;
-    this.enumMemberOrder = parameters.enumMemberOrder;
+  private constructor({
+    projectFolder,
+    packageJson,
+    packageFolder,
+    mainEntryPointFilePath,
+    bundledPackages,
+    tsconfigFilePath,
+    overrideTsconfig,
+    skipLibCheck,
+    apiReportEnabled,
+    apiReportIncludeForgottenExports,
+    reportConfigs,
+    reportFolder,
+    reportTempFolder,
+    tagsToReport,
+    docModelGenerationOptions,
+    apiJsonFilePath,
+    docModelIncludeForgottenExports,
+    projectFolderUrl,
+    rollupEnabled,
+    untrimmedFilePath,
+    alphaTrimmedFilePath,
+    betaTrimmedFilePath,
+    publicTrimmedFilePath,
+    omitTrimmingComments,
+    tsdocMetadataEnabled,
+    tsdocMetadataFilePath,
+    tsdocConfigFile,
+    tsdocConfiguration,
+    newlineKind,
+    messages,
+    testMode,
+    enumMemberOrder
+  }: IExtractorConfigParameters) {
+    this.projectFolder = projectFolder;
+    this.packageJson = packageJson;
+    this.packageFolder = packageFolder;
+    this.mainEntryPointFilePath = mainEntryPointFilePath;
+    this.bundledPackages = bundledPackages;
+    this.tsconfigFilePath = tsconfigFilePath;
+    this.overrideTsconfig = overrideTsconfig;
+    this.skipLibCheck = skipLibCheck;
+    this.apiReportEnabled = apiReportEnabled;
+    this.apiReportIncludeForgottenExports = apiReportIncludeForgottenExports;
+    this.reportConfigs = reportConfigs;
+    this.reportFolder = reportFolder;
+    this.reportTempFolder = reportTempFolder;
+    this.tagsToReport = tagsToReport;
+    this.docModelGenerationOptions = docModelGenerationOptions;
+    this.apiJsonFilePath = apiJsonFilePath;
+    this.docModelIncludeForgottenExports = docModelIncludeForgottenExports;
+    this.projectFolderUrl = projectFolderUrl;
+    this.rollupEnabled = rollupEnabled;
+    this.untrimmedFilePath = untrimmedFilePath;
+    this.alphaTrimmedFilePath = alphaTrimmedFilePath;
+    this.betaTrimmedFilePath = betaTrimmedFilePath;
+    this.publicTrimmedFilePath = publicTrimmedFilePath;
+    this.omitTrimmingComments = omitTrimmingComments;
+    this.tsdocMetadataEnabled = tsdocMetadataEnabled;
+    this.tsdocMetadataFilePath = tsdocMetadataFilePath;
+    this.tsdocConfigFile = tsdocConfigFile;
+    this.tsdocConfiguration = tsdocConfiguration;
+    this.newlineKind = newlineKind;
+    this.messages = messages;
+    this.testMode = testMode;
+    this.enumMemberOrder = enumMemberOrder;
   }
 
   /**
@@ -591,6 +628,17 @@ export class ExtractorConfig {
     let currentConfigFilePath: string = path.resolve(jsonFilePath);
     let configObject: Partial<IConfigFile> = {};
 
+    // Lodash merges array values by default, which is unintuitive for config files (and makes it impossible for derived configurations to overwrite arrays).
+    // For example, given a base config containing an array property with value ["foo", "bar"] and a derived config that specifies ["baz"] for that property, lodash will produce ["baz", "bar"], which is unintuitive.
+    // This customizer function ensures that arrays are always overwritten.
+    const mergeCustomizer: lodash.MergeWithCustomizer = (objValue, srcValue) => {
+      if (Array.isArray(srcValue)) {
+        return srcValue;
+      }
+      // Fall back to default merge behavior.
+      return undefined;
+    };
+
     try {
       do {
         // Check if this file was already processed.
@@ -635,7 +683,7 @@ export class ExtractorConfig {
         ExtractorConfig._resolveConfigFileRelativePaths(baseConfig, currentConfigFolderPath);
 
         // Merge extractorConfig into baseConfig, mutating baseConfig
-        lodash.merge(baseConfig, configObject);
+        lodash.mergeWith(baseConfig, configObject, mergeCustomizer);
         configObject = baseConfig;
 
         currentConfigFilePath = extendsField;
@@ -645,7 +693,11 @@ export class ExtractorConfig {
     }
 
     // Lastly, apply the defaults
-    configObject = lodash.merge(lodash.cloneDeep(ExtractorConfig._defaultConfig), configObject);
+    configObject = lodash.mergeWith(
+      lodash.cloneDeep(ExtractorConfig._defaultConfig),
+      configObject,
+      mergeCustomizer
+    );
 
     ExtractorConfig.jsonSchema.validateObject(configObject, jsonFilePath);
 
@@ -1013,12 +1065,11 @@ export class ExtractorConfig {
         };
       }
 
-      let docModelEnabled: boolean = false;
+      let docModelGenerationOptions: IApiModelGenerationOptions | undefined = undefined;
       let apiJsonFilePath: string = '';
       let docModelIncludeForgottenExports: boolean = false;
       let projectFolderUrl: string | undefined;
-      if (configObject.docModel) {
-        docModelEnabled = !!configObject.docModel.enabled;
+      if (configObject.docModel?.enabled) {
         apiJsonFilePath = ExtractorConfig._resolvePathWithTokens(
           'apiJsonFilePath',
           configObject.docModel.apiJsonFilePath,
@@ -1026,6 +1077,43 @@ export class ExtractorConfig {
         );
         docModelIncludeForgottenExports = !!configObject.docModel.includeForgottenExports;
         projectFolderUrl = configObject.docModel.projectFolderUrl;
+
+        const releaseTagsToTrim: Set<ReleaseTag> = new Set<ReleaseTag>();
+        const releaseTagsToTrimOption: string[] = configObject.docModel.releaseTagsToTrim || ['@internal'];
+        for (const releaseTagToTrim of releaseTagsToTrimOption) {
+          let releaseTag: ReleaseTag;
+          switch (releaseTagToTrim) {
+            case '@internal': {
+              releaseTag = ReleaseTag.Internal;
+              break;
+            }
+
+            case '@alpha': {
+              releaseTag = ReleaseTag.Alpha;
+              break;
+            }
+
+            case '@beta': {
+              releaseTag = ReleaseTag.Beta;
+              break;
+            }
+
+            case '@public': {
+              releaseTag = ReleaseTag.Public;
+              break;
+            }
+
+            default: {
+              throw new Error(`The release tag "${releaseTagToTrim}" is not supported`);
+            }
+          }
+
+          releaseTagsToTrim.add(releaseTag);
+        }
+
+        docModelGenerationOptions = {
+          releaseTagsToTrim
+        };
       }
 
       let tsdocMetadataEnabled: boolean = false;
@@ -1132,7 +1220,7 @@ export class ExtractorConfig {
         reportTempFolder,
         apiReportIncludeForgottenExports,
         tagsToReport,
-        docModelEnabled,
+        docModelGenerationOptions,
         apiJsonFilePath,
         docModelIncludeForgottenExports,
         projectFolderUrl,

@@ -1,6 +1,82 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:16 GMT and should not be manually modified.
+
+## 0.7.13
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 0.7.12
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 0.7.11
+Wed, 12 Mar 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.7.10
+Tue, 11 Mar 2025 02:12:34 GMT
+
+_Version update only_
+
+## 0.7.9
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.7.8
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.7.7
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.7.6
+Wed, 26 Feb 2025 16:11:12 GMT
+
+_Version update only_
+
+## 0.7.5
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.7.4
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.7.3
+Wed, 12 Feb 2025 01:10:52 GMT
+
+### Patches
+
+- Bump the `serialize-javascript` dependency.
+
+## 0.7.2
+Thu, 30 Jan 2025 16:10:36 GMT
+
+### Patches
+
+- Prefer `os.availableParallelism()` to `os.cpus().length`.
+
+## 0.7.1
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.7.0
+Wed, 22 Jan 2025 03:03:47 GMT
+
+### Minor changes
+
+- Add a `workerResourceLimits` option to the `WorkerPoolMinifier` constructor to control the available resources to the workers.
 
 ## 0.6.36
 Thu, 09 Jan 2025 01:10:10 GMT

@@ -14,10 +14,10 @@
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.8",
     "html-webpack-plugin": "~5.5.0",
-    "typescript": "~5.4.2",
+    "typescript": "~5.8.2",
     "webpack-bundle-analyzer": "~4.5.0",
-    "webpack": "~5.95.0"
+    "webpack": "~5.98.0"
   }
 }

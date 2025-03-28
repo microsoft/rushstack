@@ -64,6 +64,10 @@ Positional arguments:
     version             Manage package versions in the repo.
     alert               (EXPERIMENTAL) View and manage Rush alerts for the 
                         repository
+    bridge-package      (EXPERIMENTAL) Simulate installation of a locally 
+                        built project, affecting many projects.
+    link-package        (EXPERIMENTAL) Simulate installation of a locally 
+                        built project, affecting specific projects.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
@@ -149,13 +153,44 @@ Optional arguments:
 "
 `;
 
+exports[`CommandLineHelp prints the help for each action: bridge-package 1`] = `
+"usage: rush bridge-package [-h] --path PATH [--project PROJECT]
+                           [--version VERSION]
+                           
+
+This command enables you to test a locally built project by simulating its 
+installation under the Rush workspace node_modules folders. Unlike \\"pnpm 
+link\\" and \\"npm link\\", this command updates all installation doppelgangers for 
+the specified version range, potentially affecting multiple projects across 
+the workspace, as well as their indirect dependencies. The symlink is not 
+reflected in pnpm-lock.yaml, and ignores the local project's own package.json 
+dependencies, preserving whatever the lockfile installed. The symlink will be 
+cleared when you next run \\"rush install\\" or \\"rush update\\". Compare with the 
+\\"rush link-package\\" command, which affects only the consuming project.
+
+Optional arguments:
+  -h, --help         Show this help message and exit.
+  --path PATH        The folder path of a locally built project, whose 
+                     installation will be simulated using node_modules 
+                     symlinks. This folder will be the target of the symlinks.
+  --project PROJECT  A list of Rush project names to connect to the external 
+                     package. If not specified, uses the project in the 
+                     current working directory.
+  --version VERSION  It will directly replace the output for the specified 
+                     version of the package, which requires you to have that 
+                     package installed under the specified name in advance.
+"
+`;
+
 exports[`CommandLineHelp prints the help for each action: build 1`] = `
 "usage: rush build [-h] [-p COUNT] [--timeline] [--log-cobuild-plan]
                   [-t PROJECT] [-T PROJECT] [-f PROJECT] [-o PROJECT]
                   [-i PROJECT] [-I PROJECT]
                   [--to-version-policy VERSION_POLICY_NAME]
-                  [--from-version-policy VERSION_POLICY_NAME] [-v] [-c]
-                  [--ignore-hooks] [-s] [-m]
+                  [--from-version-policy VERSION_POLICY_NAME] [-v]
+                  [--include-phase-deps] [-c] [--ignore-hooks]
+                  [--node-diagnostic-dir DIRECTORY] [--debug-build-cache-ids]
+                  [-s] [-m]
                   
 
 This command is similar to \\"rush rebuild\\", except that \\"rush build\\" performs 
@@ -269,6 +304,14 @@ Optional arguments:
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
+  --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
+                        dependencies), add the minimal set of phase 
+                        dependencies. For example, \\"--from A\\" normally might 
+                        include the \\"_phase:test\\" phase for A's dependencies, 
+                        even though changes to A can't break those tests. 
+                        Using \\"--impacted-by A --include-phase-deps\\" avoids 
+                        that work by performing \\"_phase:test\\" only for 
+                        downstream projects.
   -c, --changed-projects-only
                         Normally the incremental build logic will rebuild 
                         changed projects as well as any projects that 
@@ -281,6 +324,14 @@ Optional arguments:
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --node-diagnostic-dir DIRECTORY
+                        Specifies the directory where Node.js diagnostic 
+                        reports will be written. This directory will contain 
+                        a subdirectory for each project and phase.
+  --debug-build-cache-ids
+                        Logs information about the components of the build 
+                        cache ids for individual operations. This is useful 
+                        for debugging the incremental build logic.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
@@ -432,7 +483,9 @@ exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
                            [-i PROJECT] [-I PROJECT]
                            [--to-version-policy VERSION_POLICY_NAME]
                            [--from-version-policy VERSION_POLICY_NAME] [-v]
-                           [--ignore-hooks]
+                           [--include-phase-deps] [--ignore-hooks]
+                           [--node-diagnostic-dir DIRECTORY]
+                           [--debug-build-cache-ids]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -538,9 +591,25 @@ Optional arguments:
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
+  --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
+                        dependencies), add the minimal set of phase 
+                        dependencies. For example, \\"--from A\\" normally might 
+                        include the \\"_phase:test\\" phase for A's dependencies, 
+                        even though changes to A can't break those tests. 
+                        Using \\"--impacted-by A --include-phase-deps\\" avoids 
+                        that work by performing \\"_phase:test\\" only for 
+                        downstream projects.
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --node-diagnostic-dir DIRECTORY
+                        Specifies the directory where Node.js diagnostic 
+                        reports will be written. This directory will contain 
+                        a subdirectory for each project and phase.
+  --debug-build-cache-ids
+                        Logs information about the components of the build 
+                        cache ids for individual operations. This is useful 
+                        for debugging the incremental build logic.
   --locale {en-us,fr-fr,es-es,zh-cn}
                         Selects a single instead of the default locale 
                         (en-us) for non-ship builds or all locales for ship 
@@ -805,6 +874,30 @@ Optional arguments:
 "
 `;
 
+exports[`CommandLineHelp prints the help for each action: link-package 1`] = `
+"usage: rush link-package [-h] --path PATH [--project PROJECT]
+
+This command enables you to test a locally built project by creating a 
+symlink under a consuming project's node_modules folder to simulate 
+installation. The implementation is similar to \\"pnpm link\\" and \\"npm link\\", 
+but better integrated with Rush features. Like those commands, the symlink is 
+not reflected in pnpm-lock.yaml, affects the consuming project only, and has 
+the same limitations as \\"workspace:*\\". The symlink will be cleared when you 
+next run \\"rush install\\" or \\"rush update\\". Compare with the \\"rush 
+bridge-package\\" command, which affects multiple projects and indirect 
+dependencies.
+
+Optional arguments:
+  -h, --help         Show this help message and exit.
+  --path PATH        The folder path of a locally built project, whose 
+                     installation will be simulated using node_modules 
+                     symlinks. This folder will be the target of the symlinks.
+  --project PROJECT  A list of Rush project names to connect to the external 
+                     package. If not specified, uses the project in the 
+                     current working directory.
+"
+`;
+
 exports[`CommandLineHelp prints the help for each action: list 1`] = `
 "usage: rush list [-h] [-v] [-p] [--full-path] [--detailed] [--json]
                  [-t PROJECT] [-T PROJECT] [-f PROJECT] [-o PROJECT]
@@ -1030,7 +1123,9 @@ exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
                     [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME] [-v]
-                    [--ignore-hooks] [-s] [-m]
+                    [--include-phase-deps] [--ignore-hooks]
+                    [--node-diagnostic-dir DIRECTORY]
+                    [--debug-build-cache-ids] [-s] [-m]
                     
 
 This command assumes that the package.json file for each project contains a 
@@ -1141,9 +1236,25 @@ Optional arguments:
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
+  --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
+                        dependencies), add the minimal set of phase 
+                        dependencies. For example, \\"--from A\\" normally might 
+                        include the \\"_phase:test\\" phase for A's dependencies, 
+                        even though changes to A can't break those tests. 
+                        Using \\"--impacted-by A --include-phase-deps\\" avoids 
+                        that work by performing \\"_phase:test\\" only for 
+                        downstream projects.
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --node-diagnostic-dir DIRECTORY
+                        Specifies the directory where Node.js diagnostic 
+                        reports will be written. This directory will contain 
+                        a subdirectory for each project and phase.
+  --debug-build-cache-ids
+                        Logs information about the components of the build 
+                        cache ids for individual operations. This is useful 
+                        for debugging the incremental build logic.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 

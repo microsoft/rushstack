@@ -10,6 +10,7 @@ import { IRigConfig } from '@rushstack/rig-package';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 import type * as tsdoc from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
@@ -56,7 +57,8 @@ export class ExtractorConfig {
     readonly apiReportIncludeForgottenExports: boolean;
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
-    readonly docModelEnabled: boolean;
+    // @beta
+    readonly docModelGenerationOptions: IApiModelGenerationOptions | undefined;
     readonly docModelIncludeForgottenExports: boolean;
     readonly enumMemberOrder: EnumMemberOrder;
     static readonly FILENAME: 'api-extractor.json';
@@ -173,6 +175,11 @@ export class ExtractorResult {
     readonly warningCount: number;
 }
 
+// @beta (undocumented)
+export interface IApiModelGenerationOptions {
+    releaseTagsToTrim: Set<ReleaseTag>;
+}
+
 // @public
 export interface ICompilerStateCreateOptions {
     additionalEntryPoints?: string[];
@@ -203,6 +210,7 @@ export interface IConfigDocModel {
     enabled: boolean;
     includeForgottenExports?: boolean;
     projectFolderUrl?: string;
+    releaseTagsToTrim?: ReleaseTagForTrim[];
 }
 
 // @public
@@ -296,5 +304,8 @@ export interface IExtractorMessagesConfig {
     extractorMessageReporting?: IConfigMessageReportingTable;
     tsdocMessageReporting?: IConfigMessageReportingTable;
 }
+
+// @public
+export type ReleaseTagForTrim = '@internal' | '@alpha' | '@beta' | '@public';
 
 ```

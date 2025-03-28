@@ -17,10 +17,8 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@types/http-proxy": "~1.17.8",
-    "@types/node": "18.17.15",
-    "eslint": "~8.57.0",
+    "@types/node": "20.17.19",
     "http-proxy": "~1.18.1",
-    "local-node-rig": "workspace:*",
-    "typescript": "~5.4.2"
+    "local-node-rig": "workspace:*"
   }
 }

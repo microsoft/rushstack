@@ -1,8 +1,6 @@
 'use strict';
-
 const path = require('path');
-const webpack = require('webpack');
-const { JsonFile } = require('@rushstack/node-core-library');
+const { JsonFile, FileSystem } = require('@rushstack/node-core-library');
 
 const { LocalizationPlugin } = require('@rushstack/webpack4-localization-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
@@ -11,6 +9,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 
 function resolveMissingString(localeNames, localizedResourcePath) {
+  debugger;
   let contextRelativePath = path.relative(__dirname, localizedResourcePath);
   contextRelativePath = contextRelativePath.replace(/\\/g, '/'); // Convert Windows paths to Unix paths
   if (!contextRelativePath.startsWith('.')) {
@@ -19,28 +18,24 @@ function resolveMissingString(localeNames, localizedResourcePath) {
 
   const result = {};
   for (const localeName of localeNames) {
-    const expectedCombinedStringsPath = path.resolve(
-      __dirname,
-      'localization',
-      localeName,
-      'combinedStringsData.json'
-    );
+    const expectedCombinedStringsPath = `${__dirname}/localization/${localeName}/combinedStringsData.json`;
     try {
       const loadedCombinedStringsPath = JsonFile.load(expectedCombinedStringsPath);
       result[localeName] = loadedCombinedStringsPath[contextRelativePath];
     } catch (e) {
-      if (e.code !== 'ENOENT' && e.code !== 'ENOTDIR') {
+      if (!FileSystem.isNotExistError(e)) {
         // File exists, but reading failed.
         throw e;
       }
     }
   }
+
   return result;
 }
 
-function generateConfiguration(mode, outputFolderName) {
+function generateConfiguration(mode, outputFolderName, webpack) {
   return {
-    mode: mode,
+    mode,
     module: {
       rules: [
         {
@@ -50,7 +45,7 @@ function generateConfiguration(mode, outputFolderName) {
           options: {
             compiler: require.resolve('typescript'),
             logLevel: 'ERROR',
-            configFile: path.resolve(__dirname, 'tsconfig.json')
+            configFile: `${__dirname}/tsconfig.json`
           }
         }
       ]
@@ -59,18 +54,23 @@ function generateConfiguration(mode, outputFolderName) {
       extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
     },
     entry: {
-      'localization-test-A': path.join(__dirname, 'src', 'indexA.ts'),
-      'localization-test-B': path.join(__dirname, 'src', 'indexB.ts'),
-      'localization-test-C': path.join(__dirname, 'src', 'indexC.ts'),
-      'localization-test-D': path.join(__dirname, 'src', 'indexD.ts')
+      'localization-test-A': `${__dirname}/src/indexA.ts`,
+      'localization-test-B': `${__dirname}/src/indexB.ts`,
+      'localization-test-C': `${__dirname}/src/indexC.ts`,
+      'localization-test-D': `${__dirname}/src/indexD.ts`
     },
     output: {
-      path: path.join(__dirname, outputFolderName),
+      path: `${__dirname}/${outputFolderName}`,
       filename: '[name]_[locale]_[contenthash].js',
       chunkFilename: '[id].[name]_[locale]_[contenthash].js'
     },
     optimization: {
-      minimize: true
+      minimizer: [
+        new ModuleMinifierPlugin({
+          minifier: new WorkerPoolMinifier(),
+          useSourceMap: true
+        })
+      ]
     },
     plugins: [
       new webpack.optimize.ModuleConcatenationPlugin(),
@@ -117,22 +117,22 @@ function generateConfiguration(mode, outputFolderName) {
           normalizeResxNewlines: 'lf'
         },
         typingsOptions: {
-          generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
+          generatedTsFolder: `${__dirname}/temp/loc-json-ts`,
           secondaryGeneratedTsFolders: ['lib'],
-          sourceRoot: path.resolve(__dirname, 'src'),
+          sourceRoot: `${__dirname}/src`,
           exportAsDefault: true
         },
         localizationStats: {
-          dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
+          dropPath: `${__dirname}/temp/localization-stats.json`
         },
         globsToIgnore: ['**/invalid-strings.loc.json']
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
         analyzerMode: 'static',
-        reportFilename: path.resolve(__dirname, 'temp', 'stats.html'),
+        reportFilename: `${__dirname}/temp/stats.html`,
         generateStatsFile: true,
-        statsFilename: path.resolve(__dirname, 'temp', 'stats.json'),
+        statsFilename: `${__dirname}/temp/stats.json`,
         logLevel: 'error'
       }),
       new SetPublicPathPlugin({
@@ -141,19 +141,11 @@ function generateConfiguration(mode, outputFolderName) {
         }
       }),
       new HtmlWebpackPlugin()
-    ],
-    optimization: {
-      minimizer: [
-        new ModuleMinifierPlugin({
-          minifier: new WorkerPoolMinifier(),
-          useSourceMap: true
-        })
-      ]
-    }
+    ]
   };
 }
 
-module.exports = [
-  generateConfiguration('development', 'dist-dev'),
-  generateConfiguration('production', 'dist-prod')
+module.exports = ({ webpack }) => [
+  generateConfiguration('development', 'dist-dev', webpack),
+  generateConfiguration('production', 'dist-prod', webpack)
 ];

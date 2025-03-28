@@ -18,6 +18,11 @@
           "longName": "--storybook-test",
           "description": "Executes a stripped down build-storybook for testing purposes.",
           "parameterKind": "flag"
+        },
+        {
+          "longName": "--docs",
+          "description": "Execute storybook in docs mode.",
+          "parameterKind": "flag"
         }
       ]
     }

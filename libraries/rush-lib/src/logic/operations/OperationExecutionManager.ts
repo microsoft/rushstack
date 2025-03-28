@@ -17,16 +17,19 @@ import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { type IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import type { IExecutionResult } from './IOperationExecutionResult';
+import type { IEnvironment } from '../../utilities/Utilities';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
   debugMode: boolean;
   parallelism: number;
-  changedProjectsOnly: boolean;
+  inputsSnapshot?: IInputsSnapshot;
   destination?: TerminalWritable;
 
   beforeExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
   afterExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<void>;
+  createEnvironmentForOperation?: (operation: OperationExecutionRecord) => IEnvironment;
   onOperationStatusChangedAsync?: (record: OperationExecutionRecord) => void;
   beforeExecuteOperationsAsync?: (records: Map<Operation, OperationExecutionRecord>) => Promise<void>;
 }
@@ -44,13 +47,24 @@ const prioritySort: IOperationSortFunction = (
 };
 
 /**
+ * Sorts operations lexicographically by their name.
+ * @param a - The first operation to compare
+ * @param b - The second operation to compare
+ * @returns A comparison result: -1 if a < b, 0 if a === b, 1 if a > b
+ */
+function sortOperationsByName(a: Operation, b: Operation): number {
+  const aName: string = a.name;
+  const bName: string = b.name;
+  return aName === bName ? 0 : aName < bName ? -1 : 1;
+}
+
+/**
  * A class which manages the execution of a set of tasks with interdependencies.
  * Initially, and at the end of each task execution, all unblocked tasks
  * are added to a ready queue which is then executed. This is done continually until all
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class OperationExecutionManager {
-  private readonly _changedProjectsOnly: boolean;
   private readonly _executionRecords: Map<Operation, OperationExecutionRecord>;
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
@@ -70,6 +84,7 @@ export class OperationExecutionManager {
   private readonly _beforeExecuteOperations?: (
     records: Map<Operation, OperationExecutionRecord>
   ) => Promise<void>;
+  private readonly _createEnvironmentForOperation?: (operation: OperationExecutionRecord) => IEnvironment;
 
   // Variables for current status
   private _hasAnyFailures: boolean;
@@ -82,22 +97,23 @@ export class OperationExecutionManager {
       quietMode,
       debugMode,
       parallelism,
-      changedProjectsOnly,
+      inputsSnapshot,
       beforeExecuteOperationAsync: beforeExecuteOperation,
       afterExecuteOperationAsync: afterExecuteOperation,
       onOperationStatusChangedAsync: onOperationStatusChanged,
-      beforeExecuteOperationsAsync: beforeExecuteOperations
+      beforeExecuteOperationsAsync: beforeExecuteOperations,
+      createEnvironmentForOperation
     } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
-    this._changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
 
     this._beforeExecuteOperation = beforeExecuteOperation;
     this._afterExecuteOperation = afterExecuteOperation;
     this._beforeExecuteOperations = beforeExecuteOperations;
+    this._createEnvironmentForOperation = createEnvironmentForOperation;
     this._onOperationStatusChanged = (record: OperationExecutionRecord) => {
       if (record.status === OperationStatus.Ready) {
         this._executionQueue.assignOperations();
@@ -125,13 +141,18 @@ export class OperationExecutionManager {
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
       onOperationStatusChanged: this._onOperationStatusChanged,
+      createEnvironment: this._createEnvironmentForOperation,
+      inputsSnapshot,
       debugMode,
       quietMode
     };
 
+    // Sort the operations by name to ensure consistency and readability.
+    const sortedOperations: Operation[] = Array.from(operations).sort(sortOperationsByName);
+
     let totalOperations: number = 0;
     const executionRecords: Map<Operation, OperationExecutionRecord> = (this._executionRecords = new Map());
-    for (const operation of operations) {
+    for (const operation of sortedOperations) {
       const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(
         operation,
         executionRecordContext
@@ -145,16 +166,23 @@ export class OperationExecutionManager {
     }
     this._totalOperations = totalOperations;
 
-    for (const [operation, consumer] of executionRecords) {
+    for (const [operation, record] of executionRecords) {
       for (const dependency of operation.dependencies) {
         const dependencyRecord: OperationExecutionRecord | undefined = executionRecords.get(dependency);
         if (!dependencyRecord) {
           throw new Error(
-            `Operation "${consumer.name}" declares a dependency on operation "${dependency.name}" that is not in the set of operations to execute.`
+            `Operation "${record.name}" declares a dependency on operation "${dependency.name}" that is not in the set of operations to execute.`
           );
         }
-        consumer.dependencies.add(dependencyRecord);
-        dependencyRecord.consumers.add(consumer);
+        record.dependencies.add(dependencyRecord);
+        dependencyRecord.consumers.add(record);
+      }
+    }
+
+    // Ensure we compute the compute the state hashes for all operations before the runtime graph potentially mutates.
+    if (inputsSnapshot) {
+      for (const record of executionRecords.values()) {
+        record.getStateHash();
       }
     }
 

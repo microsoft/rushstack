@@ -1,6 +1,97 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:16 GMT and should not be manually modified.
+
+## 0.5.29
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 0.5.28
+Tue, 25 Mar 2025 00:12:04 GMT
+
+### Patches
+
+- Fix the `--fix` argument when the file only contains fixable issues.
+
+## 0.5.27
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 0.5.26
+Wed, 12 Mar 2025 00:11:31 GMT
+
+_Version update only_
+
+## 0.5.25
+Tue, 11 Mar 2025 02:12:33 GMT
+
+_Version update only_
+
+## 0.5.24
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.5.23
+Thu, 06 Mar 2025 01:10:42 GMT
+
+### Patches
+
+- Fix an issue where the cache is only populated for incremental TypeScript builds.
+
+## 0.5.22
+Sat, 01 Mar 2025 07:23:16 GMT
+
+_Version update only_
+
+## 0.5.21
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.5.20
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.5.19
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 0.5.18
+Tue, 25 Feb 2025 01:11:55 GMT
+
+### Patches
+
+- Add verbose logging around finding the lint config file.
+
+## 0.5.17
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.5.16
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.5.15
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.5.14
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 0.5.13
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
 
 ## 0.5.12
 Thu, 09 Jan 2025 01:10:10 GMT

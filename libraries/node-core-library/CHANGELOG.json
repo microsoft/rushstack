@@ -2,6 +2,50 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.13.0",
+      "tag": "@rushstack/node-core-library_v5.13.0",
+      "date": "Tue, 25 Mar 2025 15:11:15 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expand `FileSystem.writeBuffersToFile` and `FileSystem.writeBuffersToFileAsync` to take more kinds of buffers."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.12.0",
+      "tag": "@rushstack/node-core-library_v5.12.0",
+      "date": "Tue, 11 Mar 2025 02:12:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `useNodeJSResolver` option to `Import.resolvePackage` to rely on the built-in `require.resolve` and share its cache."
+          },
+          {
+            "comment": "In `RealNodeModulePathResolver`, add the option to configure to throw or not throw for non-existent paths."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "In `RealNodeModulePathResolver`, add negative caching when a path segment that might be a symbolic link is not."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.11.0",
+      "tag": "@rushstack/node-core-library_v5.11.0",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update fs-extra to 11.3.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.10.2",
       "tag": "@rushstack/node-core-library_v5.10.2",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",

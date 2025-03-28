@@ -201,8 +201,8 @@ export class FileSystem {
     static readLinkAsync(path: string): Promise<string>;
     static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
     static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void>;
-    static writeBuffersToFile(filePath: string, contents: ReadonlyArray<Uint8Array>, options?: IFileSystemWriteBinaryFileOptions): void;
-    static writeBuffersToFileAsync(filePath: string, contents: ReadonlyArray<Uint8Array>, options?: IFileSystemWriteBinaryFileOptions): Promise<void>;
+    static writeBuffersToFile(filePath: string, contents: ReadonlyArray<NodeJS.ArrayBufferView>, options?: IFileSystemWriteBinaryFileOptions): void;
+    static writeBuffersToFileAsync(filePath: string, contents: ReadonlyArray<NodeJS.ArrayBufferView>, options?: IFileSystemWriteBinaryFileOptions): Promise<void>;
     static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
 }
@@ -398,6 +398,7 @@ export interface IImportResolvePackageAsyncOptions extends IImportResolveAsyncOp
 // @public
 export interface IImportResolvePackageOptions extends IImportResolveOptions {
     packageName: string;
+    useNodeJSResolver?: boolean;
 }
 
 // @public
@@ -610,6 +611,7 @@ export interface IReadLinesFromIterableOptions {
 export interface IRealNodeModulePathResolverOptions {
     // (undocumented)
     fs?: Partial<Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>>;
+    ignoreMissingPaths?: boolean;
     // (undocumented)
     path?: Partial<Pick<typeof nodePath, 'isAbsolute' | 'join' | 'resolve' | 'sep'>>;
 }

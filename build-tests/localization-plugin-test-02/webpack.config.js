@@ -1,15 +1,12 @@
 'use strict';
 
-const path = require('path');
-const webpack = require('webpack');
-
 const { LocalizationPlugin } = require('@rushstack/webpack4-localization-plugin');
 const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-function generateConfiguration(mode, outputFolderName) {
+function generateConfiguration(mode, outputFolderName, webpack) {
   return {
     mode: mode,
     entry: {
@@ -90,7 +87,7 @@ function generateConfiguration(mode, outputFolderName) {
   };
 }
 
-module.exports = [
-  generateConfiguration('development', 'dist-dev'),
-  generateConfiguration('production', 'dist-prod')
+module.exports = ({ webpack }) => [
+  generateConfiguration('development', 'dist-dev', webpack),
+  generateConfiguration('production', 'dist-prod', webpack)
 ];

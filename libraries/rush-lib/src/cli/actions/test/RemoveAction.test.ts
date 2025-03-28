@@ -15,7 +15,7 @@ describe(RemoveAction.name, () => {
   describe('basic "rush remove" tests', () => {
     let doRushRemoveMock: jest.SpyInstance;
     let removeDependencyMock: jest.SpyInstance;
-    let oldExitCode: number | undefined;
+    let oldExitCode: number | string | undefined;
     let oldArgs: string[];
 
     beforeEach(() => {

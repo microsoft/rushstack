@@ -11,9 +11,9 @@
     "@rushstack/eslint-patch": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@typescript-eslint/parser": "~8.1.0",
+    "@typescript-eslint/parser": "~8.26.1",
     "eslint": "~8.57.0",
     "local-node-rig": "workspace:*",
-    "typescript": "~5.4.2"
+    "typescript": "~5.8.2"
   }
 }

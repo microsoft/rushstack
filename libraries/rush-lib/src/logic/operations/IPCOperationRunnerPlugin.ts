@@ -51,7 +51,7 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project, runner } = operation;
 
-          if (runner || !phase || !project) {
+          if (runner) {
             continue;
           }
 
@@ -69,6 +69,10 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
             continue;
           }
 
+          // This is the command that will be used to identify the cache entry for this operation, to allow
+          // for this operation (or downstream operations) to be restored from the build cache.
+          const commandForHash: string | undefined = phase.shellCommand ?? scripts?.[phaseName];
+
           const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
           const commandToRun: string = formatCommand(rawScript, customParameterValues);
 
@@ -79,7 +83,8 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
               phase,
               project,
               name: operationName,
-              shellCommand: commandToRun,
+              commandToRun,
+              commandForHash,
               persist: true,
               requestRun: (requestor?: string) => {
                 const operationState: IOperationExecutionResult | undefined =

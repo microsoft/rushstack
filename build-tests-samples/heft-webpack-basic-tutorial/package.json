@@ -24,13 +24,13 @@
     "@types/heft-jest": "1.0.1",
     "@types/react-dom": "17.0.25",
     "@types/react": "17.0.74",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.8",
     "css-loader": "~6.6.0",
     "eslint": "~8.57.0",
     "html-webpack-plugin": "~5.5.0",
     "source-map-loader": "~3.0.1",
     "style-loader": "~3.3.1",
-    "typescript": "~5.4.2",
-    "webpack": "~5.95.0"
+    "typescript": "~5.8.2",
+    "webpack": "~5.98.0"
   }
 }

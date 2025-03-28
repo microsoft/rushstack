@@ -26,10 +26,11 @@ import {
   type IOperationExecutionResult,
   OperationStatus,
   type IExecutionResult,
-  type ILogFilePaths
+  type ILogFilePaths,
+  RushConstants
 } from '@rushstack/rush-sdk';
 import { getProjectLogFolders } from '@rushstack/rush-sdk/lib/logic/operations/ProjectLogWritable';
-import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { type CommandLineIntegerParameter, CommandLineParameterKind } from '@rushstack/ts-command-line';
 
 import { PLUGIN_NAME } from './constants';
 import { type IRoutingRule, RushServeConfiguration } from './RushProjectServeConfigFile';
@@ -102,22 +103,19 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
       let requestedPort: number = 0;
 
       // If command-line.json has an existing parameter for specifying a port, use it
-      const portParameter: CommandLineStringParameter | undefined = portParameterLongName
-        ? (customParameters.get(portParameterLongName) as CommandLineStringParameter)
+      const portParameter: CommandLineIntegerParameter | undefined = portParameterLongName
+        ? (customParameters.get(portParameterLongName) as CommandLineIntegerParameter)
         : undefined;
       if (portParameter) {
-        const rawValue: string | undefined = portParameter.value;
-        const parsedValue: number = rawValue ? parseInt(rawValue, 10) : 0;
-        if (isNaN(parsedValue)) {
-          logger.terminal.writeErrorLine(
-            `Unexpected value "${rawValue}" for parameter "${portParameterLongName}". Expected an integer.`
-          );
-          throw new AlreadyReportedError();
+        if (portParameter.kind !== CommandLineParameterKind.Integer) {
+          throw new Error(`The "${portParameterLongName}" parameter must be an integer parameter`);
         }
-        requestedPort = parsedValue;
+
+        requestedPort = portParameter.value ?? 0;
       } else if (portParameterLongName) {
         logger.terminal.writeErrorLine(
-          `Custom parameter "${portParameterLongName}" is not defined for command "${command.actionName}" in "command-line.json".`
+          `Custom parameter "${portParameterLongName}" is not defined for command "${command.actionName}" ` +
+            `in "${RushConstants.commandLineFilename}".`
         );
         throw new AlreadyReportedError();
       }
@@ -327,7 +325,7 @@ function tryEnableBuildStatusWebSocketServer(
     const { operation } = record;
     const { name, associatedPhase, associatedProject, runner, enabled } = operation;
 
-    if (!name || !associatedPhase || !associatedProject || !runner) {
+    if (!name || !runner) {
       return;
     }
 

@@ -2,6 +2,63 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.2.40",
+      "tag": "@rushstack/operation-graph_v0.2.40",
+      "date": "Tue, 25 Mar 2025 15:11:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.39",
+      "tag": "@rushstack/operation-graph_v0.2.39",
+      "date": "Tue, 11 Mar 2025 02:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.38",
+      "tag": "@rushstack/operation-graph_v0.2.38",
+      "date": "Wed, 12 Feb 2025 01:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.37",
+      "tag": "@rushstack/operation-graph_v0.2.37",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.36",
       "tag": "@rushstack/operation-graph_v0.2.36",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",

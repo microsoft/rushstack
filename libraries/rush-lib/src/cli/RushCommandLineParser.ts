@@ -62,6 +62,8 @@ import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoade
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
 import { InstallAutoinstallerAction } from './actions/InstallAutoinstallerAction';
+import { LinkPackageAction } from './actions/LinkPackageAction';
+import { BridgePackageAction } from './actions/BridgePackageAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -85,6 +87,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private readonly _rushOptions: IRushCommandLineParserOptions;
   private readonly _terminalProvider: ConsoleTerminalProvider;
   private readonly _terminal: Terminal;
+  private readonly _autocreateBuildCommand: boolean;
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
@@ -150,18 +153,28 @@ export class RushCommandLineParser extends CommandLineParser {
       rushGlobalFolder: this.rushGlobalFolder
     });
 
-    this._populateActions();
-
     const pluginCommandLineConfigurations: ICustomCommandLineConfigurationInfo[] =
       this.pluginManager.tryGetCustomCommandLineConfigurationInfos();
+
+    const hasBuildCommandInPlugin: boolean = pluginCommandLineConfigurations.some((x) =>
+      x.commandLineConfiguration.commands.has(RushConstants.buildCommandName)
+    );
+
+    // If the plugin has a build command, we don't need to autocreate the default build command.
+    this._autocreateBuildCommand = !hasBuildCommandInPlugin;
+
+    this._populateActions();
+
     for (const { commandLineConfiguration, pluginLoader } of pluginCommandLineConfigurations) {
       try {
         this._addCommandLineConfigActions(commandLineConfiguration);
       } catch (e) {
-        this._terminal.writeErrorLine(
-          `Error from plugin ${pluginLoader.pluginName} by ${pluginLoader.packageName}: ${(
-            e as Error
-          ).toString()}`
+        this._reportErrorAndSetExitCode(
+          new Error(
+            `Error from plugin ${pluginLoader.pluginName} by ${pluginLoader.packageName}: ${(
+              e as Error
+            ).toString()}`
+          )
         );
       }
     }
@@ -320,6 +333,8 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UpgradeInteractiveAction(this));
       this.addAction(new VersionAction(this));
       this.addAction(new AlertAction(this));
+      this.addAction(new BridgePackageAction(this));
+      this.addAction(new LinkPackageAction(this));
 
       this._populateScriptActions();
     } catch (error) {
@@ -338,8 +353,13 @@ export class RushCommandLineParser extends CommandLineParser {
       );
     }
 
-    const commandLineConfiguration: CommandLineConfiguration =
-      CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
+    // If a build action is already added by a plugin, we don't want to add a default "build" script
+    const doNotIncludeDefaultBuildCommands: boolean = !this._autocreateBuildCommand;
+
+    const commandLineConfiguration: CommandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(
+      commandLineConfigFilePath,
+      doNotIncludeDefaultBuildCommands
+    );
     this._addCommandLineConfigActions(commandLineConfiguration);
   }
 

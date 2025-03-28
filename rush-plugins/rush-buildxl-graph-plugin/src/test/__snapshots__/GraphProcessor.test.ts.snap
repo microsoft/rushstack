@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GraphProcessor should fail if the input schema is invalid 1`] = `"Cannot read properties of undefined (reading 'name')"`;
+
+exports[`GraphProcessor validateGraph should fail to validate when command is empty 1`] = `
+Array [
+  [Error: There is an empty command in @microsoft/rush-lib#_phase:build],
+]
+`;
+
+exports[`GraphProcessor validateGraph should fail to validate when command is missing 1`] = `
+Array [
+  [Error: There is an empty command in @microsoft/rush-lib#_phase:build],
+]
+`;
+
+exports[`GraphProcessor validateGraph should fail to validate when dependencies refer to nonexistent nodes 1`] = `
+Array [
+  [Error: @microsoft/rush-lib#_phase:build has a dependency on @this/is/presumably#_not:real which does not exist],
+]
+`;
+
+exports[`GraphProcessor validateGraph should fail to validate when id is empty 1`] = `
+Array [
+  [Error: @rushstack/rush-buildxl-graph-plugin#_phase:build has a dependency on @microsoft/rush-lib#_phase:build which does not exist],
+  [Error: @rushstack/rush-sdk#_phase:build has a dependency on @microsoft/rush-lib#_phase:build which does not exist],
+]
+`;
+
+exports[`GraphProcessor validateGraph should fail to validate when id is missing 1`] = `
+Array [
+  [Error: @rushstack/rush-buildxl-graph-plugin#_phase:build has a dependency on @microsoft/rush-lib#_phase:build which does not exist],
+  [Error: @rushstack/rush-sdk#_phase:build has a dependency on @microsoft/rush-lib#_phase:build which does not exist],
+]
+`;

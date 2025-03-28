@@ -5,6 +5,8 @@
 // https://github.com/dylang/npm-check/blob/master/lib/out/interactive-update.js
 // Extended to use one type of text table
 
+/// <reference path="../npm-check-typings.d.ts" preserve="true" />
+
 import inquirer from 'inquirer';
 import CliTable from 'cli-table';
 import type Separator from 'inquirer/lib/objects/separator';

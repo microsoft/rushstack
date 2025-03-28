@@ -54,7 +54,7 @@ describe(BuildPlanPlugin.name, () => {
     for (const operation of operations) {
       const { associatedPhase, associatedProject } = operation;
 
-      if (associatedPhase && associatedProject && !operation.runner) {
+      if (!operation.runner) {
         const name: string = `${associatedProject.packageName} (${associatedPhase.name.slice(
           RushConstants.phaseNamePrefix.length
         )})`;
@@ -127,7 +127,12 @@ describe(BuildPlanPlugin.name, () => {
       operations.forEach((operation) => {
         operationMap.set(
           operation,
-          new OperationExecutionRecord(operation, { debugMode: false, quietMode: true, streamCollator })
+          new OperationExecutionRecord(operation, {
+            debugMode: false,
+            quietMode: true,
+            streamCollator,
+            inputsSnapshot: undefined
+          })
         );
       });
 

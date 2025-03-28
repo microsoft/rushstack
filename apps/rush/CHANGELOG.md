@@ -1,6 +1,44 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 10 Jan 2025 02:36:20 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 16:58:46 GMT and should not be manually modified.
+
+## 5.151.0
+Tue, 25 Mar 2025 16:58:46 GMT
+
+### Updates
+
+- Fix an issue where `--include-phase-deps` and watch mode sometimes included operations that were not required
+- Fix an issue where build/rebuild can not be defined in a rush plugin command line configuration
+- Use `useNodeJSResolver: true` in `Import.resolvePackage` calls.
+- Add missing `./package.json` export; revert `useNodeJSResolver: true`.
+- (plugin-api) Guaranteed `operation.associatedPhase` and `operation.associatedProject` are not undefined.
+
+## 5.150.0
+Thu, 27 Feb 2025 17:41:59 GMT
+
+### Updates
+
+- Add an `--include-phase-deps` switch that expands an unsafe project selection to include its phase dependencies
+
+## 5.149.1
+Wed, 19 Feb 2025 18:54:06 GMT
+
+### Updates
+
+- Remove the unused `RushConstants.rushAlertsStateFilename` property.
+- Bump `jsonpath-plus` to `~10.3.0`.
+
+## 5.149.0
+Wed, 12 Feb 2025 04:07:30 GMT
+
+### Updates
+
+- Prefer `os.availableParallelism()` to `os.cpus().length`.
+- Add a new command line parameter `--node-diagnostic-dir=DIR` to phased commands that, when specified, tells all child build processes to write NodeJS diagnostics into `${DIR}/${packageName}/${phaseIdentifier}`. This is useful if `--cpu-prof` or `--heap-prof` are enabled, to avoid polluting workspace folders.
+- Add a new phased command hook `createEnvironmentForOperation` that can be used to customize the environment variables passed to individual operation subprocesses. This may be used to, for example, customize `NODE_OPTIONS` to pass `--diagnostic-dir` or other such parameters.
+- Allow --timeline option for all phased commands
+- Fix support for "ensureConsistentVersions" in common-versions.json when subspaces features is not enabled.
+- Fix an issue where the port parameter in `@rushstack/rush-serve-plugin` was allowed to be a string parameter.
 
 ## 5.148.0
 Fri, 10 Jan 2025 02:36:20 GMT

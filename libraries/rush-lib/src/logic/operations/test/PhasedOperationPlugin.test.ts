@@ -5,6 +5,7 @@ import path from 'path';
 import { JsonFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import {
   CommandLineConfiguration,
   type IPhase,
@@ -19,7 +20,6 @@ import {
   type ICreateOperationsContext,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
-import type { RushConfigurationProject } from '../../..';
 
 interface ISerializedOperation {
   name: string;
@@ -29,9 +29,9 @@ interface ISerializedOperation {
 
 function serializeOperation(operation: Operation): ISerializedOperation {
   return {
-    name: operation.name!,
+    name: operation.name,
     silent: !operation.enabled || operation.runner!.silent,
-    dependencies: Array.from(operation.dependencies, (dep: Operation) => dep.name!)
+    dependencies: Array.from(operation.dependencies, (dep: Operation) => dep.name)
   };
 }
 
@@ -46,7 +46,7 @@ describe(PhasedOperationPlugin.name, () => {
     for (const operation of operations) {
       const { associatedPhase, associatedProject } = operation;
 
-      if (associatedPhase && associatedProject && !operation.runner) {
+      if (!operation.runner) {
         const name: string = `${associatedProject.packageName} (${associatedPhase.name.slice(
           RushConstants.phaseNamePrefix.length
         )})`;

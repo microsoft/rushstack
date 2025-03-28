@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/// <reference types="node" preserve="true" />
+
 /**
  * This library implements a system for processing human readable text that
  * will be output by console applications.
@@ -46,4 +48,5 @@ export {
   type IPrefixProxyTerminalProviderOptionsBase,
   type IStaticPrefixProxyTerminalProviderOptions
 } from './PrefixProxyTerminalProvider';
+export { NoOpTerminalProvider } from './NoOpTerminalProvider';
 export { TerminalStreamWritable, type ITerminalStreamWritableOptions } from './TerminalStreamWritable';

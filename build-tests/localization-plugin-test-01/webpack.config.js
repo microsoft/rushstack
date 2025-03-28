@@ -1,40 +1,20 @@
 'use strict';
 
-const path = require('path');
-const webpack = require('webpack');
-
 const { LocalizationPlugin } = require('@rushstack/webpack4-localization-plugin');
 const { ModuleMinifierPlugin, LocalMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-function generateConfiguration(mode, outputFolderName) {
+function generateConfiguration(mode, outputFolderName, webpack) {
   return {
-    mode: mode,
-    module: {
-      rules: [
-        {
-          test: /\.tsx?$/,
-          loader: require.resolve('ts-loader'),
-          exclude: /(node_modules)/,
-          options: {
-            compiler: require.resolve('typescript'),
-            logLevel: 'ERROR',
-            configFile: path.resolve(__dirname, 'tsconfig.json')
-          }
-        }
-      ]
-    },
-    resolve: {
-      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
-    },
+    mode,
     entry: {
-      'localization-test-A': path.join(__dirname, 'src', 'indexA.ts'),
-      'localization-test-B': path.join(__dirname, 'src', 'indexB.ts')
+      'localization-test-A': `${__dirname}/lib/indexA.js`,
+      'localization-test-B': `${__dirname}/lib/indexB.js`
     },
     output: {
-      path: path.join(__dirname, outputFolderName),
+      path: `${__dirname}/${outputFolderName}`,
       filename: '[name]_[locale]_[contenthash].js',
       chunkFilename: '[id].[name]_[locale]_[contenthash].js'
     },
@@ -57,19 +37,19 @@ function generateConfiguration(mode, outputFolderName) {
           }
         },
         typingsOptions: {
-          generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
-          sourceRoot: path.resolve(__dirname, 'src')
+          generatedTsFolder: `${__dirname}/temp/loc-json-ts`,
+          sourceRoot: `${__dirname}/src`
         },
         localizationStats: {
-          dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
+          dropPath: `${__dirname}/temp/localization-stats.json`
         }
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
         analyzerMode: 'static',
-        reportFilename: path.resolve(__dirname, 'temp', 'stats.html'),
+        reportFilename: `${__dirname}/temp/stats.html`,
         generateStatsFile: true,
-        statsFilename: path.resolve(__dirname, 'temp', 'stats.json'),
+        statsFilename: `${__dirname}/temp/stats.json`,
         logLevel: 'error'
       }),
       new SetPublicPathPlugin({
@@ -82,7 +62,7 @@ function generateConfiguration(mode, outputFolderName) {
   };
 }
 
-module.exports = [
-  generateConfiguration('development', 'dist-dev'),
-  generateConfiguration('production', 'dist-prod')
+module.exports = ({ webpack }) => [
+  generateConfiguration('development', 'dist-dev', webpack),
+  generateConfiguration('production', 'dist-prod', webpack)
 ];

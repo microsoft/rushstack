@@ -22,3 +22,18 @@ export {
   loadTypeScriptConfigurationFileAsync,
   loadPartialTsconfigFileAsync
 } from './TypeScriptPlugin';
+
+export type { IBaseTypeScriptTool as _IBaseTypeScriptTool } from './TypeScriptBuilder';
+export {
+  loadTypeScriptToolAsync as _loadTypeScriptToolAsync,
+  type ILoadedTypeScriptTool as _ILoadedTypeScriptTool,
+  type ICompilerCapabilities as _ICompilerCapabilities,
+  type ILoadTypeScriptToolOptions as _ILoadTypeScriptToolOptions
+} from './loadTypeScriptTool';
+export {
+  loadTsconfig as _loadTsconfig,
+  getTsconfigFilePath as _getTsconfigFilePath,
+  type ILoadTsconfigOptions as _ILoadTsconfigOptions
+} from './tsconfigLoader';
+import type * as TTypeScript from 'typescript';
+export { TTypeScript as _TTypeScript };

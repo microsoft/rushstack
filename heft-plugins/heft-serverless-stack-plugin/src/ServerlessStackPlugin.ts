@@ -84,7 +84,8 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     try {
       sstCliPackagePath = Import.resolvePackage({
         packageName: SST_CLI_PACKAGE_NAME,
-        baseFolderPath: options.heftConfiguration.buildFolderPath
+        baseFolderPath: options.heftConfiguration.buildFolderPath,
+        useNodeJSResolver: true
       });
     } catch (e) {
       this._logger.emitError(

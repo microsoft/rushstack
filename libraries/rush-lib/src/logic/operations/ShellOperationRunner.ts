@@ -8,25 +8,22 @@ import { type ITerminal, type ITerminalProvider, TerminalProviderSeverity } from
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { type IEnvironment, Utilities } from '../../utilities/Utilities';
+import { Utilities } from '../../utilities/Utilities';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
 
-export interface IOperationRunnerOptions {
+export interface IShellOperationRunnerOptions {
+  phase: IPhase;
   rushProject: RushConfigurationProject;
-  rushConfiguration: RushConfiguration;
+  displayName: string;
   commandToRun: string;
   commandForHash: string;
-  displayName: string;
-  phase: IPhase;
-  environment?: IEnvironment;
 }
 
 /**
- * An `IOperationRunner` subclass that performs an operation via a shell command.
+ * An `IOperationRunner` implementation that performs an operation via a shell command.
  * Currently contains the build cache logic, pending extraction as separate operations.
  * Supports skipping an operation if allowed and it is already up-to-date.
  */
@@ -37,26 +34,25 @@ export class ShellOperationRunner implements IOperationRunner {
   public readonly silent: boolean = false;
   public readonly cacheable: boolean = true;
   public readonly warningsAreAllowed: boolean;
+  public readonly commandToRun: string;
+  /**
+   * The creator is expected to use a different runner if the command is known to be a noop.
+   */
+  public readonly isNoOp: boolean = false;
 
-  private readonly _commandToRun: string;
   private readonly _commandForHash: string;
 
   private readonly _rushProject: RushConfigurationProject;
-  private readonly _rushConfiguration: RushConfiguration;
 
-  private readonly _environment?: IEnvironment;
-
-  public constructor(options: IOperationRunnerOptions) {
+  public constructor(options: IShellOperationRunnerOptions) {
     const { phase } = options;
 
     this.name = options.displayName;
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
     this._rushProject = options.rushProject;
-    this._rushConfiguration = options.rushConfiguration;
-    this._commandToRun = options.commandToRun;
+    this.commandToRun = options.commandToRun;
     this._commandForHash = options.commandForHash;
-    this._environment = options.environment;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
@@ -75,22 +71,25 @@ export class ShellOperationRunner implements IOperationRunner {
     return await context.runWithTerminalAsync(
       async (terminal: ITerminal, terminalProvider: ITerminalProvider) => {
         let hasWarningOrError: boolean = false;
-        const projectFolder: string = this._rushProject.projectFolder;
 
         // Run the operation
-        terminal.writeLine('Invoking: ' + this._commandToRun);
+        terminal.writeLine(`Invoking: ${this.commandToRun}`);
+
+        const { rushConfiguration, projectFolder } = this._rushProject;
+
+        const { environment: initialEnvironment } = context;
 
         const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
-          this._commandToRun,
+          this.commandToRun,
           {
-            rushConfiguration: this._rushConfiguration,
+            rushConfiguration: rushConfiguration,
             workingDirectory: projectFolder,
-            initCwd: this._rushConfiguration.commonTempFolder,
+            initCwd: rushConfiguration.commonTempFolder,
             handleOutput: true,
             environmentPathOptions: {
               includeProjectBin: true
             },
-            initialEnvironment: this._environment
+            initialEnvironment
           }
         );
 

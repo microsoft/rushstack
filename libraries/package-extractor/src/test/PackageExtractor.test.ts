@@ -365,7 +365,7 @@ describe(PackageExtractor.name, () => {
     // Validate project 1 files
     await expect(
       FileSystem.existsAsync(
-        path.join(targetFolder, project1RelativePath, 'node_modules/@types/node/fs/promises.d.ts')
+        path.join(targetFolder, project1RelativePath, 'node_modules/@types/node/fs-promises.d.ts')
       )
     ).resolves.toBe(false);
     await expect(

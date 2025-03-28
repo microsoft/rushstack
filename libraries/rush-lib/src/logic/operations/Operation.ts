@@ -12,14 +12,14 @@ import type { IOperationSettings } from '../../api/RushProjectConfiguration';
  */
 export interface IOperationOptions {
   /**
-   * The Rush phase associated with this Operation, if any
+   * The Rush phase associated with this Operation
    */
-  phase?: IPhase | undefined;
+  phase: IPhase;
 
   /**
-   * The Rush project associated with this Operation, if any
+   * The Rush project associated with this Operation
    */
-  project?: RushConfigurationProject | undefined;
+  project: RushConfigurationProject;
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -49,14 +49,14 @@ export interface IOperationOptions {
  */
 export class Operation {
   /**
-   * The Rush phase associated with this Operation, if any
+   * The Rush phase associated with this Operation
    */
-  public readonly associatedPhase: IPhase | undefined;
+  public readonly associatedPhase: IPhase;
 
   /**
-   * The Rush project associated with this Operation, if any
+   * The Rush project associated with this Operation
    */
-  public readonly associatedProject: RushConfigurationProject | undefined;
+  public readonly associatedProject: RushConfigurationProject;
 
   /**
    * A set of all operations which depend on this operation.
@@ -120,15 +120,23 @@ export class Operation {
   /**
    * The name of this operation, for logging.
    */
-  public get name(): string | undefined {
-    return this.runner?.name;
+  public get name(): string {
+    const { runner } = this;
+    if (!runner) {
+      throw new Error(`Cannot get name of an Operation that does not yet have a runner.`);
+    }
+    return runner.name;
   }
 
   /**
    * If set to true, this operation is considered a no-op and can be considered always skipped for analysis purposes.
    */
   public get isNoOp(): boolean {
-    return !!this.runner?.isNoOp;
+    const { runner } = this;
+    if (!runner) {
+      throw new Error(`Cannot get isNoOp of an Operation that does not yet have a runner.`);
+    }
+    return !!runner.isNoOp;
   }
 
   /**

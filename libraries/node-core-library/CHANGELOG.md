@@ -1,6 +1,32 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:15 GMT and should not be manually modified.
+
+## 5.13.0
+Tue, 25 Mar 2025 15:11:15 GMT
+
+### Minor changes
+
+- Expand `FileSystem.writeBuffersToFile` and `FileSystem.writeBuffersToFileAsync` to take more kinds of buffers.
+
+## 5.12.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Add `useNodeJSResolver` option to `Import.resolvePackage` to rely on the built-in `require.resolve` and share its cache.
+- In `RealNodeModulePathResolver`, add the option to configure to throw or not throw for non-existent paths.
+
+### Patches
+
+- In `RealNodeModulePathResolver`, add negative caching when a path segment that might be a symbolic link is not.
+
+## 5.11.0
+Thu, 30 Jan 2025 01:11:42 GMT
+
+### Minor changes
+
+- Update fs-extra to 11.3.0.
 
 ## 5.10.2
 Thu, 09 Jan 2025 01:10:10 GMT

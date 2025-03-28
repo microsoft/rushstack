@@ -2,6 +2,75 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.16.8",
+      "tag": "@rushstack/heft-config-file_v0.16.8",
+      "date": "Tue, 25 Mar 2025 15:11:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.16.7",
+      "tag": "@rushstack/heft-config-file_v0.16.7",
+      "date": "Tue, 11 Mar 2025 02:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.16.6",
+      "tag": "@rushstack/heft-config-file_v0.16.6",
+      "date": "Wed, 19 Feb 2025 18:53:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump `jsonpath-plus` to `~10.3.0`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.16.5",
+      "tag": "@rushstack/heft-config-file_v0.16.5",
+      "date": "Wed, 12 Feb 2025 01:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.16.4",
+      "tag": "@rushstack/heft-config-file_v0.16.4",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.16.3",
       "tag": "@rushstack/heft-config-file_v0.16.3",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",

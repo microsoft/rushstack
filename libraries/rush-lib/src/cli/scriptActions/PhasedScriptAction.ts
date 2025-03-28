@@ -57,6 +57,8 @@ import { FlagFile } from '../../api/FlagFile';
 import { WeightedOperationPlugin } from '../../logic/operations/WeightedOperationPlugin';
 import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 import { Selection } from '../../logic/Selection';
+import { NodeDiagnosticDirPlugin } from '../../logic/operations/NodeDiagnosticDirPlugin';
+import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -78,7 +80,10 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
 }
 
 interface IInitialRunPhasesOptions {
-  executionManagerOptions: Omit<IOperationExecutionManagerOptions, 'beforeExecuteOperations'>;
+  executionManagerOptions: Omit<
+    IOperationExecutionManagerOptions,
+    'beforeExecuteOperations' | 'inputsSnapshot'
+  >;
   initialCreateOperationsContext: ICreateOperationsContext;
   stopwatch: Stopwatch;
   terminal: ITerminal;
@@ -153,6 +158,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _installParameter: CommandLineFlagParameter | undefined;
   private readonly _variantParameter: CommandLineStringParameter | undefined;
   private readonly _noIPCParameter: CommandLineFlagParameter | undefined;
+  private readonly _nodeDiagnosticDirParameter: CommandLineStringParameter;
+  private readonly _debugBuildCacheIdsParameter: CommandLineFlagParameter;
+  private readonly _includePhaseDeps: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -183,25 +191,26 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     new WeightedOperationPlugin().apply(this.hooks);
     new ValidateOperationsPlugin(terminal).apply(this.hooks);
 
-    if (this._enableParallelism) {
-      this._parallelismParameter = this.defineStringParameter({
-        parameterLongName: '--parallelism',
-        parameterShortName: '-p',
-        argumentName: 'COUNT',
-        environmentVariable: EnvironmentVariableNames.RUSH_PARALLELISM,
-        description:
-          'Specifies the maximum number of concurrent processes to launch during a build.' +
-          ' The COUNT should be a positive integer, a percentage value (eg. "50%%") or the word "max"' +
-          ' to specify a count that is equal to the number of CPU cores. If this parameter is omitted,' +
-          ' then the default value depends on the operating system and number of CPU cores.'
-      });
-      this._timelineParameter = this.defineFlagParameter({
-        parameterLongName: '--timeline',
-        description:
-          'After the build is complete, print additional statistics and CPU usage information,' +
-          ' including an ASCII chart of the start and stop times for each operation.'
-      });
-    }
+    this._parallelismParameter = this._enableParallelism
+      ? this.defineStringParameter({
+          parameterLongName: '--parallelism',
+          parameterShortName: '-p',
+          argumentName: 'COUNT',
+          environmentVariable: EnvironmentVariableNames.RUSH_PARALLELISM,
+          description:
+            'Specifies the maximum number of concurrent processes to launch during a build.' +
+            ' The COUNT should be a positive integer, a percentage value (eg. "50%%") or the word "max"' +
+            ' to specify a count that is equal to the number of CPU cores. If this parameter is omitted,' +
+            ' then the default value depends on the operating system and number of CPU cores.'
+        })
+      : undefined;
+
+    this._timelineParameter = this.defineFlagParameter({
+      parameterLongName: '--timeline',
+      description:
+        'After the build is complete, print additional statistics and CPU usage information,' +
+        ' including an ASCII chart of the start and stop times for each operation.'
+    });
     this._cobuildPlanParameter = this.defineFlagParameter({
       parameterLongName: '--log-cobuild-plan',
       description:
@@ -226,18 +235,26 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
 
-    if (this._isIncrementalBuildAllowed) {
-      this._changedProjectsOnly = this.defineFlagParameter({
-        parameterLongName: '--changed-projects-only',
-        parameterShortName: '-c',
-        description:
-          'Normally the incremental build logic will rebuild changed projects as well as' +
-          ' any projects that directly or indirectly depend on a changed project. Specify "--changed-projects-only"' +
-          ' to ignore dependent projects, only rebuilding those projects whose files were changed.' +
-          ' Note that this parameter is "unsafe"; it is up to the developer to ensure that the ignored projects' +
-          ' are okay to ignore.'
-      });
-    }
+    this._includePhaseDeps = this.defineFlagParameter({
+      parameterLongName: '--include-phase-deps',
+      description:
+        'If the selected projects are "unsafe" (missing some dependencies), add the minimal set of phase dependencies. For example, ' +
+        `"--from A" normally might include the "_phase:test" phase for A's dependencies, even though changes to A can't break those tests. ` +
+        `Using "--impacted-by A --include-phase-deps" avoids that work by performing "_phase:test" only for downstream projects.`
+    });
+
+    this._changedProjectsOnly = this._isIncrementalBuildAllowed
+      ? this.defineFlagParameter({
+          parameterLongName: '--changed-projects-only',
+          parameterShortName: '-c',
+          description:
+            'Normally the incremental build logic will rebuild changed projects as well as' +
+            ' any projects that directly or indirectly depend on a changed project. Specify "--changed-projects-only"' +
+            ' to ignore dependent projects, only rebuilding those projects whose files were changed.' +
+            ' Note that this parameter is "unsafe"; it is up to the developer to ensure that the ignored projects' +
+            ' are okay to ignore.'
+        })
+      : undefined;
 
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
@@ -246,43 +263,58 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         'Make sure you know what you are skipping.'
     });
 
-    if (this._watchPhases.size > 0 && !this._alwaysWatch) {
-      // Only define the parameter if it has an effect.
-      this._watchParameter = this.defineFlagParameter({
-        parameterLongName: '--watch',
-        description: `Starts a file watcher after initial execution finishes. Will run the following phases on affected projects: ${Array.from(
-          this._watchPhases,
-          (phase: IPhase) => phase.name
-        ).join(', ')}`
-      });
-    }
+    // Only define the parameter if it has an effect.
+    this._watchParameter =
+      this._watchPhases.size > 0 && !this._alwaysWatch
+        ? this.defineFlagParameter({
+            parameterLongName: '--watch',
+            description: `Starts a file watcher after initial execution finishes. Will run the following phases on affected projects: ${Array.from(
+              this._watchPhases,
+              (phase: IPhase) => phase.name
+            ).join(', ')}`
+          })
+        : undefined;
 
     // If `this._alwaysInstall === undefined`, Rush does not define the parameter
     // but a repository may still define a custom parameter with the same name.
-    if (this._alwaysInstall === false) {
-      this._installParameter = this.defineFlagParameter({
-        parameterLongName: '--install',
-        description:
-          'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified, ' +
-          'Rush will automatically perform an install before processing the current command.'
-      });
-    }
+    this._installParameter =
+      this._alwaysInstall === false
+        ? this.defineFlagParameter({
+            parameterLongName: '--install',
+            description:
+              'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified, ' +
+              'Rush will automatically perform an install before processing the current command.'
+          })
+        : undefined;
 
-    if (this._alwaysInstall !== undefined) {
-      this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
-    }
+    this._variantParameter =
+      this._alwaysInstall !== undefined ? this.defineStringParameter(VARIANT_PARAMETER) : undefined;
 
-    if (
+    const isIpcSupported: boolean =
       this._watchPhases.size > 0 &&
-      this.rushConfiguration.experimentsConfiguration.configuration.useIPCScriptsInWatchMode
-    ) {
-      this._noIPCParameter = this.defineFlagParameter({
-        parameterLongName: '--no-ipc',
-        description:
-          'Disables the IPC feature for the current command (if applicable to selected operations). Operations will not look for a ":ipc" suffixed script.' +
-          'This feature only applies in watch mode and is enabled by default.'
-      });
-    }
+      !!this.rushConfiguration.experimentsConfiguration.configuration.useIPCScriptsInWatchMode;
+    this._noIPCParameter = isIpcSupported
+      ? this.defineFlagParameter({
+          parameterLongName: '--no-ipc',
+          description:
+            'Disables the IPC feature for the current command (if applicable to selected operations). Operations will not look for a ":ipc" suffixed script.' +
+            'This feature only applies in watch mode and is enabled by default.'
+        })
+      : undefined;
+
+    this._nodeDiagnosticDirParameter = this.defineStringParameter({
+      parameterLongName: '--node-diagnostic-dir',
+      argumentName: 'DIRECTORY',
+      description:
+        'Specifies the directory where Node.js diagnostic reports will be written. ' +
+        'This directory will contain a subdirectory for each project and phase.'
+    });
+
+    this._debugBuildCacheIdsParameter = this.defineFlagParameter({
+      parameterLongName: '--debug-build-cache-ids',
+      description:
+        'Logs information about the components of the build cache ids for individual operations. This is useful for debugging the incremental build logic.'
+    });
 
     this.defineScriptParameters();
 
@@ -366,6 +398,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       new ConsoleTimelinePlugin(terminal).apply(this.hooks);
     }
 
+    const includePhaseDeps: boolean = this._includePhaseDeps?.value ?? false;
+
+    const diagnosticDir: string | undefined = this._nodeDiagnosticDirParameter.value;
+    if (diagnosticDir) {
+      new NodeDiagnosticDirPlugin({
+        diagnosticDir
+      }).apply(this.hooks);
+    }
+
     // Enable the standard summary
     new OperationResultSummarizerPlugin(terminal).apply(this.hooks);
 
@@ -440,6 +481,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           cobuildConfiguration,
           terminal
         }).apply(this.hooks);
+
+        if (this._debugBuildCacheIdsParameter.value) {
+          new DebugHashesPlugin(terminal).apply(this.hooks);
+        }
       } else if (!this._disableBuildCache) {
         terminal.writeVerboseLine(`Incremental strategy: output preservation`);
         // Explicitly disabling the build cache also disables legacy skip detection.
@@ -491,22 +536,30 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         rushConfiguration: this.rushConfiguration,
         phaseOriginal: new Set(this._originalPhases),
         phaseSelection: new Set(this._initialPhases),
+        includePhaseDeps,
         projectSelection,
         projectConfigurations,
         projectsInUnknownState: projectSelection
       };
 
-      const executionManagerOptions: Omit<IOperationExecutionManagerOptions, 'beforeExecuteOperations'> = {
+      const executionManagerOptions: Omit<
+        IOperationExecutionManagerOptions,
+        'beforeExecuteOperations' | 'inputsSnapshot'
+      > = {
         quietMode: isQuietMode,
         debugMode: this.parser.isDebug,
         parallelism,
-        changedProjectsOnly,
         beforeExecuteOperationAsync: async (record: OperationExecutionRecord) => {
           return await this.hooks.beforeExecuteOperation.promise(record);
         },
         afterExecuteOperationAsync: async (record: OperationExecutionRecord) => {
           await this.hooks.afterExecuteOperation.promise(record);
         },
+        createEnvironmentForOperation: this.hooks.createEnvironmentForOperation.isUsed()
+          ? (record: OperationExecutionRecord) => {
+              return this.hooks.createEnvironmentForOperation.call({ ...process.env }, record);
+            }
+          : undefined,
         onOperationStatusChangedAsync: (record: OperationExecutionRecord) => {
           this.hooks.onOperationStatusChanged.call(record);
         }
@@ -575,6 +628,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const executionManagerOptions: IOperationExecutionManagerOptions = {
       ...partialExecutionManagerOptions,
+      inputsSnapshot: initialSnapshot,
       beforeExecuteOperationsAsync: async (records: Map<Operation, OperationExecutionRecord>) => {
         await this.hooks.beforeExecuteOperations.promise(records, initialExecuteOperationsContext);
       }
@@ -725,11 +779,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     function invalidateOperation(operation: Operation, reason: string): void {
       const { associatedProject } = operation;
-      if (associatedProject) {
-        // Since ProjectWatcher only tracks entire projects, widen the operation to its project
-        // Revisit when migrating to @rushstack/operation-graph and we have a long-lived operation graph
-        projectWatcher.invalidateProject(associatedProject, `${operation.name!} (${reason})`);
-      }
+      // Since ProjectWatcher only tracks entire projects, widen the operation to its project
+      // Revisit when migrating to @rushstack/operation-graph and we have a long-lived operation graph
+      projectWatcher.invalidateProject(associatedProject, `${operation.name!} (${reason})`);
     }
 
     // Loop until Ctrl+C
@@ -777,6 +829,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         stopwatch,
         executionManagerOptions: {
           ...executionManagerOptions,
+          inputsSnapshot: state,
           beforeExecuteOperationsAsync: async (records: Map<Operation, OperationExecutionRecord>) => {
             await this.hooks.beforeExecuteOperations.promise(records, executeOperationsContext);
           }

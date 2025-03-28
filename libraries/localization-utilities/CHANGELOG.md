@@ -1,6 +1,78 @@
 # Change Log - @rushstack/localization-utilities
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:16 GMT and should not be manually modified.
+
+## 0.13.6
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 0.13.5
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 0.13.4
+Wed, 12 Mar 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.13.3
+Tue, 11 Mar 2025 02:12:34 GMT
+
+_Version update only_
+
+## 0.13.2
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.13.1
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.13.0
+Thu, 27 Feb 2025 16:10:47 GMT
+
+### Minor changes
+
+- Update `loc.json` format to allow keys to be mapped to raw strings. This is useful so that the file name can be preserved for a strings file that can be directly imported at runtime.
+
+## 0.12.24
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.12.23
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 0.12.22
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.12.21
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.12.20
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.12.19
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 0.12.18
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
 
 ## 0.12.17
 Thu, 09 Jan 2025 01:10:10 GMT

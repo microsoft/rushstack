@@ -51,7 +51,7 @@ class Launcher {
   }
 
   public installHook(): void {
-    const realRequire: NodeJS.Require = moduleApi.Module.prototype.require;
+    const realRequire: typeof moduleApi.Module.prototype.require = moduleApi.Module.prototype.require;
 
     const importedModules: Set<unknown> = this._importedModules; // for closure
     const importedModulePaths: Set<string> = this._importedModulePaths; // for closure

@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for the BuildXL graph drop plugin.",
+  "type": "object",
+  "required": ["buildXLCommandNames"],
+  "properties": {
+    "buildXLCommandNames": {
+      "type": "array",
+      "description": "The names of the commands that will be used to run BuildXL",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

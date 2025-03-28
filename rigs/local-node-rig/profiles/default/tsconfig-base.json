@@ -6,6 +6,7 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "target": "es2018",
 
     "outDir": "../../../../lib",
     "rootDir": "../../../../src",

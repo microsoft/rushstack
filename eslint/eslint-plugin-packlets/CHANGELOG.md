@@ -1,6 +1,20 @@
 # Change Log - @rushstack/eslint-plugin-packlets
 
-This log was last generated on Sat, 27 Jul 2024 00:10:27 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Mar 2025 02:12:33 GMT and should not be manually modified.
+
+## 0.11.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Bump the `@typescript-eslint/*` packages to add support for TypeScript 5.8.
+
+## 0.10.0
+Sat, 01 Mar 2025 07:23:16 GMT
+
+### Minor changes
+
+- Bump the `@typescript-eslint/*` dependencies to `~8.24.0` to support newer versions of TypeScript.
 
 ## 0.9.2
 Sat, 27 Jul 2024 00:10:27 GMT

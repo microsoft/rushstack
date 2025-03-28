@@ -1,6 +1,82 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Thu, 09 Jan 2025 01:10:10 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:16 GMT and should not be manually modified.
+
+## 0.8.1
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 0.8.0
+Wed, 12 Mar 2025 22:41:36 GMT
+
+### Minor changes
+
+- Expose some internal APIs to be used by `@rushstack/heft-isolated-typescript-transpile-plugin`.
+
+## 0.7.1
+Wed, 12 Mar 2025 00:11:31 GMT
+
+_Version update only_
+
+## 0.7.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Add support for TypeScript 5.8.
+
+## 0.6.16
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.6.15
+Sat, 01 Mar 2025 07:23:16 GMT
+
+### Patches
+
+- Add support for TypeScript 5.7.
+
+## 0.6.14
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.6.13
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.6.12
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 0.6.11
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.6.10
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.6.9
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.6.8
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 0.6.7
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
 
 ## 0.6.6
 Thu, 09 Jan 2025 01:10:10 GMT

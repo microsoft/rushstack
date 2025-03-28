@@ -2,6 +2,297 @@
   "name": "@rushstack/webpack5-module-minifier-plugin",
   "entries": [
     {
+      "version": "5.5.97",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.97",
+      "date": "Tue, 25 Mar 2025 15:11:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.96",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.96",
+      "date": "Wed, 12 Mar 2025 22:41:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.95",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.95",
+      "date": "Wed, 12 Mar 2025 00:11:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.94",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.94",
+      "date": "Tue, 11 Mar 2025 02:12:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.93",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.93",
+      "date": "Tue, 11 Mar 2025 00:11:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.92",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.92",
+      "date": "Sat, 01 Mar 2025 05:00:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.91",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.91",
+      "date": "Thu, 27 Feb 2025 01:10:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.90",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.90",
+      "date": "Wed, 26 Feb 2025 16:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.89",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.89",
+      "date": "Sat, 22 Feb 2025 01:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.88",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.88",
+      "date": "Wed, 19 Feb 2025 18:53:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.87",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.87",
+      "date": "Wed, 12 Feb 2025 01:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.86",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.86",
+      "date": "Thu, 30 Jan 2025 16:10:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.85",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.85",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.84",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.84",
+      "date": "Wed, 22 Jan 2025 03:03:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.5.83",
       "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.83",
       "date": "Thu, 09 Jan 2025 01:10:10 GMT",
