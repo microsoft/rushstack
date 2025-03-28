@@ -12,8 +12,16 @@
 
 export { Lib1Class } from 'api-extractor-lib1-test';
 
-/** @public */
+/**
+ * @customModifierTag
+ * @public
+ */
 export class Lib3Class {
+  /**
+   * I am a documented property!
+   * @customBlockTag My docs include a custom block tag!
+   * @virtual @override
+   */
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   prop: boolean;
 }

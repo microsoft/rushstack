@@ -139,6 +139,41 @@ export interface IConfigApiReport {
    * @defaultValue `false`
    */
   includeForgottenExports?: boolean;
+
+  /**
+   * Specifies a list of {@link https://tsdoc.org/ | TSDoc} tags that should be reported in the API report file for
+   * items whose documentation contains them.
+   *
+   * @remarks
+   * Tag names must begin with `@`.
+   *
+   * This list may include standard TSDoc tags as well as custom ones.
+   * For more information on defining custom TSDoc tags, see
+   * {@link https://api-extractor.com/pages/configs/tsdoc_json/#defining-your-own-tsdoc-tags | here}.
+   *
+   * Note that an item's release tag will always reported; this behavior cannot be overridden.
+   *
+   * @defaultValue `@sealed`, `@virtual`, `@override`, `@eventProperty`, and `@deprecated`
+   *
+   * @example Omitting default tags
+   * To omit the `@sealed` and `@virtual` tags from API reports, you would specify `tagsToReport` as follows:
+   * ```json
+   * "tagsToReport": {
+   *  "@sealed": false,
+   *  "@virtual": false
+   * }
+   * ```
+   *
+   * @example Including additional tags
+   * To include additional tags to the set included in API reports, you could specify `tagsToReport` like this:
+   * ```json
+   * "tagsToReport": {
+   *  "@customTag": true
+   * }
+   * ```
+   * This will result in `@customTag` being included in addition to the default tags.
+   */
+  tagsToReport?: Readonly<Record<`@${string}`, boolean>>;
 }
 
 /**
