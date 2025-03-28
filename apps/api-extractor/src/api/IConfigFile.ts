@@ -148,11 +148,12 @@ export interface IConfigApiReport {
    * Tag names must begin with `@`.
    *
    * This list may include standard TSDoc tags as well as custom ones.
-   * TODO: document requirements around custom tags.
+   * For more information on defining custom TSDoc tags, see
+   * {@link https://api-extractor.com/pages/configs/tsdoc_json/#defining-your-own-tsdoc-tags | here}.
    *
    * Note that an item's release tag will always reported; this behavior cannot be overridden.
    *
-   * @defaultValue `@sealed`, `@virtual`, `@override`, `@eventProperty`, `@deprecated`
+   * @defaultValue `@sealed`, `@virtual`, `@override`, `@eventProperty`, and `@deprecated`
    */
   tagsToReport?: Readonly<Record<`@${string}`, boolean>>;
 }
