@@ -3,10 +3,10 @@
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseConnectPackageAction } from './BaseConnectPackageAction';
+import { BaseSymlinkPackageAction } from './BaseSymlinkPackageAction';
 import type { RushConnect } from '../../utilities/RushConnect';
 
-export class LinkPackageAction extends BaseConnectPackageAction {
+export class LinkPackageAction extends BaseSymlinkPackageAction {
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'link-package',

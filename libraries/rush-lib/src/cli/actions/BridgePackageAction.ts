@@ -3,11 +3,11 @@
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseConnectPackageAction } from './BaseConnectPackageAction';
+import { BaseSymlinkPackageAction } from './BaseSymlinkPackageAction';
 import type { RushConnect } from '../../utilities/RushConnect';
 import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-export class BridgePackageAction extends BaseConnectPackageAction {
+export class BridgePackageAction extends BaseSymlinkPackageAction {
   private readonly _version: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {

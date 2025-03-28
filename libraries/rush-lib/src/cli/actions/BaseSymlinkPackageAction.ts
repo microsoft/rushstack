@@ -8,7 +8,7 @@ import { RushConnect } from '../../utilities/RushConnect';
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Async } from '@rushstack/node-core-library';
 
-export abstract class BaseConnectPackageAction extends BaseRushAction {
+export abstract class BaseSymlinkPackageAction extends BaseRushAction {
   protected readonly _projectList: CommandLineStringListParameter;
   protected readonly _pathParameter: CommandLineStringParameter;
 
