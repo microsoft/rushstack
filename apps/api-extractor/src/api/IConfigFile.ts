@@ -154,6 +154,24 @@ export interface IConfigApiReport {
    * Note that an item's release tag will always reported; this behavior cannot be overridden.
    *
    * @defaultValue `@sealed`, `@virtual`, `@override`, `@eventProperty`, and `@deprecated`
+   *
+   * @example Omitting default tags
+   * To omit the `@sealed` and `@virtual` tags from API reports, you would specify `tagsToReport` as follows:
+   * ```json
+   * "tagsToReport": {
+   *  "@sealed": false,
+   *  "@virtual": false
+   * }
+   * ```
+   *
+   * @example Including additional tags
+   * To include additional tags to the set included in API reports, you could specify `tagsToReport` like this:
+   * ```json
+   * "tagsToReport": {
+   *  "@customTag": true
+   * }
+   * ```
+   * This will result in `@customTag` being included in addition to the default tags.
    */
   tagsToReport?: Readonly<Record<`@${string}`, boolean>>;
 }
