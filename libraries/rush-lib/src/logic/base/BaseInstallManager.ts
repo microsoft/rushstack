@@ -59,6 +59,7 @@ import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 import { FlagFile } from '../../api/FlagFile';
 import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
+import { RushConnect } from '../../utilities/RushConnect';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -193,6 +194,11 @@ export abstract class BaseInstallManager {
       statePropertiesToIgnore: optionsToIgnore
     }));
 
+    const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
+    const isNodeModulesOverWritten: boolean = await rushConnect.isSubspaceDependencyLinkedAsync(
+      subspace.subspaceName
+    );
+
     // Allow us to defer the file read until we need it
     const canSkipInstallAsync: () => Promise<boolean> = async () => {
       // Based on timestamps, can we skip this install entirely?
@@ -203,6 +209,7 @@ export abstract class BaseInstallManager {
     if (
       resolutionOnly ||
       cleanInstall ||
+      isNodeModulesOverWritten ||
       !variantIsUpToDate ||
       !shrinkwrapIsUpToDate ||
       !(await canSkipInstallAsync()) ||

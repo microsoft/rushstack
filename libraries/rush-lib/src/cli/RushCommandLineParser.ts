@@ -62,6 +62,8 @@ import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoade
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
 import { InstallAutoinstallerAction } from './actions/InstallAutoinstallerAction';
+import { LinkPackageAction } from './actions/LinkPackageAction';
+import { BridgePackageAction } from './actions/BridgePackageAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -331,6 +333,8 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UpgradeInteractiveAction(this));
       this.addAction(new VersionAction(this));
       this.addAction(new AlertAction(this));
+      this.addAction(new BridgePackageAction(this));
+      this.addAction(new LinkPackageAction(this));
 
       this._populateScriptActions();
     } catch (error) {

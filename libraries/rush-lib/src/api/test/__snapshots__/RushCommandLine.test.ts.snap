@@ -1138,6 +1138,56 @@ Object {
       ],
     },
     Object {
+      "actionName": "bridge-package",
+      "parameters": Array [
+        Object {
+          "description": "The folder path of a locally built project, whose installation will be simulated using node_modules symlinks.  This folder will be the target of the symlinks.",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--path",
+          "required": true,
+          "shortName": undefined,
+        },
+        Object {
+          "description": "A list of Rush project names to connect to the external package. If not specified, uses the project in the current working directory.",
+          "environmentVariable": undefined,
+          "kind": "StringList",
+          "longName": "--project",
+          "required": false,
+          "shortName": undefined,
+        },
+        Object {
+          "description": "It will directly replace the output for the specified version of the package, which requires you to have that package installed under the specified name in advance.",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--version",
+          "required": false,
+          "shortName": undefined,
+        },
+      ],
+    },
+    Object {
+      "actionName": "link-package",
+      "parameters": Array [
+        Object {
+          "description": "The folder path of a locally built project, whose installation will be simulated using node_modules symlinks.  This folder will be the target of the symlinks.",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--path",
+          "required": true,
+          "shortName": undefined,
+        },
+        Object {
+          "description": "A list of Rush project names to connect to the external package. If not specified, uses the project in the current working directory.",
+          "environmentVariable": undefined,
+          "kind": "StringList",
+          "longName": "--project",
+          "required": false,
+          "shortName": undefined,
+        },
+      ],
+    },
+    Object {
       "actionName": "import-strings",
       "parameters": Array [
         Object {
