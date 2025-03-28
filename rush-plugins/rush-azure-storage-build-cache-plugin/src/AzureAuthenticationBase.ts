@@ -120,7 +120,9 @@ export interface IAzureAuthenticationBaseOptions {
    * }
    * ```
    */
-  loginFlowFailover?: Record<LoginFlowType, LoginFlowType | undefined>;
+  loginFlowFailover?: {
+    [key in LoginFlowType]?: LoginFlowType;
+  };
 }
 
 /**
@@ -145,7 +147,11 @@ export abstract class AzureAuthenticationBase {
 
   protected readonly _azureEnvironment: AzureEnvironmentName;
   protected readonly _loginFlow: LoginFlowType;
-  protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined> | undefined;
+  protected readonly _failoverOrder:
+    | {
+        [key in LoginFlowType]?: LoginFlowType;
+      }
+    | undefined;
 
   private __credentialCacheId: string | undefined;
   protected get _credentialCacheId(): string {
