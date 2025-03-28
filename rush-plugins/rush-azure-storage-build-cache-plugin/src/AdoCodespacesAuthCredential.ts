@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 import { Executable } from '@rushstack/node-core-library';
-import type { AccessToken, GetTokenOptions, TokenCredential } from '@azure/identity';
+import {
+  CredentialUnavailableError,
+  type AccessToken,
+  type GetTokenOptions,
+  type TokenCredential
+} from '@azure/identity';
 
 interface IDecodedJwt {
   header: {
@@ -34,39 +39,45 @@ interface IDecodedJwt {
 export class AdoCodespacesAuthCredential implements TokenCredential {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   public async getToken(scopes: string | [string], options?: GetTokenOptions): Promise<AccessToken> {
-    let scope: string;
-    if (Array.isArray(scopes)) {
-      if (scopes.length > 1) {
-        throw new Error('Only one scope is supported');
-      } else if ((scopes as string[]).length === 0) {
-        throw new Error('A scope must be provided.');
-      } else {
-        scope = scopes[0];
-      }
-    } else {
-      scope = scopes;
-    }
-    const azureAuthHelperExec: string = 'azure-auth-helper';
-
-    const token: string = Executable.spawnSync(azureAuthHelperExec, ['get-access-token', scope]).stdout;
-
-    let expiresOnTimestamp: number;
-
     try {
-      const decodedToken: IDecodedJwt = this._decodeToken(token);
-      if (decodedToken?.payload?.exp) {
-        expiresOnTimestamp = decodedToken.payload.exp * 1000;
+      let scope: string;
+      if (Array.isArray(scopes)) {
+        if (scopes.length > 1) {
+          throw new Error('Only one scope is supported');
+        } else if ((scopes as string[]).length === 0) {
+          throw new Error('A scope must be provided.');
+        } else {
+          scope = scopes[0];
+        }
       } else {
-        expiresOnTimestamp = Date.now() + 3600000;
+        scope = scopes;
       }
-    } catch (error) {
-      throw new Error(`Failed to decode the token: ${error}`);
-    }
+      const azureAuthHelperExec: string = 'azure-auth-helper';
 
-    return {
-      token,
-      expiresOnTimestamp
-    };
+      const token: string = Executable.spawnSync(azureAuthHelperExec, ['get-access-token', scope]).stdout;
+
+      let expiresOnTimestamp: number;
+
+      try {
+        const decodedToken: IDecodedJwt = this._decodeToken(token);
+        if (decodedToken?.payload?.exp) {
+          expiresOnTimestamp = decodedToken.payload.exp * 1000;
+        } else {
+          expiresOnTimestamp = Date.now() + 3600000;
+        }
+      } catch (error) {
+        throw new Error(`Failed to decode the token: ${error}`);
+      }
+
+      return {
+        token,
+        expiresOnTimestamp
+      };
+    } catch (error) {
+      throw new CredentialUnavailableError(
+        `Failed to get token from Azure DevOps Codespaces Authentication: ${error.message}`
+      );
+    }
   }
 
   private _decodeToken(token: string): IDecodedJwt {
