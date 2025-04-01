@@ -1,5 +1,5 @@
 {
-  "$schema": "../../../apps/api-extractor/src/schemas/api-extractor.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
 
   "mainEntryPointFilePath": "<projectFolder>/lib/index.d.ts",
 
