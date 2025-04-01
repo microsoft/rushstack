@@ -9,15 +9,21 @@ import {
   type InteractiveBrowserCredentialInBrowserOptions,
   InteractiveBrowserCredential,
   type InteractiveBrowserCredentialNodeOptions,
-  type TokenCredential
+  type TokenCredential,
+  ChainedTokenCredential,
+  VisualStudioCodeCredential,
+  AzureCliCredential,
+  AzureDeveloperCliCredential,
+  AzurePowerShellCredential
 } from '@azure/identity';
+import type { TokenCredentialOptions } from '@azure/identity';
+import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';
 import type { ITerminal } from '@rushstack/terminal';
 import { CredentialCache } from '@rushstack/rush-sdk';
 // Use a separate import line so the .d.ts file ends up with an `import type { ... }`
 // See https://github.com/microsoft/rushstack/issues/3432
 import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import { PrintUtilities } from '@rushstack/terminal';
-import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';
 
 /**
  * @public
@@ -80,7 +86,14 @@ export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 /**
  * @public
  */
-export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'AdoCodespacesAuth';
+export type LoginFlowType =
+  | 'DeviceCode'
+  | 'InteractiveBrowser'
+  | 'AdoCodespacesAuth'
+  | 'VisualStudioCode'
+  | 'AzureCli'
+  | 'AzureDeveloperCli'
+  | 'AzurePowerShell';
 
 /**
  * @public
@@ -97,13 +110,19 @@ export interface IAzureAuthenticationBaseOptions {
    * @defaultValue
    * ```json
    * {
-   *   "AdoCodespacesAuth": "InteractiveBrowser",
+   *   "AdoCodespacesAuth": "VisualStudioCode",
+   *   "VisualStudioCode": "AzureCli",
+   *   "AzureCli": "AzureDeveloperCli",
+   *   "AzureDeveloperCli": "AzurePowerShell",
+   *   "AzurePowerShell": "InteractiveBrowser",
    *   "InteractiveBrowser": "DeviceCode",
-   *   "DeviceCode": null
+   *   "DeviceCode": undefined
    * }
    * ```
    */
-  loginFlowFailover?: Record<LoginFlowType, LoginFlowType | undefined>;
+  loginFlowFailover?: {
+    [key in LoginFlowType]?: LoginFlowType;
+  };
 }
 
 /**
@@ -128,7 +147,11 @@ export abstract class AzureAuthenticationBase {
 
   protected readonly _azureEnvironment: AzureEnvironmentName;
   protected readonly _loginFlow: LoginFlowType;
-  protected readonly _failoverOrder: Record<LoginFlowType, LoginFlowType | undefined>;
+  protected readonly _failoverOrder:
+    | {
+        [key in LoginFlowType]?: LoginFlowType;
+      }
+    | undefined;
 
   private __credentialCacheId: string | undefined;
   protected get _credentialCacheId(): string {
@@ -148,13 +171,17 @@ export abstract class AzureAuthenticationBase {
   public constructor(options: IAzureAuthenticationBaseOptions) {
     const {
       azureEnvironment = 'AzurePublicCloud',
-      loginFlow = process.env.CODESPACES === 'true' ? 'AdoCodespacesAuth' : 'InteractiveBrowser'
+      loginFlow = process.env.CODESPACES === 'true' ? 'AdoCodespacesAuth' : 'VisualStudioCode'
     } = options;
     this._azureEnvironment = azureEnvironment;
     this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
     this._loginFlow = loginFlow;
     this._failoverOrder = options.loginFlowFailover || {
-      AdoCodespacesAuth: 'InteractiveBrowser',
+      AdoCodespacesAuth: 'VisualStudioCode',
+      VisualStudioCode: 'AzureCli',
+      AzureCli: 'AzureDeveloperCli',
+      AzureDeveloperCli: 'AzurePowerShell',
+      AzurePowerShell: 'InteractiveBrowser',
       InteractiveBrowser: 'DeviceCode',
       DeviceCode: undefined
     };
@@ -294,8 +321,6 @@ export abstract class AzureAuthenticationBase {
       throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
     }
 
-    let tokenCredential: TokenCredential;
-
     const interactiveCredentialOptions: (
       | InteractiveBrowserCredentialNodeOptions
       | InteractiveBrowserCredentialInBrowserOptions
@@ -305,40 +330,59 @@ export abstract class AzureAuthenticationBase {
       authorityHost
     };
 
-    switch (loginFlow) {
-      case 'AdoCodespacesAuth': {
-        tokenCredential = new AdoCodespacesAuthCredential();
-        break;
+    const deviceCodeCredentialOptions: DeviceCodeCredentialOptions = {
+      ...this._additionalDeviceCodeCredentialOptions,
+      ...interactiveCredentialOptions,
+      userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
+        PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
       }
-      case 'InteractiveBrowser': {
-        tokenCredential = new InteractiveBrowserCredential(interactiveCredentialOptions);
-        break;
-      }
-      case 'DeviceCode': {
-        tokenCredential = new DeviceCodeCredential({
-          ...interactiveCredentialOptions,
-          userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
-            PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
-          }
-        });
-        break;
-      }
-      default: {
-        throw new Error(`Unsupported login flow: ${loginFlow}`);
+    };
+
+    const options: TokenCredentialOptions = { authorityHost };
+    const priority: Set<LoginFlowType> = new Set([loginFlow]);
+    for (const credType of priority) {
+      const next: LoginFlowType | undefined = this._failoverOrder?.[credType];
+      if (next) {
+        priority.add(next);
       }
     }
+
+    const knownCredentialTypes: Record<
+      LoginFlowType,
+      new (options: TokenCredentialOptions) => TokenCredential
+    > = {
+      DeviceCode: class extends DeviceCodeCredential {
+        public new(credentialOptions: DeviceCodeCredentialOptions): DeviceCodeCredential {
+          return new DeviceCodeCredential({
+            ...deviceCodeCredentialOptions,
+            ...credentialOptions
+          });
+        }
+      },
+      InteractiveBrowser: class extends InteractiveBrowserCredential {
+        public new(credentialOptions: InteractiveBrowserCredentialNodeOptions): InteractiveBrowserCredential {
+          return new InteractiveBrowserCredential({ ...interactiveCredentialOptions, ...credentialOptions });
+        }
+      },
+      AdoCodespacesAuth: AdoCodespacesAuthCredential,
+      VisualStudioCode: VisualStudioCodeCredential,
+      AzureCli: AzureCliCredential,
+      AzureDeveloperCli: AzureDeveloperCliCredential,
+      AzurePowerShell: AzurePowerShellCredential
+    };
+
+    const credentials: TokenCredential[] = Array.from(
+      priority,
+      (credType) => new knownCredentialTypes[credType](options)
+    );
+
+    const tokenCredential: TokenCredential = new ChainedTokenCredential(...credentials);
 
     try {
       return await this._getCredentialFromTokenAsync(terminal, tokenCredential, credentialsCache);
     } catch (error) {
       terminal.writeVerbose(`Failed to get credentials with ${loginFlow}: ${error}`);
-      const fallbackFlow: LoginFlowType | undefined = this._failoverOrder[loginFlow];
-      if (fallbackFlow) {
-        terminal.writeVerbose(`Falling back to ${fallbackFlow} login flow`);
-        return this._getCredentialAsync(terminal, fallbackFlow, credentialsCache);
-      } else {
-        throw error;
-      }
+      throw error;
     }
   }
 }
