@@ -60,7 +60,7 @@
   "transformIgnorePatterns": ["\\.c?js$"],
 
   // jest-identity-mock-transform returns a proxy for exported key/value pairs, where Webpack would return a module
-  // jest-string-mock-transform returns the filename, where Webpack would return a URL
+  // jest-string-mock-transform returns the filename, relative to the current working directory, where Webpack would return a URL
   // When using the heft-jest-plugin, these will be replaced with the resolved module location
   "transform": {
     "\\.(css|sass|scss)$": "../lib/exports/jest-identity-mock-transform.js",

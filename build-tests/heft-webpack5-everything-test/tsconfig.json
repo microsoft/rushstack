@@ -5,7 +5,10 @@
     "outDir": "lib",
     "rootDir": "src",
 
+    "allowArbitraryExtensions": true,
     "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
