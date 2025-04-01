@@ -13,7 +13,8 @@ const isWindows: boolean = process.platform === 'win32';
  */
 export class StringMockTransformer implements SyncTransformer {
   public process(sourceText: string, sourcePath: string, options: TransformOptions): TransformedSource {
-    const relativePath: string = relative(options.config.cwd, sourcePath);
+    // heft-jest-plugin enforces that config.rootDir will always be the project root folder.
+    const relativePath: string = relative(options.config.rootDir, sourcePath);
     const normalizedRelativePath: string = isWindows ? relativePath.replace(/\\/g, '/') : relativePath;
     // For a file called "myImage.png", this will generate a JS module that exports the slash-normalized relative
     // path from the current working directory to "myImage.png"
