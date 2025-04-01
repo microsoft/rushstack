@@ -13,6 +13,7 @@
     "api-extractor-lib1-test": "workspace:*"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*"
   }
