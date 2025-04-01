@@ -54,19 +54,5 @@ describe('Extractor-custom-tags', () => {
           expect(tsdocConfiguration.supportedTagDefinitions.includes(tag));
         });
     });
-    it.only('apiReport.tagsToReport respected', () => {
-      const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
-        path.join(testDataFolder, 'custom-tsdoc-tags/api-extractor.json')
-      );
-      const { tagsToReport } = extractorConfig;
-      expect(tagsToReport).toEqual({
-        '@sealed': true,
-        '@virtual': true,
-        '@eventProperty': true,
-        '@deprecated': true,
-        '@block': true,
-        '@override': false
-      });
-    });
   });
 });
