@@ -18,7 +18,7 @@ import {
 } from '@rushstack/node-core-library';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 import { EnumMemberOrder, ReleaseTag } from '@microsoft/api-extractor-model';
-import { TSDocConfiguration } from '@microsoft/tsdoc';
+import { TSDocConfiguration, TSDocTagDefinition } from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
 import type {
@@ -984,6 +984,10 @@ export class ExtractorConfig {
         }
       }
 
+      if (configObject.apiReport?.tagsToReport) {
+        _validateTagsToReport(configObject.apiReport.tagsToReport);
+      }
+
       const apiReportEnabled: boolean = configObject.apiReport?.enabled ?? false;
       const apiReportIncludeForgottenExports: boolean =
         configObject.apiReport?.includeForgottenExports ?? false;
@@ -1349,5 +1353,49 @@ export class ExtractorConfig {
       throw new Error(`The "${fieldName}" value contains an unrecognized token "${match[1]}"`);
     }
     throw new Error(`The "${fieldName}" value contains extra token characters ("<" or ">"): ${value}`);
+  }
+}
+
+const releaseTags: Set<string> = new Set(['@public', '@alpha', '@beta', '@internal']);
+
+/**
+ * Validate {@link ExtractorConfig.tagsToReport}.
+ */
+function _validateTagsToReport(
+  tagsToReport: Record<string, boolean>
+): asserts tagsToReport is Record<`@${string}`, boolean> {
+  const includedReleaseTags: string[] = [];
+  const invalidTags: [string, string][] = []; // tag name, error
+  for (const tag of Object.keys(tagsToReport)) {
+    if (releaseTags.has(tag)) {
+      // If a release tags is specified, regardless of whether it is enabled, we will throw an error.
+      // Release tags must not be specified.
+      includedReleaseTags.push(tag);
+    }
+
+    // If the tag is invalid, generate an error string from the inner error message.
+    try {
+      TSDocTagDefinition.validateTSDocTagName(tag);
+    } catch (error) {
+      invalidTags.push([tag, (error as Error).message]);
+    }
+  }
+
+  const errorMessages: string[] = [];
+  for (const includedReleaseTag of includedReleaseTags) {
+    errorMessages.push(
+      `${includedReleaseTag}: Release tags are always included in API reports and must not be specified`
+    );
+  }
+  for (const [invalidTag, innerError] of invalidTags) {
+    errorMessages.push(`${invalidTag}: ${innerError}`);
+  }
+
+  if (errorMessages.length > 0) {
+    const errorMessage: string = [
+      `"tagsToReport" contained one or more invalid tags:`,
+      ...errorMessages
+    ].join('\n\t- ');
+    throw new Error(errorMessage);
   }
 }

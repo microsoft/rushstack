@@ -10,7 +10,7 @@ const testDataFolder: string = path.join(__dirname, 'test-data');
 
 describe('Extractor-custom-tags', () => {
   describe('should use a TSDocConfiguration', () => {
-    it.only("with custom TSDoc tags defined in the package's tsdoc.json", () => {
+    it("with custom TSDoc tags defined in the package's tsdoc.json", () => {
       const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
         path.join(testDataFolder, 'custom-tsdoc-tags/api-extractor.json')
       );
@@ -20,7 +20,7 @@ describe('Extractor-custom-tags', () => {
       expect(tsdocConfiguration.tryGetTagDefinition('@inline')).not.toBe(undefined);
       expect(tsdocConfiguration.tryGetTagDefinition('@modifier')).not.toBe(undefined);
     });
-    it.only("with custom TSDoc tags enabled per the package's tsdoc.json", () => {
+    it("with custom TSDoc tags enabled per the package's tsdoc.json", () => {
       const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
         path.join(testDataFolder, 'custom-tsdoc-tags/api-extractor.json')
       );
@@ -33,7 +33,7 @@ describe('Extractor-custom-tags', () => {
       expect(tsdocConfiguration.isTagSupported(inline)).toBe(true);
       expect(tsdocConfiguration.isTagSupported(modifier)).toBe(false);
     });
-    it.only("with standard tags and API Extractor custom tags defined and supported when the package's tsdoc.json extends API Extractor's tsdoc.json", () => {
+    it("with standard tags and API Extractor custom tags defined and supported when the package's tsdoc.json extends API Extractor's tsdoc.json", () => {
       const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
         path.join(testDataFolder, 'custom-tsdoc-tags/api-extractor.json')
       );
