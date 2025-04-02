@@ -273,7 +273,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     await pnpmShrinkwrapFile.getProjectShrinkwrap(project)!.updateProjectShrinkwrapAsync();
 
-    PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
+    await PnpmLinkManager._createSymlinksForTopLevelProjectAsync(localPackage);
 
     // Also symlink the ".bin" folder
     const projectFolder: string = path.join(localPackage.folderPath, 'node_modules');

@@ -35,22 +35,22 @@ export abstract class BaseLinkManager {
     this._rushConfiguration = rushConfiguration;
   }
 
-  public static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
+  public static async _createSymlinkAsync(options: IBaseLinkManagerCreateSymlinkOptions): Promise<void> {
     const newLinkFolder: string = path.dirname(options.newLinkPath);
-    FileSystem.ensureFolder(newLinkFolder);
+    await FileSystem.ensureFolderAsync(newLinkFolder);
 
     let targetPath: string;
     if (EnvironmentConfiguration.absoluteSymlinks) {
       targetPath = options.linkTargetPath;
     } else {
       // Link to the relative path, to avoid going outside containers such as a Docker image
-      targetPath = path.relative(FileSystem.getRealPath(newLinkFolder), options.linkTargetPath);
+      targetPath = path.relative(await FileSystem.getRealPathAsync(newLinkFolder), options.linkTargetPath);
     }
 
     if (process.platform === 'win32') {
       if (options.symlinkKind === SymlinkKind.Directory) {
         // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-        FileSystem.createSymbolicLinkJunction({
+        await FileSystem.createSymbolicLinkJunctionAsync({
           linkTargetPath: targetPath,
           newLinkPath: options.newLinkPath
         });
@@ -59,7 +59,7 @@ export abstract class BaseLinkManager {
         // administrator permission.
 
         // NOTE: We cannot use the relative path for hard links
-        FileSystem.createHardLink({
+        await FileSystem.createHardLinkAsync({
           linkTargetPath: options.linkTargetPath,
           newLinkPath: options.newLinkPath
         });
@@ -68,12 +68,12 @@ export abstract class BaseLinkManager {
       // However hard links seem to cause build failures on Mac, so for all other operating systems
       // we use symbolic links for this case.
       if (options.symlinkKind === SymlinkKind.Directory) {
-        FileSystem.createSymbolicLinkFolder({
+        await FileSystem.createSymbolicLinkFolderAsync({
           linkTargetPath: targetPath,
           newLinkPath: options.newLinkPath
         });
       } else {
-        FileSystem.createSymbolicLinkFile({
+        await FileSystem.createSymbolicLinkFileAsync({
           linkTargetPath: targetPath,
           newLinkPath: options.newLinkPath
         });
@@ -86,7 +86,7 @@ export abstract class BaseLinkManager {
    * (i.e. with source code that we will be building), this clears out its
    * node_modules folder and then recursively creates all the symlinked folders.
    */
-  protected static _createSymlinksForTopLevelProject(localPackage: BasePackage): void {
+  protected static async _createSymlinksForTopLevelProjectAsync(localPackage: BasePackage): Promise<void> {
     const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
 
     // Sanity check
@@ -104,7 +104,7 @@ export abstract class BaseLinkManager {
       Utilities.createFolderWithRetry(localModuleFolder);
 
       for (const child of localPackage.children) {
-        BaseLinkManager._createSymlinksForDependencies(child);
+        await BaseLinkManager._createSymlinksForDependenciesAsync(child);
       }
     }
   }
@@ -114,7 +114,7 @@ export abstract class BaseLinkManager {
    * It will recursively creates symlinked folders corresponding to each of the
    * Package objects in the provided tree.
    */
-  private static _createSymlinksForDependencies(localPackage: BasePackage): void {
+  private static async _createSymlinksForDependenciesAsync(localPackage: BasePackage): Promise<void> {
     const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
 
     if (!localPackage.symlinkTargetFolderPath) {
@@ -132,7 +132,7 @@ export abstract class BaseLinkManager {
 
     if (localPackage.children.length === 0) {
       // If there are no children, then we can symlink the entire folder
-      BaseLinkManager._createSymlink({
+      await BaseLinkManager._createSymlinkAsync({
         linkTargetPath: localPackage.symlinkTargetFolderPath,
         newLinkPath: localPackage.folderPath,
         symlinkKind: SymlinkKind.Directory
@@ -167,7 +167,7 @@ export abstract class BaseLinkManager {
             symlinkKind = SymlinkKind.Directory;
           }
 
-          BaseLinkManager._createSymlink({
+          await BaseLinkManager._createSymlinkAsync({
             linkTargetPath: linkTarget,
             newLinkPath: linkSource,
             symlinkKind
@@ -180,7 +180,7 @@ export abstract class BaseLinkManager {
       Utilities.createFolderWithRetry(localModuleFolder);
 
       for (const child of localPackage.children) {
-        BaseLinkManager._createSymlinksForDependencies(child);
+        await BaseLinkManager._createSymlinksForDependenciesAsync(child);
       }
     }
   }

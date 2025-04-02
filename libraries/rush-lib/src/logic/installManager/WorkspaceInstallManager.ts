@@ -710,7 +710,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
               // If we don't already have a symlink for this package, create one
               const parentDir: string = Utilities.trimAfterLastSlash(`${projectNodeModulesPath}/${filePath}`);
               await FileSystem.ensureFolderAsync(parentDir);
-              BaseLinkManager._createSymlink({
+              await BaseLinkManager._createSymlinkAsync({
                 linkTargetPath: `${tempNodeModulesPath}/${filePath}`,
                 newLinkPath: `${projectNodeModulesPath}/${filePath}`,
                 symlinkKind: SymlinkKind.Directory
@@ -732,7 +732,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         if (!Utilities.existsOrIsSymlink(symlinkToCreate)) {
           const parentFolder: string = Utilities.trimAfterLastSlash(symlinkToCreate);
           await FileSystem.ensureFolderAsync(parentFolder);
-          BaseLinkManager._createSymlink({
+          await BaseLinkManager._createSymlinkAsync({
             linkTargetPath: dependencyProject.projectFolder,
             newLinkPath: symlinkToCreate,
             symlinkKind: SymlinkKind.Directory
