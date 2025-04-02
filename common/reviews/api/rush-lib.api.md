@@ -1379,6 +1379,7 @@ export class RushConstants {
     static readonly pnpmModulesFilename: '.modules.yaml';
     static readonly pnpmPatchesCommonFolderName: `pnpm-patches`;
     static readonly pnpmPatchesFolderName: 'patches';
+    static readonly pnpmSyncFilename: '.pnpm-sync.json';
     static readonly pnpmV3ShrinkwrapFilename: 'pnpm-lock.yaml';
     static readonly projectImpactGraphFilename: 'project-impact-graph.yaml';
     static readonly projectRushFolderName: '.rush';
