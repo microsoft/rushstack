@@ -353,4 +353,9 @@ export class RushConstants {
    * "rush link-package" and "rush bridge-package" commands.
    */
   public static readonly rushLinkStateFilename: 'rush-link-state.json' = 'rush-link-state.json';
+
+  /**
+   * The filename ("pnpm-sync.json") used to store the state of the pnpm sync command.
+   */
+  public static readonly pnpmSyncFilename: '.pnpm-sync.json' = '.pnpm-sync.json';
 }

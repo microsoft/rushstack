@@ -340,7 +340,7 @@ export abstract class BaseInstallManager {
 
       // clean up the out of date .pnpm-sync.json
       for (const rushProject of subspace.getProjects()) {
-        const pnpmSyncJsonPath: string = `${rushProject.projectFolder}/node_modules/.pnpm-sync.json`;
+        const pnpmSyncJsonPath: string = `${rushProject.projectFolder}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmSyncFilename}`;
         if (!existsSync(pnpmSyncJsonPath)) {
           continue;
         }

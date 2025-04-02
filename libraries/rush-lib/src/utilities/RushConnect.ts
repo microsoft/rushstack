@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import path from 'path';
 import { Colorize, ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 import {
   AlreadyExistsBehavior,
@@ -80,11 +79,7 @@ export class RushConnect {
       lockfileId,
       logMessageCallback
     });
-    const pnpmSyncJsonPath: string = path.resolve(
-      sourcePath,
-      RushConstants.nodeModulesFolderName,
-      '.pnpm-sync.json'
-    );
+    const pnpmSyncJsonPath: string = `${sourcePath}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmSyncFilename}`;
     await pnpmSyncCopyAsync({
       pnpmSyncJsonPath,
       ensureFolderAsync: FileSystem.ensureFolderAsync,
@@ -128,7 +123,7 @@ export class RushConnect {
   }
 
   private async _getLinkedPackageInfoAsync(linkedPackagePath: string): Promise<ILinkedPackageInfo> {
-    const linkedPackageJsonPath: string = path.resolve(linkedPackagePath, FileConstants.PackageJson);
+    const linkedPackageJsonPath: string = `${linkedPackagePath}/${FileConstants.PackageJson}`;
 
     if (!(await FileSystem.existsAsync(linkedPackageJsonPath))) {
       throw new Error(`Cannot find ${FileConstants.PackageJson} in the path ${linkedPackagePath}`);
@@ -139,10 +134,7 @@ export class RushConnect {
       name: packageName,
       peerDependencies = {}
     }: INodePackageJson = await JsonFile.loadAsync(linkedPackageJsonPath);
-    const linkedPackageNodeModulesPath: string = path.resolve(
-      linkedPackagePath,
-      RushConstants.nodeModulesFolderName
-    );
+    const linkedPackageNodeModulesPath: string = `${linkedPackagePath}/${RushConstants.nodeModulesFolderName}`;
 
     const externalDependencies: string[] = [];
     const workspaceDependencies: string[] = [];
@@ -165,16 +157,12 @@ export class RushConnect {
   }
 
   private _getConsumerPackageInfo(consumerPackage: RushConfigurationProject): IConsumerPackageInfo {
-    const consumerSubspaceName: string = consumerPackage.subspace.subspaceName;
-    const consumerPackageNodeModulesPath: string = path.resolve(
-      consumerPackage.projectFolder,
-      RushConstants.nodeModulesFolderName
-    );
-    const consumerPackagePnpmDependenciesFolderPath: string = path.resolve(
-      consumerPackage.subspace.getSubspaceTempFolderPath(),
-      RushConstants.nodeModulesFolderName,
-      RushConstants.pnpmDependenciesFolderName
-    );
+    const { projectFolder: consumerProjectFolder, subspace } = consumerPackage;
+    const { subspaceName: consumerSubspaceName } = subspace;
+
+    const subspaceTempFolderPath: string = subspace.getSubspaceTempFolderPath();
+    const consumerPackageNodeModulesPath: string = `${consumerProjectFolder}/${RushConstants.nodeModulesFolderName}`;
+    const consumerPackagePnpmDependenciesFolderPath: string = `${subspaceTempFolderPath}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmDependenciesFolderName}`;
     return {
       consumerPackageNodeModulesPath,
       consumerSubspaceName,
@@ -188,16 +176,16 @@ export class RushConnect {
     peerDependencies: IPackageJsonDependencyTable
   ): Promise<void> {
     await Promise.all(
-      Object.keys(peerDependencies).map(async (peerDependency) => {
-        const sourcePeerDependencyPath: string = path.resolve(consumerPackageNodeModulesPath, peerDependency);
+      Object.keys(peerDependencies).map(async (peerDependencyName) => {
+        const sourcePeerDependencyPath: string = `${consumerPackageNodeModulesPath}/${peerDependencyName}`;
         if (!(await FileSystem.existsAsync(sourcePeerDependencyPath))) {
-          throw new Error(`Cannot find "${peerDependency}"`);
+          throw new Error(`Cannot find "${peerDependencyName}"`);
         }
 
         const symlinkTargetPath: string = await FileSystem.getRealPathAsync(sourcePeerDependencyPath);
         await FileSystem.createSymbolicLinkFolderAsync({
           linkTargetPath: symlinkTargetPath,
-          newLinkPath: path.resolve(linkedPackageDestination, peerDependency),
+          newLinkPath: `${linkedPackageDestination}/${peerDependencyName}`,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
       })
@@ -211,10 +199,7 @@ export class RushConnect {
   ): Promise<void> {
     await Promise.all(
       externalDependencies.map(async (dependencyName) => {
-        const linkedPackageDependencyPath: string = path.resolve(
-          linkedPackageNodeModulesPath,
-          dependencyName
-        );
+        const linkedPackageDependencyPath: string = `${linkedPackageNodeModulesPath}/${dependencyName}`;
         const linkedPackageDependencySourcePath: string =
           await FileSystem.getRealPathAsync(linkedPackageDependencyPath);
 
@@ -227,7 +212,7 @@ export class RushConnect {
 
         await FileSystem.createSymbolicLinkFolderAsync({
           linkTargetPath: linkedPackageDependencySourcePath,
-          newLinkPath: path.resolve(linkedPackageDestination, dependencyName),
+          newLinkPath: `${linkedPackageDestination}/${dependencyName}`,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
       })
@@ -245,15 +230,8 @@ export class RushConnect {
     for (const dirName of subDirectories) {
       const parsedDependency: DependencyPath = parse(dirName);
       if (parsedDependency && parsedDependency.name === packageName) {
-        const packageSourcePath: string = path.resolve(
-          consumerPackagePnpmDependenciesFolderPath,
-          dirName,
-          RushConstants.nodeModulesFolderName,
-          packageName
-        );
-        const { version } = await JsonFile.loadAsync(
-          path.resolve(packageSourcePath, FileConstants.PackageJson)
-        );
+        const packageSourcePath: string = `${consumerPackagePnpmDependenciesFolderPath}/${dirName}/${RushConstants.nodeModulesFolderName}/${packageName}`;
+        const { version } = await JsonFile.loadAsync(`${packageSourcePath}/${FileConstants.PackageJson}`);
         if (semver.satisfies(version, versionRange)) {
           return packageSourcePath;
         }
@@ -297,11 +275,8 @@ export class RushConnect {
         await this._hardLinkToLinkedPackageAsync(linkedPackagePath, sourcePath, consumerSubspaceName);
       } else {
         // Generate unique destination path for linked package
-        const linkedPackageDestination: string = path.resolve(
-          consumerPackagePnpmDependenciesFolderPath,
-          depPathToFilename(`file:${linkedPackagePath}(${packageName})`, 120),
-          RushConstants.nodeModulesFolderName
-        );
+        const depFilename: string = depPathToFilename(`file:${linkedPackagePath}(${packageName})`, 120);
+        const linkedPackageDestination: string = `${consumerPackagePnpmDependenciesFolderPath}/${depFilename}/${RushConstants.nodeModulesFolderName}`;
 
         await FileSystem.ensureFolderAsync(linkedPackageDestination);
 
@@ -319,24 +294,21 @@ export class RushConnect {
           externalDependencies
         );
 
+        const linkTargetPath: string = `${linkedPackageDestination}/${packageName}`;
         // Create hardlink to linkedPackage
-        await this._hardLinkToLinkedPackageAsync(
-          linkedPackagePath,
-          path.resolve(linkedPackageDestination, packageName),
-          consumerSubspaceName
-        );
+        await this._hardLinkToLinkedPackageAsync(linkedPackagePath, linkTargetPath, consumerSubspaceName);
 
         // Create a symbolic link pointing to the directory.
         await FileSystem.createSymbolicLinkFolderAsync({
-          linkTargetPath: path.resolve(linkedPackageDestination, packageName),
-          newLinkPath: path.resolve(parentPackageDestination ?? consumerPackageNodeModulesPath, packageName),
+          linkTargetPath,
+          newLinkPath: `${parentPackageDestination ?? consumerPackageNodeModulesPath}/${packageName}`,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
 
         // Handle workspace dependencies recursively
         await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
           const linkedWorkspacePackagePath: string = await FileSystem.getRealPathAsync(
-            path.resolve(linkedPackageNodeModulesPath, workspaceDependency)
+            `${linkedPackageNodeModulesPath}/${workspaceDependency}`
           );
           await this.bridgePackageAsync(
             consumerPackage,
@@ -393,22 +365,22 @@ export class RushConnect {
     try {
       const { packageName: linkedPackageName } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
 
-      const isScoped: boolean = linkedPackageName.includes('/');
-      const [scope, packageBaseName] = isScoped ? linkedPackageName.split('/') : [null, linkedPackageName];
+      const slashIndex: number = linkedPackageName.indexOf('/');
+      const [scope, packageBaseName] =
+        slashIndex !== -1
+          ? [linkedPackageName.substring(0, slashIndex), linkedPackageName.substring(slashIndex)]
+          : [undefined, linkedPackageName];
 
-      let sourceNodeModulesPath: string = path.resolve(
-        consumerPackage.projectFolder,
-        RushConstants.nodeModulesFolderName
-      );
-      if (isScoped) {
-        sourceNodeModulesPath = path.resolve(sourceNodeModulesPath, scope!);
+      let sourceNodeModulesPath: string = `${consumerPackage.projectFolder}/${RushConstants.nodeModulesFolderName}`;
+      if (scope) {
+        sourceNodeModulesPath = `${sourceNodeModulesPath}/${scope}`;
       }
 
       if (!(await FileSystem.existsAsync(sourceNodeModulesPath))) {
         await FileSystem.ensureFolderAsync(sourceNodeModulesPath);
       }
 
-      const symlinkPath: string = path.resolve(sourceNodeModulesPath, packageBaseName);
+      const symlinkPath: string = `${sourceNodeModulesPath}/${packageBaseName}`;
 
       // Create symlink to linkedPackage
       await FileSystem.createSymbolicLinkFolderAsync({
@@ -457,10 +429,7 @@ export class RushConnect {
   }
 
   public static loadFromLinkStateFile(rushConfiguration: RushConfiguration): RushConnect {
-    const rushLinkStateFilePath: string = path.join(
-      rushConfiguration.commonTempFolder,
-      RushConstants.rushLinkStateFilename
-    );
+    const rushLinkStateFilePath: string = `${rushConfiguration.commonTempFolder}/${RushConstants.rushLinkStateFilename}`;
     let rushLinkState: IRushLinkFileState | undefined;
     try {
       rushLinkState = JsonFile.load(rushLinkStateFilePath);

@@ -228,7 +228,7 @@ export class RushXCommandLine {
       const { configuration: experiments } = rushConfiguration?.experimentsConfiguration;
 
       if (experiments?.usePnpmSyncForInjectedDependencies) {
-        const pnpmSyncJsonPath: string = packageFolder + '/node_modules/.pnpm-sync.json';
+        const pnpmSyncJsonPath: string = `${packageFolder}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmSyncFilename}`;
         if (await FileSystem.existsAsync(pnpmSyncJsonPath)) {
           const { PackageExtractor } = await import(
             /* webpackChunkName: 'PackageExtractor' */
