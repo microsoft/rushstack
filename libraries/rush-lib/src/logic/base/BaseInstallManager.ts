@@ -195,7 +195,7 @@ export abstract class BaseInstallManager {
     }));
 
     const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
-    const isNodeModulesOverWritten: boolean = await rushConnect.pruneLinksAsync(
+    const wasNodeModulesModifiedOutsideInstallation: boolean = await rushConnect.pruneLinksAsync(
       this._terminal,
       subspace.subspaceName
     );
@@ -210,7 +210,7 @@ export abstract class BaseInstallManager {
     if (
       resolutionOnly ||
       cleanInstall ||
-      isNodeModulesOverWritten ||
+      wasNodeModulesModifiedOutsideInstallation ||
       !variantIsUpToDate ||
       !shrinkwrapIsUpToDate ||
       !(await canSkipInstallAsync()) ||

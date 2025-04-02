@@ -170,7 +170,7 @@ export class RushConnect {
 
     const subspaceTempFolderPath: string = subspace.getSubspaceTempFolderPath();
     const consumerPackageNodeModulesPath: string = `${consumerProjectFolder}/${RushConstants.nodeModulesFolderName}`;
-    const consumerPackagePnpmDependenciesFolderPath: string = `${subspaceTempFolderPath}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmDependenciesFolderName}`;
+    const consumerPackagePnpmDependenciesFolderPath: string = `${subspaceTempFolderPath}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmVirtualStoreFolderName}`;
     return {
       consumerPackageNodeModulesPath,
       consumerSubspaceName,

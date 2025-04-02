@@ -106,7 +106,7 @@ export class RushConstants {
   /**
    * The folder name (".pnpm") used by pnpm to store the code of the dependencies for this subspace
    */
-  public static readonly pnpmDependenciesFolderName: '.pnpm' = '.pnpm';
+  public static readonly pnpmVirtualStoreFolderName: '.pnpm' = '.pnpm';
 
   /**
    * The filename ("global-pnpmfile.cjs") used to add custom configuration to subspaces
