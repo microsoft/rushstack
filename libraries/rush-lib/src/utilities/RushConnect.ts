@@ -30,10 +30,7 @@ class RushConnectError extends Error {
   }
 }
 
-enum LinkType {
-  LinkPackage = 'LinkPackage',
-  BridgePackage = 'BridgePackage'
-}
+type LinkType = 'LinkPackage' | 'BridgePackage';
 
 interface IRushLinkFileState {
   [subspaceName: string]: {
@@ -362,12 +359,12 @@ export class RushConnect {
 
         if (existingLinkIndex >= 0) {
           consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
-          consumerPackageLinks[existingLinkIndex].linkType = LinkType.BridgePackage;
+          consumerPackageLinks[existingLinkIndex].linkType = 'BridgePackage';
         } else {
           consumerPackageLinks.push({
             linkedPackagePath,
             linkedPackageName: packageName,
-            linkType: LinkType.BridgePackage
+            linkType: 'BridgePackage'
           });
         }
 
@@ -429,12 +426,12 @@ export class RushConnect {
 
         if (existingLinkIndex >= 0) {
           consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
-          consumerPackageLinks[existingLinkIndex].linkType = LinkType.LinkPackage;
+          consumerPackageLinks[existingLinkIndex].linkType = 'LinkPackage';
         } else {
           consumerPackageLinks.push({
             linkedPackagePath,
             linkedPackageName,
-            linkType: LinkType.LinkPackage
+            linkType: 'LinkPackage'
           });
         }
 
