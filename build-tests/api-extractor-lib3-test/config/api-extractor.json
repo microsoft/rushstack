@@ -9,7 +9,7 @@
       // Disable reporting of `@virtual`, which is reported by default
       "@virtual": false,
       // Enable reporting of our custom TSDoc tags.
-      "@preapproved": true,
+      "@internalRemarks": true,
       "@betaDocumentation": true
     }
   },

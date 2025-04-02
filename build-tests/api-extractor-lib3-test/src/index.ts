@@ -13,7 +13,7 @@
 export { Lib1Class } from 'api-extractor-lib1-test';
 
 /**
- * @preapproved
+ * @internalRemarks Internal remarks
  * @public
  */
 export class Lib3Class {

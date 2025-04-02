@@ -8,7 +8,7 @@ import { Lib1Class } from 'api-extractor-lib1-test';
 
 export { Lib1Class }
 
-// @public @preapproved (undocumented)
+// @public @internalRemarks (undocumented)
 export class Lib3Class {
     // @override @betaDocumentation
     prop: boolean;
