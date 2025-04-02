@@ -22,6 +22,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from './PnpmSyncUtilities';
+import { BaseLinkManager, SymlinkKind } from '../logic/base/BaseLinkManager';
 
 type LinkType = 'LinkPackage' | 'BridgePackage';
 
@@ -183,7 +184,8 @@ export class RushConnect {
         }
 
         const symlinkTargetPath: string = await FileSystem.getRealPathAsync(sourcePeerDependencyPath);
-        await FileSystem.createSymbolicLinkFolderAsync({
+        await BaseLinkManager._createSymlinkAsync({
+          symlinkKind: SymlinkKind.Directory,
           linkTargetPath: symlinkTargetPath,
           newLinkPath: `${linkedPackageDestination}/${peerDependencyName}`,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
@@ -210,7 +212,8 @@ export class RushConnect {
           throw new Error(`External dependency "${dependencyName}" not found`);
         }
 
-        await FileSystem.createSymbolicLinkFolderAsync({
+        await BaseLinkManager._createSymlinkAsync({
+          symlinkKind: SymlinkKind.Directory,
           linkTargetPath: linkedPackageDependencySourcePath,
           newLinkPath: `${linkedPackageDestination}/${dependencyName}`,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
@@ -299,7 +302,8 @@ export class RushConnect {
         await this._hardLinkToLinkedPackageAsync(linkedPackagePath, linkTargetPath, consumerSubspaceName);
 
         // Create a symbolic link pointing to the directory.
-        await FileSystem.createSymbolicLinkFolderAsync({
+        await BaseLinkManager._createSymlinkAsync({
+          symlinkKind: SymlinkKind.Directory,
           linkTargetPath,
           newLinkPath: `${parentPackageDestination ?? consumerPackageNodeModulesPath}/${packageName}`,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
@@ -383,7 +387,8 @@ export class RushConnect {
       const symlinkPath: string = `${sourceNodeModulesPath}/${packageBaseName}`;
 
       // Create symlink to linkedPackage
-      await FileSystem.createSymbolicLinkFolderAsync({
+      await BaseLinkManager._createSymlinkAsync({
+        symlinkKind: SymlinkKind.Directory,
         linkTargetPath: linkedPackagePath,
         newLinkPath: symlinkPath,
         alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
