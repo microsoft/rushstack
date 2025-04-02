@@ -111,14 +111,18 @@ export class RushConnect {
 
     await this._modifyAndSaveLinkStateAsync(async (linkState) => {
       const rushLinkFileState: IRushLinkFileStateJson[number] = linkState[subspaceName] ?? [];
-      await Async.forEachAsync(rushLinkFileState, async ({ linkedPackagePath }) => {
-        await pnpmSyncUpdateFileAsync({
-          sourceProjectFolder: linkedPackagePath,
-          targetFolders: [],
-          lockfileId: subspaceName,
-          logMessageCallback
-        });
-      });
+      await Async.forEachAsync(
+        rushLinkFileState,
+        async ({ linkedPackagePath }) => {
+          await pnpmSyncUpdateFileAsync({
+            sourceProjectFolder: linkedPackagePath,
+            targetFolders: [],
+            lockfileId: subspaceName,
+            logMessageCallback
+          });
+        },
+        { concurrency: 10 }
+      );
       delete linkState[subspaceName];
     });
 
@@ -179,8 +183,9 @@ export class RushConnect {
     linkedPackageDestination: string,
     peerDependencies: IPackageJsonDependencyTable
   ): Promise<void> {
-    await Promise.all(
-      Object.keys(peerDependencies).map(async (peerDependencyName) => {
+    await Async.forEachAsync(
+      Object.keys(peerDependencies),
+      async (peerDependencyName) => {
         const sourcePeerDependencyPath: string = `${consumerPackageNodeModulesPath}/${peerDependencyName}`;
         const sourcePeerDependencyPathExists: boolean =
           await FileSystem.existsAsync(sourcePeerDependencyPath);
@@ -195,7 +200,8 @@ export class RushConnect {
           newLinkPath: `${linkedPackageDestination}/${peerDependencyName}`,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
-      })
+      },
+      { concurrency: 10 }
     );
   }
 
@@ -204,8 +210,9 @@ export class RushConnect {
     linkedPackageDestination: string,
     externalDependencies: string[]
   ): Promise<void> {
-    await Promise.all(
-      externalDependencies.map(async (dependencyName) => {
+    await Async.forEachAsync(
+      externalDependencies,
+      async (dependencyName) => {
         const linkedPackageDependencyPath: string = `${linkedPackageNodeModulesPath}/${dependencyName}`;
         const linkedPackageDependencySourcePath: string =
           await FileSystem.getRealPathAsync(linkedPackageDependencyPath);
@@ -223,7 +230,8 @@ export class RushConnect {
           newLinkPath: `${linkedPackageDestination}/${dependencyName}`,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
-      })
+      },
+      { concurrency: 10 }
     );
   }
 
