@@ -54,13 +54,17 @@ interface IRushLinkOptions {
 }
 
 export class RushConnect {
-  public readonly rushLinkState: IRushLinkFileStateJson | undefined;
+  private readonly _rushLinkState: IRushLinkFileStateJson | undefined;
   private readonly _rushLinkStateFilePath: string;
 
   private constructor(options: IRushLinkOptions) {
     const { rushLinkStateFilePath, rushLinkState } = options;
     this._rushLinkStateFilePath = rushLinkStateFilePath;
-    this.rushLinkState = rushLinkState;
+    this._rushLinkState = rushLinkState;
+  }
+
+  public hasAnyLinksInSubspace(subspaceName: string): boolean {
+    return !!this._rushLinkState?.[subspaceName]?.length;
   }
 
   private async _hardLinkToLinkedPackageAsync(
@@ -91,13 +95,13 @@ export class RushConnect {
   private async _modifyAndSaveLinkStateAsync(
     cb: (linkState: IRushLinkFileStateJson) => Promise<void> | void
   ): Promise<void> {
-    const linkState: IRushLinkFileStateJson = this.rushLinkState ?? {};
-    await Promise.resolve(cb(linkState));
+    const linkState: IRushLinkFileStateJson = this._rushLinkState ?? {};
+    await cb(linkState);
     await JsonFile.saveAsync(linkState, this._rushLinkStateFilePath);
   }
 
-  public async isSubspaceDependencyLinkedAsync(terminal: ITerminal, subspaceName: string): Promise<boolean> {
-    if (!this.rushLinkState || !this.rushLinkState[subspaceName]?.length) {
+  public async pruneLinksAsync(terminal: ITerminal, subspaceName: string): Promise<boolean> {
+    if (!this.hasAnyLinksInSubspace(subspaceName)) {
       return false;
     }
 

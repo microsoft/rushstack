@@ -350,9 +350,8 @@ export class RushProjectConfiguration {
     const rushConfiguration: RushConfiguration | undefined = this.project.rushConfiguration;
     if (rushConfiguration) {
       const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(rushConfiguration);
-      const subspaceNameList: string[] = Object.keys(rushConnect.rushLinkState ?? {});
-      if (subspaceNameList.includes(this.project.subspace.subspaceName)) {
-        return 'Caching has been disabled for this project because it is a linked package.';
+      if (rushConnect.hasAnyLinksInSubspace(this.project.subspace.subspaceName)) {
+        return 'Caching has been disabled for this project because it is in a subspace that has a link.';
       }
     }
 
