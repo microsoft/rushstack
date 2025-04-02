@@ -26,7 +26,7 @@ import { BaseLinkManager, SymlinkKind } from '../logic/base/BaseLinkManager';
 
 type LinkType = 'LinkPackage' | 'BridgePackage';
 
-interface IRushLinkFileState {
+interface IRushLinkFileStateJson {
   [subspaceName: string]: {
     linkedPackagePath: string;
     linkedPackageName: string;
@@ -50,11 +50,11 @@ interface IConsumerPackageInfo {
 
 interface IRushLinkOptions {
   rushLinkStateFilePath: string;
-  rushLinkState: IRushLinkFileState | undefined;
+  rushLinkState: IRushLinkFileStateJson | undefined;
 }
 
 export class RushConnect {
-  public readonly rushLinkState: IRushLinkFileState | undefined;
+  public readonly rushLinkState: IRushLinkFileStateJson | undefined;
   private readonly _rushLinkStateFilePath: string;
 
   private constructor(options: IRushLinkOptions) {
@@ -89,9 +89,9 @@ export class RushConnect {
   }
 
   private async _modifyAndSaveLinkStateAsync(
-    cb: (linkState: IRushLinkFileState) => Promise<void> | void
+    cb: (linkState: IRushLinkFileStateJson) => Promise<void> | void
   ): Promise<void> {
-    const linkState: IRushLinkFileState = this.rushLinkState ?? {};
+    const linkState: IRushLinkFileStateJson = this.rushLinkState ?? {};
     await Promise.resolve(cb(linkState));
     await JsonFile.saveAsync(linkState, this._rushLinkStateFilePath);
   }
@@ -106,7 +106,7 @@ export class RushConnect {
     };
 
     await this._modifyAndSaveLinkStateAsync(async (linkState) => {
-      const rushLinkFileState: IRushLinkFileState[number] = linkState[subspaceName] ?? [];
+      const rushLinkFileState: IRushLinkFileStateJson[number] = linkState[subspaceName] ?? [];
       await Async.forEachAsync(rushLinkFileState, async ({ linkedPackagePath }) => {
         await pnpmSyncUpdateFileAsync({
           sourceProjectFolder: linkedPackagePath,
@@ -338,7 +338,7 @@ export class RushConnect {
 
       // Record the link information between the consumer package and the linked package
       await this._modifyAndSaveLinkStateAsync((linkState) => {
-        const consumerPackageLinks: IRushLinkFileState[number] = linkState[consumerSubspaceName] ?? [];
+        const consumerPackageLinks: IRushLinkFileStateJson[number] = linkState[consumerSubspaceName] ?? [];
         const existingLinkIndex: number = consumerPackageLinks.findIndex(
           (link) => link.linkedPackageName === packageName
         );
@@ -409,7 +409,7 @@ export class RushConnect {
       // Record the link information between the consumer package and the linked package
       await this._modifyAndSaveLinkStateAsync((linkState) => {
         const subspaceName: string = consumerPackage.subspace.subspaceName;
-        const consumerPackageLinks: IRushLinkFileState[number] = linkState[subspaceName] ?? [];
+        const consumerPackageLinks: IRushLinkFileStateJson[number] = linkState[subspaceName] ?? [];
         const existingLinkIndex: number = consumerPackageLinks.findIndex(
           (link) => link.linkedPackageName === linkedPackageName
         );
@@ -447,7 +447,7 @@ export class RushConnect {
 
   public static loadFromLinkStateFile(rushConfiguration: RushConfiguration): RushConnect {
     const rushLinkStateFilePath: string = `${rushConfiguration.commonTempFolder}/${RushConstants.rushLinkStateFilename}`;
-    let rushLinkState: IRushLinkFileState | undefined;
+    let rushLinkState: IRushLinkFileStateJson | undefined;
     try {
       rushLinkState = JsonFile.load(rushLinkStateFilePath);
     } catch (error) {
