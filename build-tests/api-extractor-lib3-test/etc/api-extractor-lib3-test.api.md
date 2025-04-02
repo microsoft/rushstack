@@ -8,9 +8,9 @@ import { Lib1Class } from 'api-extractor-lib1-test';
 
 export { Lib1Class }
 
-// @public @customModifierTag (undocumented)
+// @public @preapproved (undocumented)
 export class Lib3Class {
-    // @override @customBlockTag
+    // @override @betaDocumentation
     prop: boolean;
 }
 
