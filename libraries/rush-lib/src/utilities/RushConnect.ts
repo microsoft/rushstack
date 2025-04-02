@@ -126,7 +126,8 @@ export class RushConnect {
   private async _getLinkedPackageInfoAsync(linkedPackagePath: string): Promise<ILinkedPackageInfo> {
     const linkedPackageJsonPath: string = `${linkedPackagePath}/${FileConstants.PackageJson}`;
 
-    if (!(await FileSystem.existsAsync(linkedPackageJsonPath))) {
+    const linkedPackageJsonExists: boolean = await FileSystem.existsAsync(linkedPackageJsonPath);
+    if (!linkedPackageJsonExists) {
       throw new Error(`Cannot find ${FileConstants.PackageJson} in the path ${linkedPackagePath}`);
     }
 
@@ -179,7 +180,9 @@ export class RushConnect {
     await Promise.all(
       Object.keys(peerDependencies).map(async (peerDependencyName) => {
         const sourcePeerDependencyPath: string = `${consumerPackageNodeModulesPath}/${peerDependencyName}`;
-        if (!(await FileSystem.existsAsync(sourcePeerDependencyPath))) {
+        const sourcePeerDependencyPathExists: boolean =
+          await FileSystem.existsAsync(sourcePeerDependencyPath);
+        if (!sourcePeerDependencyPathExists) {
           throw new Error(`Cannot find "${peerDependencyName}"`);
         }
 
@@ -380,9 +383,7 @@ export class RushConnect {
         sourceNodeModulesPath = `${sourceNodeModulesPath}/${scope}`;
       }
 
-      if (!(await FileSystem.existsAsync(sourceNodeModulesPath))) {
-        await FileSystem.ensureFolderAsync(sourceNodeModulesPath);
-      }
+      await FileSystem.ensureFolderAsync(sourceNodeModulesPath);
 
       const symlinkPath: string = `${sourceNodeModulesPath}/${packageBaseName}`;
 
