@@ -302,7 +302,7 @@ export abstract class BaseInstallManager {
           lockfilePath: pnpmLockfilePath,
           dotPnpmFolder,
           lockfileId: subspace.subspaceName,
-          ensureFolderAsync: FileSystem.ensureFolderAsync,
+          ensureFolderAsync: FileSystem.ensureFolderAsync.bind(FileSystem),
           // eslint-disable-next-line @typescript-eslint/naming-convention
           readPnpmLockfile: async (lockfilePath: string) => {
             const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
