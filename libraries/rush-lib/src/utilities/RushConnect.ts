@@ -5,6 +5,7 @@ import path from 'path';
 import { Colorize, ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 import {
   AlreadyExistsBehavior,
+  AlreadyReportedError,
   Async,
   FileConstants,
   FileSystem,
@@ -22,13 +23,6 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from './PnpmSyncUtilities';
-
-class RushConnectError extends Error {
-  public constructor(message: string) {
-    super(message);
-    this.name = 'RushConnectError';
-  }
-}
 
 type LinkType = 'LinkPackage' | 'BridgePackage';
 
@@ -224,8 +218,11 @@ export class RushConnect {
         const linkedPackageDependencySourcePath: string =
           await FileSystem.getRealPathAsync(linkedPackageDependencyPath);
 
-        if (!(await FileSystem.existsAsync(linkedPackageDependencySourcePath))) {
-          throw new RushConnectError(`External dependency "${dependencyName}" not found`);
+        const linkedPackageDependencySourcePathExists: boolean = await FileSystem.existsAsync(
+          linkedPackageDependencySourcePath
+        );
+        if (!linkedPackageDependencySourcePathExists) {
+          throw new Error(`External dependency "${dependencyName}" not found`);
         }
 
         await FileSystem.createSymbolicLinkFolderAsync({
@@ -375,12 +372,16 @@ export class RushConnect {
         Colorize.green(`Successfully bridge package "${packageName}" for "${consumerPackage.packageName}"`)
       );
     } catch (error) {
-      if (error instanceof Error) {
-        throw new RushConnectError(
+      this._terminal.writeErrorLine(
+        Colorize.red(
           `Failed to bridge package "${linkedPackagePath}" to "${consumerPackage.packageName}": ${error.message}`
-        );
-      }
-      throw error;
+        )
+      );
+
+      const alreadyExistsError: Error = new AlreadyReportedError();
+      alreadyExistsError.message = error.message;
+      alreadyExistsError.stack = error.stack;
+      throw alreadyExistsError;
     }
   }
 
@@ -442,12 +443,16 @@ export class RushConnect {
         Colorize.green(`Successfully link package "${linkedPackageName}" for "${consumerPackageName}"`)
       );
     } catch (error) {
-      if (error instanceof Error) {
-        throw new RushConnectError(
+      this._terminal.writeErrorLine(
+        Colorize.red(
           `Failed to link package "${linkedPackagePath}" to "${consumerPackageName}": ${error.message}`
-        );
-      }
-      throw error;
+        )
+      );
+
+      const alreadyExistsError: Error = new AlreadyReportedError();
+      alreadyExistsError.message = error.message;
+      alreadyExistsError.stack = error.stack;
+      throw alreadyExistsError;
     }
   }
 
