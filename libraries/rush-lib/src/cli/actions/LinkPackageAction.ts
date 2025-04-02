@@ -30,6 +30,6 @@ export class LinkPackageAction extends BaseSymlinkPackageAction {
     linkedPackagePath: string,
     rushConnect: RushConnect
   ): Promise<void> {
-    await rushConnect.linkPackageAsync(consumerPackage, linkedPackagePath);
+    await rushConnect.linkPackageAsync(this.terminal, consumerPackage, linkedPackagePath);
   }
 }

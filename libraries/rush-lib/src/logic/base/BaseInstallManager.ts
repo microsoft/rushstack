@@ -196,6 +196,7 @@ export abstract class BaseInstallManager {
 
     const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
     const isNodeModulesOverWritten: boolean = await rushConnect.isSubspaceDependencyLinkedAsync(
+      this._terminal,
       subspace.subspaceName
     );
 

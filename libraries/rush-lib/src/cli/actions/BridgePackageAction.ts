@@ -40,6 +40,6 @@ export class BridgePackageAction extends BaseSymlinkPackageAction {
     rushConnect: RushConnect
   ): Promise<void> {
     const version: string | undefined = this._version.value;
-    await rushConnect.bridgePackageAsync(consumerPackage, linkedPackagePath, version);
+    await rushConnect.bridgePackageAsync(this.terminal, consumerPackage, linkedPackagePath, version);
   }
 }

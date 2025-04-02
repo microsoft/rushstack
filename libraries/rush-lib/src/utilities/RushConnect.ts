@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Colorize, ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import {
   AlreadyExistsBehavior,
   AlreadyReportedError,
@@ -55,24 +55,22 @@ interface IRushLinkOptions {
 
 export class RushConnect {
   public readonly rushLinkState: IRushLinkFileState | undefined;
-
-  private readonly _terminal: ITerminal;
   private readonly _rushLinkStateFilePath: string;
 
-  public constructor(options: IRushLinkOptions) {
-    this._terminal = new Terminal(new ConsoleTerminalProvider());
-
-    this._rushLinkStateFilePath = options.rushLinkStateFilePath;
-    this.rushLinkState = options.rushLinkState;
+  private constructor(options: IRushLinkOptions) {
+    const { rushLinkStateFilePath, rushLinkState } = options;
+    this._rushLinkStateFilePath = rushLinkStateFilePath;
+    this.rushLinkState = rushLinkState;
   }
 
   private async _hardLinkToLinkedPackageAsync(
+    terminal: ITerminal,
     sourcePath: string,
     targetFolder: string,
     lockfileId: string
   ): Promise<void> {
     const logMessageCallback = (logMessageOptions: ILogMessageCallbackOptions): void => {
-      PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal);
+      PnpmSyncUtilities.processLogMessage(logMessageOptions, terminal);
     };
     await pnpmSyncUpdateFileAsync({
       sourceProjectFolder: sourcePath,
@@ -98,13 +96,13 @@ export class RushConnect {
     await JsonFile.saveAsync(linkState, this._rushLinkStateFilePath);
   }
 
-  public async isSubspaceDependencyLinkedAsync(subspaceName: string): Promise<boolean> {
+  public async isSubspaceDependencyLinkedAsync(terminal: ITerminal, subspaceName: string): Promise<boolean> {
     if (!this.rushLinkState || !this.rushLinkState[subspaceName]?.length) {
       return false;
     }
 
     const logMessageCallback = (logMessageOptions: ILogMessageCallbackOptions): void => {
-      PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal);
+      PnpmSyncUtilities.processLogMessage(logMessageOptions, terminal);
     };
 
     await this._modifyAndSaveLinkStateAsync(async (linkState) => {
@@ -247,6 +245,7 @@ export class RushConnect {
   }
 
   public async bridgePackageAsync(
+    terminal: ITerminal,
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string,
     version: string | undefined,
@@ -278,7 +277,12 @@ export class RushConnect {
             `Cannot find package ${packageName} in ${consumerPackagePnpmDependenciesFolderPath}`
           );
         }
-        await this._hardLinkToLinkedPackageAsync(linkedPackagePath, sourcePath, consumerSubspaceName);
+        await this._hardLinkToLinkedPackageAsync(
+          terminal,
+          linkedPackagePath,
+          sourcePath,
+          consumerSubspaceName
+        );
       } else {
         // Generate unique destination path for linked package
         const depFilename: string = depPathToFilename(`file:${linkedPackagePath}(${packageName})`, 120);
@@ -302,7 +306,12 @@ export class RushConnect {
 
         const linkTargetPath: string = `${linkedPackageDestination}/${packageName}`;
         // Create hardlink to linkedPackage
-        await this._hardLinkToLinkedPackageAsync(linkedPackagePath, linkTargetPath, consumerSubspaceName);
+        await this._hardLinkToLinkedPackageAsync(
+          terminal,
+          linkedPackagePath,
+          linkTargetPath,
+          consumerSubspaceName
+        );
 
         // Create a symbolic link pointing to the directory.
         await BaseLinkManager._createSymlinkAsync({
@@ -318,6 +327,7 @@ export class RushConnect {
             `${linkedPackageNodeModulesPath}/${workspaceDependency}`
           );
           await this.bridgePackageAsync(
+            terminal,
             consumerPackage,
             linkedWorkspacePackagePath,
             version,
@@ -347,11 +357,11 @@ export class RushConnect {
         linkState[consumerSubspaceName] = consumerPackageLinks;
       });
 
-      this._terminal.writeLine(
+      terminal.writeLine(
         Colorize.green(`Successfully bridge package "${packageName}" for "${consumerPackage.packageName}"`)
       );
     } catch (error) {
-      this._terminal.writeErrorLine(
+      terminal.writeErrorLine(
         Colorize.red(
           `Failed to bridge package "${linkedPackagePath}" to "${consumerPackage.packageName}": ${error.message}`
         )
@@ -365,6 +375,7 @@ export class RushConnect {
   }
 
   public async linkPackageAsync(
+    terminal: ITerminal,
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string
   ): Promise<void> {
@@ -417,11 +428,11 @@ export class RushConnect {
         linkState[subspaceName] = consumerPackageLinks;
       });
 
-      this._terminal.writeLine(
+      terminal.writeLine(
         Colorize.green(`Successfully link package "${linkedPackageName}" for "${consumerPackageName}"`)
       );
     } catch (error) {
-      this._terminal.writeErrorLine(
+      terminal.writeErrorLine(
         Colorize.red(
           `Failed to link package "${linkedPackagePath}" to "${consumerPackageName}": ${error.message}`
         )
