@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { Colorize, type ITerminal } from '@rushstack/terminal';
+import { Colorize } from '@rushstack/terminal';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
@@ -10,7 +10,6 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class CheckAction extends BaseRushAction {
-  private readonly _terminal: ITerminal;
   private readonly _jsonFlag: CommandLineFlagParameter;
   private readonly _verboseFlag: CommandLineFlagParameter;
   private readonly _subspaceParameter: CommandLineStringParameter | undefined;
@@ -29,7 +28,6 @@ export class CheckAction extends BaseRushAction {
       parser
     });
 
-    this._terminal = parser.terminal;
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
       description: 'If this flag is specified, output will be in JSON format.'
@@ -66,7 +64,7 @@ export class CheckAction extends BaseRushAction {
       true
     );
     if (!variant && currentlyInstalledVariant) {
-      this._terminal.writeWarningLine(
+      this.terminal.writeWarningLine(
         Colorize.yellow(
           `Variant '${currentlyInstalledVariant}' has been installed, but 'rush check' is currently checking the default variant. ` +
             `Use 'rush ${this.actionName} ${this._variantParameter.longName} '${currentlyInstalledVariant}' to check the current installation.`
@@ -74,7 +72,7 @@ export class CheckAction extends BaseRushAction {
       );
     }
 
-    VersionMismatchFinder.rushCheck(this.rushConfiguration, this._terminal, {
+    VersionMismatchFinder.rushCheck(this.rushConfiguration, this.terminal, {
       variant,
       printAsJson: this._jsonFlag.value,
       truncateLongPackageNameLists: !this._verboseFlag.value,

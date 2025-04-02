@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminal } from '@rushstack/terminal';
 import type {
   CommandLineFlagParameter,
   CommandLineStringListParameter,
@@ -21,7 +20,6 @@ export class RemoveAction extends BaseAddAndRemoveAction {
   protected readonly _allFlag: CommandLineFlagParameter;
   protected readonly _packageNameList: CommandLineStringListParameter;
   private readonly _variantParameter: CommandLineStringParameter;
-  private readonly _terminal: ITerminal;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string = [
@@ -35,8 +33,6 @@ export class RemoveAction extends BaseAddAndRemoveAction {
       safeForSimultaneousRushProcesses: false,
       parser
     });
-
-    this._terminal = parser.terminal;
 
     this._packageNameList = this.defineStringListParameter({
       parameterLongName: '--package',
@@ -74,7 +70,7 @@ export class RemoveAction extends BaseAddAndRemoveAction {
           !project.packageJsonEditor.tryGetDependency(packageName) &&
           !project.packageJsonEditor.tryGetDevDependency(packageName)
         ) {
-          this._terminal.writeLine(
+          this.terminal.writeLine(
             `The project "${project.packageName}" does not have "${packageName}" in package.json.`
           );
         }

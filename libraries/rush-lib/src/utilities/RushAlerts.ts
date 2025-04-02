@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Colorize, PrintUtilities, type Terminal } from '@rushstack/terminal';
+import { Colorize, PrintUtilities, type ITerminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { FileSystem, JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
 import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
 import { RushConstants } from '../logic/RushConstants';
 
 export interface IRushAlertsOptions {
-  terminal: Terminal;
+  terminal: ITerminal;
   rushJsonFolder: string;
   rushAlertsConfig: IRushAlertsConfig | undefined;
   rushAlertsState: IRushAlertsState | undefined;
@@ -56,7 +56,7 @@ const enum AlertPriority {
 }
 
 export class RushAlerts {
-  private readonly _terminal: Terminal;
+  private readonly _terminal: ITerminal;
 
   private readonly _rushAlertsConfig: IRushAlertsConfig | undefined;
   private readonly _rushAlertsState: IRushAlertsState;
@@ -104,7 +104,7 @@ export class RushAlerts {
 
   public static async loadFromConfigurationAsync(
     rushConfiguration: RushConfiguration,
-    terminal: Terminal
+    terminal: ITerminal
   ): Promise<RushAlerts> {
     const rushAlertsStateFilePath: string = `${rushConfiguration.commonTempFolder}/${RushConstants.rushAlertsConfigFilename}`;
     const rushAlertsConfigFilePath: string = `${rushConfiguration.commonRushConfigFolder}/${RushConstants.rushAlertsConfigFilename}`;

@@ -8,7 +8,7 @@ import type {
   IRequiredCommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
-import { type ITerminal, Colorize } from '@rushstack/terminal';
+import { Colorize } from '@rushstack/terminal';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
@@ -37,7 +37,6 @@ interface ISubspaceInstallationData {
  * This is the common base class for InstallAction and UpdateAction.
  */
 export abstract class BaseInstallAction extends BaseRushAction {
-  protected readonly _terminal: ITerminal;
   protected readonly _variantParameter: CommandLineStringParameter;
   protected readonly _purgeParameter: CommandLineFlagParameter;
   protected readonly _bypassPolicyParameter: CommandLineFlagParameter;
@@ -55,8 +54,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
   public constructor(options: IBaseRushActionOptions) {
     super(options);
-
-    this._terminal = options.parser.terminal;
 
     this._purgeParameter = this.defineFlagParameter({
       parameterLongName: '--purge',
@@ -126,8 +123,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
         this.rushConfiguration.subspacesConfiguration?.preventSelectingAllSubspaces &&
         !this._selectionParameters?.didUserSelectAnything()
       ) {
-        this._terminal.writeLine();
-        this._terminal.writeLine(
+        this.terminal.writeLine();
+        this.terminal.writeLine(
           Colorize.red(
             `The subspaces preventSelectingAllSubspaces configuration is enabled, which enforces installation for a specified set of subspace,` +
               ` passed by the "${SUBSPACE_LONG_ARG_NAME}" parameter or selected from targeted projects using any project selector.`
@@ -177,13 +174,13 @@ export abstract class BaseInstallAction extends BaseRushAction {
     if (selectedSubspaces) {
       // Check each subspace for version inconsistencies
       for (const subspace of selectedSubspaces) {
-        VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
+        VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this.terminal, {
           subspace,
           variant
         });
       }
     } else {
-      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
+      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this.terminal, {
         subspace: undefined,
         variant
       });
