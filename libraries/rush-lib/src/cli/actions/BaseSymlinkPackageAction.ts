@@ -70,8 +70,12 @@ export abstract class BaseSymlinkPackageAction extends BaseRushAction {
     const linkedPackagePath: string = path.resolve(this._pathParameter.value!);
     const projectsToLink: Set<RushConfigurationProject> = await this.getProjectsToLinkAsync();
 
-    await Async.forEachAsync(projectsToLink, async (project) => {
-      await this.connectPackageAsync(project, linkedPackagePath, rushConnect);
-    });
+    await Async.forEachAsync(
+      projectsToLink,
+      async (project) => {
+        await this.connectPackageAsync(project, linkedPackagePath, rushConnect);
+      },
+      { concurrency: 5 }
+    );
   }
 }
