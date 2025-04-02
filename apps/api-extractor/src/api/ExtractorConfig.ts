@@ -18,7 +18,7 @@ import {
 } from '@rushstack/node-core-library';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 import { EnumMemberOrder, ReleaseTag } from '@microsoft/api-extractor-model';
-import { TSDocConfiguration } from '@microsoft/tsdoc';
+import { TSDocConfiguration, TSDocTagDefinition } from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
 import type {
@@ -173,6 +173,25 @@ export interface IExtractorConfigApiReport {
   fileName: string;
 }
 
+/** Default {@link IConfigApiReport.reportVariants} */
+const defaultApiReportVariants: readonly ApiReportVariant[] = ['complete'];
+
+/**
+ * Default {@link IConfigApiReport.tagsToReport}.
+ *
+ * @remarks
+ * Note that this list is externally documented, and directly affects report output.
+ * Also note that the order of tags in this list is significant, as it determines the order of tags in the report.
+ * Any changes to this list should be considered breaking.
+ */
+const defaultTagsToReport: Readonly<Record<`@${string}`, boolean>> = {
+  '@sealed': true,
+  '@virtual': true,
+  '@override': true,
+  '@eventProperty': true,
+  '@deprecated': true
+};
+
 interface IExtractorConfigParameters {
   projectFolder: string;
   packageJson: INodePackageJson | undefined;
@@ -187,6 +206,7 @@ interface IExtractorConfigParameters {
   reportFolder: string;
   reportTempFolder: string;
   apiReportIncludeForgottenExports: boolean;
+  tagsToReport: Readonly<Record<`@${string}`, boolean>>;
   docModelGenerationOptions: IApiModelGenerationOptions | undefined;
   apiJsonFilePath: string;
   docModelIncludeForgottenExports: boolean;
@@ -282,6 +302,8 @@ export class ExtractorConfig {
   public readonly reportFolder: string;
   /** {@inheritDoc IConfigApiReport.reportTempFolder} */
   public readonly reportTempFolder: string;
+  /** {@inheritDoc IConfigApiReport.tagsToReport} */
+  public readonly tagsToReport: Readonly<Record<`@${string}`, boolean>>;
 
   /**
    * Gets the file path for the "complete" (default) report configuration, if one was specified.
@@ -375,6 +397,7 @@ export class ExtractorConfig {
     reportConfigs,
     reportFolder,
     reportTempFolder,
+    tagsToReport,
     docModelGenerationOptions,
     apiJsonFilePath,
     docModelIncludeForgottenExports,
@@ -407,6 +430,7 @@ export class ExtractorConfig {
     this.reportConfigs = reportConfigs;
     this.reportFolder = reportFolder;
     this.reportTempFolder = reportTempFolder;
+    this.tagsToReport = tagsToReport;
     this.docModelGenerationOptions = docModelGenerationOptions;
     this.apiJsonFilePath = apiJsonFilePath;
     this.docModelIncludeForgottenExports = docModelIncludeForgottenExports;
@@ -960,12 +984,17 @@ export class ExtractorConfig {
         }
       }
 
+      if (configObject.apiReport?.tagsToReport) {
+        _validateTagsToReport(configObject.apiReport.tagsToReport);
+      }
+
       const apiReportEnabled: boolean = configObject.apiReport?.enabled ?? false;
       const apiReportIncludeForgottenExports: boolean =
         configObject.apiReport?.includeForgottenExports ?? false;
       let reportFolder: string = tokenContext.projectFolder;
       let reportTempFolder: string = tokenContext.projectFolder;
       const reportConfigs: IExtractorConfigApiReport[] = [];
+      let tagsToReport: Record<`@${string}`, boolean> = {};
       if (apiReportEnabled) {
         // Undefined case checked above where we assign `apiReportEnabled`
         const apiReportConfig: IConfigApiReport = configObject.apiReport!;
@@ -998,7 +1027,8 @@ export class ExtractorConfig {
           reportFileNameBase = '<unscopedPackageName>';
         }
 
-        const reportVariantKinds: ApiReportVariant[] = apiReportConfig.reportVariants ?? ['complete'];
+        const reportVariantKinds: readonly ApiReportVariant[] =
+          apiReportConfig.reportVariants ?? defaultApiReportVariants;
 
         for (const reportVariantKind of reportVariantKinds) {
           // Omit the variant kind from the "complete" report file name for simplicity and for backwards compatibility.
@@ -1032,6 +1062,11 @@ export class ExtractorConfig {
             tokenContext
           );
         }
+
+        tagsToReport = {
+          ...defaultTagsToReport,
+          ...apiReportConfig.tagsToReport
+        };
       }
 
       let docModelGenerationOptions: IApiModelGenerationOptions | undefined = undefined;
@@ -1188,6 +1223,7 @@ export class ExtractorConfig {
         reportFolder,
         reportTempFolder,
         apiReportIncludeForgottenExports,
+        tagsToReport,
         docModelGenerationOptions,
         apiJsonFilePath,
         docModelIncludeForgottenExports,
@@ -1317,5 +1353,49 @@ export class ExtractorConfig {
       throw new Error(`The "${fieldName}" value contains an unrecognized token "${match[1]}"`);
     }
     throw new Error(`The "${fieldName}" value contains extra token characters ("<" or ">"): ${value}`);
+  }
+}
+
+const releaseTags: Set<string> = new Set(['@public', '@alpha', '@beta', '@internal']);
+
+/**
+ * Validate {@link ExtractorConfig.tagsToReport}.
+ */
+function _validateTagsToReport(
+  tagsToReport: Record<string, boolean>
+): asserts tagsToReport is Record<`@${string}`, boolean> {
+  const includedReleaseTags: string[] = [];
+  const invalidTags: [string, string][] = []; // tag name, error
+  for (const tag of Object.keys(tagsToReport)) {
+    if (releaseTags.has(tag)) {
+      // If a release tags is specified, regardless of whether it is enabled, we will throw an error.
+      // Release tags must not be specified.
+      includedReleaseTags.push(tag);
+    }
+
+    // If the tag is invalid, generate an error string from the inner error message.
+    try {
+      TSDocTagDefinition.validateTSDocTagName(tag);
+    } catch (error) {
+      invalidTags.push([tag, (error as Error).message]);
+    }
+  }
+
+  const errorMessages: string[] = [];
+  for (const includedReleaseTag of includedReleaseTags) {
+    errorMessages.push(
+      `${includedReleaseTag}: Release tags are always included in API reports and must not be specified`
+    );
+  }
+  for (const [invalidTag, innerError] of invalidTags) {
+    errorMessages.push(`${invalidTag}: ${innerError}`);
+  }
+
+  if (errorMessages.length > 0) {
+    const errorMessage: string = [
+      `"tagsToReport" contained one or more invalid tags:`,
+      ...errorMessages
+    ].join('\n\t- ');
+    throw new Error(errorMessage);
   }
 }

@@ -6,7 +6,10 @@
   "newlineKind": "crlf",
 
   "apiReport": {
-    "enabled": true
+    "enabled": true,
+    "tagsToReport": {
+      "@myCustomTag": true
+    }
   },
 
   "docModel": {

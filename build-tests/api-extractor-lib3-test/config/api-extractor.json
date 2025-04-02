@@ -4,7 +4,14 @@
   "mainEntryPointFilePath": "<projectFolder>/lib/index.d.ts",
 
   "apiReport": {
-    "enabled": true
+    "enabled": true,
+    "tagsToReport": {
+      // Disable reporting of `@virtual`, which is reported by default
+      "@virtual": false,
+      // Enable reporting of our custom TSDoc tags.
+      "@internalRemarks": true,
+      "@betaDocumentation": true
+    }
   },
 
   "docModel": {

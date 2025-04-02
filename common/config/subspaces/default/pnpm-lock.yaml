@@ -933,6 +933,9 @@ importers:
         specifier: workspace:*
         version: link:../api-extractor-lib1-test
     devDependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
