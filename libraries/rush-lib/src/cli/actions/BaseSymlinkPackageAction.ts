@@ -1,16 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { CommandLineStringListParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import type {
+  CommandLineStringListParameter,
+  IRequiredCommandLineStringParameter
+} from '@rushstack/ts-command-line';
 import path from 'path';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConnect } from '../../utilities/RushConnect';
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Async } from '@rushstack/node-core-library';
+import { RushConstants } from '../../logic/RushConstants';
 
 export abstract class BaseSymlinkPackageAction extends BaseRushAction {
   protected readonly _projectList: CommandLineStringListParameter;
-  protected readonly _pathParameter: CommandLineStringParameter;
+  protected readonly _pathParameter: IRequiredCommandLineStringParameter;
 
   protected constructor(options: IBaseRushActionOptions) {
     super(options);
@@ -49,7 +53,7 @@ export abstract class BaseSymlinkPackageAction extends BaseRushAction {
         const project: RushConfigurationProject | undefined =
           this.rushConfiguration.getProjectByName(projectName);
         if (!project) {
-          throw new Error(`The project "${projectName}" was not found in the "rush.json"`);
+          throw new Error(`The project "${projectName}" was not found in "${RushConstants.rushPackageName}"`);
         }
         projectsToLink.add(project);
       }
@@ -67,7 +71,7 @@ export abstract class BaseSymlinkPackageAction extends BaseRushAction {
 
   protected async runAsync(): Promise<void> {
     const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
-    const linkedPackagePath: string = path.resolve(this._pathParameter.value!);
+    const linkedPackagePath: string = path.resolve(process.cwd(), this._pathParameter.value);
     const projectsToLink: Set<RushConfigurationProject> = await this.getProjectsToLinkAsync();
 
     await Async.forEachAsync(
