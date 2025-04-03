@@ -480,7 +480,7 @@ export class RushConnect {
     }
   }
 
-  public static loadFromLinkStateFile(rushConfiguration: RushConfiguration): RushConnect {
+  public static loadFromRushConfiguration(rushConfiguration: RushConfiguration): RushConnect {
     const rushLinkStateFilePath: string = `${rushConfiguration.commonTempFolder}/${RushConstants.rushProjectLinkStateFilename}`;
     let rushLinkState: IProjectLinksStateJson | undefined;
     try {

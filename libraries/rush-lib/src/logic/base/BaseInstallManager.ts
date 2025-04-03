@@ -194,7 +194,7 @@ export abstract class BaseInstallManager {
       statePropertiesToIgnore: optionsToIgnore
     }));
 
-    const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
+    const rushConnect: RushConnect = RushConnect.loadFromRushConfiguration(this.rushConfiguration);
     const wasNodeModulesModifiedOutsideInstallation: boolean = await rushConnect.purgeLinksAsync(
       this._terminal,
       subspace.subspaceName
