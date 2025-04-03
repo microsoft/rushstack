@@ -36,49 +36,46 @@ export abstract class BaseLinkManager {
   }
 
   public static async _createSymlinkAsync(options: IBaseLinkManagerCreateSymlinkOptions): Promise<void> {
+    // TODO: Consider promoting this to node-core-library
     const newLinkFolder: string = path.dirname(options.newLinkPath);
     await FileSystem.ensureFolderAsync(newLinkFolder);
 
-    let targetPath: string;
-    if (EnvironmentConfiguration.absoluteSymlinks) {
-      targetPath = options.linkTargetPath;
-    } else {
-      // Link to the relative path, to avoid going outside containers such as a Docker image
-      targetPath = path.relative(await FileSystem.getRealPathAsync(newLinkFolder), options.linkTargetPath);
-    }
+    let relativePathForbidden: boolean = false;
+    let linkFunctionAsync: (options: IBaseLinkManagerCreateSymlinkOptions) => Promise<void>;
 
     if (process.platform === 'win32') {
       if (options.symlinkKind === SymlinkKind.Directory) {
         // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-        await FileSystem.createSymbolicLinkJunctionAsync({
-          linkTargetPath: targetPath,
-          newLinkPath: options.newLinkPath
-        });
+        linkFunctionAsync = FileSystem.createSymbolicLinkJunctionAsync.bind(FileSystem);
       } else {
         // For files, we use a Windows "hard link", because creating a symbolic link requires
         // administrator permission.
+        linkFunctionAsync = FileSystem.createHardLinkAsync.bind(FileSystem);
 
         // NOTE: We cannot use the relative path for hard links
-        await FileSystem.createHardLinkAsync({
-          linkTargetPath: options.linkTargetPath,
-          newLinkPath: options.newLinkPath
-        });
+        relativePathForbidden = true;
       }
     } else {
       // However hard links seem to cause build failures on Mac, so for all other operating systems
       // we use symbolic links for this case.
       if (options.symlinkKind === SymlinkKind.Directory) {
-        await FileSystem.createSymbolicLinkFolderAsync({
-          linkTargetPath: targetPath,
-          newLinkPath: options.newLinkPath
-        });
+        linkFunctionAsync = FileSystem.createSymbolicLinkFolderAsync.bind(FileSystem);
       } else {
-        await FileSystem.createSymbolicLinkFileAsync({
-          linkTargetPath: targetPath,
-          newLinkPath: options.newLinkPath
-        });
+        linkFunctionAsync = FileSystem.createSymbolicLinkFileAsync.bind(FileSystem);
       }
     }
+
+    let { linkTargetPath } = options;
+    if (!relativePathForbidden && !EnvironmentConfiguration.absoluteSymlinks) {
+      // Link to the relative path, to avoid going outside containers such as a Docker image
+      const newLinkFolderRealPath: string = await FileSystem.getRealPathAsync(newLinkFolder);
+      linkTargetPath = path.relative(newLinkFolderRealPath, linkTargetPath);
+    }
+
+    await linkFunctionAsync({
+      ...options,
+      linkTargetPath
+    });
   }
 
   /**
