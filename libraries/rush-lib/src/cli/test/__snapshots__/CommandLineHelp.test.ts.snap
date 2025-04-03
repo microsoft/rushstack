@@ -64,10 +64,12 @@ Positional arguments:
     version             Manage package versions in the repo.
     alert               (EXPERIMENTAL) View and manage Rush alerts for the 
                         repository
-    bridge-package      (EXPERIMENTAL) Simulate installation of a locally 
-                        built project, affecting many projects.
-    link-package        (EXPERIMENTAL) Simulate installation of a locally 
-                        built project, affecting specific projects.
+    bridge-package      (EXPERIMENTAL) Simulate replacement of an installed 
+                        external dependency with a package that lives in a 
+                        folder outside of this repo, affecting many projects.
+    link-package        (EXPERIMENTAL) Simulate replacement of an installed 
+                        external dependency with a package that lives in a 
+                        folder outside of this repo, affecting many projects.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
@@ -166,19 +168,20 @@ the workspace, as well as their indirect dependencies. The symlink is not
 reflected in pnpm-lock.yaml, and ignores the local project's own package.json 
 dependencies, preserving whatever the lockfile installed. The symlink will be 
 cleared when you next run \\"rush install\\" or \\"rush update\\". Compare with the 
-\\"rush link-package\\" command, which affects only the consuming project.
+\\"rush link-package \\" command, which affects only the consuming project.
 
 Optional arguments:
   -h, --help         Show this help message and exit.
-  --path PATH        The folder path of a locally built project, whose 
-                     installation will be simulated using node_modules 
-                     symlinks. This folder will be the target of the symlinks.
+  --path PATH        The path of folder of a project outside of this Rush 
+                     repo, whose installation will be simulated using 
+                     node_modules symlinks. The folder specified here be the 
+                     target of the symlinks.
   --project PROJECT  A list of Rush project names to connect to the external 
                      package. If not specified, uses the project in the 
                      current working directory.
-  --version VERSION  It will directly replace the output for the specified 
-                     version of the package, which requires you to have that 
-                     package installed under the specified name in advance.
+  --version VERSION  Directly replace the output for the specified version of 
+                     the package, which requires that package be installed in 
+                     advance.
 "
 `;
 
@@ -889,9 +892,10 @@ dependencies.
 
 Optional arguments:
   -h, --help         Show this help message and exit.
-  --path PATH        The folder path of a locally built project, whose 
-                     installation will be simulated using node_modules 
-                     symlinks. This folder will be the target of the symlinks.
+  --path PATH        The path of folder of a project outside of this Rush 
+                     repo, whose installation will be simulated using 
+                     node_modules symlinks. The folder specified here be the 
+                     target of the symlinks.
   --project PROJECT  A list of Rush project names to connect to the external 
                      package. If not specified, uses the project in the 
                      current working directory.

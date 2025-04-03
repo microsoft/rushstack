@@ -1141,7 +1141,7 @@ Object {
       "actionName": "bridge-package",
       "parameters": Array [
         Object {
-          "description": "The folder path of a locally built project, whose installation will be simulated using node_modules symlinks.  This folder will be the target of the symlinks.",
+          "description": "The path of folder of a project outside of this Rush repo, whose installation will be simulated using node_modules symlinks.  The folder specified here be the target of the symlinks.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--path",
@@ -1157,7 +1157,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "It will directly replace the output for the specified version of the package, which requires you to have that package installed under the specified name in advance.",
+          "description": "Directly replace the output for the specified version of the package, which requires that package be installed in advance.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--version",
@@ -1170,7 +1170,7 @@ Object {
       "actionName": "link-package",
       "parameters": Array [
         Object {
-          "description": "The folder path of a locally built project, whose installation will be simulated using node_modules symlinks.  This folder will be the target of the symlinks.",
+          "description": "The path of folder of a project outside of this Rush repo, whose installation will be simulated using node_modules symlinks.  The folder specified here be the target of the symlinks.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--path",

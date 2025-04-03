@@ -5,13 +5,15 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseSymlinkPackageAction } from './BaseSymlinkPackageAction';
 import type { RushConnect } from '../../utilities/RushConnect';
+import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants';
 
 export class LinkPackageAction extends BaseSymlinkPackageAction {
   public constructor(parser: RushCommandLineParser) {
     super({
-      actionName: 'link-package',
+      actionName: LINK_PACKAGE_ACTION_NAME,
       summary:
-        '(EXPERIMENTAL) Simulate installation of a locally built project, affecting specific projects.',
+        '(EXPERIMENTAL) Simulate replacement of an installed external dependency with a package that lives in ' +
+        'a folder outside of this repo, affecting many projects.',
       documentation:
         'This command enables you to test a locally built project by creating a symlink under a consuming' +
         ' project\'s node_modules folder to simulate installation.  The implementation is similar to "pnpm link"' +
@@ -19,8 +21,8 @@ export class LinkPackageAction extends BaseSymlinkPackageAction {
         ' not reflected in pnpm-lock.yaml, affects the consuming project only, and has the same limitations as' +
         ' "workspace:*".' +
         '  The symlink will be cleared when you next run "rush install" or "rush update".' +
-        '  Compare with the "rush bridge-package" command, which affects multiple projects and indirect dependencies.',
-      safeForSimultaneousRushProcesses: true,
+        `  Compare with the "rush ${BRIDGE_PACKAGE_ACTION_NAME}" command, which affects multiple` +
+        ' projects and indirect dependencies.',
       parser
     });
   }

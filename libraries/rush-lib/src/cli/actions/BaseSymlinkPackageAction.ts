@@ -24,8 +24,8 @@ export abstract class BaseSymlinkPackageAction extends BaseRushAction {
       argumentName: 'PATH',
       required: true,
       description:
-        'The folder path of a locally built project, whose installation will be simulated using node_modules' +
-        ' symlinks.  This folder will be the target of the symlinks.'
+        'The path of folder of a project outside of this Rush repo, whose installation will be simulated using' +
+        ' node_modules symlinks.  The folder specified here be the target of the symlinks.'
     });
 
     this._projectList = this.defineStringListParameter({
