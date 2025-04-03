@@ -101,7 +101,26 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
         if (firstImportNode === undefined) {
           // EXAMPLE:  const x = require('x')
           if (hoistJestMockPatterns.requireCallExpression.match(node)) {
-            firstImportNode = node;
+            // Check if this require is inside a jest.mock factory function
+            let currentNode: TSESTree.Node | undefined = node;
+            let isInJestMockFactory = false;
+
+            while (currentNode?.parent) {
+              if (
+                currentNode.parent.type === AST_NODE_TYPES.ArrowFunctionExpression &&
+                currentNode.parent.parent?.type === AST_NODE_TYPES.CallExpression &&
+                isHoistableJestCall(currentNode.parent.parent)
+              ) {
+                isInJestMockFactory = true;
+                break;
+              }
+              currentNode = currentNode.parent;
+            }
+
+            // Only set firstImportNode if not in a factory function
+            if (!isInJestMockFactory) {
+              firstImportNode = node;
+            }
           }
         }
 
@@ -124,13 +143,32 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
                   const sourceCode: TSESLint.SourceCode = context.getSourceCode();
                   const statementText: string = sourceCode.getText(outerStatement);
 
+                  // Check if this import is inside a jest.mock factory function
+                  let currentNode: TSESTree.Node | undefined = firstImportNode;
+                  let isInJestMockFactory = false;
+
+                  while (currentNode?.parent) {
+                    if (
+                      currentNode.parent.type === AST_NODE_TYPES.ArrowFunctionExpression &&
+                      currentNode.parent.parent?.type === AST_NODE_TYPES.CallExpression &&
+                      isHoistableJestCall(currentNode.parent.parent)
+                    ) {
+                      isInJestMockFactory = true;
+                      break;
+                    }
+                    currentNode = currentNode.parent;
+                  }
+
+                  // If the import is inside a jest.mock factory, don't consider it for hoisting
+                  if (isInJestMockFactory) {
+                    return null;
+                  }
+
                   // Remove the statement from its current position
-                  // const removeOriginal: TSESLint.RuleFix = fixer.remove(outerStatement);
                   const removeOriginal: TSESLint.RuleFix = fixer.removeRange([
                     outerStatement.range[0] - 1, // Include the previous line's newline character
                     outerStatement.range[1]
                   ]);
-                  // console.log('import node', firstImportNode);
 
                   const importExpr = firstImportNode;
                   let nodeToInsertBefore = importExpr;

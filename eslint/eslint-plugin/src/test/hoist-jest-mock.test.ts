@@ -134,68 +134,68 @@ ruleTester.run('hoist-jest-mock', hoistJestMock, {
       ].join('\n')
     },
     // multi line jest.mock with require in mock implementation
-    // {
-    //   code: [
-    //     "import x from 'y';",
-    //     'const mockPlaySoundFile = jest.fn();',
-    //     "jest.mock('../assets/moduleSvg', () => {",
-    //     "  const React = require('react')",
-    //     '  return {',
-    //     '    __esModule: true,',
-    //     '    default: () => "testSVG",',
-    //     '  }',
-    //     '})',
-    //     "jest.mock('./SoundPlayer', () => {",
-    //     '  return {',
-    //     '    SoundPlayer: jest.fn().mockImplementation(() => {',
-    //     '      return { playSoundFile: mockPlaySoundFile };',
-    //     '    })',
-    //     '  };',
-    //     '});'
-    //   ].join('\n'),
-    //   errors: [
-    //     { messageId: 'error-unhoisted-jest-mock', line: 3 },
-    //     { messageId: 'error-unhoisted-jest-mock', line: 10 }
-    //   ],
-    //   output: [
-    //     [
-    //       "jest.mock('../assets/moduleSvg', () => {",
-    //       "  const React = require('react')",
-    //       '  return {',
-    //       '    __esModule: true,',
-    //       '    default: () => "testSVG",',
-    //       '  }',
-    //       '})',
-    //       "import x from 'y';",
-    //       'const mockPlaySoundFile = jest.fn();',
-    //       "jest.mock('./SoundPlayer', () => {",
-    //       '  return {',
-    //       '    SoundPlayer: jest.fn().mockImplementation(() => {',
-    //       '      return { playSoundFile: mockPlaySoundFile };',
-    //       '    })',
-    //       '  };',
-    //       '});'
-    //     ].join('\n'),
-    //     [
-    //       'const mockPlaySoundFile = jest.fn();',
-    //       "jest.mock('../assets/moduleSvg', () => {",
-    //       "  const React = require('react')",
-    //       '  return {',
-    //       '    __esModule: true,',
-    //       '    default: () => "testSVG",',
-    //       '  }',
-    //       '})',
-    //       "jest.mock('./SoundPlayer', () => {",
-    //       '  return {',
-    //       '    SoundPlayer: jest.fn().mockImplementation(() => {',
-    //       '      return { playSoundFile: mockPlaySoundFile };',
-    //       '    })',
-    //       '  };',
-    //       '});',
-    //       "import x from 'y';"
-    //     ].join('\n')
-    //   ]
-    // },
+    {
+      code: [
+        "import x from 'y';",
+        'const mockPlaySoundFile = jest.fn();',
+        "jest.mock('../assets/moduleSvg', () => {",
+        "  const React = require('react')",
+        '  return {',
+        '    __esModule: true,',
+        '    default: () => "testSVG",',
+        '  }',
+        '})',
+        "jest.mock('./SoundPlayer', () => {",
+        '  return {',
+        '    SoundPlayer: jest.fn().mockImplementation(() => {',
+        '      return { playSoundFile: mockPlaySoundFile };',
+        '    })',
+        '  };',
+        '});'
+      ].join('\n'),
+      errors: [
+        { messageId: 'error-unhoisted-jest-mock', line: 3 },
+        { messageId: 'error-unhoisted-jest-mock', line: 10 }
+      ],
+      output: [
+        [
+          "jest.mock('../assets/moduleSvg', () => {",
+          "  const React = require('react')",
+          '  return {',
+          '    __esModule: true,',
+          '    default: () => "testSVG",',
+          '  }',
+          '})',
+          "import x from 'y';",
+          'const mockPlaySoundFile = jest.fn();',
+          "jest.mock('./SoundPlayer', () => {",
+          '  return {',
+          '    SoundPlayer: jest.fn().mockImplementation(() => {',
+          '      return { playSoundFile: mockPlaySoundFile };',
+          '    })',
+          '  };',
+          '});'
+        ].join('\n'),
+        [
+          "jest.mock('../assets/moduleSvg', () => {",
+          "  const React = require('react')",
+          '  return {',
+          '    __esModule: true,',
+          '    default: () => "testSVG",',
+          '  }',
+          '})',
+          "jest.mock('./SoundPlayer', () => {",
+          '  return {',
+          '    SoundPlayer: jest.fn().mockImplementation(() => {',
+          '      return { playSoundFile: mockPlaySoundFile };',
+          '    })',
+          '  };',
+          '});',
+          "import x from 'y';",
+          'const mockPlaySoundFile = jest.fn();'
+        ].join('\n')
+      ]
+    },
     {
       // Import syntaxes that should fail
       code: ["import x from 'y';", 'jest.mock();'].join('\n'),
@@ -276,21 +276,21 @@ ruleTester.run('hoist-jest-mock', hoistJestMock, {
         '  };',
         '});'
       ].join('\n')
+    },
+    {
+      // A simple success using realistic code
+      code: [
+        'const mockPlaySoundFile = jest.fn();',
+        "jest.mock('./SoundPlayer', () => {",
+        "  const React = require('react')",
+        '  return {',
+        '    SoundPlayer: jest.fn().mockImplementation(() => {',
+        '      return { playSoundFile: mockPlaySoundFile };',
+        '    })',
+        '  };',
+        '});',
+        "jest.mock('./moduleA')"
+      ].join('\n')
     }
-    // {
-    //   // A simple success using realistic code
-    //   code: [
-    //     'const mockPlaySoundFile = jest.fn();',
-    //     "jest.mock('./SoundPlayer', () => {",
-    //     "  const React = require('react')",
-    //     '  return {',
-    //     '    SoundPlayer: jest.fn().mockImplementation(() => {',
-    //     '      return { playSoundFile: mockPlaySoundFile };',
-    //     '    })',
-    //     '  };',
-    //     '});',
-    //     "jest.mock('./moduleA')"
-    //   ].join('\n')
-    // }
   ]
 });
