@@ -195,7 +195,7 @@ export abstract class BaseInstallManager {
     }));
 
     const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
-    const wasNodeModulesModifiedOutsideInstallation: boolean = await rushConnect.pruneLinksAsync(
+    const wasNodeModulesModifiedOutsideInstallation: boolean = await rushConnect.purgeLinksAsync(
       this._terminal,
       subspace.subspaceName
     );

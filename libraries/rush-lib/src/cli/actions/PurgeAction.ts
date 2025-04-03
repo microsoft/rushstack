@@ -10,12 +10,14 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { UnlinkManager } from '../../logic/UnlinkManager';
 
+export const PURGE_ACTION_NAME: 'purge' = 'purge';
+
 export class PurgeAction extends BaseRushAction {
   private readonly _unsafeParameter: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
-      actionName: 'purge',
+      actionName: PURGE_ACTION_NAME,
       summary:
         'For diagnostic purposes, use this command to delete caches and other temporary files used by Rush',
       documentation:

@@ -9,6 +9,7 @@ import {
   FileConstants,
   FileSystem,
   JsonFile,
+  JsonSchema,
   type INodePackageJson,
   type IPackageJsonDependencyTable
 } from '@rushstack/node-core-library';
@@ -23,15 +24,20 @@ import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from './PnpmSyncUtilities';
 import { BaseLinkManager, SymlinkKind } from '../logic/base/BaseLinkManager';
+import schema from '../schemas/rush-project-link-state.schema.json';
+import { PURGE_ACTION_NAME } from '../cli/actions/PurgeAction';
 
 type LinkType = 'LinkPackage' | 'BridgePackage';
 
-interface IRushLinkFileStateJson {
-  [subspaceName: string]: {
-    linkedPackagePath: string;
-    linkedPackageName: string;
-    linkType: LinkType;
-  }[];
+interface IProjectLinkInSubspaceJson {
+  linkedPackagePath: string;
+  linkedPackageName: string;
+  linkType: LinkType;
+}
+
+interface IProjectLinksStateJson {
+  fileVersion: 0;
+  linksBySubspace: Record<string, IProjectLinkInSubspaceJson[]>;
 }
 
 interface ILinkedPackageInfo {
@@ -48,23 +54,27 @@ interface IConsumerPackageInfo {
   consumerSubspaceName: string;
 }
 
+type LinksBySubspaceNameMap = Map<string, IProjectLinkInSubspaceJson[]>;
+
 interface IRushLinkOptions {
   rushLinkStateFilePath: string;
-  rushLinkState: IRushLinkFileStateJson | undefined;
+  linksBySubspaceName: LinksBySubspaceNameMap;
 }
 
+const PROJECT_LINKS_STATE_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schema);
+
 export class RushConnect {
-  private readonly _rushLinkState: IRushLinkFileStateJson | undefined;
+  private _linksBySubspaceName: LinksBySubspaceNameMap;
   private readonly _rushLinkStateFilePath: string;
 
   private constructor(options: IRushLinkOptions) {
-    const { rushLinkStateFilePath, rushLinkState } = options;
+    const { rushLinkStateFilePath, linksBySubspaceName } = options;
     this._rushLinkStateFilePath = rushLinkStateFilePath;
-    this._rushLinkState = rushLinkState;
+    this._linksBySubspaceName = linksBySubspaceName;
   }
 
   public hasAnyLinksInSubspace(subspaceName: string): boolean {
-    return !!this._rushLinkState?.[subspaceName]?.length;
+    return !!this._linksBySubspaceName.get(subspaceName)?.length;
   }
 
   private async _hardLinkToLinkedPackageAsync(
@@ -93,14 +103,18 @@ export class RushConnect {
   }
 
   private async _modifyAndSaveLinkStateAsync(
-    cb: (linkState: IRushLinkFileStateJson) => Promise<void> | void
+    cb: (linkState: LinksBySubspaceNameMap) => Promise<LinksBySubspaceNameMap> | LinksBySubspaceNameMap
   ): Promise<void> {
-    const linkState: IRushLinkFileStateJson = this._rushLinkState ?? {};
-    await cb(linkState);
-    await JsonFile.saveAsync(linkState, this._rushLinkStateFilePath);
+    const newLinksBySubspaceName: LinksBySubspaceNameMap = await cb(this._linksBySubspaceName);
+    this._linksBySubspaceName = newLinksBySubspaceName;
+    const linkStateJson: IProjectLinksStateJson = {
+      fileVersion: 0,
+      linksBySubspace: Object.fromEntries(newLinksBySubspaceName)
+    };
+    await JsonFile.saveAsync(linkStateJson, this._rushLinkStateFilePath);
   }
 
-  public async pruneLinksAsync(terminal: ITerminal, subspaceName: string): Promise<boolean> {
+  public async purgeLinksAsync(terminal: ITerminal, subspaceName: string): Promise<boolean> {
     if (!this.hasAnyLinksInSubspace(subspaceName)) {
       return false;
     }
@@ -109,8 +123,8 @@ export class RushConnect {
       PnpmSyncUtilities.processLogMessage(logMessageOptions, terminal);
     };
 
-    await this._modifyAndSaveLinkStateAsync(async (linkState) => {
-      const rushLinkFileState: IRushLinkFileStateJson[number] = linkState[subspaceName] ?? [];
+    await this._modifyAndSaveLinkStateAsync(async (linksBySubspaceName) => {
+      const rushLinkFileState: IProjectLinkInSubspaceJson[] = linksBySubspaceName.get(subspaceName) ?? [];
       await Async.forEachAsync(
         rushLinkFileState,
         async ({ linkedPackagePath }) => {
@@ -123,7 +137,10 @@ export class RushConnect {
         },
         { concurrency: 10 }
       );
-      delete linkState[subspaceName];
+
+      const newLinksBySubspaceName: LinksBySubspaceNameMap = new Map(linksBySubspaceName);
+      newLinksBySubspaceName.delete(subspaceName);
+      return newLinksBySubspaceName;
     });
 
     return true;
@@ -349,24 +366,27 @@ export class RushConnect {
       }
 
       // Record the link information between the consumer package and the linked package
-      await this._modifyAndSaveLinkStateAsync((linkState) => {
-        const consumerPackageLinks: IRushLinkFileStateJson[number] = linkState[consumerSubspaceName] ?? [];
-        const existingLinkIndex: number = consumerPackageLinks.findIndex(
+      await this._modifyAndSaveLinkStateAsync((linksBySubspaceName) => {
+        const newConsumerPackageLinks: IProjectLinkInSubspaceJson[] = [
+          ...(linksBySubspaceName.get(consumerSubspaceName) ?? [])
+        ];
+        const existingLinkIndex: number = newConsumerPackageLinks.findIndex(
           (link) => link.linkedPackageName === packageName
         );
 
         if (existingLinkIndex >= 0) {
-          consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
-          consumerPackageLinks[existingLinkIndex].linkType = 'BridgePackage';
-        } else {
-          consumerPackageLinks.push({
-            linkedPackagePath,
-            linkedPackageName: packageName,
-            linkType: 'BridgePackage'
-          });
+          newConsumerPackageLinks.splice(existingLinkIndex, 1);
         }
 
-        linkState[consumerSubspaceName] = consumerPackageLinks;
+        newConsumerPackageLinks.push({
+          linkedPackagePath,
+          linkedPackageName: packageName,
+          linkType: 'BridgePackage'
+        });
+
+        const newLinksBySubspaceName: LinksBySubspaceNameMap = new Map(linksBySubspaceName);
+        newLinksBySubspaceName.set(consumerSubspaceName, newConsumerPackageLinks);
+        return newLinksBySubspaceName;
       });
 
       terminal.writeLine(
@@ -419,25 +439,28 @@ export class RushConnect {
       });
 
       // Record the link information between the consumer package and the linked package
-      await this._modifyAndSaveLinkStateAsync((linkState) => {
+      await this._modifyAndSaveLinkStateAsync((linksBySubspaceName) => {
         const subspaceName: string = consumerPackage.subspace.subspaceName;
-        const consumerPackageLinks: IRushLinkFileStateJson[number] = linkState[subspaceName] ?? [];
-        const existingLinkIndex: number = consumerPackageLinks.findIndex(
+        const newConsumerPackageLinks: IProjectLinkInSubspaceJson[] = [
+          ...(linksBySubspaceName.get(subspaceName) ?? [])
+        ];
+        const existingLinkIndex: number = newConsumerPackageLinks.findIndex(
           (link) => link.linkedPackageName === linkedPackageName
         );
 
         if (existingLinkIndex >= 0) {
-          consumerPackageLinks[existingLinkIndex].linkedPackagePath = linkedPackagePath;
-          consumerPackageLinks[existingLinkIndex].linkType = 'LinkPackage';
-        } else {
-          consumerPackageLinks.push({
-            linkedPackagePath,
-            linkedPackageName,
-            linkType: 'LinkPackage'
-          });
+          newConsumerPackageLinks.splice(existingLinkIndex, 1);
         }
 
-        linkState[subspaceName] = consumerPackageLinks;
+        newConsumerPackageLinks.push({
+          linkedPackagePath,
+          linkedPackageName,
+          linkType: 'LinkPackage'
+        });
+
+        const newLinksBySubspaceName: LinksBySubspaceNameMap = new Map(linksBySubspaceName);
+        newLinksBySubspaceName.set(subspaceName, newConsumerPackageLinks);
+        return newLinksBySubspaceName;
       });
 
       terminal.writeLine(
@@ -458,20 +481,37 @@ export class RushConnect {
   }
 
   public static loadFromLinkStateFile(rushConfiguration: RushConfiguration): RushConnect {
-    const rushLinkStateFilePath: string = `${rushConfiguration.commonTempFolder}/${RushConstants.rushLinkStateFilename}`;
-    let rushLinkState: IRushLinkFileStateJson | undefined;
+    const rushLinkStateFilePath: string = `${rushConfiguration.commonTempFolder}/${RushConstants.rushProjectLinkStateFilename}`;
+    let rushLinkState: IProjectLinksStateJson | undefined;
     try {
-      rushLinkState = JsonFile.load(rushLinkStateFilePath);
+      rushLinkState = JsonFile.loadAndValidate(rushLinkStateFilePath, PROJECT_LINKS_STATE_JSON_SCHEMA);
     } catch (error) {
-      if (FileSystem.isNotExistError(error as Error)) {
-        // do nothing
-      } else {
+      if (!FileSystem.isNotExistError(error as Error)) {
         throw error;
       }
     }
-    return new RushConnect({
-      rushLinkStateFilePath,
-      rushLinkState
-    });
+
+    if (!rushLinkState) {
+      return new RushConnect({
+        rushLinkStateFilePath,
+        linksBySubspaceName: new Map()
+      });
+    } else {
+      const { fileVersion, linksBySubspace } = rushLinkState;
+      if (fileVersion !== 0) {
+        throw new Error(
+          `The rush project link state file "${rushLinkStateFilePath}" has an unexpected format, so this repo's ` +
+            `installation state is likely in an inconsistent state. Run 'rush ${PURGE_ACTION_NAME}' purge to clear ` +
+            `the installation.`
+        );
+      } else {
+        const linksBySubspaceName: LinksBySubspaceNameMap = new Map(Object.entries(linksBySubspace));
+
+        return new RushConnect({
+          rushLinkStateFilePath,
+          linksBySubspaceName
+        });
+      }
+    }
   }
 }

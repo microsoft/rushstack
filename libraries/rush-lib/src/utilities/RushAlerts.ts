@@ -6,6 +6,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { FileSystem, JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
 import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
 import { RushConstants } from '../logic/RushConstants';
+import { PURGE_ACTION_NAME } from '../cli/actions/PurgeAction';
 
 export interface IRushAlertsOptions {
   terminal: ITerminal;
@@ -79,12 +80,13 @@ export class RushAlerts {
   ]);
   // only display alerts when certain specific actions are triggered
   public static readonly alertTriggerActions: string[] = [
+    // TODO: put the rest of the action names in constants
     'add',
     'change',
     'deploy',
     'init',
     'publish',
-    'purge',
+    PURGE_ACTION_NAME,
     'remove',
     'update',
     'install',
