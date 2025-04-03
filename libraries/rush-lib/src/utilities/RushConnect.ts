@@ -25,7 +25,7 @@ import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from './PnpmSyncUtilities';
 import { BaseLinkManager, SymlinkKind } from '../logic/base/BaseLinkManager';
 import schema from '../schemas/rush-project-link-state.schema.json';
-import { PURGE_ACTION_NAME } from '../cli/actions/PurgeAction';
+import { PURGE_ACTION_NAME } from './actionNameConstants';
 
 type LinkType = 'LinkPackage' | 'BridgePackage';
 

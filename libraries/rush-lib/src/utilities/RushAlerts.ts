@@ -6,7 +6,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { FileSystem, JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
 import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
 import { RushConstants } from '../logic/RushConstants';
-import { PURGE_ACTION_NAME } from '../cli/actions/PurgeAction';
+import { PURGE_ACTION_NAME } from './actionNameConstants';
 
 export interface IRushAlertsOptions {
   terminal: ITerminal;

@@ -9,8 +9,7 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { UnlinkManager } from '../../logic/UnlinkManager';
-
-export const PURGE_ACTION_NAME: 'purge' = 'purge';
+import { PURGE_ACTION_NAME } from '../../utilities/actionNameConstants';
 
 export class PurgeAction extends BaseRushAction {
   private readonly _unsafeParameter: CommandLineFlagParameter;
