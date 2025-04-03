@@ -11,7 +11,7 @@ import type { HeftParameterManager, IHeftParameters } from './HeftParameterManag
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
-import type { WatchGlobFn } from '../plugins/FileGlobSpecifier';
+import type { GlobFn, WatchGlobFn } from '../plugins/FileGlobSpecifier';
 import { InternalError } from '@rushstack/node-core-library';
 import type { IWatchFileSystem } from '../utilities/WatchFileSystemAdapter';
 
@@ -169,6 +169,11 @@ export interface IHeftTaskRunHookOptions {
    * @beta
    */
   readonly abortSignal: AbortSignal;
+
+  /**
+   * Reads the specified globs and returns the result.
+   */
+  readonly globAsync: GlobFn;
 }
 
 /**
