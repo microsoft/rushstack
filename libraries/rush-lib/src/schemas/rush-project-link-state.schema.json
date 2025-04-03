@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema",
   "title": "Rush rush-project-link-state.json config file",
-  "type": "object",
 
+  "type": "object",
   "required": ["fileVersion", "linksBySubspace"],
   "additionalProperties": false,
 
@@ -19,13 +19,26 @@
     "linksBySubspace": {
       "description": "A map of subspace names to their corresponding links.",
       "type": "object",
+
       "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "links": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/link"
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["linkedPackagePath", "linkedPackageName", "linkType"],
+          "additionalProperties": false,
+
+          "properties": {
+            "linkedPackagePath": {
+              "type": "string"
+            },
+
+            "linkedPackageName": {
+              "type": "string"
+            },
+
+            "linkType": {
+              "type": "string",
+              "enum": ["LinkPackage", "BridgePackage"]
             }
           }
         }
