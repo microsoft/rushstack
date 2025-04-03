@@ -390,7 +390,7 @@ export class RushConnect {
       });
 
       terminal.writeLine(
-        Colorize.green(`Successfully bridge package "${packageName}" for "${consumerPackage.packageName}"`)
+        Colorize.green(`Successfully bridged package "${packageName}" for "${consumerPackage.packageName}"`)
       );
     } catch (error) {
       terminal.writeErrorLine(
@@ -464,7 +464,7 @@ export class RushConnect {
       });
 
       terminal.writeLine(
-        Colorize.green(`Successfully link package "${linkedPackageName}" for "${consumerPackageName}"`)
+        Colorize.green(`Successfully linked package "${linkedPackageName}" for "${consumerPackageName}"`)
       );
     } catch (error) {
       terminal.writeErrorLine(
