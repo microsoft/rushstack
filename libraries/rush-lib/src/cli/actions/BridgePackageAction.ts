@@ -25,7 +25,7 @@ export class BridgePackageAction extends BaseSymlinkPackageAction {
         ' workspace, as well as their indirect dependencies. The symlink is not reflected in pnpm-lock.yaml, and ' +
         " ignores the local project's own package.json dependencies, preserving whatever the lockfile installed." +
         '  The symlink will be cleared when you next run "rush install" or "rush update".' +
-        `  Compare with the "rush ${LINK_PACKAGE_ACTION_NAME} " command, which affects only the consuming project.`,
+        `  Compare with the "rush ${LINK_PACKAGE_ACTION_NAME}" command, which affects only the consuming project.`,
       parser
     });
 

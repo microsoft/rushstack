@@ -168,7 +168,7 @@ the workspace, as well as their indirect dependencies. The symlink is not
 reflected in pnpm-lock.yaml, and ignores the local project's own package.json 
 dependencies, preserving whatever the lockfile installed. The symlink will be 
 cleared when you next run \\"rush install\\" or \\"rush update\\". Compare with the 
-\\"rush link-package \\" command, which affects only the consuming project.
+\\"rush link-package\\" command, which affects only the consuming project.
 
 Optional arguments:
   -h, --help         Show this help message and exit.
