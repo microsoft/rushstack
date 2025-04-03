@@ -481,6 +481,7 @@ export class RushConnect {
   }
 
   public static loadFromRushConfiguration(rushConfiguration: RushConfiguration): RushConnect {
+    // TODO: make this function async
     const rushLinkStateFilePath: string = `${rushConfiguration.commonTempFolder}/${RushConstants.rushProjectLinkStateFilename}`;
     let rushLinkState: IProjectLinksStateJson | undefined;
     try {
