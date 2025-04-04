@@ -2,6 +2,21 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "5.1.78",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.1.78",
+      "date": "Fri, 04 Apr 2025 15:11:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.4.78`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.1.77",
       "tag": "@rushstack/set-webpack-public-path-plugin_v5.1.77",
       "date": "Tue, 25 Mar 2025 15:11:16 GMT",

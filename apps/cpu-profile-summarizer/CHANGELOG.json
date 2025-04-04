@@ -2,6 +2,21 @@
   "name": "@rushstack/cpu-profile-summarizer",
   "entries": [
     {
+      "version": "0.1.12",
+      "tag": "@rushstack/cpu-profile-summarizer_v0.1.12",
+      "date": "Fri, 04 Apr 2025 15:11:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.11",
       "tag": "@rushstack/cpu-profile-summarizer_v0.1.11",
       "date": "Tue, 25 Mar 2025 15:11:15 GMT",

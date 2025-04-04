@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.52.3",
+      "tag": "@microsoft/api-extractor_v7.52.3",
+      "date": "Fri, 04 Apr 2025 15:11:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for customizing which TSDoc tags appear in API reports"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.52.2",
       "tag": "@microsoft/api-extractor_v7.52.2",
       "date": "Tue, 25 Mar 2025 15:11:15 GMT",
