@@ -3,6 +3,7 @@
 
 import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-line';
 import path from 'path';
+
 import { HotlinkManager } from '../../utilities/HotlinkManager';
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 

@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Async } from '@rushstack/node-core-library';
+import type { CommandLineStringListParameter } from '@rushstack/ts-command-line';
+
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction';
 import type { HotlinkManager } from '../../utilities/HotlinkManager';
 import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants';
-import type { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { RushConstants } from '../../logic/RushConstants';
-import { Async } from '@rushstack/node-core-library';
 
 export class LinkPackageAction extends BaseHotlinkPackageAction {
   protected readonly _projectListParameter: CommandLineStringListParameter;
