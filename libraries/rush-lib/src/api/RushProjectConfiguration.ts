@@ -350,7 +350,7 @@ export class RushProjectConfiguration {
     const rushConfiguration: RushConfiguration | undefined = this.project.rushConfiguration;
     if (rushConfiguration) {
       const hotlinkManager: HotlinkManager = HotlinkManager.loadFromRushConfiguration(rushConfiguration);
-      if (hotlinkManager.hasAnyLinksInSubspace(this.project.subspace.subspaceName)) {
+      if (hotlinkManager.hasAnyHotlinksInSubspace(this.project.subspace.subspaceName)) {
         return 'Caching has been disabled for this project because it is in a subspace with hotlinked dependencies.';
       }
     }

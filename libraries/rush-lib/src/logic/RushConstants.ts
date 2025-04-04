@@ -349,11 +349,10 @@ export class RushConstants {
   public static readonly currentVariantsFilename: 'current-variants.json' = 'current-variants.json';
 
   /**
-   * The filename ("rush-project-link-state.json") used to store information about packages connected via
+   * The filename ("rush-hotlink-state.json") used to store information about packages connected via
    * "rush link-package" and "rush bridge-package" commands.
    */
-  public static readonly rushProjectLinkStateFilename: 'rush-project-link-state.json' =
-    'rush-project-link-state.json';
+  public static readonly rushHotlinkStateFilename: 'rush-hotlink-state.json' = 'rush-hotlink-state.json';
 
   /**
    * The filename ("pnpm-sync.json") used to store the state of the pnpm sync command.

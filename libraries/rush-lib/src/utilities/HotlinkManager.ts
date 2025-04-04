@@ -24,15 +24,15 @@ import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from './PnpmSyncUtilities';
 import { BaseLinkManager, SymlinkKind } from '../logic/base/BaseLinkManager';
-import schema from '../schemas/rush-project-link-state.schema.json';
+import schema from '../schemas/rush-hotlink-state.schema.json';
 import { PURGE_ACTION_NAME } from './actionNameConstants';
 
-type LinkType = 'LinkPackage' | 'BridgePackage';
+type HotlinkLinkType = 'LinkPackage' | 'BridgePackage';
 
 interface IProjectLinkInSubspaceJson {
   linkedPackagePath: string;
   linkedPackageName: string;
-  linkType: LinkType;
+  linkType: HotlinkLinkType;
 }
 
 interface IProjectLinksStateJson {
@@ -73,7 +73,7 @@ export class HotlinkManager {
     this._linksBySubspaceName = linksBySubspaceName;
   }
 
-  public hasAnyLinksInSubspace(subspaceName: string): boolean {
+  public hasAnyHotlinksInSubspace(subspaceName: string): boolean {
     return !!this._linksBySubspaceName.get(subspaceName)?.length;
   }
 
@@ -115,7 +115,7 @@ export class HotlinkManager {
   }
 
   public async purgeLinksAsync(terminal: ITerminal, subspaceName: string): Promise<boolean> {
-    if (!this.hasAnyLinksInSubspace(subspaceName)) {
+    if (!this.hasAnyHotlinksInSubspace(subspaceName)) {
       return false;
     }
 
@@ -482,7 +482,7 @@ export class HotlinkManager {
 
   public static loadFromRushConfiguration(rushConfiguration: RushConfiguration): HotlinkManager {
     // TODO: make this function async
-    const rushLinkStateFilePath: string = `${rushConfiguration.commonTempFolder}/${RushConstants.rushProjectLinkStateFilename}`;
+    const rushLinkStateFilePath: string = `${rushConfiguration.commonTempFolder}/${RushConstants.rushHotlinkStateFilename}`;
     let rushLinkState: IProjectLinksStateJson | undefined;
     try {
       rushLinkState = JsonFile.loadAndValidate(rushLinkStateFilePath, PROJECT_LINKS_STATE_JSON_SCHEMA);
