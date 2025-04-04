@@ -37,7 +37,7 @@
             },
 
             "affectedPnpmVirtualStoreFolderNames": {
-              "types": "array",
+              "type": "array",
               "items": {
                 "type": "string"
               }
