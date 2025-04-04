@@ -82,7 +82,7 @@ export class UpdateAction extends BaseInstallAction {
 
   protected async buildInstallOptionsAsync(): Promise<Omit<IInstallManagerOptions, 'subspace'>> {
     const selectedProjects: Set<RushConfigurationProject> =
-      (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) ??
+      (await this._selectionParameters?.getSelectedProjectsAsync(this.terminal)) ??
       new Set(this.rushConfiguration.projects);
 
     const variant: string | undefined = await getVariantAsync(
@@ -109,13 +109,13 @@ export class UpdateAction extends BaseInstallAction {
       // These are derived independently of the selection for command line brevity
       selectedProjects,
       pnpmFilterArgumentValues:
-        (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this._terminal)) ?? [],
+        (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this.terminal)) ?? [],
       checkOnly: false,
       beforeInstallAsync: (subspace: Subspace) =>
         this.rushSession.hooks.beforeInstall.promise(this, subspace, variant),
       afterInstallAsync: (subspace: Subspace) =>
         this.rushSession.hooks.afterInstall.promise(this, subspace, variant),
-      terminal: this._terminal
+      terminal: this.terminal
     };
   }
 }

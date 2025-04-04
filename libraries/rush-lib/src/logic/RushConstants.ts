@@ -106,7 +106,7 @@ export class RushConstants {
   /**
    * The folder name (".pnpm") used by pnpm to store the code of the dependencies for this subspace
    */
-  public static readonly pnpmDependenciesFolderName: '.pnpm' = '.pnpm';
+  public static readonly pnpmVirtualStoreFolderName: '.pnpm' = '.pnpm';
 
   /**
    * The filename ("global-pnpmfile.cjs") used to add custom configuration to subspaces
@@ -349,8 +349,13 @@ export class RushConstants {
   public static readonly currentVariantsFilename: 'current-variants.json' = 'current-variants.json';
 
   /**
-   * The filename ("rush-link-state.json") used to store information about packages connected via
+   * The filename ("rush-hotlink-state.json") used to store information about packages connected via
    * "rush link-package" and "rush bridge-package" commands.
    */
-  public static readonly rushLinkStateFilename: 'rush-link-state.json' = 'rush-link-state.json';
+  public static readonly rushHotlinkStateFilename: 'rush-hotlink-state.json' = 'rush-hotlink-state.json';
+
+  /**
+   * The filename ("pnpm-sync.json") used to store the state of the pnpm sync command.
+   */
+  public static readonly pnpmSyncFilename: '.pnpm-sync.json' = '.pnpm-sync.json';
 }

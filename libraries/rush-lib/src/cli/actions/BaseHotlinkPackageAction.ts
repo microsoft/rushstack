@@ -1,16 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { CommandLineStringListParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import type {
+  CommandLineStringListParameter,
+  IRequiredCommandLineStringParameter
+} from '@rushstack/ts-command-line';
 import path from 'path';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConnect } from '../../utilities/RushConnect';
+import { HotlinkManager } from '../../utilities/HotlinkManager';
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Async } from '@rushstack/node-core-library';
+import { RushConstants } from '../../logic/RushConstants';
 
-export abstract class BaseSymlinkPackageAction extends BaseRushAction {
+export abstract class BaseHotlinkPackageAction extends BaseRushAction {
   protected readonly _projectList: CommandLineStringListParameter;
-  protected readonly _pathParameter: CommandLineStringParameter;
+  protected readonly _pathParameter: IRequiredCommandLineStringParameter;
 
   protected constructor(options: IBaseRushActionOptions) {
     super(options);
@@ -20,8 +24,8 @@ export abstract class BaseSymlinkPackageAction extends BaseRushAction {
       argumentName: 'PATH',
       required: true,
       description:
-        'The folder path of a locally built project, whose installation will be simulated using node_modules' +
-        ' symlinks.  This folder will be the target of the symlinks.'
+        'The path of folder of a project outside of this Rush repo, whose installation will be simulated using' +
+        ' node_modules symlinks ("hotlinks").  This folder is the symlink target.'
     });
 
     this._projectList = this.defineStringListParameter({
@@ -29,15 +33,15 @@ export abstract class BaseSymlinkPackageAction extends BaseRushAction {
       required: false,
       argumentName: 'PROJECT',
       description:
-        'A list of Rush project names to connect to the external package. ' +
-        'If not specified, uses the project in the current working directory.'
+        'A list of Rush project names that will be hotlinked to the "--path" folder. ' +
+        'If not specified, the default is the project of the current working directory.'
     });
   }
 
   protected abstract connectPackageAsync(
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string,
-    rushConnect: RushConnect
+    hotlinkManager: HotlinkManager
   ): Promise<void>;
 
   protected async getProjectsToLinkAsync(): Promise<Set<RushConfigurationProject>> {
@@ -49,7 +53,7 @@ export abstract class BaseSymlinkPackageAction extends BaseRushAction {
         const project: RushConfigurationProject | undefined =
           this.rushConfiguration.getProjectByName(projectName);
         if (!project) {
-          throw new Error(`The project "${projectName}" was not found in the "rush.json"`);
+          throw new Error(`The project "${projectName}" was not found in "${RushConstants.rushPackageName}"`);
         }
         projectsToLink.add(project);
       }
@@ -66,12 +70,16 @@ export abstract class BaseSymlinkPackageAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
-    const linkedPackagePath: string = path.resolve(this._pathParameter.value!);
+    const hotlinkManager: HotlinkManager = HotlinkManager.loadFromRushConfiguration(this.rushConfiguration);
+    const linkedPackagePath: string = path.resolve(process.cwd(), this._pathParameter.value);
     const projectsToLink: Set<RushConfigurationProject> = await this.getProjectsToLinkAsync();
 
-    await Async.forEachAsync(projectsToLink, async (project) => {
-      await this.connectPackageAsync(project, linkedPackagePath, rushConnect);
-    });
+    await Async.forEachAsync(
+      projectsToLink,
+      async (project) => {
+        await this.connectPackageAsync(project, linkedPackagePath, hotlinkManager);
+      },
+      { concurrency: 5 }
+    );
   }
 }

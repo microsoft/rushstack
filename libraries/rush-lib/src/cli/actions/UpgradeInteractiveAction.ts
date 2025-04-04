@@ -55,6 +55,7 @@ export class UpgradeInteractiveAction extends BaseRushAction {
     ]);
 
     const packageJsonUpdater: PackageJsonUpdaterType.PackageJsonUpdater = new PackageJsonUpdater(
+      this.terminal,
       this.rushConfiguration,
       this.rushGlobalFolder
     );

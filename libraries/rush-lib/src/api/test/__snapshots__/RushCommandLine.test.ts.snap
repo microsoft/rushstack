@@ -1141,7 +1141,7 @@ Object {
       "actionName": "bridge-package",
       "parameters": Array [
         Object {
-          "description": "The folder path of a locally built project, whose installation will be simulated using node_modules symlinks.  This folder will be the target of the symlinks.",
+          "description": "The path of folder of a project outside of this Rush repo, whose installation will be simulated using node_modules symlinks (\\"hotlinks\\").  This folder is the symlink target.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--path",
@@ -1149,7 +1149,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "A list of Rush project names to connect to the external package. If not specified, uses the project in the current working directory.",
+          "description": "A list of Rush project names that will be hotlinked to the \\"--path\\" folder. If not specified, the default is the project of the current working directory.",
           "environmentVariable": undefined,
           "kind": "StringList",
           "longName": "--project",
@@ -1157,7 +1157,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "It will directly replace the output for the specified version of the package, which requires you to have that package installed under the specified name in advance.",
+          "description": "Specify which installed versions should be hotlinked.  If omitted, the default is all versions (\\"*).",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--version",
@@ -1170,7 +1170,7 @@ Object {
       "actionName": "link-package",
       "parameters": Array [
         Object {
-          "description": "The folder path of a locally built project, whose installation will be simulated using node_modules symlinks.  This folder will be the target of the symlinks.",
+          "description": "The path of folder of a project outside of this Rush repo, whose installation will be simulated using node_modules symlinks (\\"hotlinks\\").  This folder is the symlink target.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--path",
@@ -1178,7 +1178,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "A list of Rush project names to connect to the external package. If not specified, uses the project in the current working directory.",
+          "description": "A list of Rush project names that will be hotlinked to the \\"--path\\" folder. If not specified, the default is the project of the current working directory.",
           "environmentVariable": undefined,
           "kind": "StringList",
           "longName": "--project",

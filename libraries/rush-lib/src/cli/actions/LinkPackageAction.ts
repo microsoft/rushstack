@@ -3,24 +3,25 @@
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseSymlinkPackageAction } from './BaseSymlinkPackageAction';
-import type { RushConnect } from '../../utilities/RushConnect';
+import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction';
+import type { HotlinkManager } from '../../utilities/HotlinkManager';
+import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants';
 
-export class LinkPackageAction extends BaseSymlinkPackageAction {
+export class LinkPackageAction extends BaseHotlinkPackageAction {
   public constructor(parser: RushCommandLineParser) {
     super({
-      actionName: 'link-package',
+      actionName: LINK_PACKAGE_ACTION_NAME,
       summary:
-        '(EXPERIMENTAL) Simulate installation of a locally built project, affecting specific projects.',
+        '(EXPERIMENTAL) Use hotlinks to simulate installation of a locally built project folder as a dependency' +
+        ' of specific projects.',
       documentation:
-        'This command enables you to test a locally built project by creating a symlink under a consuming' +
-        ' project\'s node_modules folder to simulate installation.  The implementation is similar to "pnpm link"' +
-        ' and "npm link", but better integrated with Rush features.  Like those commands, the symlink is' +
-        ' not reflected in pnpm-lock.yaml, affects the consuming project only, and has the same limitations as' +
-        ' "workspace:*".' +
-        '  The symlink will be cleared when you next run "rush install" or "rush update".' +
-        '  Compare with the "rush bridge-package" command, which affects multiple projects and indirect dependencies.',
-      safeForSimultaneousRushProcesses: true,
+        'This command enables you to test a locally built project by creating a symlink under the specified' +
+        ' projects\' node_modules folders.  The implementation is similar to "pnpm link" and "npm link", but' +
+        ' better integrated with Rush features.  Like those commands, the symlink ("hotlink") is not reflected' +
+        ' in pnpm-lock.yaml, affects the consuming project only, and has the same limitations as "workspace:*".' +
+        '  The hotlinks will be cleared when you next run "rush install" or "rush update".' +
+        `  Compare with the "rush ${BRIDGE_PACKAGE_ACTION_NAME}" command, which affects the entire lockfile` +
+        ' including indirect dependencies.',
       parser
     });
   }
@@ -28,8 +29,8 @@ export class LinkPackageAction extends BaseSymlinkPackageAction {
   public async connectPackageAsync(
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string,
-    rushConnect: RushConnect
+    hotlinkManager: HotlinkManager
   ): Promise<void> {
-    await rushConnect.linkPackageAsync(consumerPackage, linkedPackagePath);
+    await hotlinkManager.linkPackageAsync(this.terminal, consumerPackage, linkedPackagePath);
   }
 }

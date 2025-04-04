@@ -64,10 +64,11 @@ Positional arguments:
     version             Manage package versions in the repo.
     alert               (EXPERIMENTAL) View and manage Rush alerts for the 
                         repository
-    bridge-package      (EXPERIMENTAL) Simulate installation of a locally 
-                        built project, affecting many projects.
-    link-package        (EXPERIMENTAL) Simulate installation of a locally 
-                        built project, affecting specific projects.
+    bridge-package      (EXPERIMENTAL) Use hotlinks to simulate upgrade of a 
+                        dependency for all consumers across a lockfile.
+    link-package        (EXPERIMENTAL) Use hotlinks to simulate installation 
+                        of a locally built project folder as a dependency of 
+                        specific projects.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
@@ -155,30 +156,31 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: bridge-package 1`] = `
 "usage: rush bridge-package [-h] --path PATH [--project PROJECT]
-                           [--version VERSION]
+                           [--version SEMVER_RANGE]
                            
 
 This command enables you to test a locally built project by simulating its 
-installation under the Rush workspace node_modules folders. Unlike \\"pnpm 
-link\\" and \\"npm link\\", this command updates all installation doppelgangers for 
-the specified version range, potentially affecting multiple projects across 
-the workspace, as well as their indirect dependencies. The symlink is not 
-reflected in pnpm-lock.yaml, and ignores the local project's own package.json 
-dependencies, preserving whatever the lockfile installed. The symlink will be 
-cleared when you next run \\"rush install\\" or \\"rush update\\". Compare with the 
-\\"rush link-package\\" command, which affects only the consuming project.
+upgrade by updating node_modules folders using hotlinks. Unlike \\"pnpm link\\" 
+and \\"npm link\\", the hotlinks created by this command affect all Rush projects 
+across the lockfile, as well as their indirect dependencies. The simulated 
+installation is not reflected in pnpm-lock.yaml, does not install new package.
+json dependencies, and simply updates the contents of existing node_modules 
+folders of \\"rush install\\". The hotlinks will be cleared when you next run 
+\\"rush install\\" or \\"rush update\\". Compare with the \\"rush link-package\\" command,
+ which affects only the consuming project.
 
 Optional arguments:
-  -h, --help         Show this help message and exit.
-  --path PATH        The folder path of a locally built project, whose 
-                     installation will be simulated using node_modules 
-                     symlinks. This folder will be the target of the symlinks.
-  --project PROJECT  A list of Rush project names to connect to the external 
-                     package. If not specified, uses the project in the 
-                     current working directory.
-  --version VERSION  It will directly replace the output for the specified 
-                     version of the package, which requires you to have that 
-                     package installed under the specified name in advance.
+  -h, --help            Show this help message and exit.
+  --path PATH           The path of folder of a project outside of this Rush 
+                        repo, whose installation will be simulated using 
+                        node_modules symlinks (\\"hotlinks\\"). This folder is 
+                        the symlink target.
+  --project PROJECT     A list of Rush project names that will be hotlinked 
+                        to the \\"--path\\" folder. If not specified, the default 
+                        is the project of the current working directory.
+  --version SEMVER_RANGE
+                        Specify which installed versions should be hotlinked. 
+                        If omitted, the default is all versions (\\"*).
 "
 `;
 
@@ -878,23 +880,24 @@ exports[`CommandLineHelp prints the help for each action: link-package 1`] = `
 "usage: rush link-package [-h] --path PATH [--project PROJECT]
 
 This command enables you to test a locally built project by creating a 
-symlink under a consuming project's node_modules folder to simulate 
-installation. The implementation is similar to \\"pnpm link\\" and \\"npm link\\", 
-but better integrated with Rush features. Like those commands, the symlink is 
-not reflected in pnpm-lock.yaml, affects the consuming project only, and has 
-the same limitations as \\"workspace:*\\". The symlink will be cleared when you 
-next run \\"rush install\\" or \\"rush update\\". Compare with the \\"rush 
-bridge-package\\" command, which affects multiple projects and indirect 
+symlink under the specified projects' node_modules folders. The 
+implementation is similar to \\"pnpm link\\" and \\"npm link\\", but better 
+integrated with Rush features. Like those commands, the symlink (\\"hotlink\\") 
+is not reflected in pnpm-lock.yaml, affects the consuming project only, and 
+has the same limitations as \\"workspace:*\\". The hotlinks will be cleared when 
+you next run \\"rush install\\" or \\"rush update\\". Compare with the \\"rush 
+bridge-package\\" command, which affects the entire lockfile including indirect 
 dependencies.
 
 Optional arguments:
   -h, --help         Show this help message and exit.
-  --path PATH        The folder path of a locally built project, whose 
-                     installation will be simulated using node_modules 
-                     symlinks. This folder will be the target of the symlinks.
-  --project PROJECT  A list of Rush project names to connect to the external 
-                     package. If not specified, uses the project in the 
-                     current working directory.
+  --path PATH        The path of folder of a project outside of this Rush 
+                     repo, whose installation will be simulated using 
+                     node_modules symlinks (\\"hotlinks\\"). This folder is the 
+                     symlink target.
+  --project PROJECT  A list of Rush project names that will be hotlinked to 
+                     the \\"--path\\" folder. If not specified, the default is 
+                     the project of the current working directory.
 "
 `;
 

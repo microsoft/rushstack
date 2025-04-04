@@ -1372,22 +1372,23 @@ export class RushConstants {
     // @deprecated
     static readonly pinnedVersionsFilename: 'pinned-versions.json';
     static readonly pnpmConfigFilename: 'pnpm-config.json';
-    static readonly pnpmDependenciesFolderName: '.pnpm';
     static readonly pnpmfileGlobalFilename: 'global-pnpmfile.cjs';
     static readonly pnpmfileV1Filename: 'pnpmfile.js';
     static readonly pnpmfileV6Filename: '.pnpmfile.cjs';
     static readonly pnpmModulesFilename: '.modules.yaml';
     static readonly pnpmPatchesCommonFolderName: `pnpm-patches`;
     static readonly pnpmPatchesFolderName: 'patches';
+    static readonly pnpmSyncFilename: '.pnpm-sync.json';
     static readonly pnpmV3ShrinkwrapFilename: 'pnpm-lock.yaml';
+    static readonly pnpmVirtualStoreFolderName: '.pnpm';
     static readonly projectImpactGraphFilename: 'project-impact-graph.yaml';
     static readonly projectRushFolderName: '.rush';
     static readonly projectShrinkwrapFilename: 'shrinkwrap-deps.json';
     static readonly rebuildCommandName: 'rebuild';
     static readonly repoStateFilename: 'repo-state.json';
     static readonly rushAlertsConfigFilename: 'rush-alerts.json';
+    static readonly rushHotlinkStateFilename: 'rush-hotlink-state.json';
     static readonly rushJsonFilename: 'rush.json';
-    static readonly rushLinkStateFilename: 'rush-link-state.json';
     static readonly rushLogsFolderName: 'rush-logs';
     static readonly rushPackageName: '@microsoft/rush';
     static readonly rushPluginManifestFilename: 'rush-plugin-manifest.json';

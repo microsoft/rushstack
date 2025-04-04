@@ -10,6 +10,7 @@ import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
+import { RushConstants } from '../RushConstants';
 
 const PLUGIN_NAME: 'PnpmSyncCopyOperationPlugin' = 'PnpmSyncCopyOperationPlugin';
 
@@ -38,7 +39,7 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
           return;
         }
 
-        const pnpmSyncJsonPath: string = `${project.projectFolder}/node_modules/.pnpm-sync.json`;
+        const pnpmSyncJsonPath: string = `${project.projectFolder}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmSyncFilename}`;
         if (await FileSystem.exists(pnpmSyncJsonPath)) {
           const { PackageExtractor } = await import(
             /* webpackChunkName: 'PackageExtractor' */

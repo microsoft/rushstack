@@ -1,45 +1,47 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { RushCommandLineParser } from '../RushCommandLineParser';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseSymlinkPackageAction } from './BaseSymlinkPackageAction';
-import type { RushConnect } from '../../utilities/RushConnect';
 import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-export class BridgePackageAction extends BaseSymlinkPackageAction {
+import type { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction';
+import type { HotlinkManager } from '../../utilities/HotlinkManager';
+import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants';
+
+export class BridgePackageAction extends BaseHotlinkPackageAction {
   private readonly _version: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
-      actionName: 'bridge-package',
-      summary: '(EXPERIMENTAL) Simulate installation of a locally built project, affecting many projects.',
+      actionName: BRIDGE_PACKAGE_ACTION_NAME,
+      summary:
+        '(EXPERIMENTAL) Use hotlinks to simulate upgrade of a dependency for all consumers across a lockfile.',
       documentation:
-        'This command enables you to test a locally built project by simulating its installation under the Rush' +
-        ' workspace node_modules folders.  Unlike "pnpm link" and "npm link", this command updates all installation' +
-        ' doppelgangers for the specified version range, potentially affecting multiple projects across the' +
-        ' workspace, as well as their indirect dependencies. The symlink is not reflected in pnpm-lock.yaml, and ' +
-        " ignores the local project's own package.json dependencies, preserving whatever the lockfile installed." +
-        '  The symlink will be cleared when you next run "rush install" or "rush update".' +
-        '  Compare with the "rush link-package" command, which affects only the consuming project.',
-      safeForSimultaneousRushProcesses: true,
+        'This command enables you to test a locally built project by simulating its upgrade by updating' +
+        ' node_modules folders using hotlinks.  Unlike "pnpm link" and "npm link", the hotlinks created by this' +
+        ' command affect all Rush projects across the lockfile, as well as their indirect dependencies.  The' +
+        ' simulated installation is not reflected in pnpm-lock.yaml, does not install new package.json dependencies,' +
+        ' and simply updates the contents of existing node_modules folders of "rush install".' +
+        '  The hotlinks will be cleared when you next run "rush install" or "rush update".' +
+        `  Compare with the "rush ${LINK_PACKAGE_ACTION_NAME}" command, which affects only the consuming project.`,
       parser
     });
 
     this._version = this.defineStringParameter({
       parameterLongName: '--version',
-      argumentName: 'VERSION',
+      argumentName: 'SEMVER_RANGE',
       description:
-        'It will directly replace the output for the specified version of the package, which requires you to have that package installed under the specified name in advance.'
+        'Specify which installed versions should be hotlinked.  If omitted, the default is all versions ("*).'
     });
   }
 
   public async connectPackageAsync(
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string,
-    rushConnect: RushConnect
+    hotlinkManager: HotlinkManager
   ): Promise<void> {
     const version: string | undefined = this._version.value;
-    await rushConnect.bridgePackageAsync(consumerPackage, linkedPackagePath, version);
+    await hotlinkManager.bridgePackageAsync(this.terminal, consumerPackage, linkedPackagePath, version);
   }
 }

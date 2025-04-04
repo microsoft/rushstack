@@ -79,6 +79,7 @@ export abstract class BaseAddAndRemoveAction extends BaseRushAction {
       /* webpackChunkName: 'PackageJsonUpdater' */ '../../logic/PackageJsonUpdater'
     );
     const updater: PackageJsonUpdaterType.PackageJsonUpdater = new packageJsonUpdater.PackageJsonUpdater(
+      this.terminal,
       this.rushConfiguration,
       this.rushGlobalFolder
     );

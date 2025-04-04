@@ -5,7 +5,7 @@
 
 import * as semver from 'semver';
 import type * as NpmCheck from 'npm-check';
-import { ConsoleTerminalProvider, Terminal, type ITerminalProvider, Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { BaseInstallManager } from './base/BaseInstallManager';
@@ -99,18 +99,18 @@ export interface IRemoveProjectOptions extends IBaseUpdateProjectOptions {}
  * @internal
  */
 export class PackageJsonUpdater {
-  private _rushConfiguration: RushConfiguration;
-  private _rushGlobalFolder: RushGlobalFolder;
+  private readonly _terminal: ITerminal;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _rushGlobalFolder: RushGlobalFolder;
 
-  private readonly _terminalProvider: ITerminalProvider;
-  private readonly _terminal: Terminal;
-
-  public constructor(rushConfiguration: RushConfiguration, rushGlobalFolder: RushGlobalFolder) {
+  public constructor(
+    terminal: ITerminal,
+    rushConfiguration: RushConfiguration,
+    rushGlobalFolder: RushGlobalFolder
+  ) {
+    this._terminal = terminal;
     this._rushConfiguration = rushConfiguration;
     this._rushGlobalFolder = rushGlobalFolder;
-
-    this._terminalProvider = new ConsoleTerminalProvider();
-    this._terminal = new Terminal(this._terminalProvider);
   }
 
   /**

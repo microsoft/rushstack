@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
@@ -9,7 +8,6 @@ import { BaseRushAction } from './BaseRushAction';
 import { RushAlerts } from '../../utilities/RushAlerts';
 
 export class AlertAction extends BaseRushAction {
-  private readonly _terminal: Terminal;
   private readonly _snoozeParameter: CommandLineStringParameter;
   private readonly _snoozeTimeFlagParameter: CommandLineFlagParameter;
 
@@ -23,7 +21,6 @@ export class AlertAction extends BaseRushAction {
         '  The alert definitions can be found in the rush-alerts.json config file.',
       parser
     });
-    this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
 
     this._snoozeParameter = this.defineStringParameter({
       parameterLongName: '--snooze',
@@ -41,7 +38,7 @@ export class AlertAction extends BaseRushAction {
   public async runAsync(): Promise<void> {
     const rushAlerts: RushAlerts = await RushAlerts.loadFromConfigurationAsync(
       this.rushConfiguration,
-      this._terminal
+      this.terminal
     );
     const snoozeAlertId: string | undefined = this._snoozeParameter.value;
     if (snoozeAlertId) {

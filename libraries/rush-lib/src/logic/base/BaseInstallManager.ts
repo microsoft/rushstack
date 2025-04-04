@@ -59,7 +59,7 @@ import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 import { FlagFile } from '../../api/FlagFile';
 import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
-import { RushConnect } from '../../utilities/RushConnect';
+import { HotlinkManager } from '../../utilities/HotlinkManager';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -194,8 +194,9 @@ export abstract class BaseInstallManager {
       statePropertiesToIgnore: optionsToIgnore
     }));
 
-    const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(this.rushConfiguration);
-    const isNodeModulesOverWritten: boolean = await rushConnect.isSubspaceDependencyLinkedAsync(
+    const hotlinkManager: HotlinkManager = HotlinkManager.loadFromRushConfiguration(this.rushConfiguration);
+    const wasNodeModulesModifiedOutsideInstallation: boolean = await hotlinkManager.purgeLinksAsync(
+      this._terminal,
       subspace.subspaceName
     );
 
@@ -209,7 +210,7 @@ export abstract class BaseInstallManager {
     if (
       resolutionOnly ||
       cleanInstall ||
-      isNodeModulesOverWritten ||
+      wasNodeModulesModifiedOutsideInstallation ||
       !variantIsUpToDate ||
       !shrinkwrapIsUpToDate ||
       !(await canSkipInstallAsync()) ||
@@ -301,7 +302,7 @@ export abstract class BaseInstallManager {
           lockfilePath: pnpmLockfilePath,
           dotPnpmFolder,
           lockfileId: subspace.subspaceName,
-          ensureFolderAsync: FileSystem.ensureFolderAsync,
+          ensureFolderAsync: FileSystem.ensureFolderAsync.bind(FileSystem),
           // eslint-disable-next-line @typescript-eslint/naming-convention
           readPnpmLockfile: async (lockfilePath: string) => {
             const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
@@ -340,7 +341,7 @@ export abstract class BaseInstallManager {
 
       // clean up the out of date .pnpm-sync.json
       for (const rushProject of subspace.getProjects()) {
-        const pnpmSyncJsonPath: string = `${rushProject.projectFolder}/node_modules/.pnpm-sync.json`;
+        const pnpmSyncJsonPath: string = `${rushProject.projectFolder}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmSyncFilename}`;
         if (!existsSync(pnpmSyncJsonPath)) {
           continue;
         }

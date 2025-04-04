@@ -12,7 +12,7 @@ import type { IPhase } from './CommandLineConfiguration';
 import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
 import schemaJson from '../schemas/rush-project.schema.json';
 import anythingSchemaJson from '../schemas/rush-project.schema.json';
-import { RushConnect } from '../utilities/RushConnect';
+import { HotlinkManager } from '../utilities/HotlinkManager';
 import type { RushConfiguration } from './RushConfiguration';
 
 /**
@@ -349,10 +349,9 @@ export class RushProjectConfiguration {
   ): string | undefined {
     const rushConfiguration: RushConfiguration | undefined = this.project.rushConfiguration;
     if (rushConfiguration) {
-      const rushConnect: RushConnect = RushConnect.loadFromLinkStateFile(rushConfiguration);
-      const subspaceNameList: string[] = Object.keys(rushConnect.rushLinkState ?? {});
-      if (subspaceNameList.includes(this.project.subspace.subspaceName)) {
-        return 'Caching has been disabled for this project because it is a linked package.';
+      const hotlinkManager: HotlinkManager = HotlinkManager.loadFromRushConfiguration(rushConfiguration);
+      if (hotlinkManager.hasAnyHotlinksInSubspace(this.project.subspace.subspaceName)) {
+        return 'Caching has been disabled for this project because it is in a subspace with hotlinked dependencies.';
       }
     }
 
