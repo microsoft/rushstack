@@ -9,12 +9,18 @@
     "_phase:build": ""
   },
   "dependencies": {
+    "@rushstack/eslint-config": "4.3.0",
+    "@rushstack/eslint-patch": "1.11.0",
     "@rushstack/heft-node-rig": "2.8.0",
     "@rushstack/heft": "0.70.0",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",
-    "@rushstack/eslint-config": "4.3.0",
-    "@rushstack/eslint-patch": "1.1.0",
+    "@typescript-eslint/parser": "~8.26.1",
+    "eslint-plugin-deprecation": "2.0.0",
+    "eslint-plugin-header": "~3.1.1",
+    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-jsdoc": "37.6.1",
+    "eslint-plugin-react-hooks": "4.3.0",
     "eslint": "~8.57.0",
     "jest-junit": "12.3.0",
     "typescript": "~5.8.2"
