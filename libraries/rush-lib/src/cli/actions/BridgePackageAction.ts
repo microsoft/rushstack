@@ -16,8 +16,7 @@ export class BridgePackageAction extends BaseSymlinkPackageAction {
     super({
       actionName: BRIDGE_PACKAGE_ACTION_NAME,
       summary:
-        '(EXPERIMENTAL) Simulate replacement of an installed external dependency with a package that lives in ' +
-        'a folder outside of this repo, affecting many projects.',
+        '(EXPERIMENTAL) Simulate installation of a local project folder as a dependency of one or more projects.',
       documentation:
         'This command enables you to test a locally built project by simulating its installation under the Rush' +
         ' workspace node_modules folders.  Unlike "pnpm link" and "npm link", this command updates all installation' +
