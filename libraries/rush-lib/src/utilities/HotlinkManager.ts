@@ -322,6 +322,7 @@ export class HotlinkManager {
         newConsumerPackageLinks.push({
           linkedPackagePath,
           linkedPackageName: packageName,
+          affectedPnpmVirtualStoreFolderNames: Array.from(sourcePathSet),
           linkType: 'BridgePackage'
         });
 
