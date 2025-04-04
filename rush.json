@@ -1230,6 +1230,7 @@
       "reviewCategory": "libraries",
       "shouldPublish": false,
       "decoupledLocalDependencies": [
+        "@microsoft/api-extractor",
         "@rushstack/heft-node-rig",
         "@rushstack/heft",
         "@rushstack/eslint-patch",

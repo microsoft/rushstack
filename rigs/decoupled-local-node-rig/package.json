@@ -9,6 +9,7 @@
     "_phase:build": ""
   },
   "dependencies": {
+    "@microsoft/api-extractor": "7.52.2",
     "@rushstack/eslint-config": "4.3.0",
     "@rushstack/eslint-patch": "1.11.0",
     "@rushstack/heft-node-rig": "2.8.0",
