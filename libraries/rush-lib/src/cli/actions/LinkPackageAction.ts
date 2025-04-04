@@ -11,7 +11,7 @@ import { RushConstants } from '../../logic/RushConstants';
 import { Async } from '@rushstack/node-core-library';
 
 export class LinkPackageAction extends BaseHotlinkPackageAction {
-  protected readonly _projectList: CommandLineStringListParameter;
+  protected readonly _projectListParameter: CommandLineStringListParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -30,7 +30,7 @@ export class LinkPackageAction extends BaseHotlinkPackageAction {
       parser
     });
 
-    this._projectList = this.defineStringListParameter({
+    this._projectListParameter = this.defineStringListParameter({
       parameterLongName: '--project',
       required: false,
       argumentName: 'PROJECT',
@@ -40,9 +40,9 @@ export class LinkPackageAction extends BaseHotlinkPackageAction {
     });
   }
 
-  protected async getProjectsToLinkAsync(): Promise<Set<RushConfigurationProject>> {
+  private async _getProjectsToLinkAsync(): Promise<Set<RushConfigurationProject>> {
     const projectsToLink: Set<RushConfigurationProject> = new Set();
-    const projectNames: readonly string[] = this._projectList.values;
+    const projectNames: readonly string[] = this._projectListParameter.values;
 
     if (projectNames.length > 0) {
       for (const projectName of projectNames) {
@@ -65,8 +65,11 @@ export class LinkPackageAction extends BaseHotlinkPackageAction {
     return projectsToLink;
   }
 
-  public async hotlinkPackageAsync(linkedPackagePath: string, hotlinkManager: HotlinkManager): Promise<void> {
-    const projectsToLink: Set<RushConfigurationProject> = await this.getProjectsToLinkAsync();
+  protected async hotlinkPackageAsync(
+    linkedPackagePath: string,
+    hotlinkManager: HotlinkManager
+  ): Promise<void> {
+    const projectsToLink: Set<RushConfigurationProject> = await this._getProjectsToLinkAsync();
     await Async.forEachAsync(
       projectsToLink,
       async (project) => {

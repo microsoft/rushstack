@@ -46,7 +46,10 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
     });
   }
 
-  public async hotlinkPackageAsync(linkedPackagePath: string, hotlinkManager: HotlinkManager): Promise<void> {
+  protected async hotlinkPackageAsync(
+    linkedPackagePath: string,
+    hotlinkManager: HotlinkManager
+  ): Promise<void> {
     const version: string = this._versionParameter.value!;
     const subspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceNameParameter.value!);
     await hotlinkManager.bridgePackageAsync(this.terminal, subspace, linkedPackagePath, version);
