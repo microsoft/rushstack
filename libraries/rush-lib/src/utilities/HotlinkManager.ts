@@ -33,7 +33,7 @@ type HotlinkLinkType = 'LinkPackage' | 'BridgePackage';
 interface IProjectLinkInSubspaceJson {
   linkedPackagePath: string;
   linkedPackageName: string;
-  affectedPnpmVirtualStoreFolderNames?: string[];
+  affectedPnpmVirtualStoreFolderPaths?: string[];
   linkType: HotlinkLinkType;
 }
 
@@ -49,12 +49,6 @@ interface ILinkedPackageInfo {
   workspaceDependencies: string[];
   peerDependencies: IPackageJsonDependencyTable;
 }
-
-// interface IConsumerPackageInfo {
-//   consumerPackageNodeModulesPath: string;
-//   consumerPackagePnpmDependenciesFolderPath: string;
-//   consumerSubspaceName: string;
-// }
 
 type LinksBySubspaceNameMap = Map<string, IProjectLinkInSubspaceJson[]>;
 
@@ -90,6 +84,7 @@ export class HotlinkManager {
     };
     await pnpmSyncUpdateFileAsync({
       sourceProjectFolder: sourcePath,
+      // TODO: Update pnpmSyncUpdateFileAsync to take an Iterable<string>
       targetFolders: Array.from(targetFolder),
       lockfileId,
       logMessageCallback
@@ -129,7 +124,7 @@ export class HotlinkManager {
       const rushLinkFileState: IProjectLinkInSubspaceJson[] = linksBySubspaceName.get(subspaceName) ?? [];
       await Async.forEachAsync(
         rushLinkFileState,
-        async ({ linkedPackagePath, affectedPnpmVirtualStoreFolderNames = [] }) => {
+        async ({ linkedPackagePath, affectedPnpmVirtualStoreFolderPaths = [] }) => {
           await pnpmSyncUpdateFileAsync({
             sourceProjectFolder: linkedPackagePath,
             targetFolders: [],
@@ -138,7 +133,7 @@ export class HotlinkManager {
           });
           // pnpm will reuse packages in .pnpm directory, so we need to manually delete them before installation
           await Async.forEachAsync(
-            affectedPnpmVirtualStoreFolderNames,
+            affectedPnpmVirtualStoreFolderPaths,
             async (affectedPnpmVirtualStoreFolderName) => {
               await FileSystem.deleteFolderAsync(affectedPnpmVirtualStoreFolderName);
             },
@@ -190,79 +185,6 @@ export class HotlinkManager {
       peerDependencies
     };
   }
-
-  // private _getConsumerPackageInfo(consumerPackage: RushConfigurationProject): IConsumerPackageInfo {
-  //   const { projectFolder: consumerProjectFolder, subspace } = consumerPackage;
-  //   const { subspaceName: consumerSubspaceName } = subspace;
-
-  //   const subspaceTempFolderPath: string = subspace.getSubspaceTempFolderPath();
-  //   const consumerPackageNodeModulesPath: string = `${consumerProjectFolder}/${RushConstants.nodeModulesFolderName}`;
-  //   const consumerPackagePnpmDependenciesFolderPath: string = `${subspaceTempFolderPath}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmVirtualStoreFolderName}`;
-  //   return {
-  //     consumerPackageNodeModulesPath,
-  //     consumerSubspaceName,
-  //     consumerPackagePnpmDependenciesFolderPath
-  //   };
-  // }
-
-  // private async _handlePeerDependenciesAsync(
-  //   consumerPackageNodeModulesPath: string,
-  //   linkedPackageDestination: string,
-  //   peerDependencies: IPackageJsonDependencyTable
-  // ): Promise<void> {
-  //   await Async.forEachAsync(
-  //     Object.keys(peerDependencies),
-  //     async (peerDependencyName) => {
-  //       const sourcePeerDependencyPath: string = `${consumerPackageNodeModulesPath}/${peerDependencyName}`;
-  //       const sourcePeerDependencyPathExists: boolean = await FileSystem.existsAsync(
-  //         sourcePeerDependencyPath
-  //       );
-  //       if (!sourcePeerDependencyPathExists) {
-  //         throw new Error(`Cannot find "${peerDependencyName}"`);
-  //       }
-
-  //       const symlinkTargetPath: string = await FileSystem.getRealPathAsync(sourcePeerDependencyPath);
-  //       await BaseLinkManager._createSymlinkAsync({
-  //         symlinkKind: SymlinkKind.Directory,
-  //         linkTargetPath: symlinkTargetPath,
-  //         newLinkPath: `${linkedPackageDestination}/${peerDependencyName}`,
-  //         alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
-  //       });
-  //     },
-  //     { concurrency: 10 }
-  //   );
-  // }
-
-  // private async _handleExternalDependenciesAsync(
-  //   linkedPackageNodeModulesPath: string,
-  //   linkedPackageDestination: string,
-  //   externalDependencies: string[]
-  // ): Promise<void> {
-  //   await Async.forEachAsync(
-  //     externalDependencies,
-  //     async (dependencyName) => {
-  //       const linkedPackageDependencyPath: string = `${linkedPackageNodeModulesPath}/${dependencyName}`;
-  //       const linkedPackageDependencySourcePath: string = await FileSystem.getRealPathAsync(
-  //         linkedPackageDependencyPath
-  //       );
-
-  //       const linkedPackageDependencySourcePathExists: boolean = await FileSystem.existsAsync(
-  //         linkedPackageDependencySourcePath
-  //       );
-  //       if (!linkedPackageDependencySourcePathExists) {
-  //         throw new Error(`External dependency "${dependencyName}" not found`);
-  //       }
-
-  //       await BaseLinkManager._createSymlinkAsync({
-  //         symlinkKind: SymlinkKind.Directory,
-  //         linkTargetPath: linkedPackageDependencySourcePath,
-  //         newLinkPath: `${linkedPackageDestination}/${dependencyName}`,
-  //         alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
-  //       });
-  //     },
-  //     { concurrency: 10 }
-  //   );
-  // }
 
   private async _parsePackageVersionAsync(
     consumerPackagePnpmDependenciesFolderPath: string,
@@ -322,7 +244,7 @@ export class HotlinkManager {
         newConsumerPackageLinks.push({
           linkedPackagePath,
           linkedPackageName: packageName,
-          affectedPnpmVirtualStoreFolderNames: Array.from(sourcePathSet),
+          affectedPnpmVirtualStoreFolderPaths: Array.from(sourcePathSet),
           linkType: 'BridgePackage'
         });
 
@@ -345,139 +267,6 @@ export class HotlinkManager {
       throw alreadyExistsError;
     }
   }
-
-  // public async bridgePackageAsync(
-  //   terminal: ITerminal,
-  //   consumerPackage: RushConfigurationProject,
-  //   linkedPackagePath: string,
-  //   version: string | undefined,
-  //   parentPackageDestination?: string
-  // ): Promise<void> {
-  //   try {
-  //     const {
-  //       packageName,
-  //       peerDependencies,
-  //       externalDependencies,
-  //       workspaceDependencies,
-  //       linkedPackageNodeModulesPath
-  //     } = await this._getLinkedPackageInfoAsync(linkedPackagePath);
-
-  //     const {
-  //       consumerPackageNodeModulesPath,
-  //       consumerPackagePnpmDependenciesFolderPath,
-  //       consumerSubspaceName
-  //     } = this._getConsumerPackageInfo(consumerPackage);
-
-  //     if (version) {
-  //       const sourcePath: string | undefined = await this._parsePackageVersionAsync(
-  //         consumerPackagePnpmDependenciesFolderPath,
-  //         packageName,
-  //         version
-  //       );
-  //       if (!sourcePath) {
-  //         throw new Error(
-  //           `Cannot find package ${packageName} in ${consumerPackagePnpmDependenciesFolderPath}`
-  //         );
-  //       }
-  //       await this._hardLinkToLinkedPackageAsync(
-  //         terminal,
-  //         linkedPackagePath,
-  //         sourcePath,
-  //         consumerSubspaceName
-  //       );
-  //     } else {
-  //       // Generate unique destination path for linked package
-  //       const depFilename: string = depPathToFilename(`file:${linkedPackagePath}(${packageName})`, 120);
-  //       const linkedPackageDestination: string = `${consumerPackagePnpmDependenciesFolderPath}/${depFilename}/${RushConstants.nodeModulesFolderName}`;
-
-  //       await FileSystem.ensureFolderAsync(linkedPackageDestination);
-
-  //       // Handle peer dependencies
-  //       await this._handlePeerDependenciesAsync(
-  //         consumerPackageNodeModulesPath,
-  //         linkedPackageDestination,
-  //         peerDependencies
-  //       );
-
-  //       // Handle external dependencies
-  //       await this._handleExternalDependenciesAsync(
-  //         linkedPackageNodeModulesPath,
-  //         linkedPackageDestination,
-  //         externalDependencies
-  //       );
-
-  //       const linkTargetPath: string = `${linkedPackageDestination}/${packageName}`;
-  //       // Create hardlink to linkedPackage
-  //       await this._hardLinkToLinkedPackageAsync(
-  //         terminal,
-  //         linkedPackagePath,
-  //         linkTargetPath,
-  //         consumerSubspaceName
-  //       );
-
-  //       // Create a symbolic link pointing to the directory.
-  //       await BaseLinkManager._createSymlinkAsync({
-  //         symlinkKind: SymlinkKind.Directory,
-  //         linkTargetPath,
-  //         newLinkPath: `${parentPackageDestination ?? consumerPackageNodeModulesPath}/${packageName}`,
-  //         alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
-  //       });
-
-  //       // Handle workspace dependencies recursively
-  //       await Async.forEachAsync(workspaceDependencies, async (workspaceDependency) => {
-  //         const linkedWorkspacePackagePath: string = await FileSystem.getRealPathAsync(
-  //           `${linkedPackageNodeModulesPath}/${workspaceDependency}`
-  //         );
-  //         await this.bridgePackageAsync(
-  //           terminal,
-  //           consumerPackage,
-  //           linkedWorkspacePackagePath,
-  //           version,
-  //           linkedPackageDestination
-  //         );
-  //       });
-  //     }
-
-  //     // Record the link information between the consumer package and the linked package
-  //     await this._modifyAndSaveLinkStateAsync((linksBySubspaceName) => {
-  //       const newConsumerPackageLinks: IProjectLinkInSubspaceJson[] = [
-  //         ...(linksBySubspaceName.get(consumerSubspaceName) ?? [])
-  //       ];
-  //       const existingLinkIndex: number = newConsumerPackageLinks.findIndex(
-  //         (link) => link.linkedPackageName === packageName
-  //       );
-
-  //       if (existingLinkIndex >= 0) {
-  //         newConsumerPackageLinks.splice(existingLinkIndex, 1);
-  //       }
-
-  //       newConsumerPackageLinks.push({
-  //         linkedPackagePath,
-  //         linkedPackageName: packageName,
-  //         linkType: 'BridgePackage'
-  //       });
-
-  //       const newLinksBySubspaceName: LinksBySubspaceNameMap = new Map(linksBySubspaceName);
-  //       newLinksBySubspaceName.set(consumerSubspaceName, newConsumerPackageLinks);
-  //       return newLinksBySubspaceName;
-  //     });
-
-  //     terminal.writeLine(
-  //       Colorize.green(`Successfully bridged package "${packageName}" for "${consumerPackage.packageName}"`)
-  //     );
-  //   } catch (error) {
-  //     terminal.writeErrorLine(
-  //       Colorize.red(
-  //         `Failed to bridge package "${linkedPackagePath}" to "${consumerPackage.packageName}": ${error.message}`
-  //       )
-  //     );
-
-  //     const alreadyExistsError: Error = new AlreadyReportedError();
-  //     alreadyExistsError.message = error.message;
-  //     alreadyExistsError.stack = error.stack;
-  //     throw alreadyExistsError;
-  //   }
-  // }
 
   public async linkPackageAsync(
     terminal: ITerminal,

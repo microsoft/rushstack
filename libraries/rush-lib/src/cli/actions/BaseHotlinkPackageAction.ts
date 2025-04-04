@@ -22,7 +22,7 @@ export abstract class BaseHotlinkPackageAction extends BaseRushAction {
     });
   }
 
-  protected abstract connectPackageAsync(
+  protected abstract hotlinkPackageAsync(
     linkedPackagePath: string,
     hotlinkManager: HotlinkManager
   ): Promise<void>;
@@ -30,6 +30,6 @@ export abstract class BaseHotlinkPackageAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     const hotlinkManager: HotlinkManager = HotlinkManager.loadFromRushConfiguration(this.rushConfiguration);
     const linkedPackagePath: string = path.resolve(process.cwd(), this._pathParameter.value);
-    await this.connectPackageAsync(linkedPackagePath, hotlinkManager);
+    await this.hotlinkPackageAsync(linkedPackagePath, hotlinkManager);
   }
 }

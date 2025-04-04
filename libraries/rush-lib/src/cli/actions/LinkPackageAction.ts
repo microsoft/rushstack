@@ -65,7 +65,7 @@ export class LinkPackageAction extends BaseHotlinkPackageAction {
     return projectsToLink;
   }
 
-  public async connectPackageAsync(linkedPackagePath: string, hotlinkManager: HotlinkManager): Promise<void> {
+  public async hotlinkPackageAsync(linkedPackagePath: string, hotlinkManager: HotlinkManager): Promise<void> {
     const projectsToLink: Set<RushConfigurationProject> = await this.getProjectsToLinkAsync();
     await Async.forEachAsync(
       projectsToLink,

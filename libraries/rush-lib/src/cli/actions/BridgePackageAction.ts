@@ -11,8 +11,8 @@ import { RushConstants } from '../../logic/RushConstants';
 import type { Subspace } from '../../api/Subspace';
 
 export class BridgePackageAction extends BaseHotlinkPackageAction {
-  private readonly _version: CommandLineStringParameter;
-  private readonly _subspaceName: CommandLineStringParameter;
+  private readonly _versionParameter: CommandLineStringParameter;
+  private readonly _subspaceNameParameter: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -30,7 +30,7 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
       parser
     });
 
-    this._version = this.defineStringParameter({
+    this._versionParameter = this.defineStringParameter({
       parameterLongName: '--version',
       argumentName: 'SEMVER_RANGE',
       defaultValue: '*',
@@ -38,7 +38,7 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
         'Specify which installed versions should be hotlinked.  If omitted, the default is all versions ("*).'
     });
 
-    this._subspaceName = this.defineStringParameter({
+    this._subspaceNameParameter = this.defineStringParameter({
       parameterLongName: '--subspace',
       argumentName: 'SUBSPACE',
       defaultValue: RushConstants.defaultSubspaceName,
@@ -46,9 +46,9 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
     });
   }
 
-  public async connectPackageAsync(linkedPackagePath: string, hotlinkManager: HotlinkManager): Promise<void> {
-    const version: string = this._version.value!;
-    const subspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceName.value!);
+  public async hotlinkPackageAsync(linkedPackagePath: string, hotlinkManager: HotlinkManager): Promise<void> {
+    const version: string = this._versionParameter.value!;
+    const subspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceNameParameter.value!);
     await hotlinkManager.bridgePackageAsync(this.terminal, subspace, linkedPackagePath, version);
   }
 }

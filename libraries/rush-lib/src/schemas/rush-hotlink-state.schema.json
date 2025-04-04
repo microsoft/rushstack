@@ -36,7 +36,7 @@
               "type": "string"
             },
 
-            "affectedPnpmVirtualStoreFolderNames": {
+            "affectedPnpmVirtualStoreFolderPaths": {
               "type": "array",
               "items": {
                 "type": "string"
