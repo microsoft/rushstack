@@ -177,8 +177,7 @@ Optional arguments:
                         the symlink target.
   --version SEMVER_RANGE
                         Specify which installed versions should be hotlinked. 
-                        If omitted, the default is all versions (\\"*). The 
-                        default value is \\"*\\".
+                        The default value is \\"*\\".
   --subspace SUBSPACE   The name of the subspace to use for the bridge 
                         package. The default value is \\"default\\".
 "

@@ -1149,7 +1149,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "Specify which installed versions should be hotlinked.  If omitted, the default is all versions (\\"*).",
+          "description": "Specify which installed versions should be hotlinked.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--version",
