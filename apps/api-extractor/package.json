@@ -52,12 +52,10 @@
     "typescript": "5.8.2"
   },
   "devDependencies": {
-    "@rushstack/heft-node-rig": "2.8.0",
+    "decoupled-local-node-rig": "workspace:*",
     "@rushstack/heft": "0.70.0",
-    "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "3.0.5",
-    "@types/node": "20.17.19",
     "@types/resolve": "1.20.2",
     "@types/semver": "7.5.0",
     "local-eslint-config": "workspace:*"

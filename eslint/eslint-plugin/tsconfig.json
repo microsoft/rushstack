@@ -1,11 +1,10 @@
 {
-  "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
+  "extends": "./node_modules/decoupled-local-node-rig/profiles/default/tsconfig-base.json",
 
   "compilerOptions": {
-    "isolatedModules": true,
-    "types": ["heft-jest", "node"],
-
     "module": "Node16",
+
+    // TODO: Update the rest of the repo to target ES2020
     "target": "ES2020",
     "lib": ["ES2020"]
   }

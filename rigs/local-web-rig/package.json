@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A rig package for Web projects that build using Heft inside the RushStack repository.",
   "license": "MIT",
-  "private": "true",
+  "private": true,
   "scripts": {
     "build": "",
     "_phase:build": ""

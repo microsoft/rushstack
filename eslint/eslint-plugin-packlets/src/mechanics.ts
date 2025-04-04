@@ -4,7 +4,12 @@
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 import { AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/utils';
 
-import { PackletAnalyzer, IAnalyzerError, InputFileMessageIds, ImportMessageIds } from './PackletAnalyzer';
+import {
+  PackletAnalyzer,
+  type IAnalyzerError,
+  type InputFileMessageIds,
+  type ImportMessageIds
+} from './PackletAnalyzer';
 
 export type MessageIds = InputFileMessageIds | ImportMessageIds;
 type Options = [];

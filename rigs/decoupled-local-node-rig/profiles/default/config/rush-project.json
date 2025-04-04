@@ -4,7 +4,7 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": [".heft"]
+      "outputFolderNames": [".heft", "lib-esnext"]
     },
     {
       "operationName": "_phase:test",

@@ -16,12 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "4.3.0",
     "@rushstack/heft": "0.70.0",
-    "@rushstack/heft-node-rig": "2.8.0",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "20.17.19",
-    "eslint": "~8.57.0",
-    "typescript": "~5.8.2"
+    "decoupled-local-node-rig": "workspace:*"
   }
 }
