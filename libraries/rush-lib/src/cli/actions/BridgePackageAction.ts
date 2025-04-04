@@ -4,13 +4,15 @@
 import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction';
 import type { HotlinkManager } from '../../utilities/HotlinkManager';
 import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants';
+import { RushConstants } from '../../logic/RushConstants';
+import type { Subspace } from '../../api/Subspace';
 
 export class BridgePackageAction extends BaseHotlinkPackageAction {
   private readonly _version: CommandLineStringParameter;
+  private readonly _subspaceName: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -31,17 +33,22 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
     this._version = this.defineStringParameter({
       parameterLongName: '--version',
       argumentName: 'SEMVER_RANGE',
+      defaultValue: '*',
       description:
         'Specify which installed versions should be hotlinked.  If omitted, the default is all versions ("*).'
     });
+
+    this._subspaceName = this.defineStringParameter({
+      parameterLongName: '--subspace',
+      argumentName: 'SUBSPACE',
+      defaultValue: RushConstants.defaultSubspaceName,
+      description: 'The name of the subspace to use for the bridge package.'
+    });
   }
 
-  public async connectPackageAsync(
-    consumerPackage: RushConfigurationProject,
-    linkedPackagePath: string,
-    hotlinkManager: HotlinkManager
-  ): Promise<void> {
-    const version: string | undefined = this._version.value;
-    await hotlinkManager.bridgePackageAsync(this.terminal, consumerPackage, linkedPackagePath, version);
+  public async connectPackageAsync(linkedPackagePath: string, hotlinkManager: HotlinkManager): Promise<void> {
+    const version: string = this._version.value!;
+    const subspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceName.value!);
+    await hotlinkManager.bridgePackageAsync(this.terminal, subspace, linkedPackagePath, version);
   }
 }

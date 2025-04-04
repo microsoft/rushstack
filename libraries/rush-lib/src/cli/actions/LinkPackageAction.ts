@@ -6,8 +6,13 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction';
 import type { HotlinkManager } from '../../utilities/HotlinkManager';
 import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants';
+import type { CommandLineStringListParameter } from '@rushstack/ts-command-line';
+import { RushConstants } from '../../logic/RushConstants';
+import { Async } from '@rushstack/node-core-library';
 
 export class LinkPackageAction extends BaseHotlinkPackageAction {
+  protected readonly _projectList: CommandLineStringListParameter;
+
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: LINK_PACKAGE_ACTION_NAME,
@@ -24,13 +29,50 @@ export class LinkPackageAction extends BaseHotlinkPackageAction {
         ' including indirect dependencies.',
       parser
     });
+
+    this._projectList = this.defineStringListParameter({
+      parameterLongName: '--project',
+      required: false,
+      argumentName: 'PROJECT',
+      description:
+        'A list of Rush project names that will be hotlinked to the "--path" folder. ' +
+        'If not specified, the default is the project of the current working directory.'
+    });
   }
 
-  public async connectPackageAsync(
-    consumerPackage: RushConfigurationProject,
-    linkedPackagePath: string,
-    hotlinkManager: HotlinkManager
-  ): Promise<void> {
-    await hotlinkManager.linkPackageAsync(this.terminal, consumerPackage, linkedPackagePath);
+  protected async getProjectsToLinkAsync(): Promise<Set<RushConfigurationProject>> {
+    const projectsToLink: Set<RushConfigurationProject> = new Set();
+    const projectNames: readonly string[] = this._projectList.values;
+
+    if (projectNames.length > 0) {
+      for (const projectName of projectNames) {
+        const project: RushConfigurationProject | undefined =
+          this.rushConfiguration.getProjectByName(projectName);
+        if (!project) {
+          throw new Error(`The project "${projectName}" was not found in "${RushConstants.rushPackageName}"`);
+        }
+        projectsToLink.add(project);
+      }
+    } else {
+      const currentProject: RushConfigurationProject | undefined =
+        this.rushConfiguration.tryGetProjectForPath(process.cwd());
+      if (!currentProject) {
+        throw new Error(`No Rush project was found in the current working directory`);
+      }
+      projectsToLink.add(currentProject);
+    }
+
+    return projectsToLink;
+  }
+
+  public async connectPackageAsync(linkedPackagePath: string, hotlinkManager: HotlinkManager): Promise<void> {
+    const projectsToLink: Set<RushConfigurationProject> = await this.getProjectsToLinkAsync();
+    await Async.forEachAsync(
+      projectsToLink,
+      async (project) => {
+        await hotlinkManager.linkPackageAsync(this.terminal, project, linkedPackagePath);
+      },
+      { concurrency: 5 }
+    );
   }
 }
