@@ -35,7 +35,7 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
       argumentName: 'SEMVER_RANGE',
       defaultValue: '*',
       description:
-        'Specify which installed versions should be hotlinked.  If omitted, the default is all versions ("*).'
+        'Specify which installed versions should be hotlinked.'
     });
 
     this._subspaceNameParameter = this.defineStringParameter({
