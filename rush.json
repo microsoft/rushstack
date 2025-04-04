@@ -434,7 +434,7 @@
       "projectFolder": "apps/api-extractor",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/cpu-profile-summarizer",
@@ -447,7 +447,7 @@
       "projectFolder": "apps/heft",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/lockfile-explorer",
@@ -746,35 +746,36 @@
       "packageName": "local-eslint-config",
       "projectFolder": "eslint/local-eslint-config",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/eslint-patch",
       "projectFolder": "eslint/eslint-patch",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/eslint-plugin",
       "projectFolder": "eslint/eslint-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/eslint-plugin-packlets",
       "projectFolder": "eslint/eslint-plugin-packlets",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/eslint-plugin-security",
       "projectFolder": "eslint/eslint-plugin-security",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
 
     // heft-* projects
@@ -1069,7 +1070,7 @@
       "projectFolder": "libraries/api-extractor-model",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/debug-certificate-manager",
@@ -1088,7 +1089,7 @@
       "projectFolder": "libraries/heft-config-file",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@microsoft/load-themed-styles",
@@ -1119,14 +1120,14 @@
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/operation-graph",
       "projectFolder": "libraries/operation-graph",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/package-deps-hash",
@@ -1139,7 +1140,7 @@
       "projectFolder": "libraries/rig-package",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/worker-pool",
@@ -1176,25 +1177,21 @@
       "projectFolder": "libraries/terminal",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/tree-pattern",
       "projectFolder": "libraries/tree-pattern",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": [
-        "@rushstack/heft-node-rig",
-        "@rushstack/heft",
-        "@rushstack/eslint-config"
-      ]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/ts-command-line",
       "projectFolder": "libraries/ts-command-line",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/typings-generator",

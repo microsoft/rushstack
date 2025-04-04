@@ -33,7 +33,7 @@ export function getEslintPath(packagePath: string): string {
     }
 
     return localEslintApiPath;
-  } catch (e) {
+  } catch (e1) {
     try {
       const {
         dependencies,
@@ -56,7 +56,7 @@ export function getEslintPath(packagePath: string): string {
       } else {
         throw new Error('@rushstack/eslint-bulk: eslint is not specified as a dependency in package.json.');
       }
-    } catch (e) {
+    } catch (e2) {
       throw new Error(
         "@rushstack/eslint-bulk: This command must be run in the same folder as a project's package.json file."
       );

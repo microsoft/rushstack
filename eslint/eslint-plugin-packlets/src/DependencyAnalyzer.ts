@@ -4,7 +4,7 @@
 import type * as ts from 'typescript';
 
 import { Path } from './Path';
-import { PackletAnalyzer } from './PackletAnalyzer';
+import type { PackletAnalyzer } from './PackletAnalyzer';
 
 enum RefFileKind {
   Import,
