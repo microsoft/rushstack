@@ -7,12 +7,12 @@ import type {
 } from '@rushstack/ts-command-line';
 import path from 'path';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConnect } from '../../utilities/RushConnect';
+import { HotlinkManager } from '../../utilities/HotlinkManager';
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Async } from '@rushstack/node-core-library';
 import { RushConstants } from '../../logic/RushConstants';
 
-export abstract class BaseSymlinkPackageAction extends BaseRushAction {
+export abstract class BaseHotlinkPackageAction extends BaseRushAction {
   protected readonly _projectList: CommandLineStringListParameter;
   protected readonly _pathParameter: IRequiredCommandLineStringParameter;
 
@@ -41,7 +41,7 @@ export abstract class BaseSymlinkPackageAction extends BaseRushAction {
   protected abstract connectPackageAsync(
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string,
-    rushConnect: RushConnect
+    hotlinkManager: HotlinkManager
   ): Promise<void>;
 
   protected async getProjectsToLinkAsync(): Promise<Set<RushConfigurationProject>> {
@@ -70,14 +70,14 @@ export abstract class BaseSymlinkPackageAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const rushConnect: RushConnect = RushConnect.loadFromRushConfiguration(this.rushConfiguration);
+    const hotlinkManager: HotlinkManager = HotlinkManager.loadFromRushConfiguration(this.rushConfiguration);
     const linkedPackagePath: string = path.resolve(process.cwd(), this._pathParameter.value);
     const projectsToLink: Set<RushConfigurationProject> = await this.getProjectsToLinkAsync();
 
     await Async.forEachAsync(
       projectsToLink,
       async (project) => {
-        await this.connectPackageAsync(project, linkedPackagePath, rushConnect);
+        await this.connectPackageAsync(project, linkedPackagePath, hotlinkManager);
       },
       { concurrency: 5 }
     );

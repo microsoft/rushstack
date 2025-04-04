@@ -59,7 +59,7 @@ import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 import { FlagFile } from '../../api/FlagFile';
 import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
-import { RushConnect } from '../../utilities/RushConnect';
+import { HotlinkManager } from '../../utilities/HotlinkManager';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -194,8 +194,8 @@ export abstract class BaseInstallManager {
       statePropertiesToIgnore: optionsToIgnore
     }));
 
-    const rushConnect: RushConnect = RushConnect.loadFromRushConfiguration(this.rushConfiguration);
-    const wasNodeModulesModifiedOutsideInstallation: boolean = await rushConnect.purgeLinksAsync(
+    const hotlinkManager: HotlinkManager = HotlinkManager.loadFromRushConfiguration(this.rushConfiguration);
+    const wasNodeModulesModifiedOutsideInstallation: boolean = await hotlinkManager.purgeLinksAsync(
       this._terminal,
       subspace.subspaceName
     );

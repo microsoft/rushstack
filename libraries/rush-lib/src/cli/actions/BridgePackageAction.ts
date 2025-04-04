@@ -5,11 +5,11 @@ import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseSymlinkPackageAction } from './BaseSymlinkPackageAction';
-import type { RushConnect } from '../../utilities/RushConnect';
+import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction';
+import type { HotlinkManager } from '../../utilities/HotlinkManager';
 import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants';
 
-export class BridgePackageAction extends BaseSymlinkPackageAction {
+export class BridgePackageAction extends BaseHotlinkPackageAction {
   private readonly _version: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
@@ -40,9 +40,9 @@ export class BridgePackageAction extends BaseSymlinkPackageAction {
   public async connectPackageAsync(
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string,
-    rushConnect: RushConnect
+    hotlinkManager: HotlinkManager
   ): Promise<void> {
     const version: string | undefined = this._version.value;
-    await rushConnect.bridgePackageAsync(this.terminal, consumerPackage, linkedPackagePath, version);
+    await hotlinkManager.bridgePackageAsync(this.terminal, consumerPackage, linkedPackagePath, version);
   }
 }

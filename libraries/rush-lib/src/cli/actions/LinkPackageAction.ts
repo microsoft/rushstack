@@ -3,11 +3,11 @@
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseSymlinkPackageAction } from './BaseSymlinkPackageAction';
-import type { RushConnect } from '../../utilities/RushConnect';
+import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction';
+import type { HotlinkManager } from '../../utilities/HotlinkManager';
 import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants';
 
-export class LinkPackageAction extends BaseSymlinkPackageAction {
+export class LinkPackageAction extends BaseHotlinkPackageAction {
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: LINK_PACKAGE_ACTION_NAME,
@@ -30,8 +30,8 @@ export class LinkPackageAction extends BaseSymlinkPackageAction {
   public async connectPackageAsync(
     consumerPackage: RushConfigurationProject,
     linkedPackagePath: string,
-    rushConnect: RushConnect
+    hotlinkManager: HotlinkManager
   ): Promise<void> {
-    await rushConnect.linkPackageAsync(this.terminal, consumerPackage, linkedPackagePath);
+    await hotlinkManager.linkPackageAsync(this.terminal, consumerPackage, linkedPackagePath);
   }
 }

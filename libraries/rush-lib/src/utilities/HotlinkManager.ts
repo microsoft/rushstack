@@ -63,7 +63,7 @@ interface IRushLinkOptions {
 
 const PROJECT_LINKS_STATE_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schema);
 
-export class RushConnect {
+export class HotlinkManager {
   private _linksBySubspaceName: LinksBySubspaceNameMap;
   private readonly _rushLinkStateFilePath: string;
 
@@ -480,7 +480,7 @@ export class RushConnect {
     }
   }
 
-  public static loadFromRushConfiguration(rushConfiguration: RushConfiguration): RushConnect {
+  public static loadFromRushConfiguration(rushConfiguration: RushConfiguration): HotlinkManager {
     // TODO: make this function async
     const rushLinkStateFilePath: string = `${rushConfiguration.commonTempFolder}/${RushConstants.rushProjectLinkStateFilename}`;
     let rushLinkState: IProjectLinksStateJson | undefined;
@@ -493,7 +493,7 @@ export class RushConnect {
     }
 
     if (!rushLinkState) {
-      return new RushConnect({
+      return new HotlinkManager({
         rushLinkStateFilePath,
         linksBySubspaceName: new Map()
       });
@@ -508,7 +508,7 @@ export class RushConnect {
       } else {
         const linksBySubspaceName: LinksBySubspaceNameMap = new Map(Object.entries(linksBySubspace));
 
-        return new RushConnect({
+        return new HotlinkManager({
           rushLinkStateFilePath,
           linksBySubspaceName
         });
