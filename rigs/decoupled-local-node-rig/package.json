@@ -1,0 +1,22 @@
+{
+  "name": "decoupled-local-node-rig",
+  "version": "1.0.0",
+  "description": "A rig package for Node.js projects that build using Heft inside the RushStack repository, but are dependencies of @rushstack/heft-node-rig or local-node-rig.",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "",
+    "_phase:build": ""
+  },
+  "dependencies": {
+    "@rushstack/heft-node-rig": "2.8.0",
+    "@rushstack/heft": "0.70.0",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "20.17.19",
+    "@rushstack/eslint-config": "4.3.0",
+    "@rushstack/eslint-patch": "1.1.0",
+    "eslint": "~8.57.0",
+    "jest-junit": "12.3.0",
+    "typescript": "~5.8.2"
+  }
+}

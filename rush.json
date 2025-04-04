@@ -1225,6 +1225,18 @@
 
     // "rigs" folder (alphabetical order)
     {
+      "packageName": "decoupled-local-node-rig",
+      "projectFolder": "rigs/decoupled-local-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false,
+      "decoupledLocalDependencies": [
+        "@rushstack/heft-node-rig",
+        "@rushstack/heft",
+        "@rushstack/eslint-patch",
+        "@rushstack/eslint-config"
+      ]
+    },
+    {
       "packageName": "@rushstack/heft-node-rig",
       "projectFolder": "rigs/heft-node-rig",
       "reviewCategory": "libraries",

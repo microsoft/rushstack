@@ -503,6 +503,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "decoupled-local-node-rig",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "diff",
       "allowedCategories": [ "libraries" ]
     },
