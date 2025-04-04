@@ -1157,7 +1157,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "Directly replace the output for the specified version of the package, which requires that package be installed in advance.",
+          "description": "Directly replace the installation folder(s) of the specified version of the package, which requires the lockfile to have installed this package.",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--version",
