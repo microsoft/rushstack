@@ -1387,13 +1387,13 @@ export class RushConstants {
     static readonly rebuildCommandName: 'rebuild';
     static readonly repoStateFilename: 'repo-state.json';
     static readonly rushAlertsConfigFilename: 'rush-alerts.json';
+    static readonly rushHotlinkStateFilename: 'rush-hotlink-state.json';
     static readonly rushJsonFilename: 'rush.json';
     static readonly rushLogsFolderName: 'rush-logs';
     static readonly rushPackageName: '@microsoft/rush';
     static readonly rushPluginManifestFilename: 'rush-plugin-manifest.json';
     static readonly rushPluginsConfigFilename: 'rush-plugins.json';
     static readonly rushProjectConfigFilename: 'rush-project.json';
-    static readonly rushProjectLinkStateFilename: 'rush-project-link-state.json';
     static readonly rushRecyclerFolderName: 'rush-recycler';
     static readonly rushTempFolderName: 'temp';
     static readonly rushTempNpmScope: '@rush-temp';
