@@ -1,6 +1,11 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Tue, 25 Mar 2025 15:11:16 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Apr 2025 18:34:35 GMT and should not be manually modified.
+
+## 1.7.28
+Fri, 04 Apr 2025 18:34:35 GMT
+
+_Version update only_
 
 ## 1.7.27
 Tue, 25 Mar 2025 15:11:16 GMT
