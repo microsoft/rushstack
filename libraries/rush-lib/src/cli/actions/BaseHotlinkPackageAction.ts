@@ -25,7 +25,7 @@ export abstract class BaseHotlinkPackageAction extends BaseRushAction {
       required: true,
       description:
         'The path of folder of a project outside of this Rush repo, whose installation will be simulated using' +
-        ' node_modules symlinks.  The folder specified here be the target of the symlinks.'
+        ' node_modules symlinks ("hotlinks").  This folder is the symlink target.'
     });
 
     this._projectList = this.defineStringListParameter({
@@ -33,8 +33,8 @@ export abstract class BaseHotlinkPackageAction extends BaseRushAction {
       required: false,
       argumentName: 'PROJECT',
       description:
-        'A list of Rush project names to connect to the external package. ' +
-        'If not specified, uses the project in the current working directory.'
+        'A list of Rush project names that will be hotlinked to the "--path" folder. ' +
+        'If not specified, the default is the project of the current working directory.'
     });
   }
 

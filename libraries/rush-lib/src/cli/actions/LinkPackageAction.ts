@@ -12,17 +12,16 @@ export class LinkPackageAction extends BaseHotlinkPackageAction {
     super({
       actionName: LINK_PACKAGE_ACTION_NAME,
       summary:
-        '(EXPERIMENTAL) Simulate replacement of an installed external dependency with a package that lives in ' +
-        'a folder outside of this repo, affecting many projects.',
+        '(EXPERIMENTAL) Use hotlinks to simulate installation of a locally built project folder as a dependency' +
+        ' of specific projects.',
       documentation:
-        'This command enables you to test a locally built project by creating a symlink under a consuming' +
-        ' project\'s node_modules folder to simulate installation.  The implementation is similar to "pnpm link"' +
-        ' and "npm link", but better integrated with Rush features.  Like those commands, the symlink is' +
-        ' not reflected in pnpm-lock.yaml, affects the consuming project only, and has the same limitations as' +
-        ' "workspace:*".' +
-        '  The symlink will be cleared when you next run "rush install" or "rush update".' +
-        `  Compare with the "rush ${BRIDGE_PACKAGE_ACTION_NAME}" command, which affects multiple` +
-        ' projects and indirect dependencies.',
+        'This command enables you to test a locally built project by creating a symlink under the specified' +
+        ' projects\' node_modules folders.  The implementation is similar to "pnpm link" and "npm link", but' +
+        ' better integrated with Rush features.  Like those commands, the symlink ("hotlink") is not reflected' +
+        ' in pnpm-lock.yaml, affects the consuming project only, and has the same limitations as "workspace:*".' +
+        '  The hotlinks will be cleared when you next run "rush install" or "rush update".' +
+        `  Compare with the "rush ${BRIDGE_PACKAGE_ACTION_NAME}" command, which affects the entire lockfile` +
+        ' including indirect dependencies.',
       parser
     });
   }

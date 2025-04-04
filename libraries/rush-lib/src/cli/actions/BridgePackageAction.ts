@@ -16,24 +16,23 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
     super({
       actionName: BRIDGE_PACKAGE_ACTION_NAME,
       summary:
-        '(EXPERIMENTAL) Simulate installation of a local project folder as a dependency of one or more projects.',
+        '(EXPERIMENTAL) Use hotlinks to simulate upgrade of a dependency for all consumers across a lockfile.',
       documentation:
-        'This command enables you to test a locally built project by simulating its installation under the Rush' +
-        ' workspace node_modules folders.  Unlike "pnpm link" and "npm link", this command updates all installation' +
-        ' doppelgangers for the specified version range, potentially affecting multiple projects across the' +
-        ' workspace, as well as their indirect dependencies. The symlink is not reflected in pnpm-lock.yaml, and ' +
-        " ignores the local project's own package.json dependencies, preserving whatever the lockfile installed." +
-        '  The symlink will be cleared when you next run "rush install" or "rush update".' +
+        'This command enables you to test a locally built project by simulating its upgrade by updating' +
+        ' node_modules folders using hotlinks.  Unlike "pnpm link" and "npm link", the hotlinks created by this' +
+        ' command affect all Rush projects across the lockfile, as well as their indirect dependencies.  The' +
+        ' simulated installation is not reflected in pnpm-lock.yaml, does not install new package.json dependencies,' +
+        ' and simply updates the contents of existing node_modules folders of "rush install".' +
+        '  The hotlinks will be cleared when you next run "rush install" or "rush update".' +
         `  Compare with the "rush ${LINK_PACKAGE_ACTION_NAME}" command, which affects only the consuming project.`,
       parser
     });
 
     this._version = this.defineStringParameter({
       parameterLongName: '--version',
-      argumentName: 'VERSION',
+      argumentName: 'SEMVER_RANGE',
       description:
-        'Directly replace the output for the specified version of the package, which requires that package be' +
-        ' installed in advance.'
+        'Specify which installed versions should be hotlinked.  If omitted, the default is all versions ("*).'
     });
   }
 
