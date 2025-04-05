@@ -186,7 +186,7 @@ export class HotlinkManager {
     };
   }
 
-  private async _parsePackageVersionAsync(
+  private async _getPackagePathsMatchingNameAndVersionAsync(
     consumerPackagePnpmDependenciesFolderPath: string,
     packageName: string,
     versionRange: string
@@ -220,7 +220,7 @@ export class HotlinkManager {
       const consumerPackagePnpmDependenciesFolderPath: string = `${subspace.getSubspaceTempFolderPath()}/${
         RushConstants.nodeModulesFolderName
       }/${RushConstants.pnpmVirtualStoreFolderName}`;
-      const sourcePathSet: Set<string> = await this._parsePackageVersionAsync(
+      const sourcePathSet: Set<string> = await this._getPackagePathsMatchingNameAndVersionAsync(
         consumerPackagePnpmDependenciesFolderPath,
         packageName,
         version

@@ -179,7 +179,7 @@ Optional arguments:
                         Specify which installed versions should be hotlinked. 
                         The default value is \\"*\\".
   --subspace SUBSPACE   The name of the subspace to use for the bridge 
-                        package. The default value is \\"default\\".
+                        package.
 "
 `;
 
