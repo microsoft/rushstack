@@ -42,7 +42,7 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
       parameterLongName: '--subspace',
       argumentName: 'SUBSPACE',
       defaultValue: RushConstants.defaultSubspaceName,
-      description: 'The name of the subspace to use for the bridge package.'
+      description: 'The name of the subspace to use for the hotlinked package.'
     });
   }
 
