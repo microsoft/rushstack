@@ -226,7 +226,9 @@ export class HotlinkManager {
         version
       );
       if (sourcePathSet.size === 0) {
-        throw new Error(`Cannot find package ${packageName} in ${consumerPackagePnpmDependenciesFolderPath}`);
+        throw new Error(
+          `Cannot find package ${packageName} ${version} in ${consumerPackagePnpmDependenciesFolderPath}`
+        );
       }
       await this._hardLinkToLinkedPackageAsync(terminal, linkedPackagePath, sourcePathSet, subspaceName);
       await this._modifyAndSaveLinkStateAsync((linksBySubspaceName) => {
