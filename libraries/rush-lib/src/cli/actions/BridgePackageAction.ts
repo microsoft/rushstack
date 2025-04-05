@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { CommandLineStringListParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import type {
+  CommandLineStringListParameter,
+  IRequiredCommandLineStringParameter
+} from '@rushstack/ts-command-line';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction';
@@ -13,7 +16,7 @@ import { Async } from '@rushstack/node-core-library';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export class BridgePackageAction extends BaseHotlinkPackageAction {
-  private readonly _versionParameter: CommandLineStringParameter;
+  private readonly _versionParameter: IRequiredCommandLineStringParameter;
   private readonly _subspaceNamesParameter: CommandLineStringListParameter;
 
   public constructor(parser: RushCommandLineParser) {
@@ -77,7 +80,7 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
     linkedPackagePath: string,
     hotlinkManager: HotlinkManager
   ): Promise<void> {
-    const version: string = this._versionParameter.value!;
+    const version: string = this._versionParameter.value;
     const subspaces: Set<Subspace> = this._getSubspacesToBridgeAsync();
     await Async.forEachAsync(
       subspaces,

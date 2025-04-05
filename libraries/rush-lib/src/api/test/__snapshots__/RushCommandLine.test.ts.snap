@@ -1157,7 +1157,7 @@ Object {
           "shortName": undefined,
         },
         Object {
-          "description": "The name of the subspace to use for the bridge package.",
+          "description": "The name of the subspace to use for the hotlinked package.",
           "environmentVariable": undefined,
           "kind": "StringList",
           "longName": "--subspace",

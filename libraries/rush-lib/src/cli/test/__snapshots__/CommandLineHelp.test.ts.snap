@@ -178,7 +178,7 @@ Optional arguments:
   --version SEMVER_RANGE
                         Specify which installed versions should be hotlinked. 
                         The default value is \\"*\\".
-  --subspace SUBSPACE   The name of the subspace to use for the bridge 
+  --subspace SUBSPACE   The name of the subspace to use for the hotlinked 
                         package.
 "
 `;
