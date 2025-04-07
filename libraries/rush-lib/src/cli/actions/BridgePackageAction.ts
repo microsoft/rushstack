@@ -89,7 +89,7 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
     hotlinkManager: HotlinkManager
   ): Promise<void> {
     const version: string = this._versionParameter.value;
-    const subspaces: Set<Subspace> = this._getSubspacesToBridgeAsync();
+    const subspaces: Set<Subspace> = await this._getSubspacesToBridgeAsync();
     await Async.forEachAsync(
       subspaces,
       async (subspace) => {
