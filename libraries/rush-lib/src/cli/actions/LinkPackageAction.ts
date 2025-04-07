@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Async } from '@rushstack/node-core-library';
-import type { CommandLineStringListParameter } from '@rushstack/ts-command-line';
+import type { CommandLineChoiceListParameter } from '@rushstack/ts-command-line';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -12,7 +12,7 @@ import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../util
 import { RushConstants } from '../../logic/RushConstants';
 
 export class LinkPackageAction extends BaseHotlinkPackageAction {
-  protected readonly _projectListParameter: CommandLineStringListParameter;
+  protected readonly _projectListParameter: CommandLineChoiceListParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -31,13 +31,18 @@ export class LinkPackageAction extends BaseHotlinkPackageAction {
       parser
     });
 
-    this._projectListParameter = this.defineStringListParameter({
+    const projectList: string[] = [];
+    for (const { packageName } of parser.rushConfiguration.projects) {
+      projectList.push(packageName);
+    }
+
+    this._projectListParameter = this.defineChoiceListParameter({
       parameterLongName: '--project',
       required: false,
-      argumentName: 'PROJECT',
       description:
         'A list of Rush project names that will be hotlinked to the "--path" folder. ' +
-        'If not specified, the default is the project of the current working directory.'
+        'If not specified, the default is the project of the current working directory.',
+      alternatives: projectList
     });
   }
 
