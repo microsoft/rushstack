@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type {
-  CommandLineChoiceListParameter,
+  CommandLineStringListParameter,
   IRequiredCommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
@@ -17,7 +17,7 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 
 export class BridgePackageAction extends BaseHotlinkPackageAction {
   private readonly _versionParameter: IRequiredCommandLineStringParameter;
-  private readonly _subspaceNamesParameter: CommandLineChoiceListParameter;
+  private readonly _subspaceNamesParameter: CommandLineStringListParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -42,19 +42,10 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
       description: 'Specify which installed versions should be hotlinked.'
     });
 
-    const subspaceNames: string[] = [];
-    // "parser.rushConfiguration" may be undefined when the constructor is called
-    if (parser.rushConfiguration) {
-      for (const { subspaceName } of parser.rushConfiguration.subspaces) {
-        subspaceNames.push(subspaceName);
-      }
-    }
-
-    this._subspaceNamesParameter = this.defineChoiceListParameter({
+    this._subspaceNamesParameter = this.defineStringListParameter({
       parameterLongName: '--subspace',
-      required: false,
-      description: 'The name of the subspace to use for the hotlinked package.',
-      alternatives: subspaceNames
+      argumentName: 'SUBSPACE_NAME',
+      description: 'The name of the subspace to use for the hotlinked package.'
     });
   }
 

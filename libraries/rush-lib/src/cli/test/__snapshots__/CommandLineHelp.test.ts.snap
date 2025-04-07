@@ -156,7 +156,7 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: bridge-package 1`] = `
 "usage: rush bridge-package [-h] --path PATH [--version SEMVER_RANGE]
-                           [--subspace SUBSPACE]
+                           [--subspace SUBSPACE_NAME]
                            
 
 This command enables you to test a locally built project by simulating its 
@@ -178,7 +178,8 @@ Optional arguments:
   --version SEMVER_RANGE
                         Specify which installed versions should be hotlinked. 
                         The default value is \\"*\\".
-  --subspace SUBSPACE   The name of the subspace to use for the hotlinked 
+  --subspace SUBSPACE_NAME
+                        The name of the subspace to use for the hotlinked 
                         package.
 "
 `;
@@ -876,7 +877,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: link-package 1`] = `
-"usage: rush link-package [-h] --path PATH [--project PROJECT]
+"usage: rush link-package [-h] --path PATH [--project PROJECT_NAME]
 
 This command enables you to test a locally built project by creating a 
 symlink under the specified projects' node_modules folders. The 
@@ -889,14 +890,15 @@ bridge-package\\" command, which affects the entire lockfile including indirect
 dependencies.
 
 Optional arguments:
-  -h, --help         Show this help message and exit.
-  --path PATH        The path of folder of a project outside of this Rush 
-                     repo, whose installation will be simulated using 
-                     node_modules symlinks (\\"hotlinks\\"). This folder is the 
-                     symlink target.
-  --project PROJECT  A list of Rush project names that will be hotlinked to 
-                     the \\"--path\\" folder. If not specified, the default is 
-                     the project of the current working directory.
+  -h, --help            Show this help message and exit.
+  --path PATH           The path of folder of a project outside of this Rush 
+                        repo, whose installation will be simulated using 
+                        node_modules symlinks (\\"hotlinks\\"). This folder is 
+                        the symlink target.
+  --project PROJECT_NAME
+                        A list of Rush project names that will be hotlinked 
+                        to the \\"--path\\" folder. If not specified, the default 
+                        is the project of the current working directory.
 "
 `;
 
