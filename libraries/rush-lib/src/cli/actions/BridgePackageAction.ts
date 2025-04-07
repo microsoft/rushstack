@@ -43,8 +43,11 @@ export class BridgePackageAction extends BaseHotlinkPackageAction {
     });
 
     const subspaceNames: string[] = [];
-    for (const { subspaceName } of parser.rushConfiguration.subspaces) {
-      subspaceNames.push(subspaceName);
+    // "parser.rushConfiguration" may be undefined when the constructor is called
+    if (parser.rushConfiguration) {
+      for (const { subspaceName } of parser.rushConfiguration.subspaces) {
+        subspaceNames.push(subspaceName);
+      }
     }
 
     this._subspaceNamesParameter = this.defineChoiceListParameter({
