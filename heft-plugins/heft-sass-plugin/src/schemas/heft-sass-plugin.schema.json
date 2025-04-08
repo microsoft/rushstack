@@ -70,7 +70,7 @@
 
     "fileExtensions": {
       "type": "array",
-      "description": "Files with these extensions will be treated as SCSS modules and pass through the Sass transpiler for typings generation.",
+      "description": "Files with these extensions will be treated as SCSS modules and pass through the Sass transpiler for typings generation and/or CSS emit.",
       "items": {
         "type": "string",
         "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
@@ -79,25 +79,16 @@
 
     "nonModuleFileExtensions": {
       "type": "array",
-      "description": "Files with these extensions will be treated as non-module SCSS and pass through the Sass transpiler for typings generation.",
+      "description": "Files with these extensions will be treated as non-module SCSS and pass through the Sass transpiler for typings generation and/or CSS emit.",
       "items": {
         "type": "string",
         "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
       }
     },
 
-    "importIncludePaths": {
-      "type": "array",
-      "description": "(DEPRECATED) Ignored.",
-      "items": {
-        "type": "string",
-        "pattern": "[^\\\\]"
-      }
-    },
-
     "excludeFiles": {
       "type": "array",
-      "description": "A list of file paths relative to the \"src\" folder that should be excluded from typings generation.",
+      "description": "A list of file paths relative to the \"src\" folder that should be excluded from typings generation and/or CSS emit.",
       "items": {
         "type": "string",
         "pattern": "[^\\\\]"
