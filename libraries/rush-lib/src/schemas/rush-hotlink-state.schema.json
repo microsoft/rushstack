@@ -36,6 +36,13 @@
               "type": "string"
             },
 
+            "affectedPnpmVirtualStoreFolderPaths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+
             "linkType": {
               "type": "string",
               "enum": ["LinkPackage", "BridgePackage"]
