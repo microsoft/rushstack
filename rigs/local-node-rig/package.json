@@ -10,13 +10,15 @@
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
+    "@rushstack/heft-isolated-typescript-transpile-plugin": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "20.17.19",
-    "local-eslint-config": "workspace:*",
     "eslint": "~8.57.0",
     "jest-junit": "12.3.0",
+    "local-eslint-config": "workspace:*",
     "typescript": "~5.8.2"
   }
 }
