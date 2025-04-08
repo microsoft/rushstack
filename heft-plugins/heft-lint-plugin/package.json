@@ -9,6 +9,21 @@
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "license": "MIT",
+  "exports": {
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft test --clean",
     "start": "heft build-watch",

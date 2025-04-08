@@ -18,8 +18,29 @@
     "scale",
     "typescript"
   ],
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "lib-commonjs/lib/index.js",
+  "module": "lib-esm/lib/index.js",
+  "typings": "lib-dts/lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/lib/index.js",
+      "require": "./lib-commonjs/lib/index.js",
+      "types": "./lib-dts/lib/index.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",

@@ -8,8 +8,29 @@
     "directory": "heft-plugins/heft-typescript-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib/index.js",
-  "types": "dist/heft-typescript-plugin.d.ts",
+  "main": "lib-commonjs/lib/index.js",
+  "module": "lib-esm/lib/index.js",
+  "typings": "dist/heft-typescript-plugin.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/lib/index.js",
+      "require": "./lib-commonjs/lib/index.js",
+      "types": "./dist/heft-typescript-plugin.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "scripts": {
     "build": "heft test --clean",

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "An ESLint configuration consumed projects inside the rushstack repo.",
+  "exports": {
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft build --clean"
