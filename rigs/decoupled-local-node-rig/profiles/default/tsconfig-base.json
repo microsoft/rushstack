@@ -11,7 +11,6 @@
     "moduleResolution": "bundler",
     "emitDeclarationOnly": true,
 
-    "outDir": "../../../../lib",
     "rootDir": "../../../../src",
     "declarationDir": "../../../../lib-dts",
 
