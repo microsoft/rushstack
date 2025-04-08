@@ -2,7 +2,6 @@
   "extends": "@rushstack/heft-node-rig/profiles/default/config/jest.config.json",
 
   "roots": ["<rootDir>/lib-commonjs"],
-
   "testMatch": ["<rootDir>/lib-commonjs/**/*.test.{cjs,js}"],
 
   // Enable code coverage for Jest
