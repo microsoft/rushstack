@@ -10,7 +10,8 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "main": "lib/index.js",
   "module": "lib-es6/index.js",
@@ -18,6 +19,14 @@
   "keywords": [],
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*"
+    "local-web-rig": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "require": "./lib/index.js",
+      "import": "./lib-es6/index.js",
+      "types": "./lib/index.d.ts"
+    },
+    "./package.json": "./package.json"
   }
 }
