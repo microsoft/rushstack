@@ -62,6 +62,13 @@ function readPackage(packageJson, context) {
       fixUndeclaredDependency(packageJson, '@typescript-eslint/parser');
       break;
     }
+
+    case '@rushstack/heft-isolated-typescript-transpile-plugin': {
+      if (packageJson.peerDependencies['@rushstack/heft-typescript-plugin'] === 'workspace:^') {
+        // This is to make the local installation happy
+        packageJson.peerDependencies['@rushstack/heft-typescript-plugin'] = '^0.8.2';
+      }
+    }
   }
 
   return packageJson;
