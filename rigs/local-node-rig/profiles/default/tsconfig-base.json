@@ -7,9 +7,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "target": "es2018",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "emitDeclarationOnly": true,
 
     "outDir": "../../../../lib",
     "rootDir": "../../../../src",
+    "declarationDir": "../../../../lib-dts",
 
     "types": ["heft-jest", "node"],
     "typeRoots": ["../../../../node_modules/@types", "../../node_modules/@types"]
