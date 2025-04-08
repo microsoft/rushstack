@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.152.0",
+      "tag": "@microsoft/rush_v5.152.0",
+      "date": "Tue, 08 Apr 2025 18:41:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add `ChainedCredential` to `AzureAuthenticationBase` to handle auth failover."
+          },
+          {
+            "comment": "Add support for developer tools credentials to the Azure build cache."
+          },
+          {
+            "comment": "Add a new CLI flag `--debug-build-cache-ids` to help with root-causing unexpected cache misses."
+          },
+          {
+            "comment": "Sort all operations lexicographically by name for reporting purposes."
+          },
+          {
+            "comment": "(EXPERIMENTAL) Add new commands `rush link-package` and `rush bridge-package`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.151.0",
       "tag": "@microsoft/rush_v5.151.0",
       "date": "Tue, 25 Mar 2025 16:58:46 GMT",

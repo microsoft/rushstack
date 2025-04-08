@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 25 Mar 2025 16:58:46 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Apr 2025 18:41:27 GMT and should not be manually modified.
+
+## 5.152.0
+Tue, 08 Apr 2025 18:41:27 GMT
+
+### Updates
+
+- Add `ChainedCredential` to `AzureAuthenticationBase` to handle auth failover.
+- Add support for developer tools credentials to the Azure build cache.
+- Add a new CLI flag `--debug-build-cache-ids` to help with root-causing unexpected cache misses.
+- Sort all operations lexicographically by name for reporting purposes.
+- (EXPERIMENTAL) Add new commands `rush link-package` and `rush bridge-package`
 
 ## 5.151.0
 Tue, 25 Mar 2025 16:58:46 GMT
