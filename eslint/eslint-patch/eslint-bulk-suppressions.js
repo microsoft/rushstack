@@ -1,1 +1,1 @@
-require('./lib/eslint-bulk-suppressions');
+require('./lib-commonjs/eslint-bulk-suppressions');

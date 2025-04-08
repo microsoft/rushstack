@@ -1,1 +1,1 @@
-require('./lib/custom-config-package-names');
+require('./lib-commonjs/custom-config-package-names');

@@ -1,16 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Import resolveModule allowSelfReference throws on an attempt to reference this package without allowSelfReference turned on 1`] = `"Cannot find module \\"@rushstack/node-core-library\\" from \\"<packageRoot>/lib/test\\": Error: Cannot find module '@rushstack/node-core-library' from '<dirname>'"`;
+exports[`Import resolveModule allowSelfReference throws on an attempt to reference this package without allowSelfReference turned on 1`] = `"Cannot find module \\"@rushstack/node-core-library\\" from \\"<packageRoot>/lib-commonjs/test\\": Error: Cannot find module '@rushstack/node-core-library' from '<dirname>'"`;
 
-exports[`Import resolveModule allowSelfReference throws on an attempt to reference this package without allowSelfReference turned on 2`] = `"Cannot find module \\"@rushstack/node-core-library/lib/Constants.js\\" from \\"<packageRoot>/lib/test\\": Error: Cannot find module '@rushstack/node-core-library/lib/Constants.js' from '<dirname>'"`;
+exports[`Import resolveModule allowSelfReference throws on an attempt to reference this package without allowSelfReference turned on 2`] = `"Cannot find module \\"@rushstack/node-core-library/lib/Constants.js\\" from \\"<packageRoot>/lib-commonjs/test\\": Error: Cannot find module '@rushstack/node-core-library/lib/Constants.js' from '<dirname>'"`;
 
-exports[`Import resolveModule includeSystemModules throws on an attempt to resolve a non-existing path inside a system module with includeSystemModules turned on 1`] = `"Cannot find module \\"fs/foo/bar\\" from \\"<packageRoot>/lib/test\\": Error: Cannot find module 'fs/foo/bar' from '<dirname>'"`;
+exports[`Import resolveModule includeSystemModules throws on an attempt to resolve a non-existing path inside a system module with includeSystemModules turned on 1`] = `"Cannot find module \\"fs/foo/bar\\" from \\"<packageRoot>/lib-commonjs/test\\": Error: Cannot find module 'fs/foo/bar' from '<dirname>'"`;
 
-exports[`Import resolveModule includeSystemModules throws on an attempt to resolve a system module without includeSystemModules turned on 1`] = `"Cannot find module \\"fs\\" from \\"<packageRoot>/lib/test\\"."`;
+exports[`Import resolveModule includeSystemModules throws on an attempt to resolve a system module without includeSystemModules turned on 1`] = `"Cannot find module \\"fs\\" from \\"<packageRoot>/lib-commonjs/test\\"."`;
 
 exports[`Import resolvePackage allowSelfReference fails to resolve a path inside this package with allowSelfReference turned on 1`] = `"The package name \\"@rushstack/node-core-library/lib/Constants.js\\" contains an invalid character: \\"/\\""`;
 
-exports[`Import resolvePackage allowSelfReference throws on an attempt to reference this package without allowSelfReference turned on 1`] = `"Cannot find package \\"@rushstack/node-core-library\\" from \\"<packageRoot>/lib/test\\": Error: Cannot find module '@rushstack/node-core-library/package.json' from '<dirname>'."`;
+exports[`Import resolvePackage allowSelfReference throws on an attempt to reference this package without allowSelfReference turned on 1`] = `"Cannot find package \\"@rushstack/node-core-library\\" from \\"<packageRoot>/lib-commonjs/test\\": Error: Cannot find module '@rushstack/node-core-library/package.json' from '<dirname>'."`;
 
 exports[`Import resolvePackage fails to resolve a path inside a dependency 1`] = `"The package name \\"@rushstack/heft/lib/start.js\\" contains an invalid character: \\"/\\""`;
 
@@ -18,4 +18,4 @@ exports[`Import resolvePackage fails to resolve a path inside a dependency of a 
 
 exports[`Import resolvePackage includeSystemModules throws on an attempt to resolve a non-existing path inside a system module with includeSystemModules turned on 1`] = `"The package name \\"fs/foo/bar\\" contains an invalid character: \\"/\\""`;
 
-exports[`Import resolvePackage includeSystemModules throws on an attempt to resolve a system module without includeSystemModules turned on 1`] = `"Cannot find package \\"fs\\" from \\"<packageRoot>/lib/test\\": Error: Cannot find module 'fs/package.json' from '<dirname>'."`;
+exports[`Import resolvePackage includeSystemModules throws on an attempt to resolve a system module without includeSystemModules turned on 1`] = `"Cannot find package \\"fs\\" from \\"<packageRoot>/lib-commonjs/test\\": Error: Cannot find module 'fs/package.json' from '<dirname>'."`;
