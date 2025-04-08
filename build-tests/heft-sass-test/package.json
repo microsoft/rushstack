@@ -14,6 +14,7 @@
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-sass-plugin": "workspace:*",
+    "@rushstack/heft-sass-load-themed-styles-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",

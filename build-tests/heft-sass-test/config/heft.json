@@ -31,6 +31,12 @@
             "pluginPackage": "@rushstack/heft-sass-plugin"
           }
         },
+        "sass-load-styles": {
+          "taskDependencies": [],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-sass-load-themed-styles-plugin"
+          }
+        },
         "typescript": {
           "taskDependencies": ["sass"],
           "taskPlugin": {

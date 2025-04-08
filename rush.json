@@ -1030,6 +1030,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-sass-load-themed-styles-plugin",
+      "projectFolder": "heft-plugins/heft-sass-load-themed-styles-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-serverless-stack-plugin",
       "projectFolder": "heft-plugins/heft-serverless-stack-plugin",
       "reviewCategory": "libraries",
