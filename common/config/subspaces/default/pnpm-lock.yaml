@@ -2496,9 +2496,6 @@ importers:
 
   ../../../heft-plugins/heft-api-extractor-plugin:
     dependencies:
-      '@rushstack/heft-config-file':
-        specifier: workspace:*
-        version: link:../../libraries/heft-config-file
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
@@ -2685,9 +2682,6 @@ importers:
 
   ../../../heft-plugins/heft-sass-plugin:
     dependencies:
-      '@rushstack/heft-config-file':
-        specifier: workspace:*
-        version: link:../../libraries/heft-config-file
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library

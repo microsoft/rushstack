@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add a method `tryLoadProjectConfigurationFileAsync<TConfigFile>(options, terminal)` to `HeftConfiguration`.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

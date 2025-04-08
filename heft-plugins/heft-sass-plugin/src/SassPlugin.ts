@@ -8,9 +8,9 @@ import type {
   IScopedLogger,
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions,
-  IWatchedFileState
+  IWatchedFileState,
+  ConfigurationFile
 } from '@rushstack/heft';
-import { ProjectConfigurationFile } from '@rushstack/heft-config-file';
 
 import { type ISassConfiguration, SassProcessor } from './SassProcessor';
 import sassConfigSchema from './schemas/heft-sass-plugin.schema.json';
@@ -20,8 +20,13 @@ export interface ISassConfigurationJson extends Partial<ISassConfiguration> {}
 const PLUGIN_NAME: 'sass-plugin' = 'sass-plugin';
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
+const SASS_CONFIGURATION_FILE_SPECIFICATION: ConfigurationFile.IProjectConfigurationFileSpecification<ISassConfigurationJson> =
+  {
+    projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
+    jsonSchemaObject: sassConfigSchema
+  };
+
 export default class SassPlugin implements IHeftPlugin {
-  private static _sassConfigurationLoader: ProjectConfigurationFile<ISassConfigurationJson> | undefined;
   private _sassConfiguration: ISassConfiguration | undefined;
   private _sassProcessor: SassProcessor | undefined;
 
@@ -100,23 +105,17 @@ export default class SassPlugin implements IHeftPlugin {
   }
 
   private async _loadSassConfigurationAsync(
-    { rigConfig, slashNormalizedBuildFolderPath }: HeftConfiguration,
+    heftConfiguration: HeftConfiguration,
     logger: IScopedLogger
   ): Promise<ISassConfiguration> {
     if (!this._sassConfiguration) {
-      if (!SassPlugin._sassConfigurationLoader) {
-        SassPlugin._sassConfigurationLoader = new ProjectConfigurationFile({
-          projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
-          jsonSchemaObject: sassConfigSchema
-        });
-      }
-
       const sassConfigurationJson: ISassConfigurationJson | undefined =
-        await SassPlugin._sassConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
-          logger.terminal,
-          slashNormalizedBuildFolderPath,
-          rigConfig
+        await heftConfiguration.tryLoadProjectConfigurationFileAsync(
+          SASS_CONFIGURATION_FILE_SPECIFICATION,
+          logger.terminal
         );
+
+      const { slashNormalizedBuildFolderPath } = heftConfiguration;
       if (sassConfigurationJson) {
         if (sassConfigurationJson.srcFolder) {
           sassConfigurationJson.srcFolder = `${slashNormalizedBuildFolderPath}/${sassConfigurationJson.srcFolder}`;

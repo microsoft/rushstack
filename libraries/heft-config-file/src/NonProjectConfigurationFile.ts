@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import type { IRigConfig } from '@rushstack/rig-package';
 
 import { ConfigurationFileBase } from './ConfigurationFileBase';
 
@@ -19,7 +18,11 @@ export class NonProjectConfigurationFile<TConfigurationFile> extends Configurati
    * `extends` properties. Will throw an error if the file cannot be found.
    */
   public loadConfigurationFile(terminal: ITerminal, filePath: string): TConfigurationFile {
-    return this._loadConfigurationFileInnerWithCache(terminal, filePath, new Set<string>(), undefined);
+    return this._loadConfigurationFileInnerWithCache(
+      terminal,
+      filePath,
+      PackageJsonLookup.instance.tryGetPackageFolderFor(filePath)
+    );
   }
 
   /**
@@ -33,8 +36,7 @@ export class NonProjectConfigurationFile<TConfigurationFile> extends Configurati
     return await this._loadConfigurationFileInnerWithCacheAsync(
       terminal,
       filePath,
-      new Set<string>(),
-      undefined
+      PackageJsonLookup.instance.tryGetPackageFolderFor(filePath)
     );
   }
 
@@ -69,23 +71,5 @@ export class NonProjectConfigurationFile<TConfigurationFile> extends Configurati
       }
       throw e;
     }
-  }
-
-  protected _tryLoadConfigurationFileInRig(
-    terminal: ITerminal,
-    rigConfig: IRigConfig,
-    visitedConfigurationFilePaths: Set<string>
-  ): TConfigurationFile | undefined {
-    // This is a no-op because we don't support rigging for non-project configuration files
-    return undefined;
-  }
-
-  protected async _tryLoadConfigurationFileInRigAsync(
-    terminal: ITerminal,
-    rigConfig: IRigConfig,
-    visitedConfigurationFilePaths: Set<string>
-  ): Promise<TConfigurationFile | undefined> {
-    // This is a no-op because we don't support rigging for non-project configuration files
-    return undefined;
   }
 }
