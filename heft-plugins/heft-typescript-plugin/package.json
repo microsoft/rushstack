@@ -27,12 +27,10 @@
     "tapable": "1.1.3"
   },
   "devDependencies": {
-    "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "2.8.0",
     "@rushstack/terminal": "workspace:*",
-    "@types/node": "20.17.19",
     "@types/semver": "7.5.0",
+    "decoupled-local-node-rig": "workspace:*",
     "typescript": "~5.8.2"
   }
 }

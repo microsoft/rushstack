@@ -24,13 +24,9 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
-    "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "2.8.0",
     "@rushstack/terminal": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "20.17.19",
     "@types/semver": "7.5.0",
-    "typescript": "~5.8.2"
+    "decoupled-local-node-rig": "workspace:*"
   }
 }
