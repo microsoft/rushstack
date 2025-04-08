@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 25 Mar 2025 15:11:15 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Apr 2025 18:34:35 GMT and should not be manually modified.
+
+## 7.52.3
+Fri, 04 Apr 2025 18:34:35 GMT
+
+### Patches
+
+- Add support for customizing which TSDoc tags appear in API reports
 
 ## 7.52.2
 Tue, 25 Mar 2025 15:11:15 GMT

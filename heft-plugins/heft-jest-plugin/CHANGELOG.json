@@ -2,6 +2,26 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.16.0",
+      "tag": "@rushstack/heft-jest-plugin_v0.16.0",
+      "date": "Fri, 04 Apr 2025 18:34:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Update `jest-string-mock-transform` to emit slash-normalized relative paths to files, rather than absolute paths, to ensure portability of snapshots."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.71.1` to `0.71.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.3",
       "tag": "@rushstack/heft-jest-plugin_v0.15.3",
       "date": "Tue, 25 Mar 2025 15:11:16 GMT",

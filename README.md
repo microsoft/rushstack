@@ -200,6 +200,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
+| [/rigs/decoupled-local-node-rig](./rigs/decoupled-local-node-rig/) | A rig package for Node.js projects that build using Heft inside the RushStack repository, but are dependencies of @rushstack/heft-node-rig or local-node-rig. |
 | [/rigs/local-node-rig](./rigs/local-node-rig/) | A rig package for Node.js projects that build using Heft inside the RushStack repository. |
 | [/rigs/local-web-rig](./rigs/local-web-rig/) | A rig package for Web projects that build using Heft inside the RushStack repository. |
 | [/rush-plugins/rush-buildxl-graph-plugin](./rush-plugins/rush-buildxl-graph-plugin/) | Rush plugin for generating a BuildXL graph. |

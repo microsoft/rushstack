@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TSESTree, TSESLint, ParserServices } from '@typescript-eslint/utils';
-import * as ts from 'typescript';
+import type { TSESTree, TSESLint, ParserServices } from '@typescript-eslint/utils';
+import type * as ts from 'typescript';
 
 type MessageIds = 'error-untyped-underscore';
 type Options = [];

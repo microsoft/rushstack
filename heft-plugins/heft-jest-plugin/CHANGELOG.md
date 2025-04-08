@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Tue, 25 Mar 2025 15:11:16 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Apr 2025 18:34:35 GMT and should not be manually modified.
+
+## 0.16.0
+Fri, 04 Apr 2025 18:34:35 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Update `jest-string-mock-transform` to emit slash-normalized relative paths to files, rather than absolute paths, to ensure portability of snapshots.
 
 ## 0.15.3
 Tue, 25 Mar 2025 15:11:16 GMT
