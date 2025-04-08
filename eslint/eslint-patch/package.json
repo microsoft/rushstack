@@ -2,7 +2,29 @@
   "name": "@rushstack/eslint-patch",
   "version": "1.11.0",
   "description": "Enhance ESLint with better support for large scale monorepos",
-  "main": "lib/usage.js",
+  "main": "lib-commonjs/usage.js",
+  "module": "lib-esm/usage.js",
+  "typings": "lib-dts/usage.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/usage.js",
+      "require": "./lib-commonjs/usage.js",
+      "types": "./lib-dts/usage.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",

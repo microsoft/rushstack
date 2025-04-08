@@ -2,13 +2,13 @@
   "name": "@rushstack/terminal",
   "version": "0.15.2",
   "description": "User interface primitives for console applications",
-  "main": "lib-commonjs/lib/index.js",
-  "module": "lib-esm/lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "typings": "dist/terminal.d.ts",
   "exports": {
     ".": {
-      "import": "./lib-esm/lib/index.js",
-      "require": "./lib-commonjs/lib/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
       "types": "./dist/terminal.d.ts"
     },
     "./lib/*": {

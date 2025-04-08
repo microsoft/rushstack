@@ -25,13 +25,13 @@
     "directory": "apps/api-extractor"
   },
   "homepage": "https://api-extractor.com",
-  "main": "lib-commonjs/lib/index.js",
-  "module": "lib-esm/lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "typings": "dist/rollup.d.ts",
   "exports": {
     ".": {
-      "import": "./lib-esm/lib/index.js",
-      "require": "./lib-commonjs/lib/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
       "types": "./dist/rollup.d.ts"
     },
     "./lib/*": {

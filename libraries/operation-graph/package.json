@@ -2,13 +2,13 @@
   "name": "@rushstack/operation-graph",
   "version": "0.2.40",
   "description": "Library for managing and executing operations in a directed acyclic graph.",
-  "main": "lib-commonjs/lib/index.js",
-  "module": "lib-esm/lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "typings": "dist/operation-graph.d.ts",
   "exports": {
     ".": {
-      "import": "./lib-esm/lib/index.js",
-      "require": "./lib-commonjs/lib/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
       "types": "./dist/operation-graph.d.ts"
     },
     "./lib/*": {

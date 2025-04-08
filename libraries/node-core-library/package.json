@@ -2,13 +2,13 @@
   "name": "@rushstack/node-core-library",
   "version": "5.13.0",
   "description": "Core libraries that every NodeJS toolchain project should use",
-  "main": "lib-commonjs/lib/index.js",
-  "module": "lib-esm/lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "typings": "dist/node-core-library.d.ts",
   "exports": {
     ".": {
-      "import": "./lib-esm/lib/index.js",
-      "require": "./lib-commonjs/lib/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
       "types": "./dist/node-core-library.d.ts"
     },
     "./lib/*": {

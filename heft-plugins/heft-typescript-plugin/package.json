@@ -8,13 +8,13 @@
     "directory": "heft-plugins/heft-typescript-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib-commonjs/lib/index.js",
-  "module": "lib-esm/lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "typings": "dist/heft-typescript-plugin.d.ts",
   "exports": {
     ".": {
-      "import": "./lib-esm/lib/index.js",
-      "require": "./lib-commonjs/lib/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
       "types": "./dist/heft-typescript-plugin.d.ts"
     },
     "./lib/*": {

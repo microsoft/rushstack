@@ -2,13 +2,13 @@
   "name": "@rushstack/lookup-by-path",
   "version": "0.5.20",
   "description": "Strongly typed trie data structure for path and URL-like strings.",
-  "main": "lib-commonjs/lib/index.js",
-  "module": "lib-esm/lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "typings": "dist/lookup-by-path.d.ts",
   "exports": {
     ".": {
-      "import": "./lib-esm/lib/index.js",
-      "require": "./lib-commonjs/lib/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
       "types": "./dist/lookup-by-path.d.ts"
     },
     "./lib/*": {
