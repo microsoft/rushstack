@@ -925,9 +925,9 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
         const packageRoot: string | undefined = projectFolderPath;
         if (!packageRoot) {
           throw new Error(
-            `Could not find a package root for path "${ConfigurationFileBase._formatPathForLogging(
+            `Project-relative resolution was requested in "${ConfigurationFileBase._formatPathForLogging(
               configurationFilePath
-            )}"`
+            )}" but no project root was provided to the configuration file loader.`
           );
         }
 
