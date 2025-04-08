@@ -39,7 +39,7 @@ import {
  */
 export interface ICssOutputFolder {
   folder: string;
-  shimType: 'commonjs' | 'esm' | undefined;
+  shimModuleFormat: 'commonjs' | 'esnext' | undefined;
 }
 
 /**
@@ -111,6 +111,11 @@ export interface ISassProcessorOptions {
    * A list of deprecation codes to silence.  This is useful for suppressing warnings from deprecated Sass features that are used in the project and known not to be a problem.
    */
   silenceDeprecations?: readonly string[];
+
+  /**
+   * A callback to further modify the raw CSS text after it has been generated. Only relevant if emitting CSS files.
+   */
+  postProcessCssAsync?: (cssText: string) => Promise<string>;
 }
 
 /**
@@ -738,12 +743,8 @@ export class SassProcessor {
     }
 
     record.cssVersion = contentHash;
-    const {
-      cssOutputFolders,
-      dtsOutputFolders,
-      srcFolder,
-      exportAsDefault
-    } = this._options;
+    const { cssOutputFolders, dtsOutputFolders, srcFolder, exportAsDefault, postProcessCssAsync } =
+      this._options;
 
     // Handle CSS modules
     let moduleMap: JsonObject | undefined;
@@ -761,6 +762,10 @@ export class SassProcessor {
         .default([postCssModules])
         .process(css, { from: sourceFilePath });
       css = postCssResult.css;
+    }
+
+    if (postProcessCssAsync) {
+      css = await postProcessCssAsync(css);
     }
 
     const relativeFilePath: string = path.relative(srcFolder, sourceFilePath);
@@ -790,14 +795,14 @@ export class SassProcessor {
       }
 
       for (const cssOutputFolder of cssOutputFolders) {
-        const { folder, shimType } = cssOutputFolder;
+        const { folder, shimModuleFormat } = cssOutputFolder;
 
         const cssFilePath: string = path.resolve(folder, relativeCssPath);
         promises.push(FileSystem.writeFileAsync(cssFilePath, css, writeFileOptions));
 
-        if (shimType && !filename.endsWith('.css')) {
+        if (shimModuleFormat && !filename.endsWith('.css')) {
           const jsFilePath: string = path.resolve(folder, `${relativeFilePath}.js`);
-          const jsShimContent: string = generateJsShimContent(shimType, cssPathFromJs);
+          const jsShimContent: string = generateJsShimContent(shimModuleFormat, cssPathFromJs);
           promises.push(FileSystem.writeFileAsync(jsFilePath, jsShimContent, writeFileOptions));
         }
       }
@@ -967,12 +972,12 @@ function determineSyntaxFromFilePath(filePath: string): Syntax {
   }
 }
 
-function generateJsShimContent(format: 'commonjs' | 'esm', relativePathToCss: string): string {
+function generateJsShimContent(format: 'commonjs' | 'esnext', relativePathToCss: string): string {
   const pathString: string = JSON.stringify(relativePathToCss);
   switch (format) {
     case 'commonjs':
       return `module.exports = require(${pathString});\nmodule.exports.default = module.exports;`;
-    case 'esm':
+    case 'esnext':
       return `export { default } from ${pathString};`;
   }
 }

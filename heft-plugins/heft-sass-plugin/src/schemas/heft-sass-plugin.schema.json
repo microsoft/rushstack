@@ -57,9 +57,9 @@
                 "type": "string",
                 "pattern": "[^\\\\]"
               },
-              "shimType": {
+              "shimModuleFormat": {
                 "type": "string",
-                "enum": ["commonjs", "esm"]
+                "enum": ["commonjs", "esnext"]
               }
             },
             "required": ["folder"]

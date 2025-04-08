@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 import path from 'node:path';
 
+import { AsyncSeriesWaterfallHook } from 'tapable';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -12,6 +13,7 @@ import type {
   ConfigurationFile
 } from '@rushstack/heft';
 
+import { PLUGIN_NAME } from './constants';
 import { type ICssOutputFolder, type ISassProcessorOptions, SassProcessor } from './SassProcessor';
 import sassConfigSchema from './schemas/heft-sass-plugin.schema.json';
 
@@ -26,7 +28,6 @@ export interface ISassConfigurationJson {
   silenceDeprecations?: string[];
 }
 
-const PLUGIN_NAME: 'sass-plugin' = 'sass-plugin';
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
 const SASS_CONFIGURATION_FILE_SPECIFICATION: ConfigurationFile.IProjectConfigurationFileSpecification<ISassConfigurationJson> =
@@ -35,7 +36,21 @@ const SASS_CONFIGURATION_FILE_SPECIFICATION: ConfigurationFile.IProjectConfigura
     jsonSchemaObject: sassConfigSchema
   };
 
+/**
+ * @public
+ */
+export interface ISassPluginAccessor {
+  /**
+   * Hook that will be invoked after the CSS is generated but before it is written to a file.
+   */
+  readonly postProcessCssAsyncHook: AsyncSeriesWaterfallHook<string>;
+}
+
 export default class SassPlugin implements IHeftPlugin {
+  public accessor: ISassPluginAccessor = {
+    postProcessCssAsyncHook: new AsyncSeriesWaterfallHook<string>(['cssText'])
+  };
+
   /**
    * Generate typings for Sass files before TypeScript compilation.
    */
@@ -45,8 +60,10 @@ export default class SassPlugin implements IHeftPlugin {
 
     const { terminal } = logger;
 
+    const { accessor } = this;
+
     let sassProcessorPromise: Promise<SassProcessor> | undefined;
-    function initializeSassProcessor(): Promise<SassProcessor> {
+    function initializeSassProcessorAsync(): Promise<SassProcessor> {
       if (sassProcessorPromise) {
         return sassProcessorPromise;
       }
@@ -84,14 +101,17 @@ export default class SassPlugin implements IHeftPlugin {
           nonModuleFileExtensions,
           cssOutputFolders: cssOutputFolders?.map((folder: string | ICssOutputFolder) => {
             const folderPath: string = typeof folder === 'string' ? folder : folder.folder;
-            const shimType: 'commonjs' | 'esm' | undefined =
-              typeof folder === 'string' ? undefined : folder.shimType;
+            const shimModuleFormat: 'commonjs' | 'esnext' | undefined =
+              typeof folder === 'string' ? undefined : folder.shimModuleFormat;
             return {
               folder: resolveFolder(folderPath),
-              shimType
+              shimModuleFormat
             };
           }),
-          silenceDeprecations
+          silenceDeprecations,
+          postProcessCssAsync: accessor.postProcessCssAsyncHook.isUsed()
+            ? async (cssText: string) => accessor.postProcessCssAsyncHook.promise(cssText)
+            : undefined
         };
 
         const sassProcessor: SassProcessor = new SassProcessor(sassProcessorOptions);
@@ -104,7 +124,7 @@ export default class SassPlugin implements IHeftPlugin {
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       terminal.writeLine(`Initializing SASS compiler...`);
-      const sassProcessor: SassProcessor = await initializeSassProcessor();
+      const sassProcessor: SassProcessor = await initializeSassProcessorAsync();
 
       terminal.writeLine(`Scanning for SCSS files...`);
       const files: string[] = await runOptions.globAsync(sassProcessor.inputFileGlob, {
@@ -127,7 +147,7 @@ export default class SassPlugin implements IHeftPlugin {
       PLUGIN_NAME,
       async (runOptions: IHeftTaskRunIncrementalHookOptions) => {
         terminal.writeLine(`Initializing SASS compiler...`);
-        const sassProcessor: SassProcessor = await initializeSassProcessor();
+        const sassProcessor: SassProcessor = await initializeSassProcessorAsync();
 
         terminal.writeLine(`Scanning for SCSS files...`);
         const changedFiles: Map<string, IWatchedFileState> = await runOptions.watchGlobAsync(
