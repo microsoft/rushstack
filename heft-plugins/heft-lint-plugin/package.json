@@ -22,15 +22,12 @@
     "semver": "~7.5.4"
   },
   "devDependencies": {
-    "local-eslint-config": "workspace:*",
-    "@rushstack/heft": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@rushstack/heft-node-rig": "2.8.0",
+    "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@types/eslint": "8.56.10",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "20.17.19",
     "@types/semver": "7.5.0",
+    "decoupled-local-node-rig": "workspace:*",
     "eslint": "~8.57.0",
     "tslint": "~5.20.1",
     "typescript": "~5.8.2"

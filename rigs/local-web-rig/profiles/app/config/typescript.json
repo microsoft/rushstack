@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/typescript.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/typescript.schema.json",
 
   "extends": "@rushstack/heft-web-rig/profiles/app/config/typescript.json"
 }
