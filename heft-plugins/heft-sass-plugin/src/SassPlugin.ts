@@ -55,7 +55,7 @@ export default class SassPlugin implements IHeftPlugin {
    * Generate typings for Sass files before TypeScript compilation.
    */
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
-    const { numberOfCores, slashNormalizedBuildFolderPath, rigConfig } = heftConfiguration;
+    const { numberOfCores, slashNormalizedBuildFolderPath } = heftConfiguration;
     const { logger, tempFolderPath } = taskSession;
 
     const { terminal } = logger;
