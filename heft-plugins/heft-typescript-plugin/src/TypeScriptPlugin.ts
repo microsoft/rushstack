@@ -324,8 +324,6 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<TypeScriptBuilder | false> {
-    const terminal: ITerminal = taskSession.logger.terminal;
-
     const { typeScriptConfigurationJson, partialTsconfigFile } = await this._loadConfigAsync(
       taskSession,
       heftConfiguration
