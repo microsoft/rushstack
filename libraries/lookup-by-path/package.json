@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*"
+    "decoupled-local-node-rig": "workspace:*"
   },
   "peerDependencies": {
     "@types/node": "*"
