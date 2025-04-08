@@ -2965,9 +2965,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      local-node-rig:
+      local-web-rig:
         specifier: workspace:*
-        version: link:../../rigs/local-node-rig
+        version: link:../../rigs/local-web-rig
 
   ../../../libraries/localization-utilities:
     dependencies:
