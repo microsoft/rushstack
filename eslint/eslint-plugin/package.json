@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "~3.0.0",
-    "@rushstack/heft": "0.70.0",
+    "@rushstack/heft": "0.71.2",
     "@types/eslint": "8.56.10",
     "@types/estree": "1.0.6",
     "@typescript-eslint/parser": "~8.26.1",
