@@ -57,9 +57,7 @@ export default class SassPlugin implements IHeftPlugin {
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     const { numberOfCores, slashNormalizedBuildFolderPath } = heftConfiguration;
     const { logger, tempFolderPath } = taskSession;
-
     const { terminal } = logger;
-
     const { accessor } = this;
 
     let sassProcessorPromise: Promise<SassProcessor> | undefined;
@@ -115,18 +113,31 @@ export default class SassPlugin implements IHeftPlugin {
         };
 
         const sassProcessor: SassProcessor = new SassProcessor(sassProcessorOptions);
-
         await sassProcessor.loadCacheAsync(tempFolderPath);
 
         return sassProcessor;
       })());
     }
 
+    const compileFilesAsync = async (
+      sassProcessor: SassProcessor,
+      files: Set<string>,
+      changed: boolean
+    ): Promise<void> => {
+      if (files.size === 0) {
+        terminal.writeLine(`No SCSS files to process.`);
+        return;
+      }
+
+      await sassProcessor.compileFilesAsync(files);
+      terminal.writeLine(`Finished compiling.`);
+    };
+
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      terminal.writeLine(`Initializing SASS compiler...`);
+      terminal.writeLine(`Starting...`);
       const sassProcessor: SassProcessor = await initializeSassProcessorAsync();
 
-      terminal.writeLine(`Scanning for SCSS files...`);
+      terminal.writeVerboseLine(`Scanning for SCSS files...`);
       const files: string[] = await runOptions.globAsync(sassProcessor.inputFileGlob, {
         absolute: true,
         ignore: sassProcessor.ignoredFileGlobs,
@@ -139,17 +150,16 @@ export default class SassPlugin implements IHeftPlugin {
         fileSet.add(path.resolve(file));
       }
 
-      await sassProcessor.compileFilesAsync(fileSet);
-      terminal.writeLine(`Finished compiling.`);
+      await compileFilesAsync(sassProcessor, fileSet, false);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runOptions: IHeftTaskRunIncrementalHookOptions) => {
-        terminal.writeLine(`Initializing SASS compiler...`);
+        terminal.writeLine(`Starting...`);
         const sassProcessor: SassProcessor = await initializeSassProcessorAsync();
 
-        terminal.writeLine(`Scanning for SCSS files...`);
+        terminal.writeVerboseLine(`Scanning for changed SCSS files...`);
         const changedFiles: Map<string, IWatchedFileState> = await runOptions.watchGlobAsync(
           sassProcessor.inputFileGlob,
           {
@@ -165,10 +175,8 @@ export default class SassPlugin implements IHeftPlugin {
             modifiedFiles.add(file);
           }
         }
-        terminal.writeLine(`Compiling ${modifiedFiles.size} changed SCSS files...`);
 
-        await sassProcessor.compileFilesAsync(modifiedFiles);
-        terminal.writeLine(`Finished compiling.`);
+        await compileFilesAsync(sassProcessor, modifiedFiles, true);
       }
     );
   }

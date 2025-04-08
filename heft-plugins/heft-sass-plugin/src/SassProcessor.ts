@@ -171,9 +171,9 @@ interface IFileContentAndVersion {
  * @public
  */
 export class SassProcessor {
+  public readonly ignoredFileGlobs: string[] | undefined;
   public readonly inputFileGlob: string;
   public readonly sourceFolderPath: string;
-  public readonly ignoredFileGlobs: string[] | undefined;
 
   // Map of input file path -> record
   private readonly _fileInfo: Map<string, IFileRecord>;
@@ -181,32 +181,15 @@ export class SassProcessor {
 
   private readonly _isFileModule: (filePath: string) => boolean;
   private readonly _options: ISassProcessorOptions;
-  private readonly _scssOptions: Options<'async'>;
   private readonly _realpathSync: (path: string) => string;
+  private readonly _scssOptions: Options<'async'>;
 
   private _configFilePath: string | undefined;
 
   public constructor(options: ISassProcessorOptions) {
     const { silenceDeprecations, excludeFiles } = options;
 
-    this._configFilePath = undefined;
-
-    this._fileInfo = new Map();
-    this._resolutions = new Map();
-
-    this._options = options;
-
-    this._realpathSync = new RealNodeModulePathResolver().realNodeModulePath;
-
     const { isFileModule, allFileExtensions } = buildExtensionClassifier(options);
-
-    this.inputFileGlob = `**/*+(${allFileExtensions.join('|')})`;
-    this.sourceFolderPath = options.srcFolder;
-    this.ignoredFileGlobs = excludeFiles?.map((excludedFile) =>
-      excludedFile.startsWith('./') ? excludedFile.slice(2) : excludedFile
-    );
-
-    this._isFileModule = isFileModule;
 
     const deprecationsToSilence: DeprecationOrId[] | undefined = silenceDeprecations
       ? Array.from(silenceDeprecations, (deprecation) => {
@@ -239,6 +222,18 @@ export class SassProcessor {
       };
     };
 
+    this.ignoredFileGlobs = excludeFiles?.map((excludedFile) =>
+      excludedFile.startsWith('./') ? excludedFile.slice(2) : excludedFile
+    );
+    this.inputFileGlob = `**/*+(${allFileExtensions.join('|')})`;
+    this.sourceFolderPath = options.srcFolder;
+
+    this._configFilePath = undefined;
+    this._fileInfo = new Map();
+    this._isFileModule = isFileModule;
+    this._resolutions = new Map();
+    this._options = options;
+    this._realpathSync = new RealNodeModulePathResolver().realNodeModulePath;
     this._scssOptions = {
       style: 'expanded', // leave minification to clean-css
       importers: [
@@ -776,13 +771,13 @@ export class SassProcessor {
       ensureFolderExists: true
     };
 
-    const promises: Promise<void>[] = dtsOutputFolders.map((dtsOutputFolder: string) => {
-      return FileSystem.writeFileAsync(
+    for (const dtsOutputFolder of dtsOutputFolders) {
+      await FileSystem.writeFileAsync(
         path.resolve(dtsOutputFolder, `${relativeFilePath}.d.ts`),
         dtsContent,
         writeFileOptions
       );
-    });
+    }
 
     const filename: string = path.basename(relativeFilePath);
     const extensionStart: number = filename.lastIndexOf('.');
@@ -798,17 +793,15 @@ export class SassProcessor {
         const { folder, shimModuleFormat } = cssOutputFolder;
 
         const cssFilePath: string = path.resolve(folder, relativeCssPath);
-        promises.push(FileSystem.writeFileAsync(cssFilePath, css, writeFileOptions));
+        await FileSystem.writeFileAsync(cssFilePath, css, writeFileOptions);
 
         if (shimModuleFormat && !filename.endsWith('.css')) {
           const jsFilePath: string = path.resolve(folder, `${relativeFilePath}.js`);
           const jsShimContent: string = generateJsShimContent(shimModuleFormat, cssPathFromJs);
-          promises.push(FileSystem.writeFileAsync(jsFilePath, jsShimContent, writeFileOptions));
+          await FileSystem.writeFileAsync(jsFilePath, jsShimContent, writeFileOptions);
         }
       }
     }
-
-    await Promise.all(promises);
   }
 
   private _createDTS(moduleMap: JsonObject | undefined): string {
