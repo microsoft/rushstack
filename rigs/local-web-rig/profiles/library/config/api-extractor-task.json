@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/api-extractor-task.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/api-extractor-task.schema.json",
 
   "extends": "@rushstack/heft-web-rig/profiles/library/config/api-extractor-task.json"
 }
