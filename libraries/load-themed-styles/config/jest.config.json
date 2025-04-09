@@ -1,7 +1,3 @@
 {
-  "extends": "local-web-rig/profiles/library/config/jest.config.json",
-
-  "rootDir": "lib",
-  "roots": ["<rootDir>/lib"],
-  "testMatch": ["<rootDir>/lib/**/*.test.js"]
+  "extends": "local-web-rig/profiles/library/config/jest.config.json"
 }
