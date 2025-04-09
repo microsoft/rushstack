@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-plugin-manifest.schema.json",
+  "plugins": [
+    {
+      "pluginName": "rush-bridge-cache-plugin",
+      "description": "Rush plugin to allow interactions with the Rush cache.",
+      "entryPoint": "./lib/index.js",
+      "commandLineJsonFilePath": "./command-line.json"
+    }
+  ]
+}

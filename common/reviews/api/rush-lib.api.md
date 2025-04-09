@@ -10,7 +10,7 @@ import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesBailHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
-import type { CollatedWriter } from '@rushstack/stream-collator';
+import { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
@@ -23,7 +23,8 @@ import { JsonNull } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
-import type { StdioSummarizer } from '@rushstack/terminal';
+import { StdioSummarizer } from '@rushstack/terminal';
+import { StreamCollator } from '@rushstack/stream-collator';
 import { SyncHook } from 'tapable';
 import { SyncWaterfallHook } from 'tapable';
 import { Terminal } from '@rushstack/terminal';
@@ -1126,6 +1127,27 @@ export type PnpmStoreLocation = 'local' | 'global';
 
 // @public @deprecated (undocumented)
 export type PnpmStoreOptions = PnpmStoreLocation;
+
+// Warning: (ae-internal-missing-underscore) The name "ProjectBuildCache" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
+export class ProjectBuildCache {
+    // (undocumented)
+    get cacheId(): string | undefined;
+    // Warning: (ae-forgotten-export) The symbol "OperationExecutionRecord" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IOperationBuildCacheOptions" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    static forOperation(operation: OperationExecutionRecord, options: IOperationBuildCacheOptions): ProjectBuildCache;
+    // Warning: (ae-forgotten-export) The symbol "IProjectBuildCacheOptions" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    static getProjectBuildCache(options: IProjectBuildCacheOptions): ProjectBuildCache;
+    // (undocumented)
+    tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
+    // (undocumented)
+    trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
+}
 
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
