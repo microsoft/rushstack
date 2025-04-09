@@ -2,6 +2,29 @@
   "name": "@rushstack/heft-typescript-plugin",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@rushstack/heft-typescript-plugin_v0.9.0",
+      "date": "Wed, 09 Apr 2025 00:11:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Leverage Heft's new `tryLoadProjectConfigurationFileAsync` method."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.17.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.72.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.71.2` to `0.72.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.2",
       "tag": "@rushstack/heft-typescript-plugin_v0.8.2",
       "date": "Fri, 04 Apr 2025 18:34:35 GMT",

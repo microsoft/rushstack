@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.17.0",
+      "tag": "@rushstack/heft-config-file_v0.17.0",
+      "date": "Wed, 09 Apr 2025 00:11:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue with `PathResolutionMethod.resolvePathRelativeToProjectRoot` when extending files across packages."
+          },
+          {
+            "comment": "Add a new `customValidationFunction` option for custom validation logic on loaded configuration files."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.16.8",
       "tag": "@rushstack/heft-config-file_v0.16.8",
       "date": "Tue, 25 Mar 2025 15:11:15 GMT",

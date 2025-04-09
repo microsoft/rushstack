@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Tue, 25 Mar 2025 15:11:15 GMT and should not be manually modified.
+This log was last generated on Wed, 09 Apr 2025 00:11:02 GMT and should not be manually modified.
+
+## 0.17.0
+Wed, 09 Apr 2025 00:11:02 GMT
+
+### Minor changes
+
+- Fix an issue with `PathResolutionMethod.resolvePathRelativeToProjectRoot` when extending files across packages.
+- Add a new `customValidationFunction` option for custom validation logic on loaded configuration files.
 
 ## 0.16.8
 Tue, 25 Mar 2025 15:11:15 GMT

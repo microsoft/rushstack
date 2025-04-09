@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Fri, 04 Apr 2025 18:34:35 GMT and should not be manually modified.
+This log was last generated on Wed, 09 Apr 2025 00:11:02 GMT and should not be manually modified.
+
+## 0.9.0
+Wed, 09 Apr 2025 00:11:02 GMT
+
+### Minor changes
+
+- Leverage Heft's new `tryLoadProjectConfigurationFileAsync` method.
 
 ## 0.8.2
 Fri, 04 Apr 2025 18:34:35 GMT

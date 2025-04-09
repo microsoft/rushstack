@@ -2,6 +2,21 @@
   "name": "@rushstack/webpack4-localization-plugin",
   "entries": [
     {
+      "version": "0.18.99",
+      "tag": "@rushstack/webpack4-localization-plugin_v0.18.99",
+      "date": "Wed, 09 Apr 2025 00:11:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.13.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.72.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.18.98",
       "tag": "@rushstack/webpack4-localization-plugin_v0.18.98",
       "date": "Fri, 04 Apr 2025 18:34:35 GMT",

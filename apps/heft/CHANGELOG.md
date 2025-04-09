@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 04 Apr 2025 18:34:35 GMT and should not be manually modified.
+This log was last generated on Wed, 09 Apr 2025 00:11:02 GMT and should not be manually modified.
+
+## 0.72.0
+Wed, 09 Apr 2025 00:11:02 GMT
+
+### Minor changes
+
+- Add a method `tryLoadProjectConfigurationFileAsync<TConfigFile>(options, terminal)` to `HeftConfiguration`.
 
 ## 0.71.2
 Fri, 04 Apr 2025 18:34:35 GMT
