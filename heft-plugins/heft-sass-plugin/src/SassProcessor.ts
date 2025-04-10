@@ -797,7 +797,11 @@ export class SassProcessor {
 
         if (shimModuleFormat && !filename.endsWith('.css')) {
           const jsFilePath: string = path.resolve(folder, `${relativeFilePath}.js`);
-          const jsShimContent: string = generateJsShimContent(shimModuleFormat, cssPathFromJs);
+          const jsShimContent: string = generateJsShimContent(
+            shimModuleFormat,
+            cssPathFromJs,
+            record.isModule
+          );
           await FileSystem.writeFileAsync(jsFilePath, jsShimContent, writeFileOptions);
         }
       }
