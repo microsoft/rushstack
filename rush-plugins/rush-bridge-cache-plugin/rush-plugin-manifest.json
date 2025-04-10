@@ -3,9 +3,8 @@
   "plugins": [
     {
       "pluginName": "rush-bridge-cache-plugin",
-      "description": "Rush plugin to allow interactions with the Rush cache.",
-      "entryPoint": "./lib/index.js",
-      "commandLineJsonFilePath": "./command-line.json"
+      "description": "Rush plugin that provides a --set-cache-only command flag to populates the cache from previous runs.",
+      "entryPoint": "./lib/index.js"
     }
   ]
 }

@@ -2,7 +2,7 @@
   "name": "@rushstack/rush-bridge-cache-plugin",
   "version": "0.0.1",
   "private": true,
-  "description": "A plugin to expose methods to interact with the Rush cache.",
+  "description": "Rush plugin that provides a --set-cache-only command flag to populates the cache from previous runs.",
   "license": "MIT",
   "main": "./lib/index.js",
   "repository": {

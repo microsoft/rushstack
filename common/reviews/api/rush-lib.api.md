@@ -946,6 +946,92 @@ export class Operation {
     weight: number;
 }
 
+// Warning: (ae-internal-missing-underscore) The name "OperationBuildCache" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
+export class OperationBuildCache {
+    // (undocumented)
+    get cacheId(): string | undefined;
+    // Warning: (ae-forgotten-export) The symbol "IOperationBuildCacheOptions" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    static forOperation(operation: OperationExecutionRecord, options: IOperationBuildCacheOptions): OperationBuildCache;
+    // Warning: (ae-forgotten-export) The symbol "IProjectBuildCacheOptions" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    static getProjectBuildCache(options: IProjectBuildCacheOptions): OperationBuildCache;
+    // (undocumented)
+    tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
+    // (undocumented)
+    trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
+}
+
+// Warning: (ae-internal-missing-underscore) The name "OperationExecutionRecord" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal
+export class OperationExecutionRecord implements IOperationRunnerContext, IOperationExecutionResult {
+    // Warning: (ae-forgotten-export) The symbol "IOperationExecutionRecordContext" needs to be exported by the entry point index.d.ts
+    constructor(operation: Operation, context: IOperationExecutionRecordContext);
+    // (undocumented)
+    readonly associatedPhase: IPhase;
+    // (undocumented)
+    readonly associatedProject: RushConfigurationProject;
+    // (undocumented)
+    get cobuildRunnerId(): string | undefined;
+    // (undocumented)
+    get collatedWriter(): CollatedWriter;
+    readonly consumers: Set<OperationExecutionRecord>;
+    criticalPathLength: number | undefined;
+    // (undocumented)
+    get debugMode(): boolean;
+    readonly dependencies: Set<OperationExecutionRecord>;
+    // (undocumented)
+    get environment(): IEnvironment | undefined;
+    error: Error | undefined;
+    // (undocumented)
+    executeAsync({ onStart, onResult }: {
+        onStart: (record: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
+        onResult: (record: OperationExecutionRecord) => Promise<void>;
+    }): Promise<void>;
+    // (undocumented)
+    getStateHash(): string;
+    // (undocumented)
+    getStateHashComponents(): ReadonlyArray<string>;
+    // (undocumented)
+    get isTerminal(): boolean;
+    // (undocumented)
+    logFilePaths: ILogFilePaths | undefined;
+    // (undocumented)
+    get metadataFolderPath(): string | undefined;
+    // (undocumented)
+    get name(): string;
+    // (undocumented)
+    get nonCachedDurationMs(): number | undefined;
+    readonly operation: Operation;
+    // (undocumented)
+    readonly _operationMetadataManager: _OperationMetadataManager;
+    // (undocumented)
+    get quietMode(): boolean;
+    // (undocumented)
+    readonly runner: IOperationRunner;
+    runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, options: {
+        createLogFile: boolean;
+        logFileSuffix: string;
+    }): Promise<T>;
+    // (undocumented)
+    get silent(): boolean;
+    get status(): OperationStatus;
+    set status(newStatus: OperationStatus);
+    // (undocumented)
+    readonly stdioSummarizer: StdioSummarizer;
+    // Warning: (ae-forgotten-export) The symbol "Stopwatch" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly stopwatch: Stopwatch;
+    // (undocumented)
+    get weight(): number;
+}
+
 // @internal
 export class _OperationMetadataManager {
     constructor(options: _IOperationMetadataManagerOptions);
@@ -1127,27 +1213,6 @@ export type PnpmStoreLocation = 'local' | 'global';
 
 // @public @deprecated (undocumented)
 export type PnpmStoreOptions = PnpmStoreLocation;
-
-// Warning: (ae-internal-missing-underscore) The name "ProjectBuildCache" should be prefixed with an underscore because the declaration is marked as @internal
-//
-// @internal (undocumented)
-export class ProjectBuildCache {
-    // (undocumented)
-    get cacheId(): string | undefined;
-    // Warning: (ae-forgotten-export) The symbol "OperationExecutionRecord" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "IOperationBuildCacheOptions" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    static forOperation(operation: OperationExecutionRecord, options: IOperationBuildCacheOptions): ProjectBuildCache;
-    // Warning: (ae-forgotten-export) The symbol "IProjectBuildCacheOptions" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    static getProjectBuildCache(options: IProjectBuildCacheOptions): ProjectBuildCache;
-    // (undocumented)
-    tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
-    // (undocumented)
-    trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
-}
 
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
