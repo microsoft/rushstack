@@ -15,7 +15,7 @@ export default class SassLoadThemedStylesPlugin implements IHeftTaskPlugin<void>
       '@rushstack/heft-sass-plugin',
       SASS_PLUGIN_NAME,
       (accessor: ISassPluginAccessor) => {
-        accessor.postProcessCssAsyncHook.tap(PLUGIN_NAME, (cssText: string) => {
+        accessor.postProcessCss.tap(PLUGIN_NAME, (cssText: string) => {
           return replaceTokensWithVariables(cssText);
         });
       }

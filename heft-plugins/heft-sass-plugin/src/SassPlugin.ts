@@ -43,12 +43,12 @@ export interface ISassPluginAccessor {
   /**
    * Hook that will be invoked after the CSS is generated but before it is written to a file.
    */
-  readonly postProcessCssAsyncHook: AsyncSeriesWaterfallHook<string>;
+  readonly postProcessCss: AsyncSeriesWaterfallHook<string>;
 }
 
 export default class SassPlugin implements IHeftPlugin {
   public accessor: ISassPluginAccessor = {
-    postProcessCssAsyncHook: new AsyncSeriesWaterfallHook<string>(['cssText'])
+    postProcessCss: new AsyncSeriesWaterfallHook<string>(['cssText'])
   };
 
   /**
@@ -107,8 +107,8 @@ export default class SassPlugin implements IHeftPlugin {
             };
           }),
           silenceDeprecations,
-          postProcessCssAsync: accessor.postProcessCssAsyncHook.isUsed()
-            ? async (cssText: string) => accessor.postProcessCssAsyncHook.promise(cssText)
+          postProcessCssAsync: accessor.postProcessCss.isUsed()
+            ? async (cssText: string) => accessor.postProcessCss.promise(cssText)
             : undefined
         };
 
