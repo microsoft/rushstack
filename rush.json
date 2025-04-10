@@ -162,15 +162,13 @@
      * IMPORTANT: Because these are regular expressions encoded as JSON string literals,
      * RegExp escapes need two backslashes, and ordinary periods should be "\\.".
      */
-    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
-
+    // "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
     /**
      * When Rush reports that the address is malformed, the notice can include an example
      * of a recommended email.  Make sure it conforms to one of the allowedEmailRegExps
      * expressions.
      */
-    "sampleEmail": "example@users.noreply.github.com"
-
+    // "sampleEmail": "example@users.noreply.github.com"
     /**
      * The commit message to use when committing changes during 'rush publish'.
      *
@@ -179,7 +177,6 @@
      * in the commit message, and then customize Rush's message to contain that string.
      */
     // "versionBumpCommitMessage": "Bump versions [skip ci]",
-
     /**
      * The commit message to use when committing changes during 'rush version'.
      *
@@ -188,7 +185,6 @@
      * in the commit message, and then customize Rush's message to contain that string.
      */
     // "changeLogUpdateCommitMessage": "Update changelogs [skip ci]",
-
     /**
      * The commit message to use when committing changefiles during 'rush change --commit'
      *
@@ -1302,6 +1298,12 @@
     {
       "packageName": "@rushstack/rush-serve-plugin",
       "projectFolder": "rush-plugins/rush-serve-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
+      "packageName": "@rushstack/rush-bridge-cache-plugin",
+      "projectFolder": "rush-plugins/rush-bridge-cache-plugin",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
