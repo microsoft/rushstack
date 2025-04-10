@@ -1635,6 +1635,9 @@ importers:
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
+      '@types/node':
+        specifier: 20.17.19
+        version: 20.17.19
       '@types/react':
         specifier: 17.0.74
         version: 17.0.74
