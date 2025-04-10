@@ -3,7 +3,8 @@
 
   "cssOutputFolders": [
     { "folder": "lib", "shimModuleFormat": "esnext" },
-    { "folder": "lib-commonjs", "shimModuleFormat": "commonjs" }
+    { "folder": "lib-commonjs", "shimModuleFormat": "commonjs" },
+    "lib-css"
   ],
   "secondaryGeneratedTsFolders": ["lib"],
   "excludeFiles": ["./ignored1.scss", "ignored2.scss"],
