@@ -965,12 +965,18 @@ function determineSyntaxFromFilePath(filePath: string): Syntax {
   }
 }
 
-function generateJsShimContent(format: 'commonjs' | 'esnext', relativePathToCss: string): string {
+function generateJsShimContent(
+  format: 'commonjs' | 'esnext',
+  relativePathToCss: string,
+  isModule: boolean
+): string {
   const pathString: string = JSON.stringify(relativePathToCss);
   switch (format) {
     case 'commonjs':
-      return `module.exports = require(${pathString});\nmodule.exports.default = module.exports;`;
+      return isModule
+        ? `module.exports = require(${pathString});\nmodule.exports.default = module.exports;`
+        : `require(${pathString});`;
     case 'esnext':
-      return `export { default } from ${pathString};`;
+      return isModule ? `export { default } from ${pathString};` : `import ${pathString};export {};`;
   }
 }
