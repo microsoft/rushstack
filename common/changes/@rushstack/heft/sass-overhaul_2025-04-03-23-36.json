@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add `globAsync` to task run options.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

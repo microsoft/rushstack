@@ -110,7 +110,9 @@ common/autoinstallers/*/.npmrc
 temp/
 lib/
 lib-amd/
+lib-dts/
 lib-es6/
+lib-esm/
 lib-esnext/
 lib-commonjs/
 lib-shim/

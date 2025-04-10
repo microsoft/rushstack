@@ -26,8 +26,8 @@
     },
 
     {
-      "moduleKind": "esnext",
-      "outFolderName": "lib-es6"
+      "moduleKind": "commonjs",
+      "outFolderName": "lib-commonjs"
     }
   ]
 }

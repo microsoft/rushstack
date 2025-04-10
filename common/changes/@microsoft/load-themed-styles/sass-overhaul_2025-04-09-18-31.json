@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Update package folder layout to be explicit about module types.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles"
+}

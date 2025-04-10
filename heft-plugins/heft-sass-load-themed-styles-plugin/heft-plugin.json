@@ -3,8 +3,8 @@
 
   "taskPlugins": [
     {
-      "pluginName": "sass-plugin",
-      "entryPoint": "./lib/SassPlugin.js"
+      "pluginName": "sass-load-themed-styles-plugin",
+      "entryPoint": "./lib/SassLoadThemedStylesPlugin.js"
     }
   ]
 }

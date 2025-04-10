@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Set css variables on `body` corresponding to all theme tokens in `loadTheme`. Add a new function `replaceTokensWithVariables` that will convert theme tokens in CSS to CSS variable references. Combined these allow callers to completely stop using `loadStyles` and export their CSS as external stylesheets.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles"
+}
