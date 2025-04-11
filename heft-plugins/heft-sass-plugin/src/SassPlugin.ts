@@ -41,6 +41,13 @@ const SASS_CONFIGURATION_FILE_SPECIFICATION: ConfigurationFile.IProjectConfigura
  * @public
  */
 export interface ISassPluginAccessor {
+  readonly hooks: ISassPluginAccessorHooks;
+}
+
+/**
+ * @public
+ */
+export interface ISassPluginAccessorHooks {
   /**
    * Hook that will be invoked after the CSS is generated but before it is written to a file.
    */
@@ -49,7 +56,9 @@ export interface ISassPluginAccessor {
 
 export default class SassPlugin implements IHeftPlugin {
   public accessor: ISassPluginAccessor = {
-    postProcessCss: new AsyncSeriesWaterfallHook<string>(['cssText'])
+    hooks: {
+      postProcessCss: new AsyncSeriesWaterfallHook<string>(['cssText'])
+    }
   };
 
   /**
@@ -59,7 +68,9 @@ export default class SassPlugin implements IHeftPlugin {
     const { numberOfCores, slashNormalizedBuildFolderPath } = heftConfiguration;
     const { logger, tempFolderPath } = taskSession;
     const { terminal } = logger;
-    const { accessor } = this;
+    const {
+      accessor: { hooks }
+    } = this;
 
     let sassProcessorPromise: Promise<SassProcessor> | undefined;
     function initializeSassProcessorAsync(): Promise<SassProcessor> {
@@ -110,8 +121,8 @@ export default class SassPlugin implements IHeftPlugin {
             };
           }),
           silenceDeprecations,
-          postProcessCssAsync: accessor.postProcessCss.isUsed()
-            ? async (cssText: string) => accessor.postProcessCss.promise(cssText)
+          postProcessCssAsync: hooks.postProcessCss.isUsed()
+            ? async (cssText: string) => hooks.postProcessCss.promise(cssText)
             : undefined
         };
 
