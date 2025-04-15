@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.73.0",
+      "tag": "@rushstack/heft_v0.73.0",
+      "date": "Tue, 15 Apr 2025 15:11:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `globAsync` to task run options."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.72.0",
       "tag": "@rushstack/heft_v0.72.0",
       "date": "Wed, 09 Apr 2025 00:11:02 GMT",

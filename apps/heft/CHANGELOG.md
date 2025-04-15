@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 09 Apr 2025 00:11:02 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Apr 2025 15:11:57 GMT and should not be manually modified.
+
+## 0.73.0
+Tue, 15 Apr 2025 15:11:57 GMT
+
+### Minor changes
+
+- Add `globAsync` to task run options.
 
 ## 0.72.0
 Wed, 09 Apr 2025 00:11:02 GMT

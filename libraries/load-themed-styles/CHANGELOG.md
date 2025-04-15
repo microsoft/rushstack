@@ -1,6 +1,14 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Wed, 09 Apr 2025 00:11:02 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Apr 2025 15:11:57 GMT and should not be manually modified.
+
+## 2.1.0
+Tue, 15 Apr 2025 15:11:57 GMT
+
+### Minor changes
+
+- Set css variables on `body` corresponding to all theme tokens in `loadTheme`. Add a new function `replaceTokensWithVariables` that will convert theme tokens in CSS to CSS variable references. Combined these allow callers to completely stop using `loadStyles` and export their CSS as external stylesheets.
+- Update package folder layout to be explicit about module types.
 
 ## 2.0.171
 Wed, 09 Apr 2025 00:11:02 GMT

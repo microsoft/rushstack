@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Wed, 09 Apr 2025 00:11:02 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Apr 2025 15:11:57 GMT and should not be manually modified.
+
+## 0.17.0
+Tue, 15 Apr 2025 15:11:57 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Remove `preserveSCSSExtension`. Change input type of `cssOutputFolders` to allow specifying JavaScript shim module format. Add accessor with hook to allow other plugins to customize final CSS.
 
 ## 0.16.0
 Wed, 09 Apr 2025 00:11:02 GMT

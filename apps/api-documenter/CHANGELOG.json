@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.26.21",
+      "tag": "@microsoft/api-documenter_v7.26.21",
+      "date": "Tue, 15 Apr 2025 15:11:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.26.20",
       "tag": "@microsoft/api-documenter_v7.26.20",
       "date": "Wed, 09 Apr 2025 00:11:02 GMT",
