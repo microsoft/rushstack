@@ -430,6 +430,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/mcp-server",
+      "projectFolder": "apps/rush-mcp-server",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@microsoft/api-extractor",
       "projectFolder": "apps/api-extractor",
       "reviewCategory": "libraries",
