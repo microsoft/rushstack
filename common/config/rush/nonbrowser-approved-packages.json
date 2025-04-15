@@ -175,6 +175,10 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/heft-sass-load-themed-styles-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-sass-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },

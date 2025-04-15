@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "(BREAKING CHANGE) Remove `preserveSCSSExtension`. Change input type of `cssOutputFolders` to allow specifying JavaScript shim module format. Add accessor with hook to allow other plugins to customize final CSS.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin"
+}

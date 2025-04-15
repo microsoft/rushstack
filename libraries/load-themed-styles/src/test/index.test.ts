@@ -7,10 +7,11 @@ import {
   splitStyles,
   loadStyles,
   configureLoadStyles,
+  replaceTokensWithVariables,
   type IThemingInstruction
 } from '../index';
 
-describe('detokenize', () => {
+describe(detokenize.name, () => {
   it('handles colors', () => {
     expect(detokenize('"[theme:name, default: #FFF]"')).toEqual('#FFF');
     expect(detokenize('"[theme: name, default: #FFF]"')).toEqual('#FFF');
@@ -46,7 +47,40 @@ describe('detokenize', () => {
   it('translates missing themes', () => {
     expect(detokenize('"[theme:name]"')).toEqual('inherit');
   });
+});
 
+describe(replaceTokensWithVariables.name, () => {
+  it('handles colors', () => {
+    expect(replaceTokensWithVariables('"[theme:name, default: #FFF]"')).toEqual('var(--name, #FFF)');
+    expect(replaceTokensWithVariables('"[theme: name, default: #FFF]"')).toEqual('var(--name, #FFF)');
+    expect(replaceTokensWithVariables('"[theme: name , default: #FFF  ]"')).toEqual('var(--name, #FFF)');
+  });
+
+  it('handles rgba', () => {
+    expect(replaceTokensWithVariables('"[theme:name, default: rgba(255,255,255,.5)]"')).toEqual(
+      'var(--name, rgba(255,255,255,.5))'
+    );
+  });
+
+  it('handles fonts', () => {
+    expect(replaceTokensWithVariables('"[theme:name, default: "Segoe UI"]"')).toEqual(
+      'var(--name, "Segoe UI")'
+    );
+  });
+
+  it('ignores malformed themes', () => {
+    expect(replaceTokensWithVariables('"[theme:name, default: "Segoe UI"]')).toEqual(
+      '"[theme:name, default: "Segoe UI"]'
+    );
+    expect(replaceTokensWithVariables('"[theme:]"')).toEqual('"[theme:]"');
+  });
+
+  it('translates missing defaults', () => {
+    expect(replaceTokensWithVariables('"[theme:name]"')).toEqual('var(--name)');
+  });
+});
+
+describe(splitStyles.name, () => {
   it('splits non-themable CSS', () => {
     const cssString: string = '.sampleClass\n{\n color: #FF0000;\n}\n';
     const arr: IThemingInstruction[] = splitStyles(cssString);
@@ -70,7 +104,9 @@ describe('detokenize', () => {
       }
     }
   });
+});
 
+describe(loadStyles.name, () => {
   it('passes the styles to loadStyles override callback', () => {
     const expected: string = 'xxx.foo { color: #FFF }xxx';
     let subject: string | undefined = undefined;

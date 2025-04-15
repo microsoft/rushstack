@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createHash, type Hash } from 'node:crypto';
+import { glob } from 'fast-glob';
 
 import {
   type IOperationRunner,
@@ -159,7 +160,8 @@ export class TaskOperationRunner implements IOperationRunner {
           async (): Promise<OperationStatus> => {
             // Create the options and provide a utility method to obtain paths to copy
             const runHookOptions: IHeftTaskRunHookOptions = {
-              abortSignal
+              abortSignal,
+              globAsync: glob
             };
 
             // Run the plugin run hook

@@ -228,6 +228,7 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskS
 export interface IHeftTaskRunHookOptions {
     // @beta
     readonly abortSignal: AbortSignal;
+    readonly globAsync: GlobFn;
 }
 
 // @public
