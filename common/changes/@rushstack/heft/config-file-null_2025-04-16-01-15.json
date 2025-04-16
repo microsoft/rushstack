@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update documentation for `extends`",
+      "type": "patch",
+      "packageName": "@rushstack/heft"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

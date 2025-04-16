@@ -13,5 +13,7 @@
     }
   },
 
-  "booleanProp": false
+  "booleanProp": false,
+
+  "stringProp": null
 }

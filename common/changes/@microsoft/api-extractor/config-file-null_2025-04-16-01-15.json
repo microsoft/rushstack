@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update documentation for `extends`",
+      "type": "patch",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

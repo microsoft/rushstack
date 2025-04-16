@@ -251,6 +251,7 @@ describe('ConfigurationFile', () => {
       things: string[];
       thingsObj: { A: { B: string }; D: { E: string } };
       booleanProp: boolean;
+      stringProp?: string;
     }
 
     it('Correctly loads the config file', () => {
@@ -266,7 +267,8 @@ describe('ConfigurationFile', () => {
       const expectedConfigFile: ISimpleConfigFile = {
         things: ['A', 'B', 'C'],
         thingsObj: { A: { B: 'C' }, D: { E: 'F' } },
-        booleanProp: true
+        booleanProp: true,
+        stringProp: 'someValue'
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
@@ -284,7 +286,8 @@ describe('ConfigurationFile', () => {
       const expectedConfigFile: ISimpleConfigFile = {
         things: ['A', 'B', 'C'],
         thingsObj: { A: { B: 'C' }, D: { E: 'F' } },
-        booleanProp: true
+        booleanProp: true,
+        stringProp: 'someValue'
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
@@ -317,7 +320,8 @@ describe('ConfigurationFile', () => {
           A: { B: nodeJsPath.resolve(__dirname, configFileFolderName, 'C') },
           D: { E: nodeJsPath.resolve(__dirname, configFileFolderName, 'F') }
         },
-        booleanProp: true
+        booleanProp: true,
+        stringProp: 'someValue'
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
@@ -350,7 +354,8 @@ describe('ConfigurationFile', () => {
           A: { B: nodeJsPath.resolve(__dirname, configFileFolderName, 'C') },
           D: { E: nodeJsPath.resolve(__dirname, configFileFolderName, 'F') }
         },
-        booleanProp: true
+        booleanProp: true,
+        stringProp: 'someValue'
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
@@ -383,7 +388,8 @@ describe('ConfigurationFile', () => {
           A: { B: nodeJsPath.resolve(projectRoot, 'C') },
           D: { E: nodeJsPath.resolve(projectRoot, 'F') }
         },
-        booleanProp: true
+        booleanProp: true,
+        stringProp: 'someValue'
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
@@ -416,7 +422,8 @@ describe('ConfigurationFile', () => {
           A: { B: nodeJsPath.resolve(projectRoot, 'C') },
           D: { E: nodeJsPath.resolve(projectRoot, 'F') }
         },
-        booleanProp: true
+        booleanProp: true,
+        stringProp: 'someValue'
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
@@ -435,6 +442,7 @@ describe('ConfigurationFile', () => {
       things: string[];
       thingsObj: { A: { B?: string; D?: string }; D?: { E: string }; F?: { G: string } };
       booleanProp: boolean;
+      stringProp?: string;
     }
 
     it('Correctly loads the config file with default config meta', () => {

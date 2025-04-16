@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update documentation for `extends`",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

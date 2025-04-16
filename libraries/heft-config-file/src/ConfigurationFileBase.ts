@@ -16,6 +16,8 @@ interface IConfigurationJson {
  * @beta
  *
  * The set of possible mechanisms for merging properties from parent configuration files.
+ * If a child configuration file sets a property value to `null`, that will always delete the value
+ * specified in the parent configuration file, regardless of the inheritance type.
  */
 const InheritanceType = {
   /**
@@ -251,6 +253,7 @@ export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritanc
    * Provides a custom inheritance function. This function takes two arguments: the first is the
    * child file's object, and the second is the parent file's object. The function should return
    * the resulting combined object.
+   * This function will not be invoked if the current value is `null`, the property will simply be deleted.
    */
   inheritanceFunction: PropertyInheritanceCustomFunction<TObject>;
 }
@@ -1085,7 +1088,15 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
         newValue = parentPropertyValue;
       };
 
-      if (propertyValue !== undefined && parentPropertyValue === undefined) {
+      if (propertyValue === null) {
+        if (parentPropertyValue !== undefined) {
+          resultAnnotation.originalValues[propertyName] = this.getPropertyOriginalValue({
+            parentObject: parentObject,
+            propertyName: propertyName
+          });
+        }
+        newValue = undefined;
+      } else if (propertyValue !== undefined && parentPropertyValue === undefined) {
         usePropertyValue();
       } else if (parentPropertyValue !== undefined && propertyValue === undefined) {
         useParentPropertyValue();
@@ -1207,7 +1218,10 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
         }
       }
 
-      result[propertyName] = newValue;
+      if (newValue !== undefined) {
+        // Don't attach the key for undefined values so that they don't enumerate.
+        result[propertyName] = newValue;
+      }
     }
 
     return result;
