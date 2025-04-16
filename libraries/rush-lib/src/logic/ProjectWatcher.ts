@@ -15,6 +15,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export interface IProjectWatcherOptions {
+  abortSignal: AbortSignal;
   getInputsSnapshotAsync: GetInputsSnapshotAsyncFn;
   debounceMs?: number;
   rushConfiguration: RushConfiguration;
@@ -53,6 +54,7 @@ interface IPathWatchOptions {
  * more projects differ from the value the previous time it was invoked. The first time will always resolve with the full selection.
  */
 export class ProjectWatcher {
+  private readonly _abortSignal: AbortSignal;
   private readonly _getInputsSnapshotAsync: GetInputsSnapshotAsyncFn;
   private readonly _debounceMs: number;
   private readonly _repoRoot: string;
@@ -64,6 +66,7 @@ export class ProjectWatcher {
   private _previousSnapshot: IInputsSnapshot | undefined;
   private _forceChangedProjects: Map<RushConfigurationProject, string> = new Map();
   private _resolveIfChanged: undefined | (() => Promise<void>);
+  private _onAbort: undefined | (() => void);
   private _getPromptLines: undefined | IPromptGeneratorFunction;
 
   private _renderedStatusLines: number;
@@ -72,6 +75,7 @@ export class ProjectWatcher {
 
   public constructor(options: IProjectWatcherOptions) {
     const {
+      abortSignal,
       getInputsSnapshotAsync: snapshotProvider,
       debounceMs = 1000,
       rushConfiguration,
@@ -80,6 +84,10 @@ export class ProjectWatcher {
       initialSnapshot: initialState
     } = options;
 
+    this._abortSignal = abortSignal;
+    abortSignal.addEventListener('abort', () => {
+      this._onAbort?.();
+    });
     this._debounceMs = debounceMs;
     this._rushConfiguration = rushConfiguration;
     this._projectsToWatch = projectsToWatch;
@@ -87,6 +95,8 @@ export class ProjectWatcher {
 
     const gitPath: string = new Git(rushConfiguration).getGitPathOrThrow();
     this._repoRoot = Path.convertToSlashes(getRepoRoot(rushConfiguration.rushJsonFolder, gitPath));
+    this._resolveIfChanged = undefined;
+    this._onAbort = undefined;
 
     this._initialSnapshot = initialState;
     this._previousSnapshot = initialState;
@@ -191,7 +201,12 @@ export class ProjectWatcher {
       }
     }
 
+    if (this._abortSignal.aborted) {
+      return initialChangeResult;
+    }
+
     const watchers: Map<string, fs.FSWatcher> = new Map();
+    const closePromises: Promise<void>[] = [];
 
     const watchedResult: IProjectChangeResult = await new Promise(
       (resolve: (result: IProjectChangeResult) => void, reject: (err: Error) => void) => {
@@ -202,7 +217,21 @@ export class ProjectWatcher {
 
         const debounceMs: number = this._debounceMs;
 
+        const abortSignal: AbortSignal = this._abortSignal;
+
         this.clearStatus();
+
+        this._onAbort = function onAbort(): void {
+          if (timeout) {
+            clearTimeout(timeout);
+          }
+          terminated = true;
+          resolve(initialChangeResult);
+        };
+
+        if (abortSignal.aborted) {
+          return this._onAbort();
+        }
 
         const resolveIfChanged: () => Promise<void> = (this._resolveIfChanged = async (): Promise<void> => {
           timeout = undefined;
@@ -296,15 +325,23 @@ export class ProjectWatcher {
             watchedPath,
             {
               encoding: 'utf-8',
-              recursive: recursive && useNativeRecursiveWatch
+              recursive: recursive && useNativeRecursiveWatch,
+              signal: abortSignal
             },
             listener
           );
           watchers.set(watchedPath, watcher);
-          watcher.on('error', (err) => {
-            watchers.delete(watchedPath);
+          watcher.once('error', (err) => {
+            watcher.close();
             onError(err);
           });
+          closePromises.push(
+            once(watcher, 'close').then(() => {
+              watchers.delete(watchedPath);
+              watcher.removeAllListeners();
+              watcher.unref();
+            })
+          );
         }
 
         function innerListener(
@@ -362,20 +399,18 @@ export class ProjectWatcher {
         }
       }
     ).finally(() => {
+      this._onAbort = undefined;
       this._resolveIfChanged = undefined;
     });
 
-    const closePromises: Promise<void>[] = [];
-    for (const [watchedPath, watcher] of watchers) {
-      closePromises.push(
-        once(watcher, 'close').then(() => {
-          watchers.delete(watchedPath);
-        })
-      );
+    this._terminal.writeDebugLine(`Closing watchers...`);
+
+    for (const watcher of watchers.values()) {
       watcher.close();
     }
 
     await Promise.all(closePromises);
+    this._terminal.writeDebugLine(`Closed ${closePromises.length} watchers`);
 
     return watchedResult;
   }
