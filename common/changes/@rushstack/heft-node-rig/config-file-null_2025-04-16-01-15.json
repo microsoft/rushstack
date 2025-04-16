@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update documentation for ",
+      "type": "patch",
+      "packageName": "@rushstack/heft-node-rig"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

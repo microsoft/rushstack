@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update documentation for ",
+      "type": "patch",
+      "packageName": "@rushstack/heft-api-extractor-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-api-extractor-plugin",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
