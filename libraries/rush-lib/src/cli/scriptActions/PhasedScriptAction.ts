@@ -581,6 +581,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }
 
         await this._runWatchPhasesAsync(internalOptions);
+        terminal.writeDebugLine(`Watch mode exited.`);
       }
     } finally {
       await cobuildConfiguration?.destroyLockProviderAsync();
@@ -653,16 +654,21 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     };
   }
 
-  private _registerWatchModeInterface(projectWatcher: ProjectWatcher): void {
+  private _registerWatchModeInterface(
+    projectWatcher: ProjectWatcher,
+    abortController: AbortController
+  ): void {
     const toggleWatcherKey: 'w' = 'w';
     const buildOnceKey: 'b' = 'b';
     const invalidateKey: 'i' = 'i';
-    const shutdownKey: 'x' = 'x';
+    const shutdownProcessesKey: 'x' = 'x';
+    const quitKey: 'q' = 'q';
 
     const terminal: ITerminal = this._terminal;
 
     projectWatcher.setPromptGenerator((isPaused: boolean) => {
       const promptLines: string[] = [
+        `  Press <${quitKey}> to gracefully exit.`,
         `  Press <${toggleWatcherKey}> to ${isPaused ? 'resume' : 'pause'}.`,
         `  Press <${invalidateKey}> to invalidate all projects.`
       ];
@@ -670,16 +676,20 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         promptLines.push(`  Press <${buildOnceKey}> to build once.`);
       }
       if (this._noIPCParameter?.value === false) {
-        promptLines.push(`  Press <${shutdownKey}> to reset child processes.`);
+        promptLines.push(`  Press <${shutdownProcessesKey}> to reset child processes.`);
       }
       return promptLines;
     });
 
-    process.stdin.setRawMode(true);
-    process.stdin.resume();
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (key: string) => {
+    const onKeyPress = (key: string): void => {
       switch (key) {
+        case quitKey:
+          terminal.writeLine(`Exiting watch mode...`);
+          process.stdin.setRawMode(false);
+          process.stdin.off('data', onKeyPress);
+          process.stdin.unref();
+          abortController.abort();
+          break;
         case toggleWatcherKey:
           if (projectWatcher.isPaused) {
             projectWatcher.resume();
@@ -703,17 +713,25 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
             projectWatcher.resume();
           }
           break;
-        case shutdownKey:
+        case shutdownProcessesKey:
           projectWatcher.clearStatus();
           terminal.writeLine(`Shutting down long-lived child processes...`);
           // TODO: Inject this promise into the execution queue somewhere so that it gets waited on between runs
           void this.hooks.shutdownAsync.promise();
           break;
         case '\u0003':
+          process.stdin.setRawMode(false);
+          process.stdin.off('data', onKeyPress);
+          process.stdin.unref();
           process.kill(process.pid, 'SIGINT');
           break;
       }
-    });
+    };
+
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', onKeyPress);
   }
 
   /**
@@ -751,18 +769,22 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       '../../logic/ProjectWatcher'
     );
 
+    const abortController: AbortController = new AbortController();
+    const abortSignal: AbortSignal = abortController.signal;
+
     const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
       getInputsSnapshotAsync,
       initialSnapshot,
       debounceMs: this._watchDebounceMs,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,
+      abortSignal,
       terminal
     });
 
     // Ensure process.stdin allows interactivity before using TTY-only APIs
     if (process.stdin.isTTY) {
-      this._registerWatchModeInterface(projectWatcher);
+      this._registerWatchModeInterface(projectWatcher, abortController);
     }
 
     const onWaitingForChanges = (): void => {
@@ -786,10 +808,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     // Loop until Ctrl+C
     // eslint-disable-next-line no-constant-condition
-    while (true) {
+    while (!abortSignal.aborted) {
       // On the initial invocation, this promise will return immediately with the full set of projects
       const { changedProjects, inputsSnapshot: state } =
         await projectWatcher.waitForChangeAsync(onWaitingForChanges);
+
+      if (abortSignal.aborted) {
+        return;
+      }
 
       if (stopwatch.state === StopwatchState.Stopped) {
         // Clear and reset the stopwatch so that we only report time from a single execution at a time

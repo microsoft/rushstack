@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Bind \"q\" to gracefully exit the watcher.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
