@@ -8,14 +8,5 @@ module.exports = {
     'local-node-rig/profiles/default/includes/eslint/profile/node-trusted-tool',
     'local-node-rig/profiles/default/includes/eslint/mixins/friendly-locals'
   ],
-  parserOptions: { tsconfigRootDir: __dirname },
-
-  overrides: [
-    {
-      files: ['*.ts', '*.tsx'],
-      rules: {
-        'no-console': 'off'
-      }
-    }
-  ]
+  parserOptions: { tsconfigRootDir: __dirname }
 };
