@@ -111,14 +111,12 @@ function configureOperations(operations: ReadonlySet<Operation>, context: ICreat
   if (!isInitial && changedProjectsOnly) {
     const potentiallyAffectedOperations: Set<Operation> = new Set(operationsWithWork);
     for (const operation of potentiallyAffectedOperations) {
+      if (operation.settings?.ignoreChangedProjectsOnlyFlag) {
+        operationsWithWork.add(operation);
+      }
+
       for (const consumer of operation.consumers) {
         potentiallyAffectedOperations.add(consumer);
-      }
-    }
-
-    for (const operation of operations) {
-      if (potentiallyAffectedOperations.has(operation) && operation.settings?.ignoreChangedProjectsOnlyFlag) {
-        operationsWithWork.add(operation);
       }
     }
   } else {
