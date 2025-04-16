@@ -409,6 +409,7 @@ export interface IConfigurationEnvironmentVariable {
 // @alpha
 export interface ICreateOperationsContext {
     readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    readonly changedProjectsOnly: boolean;
     readonly cobuildConfiguration: CobuildConfiguration | undefined;
     readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
     readonly includePhaseDeps: boolean;
@@ -663,6 +664,7 @@ export interface IOperationSettings {
     dependsOnAdditionalFiles?: string[];
     dependsOnEnvVars?: string[];
     disableBuildCacheForOperation?: boolean;
+    ignoreChangedProjectsOnlyFlag?: boolean;
     operationName: string;
     outputFolderNames?: string[];
     sharding?: IRushPhaseSharding;

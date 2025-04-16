@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Support the `--changed-projects-only` flag in watch mode and allow it to be toggled between iterations.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

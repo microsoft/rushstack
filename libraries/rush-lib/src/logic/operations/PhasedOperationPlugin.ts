@@ -28,72 +28,19 @@ function createOperations(
   existingOperations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const {
-    projectsInUnknownState: changedProjects,
-    phaseOriginal,
-    phaseSelection,
-    projectSelection,
-    projectConfigurations,
-    includePhaseDeps,
-    isInitial
-  } = context;
+  const { phaseSelection, projectSelection, projectConfigurations } = context;
 
   const operations: Map<string, Operation> = new Map();
 
   // Create tasks for selected phases and projects
   // This also creates the minimal set of dependencies needed
-  for (const phase of phaseOriginal) {
+  for (const phase of phaseSelection) {
     for (const project of projectSelection) {
       getOrCreateOperation(phase, project);
     }
   }
 
-  // Grab all operations that were explicitly requested.
-  const operationsWithWork: Set<Operation> = new Set();
-  for (const operation of existingOperations) {
-    const { associatedPhase, associatedProject } = operation;
-    if (!associatedPhase || !associatedProject) {
-      // Fix this when these are required properties.
-      continue;
-    }
-
-    if (phaseSelection.has(associatedPhase) && changedProjects.has(associatedProject)) {
-      operationsWithWork.add(operation);
-    }
-  }
-
-  // Add all operations that are selected that depend on the explicitly requested operations.
-  // This will mostly be relevant during watch; in initial runs it should not add any new operations.
-  for (const operation of operationsWithWork) {
-    for (const consumer of operation.consumers) {
-      operationsWithWork.add(consumer);
-    }
-  }
-
-  if (includePhaseDeps && isInitial) {
-    // Add all operations that are dependencies of the operations already scheduled.
-    for (const operation of operationsWithWork) {
-      for (const dependency of operation.dependencies) {
-        operationsWithWork.add(dependency);
-      }
-    }
-  }
-
-  for (const operation of existingOperations) {
-    // Enable exactly the set of operations that are requested.
-    operation.enabled &&= operationsWithWork.has(operation);
-
-    if (!includePhaseDeps || !isInitial) {
-      const { associatedPhase, associatedProject } = operation;
-      if (!associatedPhase || !associatedProject) {
-        // Fix this when these are required properties.
-        continue;
-      }
-
-      // This filter makes the "unsafe" selections happen.
-      operation.enabled &&= phaseSelection.has(associatedPhase) && projectSelection.has(associatedProject);
-    }
-  }
+  configureOperations(existingOperations, context);
 
   return existingOperations;
 
@@ -138,6 +85,69 @@ function createOperations(
     }
 
     return operation;
+  }
+}
+
+function configureOperations(operations: ReadonlySet<Operation>, context: ICreateOperationsContext): void {
+  const {
+    changedProjectsOnly,
+    projectsInUnknownState: changedProjects,
+    phaseOriginal,
+    phaseSelection,
+    projectSelection,
+    includePhaseDeps,
+    isInitial
+  } = context;
+
+  // Grab all operations that were explicitly requested.
+  const operationsWithWork: Set<Operation> = new Set();
+  for (const operation of operations) {
+    const { associatedPhase, associatedProject } = operation;
+    if (phaseOriginal.has(associatedPhase) && changedProjects.has(associatedProject)) {
+      operationsWithWork.add(operation);
+    }
+  }
+
+  if (!isInitial && changedProjectsOnly) {
+    const potentiallyAffectedOperations: Set<Operation> = new Set(operationsWithWork);
+    for (const operation of potentiallyAffectedOperations) {
+      if (operation.settings?.ignoreChangedProjectsOnlyFlag) {
+        operationsWithWork.add(operation);
+      }
+
+      for (const consumer of operation.consumers) {
+        potentiallyAffectedOperations.add(consumer);
+      }
+    }
+  } else {
+    // Add all operations that are selected that depend on the explicitly requested operations.
+    // This will mostly be relevant during watch; in initial runs it should not add any new operations.
+    for (const operation of operationsWithWork) {
+      for (const consumer of operation.consumers) {
+        operationsWithWork.add(consumer);
+      }
+    }
+  }
+
+  if (includePhaseDeps) {
+    // Add all operations that are dependencies of the operations already scheduled.
+    for (const operation of operationsWithWork) {
+      for (const dependency of operation.dependencies) {
+        operationsWithWork.add(dependency);
+      }
+    }
+  }
+
+  for (const operation of operations) {
+    // Enable exactly the set of operations that are requested.
+    operation.enabled &&= operationsWithWork.has(operation);
+
+    if (!includePhaseDeps || !isInitial) {
+      const { associatedPhase, associatedProject } = operation;
+
+      // This filter makes the "unsafe" selections happen.
+      operation.enabled &&= phaseSelection.has(associatedPhase) && projectSelection.has(associatedProject);
+    }
   }
 }
 

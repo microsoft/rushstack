@@ -69,6 +69,7 @@ export class ProjectWatcher {
   private _onAbort: undefined | (() => void);
   private _getPromptLines: undefined | IPromptGeneratorFunction;
 
+  private _lastStatus: string | undefined;
   private _renderedStatusLines: number;
 
   public isPaused: boolean = false;
@@ -138,6 +139,10 @@ export class ProjectWatcher {
 
   public clearStatus(): void {
     this._renderedStatusLines = 0;
+  }
+
+  public rerenderStatus(): void {
+    this._setStatus(this._lastStatus ?? 'Waiting for changes...');
   }
 
   public setPromptGenerator(promptGenerator: IPromptGeneratorFunction): void {
@@ -427,6 +432,7 @@ export class ProjectWatcher {
       readline.clearScreenDown(process.stdout);
     }
     this._renderedStatusLines = statusLines.length;
+    this._lastStatus = status;
 
     this._terminal.writeLine(Colorize.bold(Colorize.cyan(statusLines.join('\n'))));
   }

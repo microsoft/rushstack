@@ -106,6 +106,10 @@
           "allowCobuildWithoutCache": {
             "type": "boolean",
             "description": "If true, this operation will not need to use the build cache to leverage cobuilds"
+          },
+          "ignoreChangedProjectsOnlyFlag": {
+            "type": "boolean",
+            "description": "If true, this operation never be skipped by the `--changed-projects-only` flag. This is useful for projects that bundle code from other packages."
           }
         }
       }
