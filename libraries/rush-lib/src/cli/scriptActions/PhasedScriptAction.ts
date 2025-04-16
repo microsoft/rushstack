@@ -147,7 +147,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _knownPhases: ReadonlyMap<string, IPhase>;
   private readonly _terminal: ITerminal;
 
-  private readonly _changedProjectsOnly: CommandLineFlagParameter | undefined;
+  private readonly _changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
   private readonly _selectionParameters: SelectionParameterSet;
   private readonly _verboseParameter: CommandLineFlagParameter;
   private readonly _parallelismParameter: CommandLineStringParameter | undefined;
@@ -162,6 +162,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _debugBuildCacheIdsParameter: CommandLineFlagParameter;
   private readonly _includePhaseDeps: CommandLineFlagParameter | undefined;
 
+  private _changedProjectsOnly: boolean;
+
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
     this._enableParallelism = options.enableParallelism;
@@ -175,6 +177,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._alwaysInstall = options.alwaysInstall;
     this._runsBeforeInstall = false;
     this._knownPhases = options.phases;
+    this._changedProjectsOnly = false;
 
     this.hooks = new PhasedCommandHooks();
 
@@ -243,7 +246,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         `Using "--impacted-by A --include-phase-deps" avoids that work by performing "_phase:test" only for downstream projects.`
     });
 
-    this._changedProjectsOnly = this._isIncrementalBuildAllowed
+    this._changedProjectsOnlyParameter = this._isIncrementalBuildAllowed
       ? this.defineFlagParameter({
           parameterLongName: '--changed-projects-only',
           parameterShortName: '-c',
@@ -427,7 +430,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const isQuietMode: boolean = !this._verboseParameter.value;
 
-    const changedProjectsOnly: boolean = !!this._changedProjectsOnly?.value;
+    const changedProjectsOnly: boolean = !!this._changedProjectsOnlyParameter?.value;
+    this._changedProjectsOnly = changedProjectsOnly;
 
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
     let cobuildConfiguration: CobuildConfiguration | undefined;
@@ -528,6 +532,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       const initialCreateOperationsContext: ICreateOperationsContext = {
         buildCacheConfiguration,
+        changedProjectsOnly,
         cobuildConfiguration,
         customParameters: customParametersByName,
         isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
@@ -658,11 +663,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     projectWatcher: ProjectWatcher,
     abortController: AbortController
   ): void {
-    const toggleWatcherKey: 'w' = 'w';
     const buildOnceKey: 'b' = 'b';
+    const changedProjectsOnlyKey: 'c' = 'c';
     const invalidateKey: 'i' = 'i';
-    const shutdownProcessesKey: 'x' = 'x';
     const quitKey: 'q' = 'q';
+    const toggleWatcherKey: 'w' = 'w';
+    const shutdownProcessesKey: 'x' = 'x';
 
     const terminal: ITerminal = this._terminal;
 
@@ -670,7 +676,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       const promptLines: string[] = [
         `  Press <${quitKey}> to gracefully exit.`,
         `  Press <${toggleWatcherKey}> to ${isPaused ? 'resume' : 'pause'}.`,
-        `  Press <${invalidateKey}> to invalidate all projects.`
+        `  Press <${invalidateKey}> to invalidate all projects.`,
+        `  Press <${changedProjectsOnlyKey}> to ${this._changedProjectsOnly ? 'disable' : 'enable'} changed-projects-only mode (${this._changedProjectsOnly ? 'ENABLED' : 'DISABLED'}).`
       ];
       if (isPaused) {
         promptLines.push(`  Press <${buildOnceKey}> to build once.`);
@@ -712,6 +719,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           if (!projectWatcher.isPaused) {
             projectWatcher.resume();
           }
+          break;
+        case changedProjectsOnlyKey:
+          this._changedProjectsOnly = !this._changedProjectsOnly;
+          projectWatcher.rerenderStatus();
           break;
         case shutdownProcessesKey:
           projectWatcher.clearStatus();
@@ -834,6 +845,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       // Account for consumer relationships
       const executeOperationsContext: IExecuteOperationsContext = {
         ...initialCreateOperationsContext,
+        changedProjectsOnly: this._changedProjectsOnly,
         isInitial: false,
         inputsSnapshot: state,
         projectsInUnknownState: changedProjects,

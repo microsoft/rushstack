@@ -49,6 +49,12 @@ export interface ICreateOperationsContext {
    */
   readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
   /**
+   * If true, for an incremental build, Rush will only include projects with immediate changes or projects with no consumers.
+   * @remarks
+   * This is an optimization that may produce invalid outputs if some of the intervening projects are impacted by the changes.
+   */
+  readonly changedProjectsOnly: boolean;
+  /**
    * The configuration for the cobuild, if cobuild feature and build cache feature are both enabled.
    */
   readonly cobuildConfiguration: CobuildConfiguration | undefined;

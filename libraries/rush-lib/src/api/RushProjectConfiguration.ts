@@ -141,6 +141,11 @@ export interface IOperationSettings {
    * If true, this operation can use cobuilds for orchestration without restoring build cache entries.
    */
   allowCobuildWithoutCache?: boolean;
+
+  /**
+   * If true, this operation will never be skipped by the `--changed-projects-only` flag.
+   */
+  ignoreChangedProjectsOnlyFlag?: boolean;
 }
 
 interface IOldRushProjectJson {
