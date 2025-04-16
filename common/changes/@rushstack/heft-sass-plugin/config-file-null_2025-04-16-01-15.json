@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Update documentation for ",
+      "comment": "Update documentation for `extends`",
       "type": "patch",
       "packageName": "@rushstack/heft-sass-plugin"
     }
