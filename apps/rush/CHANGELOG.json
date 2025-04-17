@@ -2,6 +2,33 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.153.0",
+      "tag": "@microsoft/rush_v5.153.0",
+      "date": "Thu, 17 Apr 2025 21:59:15 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update documentation for `extends`"
+          },
+          {
+            "comment": "Bind \"q\" to gracefully exit the watcher."
+          },
+          {
+            "comment": "Clarify registry authentication settings in \"rush init\" template for .npmrc"
+          },
+          {
+            "comment": "Support the `--changed-projects-only` flag in watch mode and allow it to be toggled between iterations."
+          },
+          {
+            "comment": "Fix telemetry for \"--changed-projects-only\" when toggled in watch mode."
+          },
+          {
+            "comment": "(rush-serve-plugin) Support websocket message to enable/disable operations."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.152.0",
       "tag": "@microsoft/rush_v5.152.0",
       "date": "Tue, 08 Apr 2025 18:41:27 GMT",

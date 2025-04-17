@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 08 Apr 2025 18:41:27 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Apr 2025 21:59:15 GMT and should not be manually modified.
+
+## 5.153.0
+Thu, 17 Apr 2025 21:59:15 GMT
+
+### Updates
+
+- Update documentation for `extends`
+- Bind "q" to gracefully exit the watcher.
+- Clarify registry authentication settings in "rush init" template for .npmrc
+- Support the `--changed-projects-only` flag in watch mode and allow it to be toggled between iterations.
+- Fix telemetry for "--changed-projects-only" when toggled in watch mode.
+- (rush-serve-plugin) Support websocket message to enable/disable operations.
 
 ## 5.152.0
 Tue, 08 Apr 2025 18:41:27 GMT
