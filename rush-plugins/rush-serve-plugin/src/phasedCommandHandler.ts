@@ -390,6 +390,8 @@ function tryEnableBuildStatusWebSocketServer(
 
   const { hooks } = command;
 
+  let invalidateOperation: ((operation: Operation, reason: string) => void) | undefined;
+
   const operationEnabledStates: Map<string, OperationEnabledState> = new Map();
   hooks.createOperations.tap(
     {
@@ -426,6 +428,8 @@ function tryEnableBuildStatusWebSocketServer(
             break;
         }
       }
+
+      invalidateOperation = context.invalidateOperation;
 
       return operations;
     }
@@ -498,6 +502,19 @@ function tryEnableBuildStatusWebSocketServer(
             const { enabledStateByOperationName } = parsedMessage;
             for (const [name, state] of Object.entries(enabledStateByOperationName)) {
               operationEnabledStates.set(name, state);
+            }
+            break;
+          }
+
+          case 'invalidate': {
+            const { operationNames } = parsedMessage;
+            const operationNameSet: Set<string> = new Set(operationNames);
+            if (invalidateOperation && operationStates) {
+              for (const operation of operationStates.keys()) {
+                if (operationNameSet.has(operation.name)) {
+                  invalidateOperation(operation, 'WebSocket');
+                }
+              }
             }
             break;
           }
