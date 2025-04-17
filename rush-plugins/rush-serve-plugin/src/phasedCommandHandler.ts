@@ -389,6 +389,25 @@ function tryEnableBuildStatusWebSocketServer(
 
   const { hooks } = command;
 
+  const operationEnabledStates: Map<string, boolean> = new Map();
+  hooks.createOperations.tap(
+    {
+      name: PLUGIN_NAME,
+      stage: 10
+    },
+    (operations: Set<Operation>) => {
+      for (const operation of operations) {
+        const { name } = operation;
+        const expectedState: boolean | undefined = operationEnabledStates.get(name);
+        if (expectedState !== undefined) {
+          operation.enabled = expectedState;
+        }
+      }
+
+      return operations;
+    }
+  );
+
   hooks.beforeExecuteOperations.tap(
     PLUGIN_NAME,
     (operationsToExecute: Map<Operation, IOperationExecutionResult>): void => {
@@ -449,6 +468,14 @@ function tryEnableBuildStatusWebSocketServer(
         switch (parsedMessage.command) {
           case 'sync': {
             sendSyncMessage(webSocket);
+            break;
+          }
+
+          case 'set-enabled-states': {
+            const { enabledStateByOperationName } = parsedMessage;
+            for (const [name, enabled] of Object.entries(enabledStateByOperationName)) {
+              operationEnabledStates.set(name, enabled);
+            }
             break;
           }
 

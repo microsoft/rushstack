@@ -152,6 +152,16 @@ export interface IWebSocketSyncCommandMessage {
 }
 
 /**
+ * Message received from a WebSocket client to change the enabled states of operations.
+ */
+export interface IWebSocketSetEnabledStatesCommandMessage {
+  command: 'set-enabled-states';
+  enabledStateByOperationName: Record<string, boolean>;
+}
+
+/**
  * The set of possible messages received from a WebSocket client.
  */
-export type IWebSocketCommandMessage = IWebSocketSyncCommandMessage;
+export type IWebSocketCommandMessage =
+  | IWebSocketSyncCommandMessage
+  | IWebSocketSetEnabledStatesCommandMessage;
