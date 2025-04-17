@@ -146,6 +146,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _alwaysInstall: boolean | undefined;
   private readonly _knownPhases: ReadonlyMap<string, IPhase>;
   private readonly _terminal: ITerminal;
+  private _changedProjectsOnly: boolean;
 
   private readonly _changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
   private readonly _selectionParameters: SelectionParameterSet;
@@ -175,6 +176,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._alwaysInstall = options.alwaysInstall;
     this._runsBeforeInstall = false;
     this._knownPhases = options.phases;
+    this._changedProjectsOnly = false;
 
     this.hooks = new PhasedCommandHooks();
 
@@ -328,17 +330,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           phase.associatedParameters.add(tsCommandLineParameter);
         }
       }
-    }
-  }
-
-  public get changedProjectsOnly(): boolean | undefined {
-    return this._changedProjectsOnlyParameter?.value;
-  }
-
-  public set changedProjectsOnly(value: boolean) {
-    if (this._changedProjectsOnlyParameter) {
-      // Mutate the parameter so that the telemetry reflects the value.
-      (this._changedProjectsOnlyParameter as unknown as { _value?: boolean })._value = value;
     }
   }
 
@@ -684,7 +675,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         `  Press <${quitKey}> to gracefully exit.`,
         `  Press <${toggleWatcherKey}> to ${isPaused ? 'resume' : 'pause'}.`,
         `  Press <${invalidateKey}> to invalidate all projects.`,
-        `  Press <${changedProjectsOnlyKey}> to ${this.changedProjectsOnly ? 'disable' : 'enable'} changed-projects-only mode (${this.changedProjectsOnly ? 'ENABLED' : 'DISABLED'}).`
+        `  Press <${changedProjectsOnlyKey}> to ${this._changedProjectsOnly ? 'disable' : 'enable'} changed-projects-only mode (${this._changedProjectsOnly ? 'ENABLED' : 'DISABLED'}).`
       ];
       if (isPaused) {
         promptLines.push(`  Press <${buildOnceKey}> to build once.`);
@@ -728,7 +719,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           }
           break;
         case changedProjectsOnlyKey:
-          this.changedProjectsOnly = !this.changedProjectsOnly;
+          this._changedProjectsOnly = !this._changedProjectsOnly;
           projectWatcher.rerenderStatus();
           break;
         case shutdownProcessesKey:
@@ -852,7 +843,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       // Account for consumer relationships
       const executeOperationsContext: IExecuteOperationsContext = {
         ...initialCreateOperationsContext,
-        changedProjectsOnly: !!this.changedProjectsOnly,
+        changedProjectsOnly: !!this._changedProjectsOnly,
         isInitial: false,
         inputsSnapshot: state,
         projectsInUnknownState: changedProjects,
@@ -967,6 +958,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         countSkipped: 0,
         countNoOp: 0
       };
+
+      const { _changedProjectsOnlyParameter: changedProjectsOnlyParameter } = this;
+      if (changedProjectsOnlyParameter) {
+        // Overwrite this value since we allow changing it at runtime.
+        extraData[changedProjectsOnlyParameter.scopedLongName ?? changedProjectsOnlyParameter.longName] =
+          this._changedProjectsOnly;
+      }
 
       if (result) {
         const { operationResults } = result;
