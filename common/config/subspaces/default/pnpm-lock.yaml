@@ -345,6 +345,28 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../apps/rush-mcp-server:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      '@rushstack/ts-command-line':
+        specifier: workspace:*
+        version: link:../../libraries/ts-command-line
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+      typescript:
+        specifier: ~5.8.2
+        version: 5.8.2
+
   ../../../apps/trace-import:
     dependencies:
       '@rushstack/node-core-library':

@@ -1,0 +1,33 @@
+{
+  "name": "@rushstack/mcp-server",
+  "version": "0.0.1",
+  "description": "A Model Context Protocol server implementation for Rush",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/rush-mcp-server"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "engineStrict": true,
+  "homepage": "https://rushstack.io",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "bin": {
+    "mcp-server": "./bin/mcp-server"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "typescript": "~5.8.2"
+  }
+}
