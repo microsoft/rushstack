@@ -45,7 +45,8 @@ import type {
   ReadableOperationStatus,
   IWebSocketCommandMessage,
   IRushSessionInfo,
-  ILogFileURLs
+  ILogFileURLs,
+  OperationEnabledState
 } from './api.types';
 
 export interface IPhasedCommandHandlerOptions {
@@ -389,18 +390,40 @@ function tryEnableBuildStatusWebSocketServer(
 
   const { hooks } = command;
 
-  const operationEnabledStates: Map<string, boolean> = new Map();
+  const operationEnabledStates: Map<string, OperationEnabledState> = new Map();
   hooks.createOperations.tap(
     {
       name: PLUGIN_NAME,
-      stage: 10
+      stage: Infinity
     },
-    (operations: Set<Operation>) => {
+    (operations: Set<Operation>, context: ICreateOperationsContext) => {
+      const potentiallyAffectedOperations: Set<Operation> = new Set();
       for (const operation of operations) {
+        const { associatedProject } = operation;
+        if (context.projectsInUnknownState.has(associatedProject)) {
+          potentiallyAffectedOperations.add(operation);
+        }
+      }
+      for (const operation of potentiallyAffectedOperations) {
+        for (const consumer of operation.consumers) {
+          potentiallyAffectedOperations.add(consumer);
+        }
+
         const { name } = operation;
-        const expectedState: boolean | undefined = operationEnabledStates.get(name);
-        if (expectedState !== undefined) {
-          operation.enabled = expectedState;
+        const expectedState: OperationEnabledState | undefined = operationEnabledStates.get(name);
+        switch (expectedState) {
+          case 'affected':
+            operation.enabled = true;
+            break;
+          case 'never':
+            operation.enabled = false;
+            break;
+          case 'changed':
+            operation.enabled = context.projectsInUnknownState.has(operation.associatedProject);
+            break;
+          case undefined:
+            // Use the original value.
+            break;
         }
       }
 
@@ -473,8 +496,8 @@ function tryEnableBuildStatusWebSocketServer(
 
           case 'set-enabled-states': {
             const { enabledStateByOperationName } = parsedMessage;
-            for (const [name, enabled] of Object.entries(enabledStateByOperationName)) {
-              operationEnabledStates.set(name, enabled);
+            for (const [name, state] of Object.entries(enabledStateByOperationName)) {
+              operationEnabledStates.set(name, state);
             }
             break;
           }
