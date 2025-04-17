@@ -430,6 +430,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const isQuietMode: boolean = !this._verboseParameter.value;
 
     const changedProjectsOnly: boolean = !!this._changedProjectsOnlyParameter?.value;
+    this._changedProjectsOnly = changedProjectsOnly;
 
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
     let cobuildConfiguration: CobuildConfiguration | undefined;
