@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.18.0",
+      "tag": "@rushstack/heft-config-file_v0.18.0",
+      "date": "Thu, 17 Apr 2025 00:11:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow use of the value `null` to discard any value set for the property from a parent config file.."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.0",
       "tag": "@rushstack/heft-config-file_v0.17.0",
       "date": "Wed, 09 Apr 2025 00:11:02 GMT",

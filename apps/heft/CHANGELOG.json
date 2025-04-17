@@ -2,6 +2,26 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.73.1",
+      "tag": "@rushstack/heft_v0.73.1",
+      "date": "Thu, 17 Apr 2025 00:11:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation for `extends`"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.18.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.73.0",
       "tag": "@rushstack/heft_v0.73.0",
       "date": "Tue, 15 Apr 2025 15:11:57 GMT",

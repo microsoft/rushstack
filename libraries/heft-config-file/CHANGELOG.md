@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Wed, 09 Apr 2025 00:11:02 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Apr 2025 00:11:21 GMT and should not be manually modified.
+
+## 0.18.0
+Thu, 17 Apr 2025 00:11:21 GMT
+
+### Minor changes
+
+- Allow use of the value `null` to discard any value set for the property from a parent config file..
 
 ## 0.17.0
 Wed, 09 Apr 2025 00:11:02 GMT
