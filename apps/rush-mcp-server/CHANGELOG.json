@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/mcp-server",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/mcp-server_v0.1.0",
+      "date": "Thu, 17 Apr 2025 15:11:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Init rush mcp server project"
+          }
+        ]
+      }
+    }
+  ]
+}
