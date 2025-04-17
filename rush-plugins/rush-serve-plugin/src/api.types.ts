@@ -152,6 +152,30 @@ export interface IWebSocketSyncCommandMessage {
 }
 
 /**
+ * Message received from a WebSocket client to request invalidation of one or more operations.
+ */
+export interface IWebSocketInvalidateCommandMessage {
+  command: 'invalidate';
+  operationNames: string[];
+}
+
+/**
+ * The set of possible operation enabled states.
+ */
+export type OperationEnabledState = 'never' | 'changed' | 'affected';
+
+/**
+ * Message received from a WebSocket client to change the enabled states of operations.
+ */
+export interface IWebSocketSetEnabledStatesCommandMessage {
+  command: 'set-enabled-states';
+  enabledStateByOperationName: Record<string, OperationEnabledState>;
+}
+
+/**
  * The set of possible messages received from a WebSocket client.
  */
-export type IWebSocketCommandMessage = IWebSocketSyncCommandMessage;
+export type IWebSocketCommandMessage =
+  | IWebSocketSyncCommandMessage
+  | IWebSocketInvalidateCommandMessage
+  | IWebSocketSetEnabledStatesCommandMessage;

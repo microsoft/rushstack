@@ -21,6 +21,14 @@ const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
 export class PhasedOperationPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
     hooks.createOperations.tap(PLUGIN_NAME, createOperations);
+    // Configure operations later.
+    hooks.createOperations.tap(
+      {
+        name: `${PLUGIN_NAME}.Configure`,
+        stage: 1000
+      },
+      configureOperations
+    );
   }
 }
 
@@ -39,8 +47,6 @@ function createOperations(
       getOrCreateOperation(phase, project);
     }
   }
-
-  configureOperations(existingOperations, context);
 
   return existingOperations;
 
@@ -88,7 +94,7 @@ function createOperations(
   }
 }
 
-function configureOperations(operations: ReadonlySet<Operation>, context: ICreateOperationsContext): void {
+function configureOperations(operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
   const {
     changedProjectsOnly,
     projectsInUnknownState: changedProjects,
@@ -149,6 +155,8 @@ function configureOperations(operations: ReadonlySet<Operation>, context: ICreat
       operation.enabled &&= phaseSelection.has(associatedPhase) && projectSelection.has(associatedProject);
     }
   }
+
+  return operations;
 }
 
 // Convert the [IPhase, RushConfigurationProject] into a value suitable for use as a Map key

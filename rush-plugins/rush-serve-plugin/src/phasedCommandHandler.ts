@@ -45,7 +45,8 @@ import type {
   ReadableOperationStatus,
   IWebSocketCommandMessage,
   IRushSessionInfo,
-  ILogFileURLs
+  ILogFileURLs,
+  OperationEnabledState
 } from './api.types';
 
 export interface IPhasedCommandHandlerOptions {
@@ -389,6 +390,51 @@ function tryEnableBuildStatusWebSocketServer(
 
   const { hooks } = command;
 
+  let invalidateOperation: ((operation: Operation, reason: string) => void) | undefined;
+
+  const operationEnabledStates: Map<string, OperationEnabledState> = new Map();
+  hooks.createOperations.tap(
+    {
+      name: PLUGIN_NAME,
+      stage: Infinity
+    },
+    (operations: Set<Operation>, context: ICreateOperationsContext) => {
+      const potentiallyAffectedOperations: Set<Operation> = new Set();
+      for (const operation of operations) {
+        const { associatedProject } = operation;
+        if (context.projectsInUnknownState.has(associatedProject)) {
+          potentiallyAffectedOperations.add(operation);
+        }
+      }
+      for (const operation of potentiallyAffectedOperations) {
+        for (const consumer of operation.consumers) {
+          potentiallyAffectedOperations.add(consumer);
+        }
+
+        const { name } = operation;
+        const expectedState: OperationEnabledState | undefined = operationEnabledStates.get(name);
+        switch (expectedState) {
+          case 'affected':
+            operation.enabled = true;
+            break;
+          case 'never':
+            operation.enabled = false;
+            break;
+          case 'changed':
+            operation.enabled = context.projectsInUnknownState.has(operation.associatedProject);
+            break;
+          case undefined:
+            // Use the original value.
+            break;
+        }
+      }
+
+      invalidateOperation = context.invalidateOperation;
+
+      return operations;
+    }
+  );
+
   hooks.beforeExecuteOperations.tap(
     PLUGIN_NAME,
     (operationsToExecute: Map<Operation, IOperationExecutionResult>): void => {
@@ -449,6 +495,27 @@ function tryEnableBuildStatusWebSocketServer(
         switch (parsedMessage.command) {
           case 'sync': {
             sendSyncMessage(webSocket);
+            break;
+          }
+
+          case 'set-enabled-states': {
+            const { enabledStateByOperationName } = parsedMessage;
+            for (const [name, state] of Object.entries(enabledStateByOperationName)) {
+              operationEnabledStates.set(name, state);
+            }
+            break;
+          }
+
+          case 'invalidate': {
+            const { operationNames } = parsedMessage;
+            const operationNameSet: Set<string> = new Set(operationNames);
+            if (invalidateOperation && operationStates) {
+              for (const operation of operationStates.keys()) {
+                if (operationNameSet.has(operation.name)) {
+                  invalidateOperation(operation, 'WebSocket');
+                }
+              }
+            }
             break;
           }
 

@@ -146,6 +146,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _alwaysInstall: boolean | undefined;
   private readonly _knownPhases: ReadonlyMap<string, IPhase>;
   private readonly _terminal: ITerminal;
+  private _changedProjectsOnly: boolean;
 
   private readonly _changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
   private readonly _selectionParameters: SelectionParameterSet;
@@ -161,8 +162,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _nodeDiagnosticDirParameter: CommandLineStringParameter;
   private readonly _debugBuildCacheIdsParameter: CommandLineFlagParameter;
   private readonly _includePhaseDeps: CommandLineFlagParameter | undefined;
-
-  private _changedProjectsOnly: boolean;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -845,7 +844,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       // Account for consumer relationships
       const executeOperationsContext: IExecuteOperationsContext = {
         ...initialCreateOperationsContext,
-        changedProjectsOnly: this._changedProjectsOnly,
+        changedProjectsOnly: !!this._changedProjectsOnly,
         isInitial: false,
         inputsSnapshot: state,
         projectsInUnknownState: changedProjects,
@@ -960,6 +959,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         countSkipped: 0,
         countNoOp: 0
       };
+
+      const { _changedProjectsOnlyParameter: changedProjectsOnlyParameter } = this;
+      if (changedProjectsOnlyParameter) {
+        // Overwrite this value since we allow changing it at runtime.
+        extraData[changedProjectsOnlyParameter.scopedLongName ?? changedProjectsOnlyParameter.longName] =
+          this._changedProjectsOnly;
+      }
 
       if (result) {
         const { operationResults } = result;
