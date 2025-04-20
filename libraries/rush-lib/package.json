@@ -12,12 +12,26 @@
   },
   "engineStrict": true,
   "homepage": "https://rushjs.io",
-  "main": "lib/index.js",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "typings": "dist/rush-lib.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
+      "types": "./dist/rush-lib.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "typesVersions": {
     "*": {
-      "lib-esnext/*": [
-        "lib/*"
+      "lib/*": [
+        "lib-dts/*"
       ]
     }
   },
