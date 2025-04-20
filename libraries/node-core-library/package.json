@@ -47,7 +47,7 @@
     "ajv-formats": "~3.0.1"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.71.2",
+    "@rushstack/heft": "0.73.1",
     "@types/fs-extra": "7.0.0",
     "@types/jju": "1.4.1",
     "@types/resolve": "1.20.2",

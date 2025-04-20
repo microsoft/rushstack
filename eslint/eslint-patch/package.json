@@ -64,7 +64,7 @@
     "patch"
   ],
   "devDependencies": {
-    "@rushstack/heft": "0.71.2",
+    "@rushstack/heft": "0.73.1",
     "@types/eslint": "8.56.10",
     "@typescript-eslint/types": "~8.26.1",
     "decoupled-local-node-rig": "workspace:*",

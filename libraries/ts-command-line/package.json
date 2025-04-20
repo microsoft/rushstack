@@ -43,7 +43,7 @@
     "string-argv": "~0.3.1"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.71.2",
+    "@rushstack/heft": "0.73.1",
     "@rushstack/node-core-library": "workspace:*",
     "decoupled-local-node-rig": "workspace:*",
     "local-eslint-config": "workspace:*"
