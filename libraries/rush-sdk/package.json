@@ -8,25 +8,27 @@
     "directory": "apps/rush-sdk"
   },
   "homepage": "https://rushjs.io",
-  "main": "lib-commonjs/index.js",
+  "main": "lib-shim/index.js",
   "typings": "dist/rush-lib.d.ts",
   "exports": {
     ".": {
       "types": "./dist/rush-lib.d.ts",
-      "import": "./lib-esm/index.js",
-      "require": "./lib-commonjs/index.js"
+      "default": "./lib-shim/index.js"
+    },
+    "./loader": {
+      "types": "./dist/loader.d.ts",
+      "default": "./lib-shim/loader.js"
     },
     "./lib/*": {
-      "types": "./lib-dts/*.d.ts",
-      "import": "./lib-esm/*.js",
-      "require": "./lib-commonjs/*.js"
+      "types": "./lib/*.d.ts",
+      "default": "./lib/*.js"
     },
     "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
-      "lib/*": [
-        "lib-dts/*"
+      "loader": [
+        "./dist/loader.d.ts"
       ]
     }
   },
@@ -55,6 +57,5 @@
     "@types/semver": "7.5.0",
     "@types/webpack-env": "1.18.8",
     "webpack": "~5.98.0"
-  },
-  "module": "lib-esm/index.js"
+  }
 }
