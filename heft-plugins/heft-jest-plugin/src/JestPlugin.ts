@@ -971,7 +971,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
         // Example:  @rushstack/heft-jest-plugin/path/to/file.js
         if (propertyValue.startsWith(PLUGIN_PACKAGE_NAME)) {
-          debugger;
           let restOfPath: string = path.posix.normalize(
             './' + propertyValue.slice(PLUGIN_PACKAGE_NAME.length)
           );
