@@ -30,5 +30,7 @@
 # ---------------------------------------------------------------------------
 # DO NOT MODIFY ABOVE THIS LINE!  Add any project-specific overrides below.
 # ---------------------------------------------------------------------------
+
+/lib-dts/**
 /lib-commonjs/**
-/lib-esnext/**
+/lib-esm/**

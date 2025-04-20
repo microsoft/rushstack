@@ -44,7 +44,8 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "tapable": "2.2.1"
+    "tapable": "2.2.1",
+    "true-case-path": "~2.2.1"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",

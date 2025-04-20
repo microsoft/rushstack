@@ -3418,6 +3418,9 @@ importers:
       tapable:
         specifier: 2.2.1
         version: 2.2.1
+      true-case-path:
+        specifier: ~2.2.1
+        version: 2.2.1
     devDependencies:
       '@microsoft/rush-lib':
         specifier: workspace:*
