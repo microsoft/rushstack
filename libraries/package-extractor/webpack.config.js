@@ -2,7 +2,7 @@
 
 const webpack = require('webpack');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
-const { CREATE_LINKS_SCRIPT_FILENAME, SCRIPTS_FOLDER_PATH } = require('./lib/PathConstants');
+const { CREATE_LINKS_SCRIPT_FILENAME, SCRIPTS_FOLDER_PATH } = require('./lib-commonjs/PathConstants');
 
 module.exports = () => {
   return {
@@ -11,7 +11,7 @@ module.exports = () => {
     devtool: 'source-map',
     entry: {
       [CREATE_LINKS_SCRIPT_FILENAME]: {
-        import: `${__dirname}/lib-esnext/scripts/createLinks/start.js`,
+        import: `${__dirname}/lib-esm/scripts/createLinks/start.js`,
         filename: `[name]`
       }
     },
