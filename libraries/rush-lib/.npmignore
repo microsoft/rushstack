@@ -33,3 +33,7 @@
 
 !/assets/**
 
+# Consider publishing these in the future
+lib-commonjs/**
+lib-esm/**
+

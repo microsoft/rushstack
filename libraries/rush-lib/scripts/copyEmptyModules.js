@@ -22,29 +22,19 @@ module.exports = {
     // creates a problem when a `.d.ts` file references a module that doesn't have runtime code (i.e. -
     // a `.d.ts` file that only contains types).
     //
-    // This script looks through the `lib-esnext` folder for `.js` files that were produced by the TypeScript
+    // This script looks through the `lib-esm` folder for `.js` files that were produced by the TypeScript
     // compiler from `.ts` files that contain no runtime code and generates stub `.js` files for them in the
     // `lib` folder and copies the corresponding `.d.ts` files to the `lib`. This ensures that the `.d.ts`
     // files that end up in the `lib` folder don't have any unresolved imports. This is tested by the
     // `rush-lib-declaration-paths-test` project in the `build-tests`
 
     function stripCommentsFromJsFile(jsFileText) {
-      const lines = jsFileText.split('\n');
-      const resultLines = [];
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (trimmedLine === '' || trimmedLine.startsWith('//')) {
-          continue;
-        }
-
-        resultLines.push(trimmedLine);
-      }
-
-      return resultLines.join('\n');
+      jsFileText = jsFileText.replace(/^\s*\/\/.*$/gm, '');
+      jsFileText = jsFileText.replace(/\/\*.*\*\//gs, '');
+      return jsFileText;
     }
 
-    const jsInFolderPath = `${buildFolderPath}/lib-esnext`;
-    const dtsInFolderPath = `${buildFolderPath}/lib-commonjs`;
+    const inFolderPath = `${buildFolderPath}/lib-esm`;
     const outFolderPath = `${buildFolderPath}/lib`;
     const emptyModuleBuffer = Buffer.from('module.exports = {};', 'utf8');
     const folderPathQueue = new AsyncQueue([undefined]);
@@ -52,33 +42,28 @@ module.exports = {
     await Async.forEachAsync(
       folderPathQueue,
       async ([relativeFolderPath, callback]) => {
-        const folderPath = relativeFolderPath ? `${jsInFolderPath}/${relativeFolderPath}` : jsInFolderPath;
+        const folderPath = relativeFolderPath ? `${inFolderPath}/${relativeFolderPath}` : inFolderPath;
         const folderItems = await FileSystem.readFolderItemsAsync(folderPath);
         for (const folderItem of folderItems) {
           const itemName = folderItem.name;
+          if (itemName === 'IRushPlugin.js') {
+            debugger;
+          }
+
           const relativeItemPath = relativeFolderPath ? `${relativeFolderPath}/${itemName}` : itemName;
 
           if (folderItem.isDirectory()) {
             folderPathQueue.push(relativeItemPath);
           } else if (folderItem.isFile() && itemName.endsWith(JS_FILE_EXTENSION)) {
-            const jsInPath = `${jsInFolderPath}/${relativeItemPath}`;
+            const jsInPath = `${inFolderPath}/${relativeItemPath}`;
             const jsFileText = await FileSystem.readFileAsync(jsInPath);
             const strippedJsFileText = stripCommentsFromJsFile(jsFileText);
-            if (strippedJsFileText === 'export {};') {
+            if (strippedJsFileText.match(/^\s*export\s+\{\s*\}\s*;?\s*$/gs)) {
               const outJsPath = `${outFolderPath}/${relativeItemPath}`;
               terminal.writeVerboseLine(`Writing stub to ${outJsPath}`);
               await FileSystem.writeFileAsync(outJsPath, emptyModuleBuffer, {
                 ensureFolderExists: true
               });
-
-              const relativeDtsPath =
-                relativeItemPath.slice(0, -JS_FILE_EXTENSION.length) + DTS_FILE_EXTENSION;
-              const inDtsPath = `${dtsInFolderPath}/${relativeDtsPath}`;
-              const outDtsPath = `${outFolderPath}/${relativeDtsPath}`;
-              terminal.writeVerboseLine(`Copying ${inDtsPath} to ${outDtsPath}`);
-              // We know this is a file, don't need the redundant checks in FileSystem.copyFileAsync
-              const buffer = await FileSystem.readFileToBufferAsync(inDtsPath);
-              await FileSystem.writeFileAsync(outDtsPath, buffer, { ensureFolderExists: true });
             }
           }
         }
