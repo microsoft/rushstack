@@ -15,4 +15,4 @@ const identityMock: unknown = new Proxy(
   }
 );
 
-export = identityMock;
+module.exports = identityMock;

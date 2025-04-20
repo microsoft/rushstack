@@ -2,4 +2,4 @@
 // See LICENSE in the project root for license information.
 
 import resolver from '../HeftJestResolver';
-export = resolver;
+module.exports = resolver;

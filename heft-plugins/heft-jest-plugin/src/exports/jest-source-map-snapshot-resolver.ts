@@ -2,4 +2,4 @@
 // See LICENSE in the project root for license information.
 
 import resolver from '../SourceMapSnapshotResolver';
-export = resolver;
+module.exports = resolver;
