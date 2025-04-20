@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('../lib/startWithVersionSelector.js');
+require('../lib-commonjs/startWithVersionSelector.js');
