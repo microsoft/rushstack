@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import moduleApi = require('module');
+import moduleApi from 'module';
 import process from 'process';
 
 import { LauncherAction } from './LauncherTypes'; // "import type" doesn't work with const enums

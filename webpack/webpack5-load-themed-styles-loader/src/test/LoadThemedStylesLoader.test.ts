@@ -3,7 +3,7 @@
 
 import * as loader from '..';
 import type { Stats } from 'webpack';
-import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');
+import LoadThemedStylesMock from './testData/LoadThemedStylesMock';
 import getCompiler from './testData/getCompiler';
 
 const MATCH_GENERATED_LOADER_STRING_REGEXP: RegExp = /var\sloader\s\=\srequire\(["'](.+?)["']\)/;

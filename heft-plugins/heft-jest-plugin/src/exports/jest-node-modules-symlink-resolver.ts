@@ -3,5 +3,5 @@
 
 import '../JestRealPathPatch';
 // Using this syntax because HeftJestResolver uses `export =` syntax.
-import resolver = require('../HeftJestResolver');
+import resolver from '../HeftJestResolver';
 export = resolver;

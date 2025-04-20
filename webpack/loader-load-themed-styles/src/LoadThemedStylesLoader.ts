@@ -8,7 +8,7 @@
  */
 
 import type { loader } from 'webpack';
-import loaderUtils = require('loader-utils');
+import loaderUtils from 'loader-utils';
 
 const loadedThemedStylesPath: string = require.resolve('@microsoft/load-themed-styles');
 
