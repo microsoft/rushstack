@@ -2,6 +2,21 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "5.0.0",
+      "tag": "@rushstack/ts-command-line_v5.0.0",
+      "date": "Mon, 21 Apr 2025 22:24:25 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Remove the deprecated `onDefineParameters`, `execute`, `executeWithoutErrorHandling`, and `onDefineUnscopedParameters` functions."
+          },
+          {
+            "comment": "Rename `onExecute` to `onExecuteAsync`, `CommandLineParameter` to `CommandLineParameterBase`, and `completions` to `getCompletionsAsync`."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.23.7",
       "tag": "@rushstack/ts-command-line_v4.23.7",
       "date": "Tue, 25 Mar 2025 15:11:15 GMT",
