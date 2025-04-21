@@ -521,8 +521,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       aws-cdk-lib:
-        specifier: 2.187.0
-        version: 2.187.0(constructs@10.0.130)
+        specifier: 2.189.1
+        version: 2.189.1(constructs@10.0.130)
       constructs:
         specifier: ~10.0.98
         version: 10.0.130
@@ -15061,8 +15061,8 @@ packages:
       - supports-color
     dev: false
 
-  /aws-cdk-lib@2.187.0(constructs@10.0.130):
-    resolution: {integrity: sha512-OrAWin+LD5sZhRF5cWuEYEkmC/sxxlgcAasCpfzeRsj6yDImwmeQsaKhM7xqzZQBInog6ZbN6oFZYiWEGJMSIA==}
+  /aws-cdk-lib@2.189.1(constructs@10.0.130):
+    resolution: {integrity: sha512-9JU0yUr2iRTJ1oCPrHyx7hOtBDWyUfyOcdb6arlumJnMcQr2cyAMASY8HuAXHc8Y10ipVp8dRTW+J4/132IIYA==}
     engines: {node: '>= 14.15.0'}
     peerDependencies:
       constructs: ^10.0.0
