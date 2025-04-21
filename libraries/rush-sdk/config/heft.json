@@ -33,14 +33,34 @@
         },
 
         "webpack": {
-          "taskDependencies": ["typescript"],
+          "taskDependencies": ["transpile"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-webpack5-plugin"
           }
         },
 
+        "copy-stub-dts": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "./node_modules/@microsoft/rush-lib/lib-dts",
+                  "destinationFolders": ["lib"],
+                  "fileExtensions": [".d.ts", ".map"]
+                }
+              ]
+            }
+          }
+        },
+
         "generate-stubs": {
-          "taskDependencies": ["typescript"],
+          "taskDependencies": [
+            "transpile",
+            // Do this after "copy-stub-dts" to avoid disk concurrency issues
+            "copy-stub-dts"
+          ],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft",
             "pluginName": "run-script-plugin",
