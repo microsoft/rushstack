@@ -6622,6 +6622,7 @@ packages:
       '@rushstack/package-deps-hash': file:../../../libraries/package-deps-hash(@types/node@20.17.19)
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
       tapable: 2.2.1
+      true-case-path: 2.2.1
     transitivePeerDependencies:
       - '@types/node'
     dev: false
