@@ -29,9 +29,6 @@
     "*": {
       "loader": [
         "./dist/loader.d.ts"
-      ],
-      "lib/*": [
-        "lib-dts/*"
       ]
     }
   },
