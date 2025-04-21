@@ -3,7 +3,6 @@
 const { FileSystem, Async, AsyncQueue } = require('@rushstack/node-core-library');
 
 const JS_FILE_EXTENSION = '.js';
-const DTS_FILE_EXTENSION = '.d.ts';
 
 module.exports = {
   runAsync: async ({
@@ -46,10 +45,6 @@ module.exports = {
         const folderItems = await FileSystem.readFolderItemsAsync(folderPath);
         for (const folderItem of folderItems) {
           const itemName = folderItem.name;
-          if (itemName === 'IRushPlugin.js') {
-            debugger;
-          }
-
           const relativeItemPath = relativeFolderPath ? `${relativeFolderPath}/${itemName}` : itemName;
 
           if (folderItem.isDirectory()) {
