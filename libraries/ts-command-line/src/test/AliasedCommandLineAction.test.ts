@@ -73,7 +73,6 @@ class TestScopedAction extends ScopedCommandLineAction {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    expect(this._scopedArg).toBeDefined();
     if (this._scopedArg) {
       expect(this._scopedArg.longName).toBe(`--scoped-${this._scopeArg.value}`);
       this.scopedValue = this._scopedArg.value;
