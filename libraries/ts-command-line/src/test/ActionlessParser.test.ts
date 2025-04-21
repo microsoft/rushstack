@@ -20,8 +20,8 @@ class TestCommandLine extends CommandLineParser {
     });
   }
 
-  protected async onExecute(): Promise<void> {
-    await super.onExecute();
+  protected override async onExecuteAsync(): Promise<void> {
+    await super.onExecuteAsync();
     this.done = true;
   }
 }

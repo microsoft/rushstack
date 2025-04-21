@@ -5,7 +5,7 @@ import { SCOPING_PARAMETER_GROUP } from '../Constants';
 import { CommandLineAction, type ICommandLineActionOptions } from './CommandLineAction';
 import { CommandLineParser, type ICommandLineParserOptions } from './CommandLineParser';
 import { CommandLineParserExitError } from './CommandLineParserExitError';
-import type { CommandLineParameter, CommandLineParameterBase } from '../parameters/BaseClasses';
+import type { CommandLineParameter } from '../parameters/BaseClasses';
 import type {
   CommandLineParameterProvider,
   ICommandLineParserData,
@@ -69,8 +69,7 @@ class InternalScopedCommandLineParser extends CommandLineParser {
     super._registerDefinedParameters(this._internalOptions.registerDefinedParametersState);
   }
 
-  protected async onExecute(): Promise<void> {
-    // override
+  protected override async onExecuteAsync(): Promise<void> {
     // Only set if we made it this far, which may not be the case if an error occurred or
     // if '--help' was specified.
     this._canExecute = true;
@@ -129,11 +128,8 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
   /**
    * {@inheritDoc CommandLineParameterProvider.parameters}
-   *
-   * @internalremarks
-   * TODO: Replace this type with `CommandLineParameter` in the next major bump.
    */
-  public get parameters(): ReadonlyArray<CommandLineParameterBase> {
+  public get parameters(): ReadonlyArray<CommandLineParameter> {
     if (this._scopedCommandLineParser) {
       return [...super.parameters, ...this._scopedCommandLineParser.parameters];
     } else {
@@ -145,8 +141,10 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    * {@inheritdoc CommandLineParameterProvider._processParsedData}
    * @internal
    */
-  public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
-    // override
+  public override _processParsedData(
+    parserOptions: ICommandLineParserOptions,
+    data: ICommandLineParserData
+  ): void {
     super._processParsedData(parserOptions, data);
 
     // This should never happen because the super method should throw if parameters haven't been registered,
@@ -174,8 +172,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    * {@inheritdoc CommandLineAction._executeAsync}
    * @internal
    */
-  public async _executeAsync(): Promise<void> {
-    // override
+  public override async _executeAsync(): Promise<void> {
     if (!this._unscopedParserOptions || !this._scopedCommandLineParser) {
       throw new Error('The CommandLineAction parameters must be processed before execution.');
     }
@@ -268,7 +265,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   protected abstract onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void;
 
   /**
-   * {@inheritDoc CommandLineAction.onExecute}
+   * {@inheritDoc CommandLineAction.onExecuteAsync}
    */
-  protected abstract onExecute(): Promise<void>;
+  protected abstract onExecuteAsync(): Promise<void>;
 }

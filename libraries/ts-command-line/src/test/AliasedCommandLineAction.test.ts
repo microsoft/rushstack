@@ -39,7 +39,7 @@ class TestAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     expect(this._flag.value).toEqual(true);
     this.done = true;
   }
@@ -72,7 +72,7 @@ class TestScopedAction extends ScopedCommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     expect(this._scopedArg).toBeDefined();
     if (this._scopedArg) {
       expect(this._scopedArg.longName).toBe(`--scoped-${this._scopeArg.value}`);

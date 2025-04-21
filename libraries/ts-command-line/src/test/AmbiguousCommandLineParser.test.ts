@@ -69,7 +69,7 @@ class AmbiguousAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     expect(this._short1Arg.value).toEqual('short1value');
     expect(this._shortArg2.value).toEqual('short2value');
     expect(this._scope1Arg.value).toEqual('scope1value');
@@ -96,7 +96,7 @@ class AbbreviationAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     this.done = true;
   }
 }
@@ -140,7 +140,7 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     expect(this._scopingArg?.value).toEqual(true);
     if (this._short1Arg?.value) {
       this.short1Value = this._short1Arg.value;
@@ -234,7 +234,7 @@ class AbbreviationScopedAction extends ScopedCommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     expect(this._scopingArg.value).toEqual(true);
     this.done = true;
   }

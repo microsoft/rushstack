@@ -29,7 +29,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
   /** {@inheritDoc ICommandLineChoiceDefinition.completions} */
   public readonly completions: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
 
-  /** {@inheritDoc CommandLineParameter.kind} */
+  /** {@inheritDoc CommandLineParameterBase.kind} */
   public readonly kind: CommandLineParameterKind.Choice = -CommandLineParameterKind.Choice;
 
   /** @internal */
@@ -57,7 +57,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._setValue}
+   * {@inheritDoc CommandLineParameterBase._setValue}
    * @internal
    */
   public _setValue(data: unknown): void {
@@ -96,7 +96,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._getSupplementaryNotes}
+   * {@inheritDoc CommandLineParameterBase._getSupplementaryNotes}
    * @internal
    */
   public _getSupplementaryNotes(supplementaryNotes: string[]): void {
@@ -118,7 +118,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
     return this._value;
   }
 
-  /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.value !== undefined) {
       argList.push(this.longName);

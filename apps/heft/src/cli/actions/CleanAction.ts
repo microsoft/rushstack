@@ -76,7 +76,7 @@ export class CleanAction extends CommandLineAction implements IHeftAction {
     return this._selectedPhases;
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const { heftConfiguration } = this._internalHeftSession;
     const abortSignal: AbortSignal = ensureCliAbortSignal(this._terminal);
 

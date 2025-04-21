@@ -174,7 +174,7 @@ export class CheckAction extends CommandLineAction {
     }
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
     if (!rushConfiguration) {
       throw new Error(

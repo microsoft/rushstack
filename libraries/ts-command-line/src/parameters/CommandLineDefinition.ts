@@ -127,10 +127,8 @@ export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLine
    * @remarks
    * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
    * is enabled.
-   *
-   * In a future release, this will be renamed to `getCompletionsAsync`
    */
-  completions?: () => Promise<ReadonlyArray<string> | ReadonlySet<string>>;
+  getCompletionsAsync?: () => Promise<ReadonlyArray<string> | ReadonlySet<string>>;
 }
 
 /**

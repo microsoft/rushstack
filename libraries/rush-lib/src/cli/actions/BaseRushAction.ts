@@ -57,7 +57,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     this.rushGlobalFolder = rushGlobalFolder;
   }
 
-  protected onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     this._ensureEnvironment();
 
     if (this.rushConfiguration) {
@@ -74,7 +74,8 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
       this.terminal.write(`Starting "rush ${this.actionName}"\n`);
     }
-    return this.runAsync();
+
+    return await this.runAsync();
   }
 
   /**
@@ -113,7 +114,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
 
   protected readonly rushConfiguration!: RushConfiguration;
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     if (!this.rushConfiguration) {
       throw Utilities.getRushConfigNotFoundError();
     }
@@ -130,7 +131,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
       await sessionHooks.initialize.promise(this);
     }
 
-    return super.onExecute();
+    return super.onExecuteAsync();
   }
 
   /**

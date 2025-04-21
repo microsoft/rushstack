@@ -50,8 +50,7 @@ export class YamlAction extends BaseAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
-    // override
+  protected override async onExecuteAsync(): Promise<void> {
     const { apiModel, inputFolder, outputFolder } = this.buildApiModel();
 
     const yamlDocumenter: YamlDocumenter = this._officeParameter.value

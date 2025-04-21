@@ -26,7 +26,7 @@ export class LintCommandLineParser extends CommandLineParser {
     this._populateActions();
   }
 
-  protected override async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
     const lockfileExplorerPackageJson: IPackageJson = JsonFile.load(
       `${lockfileExplorerProjectRoot}/package.json`
@@ -37,7 +37,7 @@ export class LintCommandLineParser extends CommandLineParser {
       Colorize.bold(`\nRush Lockfile Lint ${appVersion}`) + Colorize.cyan(' - https://lfx.rushstack.io/\n')
     );
 
-    await super.onExecute();
+    await super.onExecuteAsync();
   }
 
   private _populateActions(): void {

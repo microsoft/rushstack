@@ -176,7 +176,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     }
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     try {
       const selectedAction: CommandLineAction | undefined = this.selectedAction;
 
@@ -196,7 +196,7 @@ export class HeftCommandLineParser extends CommandLineParser {
         commandName,
         unaliasedCommandName
       };
-      await super.onExecute();
+      await super.onExecuteAsync();
     } catch (e) {
       await this._reportErrorAndSetExitCodeAsync(e as Error);
     }

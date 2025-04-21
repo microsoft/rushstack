@@ -22,8 +22,7 @@ export class GenerateAction extends BaseAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
-    // override
+  protected override async onExecuteAsync(): Promise<void> {
     // Look for the config file under the current folder
 
     let configFilePath: string = path.join(process.cwd(), DocumenterConfig.FILENAME);

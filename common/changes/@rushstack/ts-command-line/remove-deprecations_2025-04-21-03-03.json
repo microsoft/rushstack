@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Rename `onExecute` to `onExecuteAsync`, `CommandLineParameter` to `CommandLineParameterBase`, and `completions` to `getCompletionsAsync`.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line"
+}

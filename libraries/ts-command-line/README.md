@@ -90,7 +90,7 @@ export class PushAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> { // abstract
+  protected override async onExecuteAsync(): Promise<void> { // abstract
     await BusinessLogic.doTheWork(this._force.value, this._protocol.value || "(none)");
   }
 }
@@ -117,9 +117,9 @@ export class WidgetCommandLine extends CommandLineParser {
     });
   }
 
-  protected async onExecute(): Promise<void> { // override
+  protected override async onExecuteAsync(): Promise<void> {
     BusinessLogic.configureLogger(this._verbose.value);
-    await super.onExecute();
+    await super.onExecuteAsync();
   }
 }
 ```

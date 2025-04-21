@@ -23,12 +23,11 @@ export class CreateLinksCommandLineParser extends CommandLineParser {
     this.addAction(new RemoveLinksAction(this._terminal));
   }
 
-  protected async onExecute(): Promise<void> {
-    // override
+  protected override async onExecuteAsync(): Promise<void> {
     process.exitCode = 1;
 
     try {
-      await super.onExecute();
+      await super.onExecuteAsync();
       process.exitCode = 0;
     } catch (error) {
       if (!(error instanceof AlreadyReportedError)) {

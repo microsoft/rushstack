@@ -277,7 +277,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       }
 
       this.selectedAction?._processParsedData(this._options, data);
-      await this.onExecute();
+      await this.onExecuteAsync();
     } catch (err) {
       if (err instanceof CommandLineParserExitError) {
         if (!err.exitCode) {
@@ -325,8 +325,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
    * @internal
    */
-  protected _getArgumentParser(): argparse.ArgumentParser {
-    // override
+  protected override _getArgumentParser(): argparse.ArgumentParser {
     return this._argumentParser;
   }
 
@@ -334,7 +333,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * This hook allows the subclass to perform additional operations before or after
    * the chosen action is executed.
    */
-  protected async onExecute(): Promise<void> {
+  protected async onExecuteAsync(): Promise<void> {
     if (this.selectedAction) {
       await this.selectedAction._executeAsync();
     }

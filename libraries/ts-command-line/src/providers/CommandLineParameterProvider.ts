@@ -140,7 +140,7 @@ export abstract class CommandLineParameterProvider {
   /**
    * Returns a collection of the parameters that were defined for this object.
    */
-  public get parameters(): ReadonlyArray<CommandLineParameterBase> {
+  public get parameters(): ReadonlyArray<CommandLineParameter> {
     return this._parameters;
   }
 

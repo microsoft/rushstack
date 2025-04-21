@@ -11,7 +11,7 @@ import { CommandLineParameterBase, CommandLineParameterKind } from './BaseClasse
 export class CommandLineFlagParameter extends CommandLineParameterBase {
   private _value: boolean = false;
 
-  /** {@inheritDoc CommandLineParameter.kind} */
+  /** {@inheritDoc CommandLineParameterBase.kind} */
   public readonly kind: CommandLineParameterKind.Flag = CommandLineParameterKind.Flag;
 
   /** @internal */
@@ -20,7 +20,7 @@ export class CommandLineFlagParameter extends CommandLineParameterBase {
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._setValue}
+   * {@inheritDoc CommandLineParameterBase._setValue}
    * @internal
    */
   public _setValue(data: unknown): void {
@@ -68,7 +68,7 @@ export class CommandLineFlagParameter extends CommandLineParameterBase {
     return this._value;
   }
 
-  /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.value) {
       argList.push(this.longName);

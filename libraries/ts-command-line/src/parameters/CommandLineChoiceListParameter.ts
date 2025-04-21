@@ -20,7 +20,7 @@ export class CommandLineChoiceListParameter<
   /** {@inheritDoc ICommandLineChoiceListDefinition.completions} */
   public readonly completions: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
 
-  /** {@inheritDoc CommandLineParameter.kind} */
+  /** {@inheritDoc CommandLineParameterBase.kind} */
   public readonly kind: CommandLineParameterKind.ChoiceList = CommandLineParameterKind.ChoiceList;
 
   /** @internal */
@@ -40,7 +40,7 @@ export class CommandLineChoiceListParameter<
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._setValue}
+   * {@inheritDoc CommandLineParameterBase._setValue}
    * @internal
    */
   public _setValue(data: unknown): void {
@@ -92,7 +92,7 @@ export class CommandLineChoiceListParameter<
     return this._values;
   }
 
-  /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.values.length > 0) {
       for (const value of this.values) {
