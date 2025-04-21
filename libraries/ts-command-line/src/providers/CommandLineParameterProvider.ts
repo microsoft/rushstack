@@ -589,11 +589,6 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * @deprecated - Define parameters in the constructor
-   */
-  protected onDefineParameters?(): void;
-
-  /**
    * Retrieves the argparse object.
    * @internal
    */

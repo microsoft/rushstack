@@ -101,8 +101,6 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
       }
       originalArgumentParserErrorFn(err);
     };
-
-    this.onDefineParameters?.();
   }
 
   /**

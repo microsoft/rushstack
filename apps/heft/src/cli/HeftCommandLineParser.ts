@@ -228,7 +228,7 @@ export class HeftCommandLineParser extends CommandLineParser {
       // try to evaluate any parameters. This is to ensure that the
       // `--debug` flag is defined correctly before we do this not-so-rigorous
       // parameter parsing.
-      throw new InternalError('onDefineParameters() has not yet been called.');
+      throw new InternalError('parameters have not yet been defined.');
     }
 
     const toolParameters: Set<string> = getToolParameterNamesFromArgs(args);

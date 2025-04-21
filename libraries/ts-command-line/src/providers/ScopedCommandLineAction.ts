@@ -125,8 +125,6 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
         'Scoped parameters.  Must be prefixed with "--", ex. "-- --scopedParameter ' +
         'foo --scopedFlag".  For more information on available scoped parameters, use "-- --help".'
     });
-
-    this.onDefineUnscopedParameters?.();
   }
 
   /**
@@ -182,7 +180,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
       throw new Error('The CommandLineAction parameters must be processed before execution.');
     }
     if (!this.remainder) {
-      throw new Error('CommandLineAction.onDefineParameters must be called before execution.');
+      throw new Error('Parameters must be defined before execution.');
     }
 
     // The '--' argument is required to separate the action parameters from the scoped parameters,
@@ -257,11 +255,6 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
       this._scopingParameters.push(parameter);
     }
   }
-
-  /**
-   * @deprecated - Define parameters in the constructor
-   */
-  protected onDefineUnscopedParameters?(): void;
 
   /**
    * The child class should implement this hook to define its scoped command-line

@@ -84,8 +84,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
           `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
       )
     });
-
-    this.onDefineParameters?.();
   }
 
   /**
@@ -196,14 +194,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   }
 
   /**
-   * @deprecated Use {@link CommandLineParser.executeAsync} instead.
-   */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public async execute(args?: string[]): Promise<boolean> {
-    return await this.executeAsync(args);
-  }
-
-  /**
    * This is similar to {@link CommandLineParser.executeAsync}, except that execution errors
    * simply cause the promise to reject.  It is the caller's responsibility to trap
    */
@@ -303,14 +293,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
 
       throw err;
     }
-  }
-
-  /**
-   * @deprecated Use {@link CommandLineParser.executeWithoutErrorHandlingAsync} instead.
-   */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public async executeWithoutErrorHandling(args?: string[]): Promise<void> {
-    await this.executeWithoutErrorHandlingAsync(args);
   }
 
   /** @internal */

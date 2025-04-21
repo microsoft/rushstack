@@ -217,8 +217,6 @@ export abstract class CommandLineParameterProvider {
     getParameterStringMap(): Record<string, string>;
     getStringListParameter(parameterLongName: string, parameterScope?: string): CommandLineStringListParameter;
     getStringParameter(parameterLongName: string, parameterScope?: string): CommandLineStringParameter;
-    // @deprecated (undocumented)
-    protected onDefineParameters?(): void;
     get parameters(): ReadonlyArray<CommandLineParameter>;
     get parametersProcessed(): boolean;
     parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult;
@@ -254,11 +252,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     constructor(options: ICommandLineParserOptions);
     get actions(): ReadonlyArray<CommandLineAction>;
     addAction(action: CommandLineAction): void;
-    // @deprecated (undocumented)
-    execute(args?: string[]): Promise<boolean>;
     executeAsync(args?: string[]): Promise<boolean>;
-    // @deprecated (undocumented)
-    executeWithoutErrorHandling(args?: string[]): Promise<void>;
     executeWithoutErrorHandlingAsync(args?: string[]): Promise<void>;
     getAction(actionName: string): CommandLineAction;
     // @internal
@@ -452,8 +446,6 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     // @internal
     protected _getScopedCommandLineParser(): CommandLineParser;
     protected abstract onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void;
-    // @deprecated (undocumented)
-    protected onDefineUnscopedParameters?(): void;
     protected abstract onExecute(): Promise<void>;
     get parameters(): ReadonlyArray<CommandLineParameter>;
     // @internal
