@@ -59,7 +59,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
     return this._debugParameter.value;
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
     const lockfileExplorerPackageJson: IPackageJson = JsonFile.load(
       `${lockfileExplorerProjectRoot}/package.json`

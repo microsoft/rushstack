@@ -145,7 +145,7 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     this._actionRunner.defineParameters(scopedParameterProvider);
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     await this._actionRunner.executeAsync();
   }
 }

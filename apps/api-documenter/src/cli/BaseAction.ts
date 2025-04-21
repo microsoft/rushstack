@@ -32,7 +32,6 @@ export abstract class BaseAction extends CommandLineAction {
   protected constructor(options: ICommandLineActionOptions) {
     super(options);
 
-    // override
     this._inputFolderParameter = this.defineStringParameter({
       parameterLongName: '--input-folder',
       parameterShortName: '-i',

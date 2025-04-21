@@ -75,7 +75,7 @@ export class SelectionParameterSet {
 
     this._selectorParserByScope = selectorParsers;
 
-    const getSpecifierCompletions: () => Promise<string[]> = async (): Promise<string[]> => {
+    const getCompletionsAsync: () => Promise<string[]> = async (): Promise<string[]> => {
       const completions: string[] = ['.'];
       for (const [prefix, selector] of selectorParsers) {
         for (const completion of selector.getCompletions()) {
@@ -101,7 +101,7 @@ export class SelectionParameterSet {
         ' Each "--to" parameter expands this selection to include PROJECT and all its dependencies.' +
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getSpecifierCompletions
+      getCompletionsAsync
     });
     this._toExceptProject = action.defineStringListParameter({
       parameterLongName: '--to-except',
@@ -114,7 +114,7 @@ export class SelectionParameterSet {
         ' but not PROJECT itself.' +
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getSpecifierCompletions
+      getCompletionsAsync
     });
 
     this._fromProject = action.defineStringListParameter({
@@ -128,7 +128,7 @@ export class SelectionParameterSet {
         ' plus all dependencies of this set.' +
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getSpecifierCompletions
+      getCompletionsAsync
     });
     this._onlyProject = action.defineStringListParameter({
       parameterLongName: '--only',
@@ -141,7 +141,7 @@ export class SelectionParameterSet {
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getSpecifierCompletions
+      getCompletionsAsync
     });
 
     this._impactedByProject = action.defineStringListParameter({
@@ -156,7 +156,7 @@ export class SelectionParameterSet {
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getSpecifierCompletions
+      getCompletionsAsync
     });
 
     this._impactedByExceptProject = action.defineStringListParameter({
@@ -171,7 +171,7 @@ export class SelectionParameterSet {
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getSpecifierCompletions
+      getCompletionsAsync
     });
 
     this._toVersionPolicy = action.defineStringListParameter({

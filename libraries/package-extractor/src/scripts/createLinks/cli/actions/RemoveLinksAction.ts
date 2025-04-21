@@ -38,7 +38,7 @@ export class RemoveLinksAction extends CommandLineAction {
     this._terminal = terminal;
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const extractorMetadataObject: IExtractorMetadataJson = await getExtractorMetadataAsync();
 
     this._terminal.writeLine(`Removing links for extraction at path "${TARGET_ROOT_FOLDER}"`);

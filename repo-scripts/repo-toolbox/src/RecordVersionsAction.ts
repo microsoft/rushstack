@@ -26,7 +26,7 @@ export class RecordVersionsAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     const rushConfig: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
       startingFolder: process.cwd()

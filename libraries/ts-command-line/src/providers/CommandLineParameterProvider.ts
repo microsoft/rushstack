@@ -140,7 +140,7 @@ export abstract class CommandLineParameterProvider {
   /**
    * Returns a collection of the parameters that were defined for this object.
    */
-  public get parameters(): ReadonlyArray<CommandLineParameterBase> {
+  public get parameters(): ReadonlyArray<CommandLineParameter> {
     return this._parameters;
   }
 
@@ -587,11 +587,6 @@ export abstract class CommandLineParameterProvider {
 
     this._parametersHaveBeenRegistered = true;
   }
-
-  /**
-   * @deprecated - Define parameters in the constructor
-   */
-  protected onDefineParameters?(): void;
 
   /**
    * Retrieves the argparse object.

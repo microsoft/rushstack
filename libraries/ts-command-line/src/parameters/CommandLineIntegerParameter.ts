@@ -22,7 +22,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
 
   private _value: number | undefined = undefined;
 
-  /** {@inheritDoc CommandLineParameter.kind} */
+  /** {@inheritDoc CommandLineParameterBase.kind} */
   public readonly kind: CommandLineParameterKind.Integer = CommandLineParameterKind.Integer;
 
   /** @internal */
@@ -33,7 +33,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._setValue}
+   * {@inheritDoc CommandLineParameterBase._setValue}
    * @internal
    */
   public _setValue(data: unknown): void {
@@ -71,7 +71,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._getSupplementaryNotes}
+   * {@inheritDoc CommandLineParameterBase._getSupplementaryNotes}
    * @internal
    */
   public _getSupplementaryNotes(supplementaryNotes: string[]): void {
@@ -93,7 +93,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     return this._value;
   }
 
-  /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.value !== undefined) {
       argList.push(this.longName);

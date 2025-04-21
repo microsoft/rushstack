@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Remove the deprecated `onDefineParameters`, `execute`, `executeWithoutErrorHandling`, and `onDefineUnscopedParameters` functions.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line"
+}

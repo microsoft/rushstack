@@ -98,7 +98,7 @@ export class CreateLinksAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const extractorMetadataObject: IExtractorMetadataJson = await getExtractorMetadataAsync();
     const realizeFiles: boolean = this._realizeFilesParameter.value;
     const linkBins: boolean = this._linkBinsParameter.value;

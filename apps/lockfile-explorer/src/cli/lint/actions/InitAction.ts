@@ -25,7 +25,7 @@ export class InitAction extends CommandLineAction {
     this._terminal = parser.globalTerminal;
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
     if (!rushConfiguration) {
       throw new Error(

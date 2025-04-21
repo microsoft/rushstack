@@ -224,7 +224,7 @@ export class RushCommandLineParser extends CommandLineParser {
     return await super.executeAsync(args);
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
     // For example, Node.js currently has the inexcusable design of terminating with zero exit code when
     // there is an uncaught promise exception.  This will supposedly be fixed in Node.js 9.
@@ -298,7 +298,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     try {
-      await super.onExecute();
+      await super.onExecuteAsync();
     } finally {
       if (this.telemetry) {
         this.flushTelemetry();

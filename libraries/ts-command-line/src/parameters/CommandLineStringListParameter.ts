@@ -12,7 +12,7 @@ import { EnvironmentVariableParser } from './EnvironmentVariableParser';
 export class CommandLineStringListParameter extends CommandLineParameterWithArgument {
   private _values: string[] = [];
 
-  /** {@inheritDoc CommandLineParameter.kind} */
+  /** {@inheritDoc CommandLineParameterBase.kind} */
   public readonly kind: CommandLineParameterKind.StringList = CommandLineParameterKind.StringList;
 
   /** @internal */
@@ -21,7 +21,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._setValue}
+   * {@inheritDoc CommandLineParameterBase._setValue}
    * @internal
    */
   public _setValue(data: unknown): void {
@@ -64,7 +64,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     return this._values;
   }
 
-  /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.values.length > 0) {
       for (const value of this.values) {

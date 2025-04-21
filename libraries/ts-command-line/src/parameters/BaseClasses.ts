@@ -61,6 +61,9 @@ const SCOPE_REGEXP: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
  */
 const ENVIRONMENT_VARIABLE_NAME_REGEXP: RegExp = /^[A-Z_][A-Z0-9_]*$/;
 
+/**
+ * @public
+ */
 export type CommandLineParameter =
   | CommandLineChoiceListParameter
   | CommandLineChoiceParameter
@@ -279,8 +282,10 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
   /** {@inheritDoc IBaseCommandLineDefinitionWithArgument.argumentName} */
   public readonly argumentName: string;
 
-  /** {@inheritDoc IBaseCommandLineDefinitionWithArgument.completions} */
-  public readonly completions: (() => Promise<ReadonlyArray<string> | ReadonlySet<string>>) | undefined;
+  /** {@inheritDoc IBaseCommandLineDefinitionWithArgument.getCompletionsAsync} */
+  public readonly getCompletionsAsync:
+    | (() => Promise<ReadonlyArray<string> | ReadonlySet<string>>)
+    | undefined;
 
   /** @internal */
   public constructor(definition: IBaseCommandLineDefinitionWithArgument) {
@@ -306,6 +311,6 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
       );
     }
     this.argumentName = definition.argumentName;
-    this.completions = definition.completions;
+    this.getCompletionsAsync = definition.getCompletionsAsync;
   }
 }

@@ -69,7 +69,7 @@ export class TabCompleteAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const commandLine: string = this._wordToCompleteParameter.value;
     const caretPosition: number = this._positionParameter.value || commandLine.length;
 
@@ -191,7 +191,7 @@ export class TabCompleteAction extends CommandLineAction {
       }
 
       const completionValues: ReadonlyArray<string> | ReadonlySet<string> | undefined =
-        await parameterWithArgumentOrChoices?.completions?.();
+        await parameterWithArgumentOrChoices?.getCompletionsAsync?.();
       choiceParameterValues = completionValues instanceof Set ? completionValues : new Set(completionValues);
     }
 

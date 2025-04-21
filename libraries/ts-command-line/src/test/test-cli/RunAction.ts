@@ -25,7 +25,7 @@ export class RunAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     // abstract
     // eslint-disable-next-line no-console
     console.log(`Console Title: ${this._title.value || '(none)'}`);

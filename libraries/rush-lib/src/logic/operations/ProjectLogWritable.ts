@@ -104,7 +104,7 @@ export class JsonLFileWritable extends TerminalWritable {
   }
 
   // Override writeChunk function to throw custom error
-  public writeChunk(chunk: ITerminalChunk): void {
+  public override writeChunk(chunk: ITerminalChunk): void {
     if (!this._writer) {
       throw new InternalError(`Log writer was closed for ${this.logPath}`);
     }
@@ -152,7 +152,7 @@ export class SplitLogFileWritable extends TerminalWritable {
   }
 
   // Override writeChunk function to throw custom error
-  public writeChunk(chunk: ITerminalChunk): void {
+  public override writeChunk(chunk: ITerminalChunk): void {
     if (!this._logWriter) {
       throw new InternalError(`Log writer was closed for ${this.logPath}`);
     }

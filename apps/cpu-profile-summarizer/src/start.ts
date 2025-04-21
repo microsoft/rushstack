@@ -147,7 +147,7 @@ class CpuProfileSummarizerCommandLineParser extends CommandLineParser {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const input: readonly string[] = this._inputParameter.values;
     const output: string = this._outputParameter.value;
 

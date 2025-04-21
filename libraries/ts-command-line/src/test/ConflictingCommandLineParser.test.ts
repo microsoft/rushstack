@@ -54,7 +54,7 @@ class TestAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     expect(this._scope1Arg.value).toEqual('scope1value');
     expect(this._scope2Arg.value).toEqual('scope2value');
     expect(this._nonConflictingArg.value).toEqual('nonconflictingvalue');
@@ -86,7 +86,7 @@ class UnscopedDuplicateArgumentTestAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     throw new Error('This action should not be executed');
   }
 }
@@ -115,7 +115,7 @@ class ScopedDuplicateArgumentTestAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     throw new Error('This action should not be executed');
   }
 }

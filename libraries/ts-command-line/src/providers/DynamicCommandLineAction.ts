@@ -7,7 +7,7 @@ import { CommandLineAction } from './CommandLineAction';
  * @public
  */
 export class DynamicCommandLineAction extends CommandLineAction {
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     // abstract
     // (handled by the external code)
   }
