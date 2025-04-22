@@ -135,7 +135,7 @@ export interface IHeftParameterManagerOptions {
 
 export class HeftParameterManager {
   private readonly _options: IHeftParameterManagerOptions;
-  // plugin defintiion => parameter accessors and defaults
+  // plugin definition => parameter accessors and defaults
   private readonly _heftParametersByDefinition: Map<HeftPluginDefinitionBase, IHeftParameters> = new Map();
   // plugin definition => Map< parameter long name => applied parameter >
   private readonly _parametersByDefinition: Map<HeftPluginDefinitionBase, Map<string, CommandLineParameter>> =
@@ -240,110 +240,125 @@ export class HeftParameterManager {
   /**
    * Add the parameters specified by a plugin definition to the command line parameter provider.
    * Duplicate parameters are allowed, as long as they have different parameter scopes. In this
-   * case, the parameter will only be referencable by the CLI argument
+   * case, the parameter will only be referenceable by the CLI argument
    * "--<parameterScope>:<parameterName>". If there is no duplicate parameter, it will also be
-   * referencable by the CLI argument "--<parameterName>".
+   * referenceable by the CLI argument "--<parameterName>".
    */
   private _addParametersToProvider(
     pluginDefinition: HeftPluginDefinitionBase,
     commandLineParameterProvider: CommandLineParameterProvider
   ): void {
+    const {
+      pluginName,
+      pluginPackageName,
+      pluginParameterScope: parameterScope,
+      pluginParameters
+    } = pluginDefinition;
     const existingDefinitionWithScope: HeftPluginDefinitionBase | undefined =
-      this._pluginDefinitionsByScope.get(pluginDefinition.pluginParameterScope);
+      this._pluginDefinitionsByScope.get(parameterScope);
     if (existingDefinitionWithScope && existingDefinitionWithScope !== pluginDefinition) {
+      const { pluginName: existingScopePluginName, pluginPackageName: existingScopePluginPackageName } =
+        existingDefinitionWithScope;
       throw new Error(
-        `Plugin ${JSON.stringify(pluginDefinition.pluginName)} in package ` +
-          `${JSON.stringify(pluginDefinition.pluginPackageName)} specifies the same parameter scope ` +
-          `${JSON.stringify(pluginDefinition.pluginParameterScope)} as plugin ` +
-          `${JSON.stringify(existingDefinitionWithScope.pluginName)} from package ` +
-          `${JSON.stringify(existingDefinitionWithScope.pluginPackageName)}.`
+        `Plugin ${JSON.stringify(pluginName)} in package ` +
+          `${JSON.stringify(pluginPackageName)} specifies the same parameter scope ` +
+          `${JSON.stringify(parameterScope)} as plugin ` +
+          `${JSON.stringify(existingScopePluginName)} from package ` +
+          `${JSON.stringify(existingScopePluginPackageName)}.`
       );
     } else {
-      this._pluginDefinitionsByScope.set(pluginDefinition.pluginParameterScope, pluginDefinition);
+      this._pluginDefinitionsByScope.set(parameterScope, pluginDefinition);
     }
 
     const definedPluginParametersByName: Map<string, CommandLineParameter> =
       this._parametersByDefinition.get(pluginDefinition)!;
 
-    for (const parameter of pluginDefinition.pluginParameters) {
+    for (const parameter of pluginParameters) {
       let definedParameter: CommandLineParameter;
+      const { description, required, longName: parameterLongName, shortName: parameterShortName } = parameter;
       switch (parameter.parameterKind) {
         case 'choiceList': {
+          const { alternatives } = parameter;
           definedParameter = commandLineParameterProvider.defineChoiceListParameter({
-            description: parameter.description,
-            required: parameter.required,
-            alternatives: parameter.alternatives.map((p: IChoiceParameterAlternativeJson) => p.name),
-            parameterLongName: parameter.longName,
-            parameterShortName: parameter.shortName,
-            parameterScope: pluginDefinition.pluginParameterScope
+            description,
+            required,
+            alternatives: alternatives.map((p: IChoiceParameterAlternativeJson) => p.name),
+            parameterLongName,
+            parameterShortName,
+            parameterScope
           });
           break;
         }
         case 'choice': {
+          const { alternatives, defaultValue } = parameter;
           definedParameter = commandLineParameterProvider.defineChoiceParameter({
-            description: parameter.description,
-            required: parameter.required,
-            alternatives: parameter.alternatives.map((p: IChoiceParameterAlternativeJson) => p.name),
-            defaultValue: parameter.defaultValue,
-            parameterLongName: parameter.longName,
-            parameterShortName: parameter.shortName,
-            parameterScope: pluginDefinition.pluginParameterScope
+            description,
+            required,
+            alternatives: alternatives.map((p: IChoiceParameterAlternativeJson) => p.name),
+            defaultValue,
+            parameterLongName,
+            parameterShortName,
+            parameterScope
           });
           break;
         }
         case 'flag': {
           definedParameter = commandLineParameterProvider.defineFlagParameter({
-            description: parameter.description,
-            required: parameter.required,
-            parameterLongName: parameter.longName,
-            parameterShortName: parameter.shortName,
-            parameterScope: pluginDefinition.pluginParameterScope
+            description,
+            required,
+            parameterLongName,
+            parameterShortName,
+            parameterScope
           });
           break;
         }
         case 'integerList': {
+          const { argumentName } = parameter;
           definedParameter = commandLineParameterProvider.defineIntegerListParameter({
-            description: parameter.description,
-            required: parameter.required,
-            argumentName: parameter.argumentName,
-            parameterLongName: parameter.longName,
-            parameterShortName: parameter.shortName,
-            parameterScope: pluginDefinition.pluginParameterScope
+            description,
+            required,
+            argumentName,
+            parameterLongName,
+            parameterShortName,
+            parameterScope
           });
           break;
         }
         case 'integer': {
+          const { argumentName, defaultValue } = parameter;
           definedParameter = commandLineParameterProvider.defineIntegerParameter({
-            description: parameter.description,
-            required: parameter.required,
-            argumentName: parameter.argumentName,
-            defaultValue: parameter.defaultValue,
-            parameterLongName: parameter.longName,
-            parameterShortName: parameter.shortName,
-            parameterScope: pluginDefinition.pluginParameterScope
+            description,
+            required,
+            argumentName,
+            defaultValue,
+            parameterLongName,
+            parameterShortName,
+            parameterScope
           });
           break;
         }
         case 'stringList': {
+          const { argumentName } = parameter;
           definedParameter = commandLineParameterProvider.defineStringListParameter({
-            description: parameter.description,
-            required: parameter.required,
-            argumentName: parameter.argumentName,
-            parameterLongName: parameter.longName,
-            parameterShortName: parameter.shortName,
-            parameterScope: pluginDefinition.pluginParameterScope
+            description,
+            required,
+            argumentName,
+            parameterLongName,
+            parameterShortName,
+            parameterScope
           });
           break;
         }
         case 'string': {
+          const { argumentName, defaultValue } = parameter;
           definedParameter = commandLineParameterProvider.defineStringParameter({
-            description: parameter.description,
-            required: parameter.required,
-            argumentName: parameter.argumentName,
-            defaultValue: parameter.defaultValue,
-            parameterLongName: parameter.longName,
-            parameterShortName: parameter.shortName,
-            parameterScope: pluginDefinition.pluginParameterScope
+            description,
+            required,
+            argumentName,
+            defaultValue,
+            parameterLongName,
+            parameterShortName,
+            parameterScope
           });
           break;
         }
