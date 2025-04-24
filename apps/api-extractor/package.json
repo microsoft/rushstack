@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "decoupled-local-node-rig": "workspace:*",
-    "@rushstack/heft": "0.71.2",
+    "@rushstack/heft": "0.73.2",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "3.0.5",
     "@types/resolve": "1.20.2",
