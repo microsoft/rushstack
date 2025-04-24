@@ -35,12 +35,12 @@ export interface IDropGraphPluginOptions {
 
 // @public (undocumented)
 export interface IGraphNode {
+    cacheable?: false;
     command: string;
     dependencies: string[];
     id: string;
     package: string;
     task: string;
-    uncacheable?: true;
     workingDirectory: string;
 }
 

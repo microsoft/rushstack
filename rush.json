@@ -1283,9 +1283,8 @@
     {
       "packageName": "@rushstack/rush-buildxl-graph-plugin",
       "projectFolder": "rush-plugins/rush-buildxl-graph-plugin",
-      "reviewCategory": "libraries"
-      // For now
-      // "versionPolicyName": "rush"
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
     },
     {
       "packageName": "@rushstack/rush-http-build-cache-plugin",

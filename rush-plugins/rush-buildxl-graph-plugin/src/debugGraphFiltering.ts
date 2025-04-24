@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { getOperationId } from './GraphProcessor';
+import { tryGetOperationId } from './GraphProcessor';
 
 const BANNED_KEYS: ReadonlySet<string> = new Set([
   'packageJsonEditor',
@@ -53,7 +53,7 @@ export function filterObjectForDebug(obj: object, depth: number = 10, simplify: 
       }
 
       if (simplify) {
-        const operationId: string | undefined = getOperationId(value);
+        const operationId: string | undefined = tryGetOperationId(value);
         if (operationId) {
           output[key] = operationId;
           continue;
