@@ -68,9 +68,9 @@ export interface IGraphNode {
   dependencies: string[];
 
   /**
-   * If true, the Pip is uncacheable
+   * If false, the Pip is uncacheable
    */
-  uncacheable?: true;
+  cacheable?: false;
 }
 
 interface IGraphNodeInternal extends Omit<IGraphNode, 'dependencies' | 'command'> {
@@ -90,12 +90,14 @@ const REQUIRED_FIELDS: Array<keyof IGraphNodeInternal> = [
 ];
 
 /*
- * Try to get the operation id, return undefined if it fails
+ * Get the operation id
  */
-export function getOperationId(operation: Pick<Operation, 'associatedPhase' | 'associatedProject'>): string {
-  const task: string = operation.associatedPhase.name;
-  const project: string = operation.associatedProject.packageName;
-  return `${project}#${task}`;
+export function getOperationId(operation: Operation): string {
+  const {
+    associatedPhase: { name: task },
+    associatedProject: { packageName }
+  } = operation;
+  return `${packageName}#${task}`;
 }
 
 export class GraphProcessor {
@@ -152,14 +154,6 @@ export class GraphProcessor {
   }
 
   /*
-   * Get the operation id
-   */
-  public getOperationId(operation: Operation): string {
-    const result: string = getOperationId(operation);
-    return result;
-  }
-
-  /*
    * remove all entries with empty commands
    * if an entry has a dependency with an empty command, it should inherit the dependencies of the empty command
    */
@@ -209,30 +203,35 @@ export class GraphProcessor {
    * Convert an operation into a graph node
    */
   private _operationAsHashedEntry(operation: Operation): IGraphNodeInternal {
-    const dependencies: Set<string> = new Set();
-    for (const element of operation.dependencies.values()) {
-      const id: string | undefined = this.getOperationId(element);
-      if (id) {
-        dependencies.add(id);
-      }
-    }
+    const {
+      runner,
+      associatedPhase: { name: task },
+      associatedProject: {
+        // "package" is a reserved word
+        packageName,
+        projectFolder: workingDirectory
+      },
+      settings,
+      dependencies: operationDependencies
+    } = operation;
 
-    const { runner } = operation;
-    if (!runner) {
-      throw new Error(`Operation does not have a runner assigned`);
+    const dependencies: Set<string> = new Set();
+    for (const dependency of operationDependencies.values()) {
+      const id: string = getOperationId(dependency);
+      dependencies.add(id);
     }
 
     const node: Partial<IGraphNodeInternal> = {
       id: getOperationId(operation),
-      task: operation.associatedPhase.name,
-      package: operation.associatedProject.packageName,
+      task,
+      package: packageName,
       dependencies,
-      workingDirectory: operation.associatedProject.projectFolder,
-      command: (runner as Partial<Pick<ShellOperationRunner, 'commandToRun'>>).commandToRun
+      workingDirectory,
+      command: (runner as Partial<Pick<ShellOperationRunner, 'commandToRun'>>)?.commandToRun
     };
 
-    if (operation.settings?.disableBuildCacheForOperation) {
-      node.uncacheable = true;
+    if (settings?.disableBuildCacheForOperation) {
+      node.cacheable = false;
     }
 
     const missingFields: (keyof IGraphNodeInternal)[] = [];
@@ -249,7 +248,7 @@ export class GraphProcessor {
     }
 
     // the runner is a no-op if and only if the command is empty
-    if (operation.isNoOp !== !node.command) {
+    if (!!runner?.isNoOp !== !node.command) {
       this._logger.emitError(
         new Error(`${node.id}: Operation runner isNoOp does not match commandToRun existence`)
       );
