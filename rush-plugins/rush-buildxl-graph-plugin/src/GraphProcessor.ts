@@ -5,8 +5,6 @@ import type { Operation, ILogger } from '@rushstack/rush-sdk';
 import type { ShellOperationRunner } from '@rushstack/rush-sdk/lib/logic/operations/ShellOperationRunner';
 import { Colorize } from '@rushstack/terminal';
 
-import { filterObjectForDebug } from './debugGraphFiltering';
-
 /**
  * @example
  * ```
@@ -92,12 +90,14 @@ const REQUIRED_FIELDS: Array<keyof IGraphNodeInternal> = [
 ];
 
 /*
- * Try to get the operation id, return undefined if it fails
+ * Get the operation id
  */
-export function tryGetOperationId(operation: Partial<Operation>): string | undefined {
-  const task: string | undefined = operation.associatedPhase?.name;
-  const project: string | undefined = operation.associatedProject?.packageName;
-  return task && project ? `${project}#${task}` : undefined;
+export function getOperationId(operation: Operation): string {
+  const {
+    associatedPhase: { name: task },
+    associatedProject: { packageName }
+  } = operation;
+  return `${packageName}#${task}`;
 }
 
 export class GraphProcessor {
@@ -154,20 +154,6 @@ export class GraphProcessor {
   }
 
   /*
-   * Get the operation id, throw an error if it fails
-   */
-  public getOperationId(operation: Operation): string {
-    const result: string | undefined = tryGetOperationId(operation);
-    if (!result) {
-      throw new Error(
-        `Operation does not have a name: ${JSON.stringify(filterObjectForDebug(operation, 2), undefined, 2)}`
-      );
-    }
-
-    return result;
-  }
-
-  /*
    * remove all entries with empty commands
    * if an entry has a dependency with an empty command, it should inherit the dependencies of the empty command
    */
@@ -217,26 +203,34 @@ export class GraphProcessor {
    * Convert an operation into a graph node
    */
   private _operationAsHashedEntry(operation: Operation): IGraphNodeInternal {
+    const {
+      runner,
+      associatedPhase: { name: task },
+      associatedProject: {
+        // "package" is a reserved word
+        packageName,
+        projectFolder: workingDirectory
+      },
+      settings,
+      dependencies: operationDependencies
+    } = operation;
+
     const dependencies: Set<string> = new Set();
-    for (const element of operation.dependencies.values()) {
-      const id: string | undefined = this.getOperationId(element);
-      if (id) {
-        dependencies.add(id);
-      }
+    for (const dependency of operationDependencies.values()) {
+      const id: string = getOperationId(dependency);
+      dependencies.add(id);
     }
 
-    const { runner, associatedPhase, associatedProject } = operation;
-
     const node: Partial<IGraphNodeInternal> = {
-      id: tryGetOperationId(operation),
-      task: associatedPhase?.name,
-      package: associatedProject?.packageName,
+      id: getOperationId(operation),
+      task,
+      package: packageName,
       dependencies,
-      workingDirectory: operation.associatedProject?.projectFolder,
+      workingDirectory,
       command: (runner as Partial<Pick<ShellOperationRunner, 'commandToRun'>>)?.commandToRun
     };
 
-    if (operation.settings?.disableBuildCacheForOperation) {
+    if (settings?.disableBuildCacheForOperation) {
       node.cacheable = false;
     }
 
@@ -254,7 +248,7 @@ export class GraphProcessor {
     }
 
     // the runner is a no-op if and only if the command is empty
-    if (!!operation.runner?.isNoOp !== !node.command) {
+    if (!!runner?.isNoOp !== !node.command) {
       this._logger.emitError(
         new Error(`${node.id}: Operation runner isNoOp does not match commandToRun existence`)
       );
