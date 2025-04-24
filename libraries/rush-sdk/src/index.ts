@@ -10,7 +10,7 @@ import {
   Executable
 } from '@rushstack/node-core-library';
 import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
-import { RushGlobalFolder } from '@microsoft/rush-lib/lib-esnext/api/RushGlobalFolder';
+import { RushGlobalFolder } from '@microsoft/rush-lib/lib/api/RushGlobalFolder';
 import type { SpawnSyncReturns } from 'child_process';
 import {
   RUSH_LIB_NAME,
@@ -211,6 +211,20 @@ ${errorMessage}
   process.exit(1);
 }
 
+const exports: typeof import('@microsoft/rush-lib') = {
+  /**
+   * Used by the .js stubs for path-based imports of `@microsoft/rush-lib` internal APIs.
+   */
+  _rushSdk_loadInternalModule: (srcImportPath: string) => {
+    if (!exports._RushInternals) {
+      throw new Error(
+        `Rush version ${exports.Rush.version} does not support internal API imports via rush-sdk`
+      );
+    }
+    return exports._RushInternals.loadModule(srcImportPath);
+  }
+} as unknown as typeof import('@microsoft/rush-lib');
+
 // Based on TypeScript's __exportStar()
 for (const property in sdkContext.rushLibModule) {
   if (property !== 'default' && !exports.hasOwnProperty(property)) {
@@ -226,14 +240,4 @@ for (const property in sdkContext.rushLibModule) {
   }
 }
 
-/**
- * Used by the .js stubs for path-based imports of `@microsoft/rush-lib` internal APIs.
- */
-export function _rushSdk_loadInternalModule(srcImportPath: string): unknown {
-  if (!exports._RushInternals) {
-    throw new Error(
-      `Rush version ${exports.Rush.version} does not support internal API imports via rush-sdk`
-    );
-  }
-  return exports._RushInternals.loadModule(srcImportPath);
-}
+export default exports;

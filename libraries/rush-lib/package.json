@@ -13,11 +13,25 @@
   "engineStrict": true,
   "homepage": "https://rushjs.io",
   "main": "lib/index.js",
+  "module": "lib-esm/index.js",
   "typings": "dist/rush-lib.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/index.js",
+      "require": "./lib/index.js",
+      "types": "./dist/rush-lib.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "typesVersions": {
     "*": {
-      "lib-esnext/*": [
-        "lib/*"
+      "lib/*": [
+        "lib-dts/*"
       ]
     }
   },
@@ -94,9 +108,9 @@
     "@rushstack/rush-http-build-cache-plugin": "workspace:*"
   },
   "sideEffects": [
-    "lib-esnext/start-pnpm.js",
-    "lib-esnext/start.js",
-    "lib-esnext/startx.js",
-    "lib-esnext/utilities/SetRushLibPath.js"
+    "lib-esm/start-pnpm.js",
+    "lib-esm/start.js",
+    "lib-esm/startx.js",
+    "lib-esm/utilities/SetRushLibPath.js"
   ]
 }

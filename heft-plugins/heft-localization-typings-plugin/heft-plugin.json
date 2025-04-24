@@ -4,8 +4,8 @@
   "taskPlugins": [
     {
       "pluginName": "localization-typings-plugin",
-      "entryPoint": "./lib/LocalizationTypingsPlugin",
-      "optionsSchema": "./lib/schemas/options.schema.json"
+      "entryPoint": "./lib-commonjs/LocalizationTypingsPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/options.schema.json"
     }
   ]
 }

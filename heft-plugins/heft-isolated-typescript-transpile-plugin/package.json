@@ -9,8 +9,29 @@
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "license": "MIT",
-  "main": "lib/index.js",
-  "types": "dist/heft-isolated-typescript-transpile-plugin.d.ts",
+  "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
+  "typings": "dist/heft-isolated-typescript-transpile-plugin.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js",
+      "types": "./dist/heft-isolated-typescript-transpile-plugin.d.ts"
+    },
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lib/*": [
+        "lib-dts/*"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "start": "heft test --clean --watch",
@@ -22,9 +43,9 @@
     "@rushstack/heft-typescript-plugin": "workspace:^"
   },
   "devDependencies": {
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
-    "@rushstack/heft-typescript-plugin": "workspace:*"
+    "decoupled-local-node-rig": "workspace:*"
   },
   "dependencies": {
     "@rushstack/lookup-by-path": "workspace:*",

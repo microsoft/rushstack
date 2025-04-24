@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as resolve from 'resolve';
-import lodash = require('lodash');
+import lodash from 'lodash';
 import {
   JsonFile,
   JsonSchema,

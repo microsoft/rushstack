@@ -224,7 +224,7 @@
     // "allowedVersions": { "react": "17" },
     // "allowAny": ["@babel/*"]
     // TODO: Remove once Heft is 1.0.0
-    "allowAny": ["@rushstack/heft"],
+    "allowAny": ["@rushstack/heft", "@rushstack/heft-typescript-plugin"],
     "allowedVersions": {
       "webpack": "^4 || ^5"
     }
@@ -250,13 +250,13 @@
       }
     },
 
-    "@emotion/styled": {
+    "@emotion/styled-base": {
       "peerDependencies": {
         "@types/react": ">=16"
       }
     },
 
-    "@emotion/styled-base": {
+    "@emotion/styled": {
       "peerDependencies": {
         "@types/react": ">=16"
       }
@@ -367,13 +367,13 @@
       }
     },
 
-    "react-router": {
+    "react-router-dom": {
       "peerDependencies": {
         "@types/react": ">=16"
       }
     },
 
-    "react-router-dom": {
+    "react-router": {
       "peerDependencies": {
         "@types/react": ">=16"
       }

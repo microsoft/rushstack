@@ -33,4 +33,4 @@
 
 !/includes/**
 !UPGRADING.md
-
+lib-*/root-lib/

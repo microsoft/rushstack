@@ -9,6 +9,7 @@
     "directory": "rush-plugins/rush-resolver-cache-plugin"
   },
   "main": "lib-commonjs/index.js",
+  "module": "lib-esm/index.js",
   "types": "dist/rush-resolver-cache-plugin.d.ts",
   "scripts": {
     "build": "heft test --clean",
@@ -29,15 +30,21 @@
   },
   "exports": {
     ".": {
-      "require": "./lib/index.js",
-      "types": "./dist/rush-resolver-cache-plugin.d.ts"
+      "require": "./lib-commonjs/index.js",
+      "types": "./dist/rush-resolver-cache-plugin.d.ts",
+      "import": "./lib-esm/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./lib/*": {
+      "import": "./lib-esm/*.js",
+      "require": "./lib-commonjs/*.js",
+      "types": "./lib-dts/*.d.ts"
+    }
   },
   "typesVersions": {
     "*": {
-      ".": [
-        "dist/rush-resolver-cache-plugin.d.ts"
+      "lib/*": [
+        "lib-dts/*"
       ]
     }
   }

@@ -15,4 +15,4 @@ const plugin: IPlugin = {
   }
 };
 
-export = plugin;
+module.exports = plugin;

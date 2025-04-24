@@ -10,7 +10,7 @@
     "build": {
       "tasksByName": {
         "webpack": {
-          "taskDependencies": ["typescript"],
+          "taskDependencies": ["transpile"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-webpack5-plugin"
           }

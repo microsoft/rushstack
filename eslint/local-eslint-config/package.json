@@ -10,7 +10,7 @@
   "devDependencies": {
     "eslint": "~8.57.0",
     "typescript": "~5.8.2",
-    "@rushstack/heft": "0.71.2",
+    "@rushstack/heft": "0.73.1",
     "decoupled-local-node-rig": "workspace:*"
   },
   "dependencies": {

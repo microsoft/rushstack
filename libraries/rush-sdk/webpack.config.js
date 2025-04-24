@@ -17,16 +17,16 @@ module.exports = () => {
     mode: 'development', // So the output isn't minified
     devtool: 'source-map',
     entry: {
-      // Using CommonJS due to access of module.parent
-      index: `${__dirname}/lib-commonjs/index.js`,
-      loader: `${__dirname}/lib-commonjs/loader.js`
+      index: `${__dirname}/lib-esm/index.js`,
+      loader: `${__dirname}/lib-esm/loader.js`
     },
     output: {
       path: `${__dirname}/lib-shim`,
       filename: '[name].js',
       chunkFilename: 'chunks/[name].js',
       library: {
-        type: 'commonjs2'
+        type: 'commonjs2',
+        export: 'default'
       }
     },
     optimization: {

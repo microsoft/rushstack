@@ -20,7 +20,7 @@ function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | unde
   // }
 
   // Is resolvedFileOrFolderPath itself a folder with a package.json file?  If so, return it.
-  if (fs.existsSync(path.join(resolvedFileOrFolderPath, 'package.json'))) {
+  if (fs.existsSync(`${resolvedFileOrFolderPath}/package.json`)) {
     // this._packageFolderCache.set(resolvedFileOrFolderPath, resolvedFileOrFolderPath);
     return resolvedFileOrFolderPath;
   }
@@ -69,7 +69,7 @@ function tryStartLocalHeft(): boolean {
   if (projectFolder) {
     let heftEntryPoint: string;
     try {
-      const packageJsonPath: string = path.join(projectFolder, 'package.json');
+      const packageJsonPath: string = `${projectFolder}/package.json`;
       const packageJsonContent: string = fs.readFileSync(packageJsonPath).toString();
       let packageJson: IPackageJson;
       try {
@@ -89,9 +89,9 @@ function tryStartLocalHeft(): boolean {
 
       // To avoid a loading the "resolve" NPM package, let's assume that the Heft dependency must be
       // installed as "<projectFolder>/node_modules/@rushstack/heft".
-      const heftFolder: string = path.join(projectFolder, 'node_modules', Constants.heftPackageName);
+      const heftFolder: string = `${projectFolder}/node_modules/${Constants.heftPackageName}`;
 
-      heftEntryPoint = path.join(heftFolder, 'lib', 'start.js');
+      heftEntryPoint = `${heftFolder}/lib-commonjs/start.js`;
       if (!fs.existsSync(heftEntryPoint)) {
         throw new Error('Unable to find Heft entry point: ' + heftEntryPoint);
       }

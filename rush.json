@@ -1236,10 +1236,12 @@
       "shouldPublish": false,
       "decoupledLocalDependencies": [
         "@microsoft/api-extractor",
-        "@rushstack/heft-node-rig",
-        "@rushstack/heft",
+        "@rushstack/eslint-config",
         "@rushstack/eslint-patch",
-        "@rushstack/eslint-config"
+        "@rushstack/heft-isolated-typescript-transpile-plugin",
+        "@rushstack/heft-node-rig",
+        "@rushstack/heft-typescript-plugin",
+        "@rushstack/heft"
       ]
     },
     {

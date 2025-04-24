@@ -13,7 +13,7 @@
 
       "tasksByName": {
         "copy-mock-flush-telemetry-plugin": {
-          "taskDependencies": ["typescript"],
+          "taskDependencies": ["transpile"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft",
             "pluginName": "copy-files-plugin",
@@ -48,7 +48,7 @@
         },
 
         "copy-empty-modules": {
-          "taskDependencies": ["typescript"],
+          "taskDependencies": ["transpile"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft",
             "pluginName": "run-script-plugin",
@@ -59,7 +59,7 @@
         },
 
         "webpack": {
-          "taskDependencies": ["typescript"],
+          "taskDependencies": ["transpile"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-webpack5-plugin"
           }

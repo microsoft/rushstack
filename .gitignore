@@ -107,17 +107,17 @@ common/autoinstallers/*/.npmrc
 *.lock
 
 # Common toolchain intermediate files
-temp/
-lib/
+dist-storybook/
+dist/
 lib-amd/
+lib-commonjs/
 lib-dts/
 lib-es6/
 lib-esm/
 lib-esnext/
-lib-commonjs/
 lib-shim/
-dist/
-dist-storybook/
+lib/
+temp/
 *.tsbuildinfo
 
 # Heft temporary files

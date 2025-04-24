@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import yaml = require('js-yaml');
+import yaml from 'js-yaml';
 
 import type { ApiModel } from '@microsoft/api-extractor-model';
 import { FileSystem } from '@rushstack/node-core-library';

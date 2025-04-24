@@ -893,6 +893,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
    *   - replace `<rootDir>` with the same rootDir
    *   - replace `<configDir>` with the directory containing the current configuration file
    *   - replace `<packageDir:...>` with the path to the resolved package (NOT module)
+   *   - re-path `@rushstack/heft-jest-plugin/lib/...` to `@rushstack/heft-jest-plugin/lib-commonjs/...`
    */
   private static _getJsonPathMetadata(
     options: IJestResolutionOptions
@@ -970,7 +971,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
         // Example:  @rushstack/heft-jest-plugin/path/to/file.js
         if (propertyValue.startsWith(PLUGIN_PACKAGE_NAME)) {
-          const restOfPath: string = path.normalize('./' + propertyValue.slice(PLUGIN_PACKAGE_NAME.length));
+          let restOfPath: string = path.posix.normalize(
+            './' + propertyValue.slice(PLUGIN_PACKAGE_NAME.length)
+          );
+          restOfPath = restOfPath.replace(/^(\.\/)?lib(\/|\\)/, 'lib-commonjs/');
+
           return path.join(PLUGIN_PACKAGE_FOLDER, restOfPath);
         }
 

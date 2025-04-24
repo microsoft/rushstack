@@ -2,4 +2,4 @@
 // See LICENSE in the project root for license information.
 
 import { IdentityMockTransformer } from '../transformers/IdentityMockTransformer';
-export = new IdentityMockTransformer();
+module.exports = new IdentityMockTransformer();

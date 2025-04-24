@@ -1,1 +1,1 @@
-require('./lib/modern-module-resolution');
+require('./lib-commonjs/modern-module-resolution');
