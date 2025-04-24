@@ -1,3256 +1,547 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PhasedOperationPlugin handles a full build 1`] = `
+exports[`PhasedOperationPlugin handles a full build: full 1`] = `
 Array [
-  Object {
-    "dependencies": Array [],
-    "name": "a (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "b (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "c (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "d (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "e (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "f (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "g (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "h (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "a (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "b (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (no-deps)",
-      "b (upstream-self)",
-    ],
-    "name": "c (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "d (no-deps)",
-      "b (upstream-self)",
-    ],
-    "name": "d (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "e (no-deps)",
-      "c (upstream-self)",
-    ],
-    "name": "e (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (no-deps)",
-      "a (upstream-self)",
-      "h (upstream-self)",
-    ],
-    "name": "f (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "h (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "g (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "g (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "i (no-deps)",
-    ],
-    "name": "i (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "j (no-deps)",
-    ],
-    "name": "j (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "b (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-    ],
-    "name": "c (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-    ],
-    "name": "d (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (no-deps)",
-    ],
-    "name": "e (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-      "h (no-deps)",
-    ],
-    "name": "f (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "g (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "h (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "b (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "c (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "d (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-1)",
-    ],
-    "name": "e (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-      "h (upstream-1)",
-    ],
-    "name": "f (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "g (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "h (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "b (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "c (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "d (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-2)",
-    ],
-    "name": "e (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-      "h (upstream-2)",
-    ],
-    "name": "f (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "g (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "h (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "a (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "b (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-1)",
-    ],
-    "name": "c (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "d (upstream-1)",
-    ],
-    "name": "d (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "e (upstream-1)",
-    ],
-    "name": "e (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-1)",
-    ],
-    "name": "f (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-1)",
-    ],
-    "name": "g (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-1)",
-    ],
-    "name": "h (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "i (upstream-1)",
-    ],
-    "name": "i (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "j (upstream-1)",
-    ],
-    "name": "j (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "a (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "b (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-2)",
-    ],
-    "name": "c (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "d (upstream-2)",
-    ],
-    "name": "d (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "e (upstream-2)",
-    ],
-    "name": "e (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-2)",
-    ],
-    "name": "f (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-2)",
-    ],
-    "name": "g (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-2)",
-    ],
-    "name": "h (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "i (upstream-2)",
-    ],
-    "name": "i (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "j (upstream-2)",
-    ],
-    "name": "j (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "b (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1-self)",
-    ],
-    "name": "c (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1-self)",
-    ],
-    "name": "d (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-1-self)",
-    ],
-    "name": "e (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-      "h (upstream-1-self)",
-    ],
-    "name": "f (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "g (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "h (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-3)",
-    ],
-    "name": "a (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "b (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-3)",
-      "b (upstream-1-self-upstream)",
-      "b (upstream-2-self)",
-    ],
-    "name": "c (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "d (upstream-3)",
-      "b (upstream-1-self-upstream)",
-      "b (upstream-2-self)",
-    ],
-    "name": "d (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "e (upstream-3)",
-      "c (upstream-1-self-upstream)",
-      "c (upstream-2-self)",
-    ],
-    "name": "e (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "h (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-      "h (upstream-2-self)",
-    ],
-    "name": "f (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "g (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "h (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "i (upstream-3)",
-    ],
-    "name": "i (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "j (upstream-3)",
-    ],
-    "name": "j (complex)",
-    "silent": false,
-  },
+  "a (complex) (enabled) -> [a (upstream-3)]",
+  "a (no-deps) (enabled) -> []",
+  "a (upstream-1) (enabled) -> []",
+  "a (upstream-1-self) (enabled) -> [a (upstream-1)]",
+  "a (upstream-1-self-upstream) (enabled) -> []",
+  "a (upstream-2) (enabled) -> []",
+  "a (upstream-2-self) (enabled) -> [a (upstream-2)]",
+  "a (upstream-3) (enabled) -> []",
+  "a (upstream-self) (enabled) -> [a (no-deps)]",
+  "b (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), b (upstream-3)]",
+  "b (no-deps) (enabled) -> []",
+  "b (upstream-1) (enabled) -> [a (no-deps)]",
+  "b (upstream-1-self) (enabled) -> [b (upstream-1)]",
+  "b (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self)]",
+  "b (upstream-2) (enabled) -> [a (upstream-1)]",
+  "b (upstream-2-self) (enabled) -> [b (upstream-2)]",
+  "b (upstream-3) (enabled) -> [a (upstream-2)]",
+  "b (upstream-self) (enabled) -> [a (upstream-self), b (no-deps)]",
+  "c (complex) (enabled) -> [b (upstream-1-self-upstream), b (upstream-2-self), c (upstream-3)]",
+  "c (no-deps) (enabled) -> []",
+  "c (upstream-1) (enabled) -> [b (no-deps)]",
+  "c (upstream-1-self) (enabled) -> [c (upstream-1)]",
+  "c (upstream-1-self-upstream) (enabled) -> [b (upstream-1-self)]",
+  "c (upstream-2) (enabled) -> [b (upstream-1)]",
+  "c (upstream-2-self) (enabled) -> [c (upstream-2)]",
+  "c (upstream-3) (enabled) -> [b (upstream-2)]",
+  "c (upstream-self) (enabled) -> [b (upstream-self), c (no-deps)]",
+  "d (complex) (enabled) -> [b (upstream-1-self-upstream), b (upstream-2-self), d (upstream-3)]",
+  "d (no-deps) (enabled) -> []",
+  "d (upstream-1) (enabled) -> [b (no-deps)]",
+  "d (upstream-1-self) (enabled) -> [d (upstream-1)]",
+  "d (upstream-1-self-upstream) (enabled) -> [b (upstream-1-self)]",
+  "d (upstream-2) (enabled) -> [b (upstream-1)]",
+  "d (upstream-2-self) (enabled) -> [d (upstream-2)]",
+  "d (upstream-3) (enabled) -> [b (upstream-2)]",
+  "d (upstream-self) (enabled) -> [b (upstream-self), d (no-deps)]",
+  "e (complex) (enabled) -> [c (upstream-1-self-upstream), c (upstream-2-self), e (upstream-3)]",
+  "e (no-deps) (enabled) -> []",
+  "e (upstream-1) (enabled) -> [c (no-deps)]",
+  "e (upstream-1-self) (enabled) -> [e (upstream-1)]",
+  "e (upstream-1-self-upstream) (enabled) -> [c (upstream-1-self)]",
+  "e (upstream-2) (enabled) -> [c (upstream-1)]",
+  "e (upstream-2-self) (enabled) -> [e (upstream-2)]",
+  "e (upstream-3) (enabled) -> [c (upstream-2)]",
+  "e (upstream-self) (enabled) -> [c (upstream-self), e (no-deps)]",
+  "f (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), f (upstream-3), h (upstream-1-self-upstream), h (upstream-2-self)]",
+  "f (no-deps) (enabled) -> []",
+  "f (upstream-1) (enabled) -> [a (no-deps), h (no-deps)]",
+  "f (upstream-1-self) (enabled) -> [f (upstream-1)]",
+  "f (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self), h (upstream-1-self)]",
+  "f (upstream-2) (enabled) -> [a (upstream-1), h (upstream-1)]",
+  "f (upstream-2-self) (enabled) -> [f (upstream-2)]",
+  "f (upstream-3) (enabled) -> [a (upstream-2), h (upstream-2)]",
+  "f (upstream-self) (enabled) -> [a (upstream-self), f (no-deps), h (upstream-self)]",
+  "g (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), g (upstream-3)]",
+  "g (no-deps) (enabled) -> []",
+  "g (upstream-1) (enabled) -> [a (no-deps)]",
+  "g (upstream-1-self) (enabled) -> [g (upstream-1)]",
+  "g (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self)]",
+  "g (upstream-2) (enabled) -> [a (upstream-1)]",
+  "g (upstream-2-self) (enabled) -> [g (upstream-2)]",
+  "g (upstream-3) (enabled) -> [a (upstream-2)]",
+  "g (upstream-self) (enabled) -> [a (upstream-self), g (no-deps)]",
+  "h (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), h (upstream-3)]",
+  "h (no-deps) (enabled) -> []",
+  "h (upstream-1) (enabled) -> [a (no-deps)]",
+  "h (upstream-1-self) (enabled) -> [h (upstream-1)]",
+  "h (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self)]",
+  "h (upstream-2) (enabled) -> [a (upstream-1)]",
+  "h (upstream-2-self) (enabled) -> [h (upstream-2)]",
+  "h (upstream-3) (enabled) -> [a (upstream-2)]",
+  "h (upstream-self) (enabled) -> [a (upstream-self), h (no-deps)]",
+  "i (complex) (enabled) -> [i (upstream-3)]",
+  "i (no-deps) (enabled) -> []",
+  "i (upstream-1) (enabled) -> []",
+  "i (upstream-1-self) (enabled) -> [i (upstream-1)]",
+  "i (upstream-1-self-upstream) (enabled) -> []",
+  "i (upstream-2) (enabled) -> []",
+  "i (upstream-2-self) (enabled) -> [i (upstream-2)]",
+  "i (upstream-3) (enabled) -> []",
+  "i (upstream-self) (enabled) -> [i (no-deps)]",
+  "j (complex) (enabled) -> [j (upstream-3)]",
+  "j (no-deps) (enabled) -> []",
+  "j (upstream-1) (enabled) -> []",
+  "j (upstream-1-self) (enabled) -> [j (upstream-1)]",
+  "j (upstream-1-self-upstream) (enabled) -> []",
+  "j (upstream-2) (enabled) -> []",
+  "j (upstream-2-self) (enabled) -> [j (upstream-2)]",
+  "j (upstream-3) (enabled) -> []",
+  "j (upstream-self) (enabled) -> [j (no-deps)]",
 ]
 `;
 
-exports[`PhasedOperationPlugin handles filtered phases 1`] = `
+exports[`PhasedOperationPlugin handles different phaseOriginal vs phaseSelection cross-project with --include-phase-deps: multiple-project 1`] = `
 Array [
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "a (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "b (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "b (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (no-deps)",
-      "b (upstream-self)",
-    ],
-    "name": "c (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "c (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "d (no-deps)",
-      "b (upstream-self)",
-    ],
-    "name": "d (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "d (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "e (no-deps)",
-      "c (upstream-self)",
-    ],
-    "name": "e (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "e (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "f (no-deps)",
-      "a (upstream-self)",
-      "h (upstream-self)",
-    ],
-    "name": "f (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "f (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "h (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "h (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "h (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "g (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "g (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "g (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "i (no-deps)",
-    ],
-    "name": "i (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "j (no-deps)",
-    ],
-    "name": "j (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (no-deps)",
-    "silent": true,
-  },
+  "a (no-deps) (enabled) -> []",
+  "h (upstream-1) (enabled) -> [a (no-deps)]",
+  "a (upstream-1) (disabled) -> []",
+  "h (no-deps) (disabled) -> []",
 ]
 `;
 
-exports[`PhasedOperationPlugin handles filtered phases 2`] = `
+exports[`PhasedOperationPlugin handles different phaseOriginal vs phaseSelection with --include-phase-deps: single-project 1`] = `
 Array [
-  Object {
-    "dependencies": Array [
-      "a (upstream-3)",
-    ],
-    "name": "a (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "b (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "b (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "a (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-3)",
-      "b (upstream-1-self-upstream)",
-      "b (upstream-2-self)",
-    ],
-    "name": "c (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "c (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "b (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "b (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "a (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "b (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "d (upstream-3)",
-      "b (upstream-1-self-upstream)",
-      "b (upstream-2-self)",
-    ],
-    "name": "d (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "d (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "e (upstream-3)",
-      "c (upstream-1-self-upstream)",
-      "c (upstream-2-self)",
-    ],
-    "name": "e (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-2)",
-    ],
-    "name": "e (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "c (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "b (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1-self)",
-    ],
-    "name": "c (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "b (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-2)",
-    ],
-    "name": "c (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "h (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-      "h (upstream-2-self)",
-    ],
-    "name": "f (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-      "h (upstream-2)",
-    ],
-    "name": "f (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "h (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "h (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-2)",
-    ],
-    "name": "h (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "g (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "g (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "h (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "h (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "i (upstream-3)",
-    ],
-    "name": "i (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "j (upstream-3)",
-    ],
-    "name": "j (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-    ],
-    "name": "c (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "b (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-    ],
-    "name": "d (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (no-deps)",
-    ],
-    "name": "e (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "c (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-      "h (no-deps)",
-    ],
-    "name": "f (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "h (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "g (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "h (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "d (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "e (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "f (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "g (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (no-deps)",
-    "silent": false,
-  },
+  "a (no-deps) (enabled) -> []",
+  "a (upstream-self) (enabled) -> [a (no-deps)]",
 ]
 `;
 
-exports[`PhasedOperationPlugin handles filtered phases on filtered projects 1`] = `
+exports[`PhasedOperationPlugin handles different phaseOriginal vs phaseSelection without --include-phase-deps: single-project 1`] = `
 Array [
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-      "h (upstream-1)",
-    ],
-    "name": "f (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "h (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "c (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "b (upstream-1)",
-    "silent": true,
-  },
+  "a (no-deps) (enabled) -> []",
+  "a (upstream-self) (enabled) -> [a (no-deps)]",
 ]
 `;
 
-exports[`PhasedOperationPlugin handles filtered phases on filtered projects 2`] = `
+exports[`PhasedOperationPlugin handles filtered phases on filtered projects: missing-links 1`] = `
 Array [
-  Object {
-    "dependencies": Array [
-      "f (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "h (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-      "h (upstream-2-self)",
-    ],
-    "name": "f (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-      "h (upstream-2)",
-    ],
-    "name": "f (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "h (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "h (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "a (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "a (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-2)",
-    ],
-    "name": "h (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-3)",
-    ],
-    "name": "a (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-3)",
-      "b (upstream-1-self-upstream)",
-      "b (upstream-2-self)",
-    ],
-    "name": "c (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "c (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "b (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "b (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "b (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-      "h (no-deps)",
-    ],
-    "name": "f (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "h (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-    ],
-    "name": "c (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "b (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "f (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "c (no-deps)",
-    "silent": false,
-  },
+  "a (complex) (enabled) -> [a (upstream-3)]",
+  "a (no-deps) (enabled) -> []",
+  "a (upstream-1) (enabled) -> []",
+  "a (upstream-3) (enabled) -> []",
+  "c (complex) (enabled) -> [b (upstream-1-self-upstream), b (upstream-2-self), c (upstream-3)]",
+  "c (no-deps) (enabled) -> []",
+  "c (upstream-1) (enabled) -> [b (no-deps)]",
+  "c (upstream-3) (enabled) -> [b (upstream-2)]",
+  "f (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), f (upstream-3), h (upstream-1-self-upstream), h (upstream-2-self)]",
+  "f (no-deps) (enabled) -> []",
+  "f (upstream-1) (enabled) -> [a (no-deps), h (no-deps)]",
+  "f (upstream-3) (enabled) -> [a (upstream-2), h (upstream-2)]",
+  "a (upstream-1-self) (disabled) -> [a (upstream-1)]",
+  "a (upstream-1-self-upstream) (disabled) -> []",
+  "a (upstream-2) (disabled) -> []",
+  "a (upstream-2-self) (disabled) -> [a (upstream-2)]",
+  "b (no-deps) (disabled) -> []",
+  "b (upstream-1-self-upstream) (disabled) -> [a (upstream-1-self)]",
+  "b (upstream-2) (disabled) -> [a (upstream-1)]",
+  "b (upstream-2-self) (disabled) -> [b (upstream-2)]",
+  "h (no-deps) (disabled) -> []",
+  "h (upstream-1-self-upstream) (disabled) -> [a (upstream-1-self)]",
+  "h (upstream-2) (disabled) -> [a (upstream-1)]",
+  "h (upstream-2-self) (disabled) -> [h (upstream-2)]",
 ]
 `;
 
-exports[`PhasedOperationPlugin handles filtered projects 1`] = `
+exports[`PhasedOperationPlugin handles filtered phases on filtered projects: single-phase 1`] = `
 Array [
-  Object {
-    "dependencies": Array [],
-    "name": "g (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "g (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "g (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "a (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "g (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "g (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "g (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-1)",
-    ],
-    "name": "g (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-2)",
-    ],
-    "name": "g (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "g (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "a (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "g (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "a (upstream-2-self)",
-    "silent": true,
-  },
+  "a (upstream-2) (enabled) -> []",
+  "c (upstream-2) (enabled) -> [b (upstream-1)]",
+  "f (upstream-2) (enabled) -> [a (upstream-1), h (upstream-1)]",
+  "a (no-deps) (disabled) -> []",
+  "a (upstream-1) (disabled) -> []",
+  "b (upstream-1) (disabled) -> [a (no-deps)]",
+  "h (upstream-1) (disabled) -> [a (no-deps)]",
 ]
 `;
 
-exports[`PhasedOperationPlugin handles filtered projects 2`] = `
+exports[`PhasedOperationPlugin handles filtered phases: single-phase 1`] = `
 Array [
-  Object {
-    "dependencies": Array [],
-    "name": "f (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "c (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (no-deps)",
-      "a (upstream-self)",
-      "h (upstream-self)",
-    ],
-    "name": "f (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "a (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "h (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "h (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (no-deps)",
-      "b (upstream-self)",
-    ],
-    "name": "c (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "b (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "b (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-      "h (no-deps)",
-    ],
-    "name": "f (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-    ],
-    "name": "c (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-      "h (upstream-1)",
-    ],
-    "name": "f (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "h (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "c (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "b (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-      "h (upstream-2)",
-    ],
-    "name": "f (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "h (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "c (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "b (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-1)",
-    ],
-    "name": "f (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "a (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-1)",
-    ],
-    "name": "c (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-2)",
-    ],
-    "name": "f (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "a (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-2)",
-    ],
-    "name": "c (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-      "h (upstream-1-self)",
-    ],
-    "name": "f (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-1)",
-    ],
-    "name": "h (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1-self)",
-    ],
-    "name": "c (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "b (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "h (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-      "h (upstream-2-self)",
-    ],
-    "name": "f (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "h (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-2)",
-    ],
-    "name": "h (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-3)",
-    ],
-    "name": "a (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-3)",
-      "b (upstream-1-self-upstream)",
-      "b (upstream-2-self)",
-    ],
-    "name": "c (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "b (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "b (upstream-2-self)",
-    "silent": true,
-  },
+  "a (upstream-self) (enabled) -> [a (no-deps)]",
+  "b (upstream-self) (enabled) -> [a (upstream-self), b (no-deps)]",
+  "c (upstream-self) (enabled) -> [b (upstream-self), c (no-deps)]",
+  "d (upstream-self) (enabled) -> [b (upstream-self), d (no-deps)]",
+  "e (upstream-self) (enabled) -> [c (upstream-self), e (no-deps)]",
+  "f (upstream-self) (enabled) -> [a (upstream-self), f (no-deps), h (upstream-self)]",
+  "g (upstream-self) (enabled) -> [a (upstream-self), g (no-deps)]",
+  "h (upstream-self) (enabled) -> [a (upstream-self), h (no-deps)]",
+  "i (upstream-self) (enabled) -> [i (no-deps)]",
+  "j (upstream-self) (enabled) -> [j (no-deps)]",
+  "a (no-deps) (disabled) -> []",
+  "b (no-deps) (disabled) -> []",
+  "c (no-deps) (disabled) -> []",
+  "d (no-deps) (disabled) -> []",
+  "e (no-deps) (disabled) -> []",
+  "f (no-deps) (disabled) -> []",
+  "g (no-deps) (disabled) -> []",
+  "h (no-deps) (disabled) -> []",
+  "i (no-deps) (disabled) -> []",
+  "j (no-deps) (disabled) -> []",
 ]
 `;
 
-exports[`PhasedOperationPlugin handles some changed projects 1`] = `
+exports[`PhasedOperationPlugin handles filtered phases: two-phases 1`] = `
 Array [
-  Object {
-    "dependencies": Array [],
-    "name": "a (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "b (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "c (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "d (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "e (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "f (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "g (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "h (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "a (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "b (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (no-deps)",
-      "b (upstream-self)",
-    ],
-    "name": "c (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "d (no-deps)",
-      "b (upstream-self)",
-    ],
-    "name": "d (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "e (no-deps)",
-      "c (upstream-self)",
-    ],
-    "name": "e (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "f (no-deps)",
-      "a (upstream-self)",
-      "h (upstream-self)",
-    ],
-    "name": "f (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "h (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "h (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "g (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "g (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "i (no-deps)",
-    ],
-    "name": "i (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "j (no-deps)",
-    ],
-    "name": "j (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "b (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-    ],
-    "name": "c (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-    ],
-    "name": "d (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (no-deps)",
-    ],
-    "name": "e (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-      "h (no-deps)",
-    ],
-    "name": "f (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "g (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "h (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "b (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "c (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "d (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-1)",
-    ],
-    "name": "e (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-      "h (upstream-1)",
-    ],
-    "name": "f (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "g (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "h (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-3)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "b (upstream-3)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "c (upstream-3)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "d (upstream-3)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-2)",
-    ],
-    "name": "e (upstream-3)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-      "h (upstream-2)",
-    ],
-    "name": "f (upstream-3)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "g (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "h (upstream-3)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-3)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-3)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "a (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "b (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-1)",
-    ],
-    "name": "c (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "d (upstream-1)",
-    ],
-    "name": "d (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "e (upstream-1)",
-    ],
-    "name": "e (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-1)",
-    ],
-    "name": "f (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-1)",
-    ],
-    "name": "g (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-1)",
-    ],
-    "name": "h (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "i (upstream-1)",
-    ],
-    "name": "i (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "j (upstream-1)",
-    ],
-    "name": "j (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "a (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "b (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-2)",
-    ],
-    "name": "c (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "d (upstream-2)",
-    ],
-    "name": "d (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "e (upstream-2)",
-    ],
-    "name": "e (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-2)",
-    ],
-    "name": "f (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-2)",
-    ],
-    "name": "g (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-2)",
-    ],
-    "name": "h (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "i (upstream-2)",
-    ],
-    "name": "i (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "j (upstream-2)",
-    ],
-    "name": "j (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "b (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1-self)",
-    ],
-    "name": "c (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1-self)",
-    ],
-    "name": "d (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-1-self)",
-    ],
-    "name": "e (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-      "h (upstream-1-self)",
-    ],
-    "name": "f (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "g (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "h (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-3)",
-    ],
-    "name": "a (complex)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "b (complex)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-3)",
-      "b (upstream-1-self-upstream)",
-      "b (upstream-2-self)",
-    ],
-    "name": "c (complex)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "d (upstream-3)",
-      "b (upstream-1-self-upstream)",
-      "b (upstream-2-self)",
-    ],
-    "name": "d (complex)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "e (upstream-3)",
-      "c (upstream-1-self-upstream)",
-      "c (upstream-2-self)",
-    ],
-    "name": "e (complex)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "h (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-      "h (upstream-2-self)",
-    ],
-    "name": "f (complex)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "g (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "h (complex)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "i (upstream-3)",
-    ],
-    "name": "i (complex)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "j (upstream-3)",
-    ],
-    "name": "j (complex)",
-    "silent": true,
-  },
+  "a (complex) (enabled) -> [a (upstream-3)]",
+  "a (no-deps) (enabled) -> []",
+  "a (upstream-1) (enabled) -> []",
+  "a (upstream-3) (enabled) -> []",
+  "b (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), b (upstream-3)]",
+  "b (no-deps) (enabled) -> []",
+  "b (upstream-1) (enabled) -> [a (no-deps)]",
+  "b (upstream-3) (enabled) -> [a (upstream-2)]",
+  "c (complex) (enabled) -> [b (upstream-1-self-upstream), b (upstream-2-self), c (upstream-3)]",
+  "c (no-deps) (enabled) -> []",
+  "c (upstream-1) (enabled) -> [b (no-deps)]",
+  "c (upstream-3) (enabled) -> [b (upstream-2)]",
+  "d (complex) (enabled) -> [b (upstream-1-self-upstream), b (upstream-2-self), d (upstream-3)]",
+  "d (no-deps) (enabled) -> []",
+  "d (upstream-1) (enabled) -> [b (no-deps)]",
+  "d (upstream-3) (enabled) -> [b (upstream-2)]",
+  "e (complex) (enabled) -> [c (upstream-1-self-upstream), c (upstream-2-self), e (upstream-3)]",
+  "e (no-deps) (enabled) -> []",
+  "e (upstream-1) (enabled) -> [c (no-deps)]",
+  "e (upstream-3) (enabled) -> [c (upstream-2)]",
+  "f (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), f (upstream-3), h (upstream-1-self-upstream), h (upstream-2-self)]",
+  "f (no-deps) (enabled) -> []",
+  "f (upstream-1) (enabled) -> [a (no-deps), h (no-deps)]",
+  "f (upstream-3) (enabled) -> [a (upstream-2), h (upstream-2)]",
+  "g (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), g (upstream-3)]",
+  "g (no-deps) (enabled) -> []",
+  "g (upstream-1) (enabled) -> [a (no-deps)]",
+  "g (upstream-3) (enabled) -> [a (upstream-2)]",
+  "h (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), h (upstream-3)]",
+  "h (no-deps) (enabled) -> []",
+  "h (upstream-1) (enabled) -> [a (no-deps)]",
+  "h (upstream-3) (enabled) -> [a (upstream-2)]",
+  "i (complex) (enabled) -> [i (upstream-3)]",
+  "i (no-deps) (enabled) -> []",
+  "i (upstream-1) (enabled) -> []",
+  "i (upstream-3) (enabled) -> []",
+  "j (complex) (enabled) -> [j (upstream-3)]",
+  "j (no-deps) (enabled) -> []",
+  "j (upstream-1) (enabled) -> []",
+  "j (upstream-3) (enabled) -> []",
+  "a (upstream-1-self) (disabled) -> [a (upstream-1)]",
+  "a (upstream-1-self-upstream) (disabled) -> []",
+  "a (upstream-2) (disabled) -> []",
+  "a (upstream-2-self) (disabled) -> [a (upstream-2)]",
+  "b (upstream-1-self) (disabled) -> [b (upstream-1)]",
+  "b (upstream-1-self-upstream) (disabled) -> [a (upstream-1-self)]",
+  "b (upstream-2) (disabled) -> [a (upstream-1)]",
+  "b (upstream-2-self) (disabled) -> [b (upstream-2)]",
+  "c (upstream-1-self-upstream) (disabled) -> [b (upstream-1-self)]",
+  "c (upstream-2) (disabled) -> [b (upstream-1)]",
+  "c (upstream-2-self) (disabled) -> [c (upstream-2)]",
+  "h (upstream-1-self-upstream) (disabled) -> [a (upstream-1-self)]",
+  "h (upstream-2) (disabled) -> [a (upstream-1)]",
+  "h (upstream-2-self) (disabled) -> [h (upstream-2)]",
 ]
 `;
 
-exports[`PhasedOperationPlugin handles some changed projects 2`] = `
+exports[`PhasedOperationPlugin handles filtered projects: filtered 1`] = `
 Array [
-  Object {
-    "dependencies": Array [],
-    "name": "a (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "b (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "c (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "d (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "e (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "f (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "g (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "h (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "a (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "b (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (no-deps)",
-      "b (upstream-self)",
-    ],
-    "name": "c (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "d (no-deps)",
-      "b (upstream-self)",
-    ],
-    "name": "d (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "e (no-deps)",
-      "c (upstream-self)",
-    ],
-    "name": "e (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (no-deps)",
-      "a (upstream-self)",
-      "h (upstream-self)",
-    ],
-    "name": "f (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "h (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "g (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "g (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "i (no-deps)",
-    ],
-    "name": "i (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "j (no-deps)",
-    ],
-    "name": "j (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "b (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-    ],
-    "name": "c (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-    ],
-    "name": "d (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (no-deps)",
-    ],
-    "name": "e (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-      "h (no-deps)",
-    ],
-    "name": "f (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "g (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "h (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "b (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "c (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "d (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-1)",
-    ],
-    "name": "e (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-      "h (upstream-1)",
-    ],
-    "name": "f (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "g (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "h (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "b (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "c (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "d (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-2)",
-    ],
-    "name": "e (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-      "h (upstream-2)",
-    ],
-    "name": "f (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "g (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "h (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-3)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-3)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "a (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "b (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-1)",
-    ],
-    "name": "c (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "d (upstream-1)",
-    ],
-    "name": "d (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "e (upstream-1)",
-    ],
-    "name": "e (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-1)",
-    ],
-    "name": "f (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-1)",
-    ],
-    "name": "g (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-1)",
-    ],
-    "name": "h (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "i (upstream-1)",
-    ],
-    "name": "i (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "j (upstream-1)",
-    ],
-    "name": "j (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "a (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "b (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-2)",
-    ],
-    "name": "c (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "d (upstream-2)",
-    ],
-    "name": "d (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "e (upstream-2)",
-    ],
-    "name": "e (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-2)",
-    ],
-    "name": "f (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-2)",
-    ],
-    "name": "g (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-2)",
-    ],
-    "name": "h (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "i (upstream-2)",
-    ],
-    "name": "i (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "j (upstream-2)",
-    ],
-    "name": "j (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "b (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1-self)",
-    ],
-    "name": "c (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1-self)",
-    ],
-    "name": "d (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-1-self)",
-    ],
-    "name": "e (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-      "h (upstream-1-self)",
-    ],
-    "name": "f (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "g (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "h (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "i (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "j (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-3)",
-    ],
-    "name": "a (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "b (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-3)",
-      "b (upstream-1-self-upstream)",
-      "b (upstream-2-self)",
-    ],
-    "name": "c (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "d (upstream-3)",
-      "b (upstream-1-self-upstream)",
-      "b (upstream-2-self)",
-    ],
-    "name": "d (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "e (upstream-3)",
-      "c (upstream-1-self-upstream)",
-      "c (upstream-2-self)",
-    ],
-    "name": "e (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "h (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-      "h (upstream-2-self)",
-    ],
-    "name": "f (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "g (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-    ],
-    "name": "h (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "i (upstream-3)",
-    ],
-    "name": "i (complex)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "j (upstream-3)",
-    ],
-    "name": "j (complex)",
-    "silent": true,
-  },
+  "a (complex) (enabled) -> [a (upstream-3)]",
+  "a (no-deps) (enabled) -> []",
+  "a (upstream-1) (enabled) -> []",
+  "a (upstream-1-self) (enabled) -> [a (upstream-1)]",
+  "a (upstream-1-self-upstream) (enabled) -> []",
+  "a (upstream-2) (enabled) -> []",
+  "a (upstream-2-self) (enabled) -> [a (upstream-2)]",
+  "a (upstream-3) (enabled) -> []",
+  "a (upstream-self) (enabled) -> [a (no-deps)]",
+  "c (complex) (enabled) -> [b (upstream-1-self-upstream), b (upstream-2-self), c (upstream-3)]",
+  "c (no-deps) (enabled) -> []",
+  "c (upstream-1) (enabled) -> [b (no-deps)]",
+  "c (upstream-1-self) (enabled) -> [c (upstream-1)]",
+  "c (upstream-1-self-upstream) (enabled) -> [b (upstream-1-self)]",
+  "c (upstream-2) (enabled) -> [b (upstream-1)]",
+  "c (upstream-2-self) (enabled) -> [c (upstream-2)]",
+  "c (upstream-3) (enabled) -> [b (upstream-2)]",
+  "c (upstream-self) (enabled) -> [b (upstream-self), c (no-deps)]",
+  "f (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), f (upstream-3), h (upstream-1-self-upstream), h (upstream-2-self)]",
+  "f (no-deps) (enabled) -> []",
+  "f (upstream-1) (enabled) -> [a (no-deps), h (no-deps)]",
+  "f (upstream-1-self) (enabled) -> [f (upstream-1)]",
+  "f (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self), h (upstream-1-self)]",
+  "f (upstream-2) (enabled) -> [a (upstream-1), h (upstream-1)]",
+  "f (upstream-2-self) (enabled) -> [f (upstream-2)]",
+  "f (upstream-3) (enabled) -> [a (upstream-2), h (upstream-2)]",
+  "f (upstream-self) (enabled) -> [a (upstream-self), f (no-deps), h (upstream-self)]",
+  "b (no-deps) (disabled) -> []",
+  "b (upstream-1) (disabled) -> [a (no-deps)]",
+  "b (upstream-1-self) (disabled) -> [b (upstream-1)]",
+  "b (upstream-1-self-upstream) (disabled) -> [a (upstream-1-self)]",
+  "b (upstream-2) (disabled) -> [a (upstream-1)]",
+  "b (upstream-2-self) (disabled) -> [b (upstream-2)]",
+  "b (upstream-self) (disabled) -> [a (upstream-self), b (no-deps)]",
+  "h (no-deps) (disabled) -> []",
+  "h (upstream-1) (disabled) -> [a (no-deps)]",
+  "h (upstream-1-self) (disabled) -> [h (upstream-1)]",
+  "h (upstream-1-self-upstream) (disabled) -> [a (upstream-1-self)]",
+  "h (upstream-2) (disabled) -> [a (upstream-1)]",
+  "h (upstream-2-self) (disabled) -> [h (upstream-2)]",
+  "h (upstream-self) (disabled) -> [a (upstream-self), h (no-deps)]",
 ]
 `;
 
-exports[`PhasedOperationPlugin handles some changed projects within filtered projects 1`] = `
+exports[`PhasedOperationPlugin handles filtered projects: single 1`] = `
 Array [
-  Object {
-    "dependencies": Array [],
-    "name": "f (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "c (no-deps)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (no-deps)",
-      "a (upstream-self)",
-      "h (upstream-self)",
-    ],
-    "name": "f (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "a (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "h (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "h (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "c (no-deps)",
-      "b (upstream-self)",
-    ],
-    "name": "c (upstream-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-      "a (upstream-self)",
-    ],
-    "name": "b (upstream-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "b (no-deps)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-      "h (no-deps)",
-    ],
-    "name": "f (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (no-deps)",
-    ],
-    "name": "c (upstream-1)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-      "h (upstream-1)",
-    ],
-    "name": "f (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "h (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "c (upstream-2)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "name": "b (upstream-1)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-      "h (upstream-2)",
-    ],
-    "name": "f (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "h (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "c (upstream-3)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "b (upstream-2)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-1)",
-    ],
-    "name": "f (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "name": "a (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-1)",
-    ],
-    "name": "c (upstream-1-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-2)",
-    ],
-    "name": "f (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-2)",
-    ],
-    "name": "a (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-2)",
-    ],
-    "name": "c (upstream-2-self)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-      "h (upstream-1-self)",
-    ],
-    "name": "f (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-1)",
-    ],
-    "name": "h (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [],
-    "name": "a (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1-self)",
-    ],
-    "name": "c (upstream-1-self-upstream)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-1)",
-    ],
-    "name": "b (upstream-1-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "f (upstream-3)",
-      "a (upstream-1-self-upstream)",
-      "h (upstream-1-self-upstream)",
-      "a (upstream-2-self)",
-      "h (upstream-2-self)",
-    ],
-    "name": "f (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "h (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-2)",
-    ],
-    "name": "h (upstream-2-self)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-3)",
-    ],
-    "name": "a (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "c (upstream-3)",
-      "b (upstream-1-self-upstream)",
-      "b (upstream-2-self)",
-    ],
-    "name": "c (complex)",
-    "silent": false,
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1-self)",
-    ],
-    "name": "b (upstream-1-self-upstream)",
-    "silent": true,
-  },
-  Object {
-    "dependencies": Array [
-      "b (upstream-2)",
-    ],
-    "name": "b (upstream-2-self)",
-    "silent": true,
-  },
+  "g (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), g (upstream-3)]",
+  "g (no-deps) (enabled) -> []",
+  "g (upstream-1) (enabled) -> [a (no-deps)]",
+  "g (upstream-1-self) (enabled) -> [g (upstream-1)]",
+  "g (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self)]",
+  "g (upstream-2) (enabled) -> [a (upstream-1)]",
+  "g (upstream-2-self) (enabled) -> [g (upstream-2)]",
+  "g (upstream-3) (enabled) -> [a (upstream-2)]",
+  "g (upstream-self) (enabled) -> [a (upstream-self), g (no-deps)]",
+  "a (no-deps) (disabled) -> []",
+  "a (upstream-1) (disabled) -> []",
+  "a (upstream-1-self) (disabled) -> [a (upstream-1)]",
+  "a (upstream-1-self-upstream) (disabled) -> []",
+  "a (upstream-2) (disabled) -> []",
+  "a (upstream-2-self) (disabled) -> [a (upstream-2)]",
+  "a (upstream-self) (disabled) -> [a (no-deps)]",
+]
+`;
+
+exports[`PhasedOperationPlugin handles some changed projects within filtered projects: multiple 1`] = `
+Array [
+  "a (complex) (enabled) -> [a (upstream-3)]",
+  "a (no-deps) (enabled) -> []",
+  "a (upstream-1) (enabled) -> []",
+  "a (upstream-1-self) (enabled) -> [a (upstream-1)]",
+  "a (upstream-1-self-upstream) (enabled) -> []",
+  "a (upstream-2) (enabled) -> []",
+  "a (upstream-2-self) (enabled) -> [a (upstream-2)]",
+  "a (upstream-3) (enabled) -> []",
+  "a (upstream-self) (enabled) -> [a (no-deps)]",
+  "c (complex) (enabled) -> [b (upstream-1-self-upstream), b (upstream-2-self), c (upstream-3)]",
+  "c (no-deps) (enabled) -> []",
+  "c (upstream-1) (enabled) -> [b (no-deps)]",
+  "c (upstream-1-self) (enabled) -> [c (upstream-1)]",
+  "c (upstream-1-self-upstream) (enabled) -> [b (upstream-1-self)]",
+  "c (upstream-2) (enabled) -> [b (upstream-1)]",
+  "c (upstream-2-self) (enabled) -> [c (upstream-2)]",
+  "c (upstream-3) (enabled) -> [b (upstream-2)]",
+  "c (upstream-self) (enabled) -> [b (upstream-self), c (no-deps)]",
+  "f (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), f (upstream-3), h (upstream-1-self-upstream), h (upstream-2-self)]",
+  "f (upstream-1) (enabled) -> [a (no-deps), h (no-deps)]",
+  "f (upstream-1-self) (enabled) -> [f (upstream-1)]",
+  "f (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self), h (upstream-1-self)]",
+  "f (upstream-2) (enabled) -> [a (upstream-1), h (upstream-1)]",
+  "f (upstream-2-self) (enabled) -> [f (upstream-2)]",
+  "f (upstream-3) (enabled) -> [a (upstream-2), h (upstream-2)]",
+  "f (upstream-self) (enabled) -> [a (upstream-self), f (no-deps), h (upstream-self)]",
+  "b (no-deps) (disabled) -> []",
+  "b (upstream-1) (disabled) -> [a (no-deps)]",
+  "b (upstream-1-self) (disabled) -> [b (upstream-1)]",
+  "b (upstream-1-self-upstream) (disabled) -> [a (upstream-1-self)]",
+  "b (upstream-2) (disabled) -> [a (upstream-1)]",
+  "b (upstream-2-self) (disabled) -> [b (upstream-2)]",
+  "b (upstream-self) (disabled) -> [a (upstream-self), b (no-deps)]",
+  "f (no-deps) (disabled) -> []",
+  "h (no-deps) (disabled) -> []",
+  "h (upstream-1) (disabled) -> [a (no-deps)]",
+  "h (upstream-1-self) (disabled) -> [h (upstream-1)]",
+  "h (upstream-1-self-upstream) (disabled) -> [a (upstream-1-self)]",
+  "h (upstream-2) (disabled) -> [a (upstream-1)]",
+  "h (upstream-2-self) (disabled) -> [h (upstream-2)]",
+  "h (upstream-self) (disabled) -> [a (upstream-self), h (no-deps)]",
+]
+`;
+
+exports[`PhasedOperationPlugin handles some changed projects: multiple 1`] = `
+Array [
+  "a (complex) (enabled) -> [a (upstream-3)]",
+  "a (no-deps) (enabled) -> []",
+  "a (upstream-1) (enabled) -> []",
+  "a (upstream-1-self) (enabled) -> [a (upstream-1)]",
+  "a (upstream-1-self-upstream) (enabled) -> []",
+  "a (upstream-2) (enabled) -> []",
+  "a (upstream-2-self) (enabled) -> [a (upstream-2)]",
+  "a (upstream-3) (enabled) -> []",
+  "a (upstream-self) (enabled) -> [a (no-deps)]",
+  "b (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), b (upstream-3)]",
+  "b (upstream-1) (enabled) -> [a (no-deps)]",
+  "b (upstream-1-self) (enabled) -> [b (upstream-1)]",
+  "b (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self)]",
+  "b (upstream-2) (enabled) -> [a (upstream-1)]",
+  "b (upstream-2-self) (enabled) -> [b (upstream-2)]",
+  "b (upstream-3) (enabled) -> [a (upstream-2)]",
+  "b (upstream-self) (enabled) -> [a (upstream-self), b (no-deps)]",
+  "c (complex) (enabled) -> [b (upstream-1-self-upstream), b (upstream-2-self), c (upstream-3)]",
+  "c (no-deps) (enabled) -> []",
+  "c (upstream-1) (enabled) -> [b (no-deps)]",
+  "c (upstream-1-self) (enabled) -> [c (upstream-1)]",
+  "c (upstream-1-self-upstream) (enabled) -> [b (upstream-1-self)]",
+  "c (upstream-2) (enabled) -> [b (upstream-1)]",
+  "c (upstream-2-self) (enabled) -> [c (upstream-2)]",
+  "c (upstream-3) (enabled) -> [b (upstream-2)]",
+  "c (upstream-self) (enabled) -> [b (upstream-self), c (no-deps)]",
+  "d (complex) (enabled) -> [b (upstream-1-self-upstream), b (upstream-2-self), d (upstream-3)]",
+  "d (upstream-1-self-upstream) (enabled) -> [b (upstream-1-self)]",
+  "d (upstream-2) (enabled) -> [b (upstream-1)]",
+  "d (upstream-2-self) (enabled) -> [d (upstream-2)]",
+  "d (upstream-3) (enabled) -> [b (upstream-2)]",
+  "d (upstream-self) (enabled) -> [b (upstream-self), d (no-deps)]",
+  "e (complex) (enabled) -> [c (upstream-1-self-upstream), c (upstream-2-self), e (upstream-3)]",
+  "e (upstream-1) (enabled) -> [c (no-deps)]",
+  "e (upstream-1-self) (enabled) -> [e (upstream-1)]",
+  "e (upstream-1-self-upstream) (enabled) -> [c (upstream-1-self)]",
+  "e (upstream-2) (enabled) -> [c (upstream-1)]",
+  "e (upstream-2-self) (enabled) -> [e (upstream-2)]",
+  "e (upstream-3) (enabled) -> [c (upstream-2)]",
+  "e (upstream-self) (enabled) -> [c (upstream-self), e (no-deps)]",
+  "f (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), f (upstream-3), h (upstream-1-self-upstream), h (upstream-2-self)]",
+  "f (no-deps) (enabled) -> []",
+  "f (upstream-1) (enabled) -> [a (no-deps), h (no-deps)]",
+  "f (upstream-1-self) (enabled) -> [f (upstream-1)]",
+  "f (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self), h (upstream-1-self)]",
+  "f (upstream-2) (enabled) -> [a (upstream-1), h (upstream-1)]",
+  "f (upstream-2-self) (enabled) -> [f (upstream-2)]",
+  "f (upstream-3) (enabled) -> [a (upstream-2), h (upstream-2)]",
+  "f (upstream-self) (enabled) -> [a (upstream-self), f (no-deps), h (upstream-self)]",
+  "g (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), g (upstream-3)]",
+  "g (upstream-1) (enabled) -> [a (no-deps)]",
+  "g (upstream-1-self) (enabled) -> [g (upstream-1)]",
+  "g (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self)]",
+  "g (upstream-2) (enabled) -> [a (upstream-1)]",
+  "g (upstream-2-self) (enabled) -> [g (upstream-2)]",
+  "g (upstream-3) (enabled) -> [a (upstream-2)]",
+  "g (upstream-self) (enabled) -> [a (upstream-self), g (no-deps)]",
+  "h (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), h (upstream-3)]",
+  "h (upstream-1) (enabled) -> [a (no-deps)]",
+  "h (upstream-1-self) (enabled) -> [h (upstream-1)]",
+  "h (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self)]",
+  "h (upstream-2) (enabled) -> [a (upstream-1)]",
+  "h (upstream-2-self) (enabled) -> [h (upstream-2)]",
+  "h (upstream-3) (enabled) -> [a (upstream-2)]",
+  "h (upstream-self) (enabled) -> [a (upstream-self), h (no-deps)]",
+  "b (no-deps) (disabled) -> []",
+  "d (no-deps) (disabled) -> []",
+  "d (upstream-1) (disabled) -> [b (no-deps)]",
+  "d (upstream-1-self) (disabled) -> [d (upstream-1)]",
+  "e (no-deps) (disabled) -> []",
+  "g (no-deps) (disabled) -> []",
+  "h (no-deps) (disabled) -> []",
+  "i (complex) (disabled) -> [i (upstream-3)]",
+  "i (no-deps) (disabled) -> []",
+  "i (upstream-1) (disabled) -> []",
+  "i (upstream-1-self) (disabled) -> [i (upstream-1)]",
+  "i (upstream-1-self-upstream) (disabled) -> []",
+  "i (upstream-2) (disabled) -> []",
+  "i (upstream-2-self) (disabled) -> [i (upstream-2)]",
+  "i (upstream-3) (disabled) -> []",
+  "i (upstream-self) (disabled) -> [i (no-deps)]",
+  "j (complex) (disabled) -> [j (upstream-3)]",
+  "j (no-deps) (disabled) -> []",
+  "j (upstream-1) (disabled) -> []",
+  "j (upstream-1-self) (disabled) -> [j (upstream-1)]",
+  "j (upstream-1-self-upstream) (disabled) -> []",
+  "j (upstream-2) (disabled) -> []",
+  "j (upstream-2-self) (disabled) -> [j (upstream-2)]",
+  "j (upstream-3) (disabled) -> []",
+  "j (upstream-self) (disabled) -> [j (no-deps)]",
+]
+`;
+
+exports[`PhasedOperationPlugin handles some changed projects: single 1`] = `
+Array [
+  "g (complex) (enabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), g (upstream-3)]",
+  "g (no-deps) (enabled) -> []",
+  "g (upstream-1) (enabled) -> [a (no-deps)]",
+  "g (upstream-1-self) (enabled) -> [g (upstream-1)]",
+  "g (upstream-1-self-upstream) (enabled) -> [a (upstream-1-self)]",
+  "g (upstream-2) (enabled) -> [a (upstream-1)]",
+  "g (upstream-2-self) (enabled) -> [g (upstream-2)]",
+  "g (upstream-3) (enabled) -> [a (upstream-2)]",
+  "g (upstream-self) (enabled) -> [a (upstream-self), g (no-deps)]",
+  "a (complex) (disabled) -> [a (upstream-3)]",
+  "a (no-deps) (disabled) -> []",
+  "a (upstream-1) (disabled) -> []",
+  "a (upstream-1-self) (disabled) -> [a (upstream-1)]",
+  "a (upstream-1-self-upstream) (disabled) -> []",
+  "a (upstream-2) (disabled) -> []",
+  "a (upstream-2-self) (disabled) -> [a (upstream-2)]",
+  "a (upstream-3) (disabled) -> []",
+  "a (upstream-self) (disabled) -> [a (no-deps)]",
+  "b (complex) (disabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), b (upstream-3)]",
+  "b (no-deps) (disabled) -> []",
+  "b (upstream-1) (disabled) -> [a (no-deps)]",
+  "b (upstream-1-self) (disabled) -> [b (upstream-1)]",
+  "b (upstream-1-self-upstream) (disabled) -> [a (upstream-1-self)]",
+  "b (upstream-2) (disabled) -> [a (upstream-1)]",
+  "b (upstream-2-self) (disabled) -> [b (upstream-2)]",
+  "b (upstream-3) (disabled) -> [a (upstream-2)]",
+  "b (upstream-self) (disabled) -> [a (upstream-self), b (no-deps)]",
+  "c (complex) (disabled) -> [b (upstream-1-self-upstream), b (upstream-2-self), c (upstream-3)]",
+  "c (no-deps) (disabled) -> []",
+  "c (upstream-1) (disabled) -> [b (no-deps)]",
+  "c (upstream-1-self) (disabled) -> [c (upstream-1)]",
+  "c (upstream-1-self-upstream) (disabled) -> [b (upstream-1-self)]",
+  "c (upstream-2) (disabled) -> [b (upstream-1)]",
+  "c (upstream-2-self) (disabled) -> [c (upstream-2)]",
+  "c (upstream-3) (disabled) -> [b (upstream-2)]",
+  "c (upstream-self) (disabled) -> [b (upstream-self), c (no-deps)]",
+  "d (complex) (disabled) -> [b (upstream-1-self-upstream), b (upstream-2-self), d (upstream-3)]",
+  "d (no-deps) (disabled) -> []",
+  "d (upstream-1) (disabled) -> [b (no-deps)]",
+  "d (upstream-1-self) (disabled) -> [d (upstream-1)]",
+  "d (upstream-1-self-upstream) (disabled) -> [b (upstream-1-self)]",
+  "d (upstream-2) (disabled) -> [b (upstream-1)]",
+  "d (upstream-2-self) (disabled) -> [d (upstream-2)]",
+  "d (upstream-3) (disabled) -> [b (upstream-2)]",
+  "d (upstream-self) (disabled) -> [b (upstream-self), d (no-deps)]",
+  "e (complex) (disabled) -> [c (upstream-1-self-upstream), c (upstream-2-self), e (upstream-3)]",
+  "e (no-deps) (disabled) -> []",
+  "e (upstream-1) (disabled) -> [c (no-deps)]",
+  "e (upstream-1-self) (disabled) -> [e (upstream-1)]",
+  "e (upstream-1-self-upstream) (disabled) -> [c (upstream-1-self)]",
+  "e (upstream-2) (disabled) -> [c (upstream-1)]",
+  "e (upstream-2-self) (disabled) -> [e (upstream-2)]",
+  "e (upstream-3) (disabled) -> [c (upstream-2)]",
+  "e (upstream-self) (disabled) -> [c (upstream-self), e (no-deps)]",
+  "f (complex) (disabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), f (upstream-3), h (upstream-1-self-upstream), h (upstream-2-self)]",
+  "f (no-deps) (disabled) -> []",
+  "f (upstream-1) (disabled) -> [a (no-deps), h (no-deps)]",
+  "f (upstream-1-self) (disabled) -> [f (upstream-1)]",
+  "f (upstream-1-self-upstream) (disabled) -> [a (upstream-1-self), h (upstream-1-self)]",
+  "f (upstream-2) (disabled) -> [a (upstream-1), h (upstream-1)]",
+  "f (upstream-2-self) (disabled) -> [f (upstream-2)]",
+  "f (upstream-3) (disabled) -> [a (upstream-2), h (upstream-2)]",
+  "f (upstream-self) (disabled) -> [a (upstream-self), f (no-deps), h (upstream-self)]",
+  "h (complex) (disabled) -> [a (upstream-1-self-upstream), a (upstream-2-self), h (upstream-3)]",
+  "h (no-deps) (disabled) -> []",
+  "h (upstream-1) (disabled) -> [a (no-deps)]",
+  "h (upstream-1-self) (disabled) -> [h (upstream-1)]",
+  "h (upstream-1-self-upstream) (disabled) -> [a (upstream-1-self)]",
+  "h (upstream-2) (disabled) -> [a (upstream-1)]",
+  "h (upstream-2-self) (disabled) -> [h (upstream-2)]",
+  "h (upstream-3) (disabled) -> [a (upstream-2)]",
+  "h (upstream-self) (disabled) -> [a (upstream-self), h (no-deps)]",
+  "i (complex) (disabled) -> [i (upstream-3)]",
+  "i (no-deps) (disabled) -> []",
+  "i (upstream-1) (disabled) -> []",
+  "i (upstream-1-self) (disabled) -> [i (upstream-1)]",
+  "i (upstream-1-self-upstream) (disabled) -> []",
+  "i (upstream-2) (disabled) -> []",
+  "i (upstream-2-self) (disabled) -> [i (upstream-2)]",
+  "i (upstream-3) (disabled) -> []",
+  "i (upstream-self) (disabled) -> [i (no-deps)]",
+  "j (complex) (disabled) -> [j (upstream-3)]",
+  "j (no-deps) (disabled) -> []",
+  "j (upstream-1) (disabled) -> []",
+  "j (upstream-1-self) (disabled) -> [j (upstream-1)]",
+  "j (upstream-1-self-upstream) (disabled) -> []",
+  "j (upstream-2) (disabled) -> []",
+  "j (upstream-2-self) (disabled) -> [j (upstream-2)]",
+  "j (upstream-3) (disabled) -> []",
+  "j (upstream-self) (disabled) -> [j (no-deps)]",
 ]
 `;
