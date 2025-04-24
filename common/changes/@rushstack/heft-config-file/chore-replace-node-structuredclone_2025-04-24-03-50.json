@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "replace node structuredclone",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file"
+}

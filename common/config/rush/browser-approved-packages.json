@@ -47,6 +47,10 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
+      "name": "@ungap/structured-clone",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "axios",
       "allowedCategories": [ "libraries" ]
     },
