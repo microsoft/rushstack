@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue with implicit phase expansion when `--include-phase-deps` is not specified.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

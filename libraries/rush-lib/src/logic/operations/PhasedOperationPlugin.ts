@@ -105,11 +105,13 @@ function configureOperations(operations: Set<Operation>, context: ICreateOperati
     isInitial
   } = context;
 
+  const basePhases: ReadonlySet<IPhase> = includePhaseDeps ? phaseOriginal : phaseSelection;
+
   // Grab all operations that were explicitly requested.
   const operationsWithWork: Set<Operation> = new Set();
   for (const operation of operations) {
     const { associatedPhase, associatedProject } = operation;
-    if (phaseOriginal.has(associatedPhase) && changedProjects.has(associatedProject)) {
+    if (basePhases.has(associatedPhase) && changedProjects.has(associatedProject)) {
       operationsWithWork.add(operation);
     }
   }
