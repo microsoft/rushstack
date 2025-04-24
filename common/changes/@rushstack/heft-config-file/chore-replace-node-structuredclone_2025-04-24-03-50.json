@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-config-file",
-      "comment": "replace node structuredclone",
+      "comment": "Fix Node 16 compatibility by using non-built-in structuredClone",
       "type": "patch"
     }
   ],
