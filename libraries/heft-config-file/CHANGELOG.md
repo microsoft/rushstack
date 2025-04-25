@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Thu, 17 Apr 2025 00:11:21 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Apr 2025 00:11:32 GMT and should not be manually modified.
+
+## 0.18.1
+Fri, 25 Apr 2025 00:11:32 GMT
+
+### Patches
+
+- Fix Node 16 compatibility by using non-built-in structuredClone
 
 ## 0.18.0
 Thu, 17 Apr 2025 00:11:21 GMT

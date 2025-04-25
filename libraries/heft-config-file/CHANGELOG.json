@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.18.1",
+      "tag": "@rushstack/heft-config-file_v0.18.1",
+      "date": "Fri, 25 Apr 2025 00:11:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix Node 16 compatibility by using non-built-in structuredClone"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.18.0",
       "tag": "@rushstack/heft-config-file_v0.18.0",
       "date": "Thu, 17 Apr 2025 00:11:21 GMT",
