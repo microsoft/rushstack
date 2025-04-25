@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.153.1",
+      "tag": "@microsoft/rush_v5.153.1",
+      "date": "Fri, 25 Apr 2025 01:12:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue with implicit phase expansion when `--include-phase-deps` is not specified."
+          },
+          {
+            "comment": "Upgrade `rushstack/heft-config-file` to fix an incompatibility with Node 16"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.153.0",
       "tag": "@microsoft/rush_v5.153.0",
       "date": "Thu, 17 Apr 2025 21:59:15 GMT",

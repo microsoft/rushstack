@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 17 Apr 2025 21:59:15 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Apr 2025 01:12:48 GMT and should not be manually modified.
+
+## 5.153.1
+Fri, 25 Apr 2025 01:12:48 GMT
+
+### Updates
+
+- Fix an issue with implicit phase expansion when `--include-phase-deps` is not specified.
+- Upgrade `rushstack/heft-config-file` to fix an incompatibility with Node 16
 
 ## 5.153.0
 Thu, 17 Apr 2025 21:59:15 GMT
