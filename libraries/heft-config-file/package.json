@@ -30,7 +30,6 @@
   "devDependencies": {
     "@rushstack/heft": "0.73.2",
     "@types/ungap__structured-clone": "~1.2.0",
-    "decoupled-local-node-rig": "workspace:*",
-    "local-eslint-config": "workspace:*"
+    "decoupled-local-node-rig": "workspace:*"
   }
 }
