@@ -4,7 +4,7 @@
 
 ```ts
 
-// @public (undocumented)
+// @beta (undocumented)
 class DefaultClass {
 }
 export default DefaultClass;
