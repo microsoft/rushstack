@@ -2,7 +2,7 @@
 
 const webpack = require('webpack');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
-const PathConstants = require('./lib/PathConstants');
+const { CREATE_LINKS_SCRIPT_FILENAME, SCRIPTS_FOLDER_PATH } = require('./lib/PathConstants');
 
 module.exports = () => {
   return {
@@ -10,13 +10,13 @@ module.exports = () => {
     mode: 'development', // So the output isn't minified
     devtool: 'source-map',
     entry: {
-      [PathConstants.createLinksScriptFilename]: {
-        import: `${__dirname}/lib-esnext/scripts/create-links.js`,
+      [CREATE_LINKS_SCRIPT_FILENAME]: {
+        import: `${__dirname}/lib-esnext/scripts/createLinks/start.js`,
         filename: `[name]`
       }
     },
     output: {
-      path: PathConstants.scriptsFolderPath,
+      path: SCRIPTS_FOLDER_PATH,
       filename: '[name].js',
       chunkFilename: 'chunks/[name].js', // TODO: Don't allow any chunks to be created
       library: {
@@ -29,6 +29,10 @@ module.exports = () => {
       new webpack.ids.DeterministicModuleIdsPlugin({
         maxLength: 6
       })
+    ],
+    ignoreWarnings: [
+      // This is included by the 'mz' package which is a dependency of '@pnpm/link-bins' but is unused
+      /Module not found: Error: Can't resolve 'graceful-fs'/
     ]
   };
 };

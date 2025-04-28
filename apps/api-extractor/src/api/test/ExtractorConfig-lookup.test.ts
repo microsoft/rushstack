@@ -16,19 +16,19 @@ function expectEqualPaths(path1: string, path2: string): void {
 
 // Tests for expanding the "<lookup>" token for the "projectFolder" setting in api-extractor.json
 describe(`${ExtractorConfig.name}.${ExtractorConfig.loadFileAndPrepare.name}`, () => {
-  it.only('config-lookup1: looks up ./api-extractor.json', () => {
+  it('config-lookup1: looks up ./api-extractor.json', () => {
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
       path.join(testDataFolder, 'config-lookup1/api-extractor.json')
     );
     expectEqualPaths(extractorConfig.projectFolder, path.join(testDataFolder, 'config-lookup1'));
   });
-  it.only('config-lookup2: looks up ./config/api-extractor.json', () => {
+  it('config-lookup2: looks up ./config/api-extractor.json', () => {
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
       path.join(testDataFolder, 'config-lookup2/config/api-extractor.json')
     );
     expectEqualPaths(extractorConfig.projectFolder, path.join(testDataFolder, 'config-lookup2'));
   });
-  it.only('config-lookup3a: looks up ./src/test/config/api-extractor.json', () => {
+  it('config-lookup3a: looks up ./src/test/config/api-extractor.json', () => {
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
       path.join(testDataFolder, 'config-lookup3/src/test/config/api-extractor.json')
     );

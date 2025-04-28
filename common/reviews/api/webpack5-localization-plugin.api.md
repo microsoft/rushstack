@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import type { Chunk } from 'webpack';
+import type { Compilation } from 'webpack';
 import type { Compiler } from 'webpack';
 import { ILocalizationFile } from '@rushstack/localization-utilities';
 import type { IPseudolocaleOptions } from '@rushstack/localization-utilities';
@@ -77,7 +78,7 @@ export interface ILocalizationStatsEntrypoint {
 
 // @public
 export interface ILocalizationStatsOptions {
-    callback?: (stats: ILocalizationStats) => void;
+    callback?: (stats: ILocalizationStats, compilation: Compilation) => void;
     dropPath?: string;
 }
 
@@ -124,8 +125,8 @@ export interface _IStringPlaceholder {
     locFilePath: string;
     stringName: string;
     suffix: string;
+    translations: ReadonlyMap<string, ReadonlyMap<string, string>>;
     value: string;
-    valuesByLocale: Map<string, string>;
 }
 
 // @public (undocumented)
@@ -146,8 +147,6 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     getPlaceholder(localizedFileKey: string, stringName: string): _IStringPlaceholder | undefined;
     // @internal (undocumented)
     readonly _options: ILocalizationPluginOptions;
-    // (undocumented)
-    readonly stringKeys: Map<string, _IStringPlaceholder>;
 }
 
 // @public (undocumented)

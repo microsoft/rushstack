@@ -213,9 +213,12 @@ export class PublishAction extends BaseRushAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected async runAsync(): Promise<void> {
+    const currentlyInstalledVariant: string | undefined =
+      await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
     await PolicyValidator.validatePolicyAsync(
       this.rushConfiguration,
       this.rushConfiguration.defaultSubspace,
+      currentlyInstalledVariant,
       { bypassPolicy: false }
     );
 
@@ -236,7 +239,7 @@ export class PublishAction extends BaseRushAction {
 
     this._validate();
 
-    this._addNpmPublishHome();
+    this._addNpmPublishHome(this.rushConfiguration.isPnpm);
 
     const git: Git = new Git(this.rushConfiguration);
     const publishGit: PublishGit = new PublishGit(git, this._targetBranch.value);
@@ -452,7 +455,7 @@ export class PublishAction extends BaseRushAction {
         args.push(`--access`, this._npmAccessLevel.value);
       }
 
-      if (this.rushConfiguration.packageManager === 'pnpm') {
+      if (this.rushConfiguration.isPnpm) {
         // PNPM 4.11.0 introduced a feature that may interrupt publishing and prompt the user for input.
         // See this issue for details: https://github.com/microsoft/rushstack/issues/1940
         args.push('--no-git-checks');
@@ -579,7 +582,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _addNpmPublishHome(): void {
+  private _addNpmPublishHome(supportEnvVarFallbackSyntax: boolean): void {
     // Create "common\temp\publish-home" folder, if it doesn't exist
     Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
 
@@ -587,7 +590,8 @@ export class PublishAction extends BaseRushAction {
     Utilities.syncNpmrc({
       sourceNpmrcFolder: this.rushConfiguration.commonRushConfigFolder,
       targetNpmrcFolder: this._targetNpmrcPublishFolder,
-      useNpmrcPublish: true
+      useNpmrcPublish: true,
+      supportEnvVarFallbackSyntax
     });
   }
 

@@ -22,9 +22,9 @@ import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import { MockOperationRunner } from './MockOperationRunner';
-import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 import path from 'path';
 import type { ICommandLineJson } from '../../../api/CommandLineJson';
+import type { IInputsSnapshot } from '../../incremental/InputsSnapshot';
 
 describe(BuildPlanPlugin.name, () => {
   const rushJsonFile: string = path.resolve(__dirname, `../../test/workspaceRepo/rush.json`);
@@ -54,7 +54,7 @@ describe(BuildPlanPlugin.name, () => {
     for (const operation of operations) {
       const { associatedPhase, associatedProject } = operation;
 
-      if (associatedPhase && associatedProject && !operation.runner) {
+      if (!operation.runner) {
         const name: string = `${associatedProject.packageName} (${associatedPhase.name.slice(
           RushConstants.phaseNamePrefix.length
         )})`;
@@ -104,12 +104,13 @@ describe(BuildPlanPlugin.name, () => {
       const hooks: PhasedCommandHooks = new PhasedCommandHooks();
 
       new BuildPlanPlugin(terminal).apply(hooks);
-      const context: Pick<IExecuteOperationsContext, 'projectChangeAnalyzer' | 'projectConfigurations'> = {
-        projectChangeAnalyzer: {
-          [ProjectChangeAnalyzer.prototype._tryGetProjectDependenciesAsync.name]: async () => {
-            return new Map();
-          }
-        } as unknown as ProjectChangeAnalyzer,
+      const inputsSnapshot: Pick<IInputsSnapshot, 'getTrackedFileHashesForOperation'> = {
+        getTrackedFileHashesForOperation() {
+          return new Map();
+        }
+      };
+      const context: Pick<IExecuteOperationsContext, 'inputsSnapshot' | 'projectConfigurations'> = {
+        inputsSnapshot: inputsSnapshot as unknown as IInputsSnapshot,
         projectConfigurations: new Map()
       };
       const buildCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(
@@ -126,7 +127,12 @@ describe(BuildPlanPlugin.name, () => {
       operations.forEach((operation) => {
         operationMap.set(
           operation,
-          new OperationExecutionRecord(operation, { debugMode: false, quietMode: true, streamCollator })
+          new OperationExecutionRecord(operation, {
+            debugMode: false,
+            quietMode: true,
+            streamCollator,
+            inputsSnapshot: undefined
+          })
         );
       });
 

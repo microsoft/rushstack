@@ -13,6 +13,16 @@
           "longName": "--storybook",
           "description": "(EXPERIMENTAL) Used by the \"@rushstack/heft-storybook-plugin\" package to launch Storybook.",
           "parameterKind": "flag"
+        },
+        {
+          "longName": "--storybook-test",
+          "description": "Executes a stripped down build-storybook for testing purposes.",
+          "parameterKind": "flag"
+        },
+        {
+          "longName": "--docs",
+          "description": "Execute storybook in docs mode.",
+          "parameterKind": "flag"
         }
       ]
     }

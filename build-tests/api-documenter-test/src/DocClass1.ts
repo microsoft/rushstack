@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 /**
  * A class used to exposed events.
  * @public
@@ -57,11 +60,12 @@ export interface IDocInterface2 extends IDocInterface1 {
  * A namespace containing an ECMAScript symbol
  * @public
  */
-export namespace EcmaSmbols {
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace EcmaSymbols {
   /**
    * An ECMAScript symbol
    */
-  export const example: unique symbol = Symbol('EcmaSmbols.exampleSymbol');
+  export const example: unique symbol = Symbol('EcmaSymbols.exampleSymbol');
 }
 
 /**
@@ -90,7 +94,7 @@ export interface IDocInterface3 {
   /**
    * ECMAScript symbol
    */
-  [EcmaSmbols.example]: string;
+  [EcmaSymbols.example]: string;
 
   /**
    * A quoted identifier with redundant quotes.
@@ -109,6 +113,7 @@ export interface IDocInterface3 {
  * Generic class.
  * @public
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class Generic<T> {}
 
 /**
@@ -141,12 +146,14 @@ export interface IDocInterface4 {
  * Type parameter constraint used by test case below.
  * @public
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface Constraint {}
 
 /**
  * Type parameter default type used by test case below.
  * @public
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface DefaultType {}
 
 /**
@@ -162,14 +169,6 @@ export interface DefaultType {}
  */
 export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 {
   /**
-   * An internal class constructor.
-   * @internal
-   */
-  public constructor(name: string) {
-    super();
-  }
-
-  /**
    * Some protected property.
    */
   protected protectedProperty: string;
@@ -178,6 +177,31 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
    * Some property with multiple modifiers.
    */
   protected static readonly multipleModifiersProperty: boolean;
+
+  /**
+   * This event is fired whenever the object is modified.
+   * @eventProperty
+   */
+  public readonly modifiedEvent: SystemEvent;
+
+  /**
+   * This event should have been marked as readonly.
+   * @eventProperty
+   */
+  public malformedEvent: SystemEvent;
+
+  /**
+   * This is a regular property that happens to use the SystemEvent type.
+   */
+  public regularProperty: SystemEvent;
+
+  /**
+   * An internal class constructor.
+   * @internal
+   */
+  public constructor(name: string) {
+    super();
+  }
 
   /**
    * This is an overloaded function.
@@ -189,12 +213,14 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
    *
    * @throws The second throws line
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   exampleFunction(a: string, b: string): string;
 
   /**
    * This is also an overloaded function.
    * @param x - the number
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   exampleFunction(x: number): number;
 
   public exampleFunction(x: number | string, y?: string): string | number {
@@ -219,24 +245,8 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
   /**
    * API Extractor will surface an `ae-missing-getter` finding for this property.
    */
+  // eslint-disable-next-line accessor-pairs
   public set writeonlyProperty(value: string) {}
-
-  /**
-   * This event is fired whenever the object is modified.
-   * @eventProperty
-   */
-  public readonly modifiedEvent: SystemEvent;
-
-  /**
-   * This event should have been marked as readonly.
-   * @eventProperty
-   */
-  public malformedEvent: SystemEvent;
-
-  /**
-   * This is a regular property that happens to use the SystemEvent type.
-   */
-  public regularProperty: SystemEvent;
 
   /**
    * An example with tables:
@@ -248,6 +258,7 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
    *  </tr>
    * </table>
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   tableExample(): void {}
 
   /**
@@ -255,6 +266,7 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
    *
    * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\-_]+$/
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   interestingEdgeCases(): void {}
 
   /**
@@ -293,6 +305,7 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
    * This is a method with a complex type parameter.
    * @param x - some generic parameter.
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public genericWithConstraintAndDefault<T extends Constraint = DefaultType>(x: T) {}
 }
 
@@ -364,4 +377,5 @@ export class DocClassInterfaceMerge {}
  * Interface that merges with class
  * @public
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface DocClassInterfaceMerge {}

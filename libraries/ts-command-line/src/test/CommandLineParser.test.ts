@@ -22,7 +22,7 @@ class TestAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     expect(this._flag.value).toEqual(true);
     this.done = true;
   }

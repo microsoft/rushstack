@@ -66,17 +66,11 @@
   /*[LINE "HYPOTHETICAL"]*/ "suppressNodeLtsWarning": false,
 
   /**
-   * If you would like the version specifiers for your dependencies to be consistent, then
-   * uncomment this line. This is effectively similar to running "rush check" before any
-   * of the following commands:
-   *
-   *   rush install, rush update, rush link, rush version, rush publish
-   *
-   * In some cases you may want this turned on, but need to allow certain packages to use a different
-   * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
-   * section of the common-versions.json.
+   * Rush normally prints a warning if it detects that the current version is not one published to the
+   * public npmjs.org registry. If you need to block calls to the npm registry, you can use this setting to disable
+   * Rush's check.
    */
-  /*[LINE "HYPOTHETICAL"]*/ "ensureConsistentVersions": true,
+  /*[LINE "HYPOTHETICAL"]*/ "suppressRushIsPublicVersionCheck": false,
 
   /**
    * Large monorepos can become intimidating for newcomers if project folder paths don't follow
@@ -204,7 +198,7 @@
     /*[LINE "DEMO"]*/ "changeLogUpdateCommitMessage": "Update changelogs [skip ci]",
 
     /**
-     * The commit message to use when commiting changefiles during 'rush change --commit'
+     * The commit message to use when committing changefiles during 'rush change --commit'
      *
      * If no commit message is set it will default to 'Rush change'
      */
@@ -278,6 +272,39 @@
      */
     "postRushx": []
   },
+
+  /**
+   * Installation variants allow you to maintain a parallel set of configuration files that can be
+   * used to build the entire monorepo with an alternate set of dependencies.  For example, suppose
+   * you upgrade all your projects to use a new release of an important framework, but during a transition period
+   * you intend to maintain compatibility with the old release.  In this situation, you probably want your
+   * CI validation to build the entire repo twice: once with the old release, and once with the new release.
+   *
+   * Rush "installation variants" correspond to sets of config files located under this folder:
+   *
+   *   common/config/rush/variants/<variant_name>
+   *
+   * The variant folder can contain an alternate common-versions.json file.  Its "preferredVersions" field can be used
+   * to select older versions of dependencies (within a loose SemVer range specified in your package.json files).
+   * To install a variant, run "rush install --variant <variant_name>".
+   *
+   * For more details and instructions, see this article:  https://rushjs.io/pages/advanced/installation_variants/
+   */
+   "variants": [
+    /*[BEGIN "HYPOTHETICAL"]*/
+    {
+      /**
+       * The folder name for this variant.
+       */
+      "variantName": "old-sdk",
+
+      /**
+       * An informative description
+       */
+      "description": "Build this repo using the previous release of the SDK"
+    }
+    /*[END "HYPOTHETICAL"]*/
+  ],
 
   /**
    * Rush can collect anonymous telemetry about everyday developer activity such as

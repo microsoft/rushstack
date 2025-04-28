@@ -1,6 +1,84 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:15 GMT and should not be manually modified.
+
+## 0.15.2
+Tue, 25 Mar 2025 15:11:15 GMT
+
+_Version update only_
+
+## 0.15.1
+Tue, 11 Mar 2025 02:12:33 GMT
+
+_Version update only_
+
+## 0.15.0
+Wed, 12 Feb 2025 01:10:52 GMT
+
+### Minor changes
+
+- Introduce a NoOpTerminalProvider.
+
+## 0.14.6
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.14.5
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 0.14.4
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.14.3
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.14.2
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.14.1
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.14.0
+Wed, 21 Aug 2024 05:43:04 GMT
+
+### Minor changes
+
+- Create a new instance function called `getVerboseOutput` on `StringBufferTerminalProvider` and mark `getVerbose` as deprecated.
+
+## 0.13.4
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.13.3
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.13.2
+Wed, 17 Jul 2024 06:55:09 GMT
+
+### Patches
+
+- Improve the PrintUtilities API to handle an edge case when word-wrapping a final line
+
+## 0.13.1
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
 
 ## 0.13.0
 Thu, 30 May 2024 00:13:05 GMT

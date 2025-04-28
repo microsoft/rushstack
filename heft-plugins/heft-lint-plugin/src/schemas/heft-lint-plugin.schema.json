@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Heft Lint Plugin Options Configuration",
+  "description": "This schema describes the \"options\" field that can be specified in heft.json when loading \"@rushstack/heft-lint-plugin\".",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "alwaysFix": {
+      "title": "Always Fix",
+      "description": "If set to true, fix all encountered rule violations where the violated rule provides a fixer, regardless of if the \"--fix\" command-line argument is provided. When running in production mode, fixes will be disabled regardless of this setting.",
+      "type": "boolean"
+    },
+
+    "sarifLogPath": {
+      "title": "SARIF Log Path",
+      "description": "If specified and using ESLint, a log describing the lint configuration and all messages (suppressed or not) will be emitted in the Static Analysis Results Interchange Format (https://sarifweb.azurewebsites.net/) at the provided path, relative to the project root.",
+      "type": "string"
+    }
+  }
+}

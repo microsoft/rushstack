@@ -71,6 +71,12 @@ export interface ITelemetryOperationResult {
    * Duration in milliseconds when the operation does not hit cache
    */
   nonCachedDurationMs?: number;
+
+  /**
+   * Was this operation built on this machine? If so, the duration can be calculated from `startTimestampMs` and `endTimestampMs`.
+   *  If not, you should use the metrics from the machine that built it.
+   */
+  wasExecutedOnThisMachine?: boolean;
 }
 
 /**
@@ -150,14 +156,15 @@ export class Telemetry {
     if (!this._enabled) {
       return;
     }
+    const cpus: os.CpuInfo[] = os.cpus();
     const data: ITelemetryData = {
       ...telemetryData,
       machineInfo: telemetryData.machineInfo || {
         machineArchitecture: os.arch(),
         // The Node.js model is sometimes padded, for example:
         // "AMD Ryzen 7 3700X 8-Core Processor             "
-        machineCpu: os.cpus()[0].model.trim(),
-        machineCores: os.cpus().length,
+        machineCpu: cpus[0].model.trim(),
+        machineCores: cpus.length,
         machineTotalMemoryMiB: Math.round(os.totalmem() / ONE_MEGABYTE_IN_BYTES),
         machineFreeMemoryMiB: Math.round(os.freemem() / ONE_MEGABYTE_IN_BYTES)
       },

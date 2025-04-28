@@ -10,7 +10,7 @@ import type {
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
-import { Terminal, type ITerminal, ConsoleTerminalProvider, Colorize } from '@rushstack/terminal';
+import { Colorize } from '@rushstack/terminal';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
 import type * as InquirerType from 'inquirer';
 
@@ -37,7 +37,6 @@ const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
 
 export class ChangeAction extends BaseRushAction {
   private readonly _git: Git;
-  private readonly _terminal: ITerminal;
   private readonly _verifyParameter: CommandLineFlagParameter;
   private readonly _noFetchParameter: CommandLineFlagParameter;
   private readonly _targetBranchParameter: CommandLineStringParameter;
@@ -92,7 +91,6 @@ export class ChangeAction extends BaseRushAction {
     });
 
     this._git = new Git(this.rushConfiguration);
-    this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
 
     this._verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
@@ -318,7 +316,7 @@ export class ChangeAction extends BaseRushAction {
             'Rush change'
         );
       } else {
-        this._terminal.writeWarningLine('Warning: No change files generated, nothing to commit.');
+        this.terminal.writeWarningLine('Warning: No change files generated, nothing to commit.');
       }
     }
   }
@@ -361,7 +359,7 @@ export class ChangeAction extends BaseRushAction {
     const changedProjects: Set<RushConfigurationProject> =
       await projectChangeAnalyzer.getChangedProjectsAsync({
         targetBranchName: await this._getTargetBranchAsync(),
-        terminal: this._terminal,
+        terminal: this.terminal,
         shouldFetch: !this._noFetchParameter.value,
         // Lockfile evaluation will expand the set of projects that request change files
         // Not enabling, since this would be a breaking change
@@ -395,7 +393,7 @@ export class ChangeAction extends BaseRushAction {
     const targetBranch: string = await this._getTargetBranchAsync();
     const changedFiles: string[] = await this._git.getChangedFilesAsync(
       targetBranch,
-      this._terminal,
+      this.terminal,
       true,
       relativeChangesFolder
     );
@@ -763,7 +761,7 @@ export class ChangeAction extends BaseRushAction {
         workingDirectory: this.rushConfiguration.changesFolder
       });
     } catch (error) {
-      this._terminal.writeErrorLine(`ERROR: Cannot stage and commit git changes ${(error as Error).message}`);
+      this.terminal.writeErrorLine(`ERROR: Cannot stage and commit git changes ${(error as Error).message}`);
     }
   }
 }

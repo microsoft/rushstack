@@ -25,6 +25,20 @@ describe(parseLocJson.name, () => {
     ).toMatchSnapshot();
   });
 
+  it('parses a file with raw strings', () => {
+    const content: string = JSON.stringify({
+      foo: 'Foo',
+      bar: 'Bar'
+    });
+
+    expect(
+      parseLocJson({
+        content,
+        filePath: 'test.loc.json'
+      })
+    ).toMatchSnapshot();
+  });
+
   it('throws on invalid file', () => {
     const content: string = JSON.stringify({
       foo: {

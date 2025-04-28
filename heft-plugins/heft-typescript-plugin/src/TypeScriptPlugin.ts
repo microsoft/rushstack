@@ -5,9 +5,9 @@ import * as path from 'path';
 
 import type * as TTypescript from 'typescript';
 import { SyncHook } from 'tapable';
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
+import { ProjectConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -15,12 +15,14 @@ import type {
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions,
   ICopyOperation,
-  IHeftTaskFileOperations
+  IHeftTaskFileOperations,
+  ConfigurationFile
 } from '@rushstack/heft';
 
 import { TypeScriptBuilder, type ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import anythingSchema from './schemas/anything.schema.json';
 import typescriptConfigSchema from './schemas/typescript.schema.json';
+import { getTsconfigFilePath } from './tsconfigLoader';
 
 /**
  * The name of the plugin, as specified in heft-plugin.json
@@ -78,6 +80,12 @@ export interface ITypeScriptConfigurationJson {
    */
   useTranspilerWorker?: boolean;
 
+  /**
+   * If true, the TypeScript compiler will only resolve symlinks to their targets if the links are in a node_modules folder.
+   * This significantly reduces file system operations in typical usage.
+   */
+  onlyResolveSymlinksInNodeModules?: boolean;
+
   /*
    * Specifies the tsconfig.json file that will be used for compilation. Equivalent to the "project" argument for the 'tsc' and 'tslint' command line tools.
    *
@@ -121,11 +129,22 @@ export interface ITypeScriptPluginAccessor {
   readonly onChangedFilesHook: SyncHook<IChangedFilesHookOptions>;
 }
 
-let _typeScriptConfigurationFileLoader: ConfigurationFile<ITypeScriptConfigurationJson> | undefined;
-const _typeScriptConfigurationFilePromiseCache: Map<
-  string,
-  Promise<ITypeScriptConfigurationJson | undefined>
-> = new Map();
+const TYPESCRIPT_LOADER_CONFIG: ConfigurationFile.IProjectConfigurationFileSpecification<ITypeScriptConfigurationJson> =
+  {
+    projectRelativeFilePath: 'config/typescript.json',
+    jsonSchemaObject: typescriptConfigSchema,
+    propertyInheritance: {
+      staticAssetsToCopy: {
+        // When merging objects, arrays will be automatically appended
+        inheritanceType: InheritanceType.merge
+      }
+    },
+    jsonPathMetadata: {
+      '$.additionalModuleKindsToEmit.*.outFolderName': {
+        pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+      }
+    }
+  };
 
 /**
  * @beta
@@ -134,51 +153,14 @@ export async function loadTypeScriptConfigurationFileAsync(
   heftConfiguration: HeftConfiguration,
   terminal: ITerminal
 ): Promise<ITypeScriptConfigurationJson | undefined> {
-  const buildFolderPath: string = heftConfiguration.buildFolderPath;
-
-  // Check the cache first
-  let typescriptConfigurationFilePromise: Promise<ITypeScriptConfigurationJson | undefined> | undefined =
-    _typeScriptConfigurationFilePromiseCache.get(buildFolderPath);
-
-  if (!typescriptConfigurationFilePromise) {
-    // Ensure that the file loader has been initialized.
-    if (!_typeScriptConfigurationFileLoader) {
-      _typeScriptConfigurationFileLoader = new ConfigurationFile<ITypeScriptConfigurationJson>({
-        projectRelativeFilePath: 'config/typescript.json',
-        jsonSchemaObject: typescriptConfigSchema,
-        propertyInheritance: {
-          staticAssetsToCopy: {
-            // When merging objects, arrays will be automatically appended
-            inheritanceType: InheritanceType.merge
-          }
-        }
-      });
-    }
-
-    typescriptConfigurationFilePromise =
-      _typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
-        terminal,
-        buildFolderPath,
-        heftConfiguration.rigConfig
-      );
-    _typeScriptConfigurationFilePromiseCache.set(buildFolderPath, typescriptConfigurationFilePromise);
-  }
-
-  return await typescriptConfigurationFilePromise;
-}
-
-let _partialTsconfigFileLoader: ConfigurationFile<IPartialTsconfig> | undefined;
-const _partialTsconfigFilePromiseCache: Map<string, Promise<IPartialTsconfig | undefined>> = new Map();
-
-function getTsconfigFilePath(
-  heftConfiguration: HeftConfiguration,
-  typeScriptConfigurationJson?: ITypeScriptConfigurationJson
-): string {
-  return Path.convertToSlashes(
-    // Use path.resolve because the path can start with `./` or `../`
-    path.resolve(heftConfiguration.buildFolderPath, typeScriptConfigurationJson?.project || './tsconfig.json')
+  return await heftConfiguration.tryLoadProjectConfigurationFileAsync<ITypeScriptConfigurationJson>(
+    TYPESCRIPT_LOADER_CONFIG,
+    terminal
   );
 }
+
+let _partialTsconfigFileLoader: ProjectConfigurationFile<IPartialTsconfig> | undefined;
+const _partialTsconfigFilePromiseCache: Map<string, Promise<IPartialTsconfig | undefined>> = new Map();
 
 /**
  * @beta
@@ -199,7 +181,10 @@ export async function loadPartialTsconfigFileAsync(
     // advantage of the extends functionality that ConfigurationFile provides. So we'll
     // check to see if the file exists and exit early if not.
 
-    const tsconfigFilePath: string = getTsconfigFilePath(heftConfiguration, typeScriptConfigurationJson);
+    const tsconfigFilePath: string = getTsconfigFilePath(
+      heftConfiguration,
+      typeScriptConfigurationJson?.project
+    );
     terminal.writeVerboseLine(`Looking for tsconfig at ${tsconfigFilePath}`);
     const tsconfigExists: boolean = await FileSystem.existsAsync(tsconfigFilePath);
     if (!tsconfigExists) {
@@ -207,7 +192,7 @@ export async function loadPartialTsconfigFileAsync(
     } else {
       // Ensure that the file loader has been initialized.
       if (!_partialTsconfigFileLoader) {
-        _partialTsconfigFileLoader = new ConfigurationFile<IPartialTsconfig>({
+        _partialTsconfigFileLoader = new ProjectConfigurationFile<IPartialTsconfig>({
           projectRelativeFilePath: typeScriptConfigurationJson?.project || 'tsconfig.json',
           jsonSchemaObject: anythingSchema,
           propertyInheritance: {
@@ -233,6 +218,11 @@ export async function loadPartialTsconfigFileAsync(
   }
 
   return await partialTsconfigFilePromise;
+}
+
+interface ITypeScriptConfigurationJsonAndPartialTsconfigFile {
+  typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined;
+  partialTsconfigFile: IPartialTsconfig | undefined;
 }
 
 export default class TypeScriptPlugin implements IHeftTaskPlugin {
@@ -289,33 +279,35 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<ICopyOperation[]> {
-    const typeScriptConfiguration: ITypeScriptConfigurationJson | undefined =
-      await loadTypeScriptConfigurationFileAsync(heftConfiguration, taskSession.logger.terminal);
+    const { typeScriptConfigurationJson, partialTsconfigFile } = await this._loadConfigAsync(
+      taskSession,
+      heftConfiguration
+    );
 
     // We only care about the copy if static assets were specified.
     const copyOperations: ICopyOperation[] = [];
+    const staticAssetsConfig: IStaticAssetsCopyConfiguration | undefined =
+      typeScriptConfigurationJson?.staticAssetsToCopy;
     if (
-      typeScriptConfiguration?.staticAssetsToCopy?.fileExtensions?.length ||
-      typeScriptConfiguration?.staticAssetsToCopy?.includeGlobs?.length ||
-      typeScriptConfiguration?.staticAssetsToCopy?.excludeGlobs?.length
+      staticAssetsConfig &&
+      (staticAssetsConfig.fileExtensions?.length ||
+        staticAssetsConfig.includeGlobs?.length ||
+        staticAssetsConfig.excludeGlobs?.length)
     ) {
       const destinationFolderPaths: Set<string> = new Set<string>();
 
       // Add the output folder and all additional module kind output folders as destinations
-      const tsconfigOutDir: string | undefined = await this._getTsconfigOutDirAsync(
-        taskSession,
-        heftConfiguration,
-        typeScriptConfiguration
-      );
+      const tsconfigOutDir: string | undefined = partialTsconfigFile?.compilerOptions?.outDir;
       if (tsconfigOutDir) {
         destinationFolderPaths.add(tsconfigOutDir);
       }
-      for (const emitModule of typeScriptConfiguration?.additionalModuleKindsToEmit || []) {
-        destinationFolderPaths.add(`${heftConfiguration.buildFolderPath}/${emitModule.outFolderName}`);
+
+      for (const emitModule of typeScriptConfigurationJson?.additionalModuleKindsToEmit || []) {
+        destinationFolderPaths.add(emitModule.outFolderName);
       }
 
       copyOperations.push({
-        ...typeScriptConfiguration?.staticAssetsToCopy,
+        ...staticAssetsConfig,
 
         // For now - these may need to be revised later
         sourcePath: path.resolve(heftConfiguration.buildFolderPath, 'src'),
@@ -324,6 +316,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         hardlink: false
       });
     }
+
     return copyOperations;
   }
 
@@ -331,15 +324,9 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<TypeScriptBuilder | false> {
-    const terminal: ITerminal = taskSession.logger.terminal;
-
-    const typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
-      await loadTypeScriptConfigurationFileAsync(heftConfiguration, terminal);
-
-    const partialTsconfigFile: IPartialTsconfig | undefined = await loadPartialTsconfigFileAsync(
-      heftConfiguration,
-      terminal,
-      typeScriptConfigurationJson
+    const { typeScriptConfigurationJson, partialTsconfigFile } = await this._loadConfigAsync(
+      taskSession,
+      heftConfiguration
     );
 
     if (!partialTsconfigFile) {
@@ -348,24 +335,21 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       return false;
     }
 
-    const typeScriptToolPath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
-      'typescript',
-      terminal
-    );
-
     // Build out the configuration
     const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
       buildFolderPath: heftConfiguration.buildFolderPath,
       // Build metadata is just another build output, but we put it in the temp folder because it will
       // usually be discarded when published.
       buildMetadataFolderPath: taskSession.tempFolderPath,
-      typeScriptToolPath: typeScriptToolPath,
+      heftConfiguration,
 
       buildProjectReferences: typeScriptConfigurationJson?.buildProjectReferences,
 
       useTranspilerWorker: typeScriptConfigurationJson?.useTranspilerWorker,
 
-      tsconfigPath: getTsconfigFilePath(heftConfiguration, typeScriptConfigurationJson),
+      onlyResolveSymlinksInNodeModules: typeScriptConfigurationJson?.onlyResolveSymlinksInNodeModules,
+
+      tsconfigPath: getTsconfigFilePath(heftConfiguration, typeScriptConfigurationJson?.project),
       additionalModuleKindsToEmit: typeScriptConfigurationJson?.additionalModuleKindsToEmit,
       emitCjsExtensionForCommonJS: !!typeScriptConfigurationJson?.emitCjsExtensionForCommonJS,
       emitMjsExtensionForESModule: !!typeScriptConfigurationJson?.emitMjsExtensionForESModule,
@@ -386,16 +370,24 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     return typeScriptBuilder;
   }
 
-  private async _getTsconfigOutDirAsync(
+  private async _loadConfigAsync(
     taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
-    typeScriptConfiguration: ITypeScriptConfigurationJson | undefined
-  ): Promise<string | undefined> {
+    heftConfiguration: HeftConfiguration
+  ): Promise<ITypeScriptConfigurationJsonAndPartialTsconfigFile> {
+    const terminal: ITerminal = taskSession.logger.terminal;
+
+    const typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
+      await loadTypeScriptConfigurationFileAsync(heftConfiguration, terminal);
+
     const partialTsconfigFile: IPartialTsconfig | undefined = await loadPartialTsconfigFileAsync(
       heftConfiguration,
-      taskSession.logger.terminal,
-      typeScriptConfiguration
+      terminal,
+      typeScriptConfigurationJson
     );
-    return partialTsconfigFile?.compilerOptions?.outDir;
+
+    return {
+      typeScriptConfigurationJson,
+      partialTsconfigFile
+    };
   }
 }

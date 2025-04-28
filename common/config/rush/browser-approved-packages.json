@@ -15,10 +15,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/rush-sdk",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@radix-ui/colors",
       "allowedCategories": [ "libraries" ]
     },
@@ -51,12 +47,12 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
-      "name": "axios",
+      "name": "@ungap/structured-clone",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "colors",
-      "allowedCategories": [ "tests" ]
+      "name": "axios",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "dependency-path",

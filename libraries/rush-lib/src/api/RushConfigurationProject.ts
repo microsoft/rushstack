@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import { type IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 
-import type { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from './RushConfiguration';
 import type { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 import type { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConstants } from '../logic/RushConstants';
@@ -411,12 +411,14 @@ export class RushConfigurationProject {
       ]) {
         if (dependencySet) {
           for (const [dependency, version] of Object.entries(dependencySet)) {
+            const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
+            const dependencyName: string =
+              dependencySpecifier.aliasTarget?.packageName ?? dependencySpecifier.packageName;
             // Skip if we can't find the local project or it's a cyclic dependency
             const localProject: RushConfigurationProject | undefined =
-              this.rushConfiguration.getProjectByName(dependency);
+              this.rushConfiguration.getProjectByName(dependencyName);
             if (localProject && !this.decoupledLocalDependencies.has(dependency)) {
               // Set the value if it's a workspace project, or if we have a local project and the semver is satisfied
-              const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
               switch (dependencySpecifier.specifierType) {
                 case DependencySpecifierType.Version:
                 case DependencySpecifierType.Range:

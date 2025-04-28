@@ -1,6 +1,235 @@
 # Change Log - @rushstack/webpack4-module-minifier-plugin
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Apr 2025 00:11:32 GMT and should not be manually modified.
+
+## 0.13.102
+Fri, 25 Apr 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.13.101
+Mon, 21 Apr 2025 22:24:25 GMT
+
+_Version update only_
+
+## 0.13.100
+Thu, 17 Apr 2025 00:11:21 GMT
+
+_Version update only_
+
+## 0.13.99
+Tue, 15 Apr 2025 15:11:58 GMT
+
+_Version update only_
+
+## 0.13.98
+Wed, 09 Apr 2025 00:11:03 GMT
+
+_Version update only_
+
+## 0.13.97
+Fri, 04 Apr 2025 18:34:35 GMT
+
+_Version update only_
+
+## 0.13.96
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 0.13.95
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 0.13.94
+Wed, 12 Mar 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.13.93
+Tue, 11 Mar 2025 02:12:34 GMT
+
+_Version update only_
+
+## 0.13.92
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.13.91
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.13.90
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.13.89
+Wed, 26 Feb 2025 16:11:12 GMT
+
+_Version update only_
+
+## 0.13.88
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.13.87
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.13.86
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.13.85
+Thu, 30 Jan 2025 16:10:36 GMT
+
+### Patches
+
+- Prefer `os.availableParallelism()` to `os.cpus().length`.
+
+## 0.13.84
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.13.83
+Wed, 22 Jan 2025 03:03:48 GMT
+
+_Version update only_
+
+## 0.13.82
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 0.13.81
+Tue, 07 Jan 2025 22:17:32 GMT
+
+_Version update only_
+
+## 0.13.80
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.13.79
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.13.78
+Tue, 03 Dec 2024 16:11:08 GMT
+
+_Version update only_
+
+## 0.13.77
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.13.76
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.13.75
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.13.74
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.13.73
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.13.72
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.13.71
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.13.70
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.13.69
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.13.68
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.13.67
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.13.66
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.13.65
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.13.64
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.13.63
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.13.62
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.13.61
+Wed, 17 Jul 2024 06:55:10 GMT
+
+_Version update only_
+
+## 0.13.60
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.13.59
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 0.13.58
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.13.57
 Mon, 03 Jun 2024 23:43:15 GMT

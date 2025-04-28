@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import os from 'node:os';
 import {
   CommandLineParser,
   type AliasCommandLineAction,
@@ -87,9 +88,11 @@ export class HeftCommandLineParser extends CommandLineParser {
       InternalError.breakInDebugger = true;
     }
 
+    const numberOfCores: number = os.availableParallelism?.() ?? os.cpus().length;
     this._heftConfiguration = HeftConfiguration.initialize({
       cwd: process.cwd(),
-      terminalProvider: this._terminalProvider
+      terminalProvider: this._terminalProvider,
+      numberOfCores
     });
 
     this._metricsCollector = new MetricsCollector();
@@ -173,7 +176,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     }
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     try {
       const selectedAction: CommandLineAction | undefined = this.selectedAction;
 
@@ -193,7 +196,7 @@ export class HeftCommandLineParser extends CommandLineParser {
         commandName,
         unaliasedCommandName
       };
-      await super.onExecute();
+      await super.onExecuteAsync();
     } catch (e) {
       await this._reportErrorAndSetExitCodeAsync(e as Error);
     }
@@ -225,7 +228,7 @@ export class HeftCommandLineParser extends CommandLineParser {
       // try to evaluate any parameters. This is to ensure that the
       // `--debug` flag is defined correctly before we do this not-so-rigorous
       // parameter parsing.
-      throw new InternalError('onDefineParameters() has not yet been called.');
+      throw new InternalError('parameters have not yet been defined.');
     }
 
     const toolParameters: Set<string> = getToolParameterNamesFromArgs(args);
@@ -245,8 +248,9 @@ export class HeftCommandLineParser extends CommandLineParser {
       this.globalTerminal.writeErrorLine(error.stack!);
     }
 
-    if (!process.exitCode || process.exitCode > 0) {
-      process.exit(process.exitCode);
+    const exitCode: string | number | undefined = process.exitCode;
+    if (!exitCode || typeof exitCode !== 'number' || exitCode > 0) {
+      process.exit(exitCode);
     } else {
       process.exit(1);
     }

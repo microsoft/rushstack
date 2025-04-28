@@ -1,10 +1,8 @@
 {
-  "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
+  "extends": "./node_modules/decoupled-local-node-rig/profiles/default/tsconfig-base.json",
 
   "compilerOptions": {
-    "isolatedModules": true,
-    "types": ["node"],
-    "lib": ["ES2019"],
-    "resolveJsonModule": true
+    // TODO: Remove when the repo is updated to ES2020
+    "lib": ["ES2019"]
   }
 }

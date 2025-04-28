@@ -16,10 +16,26 @@ import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { CustomValidationFunction } from '@rushstack/heft-config-file';
+import * as fs from 'fs';
+import { ICustomJsonPathMetadata } from '@rushstack/heft-config-file';
+import { ICustomPropertyInheritance } from '@rushstack/heft-config-file';
+import { IJsonPathMetadata } from '@rushstack/heft-config-file';
+import { IJsonPathMetadataResolverOptions } from '@rushstack/heft-config-file';
+import { IJsonPathsMetadata } from '@rushstack/heft-config-file';
+import { InheritanceType } from '@rushstack/heft-config-file';
+import { INonCustomJsonPathMetadata } from '@rushstack/heft-config-file';
+import { IOriginalValueOptions } from '@rushstack/heft-config-file';
 import { IPackageJson } from '@rushstack/node-core-library';
+import { IProjectConfigurationFileSpecification } from '@rushstack/heft-config-file';
+import { IPropertiesInheritance } from '@rushstack/heft-config-file';
+import { IPropertyInheritance } from '@rushstack/heft-config-file';
+import { IPropertyInheritanceDefaults } from '@rushstack/heft-config-file';
 import { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
+import { PathResolutionMethod } from '@rushstack/heft-config-file';
+import { PropertyInheritanceCustomFunction } from '@rushstack/heft-config-file';
 
 export { CommandLineChoiceListParameter }
 
@@ -37,24 +53,49 @@ export { CommandLineStringListParameter }
 
 export { CommandLineStringParameter }
 
+declare namespace ConfigurationFile {
+    export {
+        CustomValidationFunction,
+        ICustomJsonPathMetadata,
+        ICustomPropertyInheritance,
+        IJsonPathMetadata,
+        IJsonPathMetadataResolverOptions,
+        IJsonPathsMetadata,
+        INonCustomJsonPathMetadata,
+        IOriginalValueOptions,
+        IProjectConfigurationFileSpecification,
+        IPropertiesInheritance,
+        IPropertyInheritance,
+        IPropertyInheritanceDefaults,
+        InheritanceType,
+        PathResolutionMethod,
+        PropertyInheritanceCustomFunction
+    }
+}
+export { ConfigurationFile }
+
 // @public
 export type GlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<string[]>;
 
 // @public (undocumented)
 export class HeftConfiguration {
-    get buildFolderPath(): string;
+    readonly buildFolderPath: string;
     // @internal
     _checkForRigAsync(): Promise<void>;
-    get globalTerminal(): ITerminal;
+    readonly globalTerminal: ITerminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
+    readonly numberOfCores: number;
     get projectConfigFolderPath(): string;
     get projectPackageJson(): IPackageJson;
     get rigConfig(): IRigConfig;
     get rigPackageResolver(): IRigPackageResolver;
+    get slashNormalizedBuildFolderPath(): string;
     get tempFolderPath(): string;
-    get terminalProvider(): ITerminalProvider;
+    readonly terminalProvider: ITerminalProvider;
+    tryLoadProjectConfigurationFile<TConfigFile>(options: IProjectConfigurationFileSpecification<TConfigFile>, terminal: ITerminal): TConfigFile | undefined;
+    tryLoadProjectConfigurationFileAsync<TConfigFile>(options: IProjectConfigurationFileSpecification<TConfigFile>, terminal: ITerminal): Promise<TConfigFile | undefined>;
 }
 
 // @public
@@ -87,6 +128,7 @@ export interface IGlobOptions {
 // @internal (undocumented)
 export interface _IHeftConfigurationInitializationOptions {
     cwd: string;
+    numberOfCores: number;
     terminalProvider: ITerminalProvider;
 }
 
@@ -186,11 +228,13 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskS
 export interface IHeftTaskRunHookOptions {
     // @beta
     readonly abortSignal: AbortSignal;
+    readonly globAsync: GlobFn;
 }
 
 // @public
 export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
     readonly requestRun: () => void;
+    readonly watchFs: IWatchFileSystem;
     readonly watchGlobAsync: WatchGlobFn;
 }
 
@@ -234,6 +278,11 @@ export interface _IPerformanceData {
 }
 
 // @public
+export interface IReaddirOptions {
+    withFileTypes: true;
+}
+
+// @public
 export interface IRigPackageResolver {
     // (undocumented)
     resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string>;
@@ -271,6 +320,22 @@ export interface IWatchedFileState {
     changed: boolean;
 }
 
+// @public
+export interface IWatchFileSystem {
+    getStateAndTrack(filePath: string): IWatchedFileState;
+    getStateAndTrackAsync(filePath: string): Promise<IWatchedFileState>;
+    lstat(filePath: string, callback: StatCallback): void;
+    lstatSync(filePath: string): fs.Stats;
+    readdir(filePath: string, callback: ReaddirStringCallback): void;
+    // (undocumented)
+    readdir(filePath: string, options: IReaddirOptions, callback: ReaddirDirentCallback): void;
+    readdirSync(filePath: string): string[];
+    // (undocumented)
+    readdirSync(filePath: string, options: IReaddirOptions): fs.Dirent[];
+    stat(filePath: string, callback: StatCallback): void;
+    statSync(filePath: string): fs.Stats;
+}
+
 // @internal
 export class _MetricsCollector {
     recordAsync(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): Promise<void>;
@@ -278,6 +343,15 @@ export class _MetricsCollector {
     readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
     setStartTime(): void;
 }
+
+// @public
+export type ReaddirDirentCallback = (error: NodeJS.ErrnoException | null, files: fs.Dirent[]) => void;
+
+// @public
+export type ReaddirStringCallback = (error: NodeJS.ErrnoException | null, files: string[]) => void;
+
+// @public
+export type StatCallback = (error: NodeJS.ErrnoException | null, stats: fs.Stats) => void;
 
 // @public
 export type WatchGlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<Map<string, IWatchedFileState>>;

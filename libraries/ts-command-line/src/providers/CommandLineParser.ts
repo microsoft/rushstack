@@ -13,6 +13,7 @@ import {
 } from './CommandLineParameterProvider';
 import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError';
 import { TabCompleteAction } from './TabCompletionAction';
+import { TypeUuid, uuidAlreadyReportedError } from '../TypeUuidLite';
 
 /**
  * Options for the {@link CommandLineParser} constructor.
@@ -83,8 +84,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
           `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
       )
     });
-
-    this.onDefineParameters?.();
   }
 
   /**
@@ -167,6 +166,11 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         if (!process.exitCode) {
           process.exitCode = err.exitCode;
         }
+      } else if (TypeUuid.isInstanceOf(err, uuidAlreadyReportedError)) {
+        //  AlreadyReportedError
+        if (!process.exitCode) {
+          process.exitCode = 1;
+        }
       } else {
         let message: string = ((err as Error).message || 'An unknown error occurred').trim();
 
@@ -187,14 +191,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
 
       return false;
     }
-  }
-
-  /**
-   * @deprecated Use {@link CommandLineParser.executeAsync} instead.
-   */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public async execute(args?: string[]): Promise<boolean> {
-    return await this.executeAsync(args);
   }
 
   /**
@@ -281,7 +277,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       }
 
       this.selectedAction?._processParsedData(this._options, data);
-      await this.onExecute();
+      await this.onExecuteAsync();
     } catch (err) {
       if (err instanceof CommandLineParserExitError) {
         if (!err.exitCode) {
@@ -297,14 +293,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
 
       throw err;
     }
-  }
-
-  /**
-   * @deprecated Use {@link CommandLineParser.executeWithoutErrorHandlingAsync} instead.
-   */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public async executeWithoutErrorHandling(args?: string[]): Promise<void> {
-    await this.executeWithoutErrorHandlingAsync(args);
   }
 
   /** @internal */
@@ -337,8 +325,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
    * @internal
    */
-  protected _getArgumentParser(): argparse.ArgumentParser {
-    // override
+  protected override _getArgumentParser(): argparse.ArgumentParser {
     return this._argumentParser;
   }
 
@@ -346,7 +333,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * This hook allows the subclass to perform additional operations before or after
    * the chosen action is executed.
    */
-  protected async onExecute(): Promise<void> {
+  protected async onExecuteAsync(): Promise<void> {
     if (this.selectedAction) {
       await this.selectedAction._executeAsync();
     }

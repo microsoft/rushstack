@@ -1,6 +1,333 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Apr 2025 00:11:32 GMT and should not be manually modified.
+
+## 0.28.10
+Fri, 25 Apr 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.28.9
+Mon, 21 Apr 2025 22:24:25 GMT
+
+_Version update only_
+
+## 0.28.8
+Thu, 17 Apr 2025 00:11:21 GMT
+
+### Patches
+
+- Update documentation for `extends`
+
+## 0.28.7
+Tue, 15 Apr 2025 15:11:57 GMT
+
+_Version update only_
+
+## 0.28.6
+Wed, 09 Apr 2025 00:11:03 GMT
+
+_Version update only_
+
+## 0.28.5
+Fri, 04 Apr 2025 18:34:35 GMT
+
+_Version update only_
+
+## 0.28.4
+Tue, 25 Mar 2025 15:11:15 GMT
+
+_Version update only_
+
+## 0.28.3
+Tue, 25 Mar 2025 00:12:04 GMT
+
+_Version update only_
+
+## 0.28.2
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 0.28.1
+Wed, 12 Mar 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.28.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Bump TypeScript to ~5.8.2.
+
+## 0.27.2
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.27.1
+Thu, 06 Mar 2025 01:10:42 GMT
+
+_Version update only_
+
+## 0.27.0
+Tue, 04 Mar 2025 16:10:41 GMT
+
+### Minor changes
+
+- Bump Webpack to ~5.98.0.
+
+## 0.26.0
+Sat, 01 Mar 2025 07:23:16 GMT
+
+### Minor changes
+
+- Bump the `typescript` dependency to `~5.7.3`.
+
+## 0.25.26
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.25.25
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.25.24
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 0.25.23
+Tue, 25 Feb 2025 01:11:55 GMT
+
+_Version update only_
+
+## 0.25.22
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.25.21
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.25.20
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.25.19
+Fri, 07 Feb 2025 01:10:49 GMT
+
+_Version update only_
+
+## 0.25.18
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 0.25.17
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.25.16
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 0.25.15
+Tue, 07 Jan 2025 22:17:32 GMT
+
+_Version update only_
+
+## 0.25.14
+Tue, 07 Jan 2025 16:11:06 GMT
+
+_Version update only_
+
+## 0.25.13
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.25.12
+Tue, 10 Dec 2024 07:32:19 GMT
+
+_Version update only_
+
+## 0.25.11
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.25.10
+Tue, 03 Dec 2024 16:11:08 GMT
+
+_Version update only_
+
+## 0.25.9
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.25.8
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.25.7
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.25.6
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.25.5
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.25.4
+Wed, 16 Oct 2024 00:11:20 GMT
+
+_Version update only_
+
+## 0.25.3
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.25.2
+Thu, 10 Oct 2024 00:11:51 GMT
+
+_Version update only_
+
+## 0.25.1
+Thu, 03 Oct 2024 19:46:23 GMT
+
+_Version update only_
+
+## 0.25.0
+Wed, 02 Oct 2024 00:11:19 GMT
+
+### Minor changes
+
+- Update to webpack 5.95.0
+
+## 0.24.37
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.24.36
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.24.35
+Sat, 28 Sep 2024 00:11:41 GMT
+
+_Version update only_
+
+## 0.24.34
+Sat, 21 Sep 2024 00:10:27 GMT
+
+_Version update only_
+
+## 0.24.33
+Thu, 19 Sep 2024 00:11:08 GMT
+
+_Version update only_
+
+## 0.24.32
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.24.31
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.24.30
+Mon, 26 Aug 2024 02:00:11 GMT
+
+_Version update only_
+
+## 0.24.29
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.24.28
+Wed, 14 Aug 2024 22:37:32 GMT
+
+_Version update only_
+
+## 0.24.27
+Tue, 13 Aug 2024 18:17:05 GMT
+
+_Version update only_
+
+## 0.24.26
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.24.25
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.24.24
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.24.23
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.24.22
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.24.21
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.24.20
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
+
+## 0.24.19
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
+
+## 0.24.18
+Tue, 11 Jun 2024 00:21:28 GMT
+
+_Version update only_
+
+## 0.24.17
+Fri, 07 Jun 2024 15:10:25 GMT
+
+_Version update only_
 
 ## 0.24.16
 Mon, 03 Jun 2024 23:43:15 GMT

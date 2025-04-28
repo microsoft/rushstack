@@ -14,8 +14,6 @@ import {
 import { OperationStateFile } from './OperationStateFile';
 import { RushConstants } from '../RushConstants';
 
-import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
 import type { Operation } from './Operation';
 
@@ -23,8 +21,6 @@ import type { Operation } from './Operation';
  * @internal
  */
 export interface IOperationMetadataManagerOptions {
-  rushProject: RushConfigurationProject;
-  phase: IPhase;
   operation: Operation;
 }
 
@@ -52,35 +48,30 @@ export interface ILogChunkStorage {
 export class OperationMetadataManager {
   public readonly stateFile: OperationStateFile;
   public readonly logFilenameIdentifier: string;
-  private readonly _metadataFolder: string;
+  private readonly _metadataFolderPath: string;
   private readonly _logPath: string;
   private readonly _errorLogPath: string;
   private readonly _logChunksPath: string;
-  private readonly _relativeLogPath: string;
-  private readonly _relativeLogChunksPath: string;
-  private readonly _relativeErrorLogPath: string;
 
   public constructor(options: IOperationMetadataManagerOptions) {
-    const { rushProject, operation, phase } = options;
-    const { projectFolder } = rushProject;
+    const {
+      operation: { logFilenameIdentifier, associatedProject }
+    } = options;
+    const { projectFolder } = associatedProject;
 
-    this.logFilenameIdentifier = operation.name
-      ? normalizeNameForLogFilenameIdentifiers(operation.name)
-      : phase.logFilenameIdentifier;
+    this.logFilenameIdentifier = logFilenameIdentifier;
 
-    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${this.logFilenameIdentifier}`;
+    const metadataFolderPath: string = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${logFilenameIdentifier}`;
 
     this.stateFile = new OperationStateFile({
       projectFolder: projectFolder,
-      metadataFolder: this._metadataFolder
+      metadataFolder: metadataFolderPath
     });
 
-    this._relativeLogPath = `${this._metadataFolder}/all.log`;
-    this._relativeErrorLogPath = `${this._metadataFolder}/error.log`;
-    this._relativeLogChunksPath = `${this._metadataFolder}/log-chunks.jsonl`;
-    this._logPath = `${projectFolder}/${this._relativeLogPath}`;
-    this._errorLogPath = `${projectFolder}/${this._relativeErrorLogPath}`;
-    this._logChunksPath = `${projectFolder}/${this._relativeLogChunksPath}`;
+    this._metadataFolderPath = metadataFolderPath;
+    this._logPath = `${projectFolder}/${metadataFolderPath}/all.log`;
+    this._errorLogPath = `${projectFolder}/${metadataFolderPath}/error.log`;
+    this._logChunksPath = `${projectFolder}/${metadataFolderPath}/log-chunks.jsonl`;
   }
 
   /**
@@ -90,13 +81,8 @@ export class OperationMetadataManager {
    * Example: `.rush/temp/operation/_phase_build/all.log`
    * Example: `.rush/temp/operation/_phase_build/error.log`
    */
-  public get relativeFilepaths(): string[] {
-    return [
-      this.stateFile.relativeFilepath,
-      this._relativeLogPath,
-      this._relativeErrorLogPath,
-      this._relativeLogChunksPath
-    ];
+  public get metadataFolderPath(): string {
+    return this._metadataFolderPath;
   }
 
   public async saveAsync({
@@ -188,10 +174,6 @@ export class OperationMetadataManager {
       }
     }
   }
-}
-
-export function normalizeNameForLogFilenameIdentifiers(name: string): string {
-  return name.replace(/ /g, '').replace(/[^a-zA-Z0-9]/g, '_');
 }
 
 async function restoreFromLogFile(terminal: ITerminal, path: string): Promise<void> {

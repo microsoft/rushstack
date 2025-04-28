@@ -2,9 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { type IPackageJson, PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
+import { type IPackageJson, PackageJsonLookup, InternalError, Path } from '@rushstack/node-core-library';
 import { Terminal, type ITerminalProvider, type ITerminal } from '@rushstack/terminal';
-import { trueCasePathSync } from 'true-case-path';
+import {
+  type IProjectConfigurationFileSpecification,
+  ProjectConfigurationFile
+} from '@rushstack/heft-config-file';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
 import { Constants } from '../utilities/Constants';
@@ -23,26 +26,48 @@ export interface IHeftConfigurationInitializationOptions {
    * Terminal instance to facilitate logging.
    */
   terminalProvider: ITerminalProvider;
+
+  /**
+   * The number of CPU cores available to the process. This is used to determine how many tasks can be run in parallel.
+   */
+  numberOfCores: number;
+}
+
+interface IHeftConfigurationOptions extends IHeftConfigurationInitializationOptions {
+  buildFolderPath: string;
+}
+
+interface IProjectConfigurationFileEntry<TConfigFile> {
+  options: IProjectConfigurationFileSpecification<TConfigFile>;
+  loader: ProjectConfigurationFile<TConfigFile>;
 }
 
 /**
  * @public
  */
 export class HeftConfiguration {
-  private _buildFolderPath!: string;
+  private _slashNormalizedBuildFolderPath: string | undefined;
   private _projectConfigFolderPath: string | undefined;
-  private _cacheFolderPath: string | undefined;
   private _tempFolderPath: string | undefined;
   private _rigConfig: IRigConfig | undefined;
-  private _globalTerminal!: Terminal;
-  private _terminalProvider!: ITerminalProvider;
-  private _rigPackageResolver!: RigPackageResolver;
+  private _rigPackageResolver: RigPackageResolver | undefined;
+
+  private readonly _knownConfigurationFiles: Map<string, IProjectConfigurationFileEntry<unknown>> = new Map();
 
   /**
    * Project build folder path. This is the folder containing the project's package.json file.
    */
-  public get buildFolderPath(): string {
-    return this._buildFolderPath;
+  public readonly buildFolderPath: string;
+
+  /**
+   * {@link HeftConfiguration.buildFolderPath} with all path separators converted to forward slashes.
+   */
+  public get slashNormalizedBuildFolderPath(): string {
+    if (!this._slashNormalizedBuildFolderPath) {
+      this._slashNormalizedBuildFolderPath = Path.convertToSlashes(this.buildFolderPath);
+    }
+
+    return this._slashNormalizedBuildFolderPath;
   }
 
   /**
@@ -65,7 +90,7 @@ export class HeftConfiguration {
    */
   public get tempFolderPath(): string {
     if (!this._tempFolderPath) {
-      this._tempFolderPath = path.join(this._buildFolderPath, Constants.tempFolderName);
+      this._tempFolderPath = path.join(this.buildFolderPath, Constants.tempFolderName);
     }
 
     return this._tempFolderPath;
@@ -94,22 +119,19 @@ export class HeftConfiguration {
         rigConfig: this.rigConfig
       });
     }
+
     return this._rigPackageResolver;
   }
 
   /**
    * Terminal instance to facilitate logging.
    */
-  public get globalTerminal(): ITerminal {
-    return this._globalTerminal;
-  }
+  public readonly globalTerminal: ITerminal;
 
   /**
    * Terminal provider for the provided terminal.
    */
-  public get terminalProvider(): ITerminalProvider {
-    return this._terminalProvider;
-  }
+  public readonly terminalProvider: ITerminalProvider;
 
   /**
    * The Heft tool's package.json
@@ -125,7 +147,18 @@ export class HeftConfiguration {
     return PackageJsonLookup.instance.tryLoadPackageJsonFor(this.buildFolderPath)!;
   }
 
-  private constructor() {}
+  /**
+   * The number of CPU cores available to the process. This can be used to determine how many tasks can be run
+   * in parallel.
+   */
+  public readonly numberOfCores: number;
+
+  private constructor({ terminalProvider, buildFolderPath, numberOfCores }: IHeftConfigurationOptions) {
+    this.buildFolderPath = buildFolderPath;
+    this.terminalProvider = terminalProvider;
+    this.numberOfCores = numberOfCores;
+    this.globalTerminal = new Terminal(terminalProvider);
+  }
 
   /**
    * Performs the search for rig.json and initializes the `HeftConfiguration.rigConfig` object.
@@ -134,34 +167,84 @@ export class HeftConfiguration {
   public async _checkForRigAsync(): Promise<void> {
     if (!this._rigConfig) {
       this._rigConfig = await RigConfig.loadForProjectFolderAsync({
-        projectFolderPath: this._buildFolderPath
+        projectFolderPath: this.buildFolderPath
       });
     }
+  }
+
+  /**
+   * Attempts to load a riggable project configuration file using blocking, synchronous I/O.
+   * @param options - The options for the configuration file loader from `@rushstack/heft-config-file`. If invoking this function multiple times for the same file, reuse the same object.
+   * @param terminal - The terminal to log messages during configuration file loading.
+   * @returns The configuration file, or undefined if it could not be loaded.
+   */
+  public tryLoadProjectConfigurationFile<TConfigFile>(
+    options: IProjectConfigurationFileSpecification<TConfigFile>,
+    terminal: ITerminal
+  ): TConfigFile | undefined {
+    const loader: ProjectConfigurationFile<TConfigFile> = this._getConfigFileLoader(options);
+    return loader.tryLoadConfigurationFileForProject(terminal, this.buildFolderPath, this._rigConfig);
+  }
+
+  /**
+   * Attempts to load a riggable project configuration file using asynchronous I/O.
+   * @param options - The options for the configuration file loader from `@rushstack/heft-config-file`. If invoking this function multiple times for the same file, reuse the same object.
+   * @param terminal - The terminal to log messages during configuration file loading.
+   * @returns A promise that resolves to the configuration file, or undefined if it could not be loaded.
+   */
+  public async tryLoadProjectConfigurationFileAsync<TConfigFile>(
+    options: IProjectConfigurationFileSpecification<TConfigFile>,
+    terminal: ITerminal
+  ): Promise<TConfigFile | undefined> {
+    const loader: ProjectConfigurationFile<TConfigFile> = this._getConfigFileLoader(options);
+    return loader.tryLoadConfigurationFileForProjectAsync(terminal, this.buildFolderPath, this._rigConfig);
   }
 
   /**
    * @internal
    */
   public static initialize(options: IHeftConfigurationInitializationOptions): HeftConfiguration {
-    const configuration: HeftConfiguration = new HeftConfiguration();
-
     const packageJsonPath: string | undefined = PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(
       options.cwd
     );
+    let buildFolderPath: string;
     if (packageJsonPath) {
-      let buildFolderPath: string = path.dirname(packageJsonPath);
-      // The CWD path's casing may be incorrect on a case-insensitive filesystem. Some tools, like Jest
-      // expect the casing of the project path to be correct and produce unexpected behavior when the casing
-      // isn't correct.
-      // This ensures the casing of the project folder is correct.
-      buildFolderPath = trueCasePathSync(buildFolderPath);
-      configuration._buildFolderPath = buildFolderPath;
+      buildFolderPath = path.dirname(packageJsonPath);
+      // On Windows it is possible for the drive letter in the CWD to be lowercase, but the normalized naming is uppercase
+      // Force it to always be uppercase for consistency.
+      buildFolderPath =
+        process.platform === 'win32'
+          ? buildFolderPath.charAt(0).toUpperCase() + buildFolderPath.slice(1)
+          : buildFolderPath;
     } else {
       throw new Error('No package.json file found. Are you in a project folder?');
     }
 
-    configuration._terminalProvider = options.terminalProvider;
-    configuration._globalTerminal = new Terminal(options.terminalProvider);
+    const configuration: HeftConfiguration = new HeftConfiguration({
+      ...options,
+      buildFolderPath
+    });
     return configuration;
+  }
+
+  private _getConfigFileLoader<TConfigFile>(
+    options: IProjectConfigurationFileSpecification<TConfigFile>
+  ): ProjectConfigurationFile<TConfigFile> {
+    let entry: IProjectConfigurationFileEntry<TConfigFile> | undefined = this._knownConfigurationFiles.get(
+      options.projectRelativeFilePath
+    ) as IProjectConfigurationFileEntry<TConfigFile> | undefined;
+
+    if (!entry) {
+      entry = {
+        options: Object.freeze(options),
+        loader: new ProjectConfigurationFile<TConfigFile>(options)
+      };
+    } else if (options !== entry.options) {
+      throw new Error(
+        `The project configuration file for ${options.projectRelativeFilePath} has already been loaded with different options. Please ensure that options object used to load the configuration file is the same referenced object in all calls.`
+      );
+    }
+
+    return entry.loader;
   }
 }

@@ -17,6 +17,7 @@ import type {
 } from 'webpack';
 
 import { getPseudolocalizer, type ILocalizationFile, parseResJson } from '@rushstack/localization-utilities';
+import { Async } from '@rushstack/node-core-library/lib/Async';
 
 import * as Constants from './utilities/Constants';
 import type {
@@ -28,7 +29,7 @@ import type {
 } from './interfaces';
 import type { IAssetPathOptions } from './webpackInterfaces';
 import { markEntity, getMark } from './utilities/EntityMarker';
-import { processLocalizedAsset, processNonLocalizedAsset } from './AssetProcessor';
+import { processLocalizedAssetCachedAsync, processNonLocalizedAssetCachedAsync } from './AssetProcessor';
 import { getHashFunction, type HashFn, updateAssetHashes } from './trueHashes';
 import { chunkIsJs } from './utilities/chunkUtilities';
 
@@ -47,7 +48,7 @@ export interface IStringPlaceholder {
   /**
    * The values of this string in each output locale.
    */
-  valuesByLocale: Map<string, string>;
+  translations: ReadonlyMap<string, ReadonlyMap<string, string>>;
   /**
    * The key used to identify the source file containing the string.
    */
@@ -56,6 +57,12 @@ export interface IStringPlaceholder {
    * The identifier of the string within its original source file.
    */
   stringName: string;
+}
+
+export interface IFileTranslationInfo {
+  placeholders: Map<string, IStringPlaceholder>;
+  translations: Map<string, ReadonlyMap<string, string>>;
+  renderedPlacholders: Record<string, string>;
 }
 
 const PLUGIN_NAME: 'localization' = 'localization';
@@ -80,7 +87,7 @@ export function getPluginInstance(compiler: Compiler | undefined): LocalizationP
  * @public
  */
 export class LocalizationPlugin implements WebpackPluginInstance {
-  public readonly stringKeys: Map<string, IStringPlaceholder> = new Map();
+  private readonly _locFiles: Map<string, IFileTranslationInfo> = new Map();
 
   /**
    * @internal
@@ -90,7 +97,6 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     string,
     Map<string, ILocaleFileObject | string | ReadonlyMap<string, string>>
   > = new Map();
-  private _stringPlaceholderCounter: number = 0;
   private readonly _stringPlaceholderMap: Map<string, IStringPlaceholder> = new Map();
   private _passthroughLocaleName!: string;
   private _defaultLocale!: string;
@@ -100,11 +106,9 @@ export class LocalizationPlugin implements WebpackPluginInstance {
   private readonly _pseudolocalizers: Map<string, (str: string) => string> = new Map();
 
   /**
-   * The outermost map's keys are the locale names.
-   * The middle map's keys are the resolved, file names.
-   * The innermost map's keys are the string identifiers and its values are the string values.
+   * The set of locales that have translations provided.
    */
-  private _resolvedLocalizedStrings: Map<string, Map<string, Map<string, string>>> = new Map();
+  private _translatedLocales: Set<string> = new Set();
 
   public constructor(options: ILocalizationPluginOptions) {
     this._options = options;
@@ -148,11 +152,11 @@ export class LocalizationPlugin implements WebpackPluginInstance {
       GetChunkFilenameRuntimeModule.prototype.generate;
     GetChunkFilenameRuntimeModule.prototype.generate = function (
       this: runtime.GetChunkFilenameRuntimeModule
-    ) {
+    ): string | null {
       // `originalGenerate` will invoke `getAssetPath` to produce the async URL generator
       // Need to know the identity of the containing chunk to correctly produce the asset path expression
       chunkWithAsyncURLGenerator = this.chunk;
-      const result: string = originalGenerate.call(this);
+      const result: string | null = originalGenerate.call(this);
       // Unset after the call finishes because we are no longer generating async URL generators
       chunkWithAsyncURLGenerator = undefined;
       return result;
@@ -184,6 +188,8 @@ export class LocalizationPlugin implements WebpackPluginInstance {
         );
       }
 
+      const chunksWithUrlGenerators: WeakSet<Chunk> = new WeakSet();
+
       compilation.hooks.assetPath.tap(
         PLUGIN_NAME,
         (assetPath: string, options: IAssetPathOptions): string => {
@@ -198,14 +204,16 @@ export class LocalizationPlugin implements WebpackPluginInstance {
               const chunkIdsWithStrings: Set<number | string> = new Set<number | string>();
               const chunkIdsWithoutStrings: Set<number | string> = new Set<number | string>();
 
-              if (!chunkWithAsyncURLGenerator) {
+              const activeChunkWithAsyncUrlGenerator: Chunk | undefined = chunkWithAsyncURLGenerator;
+
+              if (!activeChunkWithAsyncUrlGenerator) {
                 compilation.errors.push(
                   new WebpackError(`No active chunk while constructing async chunk URL generator!`)
                 );
                 return assetPath;
               }
 
-              const asyncChunks: Set<Chunk> = chunkWithAsyncURLGenerator!.getAllAsyncChunks();
+              const asyncChunks: Set<Chunk> = activeChunkWithAsyncUrlGenerator.getAllAsyncChunks();
               for (const asyncChunk of asyncChunks) {
                 const chunkId: number | string | null = asyncChunk.id;
 
@@ -228,11 +236,14 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 const localeExpression: string =
                   (!_chunkHasLocalizedModules(
                     chunkGraph,
-                    chunkWithAsyncURLGenerator!,
+                    activeChunkWithAsyncUrlGenerator,
                     runtimeLocaleExpression
                   ) &&
                     runtimeLocaleExpression) ||
                   Constants.JSONP_PLACEHOLDER;
+                if (localeExpression === Constants.JSONP_PLACEHOLDER) {
+                  chunksWithUrlGenerators.add(activeChunkWithAsyncUrlGenerator);
+                }
 
                 if (chunkIdsWithStrings.size === 0) {
                   return this._formatLocaleForFilename(this._noStringsLocaleName);
@@ -298,7 +309,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
           stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_DEV_TOOLING - 1
         },
         async (): Promise<void> => {
-          const locales: Set<string> = new Set(this._resolvedLocalizedStrings.keys());
+          const locales: Set<string> = this._translatedLocales;
 
           const { chunkGraph, chunks } = compilation;
           const { localizationStats: statsOptions } = this._options;
@@ -309,66 +320,80 @@ export class LocalizationPlugin implements WebpackPluginInstance {
           const localizedEntryPointNames: string[] = [];
           const localizedChunkNames: string[] = [];
 
-          for (const chunk of chunks) {
-            if (!chunkIsJs(chunk, chunkGraph)) {
-              continue;
-            }
+          type CacheFacade = ReturnType<Compilation['getCache']>;
+          const cache: CacheFacade = compilation.getCache(PLUGIN_NAME);
 
-            const isLocalized: boolean = _chunkHasLocalizedModules(
-              chunkGraph,
-              chunk,
-              runtimeLocaleExpression
-            );
-
-            const template: Parameters<typeof Compilation.prototype.getAssetPath>[0] =
-              chunk.filenameTemplate ||
-              (chunk.hasRuntime() ? outputOptions.filename : outputOptions.chunkFilename)!;
-
-            const defaultAssetName: string = compilation.getPath(template, {
-              chunk,
-              contentHashType: 'javascript'
-              // Without locale this should return the name of the default asset
-            });
-
-            const asset: Asset | undefined = compilation.getAsset(defaultAssetName);
-            if (!asset) {
-              compilation.errors.push(new WebpackError(`Missing expected chunk asset ${defaultAssetName}`));
-              continue;
-            }
-
-            if (isLocalized) {
-              const localizedAssets: Record<string, string> = processLocalizedAsset({
-                // Global values
-                plugin: this,
-                compilation,
-                locales,
-                defaultLocale: this._defaultLocale,
-                fillMissingTranslationStrings: this._fillMissingTranslationStrings,
-                formatLocaleForFilenameFn: this._formatLocaleForFilename,
-                // Chunk-specific values
-                chunk,
-                asset,
-                filenameTemplate: template
-              });
-
-              if (filesByChunkName && chunk.name) {
-                filesByChunkName.set(chunk.name, localizedAssets);
-                (chunk.hasRuntime() ? localizedEntryPointNames : localizedChunkNames).push(chunk.name);
+          await Async.forEachAsync(
+            chunks,
+            async (chunk: Chunk) => {
+              if (!chunkIsJs(chunk, chunkGraph)) {
+                return;
               }
-            } else {
-              processNonLocalizedAsset({
-                // Global values
-                plugin: this,
-                compilation,
-                noStringsLocaleName: this._noStringsLocaleName,
-                formatLocaleForFilenameFn: this._formatLocaleForFilename,
-                // Chunk-specific values
+
+              const isLocalized: boolean = _chunkHasLocalizedModules(
+                chunkGraph,
                 chunk,
-                asset,
-                fileName: defaultAssetName
+                runtimeLocaleExpression
+              );
+
+              const template: Parameters<typeof Compilation.prototype.getAssetPath>[0] =
+                chunk.filenameTemplate ||
+                (chunk.hasRuntime() ? outputOptions.filename : outputOptions.chunkFilename)!;
+
+              const defaultAssetName: string = compilation.getPath(template, {
+                chunk,
+                contentHashType: 'javascript'
+                // Without locale this should return the name of the default asset
               });
+
+              const asset: Asset | undefined = compilation.getAsset(defaultAssetName);
+              if (!asset) {
+                compilation.errors.push(new WebpackError(`Missing expected chunk asset ${defaultAssetName}`));
+                return;
+              }
+
+              if (isLocalized) {
+                const localizedAssets: Record<string, string> = await processLocalizedAssetCachedAsync({
+                  // Global values
+                  plugin: this,
+                  compilation,
+                  cache,
+                  locales,
+                  defaultLocale: this._defaultLocale,
+                  passthroughLocaleName: this._passthroughLocaleName,
+                  fillMissingTranslationStrings: this._fillMissingTranslationStrings,
+                  formatLocaleForFilenameFn: this._formatLocaleForFilename,
+                  // Chunk-specific values
+                  chunk,
+                  asset,
+                  filenameTemplate: template
+                });
+
+                if (filesByChunkName && chunk.name) {
+                  filesByChunkName.set(chunk.name, localizedAssets);
+                  (chunk.hasRuntime() ? localizedEntryPointNames : localizedChunkNames).push(chunk.name);
+                }
+              } else {
+                await processNonLocalizedAssetCachedAsync({
+                  // Global values
+                  plugin: this,
+                  compilation,
+                  cache,
+                  hasUrlGenerator: chunksWithUrlGenerators.has(chunk),
+                  noStringsLocaleName: this._noStringsLocaleName,
+                  formatLocaleForFilenameFn: this._formatLocaleForFilename,
+                  // Chunk-specific values
+                  chunk,
+                  asset,
+                  fileName: defaultAssetName
+                });
+              }
+            },
+            {
+              // Only async component is the cache layer
+              concurrency: 20
             }
-          }
+          );
 
           if (hashFn) {
             updateAssetHashes({
@@ -413,7 +438,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
 
             if (callback) {
               try {
-                callback(localizationStats);
+                callback(localizationStats, compilation);
               } catch (e) {
                 /* swallow errors from the callback */
               }
@@ -435,7 +460,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     localizedResourceData: ILocalizationFile
   ): Promise<Record<string, string>> {
     const locFileData: ReadonlyMap<string, string> = convertLocalizationFileToLocData(localizedResourceData);
-    const resultObject: Record<string, string> = this._addLocFileAndGetPlaceholders(
+    const fileInfo: IFileTranslationInfo = this._addLocFileAndGetPlaceholders(
       this._defaultLocale,
       localizedFileKey,
       locFileData
@@ -449,11 +474,11 @@ export class LocalizationPlugin implements WebpackPluginInstance {
       if (!translatedLocFileFromOptions) {
         missingLocales.push(translatedLocaleName);
       } else {
-        const translatedLocFileData: ReadonlyMap<string, string> = await normalizeLocalizedData(
+        const translatedLocFileData: ReadonlyMap<string, string> = await normalizeLocalizedDataAsync(
           context,
           translatedLocFileFromOptions
         );
-        this._addTranslations(translatedLocaleName, localizedFileKey, translatedLocFileData);
+        fileInfo.translations.set(translatedLocaleName, translatedLocFileData);
       }
     }
 
@@ -478,11 +503,11 @@ export class LocalizationPlugin implements WebpackPluginInstance {
             : Object.entries(resolvedTranslatedData);
         for (const [resolvedLocaleName, resolvedLocaleData] of iterable) {
           if (resolvedLocaleData) {
-            const translatedLocFileData: ReadonlyMap<string, string> = await normalizeLocalizedData(
+            const translatedLocFileData: ReadonlyMap<string, string> = await normalizeLocalizedDataAsync(
               context,
               resolvedLocaleData
             );
-            this._addTranslations(resolvedLocaleName, localizedFileKey, translatedLocFileData);
+            fileInfo.translations.set(resolvedLocaleName, translatedLocFileData);
           }
         }
       }
@@ -495,20 +520,23 @@ export class LocalizationPlugin implements WebpackPluginInstance {
         pseudolocFileData.set(stringName, pseudolocalizer(stringValue));
       }
 
-      this._addTranslations(pseudolocaleName, localizedFileKey, pseudolocFileData);
+      fileInfo.translations.set(pseudolocaleName, pseudolocFileData);
     }
 
     markEntity(context._module!, true);
 
-    return resultObject;
+    return fileInfo.renderedPlacholders;
   }
 
   /**
    * @public
    */
   public getPlaceholder(localizedFileKey: string, stringName: string): IStringPlaceholder | undefined {
-    const stringKey: string = `${localizedFileKey}?${stringName}`;
-    return this.stringKeys.get(stringKey);
+    const file: IFileTranslationInfo | undefined = this._locFiles.get(localizedFileKey);
+    if (!file) {
+      return undefined;
+    }
+    return file.placeholders.get(stringName);
   }
 
   /**
@@ -522,56 +550,52 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     localeName: string,
     localizedFileKey: string,
     localizedFileData: ReadonlyMap<string, string>
-  ): Record<string, string> {
-    const filesMap: Map<string, ReadonlyMap<string, string>> = this._resolvedLocalizedStrings.get(
-      localeName
-    )!;
-
-    filesMap.set(localizedFileKey, localizedFileData);
+  ): IFileTranslationInfo {
+    let fileInfo: IFileTranslationInfo | undefined = this._locFiles.get(localizedFileKey);
+    if (!fileInfo) {
+      fileInfo = {
+        placeholders: new Map(),
+        translations: new Map(),
+        renderedPlacholders: {}
+      };
+      this._locFiles.set(localizedFileKey, fileInfo);
+    }
+    const { placeholders, translations } = fileInfo;
+    const locFilePrefix: string = Buffer.from(localizedFileKey, 'utf-8').toString('hex') + '$';
 
     const resultObject: Record<string, string> = {};
-    for (const [stringName, stringValue] of localizedFileData) {
-      const stringKey: string = `${localizedFileKey}?${stringName}`;
-      let placeholder: IStringPlaceholder | undefined = this.stringKeys.get(stringKey);
+    for (const stringName of localizedFileData.keys()) {
+      let placeholder: IStringPlaceholder | undefined = placeholders.get(stringName);
       if (!placeholder) {
-        // TODO: This may need to be a deterministic identifier to support watch / incremental compilation
-        const suffix: string = `${this._stringPlaceholderCounter++}`;
-
-        const values: Map<string, string> = new Map();
-        values.set(this._passthroughLocaleName, stringName);
+        const suffix: string = `${locFilePrefix}${Buffer.from(stringName, 'utf-8').toString('hex')}`;
 
         placeholder = {
-          value: `${Constants.STRING_PLACEHOLDER_PREFIX}_\\_${Constants.STRING_PLACEHOLDER_LABEL}_${suffix}`,
+          value: `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.STRING_PLACEHOLDER_LABEL}_\\_${suffix}_`,
           suffix,
-          valuesByLocale: values,
+          translations,
           locFilePath: localizedFileKey,
           stringName
         };
 
-        this.stringKeys.set(stringKey, placeholder);
+        placeholders.set(stringName, placeholder);
         this._stringPlaceholderMap.set(suffix, placeholder);
       }
 
       resultObject[stringName] = placeholder.value;
-
-      placeholder.valuesByLocale.set(localeName, stringValue);
     }
 
-    return resultObject;
+    translations.set(localeName, localizedFileData);
+    fileInfo.renderedPlacholders = resultObject;
+
+    return fileInfo;
   }
 
   private _addTranslations(
     localeName: string,
-    localizedFileKey: string,
+    fileInfo: IFileTranslationInfo,
     localizedFileData: ReadonlyMap<string, string>
   ): void {
-    for (const [stringName, stringValue] of localizedFileData) {
-      const stringKey: string = `${localizedFileKey}?${stringName}`;
-      const placeholder: IStringPlaceholder | undefined = this.stringKeys.get(stringKey);
-      if (placeholder) {
-        placeholder.valuesByLocale.set(localeName, stringValue);
-      }
-    }
+    fileInfo.translations.set(localeName, localizedFileData);
   }
 
   private _initializeAndValidateOptions(
@@ -624,7 +648,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
         const { usePassthroughLocale, passthroughLocaleName = 'passthrough' } = passthroughLocale;
         if (usePassthroughLocale) {
           this._passthroughLocaleName = passthroughLocaleName;
-          this._resolvedLocalizedStrings.set(passthroughLocaleName, new Map());
+          this._translatedLocales.add(passthroughLocaleName);
         }
       }
       // END options.localizedData.passthroughLocale
@@ -637,7 +661,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
       this._resolvedTranslatedStringsFromOptions.clear();
       if (translatedStrings) {
         for (const [localeName, locale] of Object.entries(translatedStrings)) {
-          if (this._resolvedLocalizedStrings.has(localeName)) {
+          if (this._translatedLocales.has(localeName)) {
             errors.push(
               new WebpackError(
                 `The locale "${localeName}" appears multiple times. ` +
@@ -651,7 +675,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
             return { errors, warnings };
           }
 
-          this._resolvedLocalizedStrings.set(localeName, new Map());
+          this._translatedLocales.add(localeName);
           const resolvedFromOptionsForLocale: Map<string, ILocaleFileData> = new Map();
           this._resolvedTranslatedStringsFromOptions.set(localeName, resolvedFromOptionsForLocale);
 
@@ -684,14 +708,14 @@ export class LocalizationPlugin implements WebpackPluginInstance {
       if (defaultLocale) {
         const { localeName, fillMissingTranslationStrings } = defaultLocale;
         if (localeName) {
-          if (this._resolvedLocalizedStrings.has(localeName)) {
+          if (this._translatedLocales.has(localeName)) {
             errors.push(new WebpackError('The default locale is also specified in the translated strings.'));
             return { errors, warnings };
           } else if (!ensureValidLocaleName(localeName)) {
             return { errors, warnings };
           }
 
-          this._resolvedLocalizedStrings.set(localeName, new Map());
+          this._translatedLocales.add(localeName);
           this._defaultLocale = localeName;
           this._fillMissingTranslationStrings = !!fillMissingTranslationStrings;
         } else {
@@ -715,7 +739,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
             return { errors, warnings };
           }
 
-          if (this._resolvedLocalizedStrings.has(pseudolocaleName)) {
+          if (this._translatedLocales.has(pseudolocaleName)) {
             errors.push(
               new WebpackError(
                 `A pseudolocale (${pseudolocaleName}) name is also specified in the translated strings.`
@@ -725,7 +749,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
           }
 
           this._pseudolocalizers.set(pseudolocaleName, getPseudolocalizer(pseudoLocaleOpts));
-          this._resolvedLocalizedStrings.set(pseudolocaleName, new Map<string, Map<string, string>>());
+          this._translatedLocales.add(pseudolocaleName);
         }
       }
       // END options.localizedData.pseudoLocales
@@ -821,7 +845,7 @@ function convertLocalizationFileToLocData(locFile: ILocalizationFile): ReadonlyM
   return locFileData;
 }
 
-async function normalizeLocalizedData(
+async function normalizeLocalizedDataAsync(
   context: LoaderContext<{}>,
   localizedData: ILocaleFileData
 ): Promise<ReadonlyMap<string, string>> {

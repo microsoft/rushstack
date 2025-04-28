@@ -1,0 +1,36 @@
+{
+  "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
+  "version": "0.1.8",
+  "description": "Heft plugin for transpiling TypeScript with SWC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-isolated-typescript-transpile-plugin"
+  },
+  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "types": "dist/heft-isolated-typescript-transpile-plugin.d.ts",
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^0.73.3",
+    "@rushstack/heft-typescript-plugin": "workspace:^"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*"
+  },
+  "dependencies": {
+    "@rushstack/lookup-by-path": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@swc/core": "1.7.10",
+    "@types/tapable": "1.0.6",
+    "tapable": "1.1.3"
+  }
+}

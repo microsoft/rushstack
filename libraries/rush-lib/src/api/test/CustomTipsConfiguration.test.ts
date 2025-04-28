@@ -62,7 +62,7 @@ describe(CustomTipsConfiguration.name, () => {
         appendOutputLines(terminalProvider.getOutput(), 'normal output');
         appendOutputLines(terminalProvider.getErrorOutput(), 'error output');
         appendOutputLines(terminalProvider.getWarningOutput(), 'warning output');
-        appendOutputLines(terminalProvider.getVerbose(), 'verbose output');
+        appendOutputLines(terminalProvider.getVerboseOutput(), 'verbose output');
         appendOutputLines(terminalProvider.getDebugOutput(), 'debug output');
 
         expect(outputLines).toMatchSnapshot();

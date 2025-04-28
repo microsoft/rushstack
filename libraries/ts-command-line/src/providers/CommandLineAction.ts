@@ -101,24 +101,21 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
       }
       originalArgumentParserErrorFn(err);
     };
-
-    this.onDefineParameters?.();
   }
 
   /**
    * Invoked by CommandLineParser.onExecute().
    * @internal
    */
-  public _executeAsync(): Promise<void> {
-    return this.onExecute();
+  public async _executeAsync(): Promise<void> {
+    await this.onExecuteAsync();
   }
 
   /**
    * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
    * @internal
    */
-  public _getArgumentParser(): argparse.ArgumentParser {
-    // override
+  public override _getArgumentParser(): argparse.ArgumentParser {
     if (!this._argumentParser) {
       // We will improve this in the future
       throw new Error('The CommandLineAction must be added to a CommandLineParser before it can be used');
@@ -129,9 +126,6 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
 
   /**
    * Your subclass should implement this hook to perform the operation.
-   *
-   * @remarks
-   * In a future release, this function will be renamed to onExecuteAsync
    */
-  protected abstract onExecute(): Promise<void>;
+  protected abstract onExecuteAsync(): Promise<void>;
 }

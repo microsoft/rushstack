@@ -1,6 +1,239 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Apr 2025 00:11:32 GMT and should not be manually modified.
+
+## 0.7.19
+Fri, 25 Apr 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.7.18
+Mon, 21 Apr 2025 22:24:25 GMT
+
+_Version update only_
+
+## 0.7.17
+Thu, 17 Apr 2025 00:11:21 GMT
+
+_Version update only_
+
+## 0.7.16
+Tue, 15 Apr 2025 15:11:58 GMT
+
+_Version update only_
+
+## 0.7.15
+Wed, 09 Apr 2025 00:11:03 GMT
+
+_Version update only_
+
+## 0.7.14
+Fri, 04 Apr 2025 18:34:35 GMT
+
+_Version update only_
+
+## 0.7.13
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 0.7.12
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 0.7.11
+Wed, 12 Mar 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.7.10
+Tue, 11 Mar 2025 02:12:34 GMT
+
+_Version update only_
+
+## 0.7.9
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.7.8
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.7.7
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.7.6
+Wed, 26 Feb 2025 16:11:12 GMT
+
+_Version update only_
+
+## 0.7.5
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.7.4
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.7.3
+Wed, 12 Feb 2025 01:10:52 GMT
+
+### Patches
+
+- Bump the `serialize-javascript` dependency.
+
+## 0.7.2
+Thu, 30 Jan 2025 16:10:36 GMT
+
+### Patches
+
+- Prefer `os.availableParallelism()` to `os.cpus().length`.
+
+## 0.7.1
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.7.0
+Wed, 22 Jan 2025 03:03:47 GMT
+
+### Minor changes
+
+- Add a `workerResourceLimits` option to the `WorkerPoolMinifier` constructor to control the available resources to the workers.
+
+## 0.6.36
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 0.6.35
+Tue, 07 Jan 2025 22:17:32 GMT
+
+_Version update only_
+
+## 0.6.34
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.6.33
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.6.32
+Tue, 03 Dec 2024 16:11:08 GMT
+
+_Version update only_
+
+## 0.6.31
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.6.30
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.6.29
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.6.28
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.6.27
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.6.26
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.6.25
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.6.24
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.6.23
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.6.22
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.6.21
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.6.20
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.6.19
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.6.18
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.6.17
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.6.16
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.6.15
+Wed, 17 Jul 2024 06:55:10 GMT
+
+_Version update only_
+
+## 0.6.14
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.6.13
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 0.6.12
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.6.11
 Mon, 03 Jun 2024 23:43:15 GMT

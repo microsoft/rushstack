@@ -5,8 +5,6 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import type { IPhase } from '../../api/CommandLineConfiguration';
 
 import { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
-import { NullOperationRunner } from './NullOperationRunner';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
@@ -23,6 +21,14 @@ const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
 export class PhasedOperationPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
     hooks.createOperations.tap(PLUGIN_NAME, createOperations);
+    // Configure operations later.
+    hooks.createOperations.tap(
+      {
+        name: `${PLUGIN_NAME}.Configure`,
+        stage: 1000
+      },
+      configureOperations
+    );
   }
 }
 
@@ -30,40 +36,15 @@ function createOperations(
   existingOperations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const {
-    projectsInUnknownState: changedProjects,
-    phaseOriginal,
-    phaseSelection,
-    projectSelection,
-    projectConfigurations
-  } = context;
-  const operationsWithWork: Set<Operation> = new Set();
+  const { phaseSelection, projectSelection, projectConfigurations } = context;
 
   const operations: Map<string, Operation> = new Map();
 
   // Create tasks for selected phases and projects
-  for (const phase of phaseOriginal) {
+  // This also creates the minimal set of dependencies needed
+  for (const phase of phaseSelection) {
     for (const project of projectSelection) {
       getOrCreateOperation(phase, project);
-    }
-  }
-
-  // Recursively expand all consumers in the `operationsWithWork` set.
-  for (const operation of operationsWithWork) {
-    for (const consumer of operation.consumers) {
-      operationsWithWork.add(consumer);
-    }
-  }
-
-  for (const [key, operation] of operations) {
-    if (!operationsWithWork.has(operation)) {
-      // This operation is in scope, but did not change since it was last executed by the current command.
-      // However, we have no state tracking across executions, so treat as unknown.
-      operation.runner = new NullOperationRunner({
-        name: key,
-        result: OperationStatus.Skipped,
-        silent: true
-      });
     }
   }
 
@@ -75,32 +56,23 @@ function createOperations(
     let operation: Operation | undefined = operations.get(key);
 
     if (!operation) {
+      const {
+        dependencies: { self, upstream },
+        name,
+        logFilenameIdentifier
+      } = phase;
       const operationSettings: IOperationSettings | undefined = projectConfigurations
         .get(project)
-        ?.operationSettingsByOperationName.get(phase.name);
+        ?.operationSettingsByOperationName.get(name);
       operation = new Operation({
         project,
         phase,
-        settings: operationSettings
+        settings: operationSettings,
+        logFilenameIdentifier: logFilenameIdentifier
       });
-
-      if (!phaseSelection.has(phase) || !projectSelection.has(project)) {
-        // Not in scope. Mark skipped because state is unknown.
-        operation.runner = new NullOperationRunner({
-          name: key,
-          result: OperationStatus.Skipped,
-          silent: true
-        });
-      } else if (changedProjects.has(project)) {
-        operationsWithWork.add(operation);
-      }
 
       operations.set(key, operation);
       existingOperations.add(operation);
-
-      const {
-        dependencies: { self, upstream }
-      } = phase;
 
       for (const depPhase of self) {
         operation.addDependency(getOrCreateOperation(depPhase, project));
@@ -120,6 +92,73 @@ function createOperations(
 
     return operation;
   }
+}
+
+function configureOperations(operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
+  const {
+    changedProjectsOnly,
+    projectsInUnknownState: changedProjects,
+    phaseOriginal,
+    phaseSelection,
+    projectSelection,
+    includePhaseDeps,
+    isInitial
+  } = context;
+
+  const basePhases: ReadonlySet<IPhase> = includePhaseDeps ? phaseOriginal : phaseSelection;
+
+  // Grab all operations that were explicitly requested.
+  const operationsWithWork: Set<Operation> = new Set();
+  for (const operation of operations) {
+    const { associatedPhase, associatedProject } = operation;
+    if (basePhases.has(associatedPhase) && changedProjects.has(associatedProject)) {
+      operationsWithWork.add(operation);
+    }
+  }
+
+  if (!isInitial && changedProjectsOnly) {
+    const potentiallyAffectedOperations: Set<Operation> = new Set(operationsWithWork);
+    for (const operation of potentiallyAffectedOperations) {
+      if (operation.settings?.ignoreChangedProjectsOnlyFlag) {
+        operationsWithWork.add(operation);
+      }
+
+      for (const consumer of operation.consumers) {
+        potentiallyAffectedOperations.add(consumer);
+      }
+    }
+  } else {
+    // Add all operations that are selected that depend on the explicitly requested operations.
+    // This will mostly be relevant during watch; in initial runs it should not add any new operations.
+    for (const operation of operationsWithWork) {
+      for (const consumer of operation.consumers) {
+        operationsWithWork.add(consumer);
+      }
+    }
+  }
+
+  if (includePhaseDeps) {
+    // Add all operations that are dependencies of the operations already scheduled.
+    for (const operation of operationsWithWork) {
+      for (const dependency of operation.dependencies) {
+        operationsWithWork.add(dependency);
+      }
+    }
+  }
+
+  for (const operation of operations) {
+    // Enable exactly the set of operations that are requested.
+    operation.enabled &&= operationsWithWork.has(operation);
+
+    if (!includePhaseDeps || !isInitial) {
+      const { associatedPhase, associatedProject } = operation;
+
+      // This filter makes the "unsafe" selections happen.
+      operation.enabled &&= phaseSelection.has(associatedPhase) && projectSelection.has(associatedProject);
+    }
+  }
+
+  return operations;
 }
 
 // Convert the [IPhase, RushConfigurationProject] into a value suitable for use as a Map key

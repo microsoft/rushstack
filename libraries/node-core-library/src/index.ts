@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/// <reference types="node" preserve="true" />
+
 /**
  * Core libraries that every NodeJS toolchain project should use.
  *
@@ -65,10 +67,12 @@ export {
 } from './JsonFile';
 export {
   type IJsonSchemaErrorInfo,
+  type IJsonSchemaCustomFormat,
   type IJsonSchemaFromFileOptions,
   type IJsonSchemaFromObjectOptions,
   type IJsonSchemaLoadOptions,
   type IJsonSchemaValidateOptions,
+  type IJsonSchemaValidateObjectWithOptions,
   JsonSchema,
   type JsonSchemaVersion
 } from './JsonSchema';
@@ -91,6 +95,7 @@ export {
   type IPathFormatFileLocationOptions,
   type IPathFormatConciselyOptions
 } from './Path';
+export { RealNodeModulePathResolver, type IRealNodeModulePathResolverOptions } from './RealNodeModulePath';
 export { Encoding, Text, NewlineKind, type IReadLinesFromIterableOptions } from './Text';
 export { Sort } from './Sort';
 export {

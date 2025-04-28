@@ -29,6 +29,7 @@ Positional arguments:
     init-autoinstaller  Initializes a new autoinstaller
     init-deploy         Creates a deployment scenario config file for use 
                         with \\"rush deploy\\".
+    init-subspace       Create a new subspace.
     install             Install package dependencies for all projects in the 
                         repo according to the shrinkwrap file
     link                Create node_modules symlinks for all projects
@@ -50,6 +51,8 @@ Positional arguments:
     update              Install package dependencies for all projects in the 
                         repo, and create or update the shrinkwrap file as 
                         needed
+    install-autoinstaller
+                        Install autoinstaller package dependencies
     update-autoinstaller
                         Updates autoinstaller package dependencies
     update-cloud-credentials
@@ -59,6 +62,13 @@ Positional arguments:
                         Provides interactive prompt for upgrading package 
                         dependencies per project
     version             Manage package versions in the repo.
+    alert               (EXPERIMENTAL) View and manage Rush alerts for the 
+                        repository
+    bridge-package      (EXPERIMENTAL) Use hotlinks to simulate upgrade of a 
+                        dependency for all consumers across a lockfile.
+    link-package        (EXPERIMENTAL) Use hotlinks to simulate installation 
+                        of a locally built project folder as a dependency of 
+                        specific projects.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
@@ -78,7 +88,7 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
 "usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [--peer] [-m]
-                [--all]
+                [--all] [--variant VARIANT]
                 
 
 Adds specified package(s) to the dependencies of the current project (as 
@@ -121,6 +131,56 @@ Optional arguments:
                         same version of the dependency.
   --all                 If specified, the dependency will be added to all 
                         projects.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: alert 1`] = `
+"usage: rush alert [-h] [-s ALERT_ID] [--forever]
+
+This command displays the Rush alerts for this repository. Rush alerts are 
+customizable announcements and reminders that Rush prints occasionally on the 
+command line. The alert definitions can be found in the rush-alerts.json 
+config file.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -s ALERT_ID, --snooze ALERT_ID
+                        Temporarily suspend the specified alert for one week
+  --forever             Combined with \\"--snooze\\", causes that alert to be 
+                        suspended permanently
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: bridge-package 1`] = `
+"usage: rush bridge-package [-h] --path PATH [--version SEMVER_RANGE]
+                           [--subspace SUBSPACE_NAME]
+                           
+
+This command enables you to test a locally built project by simulating its 
+upgrade by updating node_modules folders using hotlinks. Unlike \\"pnpm link\\" 
+and \\"npm link\\", the hotlinks created by this command affect all Rush projects 
+across the lockfile, as well as their indirect dependencies. The simulated 
+installation is not reflected in pnpm-lock.yaml, does not install new package.
+json dependencies, and simply updates the contents of existing node_modules 
+folders of \\"rush install\\". The hotlinks will be cleared when you next run 
+\\"rush install\\" or \\"rush update\\". Compare with the \\"rush link-package\\" command,
+ which affects only the consuming project.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --path PATH           The path of folder of a project outside of this Rush 
+                        repo, whose installation will be simulated using 
+                        node_modules symlinks (\\"hotlinks\\"). This folder is 
+                        the symlink target.
+  --version SEMVER_RANGE
+                        Specify which installed versions should be hotlinked. 
+                        The default value is \\"*\\".
+  --subspace SUBSPACE_NAME
+                        The name of the subspace to use for the hotlinked 
+                        package.
 "
 `;
 
@@ -129,8 +189,10 @@ exports[`CommandLineHelp prints the help for each action: build 1`] = `
                   [-t PROJECT] [-T PROJECT] [-f PROJECT] [-o PROJECT]
                   [-i PROJECT] [-I PROJECT]
                   [--to-version-policy VERSION_POLICY_NAME]
-                  [--from-version-policy VERSION_POLICY_NAME] [-v] [-c]
-                  [--ignore-hooks] [-s] [-m]
+                  [--from-version-policy VERSION_POLICY_NAME] [-v]
+                  [--include-phase-deps] [-c] [--ignore-hooks]
+                  [--node-diagnostic-dir DIRECTORY] [--debug-build-cache-ids]
+                  [-s] [-m]
                   
 
 This command is similar to \\"rush rebuild\\", except that \\"rush build\\" performs 
@@ -244,6 +306,14 @@ Optional arguments:
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
+  --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
+                        dependencies), add the minimal set of phase 
+                        dependencies. For example, \\"--from A\\" normally might 
+                        include the \\"_phase:test\\" phase for A's dependencies, 
+                        even though changes to A can't break those tests. 
+                        Using \\"--impacted-by A --include-phase-deps\\" avoids 
+                        that work by performing \\"_phase:test\\" only for 
+                        downstream projects.
   -c, --changed-projects-only
                         Normally the incremental build logic will rebuild 
                         changed projects as well as any projects that 
@@ -256,6 +326,14 @@ Optional arguments:
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --node-diagnostic-dir DIRECTORY
+                        Specifies the directory where Node.js diagnostic 
+                        reports will be written. This directory will contain 
+                        a subdirectory for each project and phase.
+  --debug-build-cache-ids
+                        Logs information about the components of the build 
+                        cache ids for individual operations. This is useful 
+                        for debugging the incremental build logic.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
@@ -325,6 +403,8 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: check 1`] = `
 "usage: rush check [-h] [--json] [--verbose] [--subspace SUBSPACE_NAME]
+                  [--variant VARIANT]
+                  
 
 Checks each project's package.json files and ensures that all dependencies 
 are of the same version throughout the repository.
@@ -342,6 +422,9 @@ Optional arguments:
                         within that subspace (ignoring other subspaces). This 
                         parameter is required when the \\"subspacesEnabled\\" 
                         setting is set to true in subspaces.json.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
 "
 `;
 
@@ -402,7 +485,9 @@ exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
                            [-i PROJECT] [-I PROJECT]
                            [--to-version-policy VERSION_POLICY_NAME]
                            [--from-version-policy VERSION_POLICY_NAME] [-v]
-                           [--ignore-hooks]
+                           [--include-phase-deps] [--ignore-hooks]
+                           [--node-diagnostic-dir DIRECTORY]
+                           [--debug-build-cache-ids]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -508,9 +593,25 @@ Optional arguments:
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
+  --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
+                        dependencies), add the minimal set of phase 
+                        dependencies. For example, \\"--from A\\" normally might 
+                        include the \\"_phase:test\\" phase for A's dependencies, 
+                        even though changes to A can't break those tests. 
+                        Using \\"--impacted-by A --include-phase-deps\\" avoids 
+                        that work by performing \\"_phase:test\\" only for 
+                        downstream projects.
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --node-diagnostic-dir DIRECTORY
+                        Specifies the directory where Node.js diagnostic 
+                        reports will be written. This directory will contain 
+                        a subdirectory for each project and phase.
+  --debug-build-cache-ids
+                        Logs information about the components of the build 
+                        cache ids for individual operations. This is useful 
+                        for debugging the incremental build logic.
   --locale {en-us,fr-fr,es-es,zh-cn}
                         Selects a single instead of the default locale 
                         (en-us) for non-ship builds or all locales for ship 
@@ -585,15 +686,29 @@ Optional arguments:
 "
 `;
 
+exports[`CommandLineHelp prints the help for each action: init-subspace 1`] = `
+"usage: rush init-subspace [-h] -n SUBSPACE_NAME
+
+Use this command to create a new subspace with the default subspace 
+configuration files.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -n SUBSPACE_NAME, --name SUBSPACE_NAME
+                        The name of the subspace that is being initialized.
+"
+`;
+
 exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
                     [--max-install-attempts NUMBER] [--ignore-hooks]
-                    [--offline] [-t PROJECT] [-T PROJECT] [-f PROJECT]
-                    [-o PROJECT] [-i PROJECT] [-I PROJECT]
+                    [--offline] [--variant VARIANT] [-t PROJECT] [-T PROJECT]
+                    [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME]
                     [--subspace SUBSPACE_NAME] [--check-only]
+                    [--resolution-only]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -639,6 +754,9 @@ Optional arguments:
                         necessary NPM packages cannot be obtained from the 
                         local cache. For details, see the documentation for 
                         PNPM's \\"--offline\\" parameter.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
   -t PROJECT, --to PROJECT
                         Normally all projects in the monorepo will be 
                         processed; adding this parameter will instead select 
@@ -722,6 +840,23 @@ Optional arguments:
                         be enabled in subspaces.json.
   --check-only          Only check the validity of the shrinkwrap file 
                         without performing an install.
+  --resolution-only     Only perform dependency resolution, useful for 
+                        ensuring peer dependendencies are up to date. Note 
+                        that this flag is only supported when using the pnpm 
+                        package manager.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: install-autoinstaller 1`] = `
+"usage: rush install-autoinstaller [-h] --name AUTOINSTALLER_NAME
+
+Use this command to install dependencies for an autoinstaller folder.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --name AUTOINSTALLER_NAME
+                        The name of the autoinstaller, which must be one of 
+                        the folders under common/autoinstallers.
 "
 `;
 
@@ -738,6 +873,32 @@ Optional arguments:
   -h, --help   Show this help message and exit.
   -f, --force  Deletes and recreates all links, even if the filesystem state 
                seems to indicate that this is unnecessary.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: link-package 1`] = `
+"usage: rush link-package [-h] --path PATH [--project PROJECT_NAME]
+
+This command enables you to test a locally built project by creating a 
+symlink under the specified projects' node_modules folders. The 
+implementation is similar to \\"pnpm link\\" and \\"npm link\\", but better 
+integrated with Rush features. Like those commands, the symlink (\\"hotlink\\") 
+is not reflected in pnpm-lock.yaml, affects the consuming project only, and 
+has the same limitations as \\"workspace:*\\". The hotlinks will be cleared when 
+you next run \\"rush install\\" or \\"rush update\\". Compare with the \\"rush 
+bridge-package\\" command, which affects the entire lockfile including indirect 
+dependencies.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --path PATH           The path of folder of a project outside of this Rush 
+                        repo, whose installation will be simulated using 
+                        node_modules symlinks (\\"hotlinks\\"). This folder is 
+                        the symlink target.
+  --project PROJECT_NAME
+                        A list of Rush project names that will be hotlinked 
+                        to the \\"--path\\" folder. If not specified, the default 
+                        is the project of the current working directory.
 "
 `;
 
@@ -966,7 +1127,9 @@ exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
                     [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME] [-v]
-                    [--ignore-hooks] [-s] [-m]
+                    [--include-phase-deps] [--ignore-hooks]
+                    [--node-diagnostic-dir DIRECTORY]
+                    [--debug-build-cache-ids] [-s] [-m]
                     
 
 This command assumes that the package.json file for each project contains a 
@@ -1077,9 +1240,25 @@ Optional arguments:
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
+  --include-phase-deps  If the selected projects are \\"unsafe\\" (missing some 
+                        dependencies), add the minimal set of phase 
+                        dependencies. For example, \\"--from A\\" normally might 
+                        include the \\"_phase:test\\" phase for A's dependencies, 
+                        even though changes to A can't break those tests. 
+                        Using \\"--impacted-by A --include-phase-deps\\" avoids 
+                        that work by performing \\"_phase:test\\" only for 
+                        downstream projects.
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --node-diagnostic-dir DIRECTORY
+                        Specifies the directory where Node.js diagnostic 
+                        reports will be written. This directory will contain 
+                        a subdirectory for each project and phase.
+  --debug-build-cache-ids
+                        Logs information about the components of the build 
+                        cache ids for individual operations. This is useful 
+                        for debugging the incremental build logic.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
@@ -1088,7 +1267,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: remove 1`] = `
-"usage: rush remove [-h] [-s] -p PACKAGE [--all]
+"usage: rush remove [-h] [-s] -p PACKAGE [--all] [--variant VARIANT]
 
 Removes specified package(s) from the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\".
@@ -1103,6 +1282,9 @@ Optional arguments:
                         foo --package bar\\".
   --all                 If specified, the dependency will be removed from all 
                         projects that declare it.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
 "
 `;
 
@@ -1170,7 +1352,7 @@ exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
                    [--max-install-attempts NUMBER] [--ignore-hooks]
-                   [--offline] [--full] [--recheck]
+                   [--offline] [--variant VARIANT] [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -1215,6 +1397,9 @@ Optional arguments:
                         necessary NPM packages cannot be obtained from the 
                         local cache. For details, see the documentation for 
                         PNPM's \\"--offline\\" parameter.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively be 
+                        specified via the RUSH_VARIANT environment variable.
   --full                Normally \\"rush update\\" tries to preserve your 
                         existing installed versions and only makes the 
                         minimum updates needed to satisfy the package.json 
@@ -1246,8 +1431,8 @@ folder.
 Optional arguments:
   -h, --help            Show this help message and exit.
   --name AUTOINSTALLER_NAME
-                        Specifies the name of the autoinstaller, which must 
-                        be one of the folders under common/autoinstallers.
+                        The name of the autoinstaller, which must be one of 
+                        the folders under common/autoinstallers.
 "
 `;
 
@@ -1271,6 +1456,8 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: upgrade-interactive 1`] = `
 "usage: rush upgrade-interactive [-h] [--make-consistent] [-s]
+                                [--variant VARIANT]
+                                
 
 Provide an interactive way to upgrade your dependencies. Running the command 
 will open an interactive prompt that will ask you which projects and which 
@@ -1288,6 +1475,9 @@ Optional arguments:
                      upgrade dependencies from other projects.
   -s, --skip-update  If specified, the \\"rush update\\" command will not be run 
                      after updating the package.json files.
+  --variant VARIANT  Run command using a variant installation configuration. 
+                     This parameter may alternatively be specified via the 
+                     RUSH_VARIANT environment variable.
 "
 `;
 

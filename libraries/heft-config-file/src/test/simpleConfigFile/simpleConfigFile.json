@@ -9,5 +9,7 @@
       "E": "F"
     }
   },
-  "booleanProp": true
+  "booleanProp": true,
+
+  "stringProp": "someValue"
 }

@@ -121,6 +121,15 @@ export interface IImportResolvePackageOptions extends IImportResolveOptions {
    * The package name to resolve. For example "\@rushstack/node-core-library"
    */
   packageName: string;
+
+  /**
+   * If true, then the module path will be resolved using Node.js's built-in resolution algorithm.
+   *
+   * @remarks
+   * This allows reusing Node's built-in resolver cache.
+   * This implies `allowSelfReference: true`. The passed `getRealPath` will only be used on `baseFolderPath`.
+   */
+  useNodeJSResolver?: boolean;
 }
 
 /**
@@ -409,7 +418,14 @@ export class Import {
    * and a system module is found, then its name is returned without any file path.
    */
   public static resolvePackage(options: IImportResolvePackageOptions): string {
-    const { packageName, includeSystemModules, baseFolderPath, allowSelfReference, getRealPath } = options;
+    const {
+      packageName,
+      includeSystemModules,
+      baseFolderPath,
+      allowSelfReference,
+      getRealPath,
+      useNodeJSResolver
+    } = options;
 
     if (includeSystemModules && Import._builtInModules.has(packageName)) {
       return packageName;
@@ -427,20 +443,17 @@ export class Import {
     PackageName.parse(packageName); // Ensure the package name is valid and doesn't contain a path
 
     try {
-      // Append a slash to the package name to ensure `resolve.sync` doesn't attempt to return a system package
-      const resolvedPath: string = Resolve.sync(`${packageName}/`, {
-        basedir: normalizedRootPath,
-        preserveSymlinks: false,
-        packageFilter: (pkg: Resolve.PackageJSON, pkgFile: string, dir: string): Resolve.PackageJSON => {
-          // Hardwire "main" to point to a file that is guaranteed to exist.
-          // This helps resolve packages such as @types/node that have no entry point.
-          // And then we can use path.dirname() below to locate the package folder,
-          // even if the real entry point was in an subfolder with arbitrary nesting.
-          pkg.main = 'package.json';
-          return pkg;
-        },
-        realpathSync: getRealPath
-      });
+      const resolvedPath: string = useNodeJSResolver
+        ? require.resolve(`${packageName}/package.json`, {
+            paths: [normalizedRootPath]
+          })
+        : // Append `/package.json` to ensure `resolve.sync` doesn't attempt to return a system package, and to avoid
+          // having to mess with the `packageFilter` option.
+          Resolve.sync(`${packageName}/package.json`, {
+            basedir: normalizedRootPath,
+            preserveSymlinks: false,
+            realpathSync: getRealPath
+          });
 
       const packagePath: string = path.dirname(resolvedPath);
       return packagePath;
@@ -501,23 +514,12 @@ export class Import {
               : undefined;
 
           Resolve.default(
-            // Append a slash to the package name to ensure `resolve` doesn't attempt to return a system package
-            `${packageName}/`,
+            // Append `/package.json` to ensure `resolve` doesn't attempt to return a system package, and to avoid
+            // having to mess with the `packageFilter` option.
+            `${packageName}/package.json`,
             {
               basedir: normalizedRootPath,
               preserveSymlinks: false,
-              packageFilter: (
-                pkg: Resolve.PackageJSON,
-                pkgFile: string,
-                dir: string
-              ): Resolve.PackageJSON => {
-                // Hardwire "main" to point to a file that is guaranteed to exist.
-                // This helps resolve packages such as @types/node that have no entry point.
-                // And then we can use path.dirname() below to locate the package folder,
-                // even if the real entry point was in an subfolder with arbitrary nesting.
-                pkg.main = 'package.json';
-                return pkg;
-              },
               realpath: realPathFn
             },
             (error: Error | null, resolvedPath?: string) => {

@@ -69,7 +69,7 @@ class AmbiguousAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     expect(this._short1Arg.value).toEqual('short1value');
     expect(this._shortArg2.value).toEqual('short2value');
     expect(this._scope1Arg.value).toEqual('scope1value');
@@ -96,7 +96,7 @@ class AbbreviationAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     this.done = true;
   }
 }
@@ -131,9 +131,16 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
       summary: 'does the scoped action',
       documentation: 'a longer description'
     });
+
+    // At least one scoping parameter is required to be defined on a scoped action
+    this._scopingArg = this.defineFlagParameter({
+      parameterLongName: '--scoping',
+      description: 'The scoping parameter',
+      parameterGroup: SCOPING_PARAMETER_GROUP
+    });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     expect(this._scopingArg?.value).toEqual(true);
     if (this._short1Arg?.value) {
       this.short1Value = this._short1Arg.value;
@@ -151,15 +158,6 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
       this.nonConflictingValue = this._nonConflictingArg.value;
     }
     this.done = true;
-  }
-
-  protected onDefineUnscopedParameters(): void {
-    // At least one scoping parameter is required to be defined on a scoped action
-    this._scopingArg = this.defineFlagParameter({
-      parameterLongName: '--scoping',
-      description: 'The scoping parameter',
-      parameterGroup: SCOPING_PARAMETER_GROUP
-    });
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
@@ -209,7 +207,7 @@ class AbbreviationScopedAction extends ScopedCommandLineAction {
   public unscopedAbbreviationFlag: CommandLineFlagParameter | undefined;
   public scopedAbbreviationFlag: CommandLineFlagParameter | undefined;
 
-  private _scopingArg: CommandLineFlagParameter | undefined;
+  private readonly _scopingArg: CommandLineFlagParameter;
   private _includeScopedAbbreviationFlag: boolean;
 
   public constructor(options: IAbbreviationScopedActionOptions) {
@@ -227,20 +225,18 @@ class AbbreviationScopedAction extends ScopedCommandLineAction {
     }
 
     this._includeScopedAbbreviationFlag = !!options?.includeScopedAbbreviationFlag;
-  }
 
-  protected async onExecute(): Promise<void> {
-    expect(this._scopingArg?.value).toEqual(true);
-    this.done = true;
-  }
-
-  protected onDefineUnscopedParameters(): void {
     // At least one scoping parameter is required to be defined on a scoped action
     this._scopingArg = this.defineFlagParameter({
       parameterLongName: '--scoping',
       description: 'The scoping parameter',
       parameterGroup: SCOPING_PARAMETER_GROUP
     });
+  }
+
+  protected override async onExecuteAsync(): Promise<void> {
+    expect(this._scopingArg.value).toEqual(true);
+    this.done = true;
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {

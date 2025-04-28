@@ -5,7 +5,7 @@ import type { AddressInfo } from 'net';
 
 import type * as TWebpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
-import { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook } from 'tapable';
+import { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 import { CertificateManager, type ICertificate } from '@rushstack/debug-certificate-manager';
 import { FileError, InternalError, LegacyAdapters } from '@rushstack/node-core-library';
@@ -334,15 +334,18 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         // Since the webpack-dev-server does not return infrastructure errors via a callback like
         // compiler.watch(...), we will need to intercept them and log them ourselves.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        compiler.hooks.infrastructureLog.tap(PLUGIN_NAME, (name: string, type: string, args: any[]) => {
-          if (name === WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME && type === 'error') {
-            const error: Error | undefined = args[0];
-            if (error) {
-              taskSession.logger.emitError(error);
+        compiler.hooks.infrastructureLog.tap(
+          PLUGIN_NAME,
+          (name: string, type: string, args: unknown[] | undefined) => {
+            if (name === WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME && type === 'error') {
+              const error: Error | undefined = args?.[0] as Error | undefined;
+              if (error) {
+                taskSession.logger.emitError(error);
+              }
             }
+            return true;
           }
-          return true;
-        });
+        );
 
         // The webpack-dev-server package has a design flaw, where merely loading its package will set the
         // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
@@ -356,7 +359,14 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       } else {
         // Create the watcher. Compilation will start immediately after invoking watch().
         taskSession.logger.terminal.writeLine('Starting Webpack watcher');
-        compiler.watch({}, (error?: Error | null) => {
+
+        const { onGetWatchOptions } = this.accessor.hooks;
+
+        const watchOptions: Parameters<TWebpack.Compiler['watch']>[0] = onGetWatchOptions.isUsed()
+          ? await onGetWatchOptions.promise({}, webpackConfiguration)
+          : {};
+
+        compiler.watch(watchOptions, (error?: Error | null) => {
           if (error) {
             taskSession.logger.emitError(error);
           }
@@ -485,6 +495,7 @@ export function _createAccessorHooks(): IWebpackPluginAccessorHooks {
     onLoadConfiguration: new AsyncSeriesBailHook(),
     onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
     onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
-    onEmitStats: new AsyncParallelHook(['webpackStats'])
+    onEmitStats: new AsyncParallelHook(['webpackStats']),
+    onGetWatchOptions: new AsyncSeriesWaterfallHook(['watchOptions', 'webpackConfiguration'])
   };
 }

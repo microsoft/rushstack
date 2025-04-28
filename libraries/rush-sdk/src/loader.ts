@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/// <reference types="node" preserve="true" />
+
 import * as path from 'path';
 import type { SpawnSyncReturns } from 'child_process';
 import { JsonFile, type JsonObject, Executable } from '@rushstack/node-core-library';

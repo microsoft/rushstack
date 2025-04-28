@@ -50,8 +50,9 @@ export class Npm {
           console.log(`No version is found for ${packageName}`);
         }
       }
-    } catch (error) {
-      if ((error as Error).message.indexOf('npm ERR! 404') >= 0) {
+    } catch (e) {
+      const error: Error = e;
+      if (['E404', 'npm ERR! 404'].some((check) => error.message.indexOf(check))) {
         // eslint-disable-next-line no-console
         console.log(`Package ${packageName} does not exist in the registry.`);
       } else {

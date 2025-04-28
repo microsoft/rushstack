@@ -24,6 +24,7 @@ import {
 
 export interface IAzureStorageBuildCacheProviderOptions extends IAzureStorageAuthenticationOptions {
   blobPrefix?: string;
+  readRequiresAuthentication?: boolean;
 }
 
 interface IBlobError extends Error {
@@ -43,6 +44,7 @@ export class AzureStorageBuildCacheProvider
 {
   private readonly _blobPrefix: string | undefined;
   private readonly _environmentCredential: string | undefined;
+  private readonly _readRequiresAuthentication: boolean;
 
   public get isCacheWriteAllowed(): boolean {
     return EnvironmentConfiguration.buildCacheWriteAllowed ?? this._isCacheWriteAllowedByConfiguration;
@@ -58,6 +60,7 @@ export class AzureStorageBuildCacheProvider
 
     this._blobPrefix = options.blobPrefix;
     this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
+    this._readRequiresAuthentication = !!options.readRequiresAuthentication;
 
     if (!(this._azureEnvironment in AzureAuthorityHosts)) {
       throw new Error(
@@ -208,8 +211,8 @@ export class AzureStorageBuildCacheProvider
       if (sasString) {
         const connectionString: string = this._getConnectionString(sasString);
         blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-      } else if (!this._isCacheWriteAllowedByConfiguration) {
-        // If cache write isn't allowed and we don't have a credential, assume the blob supports anonymous read
+      } else if (!this._readRequiresAuthentication && !this._isCacheWriteAllowedByConfiguration) {
+        // If we don't have a credential and read doesn't require authentication, we can still read from the cache.
         blobServiceClient = new BlobServiceClient(this._storageAccountUrl);
       } else {
         throw new Error(

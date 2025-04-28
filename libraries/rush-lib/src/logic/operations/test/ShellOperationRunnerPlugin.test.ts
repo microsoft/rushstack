@@ -22,7 +22,7 @@ interface ISerializedOperation {
 
 function serializeOperation(operation: Operation): ISerializedOperation {
   return {
-    name: operation.name!,
+    name: operation.name,
     commandToRun: operation.runner!.getConfigHash()
   };
 }

@@ -22,7 +22,7 @@ export class AliasAction extends AliasCommandLineAction {
     this._terminal = options.terminal;
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const toolFilename: string = this._toolFilename;
     const actionName: string = this.actionName;
     const targetAction: CommandLineAction = this.targetAction;
@@ -34,6 +34,6 @@ export class AliasAction extends AliasCommandLineAction {
         `${defaultParametersString ? ` ${defaultParametersString}` : ''}".`
     );
 
-    await super.onExecute();
+    await super.onExecuteAsync();
   }
 }

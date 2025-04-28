@@ -3,7 +3,12 @@
 
 import type * as TWebpack from 'webpack';
 import type { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
-import type { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook } from 'tapable';
+import type {
+  AsyncParallelHook,
+  AsyncSeriesBailHook,
+  AsyncSeriesHook,
+  AsyncSeriesWaterfallHook
+} from 'tapable';
 import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
 /**
@@ -82,6 +87,14 @@ export interface IWebpackPluginAccessorHooks {
    * this hook will not be called.
    */
   readonly onEmitStats: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats, never, never>;
+  /**
+   * A hook that allows for customization of the file watcher options. If not running in watch mode, this hook will not be called.
+   */
+  readonly onGetWatchOptions: AsyncSeriesWaterfallHook<
+    Parameters<TWebpack.Compiler['watch']>[0],
+    Readonly<IWebpackConfiguration>,
+    never
+  >;
 }
 
 /**

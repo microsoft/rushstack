@@ -1,6 +1,165 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Mon, 21 Apr 2025 22:24:25 GMT and should not be manually modified.
+
+## 7.52.5
+Mon, 21 Apr 2025 22:24:25 GMT
+
+_Version update only_
+
+## 7.52.4
+Thu, 17 Apr 2025 00:11:21 GMT
+
+### Patches
+
+- Update documentation for `extends`
+
+## 7.52.3
+Fri, 04 Apr 2025 18:34:35 GMT
+
+### Patches
+
+- Add support for customizing which TSDoc tags appear in API reports
+
+## 7.52.2
+Tue, 25 Mar 2025 15:11:15 GMT
+
+_Version update only_
+
+## 7.52.1
+Tue, 11 Mar 2025 02:12:34 GMT
+
+_Version update only_
+
+## 7.52.0
+Tue, 11 Mar 2025 00:11:25 GMT
+
+### Minor changes
+
+- Upgrade the bundled compiler engine to TypeScript 5.8.2
+
+## 7.51.1
+Sat, 01 Mar 2025 05:00:09 GMT
+
+### Patches
+
+- Include triple-slash references marked with `preserve="true"` from files that only contain re-exports. There was a behavior change in TypeScript 5.5, where only triple-slash references that are explicitly marked with `preserve="true"` are emitted into declaration files. This change adds support for placing these references in files that only contain re-exports, like the API entrypoint file.
+
+## 7.51.0
+Thu, 27 Feb 2025 01:10:39 GMT
+
+### Minor changes
+
+- Add a `docModel.releaseTagsToTrim` property to `api-extractor.json` to specify which release tags should be trimmed when the doc model is produced.
+
+## 7.50.1
+Sat, 22 Feb 2025 01:11:11 GMT
+
+### Patches
+
+- Upgrade the bundled compiler engine to TypeScript 5.7.3
+
+## 7.50.0
+Wed, 12 Feb 2025 01:10:52 GMT
+
+### Minor changes
+
+- Update merge behavior for derived configurations to allow overriding array properties
+
+## 7.49.2
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 7.49.1
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 7.49.0
+Tue, 07 Jan 2025 22:17:32 GMT
+
+### Minor changes
+
+- Upgrade the bundled compiler engine to TypeScript 5.7.2
+
+## 7.48.1
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 7.48.0
+Sat, 23 Nov 2024 01:18:55 GMT
+
+### Minor changes
+
+- Update TSDoc dependencies.
+
+## 7.47.12
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 7.47.11
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 7.47.10
+Tue, 15 Oct 2024 00:12:31 GMT
+
+### Patches
+
+- Fix a compatibility issue with usage of `getModeForUsageLocation` in TypeScript 5.6
+
+## 7.47.9
+Fri, 13 Sep 2024 00:11:42 GMT
+
+_Version update only_
+
+## 7.47.8
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 7.47.7
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 7.47.6
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 7.47.5
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 7.47.4
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 7.47.3
+Wed, 24 Jul 2024 00:12:14 GMT
+
+### Patches
+
+- Fix an edge case when discarding the file extension from the "reportFileName" setting and improve its documentation
+
+## 7.47.2
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 7.47.1
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
 
 ## 7.47.0
 Mon, 03 Jun 2024 23:43:15 GMT

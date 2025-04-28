@@ -6,7 +6,7 @@ import { Colorize } from '@rushstack/terminal';
 
 import { AsyncRecycler } from '../utilities/AsyncRecycler';
 import type { RushConfiguration } from '../api/RushConfiguration';
-import { RushConstants } from '../logic/RushConstants';
+import { RushConstants } from './RushConstants';
 import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 
 /**
@@ -88,7 +88,7 @@ export class PurgeManager {
     );
 
     if (
-      this._rushConfiguration.packageManager === 'pnpm' &&
+      this._rushConfiguration.isPnpm &&
       this._rushConfiguration.pnpmOptions.pnpmStore === 'global' &&
       this._rushConfiguration.pnpmOptions.pnpmStorePath
     ) {

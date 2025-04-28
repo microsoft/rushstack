@@ -23,6 +23,11 @@ export interface IInstallManagerOptions {
   checkOnly: boolean;
 
   /**
+   * Whether to only run resolutions. Only supported for PNPM.
+   */
+  resolutionOnly?: boolean;
+
+  /**
    * Whether a "--bypass-policy" flag can be specified.
    */
   bypassPolicyAllowed?: boolean;
@@ -77,6 +82,11 @@ export interface IInstallManagerOptions {
   collectLogFile: boolean;
 
   /**
+   * The variant to consider when performing installations and validating shrinkwrap updates.
+   */
+  variant: string | undefined;
+
+  /**
    * Retry the install the specified number of times
    */
   maxInstallAttempts: number;
@@ -102,7 +112,12 @@ export interface IInstallManagerOptions {
   /**
    * Callback to invoke between preparing the common/temp folder and running installation.
    */
-  beforeInstallAsync?: () => Promise<void>;
+  beforeInstallAsync?: (subspace: Subspace) => Promise<void>;
+
+  /**
+   * Callback to invoke after a successful installation.
+   */
+  afterInstallAsync?: (subspace: Subspace) => Promise<void>;
 
   /**
    * The specific subspace to install.

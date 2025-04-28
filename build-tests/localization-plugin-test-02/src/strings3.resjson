@@ -1,0 +1,10 @@
+{
+  "string1": "string three with a \\ backslash",
+  "_string1.comment": "the third string",
+
+  "string2": "string four with an ' apostrophe",
+  "_string2.comment": "the fourth string",
+
+  "string3": "UNUSED STRING",
+  "_string3.comment":  "UNUSED STRING"
+}

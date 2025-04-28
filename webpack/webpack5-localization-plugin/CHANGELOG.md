@@ -1,6 +1,287 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Apr 2025 00:11:32 GMT and should not be manually modified.
+
+## 0.13.12
+Fri, 25 Apr 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.13.11
+Mon, 21 Apr 2025 22:24:25 GMT
+
+_Version update only_
+
+## 0.13.10
+Thu, 17 Apr 2025 00:11:21 GMT
+
+_Version update only_
+
+## 0.13.9
+Tue, 15 Apr 2025 15:11:58 GMT
+
+_Version update only_
+
+## 0.13.8
+Wed, 09 Apr 2025 00:11:03 GMT
+
+_Version update only_
+
+## 0.13.7
+Fri, 04 Apr 2025 18:34:35 GMT
+
+_Version update only_
+
+## 0.13.6
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 0.13.5
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 0.13.4
+Wed, 12 Mar 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.13.3
+Tue, 11 Mar 2025 02:12:34 GMT
+
+_Version update only_
+
+## 0.13.2
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.13.1
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.13.0
+Thu, 27 Feb 2025 16:10:47 GMT
+
+### Minor changes
+
+- Support passing the `ignoreString` option to all loaders.
+
+## 0.12.6
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.12.5
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 0.12.4
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.12.3
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.12.2
+Fri, 14 Feb 2025 23:17:26 GMT
+
+### Patches
+
+- Fix a bug where `chunk.localizedFiles` was not set in incremental rebuilds.
+
+## 0.12.1
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.12.0
+Thu, 06 Feb 2025 01:11:16 GMT
+
+### Minor changes
+
+- Leverage webpack caching layer for localized and nonlocalized asset generation. Reduce unnecessary work.
+
+## 0.11.26
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 0.11.25
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.11.24
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 0.11.23
+Tue, 07 Jan 2025 22:17:32 GMT
+
+_Version update only_
+
+## 0.11.22
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.11.21
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.11.20
+Tue, 03 Dec 2024 16:11:08 GMT
+
+_Version update only_
+
+## 0.11.19
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.11.18
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.11.17
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.11.16
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.11.15
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.11.14
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.11.13
+Wed, 02 Oct 2024 00:11:19 GMT
+
+### Patches
+
+- Ensure compatibility with webpack 5.95.0
+
+## 0.11.12
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.11.11
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.11.10
+Sat, 28 Sep 2024 00:11:41 GMT
+
+_Version update only_
+
+## 0.11.9
+Tue, 24 Sep 2024 00:11:19 GMT
+
+### Patches
+
+- Fix circular references between localized assets' "related" properties. This caused emitting of the webpack stats object to fail.
+
+## 0.11.8
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.11.7
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.11.6
+Mon, 26 Aug 2024 02:00:11 GMT
+
+_Version update only_
+
+## 0.11.5
+Wed, 21 Aug 2024 16:24:51 GMT
+
+_Version update only_
+
+## 0.11.4
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.11.3
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.11.2
+Wed, 07 Aug 2024 00:11:51 GMT
+
+### Patches
+
+- Improve performance of localized asset reconstruction.
+
+## 0.11.1
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.11.0
+Wed, 31 Jul 2024 00:10:53 GMT
+
+### Minor changes
+
+- Include webpack compilation in localizationStats callback.
+
+## 0.10.21
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.10.20
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.10.19
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.10.18
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.10.17
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 0.10.16
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.10.15
 Mon, 03 Jun 2024 23:43:15 GMT

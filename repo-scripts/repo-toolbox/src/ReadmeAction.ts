@@ -32,7 +32,7 @@ export class ReadmeAction extends CommandLineAction {
     return project.shouldPublish || !!project.versionPolicyName;
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     const repoReadmePath: string = path.resolve(rushConfiguration.rushJsonFolder, 'README.md');

@@ -1,6 +1,230 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Apr 2025 00:11:32 GMT and should not be manually modified.
+
+## 7.26.24
+Fri, 25 Apr 2025 00:11:32 GMT
+
+_Version update only_
+
+## 7.26.23
+Mon, 21 Apr 2025 22:24:25 GMT
+
+_Version update only_
+
+## 7.26.22
+Thu, 17 Apr 2025 00:11:21 GMT
+
+_Version update only_
+
+## 7.26.21
+Tue, 15 Apr 2025 15:11:57 GMT
+
+_Version update only_
+
+## 7.26.20
+Wed, 09 Apr 2025 00:11:02 GMT
+
+_Version update only_
+
+## 7.26.19
+Fri, 04 Apr 2025 18:34:35 GMT
+
+_Version update only_
+
+## 7.26.18
+Tue, 25 Mar 2025 15:11:15 GMT
+
+_Version update only_
+
+## 7.26.17
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 7.26.16
+Wed, 12 Mar 2025 00:11:31 GMT
+
+_Version update only_
+
+## 7.26.15
+Tue, 11 Mar 2025 02:12:33 GMT
+
+_Version update only_
+
+## 7.26.14
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 7.26.13
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 7.26.12
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 7.26.11
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 7.26.10
+Sat, 22 Feb 2025 01:11:11 GMT
+
+_Version update only_
+
+## 7.26.9
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 7.26.8
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 7.26.7
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 7.26.6
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 7.26.5
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 7.26.4
+Tue, 07 Jan 2025 22:17:32 GMT
+
+_Version update only_
+
+## 7.26.3
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 7.26.2
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 7.26.1
+Tue, 03 Dec 2024 16:11:07 GMT
+
+_Version update only_
+
+## 7.26.0
+Sat, 23 Nov 2024 01:18:55 GMT
+
+### Minor changes
+
+- Update TSDoc dependencies.
+
+## 7.25.22
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 7.25.21
+Thu, 24 Oct 2024 00:15:47 GMT
+
+_Version update only_
+
+## 7.25.20
+Mon, 21 Oct 2024 18:50:09 GMT
+
+_Version update only_
+
+## 7.25.19
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 7.25.18
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 7.25.17
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 7.25.16
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 7.25.15
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 7.25.14
+Fri, 13 Sep 2024 00:11:42 GMT
+
+_Version update only_
+
+## 7.25.13
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 7.25.12
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 7.25.11
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 7.25.10
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 7.25.9
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 7.25.8
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 7.25.7
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 7.25.6
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 7.25.5
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
+
+## 7.25.4
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 7.25.3
 Mon, 03 Jun 2024 23:43:15 GMT

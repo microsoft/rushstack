@@ -6,9 +6,10 @@
 
 /// <reference types="node" />
 
-import type { MessagePort as MessagePort_2 } from 'worker_threads';
 import { MinifyOptions } from 'terser';
 import type { RawSourceMap } from 'source-map';
+import type { ResourceLimits } from 'worker_threads';
+import type * as WorkerThreads from 'worker_threads';
 
 // @public
 export function getIdentifier(ordinal: number): string;
@@ -79,6 +80,7 @@ export interface IWorkerPoolMinifierOptions {
     maxThreads?: number;
     terserOptions?: MinifyOptions;
     verbose?: boolean;
+    workerResourceLimits?: ResourceLimits;
 }
 
 // @public
@@ -92,13 +94,13 @@ export class LocalMinifier implements IModuleMinifier {
 
 // @public
 export class MessagePortMinifier implements IModuleMinifier {
-    constructor(port: MessagePort_2);
+    constructor(port: WorkerThreads.MessagePort);
     // @deprecated (undocumented)
     connect(): Promise<IMinifierConnection>;
     connectAsync(): Promise<IMinifierConnection>;
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
     // (undocumented)
-    readonly port: MessagePort_2;
+    readonly port: WorkerThreads.MessagePort;
 }
 
 export { MinifyOptions }

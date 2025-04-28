@@ -1,0 +1,209 @@
+{
+  "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
+  "entries": [
+    {
+      "version": "0.1.8",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.8",
+      "date": "Fri, 25 Apr 2025 00:11:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.5.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.9.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.73.2` to `0.73.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `^0.9.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.7",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.7",
+      "date": "Mon, 21 Apr 2025 22:24:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.5.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.9.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.73.1` to `0.73.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `^0.9.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.6",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.6",
+      "date": "Thu, 17 Apr 2025 00:11:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.5.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.9.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.73.0` to `0.73.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `^0.9.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.5",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.5",
+      "date": "Tue, 15 Apr 2025 15:11:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.5.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.9.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.72.0` to `0.73.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `^0.9.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.4",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.4",
+      "date": "Wed, 09 Apr 2025 00:11:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.5.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.72.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.71.2` to `0.72.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `^0.9.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.3",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.3",
+      "date": "Fri, 04 Apr 2025 18:34:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.5.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.8.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.71.1` to `0.71.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `^0.8.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.2",
+      "date": "Tue, 25 Mar 2025 15:11:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.5.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.8.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.71.0` to `0.71.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `^0.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.1",
+      "date": "Fri, 14 Mar 2025 03:43:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a casing issue in the `heft-plugin.json` `entryPoint` field."
+          },
+          {
+            "comment": "Fix an issue where the `rootPath` `tsconfig.json` property wasn't supported."
+          },
+          {
+            "comment": "Fix a crash when there are zero files to transpile."
+          },
+          {
+            "comment": "Fix an issue with the paths in sourcemaps."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.0",
+      "date": "Wed, 12 Mar 2025 23:12:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release."
+          }
+        ]
+      }
+    }
+  ]
+}

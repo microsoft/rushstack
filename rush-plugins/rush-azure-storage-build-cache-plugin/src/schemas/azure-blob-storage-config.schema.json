@@ -25,6 +25,12 @@
       "enum": ["AzurePublicCloud", "AzureChina", "AzureGermany", "AzureGovernment"]
     },
 
+    "loginFlow": {
+      "type": "string",
+      "description": "The Entra ID login flow to use. Defaults to 'AdoCodespacesAuth' on GitHub Codespaces, 'InteractiveBrowser' otherwise.",
+      "enum": ["AdoCodespacesAuth", "InteractiveBrowser", "DeviceCode"]
+    },
+
     "blobPrefix": {
       "type": "string",
       "description": "An optional prefix for cache item blob names."
@@ -33,6 +39,11 @@
     "isCacheWriteAllowed": {
       "type": "boolean",
       "description": "If set to true, allow writing to the cache. Defaults to false."
+    },
+
+    "readRequiresAuthentication": {
+      "type": "boolean",
+      "description": "If set to true, reading the cache requires authentication. Defaults to false."
     }
   }
 }

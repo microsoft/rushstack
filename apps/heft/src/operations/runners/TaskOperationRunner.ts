@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash, type Hash } from 'node:crypto';
+import { glob } from 'fast-glob';
+
 import {
   type IOperationRunner,
   type IOperationRunnerContext,
@@ -10,7 +13,12 @@ import {
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
 import type { HeftTask } from '../../pluginFramework/HeftTask';
-import { copyFilesAsync, normalizeCopyOperation } from '../../plugins/CopyFilesPlugin';
+import {
+  copyFilesAsync,
+  type ICopyOperation,
+  asAbsoluteCopyOperation,
+  asRelativeCopyOperation
+} from '../../plugins/CopyFilesPlugin';
 import { deleteFilesAsync } from '../../plugins/DeleteFilesPlugin';
 import type {
   HeftTaskSession,
@@ -21,7 +29,11 @@ import type {
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 import { watchGlobAsync, type IGlobOptions } from '../../plugins/FileGlobSpecifier';
-import { type IWatchedFileState, WatchFileSystemAdapter } from '../../utilities/WatchFileSystemAdapter';
+import {
+  type IWatchedFileState,
+  type IWatchFileSystem,
+  WatchFileSystemAdapter
+} from '../../utilities/WatchFileSystemAdapter';
 
 export interface ITaskOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
@@ -51,6 +63,7 @@ export class TaskOperationRunner implements IOperationRunner {
   private readonly _options: ITaskOperationRunnerOptions;
 
   private _fileOperations: IHeftTaskFileOperations | undefined = undefined;
+  private _copyConfigHash: string | undefined;
   private _watchFileSystemAdapter: WatchFileSystemAdapter | undefined = undefined;
 
   public readonly silent: boolean = false;
@@ -99,12 +112,31 @@ export class TaskOperationRunner implements IOperationRunner {
         deleteOperations: new Set()
       });
 
-      // Do this here so that we only need to do it once for each run
-      for (const copyOperation of fileOperations.copyOperations) {
-        normalizeCopyOperation(rootFolderPath, copyOperation);
+      let copyConfigHash: string | undefined;
+      const { copyOperations } = fileOperations;
+      if (copyOperations.size > 0) {
+        // Do this here so that we only need to do it once for each Heft invocation
+        const hasher: Hash | undefined = createHash('sha256');
+        const absolutePathCopyOperations: Set<ICopyOperation> = new Set();
+        for (const copyOperation of fileOperations.copyOperations) {
+          // The paths in the `fileOperations` object may be either absolute or relative
+          // For execution we need absolute paths.
+          const absoluteOperation: ICopyOperation = asAbsoluteCopyOperation(rootFolderPath, copyOperation);
+          absolutePathCopyOperations.add(absoluteOperation);
+
+          // For portability of the hash we need relative paths.
+          const portableCopyOperation: ICopyOperation = asRelativeCopyOperation(
+            rootFolderPath,
+            absoluteOperation
+          );
+          hasher.update(JSON.stringify(portableCopyOperation));
+        }
+        fileOperations.copyOperations = absolutePathCopyOperations;
+        copyConfigHash = hasher.digest('base64');
       }
 
       this._fileOperations = fileOperations;
+      this._copyConfigHash = copyConfigHash;
     }
 
     const shouldRunIncremental: boolean = isWatchMode && hooks.runIncremental.isUsed();
@@ -128,7 +160,8 @@ export class TaskOperationRunner implements IOperationRunner {
           async (): Promise<OperationStatus> => {
             // Create the options and provide a utility method to obtain paths to copy
             const runHookOptions: IHeftTaskRunHookOptions = {
-              abortSignal
+              abortSignal,
+              globAsync: glob
             };
 
             // Run the plugin run hook
@@ -144,6 +177,9 @@ export class TaskOperationRunner implements IOperationRunner {
                       ...options,
                       fs: getWatchFileSystemAdapter()
                     });
+                  },
+                  get watchFs(): IWatchFileSystem {
+                    return getWatchFileSystemAdapter();
                   },
                   requestRun: requestRun!
                 };
@@ -177,12 +213,15 @@ export class TaskOperationRunner implements IOperationRunner {
 
     if (this._fileOperations) {
       const { copyOperations, deleteOperations } = this._fileOperations;
+      const copyConfigHash: string | undefined = this._copyConfigHash;
 
       await Promise.all([
-        copyOperations.size > 0
+        copyConfigHash
           ? copyFilesAsync(
               copyOperations,
               logger.terminal,
+              `${taskSession.tempFolderPath}/file-copy.json`,
+              copyConfigHash,
               isWatchMode ? getWatchFileSystemAdapter() : undefined
             )
           : Promise.resolve(),

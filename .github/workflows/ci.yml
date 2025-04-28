@@ -9,19 +9,20 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - NodeVersion: 16.20.x
-            NodeVersionDisplayName: 16
-            OS: ubuntu-latest
-          - NodeVersion: 18.18.x
+          - NodeVersion: 18.20.x
             NodeVersionDisplayName: 18
             OS: ubuntu-latest
-          - NodeVersion: 20.9.x
+          - NodeVersion: 20.18.x
             NodeVersionDisplayName: 20
             OS: ubuntu-latest
-          - NodeVersion: 18.18.x
-            NodeVersionDisplayName: 18
+          - NodeVersion: 22.12.x
+            NodeVersionDisplayName: 22
+            OS: ubuntu-latest
+          - NodeVersion: 22.12.x
+            NodeVersionDisplayName: 22
             OS: windows-latest
     name: Node.js v${{ matrix.NodeVersionDisplayName }} (${{ matrix.OS }})
     runs-on: ${{ matrix.OS }}
@@ -87,8 +88,8 @@ jobs:
           git config --local user.email "rushbot@users.noreply.github.com"
         working-directory: repo-b
 
-      - name: Rush install (rush-lib)
-        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js install
+      - name: Rush update (rush-lib)
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js update
         working-directory: repo-b
 
       - name: Rush test (rush-lib)

@@ -11,17 +11,14 @@
     "start-proxy-server": "node ./lib/startProxyServer.js"
   },
   "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node": "18.17.15",
-    "eslint": "~8.57.0",
-    "typescript": "~5.4.2",
+    "@rushstack/terminal": "workspace:*",
+    "@types/http-proxy": "~1.17.8",
+    "@types/node": "20.17.19",
     "http-proxy": "~1.18.1",
-    "@types/http-proxy": "~1.17.8"
-  },
-  "dependencies": {
-    "@rushstack/terminal": "workspace:*"
+    "local-node-rig": "workspace:*"
   }
 }

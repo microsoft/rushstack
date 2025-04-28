@@ -1,0 +1,42 @@
+/**
+ * Config file for Lockfile Lint.  For more info, please visit: https://lfx.rushstack.io
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/lockfile-explorer/lockfile-lint.schema.json",
+
+  /**
+   * The list of rules to be checked by Lockfile Lint.  For each rule configuration, the
+   * type of rule is determined by the `rule` field.
+   */
+  "rules": [
+    // /**
+    //  * The `restrict-versions` rule enforces that direct and indirect dependencies must
+    //  * satisfy a specified version range.
+    //  */
+    // {
+    //   "rule": "restrict-versions",
+    //
+    //   /**
+    //    * The name of a workspace project to analyze.
+    //    */
+    //   "project": "@my-company/my-app",
+    //
+    //   /**
+    //    * Indicates the package versions to be checked.  The `requiredVersions` key is
+    //    * the name of an NPM package, and the value is a SemVer range.  If the project has
+    //    * that NPM package as a dependency, then its version must satisfy the SemVer range.
+    //    * This check also applies to devDependencies and peerDependencies, as well as any
+    //    * indirect dependencies of the project.
+    //    */
+    //   "requiredVersions": {
+    //     /**
+    //      * For example, if `react-router` appears anywhere in the dependency graph of
+    //      * `@my-company/my-app`, then it must be version 5 or 6.
+    //      */
+    //     "react-router": "5.x || 6.x",
+    //     "react": "^18.3.0",
+    //     "react-dom": "^18.3.0"
+    //   }
+    // }
+  ]
+}

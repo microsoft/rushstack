@@ -9,6 +9,7 @@ import {
   type LogMessageDetails,
   LogMessageKind
 } from 'pnpm-sync-lib';
+import { RushConstants } from '../logic/RushConstants';
 
 export class PnpmSyncUtilities {
   private static _addLinePrefix(message: string): string {
@@ -27,7 +28,7 @@ export class PnpmSyncUtilities {
       case LogMessageIdentifier.PREPARE_FINISHING:
         terminal.writeVerboseLine(
           PnpmSyncUtilities._addLinePrefix(
-            `Regenerated .pnpm-sync.json in ${Math.round(details.executionTimeInMs)} ms`
+            `Regenerated ${RushConstants.pnpmSyncFilename} in ${Math.round(details.executionTimeInMs)} ms`
           )
         );
         return;
@@ -46,7 +47,7 @@ export class PnpmSyncUtilities {
       case LogMessageIdentifier.PREPARE_REPLACING_FILE:
         {
           const customMessage: string =
-            `Expecting .pnpm-sync.json version ${details.expectedVersion}, ` +
+            `Expecting ${RushConstants.pnpmSyncFilename} version ${details.expectedVersion}, ` +
             `but found version ${details.actualVersion}`;
 
           terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(message));
@@ -64,7 +65,7 @@ export class PnpmSyncUtilities {
 
         terminal.writeLine(
           PnpmSyncUtilities._addLinePrefix(
-            `Expecting .pnpm-sync.json version ${details.expectedVersion}, ` +
+            `Expecting ${RushConstants.pnpmSyncFilename} version ${details.expectedVersion}, ` +
               `but found version ${details.actualVersion}\n` +
               `Affected folder: ${details.pnpmSyncJsonPath}`
           )

@@ -11,13 +11,13 @@
 
 export { AlphaClass } from './AlphaClass';
 export { BetaClass } from './BetaClass';
-export { PublicClass, IPublicClassInternalParameters } from './PublicClass';
+export { PublicClass, type IPublicClassInternalParameters } from './PublicClass';
 export { InternalClass } from './InternalClass';
 export { EntangledNamespace } from './EntangledNamespace';
 
 export * from './EnumExamples';
 
-export { BetaInterface } from './BetaInterface';
+export type { BetaInterface } from './BetaInterface';
 
 /**
  * This is a module-scoped variable.
@@ -33,6 +33,6 @@ import { AlphaClass } from './AlphaClass';
  */
 export type ExportedAlias = AlphaClass;
 
-export { IPublicComplexInterface } from './IPublicComplexInterface';
+export type { IPublicComplexInterface } from './IPublicComplexInterface';
 
-export { Lib1Interface } from 'api-extractor-lib1-test';
+export type { Lib1Interface } from 'api-extractor-lib1-test';

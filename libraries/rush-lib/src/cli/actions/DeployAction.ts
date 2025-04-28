@@ -159,11 +159,14 @@ export class DeployAction extends BaseRushAction {
     }
 
     const projects: RushConfigurationProject[] = this.rushConfiguration.projects;
-    if (this.rushConfiguration.packageManager === 'pnpm') {
+    if (this.rushConfiguration.isPnpm) {
+      const currentlyInstalledVariant: string | undefined =
+        await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
       for (const project of projects) {
         const pnpmfileConfiguration: PnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
           this.rushConfiguration,
-          project.subspace
+          project.subspace,
+          currentlyInstalledVariant
         );
         const subspace: IExtractorSubspace = {
           subspaceName: project.subspace.subspaceName,
@@ -175,7 +178,7 @@ export class DeployAction extends BaseRushAction {
         }
 
         if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
-          subspace.pnpmInstallFolder = project.subspace.getSubspaceTempFolder();
+          subspace.pnpmInstallFolder = project.subspace.getSubspaceTempFolderPath();
         }
         subspaces.set(subspace.subspaceName, subspace);
       }

@@ -1,6 +1,101 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+This log was last generated on Mon, 21 Apr 2025 22:24:25 GMT and should not be manually modified.
+
+## 5.0.0
+Mon, 21 Apr 2025 22:24:25 GMT
+
+### Breaking changes
+
+- Remove the deprecated `onDefineParameters`, `execute`, `executeWithoutErrorHandling`, and `onDefineUnscopedParameters` functions.
+- Rename `onExecute` to `onExecuteAsync`, `CommandLineParameter` to `CommandLineParameterBase`, and `completions` to `getCompletionsAsync`.
+
+## 4.23.7
+Tue, 25 Mar 2025 15:11:15 GMT
+
+_Version update only_
+
+## 4.23.6
+Tue, 11 Mar 2025 02:12:33 GMT
+
+_Version update only_
+
+## 4.23.5
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 4.23.4
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 4.23.3
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 4.23.2
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 4.23.1
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 4.23.0
+Thu, 17 Oct 2024 08:35:06 GMT
+
+### Minor changes
+
+- Expand the `alternatives` and `completions` options of `CommandLineChoiceParameter` and `CommandLineChoiceListParameter` to allow readonly arrays and sets.
+- (BREAKING API CHANGE) Change the type of the `alternatives` property of `CommandLineChoiceParameter` and `CommandLineChoiceParameter` from an array to a `ReadonlySet`.
+
+## 4.22.8
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 4.22.7
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 4.22.6
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 4.22.5
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 4.22.4
+Fri, 02 Aug 2024 17:26:42 GMT
+
+### Patches
+
+- Remove @internal so that subclasses can call _getArgumentParser
+
+## 4.22.3
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 4.22.2
+Wed, 17 Jul 2024 06:55:10 GMT
+
+_Version update only_
+
+## 4.22.1
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
 
 ## 4.22.0
 Thu, 30 May 2024 00:13:05 GMT

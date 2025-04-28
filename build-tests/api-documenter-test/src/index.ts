@@ -12,7 +12,7 @@
 
 export * from './DocClass1';
 export * from './DocEnums';
-import { IDocInterface1, IDocInterface3, SystemEvent } from './DocClass1';
+import type { IDocInterface1, IDocInterface3, SystemEvent } from './DocClass1';
 
 export { DecoratorExample } from './DecoratorExample';
 
@@ -58,10 +58,12 @@ export function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1 
  * A top-level namespace
  * @public
  */
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace OuterNamespace {
   /**
    * A nested namespace
    */
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   export namespace InnerNamespace {
     /**
      * A function inside a namespace
@@ -74,6 +76,7 @@ export namespace OuterNamespace {
   /**
    * A variable exported from within a namespace.
    */
+  // eslint-disable-next-line prefer-const
   export let nestedVariable: boolean = false;
 }
 

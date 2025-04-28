@@ -1,6 +1,252 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Apr 2025 00:11:32 GMT and should not be manually modified.
+
+## 0.9.4
+Fri, 25 Apr 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.9.3
+Mon, 21 Apr 2025 22:24:25 GMT
+
+_Version update only_
+
+## 0.9.2
+Thu, 17 Apr 2025 00:11:21 GMT
+
+### Patches
+
+- Update documentation for `extends`
+
+## 0.9.1
+Tue, 15 Apr 2025 15:11:57 GMT
+
+_Version update only_
+
+## 0.9.0
+Wed, 09 Apr 2025 00:11:02 GMT
+
+### Minor changes
+
+- Leverage Heft's new `tryLoadProjectConfigurationFileAsync` method.
+
+## 0.8.2
+Fri, 04 Apr 2025 18:34:35 GMT
+
+_Version update only_
+
+## 0.8.1
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 0.8.0
+Wed, 12 Mar 2025 22:41:36 GMT
+
+### Minor changes
+
+- Expose some internal APIs to be used by `@rushstack/heft-isolated-typescript-transpile-plugin`.
+
+## 0.7.1
+Wed, 12 Mar 2025 00:11:31 GMT
+
+_Version update only_
+
+## 0.7.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Add support for TypeScript 5.8.
+
+## 0.6.16
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.6.15
+Sat, 01 Mar 2025 07:23:16 GMT
+
+### Patches
+
+- Add support for TypeScript 5.7.
+
+## 0.6.14
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.6.13
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.6.12
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 0.6.11
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.6.10
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.6.9
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.6.8
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 0.6.7
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.6.6
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 0.6.5
+Tue, 07 Jan 2025 22:17:32 GMT
+
+_Version update only_
+
+## 0.6.4
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.6.3
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.6.2
+Tue, 03 Dec 2024 16:11:07 GMT
+
+_Version update only_
+
+## 0.6.1
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.6.0
+Fri, 22 Nov 2024 01:10:43 GMT
+
+### Minor changes
+
+- Add "onlyResolveSymlinksInNodeModules" option to improve performance for typical repository layouts.
+
+## 0.5.35
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.5.34
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.5.33
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.5.32
+Wed, 16 Oct 2024 00:11:20 GMT
+
+### Patches
+
+- Support typescript v5.6
+
+## 0.5.31
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.5.30
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.5.29
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.5.28
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.5.27
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.5.26
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.5.25
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.5.24
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.5.23
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.5.22
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.5.21
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.5.20
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.5.19
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.5.18
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 0.5.17
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.5.16
 Mon, 03 Jun 2024 23:43:15 GMT

@@ -52,7 +52,7 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
 
   const operationsByStatus: IOperationsByStatus = new Map();
   for (const record of operationResults) {
-    if (record[0].runner?.silent) {
+    if (record[1].silent) {
       // Don't report silenced operations
       continue;
     }
@@ -172,7 +172,7 @@ function writeCondensedSummary(
 
   let longestTaskName: number = 0;
   for (const [operation] of operations) {
-    const nameLength: number = (operation.name || '').length;
+    const nameLength: number = operation.name.length;
     if (nameLength > longestTaskName) {
       longestTaskName = nameLength;
     }
@@ -185,7 +185,7 @@ function writeCondensedSummary(
       operationResult.status !== OperationStatus.Skipped
     ) {
       const time: string = operationResult.stopwatch.toString();
-      const padding: string = ' '.repeat(longestTaskName - (operation.name || '').length);
+      const padding: string = ' '.repeat(longestTaskName - operation.name.length);
       terminal.writeLine(`  ${operation.name}${padding}    ${time}`);
     } else {
       terminal.writeLine(`  ${operation.name}`);

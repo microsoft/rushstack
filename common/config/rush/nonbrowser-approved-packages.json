@@ -99,6 +99,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/lockfile.types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@pnpm/logger",
       "allowedCategories": [ "libraries" ]
     },
@@ -163,8 +167,16 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-localization-typings-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-sass-load-themed-styles-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/heft-sass-plugin",
@@ -203,6 +215,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/lookup-by-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/module-minifier",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -223,6 +239,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/real-node-module-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rig-package",
       "allowedCategories": [ "libraries" ]
     },
@@ -241,6 +261,10 @@
     {
       "name": "@rushstack/rush-redis-cobuild-plugin",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/rush-resolver-cache-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/rush-sdk",
@@ -281,6 +305,10 @@
     {
       "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/webpack-workspace-resolve-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/webpack4-localization-plugin",
@@ -343,12 +371,16 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@swc/core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@tsconfig/node14",
       "allowedCategories": [ "tests" ]
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "allowedCategories": [ "libraries", "vscode-extensions" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@typescript-eslint/parser",
@@ -472,6 +504,10 @@
     },
     {
       "name": "decache",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "decoupled-local-node-rig",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -767,12 +803,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "punycode",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "read-package-tree",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "resolve",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "run-scenarios-helpers",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "sass",
@@ -862,7 +906,6 @@
       "name": "tslint",
       "allowedCategories": [ "libraries", "tests" ]
     },
-
     {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]

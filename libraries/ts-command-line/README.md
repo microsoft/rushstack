@@ -45,7 +45,7 @@ Several different kinds of parameters are supported:
 | flag | `--verbose` | `boolean` | Value is `true` if the flag was specified on the command line, `false` otherwise. |
 | integer | `--max-retry 3` | `int` | The argument is an integer number |
 | string | `--title "Hello, world"` | `string` | The argument is a text string. |
-| choice | `--color red` | `string` | The argument is must be a string from a list of allowed choices (similar to an enum). |
+| choice | `--color red` | `string` | The argument must be a string from a list of allowed choices (similar to an enum). |
 | string list | `-o file1.txt -o file2.txt` | `string[]` | The argument is a text string. The parameter can be specified multiple times to build a list. |
 
 Other parameter kinds could be implemented if requested.  That said, keeping your CLI grammar simple and systematic makes it easier for users to learn.
@@ -90,7 +90,7 @@ export class PushAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> { // abstract
+  protected override async onExecuteAsync(): Promise<void> { // abstract
     await BusinessLogic.doTheWork(this._force.value, this._protocol.value || "(none)");
   }
 }
@@ -117,9 +117,9 @@ export class WidgetCommandLine extends CommandLineParser {
     });
   }
 
-  protected async onExecute(): Promise<void> { // override
+  protected override async onExecuteAsync(): Promise<void> {
     BusinessLogic.configureLogger(this._verbose.value);
-    await super.onExecute();
+    await super.onExecuteAsync();
   }
 }
 ```

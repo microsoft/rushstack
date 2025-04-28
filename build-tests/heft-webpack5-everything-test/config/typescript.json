@@ -49,5 +49,7 @@
     // "excludeGlobs": [
     //   "some/path/*.css"
     // ]
-  }
+  },
+
+  "onlyResolveSymlinksInNodeModules": true
 }

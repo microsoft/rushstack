@@ -4,17 +4,19 @@
   "private": true,
   "description": "An ESLint configuration consumed projects inside the rushstack repo.",
   "scripts": {
-    "build": "",
-    "_phase:build": ""
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean"
   },
   "devDependencies": {
     "eslint": "~8.57.0",
-    "typescript": "~5.4.2"
+    "typescript": "~5.8.2",
+    "@rushstack/heft": "0.73.2",
+    "decoupled-local-node-rig": "workspace:*"
   },
   "dependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/eslint-patch": "workspace:*",
-    "@typescript-eslint/parser": "~6.19.0",
+    "@typescript-eslint/parser": "~8.26.1",
     "eslint-plugin-deprecation": "2.0.0",
     "eslint-plugin-header": "~3.1.1",
     "eslint-plugin-import": "2.25.4",

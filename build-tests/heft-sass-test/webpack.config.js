@@ -13,9 +13,6 @@ function createWebpackConfig({ production }) {
   const webpackConfig = {
     // Documentation: https://webpack.js.org/configuration/mode/
     mode: production ? 'production' : 'development',
-    resolve: {
-      extensions: ['.js', '.jsx', '.json', '.css']
-    },
     module: {
       rules: [
         {

@@ -18,6 +18,6 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "eslint": "~8.57.0",
-    "typescript": "~5.4.2"
+    "typescript": "~5.8.2"
   }
 }

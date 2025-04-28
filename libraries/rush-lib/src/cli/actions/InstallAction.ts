@@ -8,9 +8,12 @@ import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManager
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { Subspace } from '../../api/Subspace';
+import { getVariantAsync } from '../../api/Variants';
 
 export class InstallAction extends BaseInstallAction {
   private readonly _checkOnlyParameter: CommandLineFlagParameter;
+  private readonly _resolutionOnlyParameter: CommandLineFlagParameter | undefined;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -45,12 +48,25 @@ export class InstallAction extends BaseInstallAction {
       parameterLongName: '--check-only',
       description: `Only check the validity of the shrinkwrap file without performing an install.`
     });
+
+    if (this.rushConfiguration?.isPnpm) {
+      this._resolutionOnlyParameter = this.defineFlagParameter({
+        parameterLongName: '--resolution-only',
+        description: `Only perform dependency resolution, useful for ensuring peer dependendencies are up to date. Note that this flag is only supported when using the pnpm package manager.`
+      });
+    }
   }
 
   protected async buildInstallOptionsAsync(): Promise<Omit<IInstallManagerOptions, 'subspace'>> {
     const selectedProjects: Set<RushConfigurationProject> =
-      (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) ??
+      (await this._selectionParameters?.getSelectedProjectsAsync(this.terminal)) ??
       new Set(this.rushConfiguration.projects);
+
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      false
+    );
 
     return {
       debug: this.parser.isDebug,
@@ -63,16 +79,21 @@ export class InstallAction extends BaseInstallAction {
       offline: this._offlineParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
+      variant,
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
       selectedProjects,
       pnpmFilterArgumentValues:
-        (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this._terminal)) ?? [],
+        (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this.terminal)) ?? [],
       checkOnly: this._checkOnlyParameter.value,
-      beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
-      terminal: this._terminal
+      resolutionOnly: this._resolutionOnlyParameter?.value,
+      beforeInstallAsync: (subspace: Subspace) =>
+        this.rushSession.hooks.beforeInstall.promise(this, subspace, variant),
+      afterInstallAsync: (subspace: Subspace) =>
+        this.rushSession.hooks.afterInstall.promise(this, subspace, variant),
+      terminal: this.terminal
     };
   }
 }

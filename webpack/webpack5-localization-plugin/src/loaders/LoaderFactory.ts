@@ -8,7 +8,7 @@ import type { ILocalizationFile } from '@rushstack/localization-utilities';
 import { getPluginInstance, type LocalizationPlugin } from '../LocalizationPlugin';
 
 export interface IBaseLocLoaderOptions {
-  // Nothing
+  ignoreString?: (key: string) => boolean;
 }
 
 export function createLoader<T extends IBaseLocLoaderOptions>(

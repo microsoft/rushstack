@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CLI Tool Tests should display help for "lockfile-explorer --help" 1`] = `
+"usage: lockfile-explorer [-h] [-d] [--subspace SUBSPACE_NAME]
+
+Lockfile Explorer is a desktop app for investigating and solving version 
+conflicts in a PNPM workspace.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -d, --debug           Show the full call stack if an error occurs while 
+                        executing the tool
+  --subspace SUBSPACE_NAME
+                        Specifies an individual Rush subspace to check. The 
+                        default value is \\"default\\".
+
+[1mFor detailed help about a specific command, use: lockfile-explorer 
+<command> -h[22m
+"
+`;
+
+exports[`CLI Tool Tests should display help for "lockfile-lint --help" 1`] = `
+"usage: lockfile-lint [-h] <command> ...
+
+Lockfile Lint applies configured policies to find and report dependency 
+issues in your PNPM workspace.
+
+Positional arguments:
+  <command>
+    init      Create a new lockfile-lint.json config file
+    check     Check and report dependency issues in your workspace
+
+Optional arguments:
+  -h, --help  Show this help message and exit.
+
+[1mFor detailed help about a specific command, use: lockfile-lint <command> 
+-h[22m
+"
+`;
+
+exports[`CLI Tool Tests should display help for "lockfile-lint check --help" 1`] = `
+"usage: lockfile-lint check [-h]
+
+This command applies the policies that are configured in lockfile-lint.json, 
+reporting any problems found in your PNPM workspace.
+
+Optional arguments:
+  -h, --help  Show this help message and exit.
+"
+`;
+
+exports[`CLI Tool Tests should display help for "lockfile-lint init --help" 1`] = `
+"usage: lockfile-lint init [-h]
+
+This command initializes a new lockfile-lint.json config file. The created 
+template file includes source code comments that document the settings.
+
+Optional arguments:
+  -h, --help  Show this help message and exit.
+"
+`;

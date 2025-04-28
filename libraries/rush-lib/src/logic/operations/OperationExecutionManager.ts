@@ -12,26 +12,24 @@ import {
 import { StreamCollator, type CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 
-import {
-  AsyncOperationQueue,
-  type IOperationIteratorResult,
-  type IOperationSortFunction,
-  UNASSIGNED_OPERATION
-} from './AsyncOperationQueue';
+import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { type IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import type { IExecutionResult } from './IOperationExecutionResult';
+import type { IEnvironment } from '../../utilities/Utilities';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
   debugMode: boolean;
   parallelism: number;
-  changedProjectsOnly: boolean;
+  inputsSnapshot?: IInputsSnapshot;
   destination?: TerminalWritable;
 
   beforeExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
   afterExecuteOperationAsync?: (operation: OperationExecutionRecord) => Promise<void>;
+  createEnvironmentForOperation?: (operation: OperationExecutionRecord) => IEnvironment;
   onOperationStatusChangedAsync?: (record: OperationExecutionRecord) => void;
   beforeExecuteOperationsAsync?: (records: Map<Operation, OperationExecutionRecord>) => Promise<void>;
 }
@@ -49,13 +47,24 @@ const prioritySort: IOperationSortFunction = (
 };
 
 /**
+ * Sorts operations lexicographically by their name.
+ * @param a - The first operation to compare
+ * @param b - The second operation to compare
+ * @returns A comparison result: -1 if a < b, 0 if a === b, 1 if a > b
+ */
+function sortOperationsByName(a: Operation, b: Operation): number {
+  const aName: string = a.name;
+  const bName: string = b.name;
+  return aName === bName ? 0 : aName < bName ? -1 : 1;
+}
+
+/**
  * A class which manages the execution of a set of tasks with interdependencies.
  * Initially, and at the end of each task execution, all unblocked tasks
  * are added to a ready queue which is then executed. This is done continually until all
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class OperationExecutionManager {
-  private readonly _changedProjectsOnly: boolean;
   private readonly _executionRecords: Map<Operation, OperationExecutionRecord>;
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
@@ -75,6 +84,7 @@ export class OperationExecutionManager {
   private readonly _beforeExecuteOperations?: (
     records: Map<Operation, OperationExecutionRecord>
   ) => Promise<void>;
+  private readonly _createEnvironmentForOperation?: (operation: OperationExecutionRecord) => IEnvironment;
 
   // Variables for current status
   private _hasAnyFailures: boolean;
@@ -87,23 +97,29 @@ export class OperationExecutionManager {
       quietMode,
       debugMode,
       parallelism,
-      changedProjectsOnly,
+      inputsSnapshot,
       beforeExecuteOperationAsync: beforeExecuteOperation,
       afterExecuteOperationAsync: afterExecuteOperation,
       onOperationStatusChangedAsync: onOperationStatusChanged,
-      beforeExecuteOperationsAsync: beforeExecuteOperations
+      beforeExecuteOperationsAsync: beforeExecuteOperations,
+      createEnvironmentForOperation
     } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
-    this._changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
 
     this._beforeExecuteOperation = beforeExecuteOperation;
     this._afterExecuteOperation = afterExecuteOperation;
     this._beforeExecuteOperations = beforeExecuteOperations;
-    this._onOperationStatusChanged = onOperationStatusChanged;
+    this._createEnvironmentForOperation = createEnvironmentForOperation;
+    this._onOperationStatusChanged = (record: OperationExecutionRecord) => {
+      if (record.status === OperationStatus.Ready) {
+        this._executionQueue.assignOperations();
+      }
+      onOperationStatusChanged?.(record);
+    };
 
     // TERMINAL PIPELINE:
     //
@@ -124,37 +140,49 @@ export class OperationExecutionManager {
     // Convert the developer graph to the mutable execution graph
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
-      onOperationStatusChanged,
+      onOperationStatusChanged: this._onOperationStatusChanged,
+      createEnvironment: this._createEnvironmentForOperation,
+      inputsSnapshot,
       debugMode,
       quietMode
     };
 
+    // Sort the operations by name to ensure consistency and readability.
+    const sortedOperations: Operation[] = Array.from(operations).sort(sortOperationsByName);
+
     let totalOperations: number = 0;
     const executionRecords: Map<Operation, OperationExecutionRecord> = (this._executionRecords = new Map());
-    for (const operation of operations) {
+    for (const operation of sortedOperations) {
       const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(
         operation,
         executionRecordContext
       );
 
       executionRecords.set(operation, executionRecord);
-      if (!executionRecord.runner.silent) {
+      if (!executionRecord.silent) {
         // Only count non-silent operations
         totalOperations++;
       }
     }
     this._totalOperations = totalOperations;
 
-    for (const [operation, consumer] of executionRecords) {
+    for (const [operation, record] of executionRecords) {
       for (const dependency of operation.dependencies) {
         const dependencyRecord: OperationExecutionRecord | undefined = executionRecords.get(dependency);
         if (!dependencyRecord) {
           throw new Error(
-            `Operation "${consumer.name}" declares a dependency on operation "${dependency.name}" that is not in the set of operations to execute.`
+            `Operation "${record.name}" declares a dependency on operation "${dependency.name}" that is not in the set of operations to execute.`
           );
         }
-        consumer.dependencies.add(dependencyRecord);
-        dependencyRecord.consumers.add(consumer);
+        record.dependencies.add(dependencyRecord);
+        dependencyRecord.consumers.add(record);
+      }
+    }
+
+    // Ensure we compute the compute the state hashes for all operations before the runtime graph potentially mutates.
+    if (inputsSnapshot) {
+      for (const record of executionRecords.values()) {
+        record.getStateHash();
       }
     }
 
@@ -212,7 +240,7 @@ export class OperationExecutionManager {
       this._terminal.writeStdoutLine(`Selected ${totalOperations} operation${plural}:`);
       const nonSilentOperations: string[] = [];
       for (const record of this._executionRecords.values()) {
-        if (!record.runner.silent) {
+        if (!record.silent) {
           nonSilentOperations.push(record.name);
         }
       }
@@ -252,30 +280,11 @@ export class OperationExecutionManager {
 
     await Async.forEachAsync(
       this._executionQueue,
-      async (operation: IOperationIteratorResult) => {
-        let record: OperationExecutionRecord | undefined;
-        /**
-         * If the operation is UNASSIGNED_OPERATION, it means that the queue is not able to assign a operation.
-         * This happens when some operations run remotely. So, we should try to get a remote executing operation
-         * from the queue manually here.
-         */
-        if (operation.status === UNASSIGNED_OPERATION) {
-          // Pause for a few time
-          await Async.sleepAsync(5000);
-          record = this._executionQueue.tryGetRemoteExecutingOperation();
-        } else {
-          record = operation;
-        }
-
-        if (!record) {
-          // Fail to assign a operation, start over again
-          return;
-        } else {
-          await record.executeAsync({
-            onStart: onOperationStartAsync,
-            onResult: onOperationCompleteAsync
-          });
-        }
+      async (record: OperationExecutionRecord) => {
+        await record.executeAsync({
+          onStart: onOperationStartAsync,
+          onResult: onOperationCompleteAsync
+        });
       },
       {
         concurrency: maxParallelism,
@@ -308,10 +317,12 @@ export class OperationExecutionManager {
     if (message) {
       // This creates the writer, so don't do this until needed
       record.collatedWriter.terminal.writeStderrLine(message);
-      // Ensure that the error message, if present, shows up in the summary
+      // Ensure that the summary isn't blank if we have an error message
+      // If the summary already contains max lines of stderr, this will get dropped, so we hope those lines
+      // are more useful than the final exit code.
       record.stdioSummarizer.writeChunk({
         text: `${message}\n`,
-        kind: TerminalChunkKind.Stderr
+        kind: TerminalChunkKind.Stdout
       });
     }
   }
@@ -320,9 +331,7 @@ export class OperationExecutionManager {
    * Handles the result of the operation and propagates any relevant effects.
    */
   private _onOperationComplete(record: OperationExecutionRecord): void {
-    const { runner, name, status } = record;
-
-    const silent: boolean = runner.silent;
+    const { runner, name, status, silent } = record;
 
     switch (status) {
       /**
@@ -343,13 +352,13 @@ export class OperationExecutionManager {
             // Now that we have the concept of architectural no-ops, we could implement this by replacing
             // {blockedRecord.runner} with a no-op that sets status to Blocked and logs the blocking
             // operations. However, the existing behavior is a bit simpler, so keeping that for now.
-            if (!blockedRecord.runner.silent) {
+            if (!blockedRecord.silent) {
               terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
             }
             blockedRecord.status = OperationStatus.Blocked;
 
             this._executionQueue.complete(blockedRecord);
-            if (!blockedRecord.runner.silent) {
+            if (!blockedRecord.silent) {
               // Only increment the count if the operation is not silent to avoid confusing the user.
               // The displayed total is the count of non-silent operations.
               this._completedOperations++;
@@ -421,11 +430,10 @@ export class OperationExecutionManager {
       }
     }
 
-    if (record.status !== OperationStatus.RemoteExecuting) {
+    if (record.isTerminal) {
       // If the operation was not remote, then we can notify queue that it is complete
       this._executionQueue.complete(record);
     } else {
-      // Attempt to requeue other operations if the operation was remote
       this._executionQueue.assignOperations();
     }
   }

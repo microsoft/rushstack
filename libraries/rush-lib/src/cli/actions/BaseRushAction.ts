@@ -5,11 +5,11 @@ import * as path from 'path';
 
 import { CommandLineAction, type ICommandLineActionOptions } from '@rushstack/ts-command-line';
 import { LockFile } from '@rushstack/node-core-library';
-import { Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
-import { RushCommandLineParser } from './../RushCommandLineParser';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { RushSession } from '../../pluginFramework/RushSession';
@@ -38,45 +38,44 @@ export interface IBaseRushActionOptions extends ICommandLineActionOptions {
 export abstract class BaseConfiglessRushAction extends CommandLineAction implements IRushCommand {
   private _safeForSimultaneousRushProcesses: boolean;
 
-  protected get rushConfiguration(): RushConfiguration | undefined {
-    return this.parser.rushConfiguration;
-  }
-
-  protected get rushSession(): RushSession {
-    return this.parser.rushSession;
-  }
-
-  protected get rushGlobalFolder(): RushGlobalFolder {
-    return this.parser.rushGlobalFolder;
-  }
-
+  protected readonly rushConfiguration: RushConfiguration | undefined;
+  protected readonly terminal: ITerminal;
+  protected readonly rushSession: RushSession;
+  protected readonly rushGlobalFolder: RushGlobalFolder;
   protected readonly parser: RushCommandLineParser;
 
   public constructor(options: IBaseRushActionOptions) {
     super(options);
 
-    this.parser = options.parser;
-    this._safeForSimultaneousRushProcesses = !!options.safeForSimultaneousRushProcesses;
+    const { parser, safeForSimultaneousRushProcesses } = options;
+    this.parser = parser;
+    const { rushConfiguration, terminal, rushSession, rushGlobalFolder } = parser;
+    this._safeForSimultaneousRushProcesses = !!safeForSimultaneousRushProcesses;
+    this.rushConfiguration = rushConfiguration;
+    this.terminal = terminal;
+    this.rushSession = rushSession;
+    this.rushGlobalFolder = rushGlobalFolder;
   }
 
-  protected onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     this._ensureEnvironment();
 
     if (this.rushConfiguration) {
       if (!this._safeForSimultaneousRushProcesses) {
         if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-          // eslint-disable-next-line no-console
-          console.log(Colorize.red(`Another Rush command is already running in this repository.`));
+          this.terminal.writeLine(
+            Colorize.red(`Another Rush command is already running in this repository.`)
+          );
           process.exit(1);
         }
       }
     }
 
     if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
-      // eslint-disable-next-line no-console
-      console.log(`Starting "rush ${this.actionName}"\n`);
+      this.terminal.write(`Starting "rush ${this.actionName}"\n`);
     }
-    return this.runAsync();
+
+    return await this.runAsync();
   }
 
   /**
@@ -113,11 +112,9 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     return this._eventHooksManager;
   }
 
-  protected get rushConfiguration(): RushConfiguration {
-    return super.rushConfiguration!;
-  }
+  protected readonly rushConfiguration!: RushConfiguration;
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     if (!this.rushConfiguration) {
       throw Utilities.getRushConfigNotFoundError();
     }
@@ -134,7 +131,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
       await sessionHooks.initialize.promise(this);
     }
 
-    return super.onExecute();
+    return super.onExecuteAsync();
   }
 
   /**

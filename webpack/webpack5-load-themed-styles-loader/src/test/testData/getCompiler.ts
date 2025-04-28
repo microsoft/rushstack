@@ -3,9 +3,9 @@
 
 import path from 'path';
 import webpack from 'webpack';
-import type { Compiler, Stats } from 'webpack';
-import { createFsFromVolume, Volume } from 'memfs';
-import type { ILoadThemedStylesLoaderOptions } from '../..';
+import type { Compiler, OutputFileSystem, Stats } from 'webpack';
+import { Volume } from 'memfs';
+import type { ILoadThemedStylesLoaderOptions } from '../../index.js';
 
 // webpack5-loader-load-themed-styles/lib/LoadThemedStylesLoader.js
 const LOADER_PATH: string = path.resolve(__dirname, '../../index.js');
@@ -43,7 +43,7 @@ export default function getCompiler(
     }
   });
 
-  compiler.outputFileSystem = createFsFromVolume(new Volume());
+  compiler.outputFileSystem = new Volume() as unknown as OutputFileSystem;
   compiler.outputFileSystem.join = path.join.bind(path);
 
   return new Promise((resolve, reject) => {

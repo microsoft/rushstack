@@ -7,14 +7,11 @@
   "type": "module",
   "types": "dist/api-extractor-d-mts-test.d.mts",
   "scripts": {
-    "build": "node build.cjs",
-    "_phase:build": "node build.cjs"
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "workspace:*",
-    "@types/jest": "29.2.5",
-    "@types/node": "18.17.15",
-    "fs-extra": "~7.0.1",
-    "typescript": "~5.4.2"
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*"
   }
 }

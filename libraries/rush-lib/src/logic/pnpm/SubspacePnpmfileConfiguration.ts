@@ -25,7 +25,8 @@ export class SubspacePnpmfileConfiguration {
    */
   public static async writeCommonTempSubspaceGlobalPnpmfileAsync(
     rushConfiguration: RushConfiguration,
-    subspace: Subspace
+    subspace: Subspace,
+    variant: string | undefined
   ): Promise<void> {
     if (rushConfiguration.packageManager !== 'pnpm') {
       throw new Error(
@@ -33,7 +34,7 @@ export class SubspacePnpmfileConfiguration {
       );
     }
 
-    const targetDir: string = subspace.getSubspaceTempFolder();
+    const targetDir: string = subspace.getSubspaceTempFolderPath();
     const subspaceGlobalPnpmfilePath: string = path.join(targetDir, RushConstants.pnpmfileGlobalFilename);
 
     // Write the shim itself
@@ -43,7 +44,7 @@ export class SubspacePnpmfileConfiguration {
     });
 
     const subspaceGlobalPnpmfileShimSettings: ISubspacePnpmfileShimSettings =
-      SubspacePnpmfileConfiguration._getSubspacePnpmfileShimSettings(rushConfiguration, subspace);
+      SubspacePnpmfileConfiguration.getSubspacePnpmfileShimSettings(rushConfiguration, subspace, variant);
 
     // Write the settings file used by the shim
     await JsonFile.saveAsync(
@@ -55,9 +56,10 @@ export class SubspacePnpmfileConfiguration {
     );
   }
 
-  private static _getSubspacePnpmfileShimSettings(
+  public static getSubspacePnpmfileShimSettings(
     rushConfiguration: RushConfiguration,
-    subspace: Subspace
+    subspace: Subspace,
+    variant: string | undefined
   ): ISubspacePnpmfileShimSettings {
     const workspaceProjects: Record<string, IWorkspaceProjectInfo> = {};
     const subspaceProjects: Record<string, IWorkspaceProjectInfo> = {};
@@ -85,7 +87,7 @@ export class SubspacePnpmfileConfiguration {
 
     // common/config/subspaces/<subspace_name>/.pnpmfile.cjs
     const userPnpmfilePath: string = path.join(
-      subspace.getSubspaceConfigFolder(),
+      subspace.getVariantDependentSubspaceConfigFolderPath(variant),
       (rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
     );
     if (FileSystem.exists(userPnpmfilePath)) {

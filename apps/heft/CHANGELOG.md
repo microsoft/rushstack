@@ -1,6 +1,256 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Apr 2025 00:11:32 GMT and should not be manually modified.
+
+## 0.73.3
+Fri, 25 Apr 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.73.2
+Mon, 21 Apr 2025 22:24:25 GMT
+
+_Version update only_
+
+## 0.73.1
+Thu, 17 Apr 2025 00:11:21 GMT
+
+### Patches
+
+- Update documentation for `extends`
+
+## 0.73.0
+Tue, 15 Apr 2025 15:11:57 GMT
+
+### Minor changes
+
+- Add `globAsync` to task run options.
+
+## 0.72.0
+Wed, 09 Apr 2025 00:11:02 GMT
+
+### Minor changes
+
+- Add a method `tryLoadProjectConfigurationFileAsync<TConfigFile>(options, terminal)` to `HeftConfiguration`.
+
+## 0.71.2
+Fri, 04 Apr 2025 18:34:35 GMT
+
+_Version update only_
+
+## 0.71.1
+Tue, 25 Mar 2025 15:11:15 GMT
+
+_Version update only_
+
+## 0.71.0
+Wed, 12 Mar 2025 22:41:36 GMT
+
+### Minor changes
+
+- Add a `numberOfCores` property to `HeftConfiguration`.
+
+## 0.70.1
+Wed, 12 Mar 2025 00:11:31 GMT
+
+### Patches
+
+- Revert `useNodeJSResolver: true` to deal with plugins that have an `exports` field that doesn't contain `./package.json`.
+
+## 0.70.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Use `useNodeJSResolver: true` in `Import.resolvePackage` calls.
+
+## 0.69.3
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.69.2
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.69.1
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.69.0
+Wed, 26 Feb 2025 16:11:11 GMT
+
+### Minor changes
+
+- Expose `watchFs` on the incremental run options for tasks to give more flexibility when having Heft perform file watching than only invoking globs directly.
+
+## 0.68.18
+Sat, 22 Feb 2025 01:11:11 GMT
+
+_Version update only_
+
+## 0.68.17
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.68.16
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.68.15
+Thu, 30 Jan 2025 16:10:36 GMT
+
+### Patches
+
+- Prefer `os.availableParallelism()` to `os.cpus().length`.
+
+## 0.68.14
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.68.13
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 0.68.12
+Tue, 07 Jan 2025 22:17:32 GMT
+
+_Version update only_
+
+## 0.68.11
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.68.10
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.68.9
+Tue, 03 Dec 2024 16:11:07 GMT
+
+_Version update only_
+
+## 0.68.8
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.68.7
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.68.6
+Thu, 24 Oct 2024 00:15:47 GMT
+
+_Version update only_
+
+## 0.68.5
+Mon, 21 Oct 2024 18:50:09 GMT
+
+### Patches
+
+- Remove usage of true-case-path in favor of manually adjusting the drive letter casing to avoid confusing file system tracing tools with unnecessary directory enumerations.
+
+## 0.68.4
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.68.3
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.68.2
+Wed, 02 Oct 2024 00:11:19 GMT
+
+### Patches
+
+- Ensure `configHash` for file copy incremental cache file is portable.
+
+## 0.68.1
+Tue, 01 Oct 2024 00:11:28 GMT
+
+### Patches
+
+- Include all previous `inputFileVersions` in incremental copy files cache file during watch mode. Fix incorrect serialization of cache file for file copy.
+
+## 0.68.0
+Mon, 30 Sep 2024 15:12:19 GMT
+
+### Minor changes
+
+- Update file copy logic to use an incremental cache file in the temp directory for the current task to avoid unnecessary file writes.
+
+## 0.67.2
+Fri, 13 Sep 2024 00:11:42 GMT
+
+_Version update only_
+
+## 0.67.1
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.67.0
+Wed, 21 Aug 2024 05:43:04 GMT
+
+### Minor changes
+
+- Add a `slashNormalizedBuildFolderPath` property to `HeftConfiguration`.
+
+## 0.66.26
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.66.25
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.66.24
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.66.23
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.66.22
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.66.21
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.66.20
+Tue, 16 Jul 2024 00:36:21 GMT
+
+### Patches
+
+- Update schemas/templates/heft.json to reflect new settings
+
+## 0.66.19
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.66.18
 Mon, 03 Jun 2024 23:43:15 GMT

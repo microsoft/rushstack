@@ -1,6 +1,85 @@
 # Change Log - @rushstack/operation-graph
 
-This log was last generated on Thu, 30 May 2024 00:13:05 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Mar 2025 15:11:15 GMT and should not be manually modified.
+
+## 0.2.40
+Tue, 25 Mar 2025 15:11:15 GMT
+
+_Version update only_
+
+## 0.2.39
+Tue, 11 Mar 2025 02:12:33 GMT
+
+_Version update only_
+
+## 0.2.38
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.2.37
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.2.36
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 0.2.35
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.2.34
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.2.33
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.2.32
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.2.31
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.2.30
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.2.29
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.2.28
+Wed, 17 Jul 2024 06:55:10 GMT
+
+_Version update only_
+
+## 0.2.27
+Wed, 17 Jul 2024 00:11:19 GMT
+
+### Patches
+
+- Handle errors when sending IPC messages to host.
+
+## 0.2.26
+Tue, 16 Jul 2024 00:36:21 GMT
+
+_Version update only_
 
 ## 0.2.25
 Thu, 30 May 2024 00:13:05 GMT

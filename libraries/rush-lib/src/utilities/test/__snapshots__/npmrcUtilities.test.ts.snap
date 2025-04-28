@@ -1,0 +1,225 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a a variable without a fallback 1`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a a variable without a fallback 2`] = `
+Array [
+  "var1=\${foo}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable with a fallback 1`] = `
+Array [
+  "var1=\${foo-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable with a fallback 2`] = `
+Array [
+  "var1=\${foo-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable with a fallback 3`] = `
+Array [
+  "var1=\${foo:-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable with a fallback 4`] = `
+Array [
+  "var1=\${foo:-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable with a fallback 5`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo}-\${bar}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable with a fallback 6`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo}-\${bar}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable with a fallback 7`] = `
+Array [
+  "var1=\${foo}-\${bar}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports a variable with a fallback 8`] = `
+Array [
+  "var1=\${foo:-fallback_value}-\${bar-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports malformed lines 1`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo_fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports malformed lines 2`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo:fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports malformed lines 3`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo:_fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports malformed lines 4`] = `
+Array [
+  "var1=\${foo",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports multiple lines 1`] = `
+Array [
+  "var1=\${foo}",
+  "; MISSING ENVIRONMENT VARIABLE: var2=\${bar}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports multiple lines 2`] = `
+Array [
+  "var1=\${foo}",
+  "var2=\${bar}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports multiple lines 3`] = `
+Array [
+  "var1=\${foo}",
+  "var2=\${bar-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines With support for env var fallback syntax supports multiple lines 4`] = `
+Array [
+  "var1=\${foo:-fallback_value}",
+  "var2=\${bar-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a a variable without a fallback 1`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a a variable without a fallback 2`] = `
+Array [
+  "var1=\${foo}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable with a fallback 1`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable with a fallback 2`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable with a fallback 3`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo:-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable with a fallback 4`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo:-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable with a fallback 5`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo}-\${bar}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable with a fallback 6`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo}-\${bar}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable with a fallback 7`] = `
+Array [
+  "var1=\${foo}-\${bar}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports a variable with a fallback 8`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo:-fallback_value}-\${bar-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports malformed lines 1`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo_fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports malformed lines 2`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo:fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports malformed lines 3`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo:_fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports malformed lines 4`] = `
+Array [
+  "var1=\${foo",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports multiple lines 1`] = `
+Array [
+  "var1=\${foo}",
+  "; MISSING ENVIRONMENT VARIABLE: var2=\${bar}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports multiple lines 2`] = `
+Array [
+  "var1=\${foo}",
+  "var2=\${bar}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports multiple lines 3`] = `
+Array [
+  "var1=\${foo}",
+  "; MISSING ENVIRONMENT VARIABLE: var2=\${bar-fallback_value}",
+]
+`;
+
+exports[`npmrcUtilities trimNpmrcFileLines Without support for env var fallback syntax supports multiple lines 4`] = `
+Array [
+  "; MISSING ENVIRONMENT VARIABLE: var1=\${foo:-fallback_value}",
+  "; MISSING ENVIRONMENT VARIABLE: var2=\${bar-fallback_value}",
+]
+`;

@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import { PnpmOptionsConfiguration } from '../PnpmOptionsConfiguration';
+import { TestUtilities } from '@rushstack/heft-config-file';
 
 const fakeCommonTempFolder: string = path.join(__dirname, 'common', 'temp');
 
@@ -31,14 +32,14 @@ describe(PnpmOptionsConfiguration.name, () => {
       fakeCommonTempFolder
     );
 
-    expect(pnpmConfiguration.globalOverrides).toEqual({
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalOverrides)).toEqual({
       foo: '^1.0.0',
       quux: 'npm:@myorg/quux@^1.0.0',
       'bar@^2.1.0': '3.0.0',
       'qar@1>zoo': '2'
     });
 
-    expect(pnpmConfiguration.environmentVariables).toEqual({
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.environmentVariables)).toEqual({
       NODE_OPTIONS: {
         value: '--max-old-space-size=4096',
         override: false
@@ -52,7 +53,7 @@ describe(PnpmOptionsConfiguration.name, () => {
       fakeCommonTempFolder
     );
 
-    expect(pnpmConfiguration.globalPackageExtensions).toEqual({
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalPackageExtensions)).toEqual({
       'react-redux': {
         peerDependencies: {
           'react-dom': '*'
@@ -67,6 +68,9 @@ describe(PnpmOptionsConfiguration.name, () => {
       fakeCommonTempFolder
     );
 
-    expect(pnpmConfiguration.globalNeverBuiltDependencies).toEqual(['fsevents', 'level']);
+    expect(TestUtilities.stripAnnotations(pnpmConfiguration.globalNeverBuiltDependencies)).toEqual([
+      'fsevents',
+      'level'
+    ]);
   });
 });

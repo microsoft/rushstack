@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createBase32Hash hashes: (eslint@8.57.0)(typescript@5.4.5) 1`] = `"2nt7x5y4npubskzl4nixybkqqi"`;
+
+exports[`createBase32Hash hashes: a 1`] = `"btaxlooa6g3kqmodthrgs5zgme"`;
+
+exports[`createBase32Hash hashes: abracadabra 1`] = `"5rjiprc7bzyoyiwvf2f4x3vwia"`;
+
+exports[`depPathToFilename formats: /@some/package@1.2.3(@azure/msal-browser@2.28.1)(@azure/msal-common@6.4.0)(@fluentui/merge-styles@8.6.2)(@fluentui/react@8.117.5)(@fluentui/theme@2.6.45)(@fluentui/utilities@8.15.2)(chart.js@2.9.4)(lodash@4.17.21)(moment@2.29.4)(prop-types@15.8.1)(react-dnd-html5-backend@14.1.0)(react-dnd@14.0.5)(react-dom@17.0.1)(react-intersection-observer@8.34.0)(react@17.0.1) 1`] = `"@some+package@1.2.3_@azure+msal-browser@2.28.1_@azure+msal-common@6.4.0_@fluentui+merge-style_yt7yh6tpppbzu7nx3lzx3f3ife"`;
+
+exports[`depPathToFilename formats: /@storybook/core@6.5.15(@storybook/builder-webpack5@6.5.15)(@storybook/manager-webpack5@6.5.15)(eslint@8.57.0)(react-dom@17.0.1)(react@17.0.1)(typescript@5.3.3)(webpack@5.88.1) 1`] = `"@storybook+core@6.5.15_@storybook+builder-webpack5@6.5.15_@storybook+manager-webpack5@6.5.15__wnqw6tyxzeiksxiymflshxscdq"`;
+
+exports[`depPathToFilename formats: /@typescript-eslint/utils@6.19.1(eslint@7.7.0)(typescript@5.4.2) 1`] = `"@typescript-eslint+utils@6.19.1_eslint@7.7.0_typescript@5.4.2"`;
+
+exports[`depPathToFilename formats: /autoprefixer@9.8.8 1`] = `"autoprefixer@9.8.8"`;
+
+exports[`depPathToFilename formats: /autoprefixer@10.4.18(postcss@8.4.36) 1`] = `"autoprefixer@10.4.18_postcss@8.4.36"`;
+
+exports[`depPathToFilename formats: /react-transition-group@4.4.5(react-dom@17.0.2)(react@17.0.2) 1`] = `"react-transition-group@4.4.5_react-dom@17.0.2_react@17.0.2"`;
+
+exports[`depPathToFilename formats: file:../../../libraries/ts-command-line(@types/node@18.17.15) 1`] = `"file+..+..+..+libraries+ts-command-line_@types+node@18.17.15"`;
+
+exports[`depPathToFilename formats: file:../../../rigs/local-node-rig 1`] = `"file+..+..+..+rigs+local-node-rig"`;
+
+exports[`getDescriptionFileRootFromKey parses: "/@some/package@1.2.3(@azure/msal-browser@2.28.1)(@azure/msal-common@6.4.0)(@fluentui/merge-styles@8.6.2)(@fluentui/react@8.117.5)(@fluentui/theme@2.6.45)(@fluentui/utilities@8.15.2)(chart.js@2.9.4)(lodash@4.17.21)(moment@2.29.4)(prop-types@15.8.1)(react-dnd-html5-backend@14.1.0)(react-dnd@14.0.5)(react-dom@17.0.1)(react-intersection-observer@8.34.0)(react@17.0.1)",undefined 1`] = `"/$/node_modules/.pnpm/@some+package@1.2.3_@azure+msal-browser@2.28.1_@azure+msal-common@6.4.0_@fluentui+merge-style_yt7yh6tpppbzu7nx3lzx3f3ife/node_modules/@some/package"`;
+
+exports[`getDescriptionFileRootFromKey parses: "/@storybook/core@6.5.15(@storybook/builder-webpack5@6.5.15)(@storybook/manager-webpack5@6.5.15)(eslint@8.57.0)(react-dom@17.0.1)(react@17.0.1)(typescript@5.3.3)(webpack@5.88.1)",undefined 1`] = `"/$/node_modules/.pnpm/@storybook+core@6.5.15_@storybook+builder-webpack5@6.5.15_@storybook+manager-webpack5@6.5.15__wnqw6tyxzeiksxiymflshxscdq/node_modules/@storybook/core"`;
+
+exports[`getDescriptionFileRootFromKey parses: "/@typescript-eslint/utils@6.19.1(eslint@7.7.0)(typescript@5.4.2)",undefined 1`] = `"/$/node_modules/.pnpm/@typescript-eslint+utils@6.19.1_eslint@7.7.0_typescript@5.4.2/node_modules/@typescript-eslint/utils"`;
+
+exports[`getDescriptionFileRootFromKey parses: "/autoprefixer@9.8.8",undefined 1`] = `"/$/node_modules/.pnpm/autoprefixer@9.8.8/node_modules/autoprefixer"`;
+
+exports[`getDescriptionFileRootFromKey parses: "/autoprefixer@10.4.18(postcss@8.4.36)",undefined 1`] = `"/$/node_modules/.pnpm/autoprefixer@10.4.18_postcss@8.4.36/node_modules/autoprefixer"`;
+
+exports[`getDescriptionFileRootFromKey parses: "/react-transition-group@4.4.5(react-dom@17.0.2)(react@17.0.2)",undefined 1`] = `"/$/node_modules/.pnpm/react-transition-group@4.4.5_react-dom@17.0.2_react@17.0.2/node_modules/react-transition-group"`;
+
+exports[`getDescriptionFileRootFromKey parses: "file:../../../libraries/ts-command-line(@types/node@18.17.15)",@rushstack/ts-command-line 1`] = `"/$/node_modules/.pnpm/file+..+..+..+libraries+ts-command-line_@types+node@18.17.15/node_modules/@rushstack/ts-command-line"`;
+
+exports[`getDescriptionFileRootFromKey parses: "file:../../../rigs/local-node-rig",local-node-rig 1`] = `"/$/node_modules/.pnpm/file+..+..+..+rigs+local-node-rig/node_modules/local-node-rig"`;

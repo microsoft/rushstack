@@ -1,6 +1,246 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Apr 2025 00:11:32 GMT and should not be manually modified.
+
+## 0.14.36
+Fri, 25 Apr 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.14.35
+Mon, 21 Apr 2025 22:24:25 GMT
+
+_Version update only_
+
+## 0.14.34
+Thu, 17 Apr 2025 00:11:21 GMT
+
+_Version update only_
+
+## 0.14.33
+Tue, 15 Apr 2025 15:11:58 GMT
+
+_Version update only_
+
+## 0.14.32
+Wed, 09 Apr 2025 00:11:03 GMT
+
+_Version update only_
+
+## 0.14.31
+Fri, 04 Apr 2025 18:34:35 GMT
+
+_Version update only_
+
+## 0.14.30
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 0.14.29
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 0.14.28
+Wed, 12 Mar 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.14.27
+Tue, 11 Mar 2025 02:12:34 GMT
+
+_Version update only_
+
+## 0.14.26
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.14.25
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.14.24
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.14.23
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 0.14.22
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.14.21
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.14.20
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.14.19
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 0.14.18
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.14.17
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 0.14.16
+Tue, 07 Jan 2025 22:17:32 GMT
+
+_Version update only_
+
+## 0.14.15
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.14.14
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.14.13
+Tue, 03 Dec 2024 16:11:08 GMT
+
+_Version update only_
+
+## 0.14.12
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.14.11
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.14.10
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.14.9
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.14.8
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.14.7
+Tue, 15 Oct 2024 00:12:32 GMT
+
+_Version update only_
+
+## 0.14.6
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.14.5
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.14.4
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.14.3
+Sat, 28 Sep 2024 00:11:41 GMT
+
+### Patches
+
+- Fix reference to terminal documentation in README
+
+## 0.14.2
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.14.1
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.14.0
+Mon, 26 Aug 2024 02:00:11 GMT
+
+### Minor changes
+
+- Add a `valueDocumentationComment` option to `exportAsDefault` that allows a documentation comment to be generated for the exported value.
+- Rename the `documentationComment` property in the `exportAsDefault` value to `interfaceDocumentationComment`.
+
+## 0.13.0
+Wed, 21 Aug 2024 05:43:04 GMT
+
+### Minor changes
+
+- Expand the `exportAsDefault` option for `StringValuesTypingsGenerator` to take an object with the following properties: `interfaceName` and `documentationComment`. Note that the `exportAsDefaultInterfaceName` option has been deprecated.
+- Add an optional `exportAsDefault` property to the return value of `parseAndGenerateTypings` that overrides options provided by the same property in the `StringValuesTypingsGenerator`'s options object.
+
+## 0.12.63
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.12.62
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.12.61
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.12.60
+Wed, 24 Jul 2024 00:12:15 GMT
+
+_Version update only_
+
+## 0.12.59
+Wed, 17 Jul 2024 06:55:10 GMT
+
+_Version update only_
+
+## 0.12.58
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.12.57
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 0.12.56
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.12.55
 Mon, 03 Jun 2024 23:43:15 GMT

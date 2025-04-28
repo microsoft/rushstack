@@ -20,7 +20,10 @@ export function getRepoChanges(currentWorkingDirectory: string, revision?: strin
 export function getRepoRoot(currentWorkingDirectory: string, gitPath?: string): string;
 
 // @beta
-export function getRepoStateAsync(rootDirectory: string, additionalRelativePathsToHash?: string[], gitPath?: string): Promise<Map<string, string>>;
+export function getRepoStateAsync(rootDirectory: string, additionalRelativePathsToHash?: string[], gitPath?: string, filterPath?: string[]): Promise<Map<string, string>>;
+
+// @beta
+export function hashFilesAsync(rootDirectory: string, filesToHash: Iterable<string> | AsyncIterable<string>, gitPath?: string): Promise<Iterable<[string, string]>>;
 
 // @beta
 export interface IFileDiffStatus {

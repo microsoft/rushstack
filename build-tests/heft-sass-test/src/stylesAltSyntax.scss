@@ -4,7 +4,7 @@
  */
 
 // Testing SCSS syntax
-$marginValue: 20px;
+$marginValue: '[theme:normalMargin, default: 20px]';
 
 .label {
   margin-bottom: $marginValue;

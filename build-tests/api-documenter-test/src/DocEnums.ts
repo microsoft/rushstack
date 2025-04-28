@@ -53,6 +53,7 @@ export enum DocEnumNamespaceMerge {
  * Namespace that merges with enum
  * @public
  */
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace DocEnumNamespaceMerge {
   /**
    * This is a function inside of a namespace that merges with an enum.

@@ -14,6 +14,8 @@ import {
 
 import { PackageNameParsers } from './PackageNameParsers';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
+import type { RushConfiguration } from './RushConfiguration';
+import { RushConstants } from '../logic/RushConstants';
 import schemaJson from '../schemas/common-versions.schema.json';
 
 /**
@@ -49,6 +51,8 @@ interface ICommonVersionsJson {
   implicitlyPreferredVersions?: boolean;
 
   allowedAlternativeVersions?: ICommonVersionsJsonVersionsMap;
+
+  ensureConsistentVersions?: boolean;
 }
 
 /**
@@ -77,6 +81,12 @@ export class CommonVersionsConfiguration {
    * If the value is `undefined`, then the default value is `true`.
    */
   public readonly implicitlyPreferredVersions: boolean | undefined;
+
+  /**
+   * If true, then consistent version specifiers for dependencies will be enforced.
+   * I.e. "rush check" is run before some commands.
+   */
+  public readonly ensureConsistentVersions: boolean;
 
   /**
    * A table that specifies a "preferred version" for a given NPM package.  This feature is typically used
@@ -108,7 +118,11 @@ export class CommonVersionsConfiguration {
    */
   public readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
 
-  private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
+  private constructor(
+    commonVersionsJson: ICommonVersionsJson | undefined,
+    filePath: string,
+    rushConfiguration: RushConfiguration | undefined
+  ) {
     this._preferredVersions = new ProtectableMap<string, string>({
       onSet: this._onSetPreferredVersions.bind(this)
     });
@@ -124,6 +138,30 @@ export class CommonVersionsConfiguration {
       onSet: this._onSetAllowedAlternativeVersions.bind(this)
     });
     this.allowedAlternativeVersions = this._allowedAlternativeVersions.protectedView;
+
+    const subspacesFeatureEnabled: boolean | undefined = rushConfiguration?.subspacesFeatureEnabled;
+    const rushJsonEnsureConsistentVersions: boolean | undefined =
+      rushConfiguration?._ensureConsistentVersionsJsonValue;
+    const commonVersionsEnsureConsistentVersions: boolean | undefined =
+      commonVersionsJson?.ensureConsistentVersions;
+    if (subspacesFeatureEnabled && rushJsonEnsureConsistentVersions !== undefined) {
+      throw new Error(
+        `When using subspaces, the ensureConsistentVersions config is now defined in the ${RushConstants.commonVersionsFilename} file, ` +
+          `you must remove the old setting "ensureConsistentVersions" from ${RushConstants.rushJsonFilename}`
+      );
+    } else if (
+      !subspacesFeatureEnabled &&
+      rushJsonEnsureConsistentVersions !== undefined &&
+      commonVersionsEnsureConsistentVersions !== undefined
+    ) {
+      throw new Error(
+        `When the ensureConsistentVersions config is defined in the ${RushConstants.rushJsonFilename} file, ` +
+          `it cannot also be defined in the ${RushConstants.commonVersionsFilename} file`
+      );
+    }
+
+    this.ensureConsistentVersions =
+      commonVersionsEnsureConsistentVersions ?? rushJsonEnsureConsistentVersions ?? false;
 
     if (commonVersionsJson) {
       try {
@@ -146,14 +184,17 @@ export class CommonVersionsConfiguration {
    * Loads the common-versions.json data from the specified file path.
    * If the file has not been created yet, then an empty object is returned.
    */
-  public static loadFromFile(jsonFilename: string): CommonVersionsConfiguration {
+  public static loadFromFile(
+    jsonFilePath: string,
+    rushConfiguration?: RushConfiguration
+  ): CommonVersionsConfiguration {
     let commonVersionsJson: ICommonVersionsJson | undefined = undefined;
 
-    if (FileSystem.exists(jsonFilename)) {
-      commonVersionsJson = JsonFile.loadAndValidate(jsonFilename, CommonVersionsConfiguration._jsonSchema);
+    if (FileSystem.exists(jsonFilePath)) {
+      commonVersionsJson = JsonFile.loadAndValidate(jsonFilePath, CommonVersionsConfiguration._jsonSchema);
     }
 
-    return new CommonVersionsConfiguration(commonVersionsJson, jsonFilename);
+    return new CommonVersionsConfiguration(commonVersionsJson, jsonFilePath, rushConfiguration);
   }
 
   private static _deserializeTable<TValue>(

@@ -242,6 +242,13 @@ export class MockWritable extends TerminalWritable {
     reset(): void;
 }
 
+// @beta
+export class NoOpTerminalProvider implements ITerminalProvider {
+    get eolCharacter(): string;
+    get supportsColor(): boolean;
+    write(data: string, severity: TerminalProviderSeverity): void;
+}
+
 // @public
 export class NormalizeNewlinesTextRewriter extends TextRewriter {
     constructor(options: INormalizeNewlinesTextRewriterOptions);
@@ -335,7 +342,9 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     getDebugOutput(options?: IStringBufferOutputOptions): string;
     getErrorOutput(options?: IStringBufferOutputOptions): string;
     getOutput(options?: IStringBufferOutputOptions): string;
+    // @deprecated (undocumented)
     getVerbose(options?: IStringBufferOutputOptions): string;
+    getVerboseOutput(options?: IStringBufferOutputOptions): string;
     getWarningOutput(options?: IStringBufferOutputOptions): string;
     get supportsColor(): boolean;
     write(data: string, severity: TerminalProviderSeverity): void;

@@ -11,8 +11,9 @@ import type { HeftParameterManager, IHeftParameters } from './HeftParameterManag
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
-import type { WatchGlobFn } from '../plugins/FileGlobSpecifier';
+import type { GlobFn, WatchGlobFn } from '../plugins/FileGlobSpecifier';
 import { InternalError } from '@rushstack/node-core-library';
+import type { IWatchFileSystem } from '../utilities/WatchFileSystemAdapter';
 
 /**
  * The type of {@link IHeftTaskSession.parsedCommandLine}, which exposes details about the
@@ -168,6 +169,11 @@ export interface IHeftTaskRunHookOptions {
    * @beta
    */
   readonly abortSignal: AbortSignal;
+
+  /**
+   * Reads the specified globs and returns the result.
+   */
+  readonly globAsync: GlobFn;
 }
 
 /**
@@ -189,6 +195,12 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
    * If a change to the monitored files is detected, the task will be scheduled for re-execution.
    */
   readonly watchGlobAsync: WatchGlobFn;
+
+  /**
+   * Access to the file system view that powers `watchGlobAsync`.
+   * This is useful for plugins that do their own file system operations but still want to leverage Heft for watching.
+   */
+  readonly watchFs: IWatchFileSystem;
 }
 
 /**

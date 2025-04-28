@@ -24,6 +24,10 @@
 
     "booleanProp": {
       "type": "boolean"
+    },
+
+    "stringProp": {
+      "type": "string"
     }
   }
 }

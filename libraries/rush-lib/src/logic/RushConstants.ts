@@ -53,6 +53,13 @@ export class RushConstants {
   public static readonly rushTempNpmScope: '@rush-temp' = '@rush-temp';
 
   /**
+   * The folder name ("variants") under which named variant configurations for
+   * alternate dependency sets may be found.
+   * Example: `C:\MyRepo\common\config\rush\variants`
+   */
+  public static readonly rushVariantsFolderName: 'variants' = 'variants';
+
+  /**
    * The folder name ("temp") under the common folder, or under the .rush folder in each project's directory where
    * temporary files will be stored.
    * Example: `C:\MyRepo\common\temp`
@@ -95,6 +102,11 @@ export class RushConstants {
    * The filename (".modules.yaml") used by pnpm to specify configurations in the node_modules directory
    */
   public static readonly pnpmModulesFilename: '.modules.yaml' = '.modules.yaml';
+
+  /**
+   * The folder name (".pnpm") used by pnpm to store the code of the dependencies for this subspace
+   */
+  public static readonly pnpmVirtualStoreFolderName: '.pnpm' = '.pnpm';
 
   /**
    * The filename ("global-pnpmfile.cjs") used to add custom configuration to subspaces
@@ -325,4 +337,25 @@ export class RushConstants {
    * The filename for the last link flag
    */
   public static readonly lastLinkFlagFilename: 'last-link' = 'last-link';
+
+  /**
+   * The filename for the Rush alerts config file.
+   */
+  public static readonly rushAlertsConfigFilename: 'rush-alerts.json' = 'rush-alerts.json';
+
+  /**
+   * The filename for the file that tracks which variant is currently installed.
+   */
+  public static readonly currentVariantsFilename: 'current-variants.json' = 'current-variants.json';
+
+  /**
+   * The filename ("rush-hotlink-state.json") used to store information about packages connected via
+   * "rush link-package" and "rush bridge-package" commands.
+   */
+  public static readonly rushHotlinkStateFilename: 'rush-hotlink-state.json' = 'rush-hotlink-state.json';
+
+  /**
+   * The filename ("pnpm-sync.json") used to store the state of the pnpm sync command.
+   */
+  public static readonly pnpmSyncFilename: '.pnpm-sync.json' = '.pnpm-sync.json';
 }

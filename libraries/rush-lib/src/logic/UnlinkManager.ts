@@ -42,7 +42,7 @@ export class UnlinkManager {
     }
 
     await new FlagFile(
-      this._rushConfiguration.defaultSubspace.getSubspaceTempFolder(),
+      this._rushConfiguration.defaultSubspace.getSubspaceTempFolderPath(),
       RushConstants.lastLinkFlagFilename,
       {}
     ).clearAsync();

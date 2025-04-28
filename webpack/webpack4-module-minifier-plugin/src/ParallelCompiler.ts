@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { cpus } from 'os';
+import os from 'os';
 import { resolve } from 'path';
 import type { Worker } from 'worker_threads';
 
@@ -61,7 +61,7 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
   const configArray: Configuration[] = Array.isArray(rawConfig) ? rawConfig : [rawConfig];
   const configCount: number = configArray.length;
 
-  const totalCpus: number = cpus().length;
+  const totalCpus: number = os.availableParallelism?.() ?? os.cpus().length;
 
   // TODO: Use all cores if not minifying
   const {

@@ -22,6 +22,17 @@ Array [
 ]
 `;
 
+exports[`parseLocJson parses a file with raw strings 1`] = `
+Object {
+  "bar": Object {
+    "value": "Bar",
+  },
+  "foo": Object {
+    "value": "Foo",
+  },
+}
+`;
+
 exports[`parseLocJson parses a valid file 1`] = `
 Object {
   "bar": Object {
@@ -40,5 +51,9 @@ exports[`parseLocJson throws on invalid file 1`] = `
 test.loc.json
 
 Error: #/foo
-       must NOT have additional properties: baz"
+       must NOT have additional properties: baz
+Error: #/foo
+       must be string
+Error: #/foo
+       must match exactly one schema in oneOf"
 `;

@@ -5,11 +5,7 @@ import path from 'path';
 import { JsonFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
-import {
-  CommandLineConfiguration,
-  type IPhase,
-  type IPhasedCommandConfig
-} from '../../../api/CommandLineConfiguration';
+import { CommandLineConfiguration, type IPhasedCommandConfig } from '../../../api/CommandLineConfiguration';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import type { Operation } from '../Operation';
 import type { ICommandLineJson } from '../../../api/CommandLineJson';
@@ -19,20 +15,31 @@ import {
   type ICreateOperationsContext,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
-import type { RushConfigurationProject } from '../../..';
 
-interface ISerializedOperation {
-  name: string;
-  silent: boolean;
-  dependencies: string[];
+function serializeOperation(operation: Operation): string {
+  return `${operation.name} (${operation.enabled ? 'enabled' : 'disabled'}${operation.runner!.silent ? ', silent' : ''}) -> [${Array.from(
+    operation.dependencies,
+    (dep: Operation) => dep.name
+  )
+    .sort()
+    .join(', ')}]`;
 }
 
-function serializeOperation(operation: Operation): ISerializedOperation {
-  return {
-    name: operation.name!,
-    silent: operation.runner!.silent,
-    dependencies: Array.from(operation.dependencies, (dep: Operation) => dep.name!)
-  };
+function compareOperation(a: Operation, b: Operation): number {
+  if (a.enabled && !b.enabled) {
+    return -1;
+  }
+  if (!a.enabled && b.enabled) {
+    return 1;
+  }
+  return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+}
+
+function expectOperationsToMatchSnapshot(operations: Set<Operation>, name: string): void {
+  const serializedOperations: string[] = Array.from(operations)
+    .sort(compareOperation)
+    .map(serializeOperation);
+  expect(serializedOperations).toMatchSnapshot(name);
 }
 
 describe(PhasedOperationPlugin.name, () => {
@@ -46,7 +53,7 @@ describe(PhasedOperationPlugin.name, () => {
     for (const operation of operations) {
       const { associatedPhase, associatedProject } = operation;
 
-      if (associatedPhase && associatedProject && !operation.runner) {
+      if (!operation.runner) {
         const name: string = `${associatedProject.packageName} (${associatedPhase.name.slice(
           RushConstants.phaseNamePrefix.length
         )})`;
@@ -58,11 +65,22 @@ describe(PhasedOperationPlugin.name, () => {
     return operations;
   }
 
-  async function testCreateOperationsAsync(
-    phaseSelection: Set<IPhase>,
-    projectSelection: Set<RushConfigurationProject>,
-    changedProjects: Set<RushConfigurationProject>
-  ): Promise<Set<Operation>> {
+  interface ITestCreateOperationsContext {
+    phaseOriginal?: ICreateOperationsContext['phaseOriginal'];
+    phaseSelection: ICreateOperationsContext['phaseSelection'];
+    projectSelection: ICreateOperationsContext['projectSelection'];
+    projectsInUnknownState: ICreateOperationsContext['projectsInUnknownState'];
+    includePhaseDeps?: ICreateOperationsContext['includePhaseDeps'];
+  }
+
+  async function testCreateOperationsAsync(options: ITestCreateOperationsContext): Promise<Set<Operation>> {
+    const {
+      phaseSelection,
+      projectSelection,
+      projectsInUnknownState,
+      phaseOriginal = phaseSelection,
+      includePhaseDeps = false
+    } = options;
     const hooks: PhasedCommandHooks = new PhasedCommandHooks();
     // Apply the plugin being tested
     new PhasedOperationPlugin().apply(hooks);
@@ -71,16 +89,18 @@ describe(PhasedOperationPlugin.name, () => {
 
     const context: Pick<
       ICreateOperationsContext,
+      | 'includePhaseDeps'
       | 'phaseOriginal'
       | 'phaseSelection'
       | 'projectSelection'
       | 'projectsInUnknownState'
       | 'projectConfigurations'
     > = {
-      phaseOriginal: phaseSelection,
+      includePhaseDeps,
+      phaseOriginal,
       phaseSelection,
       projectSelection,
-      projectsInUnknownState: changedProjects,
+      projectsInUnknownState,
       projectConfigurations: new Map()
     };
     const operations: Set<Operation> = await hooks.createOperations.promise(
@@ -106,14 +126,14 @@ describe(PhasedOperationPlugin.name, () => {
       'build'
     )! as IPhasedCommandConfig;
 
-    const operations: Set<Operation> = await testCreateOperationsAsync(
-      buildCommand.phases,
-      new Set(rushConfiguration.projects),
-      new Set(rushConfiguration.projects)
-    );
+    const operations: Set<Operation> = await testCreateOperationsAsync({
+      phaseSelection: buildCommand.phases,
+      projectSelection: new Set(rushConfiguration.projects),
+      projectsInUnknownState: new Set(rushConfiguration.projects)
+    });
 
     // All projects
-    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+    expectOperationsToMatchSnapshot(operations, 'full');
   });
 
   it('handles filtered projects', async () => {
@@ -121,31 +141,31 @@ describe(PhasedOperationPlugin.name, () => {
       'build'
     )! as IPhasedCommandConfig;
 
-    let operations: Set<Operation> = await testCreateOperationsAsync(
-      buildCommand.phases,
-      new Set([rushConfiguration.getProjectByName('g')!]),
-      new Set([rushConfiguration.getProjectByName('g')!])
-    );
+    let operations: Set<Operation> = await testCreateOperationsAsync({
+      phaseSelection: buildCommand.phases,
+      projectSelection: new Set([rushConfiguration.getProjectByName('g')!]),
+      projectsInUnknownState: new Set([rushConfiguration.getProjectByName('g')!])
+    });
 
     // Single project
-    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+    expectOperationsToMatchSnapshot(operations, 'single');
 
-    operations = await testCreateOperationsAsync(
-      buildCommand.phases,
-      new Set([
+    operations = await testCreateOperationsAsync({
+      phaseSelection: buildCommand.phases,
+      projectSelection: new Set([
         rushConfiguration.getProjectByName('f')!,
         rushConfiguration.getProjectByName('a')!,
         rushConfiguration.getProjectByName('c')!
       ]),
-      new Set([
+      projectsInUnknownState: new Set([
         rushConfiguration.getProjectByName('f')!,
         rushConfiguration.getProjectByName('a')!,
         rushConfiguration.getProjectByName('c')!
       ])
-    );
+    });
 
     // Filtered projects
-    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+    expectOperationsToMatchSnapshot(operations, 'filtered');
   });
 
   it('handles some changed projects', async () => {
@@ -153,27 +173,27 @@ describe(PhasedOperationPlugin.name, () => {
       'build'
     )! as IPhasedCommandConfig;
 
-    let operations: Set<Operation> = await testCreateOperationsAsync(
-      buildCommand.phases,
-      new Set(rushConfiguration.projects),
-      new Set([rushConfiguration.getProjectByName('g')!])
-    );
+    let operations: Set<Operation> = await testCreateOperationsAsync({
+      phaseSelection: buildCommand.phases,
+      projectSelection: new Set(rushConfiguration.projects),
+      projectsInUnknownState: new Set([rushConfiguration.getProjectByName('g')!])
+    });
 
     // Single project
-    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+    expectOperationsToMatchSnapshot(operations, 'single');
 
-    operations = await testCreateOperationsAsync(
-      buildCommand.phases,
-      new Set(rushConfiguration.projects),
-      new Set([
+    operations = await testCreateOperationsAsync({
+      phaseSelection: buildCommand.phases,
+      projectSelection: new Set(rushConfiguration.projects),
+      projectsInUnknownState: new Set([
         rushConfiguration.getProjectByName('f')!,
         rushConfiguration.getProjectByName('a')!,
         rushConfiguration.getProjectByName('c')!
       ])
-    );
+    });
 
     // Filtered projects
-    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+    expectOperationsToMatchSnapshot(operations, 'multiple');
   });
 
   it('handles some changed projects within filtered projects', async () => {
@@ -181,79 +201,130 @@ describe(PhasedOperationPlugin.name, () => {
       'build'
     )! as IPhasedCommandConfig;
 
-    const operations: Set<Operation> = await testCreateOperationsAsync(
-      buildCommand.phases,
-      new Set([
+    const operations: Set<Operation> = await testCreateOperationsAsync({
+      phaseSelection: buildCommand.phases,
+      projectSelection: new Set([
         rushConfiguration.getProjectByName('f')!,
         rushConfiguration.getProjectByName('a')!,
         rushConfiguration.getProjectByName('c')!
       ]),
-      new Set([rushConfiguration.getProjectByName('a')!, rushConfiguration.getProjectByName('c')!])
-    );
+      projectsInUnknownState: new Set([
+        rushConfiguration.getProjectByName('a')!,
+        rushConfiguration.getProjectByName('c')!
+      ])
+    });
 
     // Single project
-    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+    expectOperationsToMatchSnapshot(operations, 'multiple');
+  });
+
+  it('handles different phaseOriginal vs phaseSelection without --include-phase-deps', async () => {
+    const operations: Set<Operation> = await testCreateOperationsAsync({
+      includePhaseDeps: false,
+      phaseSelection: new Set([
+        commandLineConfiguration.phases.get('_phase:no-deps')!,
+        commandLineConfiguration.phases.get('_phase:upstream-self')!
+      ]),
+      phaseOriginal: new Set([commandLineConfiguration.phases.get('_phase:upstream-self')!]),
+      projectSelection: new Set([rushConfiguration.getProjectByName('a')!]),
+      projectsInUnknownState: new Set([rushConfiguration.getProjectByName('a')!])
+    });
+
+    expectOperationsToMatchSnapshot(operations, 'single-project');
+  });
+
+  it('handles different phaseOriginal vs phaseSelection with --include-phase-deps', async () => {
+    const operations: Set<Operation> = await testCreateOperationsAsync({
+      includePhaseDeps: true,
+      phaseSelection: new Set([
+        commandLineConfiguration.phases.get('_phase:no-deps')!,
+        commandLineConfiguration.phases.get('_phase:upstream-self')!
+      ]),
+      phaseOriginal: new Set([commandLineConfiguration.phases.get('_phase:upstream-self')!]),
+      projectSelection: new Set([rushConfiguration.getProjectByName('a')!]),
+      projectsInUnknownState: new Set([rushConfiguration.getProjectByName('a')!])
+    });
+
+    expectOperationsToMatchSnapshot(operations, 'single-project');
+  });
+
+  it('handles different phaseOriginal vs phaseSelection cross-project with --include-phase-deps', async () => {
+    const operations: Set<Operation> = await testCreateOperationsAsync({
+      includePhaseDeps: true,
+      phaseSelection: new Set([
+        commandLineConfiguration.phases.get('_phase:no-deps')!,
+        commandLineConfiguration.phases.get('_phase:upstream-1')!
+      ]),
+      phaseOriginal: new Set([commandLineConfiguration.phases.get('_phase:upstream-1')!]),
+      projectSelection: new Set([
+        rushConfiguration.getProjectByName('a')!,
+        rushConfiguration.getProjectByName('h')!
+      ]),
+      projectsInUnknownState: new Set([rushConfiguration.getProjectByName('h')!])
+    });
+
+    expectOperationsToMatchSnapshot(operations, 'multiple-project');
   });
 
   it('handles filtered phases', async () => {
     // Single phase with a missing dependency
-    let operations: Set<Operation> = await testCreateOperationsAsync(
-      new Set([commandLineConfiguration.phases.get('_phase:upstream-self')!]),
-      new Set(rushConfiguration.projects),
-      new Set(rushConfiguration.projects)
-    );
-    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+    let operations: Set<Operation> = await testCreateOperationsAsync({
+      phaseSelection: new Set([commandLineConfiguration.phases.get('_phase:upstream-self')!]),
+      projectSelection: new Set(rushConfiguration.projects),
+      projectsInUnknownState: new Set(rushConfiguration.projects)
+    });
+    expectOperationsToMatchSnapshot(operations, 'single-phase');
 
     // Two phases with a missing link
-    operations = await testCreateOperationsAsync(
-      new Set([
+    operations = await testCreateOperationsAsync({
+      phaseSelection: new Set([
         commandLineConfiguration.phases.get('_phase:complex')!,
         commandLineConfiguration.phases.get('_phase:upstream-3')!,
         commandLineConfiguration.phases.get('_phase:upstream-1')!,
         commandLineConfiguration.phases.get('_phase:no-deps')!
       ]),
-      new Set(rushConfiguration.projects),
-      new Set(rushConfiguration.projects)
-    );
-    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+      projectSelection: new Set(rushConfiguration.projects),
+      projectsInUnknownState: new Set(rushConfiguration.projects)
+    });
+    expectOperationsToMatchSnapshot(operations, 'two-phases');
   });
 
   it('handles filtered phases on filtered projects', async () => {
     // Single phase with a missing dependency
-    let operations: Set<Operation> = await testCreateOperationsAsync(
-      new Set([commandLineConfiguration.phases.get('_phase:upstream-2')!]),
-      new Set([
+    let operations: Set<Operation> = await testCreateOperationsAsync({
+      phaseSelection: new Set([commandLineConfiguration.phases.get('_phase:upstream-2')!]),
+      projectSelection: new Set([
         rushConfiguration.getProjectByName('f')!,
         rushConfiguration.getProjectByName('a')!,
         rushConfiguration.getProjectByName('c')!
       ]),
-      new Set([
+      projectsInUnknownState: new Set([
         rushConfiguration.getProjectByName('f')!,
         rushConfiguration.getProjectByName('a')!,
         rushConfiguration.getProjectByName('c')!
       ])
-    );
-    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+    });
+    expectOperationsToMatchSnapshot(operations, 'single-phase');
 
     // Phases with missing links
-    operations = await testCreateOperationsAsync(
-      new Set([
+    operations = await testCreateOperationsAsync({
+      phaseSelection: new Set([
         commandLineConfiguration.phases.get('_phase:complex')!,
         commandLineConfiguration.phases.get('_phase:upstream-3')!,
         commandLineConfiguration.phases.get('_phase:upstream-1')!,
         commandLineConfiguration.phases.get('_phase:no-deps')!
       ]),
-      new Set([
+      projectSelection: new Set([
         rushConfiguration.getProjectByName('f')!,
         rushConfiguration.getProjectByName('a')!,
         rushConfiguration.getProjectByName('c')!
       ]),
-      new Set([
+      projectsInUnknownState: new Set([
         rushConfiguration.getProjectByName('f')!,
         rushConfiguration.getProjectByName('a')!,
         rushConfiguration.getProjectByName('c')!
       ])
-    );
-    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+    });
+    expectOperationsToMatchSnapshot(operations, 'missing-links');
   });
 });

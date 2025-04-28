@@ -18,24 +18,8 @@
           }
         },
 
-        "copy-src-typings": {
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft",
-            "pluginName": "copy-files-plugin",
-            "options": {
-              "copyOperations": [
-                {
-                  "sourcePath": "node_modules/@microsoft/rush-lib/src",
-                  "destinationFolders": ["src"],
-                  "includeGlobs": ["npm-check-typings.d.ts"]
-                }
-              ]
-            }
-          }
-        },
-
         "typescript": {
-          "taskDependencies": ["create-src", "copy-src-typings"]
+          "taskDependencies": ["create-src"]
         }
       }
     }

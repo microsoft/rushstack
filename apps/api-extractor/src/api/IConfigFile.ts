@@ -70,21 +70,20 @@ export interface IConfigApiReport {
   enabled: boolean;
 
   /**
-   * The base component of API report filenames.
+   * The base filename for the API report files, to be combined with {@link IConfigApiReport.reportFolder} or
+   * {@link IConfigApiReport.reportTempFolder} to produce the full file path.
    *
    * @remarks
-   * It will be combined with the specified {@link IConfigApiReport.reportVariants}, and {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
-   * produce a full output filenames in the form `<folder><reportFileName>.<variant>.api.md`.
+   * The `reportFileName` should not include any path separators such as `\` or `/`.  The `reportFileName` should
+   * not include a file extension, since API Extractor will automatically append an appropriate file extension such
+   * as `.api.md`.  If the {@link IConfigApiReport.reportVariants} setting is used, then the file extension includes
+   * the variant name, for example `my-report.public.api.md` or `my-report.beta.api.md`. The `complete` variant always
+   * uses the simple extension `my-report.api.md`.
    *
-   * The string should not contain a file extension.
-   * Note: previous guidance noted that this should be specified in a form including the `.api.md` extension.
-   * This is no longer recommended, and support for this will be removed in a future release.
-   * For example, if you were previously specifying `Foo.api.md`, you should now specify `Foo`.
-   * The `.api.md` extension will be added automatically to the resulting filename.
+   * Previous versions of API Extractor required `reportFileName` to include the `.api.md` extension explicitly;
+   * for backwards compatibility, that is still accepted but will be discarded before applying the above rules.
    *
-   * The string must not contain a path separator such as `\` or `/`.
-   *
-   * @defaultValue `<unscopedPackageName>.api.md` will be used if this argument is not specified or if it is empty.
+   * @defaultValue `<unscopedPackageName>`
    */
   reportFileName?: string;
 
@@ -92,16 +91,15 @@ export interface IConfigApiReport {
    * The set of report variants to generate.
    *
    * @remarks
-   * Each variant corresponds to a minimal release level, denoted by release tag in the TSDoc comment for each API item.
-   * E.g., the `beta` report variant will include all API items tagged `@beta` or higher (i.e. `@beta` and `@public`).
+   * To support different approval requirements for different API levels, multiple "variants" of the API report can
+   * be generated.  The `reportVariants` setting specifies a list of variants to be generated.  If omitted,
+   * by default only the `complete` variant will be generated, which includes all `@internal`, `@alpha`, `@beta`,
+   * and `@public` items.  Other possible variants are `alpha` (`@alpha` + `@beta` + `@public`),
+   * `beta` (`@beta` + `@public`), and `public` (`@public only`).
    *
    * The resulting API report file names will be derived from the {@link IConfigApiReport.reportFileName}.
-   * E.g., `foo.beta.api.md`.
-   * The only exception to this is the `complete` variant.
-   * This variant name will not be contained in the corresponding file name.
-   * I.e., `foo.api.md`.
    *
-   * @defaultValue `['complete']`
+   * @defaultValue `[ "complete" ]`
    */
   reportVariants?: ApiReportVariant[];
 
@@ -141,7 +139,48 @@ export interface IConfigApiReport {
    * @defaultValue `false`
    */
   includeForgottenExports?: boolean;
+
+  /**
+   * Specifies a list of {@link https://tsdoc.org/ | TSDoc} tags that should be reported in the API report file for
+   * items whose documentation contains them.
+   *
+   * @remarks
+   * Tag names must begin with `@`.
+   *
+   * This list may include standard TSDoc tags as well as custom ones.
+   * For more information on defining custom TSDoc tags, see
+   * {@link https://api-extractor.com/pages/configs/tsdoc_json/#defining-your-own-tsdoc-tags | here}.
+   *
+   * Note that an item's release tag will always reported; this behavior cannot be overridden.
+   *
+   * @defaultValue `@sealed`, `@virtual`, `@override`, `@eventProperty`, and `@deprecated`
+   *
+   * @example Omitting default tags
+   * To omit the `@sealed` and `@virtual` tags from API reports, you would specify `tagsToReport` as follows:
+   * ```json
+   * "tagsToReport": {
+   *  "@sealed": false,
+   *  "@virtual": false
+   * }
+   * ```
+   *
+   * @example Including additional tags
+   * To include additional tags to the set included in API reports, you could specify `tagsToReport` like this:
+   * ```json
+   * "tagsToReport": {
+   *  "@customTag": true
+   * }
+   * ```
+   * This will result in `@customTag` being included in addition to the default tags.
+   */
+  tagsToReport?: Readonly<Record<`@${string}`, boolean>>;
 }
+
+/**
+ * The allowed release tags that can be used to mark API items.
+ * @public
+ */
+export type ReleaseTagForTrim = '@internal' | '@alpha' | '@beta' | '@public';
 
 /**
  * Configures how the doc model file (*.api.json) will be generated.
@@ -190,6 +229,13 @@ export interface IConfigDocModel {
    * Can be omitted if you don't need source code links in your API documentation reference.
    */
   projectFolderUrl?: string;
+
+  /**
+   * Specifies a list of release tags that will be trimmed from the doc model.
+   *
+   * @defaultValue `["@internal"]`
+   */
+  releaseTagsToTrim?: ReleaseTagForTrim[];
 }
 
 /**
