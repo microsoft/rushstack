@@ -19,7 +19,8 @@ export class RushDocsTool extends BaseTool {
   public constructor() {
     super({
       name: 'rush_docs',
-      description: '',
+      description:
+        'Search and retrieve relevant sections from Rush official documentation based on user queries.',
       schema: {
         userQuery: z.string().describe('The user query to search for relevant documentation sections.')
       }
