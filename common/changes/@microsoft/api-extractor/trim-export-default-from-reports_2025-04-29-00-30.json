@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Correctly omit declarations associated with an entity whose release tag does not meet the configured threshold in API reports",
+      "comment": "Fix an issue where default exports were sometimes trimmed incorrectly in .api.md files when using `reportVariants` (GitHub #4775)",
       "type": "patch"
     }
   ],
