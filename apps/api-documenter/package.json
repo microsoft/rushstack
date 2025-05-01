@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.26.25",
+  "version": "7.26.26",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
