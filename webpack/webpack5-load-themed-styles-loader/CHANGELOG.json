@@ -2,6 +2,24 @@
   "name": "@microsoft/webpack5-load-themed-styles-loader",
   "entries": [
     {
+      "version": "0.2.101",
+      "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.2.101",
+      "date": "Thu, 01 May 2025 15:11:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.1.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.1.4` to `2.1.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.100",
       "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.2.100",
       "date": "Thu, 01 May 2025 00:11:12 GMT",
