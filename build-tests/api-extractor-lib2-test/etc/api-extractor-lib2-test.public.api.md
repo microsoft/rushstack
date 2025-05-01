@@ -5,11 +5,6 @@
 ```ts
 
 // @public (undocumented)
-class DefaultClass {
-}
-export default DefaultClass;
-
-// @public (undocumented)
 export class Lib2Class {
     // (undocumented)
     prop: number;

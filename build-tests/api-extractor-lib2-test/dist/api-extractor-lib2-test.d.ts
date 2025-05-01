@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-/** @public */
+/** @beta */
 declare class DefaultClass {
 }
 export default DefaultClass;
