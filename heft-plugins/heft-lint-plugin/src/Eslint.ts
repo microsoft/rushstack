@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as crypto from 'crypto';
+import { createHash, type Hash } from 'crypto';
 import * as semver from 'semver';
 import type * as TTypescript from 'typescript';
-import type * as TEslint from 'eslint';
+import type * as TEslint from 'eslint-9';
 import { performance } from 'perf_hooks';
 import { FileError, FileSystem } from '@rushstack/node-core-library';
 
 import { LinterBase, type ILinterBaseOptions } from './LinterBase';
+import type { IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 
 interface IEslintOptions extends ILinterBaseOptions {
   eslintPackage: typeof TEslint;
@@ -94,8 +95,10 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
       // the provided program, producing garbage fix output. To avoid this, only provide the existing program
       // if we're not fixing.
       overrideConfig = {
-        parserOptions: {
-          programs: [tsProgram]
+        languageOptions: {
+          parserOptions: {
+            programs: [tsProgram]
+          }
         }
       };
     }
@@ -124,15 +127,14 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     });
   }
 
-  public printVersionHeader(): void {
+  public override printVersionHeader(): void {
     const linterVersion: string = this._eslintPackage.Linter.version;
     this._terminal.writeLine(`Using ESLint version ${linterVersion}`);
 
     const majorVersion: number = semver.major(linterVersion);
-    if (majorVersion < 7) {
-      throw new Error('Heft requires ESLint 7 or newer.  Your ESLint version is too old');
-    }
-    if (majorVersion > 8) {
+    if (majorVersion < 9) {
+      throw new Error('Heft requires ESLint 9 or newer.  Your ESLint version is too old');
+    } else if (majorVersion > 9) {
       // We don't use writeWarningLine() here because, if the person wants to take their chances with
       // a newer ESLint release, their build should be allowed to succeed.
       this._terminal.writeLine(
@@ -141,22 +143,29 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     }
   }
 
-  protected async getCacheVersionAsync(): Promise<string> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const eslintBaseConfiguration: any = await this._linter.calculateConfigForFile(
-      this._linterConfigFilePath
-    );
-    const eslintConfigHash: crypto.Hash = crypto
-      .createHash('sha1')
-      .update(JSON.stringify(eslintBaseConfiguration));
-    const eslintConfigVersion: string = `${this._eslintPackage.Linter.version}_${eslintConfigHash.digest(
-      'hex'
-    )}`;
-
-    return eslintConfigVersion;
+  protected override async getCacheVersionAsync(): Promise<string> {
+    return `${this._eslintPackage.Linter.version}_${process.version}`;
   }
 
-  protected async lintFileAsync(sourceFile: TTypescript.SourceFile): Promise<TEslint.ESLint.LintResult[]> {
+  protected override async getSourceFileHashAsync(sourceFile: IExtendedSourceFile): Promise<string> {
+    // Since the original hash can either come from TypeScript or from manually hashing the file, we can just
+    // append the config hash to the original hash to avoid reducing the hash space. This is not a perfect
+    // solution, but it is good enough for our purposes.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sourceFileEslintConfiguration: any = await this._linter.calculateConfigForFile(sourceFile.fileName);
+    const hash: Hash = createHash('sha1');
+    try {
+      hash.update(JSON.stringify(sourceFileEslintConfiguration));
+    } catch (e) {
+      throw e;
+    }
+    const originalSourceFileHash: string = await super.getSourceFileHashAsync(sourceFile);
+    return `${hash.digest('base64')}_${originalSourceFileHash}`;
+  }
+
+  protected override async lintFileAsync(
+    sourceFile: TTypescript.SourceFile
+  ): Promise<TEslint.ESLint.LintResult[]> {
     const lintResults: TEslint.ESLint.LintResult[] = await this._linter.lintText(sourceFile.text, {
       filePath: sourceFile.fileName
     });
@@ -191,7 +200,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     return trimmedLintResults;
   }
 
-  protected async lintingFinishedAsync(lintResults: TEslint.ESLint.LintResult[]): Promise<void> {
+  protected override async lintingFinishedAsync(lintResults: TEslint.ESLint.LintResult[]): Promise<void> {
     let omittedRuleCount: number = 0;
     const timings: [string, number][] = Array.from(this._eslintTimings).sort(
       (x: [string, number], y: [string, number]) => {
@@ -261,7 +270,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     }
   }
 
-  protected async isFileExcludedAsync(filePath: string): Promise<boolean> {
+  protected override async isFileExcludedAsync(filePath: string): Promise<boolean> {
     return await this._linter.isPathIgnored(filePath);
   }
 

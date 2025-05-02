@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import type * as TEslint from 'eslint';
+import type * as TEslint from 'eslint-9';
 import path from 'node:path';
 import { Path } from '@rushstack/node-core-library';
 
@@ -303,12 +303,12 @@ export function formatEslintResultsAsSARIF(
         physicalLocation.region = region;
       }
 
-      if (message.source) {
-        physicalLocation.region ??= {};
-        physicalLocation.region.snippet = {
-          text: message.source
-        };
-      }
+      // if (message.source) {
+      //   physicalLocation.region ??= {};
+      //   physicalLocation.region.snippet = {
+      //     text: message.source
+      //   };
+      // }
 
       if (message.ruleId) {
         sarifResults.push(sarifRepresentation);
