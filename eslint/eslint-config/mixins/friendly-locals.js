@@ -20,72 +20,66 @@
 // people to read, enable the "@rushstack/eslint-config/mixins/friendly-locals" mixin.
 // It will restore the requirement that local variables should have explicit type declarations.
 //
-// IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
+// IMPORTANT: Your .eslintrc.js "extends" field must load mixins AFTER the profile.
+module.exports = {
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      rules: {
+        '@rushstack/typedef-var': 'off', // <--- disabled by the mixin
 
-const { defineConfig } = require('eslint/config');
-const typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin');
+        '@typescript-eslint/typedef': [
+          'warn',
+          {
+            arrayDestructuring: false,
+            arrowParameter: false,
+            memberVariableDeclaration: true,
+            objectDestructuring: false,
+            parameter: true,
+            propertyDeclaration: true,
 
-module.exports = defineConfig([
-  {
-    files: ['**/*.ts', '**/*.tsx'],
-    plugins: {
-      '@typescript-eslint': typescriptEslintPlugin
+            variableDeclaration: true, // <--- reenabled by the mixin
+
+            variableDeclarationIgnoreFunction: true
+          }
+        ]
+      }
     },
-    rules: {
-      '@rushstack/typedef-var': 'off', // <--- disabled by the mixin
+    // Note that the above block also applies to *.test.ts, so we need to
+    // reapply those overrides.
+    {
+      files: [
+        // Test files
+        '*.test.ts',
+        '*.test.tsx',
+        '*.spec.ts',
+        '*.spec.tsx',
 
-      '@typescript-eslint/typedef': [
-        'warn',
-        {
-          arrayDestructuring: false,
-          arrowParameter: false,
-          memberVariableDeclaration: true,
-          objectDestructuring: false,
-          parameter: true,
-          propertyDeclaration: true,
+        // Facebook convention
+        '**/__mocks__/*.ts',
+        '**/__mocks__/*.tsx',
+        '**/__tests__/*.ts',
+        '**/__tests__/*.tsx',
 
-          variableDeclaration: true, // <--- reenabled by the mixin
-
-          variableDeclarationIgnoreFunction: true
-        }
-      ]
+        // Microsoft convention
+        '**/test/*.ts',
+        '**/test/*.tsx'
+      ],
+      rules: {
+        '@typescript-eslint/typedef': [
+          'warn',
+          {
+            arrayDestructuring: false,
+            arrowParameter: false,
+            memberVariableDeclaration: true,
+            objectDestructuring: false,
+            parameter: true,
+            propertyDeclaration: true,
+            variableDeclaration: false, // <--- special case for test files
+            variableDeclarationIgnoreFunction: true
+          }
+        ]
+      }
     }
-  },
-  {
-    files: [
-      // Test files
-      '*.test.ts',
-      '*.test.tsx',
-      '*.spec.ts',
-      '*.spec.tsx',
-
-      // Facebook convention
-      '**/__mocks__/*.ts',
-      '**/__mocks__/*.tsx',
-      '**/__tests__/*.ts',
-      '**/__tests__/*.tsx',
-
-      // Microsoft convention
-      '**/test/*.ts',
-      '**/test/*.tsx'
-    ],
-    plugins: {
-      '@typescript-eslint': typescriptEslintPlugin
-    },
-    rules: {
-      '@typescript-eslint/typedef': [
-        'warn',
-        {
-          arrayDestructuring: false,
-          arrowParameter: false,
-          memberVariableDeclaration: true,
-          objectDestructuring: false,
-          parameter: true,
-          propertyDeclaration: true,
-          variableDeclaration: false, // <--- special case for test files
-          variableDeclarationIgnoreFunction: true
-        }
-      ]
-    }
-  }
-]);
+  ]
+};

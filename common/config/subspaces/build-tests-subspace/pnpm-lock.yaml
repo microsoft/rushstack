@@ -6625,9 +6625,10 @@ packages:
     id: file:../../../eslint/eslint-config
     name: '@rushstack/eslint-config'
     peerDependencies:
-      eslint: ^9.25.1
+      eslint: ^8.57.0 || ^9.25.1
       typescript: '>=4.7.0'
     dependencies:
+      '@rushstack/eslint-patch': file:../../../eslint/eslint-patch
       '@rushstack/eslint-plugin': file:../../../eslint/eslint-plugin(eslint@9.25.1)(typescript@4.9.5)
       '@rushstack/eslint-plugin-packlets': file:../../../eslint/eslint-plugin-packlets(eslint@9.25.1)(typescript@4.9.5)
       '@rushstack/eslint-plugin-security': file:../../../eslint/eslint-plugin-security(eslint@9.25.1)(typescript@4.9.5)
@@ -6649,9 +6650,10 @@ packages:
     id: file:../../../eslint/eslint-config
     name: '@rushstack/eslint-config'
     peerDependencies:
-      eslint: ^9.25.1
+      eslint: ^8.57.0 || ^9.25.1
       typescript: '>=4.7.0'
     dependencies:
+      '@rushstack/eslint-patch': file:../../../eslint/eslint-patch
       '@rushstack/eslint-plugin': file:../../../eslint/eslint-plugin(eslint@9.25.1)(typescript@5.8.2)
       '@rushstack/eslint-plugin-packlets': file:../../../eslint/eslint-plugin-packlets(eslint@9.25.1)(typescript@5.8.2)
       '@rushstack/eslint-plugin-security': file:../../../eslint/eslint-plugin-security(eslint@9.25.1)(typescript@5.8.2)

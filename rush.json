@@ -597,6 +597,33 @@
       "tags": ["api-extractor-tests"]
     },
     {
+      "packageName": "eslint-7-11-test",
+      "projectFolder": "build-tests/eslint-7-11-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
+    },
+    {
+      "packageName": "eslint-7-7-test",
+      "projectFolder": "build-tests/eslint-7-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
+    },
+    {
+      "packageName": "eslint-7-test",
+      "projectFolder": "build-tests/eslint-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
+    },
+    {
+      "packageName": "eslint-8-test",
+      "projectFolder": "build-tests/eslint-8-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "eslint-9-test",
       "projectFolder": "build-tests/eslint-9-test",
       "reviewCategory": "tests",

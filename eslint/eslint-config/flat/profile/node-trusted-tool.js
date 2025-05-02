@@ -12,7 +12,16 @@
 // DO NOT use this profile for a library project that might also be loaded by a Node.js service;
 // use "@rushstack/eslint-config/profiles/node" instead.
 
-const { buildRules } = require('./_common');
+const { defineConfig } = require('eslint/config');
+const { commonConfig } = require('./_common');
 
-const rules = buildRules('node-trusted-tool');
-module.exports = rules;
+module.exports = defineConfig([
+  ...commonConfig,
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    rules: {
+      // This is disabled for trusted tools because the tool is known to be safe.
+      '@rushstack/security/no-unsafe-regex': 'off'
+    }
+  }
+]);

@@ -99,4 +99,6 @@ function expandNamingConventionSelectors(inputBlocks) {
   return secondPassBlocks;
 }
 
-exports.expandNamingConventionSelectors = expandNamingConventionSelectors;
+module.exports = {
+  expandNamingConventionSelectors: expandNamingConventionSelectors
+};

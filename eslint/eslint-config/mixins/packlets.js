@@ -4,19 +4,18 @@
 // This mixin implements the "packlet" formalism for organizing source files.
 // For more information, see the documentation here:
 // https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets
-//
-// IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
+module.exports = {
+  plugins: ['@rushstack/eslint-plugin-packlets'],
 
-const { defineConfig } = require('eslint/config');
-const rushstackPackletsEslintPlugin = require('@rushstack/eslint-plugin-packlets');
+  overrides: [
+    {
+      // Declare an override that applies to TypeScript files only
+      files: ['*.ts', '*.tsx'],
 
-module.exports = defineConfig({
-  files: ['**/*.ts', '**/*.tsx'],
-  plugins: {
-    '@rushstack/packlets': rushstackPackletsEslintPlugin
-  },
-  rules: {
-    '@rushstack/packlets/mechanics': 'warn',
-    '@rushstack/packlets/circular-deps': 'warn'
-  }
-});
+      rules: {
+        '@rushstack/packlets/mechanics': 'warn',
+        '@rushstack/packlets/circular-deps': 'warn'
+      }
+    }
+  ]
+};
