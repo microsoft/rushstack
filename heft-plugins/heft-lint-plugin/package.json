@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
+    "json-stable-stringify-without-jsonify": "1.0.1",
     "semver": "~7.5.4"
   },
   "devDependencies": {
@@ -27,6 +28,7 @@
     "@rushstack/terminal": "workspace:*",
     "@types/eslint-9": "npm:@types/eslint@9.6.1",
     "@types/eslint": "8.56.10",
+    "@types/json-stable-stringify-without-jsonify": "1.0.2",
     "@types/semver": "7.5.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint-9": "npm:eslint@~9.25.1",

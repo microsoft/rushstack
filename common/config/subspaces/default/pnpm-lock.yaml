@@ -2558,6 +2558,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      json-stable-stringify-without-jsonify:
+        specifier: 1.0.1
+        version: 1.0.1
       semver:
         specifier: ~7.5.4
         version: 7.5.4
@@ -2577,6 +2580,9 @@ importers:
       '@types/eslint-9':
         specifier: npm:@types/eslint@9.6.1
         version: /@types/eslint@9.6.1
+      '@types/json-stable-stringify-without-jsonify':
+        specifier: 1.0.2
+        version: 1.0.2
       '@types/semver':
         specifier: 7.5.0
         version: 7.5.0
@@ -12829,6 +12835,10 @@ packages:
 
   /@types/json-schema@7.0.15:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
+  /@types/json-stable-stringify-without-jsonify@1.0.2:
+    resolution: {integrity: sha512-X/Kn5f5fv1KBGqGDaegrj72Dlh+qEKN3ELwMAB6RdVlVzkf6NTeEnJpgR/Hr0AlpgTlYq/Vd0U3f79lavn6aDA==}
+    dev: true
 
   /@types/json5@0.0.29:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}

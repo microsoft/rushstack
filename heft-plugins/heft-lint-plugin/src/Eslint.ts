@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { createHash, type Hash } from 'crypto';
-import * as semver from 'semver';
+import { performance } from 'perf_hooks';
 import type * as TTypescript from 'typescript';
 import type * as TEslint from 'eslint-9';
-import { performance } from 'perf_hooks';
+import * as semver from 'semver';
+import stableStringify from 'json-stable-stringify-without-jsonify';
 import { FileError, FileSystem } from '@rushstack/node-core-library';
 
 import { LinterBase, type ILinterBaseOptions } from './LinterBase';
@@ -51,6 +52,27 @@ async function patchTimerAsync(eslintPackagePath: string, timingsMap: Map<string
 function getFormattedErrorMessage(lintMessage: TEslint.Linter.LintMessage): string {
   // https://eslint.org/docs/developer-guide/nodejs-api#◆-lintmessage-type
   return lintMessage.ruleId ? `(${lintMessage.ruleId}) ${lintMessage.message}` : lintMessage.message;
+}
+
+interface IExtendedEslintConfig extends TEslint.Linter.Config {
+  // https://github.com/eslint/eslint/blob/d6fa4ac031c2fe24fb778e84940393fbda3ddf77/lib/config/config.js#L264
+  toJSON: () => TEslint.Linter.Config;
+  __originalToJSON: () => TEslint.Linter.Config;
+}
+
+function patchedToJSON(this: IExtendedEslintConfig): TEslint.Linter.Config {
+  let programs: TTypescript.Program[] | undefined;
+  if (this.languageOptions?.parserOptions?.programs) {
+    programs = this.languageOptions.parserOptions.programs;
+    delete this.languageOptions.parserOptions.programs;
+  }
+
+  const serializableConfig: TEslint.Linter.Config = this.__originalToJSON.call(this);
+  if (this.languageOptions?.parserOptions && programs) {
+    this.languageOptions.parserOptions.programs = programs;
+  }
+
+  return serializableConfig;
 }
 
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
@@ -148,17 +170,27 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   }
 
   protected override async getSourceFileHashAsync(sourceFile: IExtendedSourceFile): Promise<string> {
+    const sourceFileEslintConfiguration: IExtendedEslintConfig = await this._linter.calculateConfigForFile(
+      sourceFile.fileName
+    );
+
+    // The eslint configuration object contains a toJSON() method that returns a serializable version of the
+    // configuration. However, we are manually injecting the TypeScript program into the parserOptions, which
+    // is not serializable. Patch the function to remove the program before returning the serializable version.
+    if (!sourceFileEslintConfiguration.__originalToJSON) {
+      sourceFileEslintConfiguration.__originalToJSON = sourceFileEslintConfiguration.toJSON;
+      sourceFileEslintConfiguration.toJSON = patchedToJSON.bind(sourceFileEslintConfiguration);
+    }
+
+    const hash: Hash = createHash('sha1');
+    // Use a stable stringifier to ensure that the hash is always the same, even if the order of the properties
+    // changes. This is also done in ESLint
+    // https://github.com/eslint/eslint/blob/8bbabc4691d97733a422180c71eba6c097b35475/lib/cli-engine/lint-result-cache.js#L50
+    hash.update(stableStringify(sourceFileEslintConfiguration));
+
     // Since the original hash can either come from TypeScript or from manually hashing the file, we can just
     // append the config hash to the original hash to avoid reducing the hash space. This is not a perfect
     // solution, but it is good enough for our purposes.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sourceFileEslintConfiguration: any = await this._linter.calculateConfigForFile(sourceFile.fileName);
-    const hash: Hash = createHash('sha1');
-    try {
-      hash.update(JSON.stringify(sourceFileEslintConfiguration));
-    } catch (e) {
-      throw e;
-    }
     const originalSourceFileHash: string = await super.getSourceFileHashAsync(sourceFile);
     return `${hash.digest('base64')}_${originalSourceFileHash}`;
   }
