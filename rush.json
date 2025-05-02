@@ -597,6 +597,12 @@
       "tags": ["api-extractor-tests"]
     },
     {
+      "packageName": "eslint-9-test",
+      "projectFolder": "build-tests/eslint-9-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "eslint-bulk-suppressions-test",
       "projectFolder": "build-tests/eslint-bulk-suppressions-test",
       "reviewCategory": "tests",

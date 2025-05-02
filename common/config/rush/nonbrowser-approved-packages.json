@@ -523,11 +523,15 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "eslint-import-resolver-node",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "eslint-plugin-deprecation",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "eslint-plugin-header",
+      "name": "eslint-plugin-headers",
       "allowedCategories": [ "libraries" ]
     },
     {

@@ -2736,6 +2736,15 @@ packages:
       eslint: 9.25.1
     dev: true
 
+  /eslint-plugin-headers@1.2.1(eslint@9.25.1):
+    resolution: {integrity: sha512-1L41t3DPrXFP6YLK+sAj0xDMGVHpQwI+uGefDwc1bKP91q65AIZoXzQgI7MjZJxB6sK8/vYhXMD8x0V8xLNxJA==}
+    engines: {node: ^16.0.0 || >= 18.0.0}
+    peerDependencies:
+      eslint: '>=7'
+    dependencies:
+      eslint: 9.25.1
+    dev: true
+
   /eslint-plugin-import@2.31.0(eslint@9.25.1):
     resolution: {integrity: sha512-ixmkI62Rbc2/w8Vfxyh1jQRTdRTF52VxwRVHl/ykPAmqG+Nb7/kNn+byLP0LxPgI7zWA16Jt82SybJInmMia3A==}
     engines: {node: '>=4'}
@@ -6761,9 +6770,12 @@ packages:
     dependencies:
       '@rushstack/eslint-config': file:../../../eslint/eslint-config(eslint@9.25.1)(typescript@5.8.2)
       '@rushstack/eslint-patch': file:../../../eslint/eslint-patch
+      '@rushstack/eslint-plugin': file:../../../eslint/eslint-plugin(eslint@9.25.1)(typescript@5.8.2)
       '@typescript-eslint/eslint-plugin': 8.31.0(@typescript-eslint/parser@8.31.0)(eslint@9.25.1)(typescript@5.8.2)
       '@typescript-eslint/parser': 8.31.0(eslint@9.25.1)(typescript@5.8.2)
+      eslint-import-resolver-node: 0.3.9
       eslint-plugin-header: 3.1.1(eslint@9.25.1)
+      eslint-plugin-headers: 1.2.1(eslint@9.25.1)
       eslint-plugin-import: 2.31.0(eslint@9.25.1)
       eslint-plugin-jsdoc: 50.6.11(eslint@9.25.1)
       eslint-plugin-react-hooks: 5.2.0(eslint@9.25.1)
