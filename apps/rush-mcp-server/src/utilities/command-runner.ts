@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type * as child_process from 'child_process';
+import type { ChildProcess, SpawnSyncReturns } from 'child_process';
 import { Executable, type IExecutableSpawnSyncOptions } from '@rushstack/node-core-library';
 
 interface ICommandResult {
@@ -49,21 +49,38 @@ export class CommandRunner {
   ): Promise<ICommandResult> {
     const commandPath: string = this._resolveCommand(command);
 
-    const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(commandPath, args, options);
+    return new Promise((resolve, reject) => {
+      const childProcess: ChildProcess = Executable.spawn(commandPath, args, options);
+      let stdout = '';
+      let stderr = '';
 
-    const status: number = result.status ?? 1;
+      childProcess.stdout?.on('data', (data) => {
+        stdout += data.toString();
+      });
 
-    if (status !== 0) {
-      throw new CommandExecutionError(command, args, result.stderr, status);
-    }
+      childProcess.stderr?.on('data', (data) => {
+        stderr += data.toString();
+      });
 
-    return {
-      status,
-      stdout: result.stdout,
-      stderr: result.stderr,
-      command,
-      args
-    };
+      childProcess.on('close', (status) => {
+        if (status !== 0) {
+          reject(new CommandExecutionError(command, args, stderr, status ?? 1));
+          return;
+        }
+
+        resolve({
+          status: status ?? 0,
+          stdout,
+          stderr,
+          command,
+          args
+        });
+      });
+
+      childProcess.on('error', (error) => {
+        reject(error);
+      });
+    });
   }
 
   public static async runRushCommandAsync(
