@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/mcp-server",
+      "comment": "Add more tools to mcp server",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/mcp-server"
+}
