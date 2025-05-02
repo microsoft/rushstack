@@ -3,18 +3,18 @@
 
 // This mixin validates code comments to ensure that they follow the TSDoc standard.  For more
 // information please see the README.md for @rushstack/eslint-config.
-module.exports = {
-  // The plugin documentation is here: https://www.npmjs.com/package/eslint-plugin-tsdoc
-  plugins: ['eslint-plugin-tsdoc'],
+//
+// IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
-  overrides: [
-    {
-      // Declare an override that applies to TypeScript files only
-      files: ['*.ts', '*.tsx'],
+const { defineConfig } = require('eslint/config');
+const tsdocEslintPlugin = require('eslint-plugin-tsdoc');
 
-      rules: {
-        'tsdoc/syntax': 'warn'
-      }
-    }
-  ]
-};
+module.exports = defineConfig({
+  files: ['**/*.ts', '**/*.tsx'],
+  plugins: {
+    tsdoc: tsdocEslintPlugin
+  },
+  rules: {
+    'tsdoc/syntax': 'warn'
+  }
+});

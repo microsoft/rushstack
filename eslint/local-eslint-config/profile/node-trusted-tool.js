@@ -10,18 +10,11 @@
 // the filesystem in unsafe ways.  Such activities are safe and commonplace for a trusted tool.
 //
 // DO NOT use this profile for a library project that might also be loaded by a Node.js service;
-// use "@rushstack/eslint-config/profiles/node" instead.
+// use "local-eslint-config/profiles/node" instead.
 
 const { defineConfig } = require('eslint/config');
-const { commonConfig } = require('./_common');
+const nodeTrustedToolProfile = require('@rushstack/eslint-config/profile/node-trusted-tool');
 
-module.exports = defineConfig([
-  ...commonConfig,
-  {
-    files: ['**/*.ts', '**/*.tsx'],
-    rules: {
-      // This is disabled for trusted tools because the tool is known to be safe.
-      '@rushstack/security/no-unsafe-regex': 'off'
-    }
-  }
-]);
+const { localCommonConfig } = require('./_common');
+
+module.exports = defineConfig([...nodeTrustedToolProfile, ...localCommonConfig]);

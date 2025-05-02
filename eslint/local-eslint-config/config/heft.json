@@ -3,25 +3,25 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["mixins", "patch", "profile"] }],
-
-      "tasksByName": {
-        "copy-contents": {
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft",
-            "pluginName": "copy-files-plugin",
-            "options": {
-              "copyOperations": [
-                {
-                  "sourcePath": "node_modules/decoupled-local-node-rig/profiles/default/includes/eslint",
-                  "destinationFolders": ["."],
-                  "includeGlobs": ["**"]
-                }
-              ]
-            }
-          }
-        }
-      }
+      // TODO: Remove comment when decoupled-local-node-rig is updated to ESLint 9
+      // "cleanFiles": [{ "includeGlobs": ["mixins", "patch", "profile"] }],
+      // "tasksByName": {
+      //   "copy-contents": {
+      //     "taskPlugin": {
+      //       "pluginPackage": "@rushstack/heft",
+      //       "pluginName": "copy-files-plugin",
+      //       "options": {
+      //         "copyOperations": [
+      //           {
+      //             "sourcePath": "node_modules/decoupled-local-node-rig/profiles/default/includes/eslint",
+      //             "destinationFolders": ["."],
+      //             "includeGlobs": ["**"]
+      //           }
+      //         ]
+      //       }
+      //     }
+      //   }
+      // }
     }
   }
 }

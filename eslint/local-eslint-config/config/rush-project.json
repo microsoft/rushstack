@@ -3,8 +3,9 @@
 
   "operationSettings": [
     {
-      "operationName": "_phase:build",
-      "outputFolderNames": ["mixins", "patch", "profile"]
+      "operationName": "_phase:build"
+      // TODO: Remove comment when decoupled-local-node-rig is updated to ESLint 9
+      // "outputFolderNames": ["mixins", "patch", "profile"]
     }
   ]
 }

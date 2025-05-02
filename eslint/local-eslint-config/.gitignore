@@ -1,3 +1,4 @@
-/mixins
-/patch
-/profile
+# TODO: Remove comment when decoupled-local-node-rig is updated to ESLint 9
+# /mixins
+# /patch
+# /profile
