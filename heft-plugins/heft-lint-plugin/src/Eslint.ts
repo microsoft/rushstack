@@ -56,18 +56,18 @@ function getFormattedErrorMessage(lintMessage: TEslint.Linter.LintMessage): stri
 
 interface IExtendedEslintConfig extends TEslint.Linter.Config {
   // https://github.com/eslint/eslint/blob/d6fa4ac031c2fe24fb778e84940393fbda3ddf77/lib/config/config.js#L264
-  toJSON: () => TEslint.Linter.Config;
-  __originalToJSON: () => TEslint.Linter.Config;
+  toJSON: () => object;
+  __originalToJSON: () => object;
 }
 
-function patchedToJSON(this: IExtendedEslintConfig): TEslint.Linter.Config {
+function patchedToJSON(this: IExtendedEslintConfig): object {
   let programs: TTypescript.Program[] | undefined;
   if (this.languageOptions?.parserOptions?.programs) {
     programs = this.languageOptions.parserOptions.programs;
     delete this.languageOptions.parserOptions.programs;
   }
 
-  const serializableConfig: TEslint.Linter.Config = this.__originalToJSON.call(this);
+  const serializableConfig: object = this.__originalToJSON.call(this);
   if (this.languageOptions?.parserOptions && programs) {
     this.languageOptions.parserOptions.programs = programs;
   }
@@ -189,10 +189,9 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     hash.update(stableStringify(sourceFileEslintConfiguration));
 
     // Since the original hash can either come from TypeScript or from manually hashing the file, we can just
-    // append the config hash to the original hash to avoid reducing the hash space. This is not a perfect
-    // solution, but it is good enough for our purposes.
+    // append the config hash to the original hash to avoid reducing the hash space
     const originalSourceFileHash: string = await super.getSourceFileHashAsync(sourceFile);
-    return `${hash.digest('base64')}_${originalSourceFileHash}`;
+    return `${originalSourceFileHash}_${hash.digest('base64')}}`;
   }
 
   protected override async lintFileAsync(
