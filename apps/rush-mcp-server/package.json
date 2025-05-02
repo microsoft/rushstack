@@ -2,6 +2,8 @@
   "name": "@rushstack/mcp-server",
   "version": "0.1.4",
   "description": "A Model Context Protocol server implementation for Rush",
+  "main": "lib/index.js",
+  "typings": "dist/mcp-server.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
