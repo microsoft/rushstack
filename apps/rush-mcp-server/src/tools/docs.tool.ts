@@ -30,10 +30,12 @@ export class RushDocsTool extends BaseTool {
   }
 
   // TODO: replace with Microsoft's service
-  private searchDocs(query: string): IDocsResult {
-    const startTime = Date.now();
+  private _searchDocs(query: string): IDocsResult {
+    const startTime: number = Date.now();
 
-    const results = JsonFile.load(path.join(__dirname, '../rush-doc-fragment.mock.json'));
+    const results: IDocsResult['results'] = JsonFile.load(
+      path.join(__dirname, '../rush-doc-fragment.mock.json')
+    );
 
     return {
       query,
@@ -44,7 +46,7 @@ export class RushDocsTool extends BaseTool {
   }
 
   public async executeAsync({ userQuery }: { userQuery: string }): Promise<CallToolResult> {
-    const docSearchResult: IDocsResult = this.searchDocs(userQuery);
+    const docSearchResult: IDocsResult = this._searchDocs(userQuery);
 
     return {
       content: [
