@@ -2490,6 +2490,9 @@ importers:
       eslint-import-resolver-node:
         specifier: 0.3.9
         version: 0.3.9
+      eslint-plugin-header:
+        specifier: ~3.1.1
+        version: 3.1.1(eslint@9.25.1)
       eslint-plugin-headers:
         specifier: ~1.2.1
         version: 1.2.1(eslint@9.25.1)
@@ -18522,6 +18525,14 @@ packages:
       eslint: '>=7.7.0'
     dependencies:
       eslint: 8.57.0
+    dev: false
+
+  /eslint-plugin-header@3.1.1(eslint@9.25.1):
+    resolution: {integrity: sha512-9vlKxuJ4qf793CmeeSrZUvVClw6amtpghq3CuWcB5cUNnWHQhgcqy5eF8oVKFk1G3Y/CbchGfEaw3wiIJaNmVg==}
+    peerDependencies:
+      eslint: '>=7.7.0'
+    dependencies:
+      eslint: 9.25.1
     dev: false
 
   /eslint-plugin-headers@1.2.1(eslint@9.25.1):
