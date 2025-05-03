@@ -3,7 +3,6 @@
 
 import path from 'node:path';
 
-import { FileSystem } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -25,11 +24,6 @@ import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/Ty
 const PLUGIN_NAME: 'lint-plugin' = 'lint-plugin';
 const TYPESCRIPT_PLUGIN_NAME: typeof TypeScriptPluginName = 'typescript-plugin';
 const FIX_PARAMETER_NAME: string = '--fix';
-const ESLINT_CONFIG_JS_FILENAME: string = 'eslint.config.js';
-const ESLINT_CONFIG_CJS_FILENAME: string = 'eslint.config.cjs';
-const ESLINT_CONFIG_MJS_FILENAME: string = 'eslint.config.mjs';
-const LEGACY_ESLINTRC_JS_FILENAME: string = '.eslintrc.js';
-const LEGACY_ESLINTRC_CJS_FILENAME: string = '.eslintrc.cjs';
 
 interface ILintPluginOptions {
   alwaysFix?: boolean;
@@ -134,7 +128,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
 
   private async _initInnerAsync(heftConfiguration: HeftConfiguration, logger: IScopedLogger): Promise<void> {
     // Locate the tslint linter if enabled
-    this._tslintConfigFilePath = await this._resolveTslintConfigFilePathAsync(heftConfiguration);
+    this._tslintConfigFilePath = await Tslint.resolveTslintConfigFilePathAsync(heftConfiguration);
     if (this._tslintConfigFilePath) {
       this._tslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         'tslint',
@@ -143,7 +137,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     }
 
     // Locate the eslint linter if enabled
-    this._eslintConfigFilePath = await this._resolveEslintConfigFilePathAsync(heftConfiguration);
+    this._eslintConfigFilePath = await Eslint.resolveEslintConfigFilePathAsync(heftConfiguration);
     if (this._eslintConfigFilePath) {
       logger.terminal.writeVerboseLine(`ESLint config file path: ${this._eslintConfigFilePath}`);
       this._eslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
@@ -207,53 +201,5 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       typeScriptFilenames,
       changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
     });
-  }
-
-  private async _resolveTslintConfigFilePathAsync(
-    heftConfiguration: HeftConfiguration
-  ): Promise<string | undefined> {
-    const tslintConfigFilePath: string = `${heftConfiguration.buildFolderPath}/tslint.json`;
-    const tslintConfigFileExists: boolean = await FileSystem.existsAsync(tslintConfigFilePath);
-    return tslintConfigFileExists ? tslintConfigFilePath : undefined;
-  }
-
-  private async _resolveEslintConfigFilePathAsync(
-    heftConfiguration: HeftConfiguration
-  ): Promise<string | undefined> {
-    // When project is configured with "type": "module" in package.json, the config file must have a .cjs extension
-    // so use it if it exists
-    const configPathCandidates: string[] = [
-      `${heftConfiguration.buildFolderPath}/${ESLINT_CONFIG_JS_FILENAME}`,
-      `${heftConfiguration.buildFolderPath}/${ESLINT_CONFIG_CJS_FILENAME}`,
-      `${heftConfiguration.buildFolderPath}/${ESLINT_CONFIG_MJS_FILENAME}`
-    ];
-    const foundConfigs: string[] = (
-      await Promise.all(configPathCandidates.map(async (p: string) => (await FileSystem.existsAsync(p)) && p))
-    ).filter((p) => p !== false);
-
-    if (foundConfigs.length > 1) {
-      throw new Error(`Project contains multiple ESLint configuration files: "${foundConfigs.join('", "')}"`);
-    } else if (foundConfigs.length === 0) {
-      // Check for legacy .eslintrc.js and .eslintrc.cjs files
-      const legacyConfigPathCandidates: string[] = [
-        `${heftConfiguration.buildFolderPath}/${LEGACY_ESLINTRC_JS_FILENAME}`,
-        `${heftConfiguration.buildFolderPath}/${LEGACY_ESLINTRC_CJS_FILENAME}`
-      ];
-      const foundLegacyConfigs: string[] = (
-        await Promise.all(
-          legacyConfigPathCandidates.map(async (p: string) => (await FileSystem.existsAsync(p)) && p)
-        )
-      ).filter((p) => p !== false);
-
-      if (foundLegacyConfigs.length !== 0) {
-        throw new Error(
-          'Project contains non-flat ESLint configuration files. The ensure that all ESLint configurations are ' +
-            'formatted using flat-config. For more information, see: ' +
-            'https://eslint.org/blog/2023/10/flat-config-rollout-plans/'
-        );
-      }
-    }
-
-    return foundConfigs[0];
   }
 }

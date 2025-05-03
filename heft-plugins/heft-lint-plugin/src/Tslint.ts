@@ -7,6 +7,7 @@ import type * as TTslint from 'tslint';
 import type * as TTypescript from 'typescript';
 import { Import, JsonFile, FileError, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
+import type { HeftConfiguration } from '@rushstack/heft';
 
 import { LinterBase, type ILinterBaseOptions } from './LinterBase';
 import type { IExtendedLinter } from './internalTypings/TslintInternals';
@@ -19,6 +20,8 @@ interface ITslintOptions extends ILinterBaseOptions {
 function getFormattedErrorMessage(tslintFailure: TTslint.RuleFailure): string {
   return `(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`;
 }
+
+const TSLINT_CONFIG_FILE_NAME: string = 'tslint.json';
 
 export class Tslint extends LinterBase<TTslint.RuleFailure> {
   private readonly _tslintPackage: typeof TTslint;
@@ -63,6 +66,14 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
       tslintPackage,
       tslintConfiguration
     });
+  }
+
+  public static async resolveTslintConfigFilePathAsync(
+    heftConfiguration: HeftConfiguration
+  ): Promise<string | undefined> {
+    const tslintConfigFilePath: string = `${heftConfiguration.buildFolderPath}/${TSLINT_CONFIG_FILE_NAME}`;
+    const tslintConfigFileExists: boolean = await FileSystem.existsAsync(tslintConfigFilePath);
+    return tslintConfigFileExists ? tslintConfigFilePath : undefined;
   }
 
   /**
