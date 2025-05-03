@@ -3,8 +3,8 @@
 
 const { defineConfig } = require('eslint/config');
 const typescriptEslintParser = require('@typescript-eslint/parser');
-const nodeTrustedToolProfile = require('local-node-rig/profiles/default/includes/eslint/profile/node-trusted-tool');
-const friendlyLocalsMixin = require('local-node-rig/profiles/default/includes/eslint/mixins/friendly-locals');
+const nodeTrustedToolProfile = require('local-node-rig/profiles/default/includes/eslint/flat/profile/node-trusted-tool');
+const friendlyLocalsMixin = require('local-node-rig/profiles/default/includes/eslint/flat/mixins/friendly-locals');
 
 module.exports = defineConfig([
   ...nodeTrustedToolProfile,
