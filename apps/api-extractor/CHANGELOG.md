@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 21 Apr 2025 22:24:25 GMT and should not be manually modified.
+This log was last generated on Thu, 01 May 2025 15:11:33 GMT and should not be manually modified.
+
+## 7.52.7
+Thu, 01 May 2025 15:11:33 GMT
+
+### Patches
+
+- Fix an issue where default exports were sometimes trimmed incorrectly in .api.md files when using `reportVariants` (GitHub #4775)
+
+## 7.52.6
+Thu, 01 May 2025 00:11:12 GMT
+
+_Version update only_
 
 ## 7.52.5
 Mon, 21 Apr 2025 22:24:25 GMT

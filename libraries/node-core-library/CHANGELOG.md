@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 25 Mar 2025 15:11:15 GMT and should not be manually modified.
+This log was last generated on Thu, 01 May 2025 00:11:12 GMT and should not be manually modified.
+
+## 5.13.1
+Thu, 01 May 2025 00:11:12 GMT
+
+### Patches
+
+- Fix a bug in `FileSystem.isErrnoException` that failed to identify errors if the underlying method was invoked using only a file descriptor, e.g. for `fs.readSync`.
 
 ## 5.13.0
 Tue, 25 Mar 2025 15:11:15 GMT

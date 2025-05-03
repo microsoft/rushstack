@@ -97,6 +97,10 @@
     {
       "name": "tslib",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "zod",
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }

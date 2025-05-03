@@ -79,6 +79,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@modelcontextprotocol/sdk",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@nodelib/fs.scandir",
       "allowedCategories": [ "libraries" ]
     },

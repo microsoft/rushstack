@@ -1508,10 +1508,11 @@ export class FileSystem {
    */
   public static isErrnoException(error: Error): error is NodeJS.ErrnoException {
     const typedError: NodeJS.ErrnoException = error;
+    // Don't check for `path` because the syscall may not have a path.
+    // For example, when invoked with a file descriptor.
     return (
       typeof typedError.code === 'string' &&
       typeof typedError.errno === 'number' &&
-      typeof typedError.path === 'string' &&
       typeof typedError.syscall === 'string'
     );
   }
