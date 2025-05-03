@@ -2,6 +2,6 @@
 // See LICENSE in the project root for license information.
 
 const { defineConfig } = require('eslint/config');
-const reactMixin = require('local-eslint-config/mixins/react');
+const reactMixin = require('local-eslint-config/flat/mixins/react');
 
 module.exports = defineConfig([...reactMixin]);

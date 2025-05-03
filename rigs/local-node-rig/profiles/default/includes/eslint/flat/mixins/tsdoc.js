@@ -2,6 +2,6 @@
 // See LICENSE in the project root for license information.
 
 const { defineConfig } = require('eslint/config');
-const tsdocMixin = require('local-eslint-config/mixins/tsdoc');
+const tsdocMixin = require('local-eslint-config/flat/mixins/tsdoc');
 
 module.exports = defineConfig([...tsdocMixin]);

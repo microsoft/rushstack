@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 const { defineConfig } = require('eslint/config');
-const { expandNamingConventionSelectors } = require('@rushstack/eslint-config/profile/_macros');
-const { commonNamingConventionSelectors } = require('@rushstack/eslint-config/profile/_common');
+const { expandNamingConventionSelectors } = require('@rushstack/eslint-config/flat/profile/_macros');
+const { commonNamingConventionSelectors } = require('@rushstack/eslint-config/flat/profile/_common');
 const rushstackEslintPlugin = require('@rushstack/eslint-plugin');
 const typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin');
 const importEslintPlugin = require('eslint-plugin-import');

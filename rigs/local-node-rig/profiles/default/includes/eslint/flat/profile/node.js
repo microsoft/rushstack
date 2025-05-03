@@ -2,6 +2,6 @@
 // See LICENSE in the project root for license information.
 
 const { defineConfig } = require('eslint/config');
-const nodeProfile = require('local-eslint-config/profile/node');
+const nodeProfile = require('local-eslint-config/flat/profile/node');
 
 module.exports = defineConfig([...nodeProfile]);

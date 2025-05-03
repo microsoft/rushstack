@@ -6,7 +6,7 @@
 // untrusted user.  If that is not the case, consider using the "node-trusted-tool" profile instead.
 
 const { defineConfig } = require('eslint/config');
-const nodeProfile = require('@rushstack/eslint-config/profile/node');
+const nodeProfile = require('@rushstack/eslint-config/flat/profile/node');
 
 const { localCommonConfig } = require('./_common');
 

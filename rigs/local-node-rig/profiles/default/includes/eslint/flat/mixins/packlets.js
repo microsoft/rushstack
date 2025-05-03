@@ -2,6 +2,6 @@
 // See LICENSE in the project root for license information.
 
 const { defineConfig } = require('eslint/config');
-const packletsMixin = require('local-eslint-config/mixins/packlets');
+const packletsMixin = require('local-eslint-config/flat/mixins/packlets');
 
 module.exports = defineConfig([...packletsMixin]);

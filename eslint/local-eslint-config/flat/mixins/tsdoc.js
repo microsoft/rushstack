@@ -5,7 +5,7 @@
 
 const { defineConfig } = require('eslint/config');
 const jsdocEslintPlugin = require('eslint-plugin-jsdoc');
-const tsdocMixin = require('@rushstack/eslint-config/mixins/tsdoc');
+const tsdocMixin = require('@rushstack/eslint-config/flat/mixins/tsdoc');
 
 module.exports = defineConfig([
   ...tsdocMixin,

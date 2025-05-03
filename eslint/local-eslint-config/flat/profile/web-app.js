@@ -9,7 +9,7 @@
 
 const { defineConfig } = require('eslint/config');
 const typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin');
-const webAppProfile = require('@rushstack/eslint-config/profile/web-app');
+const webAppProfile = require('@rushstack/eslint-config/flat/profile/web-app');
 
 const { localCommonConfig } = require('./_common');
 

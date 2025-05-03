@@ -3,7 +3,7 @@
 
 // Adds support for a handful of React specific rules. These rules are sourced from two different
 // react rulesets:
-// - eslint-plugin-react (through @rushstack/eslint-config/mixins/react)
+// - eslint-plugin-react (through @rushstack/eslint-config/flat/mixins/react)
 // - eslint-plugin-react-hooks
 //
 // Additional information on how this mixin should be consumed can be found here:
@@ -13,7 +13,7 @@
 
 const { defineConfig } = require('eslint/config');
 const reactHooksEslintPlugin = require('eslint-plugin-react-hooks');
-const reactMixin = require('@rushstack/eslint-config/mixins/react');
+const reactMixin = require('@rushstack/eslint-config/flat/mixins/react');
 
 module.exports = defineConfig([
   ...reactMixin,

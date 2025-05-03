@@ -2,6 +2,6 @@
 // See LICENSE in the project root for license information.
 
 const { defineConfig } = require('eslint/config');
-const nodeTrustedToolProfile = require('local-eslint-config/profile/node-trusted-tool');
+const nodeTrustedToolProfile = require('local-eslint-config/flat/profile/node-trusted-tool');
 
 module.exports = defineConfig([...nodeTrustedToolProfile]);
