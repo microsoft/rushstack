@@ -83,10 +83,10 @@ const handleMessageAsync = async (message: ITransformModulesRequestMessage | fal
           const parsedMap: ISourceMap = JSON.parse(map);
           parsedMap.sources[0] = relativeSrcFilePath;
           map = JSON.stringify(parsedMap);
-          writeFileSync(`${buildFolderPath}${mapFilePath}`, map, 'utf8');
+          writeFileSync(`${buildFolderPath}/${mapFilePath}`, map, 'utf8');
         }
 
-        writeFileSync(`${buildFolderPath}${jsFilePath}`, code, 'utf8');
+        writeFileSync(`${buildFolderPath}/${jsFilePath}`, code, 'utf8');
       }
     },
     {
