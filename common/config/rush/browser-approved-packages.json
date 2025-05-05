@@ -39,10 +39,6 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
-      "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@rushstack/rush-themed-ui",
       "allowedCategories": [ "libraries" ]
     },

@@ -4,8 +4,5 @@
   // Enable code coverage for Jest
   "collectCoverage": true,
   "coverageDirectory": "<rootDir>/coverage",
-  "coverageReporters": ["cobertura", "html"],
-
-  // Use v8 coverage provider to avoid Babel
-  "coverageProvider": "v8"
+  "coverageReporters": ["cobertura", "html"]
 }
