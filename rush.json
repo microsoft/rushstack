@@ -864,6 +864,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-swc-test",
+      "projectFolder": "build-tests/heft-swc-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-typescript-composite-test",
       "projectFolder": "build-tests/heft-typescript-composite-test",
       "reviewCategory": "tests",

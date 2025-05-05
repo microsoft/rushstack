@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+
+  "compilerOptions": {
+    "outDir": "lib-esm",
+    "rootDir": "src",
+
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "declaration": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "declarationDir": "lib-dts",
+    "emitDeclarationOnly": true,
+    "inlineSources": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "types": ["heft-jest", "webpack-env"],
+
+    "module": "esnext",
+    "target": "esnext",
+    "lib": ["esnext"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules"]
+}
