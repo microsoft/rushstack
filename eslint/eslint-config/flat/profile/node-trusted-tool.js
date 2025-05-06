@@ -21,7 +21,7 @@ module.exports = defineConfig([
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
       // This is disabled for trusted tools because the tool is known to be safe.
-      '@rushstack/security/no-unsafe-regex': 'off'
+      '@rushstack/security/no-unsafe-regexp': 'off'
     }
   }
 ]);
