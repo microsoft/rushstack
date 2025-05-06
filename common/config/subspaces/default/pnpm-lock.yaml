@@ -282,6 +282,9 @@ importers:
       '@types/react-dom':
         specifier: 17.0.25
         version: 17.0.25
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-web-rig:
         specifier: workspace:*
         version: link:../../rigs/local-web-rig
@@ -431,8 +434,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -461,8 +464,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -484,6 +487,9 @@ importers:
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -583,7 +589,7 @@ importers:
         version: link:../../webpack/webpack4-module-minifier-plugin
       '@storybook/react':
         specifier: ~6.4.18
-        version: 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+        version: 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -603,8 +609,8 @@ importers:
         specifier: ~5.2.7
         version: 5.2.7(webpack@4.47.0)
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       heft-storybook-react-tutorial-storykit:
         specifier: workspace:*
         version: link:../heft-storybook-react-tutorial-storykit
@@ -668,7 +674,7 @@ importers:
         version: 6.4.22
       '@storybook/react':
         specifier: ~6.4.18
-        version: 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+        version: 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@storybook/theming':
         specifier: ~6.4.18
         version: 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
@@ -745,6 +751,9 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -776,6 +785,9 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -823,8 +835,8 @@ importers:
         specifier: ~6.6.0
         version: 6.6.0(webpack@5.98.0)
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       html-webpack-plugin:
         specifier: ~5.5.0
         version: 5.5.4(webpack@5.98.0)
@@ -1334,8 +1346,8 @@ importers:
         specifier: 1.0.6
         version: 1.0.6
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -1358,8 +1370,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       heft-example-plugin-01:
         specifier: workspace:*
         version: link:../heft-example-plugin-01
@@ -1392,8 +1404,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -1422,8 +1434,8 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -1458,8 +1470,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -1533,8 +1545,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       heft-example-plugin-01:
         specifier: workspace:*
         version: link:../heft-example-plugin-01
@@ -1578,8 +1590,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       heft-example-plugin-01:
         specifier: workspace:*
         version: link:../heft-example-plugin-01
@@ -1615,8 +1627,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -1706,8 +1718,8 @@ importers:
         specifier: ~5.2.7
         version: 5.2.7(webpack@4.47.0)
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       html-webpack-plugin:
         specifier: ~4.5.2
         version: 4.5.2(webpack@4.47.0)
@@ -1793,8 +1805,8 @@ importers:
         specifier: 1.18.8
         version: 1.18.8
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -1961,8 +1973,8 @@ importers:
         specifier: 1.18.8
         version: 1.18.8
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       file-loader:
         specifier: ~6.0.0
         version: 6.0.0(webpack@4.47.0)
@@ -2024,8 +2036,8 @@ importers:
         specifier: 1.18.8
         version: 1.18.8
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       html-webpack-plugin:
         specifier: ~5.5.0
         version: 5.5.4(webpack@5.98.0)
@@ -3044,6 +3056,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-web-rig:
         specifier: workspace:*
         version: link:../../rigs/local-web-rig
@@ -3072,6 +3087,9 @@ importers:
       '@types/xmldoc':
         specifier: 1.1.4
         version: 1.1.4
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3528,6 +3546,9 @@ importers:
       '@types/react-dom':
         specifier: 17.0.25
         version: 17.0.25
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-web-rig:
         specifier: workspace:*
         version: link:../../rigs/local-web-rig
@@ -3632,6 +3653,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3934,8 +3958,8 @@ importers:
         specifier: 1.18.8
         version: 1.18.8
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       jest-junit:
         specifier: 12.3.0
         version: 12.3.0
@@ -3995,6 +4019,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4020,6 +4047,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4045,6 +4075,9 @@ importers:
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../../libraries/terminal
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4064,6 +4097,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4089,6 +4125,9 @@ importers:
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../../libraries/terminal
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4117,6 +4156,9 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4175,6 +4217,9 @@ importers:
       '@types/ws':
         specifier: 8.5.5
         version: 8.5.5
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4231,8 +4276,8 @@ importers:
         specifier: ^1.63.0
         version: 1.87.0
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       html-webpack-plugin:
         specifier: ~5.5.0
         version: 5.5.4(webpack@5.98.0)
@@ -4294,6 +4339,9 @@ importers:
       '@vscode/test-electron':
         specifier: ^1.6.2
         version: 1.6.2
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       glob:
         specifier: ~7.0.5
         version: 7.0.6
@@ -4322,6 +4370,9 @@ importers:
       '@types/estree':
         specifier: 1.0.6
         version: 1.0.6
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4350,6 +4401,9 @@ importers:
       '@types/webpack':
         specifier: 4.41.32
         version: 4.41.32
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4363,6 +4417,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4372,6 +4429,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4394,6 +4454,9 @@ importers:
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4413,6 +4476,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4432,6 +4498,9 @@ importers:
       '@rushstack/webpack-plugin-utilities':
         specifier: workspace:*
         version: link:../webpack-plugin-utilities
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4457,6 +4526,9 @@ importers:
       '@types/tapable':
         specifier: 1.0.6
         version: 1.0.6
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4476,6 +4548,9 @@ importers:
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4525,6 +4600,9 @@ importers:
       '@types/webpack':
         specifier: 4.41.32
         version: 4.41.32
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4559,6 +4637,9 @@ importers:
       '@types/webpack-sources':
         specifier: 1.4.2
         version: 1.4.2
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4583,6 +4664,9 @@ importers:
       css-loader:
         specifier: ~6.6.0
         version: 6.6.0(webpack@5.98.0)
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4611,6 +4695,9 @@ importers:
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4645,6 +4732,9 @@ importers:
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -11603,7 +11693,7 @@ packages:
       '@storybook/api': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@storybook/client-logger': 6.4.22
       '@storybook/components': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@storybook/core-common': 6.4.22(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+      '@storybook/core-common': 6.4.22(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@storybook/csf': 0.0.2--canary.87bc651.0
       '@storybook/node-logger': 6.4.22
       '@storybook/store': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
@@ -11681,17 +11771,17 @@ packages:
       '@mdx-js/react': 1.6.22(react@17.0.2)
       '@storybook/addons': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@storybook/api': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@storybook/builder-webpack4': 6.4.22(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+      '@storybook/builder-webpack4': 6.4.22(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@storybook/client-logger': 6.4.22
       '@storybook/components': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@storybook/core': 6.4.22(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
+      '@storybook/core': 6.4.22(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
       '@storybook/core-events': 6.4.22
       '@storybook/csf': 0.0.2--canary.87bc651.0
       '@storybook/csf-tools': 6.4.22
       '@storybook/node-logger': 6.4.22
       '@storybook/postinstall': 6.4.22
       '@storybook/preview-web': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@storybook/react': 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+      '@storybook/react': 6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@storybook/source-loader': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@storybook/store': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@storybook/theming': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
@@ -11986,7 +12076,7 @@ packages:
       util-deprecate: 1.0.2
     dev: true
 
-  /@storybook/builder-webpack4@6.4.22(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2):
+  /@storybook/builder-webpack4@6.4.22(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2):
     resolution: {integrity: sha512-A+GgGtKGnBneRFSFkDarUIgUTI8pYFdLmUVKEAGdh2hL+vLXAz9A46sEY7C8LQ85XWa8TKy3OTDxqR4+4iWj3A==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0
@@ -12024,7 +12114,7 @@ packages:
       '@storybook/client-api': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@storybook/client-logger': 6.4.22
       '@storybook/components': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@storybook/core-common': 6.4.22(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+      '@storybook/core-common': 6.4.22(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@storybook/core-events': 6.4.22
       '@storybook/node-logger': 6.4.22
       '@storybook/preview-web': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
@@ -12116,7 +12206,7 @@ packages:
       '@babel/core': 7.20.12
       '@babel/preset-env': 7.24.0(@babel/core@7.20.12)
       '@storybook/codemod': 6.4.22(@babel/preset-env@7.24.0)
-      '@storybook/core-common': 6.4.22(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+      '@storybook/core-common': 6.4.22(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@storybook/csf-tools': 6.4.22
       '@storybook/node-logger': 6.4.22
       '@storybook/semver': 7.3.2
@@ -12288,7 +12378,7 @@ packages:
       - '@types/react'
     dev: true
 
-  /@storybook/core-common@6.4.22(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2):
+  /@storybook/core-common@6.4.22(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2):
     resolution: {integrity: sha512-PD3N/FJXPNRHeQS2zdgzYFtqPLdi3MLwAicbnw+U3SokcsspfsAuyYHZOYZgwO8IAEKy6iCc7TpBdiSJZ/vAKQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0
@@ -12331,7 +12421,7 @@ packages:
       express: 4.20.0
       file-system-cache: 1.1.0
       find-up: 5.0.0
-      fork-ts-checker-webpack-plugin: 6.5.3(eslint@8.57.0)(typescript@5.8.2)(webpack@4.47.0)
+      fork-ts-checker-webpack-plugin: 6.5.3(eslint@9.25.1)(typescript@5.8.2)(webpack@4.47.0)
       fs-extra: 9.1.0
       glob: 7.2.3
       handlebars: 4.7.8
@@ -12364,7 +12454,7 @@ packages:
       core-js: 3.36.0
     dev: true
 
-  /@storybook/core-server@6.4.22(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2):
+  /@storybook/core-server@6.4.22(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2):
     resolution: {integrity: sha512-wFh3e2fa0un1d4+BJP+nd3FVWUO7uHTqv3OGBfOmzQMKp4NU1zaBNdSQG7Hz6mw0fYPBPZgBjPfsJRwIYLLZyw==}
     peerDependencies:
       '@storybook/builder-webpack5': 6.4.22
@@ -12381,13 +12471,13 @@ packages:
         optional: true
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      '@storybook/builder-webpack4': 6.4.22(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+      '@storybook/builder-webpack4': 6.4.22(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@storybook/core-client': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
-      '@storybook/core-common': 6.4.22(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+      '@storybook/core-common': 6.4.22(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@storybook/core-events': 6.4.22
       '@storybook/csf': 0.0.2--canary.87bc651.0
       '@storybook/csf-tools': 6.4.22
-      '@storybook/manager-webpack4': 6.4.22(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+      '@storybook/manager-webpack4': 6.4.22(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@storybook/node-logger': 6.4.22
       '@storybook/semver': 7.3.2
       '@storybook/store': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
@@ -12437,7 +12527,7 @@ packages:
       - webpack-command
     dev: true
 
-  /@storybook/core@6.4.22(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0):
+  /@storybook/core@6.4.22(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0):
     resolution: {integrity: sha512-KZYJt7GM5NgKFXbPRZZZPEONZ5u/tE/cRbMdkn/zWN3He8+VP+65/tz8hbriI/6m91AWVWkBKrODSkeq59NgRA==}
     peerDependencies:
       '@storybook/builder-webpack5': 6.4.22
@@ -12452,7 +12542,7 @@ packages:
         optional: true
     dependencies:
       '@storybook/core-client': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
-      '@storybook/core-server': 6.4.22(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+      '@storybook/core-server': 6.4.22(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
       typescript: 5.8.2
@@ -12500,7 +12590,7 @@ packages:
       lodash: 4.17.21
     dev: true
 
-  /@storybook/manager-webpack4@6.4.22(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2):
+  /@storybook/manager-webpack4@6.4.22(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2):
     resolution: {integrity: sha512-nzhDMJYg0vXdcG0ctwE6YFZBX71+5NYaTGkxg3xT7gbgnP1YFXn9gVODvgq3tPb3gcRapjyOIxUa20rV+r8edA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0
@@ -12515,7 +12605,7 @@ packages:
       '@babel/preset-react': 7.23.3(@babel/core@7.20.12)
       '@storybook/addons': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@storybook/core-client': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
-      '@storybook/core-common': 6.4.22(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+      '@storybook/core-common': 6.4.22(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@storybook/node-logger': 6.4.22
       '@storybook/theming': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@storybook/ui': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
@@ -12622,7 +12712,7 @@ packages:
       - supports-color
     dev: true
 
-  /@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2):
+  /@storybook/react@6.4.22(@babel/core@7.20.12)(@types/node@20.17.19)(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2):
     resolution: {integrity: sha512-5BFxtiguOcePS5Ty/UoH7C6odmvBYIZutfiy4R3Ua6FYmtxac5vP9r5KjCz1IzZKT8mCf4X+PuK1YvDrPPROgQ==}
     engines: {node: '>=10.13.0'}
     hasBin: true
@@ -12644,8 +12734,8 @@ packages:
       '@babel/preset-react': 7.23.3(@babel/core@7.20.12)
       '@pmmmwh/react-refresh-webpack-plugin': 0.5.11(react-refresh@0.11.0)(webpack@4.47.0)
       '@storybook/addons': 6.4.22(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
-      '@storybook/core': 6.4.22(@types/react@17.0.74)(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
-      '@storybook/core-common': 6.4.22(eslint@8.57.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
+      '@storybook/core': 6.4.22(@types/react@17.0.74)(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)(webpack@4.47.0)
+      '@storybook/core-common': 6.4.22(eslint@9.25.1)(react-dom@17.0.2)(react@17.0.2)(typescript@5.8.2)
       '@storybook/csf': 0.0.2--canary.87bc651.0
       '@storybook/node-logger': 6.4.22
       '@storybook/react-docgen-typescript-plugin': 1.0.2-canary.253f8c1.0(typescript@5.8.2)(webpack@4.47.0)
@@ -20050,7 +20140,7 @@ packages:
       worker-rpc: 0.1.1
     dev: true
 
-  /fork-ts-checker-webpack-plugin@6.5.3(eslint@8.57.0)(typescript@5.8.2)(webpack@4.47.0):
+  /fork-ts-checker-webpack-plugin@6.5.3(eslint@9.25.1)(typescript@5.8.2)(webpack@4.47.0):
     resolution: {integrity: sha512-SbH/l9ikmMWycd5puHJKTkZJKddF4iRLyW3DeZ08HTI7NGyLS38MXd/KGgeWumQO7YNQbW2u/NtPT2YowbPaGQ==}
     engines: {node: '>=10', yarn: '>=1.0.0'}
     peerDependencies:
@@ -20070,7 +20160,7 @@ packages:
       chokidar: 3.6.0
       cosmiconfig: 6.0.0
       deepmerge: 4.3.1
-      eslint: 8.57.0
+      eslint: 9.25.1
       fs-extra: 9.1.0
       glob: 7.2.3
       memfs: 3.4.3
