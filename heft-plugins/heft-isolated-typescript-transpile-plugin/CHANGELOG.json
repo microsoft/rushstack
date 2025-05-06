@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
   "entries": [
     {
+      "version": "0.1.11",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.11",
+      "date": "Tue, 06 May 2025 15:11:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix source map comment in emitted files. Fix processing of \"outDir\" field to allow normal relative path formats (\"./lib\", or \"lib\" as opposed to \"/lib\")."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.10",
       "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.10",
       "date": "Thu, 01 May 2025 15:11:33 GMT",
