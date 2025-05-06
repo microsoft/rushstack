@@ -163,6 +163,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-jest-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },

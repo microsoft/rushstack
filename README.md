@@ -177,6 +177,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/heft-parameter-plugin](./build-tests/heft-parameter-plugin/) | This project contains a Heft plugin that adds a custom parameter to built-in actions |
 | [/build-tests/heft-parameter-plugin-test](./build-tests/heft-parameter-plugin-test/) | This project exercises a built-in Heft action with a custom parameter |
 | [/build-tests/heft-sass-test](./build-tests/heft-sass-test/) | This project illustrates a minimal tutorial Heft project targeting the web browser runtime |
+| [/build-tests/heft-swc-test](./build-tests/heft-swc-test/) | Building this project tests building with SWC |
 | [/build-tests/heft-typescript-composite-test](./build-tests/heft-typescript-composite-test/) | Building this project tests behavior of Heft when the tsconfig.json file uses project references. |
 | [/build-tests/heft-typescript-v2-test](./build-tests/heft-typescript-v2-test/) | Building this project tests building with TypeScript v2 |
 | [/build-tests/heft-typescript-v3-test](./build-tests/heft-typescript-v3-test/) | Building this project tests building with TypeScript v3 |

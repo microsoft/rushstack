@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-isolated-typescript-transpile-plugin
 
-This log was last generated on Thu, 01 May 2025 15:11:33 GMT and should not be manually modified.
+This log was last generated on Tue, 06 May 2025 15:11:28 GMT and should not be manually modified.
+
+## 0.1.11
+Tue, 06 May 2025 15:11:28 GMT
+
+### Patches
+
+- Fix source map comment in emitted files. Fix processing of "outDir" field to allow normal relative path formats ("./lib", or "lib" as opposed to "/lib").
 
 ## 0.1.10
 Thu, 01 May 2025 15:11:33 GMT
