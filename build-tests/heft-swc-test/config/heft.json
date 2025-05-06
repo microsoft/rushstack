@@ -1,0 +1,60 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  // TODO: Add comments
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-esnext", "lib-es5", "lib-umd", "temp"] }],
+
+      "tasksByName": {
+        "typescript": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-typescript-plugin"
+          }
+        },
+        "lint": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-lint-plugin"
+          }
+        },
+        "transpile": {
+          "taskDependencies": [],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-isolated-typescript-transpile-plugin",
+            "options": {
+              "emitKinds": [
+                {
+                  "outDir": "lib-commonjs",
+                  "formatOverride": "CommonJS",
+                  "targetOverride": "ESNext"
+                },
+                {
+                  "outDir": "lib-esm",
+                  "formatOverride": "ESNext",
+                  "targetOverride": "ESNext"
+                },
+                {
+                  "outDir": "lib-es5",
+                  "formatOverride": "ESNext",
+                  "targetOverride": "ES5"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+
+    "test": {
+      "phaseDependencies": ["build"],
+      "tasksByName": {
+        "jest": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-jest-plugin"
+          }
+        }
+      }
+    }
+  }
+}

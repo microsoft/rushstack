@@ -1,0 +1,25 @@
+{
+  "name": "heft-swc-test",
+  "description": "Building this project tests building with SWC",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "devDependencies": {
+    "local-eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-isolated-typescript-transpile-plugin": "workspace:*",
+    "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/webpack-env": "1.18.8",
+    "eslint": "~8.57.0",
+    "typescript": "~5.8.2"
+  }
+}

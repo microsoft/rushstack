@@ -278,7 +278,8 @@ async function transpileProjectAsync(
 
   const outputOptions: Map<string, IOptionsByExtension> = new Map();
   for (const emitKind of emitKinds) {
-    outputOptions.set(emitKind.outDir, getOptionsByExtension(emitKind));
+    const { outDir } = emitKind;
+    outputOptions.set(normalizeRelativeDir(outDir), getOptionsByExtension(emitKind));
   }
 
   const tasks: ITransformTask[] = [];
@@ -303,7 +304,7 @@ async function transpileProjectAsync(
     for (const [outputPrefix, optionsByExtension] of outputOptions) {
       const jsFilePath: string = `${outputPrefix}${relativeJsFilePath}`;
       const mapFilePath: string | undefined = externalSourceMaps ? `${jsFilePath}.map` : undefined;
-      const absoluteMapFilePath: string = `${buildFolderPath}${mapFilePath}`;
+      const absoluteMapFilePath: string = `${buildFolderPath}/${mapFilePath}`;
       const relativeMapSrcFilePath: string = Path.convertToSlashes(
         path.relative(path.dirname(absoluteMapFilePath), srcFilePath)
       );
@@ -395,6 +396,14 @@ function printTiming(logger: IScopedLogger, times: [string, number][], descripto
 
     logger.terminal.writeVerboseLine(`Median: (${medianFileName}): ${medianTime.toFixed(2)}ms`);
   }
+}
+
+function normalizeRelativeDir(relativeDir: string): string {
+  return relativeDir.startsWith('./')
+    ? relativeDir.slice(2)
+    : relativeDir.startsWith('/')
+      ? relativeDir.slice(1)
+      : relativeDir;
 }
 
 function endsWithCharacterX(filePath: string): boolean {
