@@ -46,6 +46,7 @@
     "@types/minimatch": "3.0.5",
     "@types/node": "20.17.19",
     "@types/webpack": "4.41.32",
+    "eslint": "~9.25.1",
     "local-node-rig": "workspace:*",
     "webpack": "~4.47.0"
   }

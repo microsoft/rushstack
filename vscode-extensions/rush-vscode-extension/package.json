@@ -264,7 +264,6 @@
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
-    "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/package-extractor": "workspace:*",
@@ -274,7 +273,9 @@
     "@types/vscode": "^1.63.0",
     "@types/webpack-env": "1.18.8",
     "@vscode/test-electron": "^1.6.2",
+    "eslint": "~9.25.1",
     "glob": "~7.0.5",
+    "local-node-rig": "workspace:*",
     "mocha": "^10.1.0",
     "vsce": "~2.14.0"
   },
