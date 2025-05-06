@@ -15,6 +15,7 @@ import type {
   IChangedFilesHookOptions,
   ITypeScriptPluginAccessor
 } from '@rushstack/heft-typescript-plugin';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import type { LinterBase } from './LinterBase';
 import { Eslint } from './Eslint';
@@ -22,6 +23,8 @@ import { Tslint } from './Tslint';
 import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 
 const PLUGIN_NAME: 'lint-plugin' = 'lint-plugin';
+const TYPESCRIPT_PLUGIN_PACKAGE_NAME: '@rushstack/heft-typescript-plugin' =
+  '@rushstack/heft-typescript-plugin';
 const TYPESCRIPT_PLUGIN_NAME: typeof TypeScriptPluginName = 'typescript-plugin';
 const FIX_PARAMETER_NAME: string = '--fix';
 
@@ -40,8 +43,6 @@ interface ILintOptions {
 }
 
 export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
-  private readonly _lintingPromises: Promise<void>[] = [];
-
   // These are initliazed by _initAsync
   private _initPromise!: Promise<void>;
   private _eslintToolPath: string | undefined;
@@ -56,61 +57,77 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
   ): void {
     // Disable linting in watch mode. Some lint rules require the context of multiple files, which
     // may not be available in watch mode.
-    if (!taskSession.parameters.watch) {
-      let fix: boolean =
-        pluginOptions?.alwaysFix || taskSession.parameters.getFlagParameter(FIX_PARAMETER_NAME).value;
-      if (fix && taskSession.parameters.production) {
-        // Write this as a standard output message since we don't want to throw errors when running in
-        // production mode and "alwaysFix" is specified in the plugin options
-        taskSession.logger.terminal.writeLine(
-          'Fix mode has been disabled since Heft is running in production mode'
-        );
-        fix = false;
-      }
-
-      const relativeSarifLogPath: string | undefined = pluginOptions?.sarifLogPath;
-      const sarifLogPath: string | undefined =
-        relativeSarifLogPath && path.resolve(heftConfiguration.buildFolderPath, relativeSarifLogPath);
-
-      // Use the changed files hook to kick off linting asynchronously
-      taskSession.requestAccessToPluginByName(
-        '@rushstack/heft-typescript-plugin',
-        TYPESCRIPT_PLUGIN_NAME,
-        (accessor: ITypeScriptPluginAccessor) => {
-          // Hook into the changed files hook to kick off linting, which will be awaited in the run hook
-          accessor.onChangedFilesHook.tap(
-            PLUGIN_NAME,
-            (changedFilesHookOptions: IChangedFilesHookOptions) => {
-              const lintingPromise: Promise<void> = this._lintAsync({
-                taskSession,
-                heftConfiguration,
-                fix,
-                sarifLogPath,
-                tsProgram: changedFilesHookOptions.program as IExtendedProgram,
-                changedFiles: changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
-              });
-              // Hold on to the original promise, which will throw in the run hook if it unexpectedly fails
-              this._lintingPromises.push(lintingPromise);
-            }
-          );
-        }
-      );
-    }
-
-    let warningPrinted: boolean = false;
-
-    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (options: IHeftTaskRunHookOptions) => {
-      // Run the linters to completion. Linters emit errors and warnings to the logger.
-      if (taskSession.parameters.watch) {
+    if (taskSession.parameters.watch) {
+      let warningPrinted: boolean = false;
+      taskSession.hooks.run.tapPromise(PLUGIN_NAME, async () => {
         if (warningPrinted) {
           return;
         }
-        warningPrinted = true;
 
         // Warn since don't run the linters when in watch mode.
         taskSession.logger.terminal.writeWarningLine("Linting isn't currently supported in watch mode");
-      } else {
-        await Promise.all(this._lintingPromises);
+        warningPrinted = true;
+      });
+      return;
+    }
+
+    const { alwaysFix, sarifLogPath } = pluginOptions || {};
+    let fix: boolean = alwaysFix || taskSession.parameters.getFlagParameter(FIX_PARAMETER_NAME).value;
+    if (fix && taskSession.parameters.production) {
+      // Write this as a standard output message since we don't want to throw errors when running in
+      // production mode and "alwaysFix" is specified in the plugin options
+      taskSession.logger.terminal.writeLine(
+        'Fix mode has been disabled since Heft is running in production mode'
+      );
+      fix = false;
+    }
+
+    const resolvedSarifLogPath: string | undefined =
+      sarifLogPath && path.resolve(heftConfiguration.buildFolderPath, sarifLogPath);
+
+    // Use the changed files hook to collect the files and programs from TypeScript
+    let typescriptChangedFiles: [IExtendedProgram, ReadonlySet<IExtendedSourceFile>][] = [];
+    taskSession.requestAccessToPluginByName(
+      TYPESCRIPT_PLUGIN_PACKAGE_NAME,
+      TYPESCRIPT_PLUGIN_NAME,
+      (accessor: ITypeScriptPluginAccessor) => {
+        // Hook into the changed files hook to kick off linting, which will be awaited in the run hook
+        accessor.onChangedFilesHook.tap(PLUGIN_NAME, (changedFilesHookOptions: IChangedFilesHookOptions) => {
+          typescriptChangedFiles.push([
+            changedFilesHookOptions.program as IExtendedProgram,
+            changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
+          ]);
+        });
+      }
+    );
+
+    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (options: IHeftTaskRunHookOptions) => {
+      // Run the linters to completion. Linters emit errors and warnings to the logger.
+      for (const [tsProgram, changedFiles] of typescriptChangedFiles) {
+        try {
+          await this._lintAsync({
+            taskSession,
+            heftConfiguration,
+            tsProgram,
+            changedFiles,
+            fix,
+            sarifLogPath: resolvedSarifLogPath
+          });
+        } catch (error) {
+          if (!(error instanceof AlreadyReportedError)) {
+            taskSession.logger.emitError(error as Error);
+          }
+        }
+      }
+
+      // Clear the changed files so that we don't lint them again if the task is executed again
+      typescriptChangedFiles = [];
+
+      // We rely on the linters to emit errors and warnings to the logger. If they do, we throw an
+      // AlreadyReportedError to indicate that the task failed, but we don't want to throw an error
+      // if the linter has already reported it.
+      if (taskSession.logger.hasErrors) {
+        throw new AlreadyReportedError();
       }
     });
   }
