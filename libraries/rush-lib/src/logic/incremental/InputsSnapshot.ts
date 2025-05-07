@@ -99,6 +99,10 @@ export interface IInputsSnapshotParameters {
    */
   hashes: ReadonlyMap<string, string>;
   /**
+   * Whether or not the repository has uncommitted changes.
+   */
+  hasUncommittedChanges: boolean;
+  /**
    * Optimized lookup engine used to route `hashes` to individual projects.
    */
   lookupByPath: IReadonlyLookupByPath<IRushConfigurationProjectForSnapshot>;
@@ -130,6 +134,11 @@ export interface IInputsSnapshot {
    * The directory that all paths in `hashes` are relative to.
    */
   readonly rootDirectory: string;
+
+  /**
+   * Whether or not the repository has uncommitted changes.
+   */
+  readonly hasUncommittedChanges: boolean;
 
   /**
    * Gets the map of file paths to Git hashes that will be used to compute the local state hash of the operation.
@@ -169,6 +178,10 @@ export class InputsSnapshot implements IInputsSnapshot {
    */
   public readonly hashes: ReadonlyMap<string, string>;
   /**
+   * {@inheritdoc IInputsSnapshot.hasUncommittedChanges}
+   */
+  public readonly hasUncommittedChanges: boolean;
+  /**
    * {@inheritdoc IInputsSnapshot.rootDirectory}
    */
   public readonly rootDirectory: string;
@@ -204,6 +217,7 @@ export class InputsSnapshot implements IInputsSnapshot {
       environment = { ...process.env },
       globalAdditionalFiles,
       hashes,
+      hasUncommittedChanges,
       lookupByPath,
       rootDir
     } = params;
@@ -261,6 +275,7 @@ export class InputsSnapshot implements IInputsSnapshot {
     // Snapshot the environment so that queries are not impacted by when they happen
     this._environment = environment;
     this.hashes = hashes;
+    this.hasUncommittedChanges = hasUncommittedChanges;
     this.rootDirectory = rootDir;
   }
 

@@ -6,8 +6,12 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
     getRepoRoot(dir: string): string {
       return dir;
     },
-    getRepoStateAsync(): ReadonlyMap<string, string> {
-      return new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']]);
+    getDetailedRepoStateAsync(): IDetailedRepoState {
+      return {
+        hasSubmodules: false,
+        hasUncommittedChanges: false,
+        files: new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']])
+      };
     },
     getRepoChangesAsync(): ReadonlyMap<string, string> {
       return new Map();
@@ -24,6 +28,7 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
 import './mockRushCommandLineParser';
 
 import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
+import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import { getCommandLineParserInstanceAsync } from './TestUtils';

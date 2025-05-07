@@ -26,8 +26,12 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
     getRepoRoot(dir: string): string {
       return dir;
     },
-    getRepoStateAsync(): ReadonlyMap<string, string> {
-      return mockHashes;
+    getDetailedRepoStateAsync(): IDetailedRepoState {
+      return {
+        hasSubmodules: false,
+        hasUncommittedChanges: false,
+        files: mockHashes
+      };
     },
     getRepoChangesAsync(): ReadonlyMap<string, string> {
       return new Map();
@@ -51,6 +55,7 @@ jest.mock('../incremental/InputsSnapshot', () => {
 
 import { resolve } from 'node:path';
 
+import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
