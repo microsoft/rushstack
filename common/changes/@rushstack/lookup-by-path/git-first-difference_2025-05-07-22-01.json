@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lookup-by-path",
+      "comment": "Expose `tree` accessor on `IReadonlyLookupByPath` for a readonly view of the raw tree.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/lookup-by-path"
+}
