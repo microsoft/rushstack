@@ -535,6 +535,7 @@ export interface IInputsSnapshot {
     getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string): string;
     getTrackedFileHashesForOperation(project: IRushConfigurationProjectForSnapshot, operationName?: string): ReadonlyMap<string, string>;
     readonly hashes: ReadonlyMap<string, string>;
+    readonly hasUncommittedChanges: boolean;
     readonly rootDirectory: string;
 }
 
