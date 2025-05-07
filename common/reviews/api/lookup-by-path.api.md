@@ -5,6 +5,18 @@
 ```ts
 
 // @beta
+export function getFirstDifferenceInCommonNodes<TItem extends {}>(options: IGetFirstDifferenceInCommonNodesOptions<TItem>): string | undefined;
+
+// @beta
+export interface IGetFirstDifferenceInCommonNodesOptions<TItem extends {}> {
+    delimiter?: string;
+    equals?: (a: TItem, b: TItem) => boolean;
+    first: IReadonlyPathTrieNode<TItem>;
+    prefix?: string;
+    second: IReadonlyPathTrieNode<TItem>;
+}
+
+// @beta
 export interface IPrefixMatch<TItem extends {}> {
     index: number;
     lastMatch?: IPrefixMatch<TItem>;
@@ -22,10 +34,14 @@ export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[strin
     groupByChild<TInfo>(infoByPath: Map<string, TInfo>, delimiter?: string): Map<TItem, Map<string, TInfo>>;
     has(query: string, delimiter?: string): boolean;
     get size(): number;
-    // Warning: (ae-forgotten-export) The symbol "IReadonlyPathTrieNode" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     get tree(): IReadonlyPathTrieNode<TItem>;
+}
+
+// @beta
+export interface IReadonlyPathTrieNode<TItem extends {}> {
+    readonly children: ReadonlyMap<string, IReadonlyPathTrieNode<TItem>> | undefined;
+    readonly value: TItem | undefined;
 }
 
 // @beta

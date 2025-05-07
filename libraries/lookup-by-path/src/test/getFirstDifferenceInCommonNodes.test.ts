@@ -15,13 +15,35 @@ describe(getFirstDifferenceInCommonNodes.name, () => {
       value: 'new'
     };
 
-    expect(getFirstDifferenceInCommonNodes(last, current)).toBe('');
-    expect(getFirstDifferenceInCommonNodes(current, last)).toBe('');
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: last,
+        second: current
+      })
+    ).toBe('');
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: current,
+        second: last
+      })
+    ).toBe('');
 
     const prefix: string = 'some/prefix';
 
-    expect(getFirstDifferenceInCommonNodes(last, current, prefix)).toBe(prefix);
-    expect(getFirstDifferenceInCommonNodes(current, last, prefix)).toBe(prefix);
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: last,
+        second: current,
+        prefix
+      })
+    ).toBe(prefix);
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: current,
+        second: last,
+        prefix
+      })
+    ).toBe(prefix);
   });
 
   it('detects no changes when both nodes are identical', () => {
@@ -50,8 +72,18 @@ describe(getFirstDifferenceInCommonNodes.name, () => {
       value: undefined
     };
 
-    expect(getFirstDifferenceInCommonNodes(last, current)).toBeUndefined();
-    expect(getFirstDifferenceInCommonNodes(current, last)).toBeUndefined();
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: last,
+        second: current
+      })
+    ).toBeUndefined();
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: current,
+        second: last
+      })
+    ).toBeUndefined();
   });
 
   it('detects no changes when both nodes are identical based on a custom equals', () => {
@@ -84,8 +116,20 @@ describe(getFirstDifferenceInCommonNodes.name, () => {
       return a === b || (a === 'same' && b === 'other') || (a === 'other' && b === 'same');
     }
 
-    expect(getFirstDifferenceInCommonNodes(last, current, '', '/', customEquals)).toBeUndefined();
-    expect(getFirstDifferenceInCommonNodes(current, last, '', '/', customEquals)).toBeUndefined();
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: last,
+        second: current,
+        equals: customEquals
+      })
+    ).toBeUndefined();
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: current,
+        second: last,
+        equals: customEquals
+      })
+    ).toBeUndefined();
   });
 
   it('detects no changes for extra children', () => {
@@ -106,8 +150,18 @@ describe(getFirstDifferenceInCommonNodes.name, () => {
       value: undefined
     };
 
-    expect(getFirstDifferenceInCommonNodes(last, current)).toBeUndefined();
-    expect(getFirstDifferenceInCommonNodes(current, last)).toBeUndefined();
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: last,
+        second: current
+      })
+    ).toBeUndefined();
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: current,
+        second: last
+      })
+    ).toBeUndefined();
   });
 
   it('detects no changes if the set of common nodes differs', () => {
@@ -120,8 +174,18 @@ describe(getFirstDifferenceInCommonNodes.name, () => {
       value: 'new'
     };
 
-    expect(getFirstDifferenceInCommonNodes(last, current)).toBeUndefined();
-    expect(getFirstDifferenceInCommonNodes(current, last)).toBeUndefined();
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: last,
+        second: current
+      })
+    ).toBeUndefined();
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: current,
+        second: last
+      })
+    ).toBeUndefined();
   });
 
   it('detects a nested change', () => {
@@ -152,7 +216,21 @@ describe(getFirstDifferenceInCommonNodes.name, () => {
 
     const prefix: string = 'some/prefix';
 
-    expect(getFirstDifferenceInCommonNodes(last, current, prefix, '@')).toBe('some/prefix@child');
-    expect(getFirstDifferenceInCommonNodes(current, last, prefix, '@')).toBe('some/prefix@child');
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: last,
+        second: current,
+        prefix,
+        delimiter: '@'
+      })
+    ).toBe('some/prefix@child');
+    expect(
+      getFirstDifferenceInCommonNodes({
+        first: current,
+        second: last,
+        prefix,
+        delimiter: '@'
+      })
+    ).toBe('some/prefix@child');
   });
 });
