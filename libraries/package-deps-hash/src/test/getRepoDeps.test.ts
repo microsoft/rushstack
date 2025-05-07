@@ -4,7 +4,13 @@
 import * as path from 'path';
 import { execSync } from 'child_process';
 
-import { getRepoStateAsync, parseGitLsTree, getRepoRoot, parseGitHashObject } from '../getRepoState';
+import {
+  getDetailedRepoStateAsync,
+  type IDetailedRepoState,
+  parseGitLsTree,
+  getRepoRoot,
+  parseGitHashObject
+} from '../getRepoState';
 
 import { FileSystem } from '@rushstack/node-core-library';
 
@@ -15,20 +21,20 @@ const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
 
 const FILTERS: string[] = [`testProject/`, `nestedTestProject/`];
 
-function checkSnapshot(results: Map<string, string>): void {
+function checkSnapshot(results: IDetailedRepoState): void {
   const relevantResults: Record<string, string> = {};
-  for (const [key, hash] of results) {
+  for (const [key, hash] of results.files) {
     if (key.startsWith(TEST_PREFIX)) {
       const partialKey: string = key.slice(TEST_PREFIX.length);
-      for (const filter of FILTERS) {
-        if (partialKey.startsWith(filter)) {
-          relevantResults[partialKey] = hash;
-        }
-      }
+      relevantResults[partialKey] = hash;
     }
   }
 
-  expect(relevantResults).toMatchSnapshot();
+  expect({
+    hasSubmodules: results.hasSubmodules,
+    hasUncommittedChanges: results.hasUncommittedChanges,
+    files: relevantResults
+  }).toMatchSnapshot();
 }
 
 describe(getRepoRoot.name, () => {
@@ -113,9 +119,14 @@ describe(parseGitHashObject.name, () => {
   });
 });
 
-describe(getRepoStateAsync.name, () => {
+describe(getDetailedRepoStateAsync.name, () => {
   it('can parse committed files', async () => {
-    const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
+    const results: IDetailedRepoState = await getDetailedRepoStateAsync(
+      SOURCE_PATH,
+      undefined,
+      undefined,
+      FILTERS
+    );
     checkSnapshot(results);
   });
 
@@ -125,7 +136,12 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath, 'a');
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
+      const results: IDetailedRepoState = await getDetailedRepoStateAsync(
+        SOURCE_PATH,
+        undefined,
+        undefined,
+        FILTERS
+      );
       checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath);
@@ -140,7 +156,12 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath2, 'a');
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
+      const results: IDetailedRepoState = await getDetailedRepoStateAsync(
+        SOURCE_PATH,
+        undefined,
+        undefined,
+        FILTERS
+      );
       checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
@@ -154,7 +175,12 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.deleteFile(testFilePath);
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
+      const results: IDetailedRepoState = await getDetailedRepoStateAsync(
+        SOURCE_PATH,
+        undefined,
+        undefined,
+        FILTERS
+      );
       checkSnapshot(results);
     } finally {
       execSync(`git checkout --force HEAD -- ${TEST_PREFIX}testProject/file1.txt`, {
@@ -170,7 +196,12 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(testFilePath, 'abc');
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
+      const results: IDetailedRepoState = await getDetailedRepoStateAsync(
+        SOURCE_PATH,
+        undefined,
+        undefined,
+        FILTERS
+      );
       checkSnapshot(results);
     } finally {
       execSync(`git checkout --force HEAD -- ${TEST_PREFIX}testProject/file1.txt`, {
@@ -190,7 +221,12 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath3, 'a');
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
+      const results: IDetailedRepoState = await getDetailedRepoStateAsync(
+        SOURCE_PATH,
+        undefined,
+        undefined,
+        FILTERS
+      );
       checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
@@ -205,9 +241,12 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath1, 'a');
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH, [
-        `${TEST_PREFIX}testProject/log.log`
-      ]);
+      const results: IDetailedRepoState = await getDetailedRepoStateAsync(
+        SOURCE_PATH,
+        [`${TEST_PREFIX}testProject/log.log`],
+        undefined,
+        FILTERS
+      );
       checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);

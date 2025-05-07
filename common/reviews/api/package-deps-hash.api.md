@@ -7,6 +7,9 @@
 // @public
 export function ensureGitMinimumVersion(gitPath?: string): void;
 
+// @beta
+export function getDetailedRepoStateAsync(rootDirectory: string, additionalRelativePathsToHash?: string[], gitPath?: string, filterPath?: string[]): Promise<IDetailedRepoState>;
+
 // @public
 export function getGitHashForFiles(filesToHash: string[], packagePath: string, gitPath?: string): Map<string, string>;
 
@@ -24,6 +27,13 @@ export function getRepoStateAsync(rootDirectory: string, additionalRelativePaths
 
 // @beta
 export function hashFilesAsync(rootDirectory: string, filesToHash: Iterable<string> | AsyncIterable<string>, gitPath?: string): Promise<Iterable<[string, string]>>;
+
+// @beta
+export interface IDetailedRepoState {
+    files: Map<string, string>;
+    hasSubmodules: boolean;
+    hasUncommittedChanges: boolean;
+}
 
 // @beta
 export interface IFileDiffStatus {
