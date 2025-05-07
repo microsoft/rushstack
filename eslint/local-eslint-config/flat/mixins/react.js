@@ -35,20 +35,20 @@ module.exports = defineConfig([
     // defaults specified above.
     files: [
       // Test files
-      '*.test.ts',
-      '*.test.tsx',
-      '*.spec.ts',
-      '*.spec.tsx',
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
 
       // Facebook convention
-      '**/__mocks__/*.ts',
-      '**/__mocks__/*.tsx',
-      '**/__tests__/*.ts',
-      '**/__tests__/*.tsx',
+      '**/__mocks__/**/*.ts',
+      '**/__mocks__/**/*.tsx',
+      '**/__tests__/**/*.ts',
+      '**/__tests__/**/*.tsx',
 
       // Microsoft convention
-      '**/test/*.ts',
-      '**/test/*.tsx'
+      '**/test/**/*.ts',
+      '**/test/**/*.tsx'
     ],
 
     // New rules and changes to existing rules

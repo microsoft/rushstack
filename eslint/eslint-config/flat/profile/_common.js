@@ -741,10 +741,10 @@ const commonConfig = defineConfig([
   {
     files: [
       // Test files
-      '*.test.ts',
-      '*.test.tsx',
-      '*.spec.ts',
-      '*.spec.tsx',
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
 
       // Facebook convention
       '**/__mocks__/*.ts',
