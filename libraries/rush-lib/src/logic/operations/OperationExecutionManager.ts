@@ -19,6 +19,7 @@ import { type IOperationExecutionRecordContext, OperationExecutionRecord } from 
 import type { IExecutionResult } from './IOperationExecutionResult';
 import type { IEnvironment } from '../../utilities/Utilities';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import type { IStopwatchResult } from '../../utilities/Stopwatch';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -295,8 +296,8 @@ export class OperationExecutionManager {
     const status: OperationStatus = this._hasAnyFailures
       ? OperationStatus.Failure
       : this._hasAnyNonAllowedWarnings
-        ? OperationStatus.SuccessWithWarning
-        : OperationStatus.Success;
+      ? OperationStatus.SuccessWithWarning
+      : OperationStatus.Success;
 
     return {
       operationResults: this._executionRecords,
@@ -331,7 +332,9 @@ export class OperationExecutionManager {
    * Handles the result of the operation and propagates any relevant effects.
    */
   private _onOperationComplete(record: OperationExecutionRecord): void {
-    const { runner, name, status, silent } = record;
+    const { runner, name, status, silent, _operationMetadataManager: operationMetadataManager } = record;
+    const stopwatch: IStopwatchResult =
+      operationMetadataManager?.tryRestoreStopwatch(record.stopwatch) || record.stopwatch;
 
     switch (status) {
       /**
@@ -413,7 +416,7 @@ export class OperationExecutionManager {
       case OperationStatus.Success: {
         if (!silent) {
           record.collatedWriter.terminal.writeStdoutLine(
-            Colorize.green(`"${name}" completed successfully in ${record.stopwatch.toString()}.`)
+            Colorize.green(`"${name}" completed successfully in ${stopwatch.toString()}.`)
           );
         }
         break;
@@ -422,7 +425,7 @@ export class OperationExecutionManager {
       case OperationStatus.SuccessWithWarning: {
         if (!silent) {
           record.collatedWriter.terminal.writeStderrLine(
-            Colorize.yellow(`"${name}" completed with warnings in ${record.stopwatch.toString()}.`)
+            Colorize.yellow(`"${name}" completed with warnings in ${stopwatch.toString()}.`)
           );
         }
         this._hasAnyNonAllowedWarnings = this._hasAnyNonAllowedWarnings || !runner.warningsAreAllowed;
