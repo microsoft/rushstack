@@ -22,6 +22,10 @@ export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[strin
     groupByChild<TInfo>(infoByPath: Map<string, TInfo>, delimiter?: string): Map<TItem, Map<string, TInfo>>;
     has(query: string, delimiter?: string): boolean;
     get size(): number;
+    // Warning: (ae-forgotten-export) The symbol "IReadonlyPathTrieNode" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    get tree(): IReadonlyPathTrieNode<TItem>;
 }
 
 // @beta
@@ -42,6 +46,8 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     setItem(serializedPath: string, value: TItem, delimiter?: string): this;
     setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this;
     get size(): number;
+    // (undocumented)
+    get tree(): IReadonlyPathTrieNode<TItem>;
 }
 
 ```
