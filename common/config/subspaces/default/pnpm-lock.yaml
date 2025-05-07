@@ -46,6 +46,9 @@ importers:
       '@types/resolve':
         specifier: 1.20.2
         version: 1.20.2
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -126,6 +129,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -245,6 +251,9 @@ importers:
       '@types/update-notifier':
         specifier: ~6.0.1
         version: 6.0.8
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -304,6 +313,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -341,6 +353,9 @@ importers:
       '@types/semver':
         specifier: 7.5.0
         version: 7.5.0
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -372,6 +387,9 @@ importers:
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -409,6 +427,9 @@ importers:
       '@types/semver':
         specifier: 7.5.0
         version: 7.5.0
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -1933,6 +1954,9 @@ importers:
       '@rushstack/heft-web-rig':
         specifier: workspace:*
         version: link:../../rigs/heft-web-rig
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
 
   ../../../build-tests/heft-webpack4-everything-test:
     devDependencies:
@@ -2614,8 +2638,8 @@ importers:
         specifier: workspace:*
         version: link:../../apps/heft
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -2768,8 +2792,8 @@ importers:
         specifier: workspace:*
         version: link:../../apps/heft
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -2821,8 +2845,8 @@ importers:
         specifier: workspace:*
         version: link:../../apps/heft
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -2842,6 +2866,9 @@ importers:
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../heft-webpack5-plugin
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -2864,6 +2891,9 @@ importers:
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../heft-webpack5-plugin
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -2935,6 +2965,9 @@ importers:
       '@types/webpack':
         specifier: 4.41.32
         version: 4.41.32
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -2972,6 +3005,9 @@ importers:
       '@types/watchpack':
         specifier: 2.4.0
         version: 2.4.0
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3019,6 +3055,9 @@ importers:
       '@types/node-forge':
         specifier: 1.0.4
         version: 1.0.4
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3202,6 +3241,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3258,8 +3300,8 @@ importers:
         specifier: 7.5.0
         version: 7.5.0
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3454,6 +3496,9 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3562,6 +3607,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3578,6 +3626,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3665,6 +3716,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3693,6 +3747,9 @@ importers:
       '@types/js-yaml':
         specifier: 3.12.1
         version: 3.12.1
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3730,6 +3787,9 @@ importers:
       '@types/diff':
         specifier: 5.0.1
         version: 5.0.1
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3858,8 +3918,8 @@ importers:
         specifier: ~3.4.1
         version: 3.4.1(webpack@5.98.0)
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       html-webpack-plugin:
         specifier: ~5.5.0
         version: 5.5.4(webpack@5.98.0)
@@ -3991,6 +4051,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig

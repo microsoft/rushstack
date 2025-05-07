@@ -19,7 +19,8 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
-    "@types/js-yaml": "3.12.1"
+    "@types/js-yaml": "3.12.1",
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*"
   }
 }

@@ -69,6 +69,7 @@
   "devDependencies": {
     "@pnpm/lockfile.types": "~1.0.3",
     "@pnpm/logger": "4.0.0",
+    "eslint": "~9.25.1",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
