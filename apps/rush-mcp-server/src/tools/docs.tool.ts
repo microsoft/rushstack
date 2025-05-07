@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { z } from 'zod';
+import { JsonFile } from '@rushstack/node-core-library';
+import path from 'path';
 
 import { BaseTool, type CallToolResult } from './base.tool';
 
@@ -20,30 +22,37 @@ export class RushDocsTool extends BaseTool {
     super({
       name: 'rush_docs',
       description:
-        'Search and retrieve relevant sections from Rush official documentation based on user queries.',
+        'Search and retrieve relevant sections from the official Rush documentation based on user queries.',
       schema: {
         userQuery: z.string().describe('The user query to search for relevant documentation sections.')
       }
     });
   }
 
-  public async executeAsync({ userQuery }: { userQuery: string }): Promise<CallToolResult> {
-    // An example of a knowledge base that can run, but needs to be replaced with Microsoft’s service.
-    const response: Response = await fetch('http://47.120.46.115/search', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ query: userQuery, topK: 10 })
-    });
+  // TODO: replace with Microsoft's service
+  private _searchDocs(query: string): IDocsResult {
+    const startTime: number = Date.now();
 
-    const result: IDocsResult = (await response.json()) as IDocsResult;
+    const results: IDocsResult['results'] = JsonFile.load(
+      path.join(__dirname, '../rush-doc-fragment.mock.json')
+    );
+
+    return {
+      query,
+      results,
+      count: results.length,
+      searchTimeMs: Date.now() - startTime
+    };
+  }
+
+  public async executeAsync({ userQuery }: { userQuery: string }): Promise<CallToolResult> {
+    const docSearchResult: IDocsResult = this._searchDocs(userQuery);
 
     return {
       content: [
         {
           type: 'text',
-          text: result.results.map((item) => item.text).join('\n')
+          text: docSearchResult.results.map((item) => item.text).join('\n\n')
         }
       ]
     };

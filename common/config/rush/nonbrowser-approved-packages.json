@@ -973,6 +973,10 @@
     {
       "name": "xmldoc",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "zod",
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }

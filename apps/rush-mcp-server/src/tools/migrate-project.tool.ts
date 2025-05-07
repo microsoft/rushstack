@@ -125,8 +125,8 @@ export class RushMigrateProjectTool extends BaseTool {
           type: 'text',
           text:
             `Project "${projectName}" migrated to subspace "${targetSubspaceName}" successfully. ` +
-            `You can ask whether user wants to run "rush update --subspace ${targetSubspaceName}" to update the project. ` +
-            `If user says "yes" you can run "rush update --subspace ${targetSubspaceName}" directly for them.`
+            `You can ask whether the user wants to run "rush update --subspace ${targetSubspaceName}" to update the project. ` +
+            `If the user says "yes", you can run "rush update --subspace ${targetSubspaceName}" directly for them.`
         }
       ]
     };

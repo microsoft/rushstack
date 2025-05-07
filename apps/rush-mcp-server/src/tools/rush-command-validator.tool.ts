@@ -88,7 +88,7 @@ export class RushCommandValidatorTool extends BaseTool {
             content: [
               {
                 type: 'text',
-                text: `The package "${packageName}" does not exist in the Rush workspace. You can retrive package name from 'package.json' file in the project folder.`
+                text: `The package "${packageName}" does not exist in the Rush workspace. You can retrieve the package name from the 'package.json' file in the project folder.`
               }
             ]
           };
