@@ -44,7 +44,13 @@ module.exports = {
 
         // Rationale: Use of `void` to explicitly indicate that a floating promise is expected
         // and allowed.
-        '@typescript-eslint/no-floating-promises': ['error', { ignoreVoid: true }],
+        '@typescript-eslint/no-floating-promises': [
+          'error',
+          {
+            ignoreVoid: true,
+            checkThenables: true
+          }
+        ],
 
         // Rationale: Redeclaring a variable likely indicates a mistake in the code.
         'no-redeclare': 'off',

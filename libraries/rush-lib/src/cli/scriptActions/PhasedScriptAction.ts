@@ -817,7 +817,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
 
     // Loop until Ctrl+C
-    // eslint-disable-next-line no-constant-condition
     while (!abortSignal.aborted) {
       // On the initial invocation, this promise will return immediately with the full set of projects
       const { changedProjects, inputsSnapshot: state } =

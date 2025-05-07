@@ -563,8 +563,8 @@ importers:
         specifier: ~10.0.98
         version: 10.0.130
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -915,6 +915,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -1206,6 +1209,9 @@ importers:
 
   ../../../build-tests/eslint-8-test:
     devDependencies:
+      '@rushstack/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint/eslint-config
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
@@ -1796,8 +1802,8 @@ importers:
         specifier: 1.18.8
         version: 1.18.8
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -2104,6 +2110,9 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       html-webpack-plugin:
         specifier: ~4.5.2
         version: 4.5.2(webpack@4.47.0)
@@ -2146,6 +2155,9 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       html-webpack-plugin:
         specifier: ~4.5.2
         version: 4.5.2(webpack@4.47.0)
@@ -2188,6 +2200,9 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       html-webpack-plugin:
         specifier: ~4.5.2
         version: 4.5.2(webpack@4.47.0)
@@ -2330,6 +2345,9 @@ importers:
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig

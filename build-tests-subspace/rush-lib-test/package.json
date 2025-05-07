@@ -23,9 +23,6 @@
     "@microsoft/rush-lib": {
       "injected": true
     },
-    "@rushstack/eslint-config": {
-      "injected": true
-    },
     "@rushstack/terminal": {
       "injected": true
     },

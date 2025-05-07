@@ -13,5 +13,6 @@ interface IToExtensionMessageCommandInfo {
 const vscode: Webview = window.acquireVsCodeApi();
 
 export const sendMessageToExtension: (message: IToExtensionMessage) => void = (message) => {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   vscode.postMessage(message);
 };

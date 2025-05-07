@@ -13,6 +13,7 @@
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
+    "eslint": "~9.25.1",
     "local-node-rig": "workspace:*",
     "run-scenarios-helpers": "workspace:*"
   }

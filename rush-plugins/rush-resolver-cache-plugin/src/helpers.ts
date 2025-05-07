@@ -91,7 +91,6 @@ export function resolveDependencyKey(
  * @returns The physical path to the dependency
  */
 export function getDescriptionFileRootFromKey(lockfileFolder: string, key: string, name?: string): string {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   if (!key.startsWith('file:')) {
     name = key.slice(1, key.indexOf('@', 2));
   }
