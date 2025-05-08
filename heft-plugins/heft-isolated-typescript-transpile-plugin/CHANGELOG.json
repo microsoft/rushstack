@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
   "entries": [
     {
+      "version": "0.1.12",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.12",
+      "date": "Thu, 08 May 2025 00:11:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.11",
       "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.1.11",
       "date": "Tue, 06 May 2025 15:11:28 GMT",

@@ -2,6 +2,21 @@
   "name": "@rushstack/lookup-by-path",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/lookup-by-path_v0.6.0",
+      "date": "Thu, 08 May 2025 00:11:15 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `getFirstDifferenceInCommonNodes` API."
+          },
+          {
+            "comment": "Expose `tree` accessor on `IReadonlyLookupByPath` for a readonly view of the raw tree."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.23",
       "tag": "@rushstack/lookup-by-path_v0.5.23",
       "date": "Thu, 01 May 2025 15:11:33 GMT",

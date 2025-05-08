@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Thu, 01 May 2025 15:11:33 GMT and should not be manually modified.
+This log was last generated on Thu, 08 May 2025 00:11:15 GMT and should not be manually modified.
+
+## 4.4.0
+Thu, 08 May 2025 00:11:15 GMT
+
+### Minor changes
+
+- Add `getDetailedRepoState` API to expose `hasSubmodules` and `hasUncommittedChanges` in addition to the results returned by `getRepoState`.
 
 ## 4.3.24
 Thu, 01 May 2025 15:11:33 GMT
