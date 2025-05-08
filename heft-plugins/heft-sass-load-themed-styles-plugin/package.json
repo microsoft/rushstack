@@ -25,6 +25,6 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-sass-plugin": "workspace:*",
     "local-node-rig": "workspace:*",
-    "eslint": "~8.57.0"
+    "eslint": "~9.25.1"
   }
 }

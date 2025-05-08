@@ -337,7 +337,12 @@ function buildRules(profile) {
           //                    or else return the object to a caller (who assumes this responsibility).  Unterminated
           //                    promise chains are a serious issue.  Besides causing errors to be silently ignored,
           //                    they can also cause a NodeJS process to terminate unexpectedly.
-          '@typescript-eslint/no-floating-promises': 'error',
+          '@typescript-eslint/no-floating-promises': [
+            'error',
+            {
+              checkThenables: true
+            }
+          ],
 
           // RATIONALE:         Catches a common coding mistake.
           '@typescript-eslint/no-for-in-array': 'error',

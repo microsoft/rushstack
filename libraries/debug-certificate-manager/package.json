@@ -23,6 +23,7 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@types/node-forge": "1.0.4",
+    "eslint": "~9.25.1",
     "local-node-rig": "workspace:*"
   }
 }

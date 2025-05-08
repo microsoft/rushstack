@@ -53,6 +53,7 @@
     "@types/express": "4.17.21",
     "@types/js-yaml": "3.12.1",
     "@types/update-notifier": "~6.0.1",
+    "eslint": "~9.25.1",
     "local-node-rig": "workspace:*",
     "@pnpm/lockfile-types": "^5.1.5",
     "@types/semver": "7.5.0"

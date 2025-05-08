@@ -23,8 +23,9 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
-    "@rushstack/heft-typescript-plugin": "workspace:*"
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*"
   },
   "dependencies": {
     "@rushstack/lookup-by-path": "workspace:*",

@@ -26,7 +26,6 @@ export class ChangeManager {
     const projectInfo: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(projectName);
     if (projectInfo && projectInfo.shouldPublish) {
       const changefile: IChangeFile = {
-        // eslint-disable-line @typescript-eslint/no-explicit-any
         changes: [
           {
             comment: '',

@@ -31,8 +31,8 @@
     // engine for API Extractor.
     "typescript": "~5.8.2",
 
-    // Workaround for https://github.com/microsoft/rushstack/issues/1466
-    "eslint": "~8.57.0"
+    // This should be the ESLint version that's used to build most of the projects in the repo.
+    "eslint": "~9.25.1"
   },
 
   /**
@@ -83,7 +83,8 @@
       "7.11.0", // Used by build-tests/eslint-7-11-test
       "~7.30.0", // Used by build-tests/eslint-7-test
       "8.6.0", // Used by build-tests/eslint-bulk-suppressions-test-legacy
-      "8.23.1" // Used by build-tests/eslint-bulk-suppressions-test-legacy
+      "8.23.1", // Used by build-tests/eslint-bulk-suppressions-test-legacy
+      "~8.57.0" // Used by build-tests/eslint-bulk-suppressions-test
     ],
     /**
      * For example, allow some projects to use an older TypeScript compiler

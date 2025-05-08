@@ -86,7 +86,6 @@ export class InitSubspaceAction extends BaseRushAction {
       updateExistingFile: true
     });
 
-    // eslint-disable-next-line no-console
     terminal.writeLine(
       '\nSubspace successfully created. Please review the subspace configuration files before committing.'
     );
