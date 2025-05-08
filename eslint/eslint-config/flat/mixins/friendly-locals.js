@@ -22,10 +22,9 @@
 //
 // IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
-const { defineConfig } = require('eslint/config');
 const typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin');
 
-module.exports = defineConfig([
+module.exports = [
   {
     files: ['**/*.ts', '**/*.tsx'],
     plugins: {
@@ -88,4 +87,4 @@ module.exports = defineConfig([
       ]
     }
   }
-]);
+];

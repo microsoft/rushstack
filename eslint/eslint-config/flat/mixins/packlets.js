@@ -7,10 +7,9 @@
 //
 // IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
-const { defineConfig } = require('eslint/config');
 const rushstackPackletsEslintPlugin = require('@rushstack/eslint-plugin-packlets');
 
-module.exports = defineConfig({
+module.exports = {
   files: ['**/*.ts', '**/*.tsx'],
   plugins: {
     '@rushstack/packlets': rushstackPackletsEslintPlugin
@@ -19,4 +18,4 @@ module.exports = defineConfig({
     '@rushstack/packlets/mechanics': 'warn',
     '@rushstack/packlets/circular-deps': 'warn'
   }
-});
+};

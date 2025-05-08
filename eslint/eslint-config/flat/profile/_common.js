@@ -20,7 +20,7 @@
 // - An issue that catches code that is likely to malfunction (e.g. unterminated promise chain)
 // - An obsolete language feature that nobody should be using for any good reason
 
-const { defineConfig, globalIgnores } = require('eslint/config');
+const { globalIgnores } = require('eslint/config');
 const promiseEslintPlugin = require('eslint-plugin-promise');
 const typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin');
 const typescriptEslintParser = require('@typescript-eslint/parser');
@@ -183,7 +183,7 @@ const commonNamingConventionSelectors = [
   }
 ];
 
-const commonConfig = defineConfig([
+const commonConfig = [
   // Manually authored .d.ts files are generally used to describe external APIs that are  not expected
   // to follow our coding conventions.  Linting those files tends to produce a lot of spurious suppressions,
   // so we simply ignore them.
@@ -772,6 +772,6 @@ const commonConfig = defineConfig([
       '@rushstack/typedef-var': 'off'
     }
   }
-]);
+];
 
 module.exports = { commonNamingConventionSelectors, commonConfig };

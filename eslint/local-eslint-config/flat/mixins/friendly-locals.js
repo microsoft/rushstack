@@ -3,7 +3,6 @@
 
 // IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
-const { defineConfig } = require('eslint/config');
 const friendlyLocalsMixin = require('@rushstack/eslint-config/flat/mixins/friendly-locals');
 
-module.exports = defineConfig([...friendlyLocalsMixin]);
+module.exports = [...friendlyLocalsMixin];

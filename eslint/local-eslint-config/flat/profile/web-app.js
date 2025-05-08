@@ -7,13 +7,12 @@
 // Also use this profile if you are creating a library that can be consumed by both Node.js
 // and web applications.
 
-const { defineConfig } = require('eslint/config');
 const typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin');
 const webAppProfile = require('@rushstack/eslint-config/flat/profile/web-app');
 
 const { localCommonConfig } = require('./_common');
 
-module.exports = defineConfig([
+module.exports = [
   ...webAppProfile,
   ...localCommonConfig,
   {
@@ -27,4 +26,4 @@ module.exports = defineConfig([
       '@typescript-eslint/no-require-imports': 'error'
     }
   }
-]);
+];

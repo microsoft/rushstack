@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-const { defineConfig } = require('eslint/config');
-const nodeTrustedToolProfile = require('@rushstack/eslint-config/flat/profile/node');
+const nodeProfile = require('@rushstack/eslint-config/flat/profile/node');
 
-module.exports = defineConfig([
-  ...nodeTrustedToolProfile,
+module.exports = [
+  ...nodeProfile,
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
@@ -14,4 +13,4 @@ module.exports = defineConfig([
       }
     }
   }
-]);
+];

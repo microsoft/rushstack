@@ -7,7 +7,6 @@
 // Also use this profile if you are creating a library that can be consumed by both Node.js
 // and web applications.
 
-const { defineConfig } = require('eslint/config');
 const { commonConfig } = require('./_common');
 
-module.exports = defineConfig([...commonConfig]);
+module.exports = [...commonConfig];

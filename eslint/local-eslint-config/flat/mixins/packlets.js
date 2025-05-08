@@ -3,7 +3,6 @@
 
 // IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
-const { defineConfig } = require('eslint/config');
 const packletsMixin = require('@rushstack/eslint-config/flat/mixins/packlets');
 
-module.exports = defineConfig([...packletsMixin]);
+module.exports = [...packletsMixin];

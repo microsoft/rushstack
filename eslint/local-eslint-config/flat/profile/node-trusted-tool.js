@@ -12,9 +12,8 @@
 // DO NOT use this profile for a library project that might also be loaded by a Node.js service;
 // use "local-eslint-config/flat/profiles/node" instead.
 
-const { defineConfig } = require('eslint/config');
 const nodeTrustedToolProfile = require('@rushstack/eslint-config/flat/profile/node-trusted-tool');
 
 const { localCommonConfig } = require('./_common');
 
-module.exports = defineConfig([...nodeTrustedToolProfile, ...localCommonConfig]);
+module.exports = [...nodeTrustedToolProfile, ...localCommonConfig];

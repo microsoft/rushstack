@@ -12,10 +12,9 @@
 // DO NOT use this profile for a library project that might also be loaded by a Node.js service;
 // use "@rushstack/eslint-config/profiles/node" instead.
 
-const { defineConfig } = require('eslint/config');
 const { commonConfig } = require('./_common');
 
-module.exports = defineConfig([
+module.exports = [
   ...commonConfig,
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -24,4 +23,4 @@ module.exports = defineConfig([
       '@rushstack/security/no-unsafe-regexp': 'off'
     }
   }
-]);
+];

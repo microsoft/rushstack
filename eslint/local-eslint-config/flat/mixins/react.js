@@ -11,11 +11,10 @@
 //
 // IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
-const { defineConfig } = require('eslint/config');
 const reactHooksEslintPlugin = require('eslint-plugin-react-hooks');
 const reactMixin = require('@rushstack/eslint-config/flat/mixins/react');
 
-module.exports = defineConfig([
+module.exports = [
   ...reactMixin,
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -54,4 +53,4 @@ module.exports = defineConfig([
     // New rules and changes to existing rules
     rules: {}
   }
-]);
+];

@@ -5,7 +5,6 @@
 // It enables security rules that assume the service could receive malicious inputs from an
 // untrusted user.  If that is not the case, consider using the "node-trusted-tool" profile instead.
 
-const { defineConfig } = require('eslint/config');
 const { commonConfig } = require('./_common');
 
-module.exports = defineConfig([...commonConfig]);
+module.exports = [...commonConfig];

@@ -6,10 +6,9 @@
 //
 // IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
-const { defineConfig } = require('eslint/config');
 const reactEslintPlugin = require('eslint-plugin-react');
 
-module.exports = defineConfig({
+module.exports = {
   files: ['**/*.ts', '**/*.tsx'],
   plugins: {
     react: reactEslintPlugin
@@ -73,4 +72,4 @@ module.exports = defineConfig({
     // RATIONALE:         Improves syntax for some cases that are not already handled by Prettier.
     'react/self-closing-comp': 'warn'
   }
-});
+};

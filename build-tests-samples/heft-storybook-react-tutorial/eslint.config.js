@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-const { defineConfig } = require('eslint/config');
 const webAppProfile = require('local-eslint-config/flat/profile/web-app');
 const reactMixin = require('local-eslint-config/flat/mixins/react');
 
-module.exports = defineConfig([
+module.exports = [
   ...webAppProfile,
   ...reactMixin,
   {
@@ -16,4 +15,4 @@ module.exports = defineConfig([
       }
     }
   }
-]);
+];

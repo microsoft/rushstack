@@ -3,11 +3,10 @@
 
 // IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
-const { defineConfig } = require('eslint/config');
 const jsdocEslintPlugin = require('eslint-plugin-jsdoc');
 const tsdocMixin = require('@rushstack/eslint-config/flat/mixins/tsdoc');
 
-module.exports = defineConfig([
+module.exports = [
   ...tsdocMixin,
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -40,4 +39,4 @@ module.exports = defineConfig([
     ],
     rules: {}
   }
-]);
+];

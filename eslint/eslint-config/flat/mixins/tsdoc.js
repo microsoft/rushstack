@@ -6,10 +6,9 @@
 //
 // IMPORTANT: Mixins must be included in your ESLint configuration AFTER the profile
 
-const { defineConfig } = require('eslint/config');
 const tsdocEslintPlugin = require('eslint-plugin-tsdoc');
 
-module.exports = defineConfig({
+module.exports = {
   files: ['**/*.ts', '**/*.tsx'],
   plugins: {
     tsdoc: tsdocEslintPlugin
@@ -17,4 +16,4 @@ module.exports = defineConfig({
   rules: {
     'tsdoc/syntax': 'warn'
   }
-});
+};
