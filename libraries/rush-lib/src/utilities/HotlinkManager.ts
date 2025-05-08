@@ -196,9 +196,8 @@ export class HotlinkManager {
     );
     const packageSourcePathSet: Set<string> = new Set();
     for (const dirName of subDirectories) {
-      const parsedDependency: DependencyPath = parse(dirName);
-      if (parsedDependency?.name === packageName) {
-        const packageSourcePath: string = `${consumerPackagePnpmDependenciesFolderPath}/${dirName}/${RushConstants.nodeModulesFolderName}/${packageName}`;
+      const packageSourcePath: string = `${consumerPackagePnpmDependenciesFolderPath}/${dirName}/${RushConstants.nodeModulesFolderName}/${packageName}`;
+      if (await FileSystem.existsAsync(packageSourcePath)) {
         const { version } = await JsonFile.loadAsync(`${packageSourcePath}/${FileConstants.PackageJson}`);
         if (semver.satisfies(version, versionRange)) {
           packageSourcePathSet.add(packageSourcePath);
