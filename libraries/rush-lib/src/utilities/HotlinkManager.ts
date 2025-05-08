@@ -13,10 +13,8 @@ import {
   type INodePackageJson,
   type IPackageJsonDependencyTable
 } from '@rushstack/node-core-library';
-import type { DependencyPath } from '@pnpm/dependency-path';
 import { PackageExtractor } from '@rushstack/package-extractor';
 import { pnpmSyncUpdateFileAsync, pnpmSyncCopyAsync, type ILogMessageCallbackOptions } from 'pnpm-sync-lib';
-import { parse } from '@pnpm/dependency-path';
 import * as semver from 'semver';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
