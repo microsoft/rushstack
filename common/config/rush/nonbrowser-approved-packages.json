@@ -227,6 +227,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/mcp-server",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/module-minifier",
       "allowedCategories": [ "libraries", "tests" ]
     },

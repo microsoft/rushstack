@@ -661,6 +661,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-mcp-example-plugin",
+      "projectFolder": "build-tests/rush-mcp-example-plugin",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "run-scenarios-helpers",
       "projectFolder": "build-tests/run-scenarios-helpers",
       "reviewCategory": "tests",
