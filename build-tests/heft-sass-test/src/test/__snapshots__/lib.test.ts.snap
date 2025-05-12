@@ -4,15 +4,15 @@ exports[`SASS ESM Shims ignored1.scss: files 1`] = `Array []`;
 
 exports[`SASS ESM Shims ignored2.scss: files 1`] = `Array []`;
 
-exports[`SASS ESM Shims styles.sass: files 1`] = `
+exports[`SASS ESM Shims styles.module.sass: files 1`] = `
 Array [
-  "styles.css",
-  "styles.sass.d.ts",
-  "styles.sass.js",
+  "styles.module.css",
+  "styles.module.sass.d.ts",
+  "styles.module.sass.js",
 ]
 `;
 
-exports[`SASS ESM Shims styles.sass: styles.css 1`] = `
+exports[`SASS ESM Shims styles.module.sass: styles.module.css 1`] = `
 "/**
  * * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
@@ -81,7 +81,7 @@ html, body {
 }"
 `;
 
-exports[`SASS ESM Shims styles.sass: styles.sass.d.ts 1`] = `
+exports[`SASS ESM Shims styles.module.sass: styles.module.sass.d.ts 1`] = `
 "declare interface IStyles {
   exampleImport: string;
   exampleApp: string;
@@ -91,7 +91,7 @@ declare const styles: IStyles;
 export default styles;"
 `;
 
-exports[`SASS ESM Shims styles.sass: styles.sass.js 1`] = `"export { default } from \\"./styles.css\\";"`;
+exports[`SASS ESM Shims styles.module.sass: styles.module.sass.js 1`] = `"export { default } from \\"./styles.module.css\\";"`;
 
 exports[`SASS ESM Shims stylesAltSyntax.global.scss: files 1`] = `
 Array [
@@ -115,18 +115,15 @@ exports[`SASS ESM Shims stylesAltSyntax.global.scss: stylesAltSyntax.global.scss
 
 exports[`SASS ESM Shims stylesAltSyntax.global.scss: stylesAltSyntax.global.scss.js 1`] = `"import \\"./stylesAltSyntax.global.css\\";export {};"`;
 
-exports[`SASS ESM Shims stylesAltSyntax.scss: files 1`] = `
+exports[`SASS ESM Shims stylesAltSyntax.module.scss: files 1`] = `
 Array [
-  "stylesAltSyntax.css",
-  "stylesAltSyntax.global.css",
-  "stylesAltSyntax.global.scss.d.ts",
-  "stylesAltSyntax.global.scss.js",
-  "stylesAltSyntax.scss.d.ts",
-  "stylesAltSyntax.scss.js",
+  "stylesAltSyntax.module.css",
+  "stylesAltSyntax.module.scss.d.ts",
+  "stylesAltSyntax.module.scss.js",
 ]
 `;
 
-exports[`SASS ESM Shims stylesAltSyntax.scss: stylesAltSyntax.css 1`] = `
+exports[`SASS ESM Shims stylesAltSyntax.module.scss: stylesAltSyntax.module.css 1`] = `
 "/**
  * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
@@ -136,21 +133,7 @@ exports[`SASS ESM Shims stylesAltSyntax.scss: stylesAltSyntax.css 1`] = `
 }"
 `;
 
-exports[`SASS ESM Shims stylesAltSyntax.scss: stylesAltSyntax.global.css 1`] = `
-"/**
- * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
- * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
- */
-.ms-label {
-  margin-bottom: 20px;
-}"
-`;
-
-exports[`SASS ESM Shims stylesAltSyntax.scss: stylesAltSyntax.global.scss.d.ts 1`] = `"export {};"`;
-
-exports[`SASS ESM Shims stylesAltSyntax.scss: stylesAltSyntax.global.scss.js 1`] = `"import \\"./stylesAltSyntax.global.css\\";export {};"`;
-
-exports[`SASS ESM Shims stylesAltSyntax.scss: stylesAltSyntax.scss.d.ts 1`] = `
+exports[`SASS ESM Shims stylesAltSyntax.module.scss: stylesAltSyntax.module.scss.d.ts 1`] = `
 "declare interface IStyles {
   label: string;
 }
@@ -158,17 +141,17 @@ declare const styles: IStyles;
 export default styles;"
 `;
 
-exports[`SASS ESM Shims stylesAltSyntax.scss: stylesAltSyntax.scss.js 1`] = `"export { default } from \\"./stylesAltSyntax.css\\";"`;
+exports[`SASS ESM Shims stylesAltSyntax.module.scss: stylesAltSyntax.module.scss.js 1`] = `"export { default } from \\"./stylesAltSyntax.module.css\\";"`;
 
-exports[`SASS ESM Shims stylesUseAltSyntax.scss: files 1`] = `
+exports[`SASS ESM Shims stylesUseAltSyntax.module.scss: files 1`] = `
 Array [
-  "stylesUseAltSyntax.css",
-  "stylesUseAltSyntax.scss.d.ts",
-  "stylesUseAltSyntax.scss.js",
+  "stylesUseAltSyntax.module.css",
+  "stylesUseAltSyntax.module.scss.d.ts",
+  "stylesUseAltSyntax.module.scss.js",
 ]
 `;
 
-exports[`SASS ESM Shims stylesUseAltSyntax.scss: stylesUseAltSyntax.css 1`] = `
+exports[`SASS ESM Shims stylesUseAltSyntax.module.scss: stylesUseAltSyntax.module.css 1`] = `
 "/**
  * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
@@ -206,7 +189,7 @@ exports[`SASS ESM Shims stylesUseAltSyntax.scss: stylesUseAltSyntax.css 1`] = `
 }"
 `;
 
-exports[`SASS ESM Shims stylesUseAltSyntax.scss: stylesUseAltSyntax.scss.d.ts 1`] = `
+exports[`SASS ESM Shims stylesUseAltSyntax.module.scss: stylesUseAltSyntax.module.scss.d.ts 1`] = `
 "declare interface IStyles {
   label: string;
   exampleList: string;
@@ -218,17 +201,17 @@ declare const styles: IStyles;
 export default styles;"
 `;
 
-exports[`SASS ESM Shims stylesUseAltSyntax.scss: stylesUseAltSyntax.scss.js 1`] = `"export { default } from \\"./stylesUseAltSyntax.css\\";"`;
+exports[`SASS ESM Shims stylesUseAltSyntax.module.scss: stylesUseAltSyntax.module.scss.js 1`] = `"export { default } from \\"./stylesUseAltSyntax.module.css\\";"`;
 
-exports[`SASS ESM Shims stylesUseSyntax.sass: files 1`] = `
+exports[`SASS ESM Shims stylesUseSyntax.module.sass: files 1`] = `
 Array [
-  "stylesUseSyntax.css",
-  "stylesUseSyntax.sass.d.ts",
-  "stylesUseSyntax.sass.js",
+  "stylesUseSyntax.module.css",
+  "stylesUseSyntax.module.sass.d.ts",
+  "stylesUseSyntax.module.sass.js",
 ]
 `;
 
-exports[`SASS ESM Shims stylesUseSyntax.sass: stylesUseSyntax.css 1`] = `
+exports[`SASS ESM Shims stylesUseSyntax.module.sass: stylesUseSyntax.module.css 1`] = `
 "/**
  * * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
@@ -282,7 +265,7 @@ exports[`SASS ESM Shims stylesUseSyntax.sass: stylesUseSyntax.css 1`] = `
 }"
 `;
 
-exports[`SASS ESM Shims stylesUseSyntax.sass: stylesUseSyntax.sass.d.ts 1`] = `
+exports[`SASS ESM Shims stylesUseSyntax.module.sass: stylesUseSyntax.module.sass.d.ts 1`] = `
 "declare interface IStyles {
   exampleAnchor: string;
 }
@@ -290,4 +273,4 @@ declare const styles: IStyles;
 export default styles;"
 `;
 
-exports[`SASS ESM Shims stylesUseSyntax.sass: stylesUseSyntax.sass.js 1`] = `"export { default } from \\"./stylesUseSyntax.css\\";"`;
+exports[`SASS ESM Shims stylesUseSyntax.module.sass: stylesUseSyntax.module.sass.js 1`] = `"export { default } from \\"./stylesUseSyntax.module.css\\";"`;

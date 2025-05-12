@@ -607,7 +607,8 @@ export class SassProcessor {
       const url: URL = pathToHeftUrl(absolutePath);
 
       const isPartial: boolean = isSassPartial(absolutePath);
-      const isModule: boolean = this._isFileModule(absolutePath);
+      // SCSS partials are not modules, insofar as they cannot be imported directly.
+      const isModule: boolean = isPartial ? false : this._isFileModule(absolutePath);
 
       const fileRecord: IFileRecord = {
         absolutePath,
@@ -670,7 +671,7 @@ export class SassProcessor {
     let record: IFileRecord | undefined = this._fileInfo.get(filePath);
     if (!record) {
       const isPartial: boolean = isSassPartial(filePath);
-      const isModule: boolean = this._isFileModule(filePath);
+      const isModule: boolean = isPartial ? false : this._isFileModule(filePath);
       const url: URL = pathToHeftUrl(filePath);
       record = {
         absolutePath: filePath,

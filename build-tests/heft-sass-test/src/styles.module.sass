@@ -1,0 +1,28 @@
+/**
+ * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
+ * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
+ */
+
+// Testing Sass imports
+@import 'stylesImport'
+
+// Testing node_modules imports
+@import 'pkg:buttono/buttono'
+
+// Testing root styles
+html, body
+  margin: 0
+  height: 100%
+  background-color: #c0c0c0
+  font-family: Tahoma, sans-serif
+
+// Testing Sass classes
+.exampleApp
+  background-color: #ffffff
+  padding: 20px
+  border-radius: 5px
+  width: 400px
+
+.exampleButton
+  @include buttono-block()
+  @include buttono-style-modifier($background-color: mediumorchid)

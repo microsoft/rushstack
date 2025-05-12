@@ -4,14 +4,14 @@ exports[`SASS CJS Shims ignored1.scss: files 1`] = `Array []`;
 
 exports[`SASS CJS Shims ignored2.scss: files 1`] = `Array []`;
 
-exports[`SASS CJS Shims styles.sass: files 1`] = `
+exports[`SASS CJS Shims styles.module.sass: files 1`] = `
 Array [
-  "styles.css",
-  "styles.sass.js",
+  "styles.module.css",
+  "styles.module.sass.js",
 ]
 `;
 
-exports[`SASS CJS Shims styles.sass: styles.css 1`] = `
+exports[`SASS CJS Shims styles.module.sass: styles.module.css 1`] = `
 "/**
  * * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
@@ -80,8 +80,8 @@ html, body {
 }"
 `;
 
-exports[`SASS CJS Shims styles.sass: styles.sass.js 1`] = `
-"module.exports = require(\\"./styles.css\\");
+exports[`SASS CJS Shims styles.module.sass: styles.module.sass.js 1`] = `
+"module.exports = require(\\"./styles.module.css\\");
 module.exports.default = module.exports;"
 `;
 
@@ -104,16 +104,14 @@ exports[`SASS CJS Shims stylesAltSyntax.global.scss: stylesAltSyntax.global.css 
 
 exports[`SASS CJS Shims stylesAltSyntax.global.scss: stylesAltSyntax.global.scss.js 1`] = `"require(\\"./stylesAltSyntax.global.css\\");"`;
 
-exports[`SASS CJS Shims stylesAltSyntax.scss: files 1`] = `
+exports[`SASS CJS Shims stylesAltSyntax.module.scss: files 1`] = `
 Array [
-  "stylesAltSyntax.css",
-  "stylesAltSyntax.global.css",
-  "stylesAltSyntax.global.scss.js",
-  "stylesAltSyntax.scss.js",
+  "stylesAltSyntax.module.css",
+  "stylesAltSyntax.module.scss.js",
 ]
 `;
 
-exports[`SASS CJS Shims stylesAltSyntax.scss: stylesAltSyntax.css 1`] = `
+exports[`SASS CJS Shims stylesAltSyntax.module.scss: stylesAltSyntax.module.css 1`] = `
 "/**
  * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
@@ -123,31 +121,19 @@ exports[`SASS CJS Shims stylesAltSyntax.scss: stylesAltSyntax.css 1`] = `
 }"
 `;
 
-exports[`SASS CJS Shims stylesAltSyntax.scss: stylesAltSyntax.global.css 1`] = `
-"/**
- * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
- * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
- */
-.ms-label {
-  margin-bottom: 20px;
-}"
-`;
-
-exports[`SASS CJS Shims stylesAltSyntax.scss: stylesAltSyntax.global.scss.js 1`] = `"require(\\"./stylesAltSyntax.global.css\\");"`;
-
-exports[`SASS CJS Shims stylesAltSyntax.scss: stylesAltSyntax.scss.js 1`] = `
-"module.exports = require(\\"./stylesAltSyntax.css\\");
+exports[`SASS CJS Shims stylesAltSyntax.module.scss: stylesAltSyntax.module.scss.js 1`] = `
+"module.exports = require(\\"./stylesAltSyntax.module.css\\");
 module.exports.default = module.exports;"
 `;
 
-exports[`SASS CJS Shims stylesUseAltSyntax.scss: files 1`] = `
+exports[`SASS CJS Shims stylesUseAltSyntax.module.scss: files 1`] = `
 Array [
-  "stylesUseAltSyntax.css",
-  "stylesUseAltSyntax.scss.js",
+  "stylesUseAltSyntax.module.css",
+  "stylesUseAltSyntax.module.scss.js",
 ]
 `;
 
-exports[`SASS CJS Shims stylesUseAltSyntax.scss: stylesUseAltSyntax.css 1`] = `
+exports[`SASS CJS Shims stylesUseAltSyntax.module.scss: stylesUseAltSyntax.module.css 1`] = `
 "/**
  * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
@@ -185,19 +171,19 @@ exports[`SASS CJS Shims stylesUseAltSyntax.scss: stylesUseAltSyntax.css 1`] = `
 }"
 `;
 
-exports[`SASS CJS Shims stylesUseAltSyntax.scss: stylesUseAltSyntax.scss.js 1`] = `
-"module.exports = require(\\"./stylesUseAltSyntax.css\\");
+exports[`SASS CJS Shims stylesUseAltSyntax.module.scss: stylesUseAltSyntax.module.scss.js 1`] = `
+"module.exports = require(\\"./stylesUseAltSyntax.module.css\\");
 module.exports.default = module.exports;"
 `;
 
-exports[`SASS CJS Shims stylesUseSyntax.sass: files 1`] = `
+exports[`SASS CJS Shims stylesUseSyntax.module.sass: files 1`] = `
 Array [
-  "stylesUseSyntax.css",
-  "stylesUseSyntax.sass.js",
+  "stylesUseSyntax.module.css",
+  "stylesUseSyntax.module.sass.js",
 ]
 `;
 
-exports[`SASS CJS Shims stylesUseSyntax.sass: stylesUseSyntax.css 1`] = `
+exports[`SASS CJS Shims stylesUseSyntax.module.sass: stylesUseSyntax.module.css 1`] = `
 "/**
  * * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
@@ -251,7 +237,7 @@ exports[`SASS CJS Shims stylesUseSyntax.sass: stylesUseSyntax.css 1`] = `
 }"
 `;
 
-exports[`SASS CJS Shims stylesUseSyntax.sass: stylesUseSyntax.sass.js 1`] = `
-"module.exports = require(\\"./stylesUseSyntax.css\\");
+exports[`SASS CJS Shims stylesUseSyntax.module.sass: stylesUseSyntax.module.sass.js 1`] = `
+"module.exports = require(\\"./stylesUseSyntax.module.css\\");
 module.exports.default = module.exports;"
 `;
