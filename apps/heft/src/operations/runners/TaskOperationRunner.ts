@@ -34,29 +34,12 @@ import {
   type IWatchFileSystem,
   WatchFileSystemAdapter
 } from '../../utilities/WatchFileSystemAdapter';
+import type { MetricsCollector } from '../../metrics/MetricsCollector';
 
 export interface ITaskOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
   task: HeftTask;
-}
-
-/**
- * Log out a start message, run a provided function, and log out an end message
- */
-export async function runAndMeasureAsync<T = void>(
-  fn: () => Promise<T>,
-  startMessageFn: () => string,
-  endMessageFn: () => string,
-  logFn: (message: string) => void
-): Promise<T> {
-  logFn(startMessageFn());
-  const startTime: number = performance.now();
-  try {
-    return await fn();
-  } finally {
-    const endTime: number = performance.now();
-    logFn(`${endMessageFn()} (${endTime - startTime}ms)`);
-  }
+  metricsCollector: MetricsCollector;
 }
 
 export class TaskOperationRunner implements IOperationRunner {
@@ -89,8 +72,9 @@ export class TaskOperationRunner implements IOperationRunner {
     context: IOperationRunnerContext,
     taskSession: HeftTaskSession
   ): Promise<OperationStatus> {
+    const { metricsCollector } = this._options;
     const { abortSignal, requestRun } = context;
-    const { hooks, logger } = taskSession;
+    const { hooks, logger, taskName, phaseName } = taskSession;
 
     // Need to clear any errors or warnings from the previous invocation, particularly
     // if this is an immediate rerun
@@ -155,61 +139,70 @@ export class TaskOperationRunner implements IOperationRunner {
       return OperationStatus.NoOp;
     }
 
-    const runResult: OperationStatus = shouldRun
-      ? await runAndMeasureAsync(
-          async (): Promise<OperationStatus> => {
-            // Create the options and provide a utility method to obtain paths to copy
-            const runHookOptions: IHeftTaskRunHookOptions = {
-              abortSignal,
-              globAsync: glob
+    let runResult: OperationStatus = OperationStatus.Success;
+    if (shouldRun) {
+      const runTaskAsync = async (): Promise<OperationStatus> => {
+        // Create the options and provide a utility method to obtain paths to copy
+        const runHookOptions: IHeftTaskRunHookOptions = {
+          abortSignal,
+          globAsync: glob
+        };
+
+        // Run the plugin run hook
+        try {
+          if (shouldRunIncremental) {
+            const runIncrementalHookOptions: IHeftTaskRunIncrementalHookOptions = {
+              ...runHookOptions,
+              watchGlobAsync: (
+                pattern: string | string[],
+                options: IGlobOptions = {}
+              ): Promise<Map<string, IWatchedFileState>> => {
+                return watchGlobAsync(pattern, {
+                  ...options,
+                  fs: getWatchFileSystemAdapter()
+                });
+              },
+              get watchFs(): IWatchFileSystem {
+                return getWatchFileSystemAdapter();
+              },
+              requestRun: requestRun!
             };
+            await hooks.runIncremental.promise(runIncrementalHookOptions);
+          } else {
+            await hooks.run.promise(runHookOptions);
+          }
+        } catch (e) {
+          // Log out using the task logger, and return an error status
+          if (!(e instanceof AlreadyReportedError)) {
+            logger.emitError(e as Error);
+          }
+          return OperationStatus.Failure;
+        }
 
-            // Run the plugin run hook
-            try {
-              if (shouldRunIncremental) {
-                const runIncrementalHookOptions: IHeftTaskRunIncrementalHookOptions = {
-                  ...runHookOptions,
-                  watchGlobAsync: (
-                    pattern: string | string[],
-                    options: IGlobOptions = {}
-                  ): Promise<Map<string, IWatchedFileState>> => {
-                    return watchGlobAsync(pattern, {
-                      ...options,
-                      fs: getWatchFileSystemAdapter()
-                    });
-                  },
-                  get watchFs(): IWatchFileSystem {
-                    return getWatchFileSystemAdapter();
-                  },
-                  requestRun: requestRun!
-                };
-                await hooks.runIncremental.promise(runIncrementalHookOptions);
-              } else {
-                await hooks.run.promise(runHookOptions);
-              }
-            } catch (e) {
-              // Log out using the task logger, and return an error status
-              if (!(e instanceof AlreadyReportedError)) {
-                logger.emitError(e as Error);
-              }
-              return OperationStatus.Failure;
-            }
+        if (abortSignal.aborted) {
+          return OperationStatus.Aborted;
+        }
 
-            if (abortSignal.aborted) {
-              return OperationStatus.Aborted;
-            }
+        return OperationStatus.Success;
+      };
 
-            return OperationStatus.Success;
-          },
-          () => `Starting ${shouldRunIncremental ? 'incremental ' : ''}task execution`,
-          () => {
-            const finishedWord: string = abortSignal.aborted ? 'Aborted' : 'Finished';
-            return `${finishedWord} ${shouldRunIncremental ? 'incremental ' : ''}task execution`;
-          },
-          terminal.writeVerboseLine.bind(terminal)
-        )
-      : // This branch only occurs if only file operations are defined.
-        OperationStatus.Success;
+      const startTime: number = performance.now();
+      terminal.writeVerboseLine(`Starting ${shouldRunIncremental ? 'incremental ' : ''}task execution`);
+      try {
+        runResult = await runTaskAsync();
+      } finally {
+        const endTime: number = performance.now();
+        const finishedWord: string = abortSignal.aborted ? 'Aborted' : 'Finished';
+        terminal.writeVerboseLine(
+          `${finishedWord} ${shouldRunIncremental ? 'incremental ' : ''}task execution (${
+            endTime - startTime
+          }ms)`
+        );
+        await metricsCollector.recordTaskAsync(taskName, phaseName, {
+          taskTotalExecutionMs: endTime - startTime
+        });
+      }
+    }
 
     if (this._fileOperations) {
       const { copyOperations, deleteOperations } = this._fileOperations;
