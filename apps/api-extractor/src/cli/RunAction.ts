@@ -3,7 +3,13 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import { PackageJsonLookup, FileSystem, type IPackageJson, Path } from '@rushstack/node-core-library';
+import {
+  PackageJsonLookup,
+  FileSystem,
+  type IPackageJson,
+  Path,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 import {
   CommandLineAction,
@@ -138,13 +144,12 @@ export class RunAction extends CommandLineAction {
     if (extractorResult.succeeded) {
       console.log(os.EOL + 'API Extractor completed successfully');
     } else {
-      process.exitCode = 1;
-
       if (extractorResult.errorCount > 0) {
         console.log(os.EOL + Colorize.red('API Extractor completed with errors'));
       } else {
         console.log(os.EOL + Colorize.yellow('API Extractor completed with warnings'));
       }
+      throw new AlreadyReportedError();
     }
   }
 }
