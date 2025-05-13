@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lookup-by-path
 
-This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+This log was last generated on Tue, 13 May 2025 20:32:55 GMT and should not be manually modified.
+
+## 0.7.0
+Tue, 13 May 2025 20:32:55 GMT
+
+### Minor changes
+
+- Add `deleteSubtree` method.
 
 ## 0.6.1
 Tue, 13 May 2025 02:09:20 GMT

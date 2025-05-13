@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-workspace-resolve-plugin",
   "entries": [
     {
+      "version": "0.4.24",
+      "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.4.24",
+      "date": "Tue, 13 May 2025 20:32:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.7.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.23",
       "tag": "@rushstack/webpack-workspace-resolve-plugin_v0.4.23",
       "date": "Tue, 13 May 2025 02:09:20 GMT",
