@@ -50,6 +50,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     constructor(entries?: Iterable<[string, TItem]>, delimiter?: string);
     clear(): this;
     deleteItem(query: string, delimeter?: string): boolean;
+    deleteSubtree(query: string, delimeter?: string): boolean;
     readonly delimiter: string;
     entries(query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
     findChildPath(childPath: string, delimiter?: string): TItem | undefined;

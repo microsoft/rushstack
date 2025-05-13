@@ -343,6 +343,38 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
   }
 
   /**
+   * Deletes an item and all its children.
+   * @param query - The path to the item to delete
+   * @param delimeter - Optional override delimeter for parsing the query
+   * @returns `true` if any nodes were deleted, `false` otherwise
+   */
+  public deleteSubtree(query: string, delimeter: string = this.delimiter): boolean {
+    const queryNode: IPathTrieNode<TItem> | undefined = this._findNodeAtPrefix(query, delimeter);
+    if (!queryNode) {
+      return false;
+    }
+
+    const queue: IPathTrieNode<TItem>[] = [queryNode];
+    let removed: number = 0;
+    while (queue.length > 0) {
+      const node: IPathTrieNode<TItem> = queue.pop()!;
+      if (node.value !== undefined) {
+        node.value = undefined;
+        removed++;
+      }
+      if (node.children) {
+        for (const child of node.children.values()) {
+          queue.push(child);
+        }
+        node.children.clear();
+      }
+    }
+
+    this._size -= removed;
+    return removed > 0;
+  }
+
+  /**
    * Associates the value with the specified path.
    * If a value is already associated, will overwrite.
    *
