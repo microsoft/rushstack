@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-isolated-typescript-transpile-plugin
 
-This log was last generated on Thu, 08 May 2025 00:11:15 GMT and should not be manually modified.
+This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+
+## 0.1.13
+Tue, 13 May 2025 02:09:20 GMT
+
+_Version update only_
 
 ## 0.1.12
 Thu, 08 May 2025 00:11:15 GMT
