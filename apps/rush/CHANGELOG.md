@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 25 Apr 2025 01:12:48 GMT and should not be manually modified.
+This log was last generated on Tue, 13 May 2025 20:33:12 GMT and should not be manually modified.
+
+## 5.153.2
+Tue, 13 May 2025 20:33:12 GMT
+
+### Updates
+
+- Fix path parsing issue when running rush bridge-package
+- Operations that were cobuilt now have the cobuild time correctly reflected across all agents.
+- Add `hasUncommittedChanges` to `IInputSnapshot` for use by plugins.
 
 ## 5.153.1
 Fri, 25 Apr 2025 01:12:48 GMT
