@@ -31,6 +31,7 @@ export class ExampleApp extends React.Component {
             <li className={stylesUseAltSyntax.exampleListItem2}>2nd</li>
             <li className={stylesUseAltSyntax.exampleListItem3}>3rd</li>
           </ul>
+          <p className={altSyntaxStyles['style-with-dashes']}>This element has a complex class name.</p>
         </div>
       </div>
     );

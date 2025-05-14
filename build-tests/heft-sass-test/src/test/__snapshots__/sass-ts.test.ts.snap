@@ -37,6 +37,7 @@ Array [
 exports[`SASS Typings stylesAltSyntax.module.scss: stylesAltSyntax.module.scss.d.ts 1`] = `
 "declare interface IStyles {
   label: string;
+  \\"style-with-dashes\\": string;
 }
 declare const styles: IStyles;
 export default styles;"

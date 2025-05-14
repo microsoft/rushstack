@@ -34,6 +34,8 @@ import {
   Sort
 } from '@rushstack/node-core-library';
 
+const SIMPLE_IDENTIFIER_REGEX: RegExp = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+
 /**
  * @public
  */
@@ -817,13 +819,22 @@ export class SassProcessor {
       if (this._options.exportAsDefault) {
         source.push(`declare interface IStyles {`);
         for (const className of Object.keys(moduleMap)) {
-          source.push(`  ${className}: string;`);
+          const safeClassName: string = SIMPLE_IDENTIFIER_REGEX.test(className)
+            ? className
+            : JSON.stringify(className);
+          // Quote and escape class names as needed.
+          source.push(`  ${safeClassName}: string;`);
         }
         source.push(`}`);
         source.push(`declare const styles: IStyles;`);
         source.push(`export default styles;`);
       } else {
         for (const className of Object.keys(moduleMap)) {
+          if (!SIMPLE_IDENTIFIER_REGEX.test(className)) {
+            throw new Error(
+              `Class name "${className}" is not a valid identifier and may only be exported using "exportAsDefault: true"`
+            );
+          }
           source.push(`export const ${className}: string;`);
         }
       }

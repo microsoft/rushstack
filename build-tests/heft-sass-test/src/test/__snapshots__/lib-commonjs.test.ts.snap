@@ -118,6 +118,10 @@ exports[`SASS CJS Shims stylesAltSyntax.module.scss: stylesAltSyntax.module.css 
  */
 .label {
   margin-bottom: var(--normalMargin, 20px);
+}
+
+.style-with-dashes {
+  margin-top: var(--normalMargin, 20px);
 }"
 `;
 
