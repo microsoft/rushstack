@@ -130,12 +130,17 @@ exports[`SASS ESM Shims stylesAltSyntax.module.scss: stylesAltSyntax.module.css 
  */
 .label {
   margin-bottom: var(--normalMargin, 20px);
+}
+
+.style-with-dashes {
+  margin-top: var(--normalMargin, 20px);
 }"
 `;
 
 exports[`SASS ESM Shims stylesAltSyntax.module.scss: stylesAltSyntax.module.scss.d.ts 1`] = `
 "declare interface IStyles {
   label: string;
+  \\"style-with-dashes\\": string;
 }
 declare const styles: IStyles;
 export default styles;"
