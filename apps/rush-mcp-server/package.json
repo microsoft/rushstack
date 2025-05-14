@@ -5,7 +5,9 @@
   "keywords": [
     "rush",
     "modelcontextprotocol",
-    "mcp"
+    "mcp",
+    "monorepo",
+    "server"
   ],
   "repository": {
     "type": "git",
