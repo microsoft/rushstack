@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.17.7",
+      "tag": "@rushstack/heft-sass-plugin_v0.17.7",
+      "date": "Thu, 15 May 2025 00:11:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Quote classnames in .d.ts files to handle non-identifier characters."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.6",
       "tag": "@rushstack/heft-sass-plugin_v0.17.6",
       "date": "Tue, 13 May 2025 02:09:20 GMT",

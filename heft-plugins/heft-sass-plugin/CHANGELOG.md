@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+This log was last generated on Thu, 15 May 2025 00:11:49 GMT and should not be manually modified.
+
+## 0.17.7
+Thu, 15 May 2025 00:11:49 GMT
+
+### Patches
+
+- Quote classnames in .d.ts files to handle non-identifier characters.
 
 ## 0.17.6
 Tue, 13 May 2025 02:09:20 GMT
