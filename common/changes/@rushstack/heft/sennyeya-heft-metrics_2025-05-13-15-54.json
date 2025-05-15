@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add new hook for collecting granular task-level metrics.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
