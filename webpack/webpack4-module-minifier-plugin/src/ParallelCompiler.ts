@@ -56,8 +56,7 @@ function formatTime(timeNs: bigint): string {
 
 export async function runParallel(options: IParallelWebpackOptions): Promise<void> {
   const resolvedPath: string = resolve(options.configFilePath);
-
-  const rawConfig: Configuration | Configuration[] = require(resolvedPath); // eslint-disable-line @typescript-eslint/no-var-requires
+  const rawConfig: Configuration | Configuration[] = require(resolvedPath);
   const configArray: Configuration[] = Array.isArray(rawConfig) ? rawConfig : [rawConfig];
   const configCount: number = configArray.length;
 

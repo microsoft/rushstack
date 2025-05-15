@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "comment": "Add flat config compatible versions of profiles and mixins for ESLint. These are located under the \"profiles/default/includes/eslint/flat/*\" path.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig"
+}

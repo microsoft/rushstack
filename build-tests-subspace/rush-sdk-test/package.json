@@ -16,14 +16,11 @@
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node": "20.17.19",
-    "eslint": "~8.57.0",
+    "eslint": "~9.25.1",
     "local-node-rig": "workspace:*"
   },
   "dependenciesMeta": {
     "@microsoft/rush-lib": {
-      "injected": true
-    },
-    "@rushstack/eslint-config": {
       "injected": true
     },
     "@rushstack/rush-sdk": {

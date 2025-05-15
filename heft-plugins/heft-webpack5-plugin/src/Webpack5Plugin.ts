@@ -333,7 +333,6 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
         // Since the webpack-dev-server does not return infrastructure errors via a callback like
         // compiler.watch(...), we will need to intercept them and log them ourselves.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         compiler.hooks.infrastructureLog.tap(
           PLUGIN_NAME,
           (name: string, type: string, args: unknown[] | undefined) => {

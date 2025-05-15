@@ -51,7 +51,6 @@ export class KnownDescriptionFilePlugin {
         if (!data?.length) {
           return callback(err);
         }
-        // eslint-disable-next-line @rushstack/no-new-null
         callback(null, JSON.parse(data.toString()));
       });
     }
@@ -132,10 +131,8 @@ export class KnownDescriptionFilePlugin {
 
               // Don't allow other processing
               if (result === undefined) {
-                // eslint-disable-next-line @rushstack/no-new-null
                 return callback(null, null);
               }
-              // eslint-disable-next-line @rushstack/no-new-null
               callback(null, result);
             }
           );

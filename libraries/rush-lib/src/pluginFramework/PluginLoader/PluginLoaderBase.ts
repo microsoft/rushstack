@@ -123,7 +123,6 @@ export abstract class PluginLoaderBase<
     type IRushPluginCtor<T = JsonObject> = new (opts: T) => IRushPlugin;
     let pluginPackage: IRushPluginCtor;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const loadedPluginPackage: IRushPluginCtor | { default: IRushPluginCtor } = require(resolvedPluginPath);
       pluginPackage = (loadedPluginPackage as { default: IRushPluginCtor }).default || loadedPluginPackage;
     } catch (e) {

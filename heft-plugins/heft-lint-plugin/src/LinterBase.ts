@@ -138,15 +138,7 @@ export abstract class LinterBase<TLintResult> {
         continue;
       }
 
-      // TypeScript only computes the version during an incremental build.
-      let version: string = sourceFile.version;
-      if (!version) {
-        // Compute the version from the source file content
-        const sourceCodeHash: Hash = createHash('sha1');
-        sourceCodeHash.update(sourceFile.text);
-        version = sourceCodeHash.digest('base64');
-      }
-
+      const version: string = await this.getSourceFileHashAsync(sourceFile);
       const cachedVersion: string = cachedNoFailureFileVersions.get(relative) || '';
       if (
         cachedVersion === '' ||
@@ -186,6 +178,19 @@ export abstract class LinterBase<TLintResult> {
     const duration: number = performance.now() - startTime;
 
     this._terminal.writeVerboseLine(`Lint: ${duration}ms (${fileCount} files)`);
+  }
+
+  protected async getSourceFileHashAsync(sourceFile: IExtendedSourceFile): Promise<string> {
+    // TypeScript only computes the version during an incremental build.
+    let version: string = sourceFile.version;
+    if (!version) {
+      // Compute the version from the source file content
+      const sourceFileHash: Hash = createHash('sha1');
+      sourceFileHash.update(sourceFile.text);
+      version = sourceFileHash.digest('base64');
+    }
+
+    return version;
   }
 
   protected abstract getCacheVersionAsync(): Promise<string>;
