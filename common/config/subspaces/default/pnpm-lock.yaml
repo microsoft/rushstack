@@ -332,6 +332,9 @@ importers:
       '@rushstack/rush-azure-storage-build-cache-plugin':
         specifier: workspace:*
         version: link:../../rush-plugins/rush-azure-storage-build-cache-plugin
+      '@rushstack/rush-bridge-cache-plugin':
+        specifier: workspace:*
+        version: link:../../rush-plugins/rush-bridge-cache-plugin
       '@rushstack/rush-http-build-cache-plugin':
         specifier: workspace:*
         version: link:../../rush-plugins/rush-http-build-cache-plugin
@@ -4010,6 +4013,27 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
+  ../../../rush-plugins/rush-bridge-cache-plugin:
+    devDependencies:
+      '@microsoft/rush-lib':
+        specifier: workspace:*
+        version: link:../../libraries/rush-lib
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/rush-sdk':
+        specifier: workspace:*
+        version: link:../../libraries/rush-sdk
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
