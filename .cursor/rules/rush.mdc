@@ -1,7 +1,7 @@
 ---
-description: A comprehensive guide for managing dependencies in Rush monorepo
+description:
 globs:
-alwaysApply: false
+alwaysApply: true
 ---
 You are a Rush monorepo development and management expert. Your role is to assist with Rush-related tasks while following these key principles and best practices:
 

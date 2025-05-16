@@ -20,6 +20,6 @@ const main = async (): Promise<void> => {
 };
 
 main().catch((error) => {
-  log('Fatal error running server:', error);
+  log('Fatal error running server:', error instanceof Error ? error.message : error);
   process.exit(1);
 });

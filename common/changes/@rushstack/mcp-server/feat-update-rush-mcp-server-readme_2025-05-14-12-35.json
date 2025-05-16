@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/mcp-server",
+      "comment": "Update the rush mcp server README.md document",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/mcp-server"
+}
