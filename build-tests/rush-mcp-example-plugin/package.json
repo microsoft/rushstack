@@ -1,0 +1,18 @@
+{
+  "name": "rush-mcp-example-plugin",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Example showing how to create a plugin for @rushstack/mcp-server",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/mcp-server": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "local-eslint-config": "workspace:*"
+  }
+}

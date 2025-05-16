@@ -2249,6 +2249,21 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../build-tests/rush-mcp-example-plugin:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/mcp-server':
+        specifier: workspace:*
+        version: link:../../apps/rush-mcp-server
+      local-eslint-config:
+        specifier: workspace:*
+        version: link:../../eslint/local-eslint-config
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../build-tests/rush-project-change-analyzer-test:
     dependencies:
       '@microsoft/rush-lib':
