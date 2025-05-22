@@ -31,6 +31,7 @@ describe(InputsSnapshot.name, () => {
           ['a/lib/file3.js', 'hash3'],
           ['common/config/some-config.json', 'hash5']
         ]),
+        hasUncommittedChanges: false,
         lookupByPath: new LookupByPath([[project.projectRelativeFolder, project]]),
         projectMap: new Map()
       }

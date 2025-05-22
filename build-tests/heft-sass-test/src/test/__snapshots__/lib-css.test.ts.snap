@@ -4,13 +4,13 @@ exports[`SASS No Shims ignored1.scss: files 1`] = `Array []`;
 
 exports[`SASS No Shims ignored2.scss: files 1`] = `Array []`;
 
-exports[`SASS No Shims styles.sass: files 1`] = `
+exports[`SASS No Shims styles.module.sass: files 1`] = `
 Array [
-  "styles.css",
+  "styles.module.css",
 ]
 `;
 
-exports[`SASS No Shims styles.sass: styles.css 1`] = `
+exports[`SASS No Shims styles.module.sass: styles.module.css 1`] = `
 "/**
  * * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
@@ -95,40 +95,33 @@ exports[`SASS No Shims stylesAltSyntax.global.scss: stylesAltSyntax.global.css 1
 }"
 `;
 
-exports[`SASS No Shims stylesAltSyntax.scss: files 1`] = `
+exports[`SASS No Shims stylesAltSyntax.module.scss: files 1`] = `
 Array [
-  "stylesAltSyntax.css",
-  "stylesAltSyntax.global.css",
+  "stylesAltSyntax.module.css",
 ]
 `;
 
-exports[`SASS No Shims stylesAltSyntax.scss: stylesAltSyntax.css 1`] = `
+exports[`SASS No Shims stylesAltSyntax.module.scss: stylesAltSyntax.module.css 1`] = `
 "/**
  * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
  */
 .label {
   margin-bottom: var(--normalMargin, 20px);
+}
+
+.style-with-dashes {
+  margin-top: var(--normalMargin, 20px);
 }"
 `;
 
-exports[`SASS No Shims stylesAltSyntax.scss: stylesAltSyntax.global.css 1`] = `
-"/**
- * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
- * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
- */
-.ms-label {
-  margin-bottom: 20px;
-}"
-`;
-
-exports[`SASS No Shims stylesUseAltSyntax.scss: files 1`] = `
+exports[`SASS No Shims stylesUseAltSyntax.module.scss: files 1`] = `
 Array [
-  "stylesUseAltSyntax.css",
+  "stylesUseAltSyntax.module.css",
 ]
 `;
 
-exports[`SASS No Shims stylesUseAltSyntax.scss: stylesUseAltSyntax.css 1`] = `
+exports[`SASS No Shims stylesUseAltSyntax.module.scss: stylesUseAltSyntax.module.css 1`] = `
 "/**
  * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
@@ -166,13 +159,13 @@ exports[`SASS No Shims stylesUseAltSyntax.scss: stylesUseAltSyntax.css 1`] = `
 }"
 `;
 
-exports[`SASS No Shims stylesUseSyntax.sass: files 1`] = `
+exports[`SASS No Shims stylesUseSyntax.module.sass: files 1`] = `
 Array [
-  "stylesUseSyntax.css",
+  "stylesUseSyntax.module.css",
 ]
 `;
 
-exports[`SASS No Shims stylesUseSyntax.sass: stylesUseSyntax.css 1`] = `
+exports[`SASS No Shims stylesUseSyntax.module.sass: stylesUseSyntax.module.css 1`] = `
 "/**
  * * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
  * * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.

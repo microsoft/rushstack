@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 01 May 2025 15:11:33 GMT and should not be manually modified.
+This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+
+## 7.52.8
+Tue, 13 May 2025 02:09:20 GMT
+
+### Patches
+
+- Fixes API extractor error handling when changed APIs are encountered and the "--local" flag is not specified
 
 ## 7.52.7
 Thu, 01 May 2025 15:11:33 GMT

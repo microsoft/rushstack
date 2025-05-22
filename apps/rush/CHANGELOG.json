@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.153.2",
+      "tag": "@microsoft/rush_v5.153.2",
+      "date": "Tue, 13 May 2025 20:33:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix path parsing issue when running rush bridge-package"
+          },
+          {
+            "comment": "Operations that were cobuilt now have the cobuild time correctly reflected across all agents."
+          },
+          {
+            "comment": "Add `hasUncommittedChanges` to `IInputSnapshot` for use by plugins."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.153.1",
       "tag": "@microsoft/rush_v5.153.1",
       "date": "Fri, 25 Apr 2025 01:12:48 GMT",

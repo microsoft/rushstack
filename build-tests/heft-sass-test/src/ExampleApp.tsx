@@ -3,11 +3,11 @@
 
 import * as React from 'react';
 
-import styles from './styles.sass';
-import oldStyles from './stylesCSS.css';
-import altSyntaxStyles from './stylesAltSyntax.scss';
-import stylesUseSyntax from './stylesUseSyntax.sass';
-import stylesUseAltSyntax from './stylesUseAltSyntax.scss';
+import styles from './styles.module.sass';
+import oldStyles from './stylesCSS.module.css';
+import altSyntaxStyles from './stylesAltSyntax.module.scss';
+import stylesUseSyntax from './stylesUseSyntax.module.sass';
+import stylesUseAltSyntax from './stylesUseAltSyntax.module.scss';
 import './stylesAltSyntax.global.scss';
 
 /**
@@ -31,6 +31,7 @@ export class ExampleApp extends React.Component {
             <li className={stylesUseAltSyntax.exampleListItem2}>2nd</li>
             <li className={stylesUseAltSyntax.exampleListItem3}>3rd</li>
           </ul>
+          <p className={altSyntaxStyles['style-with-dashes']}>This element has a complex class name.</p>
         </div>
       </div>
     );

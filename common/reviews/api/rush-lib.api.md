@@ -535,6 +535,7 @@ export interface IInputsSnapshot {
     getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string): string;
     getTrackedFileHashesForOperation(project: IRushConfigurationProjectForSnapshot, operationName?: string): ReadonlyMap<string, string>;
     readonly hashes: ReadonlyMap<string, string>;
+    readonly hasUncommittedChanges: boolean;
     readonly rootDirectory: string;
 }
 
@@ -584,7 +585,6 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 
 // @alpha
 export interface IOperationExecutionResult {
-    readonly cobuildRunnerId: string | undefined;
     readonly error: Error | undefined;
     getStateHash(): string;
     getStateHashComponents(): ReadonlyArray<string>;
@@ -958,11 +958,17 @@ export class _OperationMetadataManager {
     // (undocumented)
     readonly stateFile: _OperationStateFile;
     // (undocumented)
-    tryRestoreAsync({ terminal, terminalProvider, errorLogPath }: {
+    tryRestoreAsync({ terminal, terminalProvider, errorLogPath, cobuildContextId, cobuildRunnerId }: {
         terminalProvider: ITerminalProvider;
         terminal: ITerminal;
         errorLogPath: string;
+        cobuildContextId?: string;
+        cobuildRunnerId?: string;
     }): Promise<void>;
+    // (undocumented)
+    tryRestoreStopwatch(originalStopwatch: IStopwatchResult): IStopwatchResult;
+    // (undocumented)
+    wasCobuilt: boolean;
 }
 
 // @internal

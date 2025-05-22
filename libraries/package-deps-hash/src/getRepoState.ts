@@ -367,6 +367,49 @@ export async function getRepoStateAsync(
   gitPath?: string,
   filterPath?: string[]
 ): Promise<Map<string, string>> {
+  const { files } = await getDetailedRepoStateAsync(
+    rootDirectory,
+    additionalRelativePathsToHash,
+    gitPath,
+    filterPath
+  );
+
+  return files;
+}
+
+/**
+ * Information about the detailed state of the Git repository.
+ * @beta
+ */
+export interface IDetailedRepoState {
+  /**
+   * The Git file hashes for all files in the repository, including uncommitted changes.
+   */
+  files: Map<string, string>;
+  /**
+   * A boolean indicating whether the repository has submodules.
+   */
+  hasSubmodules: boolean;
+  /**
+   * A boolean indicating whether the repository has uncommitted changes.
+   */
+  hasUncommittedChanges: boolean;
+}
+
+/**
+ * Gets the object hashes for all files in the Git repo, combining the current commit with working tree state.
+ * Uses async operations and runs all primary Git calls in parallel.
+ * @param rootDirectory - The root directory of the Git repository
+ * @param additionalRelativePathsToHash - Root-relative file paths to have Git hash and include in the results
+ * @param gitPath - The path to the Git executable
+ * @beta
+ */
+export async function getDetailedRepoStateAsync(
+  rootDirectory: string,
+  additionalRelativePathsToHash?: string[],
+  gitPath?: string,
+  filterPath?: string[]
+): Promise<IDetailedRepoState> {
   const statePromise: Promise<IGitTreeState> = spawnGitAsync(
     gitPath,
     STANDARD_GIT_OPTIONS.concat([
@@ -428,7 +471,10 @@ export async function getRepoStateAsync(
     gitPath
   );
 
-  const [{ files, submodules }] = await Promise.all([statePromise, locallyModifiedPromise]);
+  const [{ files, submodules }, locallyModifiedFiles] = await Promise.all([
+    statePromise,
+    locallyModifiedPromise
+  ]);
 
   // The result of "git hash-object" will be a list of file hashes delimited by newlines
   for (const [filePath, hash] of await hashObjectPromise) {
@@ -453,7 +499,11 @@ export async function getRepoStateAsync(
     }
   }
 
-  return files;
+  return {
+    hasSubmodules,
+    hasUncommittedChanges: locallyModifiedFiles.size > 0,
+    files
+  };
 }
 
 /**

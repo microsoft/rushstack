@@ -1,6 +1,26 @@
 # Change Log - @rushstack/lookup-by-path
 
-This log was last generated on Thu, 01 May 2025 15:11:33 GMT and should not be manually modified.
+This log was last generated on Tue, 13 May 2025 20:32:55 GMT and should not be manually modified.
+
+## 0.7.0
+Tue, 13 May 2025 20:32:55 GMT
+
+### Minor changes
+
+- Add `deleteSubtree` method.
+
+## 0.6.1
+Tue, 13 May 2025 02:09:20 GMT
+
+_Version update only_
+
+## 0.6.0
+Thu, 08 May 2025 00:11:15 GMT
+
+### Minor changes
+
+- Add `getFirstDifferenceInCommonNodes` API.
+- Expose `tree` accessor on `IReadonlyLookupByPath` for a readonly view of the raw tree.
 
 ## 0.5.23
 Thu, 01 May 2025 15:11:33 GMT

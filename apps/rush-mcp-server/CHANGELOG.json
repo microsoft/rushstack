@@ -2,6 +2,30 @@
   "name": "@rushstack/mcp-server",
   "entries": [
     {
+      "version": "0.1.7",
+      "tag": "@rushstack/mcp-server_v0.1.7",
+      "date": "Tue, 13 May 2025 02:09:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.6",
+      "tag": "@rushstack/mcp-server_v0.1.6",
+      "date": "Wed, 07 May 2025 15:11:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Follow-ups to #5215"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.5",
       "tag": "@rushstack/mcp-server_v0.1.5",
       "date": "Fri, 02 May 2025 15:11:29 GMT",

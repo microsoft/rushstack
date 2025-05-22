@@ -9,7 +9,7 @@ import { Path, FileSystem, Async, AlreadyReportedError } from '@rushstack/node-c
 import {
   getRepoChanges,
   getRepoRoot,
-  getRepoStateAsync,
+  getDetailedRepoStateAsync,
   hashFilesAsync,
   type IFileDiffStatus
 } from '@rushstack/package-deps-hash';
@@ -304,8 +304,8 @@ export class ProjectChangeAnalyzer {
 
       return async function tryGetSnapshotAsync(): Promise<IInputsSnapshot | undefined> {
         try {
-          const [hashes, additionalFiles] = await Promise.all([
-            getRepoStateAsync(rootDirectory, additionalRelativePathsToHash, gitPath, filterPath),
+          const [{ files: hashes, hasUncommittedChanges }, additionalFiles] = await Promise.all([
+            getDetailedRepoStateAsync(rootDirectory, additionalRelativePathsToHash, gitPath, filterPath),
             getAdditionalFilesFromRushProjectConfigurationAsync(
               additionalGlobs,
               lookupByPath,
@@ -328,8 +328,9 @@ export class ProjectChangeAnalyzer {
             additionalHashes,
             globalAdditionalFiles,
             hashes,
+            hasUncommittedChanges,
             lookupByPath,
-            projectMap: projectMap,
+            projectMap,
             rootDir: rootDirectory
           });
         } catch (e) {

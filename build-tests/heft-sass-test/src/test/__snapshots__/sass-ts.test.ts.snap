@@ -4,13 +4,13 @@ exports[`SASS Typings ignored1.scss: files 1`] = `Array []`;
 
 exports[`SASS Typings ignored2.scss: files 1`] = `Array []`;
 
-exports[`SASS Typings styles.sass: files 1`] = `
+exports[`SASS Typings styles.module.sass: files 1`] = `
 Array [
-  "styles.sass.d.ts",
+  "styles.module.sass.d.ts",
 ]
 `;
 
-exports[`SASS Typings styles.sass: styles.sass.d.ts 1`] = `
+exports[`SASS Typings styles.module.sass: styles.module.sass.d.ts 1`] = `
 "declare interface IStyles {
   exampleImport: string;
   exampleApp: string;
@@ -28,30 +28,28 @@ Array [
 
 exports[`SASS Typings stylesAltSyntax.global.scss: stylesAltSyntax.global.scss.d.ts 1`] = `"export {};"`;
 
-exports[`SASS Typings stylesAltSyntax.scss: files 1`] = `
+exports[`SASS Typings stylesAltSyntax.module.scss: files 1`] = `
 Array [
-  "stylesAltSyntax.global.scss.d.ts",
-  "stylesAltSyntax.scss.d.ts",
+  "stylesAltSyntax.module.scss.d.ts",
 ]
 `;
 
-exports[`SASS Typings stylesAltSyntax.scss: stylesAltSyntax.global.scss.d.ts 1`] = `"export {};"`;
-
-exports[`SASS Typings stylesAltSyntax.scss: stylesAltSyntax.scss.d.ts 1`] = `
+exports[`SASS Typings stylesAltSyntax.module.scss: stylesAltSyntax.module.scss.d.ts 1`] = `
 "declare interface IStyles {
   label: string;
+  \\"style-with-dashes\\": string;
 }
 declare const styles: IStyles;
 export default styles;"
 `;
 
-exports[`SASS Typings stylesUseAltSyntax.scss: files 1`] = `
+exports[`SASS Typings stylesUseAltSyntax.module.scss: files 1`] = `
 Array [
-  "stylesUseAltSyntax.scss.d.ts",
+  "stylesUseAltSyntax.module.scss.d.ts",
 ]
 `;
 
-exports[`SASS Typings stylesUseAltSyntax.scss: stylesUseAltSyntax.scss.d.ts 1`] = `
+exports[`SASS Typings stylesUseAltSyntax.module.scss: stylesUseAltSyntax.module.scss.d.ts 1`] = `
 "declare interface IStyles {
   label: string;
   exampleList: string;
@@ -63,13 +61,13 @@ declare const styles: IStyles;
 export default styles;"
 `;
 
-exports[`SASS Typings stylesUseSyntax.sass: files 1`] = `
+exports[`SASS Typings stylesUseSyntax.module.sass: files 1`] = `
 Array [
-  "stylesUseSyntax.sass.d.ts",
+  "stylesUseSyntax.module.sass.d.ts",
 ]
 `;
 
-exports[`SASS Typings stylesUseSyntax.sass: stylesUseSyntax.sass.d.ts 1`] = `
+exports[`SASS Typings stylesUseSyntax.module.sass: stylesUseSyntax.module.sass.d.ts 1`] = `
 "declare interface IStyles {
   exampleAnchor: string;
 }

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.52.8",
+      "tag": "@microsoft/api-extractor_v7.52.8",
+      "date": "Tue, 13 May 2025 02:09:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixes API extractor error handling when changed APIs are encountered and the \"--local\" flag is not specified"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.52.7",
       "tag": "@microsoft/api-extractor_v7.52.7",
       "date": "Thu, 01 May 2025 15:11:33 GMT",

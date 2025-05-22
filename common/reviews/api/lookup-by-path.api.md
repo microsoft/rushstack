@@ -5,6 +5,18 @@
 ```ts
 
 // @beta
+export function getFirstDifferenceInCommonNodes<TItem extends {}>(options: IGetFirstDifferenceInCommonNodesOptions<TItem>): string | undefined;
+
+// @beta
+export interface IGetFirstDifferenceInCommonNodesOptions<TItem extends {}> {
+    delimiter?: string;
+    equals?: (a: TItem, b: TItem) => boolean;
+    first: IReadonlyPathTrieNode<TItem>;
+    prefix?: string;
+    second: IReadonlyPathTrieNode<TItem>;
+}
+
+// @beta
 export interface IPrefixMatch<TItem extends {}> {
     index: number;
     lastMatch?: IPrefixMatch<TItem>;
@@ -22,6 +34,14 @@ export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[strin
     groupByChild<TInfo>(infoByPath: Map<string, TInfo>, delimiter?: string): Map<TItem, Map<string, TInfo>>;
     has(query: string, delimiter?: string): boolean;
     get size(): number;
+    // (undocumented)
+    get tree(): IReadonlyPathTrieNode<TItem>;
+}
+
+// @beta
+export interface IReadonlyPathTrieNode<TItem extends {}> {
+    readonly children: ReadonlyMap<string, IReadonlyPathTrieNode<TItem>> | undefined;
+    readonly value: TItem | undefined;
 }
 
 // @beta
@@ -30,6 +50,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     constructor(entries?: Iterable<[string, TItem]>, delimiter?: string);
     clear(): this;
     deleteItem(query: string, delimeter?: string): boolean;
+    deleteSubtree(query: string, delimeter?: string): boolean;
     readonly delimiter: string;
     entries(query?: string, delimiter?: string): IterableIterator<[string, TItem]>;
     findChildPath(childPath: string, delimiter?: string): TItem | undefined;
@@ -42,6 +63,8 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     setItem(serializedPath: string, value: TItem, delimiter?: string): this;
     setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this;
     get size(): number;
+    // (undocumented)
+    get tree(): IReadonlyPathTrieNode<TItem>;
 }
 
 ```

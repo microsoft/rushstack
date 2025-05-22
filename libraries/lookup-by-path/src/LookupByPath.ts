@@ -16,6 +16,26 @@ interface IPathTrieNode<TItem extends {}> {
   children: Map<string, IPathTrieNode<TItem>> | undefined;
 }
 
+/**
+ * Readonly view of a node in the path trie used in LookupByPath
+ *
+ * @remarks
+ * This interface is used to facilitate parallel traversals for comparing two `LookupByPath` instances.
+ *
+ * @beta
+ */
+export interface IReadonlyPathTrieNode<TItem extends {}> {
+  /**
+   * The value that exactly matches the current relative path
+   */
+  readonly value: TItem | undefined;
+
+  /**
+   * Child nodes by subfolder
+   */
+  readonly children: ReadonlyMap<string, IReadonlyPathTrieNode<TItem>> | undefined;
+}
+
 interface IPrefixEntry {
   /**
    * The prefix that was matched
@@ -122,6 +142,11 @@ export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[strin
    * @returns The number of entries in this trie.
    */
   get size(): number;
+
+  /**
+   * @returns The root node of the trie, corresponding to the path ''
+   */
+  get tree(): IReadonlyPathTrieNode<TItem>;
 
   /**
    * Iterates over the entries in this trie.
@@ -263,10 +288,17 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
   }
 
   /**
-   * {@inheritdoc IReadonlyLookupByPath}
+   * {@inheritdoc IReadonlyLookupByPath.size}
    */
   public get size(): number {
     return this._size;
+  }
+
+  /**
+   * {@inheritdoc IReadonlyLookupByPath.tree}
+   */
+  public get tree(): IReadonlyPathTrieNode<TItem> {
+    return this._root;
   }
 
   /**
@@ -308,6 +340,38 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     }
 
     return false;
+  }
+
+  /**
+   * Deletes an item and all its children.
+   * @param query - The path to the item to delete
+   * @param delimeter - Optional override delimeter for parsing the query
+   * @returns `true` if any nodes were deleted, `false` otherwise
+   */
+  public deleteSubtree(query: string, delimeter: string = this.delimiter): boolean {
+    const queryNode: IPathTrieNode<TItem> | undefined = this._findNodeAtPrefix(query, delimeter);
+    if (!queryNode) {
+      return false;
+    }
+
+    const queue: IPathTrieNode<TItem>[] = [queryNode];
+    let removed: number = 0;
+    while (queue.length > 0) {
+      const node: IPathTrieNode<TItem> = queue.pop()!;
+      if (node.value !== undefined) {
+        node.value = undefined;
+        removed++;
+      }
+      if (node.children) {
+        for (const child of node.children.values()) {
+          queue.push(child);
+        }
+        node.children.clear();
+      }
+    }
+
+    this._size -= removed;
+    return removed > 0;
   }
 
   /**

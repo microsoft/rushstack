@@ -676,7 +676,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         `  Press <${quitKey}> to gracefully exit.`,
         `  Press <${toggleWatcherKey}> to ${isPaused ? 'resume' : 'pause'}.`,
         `  Press <${invalidateKey}> to invalidate all projects.`,
-        `  Press <${changedProjectsOnlyKey}> to ${this._changedProjectsOnly ? 'disable' : 'enable'} changed-projects-only mode (${this._changedProjectsOnly ? 'ENABLED' : 'DISABLED'}).`
+        `  Press <${changedProjectsOnlyKey}> to ${
+          this._changedProjectsOnly ? 'disable' : 'enable'
+        } changed-projects-only mode (${this._changedProjectsOnly ? 'ENABLED' : 'DISABLED'}).`
       ];
       if (isPaused) {
         promptLines.push(`  Press <${buildOnceKey}> to build once.`);
@@ -819,8 +821,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     // Loop until Ctrl+C
     while (!abortSignal.aborted) {
       // On the initial invocation, this promise will return immediately with the full set of projects
-      const { changedProjects, inputsSnapshot: state } =
-        await projectWatcher.waitForChangeAsync(onWaitingForChanges);
+      const { changedProjects, inputsSnapshot: state } = await projectWatcher.waitForChangeAsync(
+        onWaitingForChanges
+      );
 
       if (abortSignal.aborted) {
         return;
@@ -896,7 +899,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       executionManagerOptions
     );
 
-    const { isInitial, isWatch, cobuildConfiguration } = options.executeOperationsContext;
+    const { isInitial, isWatch } = options.executeOperationsContext;
 
     let success: boolean = false;
     let result: IExecutionResult | undefined;
@@ -996,14 +999,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
             continue;
           }
 
+          const { _operationMetadataManager: operationMetadataManager } =
+            operationResult as OperationExecutionRecord;
+
           const { startTime, endTime } = operationResult.stopwatch;
           jsonOperationResults[operation.name!] = {
             startTimestampMs: startTime,
             endTimestampMs: endTime,
             nonCachedDurationMs: operationResult.nonCachedDurationMs,
-            wasExecutedOnThisMachine:
-              !operationResult.cobuildRunnerId ||
-              operationResult.cobuildRunnerId === cobuildConfiguration?.cobuildRunnerId,
+            wasExecutedOnThisMachine: operationMetadataManager?.wasCobuilt !== true,
             result: operationResult.status,
             dependencies: Array.from(getNonSilentDependencies(operation)).sort()
           };

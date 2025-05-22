@@ -13,10 +13,8 @@ import {
   type INodePackageJson,
   type IPackageJsonDependencyTable
 } from '@rushstack/node-core-library';
-import type { DependencyPath } from '@pnpm/dependency-path';
 import { PackageExtractor } from '@rushstack/package-extractor';
 import { pnpmSyncUpdateFileAsync, pnpmSyncCopyAsync, type ILogMessageCallbackOptions } from 'pnpm-sync-lib';
-import { parse } from '@pnpm/dependency-path';
 import * as semver from 'semver';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -196,9 +194,8 @@ export class HotlinkManager {
     );
     const packageSourcePathSet: Set<string> = new Set();
     for (const dirName of subDirectories) {
-      const parsedDependency: DependencyPath = parse(dirName);
-      if (parsedDependency?.name === packageName) {
-        const packageSourcePath: string = `${consumerPackagePnpmDependenciesFolderPath}/${dirName}/${RushConstants.nodeModulesFolderName}/${packageName}`;
+      const packageSourcePath: string = `${consumerPackagePnpmDependenciesFolderPath}/${dirName}/${RushConstants.nodeModulesFolderName}/${packageName}`;
+      if (await FileSystem.existsAsync(packageSourcePath)) {
         const { version } = await JsonFile.loadAsync(`${packageSourcePath}/${FileConstants.PackageJson}`);
         if (semver.satisfies(version, versionRange)) {
           packageSourcePathSet.add(packageSourcePath);

@@ -9,5 +9,8 @@
   "secondaryGeneratedTsFolders": ["lib"],
   "excludeFiles": ["./ignored1.scss", "ignored2.scss"],
 
+  "fileExtensions": [".module.scss", ".module.sass", ".module.css"],
+  "nonModuleFileExtensions": [".global.scss", ".global.sass", ".global.css"],
+
   "silenceDeprecations": ["mixed-decls", "import", "global-builtin", "color-functions"]
 }

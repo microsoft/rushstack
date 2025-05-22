@@ -1,6 +1,20 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Thu, 01 May 2025 15:11:33 GMT and should not be manually modified.
+This log was last generated on Thu, 15 May 2025 00:11:49 GMT and should not be manually modified.
+
+## 0.17.7
+Thu, 15 May 2025 00:11:49 GMT
+
+### Patches
+
+- Quote classnames in .d.ts files to handle non-identifier characters.
+
+## 0.17.6
+Tue, 13 May 2025 02:09:20 GMT
+
+### Patches
+
+- Fix an issue where the SCSS module classifier evaluated SCSS partials instead of ignoring them (since they aren't directly importable).
 
 ## 0.17.5
 Thu, 01 May 2025 15:11:33 GMT

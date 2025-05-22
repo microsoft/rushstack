@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-localization-typings-plugin
 
-This log was last generated on Thu, 01 May 2025 15:11:33 GMT and should not be manually modified.
+This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+
+## 0.3.15
+Tue, 13 May 2025 02:09:20 GMT
+
+_Version update only_
 
 ## 0.3.14
 Thu, 01 May 2025 15:11:33 GMT
