@@ -8,12 +8,14 @@
 
 const tsdocEslintPlugin = require('eslint-plugin-tsdoc');
 
-module.exports = {
-  files: ['**/*.ts', '**/*.tsx'],
-  plugins: {
-    tsdoc: tsdocEslintPlugin
-  },
-  rules: {
-    'tsdoc/syntax': 'warn'
+module.exports = [
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    plugins: {
+      tsdoc: tsdocEslintPlugin
+    },
+    rules: {
+      'tsdoc/syntax': 'warn'
+    }
   }
-};
+];
