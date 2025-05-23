@@ -1279,6 +1279,33 @@ importers:
         specifier: ~5.8.2
         version: 5.8.2
 
+  ../../../build-tests/eslint-bulk-suppressions-test-flat:
+    devDependencies:
+      '@rushstack/eslint-bulk':
+        specifier: workspace:*
+        version: link:../../eslint/eslint-bulk
+      '@rushstack/eslint-patch':
+        specifier: workspace:*
+        version: link:../../eslint/eslint-patch
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@typescript-eslint/parser':
+        specifier: ~8.31.0
+        version: 8.31.0(eslint@9.25.1)(typescript@5.8.2)
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+      typescript:
+        specifier: ~5.8.2
+        version: 5.8.2
+
   ../../../build-tests/eslint-bulk-suppressions-test-legacy:
     devDependencies:
       '@rushstack/eslint-bulk':
@@ -4020,6 +4047,9 @@ importers:
       '@microsoft/api-extractor':
         specifier: workspace:*
         version: link:../../apps/api-extractor
+      '@rushstack/eslint-patch':
+        specifier: workspace:*
+        version: link:../../eslint/eslint-patch
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
@@ -4050,6 +4080,9 @@ importers:
       '@microsoft/api-extractor':
         specifier: workspace:*
         version: link:../../apps/api-extractor
+      '@rushstack/eslint-patch':
+        specifier: workspace:*
+        version: link:../../eslint/eslint-patch
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
