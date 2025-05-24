@@ -22,7 +22,13 @@ interface IEslintBulkConfigurationJson {
 }
 
 function findPatchPath(): string {
-  const candidatePaths: string[] = [`${process.cwd()}/.eslintrc.js`, `${process.cwd()}/.eslintrc.cjs`];
+  const candidatePaths: string[] = [
+    `${process.cwd()}/.eslintrc.js`,
+    `${process.cwd()}/.eslintrc.cjs`,
+    `${process.cwd()}/eslint.config.js`,
+    `${process.cwd()}/eslint.config.cjs`,
+    `${process.cwd()}/eslint.config.mjs`
+  ];
   let eslintrcPath: string | undefined;
   for (const candidatePath of candidatePaths) {
     if (fs.existsSync(candidatePath)) {
