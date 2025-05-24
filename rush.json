@@ -636,6 +636,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "eslint-bulk-suppressions-test-flat",
+      "projectFolder": "build-tests/eslint-bulk-suppressions-test-flat",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "eslint-bulk-suppressions-test-legacy",
       "projectFolder": "build-tests/eslint-bulk-suppressions-test-legacy",
       "reviewCategory": "tests",
