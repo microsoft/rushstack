@@ -95,6 +95,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/dependency-path-lockfile-pre-v10",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@pnpm/link-bins",
       "allowedCategories": [ "libraries" ]
     },

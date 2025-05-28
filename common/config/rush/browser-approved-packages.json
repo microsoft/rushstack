@@ -15,10 +15,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@pnpm/dependency-path-lockfile-pre-v10",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@radix-ui/colors",
       "allowedCategories": [ "libraries" ]
     },
