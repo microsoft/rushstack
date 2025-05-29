@@ -49,13 +49,14 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/semver": "7.5.0",
     "@types/webpack-env": "1.18.8",
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*",
     "webpack": "~5.98.0"
   }
 }

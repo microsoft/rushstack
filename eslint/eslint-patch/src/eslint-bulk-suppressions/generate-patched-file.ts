@@ -70,6 +70,20 @@ export function generatePatchedLinterJsFileIfDoesNotExist(
     return output;
   }
 
+  const markerForStartOfClassMethodSpaces: string = '\n     */\n    ';
+  const markerForStartOfClassMethodTabs: string = '\n\t */\n\t';
+  function indexOfStartOfClassMethod(input: string, position?: number): { index: number; marker?: string } {
+    let startOfClassMethodIndex: number = input.indexOf(markerForStartOfClassMethodSpaces, position);
+    if (startOfClassMethodIndex === -1) {
+      startOfClassMethodIndex = input.indexOf(markerForStartOfClassMethodTabs, position);
+      if (startOfClassMethodIndex === -1) {
+        return { index: startOfClassMethodIndex };
+      }
+      return { index: startOfClassMethodIndex, marker: markerForStartOfClassMethodTabs };
+    }
+    return { index: startOfClassMethodIndex, marker: markerForStartOfClassMethodSpaces };
+  }
+
   /**
    * Returns index of next public method
    * @param fromIndex - index of inputFile to search if public method still exists
@@ -80,16 +94,18 @@ export function generatePatchedLinterJsFileIfDoesNotExist(
 
     const endOfClassIndex: number = rest.indexOf('\n}');
 
-    const markerForStartOfClassMethod: string = '\n     */\n    ';
+    const { index: startOfClassMethodIndex, marker: startOfClassMethodMarker } =
+      indexOfStartOfClassMethod(rest);
 
-    const startOfClassMethodIndex: number = rest.indexOf(markerForStartOfClassMethod);
-
-    if (startOfClassMethodIndex === -1 || startOfClassMethodIndex > endOfClassIndex) {
+    if (
+      startOfClassMethodIndex === -1 ||
+      !startOfClassMethodMarker ||
+      startOfClassMethodIndex > endOfClassIndex
+    ) {
       return -1;
     }
 
-    const afterMarkerIndex: number =
-      rest.indexOf(markerForStartOfClassMethod) + markerForStartOfClassMethod.length;
+    const afterMarkerIndex: number = startOfClassMethodIndex + startOfClassMethodMarker.length;
 
     const isPublicMethod: boolean =
       rest[afterMarkerIndex] !== '_' &&
@@ -207,9 +223,6 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
                         // --- END MONKEY PATCH ---
 `;
 
-  outputFile += scanUntilMarker('nodeQueue.forEach(traversalInfo => {');
-  outputFile += scanUntilMarker('});');
-  outputFile += scanUntilNewline();
   outputFile += scanUntilMarker('class Linter {');
   outputFile += scanUntilNewline();
   outputFile += `

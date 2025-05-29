@@ -12,7 +12,7 @@ process.umask = () => 0;
 
 const { configFilePath, sourceMap, usePortableModules } = workerThreads.workerData;
 
-const webpackConfigs: webpack.Configuration[] = require(configFilePath); // eslint-disable-line @typescript-eslint/no-var-requires
+const webpackConfigs: webpack.Configuration[] = require(configFilePath);
 
 // chalk.enabled = enableColor;
 

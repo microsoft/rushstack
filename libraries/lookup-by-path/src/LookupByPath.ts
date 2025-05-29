@@ -504,7 +504,6 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
 
     const stack: [string, IPathTrieNode<TItem>][] = [[query ?? '', root]];
     while (stack.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const [prefix, node] = stack.pop()!;
       if (node.value !== undefined) {
         yield [prefix, node.value];

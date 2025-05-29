@@ -25,6 +25,7 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@types/xmldoc": "1.1.4",
+    "eslint": "~9.25.1",
     "local-node-rig": "workspace:*"
   }
 }
