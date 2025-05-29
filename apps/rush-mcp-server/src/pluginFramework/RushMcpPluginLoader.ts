@@ -153,6 +153,7 @@ export class RushMcpPluginLoader {
 
       let plugin: IRushMcpPlugin;
       try {
+        // TODO: Replace "{}" with the plugin's parsed config file JSON
         plugin = pluginFactory(session, {});
       } catch (e) {
         throw new Error(`Error invoking entry point for plugin ${jsonManifest.pluginName}:` + e.toString());
