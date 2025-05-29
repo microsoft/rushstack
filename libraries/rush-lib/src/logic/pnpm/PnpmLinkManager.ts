@@ -321,11 +321,25 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderName,
         RushConstants.nodeModulesFolderName
       );
-    } else if (this._pnpmVersion.major >= 9) {
+    } else if (this._pnpmVersion.major >= 10) {
       const { depPathToFilename } = await import('@pnpm/dependency-path');
 
       // project@file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
-      // The second parameter is max length of virtual store dir, default is 120 https://pnpm.io/next/npmrc#virtual-store-dir-max-length
+      // The second parameter is max length of virtual store dir, for v10 default is 60 https://pnpm.io/next/npmrc#virtual-store-dir-max-length
+      // TODO Read virtual-store-dir-max-length from .npmrc
+      const folderName: string = depPathToFilename(tempProjectDependencyKey, 60);
+      return path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        '.pnpm',
+        folderName,
+        RushConstants.nodeModulesFolderName
+      );
+    } else if (this._pnpmVersion.major >= 9) {
+      const { depPathToFilename } = await import('@pnpm/dependency-path-lockfile-pre-v10');
+
+      // project@file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
+      // The second parameter is max length of virtual store dir, for v9 default is 120 https://pnpm.io/next/npmrc#virtual-store-dir-max-length
       // TODO Read virtual-store-dir-max-length from .npmrc
       const folderName: string = depPathToFilename(tempProjectDependencyKey, 120);
       return path.join(

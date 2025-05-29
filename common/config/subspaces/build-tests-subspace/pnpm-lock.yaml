@@ -114,10 +114,10 @@ importers:
         version: file:../../../apps/heft(@types/node@20.17.19)
       '@rushstack/heft-lint-plugin':
         specifier: file:../../heft-plugins/heft-lint-plugin
-        version: file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.73.2)(@types/node@20.17.19)
+        version: file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.73.6)(@types/node@20.17.19)
       '@rushstack/heft-typescript-plugin':
         specifier: file:../../heft-plugins/heft-typescript-plugin
-        version: file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.73.2)(@types/node@20.17.19)
+        version: file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.73.6)(@types/node@20.17.19)
       eslint:
         specifier: ~8.57.0
         version: 8.57.1
@@ -877,9 +877,29 @@ packages:
       '@pnpm/crypto.polyfill': 1.0.0
       rfc4648: 1.5.3
 
+  /@pnpm/crypto.hash@1000.1.1:
+    resolution: {integrity: sha512-lb5kwXaOXdIW/4bkLLmtM9HEVRvp2eIvp+TrdawcPoaptgA/5f0/sRG0P52BF8dFqeNDj+1tGdqH89WQEqJnxA==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/crypto.polyfill': 1000.1.0
+      '@pnpm/graceful-fs': 1000.0.0
+      ssri: 10.0.5
+
   /@pnpm/crypto.polyfill@1.0.0:
     resolution: {integrity: sha512-WbmsqqcUXKKaAF77ox1TQbpZiaQcr26myuMUu+WjUtoWYgD3VP6iKYEvSx35SZ6G2L316lu+pv+40A2GbWJc1w==}
     engines: {node: '>=18.12'}
+
+  /@pnpm/crypto.polyfill@1000.1.0:
+    resolution: {integrity: sha512-tNe7a6U4rCpxLMBaR0SIYTdjxGdL0Vwb3G1zY8++sPtHSvy7qd54u8CIB0Z+Y6t5tc9pNYMYCMwhE/wdSY7ltg==}
+    engines: {node: '>=18.12'}
+
+  /@pnpm/dependency-path@1000.0.9:
+    resolution: {integrity: sha512-0AhabApfiq3EEYeed5HKQEU3ftkrfyKTNgkMH9esGdp2yc+62Zu7eWFf8WW6IGyitDQPLWGYjSEWDC9Bvv8nPg==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/crypto.hash': 1000.1.1
+      '@pnpm/types': 1000.6.0
+      semver: 7.7.2
 
   /@pnpm/dependency-path@2.1.8:
     resolution: {integrity: sha512-ywBaTjy0iSEF7lH3DlF8UXrdL2bw4AQFV2tTOeNeY7wc1W5CE+RHSJhf9MXBYcZPesqGRrPiU7Pimj3l05L9VA==}
@@ -888,7 +908,7 @@ packages:
       '@pnpm/crypto.base32-hash': 2.0.0
       '@pnpm/types': 9.4.2
       encode-registry: 3.0.1
-      semver: 7.6.3
+      semver: 7.7.2
 
   /@pnpm/dependency-path@5.1.7:
     resolution: {integrity: sha512-MKCyaTy1r9fhBXAnhDZNBVgo6ThPnicwJEG203FDp7pGhD7NruS/FhBI+uMd7GNsK3D7aIFCDAgbWpNTXn/eWw==}
@@ -896,11 +916,17 @@ packages:
     dependencies:
       '@pnpm/crypto.base32-hash': 3.0.1
       '@pnpm/types': 12.2.0
-      semver: 7.6.3
+      semver: 7.7.2
 
   /@pnpm/error@1.4.0:
     resolution: {integrity: sha512-vxkRrkneBPVmP23kyjnYwVOtipwlSl6UfL+h+Xa3TrABJTz5rYBXemlTsU5BzST8U4pD7YDkTb3SQu+MMuIDKA==}
     engines: {node: '>=10.16'}
+
+  /@pnpm/graceful-fs@1000.0.0:
+    resolution: {integrity: sha512-RvMEliAmcfd/4UoaYQ93DLQcFeqit78jhYmeJJVPxqFGmj0jEcb9Tu0eAOXr7tGP3eJHpgvPbTU4o6pZ1bJhxg==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      graceful-fs: 4.2.11
 
   /@pnpm/link-bins@5.3.25:
     resolution: {integrity: sha512-9Xq8lLNRHFDqvYPXPgaiKkZ4rtdsm7izwM/cUsFDc5IMnG0QYIVBXQbgwhz2UvjUotbJrvfKLJaCfA3NGBnLDg==}
@@ -972,6 +998,10 @@ packages:
       read-yaml-file: 2.1.0
       sort-keys: 4.2.0
       strip-bom: 4.0.0
+
+  /@pnpm/types@1000.6.0:
+    resolution: {integrity: sha512-6PsMNe98VKPGcg6LnXSW/LE3YfJ77nj+bPKiRjYRWAQLZ+xXjEQRaR0dAuyjCmchlv4wR/hpnMVRS21/fCod5w==}
+    engines: {node: '>=18.12'}
 
   /@pnpm/types@12.2.0:
     resolution: {integrity: sha512-5RtwWhX39j89/Tmyv2QSlpiNjErA357T/8r1Dkg+2lD3P7RuS7Xi2tChvmOC3VlezEFNcWnEGCOeKoGRkDuqFA==}
@@ -4321,7 +4351,7 @@ packages:
     resolution: {integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==}
     engines: {node: '>=10'}
     dependencies:
-      semver: 7.6.3
+      semver: 7.7.2
     dev: true
 
   /makeerror@1.0.12:
@@ -4452,6 +4482,10 @@ packages:
   /minipass@5.0.0:
     resolution: {integrity: sha512-3FnjYuehv9k6ovOEbyOswadCDPX1piCfhV8ncmYtHOjuPwylVWsghTLo7rabjC3Rx5xD4HDx8Wm1xnMF7S5qFQ==}
     engines: {node: '>=8'}
+
+  /minipass@7.1.2:
+    resolution: {integrity: sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==}
+    engines: {node: '>=16 || 14 >=14.17'}
 
   /minizlib@2.1.2:
     resolution: {integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==}
@@ -5254,6 +5288,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  /semver@7.7.2:
+    resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   /set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
     engines: {node: '>= 0.4'}
@@ -5349,6 +5388,12 @@ packages:
 
   /sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
+
+  /ssri@10.0.5:
+    resolution: {integrity: sha512-bSf16tAFkGeRlUNDjXu8FzaMQt6g2HZJrun7mtMbIPOddxt3GLMSz5VWUWcqTJUPfLEaDIepGxv+bYQW49596A==}
+    engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+    dependencies:
+      minipass: 7.1.2
 
   /ssri@8.0.1:
     resolution: {integrity: sha512-97qShzy1AiyxvPNIkLWoGua7xoQzzPjQ0HAH4B0rWKo7SZ6USuPcrUiAFrws0UH8RrbWmgq3LMTObhPIHbbBeQ==}
@@ -6238,7 +6283,7 @@ packages:
       - typescript
     dev: true
 
-  file:../../../heft-plugins/heft-api-extractor-plugin(@rushstack/heft@0.73.2)(@types/node@20.17.19):
+  file:../../../heft-plugins/heft-api-extractor-plugin(@rushstack/heft@0.73.6)(@types/node@20.17.19):
     resolution: {directory: ../../../heft-plugins/heft-api-extractor-plugin, type: directory}
     id: file:../../../heft-plugins/heft-api-extractor-plugin
     name: '@rushstack/heft-api-extractor-plugin'
@@ -6252,7 +6297,7 @@ packages:
       - '@types/node'
     dev: true
 
-  file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@0.73.2)(@types/node@20.17.19)(jest-environment-node@29.5.0):
+  file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@0.73.6)(@types/node@20.17.19)(jest-environment-node@29.5.0):
     resolution: {directory: ../../../heft-plugins/heft-jest-plugin, type: directory}
     id: file:../../../heft-plugins/heft-jest-plugin
     name: '@rushstack/heft-jest-plugin'
@@ -6287,7 +6332,7 @@ packages:
       - ts-node
     dev: true
 
-  file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.73.2)(@types/node@20.17.19):
+  file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.73.6)(@types/node@20.17.19):
     resolution: {directory: ../../../heft-plugins/heft-lint-plugin, type: directory}
     id: file:../../../heft-plugins/heft-lint-plugin
     name: '@rushstack/heft-lint-plugin'
@@ -6301,7 +6346,7 @@ packages:
       - '@types/node'
     dev: true
 
-  file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.73.2)(@types/node@20.17.19):
+  file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.73.6)(@types/node@20.17.19):
     resolution: {directory: ../../../heft-plugins/heft-typescript-plugin, type: directory}
     id: file:../../../heft-plugins/heft-typescript-plugin
     name: '@rushstack/heft-typescript-plugin'
@@ -6430,7 +6475,8 @@ packages:
     name: '@microsoft/rush-lib'
     engines: {node: '>=5.6.0'}
     dependencies:
-      '@pnpm/dependency-path': 5.1.7
+      '@pnpm/dependency-path': 1000.0.9
+      '@pnpm/dependency-path-lockfile-pre-v10': /@pnpm/dependency-path@5.1.7
       '@pnpm/dependency-path-lockfile-pre-v9': /@pnpm/dependency-path@2.1.8
       '@pnpm/link-bins': 5.3.25
       '@rushstack/heft-config-file': file:../../../libraries/heft-config-file(@types/node@20.17.19)
@@ -6526,7 +6572,7 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
 
-  file:../../../rigs/heft-node-rig(@rushstack/heft@0.73.2)(@types/node@20.17.19):
+  file:../../../rigs/heft-node-rig(@rushstack/heft@0.73.6)(@types/node@20.17.19):
     resolution: {directory: ../../../rigs/heft-node-rig, type: directory}
     id: file:../../../rigs/heft-node-rig
     name: '@rushstack/heft-node-rig'
@@ -6536,10 +6582,10 @@ packages:
       '@microsoft/api-extractor': file:../../../apps/api-extractor(@types/node@20.17.19)
       '@rushstack/eslint-config': file:../../../eslint/eslint-config(eslint@8.57.1)(typescript@5.8.2)
       '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
-      '@rushstack/heft-api-extractor-plugin': file:../../../heft-plugins/heft-api-extractor-plugin(@rushstack/heft@0.73.2)(@types/node@20.17.19)
-      '@rushstack/heft-jest-plugin': file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@0.73.2)(@types/node@20.17.19)(jest-environment-node@29.5.0)
-      '@rushstack/heft-lint-plugin': file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.73.2)(@types/node@20.17.19)
-      '@rushstack/heft-typescript-plugin': file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.73.2)(@types/node@20.17.19)
+      '@rushstack/heft-api-extractor-plugin': file:../../../heft-plugins/heft-api-extractor-plugin(@rushstack/heft@0.73.6)(@types/node@20.17.19)
+      '@rushstack/heft-jest-plugin': file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@0.73.6)(@types/node@20.17.19)(jest-environment-node@29.5.0)
+      '@rushstack/heft-lint-plugin': file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.73.6)(@types/node@20.17.19)
+      '@rushstack/heft-typescript-plugin': file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.73.6)(@types/node@20.17.19)
       '@types/heft-jest': 1.0.1
       eslint: 8.57.1
       jest-environment-node: 29.5.0
@@ -6559,7 +6605,7 @@ packages:
     dependencies:
       '@microsoft/api-extractor': file:../../../apps/api-extractor(@types/node@20.17.19)
       '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
-      '@rushstack/heft-node-rig': file:../../../rigs/heft-node-rig(@rushstack/heft@0.73.2)(@types/node@20.17.19)
+      '@rushstack/heft-node-rig': file:../../../rigs/heft-node-rig(@rushstack/heft@0.73.6)(@types/node@20.17.19)
       '@types/heft-jest': 1.0.1
       '@types/node': 20.17.19
       eslint: 8.57.1
