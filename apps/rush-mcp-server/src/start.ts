@@ -13,6 +13,7 @@ const main = async (): Promise<void> => {
   }
 
   const server: RushMCPServer = new RushMCPServer(rushWorkspacePath);
+  await server.startAsync();
   const transport: StdioServerTransport = new StdioServerTransport();
   await server.connect(transport);
 

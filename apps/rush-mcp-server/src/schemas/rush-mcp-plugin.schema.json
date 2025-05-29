@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Rush MCP Plugin Manifest",
+  "type": "object",
+  "properties": {
+    "pluginName": {
+      "type": "string",
+      "description": "A name that uniquely identifies your plugin. Generally this should match the NPM package name; two plugins with the same pluginName cannot be loaded together."
+    },
+    "configFileSchema": {
+      "type": "string",
+      "description": "Optional. Indicates that your plugin accepts a config file. The MCP server will load this schema file and provide it to the plugin. Path is typically `<rush-repo>/common/config/rush-mcp/<plugin-name>.json`."
+    },
+    "entryPoint": {
+      "type": "string",
+      "description": "The module path to the plugin's entry point. Its default export must be a class implementing the MCP plugin interface."
+    }
+  },
+  "required": ["pluginName", "entryPoint"],
+  "additionalProperties": false
+}

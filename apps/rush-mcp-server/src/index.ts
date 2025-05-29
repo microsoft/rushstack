@@ -8,5 +8,5 @@
 
 export * from './pluginFramework/IRushMcpPlugin';
 export * from './pluginFramework/IRushMcpTool';
-export * from './pluginFramework/RushMcpPluginSession';
+export { type IRegisterToolOptions, RushMcpPluginSession } from './pluginFramework/RushMcpPluginSession';
 export * from './pluginFramework/zodTypes';

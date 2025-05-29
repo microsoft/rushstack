@@ -20,7 +20,17 @@ export interface IRegisterToolOptions {
  *
  * @public
  */
-export class RushMcpPluginSession {
+export abstract class RushMcpPluginSession {
   public readonly zod: typeof zodModule = zod;
-  public registerTool(options: IRegisterToolOptions, tool: IRushMcpTool): void {}
+  public abstract registerTool(options: IRegisterToolOptions, tool: IRushMcpTool): void;
+}
+
+export class RushMcpPluginSessionInternal extends RushMcpPluginSession {
+  public constructor() {
+    super();
+  }
+
+  public override registerTool(options: IRegisterToolOptions, tool: IRushMcpTool): void {
+    // TODO: Register the tool
+  }
 }
