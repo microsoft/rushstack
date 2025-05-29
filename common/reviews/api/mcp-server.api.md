@@ -5,10 +5,10 @@
 ```ts
 
 import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types';
-import * as zod from 'zod';
+import type * as zodModule from 'zod';
 
 // @public (undocumented)
-export type CallToolResult = zod.infer<typeof CallToolResultSchema>;
+export type CallToolResult = zodModule.infer<typeof CallToolResultSchema>;
 
 export { CallToolResultSchema }
 
@@ -27,9 +27,9 @@ export interface IRushMcpPlugin {
 }
 
 // @public
-export interface IRushMcpTool<TSchema extends zod.ZodTypeAny = zod.ZodTypeAny> {
+export interface IRushMcpTool<TSchema extends zodModule.ZodTypeAny = zodModule.ZodTypeAny> {
     // (undocumented)
-    executeAsync(input: zod.infer<TSchema>): Promise<CallToolResult>;
+    executeAsync(input: zodModule.infer<TSchema>): Promise<CallToolResult>;
     // (undocumented)
     readonly schema: TSchema;
 }
@@ -41,8 +41,10 @@ export type RushMcpPluginFactory<TConfigFile = {}> = (session: RushMcpPluginSess
 export class RushMcpPluginSession {
     // (undocumented)
     registerTool(options: IRegisterToolOptions, tool: IRushMcpTool): void;
+    // (undocumented)
+    readonly zod: typeof zodModule;
 }
 
-export { zod }
+export { zodModule }
 
 ```
