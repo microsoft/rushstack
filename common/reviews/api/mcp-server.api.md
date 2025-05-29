@@ -38,9 +38,9 @@ export interface IRushMcpTool<TSchema extends zodModule.ZodTypeAny = zodModule.Z
 export type RushMcpPluginFactory<TConfigFile = {}> = (session: RushMcpPluginSession, configFile: TConfigFile | undefined) => IRushMcpPlugin;
 
 // @public
-export class RushMcpPluginSession {
+export abstract class RushMcpPluginSession {
     // (undocumented)
-    registerTool(options: IRegisterToolOptions, tool: IRushMcpTool): void;
+    abstract registerTool(options: IRegisterToolOptions, tool: IRushMcpTool): void;
     // (undocumented)
     readonly zod: typeof zodModule;
 }

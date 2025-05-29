@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "rush-mcp.json Configuration Schema",
+  "type": "object",
+  "properties": {
+    "mcpPlugins": {
+      "type": "array",
+      "description": "The list of plugins that `@rushstack/mcp-server` should load when processing this monorepo.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "packageName": {
+            "type": "string",
+            "description": "The name of an NPM package that appears in the package.json \"dependencies\" for the autoinstaller."
+          },
+          "autoinstaller": {
+            "type": "string",
+            "description": "The name of a Rush autoinstaller with this package as its dependency."
+          }
+        },
+        "required": ["packageName", "autoinstaller"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["mcpPlugins"],
+  "additionalProperties": false
+}
