@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/mcp-server",
       "comment": "Update the rush mcp server README.md document",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@rushstack/mcp-server"
