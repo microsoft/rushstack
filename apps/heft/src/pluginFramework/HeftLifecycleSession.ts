@@ -4,7 +4,11 @@
 import * as path from 'path';
 import type { AsyncParallelHook } from 'tapable';
 
-import type { IHeftRecordMetricsHookOptions, MetricsCollector } from '../metrics/MetricsCollector';
+import type {
+  IHeftRecordMetricsHookOptions,
+  IHeftTaskRecordMetricsHookOptions,
+  MetricsCollector
+} from '../metrics/MetricsCollector';
 import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
 import type { IInternalHeftSessionOptions } from './InternalHeftSession';
 import type { IHeftParameters } from './HeftParameterManager';
@@ -111,6 +115,16 @@ export interface IHeftLifecycleHooks {
    * @public
    */
   recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+
+  /**
+   * The `recordTaskMetrics` hook is called at the end of every Heft task execution. It is called after all
+   * tasks have completed execution (or been canceled). In a watch run, it will be called several times
+   * in between `toolStart` and (if the session is gracefully interrupted via Ctrl+C), `toolFinish`.
+   * In a non-watch run, it will be invoked exactly once between `toolStart` and `toolFinish`.
+   *  To use it, call `recordMetrics.tapPromise(<pluginName>, <callback>)`.
+   * @public
+   */
+  recordTaskMetrics: AsyncParallelHook<IHeftTaskRecordMetricsHookOptions>;
 }
 
 /**

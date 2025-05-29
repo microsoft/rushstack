@@ -792,6 +792,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-example-lifecycle-plugin",
+      "projectFolder": "build-tests/heft-example-lifecycle-plugin",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-example-plugin-01",
       "projectFolder": "build-tests/heft-example-plugin-01",
       "reviewCategory": "tests",
