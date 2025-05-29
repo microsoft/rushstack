@@ -2708,6 +2708,9 @@ importers:
       semver:
         specifier: ~7.5.4
         version: 7.5.4
+      typescript:
+        specifier: ~5.8.2
+        version: 5.8.2
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -2733,9 +2736,6 @@ importers:
       tslint:
         specifier: ~5.20.1
         version: 5.20.1(typescript@5.8.2)
-      typescript:
-        specifier: ~5.8.2
-        version: 5.8.2
 
   ../../../heft-plugins/heft-localization-typings-plugin:
     dependencies:

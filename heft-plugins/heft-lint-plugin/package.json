@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "semver": "~7.5.4"
+    "semver": "~7.5.4",
+    "typescript": "~5.8.2"
   },
   "devDependencies": {
     "@rushstack/heft-typescript-plugin": "workspace:*",
@@ -29,7 +30,6 @@
     "@types/semver": "7.5.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~8.57.0",
-    "tslint": "~5.20.1",
-    "typescript": "~5.8.2"
+    "tslint": "~5.20.1"
   }
 }

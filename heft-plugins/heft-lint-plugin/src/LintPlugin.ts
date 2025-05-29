@@ -17,10 +17,19 @@ import type {
   ITypeScriptPluginAccessor
 } from '@rushstack/heft-typescript-plugin';
 
+import {
+  readConfigFile,
+  parseJsonConfigFileContent,
+  sys,
+  createProgram,
+  type ParsedCommandLine
+} from 'typescript';
+
 import type { LinterBase } from './LinterBase';
 import { Eslint } from './Eslint';
 import { Tslint } from './Tslint';
 import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
+import ts = require('typescript');
 
 const PLUGIN_NAME: 'lint-plugin' = 'lint-plugin';
 const TYPESCRIPT_PLUGIN_NAME: typeof TypeScriptPluginName = 'typescript-plugin';
@@ -75,6 +84,8 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       const sarifLogPath: string | undefined =
         relativeSarifLogPath && path.resolve(heftConfiguration.buildFolderPath, relativeSarifLogPath);
 
+      // To support standalone linting, track if we have hooked to the typescript plugin
+      let inTypescriptPhase: boolean = false;
       // Use the changed files hook to kick off linting asynchronously
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-typescript-plugin',
@@ -99,8 +110,42 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
               this._lintingPromises.push(lintingPromise);
             }
           );
+          // Set the flag to indicate that we are in the typescript phase
+          inTypescriptPhase = true;
         }
       );
+
+      if (!inTypescriptPhase) {
+        // Create a typescript program from the tsconfig file
+        const tsconfigPath: string = path.resolve(heftConfiguration.buildFolderPath, 'tsconfig.json');
+        const parsed: ParsedCommandLine = parseJsonConfigFileContent(
+          readConfigFile(tsconfigPath, sys.readFile).config,
+          ts.sys,
+          path.dirname(tsconfigPath)
+        );
+        const program: IExtendedProgram = createProgram({
+          rootNames: parsed.fileNames,
+          options: parsed.options
+        }) as IExtendedProgram;
+
+        // Filter out node_modules since we just want to lint the source files in the package only
+        const changedFiles: ReadonlySet<IExtendedSourceFile> = new Set<IExtendedSourceFile>(
+          program.getSourceFiles().filter((file) => !file.fileName.includes('node_modules'))
+        );
+        const lintingPromise: Promise<void> = this._lintAsync({
+          taskSession,
+          heftConfiguration,
+          fix,
+          sarifLogPath,
+          tsProgram: program,
+          changedFiles: changedFiles
+        });
+        lintingPromise.catch(() => {
+          // Suppress unhandled promise rejection error
+        });
+        // Hold on to the original promise, which will throw in the run hook if it unexpectedly fails
+        this._lintingPromises.push(lintingPromise);
+      }
     }
 
     let warningPrinted: boolean = false;
