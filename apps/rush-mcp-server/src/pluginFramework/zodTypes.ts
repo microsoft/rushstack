@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as zod from 'zod';
-export { zod };
+import type * as zod from 'zod';
+export type { zod as zodModule };
 
 import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types';
 
