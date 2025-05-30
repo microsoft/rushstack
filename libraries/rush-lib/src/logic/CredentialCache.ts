@@ -69,7 +69,7 @@ export class CredentialCache /* implements IDisposable */ {
   }
 
   public static initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
-    return CredentialCache._initializeAsyncFromResolvedOptions(CredentialCache._resolveOptions(options));
+    return CredentialCache._initializeFromResolvedOptionsAsync(CredentialCache._resolveOptions(options));
   }
 
   private static _resolveOptions(options: ICredentialCacheOptions): Required<ICredentialCacheOptions> {
@@ -80,7 +80,7 @@ export class CredentialCache /* implements IDisposable */ {
     };
   }
 
-  private static async _initializeAsyncFromResolvedOptions(
+  private static async _initializeFromResolvedOptionsAsync(
     options: Required<ICredentialCacheOptions>
   ): Promise<CredentialCache> {
     const cacheFilePath: string = `${options.cacheDirectory}/${options.cacheName}.json`;

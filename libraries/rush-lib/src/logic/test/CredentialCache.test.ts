@@ -8,7 +8,7 @@ import { CredentialCache, type ICredentialCacheOptions } from '../CredentialCach
 const FAKE_RUSH_USER_FOLDER: string = '~/.rush-user';
 const FAKE_DEFAULT_CREDENTIALS_CACHE_FILE: string = `${FAKE_RUSH_USER_FOLDER}/credentials.json`;
 
-interface PathsTestCase {
+interface IPathsTestCase {
   testCaseName: string;
   partialOptions: Pick<ICredentialCacheOptions, 'cacheDirectory' | 'cacheName'>;
   expectedCacheFilePath: string;
@@ -91,7 +91,7 @@ describe(CredentialCache.name, () => {
     jest.restoreAllMocks();
   });
 
-  describe.each<PathsTestCase>([
+  describe.each<IPathsTestCase>([
     {
       testCaseName: 'default cache directory with default cache name',
       partialOptions: {},
