@@ -69,10 +69,10 @@ export class CredentialCache /* implements IDisposable */ {
   }
 
   public static initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
-    return CredentialCache.initializeAsyncFromResolvedOptions(CredentialCache.resolveOptions(options));
+    return CredentialCache._initializeAsyncFromResolvedOptions(CredentialCache._resolveOptions(options));
   }
 
-  private static resolveOptions(options: ICredentialCacheOptions): Required<ICredentialCacheOptions> {
+  private static _resolveOptions(options: ICredentialCacheOptions): Required<ICredentialCacheOptions> {
     return {
       ...options,
       cacheDirectory: options.cacheDirectory || RushUserConfiguration.getRushUserFolderPath(),
@@ -80,7 +80,7 @@ export class CredentialCache /* implements IDisposable */ {
     };
   }
 
-  private static async initializeAsyncFromResolvedOptions(
+  private static async _initializeAsyncFromResolvedOptions(
     options: Required<ICredentialCacheOptions>
   ): Promise<CredentialCache> {
     const cacheFilePath: string = `${options.cacheDirectory}/${options.cacheName}.json`;

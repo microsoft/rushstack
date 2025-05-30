@@ -62,7 +62,6 @@ describe(CredentialCache.name, () => {
     jest
       .spyOn(FileSystem, 'writeFileAsync')
       .mockImplementation(async (filePath: string, data: Buffer | string) => {
-        console.log(`Writing to fake filesystem: ${filePath}`);
         fakeFilesystem[filePath] = data.toString();
       });
 
