@@ -50,6 +50,9 @@ interface IPathsToCache {
   outputFilePaths: string[];
 }
 
+/**
+ * @internal
+ */
 export class ProjectBuildCache {
   private static _tarUtilityPromise: Promise<TarExecutable | undefined> | undefined;
 
