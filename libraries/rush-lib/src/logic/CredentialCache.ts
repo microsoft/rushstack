@@ -8,7 +8,7 @@ import { RushUserConfiguration } from '../api/RushUserConfiguration';
 import schemaJson from '../schemas/credentials.schema.json';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
-const CACHE_FILENAME: string = 'credentials.json';
+const DEFAULT_CACHE_NAME: string = 'credentials';
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
 
 interface ICredentialCacheJson {
@@ -38,6 +38,8 @@ export interface ICredentialCacheEntry {
  */
 export interface ICredentialCacheOptions {
   supportEditing: boolean;
+  cacheDirectory?: string;
+  cacheName?: string;
 }
 
 /**
@@ -66,9 +68,22 @@ export class CredentialCache /* implements IDisposable */ {
     this._lockfile = lockfile;
   }
 
-  public static async initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
-    const rushUserFolderPath: string = RushUserConfiguration.getRushUserFolderPath();
-    const cacheFilePath: string = `${rushUserFolderPath}/${CACHE_FILENAME}`;
+  public static initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
+    return CredentialCache.initializeAsyncFromResolvedOptions(CredentialCache.resolveOptions(options));
+  }
+
+  private static resolveOptions(options: ICredentialCacheOptions): Required<ICredentialCacheOptions> {
+    return {
+      ...options,
+      cacheDirectory: options.cacheDirectory || RushUserConfiguration.getRushUserFolderPath(),
+      cacheName: options.cacheName || DEFAULT_CACHE_NAME
+    };
+  }
+
+  private static async initializeAsyncFromResolvedOptions(
+    options: Required<ICredentialCacheOptions>
+  ): Promise<CredentialCache> {
+    const cacheFilePath: string = `${options.cacheDirectory}/${options.cacheName}.json`;
     const jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
     let loadedJson: ICredentialCacheJson | undefined;
@@ -82,7 +97,7 @@ export class CredentialCache /* implements IDisposable */ {
 
     let lockfile: LockFile | undefined;
     if (options.supportEditing) {
-      lockfile = await LockFile.acquireAsync(rushUserFolderPath, `${CACHE_FILENAME}.lock`);
+      lockfile = await LockFile.acquireAsync(options.cacheDirectory, `${options.cacheName}.lock`);
     }
 
     const credentialCache: CredentialCache = new CredentialCache(cacheFilePath, loadedJson, lockfile);
