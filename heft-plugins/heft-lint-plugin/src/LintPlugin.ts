@@ -44,6 +44,30 @@ interface ILintOptions {
   changedFiles?: ReadonlySet<IExtendedSourceFile>;
 }
 
+function checkFix(taskSession: IHeftTaskSession, pluginOptions?: ILintPluginOptions): boolean {
+  let fix: boolean =
+    pluginOptions?.alwaysFix || taskSession.parameters.getFlagParameter(FIX_PARAMETER_NAME).value;
+  if (fix && taskSession.parameters.production) {
+    // Write this as a standard output message since we don't want to throw errors when running in
+    // production mode and "alwaysFix" is specified in the plugin options
+    taskSession.logger.terminal.writeLine(
+      'Fix mode has been disabled since Heft is running in production mode'
+    );
+    fix = false;
+  }
+  return fix;
+}
+
+function getSarifLogPath(
+  heftConfiguration: HeftConfiguration,
+  pluginOptions?: ILintPluginOptions
+): string | undefined {
+  const relativeSarifLogPath: string | undefined = pluginOptions?.sarifLogPath;
+  const sarifLogPath: string | undefined =
+    relativeSarifLogPath && path.resolve(heftConfiguration.buildFolderPath, relativeSarifLogPath);
+  return sarifLogPath;
+}
+
 export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
   private readonly _lintingPromises: Promise<void>[] = [];
 
@@ -53,30 +77,6 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
   private _eslintConfigFilePath: string | undefined;
   private _tslintToolPath: string | undefined;
   private _tslintConfigFilePath: string | undefined;
-
-  private _checkFix(taskSession: IHeftTaskSession, pluginOptions?: ILintPluginOptions): boolean {
-    let fix: boolean =
-      pluginOptions?.alwaysFix || taskSession.parameters.getFlagParameter(FIX_PARAMETER_NAME).value;
-    if (fix && taskSession.parameters.production) {
-      // Write this as a standard output message since we don't want to throw errors when running in
-      // production mode and "alwaysFix" is specified in the plugin options
-      taskSession.logger.terminal.writeLine(
-        'Fix mode has been disabled since Heft is running in production mode'
-      );
-      fix = false;
-    }
-    return fix;
-  }
-
-  private _getSarifLogPath(
-    heftConfiguration: HeftConfiguration,
-    pluginOptions?: ILintPluginOptions
-  ): string | undefined {
-    const relativeSarifLogPath: string | undefined = pluginOptions?.sarifLogPath;
-    const sarifLogPath: string | undefined =
-      relativeSarifLogPath && path.resolve(heftConfiguration.buildFolderPath, relativeSarifLogPath);
-    return sarifLogPath;
-  }
 
   public apply(
     taskSession: IHeftTaskSession,
@@ -89,8 +89,8 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     // Disable linting in watch mode. Some lint rules require the context of multiple files, which
     // may not be available in watch mode.
     if (!taskSession.parameters.watch) {
-      const fix: boolean = this._checkFix(taskSession, pluginOptions);
-      const sarifLogPath: string | undefined = this._getSarifLogPath(heftConfiguration, pluginOptions);
+      const fix: boolean = checkFix(taskSession, pluginOptions);
+      const sarifLogPath: string | undefined = getSarifLogPath(heftConfiguration, pluginOptions);
       // Use the changed files hook to kick off linting asynchronously
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-typescript-plugin',
@@ -135,8 +135,8 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
         taskSession.logger.terminal.writeWarningLine("Linting isn't currently supported in watch mode");
       } else {
         if (!inTypescriptPhase) {
-          const fix: boolean = this._checkFix(taskSession, pluginOptions);
-          const sarifLogPath: string | undefined = this._getSarifLogPath(heftConfiguration, pluginOptions);
+          const fix: boolean = checkFix(taskSession, pluginOptions);
+          const sarifLogPath: string | undefined = getSarifLogPath(heftConfiguration, pluginOptions);
           // If we are not in the typescript phase, we need to create a typescript program
           // from the tsconfig file
           const tsProgram: IExtendedProgram = await this._createTypescriptProgramAsync(
@@ -162,9 +162,10 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
             // Suppress unhandled promise rejection error
           });
           // Hold on to the original promise, which will throw in the run hook if it unexpectedly fails
-          this._lintingPromises.push(lintingPromise);
+          await lintingPromise;
+        } else {
+          await Promise.all(this._lintingPromises);
         }
-        await Promise.all(this._lintingPromises);
       }
     });
   }
