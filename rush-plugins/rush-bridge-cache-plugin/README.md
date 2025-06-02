@@ -6,7 +6,7 @@ This is useful for integrations with other build orchestrators such as BuildXL. 
 
 ## Here be dragons!
 
-This plugin assumes that the work for a particular task has already been completed and the build artifacts have been generated on disk. **If you run this command on a package where the command hasn't already been ran and the build artifacts are missing or incorrect, you will cache invalid content**. Be careful and beware!
+This plugin assumes that the work for a particular task has already been completed and the build artifacts have been generated on disk. **If you run this command on a package where the command hasn't already been run and the build artifacts are missing or incorrect, you will cache invalid content**. Be careful and beware!
 
 
 ## Installation
