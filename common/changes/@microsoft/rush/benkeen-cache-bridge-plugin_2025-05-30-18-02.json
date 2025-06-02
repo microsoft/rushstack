@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "add build cache plugin",
+      "comment": "Introduce a `@rushstack/rush-bridge-cache-plugin` package that adds a `--set-cache-only` flag to phased commands, which sets the cache entry without performing the operation.",
       "type": "none"
     }
   ],
