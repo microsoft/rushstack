@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/mcp-server",
+      "comment": "Introduce a plugin system for custom MCP tools",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/mcp-server"
+}
