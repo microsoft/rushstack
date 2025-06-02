@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, Import, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { FileSystem, Import, JsonFile, type JsonObject, JsonSchema } from '@rushstack/node-core-library';
 import { Autoinstaller } from '@rushstack/rush-sdk/lib/logic/Autoinstaller';
 import { RushGlobalFolder } from '@rushstack/rush-sdk/lib/api/RushGlobalFolder';
 import { RushConfiguration } from '@rushstack/rush-sdk/lib/api/RushConfiguration';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 
 import type { IRushMcpPlugin, RushMcpPluginFactory } from './IRushMcpPlugin';
 import { RushMcpPluginSessionInternal } from './RushMcpPluginSession';
@@ -38,6 +39,11 @@ export interface IJsonRushMcpPlugin {
    * @rushstack/mcp-server will ensure this folder is installed before loading the plugin.
    */
   autoinstaller: string;
+
+  /**
+   * The name of the plugin. This is used to identify the plugin in the MCP server.
+   */
+  pluginName: string;
 }
 
 /**
@@ -72,9 +78,11 @@ export class RushMcpPluginLoader {
     JsonSchema.fromLoadedObject(rushMcpPluginSchemaObject);
 
   private readonly _rushWorkspacePath: string;
+  private readonly _mcpServer: McpServer;
 
-  public constructor(rushWorkspacePath: string) {
+  public constructor(rushWorkspacePath: string, mcpServer: McpServer) {
     this._rushWorkspacePath = rushWorkspacePath;
+    this._mcpServer = mcpServer;
   }
 
   public async loadAsync(): Promise<void> {
@@ -84,7 +92,6 @@ export class RushMcpPluginLoader {
     );
 
     if (!(await FileSystem.existsAsync(rushMcpFilePath))) {
-      // Should we report an error here?
       return;
     }
 
@@ -135,7 +142,23 @@ export class RushMcpPluginLoader {
         RushMcpPluginLoader._rushMcpPluginSchemaObject
       );
 
-      // TODO: Load and validate config file if defined by the manifest
+      let rushMcpPluginOptions: JsonObject = {};
+      if (jsonManifest.configFileSchema) {
+        const mcpPluginSchemaFilePath: string = path.resolve(
+          installedPluginPackageFolder,
+          jsonManifest.configFileSchema
+        );
+        const mcpPluginSchema: JsonSchema = await JsonSchema.fromFile(mcpPluginSchemaFilePath);
+        const rushMcpPluginOptionsFilePath: string = path.resolve(
+          this._rushWorkspacePath,
+          `common/config/rush-mcp/${jsonMcpPlugin.pluginName}.json`
+        );
+        // Example: /path/to/my-repo/common/config/rush-mcp/rush-mcp-example-plugin.json
+        rushMcpPluginOptions = await JsonFile.loadAndValidateAsync(
+          rushMcpPluginOptionsFilePath,
+          mcpPluginSchema
+        );
+      }
 
       const fullEntryPointPath: string = path.join(installedPluginPackageFolder, jsonManifest.entryPoint);
       let pluginFactory: RushMcpPluginFactory;
@@ -149,12 +172,11 @@ export class RushMcpPluginLoader {
         throw new Error(`Unable to load plugin entry point at ${fullEntryPointPath}: ` + e.toString());
       }
 
-      const session: RushMcpPluginSessionInternal = new RushMcpPluginSessionInternal();
+      const session: RushMcpPluginSessionInternal = new RushMcpPluginSessionInternal(this._mcpServer);
 
       let plugin: IRushMcpPlugin;
       try {
-        // TODO: Replace "{}" with the plugin's parsed config file JSON
-        plugin = pluginFactory(session, {});
+        plugin = pluginFactory(session, rushMcpPluginOptions);
       } catch (e) {
         throw new Error(`Error invoking entry point for plugin ${jsonManifest.pluginName}:` + e.toString());
       }

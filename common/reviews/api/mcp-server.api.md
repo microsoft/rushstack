@@ -27,7 +27,7 @@ export interface IRushMcpPlugin {
 }
 
 // @public
-export interface IRushMcpTool<TSchema extends zodModule.ZodTypeAny = zodModule.ZodTypeAny> {
+export interface IRushMcpTool<TSchema extends zodModule.ZodObject<zodModule.ZodRawShape> = zodModule.ZodObject<zodModule.ZodRawShape>> {
     // (undocumented)
     executeAsync(input: zodModule.infer<TSchema>): Promise<CallToolResult>;
     // (undocumented)

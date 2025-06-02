@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IRushMcpTool } from './IRushMcpTool';
 import * as zod from 'zod';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+
+import type { IRushMcpTool } from './IRushMcpTool';
 import type { zodModule } from './zodTypes';
 
 /**
@@ -26,11 +28,23 @@ export abstract class RushMcpPluginSession {
 }
 
 export class RushMcpPluginSessionInternal extends RushMcpPluginSession {
-  public constructor() {
+  private readonly _mcpServer: McpServer;
+
+  public constructor(mcpServer: McpServer) {
     super();
+    this._mcpServer = mcpServer;
   }
 
   public override registerTool(options: IRegisterToolOptions, tool: IRushMcpTool): void {
-    // TODO: Register the tool
+    if (options.description) {
+      this._mcpServer.tool(
+        options.toolName,
+        options.description,
+        tool.schema.shape,
+        tool.executeAsync.bind(tool)
+      );
+    } else {
+      this._mcpServer.tool(options.toolName, tool.schema.shape, tool.executeAsync.bind(tool));
+    }
   }
 }
