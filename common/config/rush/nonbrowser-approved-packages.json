@@ -95,6 +95,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/dependency-path-lockfile-pre-v10",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@pnpm/link-bins",
       "allowedCategories": [ "libraries" ]
     },
@@ -483,10 +487,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "chokidar",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "cli-table",
       "allowedCategories": [ "libraries" ]
     },
@@ -652,6 +652,10 @@
     },
     {
       "name": "https-proxy-agent",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "chokidar",
       "allowedCategories": [ "libraries" ]
     },
     {
