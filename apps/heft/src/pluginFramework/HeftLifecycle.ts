@@ -67,7 +67,8 @@ export class HeftLifecycle extends HeftPluginHost {
       clean: new AsyncParallelHook<IHeftLifecycleCleanHookOptions>(),
       toolStart: new AsyncParallelHook<IHeftLifecycleToolStartHookOptions>(),
       toolFinish: new AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>(),
-      recordMetrics: internalHeftSession.metricsCollector.recordMetricsHook
+      recordMetrics: internalHeftSession.metricsCollector.recordMetricsHook,
+      recordTaskMetrics: internalHeftSession.metricsCollector.recordTaskMetricsHook
     };
   }
 
