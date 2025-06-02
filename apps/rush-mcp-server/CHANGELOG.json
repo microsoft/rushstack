@@ -2,6 +2,18 @@
   "name": "@rushstack/mcp-server",
   "entries": [
     {
+      "version": "0.1.8",
+      "tag": "@rushstack/mcp-server_v0.1.8",
+      "date": "Thu, 29 May 2025 15:10:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the rush mcp server README.md document"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.7",
       "tag": "@rushstack/mcp-server_v0.1.7",
       "date": "Tue, 13 May 2025 02:09:20 GMT",
