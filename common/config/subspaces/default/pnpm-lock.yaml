@@ -4015,7 +4015,7 @@ importers:
         version: link:../../rigs/local-node-rig
 
   ../../../rush-plugins/rush-bridge-cache-plugin:
-    devDependencies:
+    dependencies:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
