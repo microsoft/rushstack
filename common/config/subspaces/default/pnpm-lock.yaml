@@ -1257,6 +1257,9 @@ importers:
       '@rushstack/eslint-bulk':
         specifier: workspace:*
         version: link:../../eslint/eslint-bulk
+      '@rushstack/eslint-config':
+        specifier: 3.7.1
+        version: 3.7.1(eslint@8.57.0)(typescript@5.8.2)
       '@rushstack/eslint-patch':
         specifier: workspace:*
         version: link:../../eslint/eslint-patch
@@ -2511,18 +2514,24 @@ importers:
       '@rushstack/heft':
         specifier: 0.73.2
         version: 0.73.2(@types/node@20.17.19)
-      '@types/eslint':
-        specifier: 8.56.10
-        version: 8.56.10
+      '@types/eslint-8':
+        specifier: npm:@types/eslint@8.56.10
+        version: /@types/eslint@8.56.10
+      '@types/eslint-9':
+        specifier: npm:@types/eslint@9.6.1
+        version: /@types/eslint@9.6.1
       '@typescript-eslint/types':
         specifier: ~8.31.0
         version: 8.31.0(typescript@5.8.2)
       decoupled-local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/decoupled-local-node-rig
-      eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+      eslint-8:
+        specifier: npm:eslint@~8.57.0
+        version: /eslint@8.57.0
+      eslint-9:
+        specifier: npm:eslint@~9.25.1
+        version: /eslint@9.25.1
       typescript:
         specifier: ~5.8.2
         version: 5.8.2
