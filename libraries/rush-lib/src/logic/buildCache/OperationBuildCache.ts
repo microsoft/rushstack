@@ -108,20 +108,20 @@ export class OperationBuildCache {
   }
 
   public static forOperation(
-    operation: IOperationExecutionResult,
+    executionResult: IOperationExecutionResult,
     options: IOperationBuildCacheOptions
   ): OperationBuildCache {
-    const outputFolders: string[] = [...(operation.operation.settings?.outputFolderNames ?? [])];
-    if (operation.metadataFolderPath) {
-      outputFolders.push(operation.metadataFolderPath);
+    const outputFolders: string[] = [...(executionResult.operation.settings?.outputFolderNames ?? [])];
+    if (executionResult.metadataFolderPath) {
+      outputFolders.push(executionResult.metadataFolderPath);
     }
     const buildCacheOptions: IProjectBuildCacheOptions = {
       buildCacheConfiguration: options.buildCacheConfiguration,
       terminal: options.terminal,
-      project: operation.associatedProject,
-      phaseName: operation.associatedPhase.name,
+      project: executionResult.operation.associatedProject,
+      phaseName: executionResult.operation.associatedPhase.name,
       projectOutputFolderNames: outputFolders,
-      operationStateHash: operation.getStateHash()
+      operationStateHash: executionResult.getStateHash()
     };
     const cacheId: string | undefined = OperationBuildCache._getCacheId(buildCacheOptions);
     return new OperationBuildCache(cacheId, buildCacheOptions);

@@ -15,6 +15,7 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
+    "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/terminal": "workspace:*",

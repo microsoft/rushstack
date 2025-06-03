@@ -591,8 +591,6 @@ export interface _IOperationBuildCacheOptions {
 
 // @alpha
 export interface IOperationExecutionResult {
-    readonly associatedPhase: IPhase;
-    readonly associatedProject: RushConfigurationProject;
     readonly error: Error | undefined;
     getStateHash(): string;
     getStateHashComponents(): ReadonlyArray<string>;
@@ -968,7 +966,7 @@ export class _OperationBuildCache {
     // (undocumented)
     get cacheId(): string | undefined;
     // (undocumented)
-    static forOperation(operation: IOperationExecutionResult, options: _IOperationBuildCacheOptions): _OperationBuildCache;
+    static forOperation(executionResult: IOperationExecutionResult, options: _IOperationBuildCacheOptions): _OperationBuildCache;
     // (undocumented)
     static getOperationBuildCache(options: _IProjectBuildCacheOptions): _OperationBuildCache;
     // (undocumented)
