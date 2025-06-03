@@ -113,6 +113,14 @@ for (let currentModule: NodeModule = module; ; ) {
         }
       }
     }
+
+    if (eslintFolder) {
+      const eslintrcFolderPath: string = path.dirname(
+        require.resolve('@eslint/eslintrc/package.json', { paths: [eslintFolder] })
+      );
+      eslintrcBundlePath = path.join(eslintrcFolderPath, 'dist/eslintrc.cjs');
+    }
+
     break;
   }
 
