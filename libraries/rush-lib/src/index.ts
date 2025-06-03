@@ -135,7 +135,6 @@ export type {
   IExecutionResult,
   IOperationExecutionResult
 } from './logic/operations/IOperationExecutionResult';
-export type { OperationExecutionRecord } from './logic/operations/OperationExecutionRecord';
 export { type IOperationOptions, Operation } from './logic/operations/Operation';
 export { OperationStatus } from './logic/operations/OperationStatus';
 export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
@@ -199,4 +198,8 @@ export {
   type IRushCommandLineAction
 } from './api/RushCommandLine';
 
-export { ProjectBuildCache as OperationBuildCache } from './logic/buildCache/ProjectBuildCache';
+export { OperationBuildCache as _OperationBuildCache } from './logic/buildCache/OperationBuildCache';
+export type {
+  IOperationBuildCacheOptions as _IOperationBuildCacheOptions,
+  IProjectBuildCacheOptions as _IProjectBuildCacheOptions
+} from './logic/buildCache/OperationBuildCache';

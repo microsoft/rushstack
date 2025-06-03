@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { OperationBuildCache } from '@rushstack/rush-sdk';
+import { _OperationBuildCache as OperationBuildCache } from '@rushstack/rush-sdk';
 import type {
   BuildCacheConfiguration,
   IExecuteOperationsContext,
@@ -10,17 +10,24 @@ import type {
   IPhasedCommand,
   IRushPlugin,
   Operation,
-  OperationExecutionRecord,
   RushSession
 } from '@rushstack/rush-sdk';
 
 const PLUGIN_NAME: 'RushBridgeCachePlugin' = 'RushBridgeCachePlugin';
 
+export interface IBridgeCachePluginOptions {
+  readonly flagName: string;
+}
 export class BridgeCachePlugin implements IRushPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
+  private readonly _flagName: string;
+
+  public constructor(options: IBridgeCachePluginOptions) {
+    this._flagName = options.flagName;
+  }
 
   public apply(session: RushSession): void {
-    const isSetCacheOnly: boolean = process.argv.includes('--set-cache-only');
+    const isSetCacheOnly: boolean = process.argv.includes(this._flagName);
     if (!isSetCacheOnly) {
       return;
     }
@@ -33,20 +40,10 @@ export class BridgeCachePlugin implements IRushPlugin {
     };
 
     session.hooks.runAnyPhasedCommand.tapPromise(PLUGIN_NAME, async (command: IPhasedCommand) => {
-      // tracks the projects being targeted by the command (--to, --only etc.)
-      const targetProjects: Set<Operation> = new Set<Operation>();
-
       // cancel the actual operations. We don't want to run the command, just cache the output folders on disk
       command.hooks.createOperations.tap(
         { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
-        (operations: Set<Operation>): Set<Operation> => {
-          operations.forEach((operation: Operation) => {
-            if (operation.enabled) {
-              targetProjects.add(operation);
-            }
-          });
-          return cancelOperations(operations);
-        }
+        cancelOperations
       );
 
       // populate the cache for each operation
@@ -60,12 +57,7 @@ export class BridgeCachePlugin implements IRushPlugin {
             return;
           }
 
-          await this._setCacheAsync(
-            session,
-            context.buildCacheConfiguration,
-            recordByOperation,
-            targetProjects
-          );
+          await this._setCacheAsync(session, context.buildCacheConfiguration, recordByOperation);
         }
       );
     });
@@ -74,8 +66,7 @@ export class BridgeCachePlugin implements IRushPlugin {
   private async _setCacheAsync(
     session: RushSession,
     buildCacheConfiguration: BuildCacheConfiguration,
-    recordByOperation: Map<Operation, IOperationExecutionResult>,
-    targetProjects: Set<Operation>
+    recordByOperation: Map<Operation, IOperationExecutionResult>
   ): Promise<void> {
     const logger: ILogger = session.getLogger(PLUGIN_NAME);
 
@@ -83,14 +74,12 @@ export class BridgeCachePlugin implements IRushPlugin {
       async (operationExecutionResult: IOperationExecutionResult, operation: Operation) => {
         const { associatedProject, associatedPhase } = operation;
 
-        // omit operations that aren't targeted, or packages without a command for this phase
-        const hasCommand: boolean = !!associatedProject.packageJson.scripts?.[associatedPhase.name];
-        if (!targetProjects.has(operation) || !hasCommand) {
+        if (operation.isNoOp) {
           return;
         }
 
         const projectBuildCache: OperationBuildCache = OperationBuildCache.forOperation(
-          operationExecutionResult as OperationExecutionRecord,
+          operationExecutionResult,
           {
             buildCacheConfiguration,
             terminal: logger.terminal
@@ -107,7 +96,6 @@ export class BridgeCachePlugin implements IRushPlugin {
           logger.terminal.writeErrorLine(
             `Error creating a cache entry set for ${associatedPhase.name} (${associatedProject.packageName}) from previously generated output folders\n`
           );
-          process.exit(1);
         }
       }
     );

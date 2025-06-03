@@ -6,6 +6,8 @@ import type { OperationStatus } from './OperationStatus';
 import type { Operation } from './Operation';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 import type { ILogFilePaths } from './ProjectLogWritable';
+import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 /**
  * The `IOperationExecutionResult` interface represents the results of executing an {@link Operation}.
@@ -52,6 +54,14 @@ export interface IOperationExecutionResult {
    * The paths to the log files, if applicable.
    */
   readonly logFilePaths: ILogFilePaths | undefined;
+  /**
+   * The Rush phase associated with this Operation.
+   */
+  readonly associatedPhase: IPhase;
+  /**
+   * The Rush project associated with this Operation.
+   */
+  readonly associatedProject: RushConfigurationProject;
 
   /**
    * Gets the hash of the state of all registered inputs to this operation.

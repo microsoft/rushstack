@@ -8,7 +8,7 @@ import type { RushConfigurationProject } from '../../../api/RushConfigurationPro
 import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import type { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
 
-import { ProjectBuildCache } from '../ProjectBuildCache';
+import { OperationBuildCache } from '../OperationBuildCache';
 
 interface ITestOptions {
   enabled: boolean;
@@ -16,11 +16,11 @@ interface ITestOptions {
   trackedProjectFiles: string[] | undefined;
 }
 
-describe(ProjectBuildCache.name, () => {
-  function prepareSubject(options: Partial<ITestOptions>): ProjectBuildCache {
+describe(OperationBuildCache.name, () => {
+  function prepareSubject(options: Partial<ITestOptions>): OperationBuildCache {
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
-    const subject: ProjectBuildCache = ProjectBuildCache.getProjectBuildCache({
+    const subject: OperationBuildCache = OperationBuildCache.getOperationBuildCache({
       buildCacheConfiguration: {
         buildCacheEnabled: options.hasOwnProperty('enabled') ? options.enabled : true,
         getCacheEntryId: (opts: IGenerateCacheEntryIdOptions) =>
@@ -46,9 +46,9 @@ describe(ProjectBuildCache.name, () => {
     return subject;
   }
 
-  describe(ProjectBuildCache.getProjectBuildCache.name, () => {
-    it('returns a ProjectBuildCache with a calculated cacheId value', () => {
-      const subject: ProjectBuildCache = prepareSubject({});
+  describe(OperationBuildCache.getOperationBuildCache.name, () => {
+    it('returns an OperationBuildCache with a calculated cacheId value', () => {
+      const subject: OperationBuildCache = prepareSubject({});
       expect(subject['_cacheId']).toMatchInlineSnapshot(
         `"acme-wizard/1926f30e8ed24cb47be89aea39e7efd70fcda075"`
       );

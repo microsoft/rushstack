@@ -263,6 +263,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rush-bridge-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-http-build-cache-plugin",
       "allowedCategories": [ "libraries" ]
     },

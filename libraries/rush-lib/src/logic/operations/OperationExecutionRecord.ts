@@ -34,6 +34,9 @@ import {
   initializeProjectLogFilesAsync
 } from './ProjectLogWritable';
 
+/**
+ * @internal
+ */
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
   onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
@@ -381,8 +384,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         this.status = this.operation.enabled
           ? await this.runner.executeAsync(this)
           : this.runner.isNoOp
-          ? OperationStatus.NoOp
-          : OperationStatus.Skipped;
+            ? OperationStatus.NoOp
+            : OperationStatus.Skipped;
       }
       // Make sure that the stopwatch is stopped before reporting the result, otherwise endTime is undefined.
       this.stopwatch.stop();

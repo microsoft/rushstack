@@ -1,6 +1,6 @@
 # @rushstack/rush-bridge-cache-plugin
 
-This is a Rush plugin that lets you to add an optional `--set-cache-only` flag to Rush's phased commands to bypass the actual _action_ of the script (build, test, lint - whatever you have configured), and just populate the cache from the action as though the action had already been performed by Rush.
+This is a Rush plugin that lets you to add an optional flag to Rush's phased commands to bypass the actual _action_ of the script (build, test, lint - whatever you have configured), and just populate the cache from the action as though the action had already been performed by Rush. The flag name is configurable.
 
 This is useful for integrations with other build orchestrators such as BuildXL. You can use those to do the work of actually running the task, then run the equivalent Rush command afterwards with a `--set-cache-only` to populate the Rush cache with whatever had been generated on disk, in addition to whatever cache mechanism is used by the other build orchestrator.
 
@@ -19,26 +19,34 @@ This plugin assumes that the work for a particular task has already been complet
   "associatedCommands": ["build", "test", "lint", "a11y", "typecheck"],
   "description": "When the flag is added to any associated command, it'll bypass running the command itself, and cache whatever it finds on disk for the action. Beware! Only run when you know the build artifacts are in a valid state for the command.",
   "parameterKind": "flag",
-  "longName": "--set-cache-only",
-  "required": false
+  "longName": "--set-cache-only"
 }
 ```
 
 3. Add a new entry in `common/config/rush/rush-plugins` to register the new plugin:
-```
+```json
 {
   "packageName": "@rushstack/rush-bridge-cache-plugin",
   "pluginName": "rush-bridge-cache-plugin",
   "autoinstallerName": "your-auto-installer-name-here"
 }
 ```
+
+4. Create a configuration file for this plugin at this location: `common/config/rush-plugins/rush-bridge-cache-plugin.json` that defines the flag name you'll use to trigger the plugin:
+```json
+{
+  "flagName": "--set-cache-only"
+}
+```
+
 ## Usage
 
-Any of the rush command can now just be given a `--set-cache-only` property, e.g.
+You can now add the flag to any Rush phased command, e.g.
 
 `rush build --to your-packageX --set-cache-only`
 
-That will examine `your-packageX` and all of its dependencies, then populate the cache.
+That will populate the cache for `your-packageX` and all of its dependencies.
+
 
 ## Performance
 
