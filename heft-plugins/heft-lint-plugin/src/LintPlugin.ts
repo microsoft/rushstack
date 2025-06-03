@@ -150,7 +150,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
             changedFiles.add(sourceFile as IExtendedSourceFile);
           });
 
-          const lintingPromise: Promise<void> = this._lintAsync({
+          await this._lintAsync({
             taskSession,
             heftConfiguration,
             fix,
@@ -158,11 +158,6 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
             tsProgram,
             changedFiles
           });
-          lintingPromise.catch(() => {
-            // Suppress unhandled promise rejection error
-          });
-          // Hold on to the original promise, which will throw in the run hook if it unexpectedly fails
-          await lintingPromise;
         } else {
           await Promise.all(this._lintingPromises);
         }
