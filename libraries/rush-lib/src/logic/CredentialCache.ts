@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema, LockFile } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
@@ -38,8 +39,7 @@ export interface ICredentialCacheEntry {
  */
 export interface ICredentialCacheOptions {
   supportEditing: boolean;
-  cacheDirectory?: string;
-  cacheName?: string;
+  cacheFilePath?: string;
 }
 
 /**
@@ -68,22 +68,18 @@ export class CredentialCache /* implements IDisposable */ {
     this._lockfile = lockfile;
   }
 
-  public static initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
-    return CredentialCache._initializeFromResolvedOptionsAsync(CredentialCache._resolveOptions(options));
-  }
+  public static async initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
+    let cacheDirectory: string;
+    let cacheName: string;
+    if (options.cacheFilePath) {
+      cacheDirectory = path.dirname(options.cacheFilePath);
+      cacheName = path.basename(options.cacheFilePath, '.json');
+    } else {
+      cacheDirectory = RushUserConfiguration.getRushUserFolderPath();
+      cacheName = DEFAULT_CACHE_NAME;
+    }
+    const cacheFilePath: string = `${cacheDirectory}/${cacheName}.json`;
 
-  private static _resolveOptions(options: ICredentialCacheOptions): Required<ICredentialCacheOptions> {
-    return {
-      ...options,
-      cacheDirectory: options.cacheDirectory || RushUserConfiguration.getRushUserFolderPath(),
-      cacheName: options.cacheName || DEFAULT_CACHE_NAME
-    };
-  }
-
-  private static async _initializeFromResolvedOptionsAsync(
-    options: Required<ICredentialCacheOptions>
-  ): Promise<CredentialCache> {
-    const cacheFilePath: string = `${options.cacheDirectory}/${options.cacheName}.json`;
     const jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
     let loadedJson: ICredentialCacheJson | undefined;
@@ -97,7 +93,7 @@ export class CredentialCache /* implements IDisposable */ {
 
     let lockfile: LockFile | undefined;
     if (options.supportEditing) {
-      lockfile = await LockFile.acquireAsync(options.cacheDirectory, `${options.cacheName}.lock`);
+      lockfile = await LockFile.acquireAsync(cacheDirectory, `${cacheName}.lock`);
     }
 
     const credentialCache: CredentialCache = new CredentialCache(cacheFilePath, loadedJson, lockfile);
