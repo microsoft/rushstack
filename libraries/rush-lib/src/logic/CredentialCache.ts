@@ -9,7 +9,8 @@ import { RushUserConfiguration } from '../api/RushUserConfiguration';
 import schemaJson from '../schemas/credentials.schema.json';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
-const DEFAULT_CACHE_NAME: string = 'credentials';
+const CACHE_FILE_EXTENSION: string = '.json';
+const DEFAULT_CACHE_FILENAME: string = `credentials${CACHE_FILE_EXTENSION}`;
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
 
 interface ICredentialCacheJson {
@@ -59,7 +60,7 @@ export class CredentialCache /* implements IDisposable */ {
     lockfile: LockFile | undefined
   ) {
     if (loadedJson && loadedJson.version !== LATEST_CREDENTIALS_JSON_VERSION) {
-      throw new Error(`Unexpected credentials.json file version: ${loadedJson.version}`);
+      throw new Error(`Unexpected ${cacheFilePath} file version: ${loadedJson.version}`);
     }
 
     this._cacheFilePath = cacheFilePath;
@@ -70,15 +71,16 @@ export class CredentialCache /* implements IDisposable */ {
 
   public static async initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
     let cacheDirectory: string;
-    let cacheName: string;
+    let cacheFileName: string;
     if (options.cacheFilePath) {
       cacheDirectory = path.dirname(options.cacheFilePath);
-      cacheName = path.basename(options.cacheFilePath, '.json');
+      // Ensure .json extension
+      cacheFileName = path.basename(options.cacheFilePath, CACHE_FILE_EXTENSION) + CACHE_FILE_EXTENSION;
     } else {
       cacheDirectory = RushUserConfiguration.getRushUserFolderPath();
-      cacheName = DEFAULT_CACHE_NAME;
+      cacheFileName = DEFAULT_CACHE_FILENAME;
     }
-    const cacheFilePath: string = `${cacheDirectory}/${cacheName}.json`;
+    const cacheFilePath: string = `${cacheDirectory}/${cacheFileName}`;
 
     const jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
@@ -93,7 +95,7 @@ export class CredentialCache /* implements IDisposable */ {
 
     let lockfile: LockFile | undefined;
     if (options.supportEditing) {
-      lockfile = await LockFile.acquireAsync(cacheDirectory, `${cacheName}.lock`);
+      lockfile = await LockFile.acquireAsync(cacheDirectory, `${cacheFileName}.lock`);
     }
 
     const credentialCache: CredentialCache = new CredentialCache(cacheFilePath, loadedJson, lockfile);
