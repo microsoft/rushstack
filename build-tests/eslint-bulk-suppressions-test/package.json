@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "@rushstack/eslint-bulk": "workspace:*",
-    "@rushstack/eslint-config": "3.7.1",
+    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/eslint-patch": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",

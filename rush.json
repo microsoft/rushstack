@@ -633,8 +633,7 @@
       "packageName": "eslint-bulk-suppressions-test",
       "projectFolder": "build-tests/eslint-bulk-suppressions-test",
       "reviewCategory": "tests",
-      "shouldPublish": false,
-      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
+      "shouldPublish": false
     },
     {
       "packageName": "eslint-bulk-suppressions-test-flat",

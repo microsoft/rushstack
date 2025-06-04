@@ -1258,8 +1258,8 @@ importers:
         specifier: workspace:*
         version: link:../../eslint/eslint-bulk
       '@rushstack/eslint-config':
-        specifier: 3.7.1
-        version: 3.7.1(eslint@8.57.0)(typescript@5.8.2)
+        specifier: workspace:*
+        version: link:../../eslint/eslint-config
       '@rushstack/eslint-patch':
         specifier: workspace:*
         version: link:../../eslint/eslint-patch
@@ -3414,12 +3414,12 @@ importers:
       '@pnpm/dependency-path':
         specifier: ~1000.0.9
         version: 1000.0.9
-      '@pnpm/dependency-path-lockfile-pre-v9':
-        specifier: npm:@pnpm/dependency-path@~2.1.2
-        version: /@pnpm/dependency-path@2.1.8
       '@pnpm/dependency-path-lockfile-pre-v10':
         specifier: npm:@pnpm/dependency-path@~5.1.7
         version: /@pnpm/dependency-path@5.1.7
+      '@pnpm/dependency-path-lockfile-pre-v9':
+        specifier: npm:@pnpm/dependency-path@~2.1.2
+        version: /@pnpm/dependency-path@2.1.8
       '@pnpm/link-bins':
         specifier: ~5.3.7
         version: 5.3.25
