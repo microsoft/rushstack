@@ -53,12 +53,12 @@
     {
       "file": "src/index.ts",
       "scopeId": ".ExampleObjectType",
-      "rule": "@typescript-eslint/ban-types"
+      "rule": "@typescript-eslint/consistent-type-definitions"
     },
     {
       "file": "src/index.ts",
       "scopeId": ".ExampleObjectType",
-      "rule": "@typescript-eslint/consistent-type-definitions"
+      "rule": "@typescript-eslint/no-wrapper-object-types"
     },
     {
       "file": "src/index.ts",
