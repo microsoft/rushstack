@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/cpu-profile-summarizer",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/cpu-profile-summarizer"
+}

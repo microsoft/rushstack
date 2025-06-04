@@ -60,17 +60,13 @@ export class SearchListPrompt extends BasePrompt<ListQuestion> {
     // eslint-disable-next-line @typescript-eslint/typedef
     const validation = this.handleSubmitEvents(events.line.pipe(map(this._getCurrentValue.bind(this))));
 
-    //eslint-disable-next-line no-void
     void validation.success.forEach(this._onSubmit.bind(this));
-    //eslint-disable-next-line no-void
     void validation.error.forEach(this._onError.bind(this));
 
-    // eslint-disable-next-line no-void
     void events.numberKey
       .pipe(takeUntil(events.line))
       .forEach(this._onNumberKey.bind(this) as (evt: unknown) => void);
 
-    // eslint-disable-next-line no-void
     void events.keypress
       .pipe(takeUntil(validation.success))
       .forEach(this._onKeyPress.bind(this) as (evt: unknown) => void);

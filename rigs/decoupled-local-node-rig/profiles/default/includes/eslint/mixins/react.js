@@ -12,7 +12,7 @@
 // https://github.com/microsoft/rushstack/tree/master/eslint/eslint-config#rushstackeslint-configmixinsreact
 module.exports = {
   extends: ['@rushstack/eslint-config/mixins/react'],
-  plugins: ['eslint-plugin-react-hooks', 'deprecation'],
+  plugins: ['eslint-plugin-react-hooks'],
 
   overrides: [
     {

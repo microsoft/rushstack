@@ -37,11 +37,11 @@ interface ICachedBulkSuppressionsConfig {
   suppressionsConfig: IBulkSuppressionsConfig;
 }
 const suppressionsJsonByFolderPath: Map<string, ICachedBulkSuppressionsConfig> = new Map();
-export function getSuppressionsConfigForEslintrcFolderPath(
-  eslintrcFolderPath: string
+export function getSuppressionsConfigForEslintConfigFolderPath(
+  eslintConfigFolderPath: string
 ): IBulkSuppressionsConfig {
   const cachedSuppressionsConfig: ICachedBulkSuppressionsConfig | undefined =
-    suppressionsJsonByFolderPath.get(eslintrcFolderPath);
+    suppressionsJsonByFolderPath.get(eslintConfigFolderPath);
 
   let shouldLoad: boolean;
   let suppressionsConfig: IBulkSuppressionsConfig;
@@ -53,7 +53,7 @@ export function getSuppressionsConfigForEslintrcFolderPath(
   }
 
   if (shouldLoad) {
-    const suppressionsPath: string = `${eslintrcFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
+    const suppressionsPath: string = `${eslintConfigFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
     let rawJsonFile: string | undefined;
     try {
       rawJsonFile = fs.readFileSync(suppressionsPath).toString();
@@ -85,27 +85,27 @@ export function getSuppressionsConfigForEslintrcFolderPath(
       };
     }
 
-    suppressionsJsonByFolderPath.set(eslintrcFolderPath, { readTime: Date.now(), suppressionsConfig });
+    suppressionsJsonByFolderPath.set(eslintConfigFolderPath, { readTime: Date.now(), suppressionsConfig });
   }
 
   return suppressionsConfig!;
 }
 
-export function getAllBulkSuppressionsConfigsByEslintrcFolderPath(): [string, IBulkSuppressionsConfig][] {
+export function getAllBulkSuppressionsConfigsByEslintConfigFolderPath(): [string, IBulkSuppressionsConfig][] {
   const result: [string, IBulkSuppressionsConfig][] = [];
-  for (const [eslintrcFolderPath, { suppressionsConfig }] of suppressionsJsonByFolderPath) {
-    result.push([eslintrcFolderPath, suppressionsConfig]);
+  for (const [eslintConfigFolderPath, { suppressionsConfig }] of suppressionsJsonByFolderPath) {
+    result.push([eslintConfigFolderPath, suppressionsConfig]);
   }
 
   return result;
 }
 
 export function writeSuppressionsJsonToFile(
-  eslintrcFolderPath: string,
+  eslintConfigFolderPath: string,
   suppressionsConfig: IBulkSuppressionsConfig
 ): void {
-  suppressionsJsonByFolderPath.set(eslintrcFolderPath, { readTime: Date.now(), suppressionsConfig });
-  const suppressionsPath: string = `${eslintrcFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
+  suppressionsJsonByFolderPath.set(eslintConfigFolderPath, { readTime: Date.now(), suppressionsConfig });
+  const suppressionsPath: string = `${eslintConfigFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
   if (suppressionsConfig.jsonObject.suppressions.length === 0) {
     deleteFile(suppressionsPath);
   } else {
@@ -114,8 +114,8 @@ export function writeSuppressionsJsonToFile(
   }
 }
 
-export function deleteBulkSuppressionsFileInEslintrcFolder(eslintrcFolderPath: string): void {
-  const suppressionsPath: string = `${eslintrcFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
+export function deleteBulkSuppressionsFileInEslintConfigFolder(eslintConfigFolderPath: string): void {
+  const suppressionsPath: string = `${eslintConfigFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
   deleteFile(suppressionsPath);
 }
 

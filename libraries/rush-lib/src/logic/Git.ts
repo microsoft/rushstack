@@ -391,8 +391,7 @@ export class Git {
 
   public async hasUncommittedChangesAsync(): Promise<boolean> {
     const gitStatusEntries: Iterable<IGitStatusEntry> = await this.getGitStatusAsync();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const gitStatusEntry of gitStatusEntries) {
+    for (const _ of gitStatusEntries) {
       // If there are any changes, return true. We only need to evaluate the first iterator entry
       return true;
     }

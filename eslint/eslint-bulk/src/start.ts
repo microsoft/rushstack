@@ -10,6 +10,14 @@ import {
 import * as process from 'process';
 import * as fs from 'fs';
 
+const ESLINT_CONFIG_FILES: string[] = [
+  'eslint.config.js',
+  'eslint.config.cjs',
+  'eslint.config.mjs',
+  '.eslintrc.js',
+  '.eslintrc.cjs'
+];
+
 interface IEslintBulkConfigurationJson {
   /**
    * `@rushtack/eslint`-bulk should report an error if its package.json is older than this number
@@ -22,18 +30,19 @@ interface IEslintBulkConfigurationJson {
 }
 
 function findPatchPath(): string {
-  const candidatePaths: string[] = [`${process.cwd()}/.eslintrc.js`, `${process.cwd()}/.eslintrc.cjs`];
-  let eslintrcPath: string | undefined;
+  const candidatePaths: string[] = ESLINT_CONFIG_FILES.map((fileName) => `${process.cwd()}/${fileName}`);
+  let eslintConfigPath: string | undefined;
   for (const candidatePath of candidatePaths) {
     if (fs.existsSync(candidatePath)) {
-      eslintrcPath = candidatePath;
+      eslintConfigPath = candidatePath;
       break;
     }
   }
 
-  if (!eslintrcPath) {
+  if (!eslintConfigPath) {
     console.error(
-      '@rushstack/eslint-bulk: Please run this command from the directory that contains .eslintrc.js or .eslintrc.cjs'
+      '@rushstack/eslint-bulk: Please run this command from the directory that contains one of the following ' +
+        `ESLint configuration files: ${ESLINT_CONFIG_FILES.join(', ')}`
     );
     process.exit(1);
   }
@@ -80,10 +89,10 @@ function findPatchPath(): string {
   let runEslintFn: () => Buffer;
   if (eslintBinPath) {
     runEslintFn = () =>
-      spawnSync(process.argv0, [eslintBinPath, ...eslintArgs, eslintrcPath], spawnOrExecOptions).stdout;
+      spawnSync(process.argv0, [eslintBinPath, ...eslintArgs, eslintConfigPath], spawnOrExecOptions).stdout;
   } else {
     // Try to use a globally-installed eslint if a local package was not found
-    runEslintFn = () => execSync(`eslint ${eslintArgs.join(' ')} "${eslintrcPath}"`, spawnOrExecOptions);
+    runEslintFn = () => execSync(`eslint ${eslintArgs.join(' ')} "${eslintConfigPath}"`, spawnOrExecOptions);
   }
 
   let stdout: Buffer;

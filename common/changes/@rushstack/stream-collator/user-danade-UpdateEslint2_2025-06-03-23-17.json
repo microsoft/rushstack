@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/stream-collator",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/stream-collator"
+}

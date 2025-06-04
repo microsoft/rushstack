@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-bulk",
+      "comment": "Update for compatibility with ESLint flat configuration files",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-bulk"
+}

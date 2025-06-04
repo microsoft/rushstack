@@ -569,7 +569,6 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     //
     // Storing the original env and restoring it like happens with argv does not seem to work
     // At the time when storybook checks env.npm_config_user_agent it has been reset to undefined
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     if (patchNpmConfigUserAgent) {
       process.env.npm_config_user_agent = 'npm';
     }

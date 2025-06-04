@@ -50,7 +50,6 @@ Object {
 
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-// eslint-disable-next-line no-console
 const path = __webpack_require__.p + \\"assets_1a20fc5e5390d91fee246bf5dbf1300e/\\";
 // eslint-disable-next-line no-console
 console.log(path);

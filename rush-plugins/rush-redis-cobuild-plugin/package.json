@@ -27,6 +27,7 @@
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
+    "eslint": "~9.25.1",
     "local-node-rig": "workspace:*"
   }
 }

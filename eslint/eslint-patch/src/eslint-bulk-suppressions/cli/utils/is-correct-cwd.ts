@@ -4,5 +4,11 @@
 import fs from 'fs';
 
 export function isCorrectCwd(cwd: string): boolean {
-  return fs.existsSync(`${cwd}/.eslintrc.js`) || fs.existsSync(`${cwd}/.eslintrc.cjs`);
+  return (
+    fs.existsSync(`${cwd}/eslint.config.js`) ||
+    fs.existsSync(`${cwd}/eslint.config.cjs`) ||
+    fs.existsSync(`${cwd}/eslint.config.mjs`) ||
+    fs.existsSync(`${cwd}/.eslintrc.js`) ||
+    fs.existsSync(`${cwd}/.eslintrc.cjs`)
+  );
 }

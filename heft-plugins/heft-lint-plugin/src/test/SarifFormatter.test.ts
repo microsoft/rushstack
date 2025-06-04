@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 import { formatEslintResultsAsSARIF } from '../SarifFormatter';
 import type { ISerifFormatterOptions } from '../SarifFormatter';
-import type { ESLint } from 'eslint';
+import type { ESLint } from 'eslint-9';
 
 describe('formatEslintResultsAsSARIF', () => {
   test('should correctly format ESLint results into SARIF log', () => {
@@ -18,8 +18,8 @@ describe('formatEslintResultsAsSARIF', () => {
             column: 5,
             nodeType: 'Identifier',
             endLine: 10,
-            endColumn: 6,
-            source: 'const x = 1;'
+            endColumn: 6
+            // source: 'const x = 1;'
           }
         ],
         suppressedMessages: [],
@@ -103,8 +103,8 @@ describe('formatEslintResultsAsSARIF', () => {
             column: 5,
             nodeType: 'Identifier',
             endLine: 10,
-            endColumn: 6,
-            source: 'const x = 1;'
+            endColumn: 6
+            // source: 'const x = 1;'
           }
         ],
         suppressedMessages: [],
@@ -172,8 +172,8 @@ describe('formatEslintResultsAsSARIF', () => {
             column: 10,
             nodeType: 'Identifier',
             endLine: 5,
-            endColumn: 11,
-            source: 'let x;'
+            endColumn: 11
+            // source: 'let x;'
           },
           {
             ruleId: 'no-console',
@@ -183,8 +183,8 @@ describe('formatEslintResultsAsSARIF', () => {
             column: 5,
             nodeType: 'MemberExpression',
             endLine: 10,
-            endColumn: 16,
-            source: 'console.log("test");'
+            endColumn: 16
+            // source: 'console.log("test");'
           }
         ],
         suppressedMessages: [],
@@ -309,8 +309,8 @@ describe('formatEslintResultsAsSARIF', () => {
             column: 5,
             nodeType: 'Identifier',
             endLine: 10,
-            endColumn: 6,
-            source: 'const x = 1;'
+            endColumn: 6
+            // source: 'const x = 1;'
           }
         ],
         suppressedMessages: [],
@@ -332,8 +332,8 @@ describe('formatEslintResultsAsSARIF', () => {
             column: 8,
             nodeType: 'BinaryExpression',
             endLine: 15,
-            endColumn: 10,
-            source: 'if (a == b) { }'
+            endColumn: 10
+            // source: 'if (a == b) { }'
           }
         ],
         suppressedMessages: [],
@@ -430,8 +430,8 @@ describe('formatEslintResultsAsSARIF', () => {
             column: 1,
             nodeType: 'DebuggerStatement',
             endLine: 20,
-            endColumn: 9,
-            source: 'debugger;'
+            endColumn: 9
+            // source: 'debugger;'
           }
         ],
         suppressedMessages: [
@@ -444,7 +444,7 @@ describe('formatEslintResultsAsSARIF', () => {
             nodeType: 'MemberExpression',
             endLine: 10,
             endColumn: 16,
-            source: 'console.log("test");',
+            // source: 'console.log("test");',
             suppressions: [
               {
                 kind: 'inSource',
@@ -546,8 +546,8 @@ describe('formatEslintResultsAsSARIF', () => {
             column: 1,
             nodeType: 'DebuggerStatement',
             endLine: 20,
-            endColumn: 9,
-            source: 'debugger;'
+            endColumn: 9
+            // source: 'debugger;'
           }
         ],
         suppressedMessages: [
@@ -560,7 +560,7 @@ describe('formatEslintResultsAsSARIF', () => {
             nodeType: 'MemberExpression',
             endLine: 10,
             endColumn: 16,
-            source: 'console.log("test");',
+            // source: 'console.log("test");',
             suppressions: [
               {
                 kind: 'inSource',
