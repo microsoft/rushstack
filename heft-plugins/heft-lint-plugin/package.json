@@ -29,7 +29,7 @@
     "@types/semver": "7.5.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~8.57.0",
-    "tslint": "~5.20.1",
-    "typescript": "~5.8.2"
+    "typescript": "~5.8.2",
+    "tslint": "~5.20.1"
   }
 }

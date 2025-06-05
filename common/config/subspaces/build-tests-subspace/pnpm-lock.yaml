@@ -6342,6 +6342,7 @@ packages:
       '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
       semver: 7.5.4
+      typescript: 5.8.2
     transitivePeerDependencies:
       - '@types/node'
     dev: true
