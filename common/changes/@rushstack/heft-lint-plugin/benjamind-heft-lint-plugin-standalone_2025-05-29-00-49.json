@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-lint-plugin",
-      "comment": "Adds support for using heft-lint-plugin standalone without a typescript phase",
-      "type": "patch"
+      "comment": "Add support for using heft-lint-plugin standalone without a typescript phase",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-lint-plugin"
