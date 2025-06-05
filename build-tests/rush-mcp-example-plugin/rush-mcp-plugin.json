@@ -1,0 +1,24 @@
+/**
+ * Every plugin package must contain a "rush-mcp-plugin.json" manifest in the top-level folder
+ * (next to package.json).
+ */
+{
+  /**
+   * A name that uniquely identifies your plugin.  Generally this should be the same name as
+   * the NPM package.  If two NPM packages have the same pluginName, they cannot be loaded together.
+   */
+  "pluginName": "rush-mcp-example-plugin",
+
+  /**
+   * (OPTIONAL) Indicates that your plugin accepts a config file.  The MCP server will load this
+   * file and provide it to the plugin.
+   *
+   * The config file path will be `<rush-repo>/common/config/rush-mcp/<plugin-name>.json`.
+   */
+  "configFileSchema": "./lib/rush-mcp-example-plugin.schema.json",
+
+  /**
+   * The entry point, whose default export should be a class that implements
+   */
+  "entryPoint": "./lib/index.js"
+}
