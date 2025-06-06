@@ -85,6 +85,10 @@ export class RushMcpPluginLoader {
     this._mcpServer = mcpServer;
   }
 
+  private static _formatError(e: Error): string {
+    return e.stack ?? RushMcpPluginLoader._formatError(e);
+  }
+
   public async loadAsync(): Promise<void> {
     const rushMcpFilePath: string = path.join(
       this._rushWorkspacePath,
@@ -169,7 +173,10 @@ export class RushMcpPluginLoader {
         }
         pluginFactory = entryPointModule.default;
       } catch (e) {
-        throw new Error(`Unable to load plugin entry point at ${fullEntryPointPath}: ` + e.toString());
+        throw new Error(
+          `Unable to load plugin entry point at ${fullEntryPointPath}:\n` +
+            RushMcpPluginLoader._formatError(e)
+        );
       }
 
       const session: RushMcpPluginSessionInternal = new RushMcpPluginSessionInternal(this._mcpServer);
@@ -178,14 +185,18 @@ export class RushMcpPluginLoader {
       try {
         plugin = pluginFactory(session, rushMcpPluginOptions);
       } catch (e) {
-        throw new Error(`Error invoking entry point for plugin ${jsonManifest.pluginName}:` + e.toString());
+        throw new Error(
+          `Error invoking entry point for plugin ${jsonManifest.pluginName}:\n` +
+            RushMcpPluginLoader._formatError(e)
+        );
       }
 
       try {
         await plugin.onInitializeAsync();
       } catch (e) {
         throw new Error(
-          `Error occurred in onInitializeAsync() for plugin ${jsonManifest.pluginName}:` + e.toString()
+          `Error occurred in onInitializeAsync() for plugin ${jsonManifest.pluginName}:\n` +
+            RushMcpPluginLoader._formatError(e)
         );
       }
     }

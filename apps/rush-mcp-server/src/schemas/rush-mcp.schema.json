@@ -22,7 +22,7 @@
             "description": "The name of the plugin. This is used to identify the plugin in the MCP server."
           }
         },
-        "required": ["packageName", "autoinstaller"],
+        "required": ["packageName", "autoinstaller", "pluginName"],
         "additionalProperties": false
       }
     }
