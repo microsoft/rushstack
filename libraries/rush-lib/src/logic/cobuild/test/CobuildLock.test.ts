@@ -4,7 +4,7 @@
 import { CobuildLock, type ICobuildLockOptions } from '../CobuildLock';
 
 import type { CobuildConfiguration } from '../../../api/CobuildConfiguration';
-import type { ProjectBuildCache } from '../../buildCache/ProjectBuildCache';
+import type { OperationBuildCache } from '../../buildCache/OperationBuildCache';
 import type { ICobuildContext } from '../ICobuildLockProvider';
 
 describe(CobuildLock.name, () => {
@@ -14,9 +14,9 @@ describe(CobuildLock.name, () => {
         cobuildContextId: 'context_id',
         cobuildRunnerId: 'runner_id'
       } as unknown as CobuildConfiguration,
-      projectBuildCache: {
+      operationBuildCache: {
         cacheId: 'cache_id'
-      } as unknown as ProjectBuildCache,
+      } as unknown as OperationBuildCache,
       cobuildClusterId: 'cluster_id',
       lockExpireTimeInSeconds: 30,
       packageName: 'package_name',
