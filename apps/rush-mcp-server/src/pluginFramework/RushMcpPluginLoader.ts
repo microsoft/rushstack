@@ -39,11 +39,6 @@ export interface IJsonRushMcpPlugin {
    * @rushstack/mcp-server will ensure this folder is installed before loading the plugin.
    */
   autoinstaller: string;
-
-  /**
-   * The name of the plugin. This is used to identify the plugin in the MCP server.
-   */
-  pluginName: string;
 }
 
 /**
@@ -155,7 +150,7 @@ export class RushMcpPluginLoader {
         const mcpPluginSchema: JsonSchema = await JsonSchema.fromFile(mcpPluginSchemaFilePath);
         const rushMcpPluginOptionsFilePath: string = path.resolve(
           this._rushWorkspacePath,
-          `common/config/rush-mcp/${jsonMcpPlugin.pluginName}.json`
+          `common/config/rush-mcp/${jsonManifest.pluginName}.json`
         );
         // Example: /path/to/my-repo/common/config/rush-mcp/rush-mcp-example-plugin.json
         rushMcpPluginOptions = await JsonFile.loadAndValidateAsync(
