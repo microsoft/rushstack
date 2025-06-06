@@ -7,9 +7,13 @@ import { log } from './utilities/log';
 import { RushMCPServer } from './server';
 
 const main = async (): Promise<void> => {
-  const rushWorkspacePath: string | undefined = process.argv[2];
+  let rushWorkspacePath: string | undefined = process.argv[2];
   if (!rushWorkspacePath) {
     throw new Error('Please provide workspace root path as the first argument');
+  }
+
+  if (rushWorkspacePath === '.') {
+    rushWorkspacePath = process.cwd();
   }
 
   const server: RushMCPServer = new RushMCPServer(rushWorkspacePath);
