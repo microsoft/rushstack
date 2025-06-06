@@ -3,10 +3,14 @@
 
 import { LockFile, Async, FileSystem } from '@rushstack/node-core-library';
 import { RushUserConfiguration } from '../../api/RushUserConfiguration';
-import { CredentialCache } from '../CredentialCache';
+import { CredentialCache, type ICredentialCacheOptions } from '../CredentialCache';
 
 const FAKE_RUSH_USER_FOLDER: string = '~/.rush-user';
-const FAKE_CREDENTIALS_CACHE_FILE: string = `${FAKE_RUSH_USER_FOLDER}/credentials.json`;
+
+interface IPathsTestCase extends Pick<ICredentialCacheOptions, 'cacheFilePath'> {
+  testCaseName: string;
+  expectedCachePath: string;
+}
 
 describe(CredentialCache.name, () => {
   let fakeFilesystem: { [key: string]: string };
@@ -85,92 +89,127 @@ describe(CredentialCache.name, () => {
     jest.restoreAllMocks();
   });
 
-  it("initializes a credential cache correctly when one doesn't exist on disk", async () => {
-    const credentialCache: CredentialCache = await CredentialCache.initializeAsync({ supportEditing: false });
-    expect(credentialCache).toBeDefined();
-    credentialCache.dispose();
-  });
-
-  it('initializes a credential cache correctly when one exists on disk', async () => {
-    const credentialId: string = 'test-credential';
-    const credentialValue: string = 'test-value';
-    fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE] = JSON.stringify({
-      version: '0.1.0',
-      cacheEntries: {
-        [credentialId]: {
-          expires: 0,
-          credential: credentialValue
-        }
-      }
+  describe.each<IPathsTestCase>([
+    {
+      testCaseName: 'default cache path',
+      expectedCachePath: `${FAKE_RUSH_USER_FOLDER}/credentials.json`
+    },
+    {
+      testCaseName: 'custom cache path with no suffix',
+      cacheFilePath: `${FAKE_RUSH_USER_FOLDER}/my-cache-name`,
+      expectedCachePath: `${FAKE_RUSH_USER_FOLDER}/my-cache-name.json`
+    },
+    {
+      testCaseName: 'custom cache path with json suffix',
+      cacheFilePath: `${FAKE_RUSH_USER_FOLDER}/my-cache-name.json`,
+      expectedCachePath: `${FAKE_RUSH_USER_FOLDER}/my-cache-name.json`
+    },
+    {
+      testCaseName: 'custom cache path with custom suffix should append a json suffix',
+      cacheFilePath: `${FAKE_RUSH_USER_FOLDER}/my-cache-name.staging`,
+      expectedCachePath: `${FAKE_RUSH_USER_FOLDER}/my-cache-name.staging.json`
+    }
+  ])('cache paths [$testCaseName]', ({ cacheFilePath, expectedCachePath }) => {
+    it("initializes a credential cache correctly when one doesn't exist on disk", async () => {
+      const credentialCache: CredentialCache = await CredentialCache.initializeAsync({
+        supportEditing: false
+      });
+      expect(credentialCache).toBeDefined();
+      credentialCache.dispose();
     });
 
-    const credentialCache: CredentialCache = await CredentialCache.initializeAsync({ supportEditing: false });
-    expect(credentialCache.tryGetCacheEntry(credentialId)?.credential).toEqual(credentialValue);
-    expect(credentialCache.tryGetCacheEntry(credentialId)?.expires).toBeUndefined();
-    credentialCache.dispose();
-  });
-
-  it('initializes a credential cache correctly when one exists on disk with a expired credential', async () => {
-    const credentialId: string = 'test-credential';
-    const credentialValue: string = 'test-value';
-    fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE] = JSON.stringify({
-      version: '0.1.0',
-      cacheEntries: {
-        [credentialId]: {
-          expires: 100, // Expired
-          credential: credentialValue
+    it('initializes a credential cache correctly when one exists on disk', async () => {
+      const credentialId: string = 'test-credential';
+      const credentialValue: string = 'test-value';
+      fakeFilesystem[expectedCachePath] = JSON.stringify({
+        version: '0.1.0',
+        cacheEntries: {
+          [credentialId]: {
+            expires: 0,
+            credential: credentialValue
+          }
         }
-      }
+      });
+
+      const credentialCache: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: false
+      });
+      expect(credentialCache.tryGetCacheEntry(credentialId)?.credential).toEqual(credentialValue);
+      expect(credentialCache.tryGetCacheEntry(credentialId)?.expires).toBeUndefined();
+      credentialCache.dispose();
     });
 
-    const credentialCache: CredentialCache = await CredentialCache.initializeAsync({ supportEditing: false });
-    expect(credentialCache.tryGetCacheEntry(credentialId)?.credential).toEqual(credentialValue);
-    expect(credentialCache.tryGetCacheEntry(credentialId)?.expires).toMatchInlineSnapshot(
-      `1970-01-01T00:00:00.100Z`
-    );
-    credentialCache.dispose();
-  });
-
-  it('correctly trims expired credentials', async () => {
-    const credentialId: string = 'test-credential';
-    const credentialValue: string = 'test-value';
-    fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE] = JSON.stringify({
-      version: '0.1.0',
-      cacheEntries: {
-        [credentialId]: {
-          expires: 100, // Expired
-          credential: credentialValue
+    it('initializes a credential cache correctly when one exists on disk with a expired credential', async () => {
+      const credentialId: string = 'test-credential';
+      const credentialValue: string = 'test-value';
+      fakeFilesystem[expectedCachePath] = JSON.stringify({
+        version: '0.1.0',
+        cacheEntries: {
+          [credentialId]: {
+            expires: 100, // Expired
+            credential: credentialValue
+          }
         }
-      }
+      });
+
+      const credentialCache: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: false
+      });
+      expect(credentialCache.tryGetCacheEntry(credentialId)?.credential).toEqual(credentialValue);
+      expect(credentialCache.tryGetCacheEntry(credentialId)?.expires).toMatchInlineSnapshot(
+        `1970-01-01T00:00:00.100Z`
+      );
+      credentialCache.dispose();
     });
 
-    const credentialCache: CredentialCache = await CredentialCache.initializeAsync({ supportEditing: true });
-    credentialCache.trimExpiredEntries();
-    expect(credentialCache.tryGetCacheEntry(credentialId)).toBeUndefined();
-    await credentialCache.saveIfModifiedAsync();
-    credentialCache.dispose();
+    it('correctly trims expired credentials', async () => {
+      const credentialId: string = 'test-credential';
+      const credentialValue: string = 'test-value';
+      fakeFilesystem[expectedCachePath] = JSON.stringify({
+        version: '0.1.0',
+        cacheEntries: {
+          [credentialId]: {
+            expires: 100, // Expired
+            credential: credentialValue
+          }
+        }
+      });
 
-    expect(fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE]).toMatchInlineSnapshot(`
+      const credentialCache: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: true
+      });
+      credentialCache.trimExpiredEntries();
+      expect(credentialCache.tryGetCacheEntry(credentialId)).toBeUndefined();
+      await credentialCache.saveIfModifiedAsync();
+      credentialCache.dispose();
+
+      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
 "{
   \\"version\\": \\"0.1.0\\",
   \\"cacheEntries\\": {}
 }
 "
 `);
-  });
+    });
 
-  it('correctly adds a new credential', async () => {
-    const credentialId: string = 'test-credential';
-    const credentialValue: string = 'test-value';
+    it('correctly adds a new credential', async () => {
+      const credentialId: string = 'test-credential';
+      const credentialValue: string = 'test-value';
 
-    const credentialCache1: CredentialCache = await CredentialCache.initializeAsync({ supportEditing: true });
-    credentialCache1.setCacheEntry(credentialId, { credential: credentialValue });
-    expect(credentialCache1.tryGetCacheEntry(credentialId)?.credential).toEqual(credentialValue);
-    expect(credentialCache1.tryGetCacheEntry(credentialId)?.expires).toBeUndefined();
-    await credentialCache1.saveIfModifiedAsync();
-    credentialCache1.dispose();
+      const credentialCache1: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: true
+      });
+      credentialCache1.setCacheEntry(credentialId, { credential: credentialValue });
+      expect(credentialCache1.tryGetCacheEntry(credentialId)?.credential).toEqual(credentialValue);
+      expect(credentialCache1.tryGetCacheEntry(credentialId)?.expires).toBeUndefined();
+      await credentialCache1.saveIfModifiedAsync();
+      credentialCache1.dispose();
 
-    expect(fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE]).toMatchInlineSnapshot(`
+      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
 "{
   \\"version\\": \\"0.1.0\\",
   \\"cacheEntries\\": {
@@ -183,36 +222,40 @@ describe(CredentialCache.name, () => {
 "
 `);
 
-    const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
-      supportEditing: false
+      const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: false
+      });
+      expect(credentialCache2.tryGetCacheEntry(credentialId)?.credential).toEqual(credentialValue);
+      expect(credentialCache2.tryGetCacheEntry(credentialId)?.expires).toBeUndefined();
+      credentialCache2.dispose();
     });
-    expect(credentialCache2.tryGetCacheEntry(credentialId)?.credential).toEqual(credentialValue);
-    expect(credentialCache2.tryGetCacheEntry(credentialId)?.expires).toBeUndefined();
-    credentialCache2.dispose();
-  });
 
-  it('correctly updates an existing credential', async () => {
-    const credentialId: string = 'test-credential';
-    const credentialValue: string = 'test-value';
-    const newCredentialValue: string = 'new-test-value';
-    fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE] = JSON.stringify({
-      version: '0.1.0',
-      cacheEntries: {
-        [credentialId]: {
-          expires: 0,
-          credential: credentialValue
+    it('correctly updates an existing credential', async () => {
+      const credentialId: string = 'test-credential';
+      const credentialValue: string = 'test-value';
+      const newCredentialValue: string = 'new-test-value';
+      fakeFilesystem[expectedCachePath] = JSON.stringify({
+        version: '0.1.0',
+        cacheEntries: {
+          [credentialId]: {
+            expires: 0,
+            credential: credentialValue
+          }
         }
-      }
-    });
+      });
 
-    const credentialCache1: CredentialCache = await CredentialCache.initializeAsync({ supportEditing: true });
-    credentialCache1.setCacheEntry(credentialId, { credential: newCredentialValue });
-    expect(credentialCache1.tryGetCacheEntry(credentialId)?.credential).toEqual(newCredentialValue);
-    expect(credentialCache1.tryGetCacheEntry(credentialId)?.expires).toBeUndefined();
-    await credentialCache1.saveIfModifiedAsync();
-    credentialCache1.dispose();
+      const credentialCache1: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: true
+      });
+      credentialCache1.setCacheEntry(credentialId, { credential: newCredentialValue });
+      expect(credentialCache1.tryGetCacheEntry(credentialId)?.credential).toEqual(newCredentialValue);
+      expect(credentialCache1.tryGetCacheEntry(credentialId)?.expires).toBeUndefined();
+      await credentialCache1.saveIfModifiedAsync();
+      credentialCache1.dispose();
 
-    expect(fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE]).toMatchInlineSnapshot(`
+      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
 "{
   \\"version\\": \\"0.1.0\\",
   \\"cacheEntries\\": {
@@ -225,33 +268,37 @@ describe(CredentialCache.name, () => {
 "
 `);
 
-    const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
-      supportEditing: false
+      const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: false
+      });
+      expect(credentialCache2.tryGetCacheEntry(credentialId)?.credential).toEqual(newCredentialValue);
+      expect(credentialCache2.tryGetCacheEntry(credentialId)?.expires).toBeUndefined();
+      credentialCache2.dispose();
     });
-    expect(credentialCache2.tryGetCacheEntry(credentialId)?.credential).toEqual(newCredentialValue);
-    expect(credentialCache2.tryGetCacheEntry(credentialId)?.expires).toBeUndefined();
-    credentialCache2.dispose();
-  });
 
-  it('correctly deletes an existing credential', async () => {
-    const credentialId: string = 'test-credential';
-    fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE] = JSON.stringify({
-      version: '0.1.0',
-      cacheEntries: {
-        [credentialId]: {
-          expires: 0,
-          credential: 'test-value'
+    it('correctly deletes an existing credential', async () => {
+      const credentialId: string = 'test-credential';
+      fakeFilesystem[expectedCachePath] = JSON.stringify({
+        version: '0.1.0',
+        cacheEntries: {
+          [credentialId]: {
+            expires: 0,
+            credential: 'test-value'
+          }
         }
-      }
-    });
+      });
 
-    const credentialCache1: CredentialCache = await CredentialCache.initializeAsync({ supportEditing: true });
-    credentialCache1.deleteCacheEntry(credentialId);
-    expect(credentialCache1.tryGetCacheEntry(credentialId)).toBeUndefined();
-    await credentialCache1.saveIfModifiedAsync();
-    credentialCache1.dispose();
+      const credentialCache1: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: true
+      });
+      credentialCache1.deleteCacheEntry(credentialId);
+      expect(credentialCache1.tryGetCacheEntry(credentialId)).toBeUndefined();
+      await credentialCache1.saveIfModifiedAsync();
+      credentialCache1.dispose();
 
-    expect(fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE]).toMatchInlineSnapshot(`
+      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
 "{
   \\"version\\": \\"0.1.0\\",
   \\"cacheEntries\\": {}
@@ -259,11 +306,129 @@ describe(CredentialCache.name, () => {
 "
 `);
 
-    const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
-      supportEditing: false
+      const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: false
+      });
+      expect(credentialCache2.tryGetCacheEntry(credentialId)).toBeUndefined();
+      credentialCache2.dispose();
     });
-    expect(credentialCache2.tryGetCacheEntry(credentialId)).toBeUndefined();
-    credentialCache2.dispose();
+
+    it('correctly sets credentialMetadata', async () => {
+      const credentialId: string = 'test-credential';
+      const credentialValue: string = 'test-value';
+      const credentialMetadata: object = {
+        a: 1,
+        b: true
+      };
+
+      const credentialCache1: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: true
+      });
+      credentialCache1.setCacheEntry(credentialId, { credential: credentialValue, credentialMetadata });
+      expect(credentialCache1.tryGetCacheEntry(credentialId)).toEqual({
+        credential: credentialValue,
+        credentialMetadata
+      });
+      await credentialCache1.saveIfModifiedAsync();
+      credentialCache1.dispose();
+
+      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
+"{
+  \\"version\\": \\"0.1.0\\",
+  \\"cacheEntries\\": {
+    \\"test-credential\\": {
+      \\"expires\\": 0,
+      \\"credential\\": \\"test-value\\",
+      \\"credentialMetadata\\": {
+        \\"a\\": 1,
+        \\"b\\": true
+      }
+    }
+  }
+}
+"
+`);
+
+      const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: false
+      });
+      expect(credentialCache2.tryGetCacheEntry(credentialId)).toEqual({
+        credential: credentialValue,
+        credentialMetadata
+      });
+      credentialCache2.dispose();
+    });
+
+    it('correctly updates credentialMetadata', async () => {
+      const credentialId: string = 'test-credential';
+      const credentialValue: string = 'test-value';
+      const oldCredentialMetadata: object = {
+        a: 1,
+        b: true
+      };
+      const newCredentialMetadata: object = {
+        c: ['a', 'b', 'c']
+      };
+
+      fakeFilesystem[expectedCachePath] = JSON.stringify({
+        version: '0.1.0',
+        cacheEntries: {
+          [credentialId]: {
+            expires: 0,
+            credential: 'test-value',
+            credentialMetadata: oldCredentialMetadata
+          }
+        }
+      });
+
+      const credentialCache1: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: true
+      });
+      credentialCache1.setCacheEntry(credentialId, {
+        credential: credentialValue,
+        credentialMetadata: newCredentialMetadata
+      });
+      expect(credentialCache1.tryGetCacheEntry(credentialId)).toEqual({
+        credential: credentialValue,
+        credentialMetadata: newCredentialMetadata
+      });
+      await credentialCache1.saveIfModifiedAsync();
+      credentialCache1.dispose();
+
+      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
+"{
+  \\"version\\": \\"0.1.0\\",
+  \\"cacheEntries\\": {
+    \\"test-credential\\": {
+      \\"expires\\": 0,
+      \\"credential\\": \\"test-value\\",
+      \\"credentialMetadata\\": {
+        \\"c\\": [
+          \\"a\\",
+          \\"b\\",
+          \\"c\\"
+        ]
+      }
+    }
+  }
+}
+"
+`);
+
+      const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
+        cacheFilePath: cacheFilePath,
+        supportEditing: false
+      });
+      expect(credentialCache2.tryGetCacheEntry(credentialId)).toEqual({
+        credential: credentialValue,
+        credentialMetadata: newCredentialMetadata
+      });
+      credentialCache2.dispose();
+    });
   });
 
   it('does not allow interaction if already disposed', async () => {
@@ -302,113 +467,5 @@ describe(CredentialCache.name, () => {
     expect(() => credentialCache.trimExpiredEntries()).toThrowErrorMatchingInlineSnapshot(
       `"This instance of CredentialCache does not support editing."`
     );
-  });
-
-  it('correctly sets credentialMetadata', async () => {
-    const credentialId: string = 'test-credential';
-    const credentialValue: string = 'test-value';
-    const credentialMetadata: object = {
-      a: 1,
-      b: true
-    };
-
-    const credentialCache1: CredentialCache = await CredentialCache.initializeAsync({ supportEditing: true });
-    credentialCache1.setCacheEntry(credentialId, { credential: credentialValue, credentialMetadata });
-    expect(credentialCache1.tryGetCacheEntry(credentialId)).toEqual({
-      credential: credentialValue,
-      credentialMetadata
-    });
-    await credentialCache1.saveIfModifiedAsync();
-    credentialCache1.dispose();
-
-    expect(fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE]).toMatchInlineSnapshot(`
-"{
-  \\"version\\": \\"0.1.0\\",
-  \\"cacheEntries\\": {
-    \\"test-credential\\": {
-      \\"expires\\": 0,
-      \\"credential\\": \\"test-value\\",
-      \\"credentialMetadata\\": {
-        \\"a\\": 1,
-        \\"b\\": true
-      }
-    }
-  }
-}
-"
-`);
-
-    const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
-      supportEditing: false
-    });
-    expect(credentialCache2.tryGetCacheEntry(credentialId)).toEqual({
-      credential: credentialValue,
-      credentialMetadata
-    });
-    credentialCache2.dispose();
-  });
-
-  it('correctly updates credentialMetadata', async () => {
-    const credentialId: string = 'test-credential';
-    const credentialValue: string = 'test-value';
-    const oldCredentialMetadata: object = {
-      a: 1,
-      b: true
-    };
-    const newCredentialMetadata: object = {
-      c: ['a', 'b', 'c']
-    };
-
-    fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE] = JSON.stringify({
-      version: '0.1.0',
-      cacheEntries: {
-        [credentialId]: {
-          expires: 0,
-          credential: 'test-value',
-          credentialMetadata: oldCredentialMetadata
-        }
-      }
-    });
-
-    const credentialCache1: CredentialCache = await CredentialCache.initializeAsync({ supportEditing: true });
-    credentialCache1.setCacheEntry(credentialId, {
-      credential: credentialValue,
-      credentialMetadata: newCredentialMetadata
-    });
-    expect(credentialCache1.tryGetCacheEntry(credentialId)).toEqual({
-      credential: credentialValue,
-      credentialMetadata: newCredentialMetadata
-    });
-    await credentialCache1.saveIfModifiedAsync();
-    credentialCache1.dispose();
-
-    expect(fakeFilesystem[FAKE_CREDENTIALS_CACHE_FILE]).toMatchInlineSnapshot(`
-"{
-  \\"version\\": \\"0.1.0\\",
-  \\"cacheEntries\\": {
-    \\"test-credential\\": {
-      \\"expires\\": 0,
-      \\"credential\\": \\"test-value\\",
-      \\"credentialMetadata\\": {
-        \\"c\\": [
-          \\"a\\",
-          \\"b\\",
-          \\"c\\"
-        ]
-      }
-    }
-  }
-}
-"
-`);
-
-    const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
-      supportEditing: false
-    });
-    expect(credentialCache2.tryGetCacheEntry(credentialId)).toEqual({
-      credential: credentialValue,
-      credentialMetadata: newCredentialMetadata
-    });
-    credentialCache2.dispose();
   });
 });
