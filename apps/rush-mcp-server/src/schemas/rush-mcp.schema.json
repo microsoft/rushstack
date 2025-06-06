@@ -16,10 +16,6 @@
           "autoinstaller": {
             "type": "string",
             "description": "The name of a Rush autoinstaller with this package as its dependency."
-          },
-          "pluginName": {
-            "type": "string",
-            "description": "The name of the plugin. This is used to identify the plugin in the MCP server."
           }
         },
         "required": ["packageName", "autoinstaller"],

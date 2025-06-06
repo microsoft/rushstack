@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/mcp-server",
+      "comment": "Fix some errors when loading plugins",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/mcp-server"
+}
