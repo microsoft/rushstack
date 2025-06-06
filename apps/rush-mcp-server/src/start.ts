@@ -1,22 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
+import { FileSystem } from '@rushstack/node-core-library';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
 import { log } from './utilities/log';
 import { RushMCPServer } from './server';
 
 const main = async (): Promise<void> => {
-  let rushWorkspacePath: string | undefined = process.argv[2];
+  const rushWorkspacePath: string | undefined = process.argv[2];
   if (!rushWorkspacePath) {
     throw new Error('Please provide workspace root path as the first argument');
   }
 
-  if (rushWorkspacePath === '.') {
-    rushWorkspacePath = process.cwd();
+  const rushWorkspaceFullPath: string = path.resolve(rushWorkspacePath);
+
+  if (!(await FileSystem.existsAsync(rushWorkspaceFullPath))) {
+    throw new Error(
+      'The specified workspace root path does not exist:\n  ' + JSON.stringify(rushWorkspacePath)
+    );
   }
 
-  const server: RushMCPServer = new RushMCPServer(rushWorkspacePath);
+  const server: RushMCPServer = new RushMCPServer(rushWorkspaceFullPath);
   await server.startAsync();
   const transport: StdioServerTransport = new StdioServerTransport();
   await server.connect(transport);
