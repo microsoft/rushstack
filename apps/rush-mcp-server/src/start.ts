@@ -2,11 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as process from 'process';
 import { FileSystem } from '@rushstack/node-core-library';
+import { RushSdkLoader } from '@rushstack/rush-sdk/loader';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
 import { log } from './utilities/log';
-import { RushMCPServer } from './server';
+import type { RushMCPServer } from './server';
 
 const main = async (): Promise<void> => {
   const rushWorkspacePath: string | undefined = process.argv[2];
@@ -22,7 +24,14 @@ const main = async (): Promise<void> => {
     );
   }
 
-  const server: RushMCPServer = new RushMCPServer(rushWorkspaceFullPath);
+  // Load rush-sdk from the specified repository
+  await RushSdkLoader.loadAsync({
+    rushJsonSearchFolder: rushWorkspaceFullPath
+  });
+
+  const RushMCPServerClass: typeof RushMCPServer = (await import('./server')).RushMCPServer;
+
+  const server: RushMCPServer = new RushMCPServerClass(rushWorkspaceFullPath);
   await server.startAsync();
   const transport: StdioServerTransport = new StdioServerTransport();
   await server.connect(transport);
