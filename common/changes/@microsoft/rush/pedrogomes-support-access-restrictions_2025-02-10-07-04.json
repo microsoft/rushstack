@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "provides access parameter to restrict packages to be installed",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
