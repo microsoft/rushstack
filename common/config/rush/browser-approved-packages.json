@@ -15,6 +15,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/lockfile-file",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@pnpm/lockfile.fs",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@radix-ui/colors",
       "allowedCategories": [ "libraries" ]
     },

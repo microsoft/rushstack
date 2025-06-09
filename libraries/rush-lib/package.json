@@ -33,6 +33,9 @@
     "@pnpm/dependency-path-lockfile-pre-v10": "npm:@pnpm/dependency-path@~5.1.7",
     "@pnpm/dependency-path": "~1000.0.9",
     "@pnpm/link-bins": "~5.3.7",
+    "@pnpm/lockfile-file-pnpm-lock-v6": "npm:@pnpm/lockfile-file@~8.1.8",
+    "@pnpm/lockfile.fs-pnpm-lock-v9": "npm:@pnpm/lockfile.fs@~1001.1.11",
+    "@pnpm/logger": "~1001.0.0",
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
@@ -65,11 +68,10 @@
     "tar": "~6.2.1",
     "true-case-path": "~2.2.1",
     "uuid": "~8.3.2",
-    "pnpm-sync-lib": "0.3.2"
+    "pnpm-sync-lib": "0.3.3"
   },
   "devDependencies": {
     "@pnpm/lockfile.types": "~1.0.3",
-    "@pnpm/logger": "4.0.0",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",

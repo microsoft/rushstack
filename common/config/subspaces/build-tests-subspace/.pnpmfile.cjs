@@ -62,6 +62,12 @@ function readPackage(packageJson, context) {
       fixUndeclaredDependency(packageJson, '@typescript-eslint/parser');
       break;
     }
+
+    case '@pnpm/lockfile-file': {
+      // The `@pnpm/lockfile-file` package requires `@pnpm/logger@^5.0.0`, but we are using `@pnpm/logger@1001.0.0`.
+      packageJson.peerDependencies['@pnpm/logger'] = '*';
+      break;
+    }
   }
 
   return packageJson;
