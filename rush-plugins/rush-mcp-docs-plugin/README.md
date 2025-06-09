@@ -1,3 +1,3 @@
-# rush-mcp-example-plugin
+# @rushstack/rush-mcp-docs-plugin
 
-This example project shows how to create a plugin for `@rushstack/mcp-server`
+The @rushstack/rush-mcp-docs-plugin package provides a documentation query tool for Rush.

@@ -21,8 +21,6 @@
 /lib-*/**/test/
 *.test.js
 
-!*.mock.json
-
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
 # package.json
