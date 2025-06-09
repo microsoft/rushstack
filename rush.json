@@ -1426,6 +1426,12 @@
       "projectFolder": "webpack/webpack5-localization-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-mcp-docs-plugin",
+      "projectFolder": "rush-plugins/rush-mcp-docs-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     }
   ]
 }
