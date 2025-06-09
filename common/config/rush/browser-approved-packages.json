@@ -4,7 +4,7 @@
   "packages": [
     {
       "name": "@fluentui/react",
-      "allowedCategories": [ "libraries", "vscode-extensions" ]
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "@fluentui/react-components",
@@ -51,20 +51,12 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "axios",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "dependency-path",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "local-web-rig",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
-    },
-    {
-      "name": "office-ui-fabric-core",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "react",
@@ -96,11 +88,7 @@
     },
     {
       "name": "tslib",
-      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
-    },
-    {
-      "name": "zod",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "tests", "vscode-extensions" ]
     }
   ]
 }

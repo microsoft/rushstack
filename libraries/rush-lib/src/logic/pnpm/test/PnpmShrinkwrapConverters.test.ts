@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { LockfileFileV9, PackageSnapshot, ProjectSnapshot } from '@pnpm/lockfile.types';
+import type { LockfileFileV9, PackageSnapshot, ProjectSnapshot } from '@pnpm/lockfile.types-900';
 import { convertLockfileV9ToLockfileObject } from '../PnpmShrinkWrapFileConverters';
 import { FileSystem } from '@rushstack/node-core-library';
 import yamlModule from 'js-yaml';
@@ -39,7 +39,7 @@ describe(convertLockfileV9ToLockfileObject.name, () => {
     });
   });
 
-  it("no nullish values", () => {
+  it('no nullish values', () => {
     const importers = new Map<string, ProjectSnapshot>(Object.entries(lockfile.importers || {}));
 
     const currentPackage = importers.get('.');
