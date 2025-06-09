@@ -3297,12 +3297,12 @@ importers:
       '@pnpm/dependency-path':
         specifier: ~1000.0.9
         version: 1000.0.9
-      '@pnpm/dependency-path-lockfile-pre-v9':
-        specifier: npm:@pnpm/dependency-path@~2.1.2
-        version: /@pnpm/dependency-path@2.1.8
       '@pnpm/dependency-path-lockfile-pre-v10':
         specifier: npm:@pnpm/dependency-path@~5.1.7
         version: /@pnpm/dependency-path@5.1.7
+      '@pnpm/dependency-path-lockfile-pre-v9':
+        specifier: npm:@pnpm/dependency-path@~2.1.2
+        version: /@pnpm/dependency-path@2.1.8
       '@pnpm/link-bins':
         specifier: ~5.3.7
         version: 5.3.25
@@ -3376,8 +3376,8 @@ importers:
         specifier: ~6.1.0
         version: 6.1.1
       pnpm-sync-lib:
-        specifier: 0.3.0
-        version: 0.3.0
+        specifier: 0.3.1
+        version: 0.3.1
       read-package-tree:
         specifier: ~5.1.5
         version: 5.1.6
@@ -24183,10 +24183,11 @@ packages:
       - typescript
     dev: true
 
-  /pnpm-sync-lib@0.3.0:
-    resolution: {integrity: sha512-Wt3Xf8pjzC2xcyN6ol5x5PdD5kU75+8OOgll2ZQsgm5uxih6dxziqRRuhNwtw94GHRd/0Oo7ESFmzmRz6OTQ0Q==}
+  /pnpm-sync-lib@0.3.1:
+    resolution: {integrity: sha512-peW6ZHSwAfQzeH1Zobjha3op9gGUx05Uz31ZcaS1B3hUwe/5mWk//Rrk1eFix67idSWz7yGfZzT50QQPRiFcdw==}
     dependencies:
-      '@pnpm/dependency-path': 2.1.8
+      '@pnpm/dependency-path-2': /@pnpm/dependency-path@2.1.8
+      '@pnpm/dependency-path-5': /@pnpm/dependency-path@5.1.7
       yaml: 2.4.1
     dev: false
 

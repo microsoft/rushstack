@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Upgrade `pnpm-sync-lib` to v0.3.1 for pnpm v9 compatibility",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

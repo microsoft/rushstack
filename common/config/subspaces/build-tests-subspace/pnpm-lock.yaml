@@ -1391,7 +1391,7 @@ packages:
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
-      semver: 7.6.3
+      semver: 7.7.2
       ts-api-utils: 1.4.3(typescript@5.8.2)
       typescript: 5.8.2
     transitivePeerDependencies:
@@ -1449,7 +1449,7 @@ packages:
       '@typescript-eslint/types': 6.21.0(typescript@5.8.2)
       '@typescript-eslint/typescript-estree': 6.21.0(typescript@5.8.2)
       eslint: 8.57.1
-      semver: 7.6.3
+      semver: 7.7.2
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -2326,7 +2326,7 @@ packages:
       require-package-name: 2.0.1
       resolve: 1.22.8
       resolve-from: 5.0.0
-      semver: 7.6.3
+      semver: 7.7.2
       yargs: 16.2.0
     transitivePeerDependencies:
       - supports-color
@@ -4074,7 +4074,7 @@ packages:
       jest-util: 29.7.0
       natural-compare: 1.4.0
       pretty-format: 29.7.0
-      semver: 7.6.3
+      semver: 7.7.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4569,7 +4569,7 @@ packages:
     dependencies:
       hosted-git-info: 4.1.0
       is-core-module: 2.15.1
-      semver: 7.6.3
+      semver: 7.7.2
       validate-npm-package-license: 3.0.4
 
   /normalize-path@3.0.0:
@@ -4814,7 +4814,7 @@ packages:
       got: 11.8.6
       registry-auth-token: 4.2.2
       registry-url: 5.1.0
-      semver: 7.6.3
+      semver: 7.7.2
 
   /pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
@@ -4900,10 +4900,11 @@ packages:
     dependencies:
       semver-compare: 1.0.0
 
-  /pnpm-sync-lib@0.3.0:
-    resolution: {integrity: sha512-Wt3Xf8pjzC2xcyN6ol5x5PdD5kU75+8OOgll2ZQsgm5uxih6dxziqRRuhNwtw94GHRd/0Oo7ESFmzmRz6OTQ0Q==}
+  /pnpm-sync-lib@0.3.1:
+    resolution: {integrity: sha512-peW6ZHSwAfQzeH1Zobjha3op9gGUx05Uz31ZcaS1B3hUwe/5mWk//Rrk1eFix67idSWz7yGfZzT50QQPRiFcdw==}
     dependencies:
-      '@pnpm/dependency-path': 2.1.8
+      '@pnpm/dependency-path-2': /@pnpm/dependency-path@2.1.8
+      '@pnpm/dependency-path-5': /@pnpm/dependency-path@5.1.7
       yaml: 2.4.1
 
   /possible-typed-array-names@1.0.0:
@@ -5850,7 +5851,7 @@ packages:
       is-yarn-global: 0.3.0
       latest-version: 5.1.0
       pupa: 2.1.1
-      semver: 7.6.3
+      semver: 7.7.2
       semver-diff: 3.1.1
       xdg-basedir: 4.0.0
 
@@ -6503,7 +6504,7 @@ packages:
       js-yaml: 3.13.1
       npm-check: 6.0.1
       npm-package-arg: 6.1.1
-      pnpm-sync-lib: 0.3.0
+      pnpm-sync-lib: 0.3.1
       read-package-tree: 5.1.6
       rxjs: 6.6.7
       semver: 7.5.4
