@@ -9,7 +9,7 @@ import { RushUserConfiguration } from '../api/RushUserConfiguration';
 import schemaJson from '../schemas/credentials.schema.json';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
-const DEFAULT_CACHE_FILENAME: string = `credentials.json`;
+const DEFAULT_CACHE_FILENAME: 'credentials.json' = 'credentials.json';
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
 
 interface ICredentialCacheJson {
