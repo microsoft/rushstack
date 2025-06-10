@@ -96,7 +96,7 @@ export class BridgeCachePlugin implements IRushPlugin {
     buildCacheConfiguration: BuildCacheConfiguration,
     recordByOperation: Map<Operation, IOperationExecutionResult>
   ): Promise<void> {
-    Async.forEachAsync(
+    await Async.forEachAsync(
       recordByOperation,
       async ([
         {
