@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 13 May 2025 20:33:12 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Jun 2025 18:45:59 GMT and should not be manually modified.
+
+## 5.154.0
+Tue, 10 Jun 2025 18:45:59 GMT
+
+### Updates
+
+- Introduce a `@rushstack/rush-bridge-cache-plugin` package that adds a `--set-cache-only` flag to phased commands, which sets the cache entry without performing the operation.
+- Update the `CredentialCache` options object to add support for custom cache file paths. This is useful if `CredentialCache` is used outside of Rush.
+- PNPMv10 support: SHA256 hashing for dependencies paths lookup
+- Add Linux/MacOS support for new 'virtual-store-dir-max-length'
 
 ## 5.153.2
 Tue, 13 May 2025 20:33:12 GMT
