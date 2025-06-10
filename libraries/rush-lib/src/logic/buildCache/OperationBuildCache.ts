@@ -13,8 +13,11 @@ import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import type { OperationExecutionRecord } from '../operations/OperationExecutionRecord';
+import type { IOperationExecutionResult } from '../operations/IOperationExecutionResult';
 
+/**
+ * @internal
+ */
 export interface IOperationBuildCacheOptions {
   /**
    * The repo-wide configuration for the build cache.
@@ -26,6 +29,9 @@ export interface IOperationBuildCacheOptions {
   terminal: ITerminal;
 }
 
+/**
+ * @internal
+ */
 export type IProjectBuildCacheOptions = IOperationBuildCacheOptions & {
   /**
    * Value from rush-project.json
@@ -50,7 +56,10 @@ interface IPathsToCache {
   outputFilePaths: string[];
 }
 
-export class ProjectBuildCache {
+/**
+ * @internal
+ */
+export class OperationBuildCache {
   private static _tarUtilityPromise: Promise<TarExecutable | undefined> | undefined;
 
   private readonly _project: RushConfigurationProject;
@@ -82,40 +91,40 @@ export class ProjectBuildCache {
   }
 
   private static _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
-    if (!ProjectBuildCache._tarUtilityPromise) {
-      ProjectBuildCache._tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal);
+    if (!OperationBuildCache._tarUtilityPromise) {
+      OperationBuildCache._tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal);
     }
 
-    return ProjectBuildCache._tarUtilityPromise;
+    return OperationBuildCache._tarUtilityPromise;
   }
 
   public get cacheId(): string | undefined {
     return this._cacheId;
   }
 
-  public static getProjectBuildCache(options: IProjectBuildCacheOptions): ProjectBuildCache {
-    const cacheId: string | undefined = ProjectBuildCache._getCacheId(options);
-    return new ProjectBuildCache(cacheId, options);
+  public static getOperationBuildCache(options: IProjectBuildCacheOptions): OperationBuildCache {
+    const cacheId: string | undefined = OperationBuildCache._getCacheId(options);
+    return new OperationBuildCache(cacheId, options);
   }
 
   public static forOperation(
-    operation: OperationExecutionRecord,
+    executionResult: IOperationExecutionResult,
     options: IOperationBuildCacheOptions
-  ): ProjectBuildCache {
-    const outputFolders: string[] = [...(operation.operation.settings?.outputFolderNames ?? [])];
-    if (operation.metadataFolderPath) {
-      outputFolders.push(operation.metadataFolderPath);
+  ): OperationBuildCache {
+    const outputFolders: string[] = [...(executionResult.operation.settings?.outputFolderNames ?? [])];
+    if (executionResult.metadataFolderPath) {
+      outputFolders.push(executionResult.metadataFolderPath);
     }
     const buildCacheOptions: IProjectBuildCacheOptions = {
       buildCacheConfiguration: options.buildCacheConfiguration,
       terminal: options.terminal,
-      project: operation.associatedProject,
-      phaseName: operation.associatedPhase.name,
+      project: executionResult.operation.associatedProject,
+      phaseName: executionResult.operation.associatedPhase.name,
       projectOutputFolderNames: outputFolders,
-      operationStateHash: operation.getStateHash()
+      operationStateHash: executionResult.getStateHash()
     };
-    const cacheId: string | undefined = ProjectBuildCache._getCacheId(buildCacheOptions);
-    return new ProjectBuildCache(cacheId, buildCacheOptions);
+    const cacheId: string | undefined = OperationBuildCache._getCacheId(buildCacheOptions);
+    return new OperationBuildCache(cacheId, buildCacheOptions);
   }
 
   public async tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean> {
@@ -175,7 +184,7 @@ export class ProjectBuildCache {
       )
     );
 
-    const tarUtility: TarExecutable | undefined = await ProjectBuildCache._tryGetTarUtility(terminal);
+    const tarUtility: TarExecutable | undefined = await OperationBuildCache._tryGetTarUtility(terminal);
     let restoreSuccess: boolean = false;
     if (tarUtility && localCacheEntryPath) {
       const logFilePath: string = this._getTarLogFilePath(cacheId, 'untar');
@@ -225,7 +234,7 @@ export class ProjectBuildCache {
 
     let localCacheEntryPath: string | undefined;
 
-    const tarUtility: TarExecutable | undefined = await ProjectBuildCache._tryGetTarUtility(terminal);
+    const tarUtility: TarExecutable | undefined = await OperationBuildCache._tryGetTarUtility(terminal);
     if (tarUtility) {
       const finalLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
 

@@ -197,3 +197,9 @@ export {
   type IRushCommandLineParameter,
   type IRushCommandLineAction
 } from './api/RushCommandLine';
+
+export { OperationBuildCache as _OperationBuildCache } from './logic/buildCache/OperationBuildCache';
+export type {
+  IOperationBuildCacheOptions as _IOperationBuildCacheOptions,
+  IProjectBuildCacheOptions as _IProjectBuildCacheOptions
+} from './logic/buildCache/OperationBuildCache';
