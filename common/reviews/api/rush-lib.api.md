@@ -437,6 +437,7 @@ export interface ICredentialCacheEntry {
 
 // @beta (undocumented)
 export interface ICredentialCacheOptions {
+    cacheFilePath?: string;
     // (undocumented)
     supportEditing: boolean;
 }
