@@ -18,7 +18,8 @@
     "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
-    "@rushstack/terminal": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
+  },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*"
