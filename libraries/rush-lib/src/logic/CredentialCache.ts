@@ -39,6 +39,9 @@ export interface ICredentialCacheEntry {
  */
 export interface ICredentialCacheOptions {
   supportEditing: boolean;
+  /**
+   * If specified, use the specified path instead of the default path of `~/.rush-user/credentials.json`
+   */
   cacheFilePath?: string;
 }
 
