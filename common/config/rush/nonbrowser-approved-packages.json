@@ -95,6 +95,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/dependency-path-lockfile-pre-v10",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@pnpm/link-bins",
       "allowedCategories": [ "libraries" ]
     },
@@ -225,6 +229,10 @@
     {
       "name": "@rushstack/lookup-by-path",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/mcp-server",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/module-minifier",
@@ -487,10 +495,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "chokidar",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "cli-table",
       "allowedCategories": [ "libraries" ]
     },
@@ -656,6 +660,10 @@
     },
     {
       "name": "https-proxy-agent",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "chokidar",
       "allowedCategories": [ "libraries" ]
     },
     {

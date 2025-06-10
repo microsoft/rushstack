@@ -2,6 +2,30 @@
   "name": "@rushstack/mcp-server",
   "entries": [
     {
+      "version": "0.2.1",
+      "tag": "@rushstack/mcp-server_v0.2.1",
+      "date": "Fri, 06 Jun 2025 08:20:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix some errors when loading plugins"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/mcp-server_v0.2.0",
+      "date": "Fri, 06 Jun 2025 00:11:09 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a plugin system for custom MCP tools"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.8",
       "tag": "@rushstack/mcp-server_v0.1.8",
       "date": "Thu, 29 May 2025 15:10:58 GMT",

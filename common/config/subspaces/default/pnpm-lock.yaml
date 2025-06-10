@@ -2249,6 +2249,21 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../build-tests/rush-mcp-example-plugin:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/mcp-server':
+        specifier: workspace:*
+        version: link:../../apps/rush-mcp-server
+      local-eslint-config:
+        specifier: workspace:*
+        version: link:../../eslint/local-eslint-config
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../build-tests/rush-project-change-analyzer-test:
     dependencies:
       '@microsoft/rush-lib':
@@ -3280,8 +3295,11 @@ importers:
   ../../../libraries/rush-lib:
     dependencies:
       '@pnpm/dependency-path':
-        specifier: ~5.1.7
-        version: 5.1.7
+        specifier: ~1000.0.9
+        version: 1000.0.9
+      '@pnpm/dependency-path-lockfile-pre-v10':
+        specifier: npm:@pnpm/dependency-path@~5.1.7
+        version: /@pnpm/dependency-path@5.1.7
       '@pnpm/dependency-path-lockfile-pre-v9':
         specifier: npm:@pnpm/dependency-path@~2.1.2
         version: /@pnpm/dependency-path@2.1.8
@@ -9794,9 +9812,32 @@ packages:
       rfc4648: 1.5.3
     dev: false
 
+  /@pnpm/crypto.hash@1000.1.1:
+    resolution: {integrity: sha512-lb5kwXaOXdIW/4bkLLmtM9HEVRvp2eIvp+TrdawcPoaptgA/5f0/sRG0P52BF8dFqeNDj+1tGdqH89WQEqJnxA==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/crypto.polyfill': 1000.1.0
+      '@pnpm/graceful-fs': 1000.0.0
+      ssri: 10.0.5
+    dev: false
+
   /@pnpm/crypto.polyfill@1.0.0:
     resolution: {integrity: sha512-WbmsqqcUXKKaAF77ox1TQbpZiaQcr26myuMUu+WjUtoWYgD3VP6iKYEvSx35SZ6G2L316lu+pv+40A2GbWJc1w==}
     engines: {node: '>=18.12'}
+    dev: false
+
+  /@pnpm/crypto.polyfill@1000.1.0:
+    resolution: {integrity: sha512-tNe7a6U4rCpxLMBaR0SIYTdjxGdL0Vwb3G1zY8++sPtHSvy7qd54u8CIB0Z+Y6t5tc9pNYMYCMwhE/wdSY7ltg==}
+    engines: {node: '>=18.12'}
+    dev: false
+
+  /@pnpm/dependency-path@1000.0.9:
+    resolution: {integrity: sha512-0AhabApfiq3EEYeed5HKQEU3ftkrfyKTNgkMH9esGdp2yc+62Zu7eWFf8WW6IGyitDQPLWGYjSEWDC9Bvv8nPg==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/crypto.hash': 1000.1.1
+      '@pnpm/types': 1000.6.0
+      semver: 7.7.2
     dev: false
 
   /@pnpm/dependency-path@2.1.8:
@@ -9815,12 +9856,19 @@ packages:
     dependencies:
       '@pnpm/crypto.base32-hash': 3.0.1
       '@pnpm/types': 12.2.0
-      semver: 7.7.2
+      semver: 7.6.3
     dev: false
 
   /@pnpm/error@1.4.0:
     resolution: {integrity: sha512-vxkRrkneBPVmP23kyjnYwVOtipwlSl6UfL+h+Xa3TrABJTz5rYBXemlTsU5BzST8U4pD7YDkTb3SQu+MMuIDKA==}
     engines: {node: '>=10.16'}
+    dev: false
+
+  /@pnpm/graceful-fs@1000.0.0:
+    resolution: {integrity: sha512-RvMEliAmcfd/4UoaYQ93DLQcFeqit78jhYmeJJVPxqFGmj0jEcb9Tu0eAOXr7tGP3eJHpgvPbTU4o6pZ1bJhxg==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      graceful-fs: 4.2.11
     dev: false
 
   /@pnpm/link-bins@5.3.25:
@@ -9910,6 +9958,11 @@ packages:
       read-yaml-file: 2.1.0
       sort-keys: 4.2.0
       strip-bom: 4.0.0
+    dev: false
+
+  /@pnpm/types@1000.6.0:
+    resolution: {integrity: sha512-6PsMNe98VKPGcg6LnXSW/LE3YfJ77nj+bPKiRjYRWAQLZ+xXjEQRaR0dAuyjCmchlv4wR/hpnMVRS21/fCod5w==}
+    engines: {node: '>=18.12'}
     dev: false
 
   /@pnpm/types@12.2.0:
@@ -23090,6 +23143,11 @@ packages:
     resolution: {integrity: sha512-3FnjYuehv9k6ovOEbyOswadCDPX1piCfhV8ncmYtHOjuPwylVWsghTLo7rabjC3Rx5xD4HDx8Wm1xnMF7S5qFQ==}
     engines: {node: '>=8'}
 
+  /minipass@7.1.2:
+    resolution: {integrity: sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==}
+    engines: {node: '>=16 || 14 >=14.17'}
+    dev: false
+
   /minizlib@2.1.2:
     resolution: {integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==}
     engines: {node: '>= 8'}
@@ -26829,6 +26887,13 @@ packages:
   /sprintf-js@1.1.3:
     resolution: {integrity: sha512-Oo+0REFV59/rz3gfJNKQiBlwfHaSESl1pcGyABQsnnIfWOFt6JNj5gCog2U6MLZ//IGYD+nA8nI+mTShREReaA==}
     dev: true
+
+  /ssri@10.0.5:
+    resolution: {integrity: sha512-bSf16tAFkGeRlUNDjXu8FzaMQt6g2HZJrun7mtMbIPOddxt3GLMSz5VWUWcqTJUPfLEaDIepGxv+bYQW49596A==}
+    engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+    dependencies:
+      minipass: 7.1.2
+    dev: false
 
   /ssri@6.0.2:
     resolution: {integrity: sha512-cepbSq/neFK7xB6A50KHN0xHDotYzq58wWCa5LeWqnPrHG8GzfEjO/4O8kpmcGW+oaxkvhEJCWgbgNk4/ZV93Q==}
