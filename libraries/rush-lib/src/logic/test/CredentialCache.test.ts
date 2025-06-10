@@ -158,9 +158,7 @@ describe(CredentialCache.name, () => {
         supportEditing: false
       });
       expect(credentialCache.tryGetCacheEntry(credentialId)?.credential).toEqual(credentialValue);
-      expect(credentialCache.tryGetCacheEntry(credentialId)?.expires).toMatchInlineSnapshot(
-        `1970-01-01T00:00:00.100Z`
-      );
+      expect(credentialCache.tryGetCacheEntry(credentialId)?.expires).toMatchSnapshot('expiration');
       credentialCache.dispose();
     });
 
@@ -186,13 +184,7 @@ describe(CredentialCache.name, () => {
       await credentialCache.saveIfModifiedAsync();
       credentialCache.dispose();
 
-      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
-"{
-  \\"version\\": \\"0.1.0\\",
-  \\"cacheEntries\\": {}
-}
-"
-`);
+      expect(fakeFilesystem[expectedCachePath]).toMatchSnapshot('credential cache file');
     });
 
     it('correctly adds a new credential', async () => {
@@ -209,18 +201,7 @@ describe(CredentialCache.name, () => {
       await credentialCache1.saveIfModifiedAsync();
       credentialCache1.dispose();
 
-      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
-"{
-  \\"version\\": \\"0.1.0\\",
-  \\"cacheEntries\\": {
-    \\"test-credential\\": {
-      \\"expires\\": 0,
-      \\"credential\\": \\"test-value\\"
-    }
-  }
-}
-"
-`);
+      expect(fakeFilesystem[expectedCachePath]).toMatchSnapshot('credential cache file');
 
       const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
         cacheFilePath: cacheFilePath,
@@ -255,18 +236,7 @@ describe(CredentialCache.name, () => {
       await credentialCache1.saveIfModifiedAsync();
       credentialCache1.dispose();
 
-      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
-"{
-  \\"version\\": \\"0.1.0\\",
-  \\"cacheEntries\\": {
-    \\"test-credential\\": {
-      \\"expires\\": 0,
-      \\"credential\\": \\"new-test-value\\"
-    }
-  }
-}
-"
-`);
+      expect(fakeFilesystem[expectedCachePath]).toMatchSnapshot('credential cache file');
 
       const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
         cacheFilePath: cacheFilePath,
@@ -298,13 +268,7 @@ describe(CredentialCache.name, () => {
       await credentialCache1.saveIfModifiedAsync();
       credentialCache1.dispose();
 
-      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
-"{
-  \\"version\\": \\"0.1.0\\",
-  \\"cacheEntries\\": {}
-}
-"
-`);
+      expect(fakeFilesystem[expectedCachePath]).toMatchSnapshot('credential cache file');
 
       const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
         cacheFilePath: cacheFilePath,
@@ -334,22 +298,7 @@ describe(CredentialCache.name, () => {
       await credentialCache1.saveIfModifiedAsync();
       credentialCache1.dispose();
 
-      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
-"{
-  \\"version\\": \\"0.1.0\\",
-  \\"cacheEntries\\": {
-    \\"test-credential\\": {
-      \\"expires\\": 0,
-      \\"credential\\": \\"test-value\\",
-      \\"credentialMetadata\\": {
-        \\"a\\": 1,
-        \\"b\\": true
-      }
-    }
-  }
-}
-"
-`);
+      expect(fakeFilesystem[expectedCachePath]).toMatchSnapshot('credential cache file');
 
       const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
         cacheFilePath: cacheFilePath,
@@ -399,25 +348,7 @@ describe(CredentialCache.name, () => {
       await credentialCache1.saveIfModifiedAsync();
       credentialCache1.dispose();
 
-      expect(fakeFilesystem[expectedCachePath]).toMatchInlineSnapshot(`
-"{
-  \\"version\\": \\"0.1.0\\",
-  \\"cacheEntries\\": {
-    \\"test-credential\\": {
-      \\"expires\\": 0,
-      \\"credential\\": \\"test-value\\",
-      \\"credentialMetadata\\": {
-        \\"c\\": [
-          \\"a\\",
-          \\"b\\",
-          \\"c\\"
-        ]
-      }
-    }
-  }
-}
-"
-`);
+      expect(fakeFilesystem[expectedCachePath]).toMatchSnapshot('credential cache file');
 
       const credentialCache2: CredentialCache = await CredentialCache.initializeAsync({
         cacheFilePath: cacheFilePath,
