@@ -9,8 +9,7 @@ import { RushUserConfiguration } from '../api/RushUserConfiguration';
 import schemaJson from '../schemas/credentials.schema.json';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
-const CACHE_FILE_EXTENSION: string = '.json';
-const DEFAULT_CACHE_FILENAME: string = `credentials${CACHE_FILE_EXTENSION}`;
+const DEFAULT_CACHE_FILENAME: string = `credentials.json`;
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
 
 interface ICredentialCacheJson {
@@ -74,8 +73,7 @@ export class CredentialCache /* implements IDisposable */ {
     let cacheFileName: string;
     if (options.cacheFilePath) {
       cacheDirectory = path.dirname(options.cacheFilePath);
-      // Ensure .json extension
-      cacheFileName = path.basename(options.cacheFilePath, CACHE_FILE_EXTENSION) + CACHE_FILE_EXTENSION;
+      cacheFileName = options.cacheFilePath.slice(cacheDirectory.length + 1);
     } else {
       cacheDirectory = RushUserConfiguration.getRushUserFolderPath();
       cacheFileName = DEFAULT_CACHE_FILENAME;
