@@ -87,5 +87,5 @@ export type {
 export type { IHeftTaskOperationMetadata } from './cli/HeftActionRunner';
 export type { IHeftPhaseOperationMetadata } from './cli/HeftActionRunner';
 
-export type { HeftTask } from './pluginFramework/HeftTask';
-export type { HeftPhase } from './pluginFramework/HeftPhase';
+export type { IHeftTask } from './pluginFramework/HeftTask';
+export type { IHeftPhase } from './pluginFramework/HeftPhase';

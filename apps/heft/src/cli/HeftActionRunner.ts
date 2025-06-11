@@ -29,7 +29,7 @@ import type { MetricsCollector } from '../metrics/MetricsCollector';
 import { HeftParameterManager } from '../pluginFramework/HeftParameterManager';
 import { TaskOperationRunner } from '../operations/runners/TaskOperationRunner';
 import { PhaseOperationRunner } from '../operations/runners/PhaseOperationRunner';
-import type { HeftPhase } from '../pluginFramework/HeftPhase';
+import type { IHeftPhase, HeftPhase } from '../pluginFramework/HeftPhase';
 import type { IHeftAction, IHeftActionOptions } from './actions/IHeftAction';
 import type {
   IHeftLifecycleCleanHookOptions,
@@ -38,7 +38,7 @@ import type {
   IHeftLifecycleToolStartHookOptions
 } from '../pluginFramework/HeftLifecycleSession';
 import type { HeftLifecycle } from '../pluginFramework/HeftLifecycle';
-import type { HeftTask } from '../pluginFramework/HeftTask';
+import type { IHeftTask, HeftTask } from '../pluginFramework/HeftTask';
 import { deleteFilesAsync, type IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import { Constants } from '../utilities/Constants';
 
@@ -51,8 +51,8 @@ export interface IHeftActionRunnerOptions extends IHeftActionOptions {
  * @public
  */
 export interface IHeftTaskOperationMetadata {
-  task: HeftTask;
-  phase: HeftPhase;
+  task: IHeftTask;
+  phase: IHeftPhase;
 }
 
 /**
@@ -60,7 +60,7 @@ export interface IHeftTaskOperationMetadata {
  * @public
  */
 export interface IHeftPhaseOperationMetadata {
-  phase: HeftPhase;
+  phase: IHeftPhase;
 }
 
 export function initializeHeft(

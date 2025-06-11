@@ -14,15 +14,12 @@ import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerListParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameter } from '@rushstack/ts-command-line';
-import { CommandLineParameterProvider } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { CustomValidationFunction } from '@rushstack/heft-config-file';
-import { FileLocationStyle } from '@rushstack/node-core-library';
 import * as fs from 'fs';
 import { ICustomJsonPathMetadata } from '@rushstack/heft-config-file';
 import { ICustomPropertyInheritance } from '@rushstack/heft-config-file';
-import { IFileErrorFormattingOptions } from '@rushstack/node-core-library';
 import { IJsonPathMetadata } from '@rushstack/heft-config-file';
 import { IJsonPathMetadataResolverOptions } from '@rushstack/heft-config-file';
 import { IJsonPathsMetadata } from '@rushstack/heft-config-file';
@@ -101,48 +98,6 @@ export class HeftConfiguration {
     readonly terminalProvider: ITerminalProvider;
     tryLoadProjectConfigurationFile<TConfigFile>(options: IProjectConfigurationFileSpecification<TConfigFile>, terminal: ITerminal): TConfigFile | undefined;
     tryLoadProjectConfigurationFileAsync<TConfigFile>(options: IProjectConfigurationFileSpecification<TConfigFile>, terminal: ITerminal): Promise<TConfigFile | undefined>;
-}
-
-// @public (undocumented)
-export class HeftPhase {
-    // Warning: (ae-forgotten-export) The symbol "InternalHeftSession" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "IHeftConfigurationJsonPhaseSpecifier" needs to be exported by the entry point index.d.ts
-    constructor(internalHeftSession: InternalHeftSession, phaseName: string, phaseSpecifier: IHeftConfigurationJsonPhaseSpecifier);
-    get cleanFiles(): ReadonlySet<IDeleteOperation>;
-    get consumingPhases(): ReadonlySet<HeftPhase>;
-    get dependencyPhases(): ReadonlySet<HeftPhase>;
-    get phaseDescription(): string | undefined;
-    get phaseName(): string;
-    // Warning: (ae-incompatible-release-tags) The symbol "tasks" is marked as @public, but its signature references "HeftTask" which is marked as @internal
-    get tasks(): ReadonlySet<HeftTask>;
-    // Warning: (ae-incompatible-release-tags) The symbol "tasksByName" is marked as @public, but its signature references "HeftTask" which is marked as @internal
-    get tasksByName(): ReadonlyMap<string, HeftTask>;
-}
-
-// Warning: (ae-internal-missing-underscore) The name "HeftTask" should be prefixed with an underscore because the declaration is marked as @internal
-//
-// @internal (undocumented)
-export class HeftTask {
-    // Warning: (ae-forgotten-export) The symbol "IHeftConfigurationJsonTaskSpecifier" needs to be exported by the entry point index.d.ts
-    constructor(parentPhase: HeftPhase, taskName: string, taskSpecifier: IHeftConfigurationJsonTaskSpecifier);
-    // (undocumented)
-    get consumingTasks(): ReadonlySet<HeftTask>;
-    // (undocumented)
-    get dependencyTasks(): Set<HeftTask>;
-    // (undocumented)
-    ensureInitializedAsync(): Promise<void>;
-    // (undocumented)
-    getPluginAsync(logger: IScopedLogger): Promise<IHeftTaskPlugin<object | void>>;
-    // (undocumented)
-    get parentPhase(): HeftPhase;
-    // Warning: (ae-forgotten-export) The symbol "HeftTaskPluginDefinition" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    get pluginDefinition(): HeftTaskPluginDefinition;
-    // (undocumented)
-    get pluginOptions(): object | undefined;
-    // (undocumented)
-    get taskName(): string;
 }
 
 // @public
@@ -245,6 +200,24 @@ export interface IHeftParsedCommandLine {
 }
 
 // @public (undocumented)
+export interface IHeftPhase {
+    // (undocumented)
+    cleanFiles: ReadonlySet<IDeleteOperation>;
+    // (undocumented)
+    consumingPhases: ReadonlySet<IHeftPhase>;
+    // (undocumented)
+    dependencyPhases: ReadonlySet<IHeftPhase>;
+    // (undocumented)
+    readonly phaseDescription: string | undefined;
+    // (undocumented)
+    readonly phaseName: string;
+    // (undocumented)
+    tasks: ReadonlySet<IHeftTask>;
+    // (undocumented)
+    tasksByName: ReadonlyMap<string, IHeftTask>;
+}
+
+// @public (undocumented)
 export interface IHeftPhaseFinishHookOptions {
     // (undocumented)
     operation: OperationGroupRecord<IHeftPhaseOperationMetadata>;
@@ -253,7 +226,7 @@ export interface IHeftPhaseFinishHookOptions {
 // @public
 export interface IHeftPhaseOperationMetadata {
     // (undocumented)
-    phase: HeftPhase;
+    phase: IHeftPhase;
 }
 
 // @public (undocumented)
@@ -274,6 +247,18 @@ export interface IHeftRecordMetricsHookOptions {
     metricData: IMetricsData;
     // (undocumented)
     metricName: string;
+}
+
+// @public (undocumented)
+export interface IHeftTask {
+    // (undocumented)
+    readonly consumingTasks: ReadonlySet<IHeftTask>;
+    // (undocumented)
+    readonly dependencyTasks: ReadonlySet<IHeftTask>;
+    // (undocumented)
+    readonly parentPhase: IHeftPhase;
+    // (undocumented)
+    readonly taskName: string;
 }
 
 // @public
@@ -298,11 +283,9 @@ export interface IHeftTaskHooks {
 // @public
 export interface IHeftTaskOperationMetadata {
     // (undocumented)
-    phase: HeftPhase;
-    // Warning: (ae-incompatible-release-tags) The symbol "task" is marked as @public, but its signature references "HeftTask" which is marked as @internal
-    //
+    phase: IHeftPhase;
     // (undocumented)
-    task: HeftTask;
+    task: IHeftTask;
 }
 
 // @public
