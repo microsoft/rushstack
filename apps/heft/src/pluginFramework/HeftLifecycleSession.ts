@@ -147,9 +147,36 @@ export interface IHeftLifecycleHooks {
    */
   recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
 
+  /**
+   * The `taskStart` hook is called at the beginning of a task. It is called before the task has begun
+   * to execute. To use it, call `taskStart.tapPromise(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
   taskStart: AsyncParallelHook<IHeftTaskStartHookOptions>;
+
+  /**
+   * The `taskFinish` hook is called at the end of a task. It is called after the task has completed
+   * execution. To use it, call `taskFinish.tapPromise(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
   taskFinish: AsyncParallelHook<IHeftTaskFinishHookOptions>;
+
+  /**
+   * The `phaseStart` hook is called at the beginning of a phase. It is called before the phase has
+   * begun to execute. To use it, call `phaseStart.tapPromise(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
   phaseStart: AsyncParallelHook<IHeftPhaseStartHookOptions>;
+
+  /**
+   * The `phaseFinish` hook is called at the end of a phase. It is called after the phase has completed
+   * execution. To use it, call `phaseFinish.tapPromise(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
   phaseFinish: AsyncParallelHook<IHeftPhaseFinishHookOptions>;
 }
 
