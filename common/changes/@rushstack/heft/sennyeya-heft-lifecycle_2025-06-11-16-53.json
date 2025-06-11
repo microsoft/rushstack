@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Added support for operation lifecycle events, `operationStart`, `operationFinish`, `operationGroupStart`, `operationGroupFinish`.",
+      "comment": "Added support for task and phase lifecycle events, `taskStart`, `taskFinish`, `phaseStart`, `phaseFinish`.",
       "type": "minor"
     }
   ],
