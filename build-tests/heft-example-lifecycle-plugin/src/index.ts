@@ -16,27 +16,45 @@ export default class ExampleLifecyclePlugin implements IHeftLifecyclePlugin {
   public apply(session: IHeftLifecycleSession): void {
     const { logger } = session;
     session.hooks.taskFinish.tapPromise(PLUGIN_NAME, async (options: IHeftTaskFinishHookOptions) => {
-      const { operation, task } = options;
-      if (operation.state) {
+      const {
+        operation: {
+          metadata: { task },
+          state
+        }
+      } = options;
+      if (state) {
         logger.terminal.writeLine(
-          `--- ${task.taskName} finished in ${operation.state.stopwatch.duration.toFixed(2)}s ---`
+          `--- ${task.taskName} finished in ${state.stopwatch.duration.toFixed(2)}s ---`
         );
       }
     });
 
     session.hooks.taskStart.tapPromise(PLUGIN_NAME, async (options: IHeftTaskStartHookOptions) => {
-      const { task } = options;
+      const {
+        operation: {
+          metadata: { task }
+        }
+      } = options;
       logger.terminal.writeLine(`--- ${task.taskName} started ---`);
     });
 
     session.hooks.phaseStart.tapPromise(PLUGIN_NAME, async (options: IHeftPhaseStartHookOptions) => {
-      const { phase } = options;
+      const {
+        operation: {
+          metadata: { phase }
+        }
+      } = options;
       logger.terminal.writeLine(`--- ${phase.phaseName} started ---`);
     });
 
     session.hooks.phaseFinish.tapPromise(PLUGIN_NAME, async (options: IHeftPhaseFinishHookOptions) => {
-      const { phase, operation } = options;
-      logger.terminal.writeLine(`--- ${phase.phaseName} finished in ${operation.duration.toFixed(2)}s ---`);
+      const {
+        operation: {
+          metadata: { phase },
+          duration
+        }
+      } = options;
+      logger.terminal.writeLine(`--- ${phase.phaseName} finished in ${duration.toFixed(2)}s ---`);
     });
   }
 }

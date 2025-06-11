@@ -453,7 +453,7 @@ export class HeftActionRunner {
       }
 
       // Create operation for the phase start node
-      const phaseOperation: Operation<IHeftTaskOperationMetadata> = _getOrCreatePhaseOperation(
+      const phaseOperation: Operation<IHeftPhaseOperationMetadata> = _getOrCreatePhaseOperation(
         internalHeftSession,
         phase,
         operations
@@ -498,16 +498,19 @@ function _getOrCreatePhaseOperation(
   this: void,
   internalHeftSession: InternalHeftSession,
   phase: HeftPhase,
-  operations: Map<string, Operation<IHeftTaskOperationMetadata>>
-): Operation<IHeftTaskOperationMetadata> {
+  operations: Map<string, Operation>
+): Operation<IHeftPhaseOperationMetadata> {
   const key: string = phase.phaseName;
 
-  let operation: Operation<IHeftTaskOperationMetadata> | undefined = operations.get(key);
+  let operation: Operation<IHeftPhaseOperationMetadata> | undefined = operations.get(
+    key
+  ) as Operation<IHeftPhaseOperationMetadata>;
   if (!operation) {
     // Only create the operation. Dependencies are hooked up separately
     operation = new Operation({
       groupName: phase.phaseName,
-      runner: new PhaseOperationRunner({ phase, internalHeftSession })
+      runner: new PhaseOperationRunner({ phase, internalHeftSession }),
+      metadata: { phase }
     });
     operations.set(key, operation);
   }
@@ -522,14 +525,17 @@ function _getOrCreateTaskOperation(
 ): Operation {
   const key: string = `${task.parentPhase.phaseName}.${task.taskName}`;
 
-  let operation: Operation | undefined = operations.get(key);
+  let operation: Operation<IHeftTaskOperationMetadata> | undefined = operations.get(
+    key
+  ) as Operation<IHeftTaskOperationMetadata>;
   if (!operation) {
     operation = new Operation({
       groupName: task.parentPhase.phaseName,
       runner: new TaskOperationRunner({
         internalHeftSession,
         task
-      })
+      }),
+      metadata: { task, phase: task.parentPhase }
     });
     operations.set(key, operation);
   }
