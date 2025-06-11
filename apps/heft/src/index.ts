@@ -61,9 +61,12 @@ export type {
 
 export {
   type IHeftRecordMetricsHookOptions,
+  type IHeftMetricsHookOptions,
   type IMetricsData,
   type IPerformanceData as _IPerformanceData,
-  MetricsCollector as _MetricsCollector
+  MetricsCollector as _MetricsCollector,
+  type IHeftTaskRecordMetricsHookOptions,
+  type ITaskMetricsData
 } from './metrics/MetricsCollector';
 
 export type { IScopedLogger } from './pluginFramework/logging/ScopedLogger';

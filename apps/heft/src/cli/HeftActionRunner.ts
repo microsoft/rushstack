@@ -403,14 +403,19 @@ export class HeftActionRunner {
 
       // Create operations for each task
       for (const task of phase.tasks) {
-        const taskOperation: Operation = _getOrCreateTaskOperation(internalHeftSession, task, operations);
+        const taskOperation: Operation = _getOrCreateTaskOperation(
+          internalHeftSession,
+          this._metricsCollector,
+          task,
+          operations
+        );
         // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
         taskOperation.addDependency(phaseOperation);
 
         // Set all dependency tasks as dependencies of the task operation
         for (const dependencyTask of task.dependencyTasks) {
           taskOperation.addDependency(
-            _getOrCreateTaskOperation(internalHeftSession, dependencyTask, operations)
+            _getOrCreateTaskOperation(internalHeftSession, this._metricsCollector, dependencyTask, operations)
           );
         }
 
@@ -459,6 +464,7 @@ function _getOrCreatePhaseOperation(
 function _getOrCreateTaskOperation(
   this: void,
   internalHeftSession: InternalHeftSession,
+  metricsCollector: MetricsCollector,
   task: HeftTask,
   operations: Map<string, Operation>
 ): Operation {
@@ -469,6 +475,7 @@ function _getOrCreateTaskOperation(
     operation = new Operation({
       groupName: task.parentPhase.phaseName,
       runner: new TaskOperationRunner({
+        metricsCollector,
         internalHeftSession,
         task
       })

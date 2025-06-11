@@ -151,6 +151,7 @@ export interface IHeftLifecycleCleanHookOptions {
 export interface IHeftLifecycleHooks {
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
     recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+    recordTaskMetrics: AsyncParallelHook<IHeftTaskRecordMetricsHookOptions>;
     toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
     toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
 }
@@ -174,6 +175,14 @@ export interface IHeftLifecycleToolFinishHookOptions {
 
 // @public
 export interface IHeftLifecycleToolStartHookOptions {
+}
+
+// @public (undocumented)
+export interface IHeftMetricsHookOptions<T> {
+    // (undocumented)
+    metricData: T;
+    // (undocumented)
+    metricName: string;
 }
 
 // @public
@@ -200,12 +209,7 @@ export interface IHeftPlugin<TSession extends IHeftLifecycleSession | IHeftTaskS
 }
 
 // @public (undocumented)
-export interface IHeftRecordMetricsHookOptions {
-    // (undocumented)
-    metricData: IMetricsData;
-    // (undocumented)
-    metricName: string;
-}
+export type IHeftRecordMetricsHookOptions = IHeftMetricsHookOptions<IMetricsData>;
 
 // @public
 export interface IHeftTaskFileOperations {
@@ -223,6 +227,9 @@ export interface IHeftTaskHooks {
 // @public
 export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskSession, TOptions> {
 }
+
+// @public (undocumented)
+export type IHeftTaskRecordMetricsHookOptions = IHeftMetricsHookOptions<ITaskMetricsData>;
 
 // @public
 export interface IHeftTaskRunHookOptions {
@@ -269,7 +276,7 @@ export interface IMetricsData {
     totalUptimeMs: number;
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export interface _IPerformanceData {
     // (undocumented)
     encounteredError?: boolean;
@@ -315,6 +322,14 @@ export interface IScopedLogger {
     readonly terminal: ITerminal;
 }
 
+// @public (undocumented)
+export interface ITaskMetricsData {
+    encounteredError?: boolean;
+    phaseName: string;
+    taskName: string;
+    taskTotalExecutionMs: number;
+}
+
 // @public
 export interface IWatchedFileState {
     changed: boolean;
@@ -341,6 +356,9 @@ export class _MetricsCollector {
     recordAsync(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): Promise<void>;
     // (undocumented)
     readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+    recordTaskAsync(taskName: string, phaseName: string, performanceData?: Partial<_IPerformanceData>): Promise<void>;
+    // (undocumented)
+    readonly recordTaskMetricsHook: AsyncParallelHook<IHeftTaskRecordMetricsHookOptions>;
     setStartTime(): void;
 }
 

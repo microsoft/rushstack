@@ -9,6 +9,31 @@ import { InternalError } from '@rushstack/node-core-library';
 /**
  * @public
  */
+export interface ITaskMetricsData {
+  /**
+   * The name of the task that was executed.
+   */
+  taskName: string;
+
+  /**
+   * The name of the phase that the task belongs to.
+   */
+  phaseName: string;
+
+  /**
+   * The total execution duration of the task, in milliseconds.
+   */
+  taskTotalExecutionMs: number;
+
+  /**
+   * Whether or not the task encountered errors.
+   */
+  encounteredError?: boolean;
+}
+
+/**
+ * @public
+ */
 export interface IMetricsData {
   /**
    * The command that was executed.
@@ -73,7 +98,7 @@ export interface IMetricsData {
 /**
  * @public
  */
-export interface IHeftRecordMetricsHookOptions {
+export interface IHeftMetricsHookOptions<T> {
   /**
    * @public
    */
@@ -82,11 +107,21 @@ export interface IHeftRecordMetricsHookOptions {
   /**
    * @public
    */
-  metricData: IMetricsData;
+  metricData: T;
 }
 
 /**
- * @internal
+ * @public
+ */
+export type IHeftRecordMetricsHookOptions = IHeftMetricsHookOptions<IMetricsData>;
+
+/**
+ * @public
+ */
+export type IHeftTaskRecordMetricsHookOptions = IHeftMetricsHookOptions<ITaskMetricsData>;
+
+/**
+ * @public
  */
 export interface IPerformanceData {
   taskTotalExecutionMs: number;
@@ -100,6 +135,9 @@ export interface IPerformanceData {
 export class MetricsCollector {
   public readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions> =
     new AsyncParallelHook<IHeftRecordMetricsHookOptions>(['recordMetricsHookOptions']);
+
+  public readonly recordTaskMetricsHook: AsyncParallelHook<IHeftTaskRecordMetricsHookOptions> =
+    new AsyncParallelHook<IHeftTaskRecordMetricsHookOptions>(['recordTaskMetricsHookOptions']);
 
   private _bootDurationMs: number | undefined;
   private _startTimeMs: number | undefined;
@@ -163,6 +201,51 @@ export class MetricsCollector {
 
     await this.recordMetricsHook.promise({
       metricName: 'inner_loop_heft',
+      metricData
+    });
+  }
+
+  /**
+   * Record metrics to the installed plugin(s).
+   *
+   * @param command - Describe the user command, e.g. `start` or `build`
+   * @param parameterMap - Optional map of parameters to their values
+   * @param performanceData - Optional performance data
+   */
+  public async recordTaskAsync(
+    taskName: string,
+    phaseName: string,
+    performanceData?: Partial<IPerformanceData>
+  ): Promise<void> {
+    const { _bootDurationMs, _startTimeMs } = this;
+    if (_bootDurationMs === undefined || _startTimeMs === undefined) {
+      throw new InternalError('MetricsCollector has not been initialized with setStartTime() yet');
+    }
+
+    if (!taskName) {
+      throw new InternalError('The task name must be specified.');
+    }
+
+    if (!phaseName) {
+      throw new InternalError('The phase name must be specified.');
+    }
+
+    const filledPerformanceData: IPerformanceData = {
+      taskTotalExecutionMs: performance.now() - _startTimeMs,
+      ...(performanceData || {})
+    };
+
+    const { taskTotalExecutionMs } = filledPerformanceData;
+
+    const metricData: ITaskMetricsData = {
+      taskName: taskName,
+      phaseName: phaseName,
+      encounteredError: filledPerformanceData.encounteredError,
+      taskTotalExecutionMs: taskTotalExecutionMs
+    };
+
+    await this.recordTaskMetricsHook.promise({
+      metricName: 'task_execution_heft',
       metricData
     });
   }

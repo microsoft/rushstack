@@ -232,6 +232,7 @@ export interface IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
 }
 
 export class HeftTaskSession implements IHeftTaskSession {
+  public readonly phaseName: string;
   public readonly taskName: string;
   public readonly hooks: IHeftTaskHooks;
   public readonly tempFolderPath: string;
@@ -280,6 +281,7 @@ export class HeftTaskSession implements IHeftTaskSession {
     this.logger = loggingManager.requestScopedLogger(`${phase.phaseName}:${task.taskName}`);
     this.metricsCollector = metricsCollector;
     this.taskName = task.taskName;
+    this.phaseName = phase.phaseName;
     this.hooks = {
       run: new AsyncParallelHook(['runHookOptions']),
       runIncremental: new AsyncParallelHook(['runIncrementalHookOptions']),
