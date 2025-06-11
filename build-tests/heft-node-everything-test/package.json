@@ -6,7 +6,7 @@
   "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "heft --debug build --clean",
+    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
     "_phase:build:incremental": "heft run --only build --",
     "_phase:test": "heft run --only test -- --clean",
