@@ -50,11 +50,11 @@ export interface IOperationExecutionOptions {
     // (undocumented)
     afterExecuteOperationAsync?: (operation: Operation) => Promise<void>;
     // (undocumented)
-    afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord) => Promise<void>;
+    afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord, operation: Operation) => Promise<void>;
     // (undocumented)
     beforeExecuteOperationAsync?: (operation: Operation) => Promise<void>;
     // (undocumented)
-    beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord) => Promise<void>;
+    beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord, operation: Operation) => Promise<void>;
     // (undocumented)
     parallelism: number;
     // (undocumented)

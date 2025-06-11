@@ -25,8 +25,14 @@ export interface IOperationExecutionOptions {
 
   beforeExecuteOperationAsync?: (operation: Operation) => Promise<void>;
   afterExecuteOperationAsync?: (operation: Operation) => Promise<void>;
-  beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord) => Promise<void>;
-  afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord) => Promise<void>;
+  beforeExecuteOperationGroupAsync?: (
+    operationGroup: OperationGroupRecord,
+    operation: Operation
+  ) => Promise<void>;
+  afterExecuteOperationGroupAsync?: (
+    operationGroup: OperationGroupRecord,
+    operation: Operation
+  ) => Promise<void>;
 }
 
 /**
@@ -145,13 +151,10 @@ export class OperationExecutionManager {
               startedGroups.add(groupRecord);
               groupRecord.startTimer();
               terminal.writeLine(` ---- ${groupRecord.name} started ---- `);
-              await executionOptions.beforeExecuteOperationGroupAsync?.(groupRecord);
-            } else {
-              await executionOptions.beforeExecuteOperationAsync?.(operation);
+              await executionOptions.beforeExecuteOperationGroupAsync?.(groupRecord, operation);
             }
-          } else {
-            await executionOptions.beforeExecuteOperationAsync?.(operation);
           }
+          await executionOptions.beforeExecuteOperationAsync?.(operation);
         },
 
         afterExecuteAsync: async (operation: Operation, state: IOperationState): Promise<void> => {
@@ -161,8 +164,6 @@ export class OperationExecutionManager {
             : undefined;
           if (groupRecord) {
             groupRecord.setOperationAsComplete(operation, state);
-          } else {
-            await executionOptions.afterExecuteOperationAsync?.(operation);
           }
 
           if (state.status === OperationStatus.Failure) {
@@ -176,6 +177,7 @@ export class OperationExecutionManager {
             hasReportedFailures = true;
           }
 
+          await executionOptions.afterExecuteOperationAsync?.(operation);
           if (groupRecord) {
             // Log out the group name and duration if it is the last operation in the group
             if (groupRecord?.finished && !finishedGroups.has(groupRecord)) {
@@ -188,9 +190,7 @@ export class OperationExecutionManager {
               terminal.writeLine(
                 ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
               );
-              await executionOptions.afterExecuteOperationGroupAsync?.(groupRecord);
-            } else {
-              await executionOptions.afterExecuteOperationAsync?.(operation);
+              await executionOptions.afterExecuteOperationGroupAsync?.(groupRecord, operation);
             }
           }
         }

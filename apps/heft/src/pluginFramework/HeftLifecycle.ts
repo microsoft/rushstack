@@ -20,10 +20,10 @@ import {
   type IHeftLifecycleToolStartHookOptions,
   type IHeftLifecycleToolFinishHookOptions,
   type IHeftLifecycleSession,
-  type IHeftOperationStartHookOptions,
-  type IHeftOperationFinishHookOptions,
-  type IHeftOperationGroupStartHookOptions,
-  type IHeftOperationGroupFinishHookOptions
+  type IHeftTaskStartHookOptions,
+  type IHeftTaskFinishHookOptions,
+  type IHeftPhaseStartHookOptions,
+  type IHeftPhaseFinishHookOptions
 } from './HeftLifecycleSession';
 import type { ScopedLogger } from './logging/ScopedLogger';
 
@@ -72,10 +72,10 @@ export class HeftLifecycle extends HeftPluginHost {
       toolStart: new AsyncParallelHook<IHeftLifecycleToolStartHookOptions>(),
       toolFinish: new AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>(),
       recordMetrics: internalHeftSession.metricsCollector.recordMetricsHook,
-      operationStart: new AsyncParallelHook<IHeftOperationStartHookOptions>(['operation']),
-      operationFinish: new AsyncParallelHook<IHeftOperationFinishHookOptions>(['operation']),
-      operationGroupStart: new AsyncParallelHook<IHeftOperationGroupStartHookOptions>(['operationGroup']),
-      operationGroupFinish: new AsyncParallelHook<IHeftOperationGroupFinishHookOptions>(['operationGroup'])
+      taskStart: new AsyncParallelHook<IHeftTaskStartHookOptions>(['task']),
+      taskFinish: new AsyncParallelHook<IHeftTaskFinishHookOptions>(['task']),
+      phaseStart: new AsyncParallelHook<IHeftPhaseStartHookOptions>(['phase']),
+      phaseFinish: new AsyncParallelHook<IHeftPhaseFinishHookOptions>(['phase'])
     };
   }
 

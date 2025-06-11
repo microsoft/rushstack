@@ -12,6 +12,8 @@ import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { HeftPluginHost } from './HeftPluginHost';
 import type { Operation, OperationGroupRecord } from '@rushstack/operation-graph';
+import type { HeftTask } from './HeftTask';
+import type { HeftPhase } from './HeftPhase';
 
 /**
  * The lifecycle session is responsible for providing session-specific information to Heft lifecycle
@@ -71,29 +73,33 @@ export interface IHeftLifecycleSession {
 /**
  * @public
  */
-export interface IHeftOperationStartHookOptions {
+export interface IHeftTaskStartHookOptions {
+  task: HeftTask;
   operation: Operation;
 }
 
 /**
  * @public
  */
-export interface IHeftOperationFinishHookOptions {
+export interface IHeftTaskFinishHookOptions {
+  task: HeftTask;
   operation: Operation;
 }
 
 /**
  * @public
  */
-export interface IHeftOperationGroupStartHookOptions {
-  operationGroup: OperationGroupRecord;
+export interface IHeftPhaseStartHookOptions {
+  phase: HeftPhase;
+  operation: OperationGroupRecord;
 }
 
 /**
  * @public
  */
-export interface IHeftOperationGroupFinishHookOptions {
-  operationGroup: OperationGroupRecord;
+export interface IHeftPhaseFinishHookOptions {
+  phase: HeftPhase;
+  operation: OperationGroupRecord;
 }
 
 /**
@@ -141,10 +147,10 @@ export interface IHeftLifecycleHooks {
    */
   recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
 
-  operationStart: AsyncParallelHook<IHeftOperationStartHookOptions>;
-  operationFinish: AsyncParallelHook<IHeftOperationFinishHookOptions>;
-  operationGroupStart: AsyncParallelHook<IHeftOperationGroupStartHookOptions>;
-  operationGroupFinish: AsyncParallelHook<IHeftOperationGroupFinishHookOptions>;
+  taskStart: AsyncParallelHook<IHeftTaskStartHookOptions>;
+  taskFinish: AsyncParallelHook<IHeftTaskFinishHookOptions>;
+  phaseStart: AsyncParallelHook<IHeftPhaseStartHookOptions>;
+  phaseFinish: AsyncParallelHook<IHeftPhaseFinishHookOptions>;
 }
 
 /**

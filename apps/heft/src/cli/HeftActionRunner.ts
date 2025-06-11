@@ -351,8 +351,7 @@ export class HeftActionRunner {
     abortSignal: AbortSignal,
     requestRun?: (requestor?: string) => void
   ): Promise<OperationStatus> {
-    const { operationStart, operationFinish, operationGroupStart, operationGroupFinish } =
-      this._internalHeftSession.lifecycle.hooks;
+    const { taskStart, taskFinish, phaseStart, phaseFinish } = this._internalHeftSession.lifecycle.hooks;
     // Record this as the start of task execution.
     this._metricsCollector.setStartTime();
     // Execute the action operations
@@ -364,23 +363,33 @@ export class HeftActionRunner {
           abortSignal,
           requestRun,
           beforeExecuteOperationAsync: async (operation: Operation) => {
-            if (operationStart.isUsed()) {
-              await operationStart.promise({ operation });
+            if (operation.runner instanceof TaskOperationRunner && taskStart.isUsed()) {
+              const runner: TaskOperationRunner = operation.runner as TaskOperationRunner;
+              await taskStart.promise({ task: runner.task, operation });
             }
           },
           afterExecuteOperationAsync: async (operation: Operation) => {
-            if (operationFinish.isUsed()) {
-              await operationFinish.promise({ operation });
+            if (operation.runner instanceof TaskOperationRunner && taskFinish.isUsed()) {
+              const runner: TaskOperationRunner = operation.runner as TaskOperationRunner;
+              await taskFinish.promise({ task: runner.task, operation });
             }
           },
-          beforeExecuteOperationGroupAsync: async (operationGroup: OperationGroupRecord) => {
-            if (operationGroupStart.isUsed()) {
-              await operationGroupStart.promise({ operationGroup });
+          beforeExecuteOperationGroupAsync: async (
+            operationGroup: OperationGroupRecord,
+            operation: Operation
+          ) => {
+            if (operation.runner instanceof PhaseOperationRunner && phaseStart.isUsed()) {
+              const runner: PhaseOperationRunner = operation.runner as PhaseOperationRunner;
+              await phaseStart.promise({ phase: runner.phase, operation: operationGroup });
             }
           },
-          afterExecuteOperationGroupAsync: async (operationGroup: OperationGroupRecord) => {
-            if (operationGroupFinish.isUsed()) {
-              await operationGroupFinish.promise({ operationGroup });
+          afterExecuteOperationGroupAsync: async (
+            operationGroup: OperationGroupRecord,
+            operation: Operation
+          ) => {
+            if (operation.runner instanceof PhaseOperationRunner && phaseFinish.isUsed()) {
+              const runner: PhaseOperationRunner = operation.runner as PhaseOperationRunner;
+              await phaseFinish.promise({ phase: runner.phase, operation: operationGroup });
             }
           }
         };

@@ -14,12 +14,15 @@ import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerListParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameter } from '@rushstack/ts-command-line';
+import { CommandLineParameterProvider } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { CustomValidationFunction } from '@rushstack/heft-config-file';
+import { FileLocationStyle } from '@rushstack/node-core-library';
 import * as fs from 'fs';
 import { ICustomJsonPathMetadata } from '@rushstack/heft-config-file';
 import { ICustomPropertyInheritance } from '@rushstack/heft-config-file';
+import { IFileErrorFormattingOptions } from '@rushstack/node-core-library';
 import { IJsonPathMetadata } from '@rushstack/heft-config-file';
 import { IJsonPathMetadataResolverOptions } from '@rushstack/heft-config-file';
 import { IJsonPathsMetadata } from '@rushstack/heft-config-file';
@@ -153,14 +156,14 @@ export interface IHeftLifecycleCleanHookOptions {
 export interface IHeftLifecycleHooks {
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
     // (undocumented)
-    operationFinish: AsyncParallelHook<IHeftOperationFinishHookOptions>;
+    phaseFinish: AsyncParallelHook<IHeftPhaseFinishHookOptions>;
     // (undocumented)
-    operationGroupFinish: AsyncParallelHook<IHeftOperationGroupFinishHookOptions>;
-    // (undocumented)
-    operationGroupStart: AsyncParallelHook<IHeftOperationGroupStartHookOptions>;
-    // (undocumented)
-    operationStart: AsyncParallelHook<IHeftOperationStartHookOptions>;
+    phaseStart: AsyncParallelHook<IHeftPhaseStartHookOptions>;
     recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+    // (undocumented)
+    taskFinish: AsyncParallelHook<IHeftTaskFinishHookOptions>;
+    // (undocumented)
+    taskStart: AsyncParallelHook<IHeftTaskStartHookOptions>;
     toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
     toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
 }
@@ -186,30 +189,6 @@ export interface IHeftLifecycleToolFinishHookOptions {
 export interface IHeftLifecycleToolStartHookOptions {
 }
 
-// @public (undocumented)
-export interface IHeftOperationFinishHookOptions {
-    // (undocumented)
-    operation: Operation;
-}
-
-// @public (undocumented)
-export interface IHeftOperationGroupFinishHookOptions {
-    // (undocumented)
-    operationGroup: OperationGroupRecord;
-}
-
-// @public (undocumented)
-export interface IHeftOperationGroupStartHookOptions {
-    // (undocumented)
-    operationGroup: OperationGroupRecord;
-}
-
-// @public (undocumented)
-export interface IHeftOperationStartHookOptions {
-    // (undocumented)
-    operation: Operation;
-}
-
 // @public
 export interface IHeftParameters extends IHeftDefaultParameters {
     getChoiceListParameter(parameterLongName: string): CommandLineChoiceListParameter;
@@ -225,6 +204,24 @@ export interface IHeftParameters extends IHeftDefaultParameters {
 export interface IHeftParsedCommandLine {
     readonly commandName: string;
     readonly unaliasedCommandName: string;
+}
+
+// @public (undocumented)
+export interface IHeftPhaseFinishHookOptions {
+    // (undocumented)
+    operation: OperationGroupRecord;
+    // Warning: (ae-forgotten-export) The symbol "HeftPhase" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    phase: HeftPhase;
+}
+
+// @public (undocumented)
+export interface IHeftPhaseStartHookOptions {
+    // (undocumented)
+    operation: OperationGroupRecord;
+    // (undocumented)
+    phase: HeftPhase;
 }
 
 // @public
@@ -245,6 +242,16 @@ export interface IHeftRecordMetricsHookOptions {
 export interface IHeftTaskFileOperations {
     copyOperations: Set<ICopyOperation>;
     deleteOperations: Set<IDeleteOperation>;
+}
+
+// @public (undocumented)
+export interface IHeftTaskFinishHookOptions {
+    // (undocumented)
+    operation: Operation;
+    // Warning: (ae-forgotten-export) The symbol "HeftTask" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    task: HeftTask;
 }
 
 // @public
@@ -281,6 +288,14 @@ export interface IHeftTaskSession {
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
     readonly taskName: string;
     readonly tempFolderPath: string;
+}
+
+// @public (undocumented)
+export interface IHeftTaskStartHookOptions {
+    // (undocumented)
+    operation: Operation;
+    // (undocumented)
+    task: HeftTask;
 }
 
 // @public

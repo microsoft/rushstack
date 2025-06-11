@@ -27,6 +27,10 @@ export class PhaseOperationRunner implements IOperationRunner {
     return `Phase ${JSON.stringify(this._options.phase.phaseName)}`;
   }
 
+  public get phase(): HeftPhase {
+    return this._options.phase;
+  }
+
   public constructor(options: IPhaseOperationRunnerOptions) {
     this._options = options;
   }

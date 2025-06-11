@@ -4,10 +4,10 @@
 import type {
   IHeftLifecyclePlugin,
   IHeftLifecycleSession,
-  IHeftOperationFinishHookOptions,
-  IHeftOperationGroupStartHookOptions,
-  IHeftOperationGroupFinishHookOptions,
-  IHeftOperationStartHookOptions
+  IHeftTaskFinishHookOptions,
+  IHeftTaskStartHookOptions,
+  IHeftPhaseFinishHookOptions,
+  IHeftPhaseStartHookOptions
 } from '@rushstack/heft';
 
 export const PLUGIN_NAME: 'example-lifecycle-plugin' = 'example-lifecycle-plugin';
@@ -15,41 +15,28 @@ export const PLUGIN_NAME: 'example-lifecycle-plugin' = 'example-lifecycle-plugin
 export default class ExampleLifecyclePlugin implements IHeftLifecyclePlugin {
   public apply(session: IHeftLifecycleSession): void {
     const { logger } = session;
-    session.hooks.operationFinish.tapPromise(
-      PLUGIN_NAME,
-      async (options: IHeftOperationFinishHookOptions) => {
-        const { operation } = options;
-        if (operation.state) {
-          logger.terminal.writeLine(
-            `--- ${operation.runner?.name} finished in ${operation.state.stopwatch.duration.toFixed(2)}s ---`
-          );
-        }
-      }
-    );
-
-    session.hooks.operationStart.tapPromise(PLUGIN_NAME, async (options: IHeftOperationStartHookOptions) => {
-      const { operation } = options;
+    session.hooks.taskFinish.tapPromise(PLUGIN_NAME, async (options: IHeftTaskFinishHookOptions) => {
+      const { operation, task } = options;
       if (operation.state) {
-        logger.terminal.writeLine(`--- ${operation.runner?.name} started ---`);
+        logger.terminal.writeLine(
+          `--- ${task.taskName} finished in ${operation.state.stopwatch.duration.toFixed(2)}s ---`
+        );
       }
     });
 
-    session.hooks.operationGroupStart.tapPromise(
-      PLUGIN_NAME,
-      async (options: IHeftOperationGroupStartHookOptions) => {
-        const { operationGroup } = options;
-        logger.terminal.writeLine(`--- ${operationGroup.name} started ---`);
-      }
-    );
+    session.hooks.taskStart.tapPromise(PLUGIN_NAME, async (options: IHeftTaskStartHookOptions) => {
+      const { task } = options;
+      logger.terminal.writeLine(`--- ${task.taskName} started ---`);
+    });
 
-    session.hooks.operationGroupFinish.tapPromise(
-      PLUGIN_NAME,
-      async (options: IHeftOperationGroupFinishHookOptions) => {
-        const { operationGroup } = options;
-        logger.terminal.writeLine(
-          `--- ${operationGroup.name} finished in ${operationGroup.duration.toFixed(2)}s ---`
-        );
-      }
-    );
+    session.hooks.phaseStart.tapPromise(PLUGIN_NAME, async (options: IHeftPhaseStartHookOptions) => {
+      const { phase } = options;
+      logger.terminal.writeLine(`--- ${phase.phaseName} started ---`);
+    });
+
+    session.hooks.phaseFinish.tapPromise(PLUGIN_NAME, async (options: IHeftPhaseFinishHookOptions) => {
+      const { phase, operation } = options;
+      logger.terminal.writeLine(`--- ${phase.phaseName} finished in ${operation.duration.toFixed(2)}s ---`);
+    });
   }
 }
