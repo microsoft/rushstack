@@ -4,10 +4,6 @@ require('local-eslint-config/patch/modern-module-resolution');
 require('local-eslint-config/patch/custom-config-package-names');
 
 module.exports = {
-  extends: [
-    'local-eslint-config/profile/node',
-    'local-eslint-config/mixins/friendly-locals',
-    'local-eslint-config/mixins/tsdoc'
-  ],
+  extends: ['local-eslint-config/profile/node-trusted-tool', 'local-eslint-config/mixins/friendly-locals'],
   parserOptions: { tsconfigRootDir: __dirname }
 };

@@ -30,8 +30,8 @@ export interface ICancelCommandMessage {
 
 // @beta
 export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 'isFirstRun' | 'requestRun'> {
-    afterExecute(operation: Operation, state: IOperationState): void;
-    beforeExecute(operation: Operation, state: IOperationState): void;
+    afterExecuteAsync(operation: Operation, state: IOperationState): Promise<void>;
+    beforeExecuteAsync(operation: Operation, state: IOperationState): Promise<void>;
     queueWork(workFn: () => Promise<OperationStatus>, priority: number): Promise<OperationStatus>;
     requestRun?: (requestor?: string) => void;
     terminal: ITerminal;
@@ -47,6 +47,14 @@ export interface IExitCommandMessage {
 export interface IOperationExecutionOptions {
     // (undocumented)
     abortSignal: AbortSignal;
+    // (undocumented)
+    afterExecuteOperationAsync?: (operation: Operation) => Promise<void>;
+    // (undocumented)
+    afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord) => Promise<void>;
+    // (undocumented)
+    beforeExecuteOperationAsync?: (operation: Operation) => Promise<void>;
+    // (undocumented)
+    beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord) => Promise<void>;
     // (undocumented)
     parallelism: number;
     // (undocumented)

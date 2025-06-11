@@ -34,6 +34,8 @@ import { IPropertyInheritanceDefaults } from '@rushstack/heft-config-file';
 import { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
+import type { Operation } from '@rushstack/operation-graph';
+import type { OperationGroupRecord } from '@rushstack/operation-graph';
 import { PathResolutionMethod } from '@rushstack/heft-config-file';
 import { PropertyInheritanceCustomFunction } from '@rushstack/heft-config-file';
 
@@ -150,6 +152,14 @@ export interface IHeftLifecycleCleanHookOptions {
 // @public
 export interface IHeftLifecycleHooks {
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
+    // (undocumented)
+    operationFinish: AsyncParallelHook<IHeftOperationFinishHookOptions>;
+    // (undocumented)
+    operationGroupFinish: AsyncParallelHook<IHeftOperationGroupFinishHookOptions>;
+    // (undocumented)
+    operationGroupStart: AsyncParallelHook<IHeftOperationGroupStartHookOptions>;
+    // (undocumented)
+    operationStart: AsyncParallelHook<IHeftOperationStartHookOptions>;
     recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
     toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
     toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
@@ -174,6 +184,30 @@ export interface IHeftLifecycleToolFinishHookOptions {
 
 // @public
 export interface IHeftLifecycleToolStartHookOptions {
+}
+
+// @public (undocumented)
+export interface IHeftOperationFinishHookOptions {
+    // (undocumented)
+    operation: Operation;
+}
+
+// @public (undocumented)
+export interface IHeftOperationGroupFinishHookOptions {
+    // (undocumented)
+    operationGroup: OperationGroupRecord;
+}
+
+// @public (undocumented)
+export interface IHeftOperationGroupStartHookOptions {
+    // (undocumented)
+    operationGroup: OperationGroupRecord;
+}
+
+// @public (undocumented)
+export interface IHeftOperationStartHookOptions {
+    // (undocumented)
+    operation: Operation;
 }
 
 // @public

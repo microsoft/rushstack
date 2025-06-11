@@ -12,6 +12,7 @@ import {
   type IWatchLoopState,
   Operation,
   OperationExecutionManager,
+  type OperationGroupRecord,
   OperationStatus,
   WatchLoop
 } from '@rushstack/operation-graph';
@@ -350,6 +351,8 @@ export class HeftActionRunner {
     abortSignal: AbortSignal,
     requestRun?: (requestor?: string) => void
   ): Promise<OperationStatus> {
+    const { operationStart, operationFinish, operationGroupStart, operationGroupFinish } =
+      this._internalHeftSession.lifecycle.hooks;
     // Record this as the start of task execution.
     this._metricsCollector.setStartTime();
     // Execute the action operations
@@ -359,7 +362,27 @@ export class HeftActionRunner {
           terminal: this._terminal,
           parallelism: this._parallelism,
           abortSignal,
-          requestRun
+          requestRun,
+          beforeExecuteOperationAsync: async (operation: Operation) => {
+            if (operationStart.isUsed()) {
+              await operationStart.promise({ operation });
+            }
+          },
+          afterExecuteOperationAsync: async (operation: Operation) => {
+            if (operationFinish.isUsed()) {
+              await operationFinish.promise({ operation });
+            }
+          },
+          beforeExecuteOperationGroupAsync: async (operationGroup: OperationGroupRecord) => {
+            if (operationGroupStart.isUsed()) {
+              await operationGroupStart.promise({ operationGroup });
+            }
+          },
+          afterExecuteOperationGroupAsync: async (operationGroup: OperationGroupRecord) => {
+            if (operationGroupFinish.isUsed()) {
+              await operationGroupFinish.promise({ operationGroup });
+            }
+          }
         };
 
         return executionManager.executeAsync(operationExecutionManagerOptions);

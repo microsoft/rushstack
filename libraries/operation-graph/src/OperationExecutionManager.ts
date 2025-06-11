@@ -22,6 +22,11 @@ export interface IOperationExecutionOptions {
   terminal: ITerminal;
 
   requestRun?: (requestor?: string) => void;
+
+  beforeExecuteOperationAsync?: (operation: Operation) => Promise<void>;
+  afterExecuteOperationAsync?: (operation: Operation) => Promise<void>;
+  beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord) => Promise<void>;
+  afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord) => Promise<void>;
 }
 
 /**
@@ -129,26 +134,35 @@ export class OperationExecutionManager {
           return workQueue.pushAsync(workFn, priority);
         },
 
-        beforeExecute: (operation: Operation): void => {
+        beforeExecuteAsync: async (operation: Operation): Promise<void> => {
           // Initialize group if uninitialized and log the group name
           const { groupName } = operation;
           const groupRecord: OperationGroupRecord | undefined = groupName
             ? groupRecords.get(groupName)
             : undefined;
-          if (groupRecord && !startedGroups.has(groupRecord)) {
-            startedGroups.add(groupRecord);
-            groupRecord.startTimer();
-            terminal.writeLine(` ---- ${groupRecord.name} started ---- `);
+          if (groupRecord) {
+            if (!startedGroups.has(groupRecord)) {
+              startedGroups.add(groupRecord);
+              groupRecord.startTimer();
+              terminal.writeLine(` ---- ${groupRecord.name} started ---- `);
+              await executionOptions.beforeExecuteOperationGroupAsync?.(groupRecord);
+            } else {
+              await executionOptions.beforeExecuteOperationAsync?.(operation);
+            }
+          } else {
+            await executionOptions.beforeExecuteOperationAsync?.(operation);
           }
         },
 
-        afterExecute: (operation: Operation, state: IOperationState): void => {
+        afterExecuteAsync: async (operation: Operation, state: IOperationState): Promise<void> => {
           const { groupName } = operation;
           const groupRecord: OperationGroupRecord | undefined = groupName
             ? groupRecords.get(groupName)
             : undefined;
           if (groupRecord) {
             groupRecord.setOperationAsComplete(operation, state);
+          } else {
+            await executionOptions.afterExecuteOperationAsync?.(operation);
           }
 
           if (state.status === OperationStatus.Failure) {
@@ -162,17 +176,22 @@ export class OperationExecutionManager {
             hasReportedFailures = true;
           }
 
-          // Log out the group name and duration if it is the last operation in the group
-          if (groupRecord?.finished && !finishedGroups.has(groupRecord)) {
-            finishedGroups.add(groupRecord);
-            const finishedLoggingWord: string = groupRecord.hasFailures
-              ? 'encountered an error'
-              : groupRecord.hasCancellations
-                ? 'cancelled'
-                : 'finished';
-            terminal.writeLine(
-              ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
-            );
+          if (groupRecord) {
+            // Log out the group name and duration if it is the last operation in the group
+            if (groupRecord?.finished && !finishedGroups.has(groupRecord)) {
+              finishedGroups.add(groupRecord);
+              const finishedLoggingWord: string = groupRecord.hasFailures
+                ? 'encountered an error'
+                : groupRecord.hasCancellations
+                  ? 'cancelled'
+                  : 'finished';
+              terminal.writeLine(
+                ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
+              );
+              await executionOptions.afterExecuteOperationGroupAsync?.(groupRecord);
+            } else {
+              await executionOptions.afterExecuteOperationAsync?.(operation);
+            }
           }
         }
       };

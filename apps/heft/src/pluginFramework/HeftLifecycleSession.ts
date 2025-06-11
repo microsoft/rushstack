@@ -11,6 +11,7 @@ import type { IHeftParameters } from './HeftParameterManager';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { HeftPluginHost } from './HeftPluginHost';
+import type { Operation, OperationGroupRecord } from '@rushstack/operation-graph';
 
 /**
  * The lifecycle session is responsible for providing session-specific information to Heft lifecycle
@@ -68,6 +69,34 @@ export interface IHeftLifecycleSession {
 }
 
 /**
+ * @public
+ */
+export interface IHeftOperationStartHookOptions {
+  operation: Operation;
+}
+
+/**
+ * @public
+ */
+export interface IHeftOperationFinishHookOptions {
+  operation: Operation;
+}
+
+/**
+ * @public
+ */
+export interface IHeftOperationGroupStartHookOptions {
+  operationGroup: OperationGroupRecord;
+}
+
+/**
+ * @public
+ */
+export interface IHeftOperationGroupFinishHookOptions {
+  operationGroup: OperationGroupRecord;
+}
+
+/**
  * Hooks that are available to the lifecycle plugin.
  *
  * @public
@@ -111,6 +140,11 @@ export interface IHeftLifecycleHooks {
    * @public
    */
   recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+
+  operationStart: AsyncParallelHook<IHeftOperationStartHookOptions>;
+  operationFinish: AsyncParallelHook<IHeftOperationFinishHookOptions>;
+  operationGroupStart: AsyncParallelHook<IHeftOperationGroupStartHookOptions>;
+  operationGroupFinish: AsyncParallelHook<IHeftOperationGroupFinishHookOptions>;
 }
 
 /**

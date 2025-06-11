@@ -30,7 +30,11 @@ export type {
   IHeftLifecycleHooks,
   IHeftLifecycleCleanHookOptions,
   IHeftLifecycleToolStartHookOptions,
-  IHeftLifecycleToolFinishHookOptions
+  IHeftLifecycleToolFinishHookOptions,
+  IHeftOperationStartHookOptions,
+  IHeftOperationFinishHookOptions,
+  IHeftOperationGroupStartHookOptions,
+  IHeftOperationGroupFinishHookOptions
 } from './pluginFramework/HeftLifecycleSession';
 
 export type {

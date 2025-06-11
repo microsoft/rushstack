@@ -495,6 +495,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "chokidar",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "cli-table",
       "allowedCategories": [ "libraries" ]
     },
@@ -660,10 +664,6 @@
     },
     {
       "name": "https-proxy-agent",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "chokidar",
       "allowedCategories": [ "libraries" ]
     },
     {
