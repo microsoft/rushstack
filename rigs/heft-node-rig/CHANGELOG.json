@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "2.8.14",
+      "tag": "@rushstack/heft-node-rig_v2.8.14",
+      "date": "Fri, 06 Jun 2025 00:11:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.8.13",
       "tag": "@rushstack/heft-node-rig_v2.8.13",
       "date": "Tue, 13 May 2025 02:09:20 GMT",

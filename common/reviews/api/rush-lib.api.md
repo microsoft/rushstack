@@ -437,6 +437,7 @@ export interface ICredentialCacheEntry {
 
 // @beta (undocumented)
 export interface ICredentialCacheOptions {
+    cacheFilePath?: string;
     // (undocumented)
     supportEditing: boolean;
 }
@@ -581,6 +582,12 @@ export class IndividualVersionPolicy extends VersionPolicy {
 
 // @internal
 export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
+}
+
+// @internal (undocumented)
+export interface _IOperationBuildCacheOptions {
+    buildCacheConfiguration: BuildCacheConfiguration;
+    terminal: ITerminal;
 }
 
 // @alpha
@@ -779,6 +786,14 @@ export interface IPnpmPeerDependencyRules {
 
 export { IPrefixMatch }
 
+// @internal (undocumented)
+export type _IProjectBuildCacheOptions = _IOperationBuildCacheOptions & {
+    projectOutputFolderNames: ReadonlyArray<string>;
+    project: RushConfigurationProject;
+    operationStateHash: string;
+    phaseName: string;
+};
+
 // @beta
 export interface IRushCommand {
     readonly actionName: string;
@@ -945,6 +960,20 @@ export class Operation {
     runner: IOperationRunner | undefined;
     settings: IOperationSettings | undefined;
     weight: number;
+}
+
+// @internal (undocumented)
+export class _OperationBuildCache {
+    // (undocumented)
+    get cacheId(): string | undefined;
+    // (undocumented)
+    static forOperation(executionResult: IOperationExecutionResult, options: _IOperationBuildCacheOptions): _OperationBuildCache;
+    // (undocumented)
+    static getOperationBuildCache(options: _IProjectBuildCacheOptions): _OperationBuildCache;
+    // (undocumented)
+    tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
+    // (undocumented)
+    trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
 }
 
 // @internal

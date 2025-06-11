@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for bridge cache plugin",
+  "type": "object",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["flagName"],
+      "properties": {
+        "s3Endpoint": {
+          "type": "string",
+          "description": "(Required) The name of the flag used to trigger this plugin on your phased commands."
+        }
+      }
+    }
+  ]
+}

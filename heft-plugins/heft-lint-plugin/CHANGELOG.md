@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+This log was last generated on Fri, 06 Jun 2025 00:11:09 GMT and should not be manually modified.
+
+## 0.6.0
+Fri, 06 Jun 2025 00:11:09 GMT
+
+### Minor changes
+
+- Add support for using heft-lint-plugin standalone without a typescript phase
 
 ## 0.5.38
 Tue, 13 May 2025 02:09:20 GMT

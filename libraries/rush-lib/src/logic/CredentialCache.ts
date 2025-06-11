@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema, LockFile } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
@@ -8,7 +9,7 @@ import { RushUserConfiguration } from '../api/RushUserConfiguration';
 import schemaJson from '../schemas/credentials.schema.json';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
-const CACHE_FILENAME: string = 'credentials.json';
+const DEFAULT_CACHE_FILENAME: 'credentials.json' = 'credentials.json';
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
 
 interface ICredentialCacheJson {
@@ -38,6 +39,10 @@ export interface ICredentialCacheEntry {
  */
 export interface ICredentialCacheOptions {
   supportEditing: boolean;
+  /**
+   * If specified, use the specified path instead of the default path of `~/.rush-user/credentials.json`
+   */
+  cacheFilePath?: string;
 }
 
 /**
@@ -57,7 +62,7 @@ export class CredentialCache /* implements IDisposable */ {
     lockfile: LockFile | undefined
   ) {
     if (loadedJson && loadedJson.version !== LATEST_CREDENTIALS_JSON_VERSION) {
-      throw new Error(`Unexpected credentials.json file version: ${loadedJson.version}`);
+      throw new Error(`Unexpected ${cacheFilePath} file version: ${loadedJson.version}`);
     }
 
     this._cacheFilePath = cacheFilePath;
@@ -67,8 +72,17 @@ export class CredentialCache /* implements IDisposable */ {
   }
 
   public static async initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
-    const rushUserFolderPath: string = RushUserConfiguration.getRushUserFolderPath();
-    const cacheFilePath: string = `${rushUserFolderPath}/${CACHE_FILENAME}`;
+    let cacheDirectory: string;
+    let cacheFileName: string;
+    if (options.cacheFilePath) {
+      cacheDirectory = path.dirname(options.cacheFilePath);
+      cacheFileName = options.cacheFilePath.slice(cacheDirectory.length + 1);
+    } else {
+      cacheDirectory = RushUserConfiguration.getRushUserFolderPath();
+      cacheFileName = DEFAULT_CACHE_FILENAME;
+    }
+    const cacheFilePath: string = `${cacheDirectory}/${cacheFileName}`;
+
     const jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
     let loadedJson: ICredentialCacheJson | undefined;
@@ -82,7 +96,7 @@ export class CredentialCache /* implements IDisposable */ {
 
     let lockfile: LockFile | undefined;
     if (options.supportEditing) {
-      lockfile = await LockFile.acquireAsync(rushUserFolderPath, `${CACHE_FILENAME}.lock`);
+      lockfile = await LockFile.acquireAsync(cacheDirectory, `${cacheFileName}.lock`);
     }
 
     const credentialCache: CredentialCache = new CredentialCache(cacheFilePath, loadedJson, lockfile);

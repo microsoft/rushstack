@@ -673,6 +673,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-mcp-example-plugin",
+      "projectFolder": "build-tests/rush-mcp-example-plugin",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "run-scenarios-helpers",
       "projectFolder": "build-tests/run-scenarios-helpers",
       "reviewCategory": "tests",
@@ -1331,6 +1337,12 @@
     {
       "packageName": "@rushstack/rush-serve-plugin",
       "projectFolder": "rush-plugins/rush-serve-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
+      "packageName": "@rushstack/rush-bridge-cache-plugin",
+      "projectFolder": "rush-plugins/rush-bridge-cache-plugin",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },

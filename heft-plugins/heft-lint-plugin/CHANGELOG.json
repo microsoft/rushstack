@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/heft-lint-plugin_v0.6.0",
+      "date": "Fri, 06 Jun 2025 00:11:09 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for using heft-lint-plugin standalone without a typescript phase"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.38",
       "tag": "@rushstack/heft-lint-plugin_v0.5.38",
       "date": "Tue, 13 May 2025 02:09:20 GMT",

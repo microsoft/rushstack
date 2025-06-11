@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/mcp-server",
-  "version": "0.1.8",
+  "version": "0.2.1",
   "description": "A Model Context Protocol server implementation for Rush",
   "keywords": [
     "rush",
@@ -9,6 +9,8 @@
     "monorepo",
     "server"
   ],
+  "main": "lib/index.js",
+  "typings": "dist/mcp-server.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",

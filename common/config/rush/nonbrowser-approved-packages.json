@@ -231,6 +231,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/mcp-server",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/module-minifier",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -264,6 +268,10 @@
     },
     {
       "name": "@rushstack/rush-azure-storage-build-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-bridge-cache-plugin",
       "allowedCategories": [ "libraries" ]
     },
     {

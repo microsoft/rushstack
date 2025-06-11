@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.154.0",
+      "tag": "@microsoft/rush_v5.154.0",
+      "date": "Tue, 10 Jun 2025 18:45:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Introduce a `@rushstack/rush-bridge-cache-plugin` package that adds a `--set-cache-only` flag to phased commands, which sets the cache entry without performing the operation."
+          },
+          {
+            "comment": "Update the `CredentialCache` options object to add support for custom cache file paths. This is useful if `CredentialCache` is used outside of Rush."
+          },
+          {
+            "comment": "PNPMv10 support: SHA256 hashing for dependencies paths lookup"
+          },
+          {
+            "comment": "Add Linux/MacOS support for new 'virtual-store-dir-max-length'"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.153.2",
       "tag": "@microsoft/rush_v5.153.2",
       "date": "Tue, 13 May 2025 20:33:12 GMT",

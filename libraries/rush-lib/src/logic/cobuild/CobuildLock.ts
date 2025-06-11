@@ -6,7 +6,7 @@ import { InternalError } from '@rushstack/node-core-library';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import type { OperationStatus } from '../operations/OperationStatus';
 import type { ICobuildContext } from './ICobuildLockProvider';
-import type { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
+import type { OperationBuildCache } from '../buildCache/OperationBuildCache';
 
 const KEY_SEPARATOR: ':' = ':';
 
@@ -27,7 +27,7 @@ export interface ICobuildLockOptions {
    * {@inheritdoc ICobuildContext.phaseName}
    */
   phaseName: string;
-  projectBuildCache: ProjectBuildCache;
+  operationBuildCache: OperationBuildCache;
   /**
    * The expire time of the lock in seconds.
    */
@@ -41,23 +41,23 @@ export interface ICobuildCompletedState {
 
 export class CobuildLock {
   public readonly cobuildConfiguration: CobuildConfiguration;
-  public readonly projectBuildCache: ProjectBuildCache;
+  public readonly operationBuildCache: OperationBuildCache;
 
   private _cobuildContext: ICobuildContext;
 
   public constructor(options: ICobuildLockOptions) {
     const {
       cobuildConfiguration,
-      projectBuildCache,
+      operationBuildCache,
       cobuildClusterId: clusterId,
       lockExpireTimeInSeconds,
       packageName,
       phaseName
     } = options;
     const { cobuildContextId: contextId, cobuildRunnerId: runnerId } = cobuildConfiguration;
-    const { cacheId } = projectBuildCache;
+    const { cacheId } = operationBuildCache;
     this.cobuildConfiguration = cobuildConfiguration;
-    this.projectBuildCache = projectBuildCache;
+    this.operationBuildCache = operationBuildCache;
 
     if (!cacheId) {
       // This should never happen
