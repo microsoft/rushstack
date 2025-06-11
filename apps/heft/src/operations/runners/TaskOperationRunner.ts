@@ -77,10 +77,6 @@ export class TaskOperationRunner implements IOperationRunner {
     this._options = options;
   }
 
-  public get task(): HeftTask {
-    return this._options.task;
-  }
-
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     const { internalHeftSession, task } = this._options;
     const { parentPhase } = task;

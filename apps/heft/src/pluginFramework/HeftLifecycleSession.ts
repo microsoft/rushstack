@@ -12,8 +12,7 @@ import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { HeftPluginHost } from './HeftPluginHost';
 import type { Operation, OperationGroupRecord } from '@rushstack/operation-graph';
-import type { HeftTask } from './HeftTask';
-import type { HeftPhase } from './HeftPhase';
+import type { IHeftPhaseOperationMetadata, IHeftTaskOperationMetadata } from '../cli/HeftActionRunner';
 
 /**
  * The lifecycle session is responsible for providing session-specific information to Heft lifecycle
@@ -74,32 +73,28 @@ export interface IHeftLifecycleSession {
  * @public
  */
 export interface IHeftTaskStartHookOptions {
-  task: HeftTask;
-  operation: Operation;
+  operation: Operation<IHeftTaskOperationMetadata>;
 }
 
 /**
  * @public
  */
 export interface IHeftTaskFinishHookOptions {
-  task: HeftTask;
-  operation: Operation;
+  operation: Operation<IHeftTaskOperationMetadata>;
 }
 
 /**
  * @public
  */
 export interface IHeftPhaseStartHookOptions {
-  phase: HeftPhase;
-  operation: OperationGroupRecord;
+  operation: OperationGroupRecord<IHeftPhaseOperationMetadata>;
 }
 
 /**
  * @public
  */
 export interface IHeftPhaseFinishHookOptions {
-  phase: HeftPhase;
-  operation: OperationGroupRecord;
+  operation: OperationGroupRecord<IHeftPhaseOperationMetadata>;
 }
 
 /**

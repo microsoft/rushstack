@@ -16,22 +16,25 @@ import { WorkQueue } from './WorkQueue';
  *
  * @beta
  */
-export interface IOperationExecutionOptions {
+export interface IOperationExecutionOptions<
+  TOperationMetadata extends {} = {},
+  TGroupMetadata extends {} = {}
+> {
   abortSignal: AbortSignal;
   parallelism: number;
   terminal: ITerminal;
 
   requestRun?: (requestor?: string) => void;
 
-  beforeExecuteOperationAsync?: (operation: Operation) => Promise<void>;
-  afterExecuteOperationAsync?: (operation: Operation) => Promise<void>;
+  beforeExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
+  afterExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
   beforeExecuteOperationGroupAsync?: (
-    operationGroup: OperationGroupRecord,
-    operation: Operation
+    operationGroup: OperationGroupRecord<TGroupMetadata>,
+    operation: Operation<TOperationMetadata>
   ) => Promise<void>;
   afterExecuteOperationGroupAsync?: (
-    operationGroup: OperationGroupRecord,
-    operation: Operation
+    operationGroup: OperationGroupRecord<TGroupMetadata>,
+    operation: Operation<TOperationMetadata>
   ) => Promise<void>;
 }
 
@@ -43,7 +46,7 @@ export interface IOperationExecutionOptions {
  *
  * @beta
  */
-export class OperationExecutionManager {
+export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
   /**
    * The set of operations that will be executed
    */
@@ -52,23 +55,26 @@ export class OperationExecutionManager {
    * Group records are metadata-only entities used for tracking the start and end of a set of related tasks.
    * This is the only extent to which the operation graph is aware of Heft phases.
    */
-  private readonly _groupRecordByName: Map<string, OperationGroupRecord>;
+  private readonly _groupRecordByName: Map<string, OperationGroupRecord<TGroupMetadata>>;
   /**
    * The total number of non-silent operations in the graph.
    * Silent operations are generally used to simplify the construction of the graph.
    */
   private readonly _trackedOperationCount: number;
 
-  public constructor(operations: ReadonlySet<Operation>) {
-    const groupRecordByName: Map<string, OperationGroupRecord> = new Map();
+  public constructor(
+    operations: ReadonlySet<Operation<TOperationMetadata>>,
+    deriveGroupMetadata: (metadata: TOperationMetadata) => TGroupMetadata = () => ({}) as TGroupMetadata
+  ) {
+    const groupRecordByName: Map<string, OperationGroupRecord<TGroupMetadata>> = new Map();
     this._groupRecordByName = groupRecordByName;
 
     let trackedOperationCount: number = 0;
     for (const operation of operations) {
       const { groupName } = operation;
-      let group: OperationGroupRecord | undefined = undefined;
+      let group: OperationGroupRecord<TGroupMetadata> | undefined = undefined;
       if (groupName && !(group = groupRecordByName.get(groupName))) {
-        group = new OperationGroupRecord(groupName);
+        group = new OperationGroupRecord(groupName, deriveGroupMetadata(operation.metadata));
         groupRecordByName.set(groupName, group);
       }
 
@@ -100,7 +106,9 @@ export class OperationExecutionManager {
    * Executes all operations which have been registered, returning a promise which is resolved when all the
    * operations are completed successfully, or rejects when any operation fails.
    */
-  public async executeAsync(executionOptions: IOperationExecutionOptions): Promise<OperationStatus> {
+  public async executeAsync(
+    executionOptions: IOperationExecutionOptions<TOperationMetadata, TGroupMetadata>
+  ): Promise<OperationStatus> {
     let hasReportedFailures: boolean = false;
 
     const { abortSignal, parallelism, terminal, requestRun } = executionOptions;
@@ -113,7 +121,7 @@ export class OperationExecutionManager {
     const finishedGroups: Set<OperationGroupRecord> = new Set();
 
     const maxParallelism: number = Math.min(this._operations.length, parallelism);
-    const groupRecords: Map<string, OperationGroupRecord> = this._groupRecordByName;
+    const groupRecords: Map<string, OperationGroupRecord<TGroupMetadata>> = this._groupRecordByName;
     for (const groupRecord of groupRecords.values()) {
       groupRecord.reset();
     }
@@ -140,10 +148,10 @@ export class OperationExecutionManager {
           return workQueue.pushAsync(workFn, priority);
         },
 
-        beforeExecuteAsync: async (operation: Operation): Promise<void> => {
+        beforeExecuteAsync: async (operation: Operation<TOperationMetadata>): Promise<void> => {
           // Initialize group if uninitialized and log the group name
           const { groupName } = operation;
-          const groupRecord: OperationGroupRecord | undefined = groupName
+          const groupRecord: OperationGroupRecord<TGroupMetadata> | undefined = groupName
             ? groupRecords.get(groupName)
             : undefined;
           if (groupRecord) {
@@ -157,9 +165,12 @@ export class OperationExecutionManager {
           await executionOptions.beforeExecuteOperationAsync?.(operation);
         },
 
-        afterExecuteAsync: async (operation: Operation, state: IOperationState): Promise<void> => {
+        afterExecuteAsync: async (
+          operation: Operation<TOperationMetadata>,
+          state: IOperationState
+        ): Promise<void> => {
           const { groupName } = operation;
-          const groupRecord: OperationGroupRecord | undefined = groupName
+          const groupRecord: OperationGroupRecord<TGroupMetadata> | undefined = groupName
             ? groupRecords.get(groupName)
             : undefined;
           if (groupRecord) {

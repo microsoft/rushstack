@@ -18,7 +18,7 @@ import { OperationStatus } from './OperationStatus';
  * Options for constructing a new Operation.
  * @beta
  */
-export interface IOperationOptions {
+export interface IOperationOptions<TMetadata extends {} = {}> {
   /**
    * The name of this operation, for logging.
    */
@@ -39,6 +39,11 @@ export interface IOperationOptions {
    * The weight used by the scheduler to determine order of execution.
    */
   weight?: number | undefined;
+
+  /**
+   * The metadata for this operation.
+   */
+  metadata?: TMetadata | undefined;
 }
 
 /**
@@ -85,15 +90,15 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
  *
  * @beta
  */
-export class Operation implements IOperationStates {
+export class Operation<TMetadata extends {} = {}> implements IOperationStates {
   /**
    * A set of all dependencies which must be executed before this operation is complete.
    */
-  public readonly dependencies: Set<Operation> = new Set<Operation>();
+  public readonly dependencies: Set<Operation<TMetadata>> = new Set<Operation<TMetadata>>();
   /**
    * A set of all operations that wait for this operation.
    */
-  public readonly consumers: Set<Operation> = new Set<Operation>();
+  public readonly consumers: Set<Operation<TMetadata>> = new Set<Operation<TMetadata>>();
   /**
    * If specified, the name of a grouping to which this Operation belongs, for logging start and end times.
    */
@@ -174,19 +179,22 @@ export class Operation implements IOperationStates {
    */
   private _runPending: boolean = true;
 
-  public constructor(options?: IOperationOptions) {
+  public readonly metadata: TMetadata;
+
+  public constructor(options?: IOperationOptions<TMetadata>) {
     this.groupName = options?.groupName;
     this.runner = options?.runner;
     this.weight = options?.weight || 1;
     this.name = options?.name;
+    this.metadata = options?.metadata || ({} as TMetadata);
   }
 
-  public addDependency(dependency: Operation): void {
+  public addDependency(dependency: Operation<TMetadata>): void {
     this.dependencies.add(dependency);
     dependency.consumers.add(this);
   }
 
-  public deleteDependency(dependency: Operation): void {
+  public deleteDependency(dependency: Operation<TMetadata>): void {
     this.dependencies.delete(dependency);
     dependency.consumers.delete(this);
   }

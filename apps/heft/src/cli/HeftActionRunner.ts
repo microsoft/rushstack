@@ -46,6 +46,23 @@ export interface IHeftActionRunnerOptions extends IHeftActionOptions {
   action: IHeftAction;
 }
 
+/**
+ * Metadata for an operation that represents a task.
+ * @public
+ */
+export interface IHeftTaskOperationMetadata {
+  task: HeftTask;
+  phase: HeftPhase;
+}
+
+/**
+ * Metadata for an operation that represents a phase.
+ * @public
+ */
+export interface IHeftPhaseOperationMetadata {
+  phase: HeftPhase;
+}
+
 export function initializeHeft(
   heftConfiguration: HeftConfiguration,
   terminal: ITerminal,
@@ -292,9 +309,15 @@ export class HeftActionRunner {
 
     initializeHeft(this._heftConfiguration, terminal, this.parameterManager.defaultParameters.verbose);
 
-    const operations: ReadonlySet<Operation> = this._generateOperations();
+    const operations: ReadonlySet<Operation<IHeftTaskOperationMetadata>> = this._generateOperations();
 
-    const executionManager: OperationExecutionManager = new OperationExecutionManager(operations);
+    const executionManager: OperationExecutionManager<
+      IHeftTaskOperationMetadata,
+      IHeftPhaseOperationMetadata
+    > = new OperationExecutionManager<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>(
+      operations,
+      (metadata) => ({ phase: metadata.phase })
+    );
 
     const cliAbortSignal: AbortSignal = ensureCliAbortSignal(this._terminal);
 
@@ -347,7 +370,7 @@ export class HeftActionRunner {
   }
 
   private async _executeOnceAsync(
-    executionManager: OperationExecutionManager,
+    executionManager: OperationExecutionManager<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>,
     abortSignal: AbortSignal,
     requestRun?: (requestor?: string) => void
   ): Promise<OperationStatus> {
@@ -357,39 +380,38 @@ export class HeftActionRunner {
     // Execute the action operations
     return await runWithLoggingAsync(
       () => {
-        const operationExecutionManagerOptions: IOperationExecutionOptions = {
+        const operationExecutionManagerOptions: IOperationExecutionOptions<
+          IHeftTaskOperationMetadata,
+          IHeftPhaseOperationMetadata
+        > = {
           terminal: this._terminal,
           parallelism: this._parallelism,
           abortSignal,
           requestRun,
-          beforeExecuteOperationAsync: async (operation: Operation) => {
-            if (operation.runner instanceof TaskOperationRunner && taskStart.isUsed()) {
-              const runner: TaskOperationRunner = operation.runner as TaskOperationRunner;
-              await taskStart.promise({ task: runner.task, operation });
+          beforeExecuteOperationAsync: async (operation: Operation<IHeftTaskOperationMetadata>) => {
+            if (operation.metadata.task && taskStart.isUsed()) {
+              await taskStart.promise({ operation });
             }
           },
-          afterExecuteOperationAsync: async (operation: Operation) => {
-            if (operation.runner instanceof TaskOperationRunner && taskFinish.isUsed()) {
-              const runner: TaskOperationRunner = operation.runner as TaskOperationRunner;
-              await taskFinish.promise({ task: runner.task, operation });
+          afterExecuteOperationAsync: async (operation: Operation<IHeftTaskOperationMetadata>) => {
+            if (operation.metadata.task && taskFinish.isUsed()) {
+              await taskFinish.promise({ operation });
             }
           },
           beforeExecuteOperationGroupAsync: async (
-            operationGroup: OperationGroupRecord,
-            operation: Operation
+            operationGroup: OperationGroupRecord<IHeftPhaseOperationMetadata>,
+            operation: Operation<IHeftPhaseOperationMetadata>
           ) => {
-            if (operation.runner instanceof PhaseOperationRunner && phaseStart.isUsed()) {
-              const runner: PhaseOperationRunner = operation.runner as PhaseOperationRunner;
-              await phaseStart.promise({ phase: runner.phase, operation: operationGroup });
+            if (operation.metadata.phase && phaseStart.isUsed()) {
+              await phaseStart.promise({ operation: operationGroup });
             }
           },
           afterExecuteOperationGroupAsync: async (
-            operationGroup: OperationGroupRecord,
-            operation: Operation
+            operationGroup: OperationGroupRecord<IHeftPhaseOperationMetadata>,
+            operation: Operation<IHeftPhaseOperationMetadata>
           ) => {
-            if (operation.runner instanceof PhaseOperationRunner && phaseFinish.isUsed()) {
-              const runner: PhaseOperationRunner = operation.runner as PhaseOperationRunner;
-              await phaseFinish.promise({ phase: runner.phase, operation: operationGroup });
+            if (operation.metadata.phase && phaseFinish.isUsed()) {
+              await phaseFinish.promise({ operation: operationGroup });
             }
           }
         };
@@ -405,10 +427,10 @@ export class HeftActionRunner {
     );
   }
 
-  private _generateOperations(): Set<Operation> {
+  private _generateOperations(): Set<Operation<IHeftTaskOperationMetadata>> {
     const { selectedPhases } = this._action;
 
-    const operations: Map<string, Operation> = new Map();
+    const operations: Map<string, Operation<IHeftTaskOperationMetadata>> = new Map();
     const internalHeftSession: InternalHeftSession = this._internalHeftSession;
 
     let hasWarnedAboutSkippedPhases: boolean = false;
@@ -431,7 +453,11 @@ export class HeftActionRunner {
       }
 
       // Create operation for the phase start node
-      const phaseOperation: Operation = _getOrCreatePhaseOperation(internalHeftSession, phase, operations);
+      const phaseOperation: Operation<IHeftTaskOperationMetadata> = _getOrCreatePhaseOperation(
+        internalHeftSession,
+        phase,
+        operations
+      );
 
       // Create operations for each task
       for (const task of phase.tasks) {
@@ -472,11 +498,11 @@ function _getOrCreatePhaseOperation(
   this: void,
   internalHeftSession: InternalHeftSession,
   phase: HeftPhase,
-  operations: Map<string, Operation>
-): Operation {
+  operations: Map<string, Operation<IHeftTaskOperationMetadata>>
+): Operation<IHeftTaskOperationMetadata> {
   const key: string = phase.phaseName;
 
-  let operation: Operation | undefined = operations.get(key);
+  let operation: Operation<IHeftTaskOperationMetadata> | undefined = operations.get(key);
   if (!operation) {
     // Only create the operation. Dependencies are hooked up separately
     operation = new Operation({

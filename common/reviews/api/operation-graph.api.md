@@ -44,17 +44,17 @@ export interface IExitCommandMessage {
 }
 
 // @beta
-export interface IOperationExecutionOptions {
+export interface IOperationExecutionOptions<TOperationMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
     // (undocumented)
     abortSignal: AbortSignal;
     // (undocumented)
-    afterExecuteOperationAsync?: (operation: Operation) => Promise<void>;
+    afterExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
     // (undocumented)
-    afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord, operation: Operation) => Promise<void>;
+    afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>, operation: Operation<TOperationMetadata>) => Promise<void>;
     // (undocumented)
-    beforeExecuteOperationAsync?: (operation: Operation) => Promise<void>;
+    beforeExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
     // (undocumented)
-    beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord, operation: Operation) => Promise<void>;
+    beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>, operation: Operation<TOperationMetadata>) => Promise<void>;
     // (undocumented)
     parallelism: number;
     // (undocumented)
@@ -64,8 +64,9 @@ export interface IOperationExecutionOptions {
 }
 
 // @beta
-export interface IOperationOptions {
+export interface IOperationOptions<TMetadata extends {} = {}> {
     groupName?: string | undefined;
+    metadata?: TMetadata | undefined;
     name?: string | undefined;
     runner?: IOperationRunner | undefined;
     weight?: number | undefined;
@@ -147,19 +148,21 @@ export interface IWatchLoopState {
 }
 
 // @beta
-export class Operation implements IOperationStates {
-    constructor(options?: IOperationOptions);
+export class Operation<TMetadata extends {} = {}> implements IOperationStates {
+    constructor(options?: IOperationOptions<TMetadata>);
     // (undocumented)
-    addDependency(dependency: Operation): void;
-    readonly consumers: Set<Operation>;
+    addDependency(dependency: Operation<TMetadata>): void;
+    readonly consumers: Set<Operation<TMetadata>>;
     criticalPathLength: number | undefined;
     // (undocumented)
-    deleteDependency(dependency: Operation): void;
-    readonly dependencies: Set<Operation>;
+    deleteDependency(dependency: Operation<TMetadata>): void;
+    readonly dependencies: Set<Operation<TMetadata>>;
     // @internal (undocumented)
     _executeAsync(context: IExecuteOperationContext): Promise<OperationStatus>;
     readonly groupName: string | undefined;
     lastState: IOperationState | undefined;
+    // (undocumented)
+    readonly metadata: TMetadata;
     readonly name: string | undefined;
     // (undocumented)
     reset(): void;
@@ -180,14 +183,14 @@ export class OperationError extends Error {
 }
 
 // @beta
-export class OperationExecutionManager {
-    constructor(operations: ReadonlySet<Operation>);
-    executeAsync(executionOptions: IOperationExecutionOptions): Promise<OperationStatus>;
+export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
+    constructor(operations: ReadonlySet<Operation<TOperationMetadata>>, deriveGroupMetadata?: (metadata: TOperationMetadata) => TGroupMetadata);
+    executeAsync(executionOptions: IOperationExecutionOptions<TOperationMetadata, TGroupMetadata>): Promise<OperationStatus>;
 }
 
 // @beta
-export class OperationGroupRecord {
-    constructor(name: string);
+export class OperationGroupRecord<TMetadata extends {} = {}> {
+    constructor(name: string, metadata?: TMetadata);
     // (undocumented)
     addOperation(operation: Operation): void;
     // (undocumented)
@@ -198,6 +201,8 @@ export class OperationGroupRecord {
     get hasCancellations(): boolean;
     // (undocumented)
     get hasFailures(): boolean;
+    // (undocumented)
+    readonly metadata: TMetadata;
     // (undocumented)
     readonly name: string;
     // (undocumented)
