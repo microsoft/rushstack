@@ -103,6 +103,48 @@ export class HeftConfiguration {
     tryLoadProjectConfigurationFileAsync<TConfigFile>(options: IProjectConfigurationFileSpecification<TConfigFile>, terminal: ITerminal): Promise<TConfigFile | undefined>;
 }
 
+// @public (undocumented)
+export class HeftPhase {
+    // Warning: (ae-forgotten-export) The symbol "InternalHeftSession" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IHeftConfigurationJsonPhaseSpecifier" needs to be exported by the entry point index.d.ts
+    constructor(internalHeftSession: InternalHeftSession, phaseName: string, phaseSpecifier: IHeftConfigurationJsonPhaseSpecifier);
+    get cleanFiles(): ReadonlySet<IDeleteOperation>;
+    get consumingPhases(): ReadonlySet<HeftPhase>;
+    get dependencyPhases(): ReadonlySet<HeftPhase>;
+    get phaseDescription(): string | undefined;
+    get phaseName(): string;
+    // Warning: (ae-incompatible-release-tags) The symbol "tasks" is marked as @public, but its signature references "HeftTask" which is marked as @internal
+    get tasks(): ReadonlySet<HeftTask>;
+    // Warning: (ae-incompatible-release-tags) The symbol "tasksByName" is marked as @public, but its signature references "HeftTask" which is marked as @internal
+    get tasksByName(): ReadonlyMap<string, HeftTask>;
+}
+
+// Warning: (ae-internal-missing-underscore) The name "HeftTask" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
+export class HeftTask {
+    // Warning: (ae-forgotten-export) The symbol "IHeftConfigurationJsonTaskSpecifier" needs to be exported by the entry point index.d.ts
+    constructor(parentPhase: HeftPhase, taskName: string, taskSpecifier: IHeftConfigurationJsonTaskSpecifier);
+    // (undocumented)
+    get consumingTasks(): ReadonlySet<HeftTask>;
+    // (undocumented)
+    get dependencyTasks(): Set<HeftTask>;
+    // (undocumented)
+    ensureInitializedAsync(): Promise<void>;
+    // (undocumented)
+    getPluginAsync(logger: IScopedLogger): Promise<IHeftTaskPlugin<object | void>>;
+    // (undocumented)
+    get parentPhase(): HeftPhase;
+    // Warning: (ae-forgotten-export) The symbol "HeftTaskPluginDefinition" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    get pluginDefinition(): HeftTaskPluginDefinition;
+    // (undocumented)
+    get pluginOptions(): object | undefined;
+    // (undocumented)
+    get taskName(): string;
+}
+
 // @public
 export interface ICopyOperation extends IFileSelectionSpecifier {
     destinationFolders: string[];
@@ -205,9 +247,11 @@ export interface IHeftParsedCommandLine {
 // @public (undocumented)
 export interface IHeftPhaseFinishHookOptions {
     // (undocumented)
-    operation: OperationGroupRecord;
-    // Warning: (ae-forgotten-export) The symbol "HeftPhase" needs to be exported by the entry point index.d.ts
-    //
+    operation: OperationGroupRecord<IHeftPhaseOperationMetadata>;
+}
+
+// @public
+export interface IHeftPhaseOperationMetadata {
     // (undocumented)
     phase: HeftPhase;
 }
@@ -215,9 +259,7 @@ export interface IHeftPhaseFinishHookOptions {
 // @public (undocumented)
 export interface IHeftPhaseStartHookOptions {
     // (undocumented)
-    operation: OperationGroupRecord;
-    // (undocumented)
-    phase: HeftPhase;
+    operation: OperationGroupRecord<IHeftPhaseOperationMetadata>;
 }
 
 // @public
@@ -243,11 +285,7 @@ export interface IHeftTaskFileOperations {
 // @public (undocumented)
 export interface IHeftTaskFinishHookOptions {
     // (undocumented)
-    operation: Operation;
-    // Warning: (ae-forgotten-export) The symbol "HeftTask" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    task: HeftTask;
+    operation: Operation<IHeftTaskOperationMetadata>;
 }
 
 // @public
@@ -255,6 +293,16 @@ export interface IHeftTaskHooks {
     readonly registerFileOperations: AsyncSeriesWaterfallHook<IHeftTaskFileOperations>;
     readonly run: AsyncParallelHook<IHeftTaskRunHookOptions>;
     readonly runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
+}
+
+// @public
+export interface IHeftTaskOperationMetadata {
+    // (undocumented)
+    phase: HeftPhase;
+    // Warning: (ae-incompatible-release-tags) The symbol "task" is marked as @public, but its signature references "HeftTask" which is marked as @internal
+    //
+    // (undocumented)
+    task: HeftTask;
 }
 
 // @public
@@ -289,9 +337,7 @@ export interface IHeftTaskSession {
 // @public (undocumented)
 export interface IHeftTaskStartHookOptions {
     // (undocumented)
-    operation: Operation;
-    // (undocumented)
-    task: HeftTask;
+    operation: Operation<IHeftTaskOperationMetadata>;
 }
 
 // @public
