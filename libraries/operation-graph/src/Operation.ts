@@ -13,7 +13,7 @@ import type {
 } from './IOperationRunner';
 import type { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
-import { OperationGroupRecord } from './OperationGroupRecord';
+import type { OperationGroupRecord } from './OperationGroupRecord';
 
 /**
  * Options for constructing a new Operation.

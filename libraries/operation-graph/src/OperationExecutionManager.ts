@@ -6,7 +6,7 @@ import type { ITerminal } from '@rushstack/terminal';
 
 import type { IOperationState } from './IOperationRunner';
 import type { IExecuteOperationContext, Operation } from './Operation';
-import { OperationGroupRecord } from './OperationGroupRecord';
+import type { OperationGroupRecord } from './OperationGroupRecord';
 import { OperationStatus } from './OperationStatus';
 import { calculateCriticalPathLengths } from './calculateCriticalPath';
 import { WorkQueue } from './WorkQueue';
