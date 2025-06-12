@@ -399,18 +399,16 @@ export class HeftActionRunner {
             }
           },
           beforeExecuteOperationGroupAsync: async (
-            operationGroup: OperationGroupRecord<IHeftPhaseOperationMetadata>,
-            operation: Operation<IHeftPhaseOperationMetadata>
+            operationGroup: OperationGroupRecord<IHeftPhaseOperationMetadata>
           ) => {
-            if (operation.metadata.phase && phaseStart.isUsed()) {
+            if (operationGroup.metadata.phase && phaseStart.isUsed()) {
               await phaseStart.promise({ operation: operationGroup });
             }
           },
           afterExecuteOperationGroupAsync: async (
-            operationGroup: OperationGroupRecord<IHeftPhaseOperationMetadata>,
-            operation: Operation<IHeftPhaseOperationMetadata>
+            operationGroup: OperationGroupRecord<IHeftPhaseOperationMetadata>
           ) => {
-            if (operation.metadata.phase && phaseFinish.isUsed()) {
+            if (operationGroup.metadata.phase && phaseFinish.isUsed()) {
               await phaseFinish.promise({ operation: operationGroup });
             }
           }

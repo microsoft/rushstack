@@ -50,11 +50,11 @@ export interface IOperationExecutionOptions<TOperationMetadata extends {} = {}, 
     // (undocumented)
     afterExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
     // (undocumented)
-    afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>, operation: Operation<TOperationMetadata>) => Promise<void>;
+    afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
     // (undocumented)
     beforeExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
     // (undocumented)
-    beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>, operation: Operation<TOperationMetadata>) => Promise<void>;
+    beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
     // (undocumented)
     parallelism: number;
     // (undocumented)

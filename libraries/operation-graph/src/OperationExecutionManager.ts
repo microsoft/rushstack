@@ -28,14 +28,8 @@ export interface IOperationExecutionOptions<
 
   beforeExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
   afterExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
-  beforeExecuteOperationGroupAsync?: (
-    operationGroup: OperationGroupRecord<TGroupMetadata>,
-    operation: Operation<TOperationMetadata>
-  ) => Promise<void>;
-  afterExecuteOperationGroupAsync?: (
-    operationGroup: OperationGroupRecord<TGroupMetadata>,
-    operation: Operation<TOperationMetadata>
-  ) => Promise<void>;
+  beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
+  afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
 }
 
 /**
@@ -159,7 +153,7 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
               startedGroups.add(groupRecord);
               groupRecord.startTimer();
               terminal.writeLine(` ---- ${groupRecord.name} started ---- `);
-              await executionOptions.beforeExecuteOperationGroupAsync?.(groupRecord, operation);
+              await executionOptions.beforeExecuteOperationGroupAsync?.(groupRecord);
             }
           }
           await executionOptions.beforeExecuteOperationAsync?.(operation);
@@ -201,7 +195,7 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
               terminal.writeLine(
                 ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
               );
-              await executionOptions.afterExecuteOperationGroupAsync?.(groupRecord, operation);
+              await executionOptions.afterExecuteOperationGroupAsync?.(groupRecord);
             }
           }
         }
