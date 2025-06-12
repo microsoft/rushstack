@@ -371,7 +371,7 @@ export class HeftActionRunner {
   }
 
   private async _executeOnceAsync(
-    executionManager: OperationExecutionManager<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>,
+    executionManager: OperationExecutionManager<HeftOperationMetadata, IHeftPhaseOperationMetadata>,
     abortSignal: AbortSignal,
     requestRun?: (requestor?: string) => void
   ): Promise<OperationStatus> {
@@ -382,21 +382,25 @@ export class HeftActionRunner {
     return await runWithLoggingAsync(
       () => {
         const operationExecutionManagerOptions: IOperationExecutionOptions<
-          IHeftTaskOperationMetadata,
+          HeftOperationMetadata,
           IHeftPhaseOperationMetadata
         > = {
           terminal: this._terminal,
           parallelism: this._parallelism,
           abortSignal,
           requestRun,
-          beforeExecuteOperationAsync: async (operation: Operation<IHeftTaskOperationMetadata>) => {
-            if (operation.metadata.task && taskStart.isUsed()) {
-              await taskStart.promise({ operation });
+          beforeExecuteOperationAsync: async (
+            operation: Operation<HeftOperationMetadata, IHeftPhaseOperationMetadata>
+          ) => {
+            if ('task' in operation.metadata && taskStart.isUsed()) {
+              await taskStart.promise({ operation: operation as Operation<IHeftTaskOperationMetadata> });
             }
           },
-          afterExecuteOperationAsync: async (operation: Operation<IHeftTaskOperationMetadata>) => {
-            if (operation.metadata.task && taskFinish.isUsed()) {
-              await taskFinish.promise({ operation });
+          afterExecuteOperationAsync: async (
+            operation: Operation<HeftOperationMetadata, IHeftPhaseOperationMetadata>
+          ) => {
+            if ('task' in operation.metadata && taskFinish.isUsed()) {
+              await taskFinish.promise({ operation: operation as Operation<IHeftTaskOperationMetadata> });
             }
           },
           beforeExecuteOperationGroupAsync: async (
