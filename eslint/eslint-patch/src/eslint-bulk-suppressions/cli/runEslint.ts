@@ -11,7 +11,7 @@ export async function runEslintAsync(files: string[], mode: 'suppress' | 'prune'
   const { ESLint }: typeof import('eslint-9') | typeof import('eslint-8') = require(eslintPath);
 
   let eslint: TEslint | TEslintLegacy;
-  const majorVersion: number = parseInt(eslintVersion.split('.')[0], 10);
+  const majorVersion: number = parseInt(eslintVersion, 10);
   if (majorVersion < 9) {
     eslint = new ESLint({ cwd, useEslintrc: true });
   } else {

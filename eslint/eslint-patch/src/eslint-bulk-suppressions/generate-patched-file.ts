@@ -23,7 +23,7 @@ export function generatePatchedLinterJsFileIfDoesNotExist(
     return;
   }
 
-  const majorVersion: number = parseInt(eslintPackageVersion.split('.')[0], 10);
+  const majorVersion: number = parseInt(eslintPackageVersion, 10);
 
   const inputFile: string = fs.readFileSync(inputFilePath).toString();
 
