@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-web-rig",
-      "comment": "",
+      "comment": "Add flat config compatible versions of profiles and mixins for ESLint. These are located under the `profiles/default/includes/eslint/flat/*` path. If you need to remain on ESLint 8, ensure your rig or project consumes ESLint 8, and that you use the legacy configuration files.",
       "type": "none"
     }
   ],

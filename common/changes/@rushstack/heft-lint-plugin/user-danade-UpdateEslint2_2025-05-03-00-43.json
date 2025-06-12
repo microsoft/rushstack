@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-lint-plugin",
-      "comment": "Add support for ESLint 9. When using ESLint 9, the configuration will be loaded from \"eslint.config.js\", and flat configs will be required by the Heft plugin",
+      "comment": "Add support for ESLint 9. When using ESLint 9, the configuration will be loaded from `eslint.config.js`, and flat configs will be required by the Heft plugin",
       "type": "minor"
     }
   ],

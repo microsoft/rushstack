@@ -96,11 +96,11 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
   private readonly _eslintPackageVersion: semver.SemVer;
   private readonly _linter: TEslint.ESLint | TEslintLegacy.ESLint;
   private readonly _eslintTimings: Map<string, number> = new Map();
-  private readonly _currentFixMessages: TEslint.Linter.LintMessage[] | TEslintLegacy.Linter.LintMessage[] =
+  private readonly _currentFixMessages: (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[] =
     [];
   private readonly _fixMessagesByResult: Map<
     TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult,
-    TEslint.Linter.LintMessage[] | TEslintLegacy.Linter.LintMessage[]
+    (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[]
   > = new Map();
   private readonly _sarifLogPath: string | undefined;
 
@@ -121,14 +121,17 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     const linterConfigFileName: string = path.basename(linterConfigFilePath);
     if (this._eslintPackageVersion.major < 9 && !ESLINT_LEGACY_CONFIG_FILENAMES.has(linterConfigFileName)) {
       throw new Error(
-        `You must use an .eslintrc.js file with ESLint 8 or older. The provided config file is "${linterConfigFilePath}".`
+        `You must use a ${LEGACY_ESLINTRC_JS_FILENAME} or a ${LEGACY_ESLINTRC_CJS_FILENAME} file with ESLint ` +
+          `8 or older. The provided config file is "${linterConfigFilePath}".`
       );
     } else if (
       this._eslintPackageVersion.major >= 9 &&
       ESLINT_LEGACY_CONFIG_FILENAMES.has(linterConfigFileName)
     ) {
       throw new Error(
-        `You must use an eslint.config.js file with ESLint 9 or newer. The provided config file is "${linterConfigFilePath}".`
+        `You must use an ${ESLINT_CONFIG_JS_FILENAME}, ${ESLINT_CONFIG_CJS_FILENAME}, or an ` +
+          `${ESLINT_CONFIG_MJS_FILENAME} file with ESLint 9 or newer. The provided config file is ` +
+          `"${linterConfigFilePath}".`
       );
     }
 
@@ -143,7 +146,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       // are mapped, the array will be cleared so that it is ready for the next fix operation.
       fixFn = (message: TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this._currentFixMessages.push(message as any);
+        this._currentFixMessages.push(message);
         return true;
       };
     } else if (this._eslintPackageVersion.major <= 8) {
@@ -276,7 +279,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
     // Map the fix messages to the results. This API should only return one result per file, so we can be sure
     // that the fix messages belong to the returned result. If we somehow receive multiple results, we will
     // drop the messages on the floor, but since they are only used for logging, this should not be a problem.
-    const fixMessages: TEslint.Linter.LintMessage[] | TEslintLegacy.Linter.LintMessage[] =
+    const fixMessages: (TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage)[] =
       this._currentFixMessages.splice(0);
     if (lintResults.length === 1) {
       this._fixMessagesByResult.set(lintResults[0], fixMessages);
@@ -289,7 +292,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
           return lintResult.fixableErrorCount + lintResult.fixableWarningCount > 0;
         }));
 
-    const trimmedLintResults: TEslint.ESLint.LintResult[] | TEslintLegacy.ESLint.LintResult[] = [];
+    const trimmedLintResults: (TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult)[] = [];
     for (const lintResult of lintResults) {
       if (
         lintResult.messages.length > 0 ||
@@ -297,8 +300,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
         lintResult.errorCount > 0 ||
         fixMessages.length > 0
       ) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        trimmedLintResults.push(lintResult as any);
+        trimmedLintResults.push(lintResult);
       }
     }
 

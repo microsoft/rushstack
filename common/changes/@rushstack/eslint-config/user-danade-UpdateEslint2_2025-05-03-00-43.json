@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/eslint-config",
-      "comment": "Add flat config compatible versions of profiles and mixins. These are located under the \"/flat/*\" path.",
+      "comment": "Add flat config compatible versions of profiles and mixins. These are located under the `/flat/*` path.",
       "type": "minor"
     }
   ],
