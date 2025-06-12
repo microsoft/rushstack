@@ -96,7 +96,7 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
 
     const maxParallelism: number = Math.min(this._operations.length, parallelism);
     const groupRecords: Set<OperationGroupRecord<TGroupMetadata>> = new Set(
-      [...this._operations].map((e) => e.group).filter((e) => e !== undefined)
+      Array.from(this._operations, (e) => e.group).filter((e) => e !== undefined)
     );
     for (const groupRecord of groupRecords) {
       groupRecord.reset();

@@ -63,11 +63,6 @@ export interface IHeftPhaseOperationMetadata {
   phase: IHeftPhase;
 }
 
-/**
- * @internal
- */
-export type HeftOperationMetadata = IHeftTaskOperationMetadata | IHeftPhaseOperationMetadata;
-
 export function initializeHeft(
   heftConfiguration: HeftConfiguration,
   terminal: ITerminal,
@@ -314,11 +309,13 @@ export class HeftActionRunner {
 
     initializeHeft(this._heftConfiguration, terminal, this.parameterManager.defaultParameters.verbose);
 
-    const operations: ReadonlySet<Operation<HeftOperationMetadata, IHeftPhaseOperationMetadata>> =
+    const operations: ReadonlySet<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> =
       this._generateOperations();
 
-    const executionManager: OperationExecutionManager<HeftOperationMetadata, IHeftPhaseOperationMetadata> =
-      new OperationExecutionManager<HeftOperationMetadata, IHeftPhaseOperationMetadata>(operations);
+    const executionManager: OperationExecutionManager<
+      IHeftTaskOperationMetadata,
+      IHeftPhaseOperationMetadata
+    > = new OperationExecutionManager<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>(operations);
 
     const cliAbortSignal: AbortSignal = ensureCliAbortSignal(this._terminal);
 
@@ -371,7 +368,7 @@ export class HeftActionRunner {
   }
 
   private async _executeOnceAsync(
-    executionManager: OperationExecutionManager<HeftOperationMetadata, IHeftPhaseOperationMetadata>,
+    executionManager: OperationExecutionManager<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>,
     abortSignal: AbortSignal,
     requestRun?: (requestor?: string) => void
   ): Promise<OperationStatus> {
@@ -382,7 +379,7 @@ export class HeftActionRunner {
     return await runWithLoggingAsync(
       () => {
         const operationExecutionManagerOptions: IOperationExecutionOptions<
-          HeftOperationMetadata,
+          IHeftTaskOperationMetadata,
           IHeftPhaseOperationMetadata
         > = {
           terminal: this._terminal,
@@ -390,14 +387,14 @@ export class HeftActionRunner {
           abortSignal,
           requestRun,
           beforeExecuteOperationAsync: async (
-            operation: Operation<HeftOperationMetadata, IHeftPhaseOperationMetadata>
+            operation: Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>
           ) => {
             if ('task' in operation.metadata && taskStart.isUsed()) {
               await taskStart.promise({ operation: operation as Operation<IHeftTaskOperationMetadata> });
             }
           },
           afterExecuteOperationAsync: async (
-            operation: Operation<HeftOperationMetadata, IHeftPhaseOperationMetadata>
+            operation: Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>
           ) => {
             if ('task' in operation.metadata && taskFinish.isUsed()) {
               await taskFinish.promise({ operation: operation as Operation<IHeftTaskOperationMetadata> });
@@ -460,7 +457,7 @@ export class HeftActionRunner {
       }
 
       // Create operation for the phase start node
-      const phaseOperation: Operation<IHeftPhaseOperationMetadata> = _getOrCreatePhaseOperation(
+      const phaseOperation: Operation = _getOrCreatePhaseOperation(
         internalHeftSession,
         phase,
         operations,
@@ -514,12 +511,10 @@ function _getOrCreatePhaseOperation(
   phase: HeftPhase,
   operations: Map<string, Operation>,
   operationGroups: Map<string, OperationGroupRecord<IHeftPhaseOperationMetadata>>
-): Operation<IHeftPhaseOperationMetadata> {
+): Operation {
   const key: string = phase.phaseName;
 
-  let operation: Operation<IHeftPhaseOperationMetadata> | undefined = operations.get(
-    key
-  ) as Operation<IHeftPhaseOperationMetadata>;
+  let operation: Operation | undefined = operations.get(key);
   if (!operation) {
     let group: OperationGroupRecord<IHeftPhaseOperationMetadata> | undefined = operationGroups.get(
       phase.phaseName
@@ -532,8 +527,7 @@ function _getOrCreatePhaseOperation(
     operation = new Operation({
       group,
       name: phase.phaseName,
-      runner: new PhaseOperationRunner({ phase, internalHeftSession }),
-      metadata: { phase }
+      runner: new PhaseOperationRunner({ phase, internalHeftSession })
     });
     operations.set(key, operation);
   }
