@@ -13,12 +13,13 @@ import type {
 } from './IOperationRunner';
 import type { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
+import { OperationGroupRecord } from './OperationGroupRecord';
 
 /**
  * Options for constructing a new Operation.
  * @beta
  */
-export interface IOperationOptions<TMetadata extends {} = {}> {
+export interface IOperationOptions<TMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
   /**
    * The name of this operation, for logging.
    */
@@ -27,7 +28,7 @@ export interface IOperationOptions<TMetadata extends {} = {}> {
   /**
    * The group that this operation belongs to. Will be used for logging and duration tracking.
    */
-  groupName?: string | undefined;
+  group?: OperationGroupRecord<TGroupMetadata> | undefined;
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -90,19 +91,25 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
  *
  * @beta
  */
-export class Operation<TMetadata extends {} = {}> implements IOperationStates {
+export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}>
+  implements IOperationStates
+{
   /**
    * A set of all dependencies which must be executed before this operation is complete.
    */
-  public readonly dependencies: Set<Operation<TMetadata>> = new Set<Operation<TMetadata>>();
+  public readonly dependencies: Set<Operation<TMetadata, TGroupMetadata>> = new Set<
+    Operation<TMetadata, TGroupMetadata>
+  >();
   /**
    * A set of all operations that wait for this operation.
    */
-  public readonly consumers: Set<Operation<TMetadata>> = new Set<Operation<TMetadata>>();
+  public readonly consumers: Set<Operation<TMetadata, TGroupMetadata>> = new Set<
+    Operation<TMetadata, TGroupMetadata>
+  >();
   /**
    * If specified, the name of a grouping to which this Operation belongs, for logging start and end times.
    */
-  public readonly groupName: string | undefined;
+  public readonly group: OperationGroupRecord<TGroupMetadata> | undefined;
   /**
    * The name of this operation, for logging.
    */
@@ -181,20 +188,24 @@ export class Operation<TMetadata extends {} = {}> implements IOperationStates {
 
   public readonly metadata: TMetadata;
 
-  public constructor(options?: IOperationOptions<TMetadata>) {
-    this.groupName = options?.groupName;
+  public constructor(options?: IOperationOptions<TMetadata, TGroupMetadata>) {
+    this.group = options?.group;
     this.runner = options?.runner;
     this.weight = options?.weight || 1;
     this.name = options?.name;
     this.metadata = options?.metadata || ({} as TMetadata);
+
+    if (this.group) {
+      this.group.addOperation(this);
+    }
   }
 
-  public addDependency(dependency: Operation<TMetadata>): void {
+  public addDependency(dependency: Operation<TMetadata, TGroupMetadata>): void {
     this.dependencies.add(dependency);
     dependency.consumers.add(this);
   }
 
-  public deleteDependency(dependency: Operation<TMetadata>): void {
+  public deleteDependency(dependency: Operation<TMetadata, TGroupMetadata>): void {
     this.dependencies.delete(dependency);
     dependency.consumers.delete(this);
   }

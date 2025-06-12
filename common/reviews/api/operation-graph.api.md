@@ -48,11 +48,11 @@ export interface IOperationExecutionOptions<TOperationMetadata extends {} = {}, 
     // (undocumented)
     abortSignal: AbortSignal;
     // (undocumented)
-    afterExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
+    afterExecuteOperationAsync?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => Promise<void>;
     // (undocumented)
     afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
     // (undocumented)
-    beforeExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
+    beforeExecuteOperationAsync?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => Promise<void>;
     // (undocumented)
     beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
     // (undocumented)
@@ -64,8 +64,8 @@ export interface IOperationExecutionOptions<TOperationMetadata extends {} = {}, 
 }
 
 // @beta
-export interface IOperationOptions<TMetadata extends {} = {}> {
-    groupName?: string | undefined;
+export interface IOperationOptions<TMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
+    group?: OperationGroupRecord<TGroupMetadata> | undefined;
     metadata?: TMetadata | undefined;
     name?: string | undefined;
     runner?: IOperationRunner | undefined;
@@ -148,18 +148,18 @@ export interface IWatchLoopState {
 }
 
 // @beta
-export class Operation<TMetadata extends {} = {}> implements IOperationStates {
-    constructor(options?: IOperationOptions<TMetadata>);
+export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}> implements IOperationStates {
+    constructor(options?: IOperationOptions<TMetadata, TGroupMetadata>);
     // (undocumented)
-    addDependency(dependency: Operation<TMetadata>): void;
-    readonly consumers: Set<Operation<TMetadata>>;
+    addDependency(dependency: Operation<TMetadata, TGroupMetadata>): void;
+    readonly consumers: Set<Operation<TMetadata, TGroupMetadata>>;
     criticalPathLength: number | undefined;
     // (undocumented)
-    deleteDependency(dependency: Operation<TMetadata>): void;
-    readonly dependencies: Set<Operation<TMetadata>>;
+    deleteDependency(dependency: Operation<TMetadata, TGroupMetadata>): void;
+    readonly dependencies: Set<Operation<TMetadata, TGroupMetadata>>;
     // @internal (undocumented)
     _executeAsync(context: IExecuteOperationContext): Promise<OperationStatus>;
-    readonly groupName: string | undefined;
+    readonly group: OperationGroupRecord<TGroupMetadata> | undefined;
     lastState: IOperationState | undefined;
     // (undocumented)
     readonly metadata: TMetadata;
@@ -184,7 +184,7 @@ export class OperationError extends Error {
 
 // @beta
 export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
-    constructor(operations: ReadonlySet<Operation<TOperationMetadata>>, deriveGroupMetadata?: (metadata: TOperationMetadata) => TGroupMetadata);
+    constructor(operations: ReadonlySet<Operation<TOperationMetadata, TGroupMetadata>>);
     executeAsync(executionOptions: IOperationExecutionOptions<TOperationMetadata, TGroupMetadata>): Promise<OperationStatus>;
 }
 

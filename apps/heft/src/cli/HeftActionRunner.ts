@@ -12,7 +12,7 @@ import {
   type IWatchLoopState,
   Operation,
   OperationExecutionManager,
-  type OperationGroupRecord,
+  OperationGroupRecord,
   OperationStatus,
   WatchLoop
 } from '@rushstack/operation-graph';
@@ -62,6 +62,11 @@ export interface IHeftTaskOperationMetadata {
 export interface IHeftPhaseOperationMetadata {
   phase: IHeftPhase;
 }
+
+/**
+ * @internal
+ */
+export type HeftOperationMetadata = IHeftTaskOperationMetadata | IHeftPhaseOperationMetadata;
 
 export function initializeHeft(
   heftConfiguration: HeftConfiguration,
@@ -309,15 +314,11 @@ export class HeftActionRunner {
 
     initializeHeft(this._heftConfiguration, terminal, this.parameterManager.defaultParameters.verbose);
 
-    const operations: ReadonlySet<Operation<IHeftTaskOperationMetadata>> = this._generateOperations();
+    const operations: ReadonlySet<Operation<HeftOperationMetadata, IHeftPhaseOperationMetadata>> =
+      this._generateOperations();
 
-    const executionManager: OperationExecutionManager<
-      IHeftTaskOperationMetadata,
-      IHeftPhaseOperationMetadata
-    > = new OperationExecutionManager<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>(
-      operations,
-      (metadata) => ({ phase: metadata.phase })
-    );
+    const executionManager: OperationExecutionManager<HeftOperationMetadata, IHeftPhaseOperationMetadata> =
+      new OperationExecutionManager<HeftOperationMetadata, IHeftPhaseOperationMetadata>(operations);
 
     const cliAbortSignal: AbortSignal = ensureCliAbortSignal(this._terminal);
 
@@ -425,10 +426,14 @@ export class HeftActionRunner {
     );
   }
 
-  private _generateOperations(): Set<Operation<IHeftTaskOperationMetadata>> {
+  private _generateOperations(): Set<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> {
     const { selectedPhases } = this._action;
 
-    const operations: Map<string, Operation<IHeftTaskOperationMetadata>> = new Map();
+    const operations: Map<
+      string,
+      Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>
+    > = new Map();
+    const operationGroups: Map<string, OperationGroupRecord<IHeftPhaseOperationMetadata>> = new Map();
     const internalHeftSession: InternalHeftSession = this._internalHeftSession;
 
     let hasWarnedAboutSkippedPhases: boolean = false;
@@ -454,19 +459,25 @@ export class HeftActionRunner {
       const phaseOperation: Operation<IHeftPhaseOperationMetadata> = _getOrCreatePhaseOperation(
         internalHeftSession,
         phase,
-        operations
+        operations,
+        operationGroups
       );
 
       // Create operations for each task
       for (const task of phase.tasks) {
-        const taskOperation: Operation = _getOrCreateTaskOperation(internalHeftSession, task, operations);
+        const taskOperation: Operation = _getOrCreateTaskOperation(
+          internalHeftSession,
+          task,
+          operations,
+          operationGroups
+        );
         // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
         taskOperation.addDependency(phaseOperation);
 
         // Set all dependency tasks as dependencies of the task operation
         for (const dependencyTask of task.dependencyTasks) {
           taskOperation.addDependency(
-            _getOrCreateTaskOperation(internalHeftSession, dependencyTask, operations)
+            _getOrCreateTaskOperation(internalHeftSession, dependencyTask, operations, operationGroups)
           );
         }
 
@@ -478,7 +489,8 @@ export class HeftActionRunner {
             const consumingPhaseOperation: Operation = _getOrCreatePhaseOperation(
               internalHeftSession,
               consumingPhase,
-              operations
+              operations,
+              operationGroups
             );
             consumingPhaseOperation.addDependency(taskOperation);
             // This is purely to simplify the reported graph for phase circularities
@@ -496,7 +508,8 @@ function _getOrCreatePhaseOperation(
   this: void,
   internalHeftSession: InternalHeftSession,
   phase: HeftPhase,
-  operations: Map<string, Operation>
+  operations: Map<string, Operation>,
+  operationGroups: Map<string, OperationGroupRecord<IHeftPhaseOperationMetadata>>
 ): Operation<IHeftPhaseOperationMetadata> {
   const key: string = phase.phaseName;
 
@@ -504,9 +517,17 @@ function _getOrCreatePhaseOperation(
     key
   ) as Operation<IHeftPhaseOperationMetadata>;
   if (!operation) {
+    let group: OperationGroupRecord<IHeftPhaseOperationMetadata> | undefined = operationGroups.get(
+      phase.phaseName
+    );
+    if (!group) {
+      group = new OperationGroupRecord(phase.phaseName, { phase });
+      operationGroups.set(phase.phaseName, group);
+    }
     // Only create the operation. Dependencies are hooked up separately
     operation = new Operation({
-      groupName: phase.phaseName,
+      group,
+      name: phase.phaseName,
       runner: new PhaseOperationRunner({ phase, internalHeftSession }),
       metadata: { phase }
     });
@@ -519,7 +540,8 @@ function _getOrCreateTaskOperation(
   this: void,
   internalHeftSession: InternalHeftSession,
   task: HeftTask,
-  operations: Map<string, Operation>
+  operations: Map<string, Operation>,
+  operationGroups: Map<string, OperationGroupRecord<IHeftPhaseOperationMetadata>>
 ): Operation {
   const key: string = `${task.parentPhase.phaseName}.${task.taskName}`;
 
@@ -527,12 +549,21 @@ function _getOrCreateTaskOperation(
     key
   ) as Operation<IHeftTaskOperationMetadata>;
   if (!operation) {
+    const group: OperationGroupRecord<IHeftPhaseOperationMetadata> | undefined = operationGroups.get(
+      task.parentPhase.phaseName
+    );
+    if (!group) {
+      throw new InternalError(
+        `Task ${task.taskName} in phase ${task.parentPhase.phaseName} has no group. This should not happen.`
+      );
+    }
     operation = new Operation({
-      groupName: task.parentPhase.phaseName,
+      group,
       runner: new TaskOperationRunner({
         internalHeftSession,
         task
       }),
+      name: task.taskName,
       metadata: { task, phase: task.parentPhase }
     });
     operations.set(key, operation);

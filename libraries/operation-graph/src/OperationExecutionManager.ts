@@ -26,8 +26,8 @@ export interface IOperationExecutionOptions<
 
   requestRun?: (requestor?: string) => void;
 
-  beforeExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
-  afterExecuteOperationAsync?: (operation: Operation<TOperationMetadata>) => Promise<void>;
+  beforeExecuteOperationAsync?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => Promise<void>;
+  afterExecuteOperationAsync?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => Promise<void>;
   beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
   afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
 }
@@ -44,36 +44,16 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
   /**
    * The set of operations that will be executed
    */
-  private readonly _operations: Operation[];
-  /**
-   * Group records are metadata-only entities used for tracking the start and end of a set of related tasks.
-   * This is the only extent to which the operation graph is aware of Heft phases.
-   */
-  private readonly _groupRecordByName: Map<string, OperationGroupRecord<TGroupMetadata>>;
+  private readonly _operations: Operation<TOperationMetadata, TGroupMetadata>[];
   /**
    * The total number of non-silent operations in the graph.
    * Silent operations are generally used to simplify the construction of the graph.
    */
   private readonly _trackedOperationCount: number;
 
-  public constructor(
-    operations: ReadonlySet<Operation<TOperationMetadata>>,
-    deriveGroupMetadata: (metadata: TOperationMetadata) => TGroupMetadata = () => ({}) as TGroupMetadata
-  ) {
-    const groupRecordByName: Map<string, OperationGroupRecord<TGroupMetadata>> = new Map();
-    this._groupRecordByName = groupRecordByName;
-
+  public constructor(operations: ReadonlySet<Operation<TOperationMetadata, TGroupMetadata>>) {
     let trackedOperationCount: number = 0;
     for (const operation of operations) {
-      const { groupName } = operation;
-      let group: OperationGroupRecord<TGroupMetadata> | undefined = undefined;
-      if (groupName && !(group = groupRecordByName.get(groupName))) {
-        group = new OperationGroupRecord(groupName, deriveGroupMetadata(operation.metadata));
-        groupRecordByName.set(groupName, group);
-      }
-
-      group?.addOperation(operation);
-
       if (!operation.runner?.silent) {
         // Only count non-silent operations
         trackedOperationCount++;
@@ -115,8 +95,10 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
     const finishedGroups: Set<OperationGroupRecord> = new Set();
 
     const maxParallelism: number = Math.min(this._operations.length, parallelism);
-    const groupRecords: Map<string, OperationGroupRecord<TGroupMetadata>> = this._groupRecordByName;
-    for (const groupRecord of groupRecords.values()) {
+    const groupRecords: Set<OperationGroupRecord<TGroupMetadata>> = new Set(
+      [...this._operations].map((e) => e.group).filter((e) => e !== undefined)
+    );
+    for (const groupRecord of groupRecords) {
       groupRecord.reset();
     }
 
@@ -142,33 +124,29 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
           return workQueue.pushAsync(workFn, priority);
         },
 
-        beforeExecuteAsync: async (operation: Operation<TOperationMetadata>): Promise<void> => {
+        beforeExecuteAsync: async (
+          operation: Operation<TOperationMetadata, TGroupMetadata>
+        ): Promise<void> => {
           // Initialize group if uninitialized and log the group name
-          const { groupName } = operation;
-          const groupRecord: OperationGroupRecord<TGroupMetadata> | undefined = groupName
-            ? groupRecords.get(groupName)
-            : undefined;
-          if (groupRecord) {
-            if (!startedGroups.has(groupRecord)) {
-              startedGroups.add(groupRecord);
-              groupRecord.startTimer();
-              terminal.writeLine(` ---- ${groupRecord.name} started ---- `);
-              await executionOptions.beforeExecuteOperationGroupAsync?.(groupRecord);
+          const { group } = operation;
+          if (group) {
+            if (!startedGroups.has(group)) {
+              startedGroups.add(group);
+              group.startTimer();
+              terminal.writeLine(` ---- ${group.name} started ---- `);
+              await executionOptions.beforeExecuteOperationGroupAsync?.(group);
             }
           }
           await executionOptions.beforeExecuteOperationAsync?.(operation);
         },
 
         afterExecuteAsync: async (
-          operation: Operation<TOperationMetadata>,
+          operation: Operation<TOperationMetadata, TGroupMetadata>,
           state: IOperationState
         ): Promise<void> => {
-          const { groupName } = operation;
-          const groupRecord: OperationGroupRecord<TGroupMetadata> | undefined = groupName
-            ? groupRecords.get(groupName)
-            : undefined;
-          if (groupRecord) {
-            groupRecord.setOperationAsComplete(operation, state);
+          const { group } = operation;
+          if (group) {
+            group.setOperationAsComplete(operation, state);
           }
 
           if (state.status === OperationStatus.Failure) {
@@ -183,19 +161,19 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
           }
 
           await executionOptions.afterExecuteOperationAsync?.(operation);
-          if (groupRecord) {
+          if (group) {
             // Log out the group name and duration if it is the last operation in the group
-            if (groupRecord?.finished && !finishedGroups.has(groupRecord)) {
-              finishedGroups.add(groupRecord);
-              const finishedLoggingWord: string = groupRecord.hasFailures
+            if (group?.finished && !finishedGroups.has(group)) {
+              finishedGroups.add(group);
+              const finishedLoggingWord: string = group.hasFailures
                 ? 'encountered an error'
-                : groupRecord.hasCancellations
+                : group.hasCancellations
                   ? 'cancelled'
                   : 'finished';
               terminal.writeLine(
-                ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
+                ` ---- ${group.name} ${finishedLoggingWord} (${group.duration.toFixed(3)}s) ---- `
               );
-              await executionOptions.afterExecuteOperationGroupAsync?.(groupRecord);
+              await executionOptions.afterExecuteOperationGroupAsync?.(group);
             }
           }
         }
