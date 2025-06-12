@@ -216,7 +216,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   //    }
   //    const problem = reportTranslator(...args);
   //    // --- BEGIN MONKEY PATCH ---
-  //    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
+  //    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) return;
   //    // --- END MONKEY PATCH ---
   //
   //    if (problem.fix && !(rule.meta && rule.meta.fixable)) {
@@ -229,6 +229,23 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
     if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) return;
     // --- END MONKEY PATCH ---`;
 
+  //
+  // Match this:
+  // ```
+  //    Object.keys(ruleListeners).forEach(selector => {
+  //      ...
+  //    });
+  // ```
+  //
+  // Convert to something like this:
+  // ```
+  //    Object.keys(ruleListeners).forEach(selector => {
+  //      // --- BEGIN MONKEY PATCH ---
+  //      emitter.on(selector, (...args) => { currentNode = args[args.length - 1]; });
+  //      // --- END MONKEY PATCH ---
+  //      ...
+  //    });
+  // ```
   if (majorVersion >= 9) {
     outputFile += scanUntilMarker('Object.keys(ruleListeners).forEach(selector => {');
     outputFile += `
