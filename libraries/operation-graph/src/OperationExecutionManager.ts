@@ -128,7 +128,7 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
           operation: Operation<TOperationMetadata, TGroupMetadata>
         ): Promise<void> => {
           // Initialize group if uninitialized and log the group name
-          const { group } = operation;
+          const { group, runner } = operation;
           if (group) {
             if (!startedGroups.has(group)) {
               startedGroups.add(group);
@@ -137,14 +137,16 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
               await executionOptions.beforeExecuteOperationGroupAsync?.(group);
             }
           }
-          await executionOptions.beforeExecuteOperationAsync?.(operation);
+          if (!runner?.silent) {
+            await executionOptions.beforeExecuteOperationAsync?.(operation);
+          }
         },
 
         afterExecuteAsync: async (
           operation: Operation<TOperationMetadata, TGroupMetadata>,
           state: IOperationState
         ): Promise<void> => {
-          const { group } = operation;
+          const { group, runner } = operation;
           if (group) {
             group.setOperationAsComplete(operation, state);
           }
@@ -160,7 +162,10 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
             hasReportedFailures = true;
           }
 
-          await executionOptions.afterExecuteOperationAsync?.(operation);
+          if (!runner?.silent) {
+            await executionOptions.afterExecuteOperationAsync?.(operation);
+          }
+
           if (group) {
             // Log out the group name and duration if it is the last operation in the group
             if (group?.finished && !finishedGroups.has(group)) {
