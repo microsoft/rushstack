@@ -51,6 +51,8 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
    */
   private readonly _trackedOperationCount: number;
 
+  private readonly _groupRecords: Set<OperationGroupRecord<TGroupMetadata>>;
+
   public constructor(operations: ReadonlySet<Operation<TOperationMetadata, TGroupMetadata>>) {
     let trackedOperationCount: number = 0;
     for (const operation of operations) {
@@ -63,6 +65,8 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
     this._trackedOperationCount = trackedOperationCount;
 
     this._operations = calculateCriticalPathLengths(operations);
+
+    this._groupRecords = new Set(Array.from(this._operations, (e) => e.group).filter((e) => e !== undefined));
 
     for (const consumer of operations) {
       for (const dependency of consumer.dependencies) {
@@ -95,10 +99,8 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
     const finishedGroups: Set<OperationGroupRecord> = new Set();
 
     const maxParallelism: number = Math.min(this._operations.length, parallelism);
-    const groupRecords: Set<OperationGroupRecord<TGroupMetadata>> = new Set(
-      Array.from(this._operations, (e) => e.group).filter((e) => e !== undefined)
-    );
-    for (const groupRecord of groupRecords) {
+
+    for (const groupRecord of this._groupRecords) {
       groupRecord.reset();
     }
 
