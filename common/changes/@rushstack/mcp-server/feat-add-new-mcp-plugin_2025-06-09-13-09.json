@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/mcp-server",
-      "comment": "Add rush docs mcp plugin",
+      "comment": "Move the `rush docs` tool to a plugin package `@rushstack/rush-mcp-docs-plugin`",
       "type": "patch"
     }
   ],
