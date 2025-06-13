@@ -315,7 +315,7 @@ export class HeftActionRunner {
     const executionManager: OperationExecutionManager<
       IHeftTaskOperationMetadata,
       IHeftPhaseOperationMetadata
-    > = new OperationExecutionManager<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>(operations);
+    > = new OperationExecutionManager(operations);
 
     const cliAbortSignal: AbortSignal = ensureCliAbortSignal(this._terminal);
 
