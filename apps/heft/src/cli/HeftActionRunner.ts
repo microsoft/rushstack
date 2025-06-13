@@ -389,14 +389,14 @@ export class HeftActionRunner {
           beforeExecuteOperationAsync: async (
             operation: Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>
           ) => {
-            if ('task' in operation.metadata && taskStart.isUsed()) {
+            if (taskStart.isUsed()) {
               await taskStart.promise({ operation: operation as Operation<IHeftTaskOperationMetadata> });
             }
           },
           afterExecuteOperationAsync: async (
             operation: Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>
           ) => {
-            if ('task' in operation.metadata && taskFinish.isUsed()) {
+            if (taskFinish.isUsed()) {
               await taskFinish.promise({ operation: operation as Operation<IHeftTaskOperationMetadata> });
             }
           },
