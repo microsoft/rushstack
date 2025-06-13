@@ -4123,6 +4123,25 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../rush-plugins/rush-mcp-docs-plugin:
+    dependencies:
+      '@rushstack/mcp-server':
+        specifier: workspace:*
+        version: link:../../apps/rush-mcp-server
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      local-eslint-config:
+        specifier: workspace:*
+        version: link:../../eslint/local-eslint-config
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../rush-plugins/rush-redis-cobuild-plugin:
     dependencies:
       '@redis/client':

@@ -8,8 +8,7 @@ import {
   RushMigrateProjectTool,
   RushCommandValidatorTool,
   RushWorkspaceDetailsTool,
-  RushProjectDetailsTool,
-  RushDocsTool
+  RushProjectDetailsTool
 } from './tools';
 import { RushMcpPluginLoader } from './pluginFramework/RushMcpPluginLoader';
 
@@ -41,7 +40,6 @@ export class RushMCPServer extends McpServer {
     this._tools.push(new RushCommandValidatorTool());
     this._tools.push(new RushWorkspaceDetailsTool());
     this._tools.push(new RushProjectDetailsTool());
-    this._tools.push(new RushDocsTool());
   }
 
   private _registerTools(): void {
