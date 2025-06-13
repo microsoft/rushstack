@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 10 Jun 2025 18:45:59 GMT and should not be manually modified.
+This log was last generated on Fri, 13 Jun 2025 16:10:38 GMT and should not be manually modified.
+
+## 5.155.0
+Fri, 13 Jun 2025 16:10:38 GMT
+
+### Updates
+
+- Add support for PNPM v9 to the pnpm-sync feature.
 
 ## 5.154.0
 Tue, 10 Jun 2025 18:45:59 GMT
