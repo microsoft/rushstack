@@ -1,14 +1,30 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { HeftTask } from './HeftTask';
+import { HeftTask, type IHeftTask } from './HeftTask';
 import type { InternalHeftSession } from './InternalHeftSession';
 import type { IHeftConfigurationJsonPhaseSpecifier } from '../utilities/CoreConfigFiles';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 
 const RESERVED_PHASE_NAMES: Set<string> = new Set(['lifecycle']);
 
-export class HeftPhase {
+/**
+ * @public
+ */
+export interface IHeftPhase {
+  readonly phaseName: string;
+  readonly phaseDescription: string | undefined;
+  cleanFiles: ReadonlySet<IDeleteOperation>;
+  consumingPhases: ReadonlySet<IHeftPhase>;
+  dependencyPhases: ReadonlySet<IHeftPhase>;
+  tasks: ReadonlySet<IHeftTask>;
+  tasksByName: ReadonlyMap<string, IHeftTask>;
+}
+
+/**
+ * @internal
+ */
+export class HeftPhase implements IHeftPhase {
   private _internalHeftSession: InternalHeftSession;
   private _phaseName: string;
   private _phaseSpecifier: IHeftConfigurationJsonPhaseSpecifier;

@@ -30,7 +30,11 @@ export type {
   IHeftLifecycleHooks,
   IHeftLifecycleCleanHookOptions,
   IHeftLifecycleToolStartHookOptions,
-  IHeftLifecycleToolFinishHookOptions
+  IHeftLifecycleToolFinishHookOptions,
+  IHeftTaskStartHookOptions,
+  IHeftTaskFinishHookOptions,
+  IHeftPhaseStartHookOptions,
+  IHeftPhaseFinishHookOptions
 } from './pluginFramework/HeftLifecycleSession';
 
 export type {
@@ -79,3 +83,9 @@ export type {
   CommandLineStringListParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
+
+export type { IHeftTaskOperationMetadata } from './cli/HeftActionRunner';
+export type { IHeftPhaseOperationMetadata } from './cli/HeftActionRunner';
+
+export type { IHeftTask } from './pluginFramework/HeftTask';
+export type { IHeftPhase } from './pluginFramework/HeftPhase';

@@ -13,7 +13,7 @@ import { Stopwatch } from './Stopwatch';
  *
  * @beta
  */
-export class OperationGroupRecord {
+export class OperationGroupRecord<TMetadata extends {} = {}> {
   private readonly _operations: Set<Operation> = new Set();
   private _remainingOperations: Set<Operation> = new Set();
 
@@ -22,6 +22,7 @@ export class OperationGroupRecord {
   private _hasFailures: boolean = false;
 
   public readonly name: string;
+  public readonly metadata: TMetadata;
 
   public get duration(): number {
     return this._groupStopwatch ? this._groupStopwatch.duration : 0;
@@ -39,8 +40,9 @@ export class OperationGroupRecord {
     return this._hasFailures;
   }
 
-  public constructor(name: string) {
+  public constructor(name: string, metadata: TMetadata = {} as TMetadata) {
     this.name = name;
+    this.metadata = metadata;
   }
 
   public addOperation(operation: Operation): void {

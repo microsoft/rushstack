@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Added support for task and phase lifecycle events, `taskStart`, `taskFinish`, `phaseStart`, `phaseFinish`.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

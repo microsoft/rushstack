@@ -13,12 +13,13 @@ import type {
 } from './IOperationRunner';
 import type { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
+import type { OperationGroupRecord } from './OperationGroupRecord';
 
 /**
  * Options for constructing a new Operation.
  * @beta
  */
-export interface IOperationOptions {
+export interface IOperationOptions<TMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
   /**
    * The name of this operation, for logging.
    */
@@ -27,7 +28,7 @@ export interface IOperationOptions {
   /**
    * The group that this operation belongs to. Will be used for logging and duration tracking.
    */
-  groupName?: string | undefined;
+  group?: OperationGroupRecord<TGroupMetadata> | undefined;
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -39,6 +40,11 @@ export interface IOperationOptions {
    * The weight used by the scheduler to determine order of execution.
    */
   weight?: number | undefined;
+
+  /**
+   * The metadata for this operation.
+   */
+  metadata?: TMetadata | undefined;
 }
 
 /**
@@ -50,12 +56,12 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
   /**
    * Function to invoke before execution of an operation, for logging.
    */
-  beforeExecute(operation: Operation, state: IOperationState): void;
+  beforeExecuteAsync(operation: Operation, state: IOperationState): Promise<void>;
 
   /**
    * Function to invoke after execution of an operation, for logging.
    */
-  afterExecute(operation: Operation, state: IOperationState): void;
+  afterExecuteAsync(operation: Operation, state: IOperationState): Promise<void>;
 
   /**
    * Function used to schedule the concurrency-limited execution of an operation.
@@ -85,19 +91,25 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
  *
  * @beta
  */
-export class Operation implements IOperationStates {
+export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}>
+  implements IOperationStates
+{
   /**
    * A set of all dependencies which must be executed before this operation is complete.
    */
-  public readonly dependencies: Set<Operation> = new Set<Operation>();
+  public readonly dependencies: Set<Operation<TMetadata, TGroupMetadata>> = new Set<
+    Operation<TMetadata, TGroupMetadata>
+  >();
   /**
    * A set of all operations that wait for this operation.
    */
-  public readonly consumers: Set<Operation> = new Set<Operation>();
+  public readonly consumers: Set<Operation<TMetadata, TGroupMetadata>> = new Set<
+    Operation<TMetadata, TGroupMetadata>
+  >();
   /**
    * If specified, the name of a grouping to which this Operation belongs, for logging start and end times.
    */
-  public readonly groupName: string | undefined;
+  public readonly group: OperationGroupRecord<TGroupMetadata> | undefined;
   /**
    * The name of this operation, for logging.
    */
@@ -174,19 +186,26 @@ export class Operation implements IOperationStates {
    */
   private _runPending: boolean = true;
 
-  public constructor(options?: IOperationOptions) {
-    this.groupName = options?.groupName;
+  public readonly metadata: TMetadata;
+
+  public constructor(options?: IOperationOptions<TMetadata, TGroupMetadata>) {
+    this.group = options?.group;
     this.runner = options?.runner;
     this.weight = options?.weight || 1;
     this.name = options?.name;
+    this.metadata = options?.metadata || ({} as TMetadata);
+
+    if (this.group) {
+      this.group.addOperation(this);
+    }
   }
 
-  public addDependency(dependency: Operation): void {
+  public addDependency(dependency: Operation<TMetadata, TGroupMetadata>): void {
     this.dependencies.add(dependency);
     dependency.consumers.add(this);
   }
 
-  public deleteDependency(dependency: Operation): void {
+  public deleteDependency(dependency: Operation<TMetadata, TGroupMetadata>): void {
     this.dependencies.delete(dependency);
     dependency.consumers.delete(this);
   }
@@ -300,7 +319,7 @@ export class Operation implements IOperationStates {
         return innerState.status;
       }
 
-      context.beforeExecute(this, innerState);
+      await context.beforeExecuteAsync(this, innerState);
 
       innerState.stopwatch.start();
       innerState.status = OperationStatus.Executing;
@@ -337,7 +356,7 @@ export class Operation implements IOperationStates {
       }
 
       state.stopwatch.stop();
-      context.afterExecute(this, state);
+      await context.afterExecuteAsync(this, state);
 
       return state.status;
     }, /* priority */ this.criticalPathLength ?? 0);
