@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Update regex in the OfficeYamlDocumenter to be case insensitive.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter"
+}
