@@ -1294,6 +1294,30 @@ importers:
         specifier: workspace:*
         version: link:../../apps/heft
 
+  ../../../build-tests/heft-example-lifecycle-plugin:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-lint-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-typescript-plugin
+      '@types/node':
+        specifier: 20.17.19
+        version: 20.17.19
+      eslint:
+        specifier: ~8.57.0
+        version: 8.57.0
+      local-eslint-config:
+        specifier: workspace:*
+        version: link:../../eslint/local-eslint-config
+      typescript:
+        specifier: ~5.8.2
+        version: 5.8.2
+
   ../../../build-tests/heft-example-plugin-01:
     dependencies:
       tapable:
@@ -1562,6 +1586,9 @@ importers:
       eslint:
         specifier: ~8.57.0
         version: 8.57.0
+      heft-example-lifecycle-plugin:
+        specifier: workspace:*
+        version: link:../heft-example-lifecycle-plugin
       heft-example-plugin-01:
         specifier: workspace:*
         version: link:../heft-example-plugin-01

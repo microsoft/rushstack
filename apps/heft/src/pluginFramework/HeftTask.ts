@@ -8,7 +8,7 @@ import type {
   HeftTaskPluginDefinition,
   HeftPluginDefinitionBase
 } from '../configuration/HeftPluginDefinition';
-import type { HeftPhase } from './HeftPhase';
+import type { HeftPhase, IHeftPhase } from './HeftPhase';
 import type {
   IHeftConfigurationJsonTaskSpecifier,
   IHeftConfigurationJsonPluginSpecifier
@@ -19,9 +19,19 @@ import type { IScopedLogger } from './logging/ScopedLogger';
 const RESERVED_TASK_NAMES: Set<string> = new Set(['clean']);
 
 /**
+ * @public
+ */
+export interface IHeftTask {
+  readonly parentPhase: IHeftPhase;
+  readonly taskName: string;
+  readonly consumingTasks: ReadonlySet<IHeftTask>;
+  readonly dependencyTasks: ReadonlySet<IHeftTask>;
+}
+
+/**
  * @internal
  */
-export class HeftTask {
+export class HeftTask implements IHeftTask {
   private _parentPhase: HeftPhase;
   private _taskName: string;
   private _taskSpecifier: IHeftConfigurationJsonTaskSpecifier;

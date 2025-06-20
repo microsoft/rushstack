@@ -167,6 +167,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/eslint-bulk-suppressions-test-legacy](./build-tests/eslint-bulk-suppressions-test-legacy/) | Sample code to test eslint bulk suppressions for versions of eslint < 8.57.0 |
 | [/build-tests/hashed-folder-copy-plugin-webpack5-test](./build-tests/hashed-folder-copy-plugin-webpack5-test/) | Building this project exercises @rushstack/hashed-folder-copy-plugin with Webpack 5. NOTE - THIS TEST IS CURRENTLY EXPECTED TO BE BROKEN |
 | [/build-tests/heft-copy-files-test](./build-tests/heft-copy-files-test/) | Building this project tests copying files with Heft |
+| [/build-tests/heft-example-lifecycle-plugin](./build-tests/heft-example-lifecycle-plugin/) | This is an example heft plugin for testing the lifecycle hooks |
 | [/build-tests/heft-example-plugin-01](./build-tests/heft-example-plugin-01/) | This is an example heft plugin that exposes hooks for other plugins |
 | [/build-tests/heft-example-plugin-02](./build-tests/heft-example-plugin-02/) | This is an example heft plugin that taps the hooks exposed from heft-example-plugin-01 |
 | [/build-tests/heft-fastify-test](./build-tests/heft-fastify-test/) | This project tests Heft support for the Fastify framework for Node.js services |

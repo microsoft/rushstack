@@ -59,6 +59,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "heft-example-lifecycle-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "local-web-rig",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
