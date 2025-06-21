@@ -21,11 +21,12 @@ import { readFile, unlink } from 'fs/promises';
 import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 import {
   type ILockfile,
-  type ILockfilePackage,
   type ILogMessageCallbackOptions,
   pnpmSyncGetJsonVersion,
   pnpmSyncPrepareAsync
 } from 'pnpm-sync-lib';
+import * as pnpmKitV8 from '@rushstack/rush-pnpm-kit-v8';
+import * as pnpmKitV9 from '@rushstack/rush-pnpm-kit-v9';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
@@ -57,7 +58,6 @@ import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfigura
 import type { Subspace } from '../../api/Subspace';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 import { FlagFile } from '../../api/FlagFile';
-import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 import { HotlinkManager } from '../../utilities/HotlinkManager';
 
@@ -304,35 +304,28 @@ export abstract class BaseInstallManager {
           lockfileId: subspace.subspaceName,
           ensureFolderAsync: FileSystem.ensureFolderAsync.bind(FileSystem),
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          readPnpmLockfile: async (lockfilePath: string) => {
-            const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-              lockfilePath,
-              { withCaching: true }
+          readPnpmLockfile: async (lockfilePath: string, options) => {
+            const pnpmLockFolder: string = path.dirname(lockfilePath);
+
+            const lockfileV9: ILockfile | null = await pnpmKitV9.lockfileFs.readWantedLockfile(
+              pnpmLockFolder,
+              options
             );
 
-            if (!wantedPnpmLockfile) {
-              return undefined;
-            } else {
-              const lockfilePackages: Record<string, ILockfilePackage> = Object.create(null);
-              for (const versionPath of wantedPnpmLockfile.packages.keys()) {
-                lockfilePackages[versionPath] = {
-                  dependencies: wantedPnpmLockfile.packages.get(versionPath)?.dependencies as Record<
-                    string,
-                    string
-                  >,
-                  optionalDependencies: wantedPnpmLockfile.packages.get(versionPath)
-                    ?.optionalDependencies as Record<string, string>
-                };
-              }
-
-              const result: ILockfile = {
-                lockfileVersion: wantedPnpmLockfile.shrinkwrapFileMajorVersion,
-                importers: Object.fromEntries(wantedPnpmLockfile.importers.entries()),
-                packages: lockfilePackages
-              };
-
-              return result;
+            if (lockfileV9?.lockfileVersion.toString().startsWith('9')) {
+              return lockfileV9;
             }
+
+            const lockfileV6: ILockfile | null = await pnpmKitV8.lockfileFs.readWantedLockfile(
+              pnpmLockFolder,
+              options
+            );
+
+            if (lockfileV6?.lockfileVersion.toString().startsWith('6')) {
+              return lockfileV6;
+            }
+
+            return undefined;
           },
           logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
             PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)

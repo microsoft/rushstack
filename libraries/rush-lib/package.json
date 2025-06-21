@@ -29,9 +29,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@pnpm/dependency-path-lockfile-pre-v9": "npm:@pnpm/dependency-path@~2.1.2",
-    "@pnpm/dependency-path-lockfile-pre-v10": "npm:@pnpm/dependency-path@~5.1.7",
-    "@pnpm/dependency-path": "~1000.0.9",
     "@pnpm/link-bins": "~5.3.7",
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/lookup-by-path": "workspace:*",
@@ -39,6 +36,9 @@
     "@rushstack/package-deps-hash": "workspace:*",
     "@rushstack/package-extractor": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
+    "@rushstack/rush-pnpm-kit-v10": "workspace:*",
+    "@rushstack/rush-pnpm-kit-v8": "workspace:*",
+    "@rushstack/rush-pnpm-kit-v9": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
@@ -65,11 +65,10 @@
     "tar": "~6.2.1",
     "true-case-path": "~2.2.1",
     "uuid": "~8.3.2",
-    "pnpm-sync-lib": "0.3.2"
+    "pnpm-sync-lib": "0.3.3"
   },
   "devDependencies": {
-    "@pnpm/lockfile.types": "~1.0.3",
-    "@pnpm/logger": "4.0.0",
+    "@pnpm/lockfile.types-900": "npm:@pnpm/lockfile.types@~900.0.0",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",

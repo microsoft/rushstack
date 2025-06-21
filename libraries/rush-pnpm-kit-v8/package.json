@@ -1,0 +1,23 @@
+{
+  "name": "@rushstack/rush-pnpm-kit-v8",
+  "version": "0.0.0",
+  "description": "rush pnpm kit v8",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "dist/rush-pnpm-kit-v8.d.ts",
+  "scripts": {
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean",
+    "build": "heft build --clean",
+    "test": "heft test --clean"
+  },
+  "dependencies": {
+    "@pnpm/dependency-path-pnpm-v8": "npm:@pnpm/dependency-path@~2.1.8",
+    "@pnpm/lockfile-file-pnpm-lock-v6": "npm:@pnpm/lockfile-file@~8.1.8",
+    "@pnpm/logger": "~5.0.0"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*"
+  }
+}
