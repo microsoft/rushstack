@@ -1,6 +1,13 @@
 # Change Log - @rushstack/operation-graph
 
-This log was last generated on Thu, 01 May 2025 00:11:12 GMT and should not be manually modified.
+This log was last generated on Sat, 21 Jun 2025 00:13:15 GMT and should not be manually modified.
+
+## 0.3.0
+Sat, 21 Jun 2025 00:13:15 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) The OperationExecutionManager `beforeExecute` and `afterExecute` hooks have been made async and renamed to `beforeExecuteAsync` and `afterExecuteAsync`. Operations now have an optional `metadata` field that can be used to store arbitrary data.
 
 ## 0.2.41
 Thu, 01 May 2025 00:11:12 GMT
