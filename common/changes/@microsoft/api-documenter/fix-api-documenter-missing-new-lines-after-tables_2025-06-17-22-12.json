@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Ensure a new line is inserted after rendering a table",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter"
+}
