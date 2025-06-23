@@ -293,7 +293,7 @@ export abstract class BaseInstallManager {
     if (this.rushConfiguration.isPnpm && experiments?.usePnpmSyncForInjectedDependencies) {
       const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
       const dotPnpmFolder: string = `${subspace.getSubspaceTempFolderPath()}/node_modules/.pnpm`;
-      const modulesFilePath = `${subspace.getSubspaceTempFolderPath()}/node_modules/.modules.yaml`;
+      const modulesFilePath: string = `${subspace.getSubspaceTempFolderPath()}/node_modules/.modules.yaml`;
 
       // we have an edge case here
       // if a package.json has no dependencies, pnpm will still generate the pnpm-lock.yaml but not .pnpm folder
