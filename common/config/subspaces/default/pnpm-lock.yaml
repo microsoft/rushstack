@@ -1399,8 +1399,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
@@ -4239,6 +4239,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -4333,6 +4336,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
