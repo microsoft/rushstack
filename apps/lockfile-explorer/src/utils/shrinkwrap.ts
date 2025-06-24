@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as dependencyPathLockfilePreV9 from '@pnpm/dependency-path-lockfile-pre-v9';
+import * as pnpmKitV8 from '@rushstack/rush-pnpm-kit-v8';
 
 interface IPackageInfo {
   name: string;
@@ -12,7 +12,8 @@ interface IPackageInfo {
 export function convertLockfileV6DepPathToV5DepPath(newDepPath: string): string {
   if (!newDepPath.includes('@', 2) || newDepPath.startsWith('file:')) return newDepPath;
   const index = newDepPath.indexOf('@', newDepPath.indexOf('/@') + 2);
-  if (newDepPath.includes('(') && index > dependencyPathLockfilePreV9.indexOfPeersSuffix(newDepPath)) return newDepPath;
+  if (newDepPath.includes('(') && index > pnpmKitV8.dependencyPath.indexOfPeersSuffix(newDepPath))
+    return newDepPath;
   return `${newDepPath.substring(0, index)}/${newDepPath.substring(index + 1)}`;
 }
 
@@ -21,7 +22,7 @@ export function parseDependencyPath(shrinkwrapFileMajorVersion: number, newDepPa
   if (shrinkwrapFileMajorVersion === 6) {
     dependencyPath = convertLockfileV6DepPathToV5DepPath(newDepPath);
   }
-  const packageInfo = dependencyPathLockfilePreV9.parse(dependencyPath);
+  const packageInfo = pnpmKitV8.dependencyPath.parse(dependencyPath);
   return {
     name: packageInfo.name as string,
     peersSuffix: packageInfo.peersSuffix,
