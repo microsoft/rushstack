@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
-import { createHash, type Hash } from 'crypto';
-import { performance } from 'perf_hooks';
+import { createHash, type Hash } from 'node:crypto';
+import { performance } from 'node:perf_hooks';
 import type * as TTypescript from 'typescript';
 import type * as TEslint from 'eslint-9';
 import type * as TEslintLegacy from 'eslint';
@@ -66,17 +66,24 @@ interface IExtendedEslintConfig extends TEslint.Linter.Config {
 }
 
 function patchedToJSON(this: IExtendedEslintConfig): object {
-  let programs: TTypescript.Program[] | undefined;
-  if (this.languageOptions?.parserOptions?.programs) {
-    programs = this.languageOptions.parserOptions.programs;
-    delete this.languageOptions.parserOptions.programs;
+  // If the input config has a parserOptions.programs property, we need to recreate it
+  // as a non-enumerable property so that it does not get serialized, as it is not
+  // serializable.
+  if (
+    this.languageOptions?.parserOptions?.programs &&
+    this.languageOptions.parserOptions.propertyIsEnumerable('programs')
+  ) {
+    let { programs } = this.languageOptions.parserOptions;
+    Object.defineProperty(this.languageOptions.parserOptions, 'programs', {
+      get: () => programs,
+      set: (value: TTypescript.Program[]) => {
+        programs = value;
+      },
+      enumerable: false
+    });
   }
 
   const serializableConfig: object = this.__originalToJSON.call(this);
-  if (this.languageOptions?.parserOptions && programs) {
-    this.languageOptions.parserOptions.programs = programs;
-  }
-
   return serializableConfig;
 }
 
@@ -285,12 +292,11 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       this._fixMessagesByResult.set(lintResults[0], fixMessages);
     }
 
-    this._fixesPossible =
-      this._fixesPossible ||
-      (!this._fix &&
-        lintResults.some((lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult) => {
-          return lintResult.fixableErrorCount + lintResult.fixableWarningCount > 0;
-        }));
+    this._fixesPossible ||=
+      !this._fix &&
+      lintResults.some((lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult) => {
+        return lintResult.fixableErrorCount + lintResult.fixableWarningCount > 0;
+      });
 
     const trimmedLintResults: (TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult)[] = [];
     for (const lintResult of lintResults) {
