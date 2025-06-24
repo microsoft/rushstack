@@ -7,4 +7,3 @@ export * from './project-details.tool';
 export * from './rush-command-validator.tool';
 export * from './workspace-details';
 export * from './conflict-resolver.tool';
-export * from './docs.tool';

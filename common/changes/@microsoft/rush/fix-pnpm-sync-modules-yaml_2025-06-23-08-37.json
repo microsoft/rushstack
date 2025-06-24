@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix pnpm-sync caused .modules.yaml ENOENT during install",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

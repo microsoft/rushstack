@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 13 May 2025 02:09:20 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Jun 2025 00:11:43 GMT and should not be manually modified.
+
+## 7.26.29
+Tue, 24 Jun 2025 00:11:43 GMT
+
+### Patches
+
+- Ensure a new line is inserted after rendering a table
+
+## 7.26.28
+Sat, 21 Jun 2025 00:13:15 GMT
+
+_Version update only_
 
 ## 7.26.27
 Tue, 13 May 2025 02:09:20 GMT

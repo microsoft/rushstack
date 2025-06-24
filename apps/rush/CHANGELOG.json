@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.155.0",
+      "tag": "@microsoft/rush_v5.155.0",
+      "date": "Fri, 13 Jun 2025 16:10:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for PNPM v9 to the pnpm-sync feature."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.154.0",
       "tag": "@microsoft/rush_v5.154.0",
       "date": "Tue, 10 Jun 2025 18:45:59 GMT",

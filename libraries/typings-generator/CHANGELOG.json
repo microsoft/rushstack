@@ -2,6 +2,18 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.14.40",
+      "tag": "@rushstack/typings-generator_v0.14.40",
+      "date": "Sat, 21 Jun 2025 00:13:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.39",
       "tag": "@rushstack/typings-generator_v0.14.39",
       "date": "Tue, 13 May 2025 02:09:20 GMT",

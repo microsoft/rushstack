@@ -2,6 +2,30 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.26.29",
+      "tag": "@microsoft/api-documenter_v7.26.29",
+      "date": "Tue, 24 Jun 2025 00:11:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure a new line is inserted after rendering a table"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.26.28",
+      "tag": "@microsoft/api-documenter_v7.26.28",
+      "date": "Sat, 21 Jun 2025 00:13:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.26.27",
       "tag": "@microsoft/api-documenter_v7.26.27",
       "date": "Tue, 13 May 2025 02:09:20 GMT",

@@ -5258,10 +5258,11 @@ packages:
     dependencies:
       semver-compare: 1.0.0
 
-  /pnpm-sync-lib@0.3.0:
-    resolution: {integrity: sha512-Wt3Xf8pjzC2xcyN6ol5x5PdD5kU75+8OOgll2ZQsgm5uxih6dxziqRRuhNwtw94GHRd/0Oo7ESFmzmRz6OTQ0Q==}
+  /pnpm-sync-lib@0.3.2:
+    resolution: {integrity: sha512-XlHyNAHlBqIMGTBD0HfgyRyj1UpSJvVyP20ihPek00YKmMb7RJ16AxlQkjT1jQ/D6s6OAT0ety/tSxcJTrvQ4w==}
     dependencies:
-      '@pnpm/dependency-path': 2.1.8
+      '@pnpm/dependency-path-2': /@pnpm/dependency-path@2.1.8
+      '@pnpm/dependency-path-5': /@pnpm/dependency-path@5.1.7
       yaml: 2.4.1
 
   /possible-typed-array-names@1.0.0:
@@ -7047,7 +7048,7 @@ packages:
       js-yaml: 3.13.1
       npm-check: 6.0.1
       npm-package-arg: 6.1.1
-      pnpm-sync-lib: 0.3.0
+      pnpm-sync-lib: 0.3.2
       read-package-tree: 5.1.6
       rxjs: 6.6.7
       semver: 7.5.4

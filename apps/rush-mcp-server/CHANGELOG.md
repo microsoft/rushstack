@@ -1,6 +1,18 @@
 # Change Log - @rushstack/mcp-server
 
-This log was last generated on Fri, 06 Jun 2025 08:20:18 GMT and should not be manually modified.
+This log was last generated on Sat, 21 Jun 2025 00:13:15 GMT and should not be manually modified.
+
+## 0.2.3
+Sat, 21 Jun 2025 00:13:15 GMT
+
+_Version update only_
+
+## 0.2.2
+Sat, 14 Jun 2025 00:11:30 GMT
+
+### Patches
+
+- Move the `rush docs` tool to a plugin package `@rushstack/rush-mcp-docs-plugin`
 
 ## 0.2.1
 Fri, 06 Jun 2025 08:20:18 GMT

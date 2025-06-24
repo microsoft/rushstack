@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-api-extractor-plugin",
   "entries": [
     {
+      "version": "0.4.8",
+      "tag": "@rushstack/heft-api-extractor-plugin_v0.4.8",
+      "date": "Sat, 21 Jun 2025 00:13:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.73.6` to `0.74.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.7",
       "tag": "@rushstack/heft-api-extractor-plugin_v0.4.7",
       "date": "Tue, 13 May 2025 02:09:20 GMT",

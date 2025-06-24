@@ -2,6 +2,23 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.74.0",
+      "tag": "@rushstack/heft_v0.74.0",
+      "date": "Sat, 21 Jun 2025 00:13:15 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added support for task and phase lifecycle events, `taskStart`, `taskFinish`, `phaseStart`, `phaseFinish`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/operation-graph\" to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.73.6",
       "tag": "@rushstack/heft_v0.73.6",
       "date": "Tue, 13 May 2025 02:09:20 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/operation-graph_v0.3.0",
+      "date": "Sat, 21 Jun 2025 00:13:15 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) The OperationExecutionManager `beforeExecute` and `afterExecute` hooks have been made async and renamed to `beforeExecuteAsync` and `afterExecuteAsync`. Operations now have an optional `metadata` field that can be used to store arbitrary data."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.41",
       "tag": "@rushstack/operation-graph_v0.2.41",
       "date": "Thu, 01 May 2025 00:11:12 GMT",
