@@ -1674,8 +1674,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
+        specifier: ~9.25.1
+        version: 9.25.1
       heft-example-lifecycle-plugin:
         specifier: workspace:*
         version: link:../heft-example-lifecycle-plugin
