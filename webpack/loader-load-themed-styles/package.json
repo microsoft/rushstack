@@ -29,9 +29,10 @@
   },
   "devDependencies": {
     "@microsoft/load-themed-styles": "workspace:*",
-    "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/loader-utils": "1.1.3",
-    "@types/webpack": "4.41.32"
+    "@types/webpack": "4.41.32",
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*"
   }
 }

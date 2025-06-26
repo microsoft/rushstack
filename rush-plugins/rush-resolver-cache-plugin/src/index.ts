@@ -30,10 +30,7 @@ export default class RushResolverCachePlugin implements IRushPlugin {
           return;
         }
 
-        const pnpmMajorVersion: number = parseInt(
-          rushConfiguration.packageManagerToolVersion.split('.')[0],
-          /* radix */ 10
-        );
+        const pnpmMajorVersion: number = parseInt(rushConfiguration.packageManagerToolVersion, 10);
         // Lockfile format parsing logic changed in pnpm v8.
         if (pnpmMajorVersion < 8) {
           logger.emitError(new Error('The RushResolverCachePlugin currently only supports pnpm version >=8'));

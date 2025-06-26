@@ -543,11 +543,19 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "eslint-import-resolver-node",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "eslint-plugin-deprecation",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "eslint-plugin-header",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-headers",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -716,6 +724,10 @@
     },
     {
       "name": "js-yaml",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "json-stable-stringify-without-jsonify",
       "allowedCategories": [ "libraries" ]
     },
     {

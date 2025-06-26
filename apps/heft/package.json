@@ -51,7 +51,6 @@
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/heft": "0.73.2",
     "@types/watchpack": "2.4.0",
-    "decoupled-local-node-rig": "workspace:*",
-    "local-eslint-config": "workspace:*"
+    "decoupled-local-node-rig": "workspace:*"
   }
 }

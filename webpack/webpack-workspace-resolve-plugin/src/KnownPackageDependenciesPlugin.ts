@@ -100,7 +100,6 @@ export class KnownPackageDependenciesPlugin {
           file: request.file,
           internal: request.internal
         };
-        // eslint-disable-next-line @rushstack/no-new-null
         resolver.doResolve(target, obj, null, resolveContext, callback);
       });
   }

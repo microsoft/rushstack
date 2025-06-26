@@ -1,19 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/**
- * An IThemingInstruction can specify a rawString to be preserved or a theme slot and a default value
- * to use if that slot is not specified by the theme.
- */
-
-/* eslint-disable @typescript-eslint/no-use-before-define */
-
 // Declaring a global here in case that the execution environment is Node.js (without importing the
 // entire node.js d.ts for now)
 /// <reference lib="dom" />
 declare let global: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 declare const DEBUG: boolean | undefined;
 
+/**
+ * An IThemingInstruction can specify a rawString to be preserved or a theme slot and a default value
+ * to use if that slot is not specified by the theme.
+ */
 export interface IThemingInstruction {
   theme?: string;
   defaultValue?: string;

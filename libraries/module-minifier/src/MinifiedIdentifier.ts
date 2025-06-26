@@ -79,11 +79,13 @@ const RESERVED_KEYWORDS: string[] = [
 export function getIdentifierInternal(ordinal: number): string {
   let ret: string = IDENTIFIER_LEADING_DIGITS[ordinal % 54];
 
-  ordinal = (ordinal / 54) | 0; // eslint-disable-line no-bitwise
+  // eslint-disable-next-line no-bitwise
+  ordinal = (ordinal / 54) | 0;
   while (ordinal > 0) {
     --ordinal;
-    ret += IDENTIFIER_TRAILING_DIGITS[ordinal & 0x3f]; // eslint-disable-line no-bitwise
-    ordinal >>>= 6; // eslint-disable-line no-bitwise
+    // eslint-disable-next-line no-bitwise
+    ret += IDENTIFIER_TRAILING_DIGITS[ordinal & 0x3f];
+    ordinal >>>= 6;
   }
 
   return ret;
@@ -112,7 +114,7 @@ export function getOrdinalFromIdentifierInternal(identifier: string): number {
       return NaN;
     }
 
-    ordinal <<= 6; // eslint-disable-line no-bitwise
+    ordinal <<= 6;
     ordinal += trailingCharIndex.get(identifier.charCodeAt(i))! + 1;
   }
 

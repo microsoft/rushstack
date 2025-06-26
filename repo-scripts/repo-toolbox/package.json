@@ -17,8 +17,9 @@
     "diff": "~5.0.0"
   },
   "devDependencies": {
-    "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/diff": "5.0.1"
+    "@types/diff": "5.0.1",
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*"
   }
 }

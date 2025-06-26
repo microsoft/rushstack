@@ -23,8 +23,8 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
-    "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "eslint": "~8.57.0"
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*"
   }
 }

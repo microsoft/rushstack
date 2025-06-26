@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-mcp-docs-plugin",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-mcp-docs-plugin"
+}

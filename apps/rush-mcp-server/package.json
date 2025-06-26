@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
+    "eslint": "~9.25.1",
     "local-node-rig": "workspace:*",
     "typescript": "~5.8.2",
     "@types/node": "20.17.19"

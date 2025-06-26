@@ -597,25 +597,25 @@
       "tags": ["api-extractor-tests"]
     },
     {
-      "packageName": "eslint-7-7-test",
-      "projectFolder": "build-tests/eslint-7-7-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false,
-      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
-    },
-    {
       "packageName": "eslint-7-11-test",
       "projectFolder": "build-tests/eslint-7-11-test",
       "reviewCategory": "tests",
       "shouldPublish": false,
-      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
+    },
+    {
+      "packageName": "eslint-7-7-test",
+      "projectFolder": "build-tests/eslint-7-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-7-test",
       "projectFolder": "build-tests/eslint-7-test",
       "reviewCategory": "tests",
       "shouldPublish": false,
-      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-8-test",
@@ -624,8 +624,20 @@
       "shouldPublish": false
     },
     {
+      "packageName": "eslint-9-test",
+      "projectFolder": "build-tests/eslint-9-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "eslint-bulk-suppressions-test",
       "projectFolder": "build-tests/eslint-bulk-suppressions-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-bulk-suppressions-test-flat",
+      "projectFolder": "build-tests/eslint-bulk-suppressions-test-flat",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

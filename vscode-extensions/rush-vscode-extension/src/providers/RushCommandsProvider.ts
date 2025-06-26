@@ -71,7 +71,6 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
   }
 
   public async openParameterViewPanelAsync(): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     // return RushCommandWebViewPanel.getInstance(this._context).reveal('');
   }
 

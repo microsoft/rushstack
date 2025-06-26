@@ -576,7 +576,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         return;
       }
 
-      // eslint-disable-next-line require-atomic-updates -- This is guaranteed to not be concurrent
       buildCacheContext.operationBuildCache = OperationBuildCache.forOperation(record, {
         buildCacheConfiguration,
         terminal
@@ -626,7 +625,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       phaseName: associatedPhase.name
     });
 
-    // eslint-disable-next-line require-atomic-updates -- This is guaranteed to not be concurrent
     buildCacheContext.operationBuildCache = operationBuildCache;
 
     return operationBuildCache;

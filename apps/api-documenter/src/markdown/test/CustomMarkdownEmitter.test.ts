@@ -174,7 +174,7 @@ test('render Markdown from TSDoc', () => {
   output.appendNodes([
     new DocHeading({ configuration, title: 'After a table' }),
     new DocParagraph({ configuration }, [
-      new DocPlainText({ configuration, text: 'just checking lines after a table' }),
+      new DocPlainText({ configuration, text: 'just checking lines after a table' })
     ])
   ]);
 
