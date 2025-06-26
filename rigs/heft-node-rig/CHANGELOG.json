@@ -2,6 +2,26 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "2.9.0",
+      "tag": "@rushstack/heft-node-rig_v2.9.0",
+      "date": "Thu, 26 Jun 2025 18:57:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add flat config compatible versions of profiles and mixins for ESLint. These are located under the `profiles/default/includes/eslint/flat/*` path. If you need to remain on ESLint 8, ensure your rig or project consumes ESLint 8, and that you use the legacy configuration files."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `4.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.7.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.8.15",
       "tag": "@rushstack/heft-node-rig_v2.8.15",
       "date": "Sat, 21 Jun 2025 00:13:15 GMT",

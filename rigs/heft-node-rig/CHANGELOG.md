@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Sat, 21 Jun 2025 00:13:15 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jun 2025 18:57:04 GMT and should not be manually modified.
+
+## 2.9.0
+Thu, 26 Jun 2025 18:57:04 GMT
+
+### Minor changes
+
+- Add flat config compatible versions of profiles and mixins for ESLint. These are located under the `profiles/default/includes/eslint/flat/*` path. If you need to remain on ESLint 8, ensure your rig or project consumes ESLint 8, and that you use the legacy configuration files.
 
 ## 2.8.15
 Sat, 21 Jun 2025 00:13:15 GMT

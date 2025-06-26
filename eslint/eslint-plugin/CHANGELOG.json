@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.19.0",
+      "tag": "@rushstack/eslint-plugin_v0.19.0",
+      "date": "Thu, 26 Jun 2025 18:57:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update for compatibility with ESLint 9"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.18.0",
       "tag": "@rushstack/eslint-plugin_v0.18.0",
       "date": "Tue, 11 Mar 2025 02:12:33 GMT",

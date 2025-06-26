@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-bulk
 
-This log was last generated on Sat, 21 Jun 2025 00:13:15 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jun 2025 18:57:04 GMT and should not be manually modified.
+
+## 0.2.0
+Thu, 26 Jun 2025 18:57:04 GMT
+
+### Minor changes
+
+- Update for compatibility with ESLint flat configuration files
 
 ## 0.1.95
 Sat, 21 Jun 2025 00:13:15 GMT

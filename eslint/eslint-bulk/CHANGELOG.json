@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-bulk",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/eslint-bulk_v0.2.0",
+      "date": "Thu, 26 Jun 2025 18:57:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update for compatibility with ESLint flat configuration files"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.95",
       "tag": "@rushstack/eslint-bulk_v0.1.95",
       "date": "Sat, 21 Jun 2025 00:13:15 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Sat, 21 Jun 2025 00:13:15 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jun 2025 18:57:04 GMT and should not be manually modified.
+
+## 0.7.0
+Thu, 26 Jun 2025 18:57:04 GMT
+
+### Minor changes
+
+- Add support for ESLint 9. When using ESLint 9, the configuration will be loaded from `eslint.config.js`, and flat configs will be required by the Heft plugin
 
 ## 0.6.1
 Sat, 21 Jun 2025 00:13:15 GMT
