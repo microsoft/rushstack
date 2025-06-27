@@ -36,33 +36,58 @@ import { chunkIsJs } from './utilities/chunkUtilities';
 /**
  * @public
  */
-export interface IStringPlaceholder {
+export type ValueForLocaleFn = (locale: string) => string;
+
+/**
+ * @public
+ */
+export interface IValuePlaceholderBase {
   /**
    * The literal string that will be injected for later replacement.
    */
   value: string;
+
   /**
    * The identifier for this particular placeholder, for lookup.
    */
   suffix: string;
+}
+
+/**
+ * @public
+ */
+export interface IStringPlaceholder extends IValuePlaceholderBase {
   /**
    * The values of this string in each output locale.
    */
   translations: ReadonlyMap<string, ReadonlyMap<string, string>>;
+
   /**
    * The key used to identify the source file containing the string.
    */
   locFilePath: string;
+
   /**
    * The identifier of the string within its original source file.
    */
   stringName: string;
 }
 
+/**
+ * @internal
+ */
+export interface ICustomDataPlaceholder extends IValuePlaceholderBase {
+  /**
+   * The function that will be invoked to get the value for this placeholder.
+   * The function will be invoked with the locale name as the first argument.
+   */
+  valueForLocaleFn: ValueForLocaleFn;
+}
+
 export interface IFileTranslationInfo {
   placeholders: Map<string, IStringPlaceholder>;
   translations: Map<string, ReadonlyMap<string, string>>;
-  renderedPlacholders: Record<string, string>;
+  renderedPlaceholders: Record<string, string>;
 }
 
 const PLUGIN_NAME: 'localization' = 'localization';
@@ -97,13 +122,19 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     string,
     Map<string, ILocaleFileObject | string | ReadonlyMap<string, string>>
   > = new Map();
-  private readonly _stringPlaceholderMap: Map<string, IStringPlaceholder> = new Map();
+  private readonly _stringPlaceholderBySuffix: Map<string, IStringPlaceholder> = new Map();
+  private readonly _customDataPlaceholderBySuffix: Map<string, ICustomDataPlaceholder> = new Map();
+  private readonly _customDataPlaceholderByCustomValueFunction: WeakMap<
+    ValueForLocaleFn,
+    ICustomDataPlaceholder
+  > = new WeakMap();
   private _passthroughLocaleName!: string;
   private _defaultLocale!: string;
   private _noStringsLocaleName!: string;
   private _fillMissingTranslationStrings!: boolean;
   private _formatLocaleForFilename!: (loc: string) => string;
   private readonly _pseudolocalizers: Map<string, (str: string) => string> = new Map();
+  private _customValueSuffixCounter: number = 0;
 
   /**
    * The set of locales that have translations provided.
@@ -525,7 +556,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
 
     markEntity(context._module!, true);
 
-    return fileInfo.renderedPlacholders;
+    return fileInfo.renderedPlaceholders;
   }
 
   /**
@@ -540,10 +571,37 @@ export class LocalizationPlugin implements WebpackPluginInstance {
   }
 
   /**
+   * @public
+   */
+  public getCustomDataPlaceholderForValueFunction(valueForLocaleFn: ValueForLocaleFn): string {
+    let placeholder: ICustomDataPlaceholder | undefined =
+      this._customDataPlaceholderByCustomValueFunction.get(valueForLocaleFn);
+    if (!placeholder) {
+      const suffix: string = String(this._customValueSuffixCounter++);
+      placeholder = {
+        value: `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.CUSTOM_PLACEHOLDER_LABEL}_${suffix}_`,
+        suffix,
+        valueForLocaleFn
+      };
+      this._customDataPlaceholderBySuffix.set(suffix, placeholder);
+      this._customDataPlaceholderByCustomValueFunction.set(valueForLocaleFn, placeholder);
+    }
+
+    return placeholder.value;
+  }
+
+  /**
    * @internal
    */
-  public getDataForSerialNumber(serialNumber: string): IStringPlaceholder | undefined {
-    return this._stringPlaceholderMap.get(serialNumber);
+  public _getStringDataForSerialNumber(suffix: string): IStringPlaceholder | undefined {
+    return this._stringPlaceholderBySuffix.get(suffix);
+  }
+
+  /**
+   * @internal
+   */
+  public _getCustomDataForSerialNumber(suffix: string): ICustomDataPlaceholder | undefined {
+    return this._customDataPlaceholderBySuffix.get(suffix);
   }
 
   private _addLocFileAndGetPlaceholders(
@@ -556,7 +614,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
       fileInfo = {
         placeholders: new Map(),
         translations: new Map(),
-        renderedPlacholders: {}
+        renderedPlaceholders: {}
       };
       this._locFiles.set(localizedFileKey, fileInfo);
     }
@@ -572,30 +630,22 @@ export class LocalizationPlugin implements WebpackPluginInstance {
         placeholder = {
           value: `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.STRING_PLACEHOLDER_LABEL}_\\_${suffix}_`,
           suffix,
-          translations,
+          translations: translations,
           locFilePath: localizedFileKey,
           stringName
         };
 
         placeholders.set(stringName, placeholder);
-        this._stringPlaceholderMap.set(suffix, placeholder);
+        this._stringPlaceholderBySuffix.set(suffix, placeholder);
       }
 
       resultObject[stringName] = placeholder.value;
     }
 
     translations.set(localeName, localizedFileData);
-    fileInfo.renderedPlacholders = resultObject;
+    fileInfo.renderedPlaceholders = resultObject;
 
     return fileInfo;
-  }
-
-  private _addTranslations(
-    localeName: string,
-    fileInfo: IFileTranslationInfo,
-    localizedFileData: ReadonlyMap<string, string>
-  ): void {
-    fileInfo.translations.set(localeName, localizedFileData);
   }
 
   private _initializeAndValidateOptions(
