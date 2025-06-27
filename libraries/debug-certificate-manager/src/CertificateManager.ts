@@ -7,13 +7,12 @@ import { EOL } from 'os';
 import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { runSudoAsync, type IRunResult, runAsync } from './runCommand';
-import { CertificateStore } from './CertificateStore';
+import { type IRunResult, runAsync } from './runCommand';
+import { CertificateStore, type ICertificateStoreOptions } from './CertificateStore';
 
 const CA_SERIAL_NUMBER: string = '731c321744e34650a202e3ef91c3c1b0';
 const TLS_SERIAL_NUMBER: string = '731c321744e34650a202e3ef00000001';
 const FRIENDLY_NAME: string = 'debug-certificate-manager Development Certificate';
-const MAC_KEYCHAIN: string = '/Library/Keychains/System.keychain';
 const CERTUTIL_EXE_NAME: string = 'certutil';
 const CA_ALT_NAME: string = 'rushstack-certificate-manager.localhost';
 const ONE_DAY_IN_MILLISECONDS: number = 24 * 60 * 60 * 1000;
@@ -58,6 +57,22 @@ export interface ICertificate {
    * The subject names the TLS server certificate is valid for
    */
   subjectAltNames: readonly string[] | undefined;
+}
+
+/**
+ * Information about certificate expiration dates
+ * @public
+ */
+export interface ICertificateExpiration {
+  /**
+   * Expiration date of the CA certificate, or undefined if no CA certificate exists
+   */
+  caCertificateExpiration: Date | undefined;
+
+  /**
+   * Expiration date of the server certificate, or undefined if no server certificate exists
+   */
+  serverCertificateExpiration: Date | undefined;
 }
 
 interface ICaCertificate {
@@ -116,6 +131,11 @@ export interface ICertificateGenerationOptions {
   skipCertificateTrust?: boolean;
 }
 
+/**
+ * @public
+ */
+export interface ICertificateManagerOptions extends ICertificateStoreOptions {}
+
 const MAX_CERTIFICATE_VALIDITY_DAYS: 365 = 365;
 
 /**
@@ -124,10 +144,18 @@ const MAX_CERTIFICATE_VALIDITY_DAYS: 365 = 365;
  * @public
  */
 export class CertificateManager {
-  private _certificateStore: CertificateStore;
+  private readonly _certificateStore: CertificateStore;
 
-  public constructor() {
-    this._certificateStore = new CertificateStore();
+  public constructor(options: ICertificateManagerOptions = {}) {
+    this._certificateStore = new CertificateStore(options);
+  }
+
+  /**
+   * Get the certificate store used by this manager.
+   * @public
+   */
+  public get certificateStore(): CertificateStore {
+    return this._certificateStore;
   }
 
   /**
@@ -268,6 +296,7 @@ export class CertificateManager {
   public async untrustCertificateAsync(terminal: ITerminal): Promise<boolean> {
     this._certificateStore.certificateData = undefined;
     this._certificateStore.keyData = undefined;
+    this._certificateStore.caCertificateData = undefined;
 
     switch (process.platform) {
       case 'win32':
@@ -292,10 +321,9 @@ export class CertificateManager {
         const macFindCertificateResult: IRunResult = await runAsync('security', [
           'find-certificate',
           '-c',
-          'localhost',
+          CA_ALT_NAME,
           '-a',
-          '-Z',
-          MAC_KEYCHAIN
+          '-Z'
         ]);
         if (macFindCertificateResult.exitCode !== 0) {
           terminal.writeErrorLine(
@@ -315,11 +343,10 @@ export class CertificateManager {
           terminal.writeVerboseLine(`Found the development certificate. SHA is ${shaHash}`);
         }
 
-        const macUntrustResult: IRunResult = await runSudoAsync('security', [
+        const macUntrustResult: IRunResult = await runAsync('security', [
           'delete-certificate',
           '-Z',
-          shaHash,
-          MAC_KEYCHAIN
+          shaHash
         ]);
 
         if (macUntrustResult.exitCode === 0) {
@@ -340,6 +367,49 @@ export class CertificateManager {
         );
         return false;
     }
+  }
+
+  /**
+   * Get the expiration dates of the stored CA and server certificates.
+   * Returns undefined for certificates that don't exist or cannot be parsed.
+   *
+   * @public
+   */
+  public async getCertificateExpirationAsync(): Promise<ICertificateExpiration> {
+    const { certificateData, caCertificateData } = this._certificateStore;
+
+    let caCertificateExpiration: Date | undefined;
+    let serverCertificateExpiration: Date | undefined;
+
+    try {
+      const forge: typeof import('node-forge') = await import('node-forge');
+
+      if (caCertificateData) {
+        try {
+          const caCertificate: pki.Certificate = forge.pki.certificateFromPem(caCertificateData);
+          caCertificateExpiration = caCertificate.validity.notAfter;
+        } catch (error) {
+          // no-op
+        }
+      }
+
+      // Parse server certificate expiration
+      if (certificateData) {
+        try {
+          const serverCertificate: pki.Certificate = forge.pki.certificateFromPem(certificateData);
+          serverCertificateExpiration = serverCertificate.validity.notAfter;
+        } catch (error) {
+          // no-op
+        }
+      }
+    } catch (error) {
+      // no-op
+    }
+
+    return {
+      caCertificateExpiration,
+      serverCertificateExpiration
+    };
   }
 
   private async _createCACertificateAsync(
@@ -568,13 +638,10 @@ export class CertificateManager {
             'root password in the prompt.'
         );
 
-        const result: IRunResult = await runSudoAsync('security', [
+        const result: IRunResult = await runAsync('security', [
           'add-trusted-cert',
-          '-d',
           '-r',
           'trustRoot',
-          '-k',
-          MAC_KEYCHAIN,
           certificatePath
         ]);
 
@@ -641,8 +708,7 @@ export class CertificateManager {
           '-c',
           'localhost',
           '-a',
-          '-Z',
-          MAC_KEYCHAIN
+          '-Z'
         ]);
 
         if (macFindCertificateResult.exitCode !== 0) {
