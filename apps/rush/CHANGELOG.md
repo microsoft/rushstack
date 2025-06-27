@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 13 Jun 2025 16:10:38 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Jun 2025 19:57:04 GMT and should not be manually modified.
+
+## 5.155.1
+Fri, 27 Jun 2025 19:57:04 GMT
+
+### Updates
+
+- Fix pnpm-sync caused .modules.yaml ENOENT during install
 
 ## 5.155.0
 Fri, 13 Jun 2025 16:10:38 GMT

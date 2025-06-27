@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.155.1",
+      "tag": "@microsoft/rush_v5.155.1",
+      "date": "Fri, 27 Jun 2025 19:57:04 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix pnpm-sync caused .modules.yaml ENOENT during install"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.155.0",
       "tag": "@microsoft/rush_v5.155.0",
       "date": "Fri, 13 Jun 2025 16:10:38 GMT",
