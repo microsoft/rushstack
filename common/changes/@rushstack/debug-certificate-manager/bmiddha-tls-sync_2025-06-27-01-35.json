@@ -1,0 +1,20 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "CertificateStore - Add params to support custom paths and filenames",
+      "type": "patch"
+    },
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "CertificateManager - Update `untrustCertificateAsync` to clear `caCertificateData`",
+      "type": "patch"
+    },
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "CertificateManager - Use user keychain instead of system on macOS",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager"
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/tls-sync-vscode-shared",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/tls-sync-vscode-shared"
+}
