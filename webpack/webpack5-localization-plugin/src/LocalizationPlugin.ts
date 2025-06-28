@@ -124,10 +124,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
   > = new Map();
   private readonly _stringPlaceholderBySuffix: Map<string, IStringPlaceholder> = new Map();
   private readonly _customDataPlaceholderBySuffix: Map<string, ICustomDataPlaceholder> = new Map();
-  private readonly _customDataPlaceholderByCustomValueFunction: WeakMap<
-    ValueForLocaleFn,
-    ICustomDataPlaceholder
-  > = new WeakMap();
+  private readonly _customDataPlaceholderByUniqueId: Map<string, ICustomDataPlaceholder> = new Map();
   private _passthroughLocaleName!: string;
   private _defaultLocale!: string;
   private _noStringsLocaleName!: string;
@@ -139,7 +136,6 @@ export class LocalizationPlugin implements WebpackPluginInstance {
    */
   private _formatLocaleForFilename!: (loc: string, chunk: unknown) => string;
   private readonly _pseudolocalizers: Map<string, (str: string) => string> = new Map();
-  private _customValueSuffixCounter: number = 0;
 
   /**
    * The set of locales that have translations provided.
@@ -578,18 +574,28 @@ export class LocalizationPlugin implements WebpackPluginInstance {
   /**
    * @public
    */
-  public getCustomDataPlaceholderForValueFunction(valueForLocaleFn: ValueForLocaleFn): string {
+  public getCustomDataPlaceholderForValueFunction(
+    valueForLocaleFn: ValueForLocaleFn,
+    placeholderUniqueId: string
+  ): string {
     let placeholder: ICustomDataPlaceholder | undefined =
-      this._customDataPlaceholderByCustomValueFunction.get(valueForLocaleFn);
+      this._customDataPlaceholderByUniqueId.get(placeholderUniqueId);
     if (!placeholder) {
-      const suffix: string = String(this._customValueSuffixCounter++);
+      const suffix: string = Buffer.from(placeholderUniqueId + valueForLocaleFn.name, 'utf-8').toString(
+        'hex'
+      );
       placeholder = {
         value: `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.CUSTOM_PLACEHOLDER_LABEL}_${suffix}_`,
         suffix,
         valueForLocaleFn
       };
       this._customDataPlaceholderBySuffix.set(suffix, placeholder);
-      this._customDataPlaceholderByCustomValueFunction.set(valueForLocaleFn, placeholder);
+      this._customDataPlaceholderByUniqueId.set(placeholderUniqueId, placeholder);
+    } else if (placeholder.valueForLocaleFn !== valueForLocaleFn) {
+      throw new Error(
+        `${this.getCustomDataPlaceholderForValueFunction.name} has already been called with "${placeholderUniqueId}" ` +
+          `and a different valueForLocaleFn.`
+      );
     }
 
     return placeholder.value;

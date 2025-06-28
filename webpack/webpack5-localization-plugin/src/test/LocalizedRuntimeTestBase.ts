@@ -46,7 +46,8 @@ class InjectCustomPlaceholderPlugin implements webpack.WebpackPluginInstance {
 
       public override generate(): string {
         const placeholder: string = localizationPlugin.getCustomDataPlaceholderForValueFunction(
-          getLocalizedChunkNamesString
+          getLocalizedChunkNamesString,
+          printLocalizedChunkName
         );
 
         return Template.asString([
