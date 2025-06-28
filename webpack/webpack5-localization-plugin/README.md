@@ -212,7 +212,7 @@ both are set.
 ## Custom Localized Data
 
 If you need to provide custom localized data, you can use the `getCustomDataPlaceholderForValueFunction` method
-of the plugin. This method takes a function that receives a locale name, a webpack compilation instance, and the chunk
+of the plugin. This method takes a function that receives a locale name and the chunk
 that the placeholder is used in and returns a string that will be used as a placeholder for the localized data.
 The provided function will be called for each locale that is used in the build and the returned value will replace
 the returned placeholder in the output.

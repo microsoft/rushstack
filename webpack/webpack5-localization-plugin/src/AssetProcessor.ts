@@ -33,10 +33,10 @@ interface IDynamicReconstructionElement {
 type IReconstructionElement = ILocalizedReconstructionElement | IDynamicReconstructionElement;
 /**
  * @remarks
- * Include the `compilation` and `chunk` parameters so that the functions arity is the same as the
+ * Include the `chunk` parameter so that the functions arity is the same as the
  * `ValueForLocaleFn` type.
  */
-type FormatLocaleForFilenameFn = (locale: string, compilation: unknown, chunk: unknown) => string;
+type FormatLocaleForFilenameFn = (locale: string, chunk: unknown) => string;
 
 interface IParseResult {
   issues: string[];
@@ -276,7 +276,6 @@ export function processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptio
       new sources.ReplaceSource(cachedSource, locale),
       parsedAsset.reconstructionSeries,
       locale,
-      compilation,
       chunk
     );
 
@@ -375,7 +374,7 @@ function _reconstructLocalized(
       }
 
       case DYNAMIC_RECONSTRUCTION_ELEMENT_KIND: {
-        const newValue: string = element.valueFn(locale, compilation, chunk);
+        const newValue: string = element.valueFn(locale, chunk);
         result.replace(start, end - 1, newValue);
         break;
       }
@@ -392,7 +391,6 @@ function _reconstructNonLocalized(
   result: sources.ReplaceSource,
   reconstructionSeries: IReconstructionElement[],
   noStringsLocaleName: string,
-  compilation: Compilation,
   chunk: Chunk
 ): INonLocalizedReconstructionResult {
   const issues: string[] = [];
@@ -411,7 +409,7 @@ function _reconstructNonLocalized(
       }
 
       case DYNAMIC_RECONSTRUCTION_ELEMENT_KIND: {
-        const newValue: string = element.valueFn(noStringsLocaleName, compilation, chunk);
+        const newValue: string = element.valueFn(noStringsLocaleName, chunk);
         result.replace(element.start, element.end - 1, newValue);
         break;
       }
@@ -479,8 +477,8 @@ function _parseStringToReconstructionSequence(
       }
 
       case Constants.JSONP_PLACEHOLDER_LABEL: {
-        jsonStringifyFormatLocaleForFilenameFn ||= (locale: string, compilation: unknown, chunk: unknown) =>
-          JSON.stringify(formatLocaleForFilenameFn(locale, undefined, undefined));
+        jsonStringifyFormatLocaleForFilenameFn ||= (locale: string, chunk: unknown) =>
+          JSON.stringify(formatLocaleForFilenameFn(locale, chunk));
         const dynamicElement: IDynamicReconstructionElement = {
           kind: DYNAMIC_RECONSTRUCTION_ELEMENT_KIND,
           start,

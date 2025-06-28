@@ -36,7 +36,7 @@ import { chunkIsJs } from './utilities/chunkUtilities';
 /**
  * @public
  */
-export type ValueForLocaleFn = (locale: string, compilation: Compilation, chunk: Chunk) => string;
+export type ValueForLocaleFn = (locale: string, chunk: Chunk) => string;
 
 /**
  * @public
@@ -132,7 +132,12 @@ export class LocalizationPlugin implements WebpackPluginInstance {
   private _defaultLocale!: string;
   private _noStringsLocaleName!: string;
   private _fillMissingTranslationStrings!: boolean;
-  private _formatLocaleForFilename!: (loc: string) => string;
+  /**
+   * @remarks
+   * Include the `chunk` parameter so that the functions arity is the same as the
+   * `ValueForLocaleFn` type.
+   */
+  private _formatLocaleForFilename!: (loc: string, chunk: unknown) => string;
   private readonly _pseudolocalizers: Map<string, (str: string) => string> = new Map();
   private _customValueSuffixCounter: number = 0;
 
@@ -277,7 +282,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 }
 
                 if (chunkIdsWithStrings.size === 0) {
-                  return this._formatLocaleForFilename(this._noStringsLocaleName);
+                  return this._formatLocaleForFilename(this._noStringsLocaleName, undefined);
                 } else if (chunkIdsWithoutStrings.size === 0) {
                   return `" + ${localeExpression} + "`;
                 } else {
@@ -300,7 +305,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                   }
 
                   const noLocaleExpression: string = JSON.stringify(
-                    this._formatLocaleForFilename(this._noStringsLocaleName)
+                    this._formatLocaleForFilename(this._noStringsLocaleName, undefined)
                   );
 
                   return `" + (${JSON.stringify(chunkMapping)}[chunkId]?${
@@ -321,7 +326,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
               }
               return assetPath.replace(
                 Constants.LOCALE_FILENAME_TOKEN_REGEX,
-                this._formatLocaleForFilename(locale)
+                this._formatLocaleForFilename(locale, undefined)
               );
             }
           } else {
