@@ -581,9 +581,8 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     let placeholder: ICustomDataPlaceholder | undefined =
       this._customDataPlaceholderByUniqueId.get(placeholderUniqueId);
     if (!placeholder) {
-      const suffix: string = Buffer.from(placeholderUniqueId + valueForLocaleFn.name, 'utf-8').toString(
-        'hex'
-      );
+      // Get a hash of the unique ID to make sure its value doesn't interfere with our placeholder tokens
+      const suffix: string = Buffer.from(placeholderUniqueId, 'utf-8').toString('hex');
       placeholder = {
         value: `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.CUSTOM_PLACEHOLDER_LABEL}_${suffix}_`,
         suffix,
