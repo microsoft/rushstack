@@ -173,7 +173,6 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): I
       locale,
       fallbackLocale,
       passthroughLocaleName,
-      compilation,
       chunk
     );
 
@@ -324,7 +323,6 @@ function _reconstructLocalized(
   locale: string,
   fallbackLocale: string | undefined,
   passthroughLocale: string | undefined,
-  compilation: Compilation,
   chunk: Chunk
 ): ILocalizedReconstructionResult {
   const issues: string[] = [];
