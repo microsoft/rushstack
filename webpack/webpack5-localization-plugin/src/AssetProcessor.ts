@@ -27,10 +27,16 @@ interface IDynamicReconstructionElement {
   kind: typeof DYNAMIC_RECONSTRUCTION_ELEMENT_KIND;
   start: number;
   end: number;
-  valueFn: (locale: string) => string;
+  valueFn: ValueForLocaleFn;
 }
 
 type IReconstructionElement = ILocalizedReconstructionElement | IDynamicReconstructionElement;
+/**
+ * @remarks
+ * Include the `compilation` and `chunk` parameters so that the functions arity is the same as the
+ * `ValueForLocaleFn` type.
+ */
+type FormatLocaleForFilenameFn = (locale: string, compilation: unknown, chunk: unknown) => string;
 
 interface IParseResult {
   issues: string[];
@@ -59,7 +65,7 @@ export interface IProcessNonLocalizedAssetOptions extends IProcessAssetOptionsBa
   fileName: string;
   hasUrlGenerator: boolean;
   noStringsLocaleName: string;
-  formatLocaleForFilenameFn: ValueForLocaleFn;
+  formatLocaleForFilenameFn: FormatLocaleForFilenameFn;
 }
 
 export interface IProcessLocalizedAssetOptions extends IProcessAssetOptionsBase {
@@ -68,7 +74,7 @@ export interface IProcessLocalizedAssetOptions extends IProcessAssetOptionsBase 
   defaultLocale: string;
   passthroughLocaleName: string | undefined;
   filenameTemplate: Parameters<typeof Compilation.prototype.getAssetPath>[0];
-  formatLocaleForFilenameFn: ValueForLocaleFn;
+  formatLocaleForFilenameFn: FormatLocaleForFilenameFn;
 }
 
 interface IProcessedAsset {
@@ -166,7 +172,9 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): I
       parsedAsset.reconstructionSeries,
       locale,
       fallbackLocale,
-      passthroughLocaleName
+      passthroughLocaleName,
+      compilation,
+      chunk
     );
 
     for (const issue of localeIssues) {
@@ -243,7 +251,7 @@ export async function processNonLocalizedAssetCachedAsync(
 }
 
 export function processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptions): IProcessedAsset {
-  const { asset, fileName, compilation, formatLocaleForFilenameFn, hasUrlGenerator } = options;
+  const { asset, fileName, compilation, formatLocaleForFilenameFn, hasUrlGenerator, chunk } = options;
 
   const { sources, WebpackError } = compilation.compiler.webpack;
 
@@ -267,7 +275,9 @@ export function processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptio
     const { issues: localeIssues, result } = _reconstructNonLocalized(
       new sources.ReplaceSource(cachedSource, locale),
       parsedAsset.reconstructionSeries,
-      locale
+      locale,
+      compilation,
+      chunk
     );
 
     for (const issue of localeIssues) {
@@ -314,7 +324,9 @@ function _reconstructLocalized(
   reconstructionSeries: IReconstructionElement[],
   locale: string,
   fallbackLocale: string | undefined,
-  passthroughLocale: string | undefined
+  passthroughLocale: string | undefined,
+  compilation: Compilation,
+  chunk: Chunk
 ): ILocalizedReconstructionResult {
   const issues: string[] = [];
 
@@ -363,7 +375,7 @@ function _reconstructLocalized(
       }
 
       case DYNAMIC_RECONSTRUCTION_ELEMENT_KIND: {
-        const newValue: string = element.valueFn(locale);
+        const newValue: string = element.valueFn(locale, compilation, chunk);
         result.replace(start, end - 1, newValue);
         break;
       }
@@ -379,7 +391,9 @@ function _reconstructLocalized(
 function _reconstructNonLocalized(
   result: sources.ReplaceSource,
   reconstructionSeries: IReconstructionElement[],
-  noStringsLocaleName: string
+  noStringsLocaleName: string,
+  compilation: Compilation,
+  chunk: Chunk
 ): INonLocalizedReconstructionResult {
   const issues: string[] = [];
 
@@ -397,7 +411,7 @@ function _reconstructNonLocalized(
       }
 
       case DYNAMIC_RECONSTRUCTION_ELEMENT_KIND: {
-        const newValue: string = element.valueFn(noStringsLocaleName);
+        const newValue: string = element.valueFn(noStringsLocaleName, compilation, chunk);
         result.replace(element.start, element.end - 1, newValue);
         break;
       }
@@ -413,12 +427,12 @@ function _reconstructNonLocalized(
 function _parseStringToReconstructionSequence(
   plugin: LocalizationPlugin,
   source: string,
-  formatLocaleForFilenameFn: ValueForLocaleFn
+  formatLocaleForFilenameFn: FormatLocaleForFilenameFn
 ): IParseResult {
   const issues: string[] = [];
   const reconstructionSeries: IReconstructionElement[] = [];
 
-  let jsonStringifyFormatLocaleForFilenameFn: ValueForLocaleFn | undefined;
+  let jsonStringifyFormatLocaleForFilenameFn: FormatLocaleForFilenameFn | undefined;
 
   let index: number = source.indexOf(Constants.STRING_PLACEHOLDER_PREFIX);
   const increment: number = Constants.STRING_PLACEHOLDER_PREFIX.length + 1;
@@ -465,8 +479,8 @@ function _parseStringToReconstructionSequence(
       }
 
       case Constants.JSONP_PLACEHOLDER_LABEL: {
-        jsonStringifyFormatLocaleForFilenameFn ||= (locale: string) =>
-          JSON.stringify(formatLocaleForFilenameFn(locale));
+        jsonStringifyFormatLocaleForFilenameFn ||= (locale: string, compilation: unknown, chunk: unknown) =>
+          JSON.stringify(formatLocaleForFilenameFn(locale, undefined, undefined));
         const dynamicElement: IDynamicReconstructionElement = {
           kind: DYNAMIC_RECONSTRUCTION_ELEMENT_KIND,
           start,

@@ -36,7 +36,7 @@ import { chunkIsJs } from './utilities/chunkUtilities';
 /**
  * @public
  */
-export type ValueForLocaleFn = (locale: string) => string;
+export type ValueForLocaleFn = (locale: string, compilation: Compilation, chunk: Chunk) => string;
 
 /**
  * @public

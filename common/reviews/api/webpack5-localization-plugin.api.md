@@ -172,7 +172,7 @@ export class TrueHashPlugin implements WebpackPluginInstance {
 }
 
 // @public (undocumented)
-export type ValueForLocaleFn = (locale: string) => string;
+export type ValueForLocaleFn = (locale: string, compilation: Compilation, chunk: Chunk) => string;
 
 // (No @packageDocumentation comment for this package)
 
