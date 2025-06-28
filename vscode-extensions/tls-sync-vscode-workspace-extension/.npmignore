@@ -1,0 +1,20 @@
+# Ignore all files by default, to avoid accidentally publishing unintended files.
+*
+
+# Use negative patterns to bring back the specific things we want to publish.
+!/bin/**
+!/lib/**
+!/lib-*/**
+!/dist/**
+!ThirdPartyNotice.txt
+!resources/**
+!webview/**
+
+# Ignore certain patterns that should not get published.
+/dist/*.stats.*
+/lib/**/test/
+/lib-*/**/test/
+lib/scripts/
+lib-*/scripts/
+*.test.js
+*.map
