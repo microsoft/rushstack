@@ -13,6 +13,7 @@ export const RESOURCE_FILE_NAME_REGEXP: RegExp = /\.(resx|resx\.json|loc\.json|r
 export const STRING_PLACEHOLDER_LABEL: 'A' = 'A';
 export const LOCALE_NAME_PLACEHOLDER_LABEL: 'B' = 'B';
 export const JSONP_PLACEHOLDER_LABEL: 'C' = 'C';
+export const CUSTOM_PLACEHOLDER_LABEL: 'D' = 'D';
 
 // _LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_B_
 export const LOCALE_NAME_PLACEHOLDER: `${typeof STRING_PLACEHOLDER_PREFIX}_${typeof LOCALE_NAME_PLACEHOLDER_LABEL}_` = `${STRING_PLACEHOLDER_PREFIX}_${LOCALE_NAME_PLACEHOLDER_LABEL}_`;

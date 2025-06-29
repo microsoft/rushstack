@@ -3,7 +3,15 @@
 
 /// <reference types="node" preserve="true" />
 
-export { LocalizationPlugin, type IStringPlaceholder as _IStringPlaceholder } from './LocalizationPlugin';
+export {
+  LocalizationPlugin,
+  // TODO: Remove this export in the next major version
+  type IStringPlaceholder as _IStringPlaceholder,
+  type IStringPlaceholder,
+  type ICustomDataPlaceholder as _ICustomDataPlaceholder,
+  type IValuePlaceholderBase,
+  type ValueForLocaleFn
+} from './LocalizationPlugin';
 export { TrueHashPlugin, type ITrueHashPluginOptions } from './TrueHashPlugin';
 
 export type {
