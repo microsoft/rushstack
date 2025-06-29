@@ -572,7 +572,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
   }
 
   /**
-   * @public
+   * @beta
    */
   public getCustomDataPlaceholderForValueFunction(
     valueForLocaleFn: ValueForLocaleFn,

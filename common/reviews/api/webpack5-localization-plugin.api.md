@@ -154,7 +154,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     apply(compiler: Compiler): void;
     // @internal (undocumented)
     _getCustomDataForSerialNumber(suffix: string): _ICustomDataPlaceholder | undefined;
-    // (undocumented)
+    // @beta (undocumented)
     getCustomDataPlaceholderForValueFunction(valueForLocaleFn: ValueForLocaleFn, placeholderUniqueId: string): string;
     // (undocumented)
     getPlaceholder(localizedFileKey: string, stringName: string): IStringPlaceholder | undefined;
