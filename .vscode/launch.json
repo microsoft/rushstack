@@ -38,7 +38,9 @@
 				"--inspect-brk",
 				"${workspaceFolder}/apps/heft/lib/start.js",
 				"--debug",
-				"test-watch"
+				"test",
+				"--test-path-pattern",
+        "${fileBasenameNoExtension}"
 			],
 			"skipFiles": ["<node_internals>/**"],
 			"outFiles": [],
