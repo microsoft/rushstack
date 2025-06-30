@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.14.0",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.14.0",
+      "date": "Mon, 30 Jun 2025 22:04:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a feature for injecting custom localized values into a compilation via the `getCustomDataPlaceholderForValueFunction` function on an instance of the `LocalizationPlugin`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.16",
       "tag": "@rushstack/webpack5-localization-plugin_v0.13.16",
       "date": "Sat, 21 Jun 2025 00:13:15 GMT",

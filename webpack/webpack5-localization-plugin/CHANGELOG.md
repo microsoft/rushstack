@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Sat, 21 Jun 2025 00:13:15 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jun 2025 22:04:32 GMT and should not be manually modified.
+
+## 0.14.0
+Mon, 30 Jun 2025 22:04:32 GMT
+
+### Minor changes
+
+- Add a feature for injecting custom localized values into a compilation via the `getCustomDataPlaceholderForValueFunction` function on an instance of the `LocalizationPlugin`.
 
 ## 0.13.16
 Sat, 21 Jun 2025 00:13:15 GMT
