@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Include \"parallelism\" in phased operation execution context. Update \"rush-bridge-cache-plugin\" to support both cache read and cache write, selectable via command line choice parameter. Fixes an issue that the options schema for \"rush-bridge-cache-plugin\" was invalid.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

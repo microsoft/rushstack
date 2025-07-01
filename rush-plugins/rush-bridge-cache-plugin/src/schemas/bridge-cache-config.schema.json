@@ -5,11 +5,11 @@
   "oneOf": [
     {
       "type": "object",
-      "required": ["flagName"],
+      "required": ["actionParameterName"],
       "properties": {
-        "s3Endpoint": {
+        "actionParameterName": {
           "type": "string",
-          "description": "(Required) The name of the flag used to trigger this plugin on your phased commands."
+          "description": "(Required) The name of the choice parameter used to trigger this plugin on your phased commands. It should accept two values, 'read' and 'write'."
         }
       }
     }

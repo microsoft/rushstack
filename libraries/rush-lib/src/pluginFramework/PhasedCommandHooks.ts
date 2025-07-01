@@ -78,6 +78,10 @@ export interface ICreateOperationsContext {
    */
   readonly isWatch: boolean;
   /**
+   * The currently configured maximum parallelism for the command.
+   */
+  readonly parallelism: number;
+  /**
    * The set of phases original for the current command execution.
    */
   readonly phaseOriginal: ReadonlySet<IPhase>;
