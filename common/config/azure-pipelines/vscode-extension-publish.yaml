@@ -34,8 +34,15 @@ extends:
         jobs:
           - job:
             pool:
-              name: publish-rushstack
+              name: build-vscode-extensions
               os: linux
+            templateContext:
+              outputs:
+                - ${{ each extension in parameters.ExtensionPublishConfig }}:
+                    - artifactName: ${{ extension.key }}
+                      targetPath: ${{ extension.vsixPath }}
+                      displayName: 'Publish Artifact: ${{ extension.key }}'
+
             steps:
               - checkout: self
                 persistCredentials: true
@@ -46,18 +53,3 @@ extends:
                 parameters:
                   BuildParameters: >
                     --to tag:vsix
-
-              - ${{ each extension in parameters.ExtensionPublishConfig }}:
-                  - displayName: 'Publish Artifact: ${{ extension.key }}'
-                    task: 1ES.PublishPipelineArtifact@1
-                    inputs:
-                      path: ${{ extension.vsixPath }}
-                      artifact: ${{ extension.key }}
-
-                  - bash: |
-                      npm install -g @vscode/vsce
-                      vsce publish --packagePath ${{ extension.vsixPath }} --no-dependencies
-                    displayName: 'Publish ${{ extension.key }}'
-                    condition: and(succeeded(), eq(parameters.shouldPublish, true))
-                    env:
-                      VSCE_PAT: $(vscePat)
