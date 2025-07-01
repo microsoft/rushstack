@@ -48,9 +48,11 @@ extends:
                     --to tag:vsix
 
               - ${{ each extension in parameters.ExtensionPublishConfig }}:
-                  - publish: ${{ extension.vsixPath }}
-                    artifact: ${{ extension.key }}
-                    displayName: 'Publish Artifact: ${{ extension.key }}'
+                  - displayName: 'Publish Artifact: ${{ extension.key }}'
+                    task: 1ES.PublishPipelineArtifact@1
+                    inputs:
+                      path: ${{ extension.vsixPath }}
+                      artifact: ${{ extension.key }}
 
                   - bash: |
                       npm install -g @vscode/vsce
