@@ -34,7 +34,7 @@ extends:
         jobs:
           - job:
             pool:
-              name: publish-vscode-extensions
+              name: publish-rushstack
               os: linux
             templateContext:
               outputs:
