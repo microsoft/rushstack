@@ -34,7 +34,7 @@ extends:
         jobs:
           - job:
             pool:
-              name: build-vscode-extensions
+              name: publish-vscode-extensions
               os: linux
             templateContext:
               outputs:
