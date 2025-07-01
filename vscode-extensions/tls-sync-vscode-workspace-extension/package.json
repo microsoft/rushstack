@@ -1,6 +1,6 @@
 {
   "name": "tls-sync-vscode-workspace-extension",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",

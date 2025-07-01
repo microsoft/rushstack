@@ -51,6 +51,27 @@ export interface IRunWithRetriesOptions<TResult> {
 
 /**
  * @remarks
+ * Used with {@link Async.runWithTimeoutAsync}.
+ *
+ * @public
+ */
+export interface IRunWithTimeoutOptions<TResult> {
+  /**
+   * The action to be performed. The action is executed with a timeout.
+   */
+  action: () => Promise<TResult> | TResult;
+  /**
+   * The timeout in milliseconds.
+   */
+  timeoutMs: number;
+  /**
+   * The message to use for the error if the timeout is reached.
+   */
+  timeoutMessage?: string;
+}
+
+/**
+ * @remarks
  * Used with {@link (Async:class).(forEachAsync:2)} and {@link (Async:class).(mapAsync:2)}.
  *
  * @public
@@ -363,17 +384,13 @@ export class Async {
   /**
    * Runs a promise with a timeout. If the promise does not resolve within the specified timeout,
    * it will reject with an error.
-   *
-   * @param promise - The promise to run with a timeout.
-   * @param timeoutMs - The timeout in milliseconds.
-   * @param timeoutMessage - The message to use for the error if the timeout is reached.
-   * @returns A promise that resolves with the result of the input promise, or rejects with a timeout error.
    */
-  public static runWithTimeoutAsync<TResult>(
-    promise: Promise<TResult>,
-    timeoutMs: number,
-    timeoutMessage: string = 'Operation timed out'
-  ): Promise<TResult> {
+  public static async runWithTimeoutAsync<TResult>({
+    action,
+    timeoutMs,
+    timeoutMessage = 'Operation timed out'
+  }: IRunWithTimeoutOptions<TResult>): Promise<TResult> {
+    const promise: Promise<TResult> = Promise.resolve(action());
     const timeoutPromise: Promise<never> = new Promise<never>((resolve, reject) => {
       setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
     });

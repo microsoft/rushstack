@@ -207,6 +207,14 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/heft-vscode-extension-plugin",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-vscode-extension-rig",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "@rushstack/heft-web-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
@@ -301,6 +309,10 @@
     {
       "name": "@rushstack/terminal",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/tls-sync-vscode-shared",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "@rushstack/tree-pattern",

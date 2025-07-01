@@ -82,13 +82,14 @@ export function activate(context: vscode.ExtensionContext): void {
       let certificates: ICertificate | undefined = undefined;
       let isCertExpired: boolean = false;
       try {
-        certificates = await Async.runWithTimeoutAsync(
-          certificateManager.ensureCertificateAsync(canGenerateNewCertificate, terminal, {
-            skipCertificateTrust
-          }),
-          5000,
-          'Certificate request timed out after 5 seconds'
-        );
+        certificates = await Async.runWithTimeoutAsync({
+          action: () =>
+            certificateManager.ensureCertificateAsync(canGenerateNewCertificate, terminal, {
+              skipCertificateTrust
+            }),
+          timeoutMs: 5000,
+          timeoutMessage: 'Certificate request timed out after 5 seconds'
+        });
         const { caCertificateExpiration, certificateExpiration } =
           await certificateManager.getCertificateExpirationAsync();
 
@@ -130,13 +131,14 @@ export function activate(context: vscode.ExtensionContext): void {
           canGenerateNewCertificate = true;
         }
 
-        certificates = await Async.runWithTimeoutAsync(
-          certificateManager.ensureCertificateAsync(canGenerateNewCertificate, terminal, {
-            skipCertificateTrust
-          }),
-          30000,
-          'Certificate generation timed out after 30 seconds'
-        );
+        certificates = await Async.runWithTimeoutAsync({
+          action: () =>
+            certificateManager.ensureCertificateAsync(canGenerateNewCertificate, terminal, {
+              skipCertificateTrust
+            }),
+          timeoutMs: 30000,
+          timeoutMessage: 'Certificate generation timed out after 30 seconds'
+        });
 
         outputChannel.appendLine(
           `Creating new certificates. Can generate new certificate: ${canGenerateNewCertificate}, Skip certificate trust: ${skipCertificateTrust}`

@@ -122,11 +122,14 @@ export function activate(context: vscode.ExtensionContext): void {
         storePath
       };
 
-      const certificatesFromUI: ICertificate | undefined = await Async.runWithTimeoutAsync(
-        vscode.commands.executeCommand<ICertificate>(UI_COMMAND_ENSURE_CERTIFICATE) as Promise<ICertificate>,
-        60000,
-        'UI certificate retrieval timed out after 60 seconds'
-      );
+      const certificatesFromUI: ICertificate | undefined = await Async.runWithTimeoutAsync({
+        action: () =>
+          vscode.commands.executeCommand<ICertificate>(
+            UI_COMMAND_ENSURE_CERTIFICATE
+          ) as Promise<ICertificate>,
+        timeoutMs: 60000,
+        timeoutMessage: 'UI certificate retrieval timed out after 60 seconds'
+      });
 
       if (!certificatesFromUI) {
         void vscode.window.showErrorMessage(
@@ -140,15 +143,16 @@ export function activate(context: vscode.ExtensionContext): void {
       const skipCertificateTrust: boolean = false;
       const canGenerateNewCertificate: boolean = false;
 
-      const localCertificates: ICertificate | undefined = await Async.runWithTimeoutAsync(
-        certificateManager
-          .ensureCertificateAsync(canGenerateNewCertificate, terminal, {
-            skipCertificateTrust
-          })
-          .catch(() => undefined),
-        5000,
-        'Certificate request timed out after 5 seconds'
-      );
+      const localCertificates: ICertificate | undefined = await Async.runWithTimeoutAsync({
+        action: () =>
+          certificateManager
+            .ensureCertificateAsync(canGenerateNewCertificate, terminal, {
+              skipCertificateTrust
+            })
+            .catch(() => undefined),
+        timeoutMs: 5000,
+        timeoutMessage: 'Certificate request timed out after 5 seconds'
+      });
 
       let isSynchronized: boolean = false;
       isSynchronized =

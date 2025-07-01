@@ -39,23 +39,11 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
-      "name": "@rushstack/heft-vscode-extension-plugin",
-      "allowedCategories": [ "libraries", "vscode-extensions" ]
-    },
-    {
-      "name": "@rushstack/heft-vscode-extension-rig",
-      "allowedCategories": [ "vscode-extensions" ]
-    },
-    {
       "name": "@rushstack/rush-themed-ui",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/rush-vscode-command-webview",
-      "allowedCategories": [ "vscode-extensions" ]
-    },
-    {
-      "name": "@rushstack/tls-sync-vscode-shared",
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
@@ -73,10 +61,6 @@
     {
       "name": "heft-example-lifecycle-plugin",
       "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "heft-node-rig",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "local-web-rig",
