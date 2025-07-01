@@ -1090,6 +1090,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-vsix-plugin",
+      "projectFolder": "heft-plugins/heft-vsix-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-webpack4-plugin",
       "projectFolder": "heft-plugins/heft-webpack4-plugin",
       "reviewCategory": "libraries",
@@ -1357,12 +1363,28 @@
     {
       "packageName": "rushstack",
       "projectFolder": "vscode-extensions/rush-vscode-extension",
-      "reviewCategory": "vscode-extensions"
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
     },
     {
       "packageName": "@rushstack/rush-vscode-command-webview",
       "projectFolder": "vscode-extensions/rush-vscode-command-webview",
-      "reviewCategory": "vscode-extensions"
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
+    },
+    {
+      "packageName": "tls-sync-vscode-workspace-extension",
+      "projectFolder": "vscode-extensions/tls-sync-vscode-workspace-extension",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"],
+      "versionPolicyName": "tls-sync-vscode-extensions"
+    },
+    {
+      "packageName": "tls-sync-vscode-ui-extension",
+      "projectFolder": "vscode-extensions/tls-sync-vscode-ui-extension",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"],
+      "versionPolicyName": "tls-sync-vscode-extensions"
     },
 
     // "webpack" folder (alphabetical order)
@@ -1456,6 +1478,13 @@
       "projectFolder": "rush-plugins/rush-mcp-docs-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/tls-sync-vscode-shared",
+      "projectFolder": "vscode-extensions/tls-sync-vscode-shared",
+      "reviewCategory": "libraries",
+      "shouldPublish": false,
+      "versionPolicyName": "tls-sync-vscode-extensions"
     }
   ]
 }

@@ -1,0 +1,155 @@
+{
+  "name": "tls-sync-vscode-workspace-extension",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "vscode-extensions/tls-sync-vscode-workspace-extension"
+  },
+  "license": "MIT",
+  "publisher": "RushStack",
+  "preview": true,
+  "displayName": "TLS Sync (Workspace Extension)",
+  "description": "",
+  "homepage": "https://rushstack.io",
+  "extensionKind": [
+    "workspace"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "keywords": [],
+  "galleryBanner": {
+    "color": "#f0f0f0",
+    "theme": "light"
+  },
+  "engines": {
+    "vscode": "^1.98.0"
+  },
+  "main": "./extension.js",
+  "scripts": {
+    "build": "heft build --clean",
+    "build:watch": "heft build-watch",
+    "start": "heft start",
+    "pretest": "npm run build",
+    "test": "node ./lib-commonjs/test/runTest.js",
+    "_phase:build": "heft build --clean",
+    "_phase:test": ""
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "tlssync.workspace.showLog",
+        "title": "Show Log",
+        "category": "TLS Sync"
+      },
+      {
+        "command": "tlssync.workspace.sync",
+        "title": "Sync TLS Certificates",
+        "category": "TLS Sync"
+      },
+      {
+        "command": "tlssync.workspace.showWalkthrough",
+        "title": "Show Walkthrough",
+        "category": "TLS Sync"
+      },
+      {
+        "command": "tlssync.workspace.showSettings",
+        "title": "Show Settings",
+        "category": "TLS Sync"
+      }
+    ],
+    "walkthroughs": [
+      {
+        "id": "sync-certificates",
+        "title": "TLS Sync",
+        "description": "Sync your debug TLS certificates with the remote machine.",
+        "featuredFor": [
+          ".tlssync"
+        ],
+        "steps": [
+          {
+            "id": "runsynccommand",
+            "title": "Sync Certificates",
+            "description": "[Sync](command:tlssync.workspace.sync)",
+            "completionEvents": [
+              "onContext:tlssync.workspace.sync.complete"
+            ],
+            "media": {
+              "markdown": "./media/walkthrough-sync.md"
+            }
+          },
+          {
+            "id": "changetlssyncsettings",
+            "title": "Change Sync Settings",
+            "description": "[Open Settings](command:tlssync.workspace.showSettings)",
+            "completionEvents": [],
+            "media": {
+              "markdown": "./media/walkthrough-settings.md"
+            }
+          }
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "TLS Sync",
+      "type": "object",
+      "properties": {
+        "tlssync.storePath": {
+          "type": "string",
+          "title": "TLS Sync Store Path",
+          "description": "Directory where TLS certificates are read and written. The same directory is used for both the UI and workspace extensions."
+        },
+        "tlssync.caCertificateFilename": {
+          "type": "string",
+          "title": "CA Certificate Filename",
+          "description": "Filename for the CA certificate."
+        },
+        "tlssync.certificateFilename": {
+          "type": "string",
+          "title": "Server Certificate Filename",
+          "description": "Filename for the server certificate."
+        },
+        "tlssync.keyFilename": {
+          "type": "string",
+          "title": "Server Key Filename",
+          "description": "Filename for the server key."
+        },
+        "tlssync.autoSync": {
+          "type": "boolean",
+          "title": "Automatically Sync Certificates",
+          "default": true,
+          "description": "Check certificates when extension is activated. Extension is automatically activated when a `.tlssync` file is present in the workspace."
+        }
+      }
+    }
+  },
+  "activationEvents": [
+    "workspaceContains:**/.tlssync"
+  ],
+  "dependencies": {
+    "@rushstack/tls-sync-vscode-shared": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/debug-certificate-manager": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "tslib": "~2.3.1"
+  },
+  "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/package-extractor": "workspace:*",
+    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
+    "@rushstack/heft-vsix-plugin": "workspace:*",
+    "@types/glob": "7.1.1",
+    "@types/mocha": "10.0.6",
+    "@types/vscode": "^1.63.0",
+    "@types/webpack-env": "1.18.8",
+    "@vscode/test-electron": "^1.6.2",
+    "glob": "~7.0.5",
+    "mocha": "^10.1.0",
+    "@types/node": "20.17.19",
+    "@vscode/vsce": "3.3.2"
+  }
+}

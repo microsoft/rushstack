@@ -8,14 +8,16 @@ import type { ITerminal } from '@rushstack/terminal';
 
 // @public
 export class CertificateManager {
-    constructor();
+    constructor(options?: ICertificateManagerOptions);
+    get certificateStore(): CertificateStore;
     ensureCertificateAsync(canGenerateNewCertificate: boolean, terminal: ITerminal, options?: ICertificateGenerationOptions): Promise<ICertificate>;
+    getCertificateExpirationAsync(): Promise<ICertificateExpiration>;
     untrustCertificateAsync(terminal: ITerminal): Promise<boolean>;
 }
 
 // @public
 export class CertificateStore {
-    constructor();
+    constructor(options?: ICertificateStoreOptions);
     get caCertificateData(): string | undefined;
     set caCertificateData(certificate: string | undefined);
     get caCertificatePath(): string;
@@ -24,6 +26,7 @@ export class CertificateStore {
     get certificatePath(): string;
     get keyData(): string | undefined;
     set keyData(key: string | undefined);
+    get keyPath(): string;
 }
 
 // @public
@@ -38,11 +41,29 @@ export interface ICertificate {
 }
 
 // @public
+export interface ICertificateExpiration {
+    caCertificateExpiration: Date | undefined;
+    serverCertificateExpiration: Date | undefined;
+}
+
+// @public
 export interface ICertificateGenerationOptions {
     skipCertificateTrust?: boolean;
     subjectAltNames?: ReadonlyArray<string>;
     subjectIPAddresses?: ReadonlyArray<string>;
     validityInDays?: number;
+}
+
+// @public (undocumented)
+export interface ICertificateManagerOptions extends ICertificateStoreOptions {
+}
+
+// @public (undocumented)
+export interface ICertificateStoreOptions {
+    caCertificateFilename?: string;
+    certificateFilename?: string;
+    keyFilename?: string;
+    storePath?: string;
 }
 
 ```

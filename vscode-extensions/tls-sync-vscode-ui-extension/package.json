@@ -1,0 +1,86 @@
+{
+  "name": "tls-sync-vscode-ui-extension",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "vscode-extensions/tls-sync-vscode-ui-extension"
+  },
+  "license": "MIT",
+  "publisher": "RushStack",
+  "preview": true,
+  "displayName": "TLS Sync (UI Extension)",
+  "description": "",
+  "homepage": "https://rushstack.io",
+  "extensionKind": [
+    "ui"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "keywords": [],
+  "galleryBanner": {
+    "color": "#f0f0f0",
+    "theme": "light"
+  },
+  "engines": {
+    "vscode": "^1.98.0"
+  },
+  "main": "./extension.js",
+  "scripts": {
+    "build": "heft build --clean",
+    "build:watch": "heft build-watch",
+    "start": "heft start",
+    "pretest": "npm run build",
+    "test": "node ./lib-commonjs/test/runTest.js",
+    "_phase:build": "heft build --clean",
+    "_phase:test": ""
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "tlssync.ui.showLog",
+        "title": "Show Log",
+        "category": "TLS Sync (UI Extension)"
+      },
+      {
+        "command": "tlssync.ui.untrustCertificate",
+        "title": "Untrust Certificate",
+        "category": "TLS Sync (UI Extension)"
+      },
+      {
+        "command": "tlssync.ui.ensureCertificate",
+        "title": "Ensure Certificate",
+        "category": "TLS Sync (UI Extension)"
+      }
+    ]
+  },
+  "activationEvents": [
+    "onCommand:tlssync.ui.ping"
+  ],
+  "dependencies": {
+    "@rushstack/tls-sync-vscode-shared": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/debug-certificate-manager": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "tslib": "~2.3.1"
+  },
+  "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-vsix-plugin": "workspace:*",
+    "@rushstack/package-extractor": "workspace:*",
+    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
+    "@types/glob": "7.1.1",
+    "@types/mocha": "10.0.6",
+    "@types/vscode": "^1.63.0",
+    "@types/webpack-env": "1.18.8",
+    "@vscode/test-electron": "^1.6.2",
+    "glob": "~7.0.5",
+    "mocha": "^10.1.0",
+    "@types/node": "20.17.19",
+    "@vscode/vsce": "3.3.2"
+  }
+}

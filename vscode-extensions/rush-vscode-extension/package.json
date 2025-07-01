@@ -277,7 +277,7 @@
     "glob": "~7.0.5",
     "local-node-rig": "workspace:*",
     "mocha": "^10.1.0",
-    "vsce": "~2.14.0"
+    "@vscode/vsce": "3.3.2"
   },
   "engines": {
     "vscode": "^1.63.0"

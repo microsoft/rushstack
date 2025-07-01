@@ -1,0 +1,25 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "CertificateStore - Add params to support custom paths and filenames",
+      "type": "patch"
+    },
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "CertificateManager - Update `untrustCertificateAsync` to clear `caCertificateData`",
+      "type": "patch"
+    },
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "CertificateManager - Use osascript (applescript) to run elevated command on macOS instead of sudo package.",
+      "type": "patch"
+    },
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "CertificateManager - Expose `getCertificateExpirationAsync` method to retrieve certificate expiration date",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager"
+}

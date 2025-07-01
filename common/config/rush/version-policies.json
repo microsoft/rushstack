@@ -105,5 +105,15 @@
     "version": "5.155.1",
     "nextBump": "patch",
     "mainProject": "@microsoft/rush"
+  },
+  {
+    // This policy is used for the TLS Sync VS Code extensions.
+    // Updating them in lockstep is necessary for the UI and Workspace extensions to work together.
+    // The Workspace and UI extensions perform a ping-pong version check to ensure they are compatible.
+    "policyName": "tls-sync-vscode-extensions",
+    "definitionName": "lockStepVersion",
+    "version": "0.0.1",
+    "nextBump": "patch",
+    "mainProject": "tls-sync-vscode-workspace-extension"
   }
 ]

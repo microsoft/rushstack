@@ -39,11 +39,19 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/heft-vsix-plugin",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "@rushstack/rush-themed-ui",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/rush-vscode-command-webview",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/tls-sync-vscode-shared",
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
