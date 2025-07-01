@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Executable } from '@rushstack/node-core-library';
+import { Executable, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import * as child_process from 'node:child_process';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import * as fs from 'node:fs';
 
 export interface IRunResult {
   stdout: string[];
@@ -30,22 +29,30 @@ export async function darwinRunSudoAsync(
     throw new Error('This function is only supported on macOS.');
   }
 
-  const tmpPrefix: string = 'sudo-runner-';
-  const stdoutFile: string = randomTmpPath(tmpPrefix, '.stdout');
-  const stderrFile: string = randomTmpPath(tmpPrefix, '.stderr');
-  const exitFile: string = randomTmpPath(tmpPrefix, '.exit');
+  const basename: string = randomTmpPath('sudo-runner-');
+  const stdoutFile: string = `${basename}.stdout`;
+  const stderrFile: string = `${basename}.stderr`;
+  const exitFile: string = `${basename}.exit`;
+  const scriptFile: string = `${basename}.script`;
 
   const commandStr: string = `${command} ${params.join(' ')}`;
   terminal.writeLine(`Running command with elevated privileges: ${commandStr}`);
 
   // Wrap the shell command in a bash command and capture stdout, stderr, and exit code
-  const shellScript: string = `bash -c 'echo "\\n\\nRunning command with elevated privileges: ${commandStr}"; sudo ${commandStr} > "${stdoutFile}" 2> "${stderrFile}"; echo $? > "${exitFile}"'`;
+  const shellScript: string = `#!/bin/bash
+set -v
+echo "\\n\\nRunning command with elevated privileges: ${commandStr}";
+sudo ${commandStr} > >(tee -a ${stdoutFile}) 2> >(tee -a ${stderrFile} >&2)
+echo $? > "${exitFile}"
+`;
+
+  FileSystem.writeFile(scriptFile, shellScript);
 
   // This AppleScript opens a new Terminal window, runs the shell script, waits for it to finish and then closes the Terminal window.
   const appleScript: string = `
   tell application "Terminal"
     activate
-    set win to do script "${shellScript.replace(/"/g, '\\"')}"
+    set win to do script "bash '${scriptFile}'"
     repeat
       delay 0.5
       if not busy of window 1 then exit repeat
@@ -61,18 +68,19 @@ export async function darwinRunSudoAsync(
   return await new Promise((resolve, reject) => {
     child.on('close', async (code) => {
       try {
-        const stdout: string = fs.readFileSync(stdoutFile, 'utf8');
-        const stderr: string = fs.readFileSync(stderrFile, 'utf8');
-        const exitCode: string = fs.readFileSync(exitFile, 'utf8');
+        const stdout: string[] = FileSystem.readFile(stdoutFile).split('\n');
+        const stderr: string[] = FileSystem.readFile(stderrFile).split('\n');
+        const exitCodeStr: string = FileSystem.readFile(exitFile);
+        const exitCode: number = exitCodeStr ? Number(exitCodeStr) : -1;
 
-        fs.unlinkSync(stdoutFile);
-        fs.unlinkSync(stderrFile);
-        fs.unlinkSync(exitFile);
+        FileSystem.deleteFile(stdoutFile);
+        FileSystem.deleteFile(stderrFile);
+        FileSystem.deleteFile(exitFile);
 
         resolve({
-          stdout: stdout.split('\n'),
-          stderr: stderr.split('\n'),
-          exitCode: Number(exitCode.trim())
+          stdout,
+          stderr,
+          exitCode
         });
       } catch (err) {
         reject(err);

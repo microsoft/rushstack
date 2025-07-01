@@ -1,48 +1,5 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
-  "extends": "local-node-rig/profiles/default/config/heft.json",
-
-  "aliasesByName": {
-    "start": {
-      "actionName": "build-watch",
-      "defaultParameters": ["--serve"]
-    }
-  },
-
-  "phasesByName": {
-    "build": {
-      "tasksByName": {
-        "webpack": {
-          "taskDependencies": ["typescript"],
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-webpack5-plugin"
-          }
-        },
-        "copy-assets": {
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft",
-            "pluginName": "copy-files-plugin",
-            "options": {
-              "copyOperations": [
-                {
-                  "sourcePath": ".",
-                  "destinationFolders": ["dist/vsix/unpacked"],
-                  "includeGlobs": ["package.json", "README.md", "LICENSE", ".vscodeignore", "media/**"]
-                }
-              ]
-            }
-          }
-        },
-        "package-vsix": {
-          "taskDependencies": ["typescript", "webpack", "copy-assets"],
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-vsix-plugin",
-            "pluginName": "vscode-extension-package-plugin",
-            "options": {}
-          }
-        }
-      }
-    }
-  }
+  "extends": "@rushstack/heft-vscode-extension-rig/profiles/default/config/heft.json"
 }

@@ -47,9 +47,10 @@ export class CertificateStore {
   private _keyData: string | undefined;
 
   public constructor(options: ICertificateStoreOptions = {}) {
-    const storePath: string | undefined = options.storePath;
-    if (storePath) {
-      this._storePath = path.resolve(storePath);
+    const requestedStorePath: string | undefined = options.storePath;
+    let storePath: string | undefined;
+    if (requestedStorePath) {
+      storePath = path.resolve(requestedStorePath);
     } else {
       // Default to the user's home directory under `.rushstack`
       const unresolvedUserFolder: string = homedir();
@@ -57,13 +58,14 @@ export class CertificateStore {
       if (!FileSystem.exists(userProfilePath)) {
         throw new Error("Unable to determine the current user's home directory");
       }
-      this._storePath = path.join(userProfilePath, '.rushstack');
+      storePath = path.join(userProfilePath, '.rushstack');
     }
-    FileSystem.ensureFolder(this._storePath);
+    this._storePath = storePath;
+    FileSystem.ensureFolder(storePath);
 
-    this._caCertificatePath = path.join(this._storePath, options.caCertificateFilename ?? 'rushstack-ca.pem');
-    this._certificatePath = path.join(this._storePath, options.certificateFilename ?? 'rushstack-serve.pem');
-    this._keyPath = path.join(this._storePath, options.keyFilename ?? 'rushstack-serve.key');
+    this._caCertificatePath = path.join(storePath, options.caCertificateFilename ?? 'rushstack-ca.pem');
+    this._certificatePath = path.join(storePath, options.certificateFilename ?? 'rushstack-serve.pem');
+    this._keyPath = path.join(storePath, options.keyFilename ?? 'rushstack-serve.key');
   }
 
   /**

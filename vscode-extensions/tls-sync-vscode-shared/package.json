@@ -21,8 +21,9 @@
     "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
-    "@types/vscode": "^1.63.0",
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*"
+    "@types/node": "20.17.19",
+    "@types/vscode": "^1.63.0",
+    "@rushstack/heft-node-rig": "workspace:*"
   }
 }

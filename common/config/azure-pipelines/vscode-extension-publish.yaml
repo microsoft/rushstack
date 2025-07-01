@@ -2,6 +2,20 @@ variables:
   - name: FORCE_COLOR
     value: 1
 
+parameters:
+  - name: shouldPublish
+    type: boolean
+    default: true
+  - name: ExtensionPublishConfig
+    type: object
+    default:
+      - key: 'tls-sync-vscode-ui-extension'
+        vsixPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-ui-extension/dist/vsix/packaged.vsix'
+      - key: 'tls-sync-vscode-workspace-extension'
+        vsixPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-workspace-extension/dist/vsix/packaged.vsix'
+      - key: 'rush-vscode-extension'
+        vsixPath: '$(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension/dist/vsix/packaged.vsix'
+
 resources:
   repositories:
     - repository: 1esPipelines
@@ -31,14 +45,17 @@ extends:
               - template: /common/config/azure-pipelines/templates/build.yaml@self
                 parameters:
                   BuildParameters: >
-                    --to rushstack
+                    --to tag:vsix
 
-              - script: node $(Build.SourcesDirectory)/common/scripts/install-run-rushx.js package
-                workingDirectory: $(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension
-                displayName: 'Package vscode extension'
+              - ${{ each extension in parameters.ExtensionPublishConfig }}:
+                  - publish: ${{ extension.vsixPath }}
+                    artifact: ${{ extension.key }}
+                    displayName: 'Publish Artifact: ${{ extension.key }}'
 
-              - script: node $(Build.SourcesDirectory)/common/scripts/install-run-rushx.js deploy
-                workingDirectory: $(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension
-                displayName: 'Publish vscode extension'
-                env:
-                  VSCE_PAT: $(vscePat)
+                  - bash: |
+                      npm install -g @vscode/vsce
+                      vsce publish --packagePath ${{ extension.vsixPath }} --no-dependencies
+                    displayName: 'Publish ${{ extension.key }}'
+                    condition: and(succeeded(), eq(parameters.shouldPublish, true))
+                    env:
+                      VSCE_PAT: $(vscePat)

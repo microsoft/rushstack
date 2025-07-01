@@ -73,7 +73,7 @@ export interface ICertificateExpiration {
   /**
    * Expiration date of the server certificate, or undefined if no server certificate exists
    */
-  serverCertificateExpiration: Date | undefined;
+  certificateExpiration: Date | undefined;
 }
 
 interface ICaCertificate {
@@ -382,7 +382,7 @@ export class CertificateManager {
     const { certificateData, caCertificateData } = this._certificateStore;
 
     let caCertificateExpiration: Date | undefined;
-    let serverCertificateExpiration: Date | undefined;
+    let certificateExpiration: Date | undefined;
 
     try {
       const forge: typeof import('node-forge') = await import('node-forge');
@@ -400,7 +400,7 @@ export class CertificateManager {
       if (certificateData) {
         try {
           const serverCertificate: pki.Certificate = forge.pki.certificateFromPem(certificateData);
-          serverCertificateExpiration = serverCertificate.validity.notAfter;
+          certificateExpiration = serverCertificate.validity.notAfter;
         } catch (error) {
           // no-op
         }
@@ -411,7 +411,7 @@ export class CertificateManager {
 
     return {
       caCertificateExpiration,
-      serverCertificateExpiration
+      certificateExpiration
     };
   }
 

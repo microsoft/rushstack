@@ -264,10 +264,8 @@
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
-    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/package-extractor": "workspace:*",
-    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/mocha": "10.0.6",
     "@types/vscode": "^1.63.0",
@@ -275,7 +273,7 @@
     "@vscode/test-electron": "^1.6.2",
     "eslint": "~9.25.1",
     "glob": "~7.0.5",
-    "local-node-rig": "workspace:*",
+    "@rushstack/heft-vscode-extension-rig": "workspace:*",
     "mocha": "^10.1.0",
     "@vscode/vsce": "3.3.2"
   },

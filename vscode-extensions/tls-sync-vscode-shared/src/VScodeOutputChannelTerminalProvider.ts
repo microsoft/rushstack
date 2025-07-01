@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Text } from '@rushstack/node-core-library';
 import type { ITerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 import type * as vscode from 'vscode';
 
@@ -31,7 +32,6 @@ export interface IVScodeOutputChannelTerminalProviderOptions {
  */
 export class VScodeOutputChannelTerminalProvider implements ITerminalProvider {
   private readonly _outputChannel: vscode.OutputChannel;
-  private _lineBuffer: string = '';
   public static readonly supportsColor: boolean = false;
 
   /**
@@ -62,12 +62,10 @@ export class VScodeOutputChannelTerminalProvider implements ITerminalProvider {
    * {@inheritDoc ITerminalProvider.write}
    */
   public write(data: string, severity: TerminalProviderSeverity): void {
-    // build _lineBuffer as data comes in
-    this._lineBuffer += data;
-    // when a newline is encountered, flush the _lineBuffer, log the line to outputChannel.appendLine
-    const lines: string[] = this._lineBuffer.split('\n');
-    this._lineBuffer = lines.pop() || ''; // keep the last line in the buffer if it doesn't end with a newline
-    this._outputChannel.appendLine(lines.join('\n') + '\n');
+    const outputChannel: vscode.OutputChannel = this._outputChannel;
+    for (const line of Text.readLinesFromIterable(data, {})) {
+      outputChannel.appendLine(line);
+    }
   }
 
   /**

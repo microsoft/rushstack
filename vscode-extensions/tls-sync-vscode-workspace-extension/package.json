@@ -136,12 +136,9 @@
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
-    "local-node-rig": "workspace:*",
-    "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@rushstack/heft-vscode-extension-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/package-extractor": "workspace:*",
-    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
-    "@rushstack/heft-vsix-plugin": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/mocha": "10.0.6",
     "@types/vscode": "^1.63.0",

@@ -1090,8 +1090,8 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@rushstack/heft-vsix-plugin",
-      "projectFolder": "heft-plugins/heft-vsix-plugin",
+      "packageName": "@rushstack/heft-vscode-extension-plugin",
+      "projectFolder": "heft-plugins/heft-vscode-extension-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -1281,6 +1281,12 @@
     {
       "packageName": "@rushstack/heft-node-rig",
       "projectFolder": "rigs/heft-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-vscode-extension-rig",
+      "projectFolder": "rigs/heft-vscode-extension-rig",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

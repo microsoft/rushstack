@@ -1,0 +1,51 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
+
+  /**
+   * The list of Heft phases that can be run by Heft.
+   */
+  "phasesByName": {
+    "build": {
+      "phaseDescription": "Build and lint the project.",
+      "cleanFiles": [{ "includeGlobs": ["lib-esm", "lib-dts", "release"] }],
+
+      "tasksByName": {
+        "webpack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack5-plugin"
+          }
+        },
+        "copy-assets": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": ".",
+                  "destinationFolders": ["dist/vsix/unpacked"],
+                  "includeGlobs": ["package.json", "README.md", "LICENSE", ".vscodeignore", "media/**"]
+                }
+              ]
+            }
+          }
+        },
+
+        "package-vsix": {
+          "taskDependencies": ["typescript", "webpack", "copy-assets"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-vscode-extension-plugin",
+            "pluginName": "vscode-extension-package-plugin",
+            "options": {
+              "unpackedDirectory": "dist/vsix/unpacked",
+              "vsixDirectory": "dist/vsix/packaged.vsix"
+            }
+          }
+        }
+      }
+    }
+  }
+}

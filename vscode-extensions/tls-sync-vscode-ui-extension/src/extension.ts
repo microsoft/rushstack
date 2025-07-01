@@ -11,10 +11,10 @@ import {
   UI_EXTENSION_DISPLAY_NAME
 } from '@rushstack/tls-sync-vscode-shared/lib/constants';
 import { getConfig } from '@rushstack/tls-sync-vscode-shared/lib/config';
-import { withTimeout } from '@rushstack/tls-sync-vscode-shared/lib/withTimeout';
 import { CertificateManager, type ICertificate } from '@rushstack/debug-certificate-manager';
 import { Terminal } from '@rushstack/terminal';
 import { version } from '../package.json';
+import { Async } from '@rushstack/node-core-library/lib/Async';
 
 /*
  * This extension provides commands to manage debug TLS certificates on the local machine. This capability is
@@ -82,20 +82,19 @@ export function activate(context: vscode.ExtensionContext): void {
       let certificates: ICertificate | undefined = undefined;
       let isCertExpired: boolean = false;
       try {
-        certificates = await withTimeout(
+        certificates = await Async.runWithTimeoutAsync(
           certificateManager.ensureCertificateAsync(canGenerateNewCertificate, terminal, {
             skipCertificateTrust
           }),
           5000,
           'Certificate request timed out after 5 seconds'
         );
-        const { caCertificateExpiration, serverCertificateExpiration } =
+        const { caCertificateExpiration, certificateExpiration } =
           await certificateManager.getCertificateExpirationAsync();
 
         const now: number = Date.now();
         isCertExpired =
-          (caCertificateExpiration?.getTime() ?? 0) < now ||
-          (serverCertificateExpiration?.getTime() ?? 0) < now;
+          (caCertificateExpiration?.getTime() ?? 0) < now || (certificateExpiration?.getTime() ?? 0) < now;
       } catch {
         outputChannel.appendLine('Failed to retrieve existing certificates. Creating new ones.');
       }
@@ -131,7 +130,7 @@ export function activate(context: vscode.ExtensionContext): void {
           canGenerateNewCertificate = true;
         }
 
-        certificates = await withTimeout(
+        certificates = await Async.runWithTimeoutAsync(
           certificateManager.ensureCertificateAsync(canGenerateNewCertificate, terminal, {
             skipCertificateTrust
           }),

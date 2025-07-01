@@ -40,6 +40,7 @@ export class Async {
         weighted: true;
     }): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
+    static runWithTimeoutAsync<TResult>(promise: Promise<TResult>, timeoutMs: number, timeoutMessage?: string): Promise<TResult>;
     static sleepAsync(ms: number): Promise<void>;
     static validateWeightedIterable(operation: IWeighted): void;
 }

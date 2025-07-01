@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-vscode-extension-plugin",
+      "comment": "Add new Heft plugin to package files into a VSIX file",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-vscode-extension-plugin"
+}

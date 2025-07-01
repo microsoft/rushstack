@@ -15,7 +15,7 @@ import {
   UI_EXTENSION_DISPLAY_NAME
 } from '@rushstack/tls-sync-vscode-shared/lib/constants';
 import { getConfig } from '@rushstack/tls-sync-vscode-shared/lib/config';
-import { withTimeout } from '@rushstack/tls-sync-vscode-shared/lib/withTimeout';
+import { Async } from '@rushstack/node-core-library/lib/Async';
 import {
   CertificateManager,
   CertificateStore,
@@ -122,8 +122,8 @@ export function activate(context: vscode.ExtensionContext): void {
         storePath
       };
 
-      const certificatesFromUI: ICertificate | undefined = await withTimeout(
-        vscode.commands.executeCommand<ICertificate>(UI_COMMAND_ENSURE_CERTIFICATE),
+      const certificatesFromUI: ICertificate | undefined = await Async.runWithTimeoutAsync(
+        vscode.commands.executeCommand<ICertificate>(UI_COMMAND_ENSURE_CERTIFICATE) as Promise<ICertificate>,
         60000,
         'UI certificate retrieval timed out after 60 seconds'
       );
@@ -140,7 +140,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const skipCertificateTrust: boolean = false;
       const canGenerateNewCertificate: boolean = false;
 
-      const localCertificates: ICertificate | undefined = await withTimeout(
+      const localCertificates: ICertificate | undefined = await Async.runWithTimeoutAsync(
         certificateManager
           .ensureCertificateAsync(canGenerateNewCertificate, terminal, {
             skipCertificateTrust

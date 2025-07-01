@@ -43,7 +43,7 @@ export interface ICertificate {
 // @public
 export interface ICertificateExpiration {
     caCertificateExpiration: Date | undefined;
-    serverCertificateExpiration: Date | undefined;
+    certificateExpiration: Date | undefined;
 }
 
 // @public
