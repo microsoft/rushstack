@@ -39,7 +39,8 @@ extends:
             templateContext:
               outputs:
                 - ${{ each extension in parameters.ExtensionPublishConfig }}:
-                    - artifactName: ${{ extension.key }}
+                    - output: pipelineArtifact
+                      artifactName: ${{ extension.key }}
                       targetPath: ${{ extension.vsixPath }}
                       displayName: 'Publish Artifact: ${{ extension.key }}'
 
