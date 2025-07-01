@@ -4,18 +4,4 @@
 const nodeTrustedToolProfile = require('@rushstack/heft-vscode-extension-rig/profiles/default/includes/eslint/flat/profile/node-trusted-tool');
 const friendlyLocalsMixin = require('@rushstack/heft-vscode-extension-rig/profiles/default/includes/eslint/flat/mixins/friendly-locals');
 
-module.exports = [
-  ...nodeTrustedToolProfile,
-  ...friendlyLocalsMixin,
-  {
-    ignores: ['out', 'dist', '**/*.d.ts']
-  },
-  {
-    files: ['**/*.ts', '**/*.tsx'],
-    languageOptions: {
-      parserOptions: {
-        tsconfigRootDir: __dirname
-      }
-    }
-  }
-];
+module.exports = [...nodeTrustedToolProfile, ...friendlyLocalsMixin];

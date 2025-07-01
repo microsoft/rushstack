@@ -428,7 +428,7 @@
     },
     {
       "name": "@vscode/vsce",
-      "allowedCategories": [ "vscode-extensions" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@yarnpkg/lockfile",

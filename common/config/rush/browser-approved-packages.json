@@ -75,6 +75,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "heft-node-rig",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "local-web-rig",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },

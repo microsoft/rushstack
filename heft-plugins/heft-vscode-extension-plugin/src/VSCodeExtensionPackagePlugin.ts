@@ -7,7 +7,8 @@ import type {
   IHeftTaskSession,
   IHeftTaskRunHookOptions
 } from '@rushstack/heft';
-import { Executable } from '@rushstack/node-core-library';
+import { Executable, IWaitForExitResult } from '@rushstack/node-core-library';
+import type { ChildProcess } from 'node:child_process';
 import * as path from 'node:path';
 
 interface IVSCodeExtensionPackagePluginOptions {
@@ -24,6 +25,10 @@ interface IVSCodeExtensionPackagePluginOptions {
 
 const PLUGIN_NAME: 'vscode-extension-package-plugin' = 'vscode-extension-package-plugin';
 
+const vsceBasePackagePath: string = require.resolve('@vscode/vsce/package.json');
+const vsceExecName: string = require(vsceBasePackagePath).bin.vsce;
+const vsceExecutable: string = path.resolve(path.dirname(vsceBasePackagePath), vsceExecName);
+
 export default class VSCodeExtensionPackagePlugin
   implements IHeftTaskPlugin<IVSCodeExtensionPackagePluginOptions>
 {
@@ -38,15 +43,29 @@ export default class VSCodeExtensionPackagePlugin
         logger: { terminal }
       } = heftTaskSession;
 
+      terminal.writeLine(`Using VSCE executable: ${vsceExecutable}`);
       terminal.writeLine(`Packaging VSIX from ${unpackedDirectory} to ${vsixDirectory}`);
-
-      Executable.spawnSync(
-        'vsce',
+      const childProcess: ChildProcess = Executable.spawn(
+        vsceExecutable,
         ['package', '--no-dependencies', '--out', `${path.resolve(vsixDirectory)}`],
         {
           currentWorkingDirectory: path.resolve(unpackedDirectory)
         }
       );
+      const result: IWaitForExitResult<string> = await Executable.waitForExitAsync(childProcess, {
+        encoding: 'utf8'
+      });
+      if (result.stdout) {
+        terminal.writeLine(`VSCE stdout: ${result.stdout}`);
+      }
+      if (result.stderr) {
+        terminal.writeLine(`VSCE stderr: ${result.stderr}`);
+      }
+
+      if (result.exitCode !== 0) {
+        throw new Error(`VSCE packaging failed with exit code ${result.exitCode}`);
+      }
+      terminal.writeLine('VSIX packaged.');
     });
   }
 }

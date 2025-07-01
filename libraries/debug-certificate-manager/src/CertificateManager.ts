@@ -66,12 +66,12 @@ export interface ICertificate {
  */
 export interface ICertificateExpiration {
   /**
-   * Expiration date of the CA certificate, or undefined if no CA certificate exists
+   * Expiration date of the Certificate Authority certificate, or undefined if no Certificate Authority certificate exists
    */
   caCertificateExpiration: Date | undefined;
 
   /**
-   * Expiration date of the server certificate, or undefined if no server certificate exists
+   * Expiration date of the TLS Server certificate, or undefined if no TLS Server certificate exists
    */
   certificateExpiration: Date | undefined;
 }
@@ -133,6 +133,7 @@ export interface ICertificateGenerationOptions {
 }
 
 /**
+ * Options for configuring the `CertificateManager`.
  * @public
  */
 export interface ICertificateManagerOptions extends ICertificateStoreOptions {}
@@ -145,18 +146,14 @@ const MAX_CERTIFICATE_VALIDITY_DAYS: 365 = 365;
  * @public
  */
 export class CertificateManager {
-  private readonly _certificateStore: CertificateStore;
-
-  public constructor(options: ICertificateManagerOptions = {}) {
-    this._certificateStore = new CertificateStore(options);
-  }
-
   /**
    * Get the certificate store used by this manager.
    * @public
    */
-  public get certificateStore(): CertificateStore {
-    return this._certificateStore;
+  public readonly certificateStore: CertificateStore;
+
+  public constructor(options: ICertificateManagerOptions = {}) {
+    this.certificateStore = new CertificateStore(options);
   }
 
   /**
@@ -172,7 +169,7 @@ export class CertificateManager {
   ): Promise<ICertificate> {
     const optionsWithDefaults: Required<ICertificateGenerationOptions> = applyDefaultOptions(options);
 
-    const { certificateData: existingCert, keyData: existingKey } = this._certificateStore;
+    const { certificateData: existingCert, keyData: existingKey } = this.certificateStore;
 
     if (process.env[DISABLE_CERT_GENERATION_VARIABLE_NAME] === '1') {
       // Allow the environment (e.g. GitHub codespaces) to forcibly disable dev cert generation
@@ -240,7 +237,7 @@ export class CertificateManager {
         );
       }
 
-      const { caCertificateData } = this._certificateStore;
+      const { caCertificateData } = this.certificateStore;
 
       if (!caCertificateData) {
         messages.push(
@@ -295,9 +292,9 @@ export class CertificateManager {
    * @public
    */
   public async untrustCertificateAsync(terminal: ITerminal): Promise<boolean> {
-    this._certificateStore.certificateData = undefined;
-    this._certificateStore.keyData = undefined;
-    this._certificateStore.caCertificateData = undefined;
+    this.certificateStore.certificateData = undefined;
+    this.certificateStore.keyData = undefined;
+    this.certificateStore.caCertificateData = undefined;
 
     switch (process.platform) {
       case 'win32':
@@ -365,7 +362,7 @@ export class CertificateManager {
         terminal.writeLine(
           'Automatic certificate untrust is only implemented for debug-certificate-manager on Windows ' +
             'and macOS. To untrust the development certificate, remove this certificate from your trusted ' +
-            `root certification authorities: "${this._certificateStore.certificatePath}". The ` +
+            `root certification authorities: "${this.certificateStore.certificatePath}". The ` +
             `certificate has serial number "${CA_SERIAL_NUMBER}".`
         );
         return false;
@@ -379,7 +376,7 @@ export class CertificateManager {
    * @public
    */
   public async getCertificateExpirationAsync(): Promise<ICertificateExpiration> {
-    const { certificateData, caCertificateData } = this._certificateStore;
+    const { certificateData, caCertificateData } = this.certificateStore;
 
     let caCertificateExpiration: Date | undefined;
     let certificateExpiration: Date | undefined;
@@ -746,7 +743,7 @@ export class CertificateManager {
         terminal.writeVerboseLine(
           'Automatic certificate trust validation is only implemented for debug-certificate-manager on Windows ' +
             'and macOS. Manually verify this development certificate is present in your trusted ' +
-            `root certification authorities: "${this._certificateStore.certificatePath}". ` +
+            `root certification authorities: "${this.certificateStore.certificatePath}". ` +
             `The certificate has serial number "${CA_SERIAL_NUMBER}".`
         );
         // Always return true on Linux to prevent breaking flow.
@@ -796,7 +793,7 @@ export class CertificateManager {
     options: Required<ICertificateGenerationOptions>,
     terminal: ITerminal
   ): Promise<ICertificate> {
-    const certificateStore: CertificateStore = this._certificateStore;
+    const certificateStore: CertificateStore = this.certificateStore;
     const generatedCertificate: ICertificate = await this._createDevelopmentCertificateAsync(options);
 
     const certificateName: string = Date.now().toString();

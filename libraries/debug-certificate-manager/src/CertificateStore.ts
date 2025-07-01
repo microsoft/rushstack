@@ -7,6 +7,7 @@ import { homedir } from 'os';
 import { FileSystem } from '@rushstack/node-core-library';
 
 /**
+ * Options for configuring paths and filenames used by the `CertificateStore`.
  * @public
  */
 export interface ICertificateStoreOptions {
@@ -66,6 +67,13 @@ export class CertificateStore {
     this._caCertificatePath = path.join(storePath, options.caCertificateFilename ?? 'rushstack-ca.pem');
     this._certificatePath = path.join(storePath, options.certificateFilename ?? 'rushstack-serve.pem');
     this._keyPath = path.join(storePath, options.keyFilename ?? 'rushstack-serve.key');
+  }
+
+  /**
+   * Path to the directory where the debug certificates are stored.
+   */
+  public get storePath(): string {
+    return this._storePath;
   }
 
   /**

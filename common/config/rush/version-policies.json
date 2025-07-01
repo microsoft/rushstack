@@ -113,7 +113,7 @@
     "policyName": "tls-sync-vscode-extensions",
     "definitionName": "lockStepVersion",
     "version": "0.0.1",
-    "nextBump": "patch",
+    "nextBump": "minor",
     "mainProject": "tls-sync-vscode-workspace-extension"
   }
 ]

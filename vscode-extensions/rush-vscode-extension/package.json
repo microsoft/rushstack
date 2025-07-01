@@ -70,13 +70,10 @@
       "description": "Rush Stack community support"
     }
   ],
-  "main": "./dist/extension.js",
+  "main": "./extension.js",
   "scripts": {
     "build": "heft build --clean",
     "build:watch": "heft build-watch",
-    "vscode:prepublish": "heft build --clean --production",
-    "deploy": "vsce publish --no-dependencies",
-    "package": "vsce package --no-dependencies",
     "start": "heft start",
     "pretest": "npm run build",
     "test": "node ./lib/test/runTest.js",
@@ -274,8 +271,7 @@
     "eslint": "~9.25.1",
     "glob": "~7.0.5",
     "@rushstack/heft-vscode-extension-rig": "workspace:*",
-    "mocha": "^10.1.0",
-    "@vscode/vsce": "3.3.2"
+    "mocha": "^10.1.0"
   },
   "engines": {
     "vscode": "^1.63.0"

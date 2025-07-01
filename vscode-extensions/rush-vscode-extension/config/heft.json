@@ -29,13 +29,18 @@
             }
           }
         },
-        "generate-vscodeignore": {
-          "taskDependencies": ["copy-webview", "typescript", "webpack"],
+        "copy-resources": {
           "taskPlugin": {
+            "pluginName": "copy-files-plugin",
             "pluginPackage": "@rushstack/heft",
-            "pluginName": "run-script-plugin",
             "options": {
-              "scriptPath": "lib/scripts/generate-vscodeignore.js"
+              "copyOperations": [
+                {
+                  "sourcePath": "resources",
+                  "destinationFolders": ["dist/vsix/unpacked/resources"],
+                  "includeGlobs": ["*"]
+                }
+              ]
             }
           }
         }

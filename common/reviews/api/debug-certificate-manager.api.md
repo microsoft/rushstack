@@ -9,7 +9,7 @@ import type { ITerminal } from '@rushstack/terminal';
 // @public
 export class CertificateManager {
     constructor(options?: ICertificateManagerOptions);
-    get certificateStore(): CertificateStore;
+    readonly certificateStore: CertificateStore;
     ensureCertificateAsync(canGenerateNewCertificate: boolean, terminal: ITerminal, options?: ICertificateGenerationOptions): Promise<ICertificate>;
     getCertificateExpirationAsync(): Promise<ICertificateExpiration>;
     untrustCertificateAsync(terminal: ITerminal): Promise<boolean>;
@@ -27,6 +27,7 @@ export class CertificateStore {
     get keyData(): string | undefined;
     set keyData(key: string | undefined);
     get keyPath(): string;
+    get storePath(): string;
 }
 
 // @public
@@ -54,11 +55,11 @@ export interface ICertificateGenerationOptions {
     validityInDays?: number;
 }
 
-// @public (undocumented)
+// @public
 export interface ICertificateManagerOptions extends ICertificateStoreOptions {
 }
 
-// @public (undocumented)
+// @public
 export interface ICertificateStoreOptions {
     caCertificateFilename?: string;
     certificateFilename?: string;
