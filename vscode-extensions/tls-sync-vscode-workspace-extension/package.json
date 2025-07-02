@@ -11,7 +11,8 @@
   "preview": true,
   "displayName": "TLS Sync (Workspace Extension)",
   "description": "",
-  "homepage": "https://rushstack.io",
+  "homepage": "https://github.com/microsoft/rushstack/tree/main/vscode-extensions/tls-sync-vscode-workspace-extension",
+  "icon": "assets/extension-icon.png",
   "extensionKind": [
     "workspace"
   ],
