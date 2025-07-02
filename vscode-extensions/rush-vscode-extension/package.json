@@ -77,7 +77,7 @@
     "start": "heft start",
     "pretest": "npm run build",
     "test": "node ./lib/test/runTest.js",
-    "_phase:build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
     "_phase:test": ""
   },
   "contributes": {
