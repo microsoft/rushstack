@@ -538,6 +538,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         isInitial: true,
         isWatch,
         rushConfiguration: this.rushConfiguration,
+        parallelism,
         phaseOriginal: new Set(this._originalPhases),
         phaseSelection: new Set(this._initialPhases),
         includePhaseDeps,
@@ -821,9 +822,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     // Loop until Ctrl+C
     while (!abortSignal.aborted) {
       // On the initial invocation, this promise will return immediately with the full set of projects
-      const { changedProjects, inputsSnapshot: state } = await projectWatcher.waitForChangeAsync(
-        onWaitingForChanges
-      );
+      const { changedProjects, inputsSnapshot: state } =
+        await projectWatcher.waitForChangeAsync(onWaitingForChanges);
 
       if (abortSignal.aborted) {
         return;
