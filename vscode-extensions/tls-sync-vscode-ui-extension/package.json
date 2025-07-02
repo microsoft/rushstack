@@ -33,7 +33,7 @@
     "start": "heft start",
     "pretest": "npm run build",
     "test": "node ./lib-commonjs/test/runTest.js",
-    "_phase:build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
     "_phase:test": ""
   },
   "contributes": {
@@ -68,13 +68,9 @@
   "devDependencies": {
     "@rushstack/heft-vscode-extension-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/glob": "7.1.1",
-    "@types/mocha": "10.0.6",
     "@types/vscode": "^1.63.0",
     "@types/webpack-env": "1.18.8",
     "@vscode/test-electron": "^1.6.2",
-    "glob": "~7.0.5",
-    "mocha": "^10.1.0",
     "@types/node": "20.17.19"
   }
 }

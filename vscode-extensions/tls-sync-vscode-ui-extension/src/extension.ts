@@ -3,6 +3,7 @@
 
 import * as vscode from 'vscode';
 import { VScodeOutputChannelTerminalProvider } from '@rushstack/tls-sync-vscode-shared/lib/VScodeOutputChannelTerminalProvider';
+import { getCertificateManager } from '@rushstack/tls-sync-vscode-shared/lib/certificates';
 import {
   UI_COMMAND_ENSURE_CERTIFICATE,
   UI_COMMAND_SHOW_LOG,
@@ -10,8 +11,7 @@ import {
   UI_COMMAND_UNTRUST_CERTIFICATE,
   UI_EXTENSION_DISPLAY_NAME
 } from '@rushstack/tls-sync-vscode-shared/lib/constants';
-import { getConfig } from '@rushstack/tls-sync-vscode-shared/lib/config';
-import { CertificateManager, type ICertificate } from '@rushstack/debug-certificate-manager';
+import { type ICertificate } from '@rushstack/debug-certificate-manager';
 import { Terminal } from '@rushstack/terminal';
 import { version } from '../package.json';
 import { Async } from '@rushstack/node-core-library/lib/Async';
@@ -46,47 +46,32 @@ export function activate(context: vscode.ExtensionContext): void {
   async function handleUntrustCertificate(): Promise<void> {
     try {
       outputChannel.appendLine('Attempting to clean up certificates...');
-      const { caCertificateFilename, keyFilename, certificateFilename, storePath } = getConfig(
-        outputChannel,
-        'ui'
-      );
-      const certificateManager: CertificateManager = new CertificateManager({
-        caCertificateFilename,
-        keyFilename,
-        certificateFilename,
-        storePath
-      });
+      const certificateManager = getCertificateManager(outputChannel, 'ui');
       await certificateManager.untrustCertificateAsync(terminal);
-      outputChannel.appendLine('Certificates untrusted successfully.');
-      void vscode.window.showInformationMessage('Certificates untrusted successfully.');
+
+      const message: string = 'Certificates untrusted successfully.';
+      outputChannel.appendLine(message);
+      void vscode.window.showInformationMessage(message);
     } catch (err) {
-      outputChannel.appendLine(
-        `Error cleaning up certificates: ${err instanceof Error ? err.message : 'Unknown error'}`
-      );
-      void vscode.window.showErrorMessage(
-        `Error cleaning up certificates: ${err instanceof Error ? err.message : 'Unknown error'}`
-      );
+      const message: string = `Error cleaning up certificates: ${
+        err instanceof Error ? err.message : 'Unknown error'
+      }`;
+      outputChannel.appendLine(message);
+      void vscode.window.showErrorMessage(message);
     }
   }
 
   async function handleEnsureCertificate(): Promise<undefined | ICertificate> {
     try {
       outputChannel.appendLine('Attempting to retrieve certificates...');
-      const { caCertificateFilename, keyFilename, certificateFilename, storePath } = getConfig(
-        outputChannel,
-        'ui'
-      );
-      const certificateManager: CertificateManager = new CertificateManager({
-        caCertificateFilename,
-        keyFilename,
-        certificateFilename,
-        storePath
-      });
+      const certificateManager = getCertificateManager(outputChannel, 'ui');
       let skipCertificateTrust: boolean = false;
       let canGenerateNewCertificate: boolean = false;
 
       let certificates: ICertificate | undefined = undefined;
       let isCertExpired: boolean = false;
+
+      // Check existing certificates first
       try {
         certificates = await Async.runWithTimeoutAsync({
           action: () =>
@@ -106,6 +91,7 @@ export function activate(context: vscode.ExtensionContext): void {
         outputChannel.appendLine('Failed to retrieve existing certificates. Creating new ones.');
       }
 
+      // Prompt the user and create new certificates
       if (
         !certificates ||
         !certificates.pemCaCertificate ||
@@ -124,8 +110,9 @@ export function activate(context: vscode.ExtensionContext): void {
         outputChannel.appendLine(`User response: ${response ? response : 'No response received'}`);
 
         if (!response) {
-          outputChannel.appendLine('User cancelled certificate creation.');
-          void vscode.window.showInformationMessage('Certificate creation cancelled.');
+          const message: string = 'User cancelled certificate creation.';
+          outputChannel.appendLine(message);
+          void vscode.window.showInformationMessage(message);
           return undefined;
         }
 
@@ -160,12 +147,11 @@ export function activate(context: vscode.ExtensionContext): void {
       outputChannel.appendLine('Certificates retrieved successfully.');
       return certificates;
     } catch (err) {
-      outputChannel.appendLine(
-        `Error retrieving certificates: ${err instanceof Error ? err.message : 'Unknown error'}`
-      );
-      void vscode.window.showErrorMessage(
-        `Error retrieving certificates: ${err instanceof Error ? err.message : 'Unknown error'}`
-      );
+      const message: string = `Error retrieving certificates: ${
+        err instanceof Error ? err.message : 'Unknown error'
+      }`;
+      outputChannel.appendLine(message);
+      void vscode.window.showErrorMessage(message);
     }
   }
 

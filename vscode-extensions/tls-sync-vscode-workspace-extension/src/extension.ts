@@ -3,6 +3,7 @@
 
 import * as vscode from 'vscode';
 import { VScodeOutputChannelTerminalProvider } from '@rushstack/tls-sync-vscode-shared/lib/VScodeOutputChannelTerminalProvider';
+import { getCertificateManager } from '@rushstack/tls-sync-vscode-shared/lib/certificates';
 import {
   UI_COMMAND_PING,
   UI_COMMAND_ENSURE_CERTIFICATE,
@@ -16,12 +17,7 @@ import {
 } from '@rushstack/tls-sync-vscode-shared/lib/constants';
 import { getConfig } from '@rushstack/tls-sync-vscode-shared/lib/config';
 import { Async } from '@rushstack/node-core-library/lib/Async';
-import {
-  CertificateManager,
-  CertificateStore,
-  type ICertificate,
-  type ICertificateManagerOptions
-} from '@rushstack/debug-certificate-manager';
+import { CertificateManager, type ICertificate } from '@rushstack/debug-certificate-manager';
 import { Terminal } from '@rushstack/terminal';
 import { version } from '../package.json';
 
@@ -47,22 +43,19 @@ export function activate(context: vscode.ExtensionContext): void {
   async function waitForUIExtension(): Promise<void> {
     outputChannel.appendLine(`Waiting for UI extension (${UI_EXTENSION_DISPLAY_NAME}) to become active...`);
 
+    const maxRetries: number = 30;
     try {
       await Async.runWithRetriesAsync({
         action: async (attempt: number) => {
-          outputChannel.appendLine(`Pinging UI extension... Attempt ${attempt + 1}/30`);
-
+          outputChannel.appendLine(`Pinging UI extension... Attempt ${attempt + 1}/${maxRetries}`);
           const { version: uiVersion } = await vscode.commands.executeCommand<{ version: string }>(
             UI_COMMAND_PING
           );
-
           if (!uiVersion) {
             outputChannel.appendLine('UI extension is not yet active. Retrying...');
-            throw new Error('UI extension not active');
+            return;
           }
-
           outputChannel.appendLine(`UI extension is active. Version: ${uiVersion}`);
-
           if (version !== uiVersion) {
             outputChannel.appendLine(
               `Warning: UI extension version mismatch. Expected ${version}, got ${uiVersion}.`
@@ -73,7 +66,7 @@ export function activate(context: vscode.ExtensionContext): void {
             throw new Error('Version mismatch');
           }
         },
-        maxRetries: 30,
+        maxRetries,
         retryDelayMs: 1000
       });
     } catch (error) {
@@ -116,16 +109,6 @@ export function activate(context: vscode.ExtensionContext): void {
       } catch (err) {
         return;
       }
-      const { caCertificateFilename, certificateFilename, keyFilename, storePath } = getConfig(
-        outputChannel,
-        'workspace'
-      );
-      const certificateManagerParams: ICertificateManagerOptions = {
-        caCertificateFilename,
-        certificateFilename,
-        keyFilename,
-        storePath
-      };
 
       const certificatesFromUI: ICertificate | undefined = await Async.runWithTimeoutAsync({
         action: () =>
@@ -144,11 +127,11 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
 
-      const certificateManager: CertificateManager = new CertificateManager(certificateManagerParams);
+      const certificateManager: CertificateManager = getCertificateManager(outputChannel, 'workspace');
       const skipCertificateTrust: boolean = false;
       const canGenerateNewCertificate: boolean = false;
 
-      const localCertificates: ICertificate | undefined = await Async.runWithTimeoutAsync({
+      const workspaceCertificates: ICertificate | undefined = await Async.runWithTimeoutAsync({
         action: () =>
           certificateManager
             .ensureCertificateAsync(canGenerateNewCertificate, terminal, {
@@ -164,9 +147,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
       let isSynchronized: boolean = false;
       isSynchronized =
-        localCertificates?.pemCaCertificate === certificatesFromUI.pemCaCertificate &&
-        localCertificates?.pemCertificate === certificatesFromUI.pemCertificate &&
-        localCertificates?.pemKey === certificatesFromUI.pemKey;
+        workspaceCertificates?.pemCaCertificate === certificatesFromUI.pemCaCertificate &&
+        workspaceCertificates?.pemCertificate === certificatesFromUI.pemCertificate &&
+        workspaceCertificates?.pemKey === certificatesFromUI.pemKey;
       if (isSynchronized) {
         void vscode.window.showInformationMessage(
           'Local certificates are already synchronized with UI certificates.'
@@ -174,24 +157,26 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
 
-      const certificateStore: CertificateStore = new CertificateStore(certificateManagerParams);
+      const { certificateStore } = certificateManager;
 
       certificateStore.caCertificateData = certificatesFromUI.pemCaCertificate;
-      outputChannel.appendLine(`Writing certificates to ${certificateStore.certificatePath}...`);
+      outputChannel.appendLine(`Writing CA certificate to ${certificateStore.caCertificatePath}...`);
 
       certificateStore.certificateData = certificatesFromUI.pemCertificate;
-      outputChannel.appendLine(`Writing certificates to ${certificateStore.caCertificatePath}...`);
+      outputChannel.appendLine(`Writing TLS server certificates to ${certificateStore.certificateData}...`);
 
       certificateStore.keyData = certificatesFromUI.pemKey;
-      outputChannel.appendLine(`Writing certificates to ${certificateStore.keyPath}...`);
+      outputChannel.appendLine(`Writing TLS private key to ${certificateStore.keyPath}...`);
 
       await vscode.commands.executeCommand('setContext', 'tlssync.workspace.sync.complete', true);
       void vscode.window.showInformationMessage(`Certificates synchronized successfully.`);
       outputChannel.appendLine(`Certificates synchronized successfully.`);
     } catch (err) {
-      const errorMessage: string = err instanceof Error ? err.message : 'Unknown error';
-      outputChannel.appendLine(`Error synchronizing certificates: ${errorMessage}`);
-      void vscode.window.showErrorMessage(`Error synchronizing certificates: ${errorMessage}`);
+      const message: string = `Error synchronizing certificates: ${
+        err instanceof Error ? err.message : 'Unknown error'
+      }`;
+      outputChannel.appendLine(message);
+      void vscode.window.showErrorMessage(message);
     }
   }
 
