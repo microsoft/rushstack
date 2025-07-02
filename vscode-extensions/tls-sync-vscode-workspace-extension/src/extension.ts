@@ -38,26 +38,26 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
   const terminal: Terminal = new Terminal(terminalProvider);
-  outputChannel.appendLine(`${WORKSPACE_EXTENSION_DISPLAY_NAME} output channel initialized.`);
+  terminal.writeLine(`${WORKSPACE_EXTENSION_DISPLAY_NAME} output channel initialized.`);
 
   async function waitForUIExtension(): Promise<void> {
-    outputChannel.appendLine(`Waiting for UI extension (${UI_EXTENSION_DISPLAY_NAME}) to become active...`);
+    terminal.writeLine(`Waiting for UI extension (${UI_EXTENSION_DISPLAY_NAME}) to become active...`);
 
     const maxRetries: number = 30;
     try {
       await Async.runWithRetriesAsync({
         action: async (attempt: number) => {
-          outputChannel.appendLine(`Pinging UI extension... Attempt ${attempt + 1}/${maxRetries}`);
+          terminal.writeLine(`Pinging UI extension... Attempt ${attempt + 1}/${maxRetries}`);
           const { version: uiVersion } = await vscode.commands.executeCommand<{ version: string }>(
             UI_COMMAND_PING
           );
           if (!uiVersion) {
-            outputChannel.appendLine('UI extension is not yet active. Retrying...');
+            terminal.writeLine('UI extension is not yet active. Retrying...');
             return;
           }
-          outputChannel.appendLine(`UI extension is active. Version: ${uiVersion}`);
+          terminal.writeLine(`UI extension is active. Version: ${uiVersion}`);
           if (version !== uiVersion) {
-            outputChannel.appendLine(
+            terminal.writeLine(
               `Warning: UI extension version mismatch. Expected ${version}, got ${uiVersion}.`
             );
             void vscode.window.showWarningMessage(
@@ -70,7 +70,7 @@ export function activate(context: vscode.ExtensionContext): void {
         retryDelayMs: 1000
       });
     } catch (error) {
-      outputChannel.appendLine('UI extension did not respond within the expected time frame.');
+      terminal.writeLine('UI extension did not respond within the expected time frame.');
       throw new Error('UI extension did not respond within the expected time frame.');
     }
   }
@@ -93,7 +93,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   async function handleSyncCertificates(): Promise<void> {
     if (!vscode.env.remoteName) {
-      outputChannel.appendLine(
+      terminal.writeLine(
         'This command is only available in remote workspaces. Please open this workspace in a remote environment.'
       );
       void vscode.window.showErrorMessage(
@@ -102,7 +102,7 @@ export function activate(context: vscode.ExtensionContext): void {
       return;
     }
     void vscode.window.showInformationMessage(`Synchronizing TLS certificates.`);
-    outputChannel.appendLine('Starting certificate synchronization...');
+    terminal.writeLine('Starting certificate synchronization...');
     try {
       try {
         await waitForUIExtension();
@@ -123,11 +123,11 @@ export function activate(context: vscode.ExtensionContext): void {
         void vscode.window.showErrorMessage(
           'No certificates found in the UI extension. Please ensure the UI extension is installed and configured.'
         );
-        outputChannel.appendLine('No certificates found in the UI extension. Synchronization aborted.');
+        terminal.writeLine('No certificates found in the UI extension. Synchronization aborted.');
         return;
       }
 
-      const certificateManager: CertificateManager = getCertificateManager(outputChannel, 'workspace');
+      const certificateManager: CertificateManager = getCertificateManager(terminal, 'workspace');
       const skipCertificateTrust: boolean = false;
       const canGenerateNewCertificate: boolean = false;
 
@@ -138,7 +138,7 @@ export function activate(context: vscode.ExtensionContext): void {
               skipCertificateTrust
             })
             .catch(() => {
-              outputChannel.appendLine('Failed to retrieve local certificates.');
+              terminal.writeLine('Failed to retrieve local certificates.');
               return undefined;
             }),
         timeoutMs: 5000,
@@ -160,29 +160,29 @@ export function activate(context: vscode.ExtensionContext): void {
       const { certificateStore } = certificateManager;
 
       certificateStore.caCertificateData = certificatesFromUI.pemCaCertificate;
-      outputChannel.appendLine(`Writing CA certificate to ${certificateStore.caCertificatePath}...`);
+      terminal.writeLine(`Writing CA certificate to ${certificateStore.caCertificatePath}...`);
 
       certificateStore.certificateData = certificatesFromUI.pemCertificate;
-      outputChannel.appendLine(`Writing TLS server certificates to ${certificateStore.certificateData}...`);
+      terminal.writeLine(`Writing TLS server certificates to ${certificateStore.certificateData}...`);
 
       certificateStore.keyData = certificatesFromUI.pemKey;
-      outputChannel.appendLine(`Writing TLS private key to ${certificateStore.keyPath}...`);
+      terminal.writeLine(`Writing TLS private key to ${certificateStore.keyPath}...`);
 
       await vscode.commands.executeCommand('setContext', 'tlssync.workspace.sync.complete', true);
       void vscode.window.showInformationMessage(`Certificates synchronized successfully.`);
-      outputChannel.appendLine(`Certificates synchronized successfully.`);
+      terminal.writeLine(`Certificates synchronized successfully.`);
     } catch (err) {
       const message: string = `Error synchronizing certificates: ${
         err instanceof Error ? err.message : 'Unknown error'
       }`;
-      outputChannel.appendLine(message);
+      terminal.writeLine(message);
       void vscode.window.showErrorMessage(message);
     }
   }
 
-  const { autoSync } = getConfig(outputChannel, 'workspace');
+  const { autoSync } = getConfig(terminal, 'workspace');
   if (autoSync) {
-    outputChannel.appendLine(`Auto-sync is enabled. Synchronizing certificates on activation...`);
+    terminal.writeLine(`Auto-sync is enabled. Synchronizing certificates on activation...`);
     void vscode.commands.executeCommand(WORKSPACE_COMMAND_SYNC);
   }
 

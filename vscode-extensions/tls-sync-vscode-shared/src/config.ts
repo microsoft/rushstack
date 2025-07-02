@@ -3,7 +3,7 @@
 
 import * as vscode from 'vscode';
 import * as path from 'node:path';
-
+import type { ITerminal } from '@rushstack/terminal';
 import type { ICertificateManagerOptions } from '@rushstack/debug-certificate-manager';
 import {
   CONFIG_AUTOSYNC,
@@ -19,10 +19,7 @@ export interface IExtensionConfig extends ICertificateManagerOptions {
   autoSync: boolean;
 }
 
-export function getConfig(
-  outputChannel: vscode.OutputChannel,
-  configType: 'ui' | 'workspace'
-): IExtensionConfig {
+export function getConfig(terminal: ITerminal, configType: 'ui' | 'workspace'): IExtensionConfig {
   const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(CONFIG_SECTION);
   const caCertificateFilename: string | undefined = config.get(CONFIG_CA_CERTIFICATE_FILENAME) || undefined;
   const certificateFilename: string | undefined = config.get(CONFIG_CERTIFICATE_FILENAME) || undefined;
@@ -50,7 +47,7 @@ export function getConfig(
       }
     }
   } else {
-    outputChannel.appendLine(`Unsupported platform: ${process.platform}`);
+    terminal.writeLine(`Unsupported platform: ${process.platform}`);
   }
 
   const extensionConfig: IExtensionConfig = {
@@ -60,6 +57,6 @@ export function getConfig(
     keyFilename,
     autoSync
   };
-  outputChannel.appendLine(`Extension config: ${JSON.stringify(extensionConfig)}`);
+  terminal.writeLine(`Extension config: ${JSON.stringify(extensionConfig)}`);
   return extensionConfig;
 }

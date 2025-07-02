@@ -11,7 +11,7 @@ export class CertificateManager {
     constructor(options?: ICertificateManagerOptions);
     readonly certificateStore: CertificateStore;
     ensureCertificateAsync(canGenerateNewCertificate: boolean, terminal: ITerminal, options?: ICertificateGenerationOptions): Promise<ICertificate>;
-    getCertificateExpirationAsync(): Promise<ICertificateExpiration>;
+    getCertificateExpirationAsync(terminal: ITerminal): Promise<ICertificateExpiration>;
     untrustCertificateAsync(terminal: ITerminal): Promise<boolean>;
 }
 

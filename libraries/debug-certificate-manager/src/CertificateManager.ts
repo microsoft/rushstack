@@ -375,7 +375,7 @@ export class CertificateManager {
    *
    * @public
    */
-  public async getCertificateExpirationAsync(): Promise<ICertificateExpiration> {
+  public async getCertificateExpirationAsync(terminal: ITerminal): Promise<ICertificateExpiration> {
     const { certificateData, caCertificateData } = this.certificateStore;
 
     let caCertificateExpiration: Date | undefined;
@@ -389,7 +389,9 @@ export class CertificateManager {
           const caCertificate: pki.Certificate = forge.pki.certificateFromPem(caCertificateData);
           caCertificateExpiration = caCertificate.validity.notAfter;
         } catch (error) {
-          // no-op
+          terminal.writeLine(
+            `Error parsing CA certificate: ${error instanceof Error ? error.message : error}`
+          );
         }
       }
 
@@ -399,11 +401,15 @@ export class CertificateManager {
           const serverCertificate: pki.Certificate = forge.pki.certificateFromPem(certificateData);
           certificateExpiration = serverCertificate.validity.notAfter;
         } catch (error) {
-          // no-op
+          terminal.writeLine(
+            `Error parsing server certificate: ${error instanceof Error ? error.message : error}`
+          );
         }
       }
     } catch (error) {
-      // no-op
+      terminal.writeLine(
+        `Error getting certificate expiration: ${error instanceof Error ? error.message : error}`
+      );
     }
 
     return {
