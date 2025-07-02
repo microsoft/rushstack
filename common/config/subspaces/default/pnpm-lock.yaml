@@ -4641,6 +4641,21 @@ importers:
         specifier: ^10.1.0
         version: 10.4.0
 
+  ../../../vscode-extensions/tls-sync-vscode-extension-pack:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-vscode-extension-rig':
+        specifier: workspace:*
+        version: link:../../rigs/heft-vscode-extension-rig
+      tls-sync-vscode-ui-extension:
+        specifier: workspace:*
+        version: link:../tls-sync-vscode-ui-extension
+      tls-sync-vscode-workspace-extension:
+        specifier: workspace:*
+        version: link:../tls-sync-vscode-workspace-extension
+
   ../../../vscode-extensions/tls-sync-vscode-shared:
     dependencies:
       '@rushstack/debug-certificate-manager':
@@ -4690,12 +4705,6 @@ importers:
       '@rushstack/heft-vscode-extension-rig':
         specifier: workspace:*
         version: link:../../rigs/heft-vscode-extension-rig
-      '@types/glob':
-        specifier: 7.1.1
-        version: 7.1.1
-      '@types/mocha':
-        specifier: 10.0.6
-        version: 10.0.6
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
@@ -4705,15 +4714,6 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
-      '@vscode/test-electron':
-        specifier: ^1.6.2
-        version: 1.6.2
-      glob:
-        specifier: ~7.0.5
-        version: 7.0.6
-      mocha:
-        specifier: ^10.1.0
-        version: 10.4.0
 
   ../../../vscode-extensions/tls-sync-vscode-workspace-extension:
     dependencies:
@@ -4739,12 +4739,6 @@ importers:
       '@rushstack/heft-vscode-extension-rig':
         specifier: workspace:*
         version: link:../../rigs/heft-vscode-extension-rig
-      '@types/glob':
-        specifier: 7.1.1
-        version: 7.1.1
-      '@types/mocha':
-        specifier: 10.0.6
-        version: 10.0.6
       '@types/node':
         specifier: 20.17.19
         version: 20.17.19
@@ -4754,15 +4748,6 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
-      '@vscode/test-electron':
-        specifier: ^1.6.2
-        version: 1.6.2
-      glob:
-        specifier: ~7.0.5
-        version: 7.0.6
-      mocha:
-        specifier: ^10.1.0
-        version: 10.4.0
 
   ../../../webpack/hashed-folder-copy-plugin:
     dependencies:

@@ -1,0 +1,44 @@
+{
+  "name": "tls-sync-vscode-extension-pack",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "vscode-extensions/tls-sync-vscode-extension-pack"
+  },
+  "license": "MIT",
+  "publisher": "RushStack",
+  "preview": true,
+  "displayName": "TLS Sync",
+  "description": "",
+  "homepage": "https://rushstack.io",
+  "categories": [
+    "Other"
+  ],
+  "extensionPack": [
+    "Rushstack.tls-sync-vscode-ui-extension",
+    "Rushstack.tls-sync-vscode-workspace-extension"
+  ],
+  "keywords": [],
+  "galleryBanner": {
+    "color": "#f0f0f0",
+    "theme": "light"
+  },
+  "engines": {
+    "vscode": "^1.98.0"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "build:watch": "heft build-watch",
+    "start": "heft start",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": ""
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tls-sync-vscode-ui-extension": "workspace:*",
+    "tls-sync-vscode-workspace-extension": "workspace:*",
+    "@rushstack/heft-vscode-extension-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*"
+  }
+}

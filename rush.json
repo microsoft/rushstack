@@ -1392,6 +1392,13 @@
       "tags": ["vsix"],
       "versionPolicyName": "tls-sync-vscode-extensions"
     },
+    {
+      "packageName": "tls-sync-vscode-extension-pack",
+      "projectFolder": "vscode-extensions/tls-sync-vscode-extension-pack",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"],
+      "versionPolicyName": "tls-sync-vscode-extensions"
+    },
 
     // "webpack" folder (alphabetical order)
     {

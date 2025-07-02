@@ -114,6 +114,6 @@
     "definitionName": "lockStepVersion",
     "version": "0.0.1",
     "nextBump": "minor",
-    "mainProject": "tls-sync-vscode-workspace-extension"
+    "mainProject": "tls-sync-vscode-extension-pack"
   }
 ]
