@@ -13,6 +13,8 @@ parameters:
         vsixPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-ui-extension/dist/vsix/packaged.vsix'
       - key: 'tls-sync-vscode-workspace-extension'
         vsixPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-workspace-extension/dist/vsix/packaged.vsix'
+      - key: 'tls-sync-vscode-extension-pack'
+        vsixPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-extension-pack/dist/vsix/packaged.vsix'
       - key: 'rush-vscode-extension'
         vsixPath: '$(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension/dist/vsix/packaged.vsix'
 
