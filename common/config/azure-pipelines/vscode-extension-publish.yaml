@@ -10,13 +10,17 @@ parameters:
     type: object
     default:
       - key: 'tls-sync-vscode-ui-extension'
-        vsixPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-ui-extension/dist/vsix/packaged.vsix'
+        vsixPath: 'dist/vsix/packaged.vsix'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-ui-extension'
       - key: 'tls-sync-vscode-workspace-extension'
-        vsixPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-workspace-extension/dist/vsix/packaged.vsix'
+        vsixPath: 'dist/vsix/packaged.vsix'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-workspace-extension'
       - key: 'tls-sync-vscode-extension-pack'
-        vsixPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-extension-pack/dist/vsix/packaged.vsix'
+        vsixPath: 'dist/vsix/packaged.vsix'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-extension-pack'
       - key: 'rush-vscode-extension'
-        vsixPath: '$(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension/dist/vsix/packaged.vsix'
+        vsixPath: 'dist/vsix/packaged.vsix'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension'
 
 resources:
   repositories:
@@ -43,7 +47,7 @@ extends:
                 - ${{ each extension in parameters.ExtensionPublishConfig }}:
                     - output: pipelineArtifact
                       artifactName: ${{ extension.key }}
-                      targetPath: ${{ extension.vsixPath }}
+                      targetPath: ${{ extension.projectPath }}/${{ extension.vsixPath }}
                       displayName: 'Publish Artifact: ${{ extension.key }}'
 
             steps:
@@ -58,8 +62,6 @@ extends:
                     --to tag:vsix
 
               - ${{ if parameters.shouldPublish }}:
-                  - bash: |
-                      npm i -g @vscode/vsce
                   - ${{ each extension in parameters.ExtensionPublishConfig }}:
                       - task: AzureCLI@2
                         displayName: 'Publish VSIX: ${{ extension.key }}'
@@ -68,4 +70,5 @@ extends:
                           scriptType: 'bash'
                           scriptLocation: 'inlineScript'
                           inlineScript: |
-                            vsce publish --no-dependencies --azure-credential --packagePath ${{ extension.vsixPath }}
+                            node node_modules/@rushstack/heft-vscode-extension-rig/node_modules/@rushstack/heft-vscode-extension-plugin/node_modules/@vscode/vsce/vsce publish --no-dependencies --azure-credential --packagePath ${{ extension.vsixPath }}
+                          workingDirectory: ${{ extension.projectPath }}
