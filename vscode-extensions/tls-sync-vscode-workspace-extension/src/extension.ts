@@ -116,7 +116,10 @@ export function activate(context: vscode.ExtensionContext): void {
       } catch (err) {
         return;
       }
-      const { caCertificateFilename, certificateFilename, keyFilename, storePath } = getConfig(outputChannel);
+      const { caCertificateFilename, certificateFilename, keyFilename, storePath } = getConfig(
+        outputChannel,
+        'workspace'
+      );
       const certificateManagerParams: ICertificateManagerOptions = {
         caCertificateFilename,
         certificateFilename,
@@ -192,7 +195,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
-  const { autoSync } = getConfig(outputChannel);
+  const { autoSync } = getConfig(outputChannel, 'workspace');
   if (autoSync) {
     outputChannel.appendLine(`Auto-sync is enabled. Synchronizing certificates on activation...`);
     void vscode.commands.executeCommand(WORKSPACE_COMMAND_SYNC);

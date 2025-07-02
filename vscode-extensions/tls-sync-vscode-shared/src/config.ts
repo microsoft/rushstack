@@ -2,33 +2,64 @@
 // See LICENSE in the project root for license information.
 
 import * as vscode from 'vscode';
+import * as path from 'node:path';
 
 import type { ICertificateManagerOptions } from '@rushstack/debug-certificate-manager';
-import { SETTINGS_PREFIX } from './constants';
+import {
+  CONFIG_AUTOSYNC,
+  CONFIG_SECTION,
+  CONFIG_CA_CERTIFICATE_FILENAME,
+  CONFIG_CERTIFICATE_FILENAME,
+  CONFIG_KEY_FILENAME,
+  CONFIG_STORE_PATH
+} from './constants';
 
+type StorePaths = Record<'windows' | 'linux' | 'osx', string>;
 export interface IExtensionConfig extends ICertificateManagerOptions {
   autoSync: boolean;
 }
 
-export function getConfig(outputChannel: vscode.OutputChannel): IExtensionConfig {
-  const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(SETTINGS_PREFIX);
-  const storePath: string | undefined = config.get('storePath') || undefined;
-  const caCertificateFilename: string | undefined = config.get('caCertificateFilename') || undefined;
-  const certificateFilename: string | undefined = config.get('certificateFilename') || undefined;
-  const keyFilename: string | undefined = config.get('keyFilename') || undefined;
-  const autoSync: boolean = config.get('autoSync') ?? false;
+export function getConfig(
+  outputChannel: vscode.OutputChannel,
+  configType: 'ui' | 'workspace'
+): IExtensionConfig {
+  const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(CONFIG_SECTION);
+  const caCertificateFilename: string | undefined = config.get(CONFIG_CA_CERTIFICATE_FILENAME) || undefined;
+  const certificateFilename: string | undefined = config.get(CONFIG_CERTIFICATE_FILENAME) || undefined;
+  const keyFilename: string | undefined = config.get(CONFIG_KEY_FILENAME) || undefined;
+  const autoSync: boolean = config.get(CONFIG_AUTOSYNC) ?? false;
+  let storePath: string | undefined = undefined;
+  const storePaths: StorePaths = {
+    windows: config.get(`${configType}.${CONFIG_STORE_PATH}.windows`) || '',
+    linux: config.get(`${configType}.${CONFIG_STORE_PATH}.linux`) || '',
+    osx: config.get(`${configType}.${CONFIG_STORE_PATH}.osx`) || ''
+  };
+  const platformMap: Record<string, keyof StorePaths> = {
+    win32: 'windows',
+    linux: 'linux',
+    darwin: 'osx'
+  };
 
-  outputChannel.appendLine(`config.storePath: ${storePath}`);
-  outputChannel.appendLine(`config.caCertificateFilename: ${caCertificateFilename}`);
-  outputChannel.appendLine(`config.certificateFilename: ${certificateFilename}`);
-  outputChannel.appendLine(`config.keyFilename: ${keyFilename}`);
-  outputChannel.appendLine(`config.autoSync: ${autoSync}`);
+  const platformKey: keyof StorePaths = platformMap[process.platform];
+  if (platformKey) {
+    storePath = storePaths[platformKey];
+    if (storePath) {
+      const homeDir: string | undefined = process.env.HOME || process.env.USERPROFILE;
+      if (storePath[0] === '~' && homeDir) {
+        storePath = path.join(homeDir, storePath.slice(1));
+      }
+    }
+  } else {
+    outputChannel.appendLine(`Unsupported platform: ${process.platform}`);
+  }
 
-  return {
+  const extensionConfig: IExtensionConfig = {
     storePath,
     caCertificateFilename,
     certificateFilename,
     keyFilename,
     autoSync
   };
+  outputChannel.appendLine(`Extension config: ${JSON.stringify(extensionConfig)}`);
+  return extensionConfig;
 }

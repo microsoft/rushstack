@@ -95,10 +95,35 @@
       "title": "TLS Sync",
       "type": "object",
       "properties": {
-        "tlssync.storePath": {
+        "tlssync.ui.storePath.osx": {
           "type": "string",
-          "title": "TLS Sync Store Path",
-          "description": "Directory where TLS certificates are read and written. The same directory is used for both the UI and workspace extensions."
+          "title": "UI Extension - TLS Sync Store Path (macOS)",
+          "description": "[UI Extension] Directory where TLS certificates are read and written."
+        },
+        "tlssync.ui.storePath.windows": {
+          "type": "string",
+          "title": "UI Extension - TLS Sync Store Path (Windows)",
+          "description": "[UI Extension] Directory where TLS certificates are read and written."
+        },
+        "tlssync.ui.storePath.linux": {
+          "type": "string",
+          "title": "UI Extension - TLS Sync Store Path (Linux)",
+          "description": "[UI Extension] Directory where TLS certificates are read and written."
+        },
+        "tlssync.workspace.storePath.osx": {
+          "type": "string",
+          "title": "Workspace Extension - TLS Sync Store Path (macOS)",
+          "description": "[Workspace Extension] Directory where TLS certificates are read and written."
+        },
+        "tlssync.workspace.storePath.windows": {
+          "type": "string",
+          "title": "Workspace Extension - TLS Sync Store Path (Windows)",
+          "description": "[Workspace Extension] Directory where TLS certificates are read and written."
+        },
+        "tlssync.workspace.storePath.linux": {
+          "type": "string",
+          "title": "Workspace Extension - TLS Sync Store Path (Linux)",
+          "description": "[Workspace Extension] Directory where TLS certificates are read and written."
         },
         "tlssync.caCertificateFilename": {
           "type": "string",
@@ -135,10 +160,8 @@
     "tslib": "~2.3.1"
   },
   "devDependencies": {
-    "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft-vscode-extension-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/package-extractor": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/mocha": "10.0.6",
     "@types/vscode": "^1.63.0",

@@ -4616,9 +4616,6 @@ importers:
       '@rushstack/heft-vscode-extension-rig':
         specifier: workspace:*
         version: link:../../rigs/heft-vscode-extension-rig
-      '@rushstack/package-extractor':
-        specifier: workspace:*
-        version: link:../../libraries/package-extractor
       '@types/glob':
         specifier: 7.1.1
         version: 7.1.1
@@ -4687,18 +4684,12 @@ importers:
         specifier: ~2.3.1
         version: 2.3.1
     devDependencies:
-      '@microsoft/rush-lib':
-        specifier: workspace:*
-        version: link:../../libraries/rush-lib
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
       '@rushstack/heft-vscode-extension-rig':
         specifier: workspace:*
         version: link:../../rigs/heft-vscode-extension-rig
-      '@rushstack/package-extractor':
-        specifier: workspace:*
-        version: link:../../libraries/package-extractor
       '@types/glob':
         specifier: 7.1.1
         version: 7.1.1
@@ -4742,18 +4733,12 @@ importers:
         specifier: ~2.3.1
         version: 2.3.1
     devDependencies:
-      '@microsoft/rush-lib':
-        specifier: workspace:*
-        version: link:../../libraries/rush-lib
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
       '@rushstack/heft-vscode-extension-rig':
         specifier: workspace:*
         version: link:../../rigs/heft-vscode-extension-rig
-      '@rushstack/package-extractor':
-        specifier: workspace:*
-        version: link:../../libraries/package-extractor
       '@types/glob':
         specifier: 7.1.1
         version: 7.1.1

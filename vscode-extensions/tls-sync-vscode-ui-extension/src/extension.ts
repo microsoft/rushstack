@@ -46,7 +46,10 @@ export function activate(context: vscode.ExtensionContext): void {
   async function handleUntrustCertificate(): Promise<void> {
     try {
       outputChannel.appendLine('Attempting to clean up certificates...');
-      const { caCertificateFilename, keyFilename, certificateFilename, storePath } = getConfig(outputChannel);
+      const { caCertificateFilename, keyFilename, certificateFilename, storePath } = getConfig(
+        outputChannel,
+        'ui'
+      );
       const certificateManager: CertificateManager = new CertificateManager({
         caCertificateFilename,
         keyFilename,
@@ -69,7 +72,10 @@ export function activate(context: vscode.ExtensionContext): void {
   async function handleEnsureCertificate(): Promise<undefined | ICertificate> {
     try {
       outputChannel.appendLine('Attempting to retrieve certificates...');
-      const { caCertificateFilename, keyFilename, certificateFilename, storePath } = getConfig(outputChannel);
+      const { caCertificateFilename, keyFilename, certificateFilename, storePath } = getConfig(
+        outputChannel,
+        'ui'
+      );
       const certificateManager: CertificateManager = new CertificateManager({
         caCertificateFilename,
         keyFilename,

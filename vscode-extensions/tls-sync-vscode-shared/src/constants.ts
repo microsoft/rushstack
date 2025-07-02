@@ -20,4 +20,9 @@ export const UI_COMMAND_UNTRUST_CERTIFICATE: string = `${UI_COMMAND_PREFIX}.untr
 export const UI_COMMAND_SHOW_LOG: string = `${UI_COMMAND_PREFIX}.showLog`;
 export const UI_COMMAND_PING: string = `${UI_COMMAND_PREFIX}.ping`;
 
-export const SETTINGS_PREFIX: string = 'tlssync';
+export const CONFIG_SECTION: string = 'tlssync';
+export const CONFIG_AUTOSYNC: string = 'autoSync';
+export const CONFIG_CA_CERTIFICATE_FILENAME: string = 'caCertificateFilename';
+export const CONFIG_CERTIFICATE_FILENAME: string = 'certificateFilename';
+export const CONFIG_KEY_FILENAME: string = 'keyFilename';
+export const CONFIG_STORE_PATH: string = 'storePath';
