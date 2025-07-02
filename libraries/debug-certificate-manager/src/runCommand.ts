@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Executable, FileSystem } from '@rushstack/node-core-library';
+import { Executable, FileSystem, Text } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type * as child_process from 'node:child_process';
 import * as path from 'node:path';
@@ -65,37 +65,30 @@ echo $? > "${exitFile}"
 
   const child: child_process.ChildProcess = Executable.spawn('osascript', ['-e', appleScript]);
 
-  return await new Promise((resolve, reject) => {
-    child.on('close', async (code) => {
-      try {
-        const [stdoutContent, stderrContent, exitCodeStr] = await Promise.all([
-          FileSystem.readFileAsync(stdoutFile),
-          FileSystem.readFileAsync(stderrFile),
-          FileSystem.readFileAsync(exitFile)
-        ]);
+  await Executable.waitForExitAsync(child);
 
-        const stdout: string[] = stdoutContent.split('\n');
-        const stderr: string[] = stderrContent.split('\n');
-        const exitCode: number = exitCodeStr ? Number(exitCodeStr) : -1;
+  const [stdoutContent, stderrContent, exitCodeStr] = await Promise.all([
+    FileSystem.readFileAsync(stdoutFile),
+    FileSystem.readFileAsync(stderrFile),
+    FileSystem.readFileAsync(exitFile)
+  ]);
 
-        await Promise.all([
-          FileSystem.deleteFileAsync(stdoutFile),
-          FileSystem.deleteFileAsync(stderrFile),
-          FileSystem.deleteFileAsync(exitFile),
-          FileSystem.deleteFileAsync(scriptFile)
-        ]);
+  const stdout: string[] = Text.splitByNewLines(stdoutContent);
+  const stderr: string[] = Text.splitByNewLines(stderrContent);
+  const exitCode: number = exitCodeStr ? Number(exitCodeStr) : -1;
 
-        resolve({
-          stdout,
-          stderr,
-          exitCode
-        });
-      } catch (err) {
-        reject(err);
-      }
-    });
-    child.on('error', reject);
-  });
+  await Promise.all([
+    FileSystem.deleteFileAsync(stdoutFile),
+    FileSystem.deleteFileAsync(stderrFile),
+    FileSystem.deleteFileAsync(exitFile),
+    FileSystem.deleteFileAsync(scriptFile)
+  ]);
+
+  return {
+    stdout,
+    stderr,
+    exitCode
+  };
 }
 
 export async function runAsync(command: string, params: string[]): Promise<IRunResult> {
