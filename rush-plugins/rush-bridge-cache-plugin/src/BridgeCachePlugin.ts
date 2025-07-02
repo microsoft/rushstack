@@ -21,7 +21,7 @@ const PLUGIN_NAME: 'RushBridgeCachePlugin' = 'RushBridgeCachePlugin';
 const CACHE_ACTION_READ: 'read' = 'read';
 const CACHE_ACTION_WRITE: 'write' = 'write';
 
-type CacheAction = typeof CACHE_ACTION_READ | typeof CACHE_ACTION_WRITE | undefined;
+type CacheAction = typeof CACHE_ACTION_READ | typeof CACHE_ACTION_WRITE;
 
 export interface IBridgeCachePluginOptions {
   readonly actionParameterName: string;
@@ -45,7 +45,7 @@ export class BridgeCachePlugin implements IRushPlugin {
     session.hooks.runAnyPhasedCommand.tapPromise(PLUGIN_NAME, async (command: IPhasedCommand) => {
       const logger: ILogger = session.getLogger(PLUGIN_NAME);
 
-      let cacheAction: CacheAction = undefined;
+      let cacheAction: CacheAction | undefined;
 
       // cancel the actual operations. We don't want to run the command, just cache the output folders on disk
       command.hooks.createOperations.tap(
@@ -90,10 +90,9 @@ export class BridgeCachePlugin implements IRushPlugin {
 
           const filteredOperations: Set<IOperationExecutionResult> = new Set();
           for (const operationExecutionResult of recordByOperation.values()) {
-            if (operationExecutionResult.operation.isNoOp) {
-              continue;
+            if (!operationExecutionResult.operation.isNoOp) {
+              filteredOperations.add(operationExecutionResult);
             }
-            filteredOperations.add(operationExecutionResult);
           }
 
           let successCount: number = 0;
@@ -150,7 +149,7 @@ export class BridgeCachePlugin implements IRushPlugin {
     });
   }
 
-  private _getCacheAction(context: IExecuteOperationsContext): CacheAction {
+  private _getCacheAction(context: IExecuteOperationsContext): CacheAction | undefined {
     const cacheActionParameter: CommandLineParameter | undefined = context.customParameters.get(
       this._actionParameterName
     );
@@ -158,6 +157,16 @@ export class BridgeCachePlugin implements IRushPlugin {
       if (cacheActionParameter.kind !== CommandLineParameterKind.Choice) {
         throw new Error(
           `The parameter "${this._actionParameterName}" must be a choice. Please check the plugin configuration.`
+        );
+      }
+
+      if (
+        cacheActionParameter.alternatives.size !== 2 ||
+        !cacheActionParameter.alternatives.has(CACHE_ACTION_READ) ||
+        !cacheActionParameter.alternatives.has(CACHE_ACTION_WRITE)
+      ) {
+        throw new Error(
+          `The parameter "${this._actionParameterName}" must have exactly two choices: "${CACHE_ACTION_READ}" and "${CACHE_ACTION_WRITE}". Please check the plugin configuration.`
         );
       }
 
