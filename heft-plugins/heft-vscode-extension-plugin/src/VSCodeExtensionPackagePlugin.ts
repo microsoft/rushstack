@@ -46,8 +46,8 @@ export default class VSCodeExtensionPackagePlugin
       terminal.writeLine(`Using VSCE executable: ${vsceExecutable}`);
       terminal.writeLine(`Packaging VSIX from ${unpackedDirectory} to ${vsixDirectory}`);
       const childProcess: ChildProcess = Executable.spawn(
-        vsceExecutable,
-        ['package', '--no-dependencies', '--out', `${path.resolve(vsixDirectory)}`],
+        'node',
+        [vsceExecutable, 'package', '--no-dependencies', '--out', `${path.resolve(vsixDirectory)}`],
         {
           currentWorkingDirectory: path.resolve(unpackedDirectory)
         }

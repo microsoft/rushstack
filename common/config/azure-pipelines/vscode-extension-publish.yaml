@@ -54,3 +54,16 @@ extends:
                 parameters:
                   BuildParameters: >
                     --to tag:vsix
+
+              - ${{ if parameters.shouldPublish }}:
+                  - bash: |
+                      npm i -g @vscode/vsce
+                  - ${{ each extension in parameters.ExtensionPublishConfig }}:
+                      - task: AzureCLI@2
+                        displayName: 'Publish VSIX: ${{ extension.key }}'
+                        inputs:
+                          azureSubscription: rushstack-vscode-publish
+                          scriptType: 'bash'
+                          scriptLocation: 'inlineScript'
+                          inlineScript: |
+                            vsce publish --no-dependencies --azure-credential --packagePath ${{ extension.vsixPath }}
