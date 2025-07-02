@@ -28,7 +28,8 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@vscode/vsce": "3.3.2"
+    "@vscode/vsce": "3.3.2",
+    "@rushstack/terminal": "workspace:*"
   },
   "sideEffects": false
 }

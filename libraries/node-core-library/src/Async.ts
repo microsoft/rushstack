@@ -390,11 +390,19 @@ export class Async {
     timeoutMs,
     timeoutMessage = 'Operation timed out'
   }: IRunWithTimeoutOptions<TResult>): Promise<TResult> {
+    let timeoutHandle: NodeJS.Timeout | undefined;
     const promise: Promise<TResult> = Promise.resolve(action());
     const timeoutPromise: Promise<never> = new Promise<never>((resolve, reject) => {
-      setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+      timeoutHandle = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
     });
-    return Promise.race([promise, timeoutPromise]);
+
+    try {
+      return Promise.race([promise, timeoutPromise]);
+    } finally {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+      }
+    }
   }
 }
 

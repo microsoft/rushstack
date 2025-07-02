@@ -68,14 +68,22 @@ echo $? > "${exitFile}"
   return await new Promise((resolve, reject) => {
     child.on('close', async (code) => {
       try {
-        const stdout: string[] = FileSystem.readFile(stdoutFile).split('\n');
-        const stderr: string[] = FileSystem.readFile(stderrFile).split('\n');
-        const exitCodeStr: string = FileSystem.readFile(exitFile);
+        const [stdoutContent, stderrContent, exitCodeStr] = await Promise.all([
+          FileSystem.readFileAsync(stdoutFile),
+          FileSystem.readFileAsync(stderrFile),
+          FileSystem.readFileAsync(exitFile)
+        ]);
+
+        const stdout: string[] = stdoutContent.split('\n');
+        const stderr: string[] = stderrContent.split('\n');
         const exitCode: number = exitCodeStr ? Number(exitCodeStr) : -1;
 
-        FileSystem.deleteFile(stdoutFile);
-        FileSystem.deleteFile(stderrFile);
-        FileSystem.deleteFile(exitFile);
+        await Promise.all([
+          FileSystem.deleteFileAsync(stdoutFile),
+          FileSystem.deleteFileAsync(stderrFile),
+          FileSystem.deleteFileAsync(exitFile),
+          FileSystem.deleteFileAsync(scriptFile)
+        ]);
 
         resolve({
           stdout,

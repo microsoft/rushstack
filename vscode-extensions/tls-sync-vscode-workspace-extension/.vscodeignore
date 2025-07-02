@@ -3,4 +3,5 @@
 !README.md
 !extension.js
 !package.json
-!media/**
+!assets/walkthrough-sync.md
+!assets/walkthrough-settings.md

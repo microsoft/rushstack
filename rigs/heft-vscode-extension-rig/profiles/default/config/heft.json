@@ -27,7 +27,7 @@
                 {
                   "sourcePath": ".",
                   "destinationFolders": ["dist/vsix/unpacked"],
-                  "includeGlobs": ["package.json", "README.md", "LICENSE", ".vscodeignore", "media/**"]
+                  "includeGlobs": ["package.json", "README.md", "LICENSE", ".vscodeignore", "assets/**"]
                 }
               ]
             }
@@ -40,8 +40,8 @@
             "pluginPackage": "@rushstack/heft-vscode-extension-plugin",
             "pluginName": "vscode-extension-package-plugin",
             "options": {
-              "unpackedDirectory": "dist/vsix/unpacked",
-              "vsixDirectory": "dist/vsix/packaged.vsix"
+              "unpackedFolderPath": "dist/vsix/unpacked",
+              "vsixPath": "dist/vsix/packaged.vsix"
             }
           }
         }

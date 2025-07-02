@@ -1,0 +1,9 @@
+**
+!LICENSE
+!README.md
+!extension.js
+!package.json
+!assets/rushstack-icon.png
+!assets/rushstack-icon.svg
+!webview/rush-command-webview/bundle.js
+!webview/rush-command-webview/index.html

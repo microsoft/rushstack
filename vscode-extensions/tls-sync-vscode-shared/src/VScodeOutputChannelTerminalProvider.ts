@@ -63,7 +63,7 @@ export class VScodeOutputChannelTerminalProvider implements ITerminalProvider {
    */
   public write(data: string, severity: TerminalProviderSeverity): void {
     const outputChannel: vscode.OutputChannel = this._outputChannel;
-    for (const line of Text.readLinesFromIterable(data, {})) {
+    for (const line of Text.readLinesFromIterable(data)) {
       outputChannel.appendLine(line);
     }
   }

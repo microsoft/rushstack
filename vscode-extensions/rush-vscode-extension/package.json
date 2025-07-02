@@ -37,7 +37,7 @@
     "color": "#f0f0f0",
     "theme": "light"
   },
-  "icon": "resources/rushstack-icon.png",
+  "icon": "assets/rushstack-icon.png",
   "badges": [
     {
       "url": "https://img.shields.io/badge/Rush-db714a",
@@ -235,7 +235,7 @@
         {
           "id": "rushstack",
           "title": "Rush Stack",
-          "icon": "resources/rushstack-icon.svg"
+          "icon": "assets/rushstack-icon.svg"
         }
       ]
     },

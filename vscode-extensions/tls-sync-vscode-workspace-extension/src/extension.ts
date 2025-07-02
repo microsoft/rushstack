@@ -44,20 +44,25 @@ export function activate(context: vscode.ExtensionContext): void {
   const terminal: Terminal = new Terminal(terminalProvider);
   outputChannel.appendLine(`${WORKSPACE_EXTENSION_DISPLAY_NAME} output channel initialized.`);
 
-  function waitForUIExtension(): Promise<void> {
+  async function waitForUIExtension(): Promise<void> {
     outputChannel.appendLine(`Waiting for UI extension (${UI_EXTENSION_DISPLAY_NAME}) to become active...`);
-    return new Promise<void>((resolve, reject) => {
-      const maxAttempts: number = 30;
-      let attempts: number = 0;
 
-      const intervalId: NodeJS.Timeout = setInterval(async () => {
-        attempts++;
-        outputChannel.appendLine(`Pinging UI extension... Attempt ${attempts}/${maxAttempts}`);
-        const { version: uiVersion } = await vscode.commands.executeCommand<{ version: string }>(
-          UI_COMMAND_PING
-        );
-        if (uiVersion) {
+    try {
+      await Async.runWithRetriesAsync({
+        action: async (attempt: number) => {
+          outputChannel.appendLine(`Pinging UI extension... Attempt ${attempt + 1}/30`);
+
+          const { version: uiVersion } = await vscode.commands.executeCommand<{ version: string }>(
+            UI_COMMAND_PING
+          );
+
+          if (!uiVersion) {
+            outputChannel.appendLine('UI extension is not yet active. Retrying...');
+            throw new Error('UI extension not active');
+          }
+
           outputChannel.appendLine(`UI extension is active. Version: ${uiVersion}`);
+
           if (version !== uiVersion) {
             outputChannel.appendLine(
               `Warning: UI extension version mismatch. Expected ${version}, got ${uiVersion}.`
@@ -65,19 +70,16 @@ export function activate(context: vscode.ExtensionContext): void {
             void vscode.window.showWarningMessage(
               `UI extension version mismatch. Expected ${version}, got ${uiVersion}. Please check that both ${WORKSPACE_EXTENSION_DISPLAY_NAME} and ${UI_EXTENSION_DISPLAY_NAME} are up to date.`
             );
-            reject();
+            throw new Error('Version mismatch');
           }
-          clearInterval(intervalId);
-          resolve();
-        } else if (attempts >= maxAttempts) {
-          outputChannel.appendLine('UI extension did not respond within the expected time frame.');
-          clearInterval(intervalId);
-          reject(new Error('UI extension did not respond within the expected time frame.'));
-        } else {
-          outputChannel.appendLine('UI extension is not yet active. Retrying...');
-        }
-      }, 1000);
-    });
+        },
+        maxRetries: 30,
+        retryDelayMs: 1000
+      });
+    } catch (error) {
+      outputChannel.appendLine('UI extension did not respond within the expected time frame.');
+      throw new Error('UI extension did not respond within the expected time frame.');
+    }
   }
 
   async function handleShowSettings(): Promise<void> {
@@ -149,7 +151,10 @@ export function activate(context: vscode.ExtensionContext): void {
             .ensureCertificateAsync(canGenerateNewCertificate, terminal, {
               skipCertificateTrust
             })
-            .catch(() => undefined),
+            .catch(() => {
+              outputChannel.appendLine('Failed to retrieve local certificates.');
+              return undefined;
+            }),
         timeoutMs: 5000,
         timeoutMessage: 'Certificate request timed out after 5 seconds'
       });
