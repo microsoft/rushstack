@@ -36,9 +36,9 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "tls-sync-vscode-ui-extension": "workspace:*",
-    "tls-sync-vscode-workspace-extension": "workspace:*",
     "@rushstack/heft-vscode-extension-rig": "workspace:*",
-    "@rushstack/heft": "workspace:*"
+    "@rushstack/heft": "workspace:*",
+    "tls-sync-vscode-ui-extension": "workspace:*",
+    "tls-sync-vscode-workspace-extension": "workspace:*"
   }
 }

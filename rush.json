@@ -1224,6 +1224,12 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/tls-sync-vscode-shared",
+      "projectFolder": "vscode-extensions/tls-sync-vscode-shared",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "@rushstack/tree-pattern",
       "projectFolder": "libraries/tree-pattern",
       "reviewCategory": "libraries",
@@ -1242,6 +1248,12 @@
       "projectFolder": "libraries/typings-generator",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/vscode-shared",
+      "projectFolder": "vscode-extensions/vscode-shared",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
     },
 
     // "repo-scripts" folder (alphabetical order)
@@ -1491,13 +1503,6 @@
       "projectFolder": "rush-plugins/rush-mcp-docs-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
-    },
-    {
-      "packageName": "@rushstack/tls-sync-vscode-shared",
-      "projectFolder": "vscode-extensions/tls-sync-vscode-shared",
-      "reviewCategory": "libraries",
-      "shouldPublish": false,
-      "versionPolicyName": "tls-sync-vscode-extensions"
     }
   ]
 }

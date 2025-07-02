@@ -1,5 +1,5 @@
 {
-  "name": "@rushstack/tls-sync-vscode-shared",
+  "name": "@rushstack/vscode-shared",
   "version": "0.0.0",
   "description": "",
   "main": "lib/index.js",
@@ -8,7 +8,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "vscode-extensions/tls-sync-vscode-shared"
+    "directory": "vscode-extensions/vscode-shared"
   },
   "scripts": {
     "build": "heft build --clean",
@@ -16,7 +16,6 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@rushstack/debug-certificate-manager": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*"
   },

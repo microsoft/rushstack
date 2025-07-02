@@ -4695,6 +4695,9 @@ importers:
       '@rushstack/tls-sync-vscode-shared':
         specifier: workspace:*
         version: link:../tls-sync-vscode-shared
+      '@rushstack/vscode-shared':
+        specifier: workspace:*
+        version: link:../vscode-shared
       tslib:
         specifier: ~2.3.1
         version: 2.3.1
@@ -4729,6 +4732,9 @@ importers:
       '@rushstack/tls-sync-vscode-shared':
         specifier: workspace:*
         version: link:../tls-sync-vscode-shared
+      '@rushstack/vscode-shared':
+        specifier: workspace:*
+        version: link:../vscode-shared
       tslib:
         specifier: ~2.3.1
         version: 2.3.1
@@ -4748,6 +4754,28 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
+
+  ../../../vscode-extensions/vscode-shared:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-node-rig':
+        specifier: workspace:*
+        version: link:../../rigs/heft-node-rig
+      '@types/node':
+        specifier: 20.17.19
+        version: 20.17.19
+      '@types/vscode':
+        specifier: ^1.63.0
+        version: 1.87.0
 
   ../../../webpack/hashed-folder-copy-plugin:
     dependencies:

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as vscode from 'vscode';
-import { VScodeOutputChannelTerminalProvider } from '@rushstack/tls-sync-vscode-shared/lib/VScodeOutputChannelTerminalProvider';
+import { VScodeOutputChannelTerminalProvider } from '@rushstack/vscode-shared/lib/VScodeOutputChannelTerminalProvider';
 import { getCertificateManager } from '@rushstack/tls-sync-vscode-shared/lib/certificates';
 import {
   UI_COMMAND_ENSURE_CERTIFICATE,

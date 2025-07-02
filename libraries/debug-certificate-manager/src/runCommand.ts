@@ -3,7 +3,7 @@
 
 import { Executable, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import * as child_process from 'node:child_process';
+import type * as child_process from 'node:child_process';
 import * as path from 'node:path';
 import * as os from 'node:os';
 
@@ -63,7 +63,7 @@ echo $? > "${exitFile}"
 
   terminal.writeLine(`Running AppleScript: ${appleScript}`);
 
-  const child: child_process.ChildProcess = child_process.spawn('osascript', ['-e', appleScript]);
+  const child: child_process.ChildProcess = Executable.spawn('osascript', ['-e', appleScript]);
 
   return await new Promise((resolve, reject) => {
     child.on('close', async (code) => {

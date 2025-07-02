@@ -91,7 +91,6 @@
     ],
     "configuration": {
       "title": "TLS Sync",
-      "type": "object",
       "properties": {
         "tlssync.ui.storePath.osx": {
           "type": "string",
@@ -151,17 +150,18 @@
     "workspaceContains:**/.tlssync"
   ],
   "dependencies": {
-    "@rushstack/tls-sync-vscode-shared": "workspace:*",
-    "@rushstack/node-core-library": "workspace:*",
     "@rushstack/debug-certificate-manager": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
+    "@rushstack/tls-sync-vscode-shared": "workspace:*",
+    "@rushstack/vscode-shared": "workspace:*",
     "tslib": "~2.3.1"
   },
   "devDependencies": {
     "@rushstack/heft-vscode-extension-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@types/node": "20.17.19",
     "@types/vscode": "^1.63.0",
-    "@types/webpack-env": "1.18.8",
-    "@types/node": "20.17.19"
+    "@types/webpack-env": "1.18.8"
   }
 }

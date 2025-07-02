@@ -9,7 +9,7 @@
   "phasesByName": {
     "build": {
       "phaseDescription": "Build and lint the project.",
-      "cleanFiles": [{ "includeGlobs": ["lib-esm", "lib-dts", "release"] }],
+      "cleanFiles": [{ "includeGlobs": ["lib-esm", "lib-dts", "release", ".vscode-test"] }],
 
       "tasksByName": {
         "webpack": {
