@@ -29,8 +29,7 @@ interface IVSCodeExtensionPackagePluginOptions {
 const PLUGIN_NAME: 'vscode-extension-package-plugin' = 'vscode-extension-package-plugin';
 
 const vsceBasePackagePath: string = require.resolve('@vscode/vsce/package.json');
-const vsceExecName: string = require(vsceBasePackagePath).bin.vsce;
-const vsceExecutable: string = path.resolve(path.dirname(vsceBasePackagePath), vsceExecName);
+const vsceScript: string = path.resolve(path.dirname(vsceBasePackagePath), 'vsce');
 
 export default class VSCodeExtensionPackagePlugin
   implements IHeftTaskPlugin<IVSCodeExtensionPackagePluginOptions>
@@ -46,7 +45,7 @@ export default class VSCodeExtensionPackagePlugin
         logger: { terminal }
       } = heftTaskSession;
 
-      terminal.writeLine(`Using VSCE executable: ${vsceExecutable}`);
+      terminal.writeLine(`Using VSCE script: ${vsceScript}`);
       terminal.writeLine(`Packaging VSIX from ${unpackedFolderPath} to ${vsixPath}`);
       const terminalOutStream: TerminalStreamWritable = new TerminalStreamWritable({
         terminal,
@@ -59,7 +58,7 @@ export default class VSCodeExtensionPackagePlugin
 
       const childProcess: ChildProcess = Executable.spawn(
         'node',
-        [vsceExecutable, 'package', '--no-dependencies', '--out', `${path.resolve(vsixPath)}`],
+        [vsceScript, 'package', '--no-dependencies', '--out', `${path.resolve(vsixPath)}`],
         {
           currentWorkingDirectory: path.resolve(unpackedFolderPath),
           stdio: [
