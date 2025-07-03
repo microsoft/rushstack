@@ -121,9 +121,8 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
       this.commandLineConfiguration?.additionalPathFolders.slice() || [];
 
     if (this._autoinstallerName) {
-      await measureAsyncFn(
-        () => this._prepareAutoinstallerNameAsync(),
-        'rush:globalScriptAction:prepareAutoinstaller'
+      await measureAsyncFn('rush:globalScriptAction:prepareAutoinstaller', () =>
+        this._prepareAutoinstallerNameAsync()
       );
 
       const autoinstallerNameBinPath: string = path.join(this._autoinstallerFullPath, 'node_modules', '.bin');

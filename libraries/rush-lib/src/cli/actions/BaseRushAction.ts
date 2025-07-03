@@ -78,7 +78,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
       this.terminal.write(`Starting "rush ${this.actionName}"\n`);
     }
 
-    await measureAsyncFn(() => this.runAsync(), `${PERF_PREFIX}:runAsync`);
+    await measureAsyncFn(`${PERF_PREFIX}:runAsync`, () => this.runAsync());
   }
 
   /**
@@ -124,20 +124,19 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
 
     this._throwPluginErrorIfNeed();
 
-    await measureAsyncFn(
-      () => this.parser.pluginManager.tryInitializeAssociatedCommandPluginsAsync(this.actionName),
-      `${PERF_PREFIX}:initializePluginsAsync`
+    await measureAsyncFn(`${PERF_PREFIX}:initializePluginsAsync`, () =>
+      this.parser.pluginManager.tryInitializeAssociatedCommandPluginsAsync(this.actionName)
     );
 
     this._throwPluginErrorIfNeed();
 
     const { hooks: sessionHooks } = this.rushSession;
-    await measureAsyncFn(async () => {
+    await measureAsyncFn(`${PERF_PREFIX}:initializePlugins`, async () => {
       if (sessionHooks.initialize.isUsed()) {
         // Avoid the cost of compiling the hook if it wasn't tapped.
         await sessionHooks.initialize.promise(this);
       }
-    }, `${PERF_PREFIX}:initializePlugins`);
+    });
 
     return super.onExecuteAsync();
   }

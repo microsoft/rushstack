@@ -286,9 +286,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
       installSuccessful = false;
       throw error;
     } finally {
-      await measureAsyncFn(
-        () => purgeManager.startDeleteAllAsync(),
-        'rush:installManager:startDeleteAllAsync'
+      await measureAsyncFn('rush:installManager:startDeleteAllAsync', () =>
+        purgeManager.startDeleteAllAsync()
       );
       stopwatch.stop();
 
@@ -331,7 +330,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         installManagerOptions
       );
 
-    await measureAsyncFn(() => installManager.doInstallAsync(), 'rush:installManager:doInstallAsync');
+    await measureAsyncFn('rush:installManager:doInstallAsync', () => installManager.doInstallAsync());
   }
 
   private _collectTelemetry(

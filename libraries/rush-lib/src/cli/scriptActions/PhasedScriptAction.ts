@@ -329,7 +329,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     if (this._alwaysInstall || this._installParameter?.value) {
-      await measureAsyncFn(async () => {
+      await measureAsyncFn(`${PERF_PREFIX}:install`, async () => {
         const { doBasicInstallAsync } = await import(
           /* webpackChunkName: 'doBasicInstallAsync' */
           '../../logic/installManager/doBasicInstallAsync'
@@ -353,11 +353,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           // Eventually we may want to allow a subspace to be selected here
           subspace: this.rushConfiguration.defaultSubspace
         });
-      }, `${PERF_PREFIX}:doBasicInstallAsync`);
+      });
     }
 
     if (!this._runsBeforeInstall) {
-      await measureAsyncFn(async () => {
+      await measureAsyncFn(`${PERF_PREFIX}:checkInstallFlag`, async () => {
         // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are removed
         const lastLinkFlag: FlagFile = new FlagFile(
           this.rushConfiguration.defaultSubspace.getSubspaceTempFolderPath(),
@@ -374,10 +374,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
             throw new Error('Link flag invalid.\nDid you run "rush link"?');
           }
         }
-      }, `${PERF_PREFIX}:checkInstallFlag`);
+      });
     }
 
-    measureFn(() => this._doBeforeTask(), `${PERF_PREFIX}:doBeforeTask`);
+    measureFn(`${PERF_PREFIX}:doBeforeTask`, () => this._doBeforeTask());
 
     const hooks: PhasedCommandHooks = this.hooks;
     const terminal: ITerminal = this._terminal;
@@ -390,7 +390,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const includePhaseDeps: boolean = this._includePhaseDeps?.value ?? false;
 
-    await measureAsyncFn(async () => {
+    await measureAsyncFn(`${PERF_PREFIX}:applyStandardPlugins`, async () => {
       // Generates the default operation graph
       new PhasedOperationPlugin().apply(hooks);
       // Splices in sharded phases to the operation graph.
@@ -419,14 +419,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       // Enable the standard summary
       new OperationResultSummarizerPlugin(terminal).apply(this.hooks);
-    }, `${PERF_PREFIX}:applyStandardPlugins`);
+    });
 
     const { hooks: sessionHooks } = this.rushSession;
     if (sessionHooks.runAnyPhasedCommand.isUsed()) {
-      await measureAsyncFn(async () => {
+      await measureAsyncFn(`${PERF_PREFIX}:runAnyPhasedCommand`, async () => {
         // Avoid the cost of compiling the hook if it wasn't tapped.
         await sessionHooks.runAnyPhasedCommand.promise(this);
-      }, `${PERF_PREFIX}:runAnyPhasedCommand`);
+      });
     }
 
     const hookForAction: AsyncSeriesHook<IPhasedCommand> | undefined = sessionHooks.runPhasedCommand.get(
@@ -434,10 +434,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     );
 
     if (hookForAction) {
-      await measureAsyncFn(async () => {
+      await measureAsyncFn(`${PERF_PREFIX}:runPhasedCommand`, async () => {
         // Run the more specific hook for a command with this name after the general hook
         await hookForAction.promise(this);
-      }, `${PERF_PREFIX}:runPhasedCommand`);
+      });
     }
 
     const isQuietMode: boolean = !this._verboseParameter.value;
@@ -448,7 +448,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
     let cobuildConfiguration: CobuildConfiguration | undefined;
     if (!this._disableBuildCache) {
-      await measureAsyncFn(async () => {
+      await measureAsyncFn(`${PERF_PREFIX}:configureBuildCache`, async () => {
         [buildCacheConfiguration, cobuildConfiguration] = await Promise.all([
           BuildCacheConfiguration.tryLoadAsync(terminal, this.rushConfiguration, this.rushSession),
           CobuildConfiguration.tryLoadAsync(terminal, this.rushConfiguration, this.rushSession)
@@ -456,13 +456,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         if (cobuildConfiguration) {
           await cobuildConfiguration.createLockProviderAsync(terminal);
         }
-      }, `${PERF_PREFIX}:configureBuildCache`);
+      });
     }
 
     try {
       const projectSelection: Set<RushConfigurationProject> = await measureAsyncFn(
-        () => this._selectionParameters.getSelectedProjectsAsync(terminal),
-        `${PERF_PREFIX}:getSelectedProjectsAsync`
+        `${PERF_PREFIX}:getSelectedProjects`,
+        () => this._selectionParameters.getSelectedProjectsAsync(terminal)
       );
 
       if (!projectSelection.size) {
@@ -479,7 +479,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
 
-      await measureAsyncFn(async () => {
+      await measureAsyncFn(`${PERF_PREFIX}:applySituationalPlugins`, async () => {
         if (isWatch && this._noIPCParameter?.value === false) {
           new (
             await import(
@@ -534,7 +534,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           );
           new PnpmSyncCopyOperationPlugin(terminal).apply(this.hooks);
         }
-      }, `${PERF_PREFIX}:applySituationalPlugins`);
+      });
 
       const relevantProjects: Set<RushConfigurationProject> =
         Selection.expandAllDependencies(projectSelection);
@@ -542,9 +542,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this
         ._runsBeforeInstall
         ? new Map()
-        : await measureAsyncFn(
-            () => RushProjectConfiguration.tryLoadForProjectsAsync(relevantProjects, terminal),
-            `${PERF_PREFIX}:loadProjectConfigurations`
+        : await measureAsyncFn(`${PERF_PREFIX}:loadProjectConfigurations`, () =>
+            RushProjectConfiguration.tryLoadForProjectsAsync(relevantProjects, terminal)
           );
 
       const initialCreateOperationsContext: ICreateOperationsContext = {
@@ -595,9 +594,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         terminal
       };
 
-      const internalOptions: IRunPhasesOptions = await measureAsyncFn(
-        () => this._runInitialPhasesAsync(initialInternalOptions),
-        `${PERF_PREFIX}:runInitialPhases`
+      const internalOptions: IRunPhasesOptions = await measureAsyncFn(`${PERF_PREFIX}:runInitialPhases`, () =>
+        this._runInitialPhasesAsync(initialInternalOptions)
       );
 
       if (isWatch) {
@@ -627,33 +625,35 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const { projectConfigurations } = initialCreateOperationsContext;
     const { projectSelection } = initialCreateOperationsContext;
 
-    const operations: Set<Operation> = await measureAsyncFn(
-      () => this.hooks.createOperations.promise(new Set(), initialCreateOperationsContext),
-      `${PERF_PREFIX}:createOperations`
+    const operations: Set<Operation> = await measureAsyncFn(`${PERF_PREFIX}:createOperations`, () =>
+      this.hooks.createOperations.promise(new Set(), initialCreateOperationsContext)
     );
 
-    const [getInputsSnapshotAsync, initialSnapshot] = await measureAsyncFn(async () => {
-      terminal.write('Analyzing repo state... ');
-      const repoStateStopwatch: Stopwatch = new Stopwatch();
-      repoStateStopwatch.start();
+    const [getInputsSnapshotAsync, initialSnapshot] = await measureAsyncFn(
+      `${PERF_PREFIX}:analyzeRepoState`,
+      async () => {
+        terminal.write('Analyzing repo state... ');
+        const repoStateStopwatch: Stopwatch = new Stopwatch();
+        repoStateStopwatch.start();
 
-      const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-      const innerGetInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined =
-        await analyzer._tryGetSnapshotProviderAsync(
-          projectConfigurations,
-          terminal,
-          // We need to include all dependencies, otherwise build cache id calculation will be incorrect
-          Selection.expandAllDependencies(projectSelection)
-        );
-      const innerInitialSnapshot: IInputsSnapshot | undefined = innerGetInputsSnapshotAsync
-        ? await innerGetInputsSnapshotAsync()
-        : undefined;
+        const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
+        const innerGetInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined =
+          await analyzer._tryGetSnapshotProviderAsync(
+            projectConfigurations,
+            terminal,
+            // We need to include all dependencies, otherwise build cache id calculation will be incorrect
+            Selection.expandAllDependencies(projectSelection)
+          );
+        const innerInitialSnapshot: IInputsSnapshot | undefined = innerGetInputsSnapshotAsync
+          ? await innerGetInputsSnapshotAsync()
+          : undefined;
 
-      repoStateStopwatch.stop();
-      terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
-      terminal.writeLine();
-      return [innerGetInputsSnapshotAsync, innerInitialSnapshot];
-    }, `${PERF_PREFIX}:analyzeRepoStateAsync`);
+        repoStateStopwatch.stop();
+        terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
+        terminal.writeLine();
+        return [innerGetInputsSnapshotAsync, innerInitialSnapshot];
+      }
+    );
 
     const initialExecuteOperationsContext: IExecuteOperationsContext = {
       ...initialCreateOperationsContext,
@@ -664,9 +664,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       ...partialExecutionManagerOptions,
       inputsSnapshot: initialSnapshot,
       beforeExecuteOperationsAsync: async (records: Map<Operation, OperationExecutionRecord>) => {
-        await measureAsyncFn(
-          () => this.hooks.beforeExecuteOperations.promise(records, initialExecuteOperationsContext),
-          `${PERF_PREFIX}:beforeExecuteOperations`
+        await measureAsyncFn(`${PERF_PREFIX}:beforeExecuteOperations`, () =>
+          this.hooks.beforeExecuteOperations.promise(records, initialExecuteOperationsContext)
         );
       }
     };
@@ -680,9 +679,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       terminal
     };
 
-    await measureAsyncFn(
-      () => this._executeOperationsAsync(initialOptions),
-      `${PERF_PREFIX}:executeOperationsAsync`
+    await measureAsyncFn(`${PERF_PREFIX}:executeOperations`, () =>
+      this._executeOperationsAsync(initialOptions)
     );
 
     return {
@@ -857,8 +855,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     while (!abortSignal.aborted) {
       // On the initial invocation, this promise will return immediately with the full set of projects
       const { changedProjects, inputsSnapshot: state } = await measureAsyncFn(
-        () => projectWatcher.waitForChangeAsync(onWaitingForChanges),
-        `${PERF_PREFIX}:waitForChangeAsync`
+        `${PERF_PREFIX}:waitForChanges`,
+        () => projectWatcher.waitForChangeAsync(onWaitingForChanges)
       );
 
       if (abortSignal.aborted) {
@@ -891,9 +889,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         invalidateOperation
       };
 
-      const operations: Set<Operation> = await measureAsyncFn(
-        () => this.hooks.createOperations.promise(new Set(), executeOperationsContext),
-        `${PERF_PREFIX}:createOperations`
+      const operations: Set<Operation> = await measureAsyncFn(`${PERF_PREFIX}:createOperations`, () =>
+        this.hooks.createOperations.promise(new Set(), executeOperationsContext)
       );
 
       const executeOptions: IExecutionOperationsOptions = {
@@ -906,9 +903,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           ...executionManagerOptions,
           inputsSnapshot: state,
           beforeExecuteOperationsAsync: async (records: Map<Operation, OperationExecutionRecord>) => {
-            await measureAsyncFn(
-              () => this.hooks.beforeExecuteOperations.promise(records, executeOperationsContext),
-              `${PERF_PREFIX}:beforeExecuteOperations`
+            await measureAsyncFn(`${PERF_PREFIX}:beforeExecuteOperations`, () =>
+              this.hooks.beforeExecuteOperations.promise(records, executeOperationsContext)
             );
           }
         },
@@ -917,9 +913,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       try {
         // Delegate the the underlying command, for only the projects that need reprocessing
-        await measureAsyncFn(
-          () => this._executeOperationsAsync(executeOptions),
-          `${PERF_PREFIX}:executeOperationsAsync`
+        await measureAsyncFn(`${PERF_PREFIX}:executeOperations`, () =>
+          this._executeOperationsAsync(executeOptions)
         );
       } catch (err) {
         // In watch mode, we want to rebuild even if the original build failed.
@@ -948,15 +943,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     try {
       const definiteResult: IExecutionResult = await measureAsyncFn(
-        () => executionManager.executeAsync(),
-        `${PERF_PREFIX}:executeOperations`
+        `${PERF_PREFIX}:executeOperationsInner`,
+        () => executionManager.executeAsync()
       );
       success = definiteResult.status === OperationStatus.Success;
       result = definiteResult;
 
-      await measureAsyncFn(
-        () => this.hooks.afterExecuteOperations.promise(definiteResult, options.executeOperationsContext),
-        `${PERF_PREFIX}:afterExecuteOperations`
+      await measureAsyncFn(`${PERF_PREFIX}:afterExecuteOperations`, () =>
+        this.hooks.afterExecuteOperations.promise(definiteResult, options.executeOperationsContext)
       );
 
       stopwatch.stop();
@@ -987,11 +981,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
 
     if (!ignoreHooks) {
-      measureFn(() => this._doAfterTask(), `${PERF_PREFIX}:doAfterTask`);
+      measureFn(`${PERF_PREFIX}:doAfterTask`, () => this._doAfterTask());
     }
 
     if (this.parser.telemetry) {
-      const logEntry: ITelemetryData = measureFn(() => {
+      const logEntry: ITelemetryData = measureFn(`${PERF_PREFIX}:prepareTelemetry`, () => {
         const jsonOperationResults: Record<string, ITelemetryOperationResult> = {};
 
         const extraData: IPhasedCommandTelemetry = {
@@ -1101,9 +1095,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         };
 
         return innerLogEntry;
-      }, `${PERF_PREFIX}:prepareTelemetry`);
+      });
 
-      measureFn(() => this.hooks.beforeLog.call(logEntry), `${PERF_PREFIX}:beforeLog`);
+      measureFn(`${PERF_PREFIX}:beforeLog`, () => this.hooks.beforeLog.call(logEntry));
 
       this.parser.telemetry.log(logEntry);
 

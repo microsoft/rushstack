@@ -23,11 +23,11 @@ export function endPerformanceMeasurement(name: string): PerformanceMeasure {
 
 /**
  * Measures the execution time of a Promise-returning function.
- * @param fn - A function that returns a Promise. This function will be executed, and its execution time will be measured.
  * @param name - The name of the performance measurement. This should be unique for each measurement.
+ * @param fn - A function that returns a Promise. This function will be executed, and its execution time will be measured.
  * @returns A Promise that resolves with the result of the function.
  */
-export function measureAsyncFn<T>(fn: () => Promise<T>, name: string): Promise<T> {
+export function measureAsyncFn<T>(name: string, fn: () => Promise<T>): Promise<T> {
   const start: number = performance.now();
   return fn().finally(() => {
     performance.measure(name, {
@@ -38,11 +38,11 @@ export function measureAsyncFn<T>(fn: () => Promise<T>, name: string): Promise<T
 
 /**
  * Measures the execution time of a synchronous function.
- * @param fn - A function that returns a value. This function will be executed, and its execution time will be measured.
  * @param name - The name of the performance measurement. This should be unique for each measurement.
+ * @param fn - A function that returns a value. This function will be executed, and its execution time will be measured.
  * @returns The result of the function.
  */
-export function measureFn<T>(fn: () => T, name: string): T {
+export function measureFn<T>(name: string, fn: () => T): T {
   const start: number = performance.now();
   try {
     return fn();

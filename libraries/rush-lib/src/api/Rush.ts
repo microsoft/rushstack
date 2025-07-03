@@ -96,7 +96,7 @@ export class Rush {
     });
     // CommandLineParser.executeAsync() should never reject the promise
     // eslint-disable-next-line no-console
-    measureAsyncFn(() => parser.executeAsync(), 'rush:parser:executeAsync').catch(console.error);
+    measureAsyncFn('rush:parser:executeAsync', () => parser.executeAsync()).catch(console.error);
   }
 
   /**

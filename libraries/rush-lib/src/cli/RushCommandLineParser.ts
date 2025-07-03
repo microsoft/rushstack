@@ -221,9 +221,8 @@ export class RushCommandLineParser extends CommandLineParser {
     this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
       process.argv.indexOf('--debug') >= 0;
 
-    await measureAsyncFn(
-      () => this.pluginManager.tryInitializeUnassociatedPluginsAsync(),
-      'rush:initializeUnassociatedPlugins'
+    await measureAsyncFn('rush:initializeUnassociatedPlugins', () =>
+      this.pluginManager.tryInitializeUnassociatedPluginsAsync()
     );
 
     return await super.executeAsync(args);
@@ -303,7 +302,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     try {
-      await measureAsyncFn(() => super.onExecuteAsync(), 'rush:commandLineParser:onExecuteAsync');
+      await measureAsyncFn('rush:commandLineParser:onExecuteAsync', () => super.onExecuteAsync());
     } finally {
       if (this.telemetry) {
         this.flushTelemetry();
