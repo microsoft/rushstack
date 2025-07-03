@@ -1,24 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { PerformanceEntry, PerformanceMark, PerformanceMeasure } from 'node:perf_hooks';
+import type { PerformanceEntry } from 'node:perf_hooks';
 
 /**
- * Starts a performance measurement.
+ * Starts a performance measurement that can be disposed later to record the elapsed time.
  * @param name - The name of the performance measurement. This should be unique for each measurement.
- * @returns The performance mark that indicates the start of a measurement.
+ * @returns A Disposable object that, when disposed, will end and record the performance measurement.
  */
-export function startPerformanceMeasurement(name: string): PerformanceMark {
-  return performance.mark(`${name}:start`);
-}
+export function measureUntilDisposed(name: string): Disposable {
+  const start: number = performance.now();
 
-/**
- * Ends a performance measurement.
- * @param name - The name of the performance measurement. This should match the name used in `startPerformanceMeasurement`.
- * @returns The performance measure that contains the start and end marks for the measurement.
- */
-export function endPerformanceMeasurement(name: string): PerformanceMeasure {
-  return performance.measure(name, `${name}:start`);
+  return {
+    [Symbol.dispose]() {
+      performance.measure(name, {
+        start
+      });
+    }
+  };
 }
 
 /**
