@@ -168,7 +168,8 @@ export class Telemetry {
     const cpus: os.CpuInfo[] = os.cpus();
     const data: ITelemetryData = {
       ...telemetryData,
-      performanceEntries: collectPerformanceEntries(this._telemetryStartTime),
+      performanceEntries:
+        telemetryData.performanceEntries || collectPerformanceEntries(this._telemetryStartTime),
       machineInfo: telemetryData.machineInfo || {
         machineArchitecture: os.arch(),
         // The Node.js model is sometimes padded, for example:
