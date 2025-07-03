@@ -22,7 +22,7 @@ export {
   CertificateManager,
   type ICertificateGenerationOptions,
   type ICertificateManagerOptions,
-  type ICertificateExpiration,
+  type ICertificateValidationResult,
   DEFAULT_CERTIFICATE_SUBJECT_NAMES
 } from './CertificateManager';
 export { CertificateStore, type ICertificateStoreOptions } from './CertificateStore';

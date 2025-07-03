@@ -28,21 +28,6 @@
               ]
             }
           }
-        },
-        "copy-resources": {
-          "taskPlugin": {
-            "pluginName": "copy-files-plugin",
-            "pluginPackage": "@rushstack/heft",
-            "options": {
-              "copyOperations": [
-                {
-                  "sourcePath": "resources",
-                  "destinationFolders": ["dist/vsix/unpacked/resources"],
-                  "includeGlobs": ["*"]
-                }
-              ]
-            }
-          }
         }
       }
     }

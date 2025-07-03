@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { getConfig } from './config';
-import { CertificateManager } from '@rushstack/debug-certificate-manager';
+import { CertificateManager, CertificateStore } from '@rushstack/debug-certificate-manager';
 import type { ITerminal } from '@rushstack/terminal';
 
 export function getCertificateManager(
@@ -21,4 +21,19 @@ export function getCertificateManager(
   });
 
   return certificateManager;
+}
+
+export function getCertificateStore(terminal: ITerminal, configType: 'ui' | 'workspace'): CertificateStore {
+  const { caCertificateFilename, keyFilename, certificateFilename, storePath } = getConfig(
+    terminal,
+    configType
+  );
+  const certificateStore: CertificateStore = new CertificateStore({
+    caCertificateFilename,
+    keyFilename,
+    certificateFilename,
+    storePath
+  });
+
+  return certificateStore;
 }

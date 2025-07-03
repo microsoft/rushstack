@@ -384,6 +384,7 @@ export class Async {
   /**
    * Runs a promise with a timeout. If the promise does not resolve within the specified timeout,
    * it will reject with an error.
+   * @remarks If the action is completely synchronous, runWithTimeoutAsync doesn't do anything meaningful.
    */
   public static async runWithTimeoutAsync<TResult>({
     action,

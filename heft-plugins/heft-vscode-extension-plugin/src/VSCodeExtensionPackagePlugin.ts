@@ -29,7 +29,7 @@ interface IVSCodeExtensionPackagePluginOptions {
 const PLUGIN_NAME: 'vscode-extension-package-plugin' = 'vscode-extension-package-plugin';
 
 const vsceBasePackagePath: string = require.resolve('@vscode/vsce/package.json');
-const vsceScript: string = path.resolve(path.dirname(vsceBasePackagePath), 'vsce');
+const vsceScript: string = path.resolve(vsceBasePackagePath, '../vsce');
 
 export default class VSCodeExtensionPackagePlugin
   implements IHeftTaskPlugin<IVSCodeExtensionPackagePluginOptions>

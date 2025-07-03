@@ -61,19 +61,24 @@ export interface ICertificate {
 }
 
 /**
- * Information about certificate expiration dates
+ * Information about certificate validation results
  * @public
  */
-export interface ICertificateExpiration {
+export interface ICertificateValidationResult {
   /**
-   * Expiration date of the Certificate Authority certificate, or undefined if no Certificate Authority certificate exists
+   * Whether valid certificates exist and are usable
    */
-  caCertificateExpiration: Date | undefined;
+  isValid: boolean;
 
   /**
-   * Expiration date of the TLS Server certificate, or undefined if no TLS Server certificate exists
+   * List of validation messages/issues found
    */
-  certificateExpiration: Date | undefined;
+  validationMessages: string[];
+
+  /**
+   * The existing certificate if it exists and is valid
+   */
+  certificate?: ICertificate;
 }
 
 interface ICaCertificate {
@@ -169,8 +174,6 @@ export class CertificateManager {
   ): Promise<ICertificate> {
     const optionsWithDefaults: Required<ICertificateGenerationOptions> = applyDefaultOptions(options);
 
-    const { certificateData: existingCert, keyData: existingKey } = this.certificateStore;
-
     if (process.env[DISABLE_CERT_GENERATION_VARIABLE_NAME] === '1') {
       // Allow the environment (e.g. GitHub codespaces) to forcibly disable dev cert generation
       terminal.writeLine(
@@ -179,102 +182,34 @@ export class CertificateManager {
       canGenerateNewCertificate = false;
     }
 
-    if (existingCert && existingKey) {
-      const messages: string[] = [];
+    // Validate existing certificates
+    const validationResult: ICertificateValidationResult = await this.validateCertificateAsync(
+      terminal,
+      options
+    );
 
-      const forge: typeof import('node-forge') = await import('node-forge');
-      const certificate: pki.Certificate = forge.pki.certificateFromPem(existingCert);
-      const altNamesExtension: ISubjectAltNameExtension | undefined = certificate.getExtension(
-        'subjectAltName'
-      ) as ISubjectAltNameExtension;
-      if (!altNamesExtension) {
-        messages.push(
-          'The existing development certificate is missing the subjectAltName ' +
-            'property and will not work with the latest versions of some browsers.'
+    if (validationResult.isValid && validationResult.certificate) {
+      // Existing certificate is valid, return it
+      return validationResult.certificate;
+    }
+
+    // Certificate is invalid or doesn't exist
+    if (validationResult.validationMessages.length > 0) {
+      if (canGenerateNewCertificate) {
+        validationResult.validationMessages.push(
+          'Attempting to untrust the certificate and generate a new one.'
         );
+        terminal.writeWarningLine(validationResult.validationMessages.join(' '));
+        if (!options?.skipCertificateTrust) {
+          await this.untrustCertificateAsync(terminal);
+        }
+        return await this._ensureCertificateInternalAsync(optionsWithDefaults, terminal);
       } else {
-        const missingSubjectNames: Set<string> = new Set(optionsWithDefaults.subjectAltNames);
-        for (const altName of altNamesExtension.altNames) {
-          missingSubjectNames.delete(isIPAddress(altName) ? altName.ip : altName.value);
-        }
-        if (missingSubjectNames.size) {
-          messages.push(
-            `The existing development certificate does not include the following expected subjectAltName values: ` +
-              Array.from(missingSubjectNames, (name: string) => `"${name}"`).join(', ')
-          );
-        }
-      }
-
-      const { notBefore, notAfter } = certificate.validity;
-      const now: Date = new Date();
-      if (now < notBefore) {
-        messages.push(
-          `The existing development certificate's validity period does not start until ${notBefore}. It is currently ${now}.`
+        validationResult.validationMessages.push(
+          'Untrust the certificate and generate a new one, or set the ' +
+            '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`.'
         );
-      }
-
-      if (now > notAfter) {
-        messages.push(
-          `The existing development certificate's validity period ended ${notAfter}. It is currently ${now}.`
-        );
-      }
-
-      now.setUTCDate(now.getUTCDate() + optionsWithDefaults.validityInDays);
-      if (notAfter > now) {
-        messages.push(
-          `The existing development certificate's expiration date ${notAfter} exceeds the allowed limit ${now}. ` +
-            `This will be rejected by many browsers.`
-        );
-      }
-
-      if (
-        notBefore.getTime() - notAfter.getTime() >
-        optionsWithDefaults.validityInDays * ONE_DAY_IN_MILLISECONDS
-      ) {
-        messages.push(
-          "The existing development certificate's validity period is longer " +
-            `than ${optionsWithDefaults.validityInDays} days.`
-        );
-      }
-
-      const { caCertificateData } = this.certificateStore;
-
-      if (!caCertificateData) {
-        messages.push(
-          'The existing development certificate is missing a separate CA cert as the root ' +
-            'of trust and will not work with the latest versions of some browsers.'
-        );
-      }
-
-      const isTrusted: boolean = await this._detectIfCertificateIsTrustedAsync(terminal);
-      if (!isTrusted) {
-        messages.push('The existing development certificate is not currently trusted by your system.');
-      }
-
-      if (messages.length > 0) {
-        if (canGenerateNewCertificate) {
-          messages.push('Attempting to untrust the certificate and generate a new one.');
-          terminal.writeWarningLine(messages.join(' '));
-          if (!options?.skipCertificateTrust) {
-            await this.untrustCertificateAsync(terminal);
-          }
-          return await this._ensureCertificateInternalAsync(optionsWithDefaults, terminal);
-        } else {
-          messages.push(
-            'Untrust the certificate and generate a new one, or set the ' +
-              '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`.'
-          );
-          throw new Error(messages.join(' '));
-        }
-      } else {
-        return {
-          pemCaCertificate: caCertificateData,
-          pemCertificate: existingCert,
-          pemKey: existingKey,
-          subjectAltNames: altNamesExtension.altNames.map((entry) =>
-            isIPAddress(entry) ? entry.ip : entry.value
-          )
-        };
+        throw new Error(validationResult.validationMessages.join(' '));
       }
     } else if (canGenerateNewCertificate) {
       return await this._ensureCertificateInternalAsync(optionsWithDefaults, terminal);
@@ -367,55 +302,6 @@ export class CertificateManager {
         );
         return false;
     }
-  }
-
-  /**
-   * Get the expiration dates of the stored CA and server certificates.
-   * Returns undefined for certificates that don't exist or cannot be parsed.
-   *
-   * @public
-   */
-  public async getCertificateExpirationAsync(terminal: ITerminal): Promise<ICertificateExpiration> {
-    const { certificateData, caCertificateData } = this.certificateStore;
-
-    let caCertificateExpiration: Date | undefined;
-    let certificateExpiration: Date | undefined;
-
-    try {
-      const forge: typeof import('node-forge') = await import('node-forge');
-
-      if (caCertificateData) {
-        try {
-          const caCertificate: pki.Certificate = forge.pki.certificateFromPem(caCertificateData);
-          caCertificateExpiration = caCertificate.validity.notAfter;
-        } catch (error) {
-          terminal.writeLine(
-            `Error parsing CA certificate: ${error instanceof Error ? error.message : error}`
-          );
-        }
-      }
-
-      // Parse server certificate expiration
-      if (certificateData) {
-        try {
-          const serverCertificate: pki.Certificate = forge.pki.certificateFromPem(certificateData);
-          certificateExpiration = serverCertificate.validity.notAfter;
-        } catch (error) {
-          terminal.writeLine(
-            `Error parsing server certificate: ${error instanceof Error ? error.message : error}`
-          );
-        }
-      }
-    } catch (error) {
-      terminal.writeLine(
-        `Error getting certificate expiration: ${error instanceof Error ? error.message : error}`
-      );
-    }
-
-    return {
-      caCertificateExpiration,
-      certificateExpiration
-    };
   }
 
   private async _createCACertificateAsync(
@@ -843,6 +729,116 @@ export class CertificateManager {
       pemCertificate: certificateStore.certificateData,
       pemKey: certificateStore.keyData,
       subjectAltNames
+    };
+  }
+
+  /**
+   * Validate existing certificates to check if they are usable.
+   *
+   * @public
+   */
+  public async validateCertificateAsync(
+    terminal: ITerminal,
+    options?: ICertificateGenerationOptions
+  ): Promise<ICertificateValidationResult> {
+    const optionsWithDefaults: Required<ICertificateGenerationOptions> = applyDefaultOptions(options);
+    const { certificateData: existingCert, keyData: existingKey } = this.certificateStore;
+
+    if (!existingCert || !existingKey) {
+      return {
+        isValid: false,
+        validationMessages: ['No development certificate found.']
+      };
+    }
+
+    const messages: string[] = [];
+
+    const forge: typeof import('node-forge') = await import('node-forge');
+    const parsedCertificate: pki.Certificate = forge.pki.certificateFromPem(existingCert);
+    const altNamesExtension: ISubjectAltNameExtension | undefined = parsedCertificate.getExtension(
+      'subjectAltName'
+    ) as ISubjectAltNameExtension;
+
+    if (!altNamesExtension) {
+      messages.push(
+        'The existing development certificate is missing the subjectAltName ' +
+          'property and will not work with the latest versions of some browsers.'
+      );
+    } else {
+      const missingSubjectNames: Set<string> = new Set(optionsWithDefaults.subjectAltNames);
+      for (const altName of altNamesExtension.altNames) {
+        missingSubjectNames.delete(isIPAddress(altName) ? altName.ip : altName.value);
+      }
+      if (missingSubjectNames.size) {
+        messages.push(
+          `The existing development certificate does not include the following expected subjectAltName values: ` +
+            Array.from(missingSubjectNames, (name: string) => `"${name}"`).join(', ')
+        );
+      }
+    }
+
+    const { notBefore, notAfter } = parsedCertificate.validity;
+    const now: Date = new Date();
+    if (now < notBefore) {
+      messages.push(
+        `The existing development certificate's validity period does not start until ${notBefore}. It is currently ${now}.`
+      );
+    }
+
+    if (now > notAfter) {
+      messages.push(
+        `The existing development certificate's validity period ended ${notAfter}. It is currently ${now}.`
+      );
+    }
+
+    now.setUTCDate(now.getUTCDate() + optionsWithDefaults.validityInDays);
+    if (notAfter > now) {
+      messages.push(
+        `The existing development certificate's expiration date ${notAfter} exceeds the allowed limit ${now}. ` +
+          `This will be rejected by many browsers.`
+      );
+    }
+
+    if (
+      notBefore.getTime() - notAfter.getTime() >
+      optionsWithDefaults.validityInDays * ONE_DAY_IN_MILLISECONDS
+    ) {
+      messages.push(
+        "The existing development certificate's validity period is longer " +
+          `than ${optionsWithDefaults.validityInDays} days.`
+      );
+    }
+
+    const { caCertificateData } = this.certificateStore;
+
+    if (!caCertificateData) {
+      messages.push(
+        'The existing development certificate is missing a separate CA cert as the root ' +
+          'of trust and will not work with the latest versions of some browsers.'
+      );
+    }
+
+    const isTrusted: boolean = await this._detectIfCertificateIsTrustedAsync(terminal);
+    if (!isTrusted) {
+      messages.push('The existing development certificate is not currently trusted by your system.');
+    }
+
+    const isValid: boolean = messages.length === 0;
+    const validCertificate: ICertificate | undefined = isValid
+      ? {
+          pemCaCertificate: caCertificateData,
+          pemCertificate: existingCert,
+          pemKey: existingKey,
+          subjectAltNames: altNamesExtension?.altNames.map((entry) =>
+            isIPAddress(entry) ? entry.ip : entry.value
+          )
+        }
+      : undefined;
+
+    return {
+      isValid,
+      validationMessages: messages,
+      certificate: validCertificate
     };
   }
 

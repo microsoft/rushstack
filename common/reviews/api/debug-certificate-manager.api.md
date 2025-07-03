@@ -11,8 +11,8 @@ export class CertificateManager {
     constructor(options?: ICertificateManagerOptions);
     readonly certificateStore: CertificateStore;
     ensureCertificateAsync(canGenerateNewCertificate: boolean, terminal: ITerminal, options?: ICertificateGenerationOptions): Promise<ICertificate>;
-    getCertificateExpirationAsync(terminal: ITerminal): Promise<ICertificateExpiration>;
     untrustCertificateAsync(terminal: ITerminal): Promise<boolean>;
+    validateCertificateAsync(terminal: ITerminal, options?: ICertificateGenerationOptions): Promise<ICertificateValidationResult>;
 }
 
 // @public
@@ -42,12 +42,6 @@ export interface ICertificate {
 }
 
 // @public
-export interface ICertificateExpiration {
-    caCertificateExpiration: Date | undefined;
-    certificateExpiration: Date | undefined;
-}
-
-// @public
 export interface ICertificateGenerationOptions {
     skipCertificateTrust?: boolean;
     subjectAltNames?: ReadonlyArray<string>;
@@ -65,6 +59,13 @@ export interface ICertificateStoreOptions {
     certificateFilename?: string;
     keyFilename?: string;
     storePath?: string;
+}
+
+// @public
+export interface ICertificateValidationResult {
+    certificate?: ICertificate;
+    isValid: boolean;
+    validationMessages: string[];
 }
 
 ```

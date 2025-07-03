@@ -39,115 +39,14 @@
     "commands": [
       {
         "command": "tlssync.workspace.showLog",
-        "title": "Show Log",
-        "category": "TLS Sync"
-      },
-      {
-        "command": "tlssync.workspace.sync",
-        "title": "Sync TLS Certificates",
-        "category": "TLS Sync"
-      },
-      {
-        "command": "tlssync.workspace.showWalkthrough",
-        "title": "Show Walkthrough",
-        "category": "TLS Sync"
-      },
-      {
-        "command": "tlssync.workspace.showSettings",
-        "title": "Show Settings",
+        "title": "Show Log (Workspace)",
         "category": "TLS Sync"
       }
-    ],
-    "walkthroughs": [
-      {
-        "id": "sync-certificates",
-        "title": "TLS Sync",
-        "description": "Sync your debug TLS certificates with the remote machine.",
-        "featuredFor": [
-          ".tlssync"
-        ],
-        "steps": [
-          {
-            "id": "runsynccommand",
-            "title": "Sync Certificates",
-            "description": "[Sync](command:tlssync.workspace.sync)",
-            "completionEvents": [
-              "onContext:tlssync.workspace.sync.complete"
-            ],
-            "media": {
-              "markdown": "./media/walkthrough-sync.md"
-            }
-          },
-          {
-            "id": "changetlssyncsettings",
-            "title": "Change Sync Settings",
-            "description": "[Open Settings](command:tlssync.workspace.showSettings)",
-            "completionEvents": [],
-            "media": {
-              "markdown": "./media/walkthrough-settings.md"
-            }
-          }
-        ]
-      }
-    ],
-    "configuration": {
-      "title": "TLS Sync",
-      "properties": {
-        "tlssync.ui.storePath.osx": {
-          "type": "string",
-          "title": "UI Extension - TLS Sync Store Path (macOS)",
-          "description": "[UI Extension] Directory where TLS certificates are read and written."
-        },
-        "tlssync.ui.storePath.windows": {
-          "type": "string",
-          "title": "UI Extension - TLS Sync Store Path (Windows)",
-          "description": "[UI Extension] Directory where TLS certificates are read and written."
-        },
-        "tlssync.ui.storePath.linux": {
-          "type": "string",
-          "title": "UI Extension - TLS Sync Store Path (Linux)",
-          "description": "[UI Extension] Directory where TLS certificates are read and written."
-        },
-        "tlssync.workspace.storePath.osx": {
-          "type": "string",
-          "title": "Workspace Extension - TLS Sync Store Path (macOS)",
-          "description": "[Workspace Extension] Directory where TLS certificates are read and written."
-        },
-        "tlssync.workspace.storePath.windows": {
-          "type": "string",
-          "title": "Workspace Extension - TLS Sync Store Path (Windows)",
-          "description": "[Workspace Extension] Directory where TLS certificates are read and written."
-        },
-        "tlssync.workspace.storePath.linux": {
-          "type": "string",
-          "title": "Workspace Extension - TLS Sync Store Path (Linux)",
-          "description": "[Workspace Extension] Directory where TLS certificates are read and written."
-        },
-        "tlssync.caCertificateFilename": {
-          "type": "string",
-          "title": "CA Certificate Filename",
-          "description": "Filename for the CA certificate."
-        },
-        "tlssync.certificateFilename": {
-          "type": "string",
-          "title": "Server Certificate Filename",
-          "description": "Filename for the server certificate."
-        },
-        "tlssync.keyFilename": {
-          "type": "string",
-          "title": "Server Key Filename",
-          "description": "Filename for the server key."
-        },
-        "tlssync.autoSync": {
-          "type": "boolean",
-          "title": "Automatically Sync Certificates",
-          "default": true,
-          "description": "Check certificates when extension is activated. Extension is automatically activated when a `.tlssync` file is present in the workspace."
-        }
-      }
-    }
+    ]
   },
   "activationEvents": [
+    "onCommand:tlssync.workspace.ping",
+    "onCommand:tlssync.workspace.sync",
     "workspaceContains:**/.tlssync"
   ],
   "dependencies": {
