@@ -6,12 +6,10 @@ The workspace and UI extensions work together to use `@rushstack/debug-certifica
 
 Both the UI and Workspace extensions must be installed for the sync process to work.
 
-1. VS Code activates the workspace extension if `.tlssync` file is present in the workspace or if the user runs the Sync command.
-2. The Workspace extension checks if the UI extension is available.
-3. If the UI extension is available, it requests the debug certificate from the UI extension.
-4. The UI extension checks if there are any existing valid certificates. If not, it generates a new certificate.
-5. The UI extension returns the certificate to the Workspace extension.
-6. The Workspace extension compares the certificate with the existing one in the remote workspace and updates it if necessary.
+1. VS Code activates the UI extension if `.tlssync` file is present in the workspace or if the user runs the Sync command.
+2. The UI extension checks if the Workspace extension is available.
+3. If the Workspace extension is available, it ensures that valid certificates are present in the local certificate store. If not, it generates a new certificate and stores it in the local certificate store.
+4. The UI extension then sends the certificate to the Workspace extension.
 
 The certificate store paths and the file names can be configured in the VS Code settings. Run the `TLS Sync: Show Settings` command to view and modify the configuration.
 
