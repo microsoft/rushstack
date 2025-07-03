@@ -47,6 +47,18 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/tls-sync-vscode-ui-extension",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/tls-sync-vscode-workspace-extension",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/vscode-shared",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "@ungap/structured-clone",
       "allowedCategories": [ "libraries" ]
     },
@@ -96,6 +108,14 @@
     },
     {
       "name": "scheduler",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "tls-sync-vscode-ui-extension",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "tls-sync-vscode-workspace-extension",
       "allowedCategories": [ "vscode-extensions" ]
     },
     {

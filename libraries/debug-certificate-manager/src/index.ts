@@ -21,6 +21,8 @@ export {
   type ICertificate,
   CertificateManager,
   type ICertificateGenerationOptions,
+  type ICertificateManagerOptions,
+  type ICertificateValidationResult,
   DEFAULT_CERTIFICATE_SUBJECT_NAMES
 } from './CertificateManager';
-export { CertificateStore } from './CertificateStore';
+export { CertificateStore, type ICertificateStoreOptions } from './CertificateStore';

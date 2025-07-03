@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "tls-sync-vscode-extension-pack",
+      "comment": "Add VSCode Extension to sync TLS certificates when using VS Code remoting.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "tls-sync-vscode-extension-pack"
+}

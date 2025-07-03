@@ -123,3 +123,6 @@ dist-storybook/
 # Heft temporary files
 .cache/
 .heft/
+
+# VS Code test runner files
+.vscode-test/

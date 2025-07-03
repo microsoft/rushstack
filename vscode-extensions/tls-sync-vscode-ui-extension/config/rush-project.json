@@ -1,0 +1,4 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-project.schema.json",
+  "extends": "@rushstack/heft-vscode-extension-rig/profiles/default/config/rush-project.json"
+}

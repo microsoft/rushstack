@@ -2,6 +2,26 @@ variables:
   - name: FORCE_COLOR
     value: 1
 
+parameters:
+  - name: shouldPublish
+    type: boolean
+    default: true
+  - name: ExtensionPublishConfig
+    type: object
+    default:
+      - key: 'tls-sync-vscode-ui-extension'
+        vsixPath: 'dist/vsix/packaged.vsix'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-ui-extension'
+      - key: 'tls-sync-vscode-workspace-extension'
+        vsixPath: 'dist/vsix/packaged.vsix'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-workspace-extension'
+      - key: 'tls-sync-vscode-extension-pack'
+        vsixPath: 'dist/vsix/packaged.vsix'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-extension-pack'
+      - key: 'rush-vscode-extension'
+        vsixPath: 'dist/vsix/packaged.vsix'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension'
+
 resources:
   repositories:
     - repository: 1esPipelines
@@ -22,6 +42,14 @@ extends:
             pool:
               name: publish-rushstack
               os: linux
+            templateContext:
+              outputs:
+                - ${{ each extension in parameters.ExtensionPublishConfig }}:
+                    - output: pipelineArtifact
+                      artifactName: ${{ extension.key }}
+                      targetPath: ${{ extension.projectPath }}/${{ extension.vsixPath }}
+                      displayName: 'Publish Artifact: ${{ extension.key }}'
+
             steps:
               - checkout: self
                 persistCredentials: true
@@ -31,14 +59,16 @@ extends:
               - template: /common/config/azure-pipelines/templates/build.yaml@self
                 parameters:
                   BuildParameters: >
-                    --to rushstack
+                    --to tag:vsix
 
-              - script: node $(Build.SourcesDirectory)/common/scripts/install-run-rushx.js package
-                workingDirectory: $(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension
-                displayName: 'Package vscode extension'
-
-              - script: node $(Build.SourcesDirectory)/common/scripts/install-run-rushx.js deploy
-                workingDirectory: $(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension
-                displayName: 'Publish vscode extension'
-                env:
-                  VSCE_PAT: $(vscePat)
+              - ${{ if parameters.shouldPublish }}:
+                  - ${{ each extension in parameters.ExtensionPublishConfig }}:
+                      - task: AzureCLI@2
+                        displayName: 'Publish VSIX: ${{ extension.key }}'
+                        inputs:
+                          azureSubscription: rushstack-vscode-publish
+                          scriptType: 'bash'
+                          scriptLocation: 'inlineScript'
+                          inlineScript: |
+                            node node_modules/@rushstack/heft-vscode-extension-rig/node_modules/@rushstack/heft-vscode-extension-plugin/node_modules/@vscode/vsce/vsce publish --no-dependencies --azure-credential --packagePath ${{ extension.vsixPath }}
+                          workingDirectory: ${{ extension.projectPath }}
