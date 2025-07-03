@@ -14,6 +14,9 @@ import { Utilities } from '../../utilities/Utilities';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { RushSession } from '../../pluginFramework/RushSession';
 import type { IRushCommand } from '../../pluginFramework/RushLifeCycle';
+import { measureAsyncFn } from '../../utilities/performance';
+
+const PERF_PREFIX: string = 'rush:action';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
@@ -75,7 +78,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
       this.terminal.write(`Starting "rush ${this.actionName}"\n`);
     }
 
-    return await this.runAsync();
+    await measureAsyncFn(`${PERF_PREFIX}:runAsync`, () => this.runAsync());
   }
 
   /**
@@ -121,15 +124,19 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
 
     this._throwPluginErrorIfNeed();
 
-    await this.parser.pluginManager.tryInitializeAssociatedCommandPluginsAsync(this.actionName);
+    await measureAsyncFn(`${PERF_PREFIX}:initializePluginsAsync`, () =>
+      this.parser.pluginManager.tryInitializeAssociatedCommandPluginsAsync(this.actionName)
+    );
 
     this._throwPluginErrorIfNeed();
 
     const { hooks: sessionHooks } = this.rushSession;
-    if (sessionHooks.initialize.isUsed()) {
-      // Avoid the cost of compiling the hook if it wasn't tapped.
-      await sessionHooks.initialize.promise(this);
-    }
+    await measureAsyncFn(`${PERF_PREFIX}:initializePlugins`, async () => {
+      if (sessionHooks.initialize.isUsed()) {
+        // Avoid the cost of compiling the hook if it wasn't tapped.
+        await sessionHooks.initialize.promise(this);
+      }
+    });
 
     return super.onExecuteAsync();
   }

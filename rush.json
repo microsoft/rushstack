@@ -304,7 +304,7 @@
    * that read these JSON files and do something with them.  These scripts are typically registered
    * in the "eventHooks" section.
    */
-  // "telemetryEnabled": false,
+  "telemetryEnabled": true,
 
   /**
    * Allows creation of hotfix changes. This feature is experimental so it is disabled by default.
