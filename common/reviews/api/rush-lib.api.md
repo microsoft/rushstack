@@ -23,6 +23,7 @@ import { JsonNull } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import type { PerformanceEntry as PerformanceEntry_2 } from 'node:perf_hooks';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import { SyncWaterfallHook } from 'tapable';
@@ -884,6 +885,7 @@ export interface ITelemetryData {
     readonly machineInfo?: ITelemetryMachineInfo;
     readonly name: string;
     readonly operationResults?: Record<string, ITelemetryOperationResult>;
+    readonly performanceEntries?: readonly PerformanceEntry_2[];
     readonly platform?: string;
     readonly result: 'Succeeded' | 'Failed';
     readonly rushVersion?: string;

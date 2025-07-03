@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add performance measures around various operations, include performance entries in telemetry payload.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

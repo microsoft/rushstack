@@ -3,11 +3,13 @@
 
 import * as os from 'os';
 import * as path from 'path';
+import type { PerformanceEntry } from 'node:perf_hooks';
 import { FileSystem, type FileSystemStats, JsonFile } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
 import type { RushSession } from '../pluginFramework/RushSession';
+import { collectPerformanceEntries } from '../utilities/performance';
 
 /**
  * @beta
@@ -129,6 +131,12 @@ export interface ITelemetryData {
   readonly operationResults?: Record<string, ITelemetryOperationResult>;
 
   readonly extraData?: { [key: string]: string | number | boolean };
+
+  /**
+   * Performance marks and measures collected during the execution of this command.
+   * This is an array of `PerformanceEntry` objects, which can include marks, measures, and function timings.
+   */
+  readonly performanceEntries?: readonly PerformanceEntry[];
 }
 
 const MAX_FILE_COUNT: number = 100;
@@ -141,6 +149,7 @@ export class Telemetry {
   private _rushConfiguration: RushConfiguration;
   private _rushSession: RushSession;
   private _flushAsyncTasks: Set<Promise<void>> = new Set();
+  private _telemetryStartTime: number = 0;
 
   public constructor(rushConfiguration: RushConfiguration, rushSession: RushSession) {
     this._rushConfiguration = rushConfiguration;
@@ -159,6 +168,7 @@ export class Telemetry {
     const cpus: os.CpuInfo[] = os.cpus();
     const data: ITelemetryData = {
       ...telemetryData,
+      performanceEntries: collectPerformanceEntries(this._telemetryStartTime),
       machineInfo: telemetryData.machineInfo || {
         machineArchitecture: os.arch(),
         // The Node.js model is sometimes padded, for example:
@@ -172,6 +182,7 @@ export class Telemetry {
       platform: telemetryData.platform || process.platform,
       rushVersion: telemetryData.rushVersion || Rush.version
     };
+    this._telemetryStartTime = performance.now();
     this._store.push(data);
   }
 
