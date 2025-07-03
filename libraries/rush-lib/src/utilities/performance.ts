@@ -42,7 +42,7 @@ export function measureAsyncFn<T>(fn: () => Promise<T>, name: string): Promise<T
  * @param name - The name of the performance measurement. This should be unique for each measurement.
  * @returns The result of the function.
  */
-export function measureSyncFn<T>(fn: () => T, name: string): T {
+export function measureFn<T>(fn: () => T, name: string): T {
   const start: number = performance.now();
   try {
     return fn();

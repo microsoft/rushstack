@@ -59,7 +59,7 @@ import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 import { Selection } from '../../logic/Selection';
 import { NodeDiagnosticDirPlugin } from '../../logic/operations/NodeDiagnosticDirPlugin';
 import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin';
-import { measureAsyncFn, measureSyncFn } from '../../utilities/performance';
+import { measureAsyncFn, measureFn } from '../../utilities/performance';
 
 const PERF_PREFIX: 'rush:phasedScriptAction' = 'rush:phasedScriptAction';
 
@@ -377,7 +377,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       }, `${PERF_PREFIX}:checkInstallFlag`);
     }
 
-    measureSyncFn(() => this._doBeforeTask(), `${PERF_PREFIX}:doBeforeTask`);
+    measureFn(() => this._doBeforeTask(), `${PERF_PREFIX}:doBeforeTask`);
 
     const hooks: PhasedCommandHooks = this.hooks;
     const terminal: ITerminal = this._terminal;
@@ -987,11 +987,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
 
     if (!ignoreHooks) {
-      measureSyncFn(() => this._doAfterTask(), `${PERF_PREFIX}:doAfterTask`);
+      measureFn(() => this._doAfterTask(), `${PERF_PREFIX}:doAfterTask`);
     }
 
     if (this.parser.telemetry) {
-      const logEntry: ITelemetryData = measureSyncFn(() => {
+      const logEntry: ITelemetryData = measureFn(() => {
         const jsonOperationResults: Record<string, ITelemetryOperationResult> = {};
 
         const extraData: IPhasedCommandTelemetry = {
@@ -1103,7 +1103,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         return innerLogEntry;
       }, `${PERF_PREFIX}:prepareTelemetry`);
 
-      measureSyncFn(() => this.hooks.beforeLog.call(logEntry), `${PERF_PREFIX}:beforeLog`);
+      measureFn(() => this.hooks.beforeLog.call(logEntry), `${PERF_PREFIX}:beforeLog`);
 
       this.parser.telemetry.log(logEntry);
 
