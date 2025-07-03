@@ -118,6 +118,21 @@
           "title": "UI Extension - TLS Sync Store Path (Linux)",
           "description": "[UI Extension] Directory where TLS certificates are read and written."
         },
+        "tlssync.workspace.storePath.osx": {
+          "type": "string",
+          "title": "Workspace Extension - TLS Sync Store Path (macOS)",
+          "description": "[Workspace Extension] Directory where TLS certificates are read and written."
+        },
+        "tlssync.workspace.storePath.windows": {
+          "type": "string",
+          "title": "Workspace Extension - TLS Sync Store Path (Windows)",
+          "description": "[Workspace Extension] Directory where TLS certificates are read and written."
+        },
+        "tlssync.workspace.storePath.linux": {
+          "type": "string",
+          "title": "Workspace Extension - TLS Sync Store Path (Linux)",
+          "description": "[Workspace Extension] Directory where TLS certificates are read and written."
+        },
         "tlssync.caCertificateFilename": {
           "type": "string",
           "title": "CA Certificate Filename",
