@@ -15,8 +15,7 @@ module.exports = [
       }
     },
     rules: {
-      // api-extractor-model uses namespaces to represent mixins
-      '@typescript-eslint/no-namespace': 'off'
+      'no-console': 'off'
     }
   }
 ];
