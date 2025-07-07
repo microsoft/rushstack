@@ -5,7 +5,8 @@
 // It enables security rules that assume the service could receive malicious inputs from an
 // untrusted user.  If that is not the case, consider using the "node-trusted-tool" profile instead.
 
-const { buildRules } = require('./_common');
+const nodeProfile = require('@rushstack/eslint-config/flat/profile/node');
 
-const rules = buildRules('node');
-module.exports = rules;
+const { localCommonConfig } = require('./_common');
+
+module.exports = [...nodeProfile, ...localCommonConfig];

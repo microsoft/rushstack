@@ -10,9 +10,10 @@
 // the filesystem in unsafe ways.  Such activities are safe and commonplace for a trusted tool.
 //
 // DO NOT use this profile for a library project that might also be loaded by a Node.js service;
-// use "local-eslint-config/profiles/node" instead.
+// use "local-eslint-config/flat/profiles/node" instead.
 
-const { buildRules } = require('./_common');
+const nodeTrustedToolProfile = require('@rushstack/eslint-config/flat/profile/node-trusted-tool');
 
-const rules = buildRules('node-trusted-tool');
-module.exports = rules;
+const { localCommonConfig } = require('./_common');
+
+module.exports = [...nodeTrustedToolProfile, ...localCommonConfig];
