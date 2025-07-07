@@ -283,7 +283,6 @@ export class ApiReportGenerator {
     reportVariant: ApiReportVariant
   ): void {
     // Should we process this declaration at all?
-    // eslint-disable-next-line no-bitwise
     if (!ApiReportGenerator._shouldIncludeDeclaration(collector, astDeclaration, reportVariant)) {
       span.modification.skipAll();
       return;

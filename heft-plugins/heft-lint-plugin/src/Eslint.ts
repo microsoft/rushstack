@@ -152,7 +152,6 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       // and subsequently mapped to the results in the ESLint.lintFileAsync method below. After the messages
       // are mapped, the array will be cleared so that it is ready for the next fix operation.
       fixFn = (message: TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this._currentFixMessages.push(message);
         return true;
       };

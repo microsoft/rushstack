@@ -19,7 +19,6 @@ export interface IParsedImportSpecifier {
 const LOADER_CAPTURE_GROUP: 'loader' = 'loader';
 const IMPORT_TARGET_CAPTURE_GROUP: 'importTarget' = 'importTarget';
 const LOADER_OPTIONS_CAPTURE_GROUP: 'loaderOptions' = 'loaderOptions';
-// eslint-disable-next-line @rushstack/security/no-unsafe-regexp
 const SPECIFIER_REGEX: RegExp = new RegExp(
   `^((?<${LOADER_CAPTURE_GROUP}>(!|-!|!!).+)!)?` +
     `(?<${IMPORT_TARGET_CAPTURE_GROUP}>[^!?]+)` +

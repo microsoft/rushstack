@@ -113,7 +113,6 @@ export class WatchLoop implements IWatchLoopState {
 
     const abortPromise: Promise<unknown> = once(abortSignal, 'abort');
 
-    // eslint-disable-next-line no-constant-condition
     while (!abortSignal.aborted) {
       await this.runUntilStableAsync(abortSignal);
 

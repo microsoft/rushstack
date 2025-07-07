@@ -22,7 +22,6 @@ function verifyProvider(): void {
 
 async function writeAsync(writable: Writable, data: string): Promise<void> {
   await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
-    // eslint-disable-next-line @rushstack/no-new-null
     writable.write(data, (error?: Error | null) => {
       if (error) {
         reject(error);
