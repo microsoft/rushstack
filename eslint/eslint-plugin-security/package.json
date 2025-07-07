@@ -34,7 +34,7 @@
     "@typescript-eslint/rule-tester": "~8.31.0",
     "@typescript-eslint/typescript-estree": "~8.31.0",
     "decoupled-local-node-rig": "workspace:*",
-    "eslint": "~8.57.0",
+    "eslint": "~9.25.1",
     "typescript": "~5.8.2"
   }
 }
