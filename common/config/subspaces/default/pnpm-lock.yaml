@@ -2912,11 +2912,11 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/terminal
       '@types/eslint':
-        specifier: 8.56.10
-        version: 8.56.10
-      '@types/eslint-9':
-        specifier: npm:@types/eslint@9.6.1
-        version: /@types/eslint@9.6.1
+        specifier: 9.6.1
+        version: 9.6.1
+      '@types/eslint-8':
+        specifier: npm:@types/eslint@8.56.10
+        version: /@types/eslint@8.56.10
       '@types/json-stable-stringify-without-jsonify':
         specifier: 1.0.2
         version: 1.0.2
@@ -2927,11 +2927,11 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/decoupled-local-node-rig
       eslint:
-        specifier: ~8.57.0
-        version: 8.57.0
-      eslint-9:
-        specifier: npm:eslint@~9.25.1
-        version: /eslint@9.25.1
+        specifier: ~9.25.1
+        version: 9.25.1
+      eslint-8:
+        specifier: npm:eslint@~8.57.0
+        version: /eslint@8.57.0
       tslint:
         specifier: ~5.20.1
         version: 5.20.1(typescript@5.8.2)
@@ -13550,7 +13550,7 @@ packages:
   /@types/eslint-scope@3.7.7:
     resolution: {integrity: sha512-MzMFlSLBqNF2gcHWO0G1vP/YQyfvrxZ0bF+u7mzUdZ1/xK4A4sru+nraZz5i3iEIk1l1uyicaDVTB4QbbEkAYg==}
     dependencies:
-      '@types/eslint': 8.56.10
+      '@types/eslint': 9.6.1
       '@types/estree': 1.0.6
 
   /@types/eslint@8.56.10:
@@ -13558,13 +13558,13 @@ packages:
     dependencies:
       '@types/estree': 1.0.6
       '@types/json-schema': 7.0.15
+    dev: true
 
   /@types/eslint@9.6.1:
     resolution: {integrity: sha512-FXx2pKgId/WyYo2jXw63kk7/+TY7u7AziEJxJAnSFzHlqTAS3Ync6SvgYAN/k4/PQpnnVuzoMuVnByKK2qp0ag==}
     dependencies:
       '@types/estree': 1.0.6
       '@types/json-schema': 7.0.15
-    dev: true
 
   /@types/estree@1.0.6:
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
