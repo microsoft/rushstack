@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 import { formatEslintResultsAsSARIF } from '../SarifFormatter';
 import type { ISerifFormatterOptions } from '../SarifFormatter';
-import type { ESLint } from 'eslint-9';
+import type { ESLint } from 'eslint';
 
 describe('formatEslintResultsAsSARIF', () => {
   test('should correctly format ESLint results into SARIF log', () => {
