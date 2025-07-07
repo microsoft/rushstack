@@ -79,6 +79,8 @@ export interface ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult = string
     getAdditionalOutputFiles?: (relativePath: string) => string[];
     // (undocumented)
     parseAndGenerateTypings: (fileContents: TFileContents, filePath: string, relativePath: string) => TTypingsResult | Promise<TTypingsResult>;
+    // (undocumented)
+    writeFileAsync?: (filePath: string, contents: string) => Promise<void>;
 }
 
 // @public (undocumented)
@@ -100,7 +102,7 @@ export class TypingsGenerator<TFileContents = string> {
     readonly ignoredFileGlobs: readonly string[];
     readonly inputFileGlob: string;
     // (undocumented)
-    protected readonly _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
+    protected readonly _options: Required<Pick<ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>, 'writeFileAsync'>> & ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
     registerDependency(consumer: string, rawDependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;

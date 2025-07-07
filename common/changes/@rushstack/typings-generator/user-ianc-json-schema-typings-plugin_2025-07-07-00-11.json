@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Add an option to provide a `writeFileAsync` function.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator"
+}

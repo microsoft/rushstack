@@ -33,6 +33,7 @@ export interface ITypingsGeneratorOptionsWithoutReadFile<
     relativePath: string
   ) => TTypingsResult | Promise<TTypingsResult>;
   getAdditionalOutputFiles?: (relativePath: string) => string[];
+  writeFileAsync?: (filePath: string, contents: string) => Promise<void>;
 }
 
 /**
@@ -80,7 +81,10 @@ export class TypingsGenerator<TFileContents = string> {
   // Map of resolved file path -> relative file path
   private readonly _relativePaths: Map<string, string>;
 
-  protected readonly _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
+  protected readonly _options: Required<
+    Pick<ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>, 'writeFileAsync'>
+  > &
+    ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
 
   protected readonly terminal: ITerminal;
 
@@ -106,46 +110,56 @@ export class TypingsGenerator<TFileContents = string> {
   );
   public constructor(options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>);
   public constructor(options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>) {
-    this._options = {
+    this._options = options = {
       ...options,
       readFile:
         options.readFile ??
         ((filePath: string, relativePath: string): Promise<TFileContents> =>
-          FileSystem.readFileAsync(filePath) as Promise<TFileContents>)
+          FileSystem.readFileAsync(filePath) as Promise<TFileContents>),
+      writeFileAsync:
+        options.writeFileAsync ??
+        ((filePath: string, contents: string): Promise<void> =>
+          FileSystem.writeFileAsync(filePath, contents, {
+            ensureFolderExists: true,
+            convertLineEndings: NewlineKind.OsDefault
+          }))
     };
 
-    if (!options.generatedTsFolder) {
+    const { generatedTsFolder, srcFolder, fileExtensions, globsToIgnore, terminal } = options;
+
+    if (!generatedTsFolder) {
       throw new Error('generatedTsFolder must be provided');
     }
 
-    if (!options.srcFolder) {
+    if (!srcFolder) {
       throw new Error('srcFolder must be provided');
     }
-    this.sourceFolderPath = options.srcFolder;
+    this.sourceFolderPath = srcFolder;
 
-    if (Path.isUnder(options.srcFolder, options.generatedTsFolder)) {
+    if (Path.isUnder(srcFolder, generatedTsFolder)) {
       throw new Error('srcFolder must not be under generatedTsFolder');
     }
 
-    if (Path.isUnder(options.generatedTsFolder, options.srcFolder)) {
+    if (Path.isUnder(generatedTsFolder, srcFolder)) {
       throw new Error('generatedTsFolder must not be under srcFolder');
     }
 
-    if (!options.fileExtensions || options.fileExtensions.length === 0) {
+    if (!fileExtensions?.length) {
       throw new Error('At least one file extension must be provided.');
     }
 
-    this.ignoredFileGlobs = options.globsToIgnore || [];
+    this.ignoredFileGlobs = globsToIgnore || [];
 
-    this.terminal = options.terminal ?? new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
+    this.terminal = terminal ?? new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
 
-    this._options.fileExtensions = this._normalizeFileExtensions(options.fileExtensions);
+    const normalizedFileExtensions: string[] = this._normalizeFileExtensions(fileExtensions);
+    this._options.fileExtensions = normalizedFileExtensions;
 
     this._dependenciesOfFile = new Map();
     this._consumersOfFile = new Map();
     this._relativePaths = new Map();
 
-    this.inputFileGlob = `**/*+(${this._options.fileExtensions.join('|')})`;
+    this.inputFileGlob = `**/*+(${normalizedFileExtensions.join('|')})`;
   }
 
   /**
@@ -165,7 +179,7 @@ export class TypingsGenerator<TFileContents = string> {
       });
     }
 
-    await this._reprocessFilesAsync(relativeFilePaths!, checkFilePaths);
+    await this._reprocessFilesAsync(relativeFilePaths, checkFilePaths);
   }
 
   public async runWatcherAsync(): Promise<void> {
@@ -316,10 +330,11 @@ export class TypingsGenerator<TFileContents = string> {
   private async _parseFileAndGenerateTypingsAsync(relativePath: string, resolvedPath: string): Promise<void> {
     // Clear registered dependencies prior to reprocessing.
     this._clearDependencies(resolvedPath);
+    const { readFile, parseAndGenerateTypings, writeFileAsync } = this._options;
 
     try {
-      const fileContents: TFileContents = await this._options.readFile(resolvedPath, relativePath);
-      const typingsData: string | undefined = await this._options.parseAndGenerateTypings(
+      const fileContents: TFileContents = await readFile(resolvedPath, relativePath);
+      const typingsData: string | undefined = await parseAndGenerateTypings(
         fileContents,
         resolvedPath,
         relativePath
@@ -338,10 +353,7 @@ export class TypingsGenerator<TFileContents = string> {
 
       const generatedTsFilePaths: Iterable<string> = this._getTypingsFilePaths(relativePath);
       for (const generatedTsFilePath of generatedTsFilePaths) {
-        await FileSystem.writeFileAsync(generatedTsFilePath, prefixedTypingsData, {
-          ensureFolderExists: true,
-          convertLineEndings: NewlineKind.OsDefault
-        });
+        await writeFileAsync(generatedTsFilePath, prefixedTypingsData);
       }
     } catch (e) {
       this.terminal.writeError(
