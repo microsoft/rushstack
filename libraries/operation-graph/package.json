@@ -20,7 +20,7 @@
     "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.73.2",
+    "@rushstack/heft": "0.74.0",
     "decoupled-local-node-rig": "workspace:*"
   },
   "peerDependencies": {

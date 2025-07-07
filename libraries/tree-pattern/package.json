@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.73.2",
+    "@rushstack/heft": "0.74.0",
     "decoupled-local-node-rig": "workspace:*"
   }
 }
