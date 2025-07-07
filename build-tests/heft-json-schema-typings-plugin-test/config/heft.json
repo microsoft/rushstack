@@ -1,0 +1,24 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  "extends": "local-node-rig/profiles/default/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "includeGlobs": ["temp/schema-dts"] }],
+
+      "tasksByName": {
+        "json-schema-typings": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-json-schema-typings-plugin",
+            "pluginName": "json-schema-typings-plugin",
+            "options": {
+              "srcFolder": "node_modules/@rushstack/node-core-library/src/test/test-data/test-schemas",
+              "generatedTsFolders": ["temp/schema-dts"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

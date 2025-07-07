@@ -50,27 +50,31 @@
 
     "srcFolder": {
       "type": "string",
-      "description": "Source code root directory. Defaults to \"src/\"."
+      "description": "Source code root directory. Defaults to \"src/\".",
+      "pattern": "[^\\\\]"
     },
 
     "trimmedJsonOutputFolders": {
       "type": "array",
       "description": "Output folders, relative to the project root, where JSON files that have had comments and any ignored strings discarded should be emitted to.",
       "items": {
-        "type": "string"
+        "type": "string",
+        "pattern": "[^\\\\]"
       }
     },
 
     "generatedTsFolder": {
       "type": "string",
-      "description": "Output directory for generated typings. Defaults to \"temp/loc-ts/\"."
+      "description": "Output directory for generated typings. Defaults to \"temp/loc-ts/\".",
+      "pattern": "[^\\\\]"
     },
 
     "secondaryGeneratedTsFolders": {
       "type": "array",
       "description": "Additional folders, relative to the project root, where the generated typings should be emitted to.",
       "items": {
-        "type": "string"
+        "type": "string",
+        "pattern": "[^\\\\]"
       }
     },
 
