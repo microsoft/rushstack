@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`JsonSchema loadAndValidate throws an error for an invalid nested schema 1`] = `
-"Failed to validate schema \\"test-schema-invalid.json\\":
+"Failed to validate schema \\"test-schema-invalid.schema.json\\":
 
 Error: #/type
        must be equal to one of the allowed values
