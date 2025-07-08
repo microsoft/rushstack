@@ -3,22 +3,29 @@
 
 import { FileSystem, type FolderItem, PackageJsonLookup } from '@rushstack/node-core-library';
 
-async function* getFolderItemsAsync(
+async function getFolderItemsAsync(
   absolutePath: string,
   relativePath: string
-): AsyncGenerator<[string, string]> {
-  const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(absolutePath);
-  for (const item of folderItems) {
-    const itemName: string = item.name;
-    const itemAbsolutePath: string = `${absolutePath}/${itemName}`;
-    const itemRelativePath: string = `${relativePath}/${itemName}`;
-    if (item.isDirectory()) {
-      yield* getFolderItemsAsync(itemAbsolutePath, itemRelativePath);
-    } else {
-      const itemContents: string = await FileSystem.readFileAsync(itemAbsolutePath);
-      yield [itemRelativePath, itemContents];
+): Promise<Record<string, string>> {
+  const folderQueue: [string, string][] = [[absolutePath, relativePath]];
+  const results: [string, string][] = [];
+  for (const [folderAbsolutePath, folderRelativePath] of folderQueue) {
+    const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(folderAbsolutePath);
+    for (const item of folderItems) {
+      const itemName: string = item.name;
+      const itemAbsolutePath: string = `${folderAbsolutePath}/${itemName}`;
+      const itemRelativePath: string = `${folderRelativePath}/${itemName}`;
+      if (item.isDirectory()) {
+        folderQueue.push([itemAbsolutePath, itemRelativePath]);
+      } else {
+        const itemContents: string = await FileSystem.readFileAsync(itemAbsolutePath);
+        results.push([itemRelativePath, itemContents]);
+      }
     }
   }
+
+  results.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  return Object.fromEntries(results);
 }
 
 describe('json-schema-typings-plugin', () => {
@@ -28,13 +35,10 @@ describe('json-schema-typings-plugin', () => {
       throw new Error('Could not find root folder for the test');
     }
 
-    const folderItemsArray: [string, string][] = [];
-    for await (const item of getFolderItemsAsync(`${rootFolder}/temp/schema-dts`, '.')) {
-      folderItemsArray.push(item);
-    }
-
-    folderItemsArray.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
-    const folderItems: Record<string, string> = Object.fromEntries(folderItemsArray);
+    const folderItems: Record<string, string> = await getFolderItemsAsync(
+      `${rootFolder}/temp/schema-dts`,
+      '.'
+    );
     expect(folderItems).toMatchSnapshot();
   });
 });
