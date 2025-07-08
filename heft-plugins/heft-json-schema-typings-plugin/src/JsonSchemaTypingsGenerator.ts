@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Path } from '@rushstack/node-core-library';
 import {
   type ITypingsGeneratorBaseOptions,
   type ITypingsGeneratorOptionsWithoutReadFile,
@@ -18,7 +17,6 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
   public constructor(options: IJsonSchemaTypingsGeneratorBaseOptions) {
     super({
       ...options,
-      srcFolder: Path.convertToPlatformDefault(options.srcFolder),
       fileExtensions: ['.schema.json'],
       // Don't bother reading the file contents, compileFromFile will read the file
       readFile: () => '',
@@ -26,7 +24,7 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
       parseAndGenerateTypings: async (fileContents: string, filePath: string): Promise<string> =>
         await compileFromFile(filePath, {
           // The typings generator adds its own banner comment
-          bannerComment: '/* eslint-disable */',
+          bannerComment: '',
           cwd: path.dirname(filePath)
         })
     });
