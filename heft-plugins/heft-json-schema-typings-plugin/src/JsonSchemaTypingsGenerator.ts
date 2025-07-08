@@ -25,18 +25,8 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       parseAndGenerateTypings: async (fileContents: string, filePath: string): Promise<string> =>
         await compileFromFile(filePath, {
-          // $refOptions: {
-          //   resolve: {
-          //     file: {
-          //       canRead: true,
-          //       // eslint-disable-next-line @typescript-eslint/naming-convention
-          //       read: async (fileInfo) => {
-          //         debugger;
-          //         return await FileSystem.readFileAsync(fileInfo.url);
-          //       }
-          //     }
-          //   }
-          // },
+          // The typings generator adds its own banner comment
+          bannerComment: '/* eslint-disable */',
           cwd: path.dirname(filePath)
         })
     });
