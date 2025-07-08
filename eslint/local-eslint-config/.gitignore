@@ -1,4 +1,3 @@
-# Uncomment the commented lines once the decoupled-local-node-rig is updated to support ESLint 9
-# /flat/mixins
-# /flat/patch
-# /flat/profile
+/flat/mixins
+/flat/patch
+/flat/profile

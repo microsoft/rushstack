@@ -313,7 +313,6 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
 
   // Do a second pass to find and replace all calls to private methods with the patched versions.
   if (privateMethodNames.length) {
-    // eslint-disable-next-line @rushstack/security/no-unsafe-regexp
     const privateMethodCallRegex: RegExp = new RegExp(`\.(${privateMethodNames.join('|')})\\(`, 'g');
     outputFile = outputFile.replace(privateMethodCallRegex, (match, privateMethodName) => {
       // Replace the leading '#' with a leading '_'

@@ -5,8 +5,8 @@ import path from 'node:path';
 import { createHash, type Hash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import type * as TTypescript from 'typescript';
-import type * as TEslint from 'eslint-9';
-import type * as TEslintLegacy from 'eslint';
+import type * as TEslint from 'eslint';
+import type * as TEslintLegacy from 'eslint-8';
 import * as semver from 'semver';
 import stableStringify from 'json-stable-stringify-without-jsonify';
 import { FileError, FileSystem } from '@rushstack/node-core-library';
@@ -152,7 +152,6 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
       // and subsequently mapped to the results in the ESLint.lintFileAsync method below. After the messages
       // are mapped, the array will be cleared so that it is ready for the next fix operation.
       fixFn = (message: TEslint.Linter.LintMessage | TEslintLegacy.Linter.LintMessage) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this._currentFixMessages.push(message);
         return true;
       };

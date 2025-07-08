@@ -45,7 +45,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
         callback(e, {} as fs.Stats);
         return;
       }
-      // eslint-disable-next-line @rushstack/no-new-null
+
       callback(null, result);
     });
   }) as FileSystemAdapter['lstat'];
@@ -115,10 +115,8 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
       // When "withFileTypes" is false or undefined, the callback is expected to return a string array.
       // Otherwise, we return a fs.Dirent array.
       if (options?.withFileTypes) {
-        // eslint-disable-next-line @rushstack/no-new-null
         (callback as ReaddirDirentCallback)(null, result as fs.Dirent[]);
       } else {
-        // eslint-disable-next-line @rushstack/no-new-null
         (callback as ReaddirStringCallback)(null, result as string[]);
       }
     });

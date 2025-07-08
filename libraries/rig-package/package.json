@@ -20,10 +20,11 @@
     "strip-json-comments": "~3.1.1"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.73.2",
+    "@rushstack/heft": "0.74.0",
     "@types/resolve": "1.20.2",
     "ajv": "~8.13.0",
     "decoupled-local-node-rig": "workspace:*",
+    "eslint": "~9.25.1",
     "resolve": "~1.22.1"
   }
 }

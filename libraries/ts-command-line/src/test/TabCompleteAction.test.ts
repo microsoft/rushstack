@@ -91,7 +91,6 @@ function getCommandLineParser(): DynamicCommandLineParser {
     parameterShortName: '-t',
     argumentName: 'PROJECT1',
     description: 'Run command in the specified project and all of its dependencies.',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     getCompletionsAsync: async (): Promise<string[]> => {
       return ['abc', 'def', 'hij'];
     }

@@ -148,7 +148,6 @@ export class Sort {
    * console.log(JSON.stringify(Array.from(map.keys()))); // ["aardvark","goose","zebra"]
    * ```
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static sortMapKeys<K, V>(
     map: Map<K, V>,
     keyComparer: (x: K, y: K) => number = Sort.compareByValue
@@ -216,7 +215,6 @@ export class Sort {
    * console.log(Array.from(set)); // ['aardvark', 'goose', 'zebra']
    * ```
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static sortSet<T>(set: Set<T>, comparer: (x: T, y: T) => number = Sort.compareByValue): void {
     // Sorting a set is expensive, so first check whether it's already sorted.
     if (Sort.isSorted(set, comparer)) {
