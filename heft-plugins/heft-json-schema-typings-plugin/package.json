@@ -25,6 +25,7 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "decoupled-local-node-rig": "workspace:*"
+    "decoupled-local-node-rig": "workspace:*",
+    "eslint": "~9.25.1"
   }
 }
