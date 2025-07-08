@@ -5,13 +5,23 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["lib-dts", "lib-esm"] }],
+      "cleanFiles": [{ "includeGlobs": ["lib-dts", "lib-esm", "temp/schema-ts"] }],
 
       "tasksByName": {
         "lint": {
           "taskPlugin": {
             "options": {
               "sarifLogPath": "temp/build/lint/lint.sarif"
+            }
+          }
+        },
+
+        "json-schema-typings": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-json-schema-typings-plugin",
+            "pluginName": "json-schema-typings-plugin",
+            "options": {
+              "generatedTsFolders": ["temp/schema-ts", "lib"]
             }
           }
         }
