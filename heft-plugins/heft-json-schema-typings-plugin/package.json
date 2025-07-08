@@ -27,7 +27,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "eslint": "~9.37.0",
-    "local-node-rig": "workspace:*"
+    "decoupled-local-node-rig": "workspace:*"
   },
   "exports": {
     "./lib/*.schema.json": "./lib-commonjs/*.schema.json",
