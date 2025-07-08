@@ -2907,6 +2907,9 @@ importers:
       decoupled-local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/decoupled-local-node-rig
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1(supports-color@8.1.1)
 
   ../../../heft-plugins/heft-lint-plugin:
     dependencies:
