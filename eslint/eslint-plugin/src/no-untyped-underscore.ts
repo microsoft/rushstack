@@ -26,7 +26,7 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
     } as TSESLint.RuleMetaDataDocs
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
-    const parserServices: ParserServices | undefined = context.parserServices;
+    const parserServices: Partial<ParserServices> | undefined = context.sourceCode.parserServices;
     if (!parserServices || !parserServices.program || !parserServices.esTreeNodeToTSNodeMap) {
       throw new Error(
         'This rule requires your ESLint configuration to define the "parserOptions.project"' +

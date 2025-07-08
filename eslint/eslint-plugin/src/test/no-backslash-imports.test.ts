@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TSESLint } from '@typescript-eslint/utils';
+import type { RuleTester, TestCaseError } from '@typescript-eslint/rule-tester';
+
+import { getRuleTesterWithProject } from './ruleTester';
 import { noBackslashImportsRule, MESSAGE_ID } from '../no-backslash-imports';
 
-const { RuleTester } = TSESLint;
-const ruleTester = new RuleTester({
-  parser: require.resolve('@typescript-eslint/parser')
-});
-const expectedErrors: TSESLint.TestCaseError<typeof MESSAGE_ID>[] = [{ messageId: MESSAGE_ID }];
+const ruleTester: RuleTester = getRuleTesterWithProject();
+const expectedErrors: TestCaseError<typeof MESSAGE_ID>[] = [{ messageId: MESSAGE_ID }];
 
 ruleTester.run('no-backslash-imports', noBackslashImportsRule, {
   invalid: [
