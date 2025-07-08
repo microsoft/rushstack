@@ -51,8 +51,8 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
-    "local-node-rig": "workspace:*"
+    "decoupled-local-node-rig": "workspace:*",
+    "eslint": "~9.37.0"
   },
   "peerDependencies": {
     "@types/node": "*"
