@@ -31,6 +31,7 @@
     "@rushstack/terminal": "workspace:*",
     "@types/semver": "7.5.0",
     "decoupled-local-node-rig": "workspace:*",
+    "eslint": "~9.25.1",
     "typescript": "~5.8.2"
   }
 }
