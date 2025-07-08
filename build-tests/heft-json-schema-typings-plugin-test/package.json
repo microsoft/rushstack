@@ -12,9 +12,8 @@
   "devDependencies": {
     "@rushstack/heft-json-schema-typings-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.25.1",
-    "local-node-rig": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/terminal": "workspace:*"
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*"
   }
 }
