@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.29.0",
+      "tag": "@rushstack/heft-web-rig_v0.29.0",
+      "date": "Wed, 09 Jul 2025 04:01:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Clean the temp/sass-ts folder."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.28.17",
       "tag": "@rushstack/heft-web-rig_v0.28.17",
       "date": "Thu, 26 Jun 2025 18:57:04 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Thu, 26 Jun 2025 18:57:04 GMT and should not be manually modified.
+This log was last generated on Wed, 09 Jul 2025 04:01:17 GMT and should not be manually modified.
+
+## 0.29.0
+Wed, 09 Jul 2025 04:01:17 GMT
+
+### Minor changes
+
+- Clean the temp/sass-ts folder.
 
 ## 0.28.17
 Thu, 26 Jun 2025 18:57:04 GMT

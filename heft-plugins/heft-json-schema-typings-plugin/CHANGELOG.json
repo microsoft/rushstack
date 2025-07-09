@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/heft-json-schema-typings-plugin",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft-json-schema-typings-plugin_v0.1.0",
+      "date": "Wed, 09 Jul 2025 04:01:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release."
+          }
+        ]
+      }
+    }
+  ]
+}
