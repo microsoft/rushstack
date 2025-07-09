@@ -840,6 +840,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-json-schema-typings-plugin-test",
+      "projectFolder": "build-tests/heft-json-schema-typings-plugin-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-fastify-test",
       "projectFolder": "build-tests/heft-fastify-test",
       "reviewCategory": "tests",
@@ -1044,6 +1050,12 @@
     {
       "packageName": "@rushstack/heft-jest-plugin",
       "projectFolder": "heft-plugins/heft-jest-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-json-schema-typings-plugin",
+      "projectFolder": "heft-plugins/heft-json-schema-typings-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

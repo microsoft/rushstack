@@ -1,5 +1,5 @@
 {
-  "$id": "http://example.com/schemas/test-schema-nested-child.json",
+  "$id": "http://example.com/schemas/test-schema-nested-child.schema.json",
   "definitions": {
     "type1": {
       "description": "Description for type1",

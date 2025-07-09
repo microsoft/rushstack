@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "srcFolder": {
+      "type": "string",
+      "description": "Source code root directory. Defaults to \"src/\".",
+      "pattern": "[^\\\\]"
+    },
+
+    "generatedTsFolders": {
+      "type": "array",
+      "description": "Output directories for generated typings. Defaults to [\"temp/schemas-ts\"].",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

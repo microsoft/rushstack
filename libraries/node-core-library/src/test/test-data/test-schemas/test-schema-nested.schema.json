@@ -1,5 +1,5 @@
 {
-  "$id": "http://example.com/schemas/test-schema-nested.json",
+  "$id": "http://example.com/schemas/test-schema-nested.schema.json",
   "title": "Test Schema File",
   "type": "object",
 
@@ -21,14 +21,14 @@
       "description": "Description for exampleOneOf - this is a very long description to show in an error message",
       "type": "object",
       "oneOf": [
-        { "$ref": "test-schema-nested-child.json#/definitions/type1" },
-        { "$ref": "test-schema-nested-child.json#/definitions/type2" }
+        { "$ref": "test-schema-nested-child.schema.json#/definitions/type1" },
+        { "$ref": "test-schema-nested-child.schema.json#/definitions/type2" }
       ]
     },
     "exampleUniqueObjectArray": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "$ref": "test-schema-nested-child.json#/definitions/type2" }
+      "items": { "$ref": "test-schema-nested-child.schema.json#/definitions/type2" }
     }
   },
   "additionalProperties": false,

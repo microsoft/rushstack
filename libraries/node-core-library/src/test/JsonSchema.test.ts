@@ -4,9 +4,9 @@
 import { JsonFile, type JsonObject } from '../JsonFile';
 import { JsonSchema, type IJsonSchemaErrorInfo } from '../JsonSchema';
 
-const SCHEMA_PATH: string = `${__dirname}/test-data/test-schema.json`;
-const DRAFT_04_SCHEMA_PATH: string = `${__dirname}/test-data/test-schema-draft-04.json`;
-const DRAFT_07_SCHEMA_PATH: string = `${__dirname}/test-data/test-schema-draft-07.json`;
+const SCHEMA_PATH: string = `${__dirname}/test-data/test-schemas/test-schema.schema.json`;
+const DRAFT_04_SCHEMA_PATH: string = `${__dirname}/test-data/test-schemas/test-schema-draft-04.schema.json`;
+const DRAFT_07_SCHEMA_PATH: string = `${__dirname}/test-data/test-schemas/test-schema-draft-07.schema.json`;
 
 describe(JsonSchema.name, () => {
   const schema: JsonSchema = JsonSchema.fromFile(SCHEMA_PATH, {
@@ -15,7 +15,7 @@ describe(JsonSchema.name, () => {
 
   describe(JsonFile.loadAndValidate.name, () => {
     test('successfully validates a JSON file', () => {
-      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-schemas/test-valid.schema.json`;
       const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schema);
 
       expect(jsonObject).toMatchObject({
@@ -27,7 +27,7 @@ describe(JsonSchema.name, () => {
     test('successfully validates a JSON file against a draft-04 schema', () => {
       const schemaDraft04: JsonSchema = JsonSchema.fromFile(DRAFT_04_SCHEMA_PATH);
 
-      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-schemas/test-valid.schema.json`;
       const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schemaDraft04);
 
       expect(jsonObject).toMatchObject({
@@ -41,14 +41,14 @@ describe(JsonSchema.name, () => {
         schemaVersion: 'draft-07'
       });
 
-      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-schemas/test-valid.schema.json`;
       expect(() => JsonFile.loadAndValidate(jsonPath, schemaDraft04)).toThrowErrorMatchingSnapshot();
     });
 
     test('validates a JSON file against a draft-07 schema', () => {
       const schemaDraft07: JsonSchema = JsonSchema.fromFile(DRAFT_07_SCHEMA_PATH);
 
-      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-schemas/test-valid.schema.json`;
       const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schemaDraft07);
 
       expect(jsonObject).toMatchObject({
@@ -58,15 +58,15 @@ describe(JsonSchema.name, () => {
     });
 
     test('validates a JSON file using nested schemas', () => {
-      const schemaPathChild: string = `${__dirname}/test-data/test-schema-nested-child.json`;
+      const schemaPathChild: string = `${__dirname}/test-data/test-schemas/test-schema-nested-child.schema.json`;
       const schemaChild: JsonSchema = JsonSchema.fromFile(schemaPathChild);
 
-      const schemaPathNested: string = `${__dirname}/test-data/test-schema-nested.json`;
+      const schemaPathNested: string = `${__dirname}/test-data/test-schemas/test-schema-nested.schema.json`;
       const schemaNested: JsonSchema = JsonSchema.fromFile(schemaPathNested, {
         dependentSchemas: [schemaChild]
       });
 
-      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-schemas/test-valid.schema.json`;
       const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schemaNested);
 
       expect(jsonObject).toMatchObject({
@@ -76,15 +76,15 @@ describe(JsonSchema.name, () => {
     });
 
     test('throws an error for an invalid nested schema', () => {
-      const schemaPathChild: string = `${__dirname}/test-data/test-schema-invalid.json`;
+      const schemaPathChild: string = `${__dirname}/test-data/test-schemas/test-schema-invalid.schema.json`;
       const schemaInvalidChild: JsonSchema = JsonSchema.fromFile(schemaPathChild);
 
-      const schemaPathNested: string = `${__dirname}/test-data/test-schema-nested.json`;
+      const schemaPathNested: string = `${__dirname}/test-data/test-schemas/test-schema-nested.schema.json`;
       const schemaNested: JsonSchema = JsonSchema.fromFile(schemaPathNested, {
         dependentSchemas: [schemaInvalidChild]
       });
 
-      const jsonPath: string = `${__dirname}/test-data/test-valid.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-schemas/test-valid.schema.json`;
 
       expect.assertions(1);
       try {
@@ -97,7 +97,7 @@ describe(JsonSchema.name, () => {
 
   describe(JsonSchema.prototype.validateObjectWithCallback.name, () => {
     test('successfully reports a compound validation error schema errors', () => {
-      const jsonPath: string = `${__dirname}/test-data/test-invalid-additional.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-schemas/test-invalid-additional.schema.json`;
       const jsonObject: JsonObject = JsonFile.load(jsonPath);
 
       const errorDetails: string[] = [];
@@ -108,7 +108,7 @@ describe(JsonSchema.name, () => {
       expect(errorDetails).toMatchSnapshot();
     });
     test('successfully reports a compound validation error for format errors', () => {
-      const jsonPath: string = `${__dirname}/test-data/test-invalid-format.json`;
+      const jsonPath: string = `${__dirname}/test-data/test-schemas/test-invalid-format.schema.json`;
       const jsonObject: JsonObject = JsonFile.load(jsonPath);
 
       const errorDetails: string[] = [];
