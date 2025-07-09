@@ -1373,6 +1373,7 @@
         "@rushstack/eslint-config",
         "@rushstack/eslint-patch",
         "@rushstack/eslint-plugin",
+        "@rushstack/heft-json-schema-typings-plugin",
         "@rushstack/heft-node-rig",
         "@rushstack/heft"
       ]
