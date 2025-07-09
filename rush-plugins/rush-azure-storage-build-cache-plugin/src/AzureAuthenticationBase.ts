@@ -99,7 +99,7 @@ export type LoginFlowType =
  * @public
  */
 export type LoginFlowFailoverMap = {
-  [LoginFlow in LoginFlowType]?: Exclude<LoginFlowType, LoginFlow>;
+  readonly [LoginFlow in LoginFlowType]?: Exclude<LoginFlowType, LoginFlow>;
 };
 
 /**
