@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
-import type { AzureEnvironmentName, LoginFlowType } from './AzureAuthenticationBase';
+import type { AzureEnvironmentName, LoginFlowFailoverMap, LoginFlowType } from './AzureAuthenticationBase';
 
 const PLUGIN_NAME: string = 'AzureStorageBuildCachePlugin';
 
@@ -30,6 +30,11 @@ interface IAzureBlobStorageConfigurationJson {
    * @defaultValue 'AdoCodespacesAuth' if on GitHub Codespaces, 'InteractiveBrowser' otherwise
    */
   readonly loginFlow?: LoginFlowType;
+
+  /**
+   * Fallback login flows to use if the primary login flow fails.
+   */
+  loginFlowFailover?: LoginFlowFailoverMap;
 
   /**
    * An optional prefix for cache item blob names.
@@ -67,6 +72,7 @@ export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
           azureEnvironment: azureBlobStorageConfiguration.azureEnvironment,
           blobPrefix: azureBlobStorageConfiguration.blobPrefix,
           loginFlow: azureBlobStorageConfiguration.loginFlow,
+          loginFlowFailover: azureBlobStorageConfiguration.loginFlowFailover,
           isCacheWriteAllowed: !!azureBlobStorageConfiguration.isCacheWriteAllowed,
           readRequiresAuthentication: !!azureBlobStorageConfiguration.readRequiresAuthentication
         });
