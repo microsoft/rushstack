@@ -15,6 +15,7 @@ export {
   AsyncQueue,
   type IAsyncParallelismOptions,
   type IRunWithRetriesOptions,
+  type IRunWithTimeoutOptions,
   type IWeighted
 } from './Async';
 export type { Brand } from './PrimitiveTypes';

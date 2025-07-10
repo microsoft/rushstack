@@ -51,6 +51,27 @@ export interface IRunWithRetriesOptions<TResult> {
 
 /**
  * @remarks
+ * Used with {@link Async.runWithTimeoutAsync}.
+ *
+ * @public
+ */
+export interface IRunWithTimeoutOptions<TResult> {
+  /**
+   * The action to be performed. The action is executed with a timeout.
+   */
+  action: () => Promise<TResult> | TResult;
+  /**
+   * The timeout in milliseconds.
+   */
+  timeoutMs: number;
+  /**
+   * The message to use for the error if the timeout is reached.
+   */
+  timeoutMessage?: string;
+}
+
+/**
+ * @remarks
  * Used with {@link (Async:class).(forEachAsync:2)} and {@link (Async:class).(mapAsync:2)}.
  *
  * @public
@@ -357,6 +378,31 @@ export class Async {
    */
   public static getSignal(): [Promise<void>, () => void, (err: Error) => void] {
     return getSignal();
+  }
+
+  /**
+   * Runs a promise with a timeout. If the promise does not resolve within the specified timeout,
+   * it will reject with an error.
+   * @remarks If the action is completely synchronous, runWithTimeoutAsync doesn't do anything meaningful.
+   */
+  public static async runWithTimeoutAsync<TResult>({
+    action,
+    timeoutMs,
+    timeoutMessage = 'Operation timed out'
+  }: IRunWithTimeoutOptions<TResult>): Promise<TResult> {
+    let timeoutHandle: NodeJS.Timeout | undefined;
+    const promise: Promise<TResult> = Promise.resolve(action());
+    const timeoutPromise: Promise<never> = new Promise<never>((resolve, reject) => {
+      timeoutHandle = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+    });
+
+    try {
+      return Promise.race([promise, timeoutPromise]);
+    } finally {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+      }
+    }
   }
 }
 
