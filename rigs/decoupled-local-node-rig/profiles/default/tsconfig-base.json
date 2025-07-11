@@ -10,7 +10,7 @@
 
     "outDir": "${configDir}/lib-commonjs",
     "declarationDir": "${configDir}/lib-dts",
-    "rootDir": "${configDir}/src",
+    "rootDirs": ["${configDir}/src", "${configDir}/temp/schema-ts"],
 
     "types": ["heft-jest", "node"],
     "typeRoots": ["${configDir}/node_modules/@types", "../../node_modules/@types"]
