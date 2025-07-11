@@ -17,7 +17,7 @@ import type {
   IExtendedSolutionBuilder,
   ITypeScriptNodeSystem
 } from './internalTypings/TypeScriptInternals';
-import type { ITypeScriptConfigurationJson, IEmitModuleKind } from './TypeScriptPlugin';
+import type { TypeScriptBuildConfiguration } from './schemas/typescript.schema.json.d.ts';
 import type { PerformanceMeasurer } from './Performance';
 import type {
   ICachedEmitModuleKind,
@@ -29,7 +29,7 @@ import { configureProgramForMultiEmit } from './configureProgramForMultiEmit';
 import { loadTsconfig } from './tsconfigLoader';
 import { loadTypeScriptToolAsync } from './loadTypeScriptTool';
 
-export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfigurationJson {
+export interface ITypeScriptBuilderConfiguration extends TypeScriptBuildConfiguration {
   /**
    * The root folder of the build.
    */

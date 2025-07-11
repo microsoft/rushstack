@@ -9,40 +9,9 @@ import type {
   IScopedLogger,
   IWatchedFileState
 } from '@rushstack/heft';
-import { type ITypingsGeneratorOptions, TypingsGenerator } from '@rushstack/localization-utilities';
+import { TypingsGenerator } from '@rushstack/localization-utilities';
 
-export interface ILocalizationTypingsPluginOptions {
-  /**
-   * Source code root directory.
-   * Defaults to "src/".
-   */
-  srcFolder?: string;
-
-  /**
-   * Output directory for generated typings.
-   * Defaults to "temp/loc-ts/".
-   */
-  generatedTsFolder?: string;
-
-  /**
-   * Folders, relative to the project root, where JSON files containing only the key/string pairs should be emitted to.
-   * These files will be emitted as `.resx.json`, `.loc.json`, or `.resjson`, depending on the input file extension.
-   * The intent is that bundlers can find these files and load them to receive the original untranslated strings.
-   */
-  trimmedJsonOutputFolders?: string[];
-
-  /**
-   * Additional folders, relative to the project root, where the generated typings should be emitted to.
-   */
-  secondaryGeneratedTsFolders?: string[];
-
-  exportAsDefault?: ITypingsGeneratorOptions['exportAsDefault'];
-
-  /**
-   * An array of string names to ignore when generating typings.
-   */
-  stringNamesToIgnore?: string[];
-}
+import type { Options as ILocalizationTypingsPluginOptions } from './schemas/options.schema.json.d.ts';
 
 const PLUGIN_NAME: 'localization-typings-plugin' = 'localization-typings-plugin';
 

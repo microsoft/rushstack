@@ -23,6 +23,7 @@ import type {
 import { TypeScriptBuilder, type ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import anythingSchema from './schemas/anything.schema.json';
 import typescriptConfigSchema from './schemas/typescript.schema.json';
+import type { TypeScriptBuildConfiguration } from './schemas/typescript.schema.json.d.ts';
 import { getTsconfigFilePath } from './tsconfigLoader';
 
 /**
@@ -37,75 +38,6 @@ export const PLUGIN_NAME: 'typescript-plugin' = 'typescript-plugin';
  * @see {@link https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-5.html#the-configdir-template-variable-for-configuration-files}
  */
 const CONFIG_DIR_TOKEN: '${configDir}' = '${configDir}';
-
-/**
- * @beta
- */
-export interface IEmitModuleKind {
-  moduleKind: 'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext';
-  outFolderName: string;
-  jsExtensionOverride?: string;
-}
-
-/**
- * @beta
- */
-export interface IStaticAssetsCopyConfiguration {
-  fileExtensions: string[];
-  excludeGlobs: string[];
-  includeGlobs: string[];
-}
-
-/**
- * @beta
- */
-export interface ITypeScriptConfigurationJson {
-  /**
-   * If provided, emit these module kinds in addition to the modules specified in the tsconfig.
-   * Note that this option only applies to the main tsconfig.json configuration.
-   */
-  additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
-
-  /**
-   * If 'true', emit CommonJS output into the TSConfig outDir with the file extension '.cjs'
-   */
-  emitCjsExtensionForCommonJS?: boolean | undefined;
-
-  /**
-   * If 'true', emit ESModule output into the TSConfig outDir with the file extension '.mjs'
-   */
-  emitMjsExtensionForESModule?: boolean | undefined;
-
-  /**
-   * If true, enable behavior analogous to the "tsc --build" command. Will build projects referenced by the main project in dependency order.
-   * Note that this will effectively enable \"noEmitOnError\".
-   */
-  buildProjectReferences?: boolean;
-
-  /**
-   * If true, and the tsconfig has \"isolatedModules\": true, then transpilation will happen in parallel in a worker thread.
-   */
-  useTranspilerWorker?: boolean;
-
-  /**
-   * If true, the TypeScript compiler will only resolve symlinks to their targets if the links are in a node_modules folder.
-   * This significantly reduces file system operations in typical usage.
-   */
-  onlyResolveSymlinksInNodeModules?: boolean;
-
-  /*
-   * Specifies the tsconfig.json file that will be used for compilation. Equivalent to the "project" argument for the 'tsc' and 'tslint' command line tools.
-   *
-   * The default value is "./tsconfig.json"
-   */
-  project?: string;
-
-  /**
-   * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example
-   * so that these files can be resolved by import statements.
-   */
-  staticAssetsToCopy?: IStaticAssetsCopyConfiguration;
-}
 
 /**
  * @beta
@@ -136,7 +68,9 @@ export interface ITypeScriptPluginAccessor {
   readonly onChangedFilesHook: SyncHook<IChangedFilesHookOptions>;
 }
 
-const TYPESCRIPT_LOADER_CONFIG: ConfigurationFile.IProjectConfigurationFileSpecification<ITypeScriptConfigurationJson> =
+type IStaticAssetsCopyConfiguration = TypeScriptBuildConfiguration['staticAssetsToCopy'];
+
+const TYPESCRIPT_LOADER_CONFIG: ConfigurationFile.IProjectConfigurationFileSpecification<TypeScriptBuildConfiguration> =
   {
     projectRelativeFilePath: 'config/typescript.json',
     jsonSchemaObject: typescriptConfigSchema,
@@ -159,8 +93,8 @@ const TYPESCRIPT_LOADER_CONFIG: ConfigurationFile.IProjectConfigurationFileSpeci
 export async function loadTypeScriptConfigurationFileAsync(
   heftConfiguration: HeftConfiguration,
   terminal: ITerminal
-): Promise<ITypeScriptConfigurationJson | undefined> {
-  return await heftConfiguration.tryLoadProjectConfigurationFileAsync<ITypeScriptConfigurationJson>(
+): Promise<TypeScriptBuildConfiguration | undefined> {
+  return await heftConfiguration.tryLoadProjectConfigurationFileAsync<TypeScriptBuildConfiguration>(
     TYPESCRIPT_LOADER_CONFIG,
     terminal
   );
@@ -175,7 +109,7 @@ const _partialTsconfigFilePromiseCache: Map<string, Promise<IPartialTsconfig | u
 export async function loadPartialTsconfigFileAsync(
   heftConfiguration: HeftConfiguration,
   terminal: ITerminal,
-  typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined
+  typeScriptConfigurationJson: TypeScriptBuildConfiguration | undefined
 ): Promise<IPartialTsconfig | undefined> {
   const buildFolderPath: string = heftConfiguration.buildFolderPath;
 
@@ -241,7 +175,7 @@ export async function loadPartialTsconfigFileAsync(
 }
 
 interface ITypeScriptConfigurationJsonAndPartialTsconfigFile {
-  typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined;
+  typeScriptConfigurationJson: TypeScriptBuildConfiguration | undefined;
   partialTsconfigFile: IPartialTsconfig | undefined;
 }
 
@@ -396,7 +330,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
   ): Promise<ITypeScriptConfigurationJsonAndPartialTsconfigFile> {
     const terminal: ITerminal = taskSession.logger.terminal;
 
-    const typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
+    const typeScriptConfigurationJson: TypeScriptBuildConfiguration | undefined =
       await loadTypeScriptConfigurationFileAsync(heftConfiguration, terminal);
 
     const partialTsconfigFile: IPartialTsconfig | undefined = await loadPartialTsconfigFileAsync(

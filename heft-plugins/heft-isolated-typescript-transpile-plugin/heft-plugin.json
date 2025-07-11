@@ -5,7 +5,7 @@
     {
       "pluginName": "swc-isolated-transpile-plugin",
       "entryPoint": "./lib-commonjs/SwcIsolatedTranspilePlugin",
-      "optionsSchema": "./lib-commonjs/schemas/swc-isolated-transpile-plugin.schema.json"
+      "optionsSchema": "./lib-commonjs/schemas/swc-isolated-transpile-plugin-options.schema.json"
     }
   ]
 }

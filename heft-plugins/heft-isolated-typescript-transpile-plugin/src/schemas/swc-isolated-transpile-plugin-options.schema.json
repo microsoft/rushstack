@@ -1,0 +1,77 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
+    "tsConfigPath": {
+      "type": "string",
+      "description": "The path to the tsconfig.json file"
+    },
+
+    "emitKinds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["outDir", "formatOverride", "targetOverride"],
+        "properties": {
+          "outDir": {
+            "type": "string",
+            "description": "The output directory for the transpiled files"
+          },
+
+          "formatOverride": {
+            "type": "string",
+            "description": "The output format for transpiled files. See type ModuleKind in TypeScript for valid values.",
+            "enum": [
+              "None",
+              "CommonJS",
+              "AMD",
+              "UMD",
+              "System",
+              "ES2015",
+              "ES2020",
+              "ES2022",
+              "ESNext",
+              "Node16",
+              "Node18",
+              "NodeNext",
+              "Preserve"
+            ]
+          },
+
+          "targetOverride": {
+            "type": "string",
+            "description": "The target for transpiled files. See type ScriptTarget in TypeScript for valid values.",
+            "enum": [
+              "ES2015",
+              "ES2020",
+              "ES2022",
+              "ESNext",
+              "ES3",
+              "ES5",
+              "ES2016",
+              "ES2017",
+              "ES2018",
+              "ES2019",
+              "ES2021",
+              "ES2023",
+              "ES2024",
+              "JSON",
+              "Latest"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

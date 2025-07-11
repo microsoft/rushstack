@@ -39,16 +39,6 @@ export interface _ICompilerCapabilities {
     solutionBuilder: boolean;
 }
 
-// @beta (undocumented)
-export interface IEmitModuleKind {
-    // (undocumented)
-    jsExtensionOverride?: string;
-    // (undocumented)
-    moduleKind: 'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext';
-    // (undocumented)
-    outFolderName: string;
-}
-
 // @internal (undocumented)
 export interface _ILoadedTypeScriptTool {
     // (undocumented)
@@ -96,47 +86,46 @@ export interface IPartialTsconfigCompilerOptions {
 }
 
 // @beta (undocumented)
-export interface IStaticAssetsCopyConfiguration {
-    // (undocumented)
-    excludeGlobs: string[];
-    // (undocumented)
-    fileExtensions: string[];
-    // (undocumented)
-    includeGlobs: string[];
-}
-
-// @beta (undocumented)
-export interface ITypeScriptConfigurationJson {
-    additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
-    buildProjectReferences?: boolean;
-    emitCjsExtensionForCommonJS?: boolean | undefined;
-    emitMjsExtensionForESModule?: boolean | undefined;
-    onlyResolveSymlinksInNodeModules?: boolean;
-    // (undocumented)
-    project?: string;
-    staticAssetsToCopy?: IStaticAssetsCopyConfiguration;
-    useTranspilerWorker?: boolean;
-}
-
-// @beta (undocumented)
 export interface ITypeScriptPluginAccessor {
     // (undocumented)
     readonly onChangedFilesHook: SyncHook<IChangedFilesHookOptions>;
 }
 
 // @beta (undocumented)
-export function loadPartialTsconfigFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal, typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined): Promise<IPartialTsconfig | undefined>;
+export function loadPartialTsconfigFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal, typeScriptConfigurationJson: TypeScriptBuildConfiguration | undefined): Promise<IPartialTsconfig | undefined>;
 
 // @internal (undocumented)
 export function _loadTsconfig(options: _ILoadTsconfigOptions): _TTypeScript.ParsedCommandLine;
 
 // @beta (undocumented)
-export function loadTypeScriptConfigurationFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal): Promise<ITypeScriptConfigurationJson | undefined>;
+export function loadTypeScriptConfigurationFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal): Promise<TypeScriptBuildConfiguration | undefined>;
 
 // @internal (undocumented)
 export function _loadTypeScriptToolAsync(options: _ILoadTypeScriptToolOptions): Promise<_ILoadedTypeScriptTool>;
 
 export { _TTypeScript }
+
+// @beta
+export interface TypeScriptBuildConfiguration {
+    $schema?: string;
+    additionalModuleKindsToEmit?: {
+        moduleKind: "commonjs" | "amd" | "umd" | "system" | "es2015" | "esnext";
+        outFolderName: string;
+        [k: string]: unknown;
+    }[];
+    buildProjectReferences?: boolean;
+    emitCjsExtensionForCommonJS?: boolean;
+    emitMjsExtensionForESModule?: boolean;
+    extends?: string;
+    onlyResolveSymlinksInNodeModules?: boolean;
+    project?: string;
+    staticAssetsToCopy?: {
+        fileExtensions?: string[];
+        excludeGlobs?: string[];
+        includeGlobs?: string[];
+    };
+    useTranspilerWorker?: boolean;
+}
 
 // @public
 export const TypeScriptPluginName: 'typescript-plugin';

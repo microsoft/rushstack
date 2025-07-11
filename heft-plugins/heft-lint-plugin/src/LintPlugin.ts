@@ -23,17 +23,13 @@ import type { LinterBase } from './LinterBase';
 import { Eslint } from './Eslint';
 import { Tslint } from './Tslint';
 import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
+import type { HeftLintPluginOptionsConfiguration } from './schemas/heft-lint-plugin-options.schema.json.d.ts';
 
 const PLUGIN_NAME: 'lint-plugin' = 'lint-plugin';
 const TYPESCRIPT_PLUGIN_PACKAGE_NAME: '@rushstack/heft-typescript-plugin' =
   '@rushstack/heft-typescript-plugin';
 const TYPESCRIPT_PLUGIN_NAME: typeof TypeScriptPluginName = 'typescript-plugin';
 const FIX_PARAMETER_NAME: string = '--fix';
-
-interface ILintPluginOptions {
-  alwaysFix?: boolean;
-  sarifLogPath?: string;
-}
 
 interface ILintOptions {
   taskSession: IHeftTaskSession;
@@ -44,7 +40,10 @@ interface ILintOptions {
   changedFiles?: ReadonlySet<IExtendedSourceFile>;
 }
 
-function checkFix(taskSession: IHeftTaskSession, pluginOptions?: ILintPluginOptions): boolean {
+function checkFix(
+  taskSession: IHeftTaskSession,
+  pluginOptions?: HeftLintPluginOptionsConfiguration
+): boolean {
   let fix: boolean =
     pluginOptions?.alwaysFix || taskSession.parameters.getFlagParameter(FIX_PARAMETER_NAME).value;
   if (fix && taskSession.parameters.production) {
@@ -60,7 +59,7 @@ function checkFix(taskSession: IHeftTaskSession, pluginOptions?: ILintPluginOpti
 
 function getSarifLogPath(
   heftConfiguration: HeftConfiguration,
-  pluginOptions?: ILintPluginOptions
+  pluginOptions?: HeftLintPluginOptionsConfiguration
 ): string | undefined {
   const relativeSarifLogPath: string | undefined = pluginOptions?.sarifLogPath;
   const sarifLogPath: string | undefined =
@@ -68,7 +67,7 @@ function getSarifLogPath(
   return sarifLogPath;
 }
 
-export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
+export default class LintPlugin implements IHeftTaskPlugin<HeftLintPluginOptionsConfiguration> {
   // These are initliazed by _initAsync
   private _initPromise!: Promise<void>;
   private _eslintToolPath: string | undefined;
@@ -79,7 +78,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
   public apply(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    pluginOptions?: ILintPluginOptions
+    pluginOptions?: HeftLintPluginOptionsConfiguration
   ): void {
     // Disable linting in watch mode. Some lint rules require the context of multiple files, which
     // may not be available in watch mode.

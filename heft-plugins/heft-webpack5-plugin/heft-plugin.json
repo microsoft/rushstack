@@ -5,7 +5,7 @@
     {
       "pluginName": "webpack5-plugin",
       "entryPoint": "./lib-commonjs/Webpack5Plugin",
-      "optionsSchema": "./lib-commonjs/schemas/heft-webpack5-plugin.schema.json",
+      "optionsSchema": "./lib-commonjs/schemas/heft-webpack5-plugin-options.schema.json",
 
       "parameterScope": "webpack5",
       "parameters": [

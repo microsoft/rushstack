@@ -30,6 +30,7 @@ import {
   type IWatchFileSystem,
   OverrideNodeWatchFSPlugin
 } from './DeferredWatchFileSystem';
+import type { Webpack4PluginConfiguration } from './schemas/heft-webpack4-plugin-options.schema.json.d.ts';
 
 type ExtendedWatching = TWebpack.Watching & {
   resume: () => void;
@@ -59,11 +60,6 @@ type ExtendedMultiCompiler = TWebpack.MultiCompiler & {
   watching: ExtendedMultiWatching;
 };
 
-export interface IWebpackPluginOptions {
-  devConfigurationPath?: string | undefined;
-  configurationPath?: string | undefined;
-}
-
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';
@@ -73,7 +69,7 @@ const WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME: 'webpack-dev-middleware' = 'webpack-d
 /**
  * @internal
  */
-export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOptions> {
+export default class Webpack4Plugin implements IHeftTaskPlugin<Webpack4PluginConfiguration> {
   private _accessor: IWebpackPluginAccessor | undefined;
   private _isServeMode: boolean = false;
   private _webpack: typeof TWebpack | undefined;
@@ -101,7 +97,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   public apply(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions = {}
+    options: Webpack4PluginConfiguration = {}
   ): void {
     this._isServeMode = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
     if (!taskSession.parameters.watch && this._isServeMode) {
@@ -127,7 +123,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   private async _getWebpackConfigurationAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions,
+    options: Webpack4PluginConfiguration,
     requestRun?: () => void
   ): Promise<IWebpackConfiguration | undefined> {
     if (this._webpackConfiguration === false) {
@@ -189,7 +185,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   private async _runWebpackAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions
+    options: Webpack4PluginConfiguration
   ): Promise<void> {
     this._validateEnvironmentVariable(taskSession);
     if (taskSession.parameters.watch || this._isServeMode) {
@@ -235,7 +231,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   private async _runWebpackWatchAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions,
+    options: Webpack4PluginConfiguration,
     requestRun: () => void
   ): Promise<void> {
     // Save a handle to the original promise, since the this-scoped promise will be replaced whenever

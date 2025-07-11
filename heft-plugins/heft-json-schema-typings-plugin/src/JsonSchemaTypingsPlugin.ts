@@ -11,15 +11,9 @@ import type {
 import type { ITerminal } from '@rushstack/terminal';
 
 import { JsonSchemaTypingsGenerator } from './JsonSchemaTypingsGenerator';
+import type { Options as IJsonSchemaTypingsPluginOptions } from './schemas/options.schema.json.d.ts';
 
 const PLUGIN_NAME: 'json-schema-typings-plugin' = 'json-schema-typings-plugin';
-
-// TODO: Replace this with usage of this plugin after this plugin is published
-export interface IJsonSchemaTypingsPluginOptions {
-  srcFolder?: string;
-  generatedTsFolders?: string[];
-  formatWithPrettier?: boolean;
-}
 
 export default class JsonSchemaTypingsPlugin implements IHeftTaskPlugin<IJsonSchemaTypingsPluginOptions> {
   /**
