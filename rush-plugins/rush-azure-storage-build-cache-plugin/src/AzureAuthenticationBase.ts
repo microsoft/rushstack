@@ -98,6 +98,13 @@ export type LoginFlowType =
 /**
  * @public
  */
+export type LoginFlowFailoverMap = {
+  readonly [LoginFlow in LoginFlowType]?: Exclude<LoginFlowType, LoginFlow>;
+};
+
+/**
+ * @public
+ */
 export interface IAzureAuthenticationBaseOptions {
   azureEnvironment?: AzureEnvironmentName;
   credentialUpdateCommandForLogging?: string | undefined;
@@ -120,9 +127,7 @@ export interface IAzureAuthenticationBaseOptions {
    * }
    * ```
    */
-  loginFlowFailover?: {
-    [key in LoginFlowType]?: LoginFlowType;
-  };
+  loginFlowFailover?: LoginFlowFailoverMap;
 }
 
 /**
