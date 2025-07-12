@@ -1102,6 +1102,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-vscode-extension-plugin",
+      "projectFolder": "heft-plugins/heft-vscode-extension-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-webpack4-plugin",
       "projectFolder": "heft-plugins/heft-webpack4-plugin",
       "reviewCategory": "libraries",
@@ -1230,6 +1236,12 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/tls-sync-vscode-shared",
+      "projectFolder": "vscode-extensions/tls-sync-vscode-shared",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "@rushstack/tree-pattern",
       "projectFolder": "libraries/tree-pattern",
       "reviewCategory": "libraries",
@@ -1248,6 +1260,12 @@
       "projectFolder": "libraries/typings-generator",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/vscode-shared",
+      "projectFolder": "vscode-extensions/vscode-shared",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
     },
 
     // "repo-scripts" folder (alphabetical order)
@@ -1288,6 +1306,12 @@
     {
       "packageName": "@rushstack/heft-node-rig",
       "projectFolder": "rigs/heft-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-vscode-extension-rig",
+      "projectFolder": "rigs/heft-vscode-extension-rig",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -1370,12 +1394,35 @@
     {
       "packageName": "rushstack",
       "projectFolder": "vscode-extensions/rush-vscode-extension",
-      "reviewCategory": "vscode-extensions"
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
     },
     {
       "packageName": "@rushstack/rush-vscode-command-webview",
       "projectFolder": "vscode-extensions/rush-vscode-command-webview",
-      "reviewCategory": "vscode-extensions"
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
+    },
+    {
+      "packageName": "tls-sync-vscode-workspace-extension",
+      "projectFolder": "vscode-extensions/tls-sync-vscode-workspace-extension",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"],
+      "versionPolicyName": "tls-sync-vscode-extensions"
+    },
+    {
+      "packageName": "tls-sync-vscode-ui-extension",
+      "projectFolder": "vscode-extensions/tls-sync-vscode-ui-extension",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"],
+      "versionPolicyName": "tls-sync-vscode-extensions"
+    },
+    {
+      "packageName": "tls-sync-vscode-extension-pack",
+      "projectFolder": "vscode-extensions/tls-sync-vscode-extension-pack",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"],
+      "versionPolicyName": "tls-sync-vscode-extensions"
     },
 
     // "webpack" folder (alphabetical order)

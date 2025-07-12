@@ -8,14 +8,16 @@ import type { ITerminal } from '@rushstack/terminal';
 
 // @public
 export class CertificateManager {
-    constructor();
+    constructor(options?: ICertificateManagerOptions);
+    readonly certificateStore: CertificateStore;
     ensureCertificateAsync(canGenerateNewCertificate: boolean, terminal: ITerminal, options?: ICertificateGenerationOptions): Promise<ICertificate>;
     untrustCertificateAsync(terminal: ITerminal): Promise<boolean>;
+    validateCertificateAsync(terminal: ITerminal, options?: ICertificateGenerationOptions): Promise<ICertificateValidationResult>;
 }
 
 // @public
 export class CertificateStore {
-    constructor();
+    constructor(options?: ICertificateStoreOptions);
     get caCertificateData(): string | undefined;
     set caCertificateData(certificate: string | undefined);
     get caCertificatePath(): string;
@@ -24,6 +26,8 @@ export class CertificateStore {
     get certificatePath(): string;
     get keyData(): string | undefined;
     set keyData(key: string | undefined);
+    get keyPath(): string;
+    get storePath(): string;
 }
 
 // @public
@@ -43,6 +47,25 @@ export interface ICertificateGenerationOptions {
     subjectAltNames?: ReadonlyArray<string>;
     subjectIPAddresses?: ReadonlyArray<string>;
     validityInDays?: number;
+}
+
+// @public
+export interface ICertificateManagerOptions extends ICertificateStoreOptions {
+}
+
+// @public
+export interface ICertificateStoreOptions {
+    caCertificateFilename?: string;
+    certificateFilename?: string;
+    keyFilename?: string;
+    storePath?: string;
+}
+
+// @public
+export interface ICertificateValidationResult {
+    certificate?: ICertificate;
+    isValid: boolean;
+    validationMessages: string[];
 }
 
 ```

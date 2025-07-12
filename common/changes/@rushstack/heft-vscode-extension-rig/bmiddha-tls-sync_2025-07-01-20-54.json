@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-vscode-extension-rig",
+      "comment": "Add new rig to build VS Code extensions",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-vscode-extension-rig"
+}

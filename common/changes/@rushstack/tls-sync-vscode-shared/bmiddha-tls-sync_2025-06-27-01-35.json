@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/tls-sync-vscode-shared",
+      "comment": "Add shared utilities for the Workspace and UI TLS Sync VS Code extensions",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/tls-sync-vscode-shared"
+}

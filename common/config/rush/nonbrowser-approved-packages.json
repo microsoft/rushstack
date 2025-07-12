@@ -120,7 +120,7 @@
     },
     {
       "name": "@rushstack/debug-certificate-manager",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/eslint-bulk",
@@ -209,6 +209,14 @@
     {
       "name": "@rushstack/heft-typescript-plugin",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-vscode-extension-plugin",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-vscode-extension-rig",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "@rushstack/heft-web-rig",
@@ -307,6 +315,10 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/tls-sync-vscode-shared",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "@rushstack/tree-pattern",
       "allowedCategories": [ "libraries" ]
     },
@@ -317,6 +329,10 @@
     {
       "name": "@rushstack/typings-generator",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/vscode-shared",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "@rushstack/webpack-deep-imports-plugin",
@@ -429,6 +445,10 @@
     {
       "name": "@vscode/test-electron",
       "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "@vscode/vsce",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@yarnpkg/lockfile",
@@ -943,6 +963,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "tls-sync-vscode-ui-extension",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "tls-sync-vscode-workspace-extension",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "true-case-path",
       "allowedCategories": [ "libraries" ]
     },
@@ -969,10 +997,6 @@
     {
       "name": "uuid",
       "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "vsce",
-      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "watchpack",

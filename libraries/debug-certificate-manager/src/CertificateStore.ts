@@ -7,6 +7,33 @@ import { homedir } from 'os';
 import { FileSystem } from '@rushstack/node-core-library';
 
 /**
+ * Options for configuring paths and filenames used by the `CertificateStore`.
+ * @public
+ */
+export interface ICertificateStoreOptions {
+  /**
+   * Path to the directory where the certificate store will be created.
+   * If not provided, it defaults to `<homedir>/.rushstack`.
+   */
+  storePath?: string;
+  /**
+   * Filename of the CA certificate file within the store directory.
+   * If not provided, it defaults to `rushstack-ca.pem`.
+   */
+  caCertificateFilename?: string;
+  /**
+   * Filename of the TLS certificate file within the store directory.
+   * If not provided, it defaults to `rushstack-serve.pem`.
+   */
+  certificateFilename?: string;
+  /**
+   * Filename of the TLS key file within the store directory.
+   * If not provided, it defaults to `rushstack-serve.key`.
+   */
+  keyFilename?: string;
+}
+
+/**
  * Store to retrieve and save debug certificate data.
  * @public
  */
@@ -14,24 +41,39 @@ export class CertificateStore {
   private readonly _caCertificatePath: string;
   private readonly _certificatePath: string;
   private readonly _keyPath: string;
+  private readonly _storePath: string;
 
   private _caCertificateData: string | undefined;
   private _certificateData: string | undefined;
   private _keyData: string | undefined;
 
-  public constructor() {
-    const unresolvedUserFolder: string = homedir();
-    const userProfilePath: string = path.resolve(unresolvedUserFolder);
-    if (!FileSystem.exists(userProfilePath)) {
-      throw new Error("Unable to determine the current user's home directory");
+  public constructor(options: ICertificateStoreOptions = {}) {
+    const requestedStorePath: string | undefined = options.storePath;
+    let storePath: string | undefined;
+    if (requestedStorePath) {
+      storePath = path.resolve(requestedStorePath);
+    } else {
+      // Default to the user's home directory under `.rushstack`
+      const unresolvedUserFolder: string = homedir();
+      const userProfilePath: string = path.resolve(unresolvedUserFolder);
+      if (!FileSystem.exists(userProfilePath)) {
+        throw new Error("Unable to determine the current user's home directory");
+      }
+      storePath = path.join(userProfilePath, '.rushstack');
     }
+    this._storePath = storePath;
+    FileSystem.ensureFolder(storePath);
 
-    const serveDataPath: string = path.join(userProfilePath, '.rushstack');
-    FileSystem.ensureFolder(serveDataPath);
+    this._caCertificatePath = path.join(storePath, options.caCertificateFilename ?? 'rushstack-ca.pem');
+    this._certificatePath = path.join(storePath, options.certificateFilename ?? 'rushstack-serve.pem');
+    this._keyPath = path.join(storePath, options.keyFilename ?? 'rushstack-serve.key');
+  }
 
-    this._caCertificatePath = path.join(serveDataPath, 'rushstack-ca.pem');
-    this._certificatePath = path.join(serveDataPath, 'rushstack-serve.pem');
-    this._keyPath = path.join(serveDataPath, 'rushstack-serve.key');
+  /**
+   * Path to the directory where the debug certificates are stored.
+   */
+  public get storePath(): string {
+    return this._storePath;
   }
 
   /**
@@ -46,6 +88,13 @@ export class CertificateStore {
    */
   public get certificatePath(): string {
     return this._certificatePath;
+  }
+
+  /**
+   * Path to the saved debug TLS key
+   */
+  public get keyPath(): string {
+    return this._keyPath;
   }
 
   /**
