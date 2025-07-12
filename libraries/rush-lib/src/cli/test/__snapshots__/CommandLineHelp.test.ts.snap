@@ -89,6 +89,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
 "usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [--peer] [-m]
                 [--all] [--variant VARIANT]
+                [--approved-packages-policy-name POLICY]
                 
 
 Adds specified package(s) to the dependencies of the current project (as 
@@ -134,6 +135,13 @@ Optional arguments:
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
+  --approved-packages-policy-name POLICY
+                        Specify whether the package should be added to 
+                        \\"browser\\" or \\"nonbrowser\\" approved packages policy. 
+                        Valid values are \\"browser\\" or \\"nonbrowser\\". If not 
+                        specified, the default behavior is to add to 
+                        \\"browser\\" approved packages unless the package 
+                        already exists in \\"nonbrowser\\" approved packages.
 "
 `;
 

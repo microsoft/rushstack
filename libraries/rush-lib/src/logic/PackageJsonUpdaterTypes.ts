@@ -79,6 +79,11 @@ export interface IPackageJsonUpdaterRushAddOptions extends IPackageJsonUpdaterRu
    * The dependencies to be added.
    */
   packagesToUpdate: IPackageForRushAdd[];
+  /**
+   * Specify which approved packages policy to use. Valid values are "browser" or "nonbrowser".
+   * If not specified, the default behavior is used.
+   */
+  approvedPackagesPolicyName?: 'browser' | 'nonbrowser';
 }
 
 /**

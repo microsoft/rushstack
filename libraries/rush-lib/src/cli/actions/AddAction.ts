@@ -28,6 +28,7 @@ export class AddAction extends BaseAddAndRemoveAction {
   private readonly _peerDependencyFlag: CommandLineFlagParameter;
   private readonly _makeConsistentFlag: CommandLineFlagParameter;
   private readonly _variantParameter: CommandLineStringParameter;
+  private readonly _approvedPackagesPolicyNameParameter: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string = [
@@ -92,6 +93,14 @@ export class AddAction extends BaseAddAndRemoveAction {
       description: 'If specified, the dependency will be added to all projects.'
     });
     this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
+    this._approvedPackagesPolicyNameParameter = this.defineStringParameter({
+      parameterLongName: '--approved-packages-policy-name',
+      argumentName: 'POLICY',
+      description:
+        'Specify whether the package should be added to "browser" or "nonbrowser" approved packages policy. ' +
+        'Valid values are "browser" or "nonbrowser". If not specified, the default behavior is to add to ' +
+        '"browser" approved packages unless the package already exists in "nonbrowser" approved packages.'
+    });
   }
 
   public async getUpdateOptionsAsync(): Promise<IPackageJsonUpdaterRushAddOptions> {
@@ -163,6 +172,19 @@ export class AddAction extends BaseAddAndRemoveAction {
       true
     );
 
+    // Validate approved packages policy name parameter
+    let approvedPackagesPolicyName: 'browser' | 'nonbrowser' | undefined;
+    if (this._approvedPackagesPolicyNameParameter.value) {
+      const policyName: string = this._approvedPackagesPolicyNameParameter.value.toLowerCase();
+      if (policyName !== 'browser' && policyName !== 'nonbrowser') {
+        throw new Error(
+          `The "${this._approvedPackagesPolicyNameParameter.longName}" parameter must be either "browser" or "nonbrowser". ` +
+            `Received: "${this._approvedPackagesPolicyNameParameter.value}"`
+        );
+      }
+      approvedPackagesPolicyName = policyName as 'browser' | 'nonbrowser';
+    }
+
     return {
       projects: projects,
       packagesToUpdate: packagesToAdd,
@@ -172,7 +194,8 @@ export class AddAction extends BaseAddAndRemoveAction {
       skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
       actionName: this.actionName,
-      variant
+      variant,
+      approvedPackagesPolicyName
     };
   }
 }

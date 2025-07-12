@@ -443,6 +443,15 @@ export class PackageJsonUpdater {
       allPackageUpdates.push(currentProjectUpdate, ...otherPackageUpdates);
     }
 
+    // Update approved packages files if a specific policy was requested
+    if (options.approvedPackagesPolicyName) {
+      this._updateApprovedPackagesForAddedDependencies(
+        dependenciesToAddOrUpdate,
+        subspaceProjects,
+        options.approvedPackagesPolicyName
+      );
+    }
+
     return allPackageUpdates;
   }
 
@@ -909,5 +918,75 @@ export class PackageJsonUpdater {
         rangeStyle: this._cheaplyDetectSemVerRangeStyle(dep.packageJson)
       };
     });
+  }
+
+  /**
+   * Updates the approved packages files when a user explicitly specifies which policy to use
+   * for newly added dependencies.
+   */
+  private _updateApprovedPackagesForAddedDependencies(
+    dependenciesToAddOrUpdate: Record<string, string>,
+    subspaceProjects: RushConfigurationProject[],
+    approvedPackagesPolicyName: 'browser' | 'nonbrowser'
+  ): void {
+    const approvedPackagesPolicy: typeof this._rushConfiguration.approvedPackagesPolicy =
+      this._rushConfiguration.approvedPackagesPolicy;
+
+    if (!approvedPackagesPolicy.enabled) {
+      // If approved packages policy is not enabled, skip this step
+      return;
+    }
+
+    // Determine which configuration to update based on user preference
+    const targetConfiguration: typeof approvedPackagesPolicy.browserApprovedPackages =
+      approvedPackagesPolicyName === 'browser'
+        ? approvedPackagesPolicy.browserApprovedPackages
+        : approvedPackagesPolicy.nonbrowserApprovedPackages;
+
+    // Get a representative project to determine review category
+    // Use the first project that has a review category
+    const representativeProject: RushConfigurationProject | undefined = subspaceProjects.find(
+      (project) => project.reviewCategory
+    );
+
+    if (!representativeProject || !representativeProject.reviewCategory) {
+      this._terminal.writeWarningLine(
+        `Warning: Cannot update approved packages files because no project has a reviewCategory configured. ` +
+          `The packages will be added to the approved packages files during the next "rush update".`
+      );
+      return;
+    }
+
+    let hasUpdates: boolean = false;
+
+    // Add each dependency to the specified approved packages file
+    for (const packageName of Object.keys(dependenciesToAddOrUpdate)) {
+      // Check if the package should be ignored based on scope
+      const scope: string = this._rushConfiguration.packageNameParser.getScope(packageName);
+      if (approvedPackagesPolicy.ignoredNpmScopes.has(scope)) {
+        continue;
+      }
+
+      // Add the package to the target configuration
+      const wasUpdated: boolean = targetConfiguration.addOrUpdatePackage(
+        packageName,
+        representativeProject.reviewCategory
+      );
+
+      if (wasUpdated) {
+        hasUpdates = true;
+        this._terminal.writeLine(
+          `Added "${packageName}" to ${approvedPackagesPolicyName} approved packages.`
+        );
+      }
+    }
+
+    // Save the configuration file if there were updates
+    if (hasUpdates) {
+      targetConfiguration.saveToFile();
+      this._terminal.writeLine(
+        `Updated ${approvedPackagesPolicyName === 'browser' ? 'browser' : 'nonbrowser'}-approved-packages.json`
+      );
+    }
   }
 }

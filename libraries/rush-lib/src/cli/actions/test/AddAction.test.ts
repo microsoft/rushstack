@@ -102,5 +102,55 @@ describe(AddAction.name, () => {
         `);
       });
     });
+
+    describe("'add' action with --approved-packages-policy-name", () => {
+      it(`adds a dependency with browser approved packages policy`, async () => {
+        const startPath: string = `${__dirname}/addRepo`;
+        const aPath: string = `${__dirname}/addRepo/a`;
+
+        const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
+        jest.spyOn(process, 'cwd').mockReturnValue(aPath);
+
+        // Mock the command
+        process.argv = [
+          'pretend-this-is-node.exe',
+          'pretend-this-is-rush',
+          'add',
+          '-p',
+          'assert',
+          '--approved-packages-policy-name',
+          'browser'
+        ];
+
+        await expect(parser.executeAsync()).resolves.toEqual(true);
+        expect(doRushAddMock).toHaveBeenCalledTimes(1);
+        const doRushAddOptions: IPackageJsonUpdaterRushAddOptions = doRushAddMock.mock.calls[0][0];
+        expect(doRushAddOptions.approvedPackagesPolicyName).toEqual('browser');
+      });
+
+      it(`adds a dependency with nonbrowser approved packages policy`, async () => {
+        const startPath: string = `${__dirname}/addRepo`;
+        const aPath: string = `${__dirname}/addRepo/a`;
+
+        const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
+        jest.spyOn(process, 'cwd').mockReturnValue(aPath);
+
+        // Mock the command
+        process.argv = [
+          'pretend-this-is-node.exe',
+          'pretend-this-is-rush',
+          'add',
+          '-p',
+          'assert',
+          '--approved-packages-policy-name',
+          'nonbrowser'
+        ];
+
+        await expect(parser.executeAsync()).resolves.toEqual(true);
+        expect(doRushAddMock).toHaveBeenCalledTimes(1);
+        const doRushAddOptions: IPackageJsonUpdaterRushAddOptions = doRushAddMock.mock.calls[0][0];
+        expect(doRushAddOptions.approvedPackagesPolicyName).toEqual('nonbrowser');
+      });
+    });
   });
 });

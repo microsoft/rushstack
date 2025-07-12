@@ -78,6 +78,14 @@ Object {
           "required": false,
           "shortName": undefined,
         },
+        Object {
+          "description": "Specify whether the package should be added to \\"browser\\" or \\"nonbrowser\\" approved packages policy. Valid values are \\"browser\\" or \\"nonbrowser\\". If not specified, the default behavior is to add to \\"browser\\" approved packages unless the package already exists in \\"nonbrowser\\" approved packages.",
+          "environmentVariable": undefined,
+          "kind": "String",
+          "longName": "--approved-packages-policy-name",
+          "required": false,
+          "shortName": undefined,
+        },
       ],
     },
     Object {
