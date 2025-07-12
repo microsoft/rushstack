@@ -3,4 +3,8 @@
 
 import { Rush } from './api/Rush';
 
+performance.mark('rush:start');
+
 Rush.launch(Rush.version, { isManaged: false });
+
+// Rush.launch has async side effects, so no point ending the measurement.

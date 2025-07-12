@@ -24,6 +24,7 @@ import { SUBSPACE_LONG_ARG_NAME, type SelectionParameterSet } from '../parsing/S
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { Subspace } from '../../api/Subspace';
 import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
+import { measureAsyncFn } from '../../utilities/performance';
 
 /**
  * Temporary data structure used by `BaseInstallAction.runAsync()`
@@ -285,7 +286,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
       installSuccessful = false;
       throw error;
     } finally {
-      await purgeManager.startDeleteAllAsync();
+      await measureAsyncFn('rush:installManager:startDeleteAllAsync', () =>
+        purgeManager.startDeleteAllAsync()
+      );
       stopwatch.stop();
 
       this._collectTelemetry(stopwatch, installManagerOptions, installSuccessful);
@@ -327,7 +330,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         installManagerOptions
       );
 
-    await installManager.doInstallAsync();
+    await measureAsyncFn('rush:installManager:doInstallAsync', () => installManager.doInstallAsync());
   }
 
   private _collectTelemetry(

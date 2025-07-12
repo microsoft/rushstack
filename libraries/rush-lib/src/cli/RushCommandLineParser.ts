@@ -65,6 +65,8 @@ import { InstallAutoinstallerAction } from './actions/InstallAutoinstallerAction
 import { LinkPackageAction } from './actions/LinkPackageAction';
 import { BridgePackageAction } from './actions/BridgePackageAction';
 
+import { measureAsyncFn } from '../utilities/performance';
+
 /**
  * Options for `RushCommandLineParser`.
  */
@@ -219,7 +221,9 @@ export class RushCommandLineParser extends CommandLineParser {
     this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
       process.argv.indexOf('--debug') >= 0;
 
-    await this.pluginManager.tryInitializeUnassociatedPluginsAsync();
+    await measureAsyncFn('rush:initializeUnassociatedPlugins', () =>
+      this.pluginManager.tryInitializeUnassociatedPluginsAsync()
+    );
 
     return await super.executeAsync(args);
   }
@@ -298,7 +302,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     try {
-      await super.onExecuteAsync();
+      await measureAsyncFn('rush:commandLineParser:onExecuteAsync', () => super.onExecuteAsync());
     } finally {
       if (this.telemetry) {
         this.flushTelemetry();

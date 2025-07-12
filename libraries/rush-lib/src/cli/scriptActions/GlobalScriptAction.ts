@@ -20,6 +20,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { IGlobalCommandConfig, IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
+import { measureAsyncFn } from '../../utilities/performance';
 
 /**
  * Constructor parameters for GlobalScriptAction.
@@ -120,7 +121,9 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
       this.commandLineConfiguration?.additionalPathFolders.slice() || [];
 
     if (this._autoinstallerName) {
-      await this._prepareAutoinstallerNameAsync();
+      await measureAsyncFn('rush:globalScriptAction:prepareAutoinstaller', () =>
+        this._prepareAutoinstallerNameAsync()
+      );
 
       const autoinstallerNameBinPath: string = path.join(this._autoinstallerFullPath, 'node_modules', '.bin');
       additionalPathFolders.push(autoinstallerNameBinPath);
