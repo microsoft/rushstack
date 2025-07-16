@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async } from '@rushstack/node-core-library';
+import { Async, FileSystem } from '@rushstack/node-core-library';
 import { _OperationBuildCache as OperationBuildCache } from '@rushstack/rush-sdk';
 import type {
   ICreateOperationsContext,
@@ -123,6 +123,29 @@ export class BridgeCachePlugin implements IRushPlugin {
                   );
                 }
               } else if (cacheAction === CACHE_ACTION_WRITE) {
+                // skip this action if any of the defined output folders do not exist on disk
+                if (
+                  operation.settings?.outputFolderNames &&
+                  operation.settings?.outputFolderNames?.length > 0
+                ) {
+                  const projectFolder: string = operation.associatedProject?.projectFolder;
+                  const results: { outputFolderName: string; exists: boolean }[] =
+                    operation.settings.outputFolderNames.map((outputFolderName: string) => ({
+                      outputFolderName,
+                      exists: FileSystem.exists(`${projectFolder}/${outputFolderName}`)
+                    }));
+
+                  if (results.some((folder) => !folder.exists)) {
+                    const missingFolders: string[] = results
+                      .filter((folder) => !folder.exists)
+                      .map((folder) => folder.outputFolderName);
+                    terminal.writeErrorLine(
+                      `Operation "${operation.name}": The following output folders do not exist: "${missingFolders.join('", "')}". Skipping cache population.`
+                    );
+                    return;
+                  }
+                }
+
                 const success: boolean = await projectBuildCache.trySetCacheEntryAsync(terminal);
                 if (success) {
                   ++successCount;

@@ -8,7 +8,7 @@ Alternatively, the `--bridge-cache-action=read` parameter is useful for tasks su
 
 ## Here be dragons!
 
-The `write` action for plugin assumes that the work for a particular task has already been completed and the build artifacts have been generated on disk. **If you run this command on a package where the command hasn't already been run and the build artifacts are missing or incorrect, you will cache invalid content**. Be careful and beware!
+The `write` action for plugin assumes that the work for a particular task has already been completed and the build artifacts have been generated on disk. **If you run this command on a package where the command hasn't already been run and the build artifacts are missing or incorrect, you will cache invalid content**. Be careful and beware! If any defined output folders for a task are not on disk, the write action will skip that package.
 
 The `read` action for this plugin makes no guarantee that the requested operations will have their outputs restored and is purely a best-effort.
 
