@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Do not try to sync cobuild waiting state.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "aramissennyeydd@users.noreply.github.com"
+}
