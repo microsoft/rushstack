@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Do not try to sync cobuild waiting state.",
+      "comment": "Do not run afterExecuteOperation if the operation has not actually completed.",
       "type": "none",
       "packageName": "@microsoft/rush"
     }
