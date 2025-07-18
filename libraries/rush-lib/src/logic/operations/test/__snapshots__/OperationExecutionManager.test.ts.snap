@@ -40,7 +40,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[green]\\"operation2 (success)\\" completed successfully in 15.00 seconds.[default]
+    "text": "[green]\\"operation2 (success)\\" completed successfully in 10.00 seconds.[default]
 ",
   },
   Object {
@@ -56,7 +56,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[green]\\"operation (success)\\" completed successfully in 15.00 seconds.[default]
+    "text": "[green]\\"operation (success)\\" completed successfully in 10.00 seconds.[default]
 ",
   },
   Object {
@@ -212,7 +212,7 @@ Array [
   },
   Object {
     "kind": "E",
-    "text": "[yellow]\\"operation2 (success with warnings)\\" completed with warnings in 15.00 seconds.[default]
+    "text": "[yellow]\\"operation2 (success with warnings)\\" completed with warnings in 10.00 seconds.[default]
 ",
   },
   Object {
@@ -240,7 +240,7 @@ Array [
   },
   Object {
     "kind": "E",
-    "text": "[yellow]\\"operation (success with warnings)\\" completed with warnings in 15.00 seconds.[default]
+    "text": "[yellow]\\"operation (success with warnings)\\" completed with warnings in 10.00 seconds.[default]
 ",
   },
   Object {
