@@ -32,6 +32,7 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
 
         //skip if the phase is skipped or no operation
         if (
+          status === OperationStatus.Waiting ||
           status === OperationStatus.Skipped ||
           status === OperationStatus.NoOp ||
           status === OperationStatus.Failure
