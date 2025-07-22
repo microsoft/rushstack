@@ -267,7 +267,6 @@ export class OperationExecutionManager {
       if (!record.isTerminal) {
         this._executionQueue.assignOperations();
       } else {
-        this._onOperationComplete(record);
         try {
           await this._afterExecuteOperation?.(record);
         } catch (e) {
@@ -275,6 +274,7 @@ export class OperationExecutionManager {
           record.error = e;
           record.status = OperationStatus.Failure;
         }
+        this._onOperationComplete(record);
       }
     };
 
