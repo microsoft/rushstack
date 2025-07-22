@@ -442,7 +442,6 @@ export class OperationExecutionManager {
       }
     }
 
-    // If the operation was not remote, then we can notify queue that it is complete
     this._executionQueue.complete(record);
   }
 }
