@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Do not run afterExecuteOperation if the operation has not actually completed.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "aramissennyeydd@users.noreply.github.com"
+}

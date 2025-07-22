@@ -263,14 +263,19 @@ export class OperationExecutionManager {
     const onOperationCompleteAsync: (record: OperationExecutionRecord) => Promise<void> = async (
       record: OperationExecutionRecord
     ) => {
-      try {
-        await this._afterExecuteOperation?.(record);
-      } catch (e) {
-        this._reportOperationErrorIfAny(record);
-        record.error = e;
-        record.status = OperationStatus.Failure;
+      // If the operation is not terminal, we should _only_ notify the queue to assign operations.
+      if (!record.isTerminal) {
+        this._executionQueue.assignOperations();
+      } else {
+        try {
+          await this._afterExecuteOperation?.(record);
+        } catch (e) {
+          this._reportOperationErrorIfAny(record);
+          record.error = e;
+          record.status = OperationStatus.Failure;
+        }
+        this._onOperationComplete(record);
       }
-      this._onOperationComplete(record);
     };
 
     const onOperationStartAsync: (
@@ -296,8 +301,8 @@ export class OperationExecutionManager {
     const status: OperationStatus = this._hasAnyFailures
       ? OperationStatus.Failure
       : this._hasAnyNonAllowedWarnings
-      ? OperationStatus.SuccessWithWarning
-      : OperationStatus.Success;
+        ? OperationStatus.SuccessWithWarning
+        : OperationStatus.Success;
 
     return {
       operationResults: this._executionRecords,
@@ -431,13 +436,12 @@ export class OperationExecutionManager {
         this._hasAnyNonAllowedWarnings = this._hasAnyNonAllowedWarnings || !runner.warningsAreAllowed;
         break;
       }
+
+      default: {
+        throw new InternalError(`Unexpected operation status: ${status}`);
+      }
     }
 
-    if (record.isTerminal) {
-      // If the operation was not remote, then we can notify queue that it is complete
-      this._executionQueue.complete(record);
-    } else {
-      this._executionQueue.assignOperations();
-    }
+    this._executionQueue.complete(record);
   }
 }
