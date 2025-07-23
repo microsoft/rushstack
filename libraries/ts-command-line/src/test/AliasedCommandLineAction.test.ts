@@ -8,6 +8,7 @@ import type { CommandLineParameterProvider } from '../providers/CommandLineParam
 import { AliasCommandLineAction } from '../providers/AliasCommandLineAction';
 import { CommandLineAction } from '../providers/CommandLineAction';
 import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 class TestAliasAction extends AliasCommandLineAction {
   public done: boolean = false;
@@ -104,6 +105,11 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe(AliasCommandLineAction.name, () => {
+  it('renders help text', () => {
+    const commandLineParser: TestCommandLine = new TestCommandLine();
+    ensureHelpTextMatchesSnapshot(commandLineParser);
+  });
+
   it('executes the aliased action', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
     const targetAction: TestAction = commandLineParser.getAction('action') as TestAction;

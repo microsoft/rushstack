@@ -4,6 +4,7 @@
 import { CommandLineAction } from '../providers/CommandLineAction';
 import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;
@@ -40,6 +41,11 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe(CommandLineParser.name, () => {
+  it('renders help text', () => {
+    const commandLineParser: TestCommandLine = new TestCommandLine();
+    ensureHelpTextMatchesSnapshot(commandLineParser);
+  });
+
   it('executes an action', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
     commandLineParser._registerDefinedParameters({ parentParameterNames: new Set() });

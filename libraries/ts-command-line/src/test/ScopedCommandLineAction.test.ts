@@ -8,6 +8,7 @@ import type { CommandLineStringParameter } from '../parameters/CommandLineString
 import { CommandLineParser } from '../providers/CommandLineParser';
 import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
 import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 class TestScopedAction extends ScopedCommandLineAction {
   public done: boolean = false;
@@ -67,6 +68,11 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe(CommandLineParser.name, () => {
+  it('renders help text', () => {
+    const commandLineParser: TestCommandLine = new TestCommandLine();
+    ensureHelpTextMatchesSnapshot(commandLineParser);
+  });
+
   it('throws on unknown scoped arg', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
     const args: string[] = ['scoped-action', '--scope', 'foo', '--', '--scoped-bar', 'baz'];

@@ -56,6 +56,42 @@ Object {
 }
 `;
 
+exports[`CommandLineParser renders help text: global help 1`] = `
+"usage: example [-h] <command> ...
+
+An example project
+
+Positional arguments:
+  <command>
+    scoped-action
+                 does the scoped action
+
+Optional arguments:
+  -h, --help     Show this help message and exit.
+
+[bold]For detailed help about a specific command, use: example <command> -h[normal]
+"
+`;
+
+exports[`CommandLineParser renders help text: scoped-action 1`] = `
+"usage: example scoped-action [-h] [--verbose] [--scope SCOPE] ...
+
+a longer description
+
+Positional arguments:
+  \\"...\\"          Scoped parameters. Must be prefixed with \\"--\\", ex. \\"-- 
+                 --scopedParameter foo --scopedFlag\\". For more information on 
+                 available scoped parameters, use \\"-- --help\\".
+
+Optional arguments:
+  -h, --help     Show this help message and exit.
+  --verbose      A flag parameter.
+
+Optional scoping arguments:
+  --scope SCOPE  The scope
+"
+`;
+
 exports[`CommandLineParser throws on missing positional arg divider with unknown positional args 1`] = `
 "usage: example scoped-action [-h] [--verbose] [--scope SCOPE] ...
 
