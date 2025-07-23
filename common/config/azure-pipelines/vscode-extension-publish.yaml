@@ -51,6 +51,15 @@ extends:
                       displayName: 'Publish Artifact: ${{ extension.key }}'
 
             steps:
+              - task: AzureCLI@2
+                displayName: 'Get Publish Managed Identity User ID'
+                inputs:
+                  azureSubscription: 'rushstack-vscode-publish'
+                  scriptType: bash
+                  scriptLocation: inlineScript
+                  inlineScript: |
+                    az rest -u https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798
+
               - checkout: self
                 persistCredentials: true
 
