@@ -14,7 +14,7 @@ import type {
   RushSession
 } from '@rushstack/rush-sdk';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
-import type { CommandLineFlagParameter, CommandLineParameter } from '@rushstack/ts-command-line';
+import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 const PLUGIN_NAME: 'RushBridgeCachePlugin' = 'RushBridgeCachePlugin';
 
@@ -225,6 +225,14 @@ export class BridgeCachePlugin implements IRushPlugin {
       this._requireOutputFoldersParameterName
     );
 
-    return !!(requireOutputFoldersParam && (requireOutputFoldersParam as CommandLineFlagParameter).value);
+    if (!requireOutputFoldersParam) {
+      return false;
+    }
+
+    if (requireOutputFoldersParam.kind !== CommandLineParameterKind.Flag) {
+      throw new Error(`The parameter "${this._requireOutputFoldersParameterName}" must be a flag.`);
+    }
+
+    return requireOutputFoldersParam.value;
   }
 }
