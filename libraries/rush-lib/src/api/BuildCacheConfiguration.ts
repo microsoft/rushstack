@@ -220,13 +220,22 @@ export class BuildCacheConfiguration {
         `${EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON} environment variable`
       );
     } else {
-      try {
-        buildCacheJson = await JsonFile.loadAndValidateAsync(jsonFilePath, BUILD_CACHE_JSON_SCHEMA);
-      } catch (e) {
-        if (!FileSystem.isNotExistError(e)) {
-          throw e;
-        } else {
-          return undefined;
+      const buildCacheOverrideJsonFilePath: string | undefined =
+        EnvironmentConfiguration.buildCacheOverrideJsonFilePath;
+      if (buildCacheOverrideJsonFilePath) {
+        buildCacheJson = await JsonFile.loadAndValidateAsync(
+          buildCacheOverrideJsonFilePath,
+          BUILD_CACHE_JSON_SCHEMA
+        );
+      } else {
+        try {
+          buildCacheJson = await JsonFile.loadAndValidateAsync(jsonFilePath, BUILD_CACHE_JSON_SCHEMA);
+        } catch (e) {
+          if (!FileSystem.isNotExistError(e)) {
+            throw e;
+          } else {
+            return undefined;
+          }
         }
       }
     }

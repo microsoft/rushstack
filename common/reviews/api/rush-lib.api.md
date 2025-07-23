@@ -238,6 +238,7 @@ export class EnvironmentConfiguration {
     static get buildCacheCredential(): string | undefined;
     static get buildCacheEnabled(): boolean | undefined;
     static get buildCacheOverrideJson(): string | undefined;
+    static get buildCacheOverrideJsonFilePath(): string | undefined;
     static get buildCacheWriteAllowed(): boolean | undefined;
     static get cobuildContextId(): string | undefined;
     static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined;
@@ -276,6 +277,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_BUILD_CACHE_ENABLED: "RUSH_BUILD_CACHE_ENABLED";
     readonly RUSH_BUILD_CACHE_WRITE_ALLOWED: "RUSH_BUILD_CACHE_WRITE_ALLOWED";
     readonly RUSH_BUILD_CACHE_OVERRIDE_JSON: "RUSH_BUILD_CACHE_OVERRIDE_JSON";
+    readonly RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH: "RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH";
     readonly RUSH_COBUILD_CONTEXT_ID: "RUSH_COBUILD_CONTEXT_ID";
     readonly RUSH_COBUILD_RUNNER_ID: "RUSH_COBUILD_RUNNER_ID";
     readonly RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED";
