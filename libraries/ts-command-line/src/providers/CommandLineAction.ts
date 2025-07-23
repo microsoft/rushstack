@@ -5,6 +5,7 @@ import type * as argparse from 'argparse';
 
 import { CommandLineParameterProvider } from './CommandLineParameterProvider';
 import { CommandLineParserExitError } from './CommandLineParserExitError';
+import { escapeSprintf } from '../escapeSprintf';
 
 /**
  * Options for the CommandLineAction constructor.
@@ -83,8 +84,8 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    */
   public _buildParser(actionsSubParser: argparse.SubParser): void {
     this._argumentParser = actionsSubParser.addParser(this.actionName, {
-      help: this.summary,
-      description: this.documentation
+      help: escapeSprintf(this.summary),
+      description: escapeSprintf(this.documentation)
     });
 
     // Monkey-patch the error handling for the action parser

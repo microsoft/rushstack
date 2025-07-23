@@ -3,7 +3,7 @@
 exports[`CommandLineParser renders help text: do:the-job 1`] = `
 "usage: example do:the-job [-h] [--flag]
 
-a longer description
+a longer description with sprintf-style escape characters, 100%
 
 Optional arguments:
   -h, --help  Show this help message and exit.
@@ -14,12 +14,12 @@ Optional arguments:
 exports[`CommandLineParser renders help text: global help 1`] = `
 "usage: example [-h] <command> ...
 
-An example project
+An example project with sprintf-style escape characters, 100%
 
 Positional arguments:
   <command>
     do:the-job
-              does the job
+              does the job with sprintf-style escape characters, 100%
 
 Optional arguments:
   -h, --help  Show this help message and exit.

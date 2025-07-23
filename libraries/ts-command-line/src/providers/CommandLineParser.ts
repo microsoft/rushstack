@@ -14,6 +14,7 @@ import {
 import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError';
 import { TabCompleteAction } from './TabCompletionAction';
 import { TypeUuid, uuidAlreadyReportedError } from '../TypeUuidLite';
+import { escapeSprintf } from '../escapeSprintf';
 
 /**
  * Options for the {@link CommandLineParser} constructor.
@@ -75,13 +76,16 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     this._actions = [];
     this._actionsByName = new Map<string, CommandLineAction>();
 
+    const { toolFilename, toolDescription, toolEpilog } = options;
+
     this._argumentParser = new CustomArgumentParser({
       addHelp: true,
-      prog: this._options.toolFilename,
-      description: this._options.toolDescription,
+      prog: toolFilename,
+      description: escapeSprintf(toolDescription),
       epilog: Colorize.bold(
-        this._options.toolEpilog ??
-          `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
+        escapeSprintf(
+          toolEpilog ?? `For detailed help about a specific command, use: ${toolFilename} <command> -h`
+        )
       )
     });
   }
