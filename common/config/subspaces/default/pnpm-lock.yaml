@@ -3605,6 +3605,9 @@ importers:
       dependency-path:
         specifier: ~9.2.8
         version: 9.2.8
+      dotenv:
+        specifier: ~16.4.7
+        version: 16.4.7
       fast-glob:
         specifier: ~3.3.1
         version: 3.3.2
@@ -18537,10 +18540,9 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /dotenv@16.4.5:
-    resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
+  /dotenv@16.4.7:
+    resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
     engines: {node: '>=12'}
-    dev: true
 
   /dotenv@8.6.0:
     resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
@@ -23741,7 +23743,7 @@ packages:
         optional: true
     dependencies:
       chalk: 4.1.2
-      dotenv: 16.4.5
+      dotenv: 16.4.7
       kysely: 0.21.6
       micromatch: 4.0.5
       minimist: 1.2.8
