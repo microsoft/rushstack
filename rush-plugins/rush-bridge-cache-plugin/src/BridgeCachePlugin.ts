@@ -14,7 +14,7 @@ import type {
   RushSession
 } from '@rushstack/rush-sdk';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
-import type { CommandLineParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter, CommandLineParameter } from '@rushstack/ts-command-line';
 
 const PLUGIN_NAME: 'RushBridgeCachePlugin' = 'RushBridgeCachePlugin';
 
@@ -25,14 +25,17 @@ type CacheAction = typeof CACHE_ACTION_READ | typeof CACHE_ACTION_WRITE;
 
 export interface IBridgeCachePluginOptions {
   readonly actionParameterName: string;
+  readonly requireOutputFoldersParameterName: string | undefined;
 }
 
 export class BridgeCachePlugin implements IRushPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
   private readonly _actionParameterName: string;
+  private readonly _requireOutputFoldersParameterName: string | undefined;
 
   public constructor(options: IBridgeCachePluginOptions) {
     this._actionParameterName = options.actionParameterName;
+    this._requireOutputFoldersParameterName = options.requireOutputFoldersParameterName;
 
     if (!this._actionParameterName) {
       throw new Error(
@@ -46,6 +49,7 @@ export class BridgeCachePlugin implements IRushPlugin {
       const logger: ILogger = session.getLogger(PLUGIN_NAME);
 
       let cacheAction: CacheAction | undefined;
+      let requireOutputFolders: boolean = false;
 
       // cancel the actual operations. We don't want to run the command, just cache the output folders on disk
       command.hooks.createOperations.tap(
@@ -63,12 +67,13 @@ export class BridgeCachePlugin implements IRushPlugin {
             for (const operation of operations) {
               operation.enabled = false;
             }
+
+            requireOutputFolders = this._isRequireOutputFoldersFlagSet(context);
           }
 
           return operations;
         }
       );
-
       // populate the cache for each operation
       command.hooks.beforeExecuteOperations.tap(
         PLUGIN_NAME,
@@ -123,8 +128,9 @@ export class BridgeCachePlugin implements IRushPlugin {
                   );
                 }
               } else if (cacheAction === CACHE_ACTION_WRITE) {
-                // skip this action if any of the defined output folders do not exist on disk
+                // if the require output folders flag has been passed, skip populating the cache if any of the expected output folders does not exist
                 if (
+                  requireOutputFolders &&
                   operation.settings?.outputFolderNames &&
                   operation.settings?.outputFolderNames?.length > 0
                 ) {
@@ -135,11 +141,11 @@ export class BridgeCachePlugin implements IRushPlugin {
                       exists: FileSystem.exists(`${projectFolder}/${outputFolderName}`)
                     }));
 
-                  if (results.some((folder) => !folder.exists)) {
-                    const missingFolders: string[] = results
-                      .filter((folder) => !folder.exists)
-                      .map((folder) => folder.outputFolderName);
-                    terminal.writeErrorLine(
+                  const missingFolders: string[] = results
+                    .filter((folder) => !folder.exists)
+                    .map((folder) => folder.outputFolderName);
+                  if (missingFolders.length > 0) {
+                    terminal.writeWarningLine(
                       `Operation "${operation.name}": The following output folders do not exist: "${missingFolders.join('", "')}". Skipping cache population.`
                     );
                     return;
@@ -208,5 +214,17 @@ export class BridgeCachePlugin implements IRushPlugin {
     }
 
     return undefined;
+  }
+
+  private _isRequireOutputFoldersFlagSet(context: IExecuteOperationsContext): boolean {
+    if (!this._requireOutputFoldersParameterName) {
+      return false;
+    }
+
+    const requireOutputFoldersParam: CommandLineParameter | undefined = context.customParameters.get(
+      this._requireOutputFoldersParameterName
+    );
+
+    return !!(requireOutputFoldersParam && (requireOutputFoldersParam as CommandLineFlagParameter).value);
   }
 }

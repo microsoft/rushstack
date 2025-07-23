@@ -8,7 +8,7 @@ Alternatively, the `--bridge-cache-action=read` parameter is useful for tasks su
 
 ## Here be dragons!
 
-The `write` action for plugin assumes that the work for a particular task has already been completed and the build artifacts have been generated on disk. **If you run this command on a package where the command hasn't already been run and the build artifacts are missing or incorrect, you will cache invalid content**. Be careful and beware! If any defined output folders for a task are not on disk, the write action will skip that package.
+The `write` action for this plugin assumes that the work for a particular task has already been completed and the build artifacts have been generated on disk. **If you run this command on a package where the command hasn't already been run and the build artifacts are missing or incorrect, you will cache invalid content**. Be careful and beware! See the optional `requireOutputFoldersParameterName` setting below to include a safety check to require all expected output folders for a command to actually be on disk.
 
 The `read` action for this plugin makes no guarantee that the requested operations will have their outputs restored and is purely a best-effort.
 
@@ -34,6 +34,14 @@ The `read` action for this plugin makes no guarantee that the requested operatio
       "description": "When specified for any associated command, bypass running the command itself, and cache whatever outputs exist in the output folders as-is. Beware! Only run when you know the build artifacts are in a valid state for the command."
     }
   ]
+},
+
+// optional
+{
+  "associatedCommands": ["build", "test", "lint", "a11y", "typecheck"],
+  "description": "Optional flag that can be used in combination with --bridge-cache-action=write. When used, this will only populate a cache entry when all defined output folders for a command are present on disk.",
+  "parameterKind": "flag",
+  "longName": "--require-output-folders",
 }
 ```
 
@@ -47,15 +55,20 @@ The `read` action for this plugin makes no guarantee that the requested operatio
 ```
 
 4. Create a configuration file for this plugin at this location: `common/config/rush-plugins/rush-bridge-cache-plugin.json` that defines the flag name you'll use to trigger the plugin:
+
 ```json
 {
-  "actionParameterName": "--bridge-cache-action"
+  "actionParameterName": "--bridge-cache-action",
+
+  // optional
+  "requireOutputFoldersParameterName": "--require-output-folders"
 }
 ```
 
+
 ## Usage
 
-You can now use the parameter to have any Rush phased command either *only* restore from the cache (without any local building), or *only* write the cache, assuming all current output files are correct.
+You can now use this plugin to have any Rush phased command either *only* restore from the cache (without any local building), or *only* write the cache, assuming all current output files are correct.
 
 **Replay the cache entries for this command as best-effort, but don't execute any build processes**
 `rush build --to your-packageX --bridge-cache-action=read`
@@ -65,9 +78,6 @@ That will populate the cache for `your-packageX` and all of its dependencies.
 `rush build --to your-packageX --bridge-cache-action=write`
 That will populate the cache for `your-packageX` and all of its dependencies.
 
-
-## Performance
-
-When running within a pipeline, you may want to populate the cache as quickly as possible so local Rush users will benefit from the cached entry sooner. So instead of waiting until the full build graph has been processed, running it after each individual task when it's been completed, e.g.
-
-`rush lint --only your-packageY --set-cache-only`
+**Write whatever outputs are on disk for this command to the cache, but only if all output folders are present**
+`rush build --to your-packageX --bridge-cache-action=write --require-output-folders`
+That will populate the cache for `your-packageX` and all of its dependencies, skipping any that don't have all output folders present.
