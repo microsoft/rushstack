@@ -1,6 +1,16 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Sat, 21 Jun 2025 00:13:15 GMT and should not be manually modified.
+This log was last generated on Wed, 23 Jul 2025 20:55:57 GMT and should not be manually modified.
+
+## 1.5.0
+Wed, 23 Jul 2025 20:55:57 GMT
+
+### Minor changes
+
+- CertificateStore - Add params to support custom paths and filenames
+- CertificateManager - Update `untrustCertificateAsync` to clear `caCertificateData`
+- CertificateManager - Use osascript (applescript) to run elevated command on macOS instead of sudo package.
+- CertificateManager - Expose `getCertificateExpirationAsync` method to retrieve certificate expiration date
 
 ## 1.4.37
 Sat, 21 Jun 2025 00:13:15 GMT

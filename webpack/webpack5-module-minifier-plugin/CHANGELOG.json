@@ -2,6 +2,27 @@
   "name": "@rushstack/webpack5-module-minifier-plugin",
   "entries": [
     {
+      "version": "5.5.108",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.108",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.5.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.7.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `0.7.24`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.5.107",
       "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.107",
       "date": "Sat, 21 Jun 2025 00:13:15 GMT",

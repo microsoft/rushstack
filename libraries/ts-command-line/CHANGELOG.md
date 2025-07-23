@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Thu, 01 May 2025 00:11:12 GMT and should not be manually modified.
+This log was last generated on Wed, 23 Jul 2025 20:55:57 GMT and should not be manually modified.
+
+## 5.0.2
+Wed, 23 Jul 2025 20:55:57 GMT
+
+### Patches
+
+- Escape `%` characters in help text to fix an issue where they were previously interpreted as sprintf-style tokens.
 
 ## 5.0.1
 Thu, 01 May 2025 00:11:12 GMT

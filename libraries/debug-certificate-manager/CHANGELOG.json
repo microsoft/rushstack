@@ -2,6 +2,38 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.5.0",
+      "tag": "@rushstack/debug-certificate-manager_v1.5.0",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "CertificateStore - Add params to support custom paths and filenames"
+          },
+          {
+            "comment": "CertificateManager - Update `untrustCertificateAsync` to clear `caCertificateData`"
+          },
+          {
+            "comment": "CertificateManager - Use osascript (applescript) to run elevated command on macOS instead of sudo package."
+          },
+          {
+            "comment": "CertificateManager - Expose `getCertificateExpirationAsync` method to retrieve certificate expiration date"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.37",
       "tag": "@rushstack/debug-certificate-manager_v1.4.37",
       "date": "Sat, 21 Jun 2025 00:13:15 GMT",

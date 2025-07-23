@@ -2,6 +2,26 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "5.0.2",
+      "tag": "@rushstack/ts-command-line_v5.0.2",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Escape `%` characters in help text to fix an issue where they were previously interpreted as sprintf-style tokens."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.14.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.1",
       "tag": "@rushstack/ts-command-line_v5.0.1",
       "date": "Thu, 01 May 2025 00:11:12 GMT",

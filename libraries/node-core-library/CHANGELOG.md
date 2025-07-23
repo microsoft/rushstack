@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 01 May 2025 00:11:12 GMT and should not be manually modified.
+This log was last generated on Wed, 23 Jul 2025 20:55:57 GMT and should not be manually modified.
+
+## 5.14.0
+Wed, 23 Jul 2025 20:55:57 GMT
+
+### Minor changes
+
+- Add a `Async.runWithTimeoutAsync` function that executes an async function, resolving if the specified timeout elapses first.
 
 ## 5.13.1
 Thu, 01 May 2025 00:11:12 GMT
