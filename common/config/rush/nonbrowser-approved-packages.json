@@ -563,6 +563,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "dotenv",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "eslint",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
