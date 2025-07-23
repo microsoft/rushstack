@@ -52,7 +52,7 @@
     "typescript": "5.8.2"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.74.0",
+    "@rushstack/heft": "0.74.1",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "3.0.5",
     "@types/resolve": "1.20.2",
