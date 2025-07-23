@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for `RUSH_BUILD_CACHE_OVERRIDE_JSON` environment variable that takes a JSON string with the same format as the `common/config/build-cache.json` file and a `RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH` environment variable that takes a file path that can be used to override the build cache configuration that is normally provided by that file.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
