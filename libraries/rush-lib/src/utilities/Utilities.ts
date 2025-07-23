@@ -155,20 +155,28 @@ interface ICreateEnvironmentForRushCommandOptions {
 export class Utilities {
   public static syncNpmrc: typeof syncNpmrc = syncNpmrc;
 
+  private static _homeFolder: string | undefined;
+
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
    * this looks something like "/home/username/"
    */
   public static getHomeFolder(): string {
-    const unresolvedUserFolder: string | undefined =
-      process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
-    const dirError: string = "Unable to determine the current user's home directory";
-    if (unresolvedUserFolder === undefined) {
-      throw new Error(dirError);
-    }
-    const homeFolder: string = path.resolve(unresolvedUserFolder);
-    if (!FileSystem.exists(homeFolder)) {
-      throw new Error(dirError);
+    let homeFolder: string | undefined = Utilities._homeFolder;
+    if (!homeFolder) {
+      const unresolvedUserFolder: string | undefined =
+        process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
+      const dirError: string = "Unable to determine the current user's home directory";
+      if (unresolvedUserFolder === undefined) {
+        throw new Error(dirError);
+      }
+
+      homeFolder = path.resolve(unresolvedUserFolder);
+      if (!FileSystem.exists(homeFolder)) {
+        throw new Error(dirError);
+      }
+
+      Utilities._homeFolder = homeFolder;
     }
 
     return homeFolder;

@@ -246,6 +246,7 @@ export class EnvironmentConfiguration {
     // @internal
     static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined;
     static get gitBinaryPath(): string | undefined;
+    static get hasBeenValidated(): boolean;
     // (undocumented)
     static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
     static get pnpmStorePathOverride(): string | undefined;

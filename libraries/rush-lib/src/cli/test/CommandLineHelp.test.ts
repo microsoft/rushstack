@@ -4,6 +4,7 @@
 import { AnsiEscape } from '@rushstack/terminal';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 describe('CommandLineHelp', () => {
   let oldCwd: string | undefined;
@@ -33,6 +34,8 @@ describe('CommandLineHelp', () => {
     if (oldCwd) {
       process.chdir(oldCwd);
     }
+
+    EnvironmentConfiguration.reset();
   });
 
   it('prints the global help', () => {

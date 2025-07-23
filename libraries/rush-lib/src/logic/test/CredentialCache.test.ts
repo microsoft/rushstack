@@ -5,7 +5,7 @@ import { LockFile, Async, FileSystem } from '@rushstack/node-core-library';
 import { RushUserConfiguration } from '../../api/RushUserConfiguration';
 import { CredentialCache, type ICredentialCacheOptions } from '../CredentialCache';
 
-const FAKE_RUSH_USER_FOLDER: string = '~/.rush-user';
+const FAKE_RUSH_USER_FOLDER: string = 'temp/.rush-user';
 
 interface IPathsTestCase extends Required<Pick<ICredentialCacheOptions, 'cacheFilePath'>> {
   testCaseName: string;
