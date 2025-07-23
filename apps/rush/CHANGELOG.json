@@ -2,6 +2,33 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.156.0",
+      "tag": "@microsoft/rush_v5.156.0",
+      "date": "Wed, 23 Jul 2025 20:56:15 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Include \"parallelism\" in phased operation execution context. Update \"rush-bridge-cache-plugin\" to support both cache read and cache write, selectable via command line choice parameter. Fixes an issue that the options schema for \"rush-bridge-cache-plugin\" was invalid."
+          },
+          {
+            "comment": "Add support for `RUSH_BUILD_CACHE_OVERRIDE_JSON` environment variable that takes a JSON string with the same format as the `common/config/build-cache.json` file and a `RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH` environment variable that takes a file path that can be used to override the build cache configuration that is normally provided by that file."
+          },
+          {
+            "comment": "Add support for setting environment variables via `<repo-root>/.env` and `~/.rush-user/.env` files."
+          },
+          {
+            "comment": "[azure-storage-build-cache] Update build-cache.json schema to allow the full range of `loginFlow` options supported by the underlying authentication provider. Add `loginFlowFailover` option to customize fallback sequencing."
+          },
+          {
+            "comment": "Add performance measures around various operations, include performance entries in telemetry payload."
+          },
+          {
+            "comment": "Do not run afterExecuteOperation if the operation has not actually completed."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.155.1",
       "tag": "@microsoft/rush_v5.155.1",
       "date": "Fri, 27 Jun 2025 19:57:04 GMT",
