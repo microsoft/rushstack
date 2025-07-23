@@ -13,8 +13,8 @@ class TestAction extends CommandLineAction {
   public constructor() {
     super({
       actionName: 'do:the-job',
-      summary: 'does the job',
-      documentation: 'a longer description'
+      summary: 'does the job with sprintf-style escape characters, 100%',
+      documentation: 'a longer description with sprintf-style escape characters, 100%'
     });
 
     this._flag = this.defineFlagParameter({
@@ -33,7 +33,7 @@ class TestCommandLine extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: 'example',
-      toolDescription: 'An example project'
+      toolDescription: 'An example project with sprintf-style escape characters, 100%'
     });
 
     this.addAction(new TestAction());
