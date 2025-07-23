@@ -16,7 +16,6 @@ import {
   Colorize,
   type ITerminal
 } from '@rushstack/terminal';
-import dotenv from 'dotenv';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -65,8 +64,7 @@ import { RushSession } from '../pluginFramework/RushSession';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
-import { RushUserConfiguration } from '../api/RushUserConfiguration';
-import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
+import { initializeDotEnv } from '../logic/dotenv';
 
 import { measureAsyncFn } from '../utilities/performance';
 
@@ -135,22 +133,7 @@ export class RushCommandLineParser extends CommandLineParser {
         showVerbose: !this._restrictConsoleOutput
       });
 
-      if (EnvironmentConfiguration.hasBeenValidated) {
-        throw new Error(
-          `The ${EnvironmentConfiguration.name} was initialized before .env files were loaded. Rush environment ` +
-            'variables may have unexpected values.'
-        );
-      }
-
-      if (rushJsonFilePath) {
-        const rushJsonFolder: string = path.dirname(rushJsonFilePath);
-        dotenv.config({ path: `${rushJsonFolder}/.env` });
-      }
-
-      const rushUserFolder: string = RushUserConfiguration.getRushUserFolderPath();
-      dotenv.config({ path: `${rushUserFolder}/.env` });
-
-      // TODO: Consider adding support for repo-specific `.rush-user` `.env` files.
+      initializeDotEnv(terminal, rushJsonFilePath);
 
       if (rushJsonFilePath) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilePath);

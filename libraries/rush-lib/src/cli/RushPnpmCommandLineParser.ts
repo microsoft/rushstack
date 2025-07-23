@@ -33,6 +33,7 @@ import { Utilities } from '../utilities/Utilities';
 import type { Subspace } from '../api/Subspace';
 import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { initializeDotEnv } from '../logic/dotenv';
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -78,10 +79,17 @@ export class RushPnpmCommandLineParser {
     this._terminal = terminal;
 
     // Are we in a Rush repo?
-    const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
+    const rushJsonFilePath: string | undefined = RushConfiguration.tryFindRushJsonLocation({
       // showVerbose is false because the logging message may break JSON output
       showVerbose: false
     });
+
+    initializeDotEnv(terminal, rushJsonFilePath);
+
+    const rushConfiguration: RushConfiguration | undefined = rushJsonFilePath
+      ? RushConfiguration.loadFromConfigurationFile(rushJsonFilePath)
+      : undefined;
+
     NodeJsCompatibility.warnAboutCompatibilityIssues({
       isRushLib: true,
       alreadyReportedNodeTooNewError: !!options.alreadyReportedNodeTooNewError,
