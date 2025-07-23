@@ -153,7 +153,6 @@ export class PublishGit {
         'push',
         'origin',
         `HEAD:${branchName || DUMMY_BRANCH_NAME}`,
-        '--follow-tags',
         '--verbose',
         ...(verify ? [] : ['--no-verify'])
       ]
