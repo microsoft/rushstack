@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-resolver-cache-plugin",
-  "version": "5.165.0",
+  "version": "5.165.0-pr5496.3",
   "description": "A Rush plugin that generates a resolver cache file after successful install.",
   "license": "MIT",
   "repository": {
