@@ -1,0 +1,37 @@
+variables:
+  - name: FORCE_COLOR
+    value: 1
+
+parameters:
+
+resources:
+  repositories:
+    - repository: 1esPipelines
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
+  parameters:
+    pool:
+      name: Azure-Pipelines-1ESPT-ExDShared
+      os: windows
+    stages:
+      - stage:
+        jobs:
+          - job:
+            pool:
+              name: publish-rushstack
+              os: linux
+            
+
+            steps:
+              - task: AzureCLI@2
+                displayName: 'Get Publish Managed Identity User ID'
+                inputs:
+                  azureSubscription: 'rushstack-vscode-publish'
+                  scriptType: bash
+                  scriptLocation: inlineScript
+                  inlineScript: |
+                    az rest -u https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798
