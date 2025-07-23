@@ -4,6 +4,7 @@
 import { CommandLineAction } from '../providers/CommandLineAction';
 import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;
@@ -12,8 +13,8 @@ class TestAction extends CommandLineAction {
   public constructor() {
     super({
       actionName: 'do:the-job',
-      summary: 'does the job',
-      documentation: 'a longer description'
+      summary: 'does the job with sprintf-style escape characters, 100%',
+      documentation: 'a longer description with sprintf-style escape characters, 100%'
     });
 
     this._flag = this.defineFlagParameter({
@@ -32,7 +33,7 @@ class TestCommandLine extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: 'example',
-      toolDescription: 'An example project'
+      toolDescription: 'An example project with sprintf-style escape characters, 100%'
     });
 
     this.addAction(new TestAction());
@@ -40,6 +41,11 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe(CommandLineParser.name, () => {
+  it('renders help text', () => {
+    const commandLineParser: TestCommandLine = new TestCommandLine();
+    ensureHelpTextMatchesSnapshot(commandLineParser);
+  });
+
   it('executes an action', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
     commandLineParser._registerDefinedParameters({ parentParameterNames: new Set() });

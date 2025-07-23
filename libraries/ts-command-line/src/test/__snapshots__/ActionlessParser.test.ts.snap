@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Actionless CommandLineParser renders help text: global help 1`] = `
+"usage: example [-h] [--flag]
+
+An example project
+
+Optional arguments:
+  -h, --help  Show this help message and exit.
+  --flag      The flag
+
+[bold]For detailed help about a specific command, use: example <command> -h[normal]
+"
+`;

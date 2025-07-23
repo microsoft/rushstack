@@ -25,21 +25,7 @@ Array [
 ]
 `;
 
-exports[`CommandLineRemainder prints the action help 1`] = `
-"usage: example run [-h] [--title TEXT] ...
-
-a longer description
-
-Positional arguments:
-  \\"...\\"         The action remainder
-
-Optional arguments:
-  -h, --help    Show this help message and exit.
-  --title TEXT  A string
-"
-`;
-
-exports[`CommandLineRemainder prints the global help 1`] = `
+exports[`CommandLineRemainder renders help text: global help 1`] = `
 "usage: example [-h] [--verbose] <command> ...
 
 An example project
@@ -52,6 +38,20 @@ Optional arguments:
   -h, --help  Show this help message and exit.
   --verbose   A flag that affects all actions
 
-For detailed help about a specific command, use: example <command> -h
+[bold]For detailed help about a specific command, use: example <command> -h[normal]
+"
+`;
+
+exports[`CommandLineRemainder renders help text: run 1`] = `
+"usage: example run [-h] [--title TEXT] ...
+
+a longer description
+
+Positional arguments:
+  \\"...\\"         The action remainder
+
+Optional arguments:
+  -h, --help    Show this help message and exit.
+  --title TEXT  A string
 "
 `;

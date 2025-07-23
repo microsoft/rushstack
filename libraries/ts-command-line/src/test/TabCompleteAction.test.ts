@@ -4,6 +4,7 @@
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
 import { TabCompleteAction } from '../providers/TabCompletionAction';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 async function arrayFromAsyncIteratorAsync(iterator: AsyncIterable<string>): Promise<string[]> {
   const ret: string[] = [];
@@ -204,6 +205,10 @@ const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
 const tc: TabCompleteAction = new TabCompleteAction(commandLineParser.actions, commandLineParser.parameters);
 
 describe(TabCompleteAction.name, () => {
+  it('renders help text', () => {
+    ensureHelpTextMatchesSnapshot(commandLineParser);
+  });
+
   it(`gets completion(s) for rush <tab>`, async () => {
     const commandLine: string = 'rush ';
     const actual: string[] = await arrayFromAsyncIteratorAsync(

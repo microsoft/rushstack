@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import type { ChildProcess } from 'node:child_process';
-import { AnsiEscape } from '@rushstack/terminal';
 import { Executable } from '@rushstack/node-core-library';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 const TEST_CLI_PATH: string = `${__dirname}/test-cli/start`;
 
@@ -36,13 +36,7 @@ describe('end-to-end test', () => {
 
     const parser = new WidgetCommandLine();
 
-    const globalHelpText: string = AnsiEscape.formatForTests(parser.renderHelpText());
-    expect(globalHelpText).toMatchSnapshot('global help');
-
-    for (const action of parser.actions) {
-      const actionHelpText: string = AnsiEscape.formatForTests(action.renderHelpText());
-      expect(actionHelpText).toMatchSnapshot(action.actionName);
-    }
+    ensureHelpTextMatchesSnapshot(parser);
   });
 
   describe('execution tests', () => {

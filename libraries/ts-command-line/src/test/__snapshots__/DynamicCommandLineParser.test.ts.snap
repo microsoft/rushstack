@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DynamicCommandLineParser parses an action: do:the-job 1`] = `
+"usage: example do:the-job [-h] [--flag]
+
+a longer description
+
+Optional arguments:
+  -h, --help  Show this help message and exit.
+  --flag      The flag
+"
+`;
+
+exports[`DynamicCommandLineParser parses an action: global help 1`] = `
+"usage: example [-h] <command> ...
+
+An example project
+
+Positional arguments:
+  <command>
+    do:the-job
+              does the job
+
+Optional arguments:
+  -h, --help  Show this help message and exit.
+
+[bold]For detailed help about a specific command, use: example <command> -h[normal]
+"
+`;

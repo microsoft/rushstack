@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AnsiEscape } from '@rushstack/terminal';
-
 import type { CommandLineAction } from '../providers/CommandLineAction';
 import type { CommandLineParser } from '../providers/CommandLineParser';
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
@@ -43,16 +42,9 @@ function createParser(): DynamicCommandLineParser {
 }
 
 describe(CommandLineRemainder.name, () => {
-  it('prints the global help', () => {
+  it('renders help text', () => {
     const commandLineParser: CommandLineParser = createParser();
-    const helpText: string = AnsiEscape.removeCodes(commandLineParser.renderHelpText());
-    expect(helpText).toMatchSnapshot();
-  });
-
-  it('prints the action help', () => {
-    const commandLineParser: CommandLineParser = createParser();
-    const helpText: string = AnsiEscape.removeCodes(commandLineParser.getAction('run').renderHelpText());
-    expect(helpText).toMatchSnapshot();
+    ensureHelpTextMatchesSnapshot(commandLineParser);
   });
 
   it('parses an action input with remainder', async () => {
