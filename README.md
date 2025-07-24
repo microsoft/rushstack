@@ -218,6 +218,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/rigs/local-node-rig](./rigs/local-node-rig/) | A rig package for Node.js projects that build using Heft inside the RushStack repository. |
 | [/rigs/local-web-rig](./rigs/local-web-rig/) | A rig package for Web projects that build using Heft inside the RushStack repository. |
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
+| [/vscode-extensions/debug-certificate-manager-vscode-extension](./vscode-extensions/debug-certificate-manager-vscode-extension/) |  |
 | [/vscode-extensions/rush-vscode-command-webview](./vscode-extensions/rush-vscode-command-webview/) | Part of the Rush Stack VSCode extension, provides a UI for invoking Rush commands |
 | [/vscode-extensions/rush-vscode-extension](./vscode-extensions/rush-vscode-extension/) | Enhanced experience for monorepos that use the Rush Stack toolchain |
 | [/vscode-extensions/vscode-shared](./vscode-extensions/vscode-shared/) |  |
