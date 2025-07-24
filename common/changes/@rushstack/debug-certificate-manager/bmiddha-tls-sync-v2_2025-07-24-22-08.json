@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "Read CertificateStore configuration from .vscode/debug-certificate-manager.json",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager"
+}
