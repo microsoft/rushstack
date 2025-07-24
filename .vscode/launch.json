@@ -85,6 +85,19 @@
 				"${workspaceFolder}/vscode-extensions/rush-vscode-extension/dist/**/*.js"
 			]
 			// "preLaunchTask": "npm: build:watch - vscode-extensions/rush-vscode-extension"
+		},
+		{
+			"name": "Launch Debug Certificate Manager VS Code Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"cwd": "${workspaceFolder}/vscode-extensions/debug-certificate-manager-vscode-extension/dist/vsix/unpacked",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/debug-certificate-manager-vscode-extension/dist/vsix/unpacked"
+			],
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/vscode-extensions/debug-certificate-manager-vscode-extension/**"
+			]
 		}
 	]
 }

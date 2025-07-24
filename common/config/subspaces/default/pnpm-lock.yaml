@@ -4744,22 +4744,7 @@ importers:
         specifier: ^10.1.0
         version: 10.4.0
 
-  ../../../vscode-extensions/tls-sync-vscode-extension-pack:
-    devDependencies:
-      '@rushstack/heft':
-        specifier: workspace:*
-        version: link:../../apps/heft
-      '@rushstack/heft-vscode-extension-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-vscode-extension-rig
-      tls-sync-vscode-ui-extension:
-        specifier: workspace:*
-        version: link:../tls-sync-vscode-ui-extension
-      tls-sync-vscode-workspace-extension:
-        specifier: workspace:*
-        version: link:../tls-sync-vscode-workspace-extension
-
-  ../../../vscode-extensions/tls-sync-vscode-shared:
+  ../../../vscode-extensions/debug-certificate-manager-vscode-extension:
     dependencies:
       '@rushstack/debug-certificate-manager':
         specifier: workspace:*
@@ -4770,71 +4755,6 @@ importers:
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../../libraries/terminal
-    devDependencies:
-      '@rushstack/heft':
-        specifier: workspace:*
-        version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/node':
-        specifier: 20.17.19
-        version: 20.17.19
-      '@types/vscode':
-        specifier: ^1.63.0
-        version: 1.87.0
-
-  ../../../vscode-extensions/tls-sync-vscode-ui-extension:
-    dependencies:
-      '@rushstack/debug-certificate-manager':
-        specifier: workspace:*
-        version: link:../../libraries/debug-certificate-manager
-      '@rushstack/node-core-library':
-        specifier: workspace:*
-        version: link:../../libraries/node-core-library
-      '@rushstack/terminal':
-        specifier: workspace:*
-        version: link:../../libraries/terminal
-      '@rushstack/tls-sync-vscode-shared':
-        specifier: workspace:*
-        version: link:../tls-sync-vscode-shared
-      '@rushstack/vscode-shared':
-        specifier: workspace:*
-        version: link:../vscode-shared
-      tslib:
-        specifier: ~2.3.1
-        version: 2.3.1
-    devDependencies:
-      '@rushstack/heft':
-        specifier: workspace:*
-        version: link:../../apps/heft
-      '@rushstack/heft-vscode-extension-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-vscode-extension-rig
-      '@types/node':
-        specifier: 20.17.19
-        version: 20.17.19
-      '@types/vscode':
-        specifier: ^1.63.0
-        version: 1.87.0
-      '@types/webpack-env':
-        specifier: 1.18.8
-        version: 1.18.8
-
-  ../../../vscode-extensions/tls-sync-vscode-workspace-extension:
-    dependencies:
-      '@rushstack/debug-certificate-manager':
-        specifier: workspace:*
-        version: link:../../libraries/debug-certificate-manager
-      '@rushstack/node-core-library':
-        specifier: workspace:*
-        version: link:../../libraries/node-core-library
-      '@rushstack/terminal':
-        specifier: workspace:*
-        version: link:../../libraries/terminal
-      '@rushstack/tls-sync-vscode-shared':
-        specifier: workspace:*
-        version: link:../tls-sync-vscode-shared
       '@rushstack/vscode-shared':
         specifier: workspace:*
         version: link:../vscode-shared

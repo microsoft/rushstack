@@ -220,10 +220,6 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
 | [/vscode-extensions/rush-vscode-command-webview](./vscode-extensions/rush-vscode-command-webview/) | Part of the Rush Stack VSCode extension, provides a UI for invoking Rush commands |
 | [/vscode-extensions/rush-vscode-extension](./vscode-extensions/rush-vscode-extension/) | Enhanced experience for monorepos that use the Rush Stack toolchain |
-| [/vscode-extensions/tls-sync-vscode-extension-pack](./vscode-extensions/tls-sync-vscode-extension-pack/) |  |
-| [/vscode-extensions/tls-sync-vscode-shared](./vscode-extensions/tls-sync-vscode-shared/) |  |
-| [/vscode-extensions/tls-sync-vscode-ui-extension](./vscode-extensions/tls-sync-vscode-ui-extension/) |  |
-| [/vscode-extensions/tls-sync-vscode-workspace-extension](./vscode-extensions/tls-sync-vscode-workspace-extension/) |  |
 | [/vscode-extensions/vscode-shared](./vscode-extensions/vscode-shared/) |  |
 | [/webpack/webpack-deep-imports-plugin](./webpack/webpack-deep-imports-plugin/) | This plugin creates a bundle and commonJS files in a 'lib' folder mirroring modules in another 'lib' folder. |
 <!-- GENERATED PROJECT SUMMARY END -->

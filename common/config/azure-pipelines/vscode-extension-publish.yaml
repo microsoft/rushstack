@@ -9,15 +9,9 @@ parameters:
   - name: ExtensionPublishConfig
     type: object
     default:
-      - key: 'tls-sync-vscode-ui-extension'
+      - key: 'debug-certificate-manager-vscode-extension'
         vsixPath: 'dist/vsix/packaged.vsix'
-        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-ui-extension'
-      - key: 'tls-sync-vscode-workspace-extension'
-        vsixPath: 'dist/vsix/packaged.vsix'
-        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-workspace-extension'
-      - key: 'tls-sync-vscode-extension-pack'
-        vsixPath: 'dist/vsix/packaged.vsix'
-        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/tls-sync-vscode-extension-pack'
+        projectPath: '$(Build.SourcesDirectory)/vscode-extensions/debug-certificate-manager-vscode-extension'
       - key: 'rush-vscode-extension'
         vsixPath: 'dist/vsix/packaged.vsix'
         projectPath: '$(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension'
@@ -62,7 +56,27 @@ extends:
                     --to tag:vsix
 
               - ${{ if parameters.shouldPublish }}:
+                  - task: AzureCLI@2
+                    displayName: 'Get managed identity user info'
+                    inputs:
+                      azureSubscription: 'rushstack-vscode-publish'
+                      scriptType: bash
+                      scriptLocation: inlineScript
+                      inlineScript: |
+                        az rest -u https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798
+
                   - ${{ each extension in parameters.ExtensionPublishConfig }}:
+                      - bash: |
+                          node node_modules/@rushstack/heft-vscode-extension-rig/node_modules/@rushstack/heft-vscode-extension-plugin/node_modules/@vscode/vsce/vsce generate-manifest --packagePath ${{ extension.vsixPath }} --out ${{ extension.projectPath }}/extension.manifest
+                        displayName: 'Generate VSIX manifest: ${{ extension.key }}'
+                        workingDirectory: ${{ extension.projectPath }}
+
+                      - bash: cp ${{ extension.projectPath }}/extension.manifest ${{ extension.projectPath }}/extension.signature.p7s
+                        displayName: 'Prepare manifest for signing: ${{ extension.key }}'
+                        workingDirectory: samples/extension-signing
+
+                      # TODO: add ESRP signing task here
+
                       - task: AzureCLI@2
                         displayName: 'Publish VSIX: ${{ extension.key }}'
                         inputs:
@@ -70,5 +84,5 @@ extends:
                           scriptType: 'bash'
                           scriptLocation: 'inlineScript'
                           inlineScript: |
-                            node node_modules/@rushstack/heft-vscode-extension-rig/node_modules/@rushstack/heft-vscode-extension-plugin/node_modules/@vscode/vsce/vsce publish --no-dependencies --azure-credential --packagePath ${{ extension.vsixPath }}
+                            node node_modules/@rushstack/heft-vscode-extension-rig/node_modules/@rushstack/heft-vscode-extension-plugin/node_modules/@vscode/vsce/vsce publish --no-dependencies --azure-credential --packagePath ${{ extension.vsixPath }} --manifestPath ${{ extension.projectPath }}/extension.manifest --signaturePath ${{ extension.projectPath }}/extension.signature.p7s
                           workingDirectory: ${{ extension.projectPath }}

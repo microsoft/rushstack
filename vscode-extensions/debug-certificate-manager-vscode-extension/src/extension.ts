@@ -7,39 +7,27 @@ import { Async } from '@rushstack/node-core-library/lib/Async';
 import { Terminal } from '@rushstack/terminal';
 import {
   CertificateManager,
+  ICertificateStoreOptions,
   ICertificateValidationResult,
   type ICertificate
 } from '@rushstack/debug-certificate-manager';
 
 import { VScodeOutputChannelTerminalProvider } from '@rushstack/vscode-shared/lib/VScodeOutputChannelTerminalProvider';
-import { getCertificateManager } from '@rushstack/tls-sync-vscode-shared/lib/certificates';
-import { getConfig } from '@rushstack/tls-sync-vscode-shared/lib/config';
+import { getCertificateManager } from './certificates';
+import { getConfig } from './config';
 import {
-  UI_COMMAND_ENSURE_CERTIFICATE,
-  UI_COMMAND_SHOW_LOG,
-  UI_COMMAND_SHOW_SETTINGS,
-  UI_COMMAND_SHOW_WALKTHROUGH,
-  UI_COMMAND_SYNC,
-  UI_COMMAND_UNTRUST_CERTIFICATE,
-  UI_EXTENSION_DISPLAY_NAME,
-  UI_EXTENSION_ID,
-  UI_WALKTHROUGH_ID,
-  VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS,
-  VSCODE_COMMAND_WORKSPACE_OPEN_WALKTHROUGH,
-  WORKSPACE_COMMAND_PING,
-  WORKSPACE_COMMAND_SYNC,
-  WORKSPACE_EXTENSION_DISPLAY_NAME
-} from '@rushstack/tls-sync-vscode-shared/lib/constants';
-
-import { version } from '../package.json';
-
-/*
- * This extension provides commands to manage debug TLS certificates on the local machine. This capability is
- * primarily intended to be called by the workspace extension counterpart.
- */
+  COMMAND_ENSURE_CERTIFICATE,
+  COMMAND_SHOW_LOG,
+  COMMAND_SHOW_SETTINGS,
+  COMMAND_SYNC,
+  COMMAND_UNTRUST_CERTIFICATE,
+  EXTENSION_DISPLAY_NAME,
+  EXTENSION_ID,
+  VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS
+} from './constants';
 
 export function activate(context: vscode.ExtensionContext): void {
-  const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel(UI_EXTENSION_DISPLAY_NAME);
+  const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel(EXTENSION_DISPLAY_NAME);
   const terminalProvider: VScodeOutputChannelTerminalProvider = new VScodeOutputChannelTerminalProvider(
     outputChannel,
     {
@@ -48,7 +36,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
   const terminal: Terminal = new Terminal(terminalProvider);
-  terminal.writeLine(`${UI_EXTENSION_DISPLAY_NAME} Extension output channel initialized.`);
+  terminal.writeLine(`${EXTENSION_DISPLAY_NAME} Extension output channel initialized.`);
 
   function handleShowLog(): void {
     outputChannel.show();
@@ -57,7 +45,7 @@ export function activate(context: vscode.ExtensionContext): void {
   async function handleUntrustCertificate(): Promise<void> {
     try {
       terminal.writeLine('Attempting to clean up certificates...');
-      const certificateManager: CertificateManager = getCertificateManager(terminal, 'ui');
+      const certificateManager: CertificateManager = getCertificateManager(terminal);
       await certificateManager.untrustCertificateAsync(terminal);
 
       const message: string = 'Certificates untrusted successfully.';
@@ -79,7 +67,7 @@ export function activate(context: vscode.ExtensionContext): void {
   async function _handleEnsureCertificateInternal(): Promise<undefined | ICertificate> {
     try {
       terminal.writeLine('Attempting to retrieve certificates...');
-      const certificateManager: CertificateManager = getCertificateManager(terminal, 'ui');
+      const certificateManager: CertificateManager = getCertificateManager(terminal);
       let skipCertificateTrust: boolean = true;
       let canGenerateNewCertificate: boolean = false;
 
@@ -149,53 +137,8 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
-  async function handleShowWalkthrough(): Promise<void> {
-    await vscode.commands.executeCommand(
-      VSCODE_COMMAND_WORKSPACE_OPEN_WALKTHROUGH,
-      `${UI_EXTENSION_ID}#${UI_WALKTHROUGH_ID}`,
-      false
-    );
-  }
-
   async function handleShowSettings(): Promise<void> {
-    await vscode.commands.executeCommand(VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS, `@ext:${UI_EXTENSION_ID}`);
-  }
-
-  async function waitForWorkspaceExtension(): Promise<void> {
-    terminal.writeLine(
-      `Waiting for Workspace extension (${WORKSPACE_EXTENSION_DISPLAY_NAME}) to become active...`
-    );
-
-    const maxRetries: number = 30;
-    try {
-      await Async.runWithRetriesAsync({
-        action: async (attempt: number) => {
-          terminal.writeLine(`Pinging Workspace extension... Attempt ${attempt + 1}/${maxRetries}`);
-          const { version: workspaceVersion } = await vscode.commands.executeCommand<{ version: string }>(
-            WORKSPACE_COMMAND_PING
-          );
-          if (!workspaceVersion) {
-            terminal.writeLine('Workspace extension is not yet active. Retrying...');
-            return;
-          }
-          terminal.writeLine(`Workspace extension is active. Version: ${workspaceVersion}`);
-          if (version !== workspaceVersion) {
-            terminal.writeLine(
-              `Warning: Workspace extension version mismatch. Expected ${version}, got ${workspaceVersion}.`
-            );
-            void vscode.window.showWarningMessage(
-              `Workspace extension version mismatch. Expected ${version}, got ${workspaceVersion}. Please check that both ${WORKSPACE_EXTENSION_DISPLAY_NAME} and ${UI_EXTENSION_DISPLAY_NAME} are up to date.`
-            );
-            throw new Error('Version mismatch');
-          }
-        },
-        maxRetries,
-        retryDelayMs: 1000
-      });
-    } catch (error) {
-      terminal.writeLine('UI extension did not respond within the expected time frame.');
-      throw new Error('UI extension did not respond within the expected time frame.');
-    }
+    await vscode.commands.executeCommand(VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS, `@ext:${EXTENSION_ID}`);
   }
 
   async function handleSync(): Promise<void> {
@@ -204,11 +147,11 @@ export function activate(context: vscode.ExtensionContext): void {
         'This command is only available in remote workspaces. Please open this workspace in a remote environment.';
       terminal.writeLine(message);
       void vscode.window.showErrorMessage(message);
+      return;
     }
 
     try {
-      await waitForWorkspaceExtension();
-      terminal.writeLine('Workspace extension is active. Proceeding with certificate synchronization...');
+      terminal.writeLine('Starting certificate synchronization...');
 
       const certificate: ICertificate | undefined = await _handleEnsureCertificateInternal();
       if (!certificate) {
@@ -216,20 +159,84 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
 
-      terminal.writeLine('Sending certificates to workspace extension for synchronization...');
-      const isSynchronized: boolean = await vscode.commands.executeCommand(
-        WORKSPACE_COMMAND_SYNC,
-        certificate
-      );
-
-      if (isSynchronized) {
-        await vscode.commands.executeCommand('setContext', 'tlssync.ui.sync.complete', true);
-        terminal.writeLine('Certificates synchronized successfully.');
-        void vscode.window.showInformationMessage('Certificates synchronized successfully.');
-      } else {
-        terminal.writeLine('Failed to synchronize certificates.');
-        void vscode.window.showErrorMessage('Failed to synchronize certificates.');
+      const { pemCaCertificate, pemCertificate, pemKey } = certificate;
+      if (!pemCaCertificate || !pemCertificate || !pemKey) {
+        terminal.writeLine('Invalid certificate data. Synchronization aborted.');
+        void vscode.window.showErrorMessage('Invalid certificate data. Synchronization aborted.');
+        return;
       }
+
+      terminal.writeLine('Writing certificates to the workspace...');
+
+      const workspaceUri: vscode.Uri | undefined = vscode.workspace.workspaceFolders?.[0].uri;
+      if (!workspaceUri) {
+        terminal.writeLine('No workspace folder found. Synchronization aborted.');
+        void vscode.window.showErrorMessage(
+          'No workspace folder found. Please open a folder in the remote workspace.'
+        );
+        return;
+      }
+
+      let remoteCertificateStoreOptions: Required<ICertificateStoreOptions> | undefined = undefined;
+
+      try {
+        const configFileUri: vscode.Uri = vscode.Uri.joinPath(
+          workspaceUri,
+          '.vscode',
+          'debug-certificate-manager.json'
+        );
+        const configFile: Uint8Array<ArrayBufferLike> = await vscode.workspace.fs.readFile(configFileUri);
+        const parsedConfig: ICertificateStoreOptions & Required<Pick<ICertificateStoreOptions, 'storePath'>> =
+          JSON.parse(configFile.toString());
+
+        remoteCertificateStoreOptions = {
+          storePath: parsedConfig.storePath,
+          caCertificateFilename: parsedConfig.caCertificateFilename || 'rushstack-ca.pem',
+          certificateFilename: parsedConfig.certificateFilename || 'rushstack-serve.pem',
+          keyFilename: parsedConfig.keyFilename || 'rushstack-serve.key'
+        };
+      } catch (error) {
+        void vscode.window.showErrorMessage(
+          'Failed to read or parse the configuration file. Ensure that .vscode/debug-certificate-manager.json exists and is valid.'
+        );
+        terminal.writeLine(
+          `Error reading or parsing configuration file: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`
+        );
+        return;
+      }
+
+      const { storePath, caCertificateFilename, certificateFilename, keyFilename } =
+        remoteCertificateStoreOptions;
+
+      let resolvedRemoteStorePath: string;
+      if (storePath.startsWith('/')) {
+        resolvedRemoteStorePath = storePath;
+      } else {
+        resolvedRemoteStorePath = vscode.Uri.joinPath(workspaceUri, storePath).fsPath;
+      }
+
+      const storePathUri: vscode.Uri = vscode.Uri.from({
+        scheme: 'vscode-remote',
+        authority: workspaceUri.authority,
+        path: resolvedRemoteStorePath
+      });
+      const caCertificateUri: vscode.Uri = vscode.Uri.joinPath(storePathUri, caCertificateFilename);
+      const certificateUri: vscode.Uri = vscode.Uri.joinPath(storePathUri, certificateFilename);
+      const keyUri: vscode.Uri = vscode.Uri.joinPath(storePathUri, keyFilename);
+
+      terminal.writeLine(`Writing CA certificate to: ${caCertificateUri.toString()}`);
+      terminal.writeLine(`Writing certificate to: ${certificateUri.toString()}`);
+      terminal.writeLine(`Writing key to: ${keyUri.toString()}`);
+
+      await Promise.all([
+        vscode.workspace.fs.writeFile(caCertificateUri, Buffer.from(pemCaCertificate, 'utf8')),
+        vscode.workspace.fs.writeFile(certificateUri, Buffer.from(pemCertificate, 'utf8')),
+        vscode.workspace.fs.writeFile(keyUri, Buffer.from(pemKey, 'utf8'))
+      ]);
+
+      terminal.writeLine('Certificates written to the workspace successfully.');
     } catch (err) {
       const message: string = `Error synchronizing certificates: ${
         err instanceof Error ? err.message : 'Unknown error'
@@ -239,20 +246,18 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
-  const { autoSync } = getConfig(terminal, 'ui');
+  const { autoSync } = getConfig(terminal);
   if (autoSync && !vscode.env.remoteName) {
     terminal.writeLine(`Auto-sync is enabled. Synchronizing certificates on activation...`);
-    void vscode.commands.executeCommand(UI_COMMAND_SYNC);
   }
 
   context.subscriptions.push(
     outputChannel,
-    vscode.commands.registerCommand(UI_COMMAND_SHOW_LOG, handleShowLog),
-    vscode.commands.registerCommand(UI_COMMAND_SHOW_SETTINGS, handleShowSettings),
-    vscode.commands.registerCommand(UI_COMMAND_SHOW_WALKTHROUGH, handleShowWalkthrough),
-    vscode.commands.registerCommand(UI_COMMAND_UNTRUST_CERTIFICATE, handleUntrustCertificate),
-    vscode.commands.registerCommand(UI_COMMAND_ENSURE_CERTIFICATE, handleEnsureCertificate),
-    vscode.commands.registerCommand(UI_COMMAND_SYNC, handleSync)
+    vscode.commands.registerCommand(COMMAND_SHOW_LOG, handleShowLog),
+    vscode.commands.registerCommand(COMMAND_SHOW_SETTINGS, handleShowSettings),
+    vscode.commands.registerCommand(COMMAND_UNTRUST_CERTIFICATE, handleUntrustCertificate),
+    vscode.commands.registerCommand(COMMAND_ENSURE_CERTIFICATE, handleEnsureCertificate),
+    vscode.commands.registerCommand(COMMAND_SYNC, handleSync)
   );
 }
 

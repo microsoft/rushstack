@@ -1236,12 +1236,6 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
-      "packageName": "@rushstack/tls-sync-vscode-shared",
-      "projectFolder": "vscode-extensions/tls-sync-vscode-shared",
-      "reviewCategory": "libraries",
-      "shouldPublish": false
-    },
-    {
       "packageName": "@rushstack/tree-pattern",
       "projectFolder": "libraries/tree-pattern",
       "reviewCategory": "libraries",
@@ -1404,28 +1398,10 @@
       "tags": ["vsix"]
     },
     {
-      "packageName": "tls-sync-vscode-workspace-extension",
-      "projectFolder": "vscode-extensions/tls-sync-vscode-workspace-extension",
+      "packageName": "debug-certificate-manager",
+      "projectFolder": "vscode-extensions/debug-certificate-manager-vscode-extension",
       "reviewCategory": "vscode-extensions",
       "tags": ["vsix"]
-      // For now, to keep this from being published to the npm package feed
-      // "versionPolicyName": "tls-sync-vscode-extensions"
-    },
-    {
-      "packageName": "tls-sync-vscode-ui-extension",
-      "projectFolder": "vscode-extensions/tls-sync-vscode-ui-extension",
-      "reviewCategory": "vscode-extensions",
-      "tags": ["vsix"]
-      // For now, to keep this from being published to the npm package feed
-      // "versionPolicyName": "tls-sync-vscode-extensions"
-    },
-    {
-      "packageName": "tls-sync-vscode-extension-pack",
-      "projectFolder": "vscode-extensions/tls-sync-vscode-extension-pack",
-      "reviewCategory": "vscode-extensions",
-      "tags": ["vsix"]
-      // For now, to keep this from being published to the npm package feed
-      // "versionPolicyName": "tls-sync-vscode-extensions"
     },
 
     // "webpack" folder (alphabetical order)

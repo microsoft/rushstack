@@ -1,3 +1,0 @@
-{
-  "extends": "./node_modules/@rushstack/heft-vscode-extension-rig/profiles/default/tsconfig-base.json"
-}
