@@ -75,7 +75,28 @@ extends:
                         displayName: 'Prepare manifest for signing: ${{ extension.key }}'
                         workingDirectory: samples/extension-signing
 
-                      # TODO: add ESRP signing task here
+                      - task: EsrpCodeSigning@5
+                        displayName: 'ESRP CodeSigning'
+                        inputs:
+                          connectedservicename: '' # TODO
+                          AppRegistrationClientId: '' # TODO
+                          AppRegistrationTenantId: '' # TODO
+                          AuthAKVName: '' # TODO
+                          AuthCertName: '' # TODO
+                          AuthSignCertName: '' # TODO
+                          FolderPath: '${{ extension.projectPath }}'
+                          Pattern: 'extension.signature.p7s'
+                          signConfigType: inlineSignParams
+                          inlineOperation: |
+                            [
+                                {
+                                    "keyCode": "CP-401405",
+                                    "operationSetCode": "VSCodePublisherSign",
+                                    "parameters": [],
+                                    "toolName": "sign",
+                                    "toolVersion": "1.0"
+                                }
+                            ]
 
                       - task: AzureCLI@2
                         displayName: 'Publish VSIX: ${{ extension.key }}'
