@@ -10,7 +10,7 @@ import type {
 } from '@rushstack/heft';
 import type { IWaitForExitResult } from '@rushstack/node-core-library';
 import * as path from 'node:path';
-import { execuateAndWaitAsync, vsceScriptPath } from './util';
+import { executeAndWaitAsync, vsceScriptPath } from './util';
 
 interface IVSCodeExtensionPublishPluginOptions {}
 
@@ -66,7 +66,7 @@ export default class VSCodeExtensionPublishPlugin
       terminal.writeLine(`Using VSCE script: ${vsceScriptPath}`);
       terminal.writeLine(`Publishing VSIX ${vsixPath}`);
 
-      const publishResult: IWaitForExitResult<string> = await execuateAndWaitAsync(
+      const publishResult: IWaitForExitResult<string> = await executeAndWaitAsync(
         terminal,
         'node',
         [

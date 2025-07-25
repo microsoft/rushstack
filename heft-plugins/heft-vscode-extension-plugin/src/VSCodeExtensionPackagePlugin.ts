@@ -9,7 +9,7 @@ import type {
 } from '@rushstack/heft';
 import type { IWaitForExitResult } from '@rushstack/node-core-library';
 import * as path from 'node:path';
-import { execuateAndWaitAsync, vsceScriptPath } from './util';
+import { executeAndWaitAsync, vsceScriptPath } from './util';
 
 interface IVSCodeExtensionPackagePluginOptions {
   /**
@@ -50,7 +50,7 @@ export default class VSCodeExtensionPackagePlugin
       terminal.writeLine(`Using VSCE script: ${vsceScriptPath}`);
 
       terminal.writeLine(`Packaging VSIX from ${unpackedFolderPath} to ${vsixPath}`);
-      const packageResult: IWaitForExitResult<string> = await execuateAndWaitAsync(
+      const packageResult: IWaitForExitResult<string> = await executeAndWaitAsync(
         terminal,
         'node',
         [vsceScriptPath, 'package', '--no-dependencies', '--out', path.resolve(vsixPath)],
@@ -64,7 +64,7 @@ export default class VSCodeExtensionPackagePlugin
       terminal.writeLine('VSIX successfully packaged.');
 
       terminal.writeLine(`Generating manifest at ${manifestPath}`);
-      const manifestResult: IWaitForExitResult<string> = await execuateAndWaitAsync(
+      const manifestResult: IWaitForExitResult<string> = await executeAndWaitAsync(
         terminal,
         'node',
         [

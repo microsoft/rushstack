@@ -6,7 +6,7 @@ import type { ChildProcess } from 'node:child_process';
 import * as path from 'node:path';
 import { TerminalStreamWritable, TerminalProviderSeverity, ITerminal } from '@rushstack/terminal';
 
-export async function execuateAndWaitAsync(
+export async function executeAndWaitAsync(
   terminal: ITerminal,
   command: string,
   args: string[],
