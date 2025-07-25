@@ -11,9 +11,11 @@ parameters:
     default:
       - key: 'debug-certificate-manager-vscode-extension'
         vsixPath: 'dist/vsix/packaged.vsix'
+        manifestPath: 'dist/vsix/extension-manifest.json'
         projectPath: '$(Build.SourcesDirectory)/vscode-extensions/debug-certificate-manager-vscode-extension'
       - key: 'rush-vscode-extension'
         vsixPath: 'dist/vsix/packaged.vsix'
+        manifestPath: 'dist/vsix/extension-manifest.json'
         projectPath: '$(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension'
 
 resources:
@@ -66,14 +68,9 @@ extends:
                         az rest -u https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798
 
                   - ${{ each extension in parameters.ExtensionPublishConfig }}:
-                      - bash: |
-                          node node_modules/@rushstack/heft-vscode-extension-rig/node_modules/@rushstack/heft-vscode-extension-plugin/node_modules/@vscode/vsce/vsce generate-manifest --packagePath ${{ extension.vsixPath }} --out ${{ extension.projectPath }}/extension.manifest
-                        displayName: 'Generate VSIX manifest: ${{ extension.key }}'
+                      - bash: cp ${{ extension.manifestPath }} ${{ extension.projectPath }}/extension.signature.p7s
                         workingDirectory: ${{ extension.projectPath }}
-
-                      - bash: cp ${{ extension.projectPath }}/extension.manifest ${{ extension.projectPath }}/extension.signature.p7s
                         displayName: 'Prepare manifest for signing: ${{ extension.key }}'
-                        workingDirectory: samples/extension-signing
 
                       - task: EsrpCodeSigning@5
                         displayName: 'ESRP CodeSigning'
@@ -105,5 +102,5 @@ extends:
                           scriptType: 'bash'
                           scriptLocation: 'inlineScript'
                           inlineScript: |
-                            node node_modules/@rushstack/heft-vscode-extension-rig/node_modules/@rushstack/heft-vscode-extension-plugin/node_modules/@vscode/vsce/vsce publish --no-dependencies --azure-credential --packagePath ${{ extension.vsixPath }} --manifestPath ${{ extension.projectPath }}/extension.manifest --signaturePath ${{ extension.projectPath }}/extension.signature.p7s
+                            node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.vsixPath }} --manifest-path ${{ extension.projectPath }}/extension.manifest --signature-path ${{ extension.projectPath }}/extension.signature.p7s
                           workingDirectory: ${{ extension.projectPath }}

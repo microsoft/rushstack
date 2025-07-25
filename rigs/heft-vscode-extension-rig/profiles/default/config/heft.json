@@ -1,8 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
-
   "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
-
   /**
    * The list of Heft phases that can be run by Heft.
    */
@@ -33,7 +31,6 @@
             }
           }
         },
-
         "package-vsix": {
           "taskDependencies": ["typescript", "webpack", "copy-assets"],
           "taskPlugin": {
@@ -41,7 +38,23 @@
             "pluginName": "vscode-extension-package-plugin",
             "options": {
               "unpackedFolderPath": "dist/vsix/unpacked",
-              "vsixPath": "dist/vsix/packaged.vsix"
+              "vsixPath": "dist/vsix/packaged.vsix",
+              "manifestPath": "dist/vsix/extension-manifest.json"
+            }
+          }
+        }
+      }
+    },
+    "publish-vsix": {
+      "phaseDescription": "Publish the VSIX package.",
+      "tasksByName": {
+        "publish-vsix": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-vscode-extension-plugin",
+            "pluginName": "vscode-extension-publish-plugin",
+            "options": {
+              "vsixPath": "dist/vsix/packaged.vsix",
+              "manifestPath": "dist/vsix/extension-manifest.json"
             }
           }
         }

@@ -105,9 +105,7 @@
       }
     }
   },
-  "enabledApiProposals": [
-    "resolvers"
-  ],
+  "enabledApiProposals": [],
   "activationEvents": [
     "workspaceContains:.vscode/debug-certificate-manager.json"
   ],

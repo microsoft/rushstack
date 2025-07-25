@@ -2,8 +2,13 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-vscode-extension-plugin",
-      "comment": "",
-      "type": "none"
+      "comment": "Add support for generating extension manifest.",
+      "type": "minor"
+    },
+    {
+      "packageName": "@rushstack/heft-vscode-extension-plugin",
+      "comment": "Add VSIX publish plugin.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-vscode-extension-plugin"
