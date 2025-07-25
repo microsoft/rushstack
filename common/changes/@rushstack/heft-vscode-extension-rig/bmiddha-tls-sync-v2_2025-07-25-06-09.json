@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-vscode-extension-rig",
+      "comment": "Add publish vsix plugin configuration.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-vscode-extension-rig"
+}
