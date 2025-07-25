@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 23 Jul 2025 20:56:15 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Jul 2025 01:24:42 GMT and should not be manually modified.
+
+## 5.157.0
+Fri, 25 Jul 2025 01:24:42 GMT
+
+### Updates
+
+- Improve performance for publishing on filtered clones.
 
 ## 5.156.0
 Wed, 23 Jul 2025 20:56:15 GMT

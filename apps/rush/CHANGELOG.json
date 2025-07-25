@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.157.0",
+      "tag": "@microsoft/rush_v5.157.0",
+      "date": "Fri, 25 Jul 2025 01:24:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve performance for publishing on filtered clones."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.156.0",
       "tag": "@microsoft/rush_v5.156.0",
       "date": "Wed, 23 Jul 2025 20:56:15 GMT",
