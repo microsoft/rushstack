@@ -1,11 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { Dirent, Stats } from 'node:fs';
 import path from 'node:path';
 import { type ChildProcess, fork } from 'node:child_process';
 
-import { Path } from '@rushstack/node-core-library';
-import type { HeftConfiguration, IHeftTaskPlugin, IHeftTaskSession, IScopedLogger } from '@rushstack/heft';
+import { Async, Path } from '@rushstack/node-core-library';
+import type {
+  HeftConfiguration,
+  IHeftTaskPlugin,
+  IHeftTaskSession,
+  IScopedLogger,
+  IWatchFileSystem,
+  IWatchedFileState
+} from '@rushstack/heft';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import {
   _loadTypeScriptToolAsync as loadTypeScriptToolAsync,
@@ -120,6 +128,18 @@ export default class SwcIsolatedTranspilePlugin implements IHeftTaskPlugin<ISwcI
 
       await transpileProjectAsync(heftConfiguration, pluginOptions, logger, this.accessor);
     });
+
+    heftSession.hooks.runIncremental.tapPromise(PLUGIN_NAME, async (incrementalOptions) => {
+      const { logger } = heftSession;
+
+      await transpileProjectAsync(
+        heftConfiguration,
+        pluginOptions,
+        logger,
+        this.accessor,
+        () => incrementalOptions.watchFs
+      );
+    });
   }
 }
 
@@ -127,7 +147,8 @@ async function transpileProjectAsync(
   heftConfiguration: HeftConfiguration,
   pluginOptions: ISwcIsolatedTranspileOptions,
   logger: IScopedLogger,
-  { hooks: { getSwcOptions: getSwcOptionsHook } }: ISwcIsolatedTranspilePluginAccessor
+  { hooks: { getSwcOptions: getSwcOptionsHook } }: ISwcIsolatedTranspilePluginAccessor,
+  getWatchFs?: (() => IWatchFileSystem) | undefined
 ): Promise<void> {
   const { buildFolderPath } = heftConfiguration;
   const { emitKinds = [] } = pluginOptions;
@@ -137,6 +158,68 @@ async function transpileProjectAsync(
     heftConfiguration
   });
   const { ts } = tool;
+
+  if (getWatchFs) {
+    const watchFs: IWatchFileSystem = getWatchFs();
+    const { system } = tool;
+    const emptyFileSystemEntries: { files: string[]; directories: string[] } = { files: [], directories: [] };
+    // Copied from TypeScript, but using the watch file system
+    function getAccessibleFileSystemEntries(directory: string): { files: string[]; directories: string[] } {
+      try {
+        const entries: Dirent[] = watchFs.readdirSync(directory || '.', { withFileTypes: true });
+        const files: string[] = [];
+        const directories: string[] = [];
+        for (const dirent of entries) {
+          const entry: string = dirent.name;
+          if (entry === '.' || entry === '..') {
+            continue;
+          }
+          let stat: Stats | Dirent | undefined;
+          if (dirent.isSymbolicLink()) {
+            const name: string = ts.combinePaths(directory, entry);
+            stat = watchFs.statSync(name);
+            if (!stat) {
+              continue;
+            }
+          } else {
+            stat = dirent;
+          }
+
+          if (stat.isFile()) {
+            files.push(entry);
+          } else if (stat.isDirectory()) {
+            directories.push(entry);
+          }
+        }
+        files.sort();
+        directories.sort();
+        return { files, directories };
+      } catch {
+        return emptyFileSystemEntries;
+      }
+    }
+
+    system.readDirectory = (
+      dirPath: string,
+      extensions?: string[],
+      excludes?: string[],
+      includes?: string[],
+      depth?: number
+    ): string[] => {
+      return ts.matchFiles(
+        dirPath,
+        extensions,
+        excludes,
+        includes,
+        system.useCaseSensitiveFileNames,
+        buildFolderPath,
+        depth,
+        getAccessibleFileSystemEntries,
+        system.realpath!,
+        system.directoryExists
+      );
+    };
+  }
 
   const tsconfigPath: string = getTsconfigFilePath(heftConfiguration, pluginOptions.tsConfigPath);
   const parsedTsConfig: TTypeScript.ParsedCommandLine | undefined = loadTsconfig({ tool, tsconfigPath });
@@ -170,6 +253,29 @@ async function transpileProjectAsync(
   }
 
   const sourceFilePaths: string[] = filesFromTsConfig.filter((filePath) => !filePath.endsWith('.d.ts'));
+  const changedFilePaths: string[] = getWatchFs ? [] : sourceFilePaths;
+  if (getWatchFs) {
+    const watchFs: IWatchFileSystem = getWatchFs();
+    await Async.forEachAsync(
+      sourceFilePaths,
+      async (file: string) => {
+        const fileState: IWatchedFileState = await watchFs.getStateAndTrackAsync(path.normalize(file));
+        if (fileState.changed) {
+          changedFilePaths.push(file);
+        }
+      },
+      {
+        concurrency: 4
+      }
+    );
+  }
+
+  if (changedFilePaths.length < 1) {
+    logger.terminal.writeLine('No changed files found. Skipping transpile.');
+    return;
+  }
+
+  changedFilePaths.sort();
 
   logger.terminal.writeVerboseLine('Reading Config');
 
@@ -289,7 +395,7 @@ async function transpileProjectAsync(
   };
 
   const indexForOptions: Map<string, number> = new Map();
-  for (const srcFilePath of sourceFilePaths) {
+  for (const srcFilePath of changedFilePaths) {
     const rootPrefixLength: number | undefined = rootDirsPaths.findChildPath(srcFilePath);
 
     if (rootPrefixLength === undefined) {
@@ -327,7 +433,7 @@ async function transpileProjectAsync(
     }
   }
 
-  logger.terminal.writeLine(`Transpiling ${tasks.length} files...`);
+  logger.terminal.writeLine(`Transpiling ${changedFilePaths.length} changed source files...`);
 
   const result: IWorkerResult = await new Promise((resolve, reject) => {
     const workerPath: string = require.resolve('./TranspileWorker.js');
