@@ -49,24 +49,68 @@ export class CertificateStore {
 
   public constructor(options: ICertificateStoreOptions = {}) {
     const requestedStorePath: string | undefined = options.storePath;
+
     let storePath: string | undefined;
+    let debugCertificateManagerConfig: ICertificateStoreOptions | undefined = undefined;
+
     if (requestedStorePath) {
       storePath = path.resolve(requestedStorePath);
     } else {
-      // Default to the user's home directory under `.rushstack`
-      const unresolvedUserFolder: string = homedir();
-      const userProfilePath: string = path.resolve(unresolvedUserFolder);
-      if (!FileSystem.exists(userProfilePath)) {
-        throw new Error("Unable to determine the current user's home directory");
+      // TLS Sync extension configuration lives in `.vscode/debug-certificate-manager.json`
+      let currentDir: string | undefined = process.cwd();
+      while (currentDir) {
+        const debugCertificateManagerConfigFile: string = path.join(
+          currentDir,
+          '.vscode',
+          'debug-certificate-manager.json'
+        );
+        if (FileSystem.exists(debugCertificateManagerConfigFile)) {
+          const configContent: string = FileSystem.readFile(debugCertificateManagerConfigFile);
+          debugCertificateManagerConfig = JSON.parse(configContent) as ICertificateStoreOptions;
+          if (debugCertificateManagerConfig.storePath) {
+            storePath = path.resolve(currentDir, debugCertificateManagerConfig.storePath);
+          }
+        }
+        const parentDir: string | undefined = path.dirname(currentDir);
+        if (parentDir === currentDir) {
+          break; // reached the root directory
+        }
+        currentDir = parentDir;
       }
-      storePath = path.join(userProfilePath, '.rushstack');
+
+      if (!storePath) {
+        // Fallback to the user's home directory under `.rushstack`
+        const unresolvedUserFolder: string = homedir();
+        const userProfilePath: string = path.resolve(unresolvedUserFolder);
+        if (!FileSystem.exists(userProfilePath)) {
+          throw new Error("Unable to determine the current user's home directory");
+        }
+        storePath = path.join(userProfilePath, '.rushstack');
+      }
     }
-    this._storePath = storePath;
     FileSystem.ensureFolder(storePath);
 
-    this._caCertificatePath = path.join(storePath, options.caCertificateFilename ?? 'rushstack-ca.pem');
-    this._certificatePath = path.join(storePath, options.certificateFilename ?? 'rushstack-serve.pem');
-    this._keyPath = path.join(storePath, options.keyFilename ?? 'rushstack-serve.key');
+    const caCertificatePath: string = path.join(
+      storePath,
+      options.caCertificateFilename ??
+        debugCertificateManagerConfig?.caCertificateFilename ??
+        'rushstack-ca.pem'
+    );
+    const certificatePath: string = path.join(
+      storePath,
+      options.certificateFilename ??
+        debugCertificateManagerConfig?.certificateFilename ??
+        'rushstack-serve.pem'
+    );
+    const keyPath: string = path.join(
+      storePath,
+      options.keyFilename ?? debugCertificateManagerConfig?.keyFilename ?? 'rushstack-serve.key'
+    );
+
+    this._storePath = storePath;
+    this._caCertificatePath = caCertificatePath;
+    this._certificatePath = certificatePath;
+    this._keyPath = keyPath;
   }
 
   /**

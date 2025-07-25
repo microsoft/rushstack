@@ -7,10 +7,9 @@ import type {
   IHeftTaskSession,
   IHeftTaskRunHookOptions
 } from '@rushstack/heft';
-import { Executable, IWaitForExitResult } from '@rushstack/node-core-library';
-import type { ChildProcess } from 'node:child_process';
+import type { IWaitForExitResult } from '@rushstack/node-core-library';
 import * as path from 'node:path';
-import { TerminalStreamWritable, TerminalProviderSeverity } from '@rushstack/terminal';
+import { executeAndWaitAsync, vsceScriptPath } from './util';
 
 interface IVSCodeExtensionPackagePluginOptions {
   /**
@@ -24,12 +23,14 @@ interface IVSCodeExtensionPackagePluginOptions {
    * If a directory is provided, the VSIX file will be named based on the extension's `package.json` name and version.
    */
   vsixPath: string;
+  /**
+   * The path where the generated manifest file will be saved.
+   * This manifest is used for signing the VS Code extension.
+   */
+  manifestPath: string;
 }
 
 const PLUGIN_NAME: 'vscode-extension-package-plugin' = 'vscode-extension-package-plugin';
-
-const vsceBasePackagePath: string = require.resolve('@vscode/vsce/package.json');
-const vsceScript: string = path.resolve(vsceBasePackagePath, '../vsce');
 
 export default class VSCodeExtensionPackagePlugin
   implements IHeftTaskPlugin<IVSCodeExtensionPackagePluginOptions>
@@ -40,46 +41,50 @@ export default class VSCodeExtensionPackagePlugin
     pluginOptions: IVSCodeExtensionPackagePluginOptions
   ): void {
     heftTaskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      const { unpackedFolderPath, vsixPath } = pluginOptions;
+      const { unpackedFolderPath, vsixPath, manifestPath } = pluginOptions;
+      const { buildFolderPath } = heftConfiguration;
       const {
         logger: { terminal }
       } = heftTaskSession;
 
-      terminal.writeLine(`Using VSCE script: ${vsceScript}`);
-      terminal.writeLine(`Packaging VSIX from ${unpackedFolderPath} to ${vsixPath}`);
-      const terminalOutStream: TerminalStreamWritable = new TerminalStreamWritable({
-        terminal,
-        severity: TerminalProviderSeverity.log
-      });
-      const terminalErrorStream: TerminalStreamWritable = new TerminalStreamWritable({
-        terminal,
-        severity: TerminalProviderSeverity.error
-      });
+      terminal.writeLine(`Using VSCE script: ${vsceScriptPath}`);
 
-      const childProcess: ChildProcess = Executable.spawn(
+      terminal.writeLine(`Packaging VSIX from ${unpackedFolderPath} to ${vsixPath}`);
+      const packageResult: IWaitForExitResult<string> = await executeAndWaitAsync(
+        terminal,
         'node',
-        [vsceScript, 'package', '--no-dependencies', '--out', `${path.resolve(vsixPath)}`],
+        [vsceScriptPath, 'package', '--no-dependencies', '--out', path.resolve(vsixPath)],
         {
-          currentWorkingDirectory: path.resolve(unpackedFolderPath),
-          stdio: [
-            'ignore', // stdin
-            'pipe', // stdout
-            'pipe' // stderr
-          ]
+          currentWorkingDirectory: path.resolve(buildFolderPath, unpackedFolderPath)
         }
       );
-
-      childProcess.stdout?.pipe(terminalOutStream);
-      childProcess.stderr?.pipe(terminalErrorStream);
-
-      const result: IWaitForExitResult<string> = await Executable.waitForExitAsync(childProcess, {
-        encoding: 'utf8'
-      });
-
-      if (result.exitCode !== 0) {
-        throw new Error(`VSIX packaging failed with exit code ${result.exitCode}`);
+      if (packageResult.exitCode !== 0) {
+        throw new Error(`VSIX packaging failed with exit code ${packageResult.exitCode}`);
       }
       terminal.writeLine('VSIX successfully packaged.');
+
+      terminal.writeLine(`Generating manifest at ${manifestPath}`);
+      const manifestResult: IWaitForExitResult<string> = await executeAndWaitAsync(
+        terminal,
+        'node',
+        [
+          vsceScriptPath,
+          'generate-manifest',
+          '--packagePath',
+          path.resolve(vsixPath),
+          '--out',
+          path.resolve(manifestPath)
+        ],
+        {
+          currentWorkingDirectory: buildFolderPath
+        }
+      );
+      if (manifestResult.exitCode !== 0) {
+        throw new Error(`Manifest generation failed with exit code ${manifestResult.exitCode}`);
+      }
+      terminal.writeLine('Manifest successfully generated.');
+
+      terminal.writeLine(`VSIX package and manifest generation completed successfully.`);
     });
   }
 }

@@ -10,7 +10,7 @@ const path = require('node:path');
 
 function createConfig({ production, webpack }) {
   const config = createExtensionConfig({
-    production,
+    production: false,
     webpack,
     entry: {
       extension: './lib/extension.js'

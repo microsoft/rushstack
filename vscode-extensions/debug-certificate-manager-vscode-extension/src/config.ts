@@ -4,7 +4,7 @@
 import * as vscode from 'vscode';
 import * as path from 'node:path';
 import type { ITerminal } from '@rushstack/terminal';
-import type { ICertificateManagerOptions } from '@rushstack/debug-certificate-manager';
+import type { ICertificateStoreOptions } from '@rushstack/debug-certificate-manager';
 import {
   CONFIG_AUTOSYNC,
   CONFIG_SECTION,
@@ -15,22 +15,20 @@ import {
 } from './constants';
 
 type StorePaths = Record<'windows' | 'linux' | 'osx', string>;
-export interface IExtensionConfig extends ICertificateManagerOptions {
+export interface IExtensionConfig extends ICertificateStoreOptions {
   autoSync: boolean;
 }
 
-export function getConfig(terminal: ITerminal, configType: 'ui' | 'workspace'): IExtensionConfig {
+export function getConfig(terminal: ITerminal): IExtensionConfig {
   const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(CONFIG_SECTION);
-  const caCertificateFilename: string | undefined = config.get(CONFIG_CA_CERTIFICATE_FILENAME) || undefined;
-  const certificateFilename: string | undefined = config.get(CONFIG_CERTIFICATE_FILENAME) || undefined;
-  const keyFilename: string | undefined = config.get(CONFIG_KEY_FILENAME) || undefined;
+  const caCertificateFilename: string | undefined =
+    config.get(CONFIG_CA_CERTIFICATE_FILENAME) || 'rushstack-ca.pem';
+  const certificateFilename: string | undefined =
+    config.get(CONFIG_CERTIFICATE_FILENAME) || 'rushstack-serve.pem';
+  const keyFilename: string | undefined = config.get(CONFIG_KEY_FILENAME) || 'rushstack-serve.key';
   const autoSync: boolean = config.get(CONFIG_AUTOSYNC) ?? false;
   let storePath: string | undefined = undefined;
-  const storePaths: StorePaths = {
-    windows: config.get(`${configType}.${CONFIG_STORE_PATH}.windows`) || '',
-    linux: config.get(`${configType}.${CONFIG_STORE_PATH}.linux`) || '',
-    osx: config.get(`${configType}.${CONFIG_STORE_PATH}.osx`) || ''
-  };
+
   const platformMap: Record<string, keyof StorePaths> = {
     win32: 'windows',
     linux: 'linux',
@@ -38,8 +36,9 @@ export function getConfig(terminal: ITerminal, configType: 'ui' | 'workspace'): 
   };
 
   const platformKey: keyof StorePaths = platformMap[process.platform];
+
   if (platformKey) {
-    storePath = storePaths[platformKey];
+    storePath = config.get(`${CONFIG_STORE_PATH}.${platformKey}`) || '~/.rushstack';
     if (storePath) {
       const homeDir: string | undefined = process.env.HOME || process.env.USERPROFILE;
       if (storePath[0] === '~' && homeDir) {
