@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Wed, 23 Jul 2025 20:55:57 GMT and should not be manually modified.
+This log was last generated on Sat, 26 Jul 2025 00:12:22 GMT and should not be manually modified.
+
+## 1.5.1
+Sat, 26 Jul 2025 00:12:22 GMT
+
+### Patches
+
+- Read CertificateStore configuration from .vscode/debug-certificate-manager.json
 
 ## 1.5.0
 Wed, 23 Jul 2025 20:55:57 GMT

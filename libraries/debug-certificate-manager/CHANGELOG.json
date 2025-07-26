@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.5.1",
+      "tag": "@rushstack/debug-certificate-manager_v1.5.1",
+      "date": "Sat, 26 Jul 2025 00:12:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Read CertificateStore configuration from .vscode/debug-certificate-manager.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.0",
       "tag": "@rushstack/debug-certificate-manager_v1.5.0",
       "date": "Wed, 23 Jul 2025 20:55:57 GMT",

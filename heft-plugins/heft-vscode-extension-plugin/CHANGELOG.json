@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-vscode-extension-plugin",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v0.2.0",
+      "date": "Sat, 26 Jul 2025 00:12:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for generating extension manifest."
+          },
+          {
+            "comment": "Add VSIX publish plugin."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/heft-vscode-extension-plugin_v0.1.0",
       "date": "Wed, 23 Jul 2025 20:55:57 GMT",
