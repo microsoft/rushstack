@@ -30,6 +30,7 @@ export async function runScenariosAsync(
   { libFolderPath, additionalApiExtractorConfig, afterApiExtractorAsync }: IRunScenariosOptions
 ): Promise<void> {
   const entryPoints: string[] = [];
+  const scenariosWithCustomCompilerOptions: string[] = [];
 
   const scenarioFolderNames: string[] = [];
   const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(libFolderPath);
@@ -54,6 +55,10 @@ export async function runScenariosAsync(
         if (!FileSystem.isNotExistError(e)) {
           throw e;
         }
+      }
+
+      if (apiExtractorJsonOverrides && 'compiler' in apiExtractorJsonOverrides) {
+        scenariosWithCustomCompilerOptions.push(scenarioFolderName);
       }
 
       const apiExtractorJson: {} = {
@@ -93,7 +98,7 @@ export async function runScenariosAsync(
     { concurrency: 10 }
   );
 
-  let compilerState: CompilerState | undefined = undefined;
+  let baseCompilerState: CompilerState | undefined = undefined;
   for (const scenarioFolderName of scenarioFolderNames) {
     logger.terminal.writeLine(`Scenario: ${scenarioFolderName}`);
 
@@ -101,10 +106,19 @@ export async function runScenariosAsync(
     const apiExtractorJsonPath: string = `${buildFolderPath}/temp/configs/api-extractor-${scenarioFolderName}.json`;
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(apiExtractorJsonPath);
 
-    if (!compilerState) {
+    let compilerState: CompilerState;
+    if (scenariosWithCustomCompilerOptions.includes(scenarioFolderName)) {
+      logger.terminal.writeLine(`Using custom compiler state (${scenarioFolderName})`);
       compilerState = CompilerState.create(extractorConfig, {
         additionalEntryPoints: entryPoints
       });
+    } else {
+      if (!baseCompilerState) {
+        baseCompilerState = CompilerState.create(extractorConfig, {
+          additionalEntryPoints: entryPoints
+        });
+      }
+      compilerState = baseCompilerState;
     }
 
     const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig, {
