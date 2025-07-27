@@ -1,4 +1,5 @@
-import { Foo } from './other';
+declare class Foo {
+}
 
 /**
  * @public
