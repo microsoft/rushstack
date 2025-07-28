@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-typescript-plugin",
   "entries": [
     {
+      "version": "0.9.10",
+      "tag": "@rushstack/heft-typescript-plugin_v0.9.10",
+      "date": "Mon, 28 Jul 2025 15:11:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update internal typings."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.9",
       "tag": "@rushstack/heft-typescript-plugin_v0.9.9",
       "date": "Wed, 23 Jul 2025 20:55:57 GMT",

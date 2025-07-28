@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-vscode-extension-plugin",
   "entries": [
     {
+      "version": "0.2.1",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v0.2.1",
+      "date": "Mon, 28 Jul 2025 15:11:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.9.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@rushstack/heft-vscode-extension-plugin_v0.2.0",
       "date": "Sat, 26 Jul 2025 00:12:22 GMT",
