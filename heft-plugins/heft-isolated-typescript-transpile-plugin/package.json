@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
-  "version": "0.1.16",
+  "version": "0.2.0",
   "description": "Heft plugin for transpiling TypeScript with SWC",
   "repository": {
     "type": "git",
