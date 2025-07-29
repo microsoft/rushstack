@@ -135,15 +135,12 @@ export class BridgeCachePlugin implements IRushPlugin {
                   operation.settings?.outputFolderNames?.length > 0
                 ) {
                   const projectFolder: string = operation.associatedProject?.projectFolder;
-                  const results: { outputFolderName: string; exists: boolean }[] =
-                    operation.settings.outputFolderNames.map((outputFolderName: string) => ({
-                      outputFolderName,
-                      exists: FileSystem.exists(`${projectFolder}/${outputFolderName}`)
-                    }));
-
-                  const missingFolders: string[] = results
-                    .filter((folder) => !folder.exists)
-                    .map((folder) => folder.outputFolderName);
+                  const missingFolders: string[] = [];
+                  operation.settings.outputFolderNames.forEach((outputFolderName: string) => {
+                      if (!FileSystem.exists(`${projectFolder}/${outputFolderName}`)) {
+                        missingFolders.push(outputFolderName);
+                      }
+                  });
                   if (missingFolders.length > 0) {
                     terminal.writeWarningLine(
                       `Operation "${operation.name}": The following output folders do not exist: "${missingFolders.join('", "')}". Skipping cache population.`
