@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async } from '@rushstack/node-core-library';
+import { Async, FileSystem } from '@rushstack/node-core-library';
 import { _OperationBuildCache as OperationBuildCache } from '@rushstack/rush-sdk';
 import type {
   ICreateOperationsContext,
@@ -25,14 +25,17 @@ type CacheAction = typeof CACHE_ACTION_READ | typeof CACHE_ACTION_WRITE;
 
 export interface IBridgeCachePluginOptions {
   readonly actionParameterName: string;
+  readonly requireOutputFoldersParameterName: string | undefined;
 }
 
 export class BridgeCachePlugin implements IRushPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
   private readonly _actionParameterName: string;
+  private readonly _requireOutputFoldersParameterName: string | undefined;
 
   public constructor(options: IBridgeCachePluginOptions) {
     this._actionParameterName = options.actionParameterName;
+    this._requireOutputFoldersParameterName = options.requireOutputFoldersParameterName;
 
     if (!this._actionParameterName) {
       throw new Error(
@@ -46,6 +49,7 @@ export class BridgeCachePlugin implements IRushPlugin {
       const logger: ILogger = session.getLogger(PLUGIN_NAME);
 
       let cacheAction: CacheAction | undefined;
+      let requireOutputFolders: boolean = false;
 
       // cancel the actual operations. We don't want to run the command, just cache the output folders on disk
       command.hooks.createOperations.tap(
@@ -63,12 +67,13 @@ export class BridgeCachePlugin implements IRushPlugin {
             for (const operation of operations) {
               operation.enabled = false;
             }
+
+            requireOutputFolders = this._isRequireOutputFoldersFlagSet(context);
           }
 
           return operations;
         }
       );
-
       // populate the cache for each operation
       command.hooks.beforeExecuteOperations.tap(
         PLUGIN_NAME,
@@ -123,6 +128,27 @@ export class BridgeCachePlugin implements IRushPlugin {
                   );
                 }
               } else if (cacheAction === CACHE_ACTION_WRITE) {
+                // if the require output folders flag has been passed, skip populating the cache if any of the expected output folders does not exist
+                if (
+                  requireOutputFolders &&
+                  operation.settings?.outputFolderNames &&
+                  operation.settings?.outputFolderNames?.length > 0
+                ) {
+                  const projectFolder: string = operation.associatedProject?.projectFolder;
+                  const missingFolders: string[] = [];
+                  operation.settings.outputFolderNames.forEach((outputFolderName: string) => {
+                      if (!FileSystem.exists(`${projectFolder}/${outputFolderName}`)) {
+                        missingFolders.push(outputFolderName);
+                      }
+                  });
+                  if (missingFolders.length > 0) {
+                    terminal.writeWarningLine(
+                      `Operation "${operation.name}": The following output folders do not exist: "${missingFolders.join('", "')}". Skipping cache population.`
+                    );
+                    return;
+                  }
+                }
+
                 const success: boolean = await projectBuildCache.trySetCacheEntryAsync(terminal);
                 if (success) {
                   ++successCount;
@@ -185,5 +211,25 @@ export class BridgeCachePlugin implements IRushPlugin {
     }
 
     return undefined;
+  }
+
+  private _isRequireOutputFoldersFlagSet(context: IExecuteOperationsContext): boolean {
+    if (!this._requireOutputFoldersParameterName) {
+      return false;
+    }
+
+    const requireOutputFoldersParam: CommandLineParameter | undefined = context.customParameters.get(
+      this._requireOutputFoldersParameterName
+    );
+
+    if (!requireOutputFoldersParam) {
+      return false;
+    }
+
+    if (requireOutputFoldersParam.kind !== CommandLineParameterKind.Flag) {
+      throw new Error(`The parameter "${this._requireOutputFoldersParameterName}" must be a flag.`);
+    }
+
+    return requireOutputFoldersParam.value;
   }
 }
