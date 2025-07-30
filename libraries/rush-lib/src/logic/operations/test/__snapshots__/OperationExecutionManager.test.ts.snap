@@ -39,7 +39,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "⚠️  SUCCESS WITH WARNINGS
+    "text": "⚠️  SUCCESS WITH WARNINGS
 ",
   },
   Object {
@@ -239,7 +239,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "⚠️  SUCCESS WITH WARNINGS
+    "text": "⚠️  SUCCESS WITH WARNINGS
 ",
   },
   Object {
@@ -292,13 +292,13 @@ Array [
   },
   Object {
     "kind": "E",
-    "text": "⚠️  [yellow]\\"operation2 (success with warnings)\\" completed with warnings in 15.00 seconds.[default]
+    "text": "⚠️  [yellow]\\"operation2 (success with warnings)\\" completed with warnings in 15.00 seconds.[default]
 ",
   },
   Object {
     "kind": "O",
     "text": "
-[gray]==[[default] [cyan]operation (success with warnings)[default] [gray]]==========================[[default][white]⚠️  1 🔄 1[default][gray]]==[default]
+[gray]==[[default] [cyan]operation (success with warnings)[default] [gray]]==========================[[default][white]⚠️  1 🔄 1[default][gray]]==[default]
 ",
   },
   Object {
@@ -320,7 +320,7 @@ Array [
   },
   Object {
     "kind": "E",
-    "text": "⚠️  [yellow]\\"operation (success with warnings)\\" completed with warnings in 15.00 seconds.[default]
+    "text": "⚠️  [yellow]\\"operation (success with warnings)\\" completed with warnings in 15.00 seconds.[default]
 ",
   },
   Object {
@@ -392,13 +392,13 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]==[[default]⚠️  [yellow]SUCCESS WITH WARNINGS: 2 operations[default] [gray]]=====================================[default]
+    "text": "[gray]==[[default]⚠️  [yellow]SUCCESS WITH WARNINGS: 2 operations[default] [gray]]=====================================[default]
 
 ",
   },
   Object {
     "kind": "O",
-    "text": "[gray]--[[default]⚠️  [yellow]WARNING: operation (success with warnings)[default] [gray]]------------[[default] [white]15.00 seconds[default] [gray]]--[default]
+    "text": "[gray]--[[default]⚠️  [yellow]WARNING: operation (success with warnings)[default] [gray]]------------[[default] [white]15.00 seconds[default] [gray]]--[default]
 
 ",
   },
@@ -409,7 +409,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]--[[default]⚠️  [yellow]WARNING: operation2 (success with warnings)[default] [gray]]-----------[[default] [white]15.00 seconds[default] [gray]]--[default]
+    "text": "[gray]--[[default]⚠️  [yellow]WARNING: operation2 (success with warnings)[default] [gray]]-----------[[default] [white]15.00 seconds[default] [gray]]--[default]
 
 ",
   },
@@ -466,7 +466,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "⚠️  SUCCESS WITH WARNINGS
+    "text": "⚠️  SUCCESS WITH WARNINGS
 ",
   },
   Object {
@@ -594,7 +594,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "⚠️  SUCCESS WITH WARNINGS
+    "text": "⚠️  SUCCESS WITH WARNINGS
 ",
   },
   Object {
@@ -722,7 +722,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "⚠️  SUCCESS WITH WARNINGS
+    "text": "⚠️  SUCCESS WITH WARNINGS
 ",
   },
   Object {
@@ -775,7 +775,7 @@ Array [
   },
   Object {
     "kind": "E",
-    "text": "⚠️  [yellow]\\"success with warnings (failure)\\" completed with warnings in 0.10 seconds.[default]
+    "text": "⚠️  [yellow]\\"success with warnings (failure)\\" completed with warnings in 0.10 seconds.[default]
 ",
   },
   Object {
@@ -787,13 +787,13 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]==[[default]⚠️  [yellow]SUCCESS WITH WARNINGS: 1 operation[default] [gray]]======================================[default]
+    "text": "[gray]==[[default]⚠️  [yellow]SUCCESS WITH WARNINGS: 1 operation[default] [gray]]======================================[default]
 
 ",
   },
   Object {
     "kind": "O",
-    "text": "[gray]--[[default]⚠️  [yellow]WARNING: success with warnings (failure)[default] [gray]]---------------[[default] [white]0.10 seconds[default] [gray]]--[default]
+    "text": "[gray]--[[default]⚠️  [yellow]WARNING: success with warnings (failure)[default] [gray]]---------------[[default] [white]0.10 seconds[default] [gray]]--[default]
 
 ",
   },
@@ -850,7 +850,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "⚠️  SUCCESS WITH WARNINGS
+    "text": "⚠️  SUCCESS WITH WARNINGS
 ",
   },
   Object {
@@ -903,7 +903,7 @@ Array [
   },
   Object {
     "kind": "E",
-    "text": "⚠️  [yellow]\\"success with warnings (success)\\" completed with warnings in 0.10 seconds.[default]
+    "text": "⚠️  [yellow]\\"success with warnings (success)\\" completed with warnings in 0.10 seconds.[default]
 ",
   },
   Object {
@@ -915,13 +915,13 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]==[[default]⚠️  [yellow]SUCCESS WITH WARNINGS: 1 operation[default] [gray]]======================================[default]
+    "text": "[gray]==[[default]⚠️  [yellow]SUCCESS WITH WARNINGS: 1 operation[default] [gray]]======================================[default]
 
 ",
   },
   Object {
     "kind": "O",
-    "text": "[gray]--[[default]⚠️  [yellow]WARNING: success with warnings (success)[default] [gray]]---------------[[default] [white]0.10 seconds[default] [gray]]--[default]
+    "text": "[gray]--[[default]⚠️  [yellow]WARNING: success with warnings (success)[default] [gray]]---------------[[default] [white]0.10 seconds[default] [gray]]--[default]
 
 ",
   },
@@ -972,7 +972,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "⚠️  SUCCESS WITH WARNINGS
+    "text": "⚠️  SUCCESS WITH WARNINGS
 ",
   },
   Object {
@@ -1025,7 +1025,7 @@ Array [
   },
   Object {
     "kind": "E",
-    "text": "⚠️  [yellow]\\"success with warnings (success)\\" completed with warnings in 0.10 seconds.[default]
+    "text": "⚠️  [yellow]\\"success with warnings (success)\\" completed with warnings in 0.10 seconds.[default]
 ",
   },
   Object {
@@ -1092,13 +1092,13 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]==[[default]⚠️  [yellow]SUCCESS WITH WARNINGS: 1 operation[default] [gray]]======================================[default]
+    "text": "[gray]==[[default]⚠️  [yellow]SUCCESS WITH WARNINGS: 1 operation[default] [gray]]======================================[default]
 
 ",
   },
   Object {
     "kind": "O",
-    "text": "[gray]--[[default]⚠️  [yellow]WARNING: success with warnings (success)[default] [gray]]---------------[[default] [white]0.10 seconds[default] [gray]]--[default]
+    "text": "[gray]--[[default]⚠️  [yellow]WARNING: success with warnings (success)[default] [gray]]---------------[[default] [white]0.10 seconds[default] [gray]]--[default]
 
 ",
   },

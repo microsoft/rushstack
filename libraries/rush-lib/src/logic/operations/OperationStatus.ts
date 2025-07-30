@@ -59,7 +59,7 @@ export enum OperationStatus {
 export const STATUS_EMOJIS: Record<OperationStatus, string> = {
   // Most important statuses to report
   [OperationStatus.Failure]: '❌',
-  [OperationStatus.SuccessWithWarning]: '⚠️ ',
+  [OperationStatus.SuccessWithWarning]: '⚠️\u2009',
 
   // Use an emoji that indicates that the operation is currently executing
   [OperationStatus.Executing]: '🔄',
