@@ -23,7 +23,7 @@
     "@rushstack/ts-command-line": "workspace:*",
     "ignore": "~5.1.6",
     "jszip": "~3.8.0",
-    "minimatch": "~3.0.3",
+    "minimatch": "10.0.3",
     "npm-packlist": "~2.1.2",
     "semver": "~7.5.4"
   },
@@ -33,7 +33,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/glob": "7.1.1",
-    "@types/minimatch": "3.0.5",
+    "@types/minimatch": "6.0.0",
     "@types/npm-packlist": "~1.1.1",
     "eslint": "~9.25.1",
     "webpack": "~5.98.0",

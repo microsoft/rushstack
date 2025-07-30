@@ -11,7 +11,7 @@ import {
   PackageName
 } from '@rushstack/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
