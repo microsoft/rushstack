@@ -57,24 +57,19 @@ export enum OperationStatus {
  * @alpha
  */
 export const STATUS_EMOJIS: Record<OperationStatus, string> = {
-  // Most important statuses to report
-  [OperationStatus.Failure]: '❌',
-  [OperationStatus.SuccessWithWarning]: '⚠️\u2009',
+  [OperationStatus.Failure]: '❌\ufe0f',
+  [OperationStatus.SuccessWithWarning]: '⚡\ufe0f',
 
-  // Use an emoji that indicates that the operation is currently executing
   [OperationStatus.Executing]: '🔄',
 
-  // Use an emoji that indicates that the operations are yet to execute
-  [OperationStatus.Waiting]: '⏳',
-  [OperationStatus.Queued]: '⏳',
-  [OperationStatus.Ready]: '⏳',
+  [OperationStatus.Waiting]: '⏳\ufe0f',
+  [OperationStatus.Queued]: '⏳\ufe0f',
+  [OperationStatus.Ready]: '⏳\ufe0f',
 
   [OperationStatus.Blocked]: '🚧',
 
-  // Use an emoji that indicates that the operation has completed successfully
-  [OperationStatus.Success]: '✅\u200b',
+  [OperationStatus.Success]: '✅\ufe0f',
 
-  // Use an emoji that indicates that the operation output was reused
   [OperationStatus.FromCache]: '📦',
   [OperationStatus.Skipped]: '📦',
   [OperationStatus.NoOp]: ''
