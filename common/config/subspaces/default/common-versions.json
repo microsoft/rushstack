@@ -35,8 +35,7 @@
     "eslint": "~9.25.1",
 
     // Updated minimatch and its types to latest major version to resolve ReDoS vulnerability
-    "minimatch": "10.0.3",
-    "@types/minimatch": "6.0.0"
+    "minimatch": "10.0.3"
   },
 
   /**

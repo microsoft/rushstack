@@ -33,7 +33,6 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/glob": "7.1.1",
-    "@types/minimatch": "6.0.0",
     "@types/npm-packlist": "~1.1.1",
     "eslint": "~9.25.1",
     "webpack": "~5.98.0",
