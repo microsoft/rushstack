@@ -14,7 +14,7 @@ import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushst
 
 import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
 import type { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
+import { OperationStatus, STATUS_BY_EMOJI, STATUS_EMOJIS } from './OperationStatus';
 import { type IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import type { IExecutionResult } from './IOperationExecutionResult';
 import type { IEnvironment } from '../../utilities/Utilities';
@@ -81,16 +81,19 @@ export class OperationExecutionManager {
     operation: OperationExecutionRecord
   ) => Promise<OperationStatus | undefined>;
   private readonly _afterExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
-  private readonly _onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  private readonly _onOperationStatusChanged?: (
+    record: OperationExecutionRecord,
+    oldStatus: OperationStatus
+  ) => void;
   private readonly _beforeExecuteOperations?: (
     records: Map<Operation, OperationExecutionRecord>
   ) => Promise<void>;
   private readonly _createEnvironmentForOperation?: (operation: OperationExecutionRecord) => IEnvironment;
 
   // Variables for current status
+  private readonly _operationCountByStatusEmoji: Record<string, number>;
   private _hasAnyFailures: boolean;
   private _hasAnyNonAllowedWarnings: boolean;
-  private _completedOperations: number;
   private _executionQueue: AsyncOperationQueue;
 
   public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
@@ -105,7 +108,6 @@ export class OperationExecutionManager {
       beforeExecuteOperationsAsync: beforeExecuteOperations,
       createEnvironmentForOperation
     } = options;
-    this._completedOperations = 0;
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
@@ -115,10 +117,23 @@ export class OperationExecutionManager {
     this._afterExecuteOperation = afterExecuteOperation;
     this._beforeExecuteOperations = beforeExecuteOperations;
     this._createEnvironmentForOperation = createEnvironmentForOperation;
-    this._onOperationStatusChanged = (record: OperationExecutionRecord) => {
+
+    const operationCountByStatusEmoji: Record<string, number> = {};
+    for (const statusEmoji of Object.values(STATUS_EMOJIS)) {
+      operationCountByStatusEmoji[statusEmoji] = 0;
+    }
+    this._operationCountByStatusEmoji = operationCountByStatusEmoji;
+
+    this._onOperationStatusChanged = (record: OperationExecutionRecord, oldStatus: OperationStatus) => {
       if (record.status === OperationStatus.Ready) {
         this._executionQueue.assignOperations();
       }
+
+      if (!record.silent) {
+        operationCountByStatusEmoji[STATUS_EMOJIS[oldStatus]]--;
+        operationCountByStatusEmoji[STATUS_EMOJIS[record.status]]++;
+      }
+
       onOperationStatusChanged?.(record);
     };
 
@@ -192,24 +207,41 @@ export class OperationExecutionManager {
       prioritySort
     );
     this._executionQueue = executionQueue;
+    for (const operation of executionRecords.values()) {
+      if (operation.silent) {
+        continue;
+      }
+      // Initialize the status counts
+      operationCountByStatusEmoji[STATUS_EMOJIS[operation.status]]++;
+    }
+  }
+
+  private _getStatusBar(): string {
+    const statusBarParts: string[] = [];
+    for (const emoji of STATUS_BY_EMOJI.keys()) {
+      const count: number = this._operationCountByStatusEmoji[emoji];
+      if (count > 0) {
+        statusBarParts.push(`${emoji} ${count}`);
+      }
+    }
+    return statusBarParts.join(' ');
   }
 
   private _streamCollator_onWriterActive = (writer: CollatedWriter | undefined): void => {
     if (writer) {
-      this._completedOperations++;
-
       // Format a header like this
       //
-      // ==[ @rushstack/the-long-thing ]=================[ 1 of 1000 ]==
+      // ==[ @rushstack/the-long-thing ]=================[❌3 ✅20 📦245]==
 
       // leftPart: "==[ @rushstack/the-long-thing "
       const leftPart: string = Colorize.gray('==[') + ' ' + Colorize.cyan(writer.taskName) + ' ';
       const leftPartLength: number = 4 + writer.taskName.length + 1;
 
-      // rightPart: " 1 of 1000 ]=="
-      const completedOfTotal: string = `${this._completedOperations} of ${this._totalOperations}`;
-      const rightPart: string = ' ' + Colorize.white(completedOfTotal) + ' ' + Colorize.gray(']==');
-      const rightPartLength: number = 1 + completedOfTotal.length + 4;
+      const statusBar: string = this._getStatusBar();
+
+      // rightPart: "❌3 ✅20 📦245]=="
+      const rightPart: string = Colorize.white(statusBar) + Colorize.gray(']==');
+      const rightPartLength: number = statusBar.length + 3;
 
       // middlePart: "]=================["
       const twoBracketsLength: number = 2;
@@ -233,7 +265,6 @@ export class OperationExecutionManager {
    * operations are completed successfully, or rejects when any operation fails.
    */
   public async executeAsync(): Promise<IExecutionResult> {
-    this._completedOperations = 0;
     const totalOperations: number = this._totalOperations;
 
     if (!this._quietMode) {
@@ -253,6 +284,11 @@ export class OperationExecutionManager {
     }
 
     this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
+
+    this._terminal.writeStdoutLine(`Legend:`);
+    for (const [emoji, statuses] of STATUS_BY_EMOJI) {
+      this._terminal.writeStdoutLine(`${emoji} ${statuses.join(' / ')}`);
+    }
 
     const maxParallelism: number = Math.min(totalOperations, this._parallelism);
 
@@ -352,7 +388,9 @@ export class OperationExecutionManager {
 
         // This creates the writer, so don't do this globally
         const { terminal } = record.collatedWriter;
-        terminal.writeStderrLine(Colorize.red(`"${name}" failed to build.`));
+        terminal.writeStderrLine(
+          `${STATUS_EMOJIS[OperationStatus.Failure]} ${Colorize.red(`"${name}" failed to build.`)}`
+        );
         const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
 
         for (const blockedRecord of blockedQueue) {
@@ -361,16 +399,13 @@ export class OperationExecutionManager {
             // {blockedRecord.runner} with a no-op that sets status to Blocked and logs the blocking
             // operations. However, the existing behavior is a bit simpler, so keeping that for now.
             if (!blockedRecord.silent) {
-              terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
+              terminal.writeStdoutLine(
+                `${STATUS_EMOJIS[OperationStatus.Blocked]} "${blockedRecord.name}" is blocked by "${name}".`
+              );
             }
             blockedRecord.status = OperationStatus.Blocked;
 
             this._executionQueue.complete(blockedRecord);
-            if (!blockedRecord.silent) {
-              // Only increment the count if the operation is not silent to avoid confusing the user.
-              // The displayed total is the count of non-silent operations.
-              this._completedOperations++;
-            }
 
             for (const dependent of blockedRecord.consumers) {
               blockedQueue.add(dependent);
@@ -392,7 +427,7 @@ export class OperationExecutionManager {
       case OperationStatus.FromCache: {
         if (!silent) {
           record.collatedWriter.terminal.writeStdoutLine(
-            Colorize.green(`"${name}" was restored from the build cache.`)
+            `${STATUS_EMOJIS[OperationStatus.FromCache]} ${Colorize.green(`"${name}" was restored from the build cache.`)}`
           );
         }
         break;
@@ -403,7 +438,9 @@ export class OperationExecutionManager {
        */
       case OperationStatus.Skipped: {
         if (!silent) {
-          record.collatedWriter.terminal.writeStdoutLine(Colorize.green(`"${name}" was skipped.`));
+          record.collatedWriter.terminal.writeStdoutLine(
+            `${STATUS_EMOJIS[OperationStatus.Skipped]} ${Colorize.green(`"${name}" was skipped.`)}`
+          );
         }
         break;
       }
@@ -413,7 +450,9 @@ export class OperationExecutionManager {
        */
       case OperationStatus.NoOp: {
         if (!silent) {
-          record.collatedWriter.terminal.writeStdoutLine(Colorize.gray(`"${name}" did not define any work.`));
+          record.collatedWriter.terminal.writeStdoutLine(
+            `${STATUS_EMOJIS[OperationStatus.NoOp]} ${Colorize.gray(`"${name}" did not define any work.`)}`
+          );
         }
         break;
       }
@@ -421,7 +460,7 @@ export class OperationExecutionManager {
       case OperationStatus.Success: {
         if (!silent) {
           record.collatedWriter.terminal.writeStdoutLine(
-            Colorize.green(`"${name}" completed successfully in ${stopwatch.toString()}.`)
+            `${STATUS_EMOJIS[OperationStatus.Success]} ${Colorize.green(`"${name}" completed successfully in ${stopwatch.toString()}.`)}`
           );
         }
         break;
@@ -430,7 +469,7 @@ export class OperationExecutionManager {
       case OperationStatus.SuccessWithWarning: {
         if (!silent) {
           record.collatedWriter.terminal.writeStderrLine(
-            Colorize.yellow(`"${name}" completed with warnings in ${stopwatch.toString()}.`)
+            `${STATUS_EMOJIS[OperationStatus.SuccessWithWarning]} ${Colorize.yellow(`"${name}" completed with warnings in ${stopwatch.toString()}.`)}`
           );
         }
         this._hasAnyNonAllowedWarnings = this._hasAnyNonAllowedWarnings || !runner.warningsAreAllowed;

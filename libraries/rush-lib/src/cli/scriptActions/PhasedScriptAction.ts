@@ -37,7 +37,7 @@ import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlu
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
-import { OperationStatus } from '../../logic/operations/OperationStatus';
+import { OperationStatus, STATUS_EMOJIS } from '../../logic/operations/OperationStatus';
 import type {
   IExecutionResult,
   IOperationExecutionResult
@@ -955,7 +955,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       stopwatch.stop();
 
-      const message: string = `rush ${this.actionName} (${stopwatch.toString()})`;
+      const message: string = `${STATUS_EMOJIS[result.status]} rush ${this.actionName} (${stopwatch.toString()})`;
       if (result.status === OperationStatus.Success) {
         terminal.writeLine(Colorize.green(message));
       } else {
@@ -966,7 +966,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       stopwatch.stop();
 
       if (error instanceof AlreadyReportedError) {
-        terminal.writeLine(`rush ${this.actionName} (${stopwatch.toString()})`);
+        terminal.writeLine(
+          `${STATUS_EMOJIS[OperationStatus.Failure]} rush ${this.actionName} (${stopwatch.toString()})`
+        );
       } else {
         if (error && (error as Error).message) {
           if (this.parser.isDebug) {
@@ -976,7 +978,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           }
         }
 
-        terminal.writeErrorLine(Colorize.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+        terminal.writeErrorLine(
+          Colorize.red(
+            `${STATUS_EMOJIS[OperationStatus.Failure]} rush ${this.actionName} - Errors! (${stopwatch.toString()})`
+          )
+        );
       }
     }
 
