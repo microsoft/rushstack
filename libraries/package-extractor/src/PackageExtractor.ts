@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { type IMinimatch, Minimatch } from 'minimatch';
+import { Minimatch } from 'minimatch';
 import semver from 'semver';
 import npmPacklist from 'npm-packlist';
 import ignore, { type Ignore } from 'ignore';
@@ -723,8 +723,8 @@ export class PackageExtractor {
         patternsToInclude: string[] | undefined,
         patternsToExclude: string[] | undefined
       ): boolean => {
-        let includeFilters: IMinimatch[] | undefined;
-        let excludeFilters: IMinimatch[] | undefined;
+        let includeFilters: Minimatch[] | undefined;
+        let excludeFilters: Minimatch[] | undefined;
         if (patternsToInclude?.length) {
           includeFilters = patternsToInclude?.map((p) => new Minimatch(p, { dot: true }));
         }
