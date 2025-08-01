@@ -2,6 +2,29 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.10.33",
+      "tag": "@rushstack/package-extractor_v0.10.33",
+      "date": "Fri, 01 Aug 2025 00:12:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrades the minimatch dependency from ~3.0.3 to 10.0.3 across the entire Rush monorepo to address a Regular Expression Denial of Service (ReDoS) vulnerability in the underlying brace-expansion dependency."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.11.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.105`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.32",
       "tag": "@rushstack/package-extractor_v0.10.32",
       "date": "Sat, 26 Jul 2025 00:12:22 GMT",

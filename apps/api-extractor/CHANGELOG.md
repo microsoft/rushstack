@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 23 Jul 2025 20:55:57 GMT and should not be manually modified.
+This log was last generated on Fri, 01 Aug 2025 00:12:48 GMT and should not be manually modified.
+
+## 7.52.10
+Fri, 01 Aug 2025 00:12:48 GMT
+
+### Patches
+
+- Upgrades the minimatch dependency from ~3.0.3 to 10.0.3 across the entire Rush monorepo to address a Regular Expression Denial of Service (ReDoS) vulnerability in the underlying brace-expansion dependency.
 
 ## 7.52.9
 Wed, 23 Jul 2025 20:55:57 GMT

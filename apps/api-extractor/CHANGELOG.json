@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.52.10",
+      "tag": "@microsoft/api-extractor_v7.52.10",
+      "date": "Fri, 01 Aug 2025 00:12:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrades the minimatch dependency from ~3.0.3 to 10.0.3 across the entire Rush monorepo to address a Regular Expression Denial of Service (ReDoS) vulnerability in the underlying brace-expansion dependency."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.52.9",
       "tag": "@microsoft/api-extractor_v7.52.9",
       "date": "Wed, 23 Jul 2025 20:55:57 GMT",
