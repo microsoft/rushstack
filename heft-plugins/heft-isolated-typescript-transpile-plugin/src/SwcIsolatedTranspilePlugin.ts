@@ -171,21 +171,22 @@ async function transpileProjectAsync(
     // If the tsconfig has wildcard directories, we need to ensure that they are watched for file changes.
     const directoryQueue: Map<string, boolean> = new Map();
     for (const [wildcardDirectory, type] of Object.entries(parsedTsConfig.wildcardDirectories)) {
-      directoryQueue.set(wildcardDirectory, type !== 0);
+      directoryQueue.set(path.normalize(wildcardDirectory), type !== 0);
     }
 
     if (directoryQueue.size > 0) {
       const watchFs: IWatchFileSystem = getWatchFs();
 
       for (const [wildcardDirectory, isRecursive] of directoryQueue) {
-        const dirents: Dirent[] = watchFs.readdirSync(path.normalize(wildcardDirectory), {
+        const dirents: Dirent[] = watchFs.readdirSync(wildcardDirectory, {
           withFileTypes: true
         });
 
         if (isRecursive) {
           for (const dirent of dirents) {
             if (dirent.isDirectory()) {
-              const absoluteDirentPath: string = ts.combinePaths(wildcardDirectory, dirent.name);
+              // Using path.join because we want platform-normalized paths.
+              const absoluteDirentPath: string = path.join(wildcardDirectory, dirent.name);
               directoryQueue.set(absoluteDirentPath, true);
             }
           }
