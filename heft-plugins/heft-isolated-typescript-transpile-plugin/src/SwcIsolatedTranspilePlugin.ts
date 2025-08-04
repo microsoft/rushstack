@@ -171,7 +171,7 @@ async function transpileProjectAsync(
     // If the tsconfig has wildcard directories, we need to ensure that they are watched for file changes.
     const directoryQueue: Map<string, boolean> = new Map();
     for (const [wildcardDirectory, type] of Object.entries(parsedTsConfig.wildcardDirectories)) {
-      directoryQueue.set(path.normalize(wildcardDirectory), type !== 0);
+      directoryQueue.set(path.normalize(wildcardDirectory), type === ts.WatchDirectoryFlags.Recursive);
     }
 
     if (directoryQueue.size > 0) {
