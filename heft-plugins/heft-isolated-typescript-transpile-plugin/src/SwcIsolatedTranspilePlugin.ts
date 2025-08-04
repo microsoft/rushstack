@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Dirent, Stats } from 'node:fs';
+import type { Dirent } from 'node:fs';
 import path from 'node:path';
 import { type ChildProcess, fork } from 'node:child_process';
 
@@ -159,74 +159,41 @@ async function transpileProjectAsync(
   });
   const { ts } = tool;
 
-  if (getWatchFs) {
-    const watchFs: IWatchFileSystem = getWatchFs();
-    const { system } = tool;
-    const emptyFileSystemEntries: { files: string[]; directories: string[] } = { files: [], directories: [] };
-    // Copied from TypeScript, but using the watch file system
-    function getAccessibleFileSystemEntries(directory: string): { files: string[]; directories: string[] } {
-      try {
-        const entries: Dirent[] = watchFs.readdirSync(directory || '.', { withFileTypes: true });
-        const files: string[] = [];
-        const directories: string[] = [];
-        for (const dirent of entries) {
-          const entry: string = dirent.name;
-          if (entry === '.' || entry === '..') {
-            continue;
-          }
-          let stat: Stats | Dirent | undefined;
-          if (dirent.isSymbolicLink()) {
-            const name: string = ts.combinePaths(directory, entry);
-            stat = watchFs.statSync(name);
-            if (!stat) {
-              continue;
-            }
-          } else {
-            stat = dirent;
-          }
-
-          if (stat.isFile()) {
-            files.push(entry);
-          } else if (stat.isDirectory()) {
-            directories.push(entry);
-          }
-        }
-        files.sort();
-        directories.sort();
-        return { files, directories };
-      } catch {
-        return emptyFileSystemEntries;
-      }
-    }
-
-    system.readDirectory = (
-      dirPath: string,
-      extensions?: string[],
-      excludes?: string[],
-      includes?: string[],
-      depth?: number
-    ): string[] => {
-      return ts.matchFiles(
-        dirPath,
-        extensions,
-        excludes,
-        includes,
-        system.useCaseSensitiveFileNames,
-        buildFolderPath,
-        depth,
-        getAccessibleFileSystemEntries,
-        system.realpath!,
-        system.directoryExists
-      );
-    };
-  }
-
   const tsconfigPath: string = getTsconfigFilePath(heftConfiguration, pluginOptions.tsConfigPath);
   const parsedTsConfig: TTypeScript.ParsedCommandLine | undefined = loadTsconfig({ tool, tsconfigPath });
 
   if (!parsedTsConfig) {
     logger.terminal.writeLine('tsconfig.json not found. Skipping parse and transpile for this project.');
     return;
+  }
+
+  if (getWatchFs && parsedTsConfig.wildcardDirectories) {
+    // If the tsconfig has wildcard directories, we need to ensure that they are watched for file changes.
+    const directoryQueue: Map<string, boolean> = new Map();
+    for (const [wildcardDirectory, type] of Object.entries(parsedTsConfig.wildcardDirectories)) {
+      directoryQueue.set(wildcardDirectory, type !== 0);
+    }
+
+    if (directoryQueue.size > 0) {
+      const watchFs: IWatchFileSystem = getWatchFs();
+
+      for (const [wildcardDirectory, isRecursive] of directoryQueue) {
+        const dirents: Dirent[] = watchFs.readdirSync(path.normalize(wildcardDirectory), {
+          withFileTypes: true
+        });
+
+        if (isRecursive) {
+          for (const dirent of dirents) {
+            if (dirent.isDirectory()) {
+              const absoluteDirentPath: string = ts.combinePaths(wildcardDirectory, dirent.name);
+              directoryQueue.set(absoluteDirentPath, true);
+            }
+          }
+        }
+      }
+
+      logger.terminal.writeDebugLine(`Watching for changes in ${directoryQueue.size} directories`);
+    }
   }
 
   if (emitKinds.length < 1) {
