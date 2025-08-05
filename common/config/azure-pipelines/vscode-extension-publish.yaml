@@ -72,7 +72,7 @@ extends:
                         workingDirectory: ${{ extension.projectPath }}
                         displayName: 'Prepare manifest for signing: ${{ extension.key }}'
 
-                      - task: EsrpCodeSigning@5
+                      - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
                         displayName: 'ESRP CodeSigning'
                         inputs:
                           connectedservicename: 'Rushstack-NPM-ESRP-Client'
