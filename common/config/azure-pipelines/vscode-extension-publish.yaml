@@ -78,9 +78,9 @@ extends:
                           connectedservicename: 'Rushstack-NPM-ESRP-Client'
                           AppRegistrationClientId: 'ceb49532-1c6a-445c-8d34-91ab779bdf50'
                           AppRegistrationTenantId: 'cdc5aeea-15c5-4db6-b079-fcadd2505dc2'
-                          AuthAKVName: '' # TODO
-                          AuthCertName: '' # TODO
-                          AuthSignCertName: '' # TODO
+                          AuthAKVName: 'rushstack-esrp'
+                          AuthCertName: 'ceb49532-rushstack-esrp'
+                          AuthSignCertName: 'rushstack-vs-marketplace-publisher-signing-certificate'
                           FolderPath: '${{ extension.projectPath }}'
                           Pattern: 'extension.signature.p7s'
                           signConfigType: inlineSignParams
