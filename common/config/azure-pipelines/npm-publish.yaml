@@ -29,6 +29,10 @@ extends:
                 - output: pipelineArtifact
                   targetPath: $(Build.ArtifactStagingDirectory)/published-versions
                   artifactName: published-versions
+                - output: pipelineArtifact
+                  targetPath: $(Build.ArtifactStagingDirectory)/packages
+                  displayName: 'Publish Rushstack Artifacts: rushstack-packages'
+                  artifactName: rushstack-packages
             steps:
               - checkout: self
                 persistCredentials: true
