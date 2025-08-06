@@ -29,7 +29,6 @@ import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
 import { Utilities } from '../utilities/Utilities';
 import type { Subspace } from '../api/Subspace';
-import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { initializeDotEnv } from '../logic/dotenv';
 
@@ -520,7 +519,7 @@ export class RushPnpmCommandLineParser {
         }
 
         // Update patchedDependencies to pnpm configuration file
-        pnpmOptions?.updateGlobalPatchedDependencies(newGlobalPatchedDependencies);
+        this._rushConfiguration.pnpmOptions.updateGlobalPatchedDependencies(newGlobalPatchedDependencies);
 
         // Rerun installation to update
         await this._doRushUpdateAsync();
