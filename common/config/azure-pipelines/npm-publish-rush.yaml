@@ -4,6 +4,12 @@ variables:
   - name: SourceBranch
     value: $[ replace(replace(resources.repositories.self.ref, 'refs/heads/', ''), 'refs/pull/', 'refs/remotes/pull/') ]
 
+parameteres:
+  - name: PublishVersionTag
+    displayName: 'Publish Version (Default is latest)'
+    type: string
+    default: 'latest'
+
 resources:
   repositories:
     - repository: 1esPipelines
@@ -39,11 +45,6 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
                 parameters:
-                  VersionPolicyName: noRush
-                  BranchName: $(SourceBranch)
-
-              - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
-                parameters:
                   VersionPolicyName: rush
                   BranchName: $(SourceBranch)
 
@@ -52,12 +53,8 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/publish.yaml@self
                 parameters:
-                  VersionPolicyName: noRush
-                  BranchName: $(SourceBranch)
-
-              - template: /common/config/azure-pipelines/templates/publish.yaml@self
-                parameters:
                   VersionPolicyName: rush
                   BranchName: $(SourceBranch)
+                  PublishVersionTag: ${{ parameters.PublishVersionTag }}
 
               - template: /common/config/azure-pipelines/templates/record-published-versions.yaml@self

@@ -4,7 +4,10 @@ parameters:
   - name: BranchName
     type: string
     default: $(Build.SourceBranchName)
+  - name: PublishVersionTag
+    type: string
+    default: latest
 
 steps:
-  - script: 'node common/scripts/install-run-rush.js publish --apply --pack --release-folder $(Build.ArtifactStagingDirectory)/packages --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details --set-access-level public'
+  - script: 'node common/scripts/install-run-rush.js publish --apply --pack --release-folder $(Build.ArtifactStagingDirectory)/packages --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details --tag ${{ parameters.PublishVersionTag }}'
     displayName: 'Rush Publish (Policy: ${{ parameters.VersionPolicyName }})'
