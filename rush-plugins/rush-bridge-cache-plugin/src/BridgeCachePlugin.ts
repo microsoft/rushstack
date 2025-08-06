@@ -75,7 +75,7 @@ export class BridgeCachePlugin implements IRushPlugin {
         }
       );
       // populate the cache for each operation
-      command.hooks.beforeExecuteOperations.tap(
+      command.hooks.beforeExecuteOperations.tapPromise(
         PLUGIN_NAME,
         async (
           recordByOperation: Map<Operation, IOperationExecutionResult>,
@@ -137,9 +137,9 @@ export class BridgeCachePlugin implements IRushPlugin {
                   const projectFolder: string = operation.associatedProject?.projectFolder;
                   const missingFolders: string[] = [];
                   operation.settings.outputFolderNames.forEach((outputFolderName: string) => {
-                      if (!FileSystem.exists(`${projectFolder}/${outputFolderName}`)) {
-                        missingFolders.push(outputFolderName);
-                      }
+                    if (!FileSystem.exists(`${projectFolder}/${outputFolderName}`)) {
+                      missingFolders.push(outputFolderName);
+                    }
                   });
                   if (missingFolders.length > 0) {
                     terminal.writeWarningLine(
