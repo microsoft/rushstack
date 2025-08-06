@@ -6,5 +6,5 @@ parameters:
     default: $(Build.SourceBranchName)
 
 steps:
-  - script: 'node common/scripts/install-run-rush.js publish --apply --pack --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details --set-access-level public'
+  - script: 'node common/scripts/install-run-rush.js publish --apply --pack --release-folder $(Build.ArtifactStagingDirectory)/packages --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details --set-access-level public'
     displayName: 'Rush Publish (Policy: ${{ parameters.VersionPolicyName }})'
