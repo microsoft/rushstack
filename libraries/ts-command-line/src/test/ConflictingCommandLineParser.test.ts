@@ -5,6 +5,7 @@ import { CommandLineAction } from '../providers/CommandLineAction';
 import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
 import type { IScopedLongNameParseResult } from '../providers/CommandLineParameterProvider';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 class GenericCommandLine extends CommandLineParser {
   public constructor(action: new () => CommandLineAction) {
@@ -54,7 +55,7 @@ class TestAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     expect(this._scope1Arg.value).toEqual('scope1value');
     expect(this._scope2Arg.value).toEqual('scope2value');
     expect(this._nonConflictingArg.value).toEqual('nonconflictingvalue');
@@ -86,7 +87,7 @@ class UnscopedDuplicateArgumentTestAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     throw new Error('This action should not be executed');
   }
 }
@@ -115,7 +116,7 @@ class ScopedDuplicateArgumentTestAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     throw new Error('This action should not be executed');
   }
 }
@@ -123,6 +124,8 @@ class ScopedDuplicateArgumentTestAction extends CommandLineAction {
 describe(`Conflicting ${CommandLineParser.name}`, () => {
   it('executes an action', async () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(TestAction);
+
+    ensureHelpTextMatchesSnapshot(commandLineParser);
 
     await commandLineParser.executeAsync([
       'do:the-job',
@@ -146,6 +149,8 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
 
   it('parses the scope out of a long name correctly', async () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(TestAction);
+
+    ensureHelpTextMatchesSnapshot(commandLineParser);
 
     let result: IScopedLongNameParseResult = commandLineParser.parseScopedLongName('--scope1:arg');
     expect(result.scope).toEqual('scope1');

@@ -17,7 +17,7 @@ export class InstallManagerFactory {
     options: IInstallManagerOptions
   ): Promise<BaseInstallManager> {
     if (
-      rushConfiguration.packageManager === 'pnpm' &&
+      rushConfiguration.isPnpm &&
       rushConfiguration.pnpmOptions &&
       rushConfiguration.pnpmOptions.useWorkspaces
     ) {

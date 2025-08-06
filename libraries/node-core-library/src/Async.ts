@@ -32,9 +32,42 @@ export interface IAsyncParallelismOptions {
  * @public
  */
 export interface IRunWithRetriesOptions<TResult> {
-  action: () => Promise<TResult> | TResult;
+  /**
+   * The action to be performed. The action is repeatedly executed until it completes without throwing or the
+   * maximum number of retries is reached.
+   *
+   * @param retryCount - The number of times the action has been retried.
+   */
+  action: (retryCount: number) => Promise<TResult> | TResult;
+  /**
+   * The maximum number of times the action should be retried.
+   */
   maxRetries: number;
+  /**
+   * The delay in milliseconds between retries.
+   */
   retryDelayMs?: number;
+}
+
+/**
+ * @remarks
+ * Used with {@link Async.runWithTimeoutAsync}.
+ *
+ * @public
+ */
+export interface IRunWithTimeoutOptions<TResult> {
+  /**
+   * The action to be performed. The action is executed with a timeout.
+   */
+  action: () => Promise<TResult> | TResult;
+  /**
+   * The timeout in milliseconds.
+   */
+  timeoutMs: number;
+  /**
+   * The message to use for the error if the timeout is reached.
+   */
+  timeoutMessage?: string;
 }
 
 /**
@@ -313,13 +346,12 @@ export class Async {
     maxRetries,
     retryDelayMs = 0
   }: IRunWithRetriesOptions<TResult>): Promise<TResult> {
-    let retryCounter: number = 0;
-    // eslint-disable-next-line no-constant-condition
+    let retryCount: number = 0;
     while (true) {
       try {
-        return await action();
+        return await action(retryCount);
       } catch (e) {
-        if (++retryCounter > maxRetries) {
+        if (++retryCount > maxRetries) {
           throw e;
         } else if (retryDelayMs > 0) {
           await Async.sleepAsync(retryDelayMs);
@@ -346,6 +378,31 @@ export class Async {
    */
   public static getSignal(): [Promise<void>, () => void, (err: Error) => void] {
     return getSignal();
+  }
+
+  /**
+   * Runs a promise with a timeout. If the promise does not resolve within the specified timeout,
+   * it will reject with an error.
+   * @remarks If the action is completely synchronous, runWithTimeoutAsync doesn't do anything meaningful.
+   */
+  public static async runWithTimeoutAsync<TResult>({
+    action,
+    timeoutMs,
+    timeoutMessage = 'Operation timed out'
+  }: IRunWithTimeoutOptions<TResult>): Promise<TResult> {
+    let timeoutHandle: NodeJS.Timeout | undefined;
+    const promise: Promise<TResult> = Promise.resolve(action());
+    const timeoutPromise: Promise<never> = new Promise<never>((resolve, reject) => {
+      timeoutHandle = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+    });
+
+    try {
+      return Promise.race([promise, timeoutPromise]);
+    } finally {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+      }
+    }
   }
 }
 

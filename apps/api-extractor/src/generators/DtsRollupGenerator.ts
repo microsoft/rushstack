@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable no-bitwise */
-
 import * as ts from 'typescript';
 import { FileSystem, type NewlineKind, InternalError } from '@rushstack/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
@@ -20,7 +18,7 @@ import { IndentedWriter } from './IndentedWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 import type { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import type { AstModuleExportInfo } from '../analyzer/AstModule';
+import type { IAstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 import type { AstEntity } from '../analyzer/AstEntity';
 
@@ -153,7 +151,7 @@ export class DtsRollupGenerator {
       }
 
       if (astEntity instanceof AstNamespaceImport) {
-        const astModuleExportInfo: AstModuleExportInfo = astEntity.fetchAstModuleExportInfo(collector);
+        const astModuleExportInfo: IAstModuleExportInfo = astEntity.fetchAstModuleExportInfo(collector);
 
         if (entity.nameForEmit === undefined) {
           // This should never happen

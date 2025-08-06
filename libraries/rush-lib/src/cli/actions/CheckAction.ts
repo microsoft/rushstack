@@ -2,17 +2,18 @@
 // See LICENSE in the project root for license information.
 
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
+import { Colorize } from '@rushstack/terminal';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
+import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class CheckAction extends BaseRushAction {
-  private readonly _terminal: ITerminal;
   private readonly _jsonFlag: CommandLineFlagParameter;
   private readonly _verboseFlag: CommandLineFlagParameter;
   private readonly _subspaceParameter: CommandLineStringParameter | undefined;
+  private readonly _variantParameter: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -27,7 +28,6 @@ export class CheckAction extends BaseRushAction {
       parser
     });
 
-    this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
       description: 'If this flag is specified, output will be in JSON format.'
@@ -46,6 +46,7 @@ export class CheckAction extends BaseRushAction {
         'consistent only within that subspace (ignoring other subspaces). This parameter is required when ' +
         'the "subspacesEnabled" setting is set to true in subspaces.json.'
     });
+    this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
   }
 
   protected async runAsync(): Promise<void> {
@@ -54,7 +55,25 @@ export class CheckAction extends BaseRushAction {
         `The --subspace parameter must be specified with "rush check" when subspaces is enabled.`
       );
     }
-    VersionMismatchFinder.rushCheck(this.rushConfiguration, this._terminal, {
+
+    const currentlyInstalledVariant: string | undefined =
+      await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      true
+    );
+    if (!variant && currentlyInstalledVariant) {
+      this.terminal.writeWarningLine(
+        Colorize.yellow(
+          `Variant '${currentlyInstalledVariant}' has been installed, but 'rush check' is currently checking the default variant. ` +
+            `Use 'rush ${this.actionName} ${this._variantParameter.longName} '${currentlyInstalledVariant}' to check the current installation.`
+        )
+      );
+    }
+
+    VersionMismatchFinder.rushCheck(this.rushConfiguration, this.terminal, {
+      variant,
       printAsJson: this._jsonFlag.value,
       truncateLongPackageNameLists: !this._verboseFlag.value,
       subspace: this._subspaceParameter?.value

@@ -66,8 +66,7 @@ export class TraceImportCommandLineParser extends CommandLineParser {
     });
   }
 
-  protected async onExecute(): Promise<void> {
-    // override
+  protected override async onExecuteAsync(): Promise<void> {
     if (this._debugParameter.value) {
       InternalError.breakInDebugger = true;
     }

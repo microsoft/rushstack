@@ -38,7 +38,9 @@
 				"--inspect-brk",
 				"${workspaceFolder}/apps/heft/lib/start.js",
 				"--debug",
-				"test-watch"
+				"test",
+				"--test-path-pattern",
+        "${fileBasenameNoExtension}"
 			],
 			"skipFiles": ["<node_internals>/**"],
 			"outFiles": [],
@@ -68,7 +70,8 @@
 			"name": "Attach",
 			"type": "node",
 			"request": "attach",
-			"port": 9229
+			"port": 9229,
+			"outFiles": [],
 		},
 		{
 			"name": "Launch Rush Extension",
@@ -82,6 +85,19 @@
 				"${workspaceFolder}/vscode-extensions/rush-vscode-extension/dist/**/*.js"
 			]
 			// "preLaunchTask": "npm: build:watch - vscode-extensions/rush-vscode-extension"
+		},
+		{
+			"name": "Launch Debug Certificate Manager VS Code Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"cwd": "${workspaceFolder}/vscode-extensions/debug-certificate-manager-vscode-extension/dist/vsix/unpacked",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/debug-certificate-manager-vscode-extension/dist/vsix/unpacked"
+			],
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/vscode-extensions/debug-certificate-manager-vscode-extension/**"
+			]
 		}
 	]
 }

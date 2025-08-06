@@ -3,6 +3,7 @@
 
 import { CommandLineParser } from '../providers/CommandLineParser';
 import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 class TestCommandLine extends CommandLineParser {
   public flag: CommandLineFlagParameter;
@@ -20,13 +21,18 @@ class TestCommandLine extends CommandLineParser {
     });
   }
 
-  protected async onExecute(): Promise<void> {
-    await super.onExecute();
+  protected override async onExecuteAsync(): Promise<void> {
+    await super.onExecuteAsync();
     this.done = true;
   }
 }
 
 describe(`Actionless ${CommandLineParser.name}`, () => {
+  it('renders help text', () => {
+    const commandLineParser: TestCommandLine = new TestCommandLine();
+    ensureHelpTextMatchesSnapshot(commandLineParser);
+  });
+
   it('parses an empty arg list', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 

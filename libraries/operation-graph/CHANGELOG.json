@@ -2,6 +2,269 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.3.1",
+      "tag": "@rushstack/operation-graph_v0.3.1",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@rushstack/operation-graph_v0.3.0",
+      "date": "Sat, 21 Jun 2025 00:13:15 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) The OperationExecutionManager `beforeExecute` and `afterExecute` hooks have been made async and renamed to `beforeExecuteAsync` and `afterExecuteAsync`. Operations now have an optional `metadata` field that can be used to store arbitrary data."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.41",
+      "tag": "@rushstack/operation-graph_v0.2.41",
+      "date": "Thu, 01 May 2025 00:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.13.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.40",
+      "tag": "@rushstack/operation-graph_v0.2.40",
+      "date": "Tue, 25 Mar 2025 15:11:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.39",
+      "tag": "@rushstack/operation-graph_v0.2.39",
+      "date": "Tue, 11 Mar 2025 02:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.38",
+      "tag": "@rushstack/operation-graph_v0.2.38",
+      "date": "Wed, 12 Feb 2025 01:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.37",
+      "tag": "@rushstack/operation-graph_v0.2.37",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.36",
+      "tag": "@rushstack/operation-graph_v0.2.36",
+      "date": "Thu, 09 Jan 2025 01:10:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.10.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.35",
+      "tag": "@rushstack/operation-graph_v0.2.35",
+      "date": "Sat, 14 Dec 2024 01:11:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.10.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.34",
+      "tag": "@rushstack/operation-graph_v0.2.34",
+      "date": "Fri, 22 Nov 2024 01:10:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.33",
+      "tag": "@rushstack/operation-graph_v0.2.33",
+      "date": "Fri, 13 Sep 2024 00:11:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.32",
+      "tag": "@rushstack/operation-graph_v0.2.32",
+      "date": "Tue, 10 Sep 2024 20:08:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.31",
+      "tag": "@rushstack/operation-graph_v0.2.31",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.14.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.30",
+      "tag": "@rushstack/operation-graph_v0.2.30",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.29",
+      "tag": "@rushstack/operation-graph_v0.2.29",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.28",
+      "tag": "@rushstack/operation-graph_v0.2.28",
+      "date": "Wed, 17 Jul 2024 06:55:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.27",
+      "tag": "@rushstack/operation-graph_v0.2.27",
+      "date": "Wed, 17 Jul 2024 00:11:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Handle errors when sending IPC messages to host."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.26",
+      "tag": "@rushstack/operation-graph_v0.2.26",
+      "date": "Tue, 16 Jul 2024 00:36:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.13.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.25",
       "tag": "@rushstack/operation-graph_v0.2.25",
       "date": "Thu, 30 May 2024 00:13:05 GMT",

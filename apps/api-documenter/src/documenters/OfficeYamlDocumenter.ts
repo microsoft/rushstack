@@ -65,7 +65,6 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
   /** @override */
   protected onGetTocRoot(): IYamlTocItem {
-    // override
     return {
       name: 'API reference',
       href: 'overview.md',

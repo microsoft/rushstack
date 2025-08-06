@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SASS Typings ignored1.scss: files 1`] = `Array []`;
+
+exports[`SASS Typings ignored2.scss: files 1`] = `Array []`;
+
+exports[`SASS Typings styles.module.sass: files 1`] = `
+Array [
+  "styles.module.sass.d.ts",
+]
+`;
+
+exports[`SASS Typings styles.module.sass: styles.module.sass.d.ts 1`] = `
+"declare interface IStyles {
+  exampleImport: string;
+  exampleApp: string;
+  exampleButton: string;
+}
+declare const styles: IStyles;
+export default styles;"
+`;
+
+exports[`SASS Typings stylesAltSyntax.global.scss: files 1`] = `
+Array [
+  "stylesAltSyntax.global.scss.d.ts",
+]
+`;
+
+exports[`SASS Typings stylesAltSyntax.global.scss: stylesAltSyntax.global.scss.d.ts 1`] = `"export {};"`;
+
+exports[`SASS Typings stylesAltSyntax.module.scss: files 1`] = `
+Array [
+  "stylesAltSyntax.module.scss.d.ts",
+]
+`;
+
+exports[`SASS Typings stylesAltSyntax.module.scss: stylesAltSyntax.module.scss.d.ts 1`] = `
+"declare interface IStyles {
+  label: string;
+  \\"style-with-dashes\\": string;
+}
+declare const styles: IStyles;
+export default styles;"
+`;
+
+exports[`SASS Typings stylesUseAltSyntax.module.scss: files 1`] = `
+Array [
+  "stylesUseAltSyntax.module.scss.d.ts",
+]
+`;
+
+exports[`SASS Typings stylesUseAltSyntax.module.scss: stylesUseAltSyntax.module.scss.d.ts 1`] = `
+"declare interface IStyles {
+  label: string;
+  exampleList: string;
+  exampleListItem1: string;
+  exampleListItem2: string;
+  exampleListItem3: string;
+}
+declare const styles: IStyles;
+export default styles;"
+`;
+
+exports[`SASS Typings stylesUseSyntax.module.sass: files 1`] = `
+Array [
+  "stylesUseSyntax.module.sass.d.ts",
+]
+`;
+
+exports[`SASS Typings stylesUseSyntax.module.sass: stylesUseSyntax.module.sass.d.ts 1`] = `
+"declare interface IStyles {
+  exampleAnchor: string;
+}
+declare const styles: IStyles;
+export default styles;"
+`;

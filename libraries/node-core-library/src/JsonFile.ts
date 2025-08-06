@@ -128,7 +128,7 @@ export interface IJsonFileLoadAndValidateOptions extends IJsonFileParseOptions, 
  *
  * @public
  */
-export interface IJsonFileStringifyOptions {
+export interface IJsonFileStringifyOptions extends IJsonFileParseOptions {
   /**
    * If provided, the specified newline type will be used instead of the default `\r\n`.
    */
@@ -345,17 +345,30 @@ export class JsonFile {
       JsonFile.validateNoUndefinedMembers(newJsonObject);
     }
 
+    let explicitMode: 'json5' | 'json' | 'cjson' | undefined = undefined;
+    switch (options.jsonSyntax) {
+      case JsonSyntax.Strict:
+        explicitMode = 'json';
+        break;
+      case JsonSyntax.JsonWithComments:
+        explicitMode = 'cjson';
+        break;
+      case JsonSyntax.Json5:
+        explicitMode = 'json5';
+        break;
+    }
+
     let stringified: string;
 
     if (previousJson !== '') {
       // NOTE: We don't use mode=json here because comments aren't allowed by strict JSON
       stringified = jju.update(previousJson, newJsonObject, {
-        mode: JsonSyntax.Json5,
+        mode: explicitMode ?? JsonSyntax.Json5,
         indent: 2
       });
     } else if (options.prettyFormatting) {
       stringified = jju.stringify(newJsonObject, {
-        mode: 'json',
+        mode: explicitMode ?? 'json',
         indent: 2
       });
 

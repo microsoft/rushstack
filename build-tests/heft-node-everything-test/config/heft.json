@@ -4,6 +4,12 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
+  "heftPlugins": [
+    {
+      "pluginPackage": "heft-example-lifecycle-plugin"
+    }
+  ],
+
   // TODO: Add comments
   "phasesByName": {
     "build": {
@@ -25,6 +31,16 @@
           "taskDependencies": ["typescript"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-api-extractor-plugin"
+          }
+        },
+        "metadata-test": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
+            "options": {
+              "scriptPath": "./lib/test-metadata.js"
+            }
           }
         }
       }

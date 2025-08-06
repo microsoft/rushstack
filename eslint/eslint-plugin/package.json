@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-plugin",
-  "version": "0.15.1",
+  "version": "0.19.0",
   "description": "An ESLint plugin providing supplementary rules for use with the @rushstack/eslint-config package",
   "license": "MIT",
   "repository": {
@@ -27,24 +27,17 @@
   },
   "dependencies": {
     "@rushstack/tree-pattern": "workspace:*",
-    "@typescript-eslint/utils": "~6.19.0"
+    "@typescript-eslint/utils": "~8.31.0"
   },
   "peerDependencies": {
-    "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0"
+    "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "~3.0.0",
-    "@rushstack/heft": "0.66.17",
-    "@rushstack/heft-node-rig": "2.6.15",
-    "@types/eslint": "8.2.0",
-    "@types/estree": "1.0.5",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "18.17.15",
-    "@typescript-eslint/parser": "~6.19.0",
-    "@typescript-eslint/rule-tester": "~6.19.0",
-    "@typescript-eslint/typescript-estree": "~6.19.0",
-    "eslint": "~8.57.0",
-    "eslint-plugin-header": "~3.1.1",
-    "typescript": "~5.4.2"
+    "@rushstack/heft": "0.74.1",
+    "@typescript-eslint/parser": "~8.31.0",
+    "@typescript-eslint/rule-tester": "~8.31.0",
+    "decoupled-local-node-rig": "workspace:*",
+    "eslint": "~9.25.1",
+    "typescript": "~5.8.2"
   }
 }

@@ -1,0 +1,27 @@
+/**
+ * Defines configuration used by core Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  "extends": "local-node-rig/profiles/default/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "includeGlobs": ["dist-dev", "dist-prod", "lib", "temp"] }],
+
+      "tasksByName": {
+        "webpack": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack4-plugin"
+          }
+        },
+
+        "typescript": {
+          // The webpack task generates some typings
+          "taskDependencies": ["webpack"]
+        }
+      }
+    }
+  }
+}

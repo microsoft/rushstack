@@ -16,8 +16,11 @@
 export { getPackageDeps, getGitHashForFiles } from './getPackageDeps';
 export {
   type IFileDiffStatus,
+  type IDetailedRepoState,
+  getDetailedRepoStateAsync,
   getRepoChanges,
   getRepoRoot,
   getRepoStateAsync,
-  ensureGitMinimumVersion
+  ensureGitMinimumVersion,
+  hashFilesAsync
 } from './getRepoState';

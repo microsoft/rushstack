@@ -7,8 +7,18 @@
 import { ITerminal } from '@rushstack/terminal';
 
 // @public (undocumented)
+export interface IExportAsDefaultOptions {
+    // @deprecated (undocumented)
+    documentationComment?: string;
+    interfaceDocumentationComment?: string;
+    interfaceName?: string;
+    valueDocumentationComment?: string;
+}
+
+// @public (undocumented)
 export interface IStringValuesTypingsGeneratorBaseOptions {
-    exportAsDefault?: boolean;
+    exportAsDefault?: boolean | IExportAsDefaultOptions;
+    // @deprecated (undocumented)
     exportAsDefaultInterfaceName?: string;
 }
 
@@ -30,6 +40,7 @@ export interface IStringValueTyping {
 
 // @public (undocumented)
 export interface IStringValueTypings {
+    exportAsDefault?: boolean | IExportAsDefaultOptions;
     // (undocumented)
     typings: IStringValueTyping[];
 }
@@ -64,8 +75,6 @@ export interface ITypingsGeneratorOptionsWithCustomReadFile<TTypingsResult = str
 export interface ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult = string | undefined, TFileContents = string> extends ITypingsGeneratorBaseOptions {
     // (undocumented)
     fileExtensions: string[];
-    // @deprecated (undocumented)
-    filesToIgnore?: string[];
     // (undocumented)
     getAdditionalOutputFiles?: (relativePath: string) => string[];
     // (undocumented)
@@ -91,11 +100,13 @@ export class TypingsGenerator<TFileContents = string> {
     readonly ignoredFileGlobs: readonly string[];
     readonly inputFileGlob: string;
     // (undocumented)
-    protected _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
+    protected readonly _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
     registerDependency(consumer: string, rawDependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;
     readonly sourceFolderPath: string;
+    // (undocumented)
+    protected readonly terminal: ITerminal;
 }
 
 ```

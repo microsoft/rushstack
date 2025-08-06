@@ -2,6 +2,59 @@
   "name": "@rushstack/eslint-plugin-packlets",
   "entries": [
     {
+      "version": "0.12.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.12.0",
+      "date": "Thu, 26 Jun 2025 18:57:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update for compatibility with ESLint 9"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.11.0",
+      "date": "Tue, 11 Mar 2025 02:12:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `@typescript-eslint/*` packages to add support for TypeScript 5.8."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.10.0",
+      "date": "Sat, 01 Mar 2025 07:23:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump the `@typescript-eslint/*` dependencies to `~8.24.0` to support newer versions of TypeScript."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.2",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.9.2",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.1",
       "tag": "@rushstack/eslint-plugin-packlets_v0.9.1",
       "date": "Sat, 17 Feb 2024 06:24:34 GMT",

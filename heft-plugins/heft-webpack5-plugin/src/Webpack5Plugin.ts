@@ -333,16 +333,18 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
         // Since the webpack-dev-server does not return infrastructure errors via a callback like
         // compiler.watch(...), we will need to intercept them and log them ourselves.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        compiler.hooks.infrastructureLog.tap(PLUGIN_NAME, (name: string, type: string, args: any[]) => {
-          if (name === WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME && type === 'error') {
-            const error: Error | undefined = args[0];
-            if (error) {
-              taskSession.logger.emitError(error);
+        compiler.hooks.infrastructureLog.tap(
+          PLUGIN_NAME,
+          (name: string, type: string, args: unknown[] | undefined) => {
+            if (name === WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME && type === 'error') {
+              const error: Error | undefined = args?.[0] as Error | undefined;
+              if (error) {
+                taskSession.logger.emitError(error);
+              }
             }
+            return true;
           }
-          return true;
-        });
+        );
 
         // The webpack-dev-server package has a design flaw, where merely loading its package will set the
         // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable

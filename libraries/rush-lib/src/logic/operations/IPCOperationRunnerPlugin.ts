@@ -38,7 +38,11 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
         before: ShellOperationPluginName
       },
       async (operations: Set<Operation>, context: ICreateOperationsContext) => {
-        const { isWatch } = context;
+        const { isWatch, isInitial } = context;
+        if (!isWatch) {
+          return operations;
+        }
+
         currentContext = context;
 
         const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
@@ -47,16 +51,30 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project, runner } = operation;
 
-          if (runner || !phase || !project) {
+          if (runner) {
             continue;
           }
 
-          const rawScript: string | undefined = project.packageJson.scripts?.[`${phase.name}:ipc`];
+          const { scripts } = project.packageJson;
+          if (!scripts) {
+            continue;
+          }
+
+          const { name: phaseName } = phase;
+
+          const rawScript: string | undefined =
+            (!isInitial ? scripts[`${phaseName}:incremental:ipc`] : undefined) ?? scripts[`${phaseName}:ipc`];
+
           if (!rawScript) {
             continue;
           }
 
-          const commandToRun: string = formatCommand(rawScript, getCustomParameterValuesForPhase(phase));
+          // This is the command that will be used to identify the cache entry for this operation, to allow
+          // for this operation (or downstream operations) to be restored from the build cache.
+          const commandForHash: string | undefined = phase.shellCommand ?? scripts?.[phaseName];
+
+          const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
+          const commandToRun: string = formatCommand(rawScript, customParameterValues);
 
           const operationName: string = getDisplayName(phase, project);
           let maybeIpcOperationRunner: IPCOperationRunner | undefined = runnerCache.get(operationName);
@@ -65,8 +83,9 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
               phase,
               project,
               name: operationName,
-              shellCommand: commandToRun,
-              persist: isWatch,
+              commandToRun,
+              commandForHash,
+              persist: true,
               requestRun: (requestor?: string) => {
                 const operationState: IOperationExecutionResult | undefined =
                   operationStatesByRunner.get(ipcOperationRunner);

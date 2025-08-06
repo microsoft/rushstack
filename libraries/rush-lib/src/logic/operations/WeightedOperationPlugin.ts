@@ -36,7 +36,7 @@ function weightOperations(
     const { associatedProject: project, associatedPhase: phase } = operation;
     if (runner!.isNoOp) {
       operation.weight = 0;
-    } else if (project && phase) {
+    } else {
       const projectConfiguration: RushProjectConfiguration | undefined = projectConfigurations.get(project);
       const operationSettings: IOperationSettings | undefined =
         operation.settings ?? projectConfiguration?.operationSettingsByOperationName.get(phase.name);

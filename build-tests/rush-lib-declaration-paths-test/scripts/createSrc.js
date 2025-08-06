@@ -26,7 +26,11 @@ module.exports = {
       }
     }
 
-    const indexFileLines = ['/// <reference path="./npm-check-typings.d.ts" />', ''];
+    const indexFileLines = [
+      '// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.',
+      '// See LICENSE in the project root for license information.',
+      ''
+    ];
     for await (const dtsPath of collectDtsPaths(`${rushLibPath}/lib`, '@microsoft/rush-lib/lib')) {
       indexFileLines.push(`import '${dtsPath}';`);
     }

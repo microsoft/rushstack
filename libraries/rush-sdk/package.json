@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.129.5",
+  "version": "5.157.0",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
@@ -11,8 +11,19 @@
   "main": "lib-shim/index.js",
   "typings": "dist/rush-lib.d.ts",
   "exports": {
-    ".": "./lib-shim/index.js",
-    "./loader": "./lib-shim/loader.js"
+    ".": {
+      "types": "./dist/rush-lib.d.ts",
+      "default": "./lib-shim/index.js"
+    },
+    "./loader": {
+      "types": "./dist/loader.d.ts",
+      "default": "./lib-shim/loader.js"
+    },
+    "./lib/*": {
+      "types": "./lib/*.d.ts",
+      "default": "./lib/*.js"
+    },
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
@@ -28,18 +39,24 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@pnpm/lockfile.types": "~1.0.3",
+    "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/package-deps-hash": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "@types/node-fetch": "2.6.2",
     "tapable": "2.2.1"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
+    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/semver": "7.5.0",
-    "@types/webpack-env": "1.18.0"
+    "@types/webpack-env": "1.18.8",
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*",
+    "webpack": "~5.98.0"
   }
 }

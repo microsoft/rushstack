@@ -1,0 +1,29 @@
+/**
+ * Defines configuration used by core Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  /**
+   * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
+   * settings to be shared across multiple projects.
+   *
+   * To delete an inherited setting, set it to `null` in this file.
+   */
+  "extends": "local-node-rig/profiles/default/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "includeGlobs": ["dist-dev", "dist-prod", "lib", "temp"] }],
+
+      "tasksByName": {
+        "webpack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack4-plugin"
+          }
+        }
+      }
+    }
+  }
+}

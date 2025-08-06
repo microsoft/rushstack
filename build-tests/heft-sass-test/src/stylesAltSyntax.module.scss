@@ -1,0 +1,15 @@
+/**
+ * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
+ * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
+ */
+
+// Testing SCSS syntax
+$marginValue: '[theme:normalMargin, default: 20px]';
+
+.label {
+  margin-bottom: $marginValue;
+}
+
+.style-with-dashes {
+  margin-top: $marginValue;
+}

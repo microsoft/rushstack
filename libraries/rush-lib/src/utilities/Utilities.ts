@@ -14,7 +14,8 @@ import {
   type FileSystemStats,
   SubprocessTerminator,
   Executable,
-  type IWaitForExitResult
+  type IWaitForExitResult,
+  Async
 } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -154,20 +155,28 @@ interface ICreateEnvironmentForRushCommandOptions {
 export class Utilities {
   public static syncNpmrc: typeof syncNpmrc = syncNpmrc;
 
+  private static _homeFolder: string | undefined;
+
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
    * this looks something like "/home/username/"
    */
   public static getHomeFolder(): string {
-    const unresolvedUserFolder: string | undefined =
-      process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
-    const dirError: string = "Unable to determine the current user's home directory";
-    if (unresolvedUserFolder === undefined) {
-      throw new Error(dirError);
-    }
-    const homeFolder: string = path.resolve(unresolvedUserFolder);
-    if (!FileSystem.exists(homeFolder)) {
-      throw new Error(dirError);
+    let homeFolder: string | undefined = Utilities._homeFolder;
+    if (!homeFolder) {
+      const unresolvedUserFolder: string | undefined =
+        process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
+      const dirError: string = "Unable to determine the current user's home directory";
+      if (unresolvedUserFolder === undefined) {
+        throw new Error(dirError);
+      }
+
+      homeFolder = path.resolve(unresolvedUserFolder);
+      if (!FileSystem.exists(homeFolder)) {
+        throw new Error(dirError);
+      }
+
+      Utilities._homeFolder = homeFolder;
     }
 
     return homeFolder;
@@ -290,19 +299,37 @@ export class Utilities {
    * NOTE: The filenames can also be paths for directories, in which case the directory
    * timestamp is compared.
    */
-  public static isFileTimestampCurrent(dateToCompare: Date, inputFilenames: string[]): boolean {
-    for (const inputFilename of inputFilenames) {
-      if (!FileSystem.exists(inputFilename)) {
-        return false;
-      }
+  public static async isFileTimestampCurrentAsync(
+    dateToCompare: Date,
+    inputFilePaths: string[]
+  ): Promise<boolean> {
+    let anyAreOutOfDate: boolean = false;
+    await Async.forEachAsync(
+      inputFilePaths,
+      async (filePath) => {
+        if (!anyAreOutOfDate) {
+          let inputStats: FileSystemStats | undefined;
+          try {
+            inputStats = await FileSystem.getStatisticsAsync(filePath);
+          } catch (e) {
+            if (FileSystem.isNotExistError(e)) {
+              // eslint-disable-next-line require-atomic-updates
+              anyAreOutOfDate = true;
+            } else {
+              throw e;
+            }
+          }
 
-      const inputStats: FileSystemStats = FileSystem.getStatistics(inputFilename);
-      if (dateToCompare < inputStats.mtime) {
-        return false;
-      }
-    }
+          if (inputStats && dateToCompare < inputStats.mtime) {
+            // eslint-disable-next-line require-atomic-updates
+            anyAreOutOfDate = true;
+          }
+        }
+      },
+      { concurrency: 10 }
+    );
 
-    return true;
+    return !anyAreOutOfDate;
   }
 
   public static async executeCommandAsync(
@@ -512,7 +539,8 @@ export class Utilities {
     if (commonRushConfigFolder) {
       Utilities.syncNpmrc({
         sourceNpmrcFolder: commonRushConfigFolder,
-        targetNpmrcFolder: directory
+        targetNpmrcFolder: directory,
+        supportEnvVarFallbackSyntax: false
       });
     }
 

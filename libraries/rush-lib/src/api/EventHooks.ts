@@ -52,7 +52,7 @@ export class EventHooks {
     for (const [name, eventHooks] of Object.entries(eventHooksJson)) {
       const eventName: Event | undefined = Enum.tryGetValueByKey(Event, name);
       if (eventName) {
-        this._hooks.set(eventName, [...eventHooks] || []);
+        this._hooks.set(eventName, [...eventHooks]);
       }
     }
   }

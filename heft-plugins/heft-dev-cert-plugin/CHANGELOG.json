@@ -2,6 +2,1031 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "0.4.107",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.107",
+      "date": "Fri, 01 Aug 2025 00:12:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.74.1` to `0.74.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.106",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.106",
+      "date": "Sat, 26 Jul 2025 00:12:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.105",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.105",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.74.0` to `0.74.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.104",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.104",
+      "date": "Sat, 21 Jun 2025 00:13:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.73.6` to `0.74.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.103",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.103",
+      "date": "Tue, 13 May 2025 02:09:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.36`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.73.5` to `0.73.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.102",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.102",
+      "date": "Thu, 01 May 2025 15:11:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.35`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.73.4` to `0.73.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.101",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.101",
+      "date": "Thu, 01 May 2025 00:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.34`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.73.3` to `0.73.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.100",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.100",
+      "date": "Fri, 25 Apr 2025 00:11:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.33`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.73.2` to `0.73.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.99",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.99",
+      "date": "Mon, 21 Apr 2025 22:24:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.32`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.73.1` to `0.73.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.98",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.98",
+      "date": "Thu, 17 Apr 2025 00:11:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.31`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.73.0` to `0.73.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.97",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.97",
+      "date": "Tue, 15 Apr 2025 15:11:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.72.0` to `0.73.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.96",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.96",
+      "date": "Wed, 09 Apr 2025 00:11:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.72.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.71.2` to `0.72.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.95",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.95",
+      "date": "Fri, 04 Apr 2025 18:34:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.28`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.71.1` to `0.71.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.94",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.94",
+      "date": "Tue, 25 Mar 2025 15:11:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.27`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.71.0` to `0.71.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.93",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.93",
+      "date": "Wed, 12 Mar 2025 22:41:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.70.1` to `0.71.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.92",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.92",
+      "date": "Wed, 12 Mar 2025 00:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.70.0` to `0.70.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.91",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.91",
+      "date": "Tue, 11 Mar 2025 02:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.69.3` to `0.70.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.90",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.90",
+      "date": "Tue, 11 Mar 2025 00:11:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.69.2` to `0.69.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.89",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.89",
+      "date": "Sat, 01 Mar 2025 05:00:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.51.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.69.1` to `0.69.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.88",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.88",
+      "date": "Thu, 27 Feb 2025 01:10:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.51.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.69.0` to `0.69.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.87",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.87",
+      "date": "Wed, 26 Feb 2025 16:11:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.18` to `0.69.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.86",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.86",
+      "date": "Sat, 22 Feb 2025 01:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.50.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.17` to `0.68.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.85",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.85",
+      "date": "Wed, 19 Feb 2025 18:53:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.16` to `0.68.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.84",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.84",
+      "date": "Wed, 12 Feb 2025 01:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.50.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.15` to `0.68.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.83",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.83",
+      "date": "Thu, 30 Jan 2025 16:10:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.14` to `0.68.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.82",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.82",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.49.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.13` to `0.68.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.81",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.81",
+      "date": "Thu, 09 Jan 2025 01:10:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.49.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.12` to `0.68.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.80",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.80",
+      "date": "Tue, 07 Jan 2025 22:17:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.49.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.11` to `0.68.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.79",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.79",
+      "date": "Sat, 14 Dec 2024 01:11:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.48.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.10` to `0.68.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.78",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.78",
+      "date": "Mon, 09 Dec 2024 20:31:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.9` to `0.68.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.77",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.77",
+      "date": "Tue, 03 Dec 2024 16:11:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.8` to `0.68.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.76",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.76",
+      "date": "Sat, 23 Nov 2024 01:18:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.48.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.7` to `0.68.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.75",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.75",
+      "date": "Fri, 22 Nov 2024 01:10:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.6` to `0.68.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.74",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.74",
+      "date": "Thu, 24 Oct 2024 00:15:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.5` to `0.68.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.73",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.73",
+      "date": "Mon, 21 Oct 2024 18:50:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.4` to `0.68.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.72",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.72",
+      "date": "Thu, 17 Oct 2024 08:35:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.3` to `0.68.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.71",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.71",
+      "date": "Tue, 15 Oct 2024 00:12:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.2` to `0.68.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.70",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.70",
+      "date": "Wed, 02 Oct 2024 00:11:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.1` to `0.68.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.69",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.69",
+      "date": "Tue, 01 Oct 2024 00:11:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.68.0` to `0.68.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.68",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.68",
+      "date": "Mon, 30 Sep 2024 15:12:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.67.2` to `0.68.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.67",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.67",
+      "date": "Sat, 21 Sep 2024 00:10:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.66",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.66",
+      "date": "Fri, 13 Sep 2024 00:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.66`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.67.1` to `0.67.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.65",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.65",
+      "date": "Tue, 10 Sep 2024 20:08:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.65`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.67.0` to `0.67.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.64",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.64",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.64`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.26` to `0.67.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.63",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.63",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.63`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.25` to `0.66.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.62",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.62",
+      "date": "Fri, 02 Aug 2024 17:26:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.62`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.24` to `0.66.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.61",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.61",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.61`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.23` to `0.66.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.60",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.60",
+      "date": "Wed, 24 Jul 2024 00:12:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.60`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.22` to `0.66.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.59",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.59",
+      "date": "Wed, 17 Jul 2024 06:55:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.59`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.21` to `0.66.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.58",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.58",
+      "date": "Wed, 17 Jul 2024 00:11:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.58`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.20` to `0.66.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.57",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.57",
+      "date": "Tue, 16 Jul 2024 00:36:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.57`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.47.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.19` to `0.66.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.56",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.4.56",
+      "date": "Thu, 27 Jun 2024 21:01:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.3.56`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.18` to `0.66.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.55",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.4.55",
       "date": "Mon, 03 Jun 2024 23:43:15 GMT",

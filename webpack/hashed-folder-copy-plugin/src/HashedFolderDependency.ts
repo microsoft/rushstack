@@ -283,9 +283,10 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
       );
       pathPrefix = path.posix.join(pathPrefix, '/'); // Ensure trailing slash
 
-      if (!parentModule.buildInfo.assets) {
-        parentModule.buildInfo.assets = {};
-      }
+      const { buildInfo = (parentModule.buildInfo = {}) } = parentModule;
+
+      const { assets = (buildInfo.assets = {}) } = buildInfo;
+
       const existingAssetNames: Set<string> = new Set<string>(Object.keys(compilation.assets));
       for (const [assetPath, asset] of assetsToAdd) {
         const fullAssetPath: string = path.posix.join(pathPrefix, assetPath);
@@ -297,7 +298,7 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
 
         const assetSource: webpack.sources.RawSource = new webpack.sources.RawSource(asset);
         compilation.emitAsset(fullAssetPath, assetSource);
-        parentModule.buildInfo.assets[fullAssetPath] = assetSource;
+        assets[fullAssetPath] = assetSource;
       }
 
       return `${webpack.RuntimeGlobals.publicPath} + ${JSON.stringify(pathPrefix)}`;

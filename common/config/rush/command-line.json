@@ -489,6 +489,13 @@
       "description": "Perform a production build, including minification and localization steps",
       "associatedPhases": ["_phase:build", "_phase:test"],
       "associatedCommands": ["build", "rebuild", "test", "retest"]
+    },
+    {
+      "longName": "--fix",
+      "parameterKind": "flag",
+      "description": "Automatically fix problems encountered while linting",
+      "associatedPhases": ["_phase:build"],
+      "associatedCommands": ["build", "rebuild", "test", "retest"]
     }
   ]
 }

@@ -1,0 +1,2393 @@
+{
+  "OperationMap": [
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/rush-sdk (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/rush-sdk",
+            "projectFolder": "/repo/libraries/rush-sdk"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/ts-command-line (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/ts-command-line",
+            "projectFolder": "/repo/libraries/ts-command-line"
+          }
+        },
+        {
+          "runner": {
+            "name": "@microsoft/rush-lib (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@microsoft/rush-lib",
+            "projectFolder": "/repo/libraries/rush-lib"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-node-rig",
+            "projectFolder": "/repo/rigs/local-node-rig"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/rush-buildxl-graph-plugin (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/rush-buildxl-graph-plugin",
+        "projectFolder": "/repo/rush-plugins/rush-buildxl-graph-plugin"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/node-core-library (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/node-core-library",
+        "projectFolder": "/repo/libraries/node-core-library"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "@rushstack/eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/eslint-config",
+            "projectFolder": "/repo/eslint/eslint-config"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/eslint-patch (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/eslint-patch",
+            "projectFolder": "/repo/eslint/eslint-patch"
+          }
+        }
+      ],
+      "runner": {
+        "isNoOp": true,
+        "name": "local-eslint-config (build)"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "local-eslint-config",
+        "projectFolder": "/repo/eslint/local-eslint-config"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/eslint-patch (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/eslint-patch",
+            "projectFolder": "/repo/eslint/eslint-patch"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/eslint-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/eslint-plugin",
+            "projectFolder": "/repo/eslint/eslint-plugin"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/eslint-plugin-packlets (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/eslint-plugin-packlets",
+            "projectFolder": "/repo/eslint/eslint-plugin-packlets"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/eslint-plugin-security (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/eslint-plugin-security",
+            "projectFolder": "/repo/eslint/eslint-plugin-security"
+          }
+        }
+      ],
+      "runner": {
+        "isNoOp": true,
+        "name": "@rushstack/eslint-config (build)"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/eslint-config",
+        "projectFolder": "/repo/eslint/eslint-config"
+      }
+    },
+    {
+      "dependencies": [],
+      "runner": {
+        "name": "@rushstack/eslint-patch (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/eslint-patch",
+        "projectFolder": "/repo/eslint/eslint-patch"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/tree-pattern (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/tree-pattern",
+            "projectFolder": "/repo/libraries/tree-pattern"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/eslint-plugin (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/eslint-plugin",
+        "projectFolder": "/repo/eslint/eslint-plugin"
+      }
+    },
+    {
+      "dependencies": [],
+      "runner": {
+        "name": "@rushstack/tree-pattern (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/tree-pattern",
+        "projectFolder": "/repo/libraries/tree-pattern"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/tree-pattern (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/tree-pattern",
+            "projectFolder": "/repo/libraries/tree-pattern"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/eslint-plugin-packlets (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/eslint-plugin-packlets",
+        "projectFolder": "/repo/eslint/eslint-plugin-packlets"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/tree-pattern (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/tree-pattern",
+            "projectFolder": "/repo/libraries/tree-pattern"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/eslint-plugin-security (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/eslint-plugin-security",
+        "projectFolder": "/repo/eslint/eslint-plugin-security"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/lookup-by-path (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/lookup-by-path",
+            "projectFolder": "/repo/libraries/lookup-by-path"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/package-deps-hash (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/package-deps-hash",
+            "projectFolder": "/repo/libraries/package-deps-hash"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "name": "@microsoft/rush-lib (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@microsoft/rush-lib",
+            "projectFolder": "/repo/libraries/rush-lib"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-node-rig",
+            "projectFolder": "/repo/rigs/local-node-rig"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft-webpack5-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-webpack5-plugin",
+            "projectFolder": "/repo/heft-plugins/heft-webpack5-plugin"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/stream-collator (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/stream-collator",
+            "projectFolder": "/repo/libraries/stream-collator"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/ts-command-line (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/ts-command-line",
+            "projectFolder": "/repo/libraries/ts-command-line"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/webpack-preserve-dynamic-require-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
+            "projectFolder": "/repo/webpack/preserve-dynamic-require-plugin"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/rush-sdk (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/rush-sdk",
+        "projectFolder": "/repo/libraries/rush-sdk"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-node-rig",
+            "projectFolder": "/repo/rigs/local-node-rig"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/lookup-by-path (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/lookup-by-path",
+        "projectFolder": "/repo/libraries/lookup-by-path"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/heft-config-file (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-config-file",
+            "projectFolder": "/repo/libraries/heft-config-file"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/operation-graph (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/operation-graph",
+            "projectFolder": "/repo/libraries/operation-graph"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/rig-package (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/rig-package",
+            "projectFolder": "/repo/libraries/rig-package"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/ts-command-line (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/ts-command-line",
+            "projectFolder": "/repo/libraries/ts-command-line"
+          }
+        },
+        {
+          "runner": {
+            "name": "@microsoft/api-extractor (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@microsoft/api-extractor",
+            "projectFolder": "/repo/apps/api-extractor"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/heft (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/heft",
+        "projectFolder": "/repo/apps/heft"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/rig-package (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/rig-package",
+            "projectFolder": "/repo/libraries/rig-package"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/heft-config-file (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/heft-config-file",
+        "projectFolder": "/repo/libraries/heft-config-file"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/rig-package (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/rig-package",
+        "projectFolder": "/repo/libraries/rig-package"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/terminal (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/terminal",
+        "projectFolder": "/repo/libraries/terminal"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/operation-graph (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/operation-graph",
+        "projectFolder": "/repo/libraries/operation-graph"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/ts-command-line (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/ts-command-line",
+        "projectFolder": "/repo/libraries/ts-command-line"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@microsoft/api-extractor-model (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@microsoft/api-extractor-model",
+            "projectFolder": "/repo/libraries/api-extractor-model"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/rig-package (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/rig-package",
+            "projectFolder": "/repo/libraries/rig-package"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/ts-command-line (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/ts-command-line",
+            "projectFolder": "/repo/libraries/ts-command-line"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@microsoft/api-extractor (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@microsoft/api-extractor",
+        "projectFolder": "/repo/apps/api-extractor"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@microsoft/api-extractor-model (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@microsoft/api-extractor-model",
+        "projectFolder": "/repo/libraries/api-extractor-model"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@microsoft/api-extractor (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@microsoft/api-extractor",
+            "projectFolder": "/repo/apps/api-extractor"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "@rushstack/heft-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-node-rig",
+            "projectFolder": "/repo/rigs/heft-node-rig"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        }
+      ],
+      "runner": {
+        "isNoOp": true,
+        "name": "local-node-rig (build)"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "local-node-rig",
+        "projectFolder": "/repo/rigs/local-node-rig"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@microsoft/api-extractor (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@microsoft/api-extractor",
+            "projectFolder": "/repo/apps/api-extractor"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "@rushstack/eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/eslint-config",
+            "projectFolder": "/repo/eslint/eslint-config"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft-api-extractor-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-api-extractor-plugin",
+            "projectFolder": "/repo/heft-plugins/heft-api-extractor-plugin"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft-jest-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-jest-plugin",
+            "projectFolder": "/repo/heft-plugins/heft-jest-plugin"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft-lint-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-lint-plugin",
+            "projectFolder": "/repo/heft-plugins/heft-lint-plugin"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft-typescript-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-typescript-plugin",
+            "projectFolder": "/repo/heft-plugins/heft-typescript-plugin"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        }
+      ],
+      "runner": {
+        "isNoOp": true,
+        "name": "@rushstack/heft-node-rig (build)"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/heft-node-rig",
+        "projectFolder": "/repo/rigs/heft-node-rig"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/heft-config-file (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-config-file",
+            "projectFolder": "/repo/libraries/heft-config-file"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@microsoft/api-extractor (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@microsoft/api-extractor",
+            "projectFolder": "/repo/apps/api-extractor"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/heft-api-extractor-plugin (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/heft-api-extractor-plugin",
+        "projectFolder": "/repo/heft-plugins/heft-api-extractor-plugin"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/heft-config-file (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-config-file",
+            "projectFolder": "/repo/libraries/heft-config-file"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/heft-jest-plugin (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/heft-jest-plugin",
+        "projectFolder": "/repo/heft-plugins/heft-jest-plugin"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft-typescript-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-typescript-plugin",
+            "projectFolder": "/repo/heft-plugins/heft-typescript-plugin"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/heft-lint-plugin (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/heft-lint-plugin",
+        "projectFolder": "/repo/heft-plugins/heft-lint-plugin"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft-config-file (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-config-file",
+            "projectFolder": "/repo/libraries/heft-config-file"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-eslint-config (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-eslint-config",
+            "projectFolder": "/repo/eslint/local-eslint-config"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/heft-typescript-plugin (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/heft-typescript-plugin",
+        "projectFolder": "/repo/heft-plugins/heft-typescript-plugin"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-node-rig",
+            "projectFolder": "/repo/rigs/local-node-rig"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/package-deps-hash (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/package-deps-hash",
+        "projectFolder": "/repo/libraries/package-deps-hash"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/heft-config-file (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-config-file",
+            "projectFolder": "/repo/libraries/heft-config-file"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/lookup-by-path (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/lookup-by-path",
+            "projectFolder": "/repo/libraries/lookup-by-path"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/package-deps-hash (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/package-deps-hash",
+            "projectFolder": "/repo/libraries/package-deps-hash"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/package-extractor (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/package-extractor",
+            "projectFolder": "/repo/libraries/package-extractor"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/rig-package (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/rig-package",
+            "projectFolder": "/repo/libraries/rig-package"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/stream-collator (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/stream-collator",
+            "projectFolder": "/repo/libraries/stream-collator"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/ts-command-line (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/ts-command-line",
+            "projectFolder": "/repo/libraries/ts-command-line"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-node-rig",
+            "projectFolder": "/repo/rigs/local-node-rig"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft-webpack5-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-webpack5-plugin",
+            "projectFolder": "/repo/heft-plugins/heft-webpack5-plugin"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/operation-graph (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/operation-graph",
+            "projectFolder": "/repo/libraries/operation-graph"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/webpack-deep-imports-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/webpack-deep-imports-plugin",
+            "projectFolder": "/repo/webpack/webpack-deep-imports-plugin"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/webpack-preserve-dynamic-require-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
+            "projectFolder": "/repo/webpack/preserve-dynamic-require-plugin"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@microsoft/rush-lib (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@microsoft/rush-lib",
+        "projectFolder": "/repo/libraries/rush-lib"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/ts-command-line (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/ts-command-line",
+            "projectFolder": "/repo/libraries/ts-command-line"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-node-rig",
+            "projectFolder": "/repo/rigs/local-node-rig"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft-webpack5-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft-webpack5-plugin",
+            "projectFolder": "/repo/heft-plugins/heft-webpack5-plugin"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/webpack-preserve-dynamic-require-plugin (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
+            "projectFolder": "/repo/webpack/preserve-dynamic-require-plugin"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/package-extractor (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/package-extractor",
+        "projectFolder": "/repo/libraries/package-extractor"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/debug-certificate-manager (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/debug-certificate-manager",
+            "projectFolder": "/repo/libraries/debug-certificate-manager"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-node-rig",
+            "projectFolder": "/repo/rigs/local-node-rig"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/heft-webpack5-plugin (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/heft-webpack5-plugin",
+        "projectFolder": "/repo/heft-plugins/heft-webpack5-plugin"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-node-rig",
+            "projectFolder": "/repo/rigs/local-node-rig"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/debug-certificate-manager (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/debug-certificate-manager",
+        "projectFolder": "/repo/libraries/debug-certificate-manager"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-node-rig",
+            "projectFolder": "/repo/rigs/local-node-rig"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/webpack-preserve-dynamic-require-plugin (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
+        "projectFolder": "/repo/webpack/preserve-dynamic-require-plugin"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/terminal (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/terminal",
+            "projectFolder": "/repo/libraries/terminal"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-node-rig",
+            "projectFolder": "/repo/rigs/local-node-rig"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/stream-collator (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/stream-collator",
+        "projectFolder": "/repo/libraries/stream-collator"
+      }
+    },
+    {
+      "dependencies": [
+        {
+          "runner": {
+            "name": "@rushstack/node-core-library (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/node-core-library",
+            "projectFolder": "/repo/libraries/node-core-library"
+          }
+        },
+        {
+          "runner": {
+            "isNoOp": true,
+            "name": "local-node-rig (build)"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "local-node-rig",
+            "projectFolder": "/repo/rigs/local-node-rig"
+          }
+        },
+        {
+          "runner": {
+            "name": "@rushstack/heft (build)",
+            "commandToRun": "heft run --only build -- --clean --production"
+          },
+          "associatedPhase": {
+            "name": "_phase:build",
+            "dependencies": {}
+          },
+          "associatedProject": {
+            "packageName": "@rushstack/heft",
+            "projectFolder": "/repo/apps/heft"
+          }
+        }
+      ],
+      "runner": {
+        "name": "@rushstack/webpack-deep-imports-plugin (build)",
+        "commandToRun": "heft run --only build -- --clean --production"
+      },
+      "associatedPhase": {
+        "name": "_phase:build",
+        "dependencies": {}
+      },
+      "associatedProject": {
+        "packageName": "@rushstack/webpack-deep-imports-plugin",
+        "projectFolder": "/repo/webpack/webpack-deep-imports-plugin"
+      }
+    }
+  ],
+  "ICreateOperationsContext": {}
+}

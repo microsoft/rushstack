@@ -1,0 +1,79 @@
+{
+  "name": "@rushstack/heft-vscode-extension-plugin",
+  "entries": [
+    {
+      "version": "0.2.2",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v0.2.2",
+      "date": "Fri, 01 Aug 2025 00:12:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.9.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.74.1` to `0.74.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v0.2.1",
+      "date": "Mon, 28 Jul 2025 15:11:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.9.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v0.2.0",
+      "date": "Sat, 26 Jul 2025 00:12:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for generating extension manifest."
+          },
+          {
+            "comment": "Add VSIX publish plugin."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v0.1.0",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new Heft plugin to package files into a VSIX file"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.15.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.9.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.73.6` to `0.74.1`"
+          }
+        ]
+      }
+    }
+  ]
+}

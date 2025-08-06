@@ -33,7 +33,7 @@ export class DependencyAnalyzer {
     | undefined;
 
   private _rushConfiguration: RushConfiguration;
-  private _analysisBySubspace: WeakMap<Subspace, IDependencyAnalysis> | undefined;
+  private _analysisByVariantBySubspace: Map<string, WeakMap<Subspace, IDependencyAnalysis>> | undefined;
 
   private constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
@@ -54,20 +54,36 @@ export class DependencyAnalyzer {
     return analyzer;
   }
 
-  public getAnalysis(subspace?: Subspace, addAction?: boolean): IDependencyAnalysis {
-    if (!this._analysisBySubspace) {
-      this._analysisBySubspace = new WeakMap();
+  public getAnalysis(
+    subspace: Subspace | undefined,
+    variant: string | undefined,
+    addAction: boolean
+  ): IDependencyAnalysis {
+    // Use an empty string as the key when no variant provided. Anything else would possibly conflict
+    // with a variant created by the user
+    const variantKey: string = variant || '';
+
+    if (!this._analysisByVariantBySubspace) {
+      this._analysisByVariantBySubspace = new Map();
     }
 
     const subspaceToAnalyze: Subspace = subspace || this._rushConfiguration.defaultSubspace;
-    if (!this._analysisBySubspace.has(subspaceToAnalyze)) {
-      this._analysisBySubspace.set(
-        subspaceToAnalyze,
-        this._getAnalysisInternal(subspace || this._rushConfiguration.defaultSubspace, addAction)
-      );
+    let analysisForVariant: WeakMap<Subspace, IDependencyAnalysis> | undefined =
+      this._analysisByVariantBySubspace.get(variantKey);
+
+    if (!analysisForVariant) {
+      analysisForVariant = new WeakMap();
+      this._analysisByVariantBySubspace.set(variantKey, analysisForVariant);
     }
 
-    return this._analysisBySubspace.get(subspaceToAnalyze) as IDependencyAnalysis;
+    let analysisForSubspace: IDependencyAnalysis | undefined = analysisForVariant.get(subspaceToAnalyze);
+    if (!analysisForSubspace) {
+      analysisForSubspace = this._getAnalysisInternal(subspaceToAnalyze, variant, addAction);
+
+      analysisForVariant.set(subspaceToAnalyze, analysisForSubspace);
+    }
+
+    return analysisForSubspace;
   }
 
   /**
@@ -76,8 +92,12 @@ export class DependencyAnalyzer {
    * @remarks
    * The result of this function is not cached.
    */
-  private _getAnalysisInternal(subspace: Subspace, addAction?: boolean): IDependencyAnalysis {
-    const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions();
+  private _getAnalysisInternal(
+    subspace: Subspace,
+    variant: string | undefined,
+    addAction: boolean
+  ): IDependencyAnalysis {
+    const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions(variant);
     const allVersionsByPackageName: Map<string, Set<string>> = new Map();
     const allowedAlternativeVersions: Map<
       string,

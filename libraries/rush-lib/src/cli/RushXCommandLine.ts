@@ -25,6 +25,7 @@ import { Event } from '../api/EventHooks';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from '../utilities/PnpmSyncUtilities';
+import { initializeDotEnv } from '../logic/dotenv';
 
 interface IRushXCommandLineArguments {
   /**
@@ -77,18 +78,31 @@ export class RushXCommandLine {
   public static async launchRushXAsync(launcherVersion: string, options: ILaunchOptions): Promise<void> {
     try {
       const rushxArguments: IRushXCommandLineArguments = RushXCommandLine._parseCommandLineArguments();
-      const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
+      const rushJsonFilePath: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         showVerbose: false
       });
+      const { isDebug, help, ignoreHooks } = rushxArguments;
+
+      const terminalProvider: ITerminalProvider = new ConsoleTerminalProvider({
+        debugEnabled: isDebug,
+        verboseEnabled: isDebug
+      });
+      const terminal: ITerminal = new Terminal(terminalProvider);
+
+      initializeDotEnv(terminal, rushJsonFilePath);
+
+      const rushConfiguration: RushConfiguration | undefined = rushJsonFilePath
+        ? RushConfiguration.loadFromConfigurationFile(rushJsonFilePath)
+        : undefined;
       const eventHooksManager: EventHooksManager | undefined = rushConfiguration
         ? new EventHooksManager(rushConfiguration)
         : undefined;
 
       const suppressHooks: boolean = process.env[EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL] === '1';
-      const attemptHooks: boolean = !suppressHooks && !rushxArguments.help;
+      const attemptHooks: boolean = !suppressHooks && !help;
       if (attemptHooks) {
         try {
-          eventHooksManager?.handle(Event.preRushx, rushxArguments.isDebug, rushxArguments.ignoreHooks);
+          eventHooksManager?.handle(Event.preRushx, isDebug, ignoreHooks);
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error(Colorize.red('PreRushx hook error: ' + (error as Error).message));
@@ -98,10 +112,10 @@ export class RushXCommandLine {
       // promise exception), so we start with the assumption that the exit code is 1
       // and set it to 0 only on success.
       process.exitCode = 1;
-      await RushXCommandLine._launchRushXInternalAsync(rushxArguments, rushConfiguration, options);
+      await RushXCommandLine._launchRushXInternalAsync(terminal, rushxArguments, rushConfiguration, options);
       if (attemptHooks) {
         try {
-          eventHooksManager?.handle(Event.postRushx, rushxArguments.isDebug, rushxArguments.ignoreHooks);
+          eventHooksManager?.handle(Event.postRushx, isDebug, ignoreHooks);
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error(Colorize.red('PostRushx hook error: ' + (error as Error).message));
@@ -122,6 +136,7 @@ export class RushXCommandLine {
   }
 
   private static async _launchRushXInternalAsync(
+    terminal: ITerminal,
     rushxArguments: IRushXCommandLineArguments,
     rushConfiguration: RushConfiguration | undefined,
     options: ILaunchOptions
@@ -218,17 +233,11 @@ export class RushXCommandLine {
       }
     });
 
-    const terminalProvider: ITerminalProvider = new ConsoleTerminalProvider({
-      debugEnabled: rushxArguments.isDebug,
-      verboseEnabled: rushxArguments.isDebug
-    });
-    const terminal: ITerminal = new Terminal(terminalProvider);
-
-    if (rushConfiguration?.packageManager === 'pnpm' && rushConfiguration?.experimentsConfiguration) {
+    if (rushConfiguration?.isPnpm && rushConfiguration?.experimentsConfiguration) {
       const { configuration: experiments } = rushConfiguration?.experimentsConfiguration;
 
       if (experiments?.usePnpmSyncForInjectedDependencies) {
-        const pnpmSyncJsonPath: string = packageFolder + '/node_modules/.pnpm-sync.json';
+        const pnpmSyncJsonPath: string = `${packageFolder}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmSyncFilename}`;
         if (await FileSystem.existsAsync(pnpmSyncJsonPath)) {
           const { PackageExtractor } = await import(
             /* webpackChunkName: 'PackageExtractor' */

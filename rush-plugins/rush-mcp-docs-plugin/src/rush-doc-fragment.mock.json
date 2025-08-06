@@ -1,0 +1,18 @@
+[
+  {
+    "text": "---\ntitle: rush install-autoinstaller\n---\n\n```\nusage: rush install-autoinstaller [-h] --name AUTOINSTALLER_NAME\n\nUse this command to install dependencies for an autoinstaller folder.\n\nOptional arguments:\n  -h, --help            Show this help message and exit.\n  --name AUTOINSTALLER_NAME\n                        The name of the autoinstaller, which must be one of\n                        the folders under common/autoinstallers.\n```\n\n## See also\n\n- [rush update-autoinstaller](../commands/rush_update-autoinstaller.md)\n- [rush init-autoinstaller](../commands/rush_init-autoinstaller.md)",
+    "score": 0.7231232
+  },
+  {
+    "text": "---\ntitle: rush install-autoinstaller\n---\n\n```\n用法：rush install-autoinstaller [-h] --name AUTOINSTALLER_NAME\n\n使用该指令给一个项目安装依赖。\n\n可选参数：\n  -h, --help            展示帮助信息并退出\n  --name AUTOINSTALLER_NAME\n                        指定自动安装的包名，它必须是 common/autoinstallers\n                        下的一个文件夹。\n```\n\n## See also\n\n- [rush update-autoinstaller](../commands/rush_update-autoinstaller.md)\n- [rush init-autoinstaller](../commands/rush_init-autoinstaller.md)",
+    "score": 0.7132133
+  },
+  {
+    "text": "---\ntitle: rush update-autoinstaller\n---\n\n```\nusage: rush update-autoinstaller [-h] --name AUTOINSTALLER_NAME\n\nUse this command to regenerate the shrinkwrap file for an autoinstaller\nfolder.\n\nOptional arguments:\n  -h, --help            Show this help message and exit.\n  --name AUTOINSTALLER_NAME\n                        The name of the autoinstaller, which must be one of\n                        the folders under common/autoinstallers.\n```\n\n## See also\n\n- [rush install-autoinstaller](../commands/rush_install-autoinstaller.md)\n- [rush init-autoinstaller](../commands/rush_init-autoinstaller.md)",
+    "score": 0.6632131
+  },
+  {
+    "text": "---\ntitle: rush update-autoinstaller\n---\n\n```\nusage: rush update-autoinstaller [-h] --name AUTOINSTALLER_NAME\n\nUse this command to regenerate the shrinkwrap file for an autoinstaller\nfolder.\n\nOptional arguments:\n  -h, --help            Show this help message and exit.\n  --name AUTOINSTALLER_NAME\n                        The name of the autoinstaller, which must be one of\n                        the folders under common/autoinstallers.\n```\n\n## See also\n\n- [rush install-autoinstaller](../commands/rush_install-autoinstaller.md)\n- [rush init-autoinstaller](../commands/rush_init-autoinstaller.md)",
+    "score": 0.6528328
+  }
+]

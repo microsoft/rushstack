@@ -143,7 +143,11 @@ export class PublishGit {
     ]);
   }
 
-  public async pushAsync(branchName: string | undefined, verify: boolean = false): Promise<void> {
+  public async pushAsync(
+    branchName: string | undefined,
+    verify: boolean = false,
+    followTags: boolean = true
+  ): Promise<void> {
     await PublishUtilities.execCommandAsync(
       !!this._targetBranch,
       this._gitPath,
@@ -153,7 +157,7 @@ export class PublishGit {
         'push',
         'origin',
         `HEAD:${branchName || DUMMY_BRANCH_NAME}`,
-        '--follow-tags',
+        ...(followTags ? ['--follow-tags'] : []),
         '--verbose',
         ...(verify ? [] : ['--no-verify'])
       ]

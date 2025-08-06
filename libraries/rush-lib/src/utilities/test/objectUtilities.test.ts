@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { objectsAreDeepEqual, cloneDeep, merge } from '../objectUtilities';
+import { objectsAreDeepEqual, cloneDeep, merge, removeNullishProps } from '../objectUtilities';
 
 describe('objectUtilities', () => {
   describe(objectsAreDeepEqual.name, () => {
@@ -145,6 +145,14 @@ describe('objectUtilities', () => {
       expect(merge({ a: 1 }, { b: 2 })).toEqual({ a: 1, b: 2 });
       expect(merge({ a: 1 }, { a: 2 })).toEqual({ a: 2 });
       expect(merge({ a: { b: 1 } }, { a: { c: 2 } })).toEqual({ a: { b: 1, c: 2 } });
+    });
+  });
+
+  describe(removeNullishProps.name, () => {
+    it('can remove undefined and null properties', () => {
+      expect(removeNullishProps({ a: 1, b: undefined })).toEqual({ a: 1 });
+      expect(removeNullishProps({ a: 1, b: null })).toEqual({ a: 1 });
+      expect(removeNullishProps({ a: 1, b: undefined, c: null })).toEqual({ a: 1 });
     });
   });
 });

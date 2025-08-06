@@ -14,21 +14,20 @@ const LOC_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(locJsonSchema);
 export function parseLocJson({ content, filePath, ignoreString }: IParseFileOptions): ILocalizationFile {
   const parsedFile: ILocalizationFile = JsonFile.parseString(content);
   try {
-    LOC_JSON_SCHEMA.validateObject(parsedFile, filePath);
+    LOC_JSON_SCHEMA.validateObject(parsedFile, filePath, { ignoreSchemaField: true });
   } catch (e) {
     throw new Error(`The loc file is invalid. Error: ${e}`);
   }
 
-  if (ignoreString) {
-    const newParsedFile: ILocalizationFile = {};
-    for (const [key, stringData] of Object.entries(parsedFile)) {
-      if (!ignoreString(filePath, key)) {
-        newParsedFile[key] = stringData;
-      }
+  // Normalize file shape and possibly filter
+  const newParsedFile: ILocalizationFile = {};
+  for (const [key, stringData] of Object.entries(parsedFile)) {
+    if (!ignoreString?.(filePath, key)) {
+      // Normalize entry shape. We allow the values to be plain strings as a format that can be handed
+      // off to webpack builds that don't understand the comment syntax.
+      newParsedFile[key] = typeof stringData === 'string' ? { value: stringData } : stringData;
     }
-
-    return newParsedFile;
-  } else {
-    return parsedFile;
   }
+
+  return newParsedFile;
 }

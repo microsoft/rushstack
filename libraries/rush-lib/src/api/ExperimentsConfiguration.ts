@@ -98,6 +98,36 @@ export interface IExperimentsJson {
    * across invocations.
    */
   useIPCScriptsInWatchMode?: boolean;
+
+  /**
+   * (UNDER DEVELOPMENT) The Rush alerts feature provides a way to send announcements to engineers
+   * working in the monorepo, by printing directly in the user's shell window when they invoke Rush commands.
+   * This ensures that important notices will be seen by anyone doing active development, since people often
+   * ignore normal discussion group messages or don't know to subscribe.
+   */
+  rushAlerts?: boolean;
+
+  /**
+   * Allow cobuilds without using the build cache to store previous execution info. When setting up
+   *  distributed builds, Rush will allow uncacheable projects to still leverage the cobuild feature.
+   * This is useful when you want to speed up operations that can't (or shouldn't) be cached.
+   */
+  allowCobuildWithoutCache?: boolean;
+
+  /**
+   * By default, rush perform a full scan of the entire repository. For example, Rush runs `git status` to check for local file changes.
+   * When this toggle is enabled, Rush will only scan specific paths, significantly speeding up Git operations.
+   */
+  enableSubpathScan?: boolean;
+
+  /**
+   * Rush has a policy that normally requires Rush projects to specify `workspace:*` in package.json when depending
+   * on other projects in the workspace, unless they are explicitly declared as `decoupledLocalDependencies`
+   * in rush.json.  Enabling this experiment will remove that requirement for dependencies belonging to a different
+   * subspace.  This is useful for large product groups who work in separate subspaces and generally prefer to consume
+   * each other's packages via the NPM registry.
+   */
+  exemptDecoupledDependenciesBetweenSubspaces?: boolean;
 }
 
 const _EXPERIMENTS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);

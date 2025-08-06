@@ -17,6 +17,7 @@ export interface IExtractorDependencyConfiguration {
 
 // @public
 export interface IExtractorMetadataJson {
+    files: string[];
     links: ILinkInfo[];
     mainProjectName: string;
     projects: IProjectInfoJson[];
@@ -30,7 +31,8 @@ export interface IExtractorOptions {
     folderToCopy?: string;
     includeDevDependencies?: boolean;
     includeNpmIgnoreFiles?: boolean;
-    linkCreation?: 'default' | 'script' | 'none';
+    linkCreation?: LinkCreationMode;
+    linkCreationScriptPath?: string;
     mainProjectName: string;
     overwriteExisting: boolean;
     pnpmInstallFolder?: string;
@@ -72,6 +74,9 @@ export interface IProjectInfoJson {
     path: string;
     projectName: string;
 }
+
+// @public
+export type LinkCreationMode = 'default' | 'script' | 'none';
 
 // @public
 export class PackageExtractor {

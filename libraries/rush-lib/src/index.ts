@@ -1,10 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/// <reference types="node" preserve="true" />
+
 /**
  * A library for writing scripts that interact with the {@link https://rushjs.io/ | Rush} tool.
  * @packageDocumentation
  */
+
+// For backwards compatibility
+export { LookupByPath as LookupByPath, type IPrefixMatch } from '@rushstack/lookup-by-path';
 
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
@@ -88,7 +93,6 @@ export {
 
 export { RepoStateFile } from './logic/RepoStateFile';
 
-export { LookupByPath, type IPrefixMatch } from './logic/LookupByPath';
 export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';
@@ -119,11 +123,12 @@ export {
   CustomTipType
 } from './api/CustomTipsConfiguration';
 
-export {
-  ProjectChangeAnalyzer,
-  type IGetChangedProjectsOptions,
-  type IRawRepoState as _IRawRepoState
-} from './logic/ProjectChangeAnalyzer';
+export { ProjectChangeAnalyzer, type IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
+export type {
+  IInputsSnapshot,
+  GetInputsSnapshotAsyncFn as GetInputsSnapshotAsyncFn,
+  IRushConfigurationProjectForSnapshot
+} from './logic/incremental/InputsSnapshot';
 
 export type { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 export type {
@@ -132,6 +137,7 @@ export type {
 } from './logic/operations/IOperationExecutionResult';
 export { type IOperationOptions, Operation } from './logic/operations/Operation';
 export { OperationStatus } from './logic/operations/OperationStatus';
+export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 
 export {
   RushSession,
@@ -191,3 +197,9 @@ export {
   type IRushCommandLineParameter,
   type IRushCommandLineAction
 } from './api/RushCommandLine';
+
+export { OperationBuildCache as _OperationBuildCache } from './logic/buildCache/OperationBuildCache';
+export type {
+  IOperationBuildCacheOptions as _IOperationBuildCacheOptions,
+  IProjectBuildCacheOptions as _IProjectBuildCacheOptions
+} from './logic/buildCache/OperationBuildCache';

@@ -10,13 +10,14 @@
     "_phase:test": "heft run --only test -- --clean --custom-parameter  --custom-integer-parameter 5 --custom-integer-list-parameter 6 --custom-integer-list-parameter 7 --custom-string-parameter test --custom-string-list-parameter eevee --custom-string-list-parameter togepi --custom-string-list-parameter mareep --custom-choice-parameter red --custom-choice-list-parameter totodile --custom-choice-list-parameter gudetama --custom-choice-list-parameter wobbuffet"
   },
   "devDependencies": {
-    "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@types/heft-jest": "1.0.1",
+    "@types/node": "20.17.19",
     "heft-parameter-plugin": "workspace:*",
-    "typescript": "~5.4.2"
+    "typescript": "~5.8.2"
   }
 }

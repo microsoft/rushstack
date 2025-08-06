@@ -33,6 +33,12 @@
       "pattern": "^/(?:[a-zA-Z0-9_$-]+(?:/[a-zA-Z0-9_$-]+)*)?$"
     },
 
+    "logServePath": {
+      "type": "string",
+      "description": "The URL path at which to host Rush log files. If not specified, log files will not be served.",
+      "pattern": "^/(?:[a-zA-Z0-9_$-]+(?:/[a-zA-Z0-9_$-]+)*)?$"
+    },
+
     "globalRouting": {
       "type": "array",
       "description": "Routing rules for files that are associated with the entire workspace, rather than a single project (e.g. files output by Rush plugins).",

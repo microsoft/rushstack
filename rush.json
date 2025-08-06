@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.129.3",
+  "rushVersion": "5.157.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "8.15.8",
+  "pnpmVersion": "8.15.9",
 
   // "npmVersion": "6.14.15",
   // "yarnVersion": "1.9.4",
@@ -42,7 +42,7 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=16.13.0 <17.0.0 || >=18.15.0 <19.0.0 || >=20.9.0 <21.0.0",
+  "nodeSupportedVersionRange": ">=18.15.0 <19.0.0 || >=20.9.0 <21.0.0 || >=22.12.0 <23.0.0",
 
   /**
    * If the version check above fails, Rush will display a message showing the current
@@ -64,6 +64,13 @@
    * to disable Rush's warning.
    */
   // "suppressNodeLtsWarning": false,
+
+  /**
+   * Rush normally prints a warning if it detects that the current version is not one published to the
+   * public npmjs.org registry. If you need to block calls to the npm registry, you can use this setting to disable
+   * Rush's check.
+   */
+  // "suppressRushIsPublicVersionCheck": false,
 
   /**
    * Large monorepos can become intimidating for newcomers if project folder paths don't follow
@@ -183,7 +190,7 @@
     // "changeLogUpdateCommitMessage": "Update changelogs [skip ci]",
 
     /**
-     * The commit message to use when commiting changefiles during 'rush change --commit'
+     * The commit message to use when committing changefiles during 'rush change --commit'
      *
      * If no commit message is set it will default to 'Rush change'
      */
@@ -259,6 +266,37 @@
   },
 
   /**
+   * Installation variants allow you to maintain a parallel set of configuration files that can be
+   * used to build the entire monorepo with an alternate set of dependencies.  For example, suppose
+   * you upgrade all your projects to use a new release of an important framework, but during a transition period
+   * you intend to maintain compatibility with the old release.  In this situation, you probably want your
+   * CI validation to build the entire repo twice: once with the old release, and once with the new release.
+   *
+   * Rush "installation variants" correspond to sets of config files located under this folder:
+   *
+   *   common/config/rush/variants/<variant_name>
+   *
+   * The variant folder can contain an alternate common-versions.json file.  Its "preferredVersions" field can be used
+   * to select older versions of dependencies (within a loose SemVer range specified in your package.json files).
+   * To install a variant, run "rush install --variant <variant_name>".
+   *
+   * For more details and instructions, see this article:  https://rushjs.io/pages/advanced/installation_variants/
+   */
+  "variants": [
+    // {
+    //   /**
+    //    * The folder name for this variant.
+    //    */
+    //   "variantName": "old-sdk",
+    //
+    //   /**
+    //    * An informative description
+    //    */
+    //   "description": "Build this repo using the previous release of the SDK"
+    // }
+  ],
+
+  /**
    * Rush can collect anonymous telemetry about everyday developer activity such as
    * success/failure of installs, builds, and other operations.  You can use this to identify
    * problems with your toolchain or Rush itself.  THIS TELEMETRY IS NOT SHARED WITH MICROSOFT.
@@ -266,7 +304,7 @@
    * that read these JSON files and do something with them.  These scripts are typically registered
    * in the "eventHooks" section.
    */
-  // "telemetryEnabled": false,
+  "telemetryEnabled": true,
 
   /**
    * Allows creation of hotfix changes. This feature is experimental so it is disabled by default.
@@ -392,18 +430,30 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/mcp-server",
+      "projectFolder": "apps/rush-mcp-server",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@microsoft/api-extractor",
       "projectFolder": "apps/api-extractor",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/cpu-profile-summarizer",
+      "projectFolder": "apps/cpu-profile-summarizer",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/heft",
       "projectFolder": "apps/heft",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/lockfile-explorer",
@@ -540,22 +590,32 @@
       "tags": ["api-extractor-tests"]
     },
     {
-      "packageName": "eslint-7-7-test",
-      "projectFolder": "build-tests/eslint-7-7-test",
+      "packageName": "api-extractor-test-05",
+      "projectFolder": "build-tests/api-extractor-test-05",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "eslint-7-11-test",
       "projectFolder": "build-tests/eslint-7-11-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
+    },
+    {
+      "packageName": "eslint-7-7-test",
+      "projectFolder": "build-tests/eslint-7-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-7-test",
       "projectFolder": "build-tests/eslint-7-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "eslint-8-test",
@@ -564,10 +624,29 @@
       "shouldPublish": false
     },
     {
+      "packageName": "eslint-9-test",
+      "projectFolder": "build-tests/eslint-9-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "eslint-bulk-suppressions-test",
       "projectFolder": "build-tests/eslint-bulk-suppressions-test",
       "reviewCategory": "tests",
       "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-bulk-suppressions-test-flat",
+      "projectFolder": "build-tests/eslint-bulk-suppressions-test-flat",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-bulk-suppressions-test-legacy",
+      "projectFolder": "build-tests/eslint-bulk-suppressions-test-legacy",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "cyclicDependencyProjects": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "package-extractor-test-01",
@@ -590,6 +669,18 @@
     {
       "packageName": "package-extractor-test-04",
       "projectFolder": "build-tests/package-extractor-test-04",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "rush-mcp-example-plugin",
+      "projectFolder": "build-tests/rush-mcp-example-plugin",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "run-scenarios-helpers",
+      "projectFolder": "build-tests/run-scenarios-helpers",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -679,41 +770,48 @@
       "packageName": "local-eslint-config",
       "projectFolder": "eslint/local-eslint-config",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/eslint-patch",
       "projectFolder": "eslint/eslint-patch",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/eslint-plugin",
       "projectFolder": "eslint/eslint-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/eslint-plugin-packlets",
       "projectFolder": "eslint/eslint-plugin-packlets",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/eslint-plugin-security",
       "projectFolder": "eslint/eslint-plugin-security",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
 
     // heft-* projects
     {
       "packageName": "heft-copy-files-test",
       "projectFolder": "build-tests/heft-copy-files-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-example-lifecycle-plugin",
+      "projectFolder": "build-tests/heft-example-lifecycle-plugin",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -738,6 +836,12 @@
     {
       "packageName": "heft-jest-reporters-test",
       "projectFolder": "build-tests/heft-jest-reporters-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-json-schema-typings-plugin-test",
+      "projectFolder": "build-tests/heft-json-schema-typings-plugin-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -786,6 +890,12 @@
     {
       "packageName": "heft-sass-test",
       "projectFolder": "build-tests/heft-sass-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-swc-test",
+      "projectFolder": "build-tests/heft-swc-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -917,20 +1027,13 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-    {
-      "packageName": "ts-command-line-test",
-      "projectFolder": "build-tests/ts-command-line-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
 
     // "heft-plugins" folder (alphabetical order)
     {
       "packageName": "@rushstack/heft-api-extractor-plugin",
       "projectFolder": "heft-plugins/heft-api-extractor-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/heft-dev-cert-plugin",
@@ -939,22 +1042,44 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-isolated-typescript-transpile-plugin",
+      "projectFolder": "heft-plugins/heft-isolated-typescript-transpile-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-jest-plugin",
       "projectFolder": "heft-plugins/heft-jest-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-json-schema-typings-plugin",
+      "projectFolder": "heft-plugins/heft-json-schema-typings-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/heft-lint-plugin",
       "projectFolder": "heft-plugins/heft-lint-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-localization-typings-plugin",
+      "projectFolder": "heft-plugins/heft-localization-typings-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/heft-sass-plugin",
       "projectFolder": "heft-plugins/heft-sass-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-sass-load-themed-styles-plugin",
+      "projectFolder": "heft-plugins/heft-sass-load-themed-styles-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -974,8 +1099,13 @@
       "packageName": "@rushstack/heft-typescript-plugin",
       "projectFolder": "heft-plugins/heft-typescript-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-vscode-extension-plugin",
+      "projectFolder": "heft-plugins/heft-vscode-extension-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/heft-webpack4-plugin",
@@ -996,7 +1126,7 @@
       "projectFolder": "libraries/api-extractor-model",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/debug-certificate-manager",
@@ -1015,7 +1145,7 @@
       "projectFolder": "libraries/heft-config-file",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@microsoft/load-themed-styles",
@@ -1030,6 +1160,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/lookup-by-path",
+      "projectFolder": "libraries/lookup-by-path",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/module-minifier",
       "projectFolder": "libraries/module-minifier",
       "reviewCategory": "libraries",
@@ -1040,14 +1176,14 @@
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/operation-graph",
       "projectFolder": "libraries/operation-graph",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/package-deps-hash",
@@ -1060,7 +1196,7 @@
       "projectFolder": "libraries/rig-package",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/worker-pool",
@@ -1097,31 +1233,33 @@
       "projectFolder": "libraries/terminal",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/tree-pattern",
       "projectFolder": "libraries/tree-pattern",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": [
-        "@rushstack/heft-node-rig",
-        "@rushstack/heft",
-        "@rushstack/eslint-config"
-      ]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/ts-command-line",
       "projectFolder": "libraries/ts-command-line",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/typings-generator",
       "projectFolder": "libraries/typings-generator",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/vscode-shared",
+      "projectFolder": "vscode-extensions/vscode-shared",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
     },
 
     // "repo-scripts" folder (alphabetical order)
@@ -1146,8 +1284,28 @@
 
     // "rigs" folder (alphabetical order)
     {
+      "packageName": "decoupled-local-node-rig",
+      "projectFolder": "rigs/decoupled-local-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false,
+      "decoupledLocalDependencies": [
+        "@microsoft/api-extractor",
+        "@rushstack/eslint-config",
+        "@rushstack/eslint-patch",
+        "@rushstack/eslint-plugin",
+        "@rushstack/heft-node-rig",
+        "@rushstack/heft"
+      ]
+    },
+    {
       "packageName": "@rushstack/heft-node-rig",
       "projectFolder": "rigs/heft-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-vscode-extension-rig",
+      "projectFolder": "rigs/heft-vscode-extension-rig",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -1184,6 +1342,12 @@
       "versionPolicyName": "rush"
     },
     {
+      "packageName": "@rushstack/rush-buildxl-graph-plugin",
+      "projectFolder": "rush-plugins/rush-buildxl-graph-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@rushstack/rush-http-build-cache-plugin",
       "projectFolder": "rush-plugins/rush-http-build-cache-plugin",
       "reviewCategory": "libraries",
@@ -1202,8 +1366,20 @@
       "versionPolicyName": "rush"
     },
     {
+      "packageName": "@rushstack/rush-resolver-cache-plugin",
+      "projectFolder": "rush-plugins/rush-resolver-cache-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@rushstack/rush-serve-plugin",
       "projectFolder": "rush-plugins/rush-serve-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
+      "packageName": "@rushstack/rush-bridge-cache-plugin",
+      "projectFolder": "rush-plugins/rush-bridge-cache-plugin",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
@@ -1212,12 +1388,20 @@
     {
       "packageName": "rushstack",
       "projectFolder": "vscode-extensions/rush-vscode-extension",
-      "reviewCategory": "vscode-extensions"
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
     },
     {
       "packageName": "@rushstack/rush-vscode-command-webview",
       "projectFolder": "vscode-extensions/rush-vscode-command-webview",
-      "reviewCategory": "vscode-extensions"
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
+    },
+    {
+      "packageName": "debug-certificate-manager",
+      "projectFolder": "vscode-extensions/debug-certificate-manager-vscode-extension",
+      "reviewCategory": "vscode-extensions",
+      "tags": ["vsix"]
     },
 
     // "webpack" folder (alphabetical order)
@@ -1270,6 +1454,12 @@
       "shouldPublish": false // for now
     },
     {
+      "packageName": "@rushstack/webpack-workspace-resolve-plugin",
+      "projectFolder": "webpack/webpack-workspace-resolve-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/set-webpack-public-path-plugin",
       "projectFolder": "webpack/set-webpack-public-path-plugin",
       "reviewCategory": "libraries",
@@ -1297,6 +1487,12 @@
     {
       "packageName": "@rushstack/webpack5-localization-plugin",
       "projectFolder": "webpack/webpack5-localization-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-mcp-docs-plugin",
+      "projectFolder": "rush-plugins/rush-mcp-docs-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     }

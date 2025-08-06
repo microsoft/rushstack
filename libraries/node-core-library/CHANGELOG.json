@@ -2,6 +2,190 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.14.0",
+      "tag": "@rushstack/node-core-library_v5.14.0",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `Async.runWithTimeoutAsync` function that executes an async function, resolving if the specified timeout elapses first."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.13.1",
+      "tag": "@rushstack/node-core-library_v5.13.1",
+      "date": "Thu, 01 May 2025 00:11:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a bug in `FileSystem.isErrnoException` that failed to identify errors if the underlying method was invoked using only a file descriptor, e.g. for `fs.readSync`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.13.0",
+      "tag": "@rushstack/node-core-library_v5.13.0",
+      "date": "Tue, 25 Mar 2025 15:11:15 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expand `FileSystem.writeBuffersToFile` and `FileSystem.writeBuffersToFileAsync` to take more kinds of buffers."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.12.0",
+      "tag": "@rushstack/node-core-library_v5.12.0",
+      "date": "Tue, 11 Mar 2025 02:12:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `useNodeJSResolver` option to `Import.resolvePackage` to rely on the built-in `require.resolve` and share its cache."
+          },
+          {
+            "comment": "In `RealNodeModulePathResolver`, add the option to configure to throw or not throw for non-existent paths."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "In `RealNodeModulePathResolver`, add negative caching when a path segment that might be a symbolic link is not."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.11.0",
+      "tag": "@rushstack/node-core-library_v5.11.0",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update fs-extra to 11.3.0."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.2",
+      "tag": "@rushstack/node-core-library_v5.10.2",
+      "date": "Thu, 09 Jan 2025 01:10:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Provide the `retryCount` parameter to actions executed using `Async.runWithRetriesAsync`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.1",
+      "tag": "@rushstack/node-core-library_v5.10.1",
+      "date": "Sat, 14 Dec 2024 01:11:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix handling of trailing slashes and relative paths in RealNodeModulePath to match semantics of `fs.realpathSync.native`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.0",
+      "tag": "@rushstack/node-core-library_v5.10.0",
+      "date": "Fri, 22 Nov 2024 01:10:43 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `RealNodeModulePathResolver` class to get equivalent behavior to `realpath` with fewer system calls (and therefore higher performance) in the typical scenario where the only symlinks in the repository are inside of `node_modules` folders and are links to package folders."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.9.0",
+      "tag": "@rushstack/node-core-library_v5.9.0",
+      "date": "Fri, 13 Sep 2024 00:11:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `Sort.sortKeys` function for sorting keys in an object"
+          },
+          {
+            "comment": "Rename `LockFile.acquire` to `Lockfile.acquireAsync`."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue where attempting to acquire multiple `LockFile`s at the same time on POSIX would cause the second to immediately be acquired without releasing the first."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.8.0",
+      "tag": "@rushstack/node-core-library_v5.8.0",
+      "date": "Tue, 10 Sep 2024 20:08:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `customFormats` option to `JsonSchema`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.7.0",
+      "tag": "@rushstack/node-core-library_v5.7.0",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a `Text.splitByNewLines` function."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.6.0",
+      "tag": "@rushstack/node-core-library_v5.6.0",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `ignoreSchemaField` option to the `JsonSchema.validateObject` options to ignore `$schema` properties and add an options object argument to `JsonSchema.validateObjectWithCallback` with the same `ignoreSchemaField` option."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.1",
+      "tag": "@rushstack/node-core-library_v5.5.1",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.0",
+      "tag": "@rushstack/node-core-library_v5.5.0",
+      "date": "Tue, 16 Jul 2024 00:36:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for the `jsonSyntax` option to the `JsonFile.save`, `JsonFile.saveAsync`, and `JsonFile.stringify` functions."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.4.1",
       "tag": "@rushstack/node-core-library_v5.4.1",
       "date": "Thu, 30 May 2024 00:13:05 GMT",

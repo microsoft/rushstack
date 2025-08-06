@@ -4,7 +4,10 @@
 import type * as TTslint from 'tslint';
 import type * as TTypescript from 'typescript';
 
-type TrimmedLinter = Omit<TTslint.Linter, 'getAllFailures' | 'getEnabledRules' | 'failures'>;
+type TrimmedLinter = Omit<
+  TTslint.Linter,
+  'getAllFailures' | 'applyAllFixes' | 'getEnabledRules' | 'failures'
+>;
 export interface IExtendedLinter extends TrimmedLinter {
   /**
    * https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L117
@@ -20,4 +23,14 @@ export interface IExtendedLinter extends TrimmedLinter {
    * https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L303-L306
    */
   getEnabledRules(configuration: TTslint.Configuration.IConfigurationFile, isJs: boolean): TTslint.IRule[];
+
+  /**
+   * https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L212-L241
+   */
+  applyAllFixes(
+    enabledRules: TTslint.IRule[],
+    fileFailures: TTslint.RuleFailure[],
+    sourceFile: TTypescript.SourceFile,
+    sourceFileName: string
+  ): TTslint.RuleFailure[];
 }

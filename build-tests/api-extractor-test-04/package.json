@@ -6,13 +6,14 @@
   "main": "lib/index.js",
   "typings": "dist/api-extractor-test-04.d.ts",
   "scripts": {
-    "build": "node build.js",
-    "_phase:build": "node build.js"
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "workspace:*",
-    "api-extractor-lib1-test": "workspace:*",
-    "fs-extra": "~7.0.1",
-    "typescript": "~5.4.2"
+    "api-extractor-lib1-test": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*"
   }
 }

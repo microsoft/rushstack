@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { once } from 'events';
-import type { MessagePort } from 'worker_threads';
+import type * as WorkerThreads from 'worker_threads';
 
 import type {
   IMinifierConnection,
@@ -17,11 +17,11 @@ import type {
  * @public
  */
 export class MessagePortMinifier implements IModuleMinifier {
-  public readonly port: MessagePort;
+  public readonly port: WorkerThreads.MessagePort;
 
   private readonly _callbacks: Map<string, IModuleMinificationCallback[]>;
 
-  public constructor(port: MessagePort) {
+  public constructor(port: WorkerThreads.MessagePort) {
     this.port = port;
     this._callbacks = new Map();
   }

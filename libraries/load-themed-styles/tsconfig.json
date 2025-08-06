@@ -2,6 +2,8 @@
   "extends": "./node_modules/local-web-rig/profiles/library/tsconfig-base.json",
   "compilerOptions": {
     "importHelpers": false,
-    "module": "commonjs"
+    "outDir": "lib-esm",
+    "declarationDir": "lib-dts",
+    "lib": ["ES2015"]
   }
 }

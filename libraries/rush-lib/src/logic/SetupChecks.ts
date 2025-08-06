@@ -7,7 +7,7 @@ import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
-import { RushConstants } from '../logic/RushConstants';
+import { RushConstants } from './RushConstants';
 
 // Refuses to run at all if the PNPM version is older than this, because there
 // are known bugs or missing features in earlier releases.
@@ -40,7 +40,7 @@ export class SetupChecks {
 
   private static _validate(rushConfiguration: RushConfiguration): string | undefined {
     // Check for outdated tools
-    if (rushConfiguration.packageManager === 'pnpm') {
+    if (rushConfiguration.isPnpm) {
       if (semver.lt(rushConfiguration.packageManagerToolVersion, MINIMUM_SUPPORTED_PNPM_VERSION)) {
         return (
           `The ${RushConstants.rushJsonFilename} file requests PNPM version ` +

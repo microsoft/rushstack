@@ -1,3 +1,4 @@
+// This project is using TypeScript 2, so we can't extend from the rig
 {
   "compilerOptions": {
     "target": "es6",
@@ -7,7 +8,7 @@
     "sourceMap": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,
-    "lib": ["es5", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable", "dom"],
+    "lib": ["es5", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable"],
     "outDir": "lib"
   },
   "include": ["src/**/*.ts"]

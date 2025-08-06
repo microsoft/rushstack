@@ -14,13 +14,16 @@ import {
  */
 export function generatePatchedLinterJsFileIfDoesNotExist(
   inputFilePath: string,
-  outputFilePath: string
+  outputFilePath: string,
+  eslintPackageVersion: string
 ): void {
   const generateEnvVarValue: string | undefined =
     process.env[ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME];
   if (generateEnvVarValue !== 'true' && generateEnvVarValue !== '1' && fs.existsSync(outputFilePath)) {
     return;
   }
+
+  const majorVersion: number = parseInt(eslintPackageVersion, 10);
 
   const inputFile: string = fs.readFileSync(inputFilePath).toString();
 
@@ -70,26 +73,42 @@ export function generatePatchedLinterJsFileIfDoesNotExist(
     return output;
   }
 
+  const markerForStartOfClassMethodSpaces: string = '\n     */\n    ';
+  const markerForStartOfClassMethodTabs: string = '\n\t */\n\t';
+  function indexOfStartOfClassMethod(input: string, position?: number): { index: number; marker?: string } {
+    let startOfClassMethodIndex: number = input.indexOf(markerForStartOfClassMethodSpaces, position);
+    if (startOfClassMethodIndex === -1) {
+      startOfClassMethodIndex = input.indexOf(markerForStartOfClassMethodTabs, position);
+      if (startOfClassMethodIndex === -1) {
+        return { index: startOfClassMethodIndex };
+      }
+      return { index: startOfClassMethodIndex, marker: markerForStartOfClassMethodTabs };
+    }
+    return { index: startOfClassMethodIndex, marker: markerForStartOfClassMethodSpaces };
+  }
+
   /**
    * Returns index of next public method
    * @param fromIndex - index of inputFile to search if public method still exists
    * @returns -1 if public method does not exist or index of next public method
    */
-  function getIndexOfNextPublicMethod(fromIndex: number): number {
+  function getIndexOfNextMethod(fromIndex: number): { index: number; isPublic?: boolean } {
     const rest: string = inputFile.substring(fromIndex);
 
     const endOfClassIndex: number = rest.indexOf('\n}');
 
-    const markerForStartOfClassMethod: string = '\n     */\n    ';
+    const { index: startOfClassMethodIndex, marker: startOfClassMethodMarker } =
+      indexOfStartOfClassMethod(rest);
 
-    const startOfClassMethodIndex: number = rest.indexOf(markerForStartOfClassMethod);
-
-    if (startOfClassMethodIndex === -1 || startOfClassMethodIndex > endOfClassIndex) {
-      return -1;
+    if (
+      startOfClassMethodIndex === -1 ||
+      !startOfClassMethodMarker ||
+      startOfClassMethodIndex > endOfClassIndex
+    ) {
+      return { index: -1 };
     }
 
-    const afterMarkerIndex: number =
-      rest.indexOf(markerForStartOfClassMethod) + markerForStartOfClassMethod.length;
+    const afterMarkerIndex: number = startOfClassMethodIndex + startOfClassMethodMarker.length;
 
     const isPublicMethod: boolean =
       rest[afterMarkerIndex] !== '_' &&
@@ -97,11 +116,7 @@ export function generatePatchedLinterJsFileIfDoesNotExist(
       !rest.substring(afterMarkerIndex, rest.indexOf('\n', afterMarkerIndex)).includes('static') &&
       !rest.substring(afterMarkerIndex, rest.indexOf('\n', afterMarkerIndex)).includes('constructor');
 
-    if (isPublicMethod) {
-      return fromIndex + afterMarkerIndex;
-    }
-
-    return getIndexOfNextPublicMethod(fromIndex + afterMarkerIndex);
+    return { index: fromIndex + afterMarkerIndex, isPublic: isPublicMethod };
   }
 
   function scanUntilIndex(indexToScanTo: number): string {
@@ -162,6 +177,14 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   outputFile += `--- END MONKEY PATCH ---
 `;
 
+  if (majorVersion >= 9) {
+    outputFile += scanUntilMarker('const emitter = createEmitter();');
+    outputFile += `
+      // --- BEGIN MONKEY PATCH ---
+      let currentNode = undefined;
+      // --- END MONKEY PATCH ---`;
+  }
+
   // Match this:
   // ```
   //      if (reportTranslator === null) {
@@ -193,7 +216,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   //    }
   //    const problem = reportTranslator(...args);
   //    // --- BEGIN MONKEY PATCH ---
-  //    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
+  //    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) return;
   //    // --- END MONKEY PATCH ---
   //
   //    if (problem.fix && !(rule.meta && rule.meta.fixable)) {
@@ -202,14 +225,35 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   // ```
   outputFile += scanUntilMarker('const problem = reportTranslator(...args);');
   outputFile += `
-                        // --- BEGIN MONKEY PATCH ---
-                        if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId, problem })) return;
-                        // --- END MONKEY PATCH ---
-`;
+    // --- BEGIN MONKEY PATCH ---
+    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode: args[0]?.node ?? currentNode, ruleId, problem })) return;
+    // --- END MONKEY PATCH ---`;
 
-  outputFile += scanUntilMarker('nodeQueue.forEach(traversalInfo => {');
-  outputFile += scanUntilMarker('});');
-  outputFile += scanUntilNewline();
+  //
+  // Match this:
+  // ```
+  //    Object.keys(ruleListeners).forEach(selector => {
+  //      ...
+  //    });
+  // ```
+  //
+  // Convert to something like this:
+  // ```
+  //    Object.keys(ruleListeners).forEach(selector => {
+  //      // --- BEGIN MONKEY PATCH ---
+  //      emitter.on(selector, (...args) => { currentNode = args[args.length - 1]; });
+  //      // --- END MONKEY PATCH ---
+  //      ...
+  //    });
+  // ```
+  if (majorVersion >= 9) {
+    outputFile += scanUntilMarker('Object.keys(ruleListeners).forEach(selector => {');
+    outputFile += `
+      // --- BEGIN MONKEY PATCH ---
+      emitter.on(selector, (...args) => { currentNode = args[args.length - 1]; });
+      // --- END MONKEY PATCH ---`;
+  }
+
   outputFile += scanUntilMarker('class Linter {');
   outputFile += scanUntilNewline();
   outputFile += `
@@ -238,18 +282,43 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
     // --- END MONKEY PATCH ---
 `;
 
-  let indexOfNextPublicMethod: number = getIndexOfNextPublicMethod(inputIndex);
-  while (indexOfNextPublicMethod !== -1) {
-    outputFile += scanUntilIndex(indexOfNextPublicMethod);
-    outputFile += scanUntilNewline();
-    outputFile += `        // --- BEGIN MONKEY PATCH ---
+  const privateMethodNames: string[] = [];
+  let { index: indexOfNextMethod, isPublic } = getIndexOfNextMethod(inputIndex);
+
+  while (indexOfNextMethod !== -1) {
+    outputFile += scanUntilIndex(indexOfNextMethod);
+    if (isPublic) {
+      // Inject the monkey patch at the start of the public method
+      outputFile += scanUntilNewline();
+      outputFile += `        // --- BEGIN MONKEY PATCH ---
         this._conditionallyReinitialize();
         // --- END MONKEY PATCH ---
 `;
-    indexOfNextPublicMethod = getIndexOfNextPublicMethod(inputIndex);
+    } else if (inputFile[inputIndex] === '#') {
+      // Replace the '#' private method with a '_' private method, so that our monkey patch
+      // can still call it. Otherwise, we get the following error during execution:
+      // TypeError: Receiver must be an instance of class Linter
+      const privateMethodName: string = scanUntilMarker('(');
+      // Remove the '(' at the end and stash it, since we need to escape it for the regex later
+      privateMethodNames.push(privateMethodName.slice(0, -1));
+      outputFile += `_${privateMethodName.slice(1)}`;
+    }
+
+    const indexResult: { index: number; isPublic?: boolean } = getIndexOfNextMethod(inputIndex);
+    indexOfNextMethod = indexResult.index;
+    isPublic = indexResult.isPublic;
   }
 
   outputFile += scanUntilEnd();
+
+  // Do a second pass to find and replace all calls to private methods with the patched versions.
+  if (privateMethodNames.length) {
+    const privateMethodCallRegex: RegExp = new RegExp(`\.(${privateMethodNames.join('|')})\\(`, 'g');
+    outputFile = outputFile.replace(privateMethodCallRegex, (match, privateMethodName) => {
+      // Replace the leading '#' with a leading '_'
+      return `._${privateMethodName.slice(1)}(`;
+    });
+  }
 
   fs.writeFileSync(outputFilePath, outputFile);
 }

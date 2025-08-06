@@ -21,24 +21,21 @@ export class ProtectableMapView<K, V> extends Map<K, V> {
     this._parameters = parameters;
   }
 
-  public clear(): void {
-    // override
+  public override clear(): void {
     if (this._parameters.onClear) {
       this._parameters.onClear(this._owner);
     }
     super.clear();
   }
 
-  public delete(key: K): boolean {
-    // override
+  public override delete(key: K): boolean {
     if (this._parameters.onDelete) {
       this._parameters.onDelete(this._owner, key);
     }
     return super.delete(key);
   }
 
-  public set(key: K, value: V): this {
-    // override
+  public override set(key: K, value: V): this {
     let modifiedValue: V = value;
     if (this._parameters.onSet) {
       modifiedValue = this._parameters.onSet(this._owner, key, modifiedValue);

@@ -9,8 +9,12 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
     getRepoRoot(dir: string): string {
       return dir;
     },
-    getRepoStateAsync(): ReadonlyMap<string, string> {
-      return new Map();
+    getDetailedRepoStateAsync(): IDetailedRepoState {
+      return {
+        hasSubmodules: false,
+        hasUncommittedChanges: false,
+        files: new Map()
+      };
     },
     getRepoChangesAsync(): ReadonlyMap<string, string> {
       return new Map();
@@ -19,6 +23,7 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
 });
 
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import { getCommandLineParserInstanceAsync, setSpawnMock } from './TestUtils';

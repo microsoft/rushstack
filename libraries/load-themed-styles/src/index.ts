@@ -1,17 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// Declaring a global here in case that the execution environment is Node.js (without importing the
+// entire node.js d.ts for now)
+/// <reference lib="dom" />
+declare let global: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+declare const DEBUG: boolean | undefined;
+
 /**
  * An IThemingInstruction can specify a rawString to be preserved or a theme slot and a default value
  * to use if that slot is not specified by the theme.
  */
-
-/* eslint-disable @typescript-eslint/no-use-before-define */
-
-// Declaring a global here in case that the execution environment is Node.js (without importing the
-// entire node.js d.ts for now)
-declare let global: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-
 export interface IThemingInstruction {
   theme?: string;
   defaultValue?: string;
@@ -251,8 +250,26 @@ function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRec
 export function loadTheme(theme: ITheme | undefined): void {
   _themeState.theme = theme;
 
+  const { style } = document.body;
+  for (const key in theme) {
+    if (theme.hasOwnProperty(key)) {
+      style.setProperty(`--${key}`, theme[key]);
+    }
+  }
+
   // reload styles.
   reloadStyles();
+}
+
+/**
+ * Replaces theme tokens with CSS variable references.
+ * @param styles - Raw css text with theme tokens
+ * @returns A css string with theme tokens replaced with css variable references
+ */
+export function replaceTokensWithVariables(styles: string): string {
+  return styles.replace(_themeTokenRegex, (match: string, themeSlot: string, defaultValue: string) => {
+    return typeof defaultValue === 'string' ? `var(--${themeSlot}, ${defaultValue})` : `var(--${themeSlot})`;
+  });
 }
 
 /**

@@ -22,7 +22,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
 
   private _value: string | undefined = undefined;
 
-  /** {@inheritDoc CommandLineParameter.kind} */
+  /** {@inheritDoc CommandLineParameterBase.kind} */
   public readonly kind: CommandLineParameterKind.String = CommandLineParameterKind.String;
 
   /** @internal */
@@ -34,7 +34,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._setValue}
+   * {@inheritDoc CommandLineParameterBase._setValue}
    * @internal
    */
   public _setValue(data: unknown): void {
@@ -67,7 +67,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._getSupplementaryNotes}
+   * {@inheritDoc CommandLineParameterBase._getSupplementaryNotes}
    * @internal
    */
   public _getSupplementaryNotes(supplementaryNotes: string[]): void {
@@ -91,7 +91,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     return this._value;
   }
 
-  /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameterBase.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.value !== undefined) {
       argList.push(this.longName);

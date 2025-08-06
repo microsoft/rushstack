@@ -1,6 +1,290 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Mon, 03 Jun 2024 23:43:15 GMT and should not be manually modified.
+This log was last generated on Fri, 01 Aug 2025 00:12:49 GMT and should not be manually modified.
+
+## 0.17.10
+Fri, 01 Aug 2025 00:12:49 GMT
+
+_Version update only_
+
+## 0.17.9
+Wed, 23 Jul 2025 20:55:57 GMT
+
+_Version update only_
+
+## 0.17.8
+Sat, 21 Jun 2025 00:13:15 GMT
+
+_Version update only_
+
+## 0.17.7
+Thu, 15 May 2025 00:11:49 GMT
+
+### Patches
+
+- Quote classnames in .d.ts files to handle non-identifier characters.
+
+## 0.17.6
+Tue, 13 May 2025 02:09:20 GMT
+
+### Patches
+
+- Fix an issue where the SCSS module classifier evaluated SCSS partials instead of ignoring them (since they aren't directly importable).
+
+## 0.17.5
+Thu, 01 May 2025 15:11:33 GMT
+
+_Version update only_
+
+## 0.17.4
+Thu, 01 May 2025 00:11:12 GMT
+
+_Version update only_
+
+## 0.17.3
+Fri, 25 Apr 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.17.2
+Mon, 21 Apr 2025 22:24:25 GMT
+
+_Version update only_
+
+## 0.17.1
+Thu, 17 Apr 2025 00:11:21 GMT
+
+### Patches
+
+- Update documentation for `extends`
+
+## 0.17.0
+Tue, 15 Apr 2025 15:11:57 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Remove `preserveSCSSExtension`. Change input type of `cssOutputFolders` to allow specifying JavaScript shim module format. Add accessor with hook to allow other plugins to customize final CSS.
+
+## 0.16.0
+Wed, 09 Apr 2025 00:11:02 GMT
+
+### Minor changes
+
+- Use `tryLoadProjectConfigurationFileAsync` API to remove direct dependency on `@rushstack/heft-config-file`.
+
+## 0.15.25
+Fri, 04 Apr 2025 18:34:35 GMT
+
+_Version update only_
+
+## 0.15.24
+Tue, 25 Mar 2025 15:11:16 GMT
+
+_Version update only_
+
+## 0.15.23
+Wed, 12 Mar 2025 22:41:36 GMT
+
+_Version update only_
+
+## 0.15.22
+Wed, 12 Mar 2025 00:11:32 GMT
+
+_Version update only_
+
+## 0.15.21
+Tue, 11 Mar 2025 02:12:34 GMT
+
+_Version update only_
+
+## 0.15.20
+Tue, 11 Mar 2025 00:11:25 GMT
+
+_Version update only_
+
+## 0.15.19
+Sat, 01 Mar 2025 05:00:09 GMT
+
+_Version update only_
+
+## 0.15.18
+Thu, 27 Feb 2025 01:10:39 GMT
+
+_Version update only_
+
+## 0.15.17
+Wed, 26 Feb 2025 16:11:11 GMT
+
+_Version update only_
+
+## 0.15.16
+Sat, 22 Feb 2025 01:11:12 GMT
+
+_Version update only_
+
+## 0.15.15
+Wed, 19 Feb 2025 18:53:48 GMT
+
+_Version update only_
+
+## 0.15.14
+Wed, 12 Feb 2025 01:10:52 GMT
+
+_Version update only_
+
+## 0.15.13
+Thu, 30 Jan 2025 16:10:36 GMT
+
+_Version update only_
+
+## 0.15.12
+Thu, 30 Jan 2025 01:11:42 GMT
+
+_Version update only_
+
+## 0.15.11
+Thu, 09 Jan 2025 01:10:10 GMT
+
+_Version update only_
+
+## 0.15.10
+Tue, 07 Jan 2025 22:17:32 GMT
+
+_Version update only_
+
+## 0.15.9
+Sat, 14 Dec 2024 01:11:07 GMT
+
+_Version update only_
+
+## 0.15.8
+Mon, 09 Dec 2024 20:31:43 GMT
+
+_Version update only_
+
+## 0.15.7
+Tue, 03 Dec 2024 16:11:07 GMT
+
+_Version update only_
+
+## 0.15.6
+Sat, 23 Nov 2024 01:18:55 GMT
+
+_Version update only_
+
+## 0.15.5
+Fri, 22 Nov 2024 01:10:43 GMT
+
+_Version update only_
+
+## 0.15.4
+Thu, 24 Oct 2024 00:15:48 GMT
+
+_Version update only_
+
+## 0.15.3
+Mon, 21 Oct 2024 18:50:10 GMT
+
+_Version update only_
+
+## 0.15.2
+Thu, 17 Oct 2024 08:35:06 GMT
+
+_Version update only_
+
+## 0.15.1
+Tue, 15 Oct 2024 00:12:31 GMT
+
+_Version update only_
+
+## 0.15.0
+Thu, 03 Oct 2024 19:46:23 GMT
+
+### Minor changes
+
+- Add "suppressDeprecations" option to suppress specific SASS deprecation IDs. Add "ignoreDeprecationsInDependencies" option to ignore deprecation warnings from external SASS.
+
+## 0.14.24
+Wed, 02 Oct 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.14.23
+Tue, 01 Oct 2024 00:11:28 GMT
+
+_Version update only_
+
+## 0.14.22
+Mon, 30 Sep 2024 15:12:19 GMT
+
+_Version update only_
+
+## 0.14.21
+Sat, 28 Sep 2024 00:11:41 GMT
+
+_Version update only_
+
+## 0.14.20
+Fri, 13 Sep 2024 00:11:43 GMT
+
+_Version update only_
+
+## 0.14.19
+Tue, 10 Sep 2024 20:08:11 GMT
+
+_Version update only_
+
+## 0.14.18
+Mon, 26 Aug 2024 02:00:11 GMT
+
+_Version update only_
+
+## 0.14.17
+Wed, 21 Aug 2024 05:43:04 GMT
+
+_Version update only_
+
+## 0.14.16
+Mon, 12 Aug 2024 22:16:04 GMT
+
+_Version update only_
+
+## 0.14.15
+Fri, 02 Aug 2024 17:26:42 GMT
+
+_Version update only_
+
+## 0.14.14
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
+
+## 0.14.13
+Wed, 24 Jul 2024 00:12:14 GMT
+
+_Version update only_
+
+## 0.14.12
+Wed, 17 Jul 2024 06:55:09 GMT
+
+_Version update only_
+
+## 0.14.11
+Wed, 17 Jul 2024 00:11:19 GMT
+
+_Version update only_
+
+## 0.14.10
+Tue, 16 Jul 2024 00:36:22 GMT
+
+_Version update only_
+
+## 0.14.9
+Thu, 27 Jun 2024 21:01:36 GMT
+
+_Version update only_
 
 ## 0.14.8
 Mon, 03 Jun 2024 23:43:15 GMT

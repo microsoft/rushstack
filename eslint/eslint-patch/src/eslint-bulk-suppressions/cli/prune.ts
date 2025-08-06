@@ -7,8 +7,8 @@ import { printPruneHelp } from './utils/print-help';
 import { runEslintAsync } from './runEslint';
 import { ESLINT_BULK_PRUNE_ENV_VAR_NAME } from '../constants';
 import {
-  deleteBulkSuppressionsFileInEslintrcFolder,
-  getSuppressionsConfigForEslintrcFolderPath
+  deleteBulkSuppressionsFileInEslintConfigFolder,
+  getSuppressionsConfigForEslintConfigFolderPath
 } from '../bulk-suppressions-file';
 
 export async function pruneAsync(): Promise<void> {
@@ -31,13 +31,13 @@ export async function pruneAsync(): Promise<void> {
     await runEslintAsync(allFiles, 'prune');
   } else {
     console.log('No files with existing suppressions found.');
-    deleteBulkSuppressionsFileInEslintrcFolder(normalizedCwd);
+    deleteBulkSuppressionsFileInEslintConfigFolder(normalizedCwd);
   }
 }
 
 async function getAllFilesWithExistingSuppressionsForCwdAsync(normalizedCwd: string): Promise<string[]> {
   const { jsonObject: bulkSuppressionsConfigJson } =
-    getSuppressionsConfigForEslintrcFolderPath(normalizedCwd);
+    getSuppressionsConfigForEslintConfigFolderPath(normalizedCwd);
   const allFiles: Set<string> = new Set();
   for (const { file: filePath } of bulkSuppressionsConfigJson.suppressions) {
     allFiles.add(filePath);

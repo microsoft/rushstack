@@ -7,7 +7,8 @@
 /// <reference types="node" />
 
 import * as child_process from 'child_process';
-import * as fs from 'fs';
+import * as nodeFs from 'fs';
+import * as nodePath from 'path';
 
 // @public
 export enum AlreadyExistsBehavior {
@@ -39,6 +40,7 @@ export class Async {
         weighted: true;
     }): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
+    static runWithTimeoutAsync<TResult>({ action, timeoutMs, timeoutMessage }: IRunWithTimeoutOptions<TResult>): Promise<TResult>;
     static sleepAsync(ms: number): Promise<void>;
     static validateWeightedIterable(operation: IWeighted): void;
 }
@@ -200,8 +202,8 @@ export class FileSystem {
     static readLinkAsync(path: string): Promise<string>;
     static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
     static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void>;
-    static writeBuffersToFile(filePath: string, contents: ReadonlyArray<Uint8Array>, options?: IFileSystemWriteBinaryFileOptions): void;
-    static writeBuffersToFileAsync(filePath: string, contents: ReadonlyArray<Uint8Array>, options?: IFileSystemWriteBinaryFileOptions): Promise<void>;
+    static writeBuffersToFile(filePath: string, contents: ReadonlyArray<NodeJS.ArrayBufferView>, options?: IFileSystemWriteBinaryFileOptions): void;
+    static writeBuffersToFileAsync(filePath: string, contents: ReadonlyArray<NodeJS.ArrayBufferView>, options?: IFileSystemWriteBinaryFileOptions): Promise<void>;
     static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
 }
@@ -213,7 +215,7 @@ export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPat
 export type FileSystemCopyFilesFilter = (sourcePath: string, destinationPath: string) => boolean;
 
 // @public
-export type FileSystemStats = fs.Stats;
+export type FileSystemStats = nodeFs.Stats;
 
 // @public
 export class FileWriter {
@@ -231,7 +233,7 @@ export const FolderConstants: {
 };
 
 // @public
-export type FolderItem = fs.Dirent;
+export type FolderItem = nodeFs.Dirent;
 
 // @public
 export interface IAsyncParallelismOptions {
@@ -397,6 +399,7 @@ export interface IImportResolvePackageAsyncOptions extends IImportResolveAsyncOp
 // @public
 export interface IImportResolvePackageOptions extends IImportResolveOptions {
     packageName: string;
+    useNodeJSResolver?: boolean;
 }
 
 // @public
@@ -416,11 +419,17 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
 }
 
 // @public
-export interface IJsonFileStringifyOptions {
+export interface IJsonFileStringifyOptions extends IJsonFileParseOptions {
     headerComment?: string;
     ignoreUndefinedValues?: boolean;
     newlineConversion?: NewlineKind;
     prettyFormatting?: boolean;
+}
+
+// @public
+export interface IJsonSchemaCustomFormat<T extends string | number> {
+    type: T extends string ? 'string' : T extends number ? 'number' : never;
+    validate: (data: T) => boolean;
 }
 
 // @public
@@ -436,12 +445,18 @@ export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
 
 // @public
 export interface IJsonSchemaLoadOptions {
+    customFormats?: Record<string, IJsonSchemaCustomFormat<string> | IJsonSchemaCustomFormat<number>>;
     dependentSchemas?: JsonSchema[];
     schemaVersion?: JsonSchemaVersion;
 }
 
 // @public
-export interface IJsonSchemaValidateOptions {
+export interface IJsonSchemaValidateObjectWithOptions {
+    ignoreSchemaField?: boolean;
+}
+
+// @public
+export interface IJsonSchemaValidateOptions extends IJsonSchemaValidateObjectWithOptions {
     customErrorHeader?: string;
 }
 
@@ -593,14 +608,27 @@ export interface IReadLinesFromIterableOptions {
     ignoreEmptyLines?: boolean;
 }
 
+// @public
+export interface IRealNodeModulePathResolverOptions {
+    // (undocumented)
+    fs?: Partial<Pick<typeof nodeFs, 'lstatSync' | 'readlinkSync'>>;
+    ignoreMissingPaths?: boolean;
+    // (undocumented)
+    path?: Partial<Pick<typeof nodePath, 'isAbsolute' | 'join' | 'resolve' | 'sep'>>;
+}
+
 // @public (undocumented)
 export interface IRunWithRetriesOptions<TResult> {
-    // (undocumented)
-    action: () => Promise<TResult> | TResult;
-    // (undocumented)
+    action: (retryCount: number) => Promise<TResult> | TResult;
     maxRetries: number;
-    // (undocumented)
     retryDelayMs?: number;
+}
+
+// @public (undocumented)
+export interface IRunWithTimeoutOptions<TResult> {
+    action: () => Promise<TResult> | TResult;
+    timeoutMessage?: string;
+    timeoutMs: number;
 }
 
 // @public
@@ -675,7 +703,7 @@ export class JsonSchema {
     static fromLoadedObject(schemaObject: JsonObject, options?: IJsonSchemaFromObjectOptions): JsonSchema;
     get shortName(): string;
     validateObject(jsonObject: JsonObject, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
-    validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
+    validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void, options?: IJsonSchemaValidateObjectWithOptions): void;
 }
 
 // @public
@@ -707,7 +735,9 @@ export type LegacyCallback<TResult, TError> = (error: TError | null | undefined,
 
 // @public
 export class LockFile {
+    // @deprecated (undocumented)
     static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
+    static acquireAsync(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
     get dirtyWhenAcquired(): boolean;
     get filePath(): string;
     static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;
@@ -821,11 +851,19 @@ export class ProtectableMap<K, V> {
 }
 
 // @public
+export class RealNodeModulePathResolver {
+    constructor(options?: IRealNodeModulePathResolverOptions);
+    clearCache(): void;
+    readonly realNodeModulePath: (input: string) => string;
+}
+
+// @public
 export class Sort {
     static compareByValue(x: any, y: any): number;
     static isSorted<T>(collection: Iterable<T>, comparer?: (x: any, y: any) => number): boolean;
     static isSortedBy<T>(collection: Iterable<T>, keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): boolean;
     static sortBy<T>(array: T[], keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): void;
+    static sortKeys<T extends Partial<Record<string, unknown>> | unknown[]>(object: T): T;
     static sortMapKeys<K, V>(map: Map<K, V>, keyComparer?: (x: K, y: K) => number): void;
     static sortSet<T>(set: Set<T>, comparer?: (x: T, y: T) => number): void;
     static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any, keyComparer?: (x: T, y: T) => number): void;
@@ -859,6 +897,11 @@ export class Text {
     static readLinesFromIterableAsync(iterable: AsyncIterable<string | Buffer>, options?: IReadLinesFromIterableOptions): AsyncGenerator<string>;
     static replaceAll(input: string, searchValue: string, replaceValue: string): string;
     static reverse(s: string): string;
+    static splitByNewLines(s: undefined): undefined;
+    // (undocumented)
+    static splitByNewLines(s: string): string[];
+    // (undocumented)
+    static splitByNewLines(s: string | undefined): string[] | undefined;
     static truncateWithEllipsis(s: string, maximumLength: number): string;
 }
 

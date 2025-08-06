@@ -58,7 +58,7 @@ export function getProcessStartTimeFromProcStat(stat: string): string | undefine
   // In theory, the representations of start time returned by `cat /proc/[pid]/stat` and `ps -o lstart` can change
   // while the system is running, but we assume this does not happen.
   // So the caller can safely use this value as part of a unique process id (on the machine, without comparing
-  // accross reboots).
+  // across reboots).
   return startTimeJiffies;
 }
 
@@ -121,7 +121,7 @@ export function getProcessStartTime(pid: number): string | undefined {
 
   const psSplit: string[] = psStdout.split('\n');
 
-  // successfuly able to run "ps", but no process was found
+  // successfully able to run "ps", but no process was found
   if (psSplit[1] === '') {
     return undefined;
   }
@@ -135,6 +135,10 @@ export function getProcessStartTime(pid: number): string | undefined {
 
   throw new Error(`Unexpected output from the "ps" command`);
 }
+
+// A set of locks that currently exist in the current process, to be used when
+// multiple locks are acquired in the same process.
+const IN_PROC_LOCKS: Set<string> = new Set<string>();
 
 /**
  * The `LockFile` implements a file-based mutex for synchronizing access to a shared resource
@@ -157,6 +161,8 @@ export class LockFile {
     this._fileWriter = fileWriter;
     this._filePath = filePath;
     this._dirtyWhenAcquired = dirtyWhenAcquired;
+
+    IN_PROC_LOCKS.add(filePath);
   }
 
   /**
@@ -174,17 +180,24 @@ export class LockFile {
     if (!resourceName.match(/^[a-zA-Z0-9][a-zA-Z0-9-.]+[a-zA-Z0-9]$/)) {
       throw new Error(
         `The resource name "${resourceName}" is invalid.` +
-          ` It must be an alphanumberic string with only "-" or "." It must start with an alphanumeric character.`
+          ` It must be an alphanumeric string with only "-" or "." It must start and end with an alphanumeric character.`
       );
     }
 
-    if (process.platform === 'win32') {
-      return path.join(path.resolve(resourceFolder), `${resourceName}.lock`);
-    } else if (process.platform === 'linux' || process.platform === 'darwin') {
-      return path.join(path.resolve(resourceFolder), `${resourceName}#${pid}.lock`);
-    }
+    switch (process.platform) {
+      case 'win32': {
+        return path.resolve(resourceFolder, `${resourceName}.lock`);
+      }
 
-    throw new Error(`File locking not implemented for platform: "${process.platform}"`);
+      case 'linux':
+      case 'darwin': {
+        return path.resolve(resourceFolder, `${resourceName}#${pid}.lock`);
+      }
+
+      default: {
+        throw new Error(`File locking not implemented for platform: "${process.platform}"`);
+      }
+    }
   }
 
   /**
@@ -196,12 +209,15 @@ export class LockFile {
    */
   public static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined {
     FileSystem.ensureFolder(resourceFolder);
-    if (process.platform === 'win32') {
-      return LockFile._tryAcquireWindows(resourceFolder, resourceName);
-    } else if (process.platform === 'linux' || process.platform === 'darwin') {
-      return LockFile._tryAcquireMacOrLinux(resourceFolder, resourceName);
-    }
-    throw new Error(`File locking not implemented for platform: "${process.platform}"`);
+    const lockFilePath: string = LockFile.getLockFilePath(resourceFolder, resourceName);
+    return LockFile._tryAcquireInner(resourceFolder, resourceName, lockFilePath);
+  }
+
+  /**
+   * @deprecated Use {@link LockFile.acquireAsync} instead.
+   */
+  public static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile> {
+    return LockFile.acquireAsync(resourceFolder, resourceName, maxWaitMs);
   }
 
   /**
@@ -218,30 +234,67 @@ export class LockFile {
    *   the filename of the temporary file created to manage the lock.
    * @param maxWaitMs - The maximum number of milliseconds to wait for the lock before reporting an error
    */
-  public static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile> {
+  public static async acquireAsync(
+    resourceFolder: string,
+    resourceName: string,
+    maxWaitMs?: number
+  ): Promise<LockFile> {
     const interval: number = 100;
     const startTime: number = Date.now();
+    const timeoutTime: number | undefined = maxWaitMs ? startTime + maxWaitMs : undefined;
 
-    const retryLoop: () => Promise<LockFile> = async () => {
-      const lock: LockFile | undefined = LockFile.tryAcquire(resourceFolder, resourceName);
+    await FileSystem.ensureFolderAsync(resourceFolder);
+
+    const lockFilePath: string = LockFile.getLockFilePath(resourceFolder, resourceName);
+
+    // eslint-disable-next-line no-unmodified-loop-condition
+    while (!timeoutTime || Date.now() <= timeoutTime) {
+      const lock: LockFile | undefined = LockFile._tryAcquireInner(
+        resourceFolder,
+        resourceName,
+        lockFilePath
+      );
       if (lock) {
         return lock;
       }
-      if (maxWaitMs && Date.now() > startTime + maxWaitMs) {
-        throw new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`);
-      }
 
       await Async.sleepAsync(interval);
-      return retryLoop();
-    };
+    }
 
-    return retryLoop();
+    throw new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`);
+  }
+
+  private static _tryAcquireInner(
+    resourceFolder: string,
+    resourceName: string,
+    lockFilePath: string
+  ): LockFile | undefined {
+    if (!IN_PROC_LOCKS.has(lockFilePath)) {
+      switch (process.platform) {
+        case 'win32': {
+          return LockFile._tryAcquireWindows(lockFilePath);
+        }
+
+        case 'linux':
+        case 'darwin': {
+          return LockFile._tryAcquireMacOrLinux(resourceFolder, resourceName, lockFilePath);
+        }
+
+        default: {
+          throw new Error(`File locking not implemented for platform: "${process.platform}"`);
+        }
+      }
+    }
   }
 
   /**
    * Attempts to acquire the lock on a Linux or OSX machine
    */
-  private static _tryAcquireMacOrLinux(resourceFolder: string, resourceName: string): LockFile | undefined {
+  private static _tryAcquireMacOrLinux(
+    resourceFolder: string,
+    resourceName: string,
+    pidLockFilePath: string
+  ): LockFile | undefined {
     let dirtyWhenAcquired: boolean = false;
 
     // get the current process' pid
@@ -252,7 +305,6 @@ export class LockFile {
       throw new Error(`Unable to calculate start time for current process.`);
     }
 
-    const pidLockFilePath: string = LockFile.getLockFilePath(resourceFolder, resourceName);
     let lockFileHandle: FileWriter | undefined;
 
     let lockFile: LockFile;
@@ -283,7 +335,7 @@ export class LockFile {
           (otherPid = match[2]) !== pid.toString()
         ) {
           // we found at least one lockfile hanging around that isn't ours
-          const fileInFolderPath: string = path.join(resourceFolder, fileInFolder);
+          const fileInFolderPath: string = `${resourceFolder}/${fileInFolder}`;
           dirtyWhenAcquired = true;
 
           // console.log(`FOUND OTHER LOCKFILE: ${otherPid}`);
@@ -382,8 +434,7 @@ export class LockFile {
    * Attempts to acquire the lock using Windows
    * This algorithm is much simpler since we can rely on the operating system
    */
-  private static _tryAcquireWindows(resourceFolder: string, resourceName: string): LockFile | undefined {
-    const lockFilePath: string = LockFile.getLockFilePath(resourceFolder, resourceName);
+  private static _tryAcquireWindows(lockFilePath: string): LockFile | undefined {
     let dirtyWhenAcquired: boolean = false;
 
     let fileHandle: FileWriter | undefined;
@@ -433,10 +484,13 @@ export class LockFile {
       throw new Error(`The lock for file "${path.basename(this._filePath)}" has already been released.`);
     }
 
+    IN_PROC_LOCKS.delete(this._filePath);
+
     this._fileWriter!.close();
     if (deleteFile) {
       FileSystem.deleteFile(this._filePath);
     }
+
     this._fileWriter = undefined;
   }
 

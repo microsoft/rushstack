@@ -4,17 +4,35 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import type { FileSystemAdapter } from 'fast-glob';
 import Watchpack from 'watchpack';
 
-interface IReaddirOptions {
+/**
+ * Options for `fs.readdir`
+ * @public
+ */
+export interface IReaddirOptions {
+  /**
+   * If true, readdir will return `fs.Dirent` objects instead of strings.
+   */
   withFileTypes: true;
 }
 
 /* eslint-disable @rushstack/no-new-null */
-type StatCallback = (error: NodeJS.ErrnoException | null, stats: fs.Stats) => void;
-type ReaddirStringCallback = (error: NodeJS.ErrnoException | null, files: string[]) => void;
-type ReaddirDirentCallback = (error: NodeJS.ErrnoException | null, files: fs.Dirent[]) => void;
+/**
+ * Callback for `fs.stat` and `fs.lstat`
+ * @public
+ */
+export type StatCallback = (error: NodeJS.ErrnoException | null, stats: fs.Stats) => void;
+/**
+ * Callback for `fs.readdir` when `withFileTypes` is not specified or false
+ * @public
+ */
+export type ReaddirStringCallback = (error: NodeJS.ErrnoException | null, files: string[]) => void;
+/**
+ * Callback for `fs.readdir` when `withFileTypes` is true
+ * @public
+ */
+export type ReaddirDirentCallback = (error: NodeJS.ErrnoException | null, files: fs.Dirent[]) => void;
 /* eslint-enable @rushstack/no-new-null */
 
 /**
@@ -29,12 +47,72 @@ export interface IWatchedFileState {
 }
 
 /**
+ * Interface contract for heft plugins to use the `WatchFileSystemAdapter`
+ * @public
+ */
+export interface IWatchFileSystem {
+  /**
+   * Synchronous readdir. Watches the directory for changes.
+   *
+   * @see fs.readdirSync
+   */
+  readdirSync(filePath: string): string[];
+  readdirSync(filePath: string, options: IReaddirOptions): fs.Dirent[];
+
+  /**
+   * Asynchronous readdir. Watches the directory for changes.
+   *
+   * @see fs.readdir
+   */
+  readdir(filePath: string, callback: ReaddirStringCallback): void;
+  readdir(filePath: string, options: IReaddirOptions, callback: ReaddirDirentCallback): void;
+
+  /**
+   * Asynchronous lstat. Watches the file for changes, or if it does not exist, watches to see if it is created.
+   * @see fs.lstat
+   */
+  lstat(filePath: string, callback: StatCallback): void;
+
+  /**
+   * Synchronous lstat. Watches the file for changes, or if it does not exist, watches to see if it is created.
+   * @see fs.lstatSync
+   */
+  lstatSync(filePath: string): fs.Stats;
+
+  /**
+   * Asynchronous stat. Watches the file for changes, or if it does not exist, watches to see if it is created.
+   * @see fs.stat
+   */
+  stat(filePath: string, callback: StatCallback): void;
+
+  /**
+   * Synchronous stat. Watches the file for changes, or if it does not exist, watches to see if it is created.
+   * @see fs.statSync
+   */
+  statSync(filePath: string): fs.Stats;
+
+  /**
+   * Tells the adapter to track the specified file (or folder) as used.
+   * Returns an object containing data about the state of said file (or folder).
+   * Uses promise-based API.
+   */
+  getStateAndTrackAsync(filePath: string): Promise<IWatchedFileState>;
+
+  /**
+   * Tells the adapter to track the specified file (or folder) as used.
+   * Returns an object containing data about the state of said file (or folder).
+   * Uses synchronous API.
+   */
+  getStateAndTrack(filePath: string): IWatchedFileState;
+}
+
+/**
  * Interface contract for `WatchFileSystemAdapter` for cross-version compatibility
  */
-export interface IWatchFileSystemAdapter extends FileSystemAdapter {
+export interface IWatchFileSystemAdapter extends IWatchFileSystem {
   /**
    * Prepares for incoming glob requests. Any file changed after this method is called
-   * will trigger teh watch callback in the next invocation.
+   * will trigger the watch callback in the next invocation.
    * File mtimes will be recorded at this time for any files that do not receive explicit
    * stat() or lstat() calls.
    */
@@ -44,11 +122,6 @@ export interface IWatchFileSystemAdapter extends FileSystemAdapter {
    * Clears the tracked file lists.
    */
   watch(onChange: () => void): void;
-  /**
-   * Tells the adapter to track the specified file (or folder) as used.
-   * Returns an object containing data about the state of said file (or folder).
-   */
-  getStateAndTrackAsync(filePath: string): Promise<IWatchedFileState>;
 }
 
 interface ITimeEntry {
@@ -72,7 +145,10 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   private _times: Map<string, ITimeEntry> | undefined;
 
   /** { @inheritdoc fs.readdirSync } */
-  public readdirSync: FileSystemAdapter['readdirSync'] = ((filePath: string, options?: IReaddirOptions) => {
+  public readdirSync: IWatchFileSystemAdapter['readdirSync'] = ((
+    filePath: string,
+    options?: IReaddirOptions
+  ) => {
     filePath = path.normalize(filePath);
 
     try {
@@ -89,10 +165,10 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
       this._missing.set(filePath, Date.now());
       throw err;
     }
-  }) as FileSystemAdapter['readdirSync'];
+  }) as IWatchFileSystemAdapter['readdirSync'];
 
   /** { @inheritdoc fs.readdir } */
-  public readdir: FileSystemAdapter['readdir'] = (
+  public readdir: IWatchFileSystemAdapter['readdir'] = (
     filePath: string,
     optionsOrCallback: IReaddirOptions | ReaddirStringCallback,
     callback?: ReaddirDirentCallback | ReaddirStringCallback
@@ -128,7 +204,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   };
 
   /** { @inheritdoc fs.lstat } */
-  public lstat: FileSystemAdapter['lstat'] = (filePath: string, callback: StatCallback): void => {
+  public lstat: IWatchFileSystemAdapter['lstat'] = (filePath: string, callback: StatCallback): void => {
     filePath = path.normalize(filePath);
     fs.lstat(filePath, (err: NodeJS.ErrnoException | null, stats: fs.Stats) => {
       if (err) {
@@ -141,7 +217,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   };
 
   /** { @inheritdoc fs.lstatSync } */
-  public lstatSync: FileSystemAdapter['lstatSync'] = (filePath: string): fs.Stats => {
+  public lstatSync: IWatchFileSystemAdapter['lstatSync'] = (filePath: string): fs.Stats => {
     filePath = path.normalize(filePath);
     try {
       const stats: fs.Stats = fs.lstatSync(filePath);
@@ -154,7 +230,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   };
 
   /** { @inheritdoc fs.stat } */
-  public stat: FileSystemAdapter['stat'] = (filePath: string, callback: StatCallback): void => {
+  public stat: IWatchFileSystemAdapter['stat'] = (filePath: string, callback: StatCallback): void => {
     filePath = path.normalize(filePath);
     fs.stat(filePath, (err: NodeJS.ErrnoException | null, stats: fs.Stats) => {
       if (err) {
@@ -167,7 +243,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   };
 
   /** { @inheritdoc fs.statSync } */
-  public statSync: FileSystemAdapter['statSync'] = (filePath: string) => {
+  public statSync: IWatchFileSystemAdapter['statSync'] = (filePath: string) => {
     filePath = path.normalize(filePath);
     try {
       const stats: fs.Stats = fs.statSync(filePath);
@@ -240,6 +316,40 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
           safeTime: rounded
         };
       } catch (err) {
+        this._missing.set(normalizedSourcePath, Date.now());
+      }
+    }
+
+    const newTime: number | undefined =
+      (newTimeEntry && (newTimeEntry.timestamp ?? newTimeEntry.safeTime)) || this._lastQueryTime;
+
+    if (newTime) {
+      this._files.set(normalizedSourcePath, newTime);
+    }
+
+    return {
+      changed: newTime !== oldTime
+    };
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getStateAndTrack(filePath: string): IWatchedFileState {
+    const normalizedSourcePath: string = path.normalize(filePath);
+    const oldTime: number | undefined = this._lastFiles?.get(normalizedSourcePath);
+    let newTimeEntry: ITimeEntry | undefined = this._times?.get(normalizedSourcePath);
+
+    if (!newTimeEntry) {
+      // Need to record a timestamp, otherwise first rerun will select everything
+      const stats: fs.Stats | undefined = fs.lstatSync(normalizedSourcePath, { throwIfNoEntry: false });
+      if (stats) {
+        const rounded: number = stats.mtime.getTime() || stats.ctime.getTime() || Date.now();
+        newTimeEntry = {
+          timestamp: rounded,
+          safeTime: rounded
+        };
+      } else {
         this._missing.set(normalizedSourcePath, Date.now());
       }
     }

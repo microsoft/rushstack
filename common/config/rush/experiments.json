@@ -82,10 +82,39 @@
    * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
    */
   // "generateProjectImpactGraphDuringRushUpdate": true,
+
   /**
    * If true, when running in watch mode, Rush will check for phase scripts named `_phase:<name>:ipc` and run them instead
    * of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist
    * across invocations.
    */
-  // "useIPCScriptsInWatchMode": true
+  // "useIPCScriptsInWatchMode": true,
+
+  /**
+   * (UNDER DEVELOPMENT) The Rush alerts feature provides a way to send announcements to engineers
+   * working in the monorepo, by printing directly in the user's shell window when they invoke Rush commands.
+   * This ensures that important notices will be seen by anyone doing active development, since people often
+   * ignore normal discussion group messages or don't know to subscribe.
+   */
+  // "rushAlerts": true,
+
+  /**
+   * When using cobuilds, this experiment allows uncacheable operations to benefit from cobuild orchestration without using the build cache.
+   */
+  // "allowCobuildWithoutCache": true,
+
+  /**
+   * By default, rush perform a full scan of the entire repository. For example, Rush runs `git status` to check for local file changes.
+   * When this toggle is enabled, Rush will only scan specific paths, significantly speeding up Git operations.
+   */
+  // "enableSubpathScan": true
+
+  /**
+   * Rush has a policy that normally requires Rush projects to specify `workspace:*` in package.json when depending
+   * on other projects in the workspace, unless they are explicitly declared as `decoupledLocalDependencies`
+   * in rush.json.  Enabling this experiment will remove that requirement for dependencies belonging to a different
+   * subspace.  This is useful for large product groups who work in separate subspaces and generally prefer to consume
+   * each other's packages via the NPM registry.
+   */
+  //  "exemptDecoupledDependenciesBetweenSubspaces": true
 }

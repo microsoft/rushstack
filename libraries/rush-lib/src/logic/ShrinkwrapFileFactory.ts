@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import type { PackageManagerName } from '../api/packageManager/PackageManager';
-import type { PackageManagerOptionsConfigurationBase } from './base/BasePackageManagerOptionsConfiguration';
 import type { BaseShrinkwrapFile } from './base/BaseShrinkwrapFile';
 import { NpmShrinkwrapFile } from './npm/NpmShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
@@ -11,7 +10,6 @@ import { YarnShrinkwrapFile } from './yarn/YarnShrinkwrapFile';
 export class ShrinkwrapFileFactory {
   public static getShrinkwrapFile(
     packageManager: PackageManagerName,
-    packageManagerOptions: PackageManagerOptionsConfigurationBase,
     shrinkwrapFilename: string
   ): BaseShrinkwrapFile | undefined {
     switch (packageManager) {
@@ -28,7 +26,6 @@ export class ShrinkwrapFileFactory {
 
   public static parseShrinkwrapFile(
     packageManager: PackageManagerName,
-    packageManagerOptions: PackageManagerOptionsConfigurationBase,
     shrinkwrapContent: string
   ): BaseShrinkwrapFile | undefined {
     switch (packageManager) {

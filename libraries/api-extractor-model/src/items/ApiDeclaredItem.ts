@@ -39,7 +39,6 @@ export interface IApiDeclaredItemJson extends IApiDocumentedItemJson {
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export class ApiDeclaredItem extends ApiDocumentedItem {
   private _excerptTokens: ExcerptToken[];
   private _excerpt: Excerpt;

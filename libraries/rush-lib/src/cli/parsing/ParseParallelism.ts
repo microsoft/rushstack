@@ -9,7 +9,7 @@ import * as os from 'os';
  */
 export function parseParallelism(
   rawParallelism: string | undefined,
-  numberOfCores: number = os.cpus().length
+  numberOfCores: number = os.availableParallelism?.() ?? os.cpus().length
 ): number {
   if (rawParallelism) {
     if (rawParallelism === 'max') {

@@ -20,6 +20,8 @@ describe(Telemetry.name, () => {
   });
 
   beforeEach(() => {
+    performance.clearMarks();
+    performance.clearMeasures();
     jest.clearAllMocks();
   });
 
@@ -42,7 +44,8 @@ describe(Telemetry.name, () => {
       timestampMs: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version,
-      machineInfo: {} as ITelemetryMachineInfo
+      machineInfo: {} as ITelemetryMachineInfo,
+      performanceEntries: []
     };
 
     const logData2: ITelemetryData = {
@@ -52,7 +55,8 @@ describe(Telemetry.name, () => {
       timestampMs: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version,
-      machineInfo: {} as ITelemetryMachineInfo
+      machineInfo: {} as ITelemetryMachineInfo,
+      performanceEntries: []
     };
 
     telemetry.log(logData1);
@@ -96,7 +100,8 @@ describe(Telemetry.name, () => {
       timestampMs: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version,
-      machineInfo: {} as ITelemetryMachineInfo
+      machineInfo: {} as ITelemetryMachineInfo,
+      performanceEntries: []
     };
 
     telemetry.log(logData);

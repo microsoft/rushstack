@@ -25,6 +25,12 @@
       "enum": ["AzurePublicCloud", "AzureChina", "AzureGermany", "AzureGovernment"]
     },
 
+    "loginFlow": {
+      "type": "string",
+      "description": "The Entra ID login flow to use. Defaults to 'AdoCodespacesAuth' on GitHub Codespaces, 'InteractiveBrowser' otherwise.",
+      "enum": ["AdoCodespacesAuth", "InteractiveBrowser", "DeviceCode"]
+    },
+
     "minimumValidityInMinutes": {
       "type": "number",
       "description": "If specified and a credential exists that will be valid for at least this many minutes from the time of execution, no action will be taken."

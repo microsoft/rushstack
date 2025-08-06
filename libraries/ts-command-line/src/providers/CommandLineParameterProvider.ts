@@ -39,6 +39,7 @@ import { CommandLineStringListParameter } from '../parameters/CommandLineStringL
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
 import { CommandLineParserExitError } from './CommandLineParserExitError';
+import { escapeSprintf } from '../escapeSprintf';
 
 /**
  * The result containing the parsed parameter long name and scope. Returned when calling
@@ -140,7 +141,7 @@ export abstract class CommandLineParameterProvider {
   /**
    * Returns a collection of the parameters that were defined for this object.
    */
-  public get parameters(): ReadonlyArray<CommandLineParameterBase> {
+  public get parameters(): ReadonlyArray<CommandLineParameter> {
     return this._parameters;
   }
 
@@ -589,11 +590,6 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * @deprecated - Define parameters in the constructor
-   */
-  protected onDefineParameters?(): void;
-
-  /**
    * Retrieves the argparse object.
    * @internal
    */
@@ -835,11 +831,11 @@ export abstract class CommandLineParameterProvider {
     let type: string | undefined;
     switch (kind) {
       case CommandLineParameterKind.Choice: {
-        choices = parameter.alternatives as string[];
+        choices = Array.from(parameter.alternatives);
         break;
       }
       case CommandLineParameterKind.ChoiceList: {
-        choices = parameter.alternatives as string[];
+        choices = Array.from(parameter.alternatives);
         action = 'append';
         break;
       }
@@ -863,7 +859,7 @@ export abstract class CommandLineParameterProvider {
     // NOTE: Our "environmentVariable" feature takes precedence over argparse's "defaultValue",
     // so we have to reimplement that feature.
     const argparseOptions: argparse.ArgumentOptions = {
-      help: finalDescription,
+      help: escapeSprintf(finalDescription),
       dest: parserKey,
       metavar: (parameter as CommandLineParameterWithArgument).argumentName,
       required,

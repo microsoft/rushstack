@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { InternalError, type IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
+import { InternalError, type IPackageJson, JsonFile, Sort, JsonSyntax } from '@rushstack/node-core-library';
 import { cloneDeep } from '../utilities/objectUtilities';
 
 /**
@@ -308,7 +308,10 @@ export class PackageJsonEditor {
     if (this._modified) {
       this._modified = false;
       this._sourceData = this._normalize(this._sourceData);
-      JsonFile.save(this._sourceData, this.filePath, { updateExistingFile: true });
+      JsonFile.save(this._sourceData, this.filePath, {
+        updateExistingFile: true,
+        jsonSyntax: JsonSyntax.Strict
+      });
       return true;
     }
     return false;

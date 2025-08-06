@@ -8,6 +8,7 @@ import type { CommandLineParameterProvider } from '../providers/CommandLineParam
 import { AliasCommandLineAction } from '../providers/AliasCommandLineAction';
 import { CommandLineAction } from '../providers/CommandLineAction';
 import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 class TestAliasAction extends AliasCommandLineAction {
   public done: boolean = false;
@@ -39,7 +40,7 @@ class TestAction extends CommandLineAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     expect(this._flag.value).toEqual(true);
     this.done = true;
   }
@@ -48,8 +49,8 @@ class TestAction extends CommandLineAction {
 class TestScopedAction extends ScopedCommandLineAction {
   public done: boolean = false;
   public scopedValue: string | undefined;
-  private _verboseArg!: CommandLineFlagParameter;
-  private _scopeArg!: CommandLineStringParameter;
+  private readonly _verboseArg: CommandLineFlagParameter;
+  private readonly _scopeArg: CommandLineStringParameter;
   private _scopedArg: CommandLineStringParameter | undefined;
 
   public constructor() {
@@ -58,17 +59,7 @@ class TestScopedAction extends ScopedCommandLineAction {
       summary: 'does the scoped action',
       documentation: 'a longer description'
     });
-  }
 
-  protected async onExecute(): Promise<void> {
-    if (this._scopedArg) {
-      expect(this._scopedArg.longName).toBe(`--scoped-${this._scopeArg.value}`);
-      this.scopedValue = this._scopedArg.value;
-    }
-    this.done = true;
-  }
-
-  protected onDefineUnscopedParameters(): void {
     this._verboseArg = this.defineFlagParameter({
       parameterLongName: '--verbose',
       description: 'A flag parameter.'
@@ -80,6 +71,14 @@ class TestScopedAction extends ScopedCommandLineAction {
       argumentName: 'SCOPE',
       description: 'The scope'
     });
+  }
+
+  protected override async onExecuteAsync(): Promise<void> {
+    if (this._scopedArg) {
+      expect(this._scopedArg.longName).toBe(`--scoped-${this._scopeArg.value}`);
+      this.scopedValue = this._scopedArg.value;
+    }
+    this.done = true;
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
@@ -106,6 +105,11 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe(AliasCommandLineAction.name, () => {
+  it('renders help text', () => {
+    const commandLineParser: TestCommandLine = new TestCommandLine();
+    ensureHelpTextMatchesSnapshot(commandLineParser);
+  });
+
   it('executes the aliased action', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
     const targetAction: TestAction = commandLineParser.getAction('action') as TestAction;

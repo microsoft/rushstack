@@ -52,10 +52,6 @@ export class RushUserConfiguration {
 
   public static getRushUserFolderPath(): string {
     const homeFolderPath: string = Utilities.getHomeFolder();
-    const rushUserSettingsFilePath: string = path.join(
-      homeFolderPath,
-      RushConstants.rushUserConfigurationFolderName
-    );
-    return rushUserSettingsFilePath;
+    return `${homeFolderPath}/${RushConstants.rushUserConfigurationFolderName}`;
   }
 }

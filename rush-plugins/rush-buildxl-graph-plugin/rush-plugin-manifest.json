@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-plugin-manifest.schema.json",
+  "plugins": [
+    {
+      "pluginName": "rush-buildxl-graph-plugin",
+      "description": "Plugin for providing access to Rush build graph.",
+      "entryPoint": "lib/index.js",
+      "optionsSchema": "lib/schemas/rush-buildxl-graph-plugin.schema.json"
+    }
+  ]
+}

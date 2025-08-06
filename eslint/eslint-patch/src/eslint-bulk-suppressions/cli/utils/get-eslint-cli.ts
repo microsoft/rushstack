@@ -13,10 +13,11 @@ const TESTED_VERSIONS: Set<string> = new Set([
   '8.22.0',
   '8.23.0',
   '8.23.1',
-  '8.57.0'
+  '8.57.0',
+  '9.25.1'
 ]);
 
-export function getEslintPath(packagePath: string): string {
+export function getEslintPathAndVersion(packagePath: string): [string, string] {
   // Try to find a local ESLint installation, the one that should be listed as a dev dependency in package.json
   // and installed in node_modules
   try {
@@ -32,8 +33,8 @@ export function getEslintPath(packagePath: string): string {
       );
     }
 
-    return localEslintApiPath;
-  } catch (e) {
+    return [localEslintApiPath, localEslintVersion];
+  } catch (e1) {
     try {
       const {
         dependencies,
@@ -56,7 +57,7 @@ export function getEslintPath(packagePath: string): string {
       } else {
         throw new Error('@rushstack/eslint-bulk: eslint is not specified as a dependency in package.json.');
       }
-    } catch (e) {
+    } catch (e2) {
       throw new Error(
         "@rushstack/eslint-bulk: This command must be run in the same folder as a project's package.json file."
       );

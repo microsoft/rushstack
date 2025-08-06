@@ -178,13 +178,17 @@ export async function getFileSelectionSpecifierPathsAsync(
   return results;
 }
 
-export function normalizeFileSelectionSpecifier(
+export function asAbsoluteFileSelectionSpecifier<TSpecifier extends IFileSelectionSpecifier>(
   rootPath: string,
-  fileGlobSpecifier: IFileSelectionSpecifier
-): void {
+  fileGlobSpecifier: TSpecifier
+): TSpecifier {
   const { sourcePath } = fileGlobSpecifier;
-  fileGlobSpecifier.sourcePath = sourcePath ? path.resolve(rootPath, sourcePath) : rootPath;
-  fileGlobSpecifier.includeGlobs = getIncludedGlobPatterns(fileGlobSpecifier);
+  return {
+    ...fileGlobSpecifier,
+    sourcePath: sourcePath ? path.resolve(rootPath, sourcePath) : rootPath,
+    includeGlobs: getIncludedGlobPatterns(fileGlobSpecifier),
+    fileExtensions: undefined
+  };
 }
 
 function getIncludedGlobPatterns(fileGlobSpecifier: IFileSelectionSpecifier): string[] {

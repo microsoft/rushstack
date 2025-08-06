@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../../schemas/api-extractor.schema.json",
+
+  "mainEntryPointFilePath": "index.d.ts",
+
+  "apiReport": {
+    "enabled": true,
+    "tagsToReport": {
+      "@validTag1": true, // Valid custom tag
+      "@-invalid-tag-2": true, // Invalid tag - invalid characters
+      "@public": false, // Release tags must not be specified
+      "@override": false // Valid (override base tag)
+    }
+  },
+
+  "docModel": {
+    "enabled": true
+  },
+
+  "dtsRollup": {
+    "enabled": true
+  }
+}

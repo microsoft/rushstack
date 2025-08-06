@@ -6,11 +6,21 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
     getRepoRoot(dir: string): string {
       return dir;
     },
-    getRepoStateAsync(): ReadonlyMap<string, string> {
-      return new Map();
+    getDetailedRepoStateAsync(): IDetailedRepoState {
+      return {
+        hasSubmodules: false,
+        hasUncommittedChanges: false,
+        files: new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']])
+      };
     },
     getRepoChangesAsync(): ReadonlyMap<string, string> {
       return new Map();
+    },
+    getGitHashForFiles(filePaths: Iterable<string>): ReadonlyMap<string, string> {
+      return new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]));
+    },
+    hashFilesAsync(rootDirectory: string, filePaths: Iterable<string>): ReadonlyMap<string, string> {
+      return new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]));
     }
   };
 });
@@ -18,9 +28,11 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
 import './mockRushCommandLineParser';
 
 import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
+import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import { getCommandLineParserInstanceAsync } from './TestUtils';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 function pathEquals(actual: string, expected: string): void {
   expect(Path.convertToSlashes(actual)).toEqual(Path.convertToSlashes(expected));
@@ -34,6 +46,7 @@ describe('RushCommandLineParser', () => {
   describe('execute', () => {
     afterEach(() => {
       jest.clearAllMocks();
+      EnvironmentConfiguration.reset();
     });
 
     describe('in basic repo', () => {
@@ -309,6 +322,173 @@ describe('RushCommandLineParser', () => {
         const telemetryStore: ITelemetryData[] = await JsonFile.loadAsync(telemetryFilePath);
         expect(telemetryStore?.[0].name).toEqual('build');
         expect(telemetryStore?.[0].result).toEqual('Succeeded');
+      });
+    });
+
+    describe('in repo plugin with build command', () => {
+      describe("'build' action", () => {
+        it(`executes the package's 'build' script`, async () => {
+          const repoName: string = 'pluginWithBuildCommandRepo';
+          const { parser, spawnMock, repoPath } = await getCommandLineParserInstanceAsync(repoName, 'build');
+
+          expect(parser.getAction('build').summary).toEqual('Override build command summary in plugin');
+          expect(parser.getAction('rebuild').summary).toEqual(expect.any(String));
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          // There should be 1 build per package
+          const packageCount: number = spawnMock.mock.calls.length;
+          expect(packageCount).toEqual(2);
+
+          // Use regex for task name in case spaces were prepended or appended to spawned command
+          const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const firstSpawn: any[] = spawnMock.mock.calls[0];
+          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const secondSpawn: any[] = spawnMock.mock.calls[1];
+          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+        });
+      });
+
+      describe("'rebuild' action", () => {
+        it(`executes the package's 'rebuild' script`, async () => {
+          const repoName: string = 'pluginWithBuildCommandRepo';
+          const { parser, spawnMock, repoPath } = await getCommandLineParserInstanceAsync(
+            repoName,
+            'rebuild'
+          );
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          // There should be 1 build per package
+          const packageCount: number = spawnMock.mock.calls.length;
+          expect(packageCount).toEqual(2);
+
+          // Use regex for task name in case spaces were prepended or appended to spawned command
+          const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const firstSpawn: any[] = spawnMock.mock.calls[0];
+          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const secondSpawn: any[] = spawnMock.mock.calls[1];
+          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+        });
+      });
+    });
+
+    describe('in repo plugin with rebuild command', () => {
+      describe("'build' action", () => {
+        it(`executes the package's 'build' script`, async () => {
+          const repoName: string = 'pluginWithRebuildCommandRepo';
+          const { parser, spawnMock, repoPath } = await getCommandLineParserInstanceAsync(repoName, 'build');
+
+          expect(parser.getAction('rebuild').summary).toEqual('Override rebuild command summary in plugin');
+          expect(parser.getAction('build').summary).toEqual(expect.any(String));
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          // There should be 1 build per package
+          const packageCount: number = spawnMock.mock.calls.length;
+          expect(packageCount).toEqual(2);
+
+          // Use regex for task name in case spaces were prepended or appended to spawned command
+          const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const firstSpawn: any[] = spawnMock.mock.calls[0];
+          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const secondSpawn: any[] = spawnMock.mock.calls[1];
+          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+        });
+      });
+
+      describe("'rebuild' action", () => {
+        it(`executes the package's 'rebuild' script`, async () => {
+          const repoName: string = 'pluginWithRebuildCommandRepo';
+          const { parser, spawnMock, repoPath } = await getCommandLineParserInstanceAsync(
+            repoName,
+            'rebuild'
+          );
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          // There should be 1 build per package
+          const packageCount: number = spawnMock.mock.calls.length;
+          expect(packageCount).toEqual(2);
+
+          // Use regex for task name in case spaces were prepended or appended to spawned command
+          const expectedBuildTaskRegexp: RegExp = /fake_REbuild_task_but_works_with_mock/;
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const firstSpawn: any[] = spawnMock.mock.calls[0];
+          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/a`);
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const secondSpawn: any[] = spawnMock.mock.calls[1];
+          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${repoPath}/b`);
+        });
+      });
+    });
+
+    describe('in repo plugin with conflict build command', () => {
+      it(`throws an error when starting Rush`, async () => {
+        const repoName: string = 'pluginWithConflictBuildCommandRepo';
+
+        await expect(async () => {
+          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
+        }).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Error from plugin rush-build-command-plugin by rush-build-command-plugin: Error: command-line.json defines a command \\"build\\" using a name that already exists"`
+        );
+      });
+    });
+
+    describe("in repo plugin with conflict rebuild command'", () => {
+      it(`throws an error when starting Rush`, async () => {
+        const repoName: string = 'pluginWithConflictRebuildCommandRepo';
+
+        await expect(async () => {
+          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
+        }).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"command-line.json defines a parameter \\"--no-color\\" that is associated with a command \\"build\\" that is not defined in this file."`
+        );
       });
     });
   });

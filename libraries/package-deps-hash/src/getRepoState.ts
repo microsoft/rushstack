@@ -298,6 +298,61 @@ async function spawnGitAsync(
   return stdout;
 }
 
+function isIterable<T>(value: Iterable<T> | AsyncIterable<T>): value is Iterable<T> {
+  return Symbol.iterator in value;
+}
+
+/**
+ * Uses `git hash-object` to hash the provided files. Unlike `getGitHashForFiles`, this API is asynchronous, and also allows for
+ * the input file paths to be specified as an async iterable.
+ *
+ * @param rootDirectory - The root directory to which paths are specified relative. Must be the root of the Git repository.
+ * @param filesToHash - The file paths to hash using `git hash-object`
+ * @param gitPath - The path to the Git executable
+ * @returns An iterable of [filePath, hash] pairs
+ *
+ * @remarks
+ * The input file paths must be specified relative to the Git repository root, or else be absolute paths.
+ * @beta
+ */
+export async function hashFilesAsync(
+  rootDirectory: string,
+  filesToHash: Iterable<string> | AsyncIterable<string>,
+  gitPath?: string
+): Promise<Iterable<[string, string]>> {
+  const hashPaths: string[] = [];
+
+  const input: Readable = Readable.from(
+    isIterable(filesToHash)
+      ? (function* (): IterableIterator<string> {
+          for (const file of filesToHash) {
+            hashPaths.push(file);
+            yield `${file}\n`;
+          }
+        })()
+      : (async function* (): AsyncIterableIterator<string> {
+          for await (const file of filesToHash) {
+            hashPaths.push(file);
+            yield `${file}\n`;
+          }
+        })(),
+    {
+      encoding: 'utf-8',
+      objectMode: false,
+      autoDestroy: true
+    }
+  );
+
+  const hashObjectResult: string = await spawnGitAsync(
+    gitPath,
+    STANDARD_GIT_OPTIONS.concat(['hash-object', '--stdin-paths']),
+    rootDirectory,
+    input
+  );
+
+  return parseGitHashObject(hashObjectResult, hashPaths);
+}
+
 /**
  * Gets the object hashes for all files in the Git repo, combining the current commit with working tree state.
  * Uses async operations and runs all primary Git calls in parallel.
@@ -309,8 +364,52 @@ async function spawnGitAsync(
 export async function getRepoStateAsync(
   rootDirectory: string,
   additionalRelativePathsToHash?: string[],
-  gitPath?: string
+  gitPath?: string,
+  filterPath?: string[]
 ): Promise<Map<string, string>> {
+  const { files } = await getDetailedRepoStateAsync(
+    rootDirectory,
+    additionalRelativePathsToHash,
+    gitPath,
+    filterPath
+  );
+
+  return files;
+}
+
+/**
+ * Information about the detailed state of the Git repository.
+ * @beta
+ */
+export interface IDetailedRepoState {
+  /**
+   * The Git file hashes for all files in the repository, including uncommitted changes.
+   */
+  files: Map<string, string>;
+  /**
+   * A boolean indicating whether the repository has submodules.
+   */
+  hasSubmodules: boolean;
+  /**
+   * A boolean indicating whether the repository has uncommitted changes.
+   */
+  hasUncommittedChanges: boolean;
+}
+
+/**
+ * Gets the object hashes for all files in the Git repo, combining the current commit with working tree state.
+ * Uses async operations and runs all primary Git calls in parallel.
+ * @param rootDirectory - The root directory of the Git repository
+ * @param additionalRelativePathsToHash - Root-relative file paths to have Git hash and include in the results
+ * @param gitPath - The path to the Git executable
+ * @beta
+ */
+export async function getDetailedRepoStateAsync(
+  rootDirectory: string,
+  additionalRelativePathsToHash?: string[],
+  gitPath?: string,
+  filterPath?: string[]
+): Promise<IDetailedRepoState> {
   const statePromise: Promise<IGitTreeState> = spawnGitAsync(
     gitPath,
     STANDARD_GIT_OPTIONS.concat([
@@ -323,7 +422,8 @@ export async function getRepoStateAsync(
       '--full-name',
       // As of last commit
       'HEAD',
-      '--'
+      '--',
+      ...(filterPath ?? [])
     ]),
     rootDirectory
   ).then(parseGitLsTree);
@@ -341,17 +441,16 @@ export async function getRepoStateAsync(
       '--ignore-submodules',
       // Don't compare against the remote
       '--no-ahead-behind',
-      '--'
+      '--',
+      ...(filterPath ?? [])
     ]),
     rootDirectory
   ).then(parseGitStatus);
 
-  const hashPaths: string[] = [];
   async function* getFilesToHash(): AsyncIterableIterator<string> {
     if (additionalRelativePathsToHash) {
       for (const file of additionalRelativePathsToHash) {
-        hashPaths.push(file);
-        yield `${file}\n`;
+        yield file;
       }
     }
 
@@ -359,33 +458,26 @@ export async function getRepoStateAsync(
 
     for (const [filePath, exists] of locallyModified) {
       if (exists) {
-        hashPaths.push(filePath);
-        yield `${filePath}\n`;
+        yield filePath;
       } else {
         files.delete(filePath);
       }
     }
   }
 
-  const hashObjectPromise: Promise<string> = spawnGitAsync(
-    gitPath,
-    STANDARD_GIT_OPTIONS.concat(['hash-object', '--stdin-paths']),
+  const hashObjectPromise: Promise<Iterable<[string, string]>> = hashFilesAsync(
     rootDirectory,
-    Readable.from(getFilesToHash(), {
-      encoding: 'utf-8',
-      objectMode: false,
-      autoDestroy: true
-    })
+    getFilesToHash(),
+    gitPath
   );
 
-  const [{ files, submodules }, hashObject] = await Promise.all([
+  const [{ files, submodules }, locallyModifiedFiles] = await Promise.all([
     statePromise,
-    hashObjectPromise,
     locallyModifiedPromise
   ]);
 
   // The result of "git hash-object" will be a list of file hashes delimited by newlines
-  for (const [filePath, hash] of parseGitHashObject(hashObject, hashPaths)) {
+  for (const [filePath, hash] of await hashObjectPromise) {
     files.set(filePath, hash);
   }
 
@@ -407,7 +499,11 @@ export async function getRepoStateAsync(
     }
   }
 
-  return files;
+  return {
+    hasSubmodules,
+    hasUncommittedChanges: locallyModifiedFiles.size > 0,
+    files
+  };
 }
 
 /**

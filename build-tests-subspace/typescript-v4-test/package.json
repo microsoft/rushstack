@@ -16,7 +16,7 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "typescript": "~4.9.5",
     "tslint": "~5.20.1",
-    "eslint": "~8.57.0"
+    "eslint": "~9.25.1"
   },
   "dependenciesMeta": {
     "@rushstack/eslint-config": {

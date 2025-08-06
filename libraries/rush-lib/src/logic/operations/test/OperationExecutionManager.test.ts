@@ -3,6 +3,7 @@
 
 // The TaskExecutionManager prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
+jest.mock('../OperationStateFile');
 
 jest.mock('@rushstack/terminal', () => {
   const originalModule = jest.requireActual('@rushstack/terminal');
@@ -19,6 +20,8 @@ import { Terminal } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable, PrintUtilities } from '@rushstack/terminal';
 
+import type { IPhase } from '../../../api/CommandLineConfiguration';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import {
   OperationExecutionManager,
   type IOperationExecutionManagerOptions
@@ -32,6 +35,8 @@ import type { IOperationRunner } from '../IOperationRunner';
 import { MockOperationRunner } from './MockOperationRunner';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
+import type { CobuildConfiguration } from '../../../api/CobuildConfiguration';
+import type { OperationStateFile } from '../OperationStateFile';
 
 const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;
@@ -45,13 +50,39 @@ mockGetTimeInMs.mockImplementation(() => {
 const mockWritable: MockWritable = new MockWritable();
 const mockTerminal: Terminal = new Terminal(new CollatedTerminalProvider(new CollatedTerminal(mockWritable)));
 
+const mockPhase: IPhase = {
+  name: 'phase',
+  allowWarningsOnSuccess: false,
+  associatedParameters: new Set(),
+  dependencies: {
+    self: new Set(),
+    upstream: new Set()
+  },
+  isSynthetic: false,
+  logFilenameIdentifier: 'phase',
+  missingScriptBehavior: 'silent'
+};
+const projectsByName: Map<string, RushConfigurationProject> = new Map();
+function getOrCreateProject(name: string): RushConfigurationProject {
+  let project: RushConfigurationProject | undefined = projectsByName.get(name);
+  if (!project) {
+    project = {
+      packageName: name
+    } as unknown as RushConfigurationProject;
+    projectsByName.set(name, project);
+  }
+  return project;
+}
+
 function createExecutionManager(
   executionManagerOptions: IOperationExecutionManagerOptions,
   operationRunner: IOperationRunner
 ): OperationExecutionManager {
   const operation: Operation = new Operation({
     runner: operationRunner,
-    logFilenameIdentifier: 'operation'
+    logFilenameIdentifier: 'operation',
+    phase: mockPhase,
+    project: getOrCreateProject('project')
   });
 
   return new OperationExecutionManager(new Set([operation]), executionManagerOptions);
@@ -72,7 +103,6 @@ describe(OperationExecutionManager.name, () => {
         quietMode: false,
         debugMode: false,
         parallelism: 1,
-        changedProjectsOnly: false,
         destination: mockWritable
       };
     });
@@ -91,8 +121,10 @@ describe(OperationExecutionManager.name, () => {
       _printOperationStatus(mockTerminal, result);
       expect(result.status).toEqual(OperationStatus.Failure);
       expect(result.operationResults.size).toEqual(1);
-      const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
-      expect(firstResult.status).toEqual(OperationStatus.Failure);
+      const firstResult: IOperationExecutionResult | undefined = result.operationResults
+        .values()
+        .next().value;
+      expect(firstResult?.status).toEqual(OperationStatus.Failure);
 
       const allMessages: string = mockWritable.getAllOutput();
       expect(allMessages).toContain('Error: step 1 failed');
@@ -113,8 +145,10 @@ describe(OperationExecutionManager.name, () => {
       _printOperationStatus(mockTerminal, result);
       expect(result.status).toEqual(OperationStatus.Failure);
       expect(result.operationResults.size).toEqual(1);
-      const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
-      expect(firstResult.status).toEqual(OperationStatus.Failure);
+      const firstResult: IOperationExecutionResult | undefined = result.operationResults
+        .values()
+        .next().value;
+      expect(firstResult?.status).toEqual(OperationStatus.Failure);
 
       const allOutput: string = mockWritable.getAllOutput();
       expect(allOutput).toMatch(/Build step 1/);
@@ -129,6 +163,8 @@ describe(OperationExecutionManager.name, () => {
         runner: new MockOperationRunner('fail', async () => {
           return OperationStatus.Failure;
         }),
+        phase: mockPhase,
+        project: getOrCreateProject('fail'),
         logFilenameIdentifier: 'fail'
       });
 
@@ -136,6 +172,8 @@ describe(OperationExecutionManager.name, () => {
 
       const blockedOperation = new Operation({
         runner: new MockOperationRunner('blocked', blockedRunFn),
+        phase: mockPhase,
+        project: getOrCreateProject('blocked'),
         logFilenameIdentifier: 'blocked'
       });
 
@@ -147,7 +185,6 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
-          changedProjectsOnly: false,
           destination: mockWritable
         }
       );
@@ -168,7 +205,6 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
-          changedProjectsOnly: false,
           destination: mockWritable
         };
       });
@@ -187,8 +223,10 @@ describe(OperationExecutionManager.name, () => {
         _printOperationStatus(mockTerminal, result);
         expect(result.status).toEqual(OperationStatus.SuccessWithWarning);
         expect(result.operationResults.size).toEqual(1);
-        const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
-        expect(firstResult.status).toEqual(OperationStatus.SuccessWithWarning);
+        const firstResult: IOperationExecutionResult | undefined = result.operationResults
+          .values()
+          .next().value;
+        expect(firstResult?.status).toEqual(OperationStatus.SuccessWithWarning);
 
         const allMessages: string = mockWritable.getAllOutput();
         expect(allMessages).toContain('Build step 1');
@@ -203,7 +241,6 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
-          changedProjectsOnly: false,
           destination: mockWritable
         };
       });
@@ -226,8 +263,10 @@ describe(OperationExecutionManager.name, () => {
         _printOperationStatus(mockTerminal, result);
         expect(result.status).toEqual(OperationStatus.Success);
         expect(result.operationResults.size).toEqual(1);
-        const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
-        expect(firstResult.status).toEqual(OperationStatus.SuccessWithWarning);
+        const firstResult: IOperationExecutionResult | undefined = result.operationResults
+          .values()
+          .next().value;
+        expect(firstResult?.status).toEqual(OperationStatus.SuccessWithWarning);
         const allMessages: string = mockWritable.getAllOutput();
         expect(allMessages).toContain('Build step 1');
         expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
@@ -256,6 +295,109 @@ describe(OperationExecutionManager.name, () => {
         expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
         expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
       });
+    });
+  });
+
+  describe('Cobuild logging', () => {
+    beforeEach(() => {
+      let mockCobuildTimeInMs: number = 0;
+      mockGetTimeInMs.mockImplementation(() => {
+        mockCobuildTimeInMs += 10_000;
+        return mockCobuildTimeInMs;
+      });
+    });
+    function createCobuildExecutionManager(
+      cobuildExecutionManagerOptions: IOperationExecutionManagerOptions,
+      operationRunnerFactory: (name: string) => IOperationRunner,
+      phase: IPhase,
+      project: RushConfigurationProject
+    ): OperationExecutionManager {
+      const operation: Operation = new Operation({
+        runner: operationRunnerFactory('operation'),
+        logFilenameIdentifier: 'operation',
+        phase,
+        project
+      });
+
+      const operation2: Operation = new Operation({
+        runner: operationRunnerFactory('operation2'),
+        logFilenameIdentifier: 'operation2',
+        phase,
+        project
+      });
+
+      return new OperationExecutionManager(new Set([operation, operation2]), {
+        afterExecuteOperationAsync: async (record) => {
+          if (!record._operationMetadataManager) {
+            throw new Error('OperationMetadataManager is not defined');
+          }
+          // Mock the readonly state property.
+          (record._operationMetadataManager as unknown as Record<string, unknown>).stateFile = {
+            state: {
+              cobuildContextId: '123',
+              cobuildRunnerId: '456',
+              nonCachedDurationMs: 15_000
+            }
+          } as unknown as OperationStateFile;
+          record._operationMetadataManager.wasCobuilt = true;
+        },
+        ...cobuildExecutionManagerOptions
+      });
+    }
+    it('logs cobuilt operations correctly with --timeline option', async () => {
+      executionManager = createCobuildExecutionManager(
+        executionManagerOptions,
+        (name) =>
+          new MockOperationRunner(
+            `${name} (success)`,
+            async () => {
+              return OperationStatus.Success;
+            },
+            /* warningsAreAllowed */ true
+          ),
+        { name: 'my-name' } as unknown as IPhase,
+        {} as unknown as RushConfigurationProject
+      );
+
+      const result: IExecutionResult = await executionManager.executeAsync();
+      _printTimeline({
+        terminal: mockTerminal,
+        result,
+        cobuildConfiguration: {
+          cobuildRunnerId: '123',
+          cobuildContextId: '123'
+        } as unknown as CobuildConfiguration
+      });
+      _printOperationStatus(mockTerminal, result);
+      expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
+    });
+    it('logs warnings correctly with --timeline option', async () => {
+      executionManager = createCobuildExecutionManager(
+        executionManagerOptions,
+        (name) =>
+          new MockOperationRunner(`${name} (success with warnings)`, async (terminal: CollatedTerminal) => {
+            terminal.writeStdoutLine('Build step 1\n');
+            terminal.writeStdoutLine('Warning: step 1 succeeded with warnings\n');
+            return OperationStatus.SuccessWithWarning;
+          }),
+        { name: 'my-name' } as unknown as IPhase,
+        {} as unknown as RushConfigurationProject
+      );
+
+      const result: IExecutionResult = await executionManager.executeAsync();
+      _printTimeline({
+        terminal: mockTerminal,
+        result,
+        cobuildConfiguration: {
+          cobuildRunnerId: '123',
+          cobuildContextId: '123'
+        } as unknown as CobuildConfiguration
+      });
+      _printOperationStatus(mockTerminal, result);
+      const allMessages: string = mockWritable.getAllOutput();
+      expect(allMessages).toContain('Build step 1');
+      expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
+      expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
     });
   });
 });

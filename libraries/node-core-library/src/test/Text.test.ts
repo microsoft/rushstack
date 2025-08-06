@@ -119,4 +119,17 @@ describe(Text.name, () => {
       expect(Text.escapeRegExp('a\\c')).toEqual('a\\\\c');
     });
   });
+
+  describe(Text.splitByNewLines.name, () => {
+    it('splits a string by newlines', () => {
+      expect(Text.splitByNewLines(undefined)).toEqual(undefined);
+      expect(Text.splitByNewLines('')).toEqual(['']);
+      expect(Text.splitByNewLines('abc')).toEqual(['abc']);
+      expect(Text.splitByNewLines('a\nb\nc')).toEqual(['a', 'b', 'c']);
+      expect(Text.splitByNewLines('a\nb\nc\n')).toEqual(['a', 'b', 'c', '']);
+      expect(Text.splitByNewLines('a\nb\nc\n\n')).toEqual(['a', 'b', 'c', '', '']);
+      expect(Text.splitByNewLines('\n\na\nb\nc\n\n')).toEqual(['', '', 'a', 'b', 'c', '', '']);
+      expect(Text.splitByNewLines('a\r\nb\nc')).toEqual(['a', 'b', 'c']);
+    });
+  });
 });

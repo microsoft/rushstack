@@ -1,6 +1,65 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Wed, 29 May 2024 00:10:52 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jun 2025 18:57:04 GMT and should not be manually modified.
+
+## 4.4.0
+Thu, 26 Jun 2025 18:57:04 GMT
+
+### Minor changes
+
+- Add flat config compatible versions of profiles and mixins. These are located under the `/flat/*` path.
+
+## 4.3.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Bump the `@typescript-eslint/*` packages to add support for TypeScript 5.8.
+
+## 4.2.0
+Sat, 01 Mar 2025 07:23:16 GMT
+
+### Minor changes
+
+- Bump the `@typescript-eslint/*` dependencies to `~8.24.0` to support newer versions of TypeScript.
+
+## 4.1.1
+Tue, 07 Jan 2025 16:11:06 GMT
+
+_Version update only_
+
+## 4.1.0
+Sat, 23 Nov 2024 01:18:55 GMT
+
+### Minor changes
+
+- Update TSDoc dependencies.
+
+## 4.0.2
+Thu, 19 Sep 2024 00:11:08 GMT
+
+### Patches
+
+- Fix ESLint broken links
+
+## 4.0.1
+Wed, 14 Aug 2024 22:37:32 GMT
+
+_Version update only_
+
+## 4.0.0
+Tue, 13 Aug 2024 18:17:05 GMT
+
+### Breaking changes
+
+- [BREAKING CHANGE] Bump "@typescript-eslint/eslint-plugin" to "~8.1.0" and "@typescript-eslint/eslint-parser" to "~8.1.0". Due to these changes, node@>=17.0.0 and eslint@^8.57.0 are now required due to breaking changes in the newer rules set.
+
+## 3.7.1
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
 
 ## 3.7.0
 Wed, 29 May 2024 00:10:52 GMT

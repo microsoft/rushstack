@@ -21,6 +21,7 @@ export {
 export {
   type IStringValueTyping,
   type IStringValueTypings,
+  type IExportAsDefaultOptions,
   type IStringValuesTypingsGeneratorBaseOptions,
   type IStringValuesTypingsGeneratorOptions,
   type IStringValuesTypingsGeneratorOptionsWithCustomReadFile,

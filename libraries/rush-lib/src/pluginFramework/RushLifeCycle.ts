@@ -5,6 +5,7 @@ import { AsyncParallelHook, AsyncSeriesHook, HookMap } from 'tapable';
 import type { ITelemetryData } from '../logic/Telemetry';
 
 import type { PhasedCommandHooks } from './PhasedCommandHooks';
+import type { Subspace } from '../api/Subspace';
 
 /**
  * Information about the currently executing command provided to plugins.
@@ -85,10 +86,16 @@ export class RushLifecycleHooks {
   /**
    * The hook to run between preparing the common/temp folder and invoking the package manager during "rush install" or "rush update".
    */
-  public readonly beforeInstall: AsyncSeriesHook<IGlobalCommand> = new AsyncSeriesHook<IGlobalCommand>(
-    ['command'],
-    'beforeInstall'
-  );
+  public readonly beforeInstall: AsyncSeriesHook<
+    [command: IGlobalCommand, subspace: Subspace, variant: string | undefined]
+  > = new AsyncSeriesHook(['command', 'subspace', 'variant'], 'beforeInstall');
+
+  /**
+   * The hook to run after a successful install.
+   */
+  public readonly afterInstall: AsyncSeriesHook<
+    [command: IRushCommand, subspace: Subspace, variant: string | undefined]
+  > = new AsyncSeriesHook(['command', 'subspace', 'variant'], 'afterInstall');
 
   /**
    * A hook to allow plugins to hook custom logic to process telemetry data.

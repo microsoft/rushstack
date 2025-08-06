@@ -279,11 +279,9 @@ export function parseProcessListOutput(
 const NAME_GROUP: 'name' = 'name';
 const PROCESS_ID_GROUP: 'pid' = 'pid';
 const PARENT_PROCESS_ID_GROUP: 'ppid' = 'ppid';
-// eslint-disable-next-line @rushstack/security/no-unsafe-regexp
 const PROCESS_LIST_ENTRY_REGEX_WIN32: RegExp = new RegExp(
   `^(?<${NAME_GROUP}>.+?)\\s+(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s*$`
 );
-// eslint-disable-next-line @rushstack/security/no-unsafe-regexp
 const PROCESS_LIST_ENTRY_REGEX_UNIX: RegExp = new RegExp(
   `^\\s*(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s+(?<${NAME_GROUP}>.+?)\\s*$`
 );
@@ -535,7 +533,6 @@ export class Executable {
     return child_process.spawn(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
   }
 
-  /* eslint-disable @rushstack/no-new-null */
   /** {@inheritDoc Executable.(waitForExitAsync:3)} */
   public static async waitForExitAsync(
     childProcess: child_process.ChildProcess,
@@ -633,7 +630,6 @@ export class Executable {
 
     return result;
   }
-  /* eslint-enable @rushstack/no-new-null */
 
   /**
    * Get the list of processes currently running on the system, keyed by the process ID.

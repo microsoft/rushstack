@@ -1,0 +1,11 @@
+{
+  "extends": "./api-extractor-base.json",
+
+  "apiReport": {
+    "tagsToReport": {
+      "@myCustomTag": true, // Enable reporting of custom tag
+      "@override": false, // Disable default reporting of `@override` tag
+      "@myCustomTag2": false // Disable reporting of custom tag (not included by base config)
+    }
+  }
+}

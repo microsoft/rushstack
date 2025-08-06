@@ -7,6 +7,11 @@
   "additionalProperties": false,
 
   "properties": {
+    "configurationPath": {
+      "title": "Path to Jest configuration file",
+      "description": "If provided, this path will be used to load Jest configuration. Otherwise, Jest configuration will be loaded from \"<projectDir>/config/jest.config.json\".",
+      "type": "string"
+    },
     "disableConfigurationModuleResolution": {
       "title": "Disable Configuration Module Resolution",
       "description": "If set to true, modules specified in the Jest configuration will be resolved using Jest default (rootDir-relative) resolution. Otherwise, modules will be resolved using Node module resolution.",

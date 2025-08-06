@@ -12,7 +12,16 @@
 
 export { Lib1Class } from 'api-extractor-lib1-test';
 
-/** @public */
+/**
+ * @internalRemarks Internal remarks
+ * @public
+ */
 export class Lib3Class {
+  /**
+   * I am a documented property!
+   * @betaDocumentation My docs include a custom block tag!
+   * @virtual @override
+   */
+  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   prop: boolean;
 }

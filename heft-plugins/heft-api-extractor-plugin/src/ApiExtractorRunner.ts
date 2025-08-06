@@ -19,7 +19,7 @@ export interface IApiExtractorRunnerConfiguration {
   apiExtractorConfiguration: TApiExtractor.ExtractorConfig;
 
   /**
-   * The imported @microsoft/api-extractor package
+   * The imported \@microsoft/api-extractor package
    */
   apiExtractor: typeof TApiExtractor;
 

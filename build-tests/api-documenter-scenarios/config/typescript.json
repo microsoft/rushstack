@@ -1,0 +1,7 @@
+{
+  "extends": "local-node-rig/profiles/default/config/typescript.json",
+
+  "staticAssetsToCopy": {
+    "fileExtensions": [".json", ".d.ts"]
+  }
+}

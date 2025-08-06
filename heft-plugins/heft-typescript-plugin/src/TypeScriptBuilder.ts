@@ -5,13 +5,17 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import { Worker } from 'worker_threads';
 
-import * as semver from 'semver';
 import type * as TTypescript from 'typescript';
-import { JsonFile, type IPackageJson, Path, FileError } from '@rushstack/node-core-library';
+import { Path, FileError } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import type { IScopedLogger } from '@rushstack/heft';
+import type { HeftConfiguration, IScopedLogger } from '@rushstack/heft';
 
-import type { ExtendedTypeScript, IExtendedSolutionBuilder } from './internalTypings/TypeScriptInternals';
+import type {
+  ExtendedBuilderProgram,
+  ExtendedTypeScript,
+  IExtendedSolutionBuilder,
+  ITypeScriptNodeSystem
+} from './internalTypings/TypeScriptInternals';
 import type { ITypeScriptConfigurationJson } from './TypeScriptPlugin';
 import type { PerformanceMeasurer } from './Performance';
 import type {
@@ -21,6 +25,8 @@ import type {
   ITypescriptWorkerData
 } from './types';
 import { configureProgramForMultiEmit } from './configureProgramForMultiEmit';
+import { loadTsconfig } from './tsconfigLoader';
+import { loadTypeScriptToolAsync } from './loadTypeScriptTool';
 
 export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfigurationJson {
   /**
@@ -36,7 +42,7 @@ export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfiguratio
   /**
    * The path to the TypeScript tool.
    */
-  typeScriptToolPath: string;
+  heftConfiguration: HeftConfiguration;
 
   // watchMode: boolean;
 
@@ -67,20 +73,6 @@ type TWatchSolutionHost =
 type TWatchProgram =
   TTypescript.WatchOfFilesAndCompilerOptions<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
 
-interface ICompilerCapabilities {
-  /**
-   * Support for incremental compilation via `ts.createIncrementalProgram()`.
-   * Introduced with TypeScript 3.6.
-   */
-  incrementalProgram: boolean;
-
-  /**
-   * Support for composite projects via `ts.createSolutionBuilder()`.
-   * Introduced with TypeScript 3.0.
-   */
-  solutionBuilder: boolean;
-}
-
 interface IFileToWrite {
   filePath: string;
   data: string;
@@ -107,15 +99,16 @@ interface ITranspileSignal {
   reject: (error: Error) => void;
 }
 
-const OLDEST_SUPPORTED_TS_MAJOR_VERSION: number = 2;
-const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
-
-const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 5;
-const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 4;
-
-interface ITypeScriptTool {
+/**
+ * @internal
+ */
+export interface IBaseTypeScriptTool<TSystem extends TTypescript.System = TTypescript.System> {
+  typeScriptToolPath: string;
   ts: ExtendedTypeScript;
-  system: TTypescript.System;
+  system: TSystem;
+}
+
+interface ITypeScriptTool extends IBaseTypeScriptTool<ITypeScriptNodeSystem> {
   measureSync: PerformanceMeasurer;
 
   sourceFileCache: Map<string, TTypescript.SourceFile>;
@@ -141,10 +134,6 @@ export class TypeScriptBuilder {
   private readonly _typescriptLogger: IScopedLogger;
   private readonly _typescriptTerminal: ITerminal;
 
-  private _typescriptVersion!: string;
-  private _typescriptParsedVersion!: semver.SemVer;
-
-  private _capabilities!: ICompilerCapabilities;
   private _useSolutionBuilder!: boolean;
 
   private _moduleKindsToEmit!: ICachedEmitModuleKind[];
@@ -189,70 +178,15 @@ export class TypeScriptBuilder {
 
   public async invokeAsync(onChangeDetected?: () => void): Promise<void> {
     if (!this._tool) {
-      // Determine the compiler version
-      const compilerPackageJsonFilename: string = path.join(
-        this._configuration.typeScriptToolPath,
-        'package.json'
-      );
-      const packageJson: IPackageJson = await JsonFile.loadAsync(compilerPackageJsonFilename);
-      this._typescriptVersion = packageJson.version;
-      const parsedVersion: semver.SemVer | null = semver.parse(this._typescriptVersion);
-      if (!parsedVersion) {
-        throw new Error(
-          `Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ` +
-            compilerPackageJsonFilename
-        );
-      }
-      this._typescriptParsedVersion = parsedVersion;
-
-      // Detect what features this compiler supports.  Note that manually comparing major/minor numbers
-      // loosens the matching to accept prereleases such as "3.6.0-dev.20190530"
-      this._capabilities = {
-        incrementalProgram: false,
-        solutionBuilder: this._typescriptParsedVersion.major >= 3
-      };
-
-      if (
-        this._typescriptParsedVersion.major > 3 ||
-        (this._typescriptParsedVersion.major === 3 && this._typescriptParsedVersion.minor >= 6)
-      ) {
-        this._capabilities.incrementalProgram = true;
-      }
-
+      const {
+        tool: { ts, system: baseSystem, typeScriptToolPath }
+      } = await loadTypeScriptToolAsync({
+        terminal: this._typescriptTerminal,
+        heftConfiguration: this._configuration.heftConfiguration,
+        buildProjectReferences: this._configuration.buildProjectReferences,
+        onlyResolveSymlinksInNodeModules: this._configuration.onlyResolveSymlinksInNodeModules
+      });
       this._useSolutionBuilder = !!this._configuration.buildProjectReferences;
-      if (this._useSolutionBuilder && !this._capabilities.solutionBuilder) {
-        throw new Error(
-          `Building project references requires TypeScript@>=3.0, but the current version is ${this._typescriptVersion}`
-        );
-      }
-
-      // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
-      // TypeScript 2.9. Prior to that the "ts.getConfigFileParsingDiagnostics()" API is missing; more fixups
-      // would be required to deal with that.  We won't do that work unless someone requests it.
-      if (
-        this._typescriptParsedVersion.major < OLDEST_SUPPORTED_TS_MAJOR_VERSION ||
-        (this._typescriptParsedVersion.major === OLDEST_SUPPORTED_TS_MAJOR_VERSION &&
-          this._typescriptParsedVersion.minor < OLDEST_SUPPORTED_TS_MINOR_VERSION)
-      ) {
-        // We don't use writeWarningLine() here because, if the person wants to take their chances with
-        // a seemingly unsupported compiler, their build should be allowed to succeed.
-        this._typescriptTerminal.writeLine(
-          `The TypeScript compiler version ${this._typescriptVersion} is very old` +
-            ` and has not been tested with Heft; it may not work correctly.`
-        );
-      } else if (
-        this._typescriptParsedVersion.major > NEWEST_SUPPORTED_TS_MAJOR_VERSION ||
-        (this._typescriptParsedVersion.major === NEWEST_SUPPORTED_TS_MAJOR_VERSION &&
-          this._typescriptParsedVersion.minor > NEWEST_SUPPORTED_TS_MINOR_VERSION)
-      ) {
-        this._typescriptTerminal.writeLine(
-          `The TypeScript compiler version ${this._typescriptVersion} is newer` +
-            ' than the latest version that was tested with Heft ' +
-            `(${NEWEST_SUPPORTED_TS_MAJOR_VERSION}.${NEWEST_SUPPORTED_TS_MINOR_VERSION}); it may not work correctly.`
-        );
-      }
-
-      const ts: ExtendedTypeScript = require(this._configuration.typeScriptToolPath);
 
       ts.performance.enable();
 
@@ -310,15 +244,37 @@ export class TypeScriptBuilder {
         return timeout;
       };
 
+      const getCurrentDirectory: () => string = () => this._configuration.buildFolderPath;
+
       // Need to also update watchFile and watchDirectory
-      const system: TTypescript.System = {
-        ...ts.sys,
-        getCurrentDirectory: () => this._configuration.buildFolderPath,
+      const system: ITypeScriptNodeSystem = {
+        ...baseSystem,
+        getCurrentDirectory,
         clearTimeout,
         setTimeout
       };
+      const { realpath } = system;
+
+      if (realpath && system.getAccessibleFileSystemEntries) {
+        const { getAccessibleFileSystemEntries } = system;
+        system.readDirectory = (folderPath, extensions, exclude, include, depth): string[] => {
+          return ts.matchFiles(
+            folderPath,
+            extensions,
+            exclude,
+            include,
+            ts.sys.useCaseSensitiveFileNames,
+            getCurrentDirectory(),
+            depth,
+            getAccessibleFileSystemEntries,
+            realpath,
+            ts.sys.directoryExists
+          );
+        };
+      }
 
       this._tool = {
+        typeScriptToolPath,
         ts,
         system,
 
@@ -372,7 +328,11 @@ export class TypeScriptBuilder {
     if (!tool.solutionBuilder && !tool.watchProgram) {
       //#region CONFIGURE
       const { duration: configureDurationMs, tsconfig } = measureTsPerformance('Configure', () => {
-        const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
+        const _tsconfig: TTypescript.ParsedCommandLine = loadTsconfig({
+          tool,
+          tsconfigPath: this._configuration.tsconfigPath,
+          tsCacheFilePath: this._tsCacheFilePath
+        });
         this._validateTsconfig(ts, _tsconfig);
 
         return {
@@ -426,7 +386,11 @@ export class TypeScriptBuilder {
       tsconfig,
       compilerHost
     } = measureTsPerformance('Configure', () => {
-      const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
+      const _tsconfig: TTypescript.ParsedCommandLine = loadTsconfig({
+        tool,
+        tsconfigPath: this._configuration.tsconfigPath,
+        tsCacheFilePath: this._tsCacheFilePath
+      });
       this._validateTsconfig(ts, _tsconfig);
 
       const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(tool, _tsconfig);
@@ -553,7 +517,11 @@ export class TypeScriptBuilder {
     if (!tool.solutionBuilder) {
       //#region CONFIGURE
       const { duration: configureDurationMs, solutionBuilderHost } = measureSync('Configure', () => {
-        const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
+        const _tsconfig: TTypescript.ParsedCommandLine = loadTsconfig({
+          tool,
+          tsconfigPath: this._configuration.tsconfigPath,
+          tsCacheFilePath: this._tsCacheFilePath
+        });
         this._validateTsconfig(ts, _tsconfig);
 
         const _solutionBuilderHost: TSolutionHost = this._buildSolutionBuilderHost(tool);
@@ -918,33 +886,6 @@ export class TypeScriptBuilder {
     return `${outFolderName}:${jsExtensionOverride || '.js'}`;
   }
 
-  private _loadTsconfig(ts: ExtendedTypeScript): TTypescript.ParsedCommandLine {
-    const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
-      this._configuration.tsconfigPath,
-      ts.sys.readFile
-    );
-
-    const currentFolder: string = path.dirname(this._configuration.tsconfigPath);
-    const tsconfig: TTypescript.ParsedCommandLine = ts.parseJsonConfigFileContent(
-      parsedConfigFile.config,
-      {
-        fileExists: ts.sys.fileExists,
-        readFile: ts.sys.readFile,
-        readDirectory: ts.sys.readDirectory,
-        useCaseSensitiveFileNames: true
-      },
-      currentFolder,
-      /*existingOptions:*/ undefined,
-      this._configuration.tsconfigPath
-    );
-
-    if (tsconfig.options.incremental) {
-      tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
-    }
-
-    return tsconfig;
-  }
-
   private _getCreateBuilderProgram(
     ts: ExtendedTypeScript
   ): TTypescript.CreateProgram<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> {
@@ -1050,11 +991,11 @@ export class TypeScriptBuilder {
       // Do nothing
     };
 
-    const { ts } = tool;
+    const { ts, system } = tool;
 
     const solutionBuilderHost: TTypescript.SolutionBuilderHost<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> =
       ts.createSolutionBuilderHost(
-        ts.sys,
+        system,
         this._getCreateBuilderProgram(ts),
         tool.reportDiagnostic,
         reportSolutionBuilderStatus,
@@ -1086,7 +1027,11 @@ export class TypeScriptBuilder {
     if (tsconfig.options.incremental) {
       compilerHost = ts.createIncrementalCompilerHost(tsconfig.options, system);
     } else {
-      compilerHost = ts.createCompilerHost(tsconfig.options, undefined, system);
+      compilerHost = (ts.createCompilerHostWorker ?? ts.createCompilerHost)(
+        tsconfig.options,
+        undefined,
+        system
+      );
     }
 
     this._changeCompilerHostToUseCache(compilerHost, tool);
@@ -1207,11 +1152,11 @@ export class TypeScriptBuilder {
     compilerOptions: TTypescript.CompilerOptions,
     filesToTranspile: Map<string, string>
   ): void {
-    const { pendingTranspilePromises, pendingTranspileSignals } = tool;
+    const { typeScriptToolPath, pendingTranspilePromises, pendingTranspileSignals } = tool;
     let maybeWorker: Worker | undefined = tool.worker;
     if (!maybeWorker) {
       const workerData: ITypescriptWorkerData = {
-        typeScriptToolPath: this._configuration.typeScriptToolPath
+        typeScriptToolPath
       };
       tool.worker = maybeWorker = new Worker(require.resolve('./TranspilerWorker.js'), {
         workerData: workerData
@@ -1300,9 +1245,10 @@ export class TypeScriptBuilder {
 function getFilesToTranspileFromBuilderProgram(
   builderProgram: TTypescript.BuilderProgram
 ): Map<string, string> {
-  const changedFilesSet: Set<string> = (
-    builderProgram as unknown as { getState(): { changedFilesSet: Set<string> } }
-  ).getState().changedFilesSet;
+  const program: ExtendedBuilderProgram = builderProgram as unknown as ExtendedBuilderProgram;
+  // getState was removed in Typescript 5.6, replaced with state
+  const changedFilesSet: Set<string> = (program.state ?? program.getState()).changedFilesSet;
+
   const filesToTranspile: Map<string, string> = new Map();
   for (const fileName of changedFilesSet) {
     const sourceFile: TTypescript.SourceFile | undefined = builderProgram.getSourceFile(fileName);

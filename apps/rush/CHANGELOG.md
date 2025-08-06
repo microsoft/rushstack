@@ -1,6 +1,467 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 25 Jun 2024 20:13:29 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Jul 2025 01:24:42 GMT and should not be manually modified.
+
+## 5.157.0
+Fri, 25 Jul 2025 01:24:42 GMT
+
+### Updates
+
+- Improve performance for publishing on filtered clones.
+
+## 5.156.0
+Wed, 23 Jul 2025 20:56:15 GMT
+
+### Updates
+
+- Include "parallelism" in phased operation execution context. Update "rush-bridge-cache-plugin" to support both cache read and cache write, selectable via command line choice parameter. Fixes an issue that the options schema for "rush-bridge-cache-plugin" was invalid.
+- Add support for `RUSH_BUILD_CACHE_OVERRIDE_JSON` environment variable that takes a JSON string with the same format as the `common/config/build-cache.json` file and a `RUSH_BUILD_CACHE_OVERRIDE_JSON_FILE_PATH` environment variable that takes a file path that can be used to override the build cache configuration that is normally provided by that file.
+- Add support for setting environment variables via `<repo-root>/.env` and `~/.rush-user/.env` files.
+- [azure-storage-build-cache] Update build-cache.json schema to allow the full range of `loginFlow` options supported by the underlying authentication provider. Add `loginFlowFailover` option to customize fallback sequencing.
+- Add performance measures around various operations, include performance entries in telemetry payload.
+- Do not run afterExecuteOperation if the operation has not actually completed.
+
+## 5.155.1
+Fri, 27 Jun 2025 19:57:04 GMT
+
+### Updates
+
+- Fix pnpm-sync caused .modules.yaml ENOENT during install
+
+## 5.155.0
+Fri, 13 Jun 2025 16:10:38 GMT
+
+### Updates
+
+- Add support for PNPM v9 to the pnpm-sync feature.
+
+## 5.154.0
+Tue, 10 Jun 2025 18:45:59 GMT
+
+### Updates
+
+- Introduce a `@rushstack/rush-bridge-cache-plugin` package that adds a `--set-cache-only` flag to phased commands, which sets the cache entry without performing the operation.
+- Update the `CredentialCache` options object to add support for custom cache file paths. This is useful if `CredentialCache` is used outside of Rush.
+- PNPMv10 support: SHA256 hashing for dependencies paths lookup
+- Add Linux/MacOS support for new 'virtual-store-dir-max-length'
+
+## 5.153.2
+Tue, 13 May 2025 20:33:12 GMT
+
+### Updates
+
+- Fix path parsing issue when running rush bridge-package
+- Operations that were cobuilt now have the cobuild time correctly reflected across all agents.
+- Add `hasUncommittedChanges` to `IInputSnapshot` for use by plugins.
+
+## 5.153.1
+Fri, 25 Apr 2025 01:12:48 GMT
+
+### Updates
+
+- Fix an issue with implicit phase expansion when `--include-phase-deps` is not specified.
+- Upgrade `rushstack/heft-config-file` to fix an incompatibility with Node 16
+
+## 5.153.0
+Thu, 17 Apr 2025 21:59:15 GMT
+
+### Updates
+
+- Update documentation for `extends`
+- Bind "q" to gracefully exit the watcher.
+- Clarify registry authentication settings in "rush init" template for .npmrc
+- Support the `--changed-projects-only` flag in watch mode and allow it to be toggled between iterations.
+- Fix telemetry for "--changed-projects-only" when toggled in watch mode.
+- (rush-serve-plugin) Support websocket message to enable/disable operations.
+
+## 5.152.0
+Tue, 08 Apr 2025 18:41:27 GMT
+
+### Updates
+
+- Add `ChainedCredential` to `AzureAuthenticationBase` to handle auth failover.
+- Add support for developer tools credentials to the Azure build cache.
+- Add a new CLI flag `--debug-build-cache-ids` to help with root-causing unexpected cache misses.
+- Sort all operations lexicographically by name for reporting purposes.
+- (EXPERIMENTAL) Add new commands `rush link-package` and `rush bridge-package`
+
+## 5.151.0
+Tue, 25 Mar 2025 16:58:46 GMT
+
+### Updates
+
+- Fix an issue where `--include-phase-deps` and watch mode sometimes included operations that were not required
+- Fix an issue where build/rebuild can not be defined in a rush plugin command line configuration
+- Use `useNodeJSResolver: true` in `Import.resolvePackage` calls.
+- Add missing `./package.json` export; revert `useNodeJSResolver: true`.
+- (plugin-api) Guaranteed `operation.associatedPhase` and `operation.associatedProject` are not undefined.
+
+## 5.150.0
+Thu, 27 Feb 2025 17:41:59 GMT
+
+### Updates
+
+- Add an `--include-phase-deps` switch that expands an unsafe project selection to include its phase dependencies
+
+## 5.149.1
+Wed, 19 Feb 2025 18:54:06 GMT
+
+### Updates
+
+- Remove the unused `RushConstants.rushAlertsStateFilename` property.
+- Bump `jsonpath-plus` to `~10.3.0`.
+
+## 5.149.0
+Wed, 12 Feb 2025 04:07:30 GMT
+
+### Updates
+
+- Prefer `os.availableParallelism()` to `os.cpus().length`.
+- Add a new command line parameter `--node-diagnostic-dir=DIR` to phased commands that, when specified, tells all child build processes to write NodeJS diagnostics into `${DIR}/${packageName}/${phaseIdentifier}`. This is useful if `--cpu-prof` or `--heap-prof` are enabled, to avoid polluting workspace folders.
+- Add a new phased command hook `createEnvironmentForOperation` that can be used to customize the environment variables passed to individual operation subprocesses. This may be used to, for example, customize `NODE_OPTIONS` to pass `--diagnostic-dir` or other such parameters.
+- Allow --timeline option for all phased commands
+- Fix support for "ensureConsistentVersions" in common-versions.json when subspaces features is not enabled.
+- Fix an issue where the port parameter in `@rushstack/rush-serve-plugin` was allowed to be a string parameter.
+
+## 5.148.0
+Fri, 10 Jan 2025 02:36:20 GMT
+
+### Updates
+
+- Add a configuration option to avoid manually configuring decoupledLocalDependencies across subspaces.
+- Improve some `rush-sdk` APIs to support future work on GitHub issue #3994
+- Fix an issue where MaxListenersExceeded would get thrown when using the HTTP build cache plugin
+
+## 5.147.2
+Mon, 06 Jan 2025 21:48:43 GMT
+
+### Updates
+
+- Fix an issue with evaluation of `shouldEnsureConsistentVersions` when the value is not constant across subspaces or variants.
+- Fix an issue where the lockfile object has a nullish value causing yaml.dump to report an error.
+
+## 5.147.1
+Thu, 26 Dec 2024 23:35:27 GMT
+
+### Updates
+
+- Fix an issue with the `enableSubpathScan` experiment where the set of returned hashes would result in incorrect build cache identifiers when using `--only`.
+- When a no-op operation is not in scope, reflect its result as no-op instead of skipped, so that downstream operations can still write to the build cache.
+- Allow injected dependencies without enabling subspaces.
+
+## 5.147.0
+Thu, 12 Dec 2024 01:37:25 GMT
+
+### Updates
+
+- Add a new experiment flag `enableSubpathScan` that, when invoking phased script commands with project selection parameters, such as `--to` or `--from`, only hashes files that are needed to compute the cache ids for the selected projects.
+
+## 5.146.0
+Tue, 10 Dec 2024 21:23:18 GMT
+
+### Updates
+
+- Support fallback syntax in `.npmrc` files if the package manager is PNPM. See https://pnpm.io/npmrc
+- Add an `.isPnpm` property to `RushConfiguration` that is set to true if the package manager for the Rush repo is PNPM.
+- Support pnpm lockfile v9, which is used by default starting in pnpm v9.
+
+## 5.145.0
+Tue, 10 Dec 2024 05:14:11 GMT
+
+### Updates
+
+- Upgrade `@azure/identity` and `@azure/storage-blob`.
+- Add support for Node 22.
+- Remove the dependency on node-fetch.
+
+## 5.144.1
+Mon, 09 Dec 2024 20:32:01 GMT
+
+### Updates
+
+- Bump `jsonpath-plus` to `~10.2.0`.
+
+## 5.144.0
+Wed, 04 Dec 2024 19:32:23 GMT
+
+### Updates
+
+- Remove the `node-fetch` dependency from `@rushstack/rush-http-build-cache-plugin`.
+
+## 5.143.0
+Wed, 04 Dec 2024 03:07:08 GMT
+
+### Updates
+
+- Remove the `node-fetch` dependency from @rushstack/rush-amazon-s3-build-cache-plugin.
+- (BREAKING API CHANGE) Remove the exported `WebClient` API from @rushstack/rush-amazon-s3-build-cache-plugin.
+
+## 5.142.0
+Tue, 03 Dec 2024 23:42:22 GMT
+
+### Updates
+
+- Fix an issue where the ability to skip `rush install` may be incorrectly calculated when using the variants feature.
+- Add support for an `"extends"` property in the `common/config/rush/pnpm-config.json` and `common/config/subspace/*/pnpm-config.json` files.
+- Add warning when the `globalIgnoredOptionalDependencies` property is specified in `common/config/rush/pnpm-config.json` and the repo is configured to use pnpm <9.0.0.
+
+## 5.141.4
+Mon, 02 Dec 2024 20:40:41 GMT
+
+### Updates
+
+- Fix an issue where Rush sometimes incorrectly reported "fatal: could not open 'packages/xxx/.rush/temp/shrinkwrap-deps.json' for reading: No such file or directory" when using subspaces
+
+## 5.141.3
+Wed, 27 Nov 2024 07:16:50 GMT
+
+### Updates
+
+- Fix an issue where Rush sometimes incorrectly reported "The overrides settings doesn't match the current shrinkwrap" when using subspaces
+- Fix an issue where Rush sometimes incorrectly reported "The package extension hash doesn't match the current shrinkwrap." when using subspaces
+
+## 5.141.2
+Wed, 27 Nov 2024 03:27:26 GMT
+
+### Updates
+
+- Fix an issue where filtered installs neglected to install dependencies from other subspaces
+
+## 5.141.1
+Wed, 20 Nov 2024 00:24:34 GMT
+
+### Updates
+
+- Update schema for build-cache.json to include recent updates to the @rushstack/rush-azure-storage-build-cache-plugin.
+
+## 5.141.0
+Tue, 19 Nov 2024 06:38:33 GMT
+
+### Updates
+
+- Adds two new properties to the configuration for `rush-azure-storage-build-cache-plugin`: `loginFlow` selects the flow to use for interactive authentication to Entra ID, and `readRequiresAuthentication` specifies that a SAS token is required for read and therefore expired authentication is always fatal.
+- Adds a new `wasExecutedOnThisMachine` property to operation telemetry events, to simplify reporting about cobuilt operations.
+- Fix an issue where empty error logs were created for operations that did not write to standard error.
+- Fix an issue where incremental building (with LegacySkipPlugin) would not work when no-op operations were present in the process
+- Fix lack of "local-only" option for cacheProvider in build-cache.schema.json
+- Fix an issue where if an Operation wrote all logs to stdout, then exited with a non-zero exit code, only the non-zero exit code would show up in the summary.
+
+## 5.140.1
+Wed, 30 Oct 2024 21:50:51 GMT
+
+### Updates
+
+- Update the `jsonpath-plus` indirect dependency to mitigate CVE-2024-21534.
+
+## 5.140.0
+Tue, 22 Oct 2024 23:59:54 GMT
+
+### Updates
+
+- Fix an issue when using `rush deploy` where the `node_modules/.bin` folder symlinks were not created for deployed packages when using the "default" link creation mode
+- Add support for the `globalIgnoredOptionalDependencies` field in the `common/config/rush/pnpm-config.json` file to allow specifying optional dependencies that should be ignored by PNPM
+
+## 5.139.0
+Thu, 17 Oct 2024 20:37:39 GMT
+
+### Updates
+
+- Allow rush plugins to extend build cache entries by writing additional files to the metadata folder. Expose the metadata folder path to plugins.
+- [CACHE BREAK] Alter the computation of build cache IDs to depend on the graph of operations in the build and therefore account for multiple phases, rather than only the declared dependencies. Ensure that `dependsOnEnvVars` and command line parameters that affect upstream phases impact the cache IDs of downstream operations.
+- (BREAKING CHANGE) Replace use of `ProjectChangeAnalyzer` in phased command hooks with a new `InputsSnapshot` data structure that is completely synchronous and does not perform any disk operations. Perform all disk operations and state computation prior to executing the build graph.
+- Add a new property `enabled` to `Operation` that when set to false, will cause the execution engine to immediately return `OperationStatus.Skipped` instead of invoking the runner. Use this property to disable operations that are not intended to be executed in the current pass, e.g. those that did not contain changes in the most recent watch iteration, or those excluded by `--only`.
+- Add an optional property `cacheHashSalt` to `build-cache.json` to allow repository maintainers to globally force a hash change in build cache entries.
+
+## 5.138.0
+Thu, 03 Oct 2024 22:31:07 GMT
+
+### Updates
+
+- Changes the behavior of phased commands in watch mode to, when running a phase `_phase:<name>` in all iterations after the first, prefer a script entry named `_phase:<name>:incremental` if such a script exists. The build cache will expect the outputs from the corresponding `_phase:<name>` script (with otherwise the same inputs) to be equivalent when looking for a cache hit.
+
+## 5.137.0
+Thu, 03 Oct 2024 19:46:40 GMT
+
+### Patches
+
+- Expose `getChangesByProject` to allow classes that extend ProjectChangeAnalyzer to override file change analysis
+
+## 5.136.1
+Thu, 26 Sep 2024 22:59:11 GMT
+
+### Updates
+
+- Fix an issue where the `--variant` parameter was missing from a phased command when the command's `alwaysInstall` property was set to `true`.
+
+## 5.136.0
+Thu, 26 Sep 2024 21:48:00 GMT
+
+### Updates
+
+- Bring back the Variants feature that was removed in https://github.com/microsoft/rushstack/pull/4538.
+- Bump express dependency to 4.20.0
+
+## 5.135.0
+Fri, 20 Sep 2024 20:23:40 GMT
+
+### Updates
+
+- Fix a bug that caused rush-resolver-cache-plugin to crash on Windows.
+- Make individual Rush log files available via the rush-serve-plugin server at the relative URL specified by "logServePath" option. Annotate operations sent over the WebSocket with the URLs of their log files.
+- Adds a new experiment 'allowCobuildWithoutCache' for cobuilds to allow uncacheable operations to benefit from cobuild orchestration without using the build cache.
+- Deprecate the `sharding.shardOperationSettings` property in the project `config/rush-project.json` in favor of an `operationSettings` entry for an operation with a suffix of `:shard`.
+
+## 5.134.0
+Fri, 13 Sep 2024 01:02:46 GMT
+
+### Updates
+
+- Always update shrinkwrap when `globalPackageExtensions` in `common/config/rush/pnpm-config.json` has been changed.
+- Pass the initialized credentials cache to `AzureAuthenticationBase._getCredentialFromTokenAsync` in `@rushstack/rush-azure-storage-build-cache-plugin`.
+- Support the `rush-pnpm patch-remove` command.
+
+## 5.133.4
+Sat, 07 Sep 2024 00:18:08 GMT
+
+### Updates
+
+- Mark `AzureAuthenticationBase._credentialCacheId` as protected in `@rushstack/rush-azure-storage-build-cache-plugin`.
+
+## 5.133.3
+Thu, 29 Aug 2024 22:49:36 GMT
+
+### Updates
+
+- Fix Windows compatibility for `@rushstack/rush-resolver-cache-plugin`.
+
+## 5.133.2
+Wed, 28 Aug 2024 20:46:32 GMT
+
+### Updates
+
+- Fix an issue where running `rush install --resolution-only` followed by `rush install` would not actually install modules.
+
+## 5.133.1
+Wed, 28 Aug 2024 18:19:55 GMT
+
+### Updates
+
+- In rush-resolver-cache-plugin, include the base path in the resolver cache file.
+- Support `bundledDependencies` in rush-resolver-cache-plugin.
+
+## 5.133.0
+Fri, 23 Aug 2024 00:40:08 GMT
+
+### Updates
+
+- Always update shrinkwrap when globalOverrides has been changed
+- Add `afterInstall` plugin hook, which runs after any install finishes.
+- Add rush.json option "suppressRushIsPublicVersionCheck" to allow suppressing hardcoded calls to the npmjs.org registry.
+
+## 5.132.0
+Wed, 21 Aug 2024 16:25:07 GMT
+
+### Updates
+
+- Add a new `rush install-autoinstaller` command that ensures that the specified autoinstaller is installed.
+- Emit an error if a `workspace:` specifier is used in a dependency that is listed in `decoupledLocalDependencies`.
+- Add support for `--resolution-only` to `rush install` to enforce strict peer dependency resolution.
+
+## 5.131.5
+Mon, 19 Aug 2024 20:03:03 GMT
+
+### Updates
+
+- Fix an issue where PreferredVersions are ignored when a project contains an overlapping dependency entry (https://github.com/microsoft/rushstack/issues/3205)
+
+## 5.131.4
+Sun, 11 Aug 2024 05:02:05 GMT
+
+### Updates
+
+- Revert a breaking change in Rush 5.131.3 where pnpm patches were moved from `common/pnpm-patches` to `common/config/rush/pnpm-patches`.
+
+## 5.131.3
+Sat, 10 Aug 2024 02:27:14 GMT
+
+### Updates
+
+- Fix an issue where `rush-pnpm patch-commit` would not correctly resolve patch files when the subspaces feature is enabled.
+
+## 5.131.2
+Thu, 08 Aug 2024 23:38:18 GMT
+
+### Updates
+
+- Include a missing dependency in `@rushstack/rush-sdk`.
+
+## 5.131.1
+Thu, 08 Aug 2024 22:08:41 GMT
+
+### Updates
+
+- Fix an issue where rush-sdk can't be bundled by a consuming package.
+- Extract LookupByPath to @rushstack/lookup-by-path and load it from there.
+
+## 5.131.0
+Fri, 02 Aug 2024 17:26:59 GMT
+
+### Updates
+
+- Improve Rush alerts with a new "rush alert" command and snooze feature
+
+## 5.130.3
+Wed, 31 Jul 2024 23:30:13 GMT
+
+### Updates
+
+- Fix an issue where Rush does not detect an outdated lockfile if the `dependenciesMeta` `package.json` field is edited.
+- Include CHANGELOG.md in published releases again
+- Fix a bug that caused the build cache to close its terminal writer before execution on error.
+
+## 5.130.2
+Fri, 19 Jul 2024 03:41:44 GMT
+
+### Updates
+
+- Fix an issue where `rush-pnpm patch-commit` did not work correctly when subspaces are enabled.
+
+## 5.130.1
+Wed, 17 Jul 2024 07:37:13 GMT
+
+### Updates
+
+- Fix a recent regression for `rush init`
+
+## 5.130.0
+Wed, 17 Jul 2024 06:55:27 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Initial implementation of Rush alerts feature
+- Adjusts how cobuilt operations are added and requeued to the operation graph. Removes the 'RemoteExecuting' status.
+
+## 5.129.7
+Tue, 16 Jul 2024 04:16:56 GMT
+
+### Updates
+
+- Upgrade pnpm-sync-lib to fix an edge case when handling node_modules folder
+- Don't interrupt the installation process if the user hasn't enabled the inject dependencies feature.
+- Improve `@rushtack/rush-sdk` and make it reuse `@microsoft/rush-lib` from rush global folder
+- Remove the trailing slash in the `.DS_Store/` line in the `.gitignore` file generated by `rush init`. `.DS_Store` is a file, not a folder.
+- Support deep references to internal Apis
+- Fix an issue where `rush add` would ignore the `ensureConsistentVersions` option if that option was set in `rush.json` instead of in `common/config/rush/common-versions.json`.
+- Fix an issue where running `rush add` in a project can generate a `package.json` file that uses JSON5 syntax. Package managers expect strict JSON.
+- fix spelling of "committing" in rush.json init template and schema
+
+## 5.129.6
+Thu, 27 Jun 2024 00:44:32 GMT
+
+### Updates
+
+- Fix an edge case for workspace peer dependencies when calculating packageJsonInjectedDependenciesHash to improve its accuracy 
+- Update a URL in the `.pnpmfile.cjs` generated by `rush init`.
 
 ## 5.129.5
 Tue, 25 Jun 2024 20:13:29 GMT

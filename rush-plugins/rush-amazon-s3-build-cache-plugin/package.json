@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
-  "version": "5.129.5",
+  "version": "5.157.0",
   "description": "Rush plugin for Amazon S3 cloud build cache",
   "repository": {
     "type": "git",
@@ -22,13 +22,12 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "https-proxy-agent": "~5.0.0",
-    "node-fetch": "2.6.7"
+    "https-proxy-agent": "~5.0.0"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
-    "@types/node-fetch": "2.6.2"
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*"
   }
 }

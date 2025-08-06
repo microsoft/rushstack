@@ -6,8 +6,8 @@
   "main": "lib/index.js",
   "typings": "dist/api-extractor-test-01.d.ts",
   "scripts": {
-    "build": "node build.js",
-    "_phase:build": "node build.js"
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
     "@types/jest": "29.2.5",
@@ -15,10 +15,7 @@
     "long": "^4.0.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "18.17.15",
-    "fs-extra": "~7.0.1",
-    "typescript": "~5.4.2"
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*"
   }
 }

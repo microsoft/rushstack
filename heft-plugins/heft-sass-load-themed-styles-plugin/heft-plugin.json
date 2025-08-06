@@ -1,0 +1,10 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "sass-load-themed-styles-plugin",
+      "entryPoint": "./lib/SassLoadThemedStylesPlugin.js"
+    }
+  ]
+}

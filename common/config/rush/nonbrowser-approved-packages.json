@@ -79,6 +79,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@modelcontextprotocol/sdk",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@nodelib/fs.scandir",
       "allowedCategories": [ "libraries" ]
     },
@@ -91,11 +95,19 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/dependency-path-lockfile-pre-v10",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@pnpm/link-bins",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@pnpm/lockfile-types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@pnpm/lockfile.types",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -108,7 +120,7 @@
     },
     {
       "name": "@rushstack/debug-certificate-manager",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/eslint-bulk",
@@ -155,16 +167,32 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-jest-plugin",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/heft-json-schema-typings-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/heft-lint-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-localization-typings-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-sass-load-themed-styles-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/heft-sass-plugin",
@@ -181,6 +209,14 @@
     {
       "name": "@rushstack/heft-typescript-plugin",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-vscode-extension-plugin",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-vscode-extension-rig",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "@rushstack/heft-web-rig",
@@ -203,6 +239,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/lookup-by-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/mcp-server",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@rushstack/module-minifier",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -223,6 +267,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/real-node-module-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rig-package",
       "allowedCategories": [ "libraries" ]
     },
@@ -235,12 +283,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rush-bridge-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-http-build-cache-plugin",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/rush-redis-cobuild-plugin",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/rush-resolver-cache-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/rush-sdk",
@@ -259,6 +315,10 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/tls-sync-vscode-shared",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "@rushstack/tree-pattern",
       "allowedCategories": [ "libraries" ]
     },
@@ -271,6 +331,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/vscode-shared",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "@rushstack/webpack-deep-imports-plugin",
       "allowedCategories": [ "libraries" ]
     },
@@ -281,6 +345,10 @@
     {
       "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/webpack-workspace-resolve-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/webpack4-localization-plugin",
@@ -343,12 +411,16 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@swc/core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@tsconfig/node14",
       "allowedCategories": [ "tests" ]
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "allowedCategories": [ "libraries", "vscode-extensions" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@typescript-eslint/parser",
@@ -373,6 +445,10 @@
     {
       "name": "@vscode/test-electron",
       "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "@vscode/vsce",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@yarnpkg/lockfile",
@@ -475,6 +551,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "decoupled-local-node-rig",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "diff",
       "allowedCategories": [ "libraries" ]
     },
@@ -483,8 +563,16 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "dotenv",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "eslint",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "eslint-import-resolver-node",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "eslint-plugin-deprecation",
@@ -492,6 +580,10 @@
     },
     {
       "name": "eslint-plugin-header",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-headers",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -556,6 +648,10 @@
     },
     {
       "name": "heft-action-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-example-lifecycle-plugin",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -663,6 +759,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "json-schema-to-typescript",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "json-stable-stringify-without-jsonify",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jsonpath-plus",
       "allowedCategories": [ "libraries" ]
     },
@@ -681,6 +785,10 @@
     {
       "name": "local-node-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "local-web-rig",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "lodash",
@@ -767,12 +875,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "punycode",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "read-package-tree",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "resolve",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "run-scenarios-helpers",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "sass",
@@ -851,6 +967,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "tls-sync-vscode-ui-extension",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "tls-sync-vscode-workspace-extension",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "true-case-path",
       "allowedCategories": [ "libraries" ]
     },
@@ -862,7 +986,6 @@
       "name": "tslint",
       "allowedCategories": [ "libraries", "tests" ]
     },
-
     {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
@@ -878,10 +1001,6 @@
     {
       "name": "uuid",
       "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "vsce",
-      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "watchpack",
@@ -921,6 +1040,10 @@
     },
     {
       "name": "xmldoc",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "zod",
       "allowedCategories": [ "libraries" ]
     }
   ]

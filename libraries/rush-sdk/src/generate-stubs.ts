@@ -51,7 +51,8 @@ function generateLibFilesRecursively(options: {
 export async function runAsync(): Promise<void> {
   const rushLibFolder: string = Import.resolvePackage({
     baseFolderPath: __dirname,
-    packageName: '@microsoft/rush-lib'
+    packageName: '@microsoft/rush-lib',
+    useNodeJSResolver: true
   });
 
   const stubsTargetPath: string = path.resolve(__dirname, '../lib');

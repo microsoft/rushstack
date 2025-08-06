@@ -19,13 +19,13 @@
     }
   },
   "devDependencies": {
-    "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@types/node": "18.17.15",
-    "eslint": "~8.57.0",
+    "@types/node": "20.17.19",
+    "eslint": "~9.25.1",
     "heft-example-plugin-01": "workspace:*",
-    "typescript": "~5.4.2"
+    "local-eslint-config": "workspace:*",
+    "typescript": "~5.8.2"
   }
 }

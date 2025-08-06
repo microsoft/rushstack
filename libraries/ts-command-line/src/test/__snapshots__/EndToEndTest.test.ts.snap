@@ -1,0 +1,174 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`end-to-end test execution tests push --force: process exit code 1`] = `0`;
+
+exports[`end-to-end test execution tests push --force: process signal 1`] = `null`;
+
+exports[`end-to-end test execution tests push --force: process stderr 1`] = `""`;
+
+exports[`end-to-end test execution tests push --force: process stdout 1`] = `
+"Business logic configured the logger: verbose=false
+Received parameters: force=true, protocol=\\"scp\\"
+Business logic did the work.
+"
+`;
+
+exports[`end-to-end test execution tests push --protocol bogus: process exit code 1`] = `2`;
+
+exports[`end-to-end test execution tests push --protocol bogus: process signal 1`] = `null`;
+
+exports[`end-to-end test execution tests push --protocol bogus: process stderr 1`] = `
+"widget push: error: argument \\"--protocol\\": Invalid choice: bogus (choose from [ftp, webdav, scp])
+
+"
+`;
+
+exports[`end-to-end test execution tests push --protocol bogus: process stdout 1`] = `
+"usage: widget push [-h] [-f] [--protocol {ftp,webdav,scp}]
+"
+`;
+
+exports[`end-to-end test execution tests push --protocol ftp: process exit code 1`] = `0`;
+
+exports[`end-to-end test execution tests push --protocol ftp: process signal 1`] = `null`;
+
+exports[`end-to-end test execution tests push --protocol ftp: process stderr 1`] = `""`;
+
+exports[`end-to-end test execution tests push --protocol ftp: process stdout 1`] = `
+"Business logic configured the logger: verbose=false
+Received parameters: force=false, protocol=\\"ftp\\"
+Business logic did the work.
+"
+`;
+
+exports[`end-to-end test execution tests push: process exit code 1`] = `0`;
+
+exports[`end-to-end test execution tests push: process signal 1`] = `null`;
+
+exports[`end-to-end test execution tests push: process stderr 1`] = `""`;
+
+exports[`end-to-end test execution tests push: process stdout 1`] = `
+"Business logic configured the logger: verbose=false
+Received parameters: force=false, protocol=\\"scp\\"
+Business logic did the work.
+"
+`;
+
+exports[`end-to-end test execution tests run --title My Title --remaining --args: process exit code 1`] = `2`;
+
+exports[`end-to-end test execution tests run --title My Title --remaining --args: process signal 1`] = `null`;
+
+exports[`end-to-end test execution tests run --title My Title --remaining --args: process stderr 1`] = `
+"widget run: error: Unrecognized arguments: --remaining --args.
+
+"
+`;
+
+exports[`end-to-end test execution tests run --title My Title --remaining --args: process stdout 1`] = `
+"usage: widget run [-h] [--title TITLE] ...
+"
+`;
+
+exports[`end-to-end test execution tests run --title My Title: process exit code 1`] = `0`;
+
+exports[`end-to-end test execution tests run --title My Title: process signal 1`] = `null`;
+
+exports[`end-to-end test execution tests run --title My Title: process stderr 1`] = `""`;
+
+exports[`end-to-end test execution tests run --title My Title: process stdout 1`] = `
+"Business logic configured the logger: verbose=false
+Console Title: My Title
+Arguments to be executed: []
+"
+`;
+
+exports[`end-to-end test execution tests run: process exit code 1`] = `0`;
+
+exports[`end-to-end test execution tests run: process signal 1`] = `null`;
+
+exports[`end-to-end test execution tests run: process stderr 1`] = `""`;
+
+exports[`end-to-end test execution tests run: process stdout 1`] = `
+"Business logic configured the logger: verbose=false
+Console Title: (none)
+Arguments to be executed: []
+"
+`;
+
+exports[`end-to-end test execution tests with no args: process exit code 1`] = `0`;
+
+exports[`end-to-end test execution tests with no args: process signal 1`] = `null`;
+
+exports[`end-to-end test execution tests with no args: process stderr 1`] = `""`;
+
+exports[`end-to-end test execution tests with no args: process stdout 1`] = `
+"usage: widget [-h] [-v] <command> ...
+
+The \\"widget\\" tool is a code sample for using the @rushstack/ts-command-line 
+library.
+
+Positional arguments:
+  <command>
+    push         Pushes a widget to the service
+    run          This action (hypothetically) passes its command line 
+                 arguments to the shell to be executed.
+
+Optional arguments:
+  -h, --help     Show this help message and exit.
+  -v, --verbose  Show extra logging detail
+
+[1mFor detailed help about a specific command, use: widget <command> -h[22m
+"
+`;
+
+exports[`end-to-end test prints the help: global help 1`] = `
+"usage: widget [-h] [-v] <command> ...
+
+The \\"widget\\" tool is a code sample for using the @rushstack/ts-command-line 
+library.
+
+Positional arguments:
+  <command>
+    push         Pushes a widget to the service
+    run          This action (hypothetically) passes its command line 
+                 arguments to the shell to be executed.
+
+Optional arguments:
+  -h, --help     Show this help message and exit.
+  -v, --verbose  Show extra logging detail
+
+[bold]For detailed help about a specific command, use: widget <command> -h[normal]
+"
+`;
+
+exports[`end-to-end test prints the help: push 1`] = `
+"usage: widget push [-h] [-f] [--protocol {ftp,webdav,scp}]
+
+Here we provide a longer description of how our action works.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -f, --force           Push and overwrite any existing state
+  --protocol {ftp,webdav,scp}
+                        Specify the protocol to use. This parameter may 
+                        alternatively be specified via the WIDGET_PROTOCOL 
+                        environment variable. The default value is \\"scp\\".
+"
+`;
+
+exports[`end-to-end test prints the help: run 1`] = `
+"usage: widget run [-h] [--title TITLE] ...
+
+This demonstrates how to use the defineCommandLineRemainder() API.
+
+Positional arguments:
+  \\"...\\"          The remaining arguments are passed along to the command 
+                 shell.
+
+Optional arguments:
+  -h, --help     Show this help message and exit.
+  --title TITLE  An optional title to show in the console window. This 
+                 parameter may alternatively be specified via the 
+                 WIDGET_TITLE environment variable.
+"
+`;

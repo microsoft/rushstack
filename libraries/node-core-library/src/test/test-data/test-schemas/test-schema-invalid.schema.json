@@ -1,0 +1,5 @@
+{
+  "$id": "http://example.com/schemas/test-schema-nested-child.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "wrong_type"
+}

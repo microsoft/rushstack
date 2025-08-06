@@ -87,7 +87,7 @@ export namespace DocEnumNamespaceMerge {
 }
 
 // @public
-export namespace EcmaSmbols {
+export namespace EcmaSymbols {
     const example: unique symbol;
 }
 
@@ -124,7 +124,7 @@ export interface IDocInterface2 extends IDocInterface1 {
 // @public
 export interface IDocInterface3 {
     "[not.a.symbol]": string;
-    [EcmaSmbols.example]: string;
+    [EcmaSymbols.example]: string;
     (x: number): number;
     [x: string]: string;
     new (): IDocInterface1;
@@ -184,7 +184,7 @@ export namespace OuterNamespace {
     let nestedVariable: boolean;
 }
 
-// @public
+// @public @myCustomTag
 export class SystemEvent {
     addHandler(handler: () => void): void;
 }

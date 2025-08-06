@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "Rush rush-project-link-state.json config file",
+
+  "type": "object",
+  "required": ["fileVersion", "linksBySubspace"],
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "fileVersion": {
+      "type": "number"
+    },
+
+    "linksBySubspace": {
+      "description": "A map of subspace names to their corresponding links.",
+      "type": "object",
+
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["linkedPackagePath", "linkedPackageName", "linkType"],
+          "additionalProperties": false,
+
+          "properties": {
+            "linkedPackagePath": {
+              "type": "string"
+            },
+
+            "linkedPackageName": {
+              "type": "string"
+            },
+
+            "affectedPnpmVirtualStoreFolderPaths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+
+            "linkType": {
+              "type": "string",
+              "enum": ["LinkPackage", "BridgePackage"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

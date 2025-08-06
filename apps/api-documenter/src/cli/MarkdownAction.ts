@@ -16,8 +16,7 @@ export class MarkdownAction extends BaseAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
-    // override
+  protected override async onExecuteAsync(): Promise<void> {
     const { apiModel, outputFolder } = this.buildApiModel();
 
     const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter({

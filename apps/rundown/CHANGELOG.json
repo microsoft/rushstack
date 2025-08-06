@@ -2,6 +2,710 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.1.105",
+      "tag": "@rushstack/rundown_v1.1.105",
+      "date": "Fri, 01 Aug 2025 00:12:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.104",
+      "tag": "@rushstack/rundown_v1.1.104",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.0.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.103",
+      "tag": "@rushstack/rundown_v1.1.103",
+      "date": "Sat, 21 Jun 2025 00:13:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.102",
+      "tag": "@rushstack/rundown_v1.1.102",
+      "date": "Tue, 13 May 2025 02:09:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.101",
+      "tag": "@rushstack/rundown_v1.1.101",
+      "date": "Thu, 01 May 2025 15:11:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.100",
+      "tag": "@rushstack/rundown_v1.1.100",
+      "date": "Thu, 01 May 2025 00:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.13.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.99",
+      "tag": "@rushstack/rundown_v1.1.99",
+      "date": "Fri, 25 Apr 2025 00:11:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.98",
+      "tag": "@rushstack/rundown_v1.1.98",
+      "date": "Mon, 21 Apr 2025 22:24:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.97",
+      "tag": "@rushstack/rundown_v1.1.97",
+      "date": "Thu, 17 Apr 2025 00:11:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.96",
+      "tag": "@rushstack/rundown_v1.1.96",
+      "date": "Tue, 15 Apr 2025 15:11:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.95",
+      "tag": "@rushstack/rundown_v1.1.95",
+      "date": "Wed, 09 Apr 2025 00:11:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.72.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.94",
+      "tag": "@rushstack/rundown_v1.1.94",
+      "date": "Fri, 04 Apr 2025 18:34:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.93",
+      "tag": "@rushstack/rundown_v1.1.93",
+      "date": "Tue, 25 Mar 2025 15:11:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.92",
+      "tag": "@rushstack/rundown_v1.1.92",
+      "date": "Wed, 12 Mar 2025 22:41:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.91",
+      "tag": "@rushstack/rundown_v1.1.91",
+      "date": "Wed, 12 Mar 2025 00:11:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.90",
+      "tag": "@rushstack/rundown_v1.1.90",
+      "date": "Tue, 11 Mar 2025 02:12:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.89",
+      "tag": "@rushstack/rundown_v1.1.89",
+      "date": "Tue, 11 Mar 2025 00:11:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.88",
+      "tag": "@rushstack/rundown_v1.1.88",
+      "date": "Sat, 01 Mar 2025 05:00:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.87",
+      "tag": "@rushstack/rundown_v1.1.87",
+      "date": "Thu, 27 Feb 2025 01:10:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.86",
+      "tag": "@rushstack/rundown_v1.1.86",
+      "date": "Wed, 26 Feb 2025 16:11:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.85",
+      "tag": "@rushstack/rundown_v1.1.85",
+      "date": "Sat, 22 Feb 2025 01:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.84",
+      "tag": "@rushstack/rundown_v1.1.84",
+      "date": "Wed, 19 Feb 2025 18:53:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.83",
+      "tag": "@rushstack/rundown_v1.1.83",
+      "date": "Wed, 12 Feb 2025 01:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.82",
+      "tag": "@rushstack/rundown_v1.1.82",
+      "date": "Thu, 30 Jan 2025 16:10:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.81",
+      "tag": "@rushstack/rundown_v1.1.81",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.80",
+      "tag": "@rushstack/rundown_v1.1.80",
+      "date": "Thu, 09 Jan 2025 01:10:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.10.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.79",
+      "tag": "@rushstack/rundown_v1.1.79",
+      "date": "Tue, 07 Jan 2025 22:17:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.78",
+      "tag": "@rushstack/rundown_v1.1.78",
+      "date": "Sat, 14 Dec 2024 01:11:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.10.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.77",
+      "tag": "@rushstack/rundown_v1.1.77",
+      "date": "Mon, 09 Dec 2024 20:31:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.76",
+      "tag": "@rushstack/rundown_v1.1.76",
+      "date": "Tue, 03 Dec 2024 16:11:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.75",
+      "tag": "@rushstack/rundown_v1.1.75",
+      "date": "Sat, 23 Nov 2024 01:18:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.74",
+      "tag": "@rushstack/rundown_v1.1.74",
+      "date": "Fri, 22 Nov 2024 01:10:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.73",
+      "tag": "@rushstack/rundown_v1.1.73",
+      "date": "Thu, 24 Oct 2024 00:15:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.72",
+      "tag": "@rushstack/rundown_v1.1.72",
+      "date": "Mon, 21 Oct 2024 18:50:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.71",
+      "tag": "@rushstack/rundown_v1.1.71",
+      "date": "Thu, 17 Oct 2024 08:35:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.23.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.70",
+      "tag": "@rushstack/rundown_v1.1.70",
+      "date": "Tue, 15 Oct 2024 00:12:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.69",
+      "tag": "@rushstack/rundown_v1.1.69",
+      "date": "Wed, 02 Oct 2024 00:11:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.68",
+      "tag": "@rushstack/rundown_v1.1.68",
+      "date": "Tue, 01 Oct 2024 00:11:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.67",
+      "tag": "@rushstack/rundown_v1.1.67",
+      "date": "Mon, 30 Sep 2024 15:12:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.66",
+      "tag": "@rushstack/rundown_v1.1.66",
+      "date": "Fri, 13 Sep 2024 00:11:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.65",
+      "tag": "@rushstack/rundown_v1.1.65",
+      "date": "Tue, 10 Sep 2024 20:08:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.64",
+      "tag": "@rushstack/rundown_v1.1.64",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.63",
+      "tag": "@rushstack/rundown_v1.1.63",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.62",
+      "tag": "@rushstack/rundown_v1.1.62",
+      "date": "Fri, 02 Aug 2024 17:26:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.61",
+      "tag": "@rushstack/rundown_v1.1.61",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.60",
+      "tag": "@rushstack/rundown_v1.1.60",
+      "date": "Wed, 24 Jul 2024 00:12:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.59",
+      "tag": "@rushstack/rundown_v1.1.59",
+      "date": "Wed, 17 Jul 2024 06:55:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.58",
+      "tag": "@rushstack/rundown_v1.1.58",
+      "date": "Wed, 17 Jul 2024 00:11:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.57",
+      "tag": "@rushstack/rundown_v1.1.57",
+      "date": "Tue, 16 Jul 2024 00:36:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.22.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.56",
+      "tag": "@rushstack/rundown_v1.1.56",
+      "date": "Thu, 27 Jun 2024 21:01:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.55",
       "tag": "@rushstack/rundown_v1.1.55",
       "date": "Mon, 03 Jun 2024 23:43:15 GMT",

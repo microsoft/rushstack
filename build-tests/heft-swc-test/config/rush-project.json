@@ -1,0 +1,14 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-project.schema.json",
+
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": ["lib-commonjs", "lib-dts", "lib-esm", "temp/build"]
+    },
+    {
+      "operationName": "_phase:test",
+      "outputFolderNames": ["coverage"]
+    }
+  ]
+}

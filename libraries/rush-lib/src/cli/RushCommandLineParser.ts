@@ -8,7 +8,7 @@ import {
   type CommandLineFlagParameter,
   CommandLineHelper
 } from '@rushstack/ts-command-line';
-import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
+import { InternalError, AlreadyReportedError, Text } from '@rushstack/node-core-library';
 import {
   ConsoleTerminalProvider,
   Terminal,
@@ -27,6 +27,8 @@ import {
 } from '../api/CommandLineConfiguration';
 
 import { AddAction } from './actions/AddAction';
+import { AlertAction } from './actions/AlertAction';
+import { BridgePackageAction } from './actions/BridgePackageAction';
 import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
 import { DeployAction } from './actions/DeployAction';
@@ -34,7 +36,9 @@ import { InitAction } from './actions/InitAction';
 import { InitAutoinstallerAction } from './actions/InitAutoinstallerAction';
 import { InitDeployAction } from './actions/InitDeployAction';
 import { InstallAction } from './actions/InstallAction';
+import { InstallAutoinstallerAction } from './actions/InstallAutoinstallerAction';
 import { LinkAction } from './actions/LinkAction';
+import { LinkPackageAction } from './actions/LinkPackageAction';
 import { ListAction } from './actions/ListAction';
 import { PublishAction } from './actions/PublishAction';
 import { PurgeAction } from './actions/PurgeAction';
@@ -43,11 +47,12 @@ import { ScanAction } from './actions/ScanAction';
 import { UnlinkAction } from './actions/UnlinkAction';
 import { UpdateAction } from './actions/UpdateAction';
 import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
-import { VersionAction } from './actions/VersionAction';
 import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
 import { UpgradeInteractiveAction } from './actions/UpgradeInteractiveAction';
+import { VersionAction } from './actions/VersionAction';
 
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
+import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
 
 import { Telemetry } from '../logic/Telemetry';
@@ -56,9 +61,12 @@ import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SetupAction } from './actions/SetupAction';
 import { type ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
 import { RushSession } from '../pluginFramework/RushSession';
-import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
+import { RushAlerts } from '../utilities/RushAlerts';
+import { initializeDotEnv } from '../logic/dotenv';
+
+import { measureAsyncFn } from '../utilities/performance';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -82,6 +90,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private readonly _rushOptions: IRushCommandLineParserOptions;
   private readonly _terminalProvider: ConsoleTerminalProvider;
   private readonly _terminal: Terminal;
+  private readonly _autocreateBuildCommand: boolean;
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
@@ -110,17 +119,24 @@ export class RushCommandLineParser extends CommandLineParser {
       description: 'Hide rush startup information'
     });
 
-    this._terminalProvider = new ConsoleTerminalProvider();
-    this._terminal = new Terminal(this._terminalProvider);
+    const terminalProvider: ConsoleTerminalProvider = new ConsoleTerminalProvider();
+    this._terminalProvider = terminalProvider;
+    const terminal: Terminal = new Terminal(this._terminalProvider);
+    this._terminal = terminal;
     this._rushOptions = this._normalizeOptions(options || {});
+    const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations } = this._rushOptions;
 
+    let rushJsonFilePath: string | undefined;
     try {
-      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-        startingFolder: this._rushOptions.cwd,
+      rushJsonFilePath = RushConfiguration.tryFindRushJsonLocation({
+        startingFolder: cwd,
         showVerbose: !this._restrictConsoleOutput
       });
-      if (rushJsonFilename) {
-        this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+
+      initializeDotEnv(terminal, rushJsonFilePath);
+
+      if (rushJsonFilePath) {
+        this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilePath);
       }
     } catch (error) {
       this._reportErrorAndSetExitCode(error as Error);
@@ -128,7 +144,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
     NodeJsCompatibility.warnAboutCompatibilityIssues({
       isRushLib: true,
-      alreadyReportedNodeTooNewError: this._rushOptions.alreadyReportedNodeTooNewError,
+      alreadyReportedNodeTooNewError,
       rushConfiguration: this.rushConfiguration
     });
 
@@ -136,29 +152,39 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this.rushSession = new RushSession({
       getIsDebugMode: () => this.isDebug,
-      terminalProvider: this._terminalProvider
+      terminalProvider
     });
     this.pluginManager = new PluginManager({
       rushSession: this.rushSession,
       rushConfiguration: this.rushConfiguration,
-      terminal: this._terminal,
-      builtInPluginConfigurations: this._rushOptions.builtInPluginConfigurations,
+      terminal,
+      builtInPluginConfigurations,
       restrictConsoleOutput: this._restrictConsoleOutput,
       rushGlobalFolder: this.rushGlobalFolder
     });
 
-    this._populateActions();
-
     const pluginCommandLineConfigurations: ICustomCommandLineConfigurationInfo[] =
       this.pluginManager.tryGetCustomCommandLineConfigurationInfos();
+
+    const hasBuildCommandInPlugin: boolean = pluginCommandLineConfigurations.some((x) =>
+      x.commandLineConfiguration.commands.has(RushConstants.buildCommandName)
+    );
+
+    // If the plugin has a build command, we don't need to autocreate the default build command.
+    this._autocreateBuildCommand = !hasBuildCommandInPlugin;
+
+    this._populateActions();
+
     for (const { commandLineConfiguration, pluginLoader } of pluginCommandLineConfigurations) {
       try {
         this._addCommandLineConfigActions(commandLineConfiguration);
       } catch (e) {
-        this._terminal.writeErrorLine(
-          `Error from plugin ${pluginLoader.pluginName} by ${pluginLoader.packageName}: ${(
-            e as Error
-          ).toString()}`
+        this._reportErrorAndSetExitCode(
+          new Error(
+            `Error from plugin ${pluginLoader.pluginName} by ${pluginLoader.packageName}: ${(
+              e as Error
+            ).toString()}`
+          )
         );
       }
     }
@@ -203,12 +229,14 @@ export class RushCommandLineParser extends CommandLineParser {
     this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
       process.argv.indexOf('--debug') >= 0;
 
-    await this.pluginManager.tryInitializeUnassociatedPluginsAsync();
+    await measureAsyncFn('rush:initializeUnassociatedPlugins', () =>
+      this.pluginManager.tryInitializeUnassociatedPluginsAsync()
+    );
 
     return await super.executeAsync(args);
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
     // For example, Node.js currently has the inexcusable design of terminating with zero exit code when
     // there is an uncaught promise exception.  This will supposedly be fixed in Node.js 9.
@@ -222,6 +250,42 @@ export class RushCommandLineParser extends CommandLineParser {
 
     try {
       await this._wrapOnExecuteAsync();
+
+      // TODO: rushConfiguration is typed as "!: RushConfiguration" here, but can sometimes be undefined
+      if (this.rushConfiguration) {
+        try {
+          const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+
+          if (experiments.rushAlerts) {
+            // TODO: Fix this
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const actionName: string = (this as any)
+              ._getArgumentParser()
+              .parseArgs(process.argv.slice(2)).action;
+
+            // only display alerts when certain specific actions are triggered
+            if (RushAlerts.alertTriggerActions.includes(actionName)) {
+              this._terminal.writeDebugLine('Checking Rush alerts...');
+              const rushAlerts: RushAlerts = await RushAlerts.loadFromConfigurationAsync(
+                this.rushConfiguration,
+                this._terminal
+              );
+              // Print out alerts if have after each successful command actions
+              await rushAlerts.printAlertsAsync();
+            }
+          }
+        } catch (error) {
+          if (error instanceof AlreadyReportedError) {
+            throw error;
+          }
+          // Generally the RushAlerts implementation should handle its own error reporting; if not,
+          // clarify the source, since the Rush Alerts behavior is nondeterministic and may not repro easily:
+          this._terminal.writeErrorLine(`\nAn unexpected error was encountered by the Rush alerts feature:`);
+          this._terminal.writeErrorLine(error.message);
+          throw new AlreadyReportedError();
+        }
+      }
+
       // If we make it here, everything went fine, so reset the exit code back to 0
       process.exitCode = 0;
     } catch (error) {
@@ -246,7 +310,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     try {
-      await super.onExecute();
+      await measureAsyncFn('rush:commandLineParser:onExecuteAsync', () => super.onExecuteAsync());
     } finally {
       if (this.telemetry) {
         this.flushTelemetry();
@@ -275,10 +339,14 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new SetupAction(this));
       this.addAction(new UnlinkAction(this));
       this.addAction(new UpdateAction(this));
+      this.addAction(new InstallAutoinstallerAction(this));
       this.addAction(new UpdateAutoinstallerAction(this));
       this.addAction(new UpdateCloudCredentialsAction(this));
       this.addAction(new UpgradeInteractiveAction(this));
       this.addAction(new VersionAction(this));
+      this.addAction(new AlertAction(this));
+      this.addAction(new BridgePackageAction(this));
+      this.addAction(new LinkPackageAction(this));
 
       this._populateScriptActions();
     } catch (error) {
@@ -297,8 +365,13 @@ export class RushCommandLineParser extends CommandLineParser {
       );
     }
 
-    const commandLineConfiguration: CommandLineConfiguration =
-      CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
+    // If a build action is already added by a plugin, we don't want to add a default "build" script
+    const doNotIncludeDefaultBuildCommands: boolean = !this._autocreateBuildCommand;
+
+    const commandLineConfiguration: CommandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(
+      commandLineConfigFilePath,
+      doNotIncludeDefaultBuildCommands
+    );
     this._addCommandLineConfigActions(commandLineConfiguration);
   }
 
@@ -417,8 +490,7 @@ export class RushCommandLineParser extends CommandLineParser {
       // The colors package will eat multi-newlines, which could break formatting
       // in user-specified messages and instructions, so we prefer to color each
       // line individually.
-      const message: string = PrintUtilities.wrapWords(prefix + error.message)
-        .split(/\r?\n/)
+      const message: string = Text.splitByNewLines(PrintUtilities.wrapWords(prefix + error.message))
         .map((line) => Colorize.red(line))
         .join('\n');
       // eslint-disable-next-line no-console

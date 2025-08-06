@@ -12,14 +12,14 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
-    "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "18.17.15",
-    "eslint": "~8.57.0",
-    "typescript": "~5.4.2"
+    "@types/node": "20.17.19",
+    "eslint": "~9.25.1",
+    "local-eslint-config": "workspace:*",
+    "typescript": "~5.8.2"
   },
   "dependencies": {
     "fastify": "~3.16.1"

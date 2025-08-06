@@ -48,6 +48,7 @@ import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import type { AstEntity } from '../analyzer/AstEntity';
 import type { AstModule } from '../analyzer/AstModule';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
+import type { ExtractorConfig } from '../api/ExtractorConfig';
 
 interface IProcessAstEntityContext {
   name: string;
@@ -55,15 +56,37 @@ interface IProcessAstEntityContext {
   parentApiItem: ApiItemContainerMixin;
 }
 
+/**
+ * @beta
+ */
+export interface IApiModelGenerationOptions {
+  /**
+   * The release tags to trim.
+   */
+  releaseTagsToTrim: Set<ReleaseTag>;
+}
+
 export class ApiModelGenerator {
   private readonly _collector: Collector;
   private readonly _apiModel: ApiModel;
   private readonly _referenceGenerator: DeclarationReferenceGenerator;
+  private readonly _releaseTagsToTrim: Set<ReleaseTag> | undefined;
 
-  public constructor(collector: Collector) {
+  public readonly docModelEnabled: boolean;
+
+  public constructor(collector: Collector, extractorConfig: ExtractorConfig) {
     this._collector = collector;
     this._apiModel = new ApiModel();
     this._referenceGenerator = new DeclarationReferenceGenerator(collector);
+
+    const apiModelGenerationOptions: IApiModelGenerationOptions | undefined =
+      extractorConfig.docModelGenerationOptions;
+    if (apiModelGenerationOptions) {
+      this._releaseTagsToTrim = apiModelGenerationOptions.releaseTagsToTrim;
+      this.docModelEnabled = true;
+    } else {
+      this.docModelEnabled = false;
+    }
   }
 
   public get apiModel(): ApiModel {
@@ -176,8 +199,8 @@ export class ApiModelGenerator {
 
     const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
     const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-    if (releaseTag === ReleaseTag.Internal) {
-      return; // trim out items marked as "@internal"
+    if (this._releaseTagsToTrim?.has(releaseTag)) {
+      return;
     }
 
     switch (astDeclaration.declaration.kind) {
@@ -266,7 +289,7 @@ export class ApiModelGenerator {
   }
 
   private _tryFindFunctionDeclaration(astDeclaration: AstDeclaration): ts.FunctionDeclaration | undefined {
-    const children: ts.Node[] = astDeclaration.declaration.getChildren(
+    const children: readonly ts.Node[] = astDeclaration.declaration.getChildren(
       astDeclaration.declaration.getSourceFile()
     );
     return children.find(ts.isFunctionTypeNode) as ts.FunctionDeclaration | undefined;

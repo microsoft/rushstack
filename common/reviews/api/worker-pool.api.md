@@ -6,6 +6,7 @@
 
 /// <reference types="node" />
 
+import { ResourceLimits } from 'worker_threads';
 import { Worker } from 'worker_threads';
 
 // Warning: (ae-internal-missing-underscore) The name "IWorkerPoolOptions" should be prefixed with an underscore because the declaration is marked as @internal
@@ -17,6 +18,7 @@ export interface IWorkerPoolOptions {
     onWorkerDestroyed?: () => void;
     prepareWorker?: (worker: Worker) => void;
     workerData?: unknown;
+    workerResourceLimits?: ResourceLimits;
     workerScriptPath: string;
 }
 

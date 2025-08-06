@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import Watchpack, { type WatchOptions } from 'watchpack';
-import type { Compiler, WebpackPluginInstance } from 'webpack';
+import type { Compiler, WebpackPluginInstance, InputFileSystem } from 'webpack';
 
-export type InputFileSystem = Compiler['inputFileSystem'];
-export type WatchFileSystem = Compiler['watchFileSystem'];
+export type { InputFileSystem };
+export type WatchFileSystem = NonNullable<Compiler['watchFileSystem']>;
 export type WatchCallback = Parameters<WatchFileSystem['watch']>[5];
 export type WatchUndelayedCallback = Parameters<WatchFileSystem['watch']>[6];
 export type Watcher = ReturnType<WatchFileSystem['watch']>;
@@ -79,7 +79,7 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
 
       const { fileTimeInfoEntries, contextTimeInfoEntries } = this._fetchTimeInfo();
 
-      callback(undefined, fileTimeInfoEntries, contextTimeInfoEntries, changes, removals);
+      callback(null, fileTimeInfoEntries, contextTimeInfoEntries, changes, removals);
 
       changes.clear();
       removals.clear();
@@ -204,8 +204,13 @@ export class OverrideNodeWatchFSPlugin implements WebpackPluginInstance {
   }
 
   public apply(compiler: Compiler): void {
+    const { inputFileSystem } = compiler;
+    if (!inputFileSystem) {
+      throw new Error(`compiler.inputFileSystem is not defined`);
+    }
+
     const watchFileSystem: DeferredWatchFileSystem = new DeferredWatchFileSystem(
-      compiler.inputFileSystem,
+      inputFileSystem,
       this._onChange
     );
     this.fileSystems.add(watchFileSystem);

@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`serializeBuildInfo Has expected serialized format: posix 1`] = `
+Object {
+  "configHash": "foobar",
+  "fileDependencies": Object {
+    "../c/output1": Array [
+      0,
+    ],
+    "../c/output2": Array [
+      0,
+      1,
+    ],
+  },
+  "inputFileVersions": Object {
+    "../c/file1": "1",
+    "../c/file2": "2",
+  },
+}
+`;
+
+exports[`serializeBuildInfo Has expected serialized format: win32 1`] = `
+Object {
+  "configHash": "foobar",
+  "fileDependencies": Object {
+    "../c/output1": Array [
+      0,
+    ],
+    "../c/output2": Array [
+      0,
+      1,
+    ],
+  },
+  "inputFileVersions": Object {
+    "../c/file1": "1",
+    "../c/file2": "2",
+  },
+}
+`;

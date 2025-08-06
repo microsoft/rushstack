@@ -27,7 +27,7 @@ export interface IAzureInteractiveAuthOptions {
 
   /**
    * Login flow to use for interactive authentication.
-   * @defaultValue 'deviceCode'
+   * @defaultValue 'AdoCodespacesAuth' if on GitHub Codespaces, 'InteractiveBrowser' otherwise
    */
   readonly loginFlow?: LoginFlowType;
 
@@ -86,7 +86,7 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
         storageContainerName,
         azureEnvironment = 'AzurePublicCloud',
         minimumValidityInMinutes,
-        loginFlow = 'DeviceCode'
+        loginFlow = process.env.CODESPACES ? 'AdoCodespacesAuth' : 'InteractiveBrowser'
       } = options;
 
       const logger: ILogger = rushSession.getLogger(PLUGIN_NAME);

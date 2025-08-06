@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TSESTree, TSESLint, ParserServices } from '@typescript-eslint/utils';
-import * as ts from 'typescript';
+import type { TSESTree, TSESLint, ParserServices } from '@typescript-eslint/utils';
+import type * as ts from 'typescript';
 
 type MessageIds = 'error-untyped-underscore';
 type Options = [];
@@ -26,7 +26,8 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
     } as TSESLint.RuleMetaDataDocs
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
-    const parserServices: ParserServices | undefined = context.parserServices;
+    const parserServices: Partial<ParserServices> | undefined =
+      context.sourceCode?.parserServices ?? context.parserServices;
     if (!parserServices || !parserServices.program || !parserServices.esTreeNodeToTSNodeMap) {
       throw new Error(
         'This rule requires your ESLint configuration to define the "parserOptions.project"' +

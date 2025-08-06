@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import * as path from 'path';
 import type * as Webpack from 'webpack';
 import type * as SetPublicPathPluginPackageType from '@rushstack/set-webpack-public-path-plugin';

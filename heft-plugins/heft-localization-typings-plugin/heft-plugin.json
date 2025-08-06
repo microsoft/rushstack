@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "localization-typings-plugin",
+      "entryPoint": "./lib/LocalizationTypingsPlugin",
+      "optionsSchema": "./lib/schemas/options.schema.json"
+    }
+  ]
+}

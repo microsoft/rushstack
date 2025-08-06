@@ -25,7 +25,7 @@ export class InspectAction extends BaseReportAction {
     });
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const rundown: Rundown = new Rundown();
     await rundown.invokeAsync(
       this.scriptParameter.value,

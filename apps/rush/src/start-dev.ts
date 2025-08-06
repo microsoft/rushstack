@@ -20,7 +20,8 @@ function includePlugin(pluginName: string, pluginPackageName?: string): void {
     pluginName: pluginName,
     pluginPackageFolder: Import.resolvePackage({
       packageName: pluginPackageName,
-      baseFolderPath: __dirname
+      baseFolderPath: __dirname,
+      useNodeJSResolver: true
     })
   });
 }

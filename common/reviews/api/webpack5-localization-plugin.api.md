@@ -7,11 +7,17 @@
 /// <reference types="node" />
 
 import type { Chunk } from 'webpack';
+import type { Compilation } from 'webpack';
 import type { Compiler } from 'webpack';
 import { ILocalizationFile } from '@rushstack/localization-utilities';
 import type { IPseudolocaleOptions } from '@rushstack/localization-utilities';
 import type { LoaderContext } from 'webpack';
 import type { WebpackPluginInstance } from 'webpack';
+
+// @internal (undocumented)
+export interface _ICustomDataPlaceholder extends IValuePlaceholderBase {
+    valueForLocaleFn: ValueForLocaleFn;
+}
 
 // @public (undocumented)
 export interface IDefaultLocaleOptions {
@@ -77,7 +83,7 @@ export interface ILocalizationStatsEntrypoint {
 
 // @public
 export interface ILocalizationStatsOptions {
-    callback?: (stats: ILocalizationStats) => void;
+    callback?: (stats: ILocalizationStats, compilation: Compilation) => void;
     dropPath?: string;
 }
 
@@ -120,18 +126,24 @@ export interface IPseudolocalesOptions {
 export type IResolvedMissingTranslations = ReadonlyMap<string, ILocaleFileData>;
 
 // @public (undocumented)
-export interface _IStringPlaceholder {
+interface IStringPlaceholder extends IValuePlaceholderBase {
     locFilePath: string;
     stringName: string;
-    suffix: string;
-    value: string;
-    valuesByLocale: Map<string, string>;
+    translations: ReadonlyMap<string, ReadonlyMap<string, string>>;
 }
+export { IStringPlaceholder }
+export { IStringPlaceholder as _IStringPlaceholder }
 
 // @public (undocumented)
 export interface ITrueHashPluginOptions {
     hashFunction?: (contents: string | Buffer) => string;
     stageOverride?: number;
+}
+
+// @public (undocumented)
+export interface IValuePlaceholderBase {
+    suffix: string;
+    value: string;
 }
 
 // @public
@@ -141,13 +153,15 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     addDefaultLocFileAsync(context: LoaderContext<{}>, localizedFileKey: string, localizedResourceData: ILocalizationFile): Promise<Record<string, string>>;
     apply(compiler: Compiler): void;
     // @internal (undocumented)
-    getDataForSerialNumber(serialNumber: string): _IStringPlaceholder | undefined;
+    _getCustomDataForSerialNumber(suffix: string): _ICustomDataPlaceholder | undefined;
+    // @beta (undocumented)
+    getCustomDataPlaceholderForValueFunction(valueForLocaleFn: ValueForLocaleFn, placeholderUniqueId: string): string;
     // (undocumented)
-    getPlaceholder(localizedFileKey: string, stringName: string): _IStringPlaceholder | undefined;
+    getPlaceholder(localizedFileKey: string, stringName: string): IStringPlaceholder | undefined;
+    // @internal (undocumented)
+    _getStringDataForSerialNumber(suffix: string): IStringPlaceholder | undefined;
     // @internal (undocumented)
     readonly _options: ILocalizationPluginOptions;
-    // (undocumented)
-    readonly stringKeys: Map<string, _IStringPlaceholder>;
 }
 
 // @public (undocumented)
@@ -156,6 +170,9 @@ export class TrueHashPlugin implements WebpackPluginInstance {
     // (undocumented)
     apply(compiler: Compiler): void;
 }
+
+// @public (undocumented)
+export type ValueForLocaleFn = (locale: string, chunk: Chunk) => string;
 
 // (No @packageDocumentation comment for this package)
 

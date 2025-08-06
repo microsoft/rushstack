@@ -3,11 +3,11 @@
 
 import * as nodeJsPath from 'path';
 import * as fs from 'fs';
+import * as fsPromises from 'fs/promises';
 import * as fsx from 'fs-extra';
 
 import { Text, type NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
-import { LegacyAdapters } from './LegacyAdapters';
 
 /**
  * An alias for the Node.js `fs.Stats` object.
@@ -684,11 +684,7 @@ export class FileSystem {
         ...options
       };
 
-      const folderEntries: FolderItem[] = await LegacyAdapters.convertCallbackToPromise(
-        fs.readdir,
-        folderPath,
-        { withFileTypes: true }
-      );
+      const folderEntries: FolderItem[] = await fsPromises.readdir(folderPath, { withFileTypes: true });
       if (options.absolutePaths) {
         return folderEntries.map((folderEntry) => {
           folderEntry.name = nodeJsPath.resolve(folderPath, folderEntry.name);
@@ -806,13 +802,13 @@ export class FileSystem {
    */
   public static writeBuffersToFile(
     filePath: string,
-    contents: ReadonlyArray<Uint8Array>,
+    contents: ReadonlyArray<NodeJS.ArrayBufferView>,
     options?: IFileSystemWriteBinaryFileOptions
   ): void {
     FileSystem._wrapException(() => {
       // Need a mutable copy of the iterable to handle incomplete writes,
       // since writev() doesn't take an argument for where to start writing.
-      const toCopy: Uint8Array[] = [...contents];
+      const toCopy: NodeJS.ArrayBufferView[] = [...contents];
 
       let fd: number | undefined;
       try {
@@ -837,7 +833,12 @@ export class FileSystem {
             const bytesInCurrentBuffer: number = toCopy[buffersWritten].byteLength;
             if (bytesWritten < bytesInCurrentBuffer) {
               // This buffer was partially written.
-              toCopy[buffersWritten] = toCopy[buffersWritten].subarray(bytesWritten);
+              const currentToCopy: NodeJS.ArrayBufferView = toCopy[buffersWritten];
+              toCopy[buffersWritten] = new Uint8Array(
+                currentToCopy.buffer,
+                currentToCopy.byteOffset + bytesWritten,
+                currentToCopy.byteLength - bytesWritten
+              );
               break;
             }
             bytesWritten -= bytesInCurrentBuffer;
@@ -896,17 +897,17 @@ export class FileSystem {
    */
   public static async writeBuffersToFileAsync(
     filePath: string,
-    contents: ReadonlyArray<Uint8Array>,
+    contents: ReadonlyArray<NodeJS.ArrayBufferView>,
     options?: IFileSystemWriteBinaryFileOptions
   ): Promise<void> {
     await FileSystem._wrapExceptionAsync(async () => {
       // Need a mutable copy of the iterable to handle incomplete writes,
       // since writev() doesn't take an argument for where to start writing.
-      const toCopy: Uint8Array[] = [...contents];
+      const toCopy: NodeJS.ArrayBufferView[] = [...contents];
 
-      let handle: fs.promises.FileHandle | undefined;
+      let handle: fsPromises.FileHandle | undefined;
       try {
-        handle = await fs.promises.open(filePath, 'w');
+        handle = await fsPromises.open(filePath, 'w');
       } catch (error) {
         if (!options?.ensureFolderExists || !FileSystem.isNotExistError(error as Error)) {
           throw error;
@@ -914,7 +915,7 @@ export class FileSystem {
 
         const folderPath: string = nodeJsPath.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
-        handle = await fs.promises.open(filePath, 'w');
+        handle = await fsPromises.open(filePath, 'w');
       }
 
       try {
@@ -927,7 +928,12 @@ export class FileSystem {
             const bytesInCurrentBuffer: number = toCopy[buffersWritten].byteLength;
             if (bytesWritten < bytesInCurrentBuffer) {
               // This buffer was partially written.
-              toCopy[buffersWritten] = toCopy[buffersWritten].subarray(bytesWritten);
+              const currentToCopy: NodeJS.ArrayBufferView = toCopy[buffersWritten];
+              toCopy[buffersWritten] = new Uint8Array(
+                currentToCopy.buffer,
+                currentToCopy.byteOffset + bytesWritten,
+                currentToCopy.byteLength - bytesWritten
+              );
               break;
             }
             bytesWritten -= bytesInCurrentBuffer;
@@ -1502,10 +1508,11 @@ export class FileSystem {
    */
   public static isErrnoException(error: Error): error is NodeJS.ErrnoException {
     const typedError: NodeJS.ErrnoException = error;
+    // Don't check for `path` because the syscall may not have a path.
+    // For example, when invoked with a file descriptor.
     return (
       typeof typedError.code === 'string' &&
       typeof typedError.errno === 'number' &&
-      typeof typedError.path === 'string' &&
       typeof typedError.syscall === 'string'
     );
   }
@@ -1608,25 +1615,19 @@ export class FileSystem {
   private static _updateErrorMessage(error: Error): void {
     if (FileSystem.isErrnoException(error)) {
       if (FileSystem.isFileDoesNotExistError(error)) {
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `File does not exist: ${error.path}\n${error.message}`;
       } else if (FileSystem.isFolderDoesNotExistError(error)) {
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `Folder does not exist: ${error.path}\n${error.message}`;
       } else if (FileSystem.isExistError(error)) {
         // Oddly, the typing does not include the `dest` property even though the documentation
         // indicates it is there: https://nodejs.org/docs/latest-v10.x/api/errors.html#errors_error_dest
         const extendedError: NodeJS.ErrnoException & { dest?: string } = error;
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `File or folder already exists: ${extendedError.dest}\n${error.message}`;
       } else if (FileSystem.isUnlinkNotPermittedError(error)) {
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `File or folder could not be deleted: ${error.path}\n${error.message}`;
       } else if (FileSystem.isDirectoryError(error)) {
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `Target is a folder, not a file: ${error.path}\n${error.message}`;
       } else if (FileSystem.isNotDirectoryError(error)) {
-        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `Target is not a folder: ${error.path}\n${error.message}`;
       }
     }

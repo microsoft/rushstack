@@ -17,7 +17,7 @@ export class TypeScriptInternals {
   public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     // Compiler internal:
     // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/checker.ts
-    return (typeChecker as any).getImmediateAliasedSymbol(symbol); // eslint-disable-line @typescript-eslint/no-explicit-any
+    return (typeChecker as any).getImmediateAliasedSymbol(symbol);
   }
 
   /**
@@ -101,13 +101,14 @@ export class TypeScriptInternals {
    * Gets the mode required for module resolution required with the addition of Node16/nodenext
    */
   public static getModeForUsageLocation(
-    file: { impliedNodeFormat?: ts.SourceFile['impliedNodeFormat'] },
-    usage: ts.StringLiteralLike | undefined
+    file: ts.SourceFile,
+    usage: ts.StringLiteralLike,
+    compilerOptions: ts.CompilerOptions
   ): ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v4.7.2/src/compiler/program.ts#L568
+    // https://github.com/microsoft/TypeScript/blob/v5.8.2/src/compiler/program.ts#L931
 
-    return (ts as any).getModeForUsageLocation?.(file, usage);
+    return ts.getModeForUsageLocation?.(file, usage, compilerOptions);
   }
 
   /**

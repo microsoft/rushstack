@@ -3,7 +3,7 @@
 
 import webpack = require('webpack');
 
-import { LoadThemedStylesLoader } from './../LoadThemedStylesLoader';
+import { LoadThemedStylesLoader } from '../LoadThemedStylesLoader';
 import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');
 
 function wrapResult(loaderResult: string): string {

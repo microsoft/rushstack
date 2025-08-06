@@ -1,0 +1,220 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SASS No Shims ignored1.scss: files 1`] = `Array []`;
+
+exports[`SASS No Shims ignored2.scss: files 1`] = `Array []`;
+
+exports[`SASS No Shims styles.module.sass: files 1`] = `
+Array [
+  "styles.module.css",
+]
+`;
+
+exports[`SASS No Shims styles.module.sass: styles.module.css 1`] = `
+"/**
+ * * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
+ * * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
+ * */
+/**
+ * * This file is a SASS partial and therefore has no direct output file, but gets embedded into other files.
+ * */
+.exampleImport {
+  font-style: italic;
+  color: darkcyan;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background-color: #c0c0c0;
+  font-family: Tahoma, sans-serif;
+}
+
+.exampleApp {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 5px;
+  width: 400px;
+}
+
+.exampleButton {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 0 solid transparent;
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: center;
+  transition-duration: 0.4s;
+  user-select: none;
+  vertical-align: middle;
+  transition-property: background-color, color, border-color;
+  background-color: mediumorchid;
+  border-color: mediumorchid;
+  border-radius: 3px;
+  color: #fff;
+}
+.exampleButton:not(:disabled):not([aria-disabled=true]) {
+  cursor: pointer;
+}
+.exampleButton:hover, .exampleButton:focus {
+  text-decoration: none;
+}
+.exampleButton:disabled, .exampleButton[aria-disabled=true] {
+  box-shadow: none;
+}
+.exampleButton:hover {
+  background-color: rgb(160.4485981308, 48.6878504673, 188.1121495327);
+  border-color: rgb(160.4485981308, 48.6878504673, 188.1121495327);
+  color: #fff;
+}
+.exampleButton:focus {
+  outline: 2px dotted mediumorchid;
+  outline-offset: 1px;
+}
+.exampleButton:disabled, .exampleButton[aria-disabled=true] {
+  background-color: mediumorchid;
+  border-color: mediumorchid;
+  color: #fff;
+  opacity: 0.7;
+}"
+`;
+
+exports[`SASS No Shims stylesAltSyntax.global.scss: files 1`] = `
+Array [
+  "stylesAltSyntax.global.css",
+]
+`;
+
+exports[`SASS No Shims stylesAltSyntax.global.scss: stylesAltSyntax.global.css 1`] = `
+"/**
+ * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
+ * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
+ */
+.ms-label {
+  margin-bottom: 20px;
+}"
+`;
+
+exports[`SASS No Shims stylesAltSyntax.module.scss: files 1`] = `
+Array [
+  "stylesAltSyntax.module.css",
+]
+`;
+
+exports[`SASS No Shims stylesAltSyntax.module.scss: stylesAltSyntax.module.css 1`] = `
+"/**
+ * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
+ * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
+ */
+.label {
+  margin-bottom: var(--normalMargin, 20px);
+}
+
+.style-with-dashes {
+  margin-top: var(--normalMargin, 20px);
+}"
+`;
+
+exports[`SASS No Shims stylesUseAltSyntax.module.scss: files 1`] = `
+Array [
+  "stylesUseAltSyntax.module.css",
+]
+`;
+
+exports[`SASS No Shims stylesUseAltSyntax.module.scss: stylesUseAltSyntax.module.css 1`] = `
+"/**
+ * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
+ * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
+ */
+/**
+ * This file is a SASS partial and therefore has no direct output file,
+ * but gets embedded into other files.
+ */
+/**
+ * * * This file is used to verify that Sass imports using with configurable variable definition are successful.
+ * * */
+:root {
+  --list-margin-top: calc(1.25 * 1rem);
+}
+
+.label {
+  display: block;
+  color: #4682ff;
+}
+
+.exampleList {
+  list-style-type: circle;
+  margin-top: var(--list-margin-top);
+}
+.exampleListItem1 {
+  color: deepskyblue;
+}
+.exampleListItem2 {
+  background-color: dodgerblue;
+  color: #e16f00;
+}
+.exampleListItem3 {
+  background-color: #b7c274;
+  color: darkslateblue;
+}"
+`;
+
+exports[`SASS No Shims stylesUseSyntax.module.sass: files 1`] = `
+Array [
+  "stylesUseSyntax.module.css",
+]
+`;
+
+exports[`SASS No Shims stylesUseSyntax.module.sass: stylesUseSyntax.module.css 1`] = `
+"/**
+ * * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
+ * * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
+ * */
+/**
+ * This file is a SASS partial and therefore has no direct output file,
+ * but gets embedded into other files.
+ */
+/**
+ * * * This file is used to verify that Sass imports using with configurable variable definition are successful.
+ * * */
+.exampleAnchor {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 0 solid transparent;
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: center;
+  transition-duration: 0.4s;
+  user-select: none;
+  vertical-align: middle;
+  transition-property: background-color, color, border-color;
+  background-color: #7a717f;
+  border-color: #7a717f;
+  border-radius: 3px;
+  color: #fff;
+}
+.exampleAnchor:not(:disabled):not([aria-disabled=true]) {
+  cursor: pointer;
+}
+.exampleAnchor:hover, .exampleAnchor:focus {
+  text-decoration: none;
+}
+.exampleAnchor:disabled, .exampleAnchor[aria-disabled=true] {
+  box-shadow: none;
+}
+.exampleAnchor:hover {
+  background-color: rgb(97.6, 90.4, 101.6);
+  border-color: rgb(97.6, 90.4, 101.6);
+  color: #fff;
+}
+.exampleAnchor:focus {
+  outline: 2px dotted #7a717f;
+  outline-offset: 1px;
+}
+.exampleAnchor:disabled, .exampleAnchor[aria-disabled=true] {
+  background-color: #7a717f;
+  border-color: #7a717f;
+  color: #fff;
+  opacity: 0.7;
+}"
+`;

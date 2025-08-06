@@ -102,7 +102,7 @@ export class CheckAction extends CommandLineAction {
 
     const projectFolder: string = project.projectFolder;
     const subspace: Subspace = project.subspace;
-    const shrinkwrapFilename: string = subspace.getCommittedShrinkwrapFilename();
+    const shrinkwrapFilename: string = subspace.getCommittedShrinkwrapFilePath();
     let doc: Lockfile | LockfileV6;
     if (this._docMap.has(shrinkwrapFilename)) {
       doc = this._docMap.get(shrinkwrapFilename)!;
@@ -174,7 +174,7 @@ export class CheckAction extends CommandLineAction {
     }
   }
 
-  protected async onExecute(): Promise<void> {
+  protected override async onExecuteAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation();
     if (!rushConfiguration) {
       throw new Error(

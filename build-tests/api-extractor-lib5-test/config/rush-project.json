@@ -4,6 +4,7 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
+      // dist is intentionally tracked
       "outputFolderNames": ["lib"]
     }
   ]

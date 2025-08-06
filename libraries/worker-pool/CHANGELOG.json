@@ -2,6 +2,623 @@
   "name": "@rushstack/worker-pool",
   "entries": [
     {
+      "version": "0.5.25",
+      "tag": "@rushstack/worker-pool_v0.5.25",
+      "date": "Fri, 01 Aug 2025 00:12:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.24",
+      "tag": "@rushstack/worker-pool_v0.5.24",
+      "date": "Wed, 23 Jul 2025 20:55:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.23",
+      "tag": "@rushstack/worker-pool_v0.5.23",
+      "date": "Sat, 21 Jun 2025 00:13:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.74.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.22",
+      "tag": "@rushstack/worker-pool_v0.5.22",
+      "date": "Tue, 13 May 2025 02:09:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.21",
+      "tag": "@rushstack/worker-pool_v0.5.21",
+      "date": "Thu, 01 May 2025 15:11:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.20",
+      "tag": "@rushstack/worker-pool_v0.5.20",
+      "date": "Thu, 01 May 2025 00:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.19",
+      "tag": "@rushstack/worker-pool_v0.5.19",
+      "date": "Fri, 25 Apr 2025 00:11:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.18",
+      "tag": "@rushstack/worker-pool_v0.5.18",
+      "date": "Mon, 21 Apr 2025 22:24:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.17",
+      "tag": "@rushstack/worker-pool_v0.5.17",
+      "date": "Thu, 17 Apr 2025 00:11:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.16",
+      "tag": "@rushstack/worker-pool_v0.5.16",
+      "date": "Tue, 15 Apr 2025 15:11:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.73.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.15",
+      "tag": "@rushstack/worker-pool_v0.5.15",
+      "date": "Wed, 09 Apr 2025 00:11:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.72.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.14",
+      "tag": "@rushstack/worker-pool_v0.5.14",
+      "date": "Fri, 04 Apr 2025 18:34:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.13",
+      "tag": "@rushstack/worker-pool_v0.5.13",
+      "date": "Tue, 25 Mar 2025 15:11:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.12",
+      "tag": "@rushstack/worker-pool_v0.5.12",
+      "date": "Wed, 12 Mar 2025 22:41:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.71.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.11",
+      "tag": "@rushstack/worker-pool_v0.5.11",
+      "date": "Wed, 12 Mar 2025 00:11:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.10",
+      "tag": "@rushstack/worker-pool_v0.5.10",
+      "date": "Tue, 11 Mar 2025 02:12:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.70.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.9",
+      "tag": "@rushstack/worker-pool_v0.5.9",
+      "date": "Tue, 11 Mar 2025 00:11:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.8",
+      "tag": "@rushstack/worker-pool_v0.5.8",
+      "date": "Sat, 01 Mar 2025 05:00:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.7",
+      "tag": "@rushstack/worker-pool_v0.5.7",
+      "date": "Thu, 27 Feb 2025 01:10:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.6",
+      "tag": "@rushstack/worker-pool_v0.5.6",
+      "date": "Wed, 26 Feb 2025 16:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.69.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.5",
+      "tag": "@rushstack/worker-pool_v0.5.5",
+      "date": "Sat, 22 Feb 2025 01:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.4",
+      "tag": "@rushstack/worker-pool_v0.5.4",
+      "date": "Wed, 19 Feb 2025 18:53:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.3",
+      "tag": "@rushstack/worker-pool_v0.5.3",
+      "date": "Wed, 12 Feb 2025 01:10:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.2",
+      "tag": "@rushstack/worker-pool_v0.5.2",
+      "date": "Thu, 30 Jan 2025 16:10:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.1",
+      "tag": "@rushstack/worker-pool_v0.5.1",
+      "date": "Thu, 30 Jan 2025 01:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.0",
+      "tag": "@rushstack/worker-pool_v0.5.0",
+      "date": "Wed, 22 Jan 2025 03:03:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `workerResourceLimits` option to the `WorkerPool` constructor to control the available resources to the workers."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.81",
+      "tag": "@rushstack/worker-pool_v0.4.81",
+      "date": "Thu, 09 Jan 2025 01:10:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.80",
+      "tag": "@rushstack/worker-pool_v0.4.80",
+      "date": "Tue, 07 Jan 2025 22:17:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.79",
+      "tag": "@rushstack/worker-pool_v0.4.79",
+      "date": "Sat, 14 Dec 2024 01:11:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.78",
+      "tag": "@rushstack/worker-pool_v0.4.78",
+      "date": "Mon, 09 Dec 2024 20:31:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.77",
+      "tag": "@rushstack/worker-pool_v0.4.77",
+      "date": "Tue, 03 Dec 2024 16:11:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.76",
+      "tag": "@rushstack/worker-pool_v0.4.76",
+      "date": "Sat, 23 Nov 2024 01:18:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.75",
+      "tag": "@rushstack/worker-pool_v0.4.75",
+      "date": "Fri, 22 Nov 2024 01:10:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.74",
+      "tag": "@rushstack/worker-pool_v0.4.74",
+      "date": "Thu, 24 Oct 2024 00:15:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.73",
+      "tag": "@rushstack/worker-pool_v0.4.73",
+      "date": "Mon, 21 Oct 2024 18:50:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.72",
+      "tag": "@rushstack/worker-pool_v0.4.72",
+      "date": "Thu, 17 Oct 2024 08:35:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.71",
+      "tag": "@rushstack/worker-pool_v0.4.71",
+      "date": "Tue, 15 Oct 2024 00:12:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.70",
+      "tag": "@rushstack/worker-pool_v0.4.70",
+      "date": "Wed, 02 Oct 2024 00:11:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.69",
+      "tag": "@rushstack/worker-pool_v0.4.69",
+      "date": "Tue, 01 Oct 2024 00:11:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.68",
+      "tag": "@rushstack/worker-pool_v0.4.68",
+      "date": "Mon, 30 Sep 2024 15:12:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.68.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.67",
+      "tag": "@rushstack/worker-pool_v0.4.67",
+      "date": "Fri, 13 Sep 2024 00:11:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.66",
+      "tag": "@rushstack/worker-pool_v0.4.66",
+      "date": "Tue, 10 Sep 2024 20:08:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.65",
+      "tag": "@rushstack/worker-pool_v0.4.65",
+      "date": "Wed, 21 Aug 2024 05:43:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.67.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.64",
+      "tag": "@rushstack/worker-pool_v0.4.64",
+      "date": "Mon, 12 Aug 2024 22:16:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.63",
+      "tag": "@rushstack/worker-pool_v0.4.63",
+      "date": "Fri, 02 Aug 2024 17:26:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.62",
+      "tag": "@rushstack/worker-pool_v0.4.62",
+      "date": "Sat, 27 Jul 2024 00:10:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include CHANGELOG.md in published releases again"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.61",
+      "tag": "@rushstack/worker-pool_v0.4.61",
+      "date": "Wed, 24 Jul 2024 00:12:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.60",
+      "tag": "@rushstack/worker-pool_v0.4.60",
+      "date": "Wed, 17 Jul 2024 06:55:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.59",
+      "tag": "@rushstack/worker-pool_v0.4.59",
+      "date": "Wed, 17 Jul 2024 00:11:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.58",
+      "tag": "@rushstack/worker-pool_v0.4.58",
+      "date": "Tue, 16 Jul 2024 00:36:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.57",
+      "tag": "@rushstack/worker-pool_v0.4.57",
+      "date": "Thu, 27 Jun 2024 21:01:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.56",
       "tag": "@rushstack/worker-pool_v0.4.56",
       "date": "Mon, 03 Jun 2024 23:43:15 GMT",

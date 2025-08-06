@@ -1353,22 +1353,22 @@
         },
         {
           "kind": "Namespace",
-          "canonicalReference": "api-documenter-test!EcmaSmbols:namespace",
+          "canonicalReference": "api-documenter-test!EcmaSymbols:namespace",
           "docComment": "/**\n * A namespace containing an ECMAScript symbol\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare namespace EcmaSmbols "
+              "text": "export declare namespace EcmaSymbols "
             }
           ],
           "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
-          "name": "EcmaSmbols",
+          "name": "EcmaSymbols",
           "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Variable",
-              "canonicalReference": "api-documenter-test!EcmaSmbols.example:var",
+              "canonicalReference": "api-documenter-test!EcmaSymbols.example:var",
               "docComment": "/**\n * An ECMAScript symbol\n */\n",
               "excerptTokens": [
                 {
@@ -1776,7 +1776,7 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3#[EcmaSmbols.example]:member",
+              "canonicalReference": "api-documenter-test!IDocInterface3#[EcmaSymbols.example]:member",
               "docComment": "/**\n * ECMAScript symbol\n */\n",
               "excerptTokens": [
                 {
@@ -1785,8 +1785,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "EcmaSmbols.example",
-                  "canonicalReference": "api-documenter-test!EcmaSmbols.example"
+                  "text": "EcmaSymbols.example",
+                  "canonicalReference": "api-documenter-test!EcmaSymbols.example"
                 },
                 {
                   "kind": "Content",
@@ -1804,7 +1804,7 @@
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
-              "name": "[EcmaSmbols.example]",
+              "name": "[EcmaSymbols.example]",
               "propertyTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4

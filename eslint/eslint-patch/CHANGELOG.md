@@ -1,6 +1,34 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Fri, 17 May 2024 00:10:40 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jun 2025 18:57:04 GMT and should not be manually modified.
+
+## 1.12.0
+Thu, 26 Jun 2025 18:57:04 GMT
+
+### Minor changes
+
+- Update for compatibility with ESLint 9
+
+## 1.11.0
+Tue, 11 Mar 2025 02:12:33 GMT
+
+### Minor changes
+
+- Bump the `@typescript-eslint/*` packages to add support for TypeScript 5.8.
+
+## 1.10.5
+Tue, 07 Jan 2025 16:11:06 GMT
+
+### Patches
+
+- Fix a performance issue when locating ".eslint-bulk-suppressions.json".
+
+## 1.10.4
+Sat, 27 Jul 2024 00:10:27 GMT
+
+### Patches
+
+- Include CHANGELOG.md in published releases again
 
 ## 1.10.3
 Fri, 17 May 2024 00:10:40 GMT

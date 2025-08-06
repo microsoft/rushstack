@@ -14,6 +14,7 @@ import {
 import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError';
 import { TabCompleteAction } from './TabCompletionAction';
 import { TypeUuid, uuidAlreadyReportedError } from '../TypeUuidLite';
+import { escapeSprintf } from '../escapeSprintf';
 
 /**
  * Options for the {@link CommandLineParser} constructor.
@@ -75,17 +76,18 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     this._actions = [];
     this._actionsByName = new Map<string, CommandLineAction>();
 
+    const { toolFilename, toolDescription, toolEpilog } = options;
+
     this._argumentParser = new CustomArgumentParser({
       addHelp: true,
-      prog: this._options.toolFilename,
-      description: this._options.toolDescription,
+      prog: toolFilename,
+      description: escapeSprintf(toolDescription),
       epilog: Colorize.bold(
-        this._options.toolEpilog ??
-          `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
+        escapeSprintf(
+          toolEpilog ?? `For detailed help about a specific command, use: ${toolFilename} <command> -h`
+        )
       )
     });
-
-    this.onDefineParameters?.();
   }
 
   /**
@@ -196,14 +198,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   }
 
   /**
-   * @deprecated Use {@link CommandLineParser.executeAsync} instead.
-   */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public async execute(args?: string[]): Promise<boolean> {
-    return await this.executeAsync(args);
-  }
-
-  /**
    * This is similar to {@link CommandLineParser.executeAsync}, except that execution errors
    * simply cause the promise to reject.  It is the caller's responsibility to trap
    */
@@ -287,7 +281,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       }
 
       this.selectedAction?._processParsedData(this._options, data);
-      await this.onExecute();
+      await this.onExecuteAsync();
     } catch (err) {
       if (err instanceof CommandLineParserExitError) {
         if (!err.exitCode) {
@@ -303,14 +297,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
 
       throw err;
     }
-  }
-
-  /**
-   * @deprecated Use {@link CommandLineParser.executeWithoutErrorHandlingAsync} instead.
-   */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public async executeWithoutErrorHandling(args?: string[]): Promise<void> {
-    await this.executeWithoutErrorHandlingAsync(args);
   }
 
   /** @internal */
@@ -343,8 +329,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
    * @internal
    */
-  protected _getArgumentParser(): argparse.ArgumentParser {
-    // override
+  protected override _getArgumentParser(): argparse.ArgumentParser {
     return this._argumentParser;
   }
 
@@ -352,7 +337,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * This hook allows the subclass to perform additional operations before or after
    * the chosen action is executed.
    */
-  protected async onExecute(): Promise<void> {
+  protected async onExecuteAsync(): Promise<void> {
     if (this.selectedAction) {
       await this.selectedAction._executeAsync();
     }

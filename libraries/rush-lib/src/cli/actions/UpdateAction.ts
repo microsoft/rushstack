@@ -8,6 +8,8 @@ import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManager
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { Subspace } from '../../api/Subspace';
+import { getVariantAsync } from '../../api/Variants';
 
 export class UpdateAction extends BaseInstallAction {
   private readonly _fullParameter: CommandLineFlagParameter;
@@ -80,8 +82,14 @@ export class UpdateAction extends BaseInstallAction {
 
   protected async buildInstallOptionsAsync(): Promise<Omit<IInstallManagerOptions, 'subspace'>> {
     const selectedProjects: Set<RushConfigurationProject> =
-      (await this._selectionParameters?.getSelectedProjectsAsync(this._terminal)) ??
+      (await this._selectionParameters?.getSelectedProjectsAsync(this.terminal)) ??
       new Set(this.rushConfiguration.projects);
+
+    const variant: string | undefined = await getVariantAsync(
+      this._variantParameter,
+      this.rushConfiguration,
+      false
+    );
 
     return {
       debug: this.parser.isDebug,
@@ -94,16 +102,20 @@ export class UpdateAction extends BaseInstallAction {
       offline: this._offlineParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
+      variant,
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
       selectedProjects,
       pnpmFilterArgumentValues:
-        (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this._terminal)) ?? [],
+        (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this.terminal)) ?? [],
       checkOnly: false,
-      beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
-      terminal: this._terminal
+      beforeInstallAsync: (subspace: Subspace) =>
+        this.rushSession.hooks.beforeInstall.promise(this, subspace, variant),
+      afterInstallAsync: (subspace: Subspace) =>
+        this.rushSession.hooks.afterInstall.promise(this, subspace, variant),
+      terminal: this.terminal
     };
   }
 }
