@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Remove default .npmrc setting",
+      "comment": "Remove the public NPM registry from the `.npmrc` generated during `rush init`. The public registry is the default, and including it in the repo's default `.npmrc` will override the user's default registry.",
       "type": "none"
     }
   ],
