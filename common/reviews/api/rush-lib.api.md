@@ -1348,6 +1348,8 @@ export class RushConfigurationProject {
     //
     // @internal
     constructor(options: IRushConfigurationProjectOptions);
+    // Warning: (ae-forgotten-export) The symbol "PackageAccessType" needs to be exported by the entry point index.d.ts
+    readonly access: PackageAccessType;
     // @beta
     readonly configuredSubspaceName: string | undefined;
     get consumingProjects(): ReadonlySet<RushConfigurationProject>;
@@ -1379,6 +1381,7 @@ export class RushConfigurationProject {
     readonly tags: ReadonlySet<string>;
     readonly tempProjectName: string;
     readonly unscopedTempProjectName: string;
+    validateAccess(): void;
     // @beta
     get versionPolicy(): VersionPolicy | undefined;
     // @beta
