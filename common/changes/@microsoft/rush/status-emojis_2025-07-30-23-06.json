@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add emojis for operation statuses. Replace the \"x of y\" operations indicator with a breakdown by status using the emojis. Add a legend at the start of the build log.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
