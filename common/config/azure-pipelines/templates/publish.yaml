@@ -9,5 +9,10 @@ parameters:
     default: latest
 
 steps:
-  - script: 'node common/scripts/install-run-rush.js publish --apply --pack --release-folder $(Build.ArtifactStagingDirectory)/packages --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details --tag ${{ parameters.PublishVersionTag }}'
+  - script: 'node common/scripts/install-run-rush.js publish --apply --pack --release-folder $(Build.ArtifactStagingDirectory)/packages --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details'
     displayName: 'Rush Publish (Policy: ${{ parameters.VersionPolicyName }})'
+
+  - script: |
+      mkdir -p "$(Build.ArtifactStagingDirectory)/published-versions"
+      echo "${{ parameters.PublishVersionTag }}" > "$(Build.ArtifactStagingDirectory)/published-versions/version.txt"
+    displayName: 'Create version.txt with publish tag'
