@@ -39,7 +39,7 @@ describe(convertLockfileV9ToLockfileObject.name, () => {
     });
   });
 
-  it("no nullish values", () => {
+  it('no nullish values', () => {
     const importers = new Map<string, ProjectSnapshot>(Object.entries(lockfile.importers || {}));
 
     const currentPackage = importers.get('.');
