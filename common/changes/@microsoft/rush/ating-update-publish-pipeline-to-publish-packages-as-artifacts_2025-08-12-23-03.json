@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Updated descriptions for rush publish for packages published as tarballs. ",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
