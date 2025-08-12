@@ -82,7 +82,9 @@ export class PublishAction extends BaseRushAction {
     this._publish = this.defineFlagParameter({
       parameterLongName: '--publish',
       parameterShortName: '-p',
-      description: 'If this flag is specified, applied changes will be published to the NPM registry.'
+      description:
+        'If this flag is specified, applied changes will be published to the NPM registry. ' +
+        'This flag must be specified with --pack to publish packages as tarballs, or else the run will only be a dry run.'
     });
     this._addCommitDetails = this.defineFlagParameter({
       parameterLongName: '--add-commit-details',
@@ -140,7 +142,8 @@ export class PublishAction extends BaseRushAction {
       parameterLongName: '--pack',
       description:
         `Packs projects into tarballs instead of publishing to npm repository. It can only be used when ` +
-        `--include-all is specified. If this flag is specified, NPM registry related parameters will be ignored.`
+        `--include-all is specified. If this flag is specified, NPM registry related parameters will be ignored.` +
+        `--publish must be specified to publish as tarballs, or else the run will only be a dry run. `
     });
     this._releaseFolder = this.defineStringParameter({
       parameterLongName: '--release-folder',
