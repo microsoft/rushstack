@@ -4,7 +4,7 @@ variables:
   - name: SourceBranch
     value: $[ replace(replace(resources.repositories.self.ref, 'refs/heads/', ''), 'refs/pull/', 'refs/remotes/pull/') ]
 
-parameteres:
+parameters:
   - name: PublishVersionTag
     displayName: 'Publish Version (Default is latest)'
     type: string
