@@ -84,7 +84,7 @@ export class PublishAction extends BaseRushAction {
       parameterShortName: '-p',
       description:
         'If this flag is specified, applied changes will be published to the NPM registry. ' +
-        'This flag must be specified with --pack to publish packages as tarballs, or else the run will only be a dry run.'
+        'If the --pack flag is passed, this flag must also be included, otherwise tarballs will not be produced.'
     });
     this._addCommitDetails = this.defineFlagParameter({
       parameterLongName: '--add-commit-details',
