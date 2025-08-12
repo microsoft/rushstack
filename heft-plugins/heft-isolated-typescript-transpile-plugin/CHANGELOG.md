@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-isolated-typescript-transpile-plugin
 
-This log was last generated on Fri, 01 Aug 2025 00:12:49 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Aug 2025 21:05:42 GMT and should not be manually modified.
+
+## 0.2.2
+Tue, 12 Aug 2025 21:05:42 GMT
+
+### Patches
+
+- Manually process wildcard directories for watching instead of watching all read directories.
 
 ## 0.2.1
 Fri, 01 Aug 2025 00:12:49 GMT

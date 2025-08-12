@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.2.2",
+      "date": "Tue, 12 Aug 2025 21:05:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Manually process wildcard directories for watching instead of watching all read directories."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v0.2.1",
       "date": "Fri, 01 Aug 2025 00:12:49 GMT",
