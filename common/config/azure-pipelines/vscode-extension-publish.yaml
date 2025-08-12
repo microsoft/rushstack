@@ -75,7 +75,7 @@ extends:
                       - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
                         displayName: 'ESRP CodeSigning'
                         inputs:
-                          connectedservicename: 'Rushstack-NPM-ESRP-Client'
+                          connectedservicename: 'rushstack-esrp-codesign-client'
                           AppRegistrationClientId: 'ceb49532-1c6a-445c-8d34-91ab779bdf50'
                           AppRegistrationTenantId: 'cdc5aeea-15c5-4db6-b079-fcadd2505dc2'
                           AuthAKVName: 'rushstack-esrp'
