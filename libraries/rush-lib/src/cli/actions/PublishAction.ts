@@ -143,7 +143,7 @@ export class PublishAction extends BaseRushAction {
       description:
         `Packs projects into tarballs instead of publishing to npm repository. It can only be used when ` +
         `--include-all is specified. If this flag is specified, NPM registry related parameters will be ignored.` +
-        `--publish must be specified to publish as tarballs, or else the run will only be a dry run. `
+        `--publish must be specified to produce as tarballs, otherwise a dry run will be performed.`
     });
     this._releaseFolder = this.defineStringParameter({
       parameterLongName: '--release-folder',
