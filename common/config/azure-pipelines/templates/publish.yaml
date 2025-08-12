@@ -13,6 +13,6 @@ steps:
     displayName: 'Rush Publish (Policy: ${{ parameters.VersionPolicyName }})'
 
   - script: |
-      mkdir -p "$(Build.ArtifactStagingDirectory)/published-versions"
-      echo "${{ parameters.PublishVersionTag }}" > "$(Build.ArtifactStagingDirectory)/published-versions/version.txt"
+      echo "${{ parameters.PublishVersionTag }}" > "$(Build.ArtifactStagingDirectory)/npm-tag"
+
     displayName: 'Create version.txt with publish tag'
