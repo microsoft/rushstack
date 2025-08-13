@@ -11,13 +11,13 @@ parameters:
     default:
       - key: 'debug-certificate-manager-vscode-extension'
         projectRelativeAssetsDir: dist/vsix
-        vsixPath: 'packaged.vsix'
-        manifestPath: 'extension-manifest.json'
+        vsixPath: 'extension.vsix'
+        manifestPath: 'extension.signature.manifest'
         projectPath: '$(Build.SourcesDirectory)/vscode-extensions/debug-certificate-manager-vscode-extension'
       - key: 'rush-vscode-extension'
         projectRelativeAssetsDir: dist/vsix
-        vsixPath: 'packaged.vsix'
-        manifestPath: 'extension-manifest.json'
+        vsixPath: 'extension.vsix'
+        manifestPath: 'extension.signature.manifest'
         projectPath: '$(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension'
 
 resources:
@@ -60,14 +60,14 @@ extends:
                     --to tag:vsix
 
               - ${{ if parameters.shouldPublish }}:
-                  - task: AzureCLI@2
-                    displayName: 'Get managed identity user info'
-                    inputs:
-                      azureSubscription: 'rushstack-vscode-publish'
-                      scriptType: bash
-                      scriptLocation: inlineScript
-                      inlineScript: |
-                        az rest -u https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798
+                  # - task: AzureCLI@2
+                  #   displayName: 'Get managed identity user info'
+                  #   inputs:
+                  #     azureSubscription: 'rushstack-vscode-publish'
+                  #     scriptType: bash
+                  #     scriptLocation: inlineScript
+                  #     inlineScript: |
+                  #       az rest -u https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798
 
                   - ${{ each extension in parameters.ExtensionPublishConfig }}:
                       - bash: cp ${{ extension.manifestPath }} ${{ extension.projectPath }}/extension.signature.p7s
