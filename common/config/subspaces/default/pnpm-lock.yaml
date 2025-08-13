@@ -3116,8 +3116,8 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/terminal
       '@vscode/vsce':
-        specifier: 3.3.2
-        version: 3.3.2
+        specifier: 3.2.1
+        version: 3.2.1
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -15021,8 +15021,8 @@ packages:
       '@vscode/vsce-sign-win32-x64': 2.0.5
     dev: false
 
-  /@vscode/vsce@3.3.2:
-    resolution: {integrity: sha512-XQ4IhctYalSTMwLnMS8+nUaGbU7v99Qm2sOoGfIEf2QC7jpiLXZZMh7NwArEFsKX4gHTJLx0/GqAUlCdC3gKCw==}
+  /@vscode/vsce@3.2.1:
+    resolution: {integrity: sha512-AY9vBjwExakK1c0cI/3NN2Ey0EgiKLBye/fxl/ue+o4q6RZ7N+xzd1jAD6eI6eBeMVANi617+V2rxIAkDPco2Q==}
     engines: {node: '>= 20'}
     hasBin: true
     dependencies:
@@ -15032,7 +15032,7 @@ packages:
       chalk: 2.4.2
       cheerio: 1.0.0-rc.12
       cockatiel: 3.2.1
-      commander: 12.1.0
+      commander: 6.2.1
       form-data: 4.0.0
       glob: 11.0.3
       hosted-git-info: 4.1.0
@@ -17325,11 +17325,6 @@ packages:
     engines: {node: '>=18'}
     dev: false
 
-  /commander@12.1.0:
-    resolution: {integrity: sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA==}
-    engines: {node: '>=18'}
-    dev: false
-
   /commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
 
@@ -17340,7 +17335,6 @@ packages:
   /commander@6.2.1:
     resolution: {integrity: sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==}
     engines: {node: '>= 6'}
-    dev: true
 
   /commander@7.2.0:
     resolution: {integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==}
