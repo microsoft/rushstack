@@ -60,15 +60,6 @@ extends:
                     --to tag:vsix
 
               - ${{ if parameters.shouldPublish }}:
-                  # - task: AzureCLI@2
-                  #   displayName: 'Get managed identity user info'
-                  #   inputs:
-                  #     azureSubscription: 'rushstack-vscode-publish'
-                  #     scriptType: bash
-                  #     scriptLocation: inlineScript
-                  #     inlineScript: |
-                  #       az rest -u https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798
-
                   - ${{ each extension in parameters.ExtensionPublishConfig }}:
                       - bash: cp ${{ extension.manifestPath }} extension.signature.p7s
                         workingDirectory: ${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}
@@ -97,9 +88,9 @@ extends:
                                 }
                             ]
 
-                      # - bash: node node_modules/@rushstack/heft/lib/start.js verify-signature --vsix-path ${{ extension.vsixPath }} --manifest-path ${{ extension.manifestPath }} --signature-path ${{ extension.projectPath }}/extension.signature.p7s
-                      #   displayName: 'Verify Signature: ${{ extension.key }}'
-                      #   workingDirectory: ${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}
+                      - bash: node node_modules/@rushstack/heft/lib/start.js verify-signature --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s
+                        displayName: 'Verify Signature: ${{ extension.key }}'
+                        workingDirectory: ${{ extension.projectPath }}
 
                       - task: AzureCLI@2
                         displayName: 'Publish VSIX: ${{ extension.key }}'
@@ -107,7 +98,5 @@ extends:
                           azureSubscription: rushstack-vscode-publish
                           scriptType: 'bash'
                           scriptLocation: 'inlineScript'
-                          inlineScript: |
-                            set -v
-                            node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s
+                          inlineScript: node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s
                           workingDirectory: ${{ extension.projectPath }}

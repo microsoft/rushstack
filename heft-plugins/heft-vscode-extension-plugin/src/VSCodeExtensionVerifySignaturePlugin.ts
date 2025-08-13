@@ -72,8 +72,6 @@ export default class VSCodeExtensionVerifySignaturePlugin
         [
           vsceScriptPath,
           'verify-signature',
-          '--no-dependencies',
-          '--azure-credential',
           '--packagePath',
           path.resolve(vsixPath),
           '--manifestPath',

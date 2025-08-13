@@ -45,6 +45,21 @@
         }
       }
     },
+    "verify-signature": {
+      "phaseDescription": "Verify the signature of the VSIX package",
+      "tasksByName": {
+        "verify-signature": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-vscode-extension-plugin",
+            "pluginName": "vscode-extension-verify-signature-plugin",
+            "options": {
+              "vsixPath": "dist/vsix/extension.vsix",
+              "manifestPath": "dist/vsix/extension.signature.manifest"
+            }
+          }
+        }
+      }
+    },
     "publish-vsix": {
       "phaseDescription": "Publish the VSIX package.",
       "tasksByName": {
