@@ -10,12 +10,14 @@ parameters:
     type: object
     default:
       - key: 'debug-certificate-manager-vscode-extension'
-        vsixPath: 'dist/vsix/packaged.vsix'
-        manifestPath: 'dist/vsix/extension-manifest.json'
+        projectRelativeAssetsDir: dist/vsix
+        vsixPath: 'packaged.vsix'
+        manifestPath: 'extension-manifest.json'
         projectPath: '$(Build.SourcesDirectory)/vscode-extensions/debug-certificate-manager-vscode-extension'
       - key: 'rush-vscode-extension'
-        vsixPath: 'dist/vsix/packaged.vsix'
-        manifestPath: 'dist/vsix/extension-manifest.json'
+        projectRelativeAssetsDir: dist/vsix
+        vsixPath: 'packaged.vsix'
+        manifestPath: 'extension-manifest.json'
         projectPath: '$(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension'
 
 resources:
@@ -69,7 +71,7 @@ extends:
 
                   - ${{ each extension in parameters.ExtensionPublishConfig }}:
                       - bash: cp ${{ extension.manifestPath }} ${{ extension.projectPath }}/extension.signature.p7s
-                        workingDirectory: ${{ extension.projectPath }}
+                        workingDirectory: ${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}
                         displayName: 'Prepare manifest for signing: ${{ extension.key }}'
 
                       - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
@@ -81,7 +83,7 @@ extends:
                           AuthAKVName: 'rushstack-esrp'
                           AuthCertName: 'ceb49532-rushstack-esrp'
                           AuthSignCertName: 'rushstack-vs-marketplace-publisher-signing-certificate'
-                          FolderPath: '${{ extension.projectPath }}'
+                          FolderPath: '${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}'
                           Pattern: 'extension.signature.p7s'
                           signConfigType: inlineSignParams
                           inlineOperation: |
@@ -97,6 +99,7 @@ extends:
 
                       # - bash: node node_modules/@rushstack/heft/lib/start.js verify-signature --vsix-path ${{ extension.vsixPath }} --manifest-path ${{ extension.manifestPath }} --signature-path ${{ extension.projectPath }}/extension.signature.p7s
                       #   displayName: 'Verify Signature: ${{ extension.key }}'
+                      #   workingDirectory: ${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}
 
                       - task: AzureCLI@2
                         displayName: 'Publish VSIX: ${{ extension.key }}'
@@ -107,4 +110,4 @@ extends:
                           inlineScript: |
                             set -v
                             node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.vsixPath }} --manifest-path ${{ extension.manifestPath }} --signature-path ${{ extension.projectPath }}/extension.signature.p7s
-                          workingDirectory: ${{ extension.projectPath }}
+                          workingDirectory: ${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}
