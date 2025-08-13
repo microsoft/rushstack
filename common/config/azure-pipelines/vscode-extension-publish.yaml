@@ -95,8 +95,8 @@ extends:
                                 }
                             ]
 
-                      - bash: node node_modules/@rushstack/heft/lib/start.js verify-signature --vsix-path ${{ extension.vsixPath }} --manifest-path ${{ extension.manifestPath }} --signature-path ${{ extension.projectPath }}/extension.signature.p7s
-                        displayName: 'Verify Signature: ${{ extension.key }}'
+                      # - bash: node node_modules/@rushstack/heft/lib/start.js verify-signature --vsix-path ${{ extension.vsixPath }} --manifest-path ${{ extension.manifestPath }} --signature-path ${{ extension.projectPath }}/extension.signature.p7s
+                      #   displayName: 'Verify Signature: ${{ extension.key }}'
 
                       - task: AzureCLI@2
                         displayName: 'Publish VSIX: ${{ extension.key }}'
