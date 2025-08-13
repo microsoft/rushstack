@@ -72,7 +72,6 @@ extends:
                         workingDirectory: ${{ extension.projectPath }}
                         displayName: 'Prepare manifest for signing: ${{ extension.key }}'
 
-                      - bash: cat ${{ extension.projectPath }}/extension.signature.p7s
                       - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
                         displayName: 'ESRP CodeSigning'
                         inputs:
@@ -95,10 +94,7 @@ extends:
                                     "toolVersion": "1.0"
                                 }
                             ]
-                      - bash: cat ${{ extension.projectPath }}/extension.signature.p7s
-                      - bash: cat ${{ extension.projectPath }}/CodeSignSummary*.md
-                      - bash: ls -la ${{ extension.projectPath }}
-                      - bash: ls -la
+
                       - task: AzureCLI@2
                         displayName: 'Publish VSIX: ${{ extension.key }}'
                         inputs:
@@ -106,5 +102,6 @@ extends:
                           scriptType: 'bash'
                           scriptLocation: 'inlineScript'
                           inlineScript: |
+                            set -v
                             node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.vsixPath }} --manifest-path ${{ extension.manifestPath }} --signature-path ${{ extension.projectPath }}/extension.signature.p7s
                           workingDirectory: ${{ extension.projectPath }}
