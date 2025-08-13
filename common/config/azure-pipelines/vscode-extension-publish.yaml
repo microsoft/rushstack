@@ -106,5 +106,5 @@ extends:
                           scriptType: 'bash'
                           scriptLocation: 'inlineScript'
                           inlineScript: |
-                            node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.vsixPath }} --manifest-path ${{ extension.projectPath }}/extension.manifest --signature-path ${{ extension.projectPath }}/extension.signature.p7s
+                            node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.vsixPath }} --manifest-path ${{ extension.manifestPath }} --signature-path ${{ extension.projectPath }}/extension.signature.p7s
                           workingDirectory: ${{ extension.projectPath }}
