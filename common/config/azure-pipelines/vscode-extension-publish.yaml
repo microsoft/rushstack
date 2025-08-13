@@ -109,5 +109,5 @@ extends:
                           scriptLocation: 'inlineScript'
                           inlineScript: |
                             set -v
-                            node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.vsixPath }} --manifest-path ${{ extension.manifestPath }} --signature-path ${{ extension.projectPath }}/extension.signature.p7s
-                          workingDirectory: ${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}
+                            node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s
+                          workingDirectory: ${{ extension.projectPath }}
