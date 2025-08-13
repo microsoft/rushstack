@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-vscode-extension-plugin",
+      "comment": "bump @vscode/vsce",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-vscode-extension-plugin"
+}
