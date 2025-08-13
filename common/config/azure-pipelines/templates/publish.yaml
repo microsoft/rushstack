@@ -14,5 +14,4 @@ steps:
 
   - script: |
       echo "${{ parameters.PublishVersionTag }}" > "$(Build.ArtifactStagingDirectory)/npm-tag"
-
     displayName: 'Create version.txt with publish tag'

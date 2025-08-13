@@ -5,7 +5,6 @@ variables:
     value: $[ replace(replace(resources.repositories.self.ref, 'refs/heads/', ''), 'refs/pull/', 'refs/remotes/pull/') ]
 
 parameters:
-
   - name: PublishVersionTag
     displayName: 'Publish Version (Default is latest)'
     type: string
