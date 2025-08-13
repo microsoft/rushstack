@@ -94,8 +94,10 @@ extends:
                                     "toolVersion": "1.0"
                                 }
                             ]
+                      - bash: cat ${{ extension.projectPath }}/CodeSignSummary*.md
 
                       - bash: ls -la ${{ extension.projectPath }}
+                      - bash: ls -la
                       - task: AzureCLI@2
                         displayName: 'Publish VSIX: ${{ extension.key }}'
                         inputs:
