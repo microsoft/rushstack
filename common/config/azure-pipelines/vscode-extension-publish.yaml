@@ -70,7 +70,7 @@ extends:
                   #       az rest -u https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798
 
                   - ${{ each extension in parameters.ExtensionPublishConfig }}:
-                      - bash: cp ${{ extension.manifestPath }} ${{ extension.projectPath }}/extension.signature.p7s
+                      - bash: cp ${{ extension.manifestPath }} extension.signature.p7s
                         workingDirectory: ${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}
                         displayName: 'Prepare manifest for signing: ${{ extension.key }}'
 
