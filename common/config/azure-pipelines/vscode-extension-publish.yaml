@@ -95,6 +95,7 @@ extends:
                                 }
                             ]
 
+                      - bash: ls -la ${{ extension.projectPath }}
                       - task: AzureCLI@2
                         displayName: 'Publish VSIX: ${{ extension.key }}'
                         inputs:
