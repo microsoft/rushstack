@@ -1,13 +1,13 @@
 {
   "name": "debug-certificate-manager",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "vscode-extensions/debug-certificate-manager-vscode-extension"
   },
   "license": "MIT",
-  "publisher": "RushStack",
+  "publisher": "ms-RushStack",
   "preview": true,
   "displayName": "Debug Certificate Manager",
   "description": "VS Code extension to manage debug TLS certificates and sync them to the VS Code workspace. Works with VS Code remote development (Codespaces, SSH, Dev Containers, WSL, VS Code Tunnels).",
