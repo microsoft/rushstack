@@ -206,7 +206,7 @@ export function activate(context: vscode.ExtensionContext): void {
       if (storePath.startsWith('/')) {
         resolvedWorkspaceStorePath = storePath;
       } else {
-        resolvedWorkspaceStorePath = vscode.Uri.joinPath(workspaceUri, storePath).fsPath;
+        resolvedWorkspaceStorePath = vscode.Uri.joinPath(workspaceUri, storePath).path;
       }
 
       let storePathUri: vscode.Uri | undefined;
