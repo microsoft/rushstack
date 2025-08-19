@@ -9,8 +9,7 @@ import {
   type ILockStepVersionJson,
   type IIndividualVersionJson,
   VersionFormatForCommit,
-  VersionFormatForPublish,
-  type IVersionPolicyDependencyJson
+  VersionFormatForPublish
 } from './VersionPolicyConfiguration';
 import type { PackageJsonEditor } from './PackageJsonEditor';
 import type { RushConfiguration } from './RushConfiguration';
@@ -57,42 +56,54 @@ export enum VersionPolicyDefinitionName {
  * @public
  */
 export abstract class VersionPolicy {
-  private _versionFormatForCommit: VersionFormatForCommit;
-  private _versionFormatForPublish: VersionFormatForPublish;
+  /**
+   * Serialized json for the policy
+   *
+   * @internal
+   */
+  public readonly _json: IVersionPolicyJson;
+
+  private get _versionFormatForCommit(): VersionFormatForCommit {
+    return this._json.dependencies?.versionFormatForCommit ?? VersionFormatForCommit.original;
+  }
+
+  private get _versionFormatForPublish(): VersionFormatForPublish {
+    return this._json.dependencies?.versionFormatForPublish ?? VersionFormatForPublish.original;
+  }
 
   /**
    * Version policy name
    */
-  public readonly policyName: string;
+  public get policyName(): string {
+    return this._json.policyName;
+  }
 
   /**
    * Version policy definition name
    */
-  public readonly definitionName: VersionPolicyDefinitionName;
+  public get definitionName(): VersionPolicyDefinitionName {
+    return Enum.getValueByKey(VersionPolicyDefinitionName, this._json.definitionName);
+  }
 
   /**
    * Determines if a version policy wants to opt out of changelog files.
    */
-  public readonly exemptFromRushChange: boolean;
+  public get exemptFromRushChange(): boolean {
+    return this._json.exemptFromRushChange ?? false;
+  }
 
   /**
    * Determines if a version policy wants to opt in to including email.
    */
-  public readonly includeEmailInChangeFile: boolean;
+  public get includeEmailInChangeFile(): boolean {
+    return this._json.includeEmailInChangeFile ?? false;
+  }
 
   /**
    * @internal
    */
   public constructor(versionPolicyJson: IVersionPolicyJson) {
-    this.policyName = versionPolicyJson.policyName;
-    this.definitionName = Enum.getValueByKey(VersionPolicyDefinitionName, versionPolicyJson.definitionName);
-    this.exemptFromRushChange = versionPolicyJson.exemptFromRushChange || false;
-    this.includeEmailInChangeFile = versionPolicyJson.includeEmailInChangeFile || false;
-
-    const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || {};
-    this._versionFormatForCommit = jsonDependencies.versionFormatForCommit || VersionFormatForCommit.original;
-    this._versionFormatForPublish =
-      jsonDependencies.versionFormatForPublish || VersionFormatForPublish.original;
+    this._json = versionPolicyJson;
   }
 
   /**
@@ -139,13 +150,6 @@ export abstract class VersionPolicy {
    * @param identifier - (optional) override prerelease Id
    */
   public abstract bump(bumpType?: BumpType, identifier?: string): void;
-
-  /**
-   * Serialized json for the policy
-   *
-   * @internal
-   */
-  public abstract get _json(): IVersionPolicyJson;
 
   /**
    * Validates the specified version and throws if the version does not satisfy the policy.
@@ -211,6 +215,7 @@ export abstract class VersionPolicy {
  * @public
  */
 export class LockStepVersionPolicy extends VersionPolicy {
+  public declare _json: ILockStepVersionJson;
   private _version: semver.SemVer;
 
   /**
@@ -218,7 +223,9 @@ export class LockStepVersionPolicy extends VersionPolicy {
    */
   // nextBump is probably not needed. It can be prerelease only.
   // Other types of bumps can be passed in as a parameter to bump method, so can identifier.
-  public readonly nextBump: BumpType | undefined;
+  public get nextBump(): BumpType | undefined {
+    return this._json.nextBump !== undefined ? Enum.getValueByKey(BumpType, this._json.nextBump) : undefined;
+  }
 
   /**
    * The main project for the version policy.
@@ -226,7 +233,9 @@ export class LockStepVersionPolicy extends VersionPolicy {
    * If the value is provided, change logs will only be generated in that project.
    * If the value is not provided, change logs will be hosted in each project associated with the policy.
    */
-  public readonly mainProject: string | undefined;
+  public get mainProject(): string | undefined {
+    return this._json.mainProject;
+  }
 
   /**
    * @internal
@@ -234,11 +243,6 @@ export class LockStepVersionPolicy extends VersionPolicy {
   public constructor(versionPolicyJson: ILockStepVersionJson) {
     super(versionPolicyJson);
     this._version = new semver.SemVer(versionPolicyJson.version);
-    this.nextBump =
-      versionPolicyJson.nextBump !== undefined
-        ? Enum.getValueByKey(BumpType, versionPolicyJson.nextBump)
-        : undefined;
-    this.mainProject = versionPolicyJson.mainProject;
   }
 
   /**
@@ -246,26 +250,6 @@ export class LockStepVersionPolicy extends VersionPolicy {
    */
   public get version(): string {
     return this._version.format();
-  }
-
-  /**
-   * Serialized json for this policy
-   *
-   * @internal
-   */
-  public get _json(): ILockStepVersionJson {
-    const json: ILockStepVersionJson = {
-      policyName: this.policyName,
-      definitionName: VersionPolicyDefinitionName[this.definitionName],
-      version: this.version
-    };
-    if (this.nextBump !== undefined) {
-      json.nextBump = BumpType[this.nextBump];
-    }
-    if (this.mainProject !== undefined) {
-      json.mainProject = this.mainProject;
-    }
-    return json;
   }
 
   /**
@@ -303,6 +287,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
     }
 
     this._version.inc(this._getReleaseType(nextBump), identifier);
+    this._json.version = this.version;
   }
 
   /**
@@ -315,6 +300,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
       return false;
     }
     this._version = newVersion;
+    this._json.version = this.version;
     return true;
   }
 
@@ -348,33 +334,20 @@ export class LockStepVersionPolicy extends VersionPolicy {
  * @public
  */
 export class IndividualVersionPolicy extends VersionPolicy {
+  public declare readonly _json: IIndividualVersionJson;
+
   /**
    * The major version that has been locked
    */
-  public readonly lockedMajor: number | undefined;
+  public get lockedMajor(): number | undefined {
+    return this._json.lockedMajor;
+  }
 
   /**
    * @internal
    */
   public constructor(versionPolicyJson: IIndividualVersionJson) {
     super(versionPolicyJson);
-    this.lockedMajor = versionPolicyJson.lockedMajor;
-  }
-
-  /**
-   * Serialized json for this policy
-   *
-   * @internal
-   */
-  public get _json(): IIndividualVersionJson {
-    const json: IIndividualVersionJson = {
-      policyName: this.policyName,
-      definitionName: VersionPolicyDefinitionName[this.definitionName]
-    };
-    if (this.lockedMajor !== undefined) {
-      json.lockedMajor = this.lockedMajor;
-    }
-    return json;
   }
 
   /**

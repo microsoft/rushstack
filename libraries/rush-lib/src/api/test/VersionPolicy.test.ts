@@ -3,7 +3,13 @@
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import { VersionPolicyConfiguration } from '../VersionPolicyConfiguration';
+import {
+  type ILockStepVersionJson,
+  VersionFormatForCommit,
+  VersionFormatForPublish,
+  VersionPolicyConfiguration,
+  type IIndividualVersionJson
+} from '../VersionPolicyConfiguration';
 import { VersionPolicy, LockStepVersionPolicy, IndividualVersionPolicy, BumpType } from '../VersionPolicy';
 
 describe(VersionPolicy.name, () => {
@@ -113,6 +119,25 @@ describe(VersionPolicy.name, () => {
       lockStepVersionPolicy.update(newVersion);
       expect(lockStepVersionPolicy.version).toEqual(newVersion);
     });
+
+    it('preserves fields', () => {
+      const originalJson: ILockStepVersionJson = {
+        definitionName: 'lockStepVersion',
+        policyName: 'test',
+        dependencies: {
+          versionFormatForCommit: VersionFormatForCommit.original,
+          versionFormatForPublish: VersionFormatForPublish.original
+        },
+        exemptFromRushChange: true,
+        includeEmailInChangeFile: true,
+        version: '1.1.0',
+        mainProject: 'main-project',
+        nextBump: 'major'
+      };
+
+      const nextJson: ILockStepVersionJson = new LockStepVersionPolicy(originalJson)._json;
+      expect(nextJson).toMatchObject(originalJson);
+    });
   });
 
   describe(IndividualVersionPolicy.name, () => {
@@ -158,6 +183,23 @@ describe(VersionPolicy.name, () => {
       expect(() => {
         individualVersionPolicy.ensure(originalPackageJson);
       }).toThrow();
+    });
+
+    it('preserves fields', () => {
+      const originalJson: IIndividualVersionJson = {
+        definitionName: 'individualVersion',
+        policyName: 'test',
+        dependencies: {
+          versionFormatForCommit: VersionFormatForCommit.original,
+          versionFormatForPublish: VersionFormatForPublish.original
+        },
+        exemptFromRushChange: true,
+        includeEmailInChangeFile: true,
+        lockedMajor: 3
+      };
+
+      const nextJson: IIndividualVersionJson = new IndividualVersionPolicy(originalJson)._json;
+      expect(nextJson).toMatchObject(originalJson);
     });
   });
 });

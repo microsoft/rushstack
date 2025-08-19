@@ -575,15 +575,15 @@ export interface ILogger {
 
 // @public
 export class IndividualVersionPolicy extends VersionPolicy {
-    // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(versionPolicyJson: IIndividualVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    // @internal
-    get _json(): IIndividualVersionJson;
-    readonly lockedMajor: number | undefined;
+    // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly _json: IIndividualVersionJson;
+    get lockedMajor(): number | undefined;
     validate(versionString: string, packageName: string): void;
 }
 
@@ -929,16 +929,16 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 
 // @public
 export class LockStepVersionPolicy extends VersionPolicy {
-    // Warning: (ae-forgotten-export) The symbol "ILockStepVersionJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(versionPolicyJson: ILockStepVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    // @internal
-    get _json(): ILockStepVersionJson;
-    readonly mainProject: string | undefined;
-    readonly nextBump: BumpType | undefined;
+    // Warning: (ae-forgotten-export) The symbol "ILockStepVersionJson" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    _json: ILockStepVersionJson;
+    get mainProject(): string | undefined;
+    get nextBump(): BumpType | undefined;
     update(newVersionString: string): boolean;
     validate(versionString: string, packageName: string): void;
     get version(): string;
@@ -1603,21 +1603,21 @@ export class SubspacesConfiguration {
 
 // @public
 export abstract class VersionPolicy {
-    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(versionPolicyJson: IVersionPolicyJson);
     abstract bump(bumpType?: BumpType, identifier?: string): void;
-    readonly definitionName: VersionPolicyDefinitionName;
+    get definitionName(): VersionPolicyDefinitionName;
     abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    readonly exemptFromRushChange: boolean;
-    readonly includeEmailInChangeFile: boolean;
+    get exemptFromRushChange(): boolean;
+    get includeEmailInChangeFile(): boolean;
     get isLockstepped(): boolean;
+    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
+    //
     // @internal
-    abstract get _json(): IVersionPolicyJson;
+    readonly _json: IVersionPolicyJson;
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
-    readonly policyName: string;
+    get policyName(): string;
     setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void;
     setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void;
     abstract validate(versionString: string, packageName: string): void;
