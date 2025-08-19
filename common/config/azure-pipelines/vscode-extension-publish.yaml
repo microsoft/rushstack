@@ -6,6 +6,9 @@ parameters:
   - name: shouldPublish
     type: boolean
     default: true
+  - name: publishUnsigned
+    type: boolean
+    default: true
   - name: ExtensionPublishConfig
     type: object
     default:
@@ -107,5 +110,8 @@ extends:
                           azureSubscription: rushstack-vscode-publish
                           scriptType: 'bash'
                           scriptLocation: 'inlineScript'
-                          inlineScript: node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s
                           workingDirectory: ${{ extension.projectPath }}
+                          ${{ if parameters.publishUnsigned }}:
+                            inlineScript: node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --publish-unsigned
+                          ${{ else }}:
+                            inlineScript: node node_modules/@rushstack/heft/lib/start.js publish-vsix --vsix-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }} --manifest-path ${{ extension.projectRelativeAssetsDir }}/${{ extension.manifestPath }} --signature-path ${{ extension.projectRelativeAssetsDir }}/extension.signature.p7s
