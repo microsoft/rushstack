@@ -37,25 +37,10 @@ export default class VSCodeExtensionVerifySignaturePlugin
       SIGNATURE_PATH_PARAMETER_NAME
     );
 
-    if (!vsixPathParameter.value) {
-      throw new Error(
-        `The parameter "${VSIX_PATH_PARAMETER_NAME}" is required for the VSCodeExtensionVerifySignaturePlugin.`
-      );
-    }
-    if (!manifestPathParameter.value) {
-      throw new Error(
-        `The parameter "${MANIFEST_PATH_PARAMETER_NAME}" is required for the VSCodeExtensionVerifySignaturePlugin.`
-      );
-    }
-    if (!signaturePathParameter.value) {
-      throw new Error(
-        `The parameter "${SIGNATURE_PATH_PARAMETER_NAME}" is required for the VSCodeExtensionVerifySignaturePlugin.`
-      );
-    }
-
-    const vsixPath: string = vsixPathParameter.value;
-    const manifestPath: string = manifestPathParameter.value;
-    const signaturePath: string = signaturePathParameter.value;
+    // required parameters defined in heft-plugin.json
+    const vsixPath: string = vsixPathParameter.value!;
+    const manifestPath: string = manifestPathParameter.value!;
+    const signaturePath: string = signaturePathParameter.value!;
 
     heftTaskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       const { buildFolderPath } = heftConfiguration;

@@ -42,20 +42,17 @@ export default class VSCodeExtensionPublishPlugin
       PUBLISH_UNSIGNED_PARAMETER_NAME
     );
 
-    if (!vsixPathParameter.value) {
-      throw new Error(
-        `The parameter "${VSIX_PATH_PARAMETER_NAME}" is required for the VSCodeExtensionPublishPlugin.`
-      );
-    }
     const {
       logger: { terminal }
     } = heftTaskSession;
 
-    const vsixPath: string = vsixPathParameter.value;
+    // required parameters defined in heft-plugin.json
+    const vsixPath: string = vsixPathParameter.value!;
+
+    // manifestPath and signaturePath are required if publishUnsigned is unset
     const manifestPath: string | undefined = manifestPathParameter.value;
     const signaturePath: string | undefined = signaturePathParameter.value;
-    const publishUnsigned: boolean = publishUnsignedParameter.value ?? false;
-
+    const publishUnsigned: boolean = publishUnsignedParameter.value;
     if (publishUnsigned) {
       terminal.writeLine(`Publishing unsigned VSIX ${vsixPath}`);
     } else {
