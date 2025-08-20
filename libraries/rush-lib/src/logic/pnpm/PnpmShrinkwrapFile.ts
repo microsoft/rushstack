@@ -42,6 +42,7 @@ import type {
   ResolvedDependencies
 } from '@pnpm/lockfile.types';
 import { convertLockfileV9ToLockfileObject } from './PnpmShrinkWrapFileConverters';
+import type { IReadonlyLookupByPath } from '@rushstack/lookup-by-path';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -812,12 +813,15 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return super.findOrphanedProjects(rushConfiguration, subspace);
     }
 
+    const subspaceTempFolder: string = subspace.getSubspaceTempFolderPath();
+    const lookup: IReadonlyLookupByPath<RushConfigurationProject> =
+      rushConfiguration.getProjectLookupForRoot(subspaceTempFolder);
+
     const orphanedProjectPaths: string[] = [];
     for (const importerKey of this.getImporterKeys()) {
-      // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
-      const rushProjectPath: string = path.resolve(subspace.getSubspaceTempFolderPath(), importerKey);
-      if (!rushConfiguration.tryGetProjectForPath(rushProjectPath)) {
-        orphanedProjectPaths.push(rushProjectPath);
+      if (!lookup.findChildPath(importerKey)) {
+        // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
+        orphanedProjectPaths.push(path.resolve(subspaceTempFolder, importerKey));
       }
     }
     return orphanedProjectPaths;
