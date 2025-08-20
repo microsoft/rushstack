@@ -107,7 +107,12 @@ export {
   VersionPolicy
 } from './api/VersionPolicy';
 
-export { VersionPolicyConfiguration } from './api/VersionPolicyConfiguration';
+export {
+  VersionPolicyConfiguration,
+  type ILockStepVersionJson,
+  type IIndividualVersionJson,
+  type IVersionPolicyJson
+} from './api/VersionPolicyConfiguration';
 
 export { type ILaunchOptions, Rush } from './api/Rush';
 export { RushInternals as _RushInternals } from './api/RushInternals';

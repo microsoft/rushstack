@@ -538,6 +538,12 @@ export interface IGetChangedProjectsOptions {
 export interface IGlobalCommand extends IRushCommand {
 }
 
+// @public
+export interface IIndividualVersionJson extends IVersionPolicyJson {
+    // (undocumented)
+    lockedMajor?: number;
+}
+
 // @beta
 export interface IInputsSnapshot {
     getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string): string;
@@ -554,6 +560,16 @@ export interface ILaunchOptions {
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
     terminalProvider?: ITerminalProvider;
+}
+
+// @public
+export interface ILockStepVersionJson extends IVersionPolicyJson {
+    // (undocumented)
+    mainProject?: string;
+    // (undocumented)
+    nextBump?: string;
+    // (undocumented)
+    version: string;
 }
 
 // @alpha
@@ -579,9 +595,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
     constructor(versionPolicyJson: IIndividualVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
+    // @internal (undocumented)
     readonly _json: IIndividualVersionJson;
     get lockedMajor(): number | undefined;
     validate(versionString: string, packageName: string): void;
@@ -922,6 +936,22 @@ export interface ITryFindRushJsonLocationOptions {
     startingFolder?: string;
 }
 
+// @public
+export interface IVersionPolicyJson {
+    // (undocumented)
+    definitionName: string;
+    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyDependencyJson" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    dependencies?: IVersionPolicyDependencyJson;
+    // (undocumented)
+    exemptFromRushChange?: boolean;
+    // (undocumented)
+    includeEmailInChangeFile?: boolean;
+    // (undocumented)
+    policyName: string;
+}
+
 // @internal
 export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
     ignoreEngines?: boolean;
@@ -933,10 +963,8 @@ export class LockStepVersionPolicy extends VersionPolicy {
     constructor(versionPolicyJson: ILockStepVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    // Warning: (ae-forgotten-export) The symbol "ILockStepVersionJson" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    _json: ILockStepVersionJson;
+    // @internal (undocumented)
+    readonly _json: ILockStepVersionJson;
     get mainProject(): string | undefined;
     get nextBump(): BumpType | undefined;
     update(newVersionString: string): boolean;
@@ -1611,8 +1639,6 @@ export abstract class VersionPolicy {
     get exemptFromRushChange(): boolean;
     get includeEmailInChangeFile(): boolean;
     get isLockstepped(): boolean;
-    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     readonly _json: IVersionPolicyJson;
     // @internal

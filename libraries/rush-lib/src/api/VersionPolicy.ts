@@ -4,10 +4,10 @@
 import * as semver from 'semver';
 import { type IPackageJson, Enum } from '@rushstack/node-core-library';
 
-import {
-  type IVersionPolicyJson,
-  type ILockStepVersionJson,
-  type IIndividualVersionJson,
+import type {
+  IVersionPolicyJson,
+  ILockStepVersionJson,
+  IIndividualVersionJson,
   VersionFormatForCommit,
   VersionFormatForPublish
 } from './VersionPolicyConfiguration';
@@ -64,11 +64,11 @@ export abstract class VersionPolicy {
   public readonly _json: IVersionPolicyJson;
 
   private get _versionFormatForCommit(): VersionFormatForCommit {
-    return this._json.dependencies?.versionFormatForCommit ?? VersionFormatForCommit.original;
+    return this._json.dependencies?.versionFormatForCommit ?? 'original';
   }
 
   private get _versionFormatForPublish(): VersionFormatForPublish {
-    return this._json.dependencies?.versionFormatForPublish ?? VersionFormatForPublish.original;
+    return this._json.dependencies?.versionFormatForPublish ?? 'original';
   }
 
   /**
@@ -164,7 +164,7 @@ export abstract class VersionPolicy {
    * to values used for publishing.
    */
   public setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void {
-    if (this._versionFormatForPublish === VersionFormatForPublish.exact) {
+    if (this._versionFormatForPublish === 'exact') {
       const project: RushConfigurationProject = configuration.getProjectByName(packageName)!;
 
       const packageJsonEditor: PackageJsonEditor = project.packageJsonEditor;
@@ -190,7 +190,7 @@ export abstract class VersionPolicy {
    * to values used for checked-in source.
    */
   public setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void {
-    if (this._versionFormatForCommit === VersionFormatForCommit.wildcard) {
+    if (this._versionFormatForCommit === 'wildcard') {
       const project: RushConfigurationProject = configuration.getProjectByName(packageName)!;
 
       const packageJsonEditor: PackageJsonEditor = project.packageJsonEditor;
@@ -215,7 +215,10 @@ export abstract class VersionPolicy {
  * @public
  */
 export class LockStepVersionPolicy extends VersionPolicy {
-  public declare _json: ILockStepVersionJson;
+  /**
+   * @internal
+   */
+  public declare readonly _json: ILockStepVersionJson;
   private _version: semver.SemVer;
 
   /**
@@ -334,6 +337,9 @@ export class LockStepVersionPolicy extends VersionPolicy {
  * @public
  */
 export class IndividualVersionPolicy extends VersionPolicy {
+  /**
+   * @internal
+   */
   public declare readonly _json: IIndividualVersionJson;
 
   /**

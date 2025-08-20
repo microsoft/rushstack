@@ -5,8 +5,6 @@ import type { IPackageJson } from '@rushstack/node-core-library';
 
 import {
   type ILockStepVersionJson,
-  VersionFormatForCommit,
-  VersionFormatForPublish,
   VersionPolicyConfiguration,
   type IIndividualVersionJson
 } from '../VersionPolicyConfiguration';
@@ -125,8 +123,8 @@ describe(VersionPolicy.name, () => {
         definitionName: 'lockStepVersion',
         policyName: 'test',
         dependencies: {
-          versionFormatForCommit: VersionFormatForCommit.original,
-          versionFormatForPublish: VersionFormatForPublish.original
+          versionFormatForCommit: 'original',
+          versionFormatForPublish: 'original'
         },
         exemptFromRushChange: true,
         includeEmailInChangeFile: true,
@@ -190,8 +188,8 @@ describe(VersionPolicy.name, () => {
         definitionName: 'individualVersion',
         policyName: 'test',
         dependencies: {
-          versionFormatForCommit: VersionFormatForCommit.original,
-          versionFormatForPublish: VersionFormatForPublish.original
+          versionFormatForCommit: 'wildcard',
+          versionFormatForPublish: 'exact'
         },
         exemptFromRushChange: true,
         includeEmailInChangeFile: true,
