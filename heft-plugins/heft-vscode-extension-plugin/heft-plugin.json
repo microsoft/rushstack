@@ -7,6 +7,34 @@
       "parameterScope": "package"
     },
     {
+      "pluginName": "vscode-extension-verify-signature-plugin",
+      "entryPoint": "./lib/VSCodeExtensionVerifySignaturePlugin.js",
+      "parameterScope": "verify-signature",
+      "parameters": [
+        {
+          "longName": "--vsix-path",
+          "parameterKind": "string",
+          "argumentName": "RELATIVE_PATH",
+          "description": "Use this parameter to control which VSIX file will be used for verifying signature.",
+          "required": true
+        },
+        {
+          "longName": "--manifest-path",
+          "parameterKind": "string",
+          "argumentName": "RELATIVE_PATH",
+          "description": "Use this parameter to control which manifest file will be used for verifying signature.",
+          "required": true
+        },
+        {
+          "longName": "--signature-path",
+          "parameterKind": "string",
+          "argumentName": "RELATIVE_PATH",
+          "description": "Use this parameter to control which signature file will be used for verifying signature.",
+          "required": true
+        }
+      ]
+    },
+    {
       "pluginName": "vscode-extension-publish-plugin",
       "entryPoint": "./lib/VSCodeExtensionPublishPlugin.js",
       "parameterScope": "publish-vsix",
@@ -23,14 +51,20 @@
           "parameterKind": "string",
           "argumentName": "RELATIVE_PATH",
           "description": "Use this parameter to control which manifest file will be used for publishing.",
-          "required": true
+          "required": false
         },
         {
           "longName": "--signature-path",
           "parameterKind": "string",
           "argumentName": "RELATIVE_PATH",
           "description": "Use this parameter to control which signature file will be used for publishing.",
-          "required": true
+          "required": false
+        },
+        {
+          "longName": "--publish-unsigned",
+          "parameterKind": "flag",
+          "description": "Use this parameter to control whether to publish unsigned.",
+          "required": false
         }
       ]
     }
