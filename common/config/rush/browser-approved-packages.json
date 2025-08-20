@@ -91,10 +91,6 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
-      "name": "strip-ansi",
-      "allowedCategories": [ "vscode-extensions" ]
-    },
-    {
       "name": "tslib",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
