@@ -538,6 +538,12 @@ export interface IGetChangedProjectsOptions {
 export interface IGlobalCommand extends IRushCommand {
 }
 
+// @public
+export interface IIndividualVersionJson extends IVersionPolicyJson {
+    // (undocumented)
+    lockedMajor?: number;
+}
+
 // @beta
 export interface IInputsSnapshot {
     getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string): string;
@@ -554,6 +560,16 @@ export interface ILaunchOptions {
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
     terminalProvider?: ITerminalProvider;
+}
+
+// @public
+export interface ILockStepVersionJson extends IVersionPolicyJson {
+    // (undocumented)
+    mainProject?: string;
+    // (undocumented)
+    nextBump?: string;
+    // (undocumented)
+    version: string;
 }
 
 // @alpha
@@ -575,15 +591,13 @@ export interface ILogger {
 
 // @public
 export class IndividualVersionPolicy extends VersionPolicy {
-    // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(versionPolicyJson: IIndividualVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    // @internal
-    get _json(): IIndividualVersionJson;
-    readonly lockedMajor: number | undefined;
+    // @internal (undocumented)
+    readonly _json: IIndividualVersionJson;
+    get lockedMajor(): number | undefined;
     validate(versionString: string, packageName: string): void;
 }
 
@@ -922,6 +936,22 @@ export interface ITryFindRushJsonLocationOptions {
     startingFolder?: string;
 }
 
+// @public
+export interface IVersionPolicyJson {
+    // (undocumented)
+    definitionName: string;
+    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyDependencyJson" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    dependencies?: IVersionPolicyDependencyJson;
+    // (undocumented)
+    exemptFromRushChange?: boolean;
+    // (undocumented)
+    includeEmailInChangeFile?: boolean;
+    // (undocumented)
+    policyName: string;
+}
+
 // @internal
 export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
     ignoreEngines?: boolean;
@@ -929,16 +959,14 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 
 // @public
 export class LockStepVersionPolicy extends VersionPolicy {
-    // Warning: (ae-forgotten-export) The symbol "ILockStepVersionJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(versionPolicyJson: ILockStepVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    // @internal
-    get _json(): ILockStepVersionJson;
-    readonly mainProject: string | undefined;
-    readonly nextBump: BumpType | undefined;
+    // @internal (undocumented)
+    readonly _json: ILockStepVersionJson;
+    get mainProject(): string | undefined;
+    get nextBump(): BumpType | undefined;
     update(newVersionString: string): boolean;
     validate(versionString: string, packageName: string): void;
     get version(): string;
@@ -1603,21 +1631,19 @@ export class SubspacesConfiguration {
 
 // @public
 export abstract class VersionPolicy {
-    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(versionPolicyJson: IVersionPolicyJson);
     abstract bump(bumpType?: BumpType, identifier?: string): void;
-    readonly definitionName: VersionPolicyDefinitionName;
+    get definitionName(): VersionPolicyDefinitionName;
     abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    readonly exemptFromRushChange: boolean;
-    readonly includeEmailInChangeFile: boolean;
+    get exemptFromRushChange(): boolean;
+    get includeEmailInChangeFile(): boolean;
     get isLockstepped(): boolean;
     // @internal
-    abstract get _json(): IVersionPolicyJson;
+    readonly _json: IVersionPolicyJson;
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
-    readonly policyName: string;
+    get policyName(): string;
     setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void;
     setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void;
     abstract validate(versionString: string, packageName: string): void;
