@@ -3,7 +3,7 @@
 
 import { ITerminal } from '@rushstack/terminal';
 import * as vscode from 'vscode';
-import stripAnsi from 'strip-ansi';
+import { stripVTControlCharacters } from 'node:util';
 
 export async function runWorkspaceCommandAsync({
   terminalOptions,
@@ -67,7 +67,7 @@ export async function runWorkspaceCommandAsync({
 
         terminal.writeLine(`Terminal shell execution ended with exit code ${event.exitCode}`);
         outputStream = outputStream.trim();
-        outputStream = stripAnsi(outputStream);
+        outputStream = stripVTControlCharacters(outputStream);
         terminal.writeLine(`Terminal output: ${outputStream}`);
 
         endExecutionDisposable.dispose();

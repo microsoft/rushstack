@@ -931,10 +931,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "strip-ansi",
-      "allowedCategories": [ "vscode-extensions" ]
-    },
-    {
       "name": "strip-json-comments",
       "allowedCategories": [ "libraries" ]
     },

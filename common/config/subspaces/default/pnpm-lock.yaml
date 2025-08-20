@@ -4633,9 +4633,6 @@ importers:
       '@rushstack/vscode-shared':
         specifier: workspace:*
         version: link:../vscode-shared
-      strip-ansi:
-        specifier: ~7.1.0
-        version: 7.1.0
       tslib:
         specifier: ~2.3.1
         version: 2.3.1
