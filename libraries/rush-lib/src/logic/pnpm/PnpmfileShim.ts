@@ -16,15 +16,21 @@ import type { IPnpmfile, IPnpmfileShimSettings, IPnpmfileContext, IPnpmfileHooks
 
 let settings: IPnpmfileShimSettings | undefined;
 let allPreferredVersions: Map<string, string> | undefined;
+let rangeCache: Map<string, TSemver.Range | false> | undefined;
 let allowedAlternativeVersions: Map<string, Set<string>> | undefined;
+let workspaceVersions: Map<string, string> | undefined;
 let userPnpmfile: IPnpmfile | undefined;
 let semver: typeof TSemver | undefined;
+
+const SEMVER_COMPARE_OPTIONS: TSemver.RangeOptions = { includePrerelease: true };
 
 // Resets the internal state of the pnpmfile
 export function reset(): void {
   settings = undefined;
   allPreferredVersions = undefined;
   allowedAlternativeVersions = undefined;
+  workspaceVersions = undefined;
+  rangeCache = undefined;
   userPnpmfile = undefined;
   semver = undefined;
 }
@@ -56,6 +62,7 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
   }
   if (!allPreferredVersions && settings.allPreferredVersions) {
     allPreferredVersions = new Map(Object.entries(settings.allPreferredVersions));
+    rangeCache = new Map();
   }
   if (!allowedAlternativeVersions && settings.allowedAlternativeVersions) {
     allowedAlternativeVersions = new Map(
@@ -63,6 +70,9 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
         return [packageName, new Set(versions)];
       })
     );
+  }
+  if (!workspaceVersions && settings.workspaceVersions) {
+    workspaceVersions = new Map(Object.entries(settings.workspaceVersions));
   }
   // If a userPnpmfilePath is provided, we expect it to exist
   if (!userPnpmfile && settings.userPnpmfilePath) {
@@ -76,27 +86,61 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
   return context as IPnpmfileContext;
 }
 
+function parseRange(range: string): TSemver.Range | false {
+  if (!rangeCache || !semver) {
+    return false;
+  }
+
+  if (range.includes(':')) {
+    return false;
+  }
+
+  const entry: TSemver.Range | false | undefined = rangeCache.get(range);
+  if (entry !== undefined) {
+    return entry;
+  }
+
+  try {
+    const parsedRange: TSemver.Range = new semver.Range(range, SEMVER_COMPARE_OPTIONS);
+    rangeCache.set(range, parsedRange);
+    return parsedRange;
+  } catch {
+    rangeCache.set(range, false);
+    return false;
+  }
+}
+
 // Set the preferred versions on the dependency map. If the version on the map is an allowedAlternativeVersion
 // then skip it. Otherwise, check to ensure that the common version is a subset of the specified version. If
 // it is, then replace the specified version with the preferredVersion
 function setPreferredVersions(dependencies: { [dependencyName: string]: string } | undefined): void {
-  for (const [name, version] of Object.entries(dependencies || {})) {
+  if (!dependencies || !semver) {
+    return;
+  }
+
+  for (const [name, version] of Object.entries(dependencies)) {
+    if (version?.includes(':')) {
+      // Skip any specifier that isn't a raw SemVer range.
+      continue;
+    }
+
     const preferredVersion: string | undefined = allPreferredVersions?.get(name);
+    // If preferredVersionRange is valid and the current version is not an allowed alternative, proceed to check subsets
     if (preferredVersion && !allowedAlternativeVersions?.get(name)?.has(version)) {
-      let preferredVersionRange: TSemver.Range | undefined;
+      const preferredVersionRange: TSemver.Range | false = parseRange(preferredVersion);
+      if (!preferredVersionRange) {
+        continue;
+      }
+
       let versionRange: TSemver.Range | undefined;
       try {
-        preferredVersionRange = new semver!.Range(preferredVersion);
-        versionRange = new semver!.Range(version);
+        versionRange = new semver.Range(version, SEMVER_COMPARE_OPTIONS);
       } catch {
         // Swallow invalid range errors
       }
-      if (
-        preferredVersionRange &&
-        versionRange &&
-        semver!.subset(preferredVersionRange, versionRange, { includePrerelease: true })
-      ) {
-        dependencies![name] = preferredVersion;
+
+      if (versionRange && semver.subset(preferredVersionRange, versionRange, SEMVER_COMPARE_OPTIONS)) {
+        dependencies[name] = preferredVersion;
       }
     }
   }
@@ -115,7 +159,10 @@ export const hooks: IPnpmfileHooks = {
   readPackage: (pkg: IPackageJson, context: IPnpmfileContext) => {
     context = init(context);
     setPreferredVersions(pkg.dependencies);
-    setPreferredVersions(pkg.devDependencies);
+    if (workspaceVersions && workspaceVersions.get(pkg.name) === pkg.version) {
+      // devDependencies are only installed for workspace packages, so the rest of the time we can save the trouble of scanning.
+      setPreferredVersions(pkg.devDependencies);
+    }
     setPreferredVersions(pkg.optionalDependencies);
     return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
   },

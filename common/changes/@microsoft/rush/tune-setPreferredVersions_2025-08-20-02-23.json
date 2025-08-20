@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Optimize `setPreferredVersions` in install setup.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
