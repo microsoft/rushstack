@@ -23,6 +23,6 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node": "20.17.19",
-    "@types/vscode": "^1.63.0"
+    "@types/vscode": "1.103.0"
   }
 }

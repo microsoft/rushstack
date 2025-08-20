@@ -25,7 +25,7 @@
     "theme": "light"
   },
   "engines": {
-    "vscode": "^1.98.0"
+    "vscode": "^1.103.0"
   },
   "main": "./extension.js",
   "scripts": {
@@ -114,13 +114,14 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/vscode-shared": "workspace:*",
-    "tslib": "~2.3.1"
+    "tslib": "~2.3.1",
+    "strip-ansi": "~7.1.0"
   },
   "devDependencies": {
     "@rushstack/heft-vscode-extension-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node": "20.17.19",
-    "@types/vscode": "^1.63.0",
+    "@types/vscode": "1.103.0",
     "@types/webpack-env": "1.18.8"
   }
 }
