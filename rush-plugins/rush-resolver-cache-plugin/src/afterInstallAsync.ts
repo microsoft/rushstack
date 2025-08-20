@@ -40,6 +40,8 @@ function getPlatformInfo(): IPlatformInfo {
   };
 }
 
+const END_TOKEN: string = '/package.json":';
+
 /**
  * Plugin entry point for after install.
  * @param rushSession - The Rush Session
@@ -59,10 +61,6 @@ export async function afterInstallAsync(
   const rushRoot: string = `${rushConfiguration.rushJsonFolder}/`;
 
   const lockFilePath: string = subspace.getCommittedShrinkwrapFilePath(variant);
-  const workspaceRoot: string = subspace.getSubspaceTempFolderPath();
-
-  const projectByImporterPath: LookupByPath<RushConfigurationProject> =
-    rushConfiguration.getProjectLookupForRoot(workspaceRoot);
 
   const pnpmStoreDir: string = `${rushConfiguration.pnpmOptions.pnpmStorePath}/v3/files/`;
 
@@ -75,6 +73,11 @@ export async function afterInstallAsync(
   if (!lockFile) {
     throw new Error(`Failed to load shrinkwrap file: ${lockFilePath}`);
   }
+
+  const workspaceRoot: string = subspace.getSubspaceTempFolderPath();
+
+  const projectByImporterPath: LookupByPath<RushConfigurationProject> =
+    rushConfiguration.getProjectLookupForRoot(workspaceRoot);
 
   const cacheFilePath: string = `${workspaceRoot}/resolver-cache.json`;
 
@@ -96,7 +99,7 @@ export async function afterInstallAsync(
       if (descriptionFileHash === undefined) {
         // Assume this package has no nested package json files for now.
         terminal.writeDebugLine(
-          `Package at ${descriptionFileRoot} does not having a file list. Assuming no nested "package.json" files.`
+          `Package at ${descriptionFileRoot} does not have a file list. Assuming no nested "package.json" files.`
         );
         return;
       }
@@ -115,23 +118,27 @@ export async function afterInstallAsync(
 
       try {
         const indexContent: string = await FileSystem.readFileAsync(indexPath);
-        const { files } = JSON.parse(indexContent);
-
-        const filteredFiles: string[] = Object.keys(files).filter((file) => file.endsWith('/package.json'));
-        if (filteredFiles.length > 0) {
-          const nestedPackageDirs: string[] = filteredFiles.map((x) =>
-            x.slice(0, /* -'/package.json'.length */ -13)
-          );
-
-          if (nestedPackageDirs.length > 0) {
-            // eslint-disable-next-line require-atomic-updates
-            context.nestedPackageDirs = nestedPackageDirs;
-          }
+        let endIndex: number = indexContent.lastIndexOf(END_TOKEN);
+        if (endIndex > 0) {
+          const nestedPackageDirs: string[] = [];
+          // eslint-disable-next-line require-atomic-updates
+          context.nestedPackageDirs = nestedPackageDirs;
+          do {
+            const startIndex: number = indexContent.lastIndexOf('"', endIndex);
+            if (startIndex < 0) {
+              throw new Error(
+                `Malformed index file at ${indexPath}: missing starting quote for nested package.json path`
+              );
+            }
+            const nestedPath: string = indexContent.slice(startIndex + 1, endIndex);
+            nestedPackageDirs.push(nestedPath);
+            endIndex = indexContent.lastIndexOf(END_TOKEN, startIndex - 1);
+          } while (endIndex > 0);
         }
       } catch (error) {
         if (!context.optional) {
           throw new Error(
-            `Error reading index file for: "${context.descriptionFileRoot}" (${descriptionFileHash})`
+            `Error reading index file for: "${context.descriptionFileRoot}" (${descriptionFileHash}): ${error.toString()}`
           );
         } else {
           terminal.writeLine(`Trimming missing optional dependency at: ${descriptionFileRoot}`);
@@ -163,4 +170,6 @@ export async function afterInstallAsync(
   await FileSystem.writeFileAsync(cacheFilePath, serialized, {
     ensureFolderExists: true
   });
+
+  terminal.writeLine(`Resolver cache written.`);
 }
