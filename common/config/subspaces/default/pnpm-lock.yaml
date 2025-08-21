@@ -4647,8 +4647,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       '@types/vscode':
-        specifier: ^1.63.0
-        version: 1.87.0
+        specifier: 1.103.0
+        version: 1.103.0
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
@@ -4702,8 +4702,8 @@ importers:
         specifier: ~7.1.22
         version: 7.1.33
       '@types/vscode':
-        specifier: ^1.63.0
-        version: 1.87.0
+        specifier: 1.103.0
+        version: 1.103.0
       eslint:
         specifier: ~9.25.1
         version: 9.25.1(supports-color@8.1.1)
@@ -4754,8 +4754,8 @@ importers:
         specifier: 10.0.6
         version: 10.0.6
       '@types/vscode':
-        specifier: ^1.63.0
-        version: 1.87.0
+        specifier: 1.103.0
+        version: 1.103.0
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
@@ -4791,8 +4791,8 @@ importers:
         specifier: 20.17.19
         version: 20.17.19
       '@types/vscode':
-        specifier: ^1.63.0
-        version: 1.87.0
+        specifier: 1.103.0
+        version: 1.103.0
 
   ../../../webpack/hashed-folder-copy-plugin:
     dependencies:
@@ -14172,8 +14172,8 @@ packages:
     resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
     dev: true
 
-  /@types/vscode@1.87.0:
-    resolution: {integrity: sha512-y3yYJV2esWr8LNjp3VNbSMWG7Y43jC8pCldG8YwiHGAQbsymkkMMt0aDT1xZIOFM2eFcNiUc+dJMx1+Z0UT8fg==}
+  /@types/vscode@1.103.0:
+    resolution: {integrity: sha512-o4hanZAQdNfsKecexq9L3eHICd0AAvdbLk6hA60UzGXbGH/q8b/9xv2RgR7vV3ZcHuyKVq7b37IGd/+gM4Tu+Q==}
     dev: true
 
   /@types/watchpack@2.4.0:
