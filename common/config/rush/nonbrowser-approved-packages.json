@@ -91,6 +91,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@playwright/test",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@pnpm/dependency-path",
       "allowedCategories": [ "libraries" ]
     },
@@ -849,6 +853,10 @@
     {
       "name": "package-extractor-test-03",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "playwright-core",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "pnpm-sync-lib",

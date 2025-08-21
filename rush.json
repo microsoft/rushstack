@@ -467,6 +467,12 @@
       "reviewCategory": "libraries"
     },
     {
+      "packageName": "@rushstack/playwright-browser-tunnel",
+      "projectFolder": "apps/playwright-browser-tunnel",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/rush-themed-ui",
       "projectFolder": "libraries/rush-themed-ui",
       "reviewCategory": "libraries"

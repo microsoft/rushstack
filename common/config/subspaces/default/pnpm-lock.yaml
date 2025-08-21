@@ -301,6 +301,49 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-web-rig
 
+  ../../../apps/playwright-browser-tunnel:
+    dependencies:
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      '@rushstack/ts-command-line':
+        specifier: workspace:*
+        version: link:../../libraries/ts-command-line
+      semver:
+        specifier: ~7.5.4
+        version: 7.5.4
+      string-argv:
+        specifier: ~0.3.1
+        version: 0.3.2
+      ws:
+        specifier: ~8.14.1
+        version: 8.14.2
+    devDependencies:
+      '@playwright/test':
+        specifier: ~1.54.1
+        version: 1.54.1
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../heft
+      '@types/semver':
+        specifier: 7.5.0
+        version: 7.5.0
+      '@types/ws':
+        specifier: 8.5.5
+        version: 8.5.5
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1(supports-color@8.1.1)
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+      playwright-core:
+        specifier: ~1.54.1
+        version: 1.54.1
+
   ../../../apps/rundown:
     dependencies:
       '@rushstack/node-core-library':
@@ -10330,6 +10373,14 @@ packages:
       rimraf: 3.0.2
     dev: true
 
+  /@playwright/test@1.54.1:
+    resolution: {integrity: sha512-FS8hQ12acieG2dYSksmLOF7BNxnVf2afRJdCuM1eMSxj6QTSE6G4InGF7oApGgDb65MX7AwMVlIkpru0yZA4Xw==}
+    engines: {node: '>=18'}
+    hasBin: true
+    dependencies:
+      playwright: 1.54.1
+    dev: true
+
   /@pmmmwh/react-refresh-webpack-plugin@0.5.11(react-refresh@0.11.0)(webpack@4.47.0):
     resolution: {integrity: sha512-7j/6vdTym0+qZ6u4XbSAxrWBGYSdCfTzySkj7WAFgDLmSyWlOrWvpyzxlFh5jtw9dn0oL/jtW+06XfFiisN3JQ==}
     engines: {node: '>= 10.13'}
@@ -10435,7 +10486,7 @@ packages:
     dependencies:
       '@pnpm/crypto.base32-hash': 3.0.1
       '@pnpm/types': 12.2.0
-      semver: 7.6.3
+      semver: 7.7.2
     dev: false
 
   /@pnpm/error@1.4.0:
@@ -14547,7 +14598,7 @@ packages:
       eslint: 9.25.1(supports-color@8.1.1)
       json-stable-stringify-without-jsonify: 1.0.1
       lodash.merge: 4.6.2
-      semver: 7.6.3
+      semver: 7.7.2
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -14756,7 +14807,7 @@ packages:
       fast-glob: 3.3.2
       is-glob: 4.0.3
       minimatch: 9.0.5
-      semver: 7.6.3
+      semver: 7.7.2
       ts-api-utils: 2.0.1(typescript@4.9.5)
       typescript: 4.9.5
     transitivePeerDependencies:
@@ -14775,7 +14826,7 @@ packages:
       fast-glob: 3.3.2
       is-glob: 4.0.3
       minimatch: 9.0.5
-      semver: 7.6.3
+      semver: 7.7.2
       ts-api-utils: 2.0.1(typescript@5.8.2)
       typescript: 5.8.2
     transitivePeerDependencies:
@@ -19257,7 +19308,7 @@ packages:
       espree: 10.3.0
       esquery: 1.6.0
       parse-imports-exports: 0.2.4
-      semver: 7.6.3
+      semver: 7.7.2
       spdx-expression-parse: 4.0.0
     transitivePeerDependencies:
       - supports-color
@@ -25548,6 +25599,22 @@ packages:
       find-up: 3.0.0
     dev: true
 
+  /playwright-core@1.54.1:
+    resolution: {integrity: sha512-Nbjs2zjj0htNhzgiy5wu+3w09YetDx5pkrpI/kZotDlDUaYk0HVA5xrBVPdow4SAUIlhgKcJeJg4GRKW6xHusA==}
+    engines: {node: '>=18'}
+    hasBin: true
+    dev: true
+
+  /playwright@1.54.1:
+    resolution: {integrity: sha512-peWpSwIBmSLi6aW2auvrUtf2DqY16YYcCMO8rTVx486jKmDTJg7UAhyrraP98GB8BoPURZP8+nxO7TSd4cPr5g==}
+    engines: {node: '>=18'}
+    hasBin: true
+    dependencies:
+      playwright-core: 1.54.1
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
+
   /please-upgrade-node@3.2.0:
     resolution: {integrity: sha512-gQR3WpIgNIKwBMVLkpMUeR3e1/E1y42bqDQZfql+kDeXd8COYfM8PQA4X6y7a8u9Ua9FHmsrrmirW2vHs45hWg==}
     dependencies:
@@ -27732,16 +27799,10 @@ packages:
     dependencies:
       lru-cache: 6.0.0
 
-  /semver@7.6.3:
-    resolution: {integrity: sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A==}
-    engines: {node: '>=10'}
-    hasBin: true
-
   /semver@7.7.2:
     resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
     engines: {node: '>=10'}
     hasBin: true
-    dev: false
 
   /send@0.17.2:
     resolution: {integrity: sha512-UJYB6wFSJE3G00nEivR5rgWp8c2xXvJ3OPWPhmuteU0IKj8nKbG3DrjiOmLwpnHGYWAVwA69zmTm++YG0Hmwww==}
