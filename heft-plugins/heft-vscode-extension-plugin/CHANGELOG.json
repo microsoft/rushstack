@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-vscode-extension-plugin",
   "entries": [
     {
+      "version": "0.2.4",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v0.2.4",
+      "date": "Thu, 21 Aug 2025 00:12:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for verifying extension signature."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.3",
       "tag": "@rushstack/heft-vscode-extension-plugin_v0.2.3",
       "date": "Tue, 19 Aug 2025 20:45:02 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-vscode-extension-plugin
 
-This log was last generated on Tue, 19 Aug 2025 20:45:02 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Aug 2025 00:12:45 GMT and should not be manually modified.
+
+## 0.2.4
+Thu, 21 Aug 2025 00:12:45 GMT
+
+### Patches
+
+- Add support for verifying extension signature.
 
 ## 0.2.3
 Tue, 19 Aug 2025 20:45:02 GMT
