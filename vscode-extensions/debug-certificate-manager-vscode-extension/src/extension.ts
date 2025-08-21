@@ -211,7 +211,7 @@ export function activate(context: vscode.ExtensionContext): void {
         if (vscode.env.remoteName) {
           homeDir = await runWorkspaceCommandAsync({
             terminalOptions: { name: 'debug-certificate-manager', hideFromUser: true },
-            commandLine: `node -e "console.log(require('os').homedir())"`,
+            commandLine: `node -p "require('os').homedir()"`,
             terminal
           });
         } else {
