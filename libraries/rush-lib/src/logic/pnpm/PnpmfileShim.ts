@@ -16,12 +16,14 @@ import type { IPnpmfile, IPnpmfileShimSettings, IPnpmfileContext, IPnpmfileHooks
 
 let settings: IPnpmfileShimSettings | undefined;
 let allPreferredVersions: Map<string, string> | undefined;
-let rangeCache: Map<string, TSemver.Range | false> | undefined;
+let rangeParseCache: Map<string, TSemver.Range | false> | undefined;
 let allowedAlternativeVersions: Map<string, Set<string>> | undefined;
 let workspaceVersions: Map<string, string> | undefined;
 let userPnpmfile: IPnpmfile | undefined;
 let semver: typeof TSemver | undefined;
 
+// All calls to new semver.Range and the comparison functions need to have the same options
+// It can be a different object with the same properties, but reusing this const avoids allocations
 const SEMVER_COMPARE_OPTIONS: TSemver.RangeOptions = { includePrerelease: true };
 
 // Resets the internal state of the pnpmfile
@@ -30,7 +32,7 @@ export function reset(): void {
   allPreferredVersions = undefined;
   allowedAlternativeVersions = undefined;
   workspaceVersions = undefined;
-  rangeCache = undefined;
+  rangeParseCache = undefined;
   userPnpmfile = undefined;
   semver = undefined;
 }
@@ -62,7 +64,7 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
   }
   if (!allPreferredVersions && settings.allPreferredVersions) {
     allPreferredVersions = new Map(Object.entries(settings.allPreferredVersions));
-    rangeCache = new Map();
+    rangeParseCache = new Map();
   }
   if (!allowedAlternativeVersions && settings.allowedAlternativeVersions) {
     allowedAlternativeVersions = new Map(
@@ -87,25 +89,26 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
 }
 
 function parseRange(range: string): TSemver.Range | false {
-  if (!rangeCache || !semver) {
+  if (!rangeParseCache || !semver) {
     return false;
   }
 
-  if (range.includes(':')) {
-    return false;
-  }
-
-  const entry: TSemver.Range | false | undefined = rangeCache.get(range);
+  const entry: TSemver.Range | false | undefined = rangeParseCache.get(range);
   if (entry !== undefined) {
     return entry;
   }
 
+  if (range.includes(':')) {
+    rangeParseCache.set(range, false);
+    return false;
+  }
+
   try {
     const parsedRange: TSemver.Range = new semver.Range(range, SEMVER_COMPARE_OPTIONS);
-    rangeCache.set(range, parsedRange);
+    rangeParseCache.set(range, parsedRange);
     return parsedRange;
   } catch {
-    rangeCache.set(range, false);
+    rangeParseCache.set(range, false);
     return false;
   }
 }
@@ -119,11 +122,6 @@ function setPreferredVersions(dependencies: { [dependencyName: string]: string }
   }
 
   for (const [name, version] of Object.entries(dependencies)) {
-    if (version?.includes(':')) {
-      // Skip any specifier that isn't a raw SemVer range.
-      continue;
-    }
-
     const preferredVersion: string | undefined = allPreferredVersions?.get(name);
     // If preferredVersionRange is valid and the current version is not an allowed alternative, proceed to check subsets
     if (preferredVersion && !allowedAlternativeVersions?.get(name)?.has(version)) {
@@ -132,14 +130,12 @@ function setPreferredVersions(dependencies: { [dependencyName: string]: string }
         continue;
       }
 
-      let versionRange: TSemver.Range | undefined;
-      try {
-        versionRange = new semver.Range(version, SEMVER_COMPARE_OPTIONS);
-      } catch {
-        // Swallow invalid range errors
+      const versionRange: TSemver.Range | false = parseRange(version);
+      if (!versionRange) {
+        continue;
       }
 
-      if (versionRange && semver.subset(preferredVersionRange, versionRange, SEMVER_COMPARE_OPTIONS)) {
+      if (semver.subset(preferredVersionRange, versionRange, SEMVER_COMPARE_OPTIONS)) {
         dependencies[name] = preferredVersion;
       }
     }
@@ -150,21 +146,24 @@ export const hooks: IPnpmfileHooks = {
   // Call the original pnpmfile (if it exists)
   afterAllResolved: (lockfile: IPnpmShrinkwrapYaml, context: IPnpmfileContext) => {
     context = init(context);
-    return userPnpmfile?.hooks?.afterAllResolved
-      ? userPnpmfile.hooks.afterAllResolved(lockfile, context)
-      : lockfile;
+    return userPnpmfile?.hooks?.afterAllResolved?.(lockfile, context) ?? lockfile;
   },
 
   // Set the preferred versions in the package, then call the original pnpmfile (if it exists)
   readPackage: (pkg: IPackageJson, context: IPnpmfileContext) => {
     context = init(context);
+    // Apply the user pnpmfile readPackage hook first, in case it moves dependencies around, and so that it sees the true package.json
+    pkg = userPnpmfile?.hooks?.readPackage?.(pkg, context) ?? pkg;
+
+    // Then do version refinement of preferredVersions, since this is just supposed to act as if pnpm "prefers" these resolutions during
+    // calculation.
     setPreferredVersions(pkg.dependencies);
     if (workspaceVersions && workspaceVersions.get(pkg.name) === pkg.version) {
       // devDependencies are only installed for workspace packages, so the rest of the time we can save the trouble of scanning.
       setPreferredVersions(pkg.devDependencies);
     }
     setPreferredVersions(pkg.optionalDependencies);
-    return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
+    return pkg;
   },
 
   // Call the original pnpmfile (if it exists)
