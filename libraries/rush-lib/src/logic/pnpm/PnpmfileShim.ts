@@ -99,6 +99,7 @@ function parseRange(range: string): TSemver.Range | false {
   }
 
   if (range.includes(':')) {
+    // This version specifier has a protocol (e.g. npm:, workspace:, etc.), so it is not a normal semver range.
     rangeParseCache.set(range, false);
     return false;
   }
