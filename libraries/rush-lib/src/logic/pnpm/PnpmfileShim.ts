@@ -117,29 +117,33 @@ function parseRange(range: string): TSemver.Range | false {
 // then skip it. Otherwise, check to ensure that the common version is a subset of the specified version. If
 // it is, then replace the specified version with the preferredVersion
 function setPreferredVersions(dependencies: { [dependencyName: string]: string } | undefined): void {
-  if (!dependencies || !semver) {
+  if (!dependencies || !semver || !allPreferredVersions) {
     return;
   }
 
-  for (const [name, version] of Object.entries(dependencies)) {
-    const preferredVersion: string | undefined = allPreferredVersions?.get(name);
+  // Needed for control flow analyzer.
+  const definitelyDefinedAllPreferredVersions: Map<string, string> = allPreferredVersions;
+  const definiteSemver: typeof TSemver = semver;
+
+  Object.entries(dependencies).forEach(([name, version]: [string, string]) => {
+    const preferredVersion: string | undefined = definitelyDefinedAllPreferredVersions.get(name);
     // If preferredVersionRange is valid and the current version is not an allowed alternative, proceed to check subsets
     if (preferredVersion && !allowedAlternativeVersions?.get(name)?.has(version)) {
       const preferredVersionRange: TSemver.Range | false = parseRange(preferredVersion);
       if (!preferredVersionRange) {
-        continue;
+        return;
       }
 
       const versionRange: TSemver.Range | false = parseRange(version);
       if (!versionRange) {
-        continue;
+        return;
       }
 
-      if (semver.subset(preferredVersionRange, versionRange, SEMVER_COMPARE_OPTIONS)) {
+      if (definiteSemver.subset(preferredVersionRange, versionRange, SEMVER_COMPARE_OPTIONS)) {
         dependencies[name] = preferredVersion;
       }
     }
-  }
+  });
 }
 
 export const hooks: IPnpmfileHooks = {
