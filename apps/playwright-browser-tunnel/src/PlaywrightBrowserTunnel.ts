@@ -58,7 +58,7 @@ export class PlaywrightTunnel {
   private readonly _playwrightBrowsersInstalled: Set<string> = new Set();
   private _status: TunnelStatus = 'stopped';
   private _initWsPromise?: Promise<WebSocket>;
-  private _keepRunning: boolean = true;
+  private _keepRunning: boolean = false;
   private _ws?: WebSocket;
   private _mode: ITunnelMode;
   private readonly _wsEndpoint?: string;
@@ -98,7 +98,21 @@ export class PlaywrightTunnel {
     this._onStatusChange(newStatus);
   }
 
-  public async startAsync(): Promise<void> {
+  public async waitForCloseAsync(): Promise<void> {
+    const terminal: ITerminal = this._terminal;
+    await new Promise<void>((resolve) => {
+      void this._initWsPromise?.then((ws) => {
+        ws.on('close', () => {
+          terminal.writeLine('WebSocket connection closed. resolving init promise.');
+          this._initWsPromise = undefined;
+          resolve();
+        });
+      });
+    });
+  }
+
+  public async startAsync(options: { keepRunning?: boolean } = {}): Promise<void> {
+    this._keepRunning = options.keepRunning ?? true;
     const terminal: ITerminal = this._terminal;
     terminal.writeLine(`keepRunning: ${this._keepRunning}`);
     while (this._keepRunning) {
@@ -107,15 +121,7 @@ export class PlaywrightTunnel {
       } else {
         terminal.writeLine(`Tunnel is already running with status: ${this.status}`);
       }
-      await new Promise<void>((resolve) => {
-        void this._initWsPromise?.then((ws) => {
-          ws.on('close', () => {
-            terminal.writeLine('WebSocket connection closed. resolving init promise.');
-            this._initWsPromise = undefined;
-            resolve();
-          });
-        });
-      });
+      await this.waitForCloseAsync();
     }
   }
 

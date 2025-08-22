@@ -19,6 +19,9 @@ export default defineConfig({
     trace: 'on'
   },
 
+  // globalSetup: require.resolve('./tests/globalSetup'),
+  // globalTeardown: require.resolve('./tests/globalTeardown'),
+
   /* Configure projects for major browsers */
   projects: [
     {
