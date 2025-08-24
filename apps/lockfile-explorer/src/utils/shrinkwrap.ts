@@ -12,7 +12,8 @@ interface IPackageInfo {
 export function convertLockfileV6DepPathToV5DepPath(newDepPath: string): string {
   if (!newDepPath.includes('@', 2) || newDepPath.startsWith('file:')) return newDepPath;
   const index = newDepPath.indexOf('@', newDepPath.indexOf('/@') + 2);
-  if (newDepPath.includes('(') && index > dependencyPathLockfilePreV9.indexOfPeersSuffix(newDepPath)) return newDepPath;
+  if (newDepPath.includes('(') && index > dependencyPathLockfilePreV9.indexOfPeersSuffix(newDepPath))
+    return newDepPath;
   return `${newDepPath.substring(0, index)}/${newDepPath.substring(index + 1)}`;
 }
 
