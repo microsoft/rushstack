@@ -53,6 +53,45 @@ export enum OperationStatus {
 }
 
 /**
+ * Mapping from {@link OperationStatus} to an emoji that can be used in the terminal.
+ * @alpha
+ */
+export const STATUS_EMOJIS: Record<OperationStatus, string> = {
+  [OperationStatus.Failure]: '❌\ufe0f',
+  [OperationStatus.SuccessWithWarning]: '⚡\ufe0f',
+
+  [OperationStatus.Executing]: '🔄',
+
+  [OperationStatus.Waiting]: '⏳\ufe0f',
+  [OperationStatus.Queued]: '⏳\ufe0f',
+  [OperationStatus.Ready]: '⏳\ufe0f',
+
+  [OperationStatus.Blocked]: '🚧',
+
+  [OperationStatus.Success]: '✅\ufe0f',
+
+  [OperationStatus.FromCache]: '📦',
+  [OperationStatus.Skipped]: '📦',
+  [OperationStatus.NoOp]: ''
+};
+
+/**
+ * The set of unique status emojis used in the `STATUS_EMOJIS` mapping.
+ * @alpha
+ */
+export const STATUS_BY_EMOJI: Map<string, OperationStatus[]> = new Map();
+for (const [status, emoji] of Object.entries(STATUS_EMOJIS)) {
+  if (emoji) {
+    let existingStatuses: OperationStatus[] | undefined = STATUS_BY_EMOJI.get(emoji);
+    if (!existingStatuses) {
+      existingStatuses = [];
+      STATUS_BY_EMOJI.set(emoji, existingStatuses);
+    }
+    existingStatuses.push(status as OperationStatus);
+  }
+}
+
+/**
  * The set of statuses that are considered terminal.
  * @alpha
  */
