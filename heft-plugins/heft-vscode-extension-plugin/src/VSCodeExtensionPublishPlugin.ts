@@ -6,7 +6,8 @@ import type {
   IHeftTaskPlugin,
   IHeftTaskSession,
   IHeftTaskRunHookOptions,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  CommandLineFlagParameter
 } from '@rushstack/heft';
 import type { IWaitForExitResult } from '@rushstack/node-core-library';
 import * as path from 'node:path';
@@ -19,6 +20,7 @@ const PLUGIN_NAME: 'vscode-extension-publish-plugin' = 'vscode-extension-publish
 const VSIX_PATH_PARAMETER_NAME: string = '--vsix-path';
 const MANIFEST_PATH_PARAMETER_NAME: string = '--manifest-path';
 const SIGNATURE_PATH_PARAMETER_NAME: string = '--signature-path';
+const PUBLISH_UNSIGNED_PARAMETER_NAME: string = '--publish-unsigned';
 
 export default class VSCodeExtensionPublishPlugin
   implements IHeftTaskPlugin<IVSCodeExtensionPublishPluginOptions>
@@ -36,55 +38,82 @@ export default class VSCodeExtensionPublishPlugin
     const signaturePathParameter: CommandLineStringParameter = heftTaskSession.parameters.getStringParameter(
       SIGNATURE_PATH_PARAMETER_NAME
     );
+    const publishUnsignedParameter: CommandLineFlagParameter = heftTaskSession.parameters.getFlagParameter(
+      PUBLISH_UNSIGNED_PARAMETER_NAME
+    );
 
-    if (!vsixPathParameter.value) {
-      throw new Error(
-        `The parameter "${VSIX_PATH_PARAMETER_NAME}" is required for the VSCodeExtensionPublishPlugin.`
-      );
-    }
-    if (!manifestPathParameter.value) {
-      throw new Error(
-        `The parameter "${MANIFEST_PATH_PARAMETER_NAME}" is required for the VSCodeExtensionPublishPlugin.`
-      );
-    }
-    if (!signaturePathParameter.value) {
-      throw new Error(
-        `The parameter "${SIGNATURE_PATH_PARAMETER_NAME}" is required for the VSCodeExtensionPublishPlugin.`
-      );
-    }
+    const {
+      logger: { terminal }
+    } = heftTaskSession;
 
-    const vsixPath: string = vsixPathParameter.value;
-    const manifestPath: string = manifestPathParameter.value;
-    const signaturePath: string = signaturePathParameter.value;
+    // required parameters defined in heft-plugin.json
+    const vsixPath: string = vsixPathParameter.value!;
+
+    // manifestPath and signaturePath are required if publishUnsigned is unset
+    const manifestPath: string | undefined = manifestPathParameter.value;
+    const signaturePath: string | undefined = signaturePathParameter.value;
+    const publishUnsigned: boolean = publishUnsignedParameter.value;
+    if (publishUnsigned) {
+      terminal.writeLine(`Publishing unsigned VSIX ${vsixPath}`);
+    } else {
+      if (!manifestPath || !signaturePath) {
+        throw new Error(
+          `The parameters "${MANIFEST_PATH_PARAMETER_NAME}" and "${SIGNATURE_PATH_PARAMETER_NAME}" are required for the VSCodeExtensionPublishPlugin.`
+        );
+      }
+    }
 
     heftTaskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       const { buildFolderPath } = heftConfiguration;
-      const {
-        logger: { terminal }
-      } = heftTaskSession;
 
       terminal.writeLine(`Using VSCE script: ${vsceScriptPath}`);
       terminal.writeLine(`Publishing VSIX ${vsixPath}`);
 
-      const publishResult: IWaitForExitResult<string> = await executeAndWaitAsync(
-        terminal,
-        'node',
-        [
-          vsceScriptPath,
-          'publish',
-          '--no-dependencies',
-          '--azure-credential',
-          '--packagePath',
-          path.resolve(vsixPath),
-          '--manifestPath',
-          path.resolve(manifestPath),
-          '--signaturePath',
-          path.resolve(signaturePath)
-        ],
-        {
-          currentWorkingDirectory: path.resolve(buildFolderPath)
+      let publishResult: IWaitForExitResult<string>;
+
+      if (publishUnsigned) {
+        publishResult = await executeAndWaitAsync(
+          terminal,
+          'node',
+          [
+            vsceScriptPath,
+            'publish',
+            '--no-dependencies',
+            '--azure-credential',
+            '--packagePath',
+            path.resolve(vsixPath)
+          ],
+          {
+            currentWorkingDirectory: path.resolve(buildFolderPath)
+          }
+        );
+      } else {
+        if (!manifestPath) {
+          throw new Error(`Missing manifest path for the VSCodeExtensionPublishPlugin.`);
         }
-      );
+        if (!signaturePath) {
+          throw new Error(`Missing signature path for the VSCodeExtensionPublishPlugin.`);
+        }
+        publishResult = await executeAndWaitAsync(
+          terminal,
+          'node',
+          [
+            vsceScriptPath,
+            'publish',
+            '--no-dependencies',
+            '--azure-credential',
+            '--packagePath',
+            path.resolve(vsixPath),
+            '--manifestPath',
+            path.resolve(manifestPath),
+            '--signaturePath',
+            path.resolve(signaturePath)
+          ],
+          {
+            currentWorkingDirectory: path.resolve(buildFolderPath)
+          }
+        );
+      }
       if (publishResult.exitCode !== 0) {
         throw new Error(`VSIX publishing failed with exit code ${publishResult.exitCode}`);
       }

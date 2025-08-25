@@ -25,6 +25,7 @@ import {
   EXTENSION_ID,
   VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS
 } from './constants';
+import { runWorkspaceCommandAsync } from './terminal';
 
 export function activate(context: vscode.ExtensionContext): void {
   const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel(EXTENSION_DISPLAY_NAME);
@@ -142,14 +143,6 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   async function handleSync(): Promise<void> {
-    if (!vscode.env.remoteName) {
-      const message: string =
-        'This command is only available in remote workspaces. Please open this workspace in a remote environment.';
-      terminal.writeLine(message);
-      void vscode.window.showErrorMessage(message);
-      return;
-    }
-
     try {
       terminal.writeLine('Starting certificate synchronization...');
 
@@ -172,12 +165,12 @@ export function activate(context: vscode.ExtensionContext): void {
       if (!workspaceUri) {
         terminal.writeLine('No workspace folder found. Synchronization aborted.');
         void vscode.window.showErrorMessage(
-          'No workspace folder found. Please open a folder in the remote workspace.'
+          'No workspace folder found. Open the project folder to sync TLS certificates.'
         );
         return;
       }
 
-      let remoteCertificateStoreOptions: Required<ICertificateStoreOptions> | undefined = undefined;
+      let workspaceCertificateStoreOptions: Required<ICertificateStoreOptions> | undefined = undefined;
 
       try {
         const configFileUri: vscode.Uri = vscode.Uri.joinPath(
@@ -189,7 +182,7 @@ export function activate(context: vscode.ExtensionContext): void {
         const parsedConfig: ICertificateStoreOptions & Required<Pick<ICertificateStoreOptions, 'storePath'>> =
           JSON.parse(configFile.toString());
 
-        remoteCertificateStoreOptions = {
+        workspaceCertificateStoreOptions = {
           storePath: parsedConfig.storePath,
           caCertificateFilename: parsedConfig.caCertificateFilename || 'rushstack-ca.pem',
           certificateFilename: parsedConfig.certificateFilename || 'rushstack-serve.pem',
@@ -208,20 +201,39 @@ export function activate(context: vscode.ExtensionContext): void {
       }
 
       const { storePath, caCertificateFilename, certificateFilename, keyFilename } =
-        remoteCertificateStoreOptions;
+        workspaceCertificateStoreOptions;
 
-      let resolvedRemoteStorePath: string;
+      let resolvedWorkspaceStorePath: string;
       if (storePath.startsWith('/')) {
-        resolvedRemoteStorePath = storePath;
+        resolvedWorkspaceStorePath = storePath;
+      } else if (storePath.startsWith('~')) {
+        let homeDir: string;
+        if (vscode.env.remoteName) {
+          homeDir = await runWorkspaceCommandAsync({
+            terminalOptions: { name: 'debug-certificate-manager', hideFromUser: true },
+            commandLine: `node -p "require('os').homedir()"`,
+            terminal
+          });
+        } else {
+          homeDir = require('os').homedir();
+        }
+        terminal.writeLine(`Resolved home directory: ${homeDir}`);
+        const homeDirUri: vscode.Uri = vscode.Uri.from({
+          scheme: workspaceUri.scheme,
+          authority: workspaceUri.authority,
+          path: homeDir
+        });
+        resolvedWorkspaceStorePath = vscode.Uri.joinPath(homeDirUri, storePath.slice(1)).path;
       } else {
-        resolvedRemoteStorePath = vscode.Uri.joinPath(workspaceUri, storePath).fsPath;
+        resolvedWorkspaceStorePath = vscode.Uri.joinPath(workspaceUri, storePath).path;
       }
 
       const storePathUri: vscode.Uri = vscode.Uri.from({
-        scheme: 'vscode-remote',
+        scheme: workspaceUri.scheme,
         authority: workspaceUri.authority,
-        path: resolvedRemoteStorePath
+        path: resolvedWorkspaceStorePath
       });
+
       const caCertificateUri: vscode.Uri = vscode.Uri.joinPath(storePathUri, caCertificateFilename);
       const certificateUri: vscode.Uri = vscode.Uri.joinPath(storePathUri, certificateFilename);
       const keyUri: vscode.Uri = vscode.Uri.joinPath(storePathUri, keyFilename);
@@ -247,8 +259,9 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   const { autoSync } = getConfig(terminal);
-  if (autoSync && !vscode.env.remoteName) {
+  if (autoSync) {
     terminal.writeLine(`Auto-sync is enabled. Synchronizing certificates on activation...`);
+    void handleSync();
   }
 
   context.subscriptions.push(

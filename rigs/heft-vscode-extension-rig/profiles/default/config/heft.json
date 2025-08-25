@@ -38,8 +38,23 @@
             "pluginName": "vscode-extension-package-plugin",
             "options": {
               "unpackedFolderPath": "dist/vsix/unpacked",
-              "vsixPath": "dist/vsix/packaged.vsix",
-              "manifestPath": "dist/vsix/extension-manifest.json"
+              "vsixPath": "dist/vsix/extension.vsix",
+              "manifestPath": "dist/vsix/extension.signature.manifest"
+            }
+          }
+        }
+      }
+    },
+    "verify-signature": {
+      "phaseDescription": "Verify the signature of the VSIX package",
+      "tasksByName": {
+        "verify-signature": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-vscode-extension-plugin",
+            "pluginName": "vscode-extension-verify-signature-plugin",
+            "options": {
+              "vsixPath": "dist/vsix/extension.vsix",
+              "manifestPath": "dist/vsix/extension.signature.manifest"
             }
           }
         }
@@ -53,8 +68,8 @@
             "pluginPackage": "@rushstack/heft-vscode-extension-plugin",
             "pluginName": "vscode-extension-publish-plugin",
             "options": {
-              "vsixPath": "dist/vsix/packaged.vsix",
-              "manifestPath": "dist/vsix/extension-manifest.json"
+              "vsixPath": "dist/vsix/extension.vsix",
+              "manifestPath": "dist/vsix/extension.signature.manifest"
             }
           }
         }

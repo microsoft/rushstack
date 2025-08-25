@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.52.11",
+      "tag": "@microsoft/api-extractor_v7.52.11",
+      "date": "Tue, 19 Aug 2025 20:45:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix self-package import resolution by removing outDir/declarationDir from compiler options"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.52.10",
       "tag": "@microsoft/api-extractor_v7.52.10",
       "date": "Fri, 01 Aug 2025 00:12:48 GMT",

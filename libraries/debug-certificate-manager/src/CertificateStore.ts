@@ -69,6 +69,9 @@ export class CertificateStore {
           debugCertificateManagerConfig = JSON.parse(configContent) as ICertificateStoreOptions;
           if (debugCertificateManagerConfig.storePath) {
             storePath = path.resolve(currentDir, debugCertificateManagerConfig.storePath);
+            if (storePath.startsWith('~')) {
+              storePath = path.join(homedir(), storePath.slice(2));
+            }
           }
         }
         const parentDir: string | undefined = path.dirname(currentDir);

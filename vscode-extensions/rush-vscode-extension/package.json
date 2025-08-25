@@ -264,7 +264,7 @@
     "@rushstack/heft": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/mocha": "10.0.6",
-    "@types/vscode": "^1.63.0",
+    "@types/vscode": "1.103.0",
     "@types/webpack-env": "1.18.8",
     "@vscode/test-electron": "^1.6.2",
     "eslint": "~9.25.1",
@@ -273,6 +273,6 @@
     "mocha": "^10.1.0"
   },
   "engines": {
-    "vscode": "^1.63.0"
+    "vscode": "^1.103.0"
   }
 }

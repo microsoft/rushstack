@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "Fix handling of home directory paths when reading debug-certificate-manager.json config file.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager"
+}
