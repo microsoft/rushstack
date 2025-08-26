@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Treat intermittent ignored errors as warnings and allow build to continue.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "aramissennyeydd@users.noreply.github.com"
+}
