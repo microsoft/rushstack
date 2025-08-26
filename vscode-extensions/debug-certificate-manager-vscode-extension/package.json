@@ -1,6 +1,6 @@
 {
   "name": "debug-certificate-manager",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
@@ -107,7 +107,7 @@
   },
   "enabledApiProposals": [],
   "activationEvents": [
-    "workspaceContains:.vscode/debug-certificate-manager.json"
+    "workspaceContains:/.vscode/debug-certificate-manager.json"
   ],
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*",
