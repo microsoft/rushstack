@@ -107,7 +107,7 @@
   },
   "enabledApiProposals": [],
   "activationEvents": [
-    "workspaceContains:.vscode/debug-certificate-manager.json"
+    "workspaceContains:/.vscode/debug-certificate-manager.json"
   ],
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*",
