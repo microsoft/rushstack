@@ -41,9 +41,11 @@ function getPlatformInfo(): IPlatformInfo {
 }
 
 const END_TOKEN: string = '/package.json":';
+const SUBPACKAGE_CACHE_FILE_VERSION: 1 = 1;
 
 interface INestedPackageJsonCache {
   subPackagesByIntegrity: [string, string[] | boolean][];
+  version: number;
 }
 
 /**
@@ -93,8 +95,14 @@ export async function afterInstallAsync(
   try {
     const cacheContent: string = await FileSystem.readFileAsync(subPackageCacheFilePath);
     const cacheJson: INestedPackageJsonCache = JSON.parse(cacheContent);
-    oldSubPackagesByIntegrity = new Map(cacheJson.subPackagesByIntegrity);
-    terminal.writeLine(`Loaded subpackage cache from ${subPackageCacheFilePath}`);
+    if (cacheJson.version !== SUBPACKAGE_CACHE_FILE_VERSION) {
+      terminal.writeLine(
+        `Expected subpackage cache version ${SUBPACKAGE_CACHE_FILE_VERSION}, got ${cacheJson.version}`
+      );
+    } else {
+      oldSubPackagesByIntegrity = new Map(cacheJson.subPackagesByIntegrity);
+      terminal.writeLine(`Loaded subpackage cache from ${subPackageCacheFilePath}`);
+    }
   } catch (err) {
     // Ignore
   }
@@ -196,8 +204,9 @@ export async function afterInstallAsync(
         terminal.writeDebugLine(
           `Nested "package.json" files found for package at ${descriptionFileRoot}: ${result.join(', ')}`
         );
+        // Clone this array to ensure that mutations don't affect the subpackage cache.
         // eslint-disable-next-line require-atomic-updates
-        context.nestedPackageDirs = result;
+        context.nestedPackageDirs = [...result];
       }
     }
 
@@ -209,6 +218,21 @@ export async function afterInstallAsync(
     });
   }
 
+  // Serialize this before `computeResolverCacheFromLockfileAsync` because bundledDependencies get removed
+  // from the `nestedPackageDirs` array. We clone above for safety, but this is making doubly sure.
+  const newSubPackageCache: INestedPackageJsonCache = {
+    version: SUBPACKAGE_CACHE_FILE_VERSION,
+    subPackagesByIntegrity: Array.from(subPackagesByIntegrity)
+  };
+  const serializedSubpackageCache: string = JSON.stringify(newSubPackageCache);
+  const writeSubPackageCachePromise: Promise<void> = FileSystem.writeFileAsync(
+    subPackageCacheFilePath,
+    serializedSubpackageCache,
+    {
+      ensureFolderExists: true
+    }
+  );
+
   const cacheFile: IResolverCacheFile = await computeResolverCacheFromLockfileAsync({
     workspaceRoot,
     commonPrefixToTrim: rushRoot,
@@ -218,19 +242,13 @@ export async function afterInstallAsync(
     afterExternalPackagesAsync
   });
 
-  const newSubPackageCache: string = JSON.stringify({
-    subPackagesByIntegrity: Array.from(subPackagesByIntegrity)
-  });
-
   const serialized: string = JSON.stringify(cacheFile);
 
   await Promise.all([
     FileSystem.writeFileAsync(cacheFilePath, serialized, {
       ensureFolderExists: true
     }),
-    FileSystem.writeFileAsync(subPackageCacheFilePath, newSubPackageCache, {
-      ensureFolderExists: true
-    })
+    writeSubPackageCachePromise
   ]);
 
   terminal.writeLine(`Resolver cache written.`);
