@@ -243,6 +243,9 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
       webSocketServerUpgrader?.(server);
 
       server.listen(requestedPort);
+      // Don't let the HTTP/2 server keep the process alive if the user asks to quit.
+      // TODO: use some "user wants to exit" event to close the server.
+      server.unref();
       await once(server, 'listening');
 
       const address: AddressInfo | undefined = server.address() as AddressInfo;

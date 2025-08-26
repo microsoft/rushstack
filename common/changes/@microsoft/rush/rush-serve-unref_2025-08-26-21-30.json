@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "[rush-serve-plugin] Allow the Rush process to exit if the server is the only active handle.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
