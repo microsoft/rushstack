@@ -56,6 +56,10 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     } catch (e) {
       throw new Error(`Failed to create redis client: ${e.message}`);
     }
+    // Register error event handler to avoid process exit when redis client error occurs.
+    this._redisClient.on('error', (e: Error) => {
+      this._terminal.writeErrorLine(`Redis client error: ${e.message}`);
+    });
   }
 
   public static expandOptionsWithEnvironmentVariables(
