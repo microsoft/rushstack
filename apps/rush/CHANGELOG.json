@@ -2,6 +2,39 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.158.0",
+      "tag": "@microsoft/rush_v5.158.0",
+      "date": "Tue, 26 Aug 2025 23:27:47 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Adds an optional safety check flag to the Bridge Cache plugin write action."
+          },
+          {
+            "comment": "Fix a bug in \"@rushstack/rush-bridge-cache-plugin\" where the cache replay did not block the normal execution process and instead was a floating promise."
+          },
+          {
+            "comment": "[resolver-cache-plugin] Optimize search for nested package.json files with persistent cache file keyed by integrity hash."
+          },
+          {
+            "comment": "[rush-serve-plugin] Allow the Rush process to exit if the server is the only active handle."
+          },
+          {
+            "comment": "Fix poor performance scaling during `rush install` when identifying projects in the lockfile that no longer exist."
+          },
+          {
+            "comment": "[resolver-cache-plugin] Improve performance of scan for nested package.json files in external packages."
+          },
+          {
+            "comment": "Optimize `setPreferredVersions` in install setup."
+          },
+          {
+            "comment": "Ensure that `rush version` and `rush publish` preserve all fields in `version-policies-json`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.157.0",
       "tag": "@microsoft/rush_v5.157.0",
       "date": "Fri, 25 Jul 2025 01:24:42 GMT",
