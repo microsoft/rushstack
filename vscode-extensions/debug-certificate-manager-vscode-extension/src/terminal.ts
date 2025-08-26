@@ -5,8 +5,6 @@ import { ITerminal } from '@rushstack/terminal';
 import * as vscode from 'vscode';
 import { stripVTControlCharacters } from 'node:util';
 
-const SHELL_INTEGRATION_TIMEOUT: number = 15_000;
-
 export async function runWorkspaceCommandAsync({
   terminalOptions,
   commandLine,
@@ -22,24 +20,16 @@ export async function runWorkspaceCommandAsync({
   const shellIntegration: vscode.TerminalShellIntegration =
     vsTerminal.shellIntegration ??
     (await new Promise((resolve, reject) => {
-      let timeoutId: NodeJS.Timeout | undefined;
       const shellIntegrationDisposable: vscode.Disposable = vscode.window.onDidChangeTerminalShellIntegration(
         (event) => {
           if (event.terminal !== vsTerminal) {
             return;
           }
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-            timeoutId = undefined;
-          }
+
           resolve(event.shellIntegration);
           shellIntegrationDisposable?.dispose();
         }
       );
-      timeoutId = setTimeout(() => {
-        shellIntegrationDisposable?.dispose();
-        reject(new Error('Shell integration timeout'));
-      }, SHELL_INTEGRATION_TIMEOUT);
     }));
 
   // Run the command through shell integration and grab output
