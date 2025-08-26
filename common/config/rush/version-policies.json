@@ -102,7 +102,7 @@
   {
     "policyName": "rush",
     "definitionName": "lockStepVersion",
-    "version": "5.157.0",
+    "version": "5.158.0",
     "nextBump": "minor",
     "mainProject": "@microsoft/rush"
   }
