@@ -7,8 +7,7 @@ import type {
   RedisClientType,
   RedisFunctions,
   RedisModules,
-  RedisScripts,
-  TypeMapping
+  RedisScripts
 } from '@redis/client';
 
 import type {
@@ -52,16 +51,18 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
 
   public constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession) {
     this._options = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(options);
+    // Provide a default reconnect strategy that prevents more than 5 reconnect attempts.
+    this._options.socket = {
+      reconnectStrategy: (count: number) => {
+        this._terminal.writeErrorLine(`Redis client reconnecting attempt #${count}`);
+        return count < 5 ? count * 1000 : false;
+      },
+      ...this._options.socket
+    };
     this._terminal = rushSession.getLogger('RedisCobuildLockProvider').terminal;
     try {
       this._redisClient = createClient({
-        ...this._options,
-        socket: {
-          reconnectStrategy: (count: number) => {
-            this._terminal.writeErrorLine(`Redis client reconnecting attempt #${count}`);
-            return count < 5 ? count * 1000 : false;
-          }
-        }
+        ...this._options
       });
     } catch (e) {
       throw new Error(`Failed to create redis client: ${e.message}`);
@@ -73,6 +74,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     environment: NodeJS.ProcessEnv = process.env
   ): IRedisCobuildLockProviderOptions {
     const finalOptions: IRedisCobuildLockProviderOptions = { ...options };
+
     const missingEnvironmentVariables: Set<string> = new Set<string>();
 
     if (finalOptions.passwordEnvironmentVariable) {
