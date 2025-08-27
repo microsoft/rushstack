@@ -11,14 +11,11 @@ import type { ICobuildContext } from '@rushstack/rush-sdk';
 import type { ICobuildLockProvider } from '@rushstack/rush-sdk';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import type { RedisClientOptions } from '@redis/client';
-import type { RedisFunctions } from '@redis/client';
-import type { RedisModules } from '@redis/client';
-import type { RedisScripts } from '@redis/client';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { RushSession } from '@rushstack/rush-sdk';
 
 // @beta
-export interface IRedisCobuildLockProviderOptions extends RedisClientOptions<RedisModules, RedisFunctions, RedisScripts, 2 | 3> {
+export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {
     passwordEnvironmentVariable?: string;
 }
 
