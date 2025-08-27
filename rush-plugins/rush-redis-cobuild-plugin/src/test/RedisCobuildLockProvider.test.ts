@@ -58,7 +58,12 @@ describe(RedisCobuildLockProvider.name, () => {
         get: jest.fn().mockImplementation((key: string) => {
           return storage[key];
         })
-      } as unknown as RedisClientType;
+      } as unknown as RedisClientType<
+        redisAPI.RedisModules,
+        redisAPI.RedisFunctions,
+        redisAPI.RedisScripts,
+        2 | 3
+      >;
     });
   });
 

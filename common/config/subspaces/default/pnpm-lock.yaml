@@ -4557,8 +4557,8 @@ importers:
   ../../../rush-plugins/rush-redis-cobuild-plugin:
     dependencies:
       '@redis/client':
-        specifier: ~1.5.5
-        version: 1.5.14
+        specifier: ~5.8.2
+        version: 5.8.2
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
@@ -11047,13 +11047,11 @@ packages:
       react: 17.0.2
     dev: true
 
-  /@redis/client@1.5.14:
-    resolution: {integrity: sha512-YGn0GqsRBFUQxklhY7v562VMOP0DcmlrHHs3IV1mFE3cbxe31IITUkqhBcIhVSI/2JqtWAJXg5mjV4aU+zD0HA==}
-    engines: {node: '>=14'}
+  /@redis/client@5.8.2:
+    resolution: {integrity: sha512-WtMScno3+eBpTac1Uav2zugXEoXqaU23YznwvFgkPwBQVwEHTDgOG7uEAObtZ/Nyn8SmAMbqkEubJaMOvnqdsQ==}
+    engines: {node: '>= 18'}
     dependencies:
       cluster-key-slot: 1.1.2
-      generic-pool: 3.9.0
-      yallist: 4.0.0
     dev: false
 
   /@reduxjs/toolkit@1.8.6(react-redux@8.0.7)(react@17.0.2):
@@ -21068,11 +21066,6 @@ packages:
     resolution: {integrity: sha512-ySFolZQfw9FoDb3ed9d80Cm9f0+r7qj+HJkWjeD9RBfpxEVTlVhol+gvaQB/78WbwYfbnNh8nWHHBSlg072y6A==}
     dependencies:
       loader-utils: 3.2.1
-    dev: false
-
-  /generic-pool@3.9.0:
-    resolution: {integrity: sha512-hymDOu5B53XvN4QT9dBmZxPX4CWhBPPLguTZ9MMFeFa/Kg0xWVfylOVNlJji/E7yTZWFd/q9GO5TxDLq156D7g==}
-    engines: {node: '>= 4'}
     dev: false
 
   /gensync@1.0.0-beta.2:

@@ -7,7 +7,8 @@ import type {
   RedisClientType,
   RedisFunctions,
   RedisModules,
-  RedisScripts
+  RedisScripts,
+  TypeMapping
 } from '@redis/client';
 
 import type {
@@ -22,7 +23,8 @@ import type { ITerminal } from '@rushstack/terminal';
  * The redis client options
  * @beta
  */
-export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {
+export interface IRedisCobuildLockProviderOptions
+  extends RedisClientOptions<RedisModules, RedisFunctions, RedisScripts, 2 | 3> {
   /**
    * The environment variable name for the redis password
    */
@@ -46,20 +48,24 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     string
   >();
 
-  private readonly _redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts>;
+  private readonly _redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts, 2 | 3>;
 
   public constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession) {
     this._options = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(options);
     this._terminal = rushSession.getLogger('RedisCobuildLockProvider').terminal;
     try {
-      this._redisClient = createClient(this._options);
+      this._redisClient = createClient({
+        ...this._options,
+        socket: {
+          reconnectStrategy: (count: number) => {
+            this._terminal.writeErrorLine(`Redis client reconnecting attempt #${count}`);
+            return count < 5 ? count * 1000 : false;
+          }
+        }
+      });
     } catch (e) {
       throw new Error(`Failed to create redis client: ${e.message}`);
     }
-    // Register error event handler to avoid process exit when redis client error occurs.
-    this._redisClient.on('error', (e: Error) => {
-      this._terminal.writeErrorLine(`Redis client error: ${e.message}`);
-    });
   }
 
   public static expandOptionsWithEnvironmentVariables(
@@ -99,11 +105,20 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     } catch (e) {
       throw new Error(`Failed to connect to redis server: ${e.message}`);
     }
+
+    // Register error event handler to avoid process exit when redis client error occurs.
+    this._redisClient.on('error', (e: Error) => {
+      if (e.message) {
+        this._terminal.writeErrorLine(`Redis client error: ${e.message}`);
+      } else {
+        this._terminal.writeErrorLine(`Redis client error: ${e}`);
+      }
+    });
   }
 
   public async disconnectAsync(): Promise<void> {
     try {
-      await this._redisClient.disconnect();
+      await this._redisClient.quit();
     } catch (e) {
       throw new Error(`Failed to disconnect to redis server: ${e.message}`);
     }
