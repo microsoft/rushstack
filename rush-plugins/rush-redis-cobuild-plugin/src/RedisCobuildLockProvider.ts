@@ -22,8 +22,7 @@ import type { ITerminal } from '@rushstack/terminal';
  * The redis client options
  * @beta
  */
-export interface IRedisCobuildLockProviderOptions
-  extends RedisClientOptions<RedisModules, RedisFunctions, RedisScripts, 2 | 3> {
+export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {
   /**
    * The environment variable name for the redis password
    */
