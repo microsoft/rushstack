@@ -19,7 +19,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@redis/client": "~1.5.5",
+    "@redis/client": "~5.8.2",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*"
   },
