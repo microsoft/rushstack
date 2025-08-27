@@ -117,7 +117,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
 
   public async disconnectAsync(): Promise<void> {
     try {
-      await this._redisClient.quit();
+      await this._redisClient.destroy();
     } catch (e) {
       throw new Error(`Failed to disconnect to redis server: ${e.message}`);
     }
