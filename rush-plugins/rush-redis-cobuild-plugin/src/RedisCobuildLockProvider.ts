@@ -61,9 +61,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     };
     this._terminal = rushSession.getLogger('RedisCobuildLockProvider').terminal;
     try {
-      this._redisClient = createClient({
-        ...this._options
-      });
+      this._redisClient = createClient(this._options);
     } catch (e) {
       throw new Error(`Failed to create redis client: ${e.message}`);
     }
@@ -74,7 +72,6 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     environment: NodeJS.ProcessEnv = process.env
   ): IRedisCobuildLockProviderOptions {
     const finalOptions: IRedisCobuildLockProviderOptions = { ...options };
-
     const missingEnvironmentVariables: Set<string> = new Set<string>();
 
     if (finalOptions.passwordEnvironmentVariable) {
