@@ -15,7 +15,7 @@ import type { AstEntity } from './AstEntity';
 import { AstNamespaceImport } from './AstNamespaceImport';
 import { SyntaxHelpers } from './SyntaxHelpers';
 import { AstNamespaceExport } from './AstNamespaceExport';
-import { AstSubPathImport } from './AstSubPathImport';
+import { AstSubPathImport, IAstSubPathImportOptions } from './AstSubPathImport';
 
 /**
  * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.
@@ -483,10 +483,10 @@ export class ExportAnalyzer {
             isTypeOnly: true
           });
         }
-        return this._fetchAstSubPathImport(
-          exportAstEntity,
-          importPath.slice(1).map((id) => id.getText().trim())
-        );
+        return this._fetchAstSubPathImport({
+          astEntity: exportAstEntity,
+          exportPath: importPath.slice(1).map((id) => id.getText().trim())
+        });
       } else {
         // Example input:
         //   import('api-extractor-lib1-test')
@@ -510,10 +510,10 @@ export class ExportAnalyzer {
       const exportName: ts.Identifier = importPath[0];
       const astModule: AstModule = this._fetchSpecifierAstModule(node, undefined);
       const exportAstEntity: AstEntity = this._getExportOfAstModule(exportName.getText().trim(), astModule);
-      return this._fetchAstSubPathImport(
-        exportAstEntity,
-        importPath.slice(1).map((id) => id.getText().trim())
-      );
+      return this._fetchAstSubPathImport({
+        astEntity: exportAstEntity,
+        exportPath: importPath.slice(1).map((id) => id.getText().trim())
+      });
     } else {
       throw new InternalError(
         `import() for local module without qualifier is not supported: ${node.getText()}\n` +
@@ -995,27 +995,24 @@ export class ExportAnalyzer {
     return astImport;
   }
 
-  private _fetchAstSubPathImport(astEntity: AstEntity, exportPath: string[]): AstEntity {
-    if (exportPath.length === 0) {
+  private _fetchAstSubPathImport(options: IAstSubPathImportOptions): AstEntity {
+    if (options.exportPath.length === 0) {
       // If the exportPath is empty, just use the AstEntity directly instead of creating an unnecessary AstSubPathImport.
       // e.g. return AstImport for `import("foo").Bar`, return AstEntity of Bar for `import("./foo").Bar`.
-      return astEntity;
+      return options.astEntity;
     }
 
     let astSubPathImportsByExportPath: Map<string, AstSubPathImport> | undefined =
-      this._astSubPathImportsByKey.get(astEntity);
+      this._astSubPathImportsByKey.get(options.astEntity);
     if (astSubPathImportsByExportPath === undefined) {
       astSubPathImportsByExportPath = new Map<string, AstSubPathImport>();
-      this._astSubPathImportsByKey.set(astEntity, astSubPathImportsByExportPath);
+      this._astSubPathImportsByKey.set(options.astEntity, astSubPathImportsByExportPath);
     }
 
-    const exportPathKey: string = exportPath.join('.');
+    const exportPathKey: string = options.exportPath.join('.');
     let astSubPathImport: AstSubPathImport | undefined = astSubPathImportsByExportPath.get(exportPathKey);
     if (astSubPathImport === undefined) {
-      astSubPathImport = new AstSubPathImport({
-        astEntity: astEntity,
-        exportPath: exportPath
-      });
+      astSubPathImport = new AstSubPathImport(options);
       astSubPathImportsByExportPath.set(exportPathKey, astSubPathImport);
     }
     return astSubPathImport;

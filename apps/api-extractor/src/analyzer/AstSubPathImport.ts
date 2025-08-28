@@ -18,13 +18,13 @@ export interface IAstSubPathImportOptions {
  *
  * ```ts
  * // import from AstImport (NamedImport, modulePath="foo", exportName="X"), with exportPath ["Y", "Z"]
- * const foo: import("foo").X.Y.Z;
+ * const bar: import("foo").X.Y.Z;
  *
  * // import from AstImport (DefaultImport, modulePath="foo"), with exportPath ["X", "Y", "Z"]
  * const bar: import("foo").default.X.Y.Z;
  *
  * // import from AstEntity of X, with exportPath ["Y", "Z"]
- * const baz: import("./foo").X.Y.Z;
+ * const bar: import("./foo").X.Y.Z;
  * ```
  */
 export class AstSubPathImport extends AstSyntheticEntity {
