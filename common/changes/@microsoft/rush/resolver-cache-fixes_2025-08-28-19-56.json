@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Dedupe shrinkwrap parsing by content hash.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
