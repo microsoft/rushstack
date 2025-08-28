@@ -436,36 +436,34 @@ export class ExportAnalyzer {
     return astSymbol;
   }
 
-  private _collectIdentifierPath(node: ts.EntityName): ts.Identifier[] {
-    const identifiers: ts.Identifier[] = [];
-    let leftNode: ts.EntityName = node;
-    while (leftNode.kind === ts.SyntaxKind.QualifiedName) {
-      identifiers.unshift(leftNode.right);
-      leftNode = leftNode.left;
-    }
-    identifiers.unshift(leftNode);
-    return identifiers;
-  }
-
   public fetchReferencedAstEntityFromImportTypeNode(
     node: ts.ImportTypeNode,
     referringModuleIsExternal: boolean
   ): AstEntity | undefined {
+    const importPath: ts.Identifier[] = [];
+    if (node.qualifier) {
+      let leftNode: ts.EntityName = node.qualifier;
+      while (leftNode.kind === ts.SyntaxKind.QualifiedName) {
+        importPath.unshift(leftNode.right);
+        leftNode = leftNode.left;
+      }
+      importPath.unshift(leftNode);
+    }
+
     const externalModulePath: string | undefined = this._tryGetExternalModulePath(node);
 
     if (externalModulePath) {
-      if (node.qualifier) {
-        // Example input:
-        //   import('api-extractor-lib1-test').Lib1GenericType<number>
-        //
-        // Extracted import base:
-        //   import { Lib1GenericType } from 'api-extractor-lib1-test';
-        const fullExportPath: ts.Identifier[] = this._collectIdentifierPath(node.qualifier);
-        const exportName: string = fullExportPath[0].getText().trim();
+      if (importPath.length > 0) {
+        const exportName: string = importPath[0].getText().trim();
         // There is no symbol property in a ImportTypeNode, obtain the associated export symbol
-        const exportSymbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(fullExportPath[0]);
+        const exportSymbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(importPath[0]);
         let exportAstEntity: AstEntity;
         if (exportName === ts.InternalSymbolName.Default) {
+          // Example input:
+          //   import('api-extractor-lib1-test').default
+          //
+          // Extracted import base:
+          //   import apiExtractorLib1Test from 'api-extractor-lib1-test';
           exportAstEntity = this._fetchAstImport(exportSymbol, {
             importKind: AstImportKind.DefaultImport,
             modulePath: externalModulePath,
@@ -473,6 +471,11 @@ export class ExportAnalyzer {
             isTypeOnly: true
           });
         } else {
+          // Example input:
+          //   import('api-extractor-lib1-test').Lib1GenericType<number>
+          //
+          // Extracted import base:
+          //   import { Lib1GenericType } from 'api-extractor-lib1-test';
           exportAstEntity = this._fetchAstImport(exportSymbol, {
             importKind: AstImportKind.NamedImport,
             exportName: exportName,
@@ -482,7 +485,7 @@ export class ExportAnalyzer {
         }
         return this._fetchAstSubPathImport(
           exportAstEntity,
-          fullExportPath.slice(1).map((id) => id.getText().trim())
+          importPath.slice(1).map((id) => id.getText().trim())
         );
       } else {
         // Example input:
@@ -503,14 +506,13 @@ export class ExportAnalyzer {
     }
 
     // Internal reference
-    if (node.qualifier) {
-      const fullExportPath: ts.Identifier[] = this._collectIdentifierPath(node.qualifier);
-      const exportName: ts.Identifier = fullExportPath[0];
+    if (importPath.length > 0) {
+      const exportName: ts.Identifier = importPath[0];
       const astModule: AstModule = this._fetchSpecifierAstModule(node, undefined);
       const exportAstEntity: AstEntity = this._getExportOfAstModule(exportName.getText().trim(), astModule);
       return this._fetchAstSubPathImport(
         exportAstEntity,
-        fullExportPath.slice(1).map((id) => id.getText().trim())
+        importPath.slice(1).map((id) => id.getText().trim())
       );
     } else {
       throw new InternalError(
