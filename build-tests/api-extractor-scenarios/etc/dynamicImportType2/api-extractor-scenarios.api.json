@@ -275,7 +275,7 @@
                 {
                   "kind": "Reference",
                   "text": "LocalModule.LocalClass",
-                  "canonicalReference": "api-extractor-scenarios!~LocalClass:class"
+                  "canonicalReference": "api-extractor-scenarios!~LocalClass_2:class"
                 },
                 {
                   "kind": "Content",

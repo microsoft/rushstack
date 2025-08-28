@@ -4,17 +4,18 @@
 
 ```ts
 
-import { apiExtractorLib3Test } from 'api-extractor-lib3-test';
+import * as apiExtractorLib3Test from 'api-extractor-lib3-test';
 import * as Lib1 from 'api-extractor-lib1-test';
-import { Lib1Class } from 'api-extractor-lib3-test';
-import { Lib1Interface } from 'api-extractor-lib1-test';
+import type { Lib1Class } from 'api-extractor-lib3-test';
+import type { Lib1Interface } from 'api-extractor-lib1-test';
 import { Lib2Class } from 'api-extractor-lib2-test';
 import { Lib2Interface } from 'api-extractor-lib2-test';
+import { Lib3Class } from 'api-extractor-lib3-test';
 
 // @public (undocumented)
 export class Item {
     // (undocumented)
-    externalModule: apiExtractorLib3Test;
+    externalModule: typeof apiExtractorLib3Test;
     // (undocumented)
     lib1: Lib1Interface;
     // (undocumented)
@@ -25,18 +26,16 @@ export class Item {
     //
     // (undocumented)
     options: Options;
-    // Warning: (ae-forgotten-export) The symbol "Lib3Class" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     reExportExternal: Lib3Class;
     // (undocumented)
     reExportLocal: Lib2Class;
     // (undocumented)
-    typeofImportExternal: Lib1Class;
+    typeofImportExternal: typeof Lib1Class;
     // Warning: (ae-forgotten-export) The symbol "OptionsClass" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    typeofImportLocal: OptionsClass;
+    typeofImportLocal: typeof OptionsClass;
 }
 
 export { Lib1 }
