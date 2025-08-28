@@ -220,7 +220,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           continue;
         }
 
-        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(name, version);
+        const dependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(name, version);
 
         // Is there a locally built Rush project that could satisfy this dependency?
         let referencedLocalProject: RushConfigurationProject | undefined =

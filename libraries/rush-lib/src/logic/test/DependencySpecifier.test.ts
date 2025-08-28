@@ -4,6 +4,10 @@
 import { DependencySpecifier } from '../DependencySpecifier';
 
 describe(DependencySpecifier.name, () => {
+  afterEach(() => {
+    DependencySpecifier.clearCache();
+  });
+
   it('parses a simple version', () => {
     const specifier = new DependencySpecifier('dep', '1.2.3');
     expect(specifier).toMatchInlineSnapshot(`
@@ -133,6 +137,25 @@ DependencySpecifier {
   "versionSpecifier": "alias-target@*",
 }
 `);
+    });
+  });
+
+  describe(DependencySpecifier.parseWithCache.name, () => {
+    it('returns a cached instance for the same input', () => {
+      const specifier1 = DependencySpecifier.parseWithCache('dep', '1.2.3');
+      const specifier2 = DependencySpecifier.parseWithCache('dep', '1.2.3');
+      expect(specifier1).toBe(specifier2);
+    });
+    it('returns a cached instance for the same alias', () => {
+      const specifier1 = DependencySpecifier.parseWithCache('dep1', 'npm:dep@1.2.3');
+      const specifier2 = DependencySpecifier.parseWithCache('dep2', 'npm:dep@1.2.3');
+      expect(specifier1.aliasTarget).toBe(specifier2.aliasTarget);
+    });
+
+    it('returns different instances for different inputs', () => {
+      const specifier1 = DependencySpecifier.parseWithCache('dep', '1.2.3');
+      const specifier2 = DependencySpecifier.parseWithCache('dep', '1.2.4');
+      expect(specifier1).not.toBe(specifier2);
     });
   });
 });

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Deduplicate parsing of dependency specifiers.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
