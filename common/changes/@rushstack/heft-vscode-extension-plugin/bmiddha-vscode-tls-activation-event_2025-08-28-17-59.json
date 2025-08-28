@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-vscode-extension-plugin",
+      "comment": "add extraPackagingFlags plugin option",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-vscode-extension-plugin"
+}
