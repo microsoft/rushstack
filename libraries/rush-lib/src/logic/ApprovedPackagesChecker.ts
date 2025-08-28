@@ -70,7 +70,7 @@ export class ApprovedPackagesChecker {
         // "dependencies": {
         //   "alias-name": "npm:target-name@^1.2.3"
         // }
-        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(
+        const dependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
           packageName,
           dependencies[packageName]
         );

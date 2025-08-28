@@ -89,6 +89,8 @@ export enum DependencySpecifierType {
   Workspace = 'Workspace'
 }
 
+const dependencySpecifierParseCache: Map<string, DependencySpecifier> = new Map();
+
 /**
  * An NPM "version specifier" is a string that can appear as a package.json "dependencies" value.
  * Example version specifiers: `^1.2.3`, `file:./blah.tgz`, `npm:other-package@~1.2.3`, and so forth.
@@ -131,7 +133,10 @@ export class DependencySpecifier {
 
       if (workspaceSpecResult.alias) {
         // "workspace:some-package@^1.2.3" should be resolved as alias
-        this.aliasTarget = new DependencySpecifier(workspaceSpecResult.alias, workspaceSpecResult.version);
+        this.aliasTarget = DependencySpecifier.parseWithCache(
+          workspaceSpecResult.alias,
+          workspaceSpecResult.version
+        );
       } else {
         this.aliasTarget = undefined;
       }
@@ -147,10 +152,36 @@ export class DependencySpecifier {
       if (!aliasResult.subSpec || !aliasResult.subSpec.name) {
         throw new InternalError('Unexpected result from npm-package-arg');
       }
-      this.aliasTarget = new DependencySpecifier(aliasResult.subSpec.name, aliasResult.subSpec.rawSpec);
+      this.aliasTarget = DependencySpecifier.parseWithCache(
+        aliasResult.subSpec.name,
+        aliasResult.subSpec.rawSpec
+      );
     } else {
       this.aliasTarget = undefined;
     }
+  }
+
+  /**
+   * Clears the dependency specifier parse cache.
+   */
+  public static clearCache(): void {
+    dependencySpecifierParseCache.clear();
+  }
+
+  /**
+   * Parses a dependency specifier with caching.
+   * @param packageName - The name of the package the version specifier corresponds to
+   * @param versionSpecifier - The version specifier to parse
+   * @returns The parsed dependency specifier
+   */
+  public static parseWithCache(packageName: string, versionSpecifier: string): DependencySpecifier {
+    const cacheKey: string = `${packageName}\0${versionSpecifier}`;
+    let result: DependencySpecifier | undefined = dependencySpecifierParseCache.get(cacheKey);
+    if (!result) {
+      result = new DependencySpecifier(packageName, versionSpecifier);
+      dependencySpecifierParseCache.set(cacheKey, result);
+    }
+    return result;
   }
 
   public static getDependencySpecifierType(specifierType: string): DependencySpecifierType {

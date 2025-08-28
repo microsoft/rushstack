@@ -341,7 +341,7 @@ export class VersionManager {
     oldDependencyVersion: string,
     newDependencyVersion: string
   ): void {
-    const oldSpecifier: DependencySpecifier = new DependencySpecifier(
+    const oldSpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
       updatedDependentProject.name,
       oldDependencyVersion
     );

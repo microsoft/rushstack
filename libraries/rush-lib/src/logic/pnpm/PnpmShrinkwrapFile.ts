@@ -151,7 +151,7 @@ export function parsePnpm9DependencyKey(
 
     // Example: 7.26.0
     if (semver.valid(key)) {
-      return new DependencySpecifier(dependencyName, key);
+      return DependencySpecifier.parseWithCache(dependencyName, key);
     }
   }
 
@@ -169,16 +169,16 @@ export function parsePnpm9DependencyKey(
   // Example: https://github.com/jonschlinkert/pad-left/tarball/2.1.0
   // Example: https://codeload.github.com/jonschlinkert/pad-left/tar.gz/7798d648225aa5d879660a37c408ab4675b65ac7
   if (/^https?:/.test(version)) {
-    return new DependencySpecifier(name, version);
+    return DependencySpecifier.parseWithCache(name, version);
   }
 
   // Is it an alias for a different package?
   if (name === dependencyName) {
     // No, it's a regular dependency
-    return new DependencySpecifier(name, version);
+    return DependencySpecifier.parseWithCache(name, version);
   } else {
     // If the parsed package name is different from the dependencyName, then this is an NPM package alias
-    return new DependencySpecifier(dependencyName, `npm:${name}@${version}`);
+    return DependencySpecifier.parseWithCache(dependencyName, `npm:${name}@${version}`);
   }
 }
 
@@ -266,7 +266,10 @@ export function parsePnpmDependencyKey(
     //     git@bitbucket.com+abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     //     bitbucket.co.in/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     if (urlRegex.test(dependencyKey)) {
-      const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependencyName, dependencyKey);
+      const dependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
+        dependencyName,
+        dependencyKey
+      );
       return dependencySpecifier;
     } else {
       return undefined;
@@ -276,10 +279,13 @@ export function parsePnpmDependencyKey(
   // Is it an alias for a different package?
   if (parsedPackageName === dependencyName) {
     // No, it's a regular dependency
-    return new DependencySpecifier(parsedPackageName, parsedVersionPart);
+    return DependencySpecifier.parseWithCache(parsedPackageName, parsedVersionPart);
   } else {
     // If the parsed package name is different from the dependencyName, then this is an NPM package alias
-    return new DependencySpecifier(dependencyName, `npm:${parsedPackageName}@${parsedVersionPart}`);
+    return DependencySpecifier.parseWithCache(
+      dependencyName,
+      `npm:${parsedPackageName}@${parsedVersionPart}`
+    );
   }
 }
 
@@ -673,7 +679,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
       const dependency: IPnpmShrinkwrapDependencyYaml | undefined = this.packages.get(value);
       if (dependency?.resolution?.tarball && value.startsWith(dependency.resolution.tarball)) {
-        return new DependencySpecifier(dependencyName, dependency.resolution.tarball);
+        return DependencySpecifier.parseWithCache(dependencyName, dependency.resolution.tarball);
       }
 
       if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9) {
@@ -690,7 +696,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         }
       }
 
-      return new DependencySpecifier(dependencyName, value);
+      return DependencySpecifier.parseWithCache(dependencyName, value);
     }
     return undefined;
   }
