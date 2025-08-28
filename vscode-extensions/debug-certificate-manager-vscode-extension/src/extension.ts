@@ -189,9 +189,6 @@ export function activate(context: vscode.ExtensionContext): void {
           keyFilename: parsedConfig.keyFilename || 'rushstack-serve.key'
         };
       } catch (error) {
-        void vscode.window.showErrorMessage(
-          'Failed to read or parse the configuration file. Ensure that .vscode/debug-certificate-manager.json exists and is valid.'
-        );
         terminal.writeLine(
           `Error reading or parsing configuration file: ${
             error instanceof Error ? error.message : 'Unknown error'
