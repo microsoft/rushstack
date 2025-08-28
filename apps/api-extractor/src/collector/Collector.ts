@@ -581,9 +581,9 @@ export class Collector {
     }
 
     if (astEntity instanceof AstSubPathImport) {
-      this._createCollectorEntity(astEntity.astEntity);
+      this._createCollectorEntity(astEntity.baseAstEntity);
       this._createCollectorEntity(astEntity);
-      this._recursivelyCreateEntities(astEntity.astEntity, alreadySeenAstEntities);
+      this._recursivelyCreateEntities(astEntity.baseAstEntity, alreadySeenAstEntities);
     }
   }
 

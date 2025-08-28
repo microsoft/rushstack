@@ -333,7 +333,7 @@ export class AstSymbolTable {
         }
 
         if (referencedAstEntity instanceof AstSubPathImport) {
-          analyzeReferencedLocalAstEntity(referencedAstEntity.astEntity);
+          analyzeReferencedLocalAstEntity(referencedAstEntity.baseAstEntity);
         }
       };
 

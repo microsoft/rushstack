@@ -995,6 +995,8 @@ export class ExportAnalyzer {
 
   private _fetchAstSubPathImport(astEntity: AstEntity, exportPath: string[]): AstEntity {
     if (exportPath.length === 0) {
+      // If the exportPath is empty, just use the AstEntity directly instead of creating an unnecessary AstSubPathImport.
+      // e.g. return AstImport for `import("foo").Bar`, return AstEntity of Bar for `import("./foo").Bar`.
       return astEntity;
     }
 
