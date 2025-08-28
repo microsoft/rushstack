@@ -41,7 +41,18 @@ function getPlatformInfo(): IPlatformInfo {
 }
 
 const END_TOKEN: string = '/package.json":';
-const SUBPACKAGE_CACHE_FILE_VERSION: 1 = 1;
+const RESOLVER_CACHE_FILE_VERSION: 1 = 1;
+
+interface IExtendedResolverCacheFile extends IResolverCacheFile {
+  /**
+   * The hash of the shrinkwrap file this cache file was generated from.
+   */
+  shrinkwrapHash: string;
+  /**
+   * The version of the resolver cache file.
+   */
+  version: number;
+}
 
 interface INestedPackageJsonCache {
   subPackagesByIntegrity: [string, string[] | boolean][];
@@ -73,6 +84,9 @@ export async function afterInstallAsync(
   terminal.writeLine(`Using pnpm-lock from: ${lockFilePath}`);
   terminal.writeLine(`Using pnpm store folder: ${pnpmStoreDir}`);
 
+  const workspaceRoot: string = subspace.getSubspaceTempFolderPath();
+  const cacheFilePath: string = `${workspaceRoot}/resolver-cache.json`;
+
   const lockFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(lockFilePath, {
     withCaching: true
   });
@@ -80,12 +94,20 @@ export async function afterInstallAsync(
     throw new Error(`Failed to load shrinkwrap file: ${lockFilePath}`);
   }
 
-  const workspaceRoot: string = subspace.getSubspaceTempFolderPath();
+  try {
+    const oldCacheFileContent: string = await FileSystem.readFileAsync(cacheFilePath);
+    const oldCache: IExtendedResolverCacheFile = JSON.parse(oldCacheFileContent);
+    if (oldCache.version === RESOLVER_CACHE_FILE_VERSION && oldCache.shrinkwrapHash === lockFile.hash) {
+      // Cache is valid, use it
+      return;
+    }
+  } catch (err) {
+    // Ignore
+  }
 
   const projectByImporterPath: LookupByPath<RushConfigurationProject> =
     rushConfiguration.getProjectLookupForRoot(workspaceRoot);
 
-  const cacheFilePath: string = `${workspaceRoot}/resolver-cache.json`;
   const subPackageCacheFilePath: string = `${workspaceRoot}/subpackage-entry-cache.json`;
 
   terminal.writeLine(`Resolver cache will be written at ${cacheFilePath}`);
@@ -95,9 +117,9 @@ export async function afterInstallAsync(
   try {
     const cacheContent: string = await FileSystem.readFileAsync(subPackageCacheFilePath);
     const cacheJson: INestedPackageJsonCache = JSON.parse(cacheContent);
-    if (cacheJson.version !== SUBPACKAGE_CACHE_FILE_VERSION) {
+    if (cacheJson.version !== RESOLVER_CACHE_FILE_VERSION) {
       terminal.writeLine(
-        `Expected subpackage cache version ${SUBPACKAGE_CACHE_FILE_VERSION}, got ${cacheJson.version}`
+        `Expected subpackage cache version ${RESOLVER_CACHE_FILE_VERSION}, got ${cacheJson.version}`
       );
     } else {
       oldSubPackagesByIntegrity = new Map(cacheJson.subPackagesByIntegrity);
@@ -204,9 +226,8 @@ export async function afterInstallAsync(
         terminal.writeDebugLine(
           `Nested "package.json" files found for package at ${descriptionFileRoot}: ${result.join(', ')}`
         );
-        // Clone this array to ensure that mutations don't affect the subpackage cache.
         // eslint-disable-next-line require-atomic-updates
-        context.nestedPackageDirs = [...result];
+        context.nestedPackageDirs = result;
       }
     }
 
@@ -218,22 +239,7 @@ export async function afterInstallAsync(
     });
   }
 
-  // Serialize this before `computeResolverCacheFromLockfileAsync` because bundledDependencies get removed
-  // from the `nestedPackageDirs` array. We clone above for safety, but this is making doubly sure.
-  const newSubPackageCache: INestedPackageJsonCache = {
-    version: SUBPACKAGE_CACHE_FILE_VERSION,
-    subPackagesByIntegrity: Array.from(subPackagesByIntegrity)
-  };
-  const serializedSubpackageCache: string = JSON.stringify(newSubPackageCache);
-  const writeSubPackageCachePromise: Promise<void> = FileSystem.writeFileAsync(
-    subPackageCacheFilePath,
-    serializedSubpackageCache,
-    {
-      ensureFolderExists: true
-    }
-  );
-
-  const cacheFile: IResolverCacheFile = await computeResolverCacheFromLockfileAsync({
+  const rawCacheFile: IResolverCacheFile = await computeResolverCacheFromLockfileAsync({
     workspaceRoot,
     commonPrefixToTrim: rushRoot,
     platformInfo: getPlatformInfo(),
@@ -242,13 +248,27 @@ export async function afterInstallAsync(
     afterExternalPackagesAsync
   });
 
-  const serialized: string = JSON.stringify(cacheFile);
+  const extendedCacheFile: IExtendedResolverCacheFile = {
+    version: RESOLVER_CACHE_FILE_VERSION,
+    shrinkwrapHash: lockFile.hash,
+    ...rawCacheFile
+  };
+
+  const newSubPackageCache: INestedPackageJsonCache = {
+    version: RESOLVER_CACHE_FILE_VERSION,
+    subPackagesByIntegrity: Array.from(subPackagesByIntegrity)
+  };
+  const serializedSubpackageCache: string = JSON.stringify(newSubPackageCache);
+
+  const serialized: string = JSON.stringify(extendedCacheFile);
 
   await Promise.all([
     FileSystem.writeFileAsync(cacheFilePath, serialized, {
       ensureFolderExists: true
     }),
-    writeSubPackageCachePromise
+    FileSystem.writeFileAsync(subPackageCacheFilePath, serializedSubpackageCache, {
+      ensureFolderExists: true
+    })
   ]);
 
   terminal.writeLine(`Resolver cache written.`);
