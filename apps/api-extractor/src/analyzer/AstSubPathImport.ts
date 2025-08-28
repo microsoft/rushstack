@@ -42,11 +42,6 @@ export class AstSubPathImport extends AstSyntheticEntity {
    */
   public readonly exportPath: string[];
 
-  /**
-   * Whether it is referenced only by import type syntax, e.g. `import("foo").Bar`.
-   */
-  public isImportTypeEverywhere: boolean = true;
-
   public constructor(options: IAstSubPathImportOptions) {
     super();
 
