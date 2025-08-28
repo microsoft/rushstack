@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/cpu-profile-summarizer",
+      "comment": "docs(worker): improve JSDoc and strengthen error handling",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/cpu-profile-summarizer"
+}
