@@ -364,6 +364,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return dependencyPath.removeSuffix(version).includes('@', 1) ? version : `${name}@${version}`;
   }
 
+  /**
+   * Clears the cache of PnpmShrinkwrapFile instances to free up memory.
+   */
+  public static clearCache(): void {
+    cacheByLockfileHash.clear();
+  }
+
   public static loadFromFile(
     shrinkwrapYamlFilePath: string,
     options: ILoadFromFileOptions = {}
