@@ -54,7 +54,7 @@
       },
       {
         "command": "debugCertificateManager.sync",
-        "title": "Sync TLS Certificates",
+        "title": "Ensure and Sync TLS Certificates",
         "category": "Debug Certificate Manager"
       },
       {
