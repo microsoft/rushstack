@@ -18,6 +18,7 @@ import type { MessageRouter } from '../collector/MessageRouter';
 import { TypeScriptInternals, type IGlobalVariableAnalyzer } from './TypeScriptInternals';
 import { SyntaxHelpers } from './SyntaxHelpers';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
+import { AstSubPathImport } from './AstSubPathImport';
 
 /**
  * Options for `AstSymbolTable._fetchAstSymbol()`
@@ -318,20 +319,28 @@ export class AstSymbolTable {
       // If this symbol is non-external (i.e. it belongs to the working package), then we also analyze any
       // referencedAstSymbols that are non-external.  For example, this ensures that forgotten exports
       // get analyzed.
+      const analyzeReferencedLocalAstEntity = (referencedAstEntity: AstEntity) => {
+        if (referencedAstEntity instanceof AstSymbol) {
+          if (!referencedAstEntity.isExternal) {
+            this._analyzeAstSymbol(referencedAstEntity);
+          }
+        }
+
+        if (referencedAstEntity instanceof AstNamespaceImport) {
+          if (!referencedAstEntity.astModule.isExternal) {
+            this._analyzeAstNamespaceImport(referencedAstEntity);
+          }
+        }
+
+        if (referencedAstEntity instanceof AstSubPathImport) {
+          analyzeReferencedLocalAstEntity(referencedAstEntity.astEntity);
+        }
+      };
+
       rootAstSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
         for (const referencedAstEntity of astDeclaration.referencedAstEntities) {
           // Walk up to the root of the tree, looking for any imports along the way
-          if (referencedAstEntity instanceof AstSymbol) {
-            if (!referencedAstEntity.isExternal) {
-              this._analyzeAstSymbol(referencedAstEntity);
-            }
-          }
-
-          if (referencedAstEntity instanceof AstNamespaceImport) {
-            if (!referencedAstEntity.astModule.isExternal) {
-              this._analyzeAstNamespaceImport(referencedAstEntity);
-            }
-          }
+          analyzeReferencedLocalAstEntity(referencedAstEntity);
         }
       });
     }

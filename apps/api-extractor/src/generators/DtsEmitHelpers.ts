@@ -11,6 +11,7 @@ import type { Collector } from '../collector/Collector';
 import type { Span } from '../analyzer/Span';
 import type { IndentedWriter } from './IndentedWriter';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
+import { AstSubPathImport } from '../analyzer/AstSubPathImport';
 
 /**
  * Some common code shared between DtsRollupGenerator and ApiReportGenerator.
@@ -109,6 +110,8 @@ export class DtsEmitHelpers {
         throw new InternalError('referencedEntry.nameForEmit is undefined');
       }
 
+      const typeofPrefix: string = node.isTypeOf ? 'typeof ' : '';
+
       let typeArgumentsText: string = '';
 
       if (node.typeArguments && node.typeArguments.length > 0) {
@@ -146,11 +149,7 @@ export class DtsEmitHelpers {
 
       const separatorAfter: string = /(\s*)$/.exec(span.getText())?.[1] ?? '';
 
-      if (
-        referencedEntity.astEntity instanceof AstImport &&
-        referencedEntity.astEntity.importKind === AstImportKind.ImportType &&
-        referencedEntity.astEntity.exportName
-      ) {
+      if (referencedEntity.astEntity instanceof AstSubPathImport) {
         // For an ImportType with a namespace chain, only the top namespace is imported.
         // Must add the original nested qualifiers to the rolled up import.
         const qualifiersText: string = node.qualifier?.getText() ?? '';
@@ -158,15 +157,23 @@ export class DtsEmitHelpers {
         // Including the leading "."
         const nestedQualifiersText: string =
           nestedQualifiersStart >= 0 ? qualifiersText.substring(nestedQualifiersStart) : '';
-
-        const replacement: string = `${referencedEntity.nameForEmit}${nestedQualifiersText}${typeArgumentsText}${separatorAfter}`;
+        const baseEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(
+          referencedEntity.astEntity.astEntity
+        );
+        if (!baseEntity) {
+          throw new InternalError(
+            `Collector entity for import() not found: ${node.getText()}\n` +
+              SourceFileLocationFormatter.formatDeclaration(node)
+          );
+        }
+        const replacement: string = `${typeofPrefix}${baseEntity.nameForEmit}${nestedQualifiersText}${typeArgumentsText}${separatorAfter}`;
 
         span.modification.skipAll();
         span.modification.prefix = replacement;
       } else {
         // Replace with internal symbol or AstImport
         span.modification.skipAll();
-        span.modification.prefix = `${referencedEntity.nameForEmit}${typeArgumentsText}${separatorAfter}`;
+        span.modification.prefix = `${typeofPrefix}${referencedEntity.nameForEmit}${typeArgumentsText}${separatorAfter}`;
       }
     }
   }
