@@ -121,6 +121,11 @@ export class DependencyAnalyzer {
           continue;
         }
 
+        if (dependencyVersion.startsWith('workspace:')) {
+          // If this is a workspace protocol dependency, ignore it.
+          continue;
+        }
+
         // Is it a local project?
         const localProject: RushConfigurationProject | undefined =
           this._rushConfiguration.getProjectByName(dependencyName);
