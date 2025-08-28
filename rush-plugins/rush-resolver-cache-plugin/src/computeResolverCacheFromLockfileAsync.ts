@@ -74,7 +74,7 @@ function extractBundledDependencies(
 
     if (!foundBundledDependencies) {
       foundBundledDependencies = true;
-      nestedPackageDirs = nestedPackageDirs.slice(0);
+      context.nestedPackageDirs = nestedPackageDirs = nestedPackageDirs.slice(0);
     }
     // Remove this nested package from the list
     nestedPackageDirs.splice(i, 1);
