@@ -74,6 +74,8 @@ function extractBundledDependencies(
 
     if (!foundBundledDependencies) {
       foundBundledDependencies = true;
+      // Make a copy of the nestedPackageDirs array so that we don't mutate the version being
+      // saved into the subpackage index cache.
       context.nestedPackageDirs = nestedPackageDirs = nestedPackageDirs.slice(0);
     }
     // Remove this nested package from the list
