@@ -190,6 +190,41 @@
           "members": [
             {
               "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!Item#defaultImport:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "defaultImport: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "import('api-extractor-lib2-test')."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "default",
+                  "canonicalReference": "api-extractor-lib2-test!DefaultClass:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "defaultImport",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "isStatic": false,
+              "isProtected": false,
+              "isAbstract": false
+            },
+            {
+              "kind": "Property",
               "canonicalReference": "api-extractor-scenarios!Item#externalModule:member",
               "docComment": "",
               "excerptTokens": [

@@ -4,12 +4,13 @@
 
 ```ts
 
+import type apiExtractorLib2Test from 'api-extractor-lib2-test';
 import { default as default_2 } from 'api-extractor-lib2-test';
 
 // @public (undocumented)
 export interface DefaultImportTypes {
     // (undocumented)
-    dynamicImport: default_2;
+    dynamicImport: apiExtractorLib2Test;
     // (undocumented)
     namedImport: default_2;
     // (undocumented)

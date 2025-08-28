@@ -469,7 +469,7 @@ export class ExportAnalyzer {
           exportAstEntity = this._fetchAstImport(exportSymbol, {
             importKind: AstImportKind.DefaultImport,
             modulePath: externalModulePath,
-            exportName: exportSymbol?.name ?? exportName,
+            exportName: SyntaxHelpers.makeCamelCaseIdentifier(externalModulePath),
             isTypeOnly: true
           });
         } else {

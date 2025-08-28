@@ -1,3 +1,4 @@
+import type apiExtractorLib2Test from 'api-extractor-lib2-test';
 import * as apiExtractorLib3Test from 'api-extractor-lib3-test';
 import * as Lib1 from 'api-extractor-lib1-test';
 import type { Lib1Class } from 'api-extractor-lib3-test';
@@ -12,6 +13,7 @@ export declare class Item {
     lib1: Lib1Interface;
     lib2: Lib2Interface;
     lib3: Lib1Class;
+    defaultImport: apiExtractorLib2Test;
     externalModule: typeof apiExtractorLib3Test;
     typeofImportLocal: typeof OptionsClass;
     typeofImportExternal: typeof Lib1Class;

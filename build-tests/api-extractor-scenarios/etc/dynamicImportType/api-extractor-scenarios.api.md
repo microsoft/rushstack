@@ -4,6 +4,7 @@
 
 ```ts
 
+import type apiExtractorLib2Test from 'api-extractor-lib2-test';
 import * as apiExtractorLib3Test from 'api-extractor-lib3-test';
 import * as Lib1 from 'api-extractor-lib1-test';
 import type { Lib1Class } from 'api-extractor-lib3-test';
@@ -14,6 +15,8 @@ import { Lib3Class } from 'api-extractor-lib3-test';
 
 // @public (undocumented)
 export class Item {
+    // (undocumented)
+    defaultImport: apiExtractorLib2Test;
     // (undocumented)
     externalModule: typeof apiExtractorLib3Test;
     // (undocumented)
