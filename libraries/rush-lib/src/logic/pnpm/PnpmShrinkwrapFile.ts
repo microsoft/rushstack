@@ -291,10 +291,9 @@ export function normalizePnpmVersionSpecifier(versionSpecifier: IPnpmVersionSpec
   }
 }
 
-export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
-  // TODO: Implement cache eviction when a lockfile is copied back
-  private static _cacheByLockfilePath: Map<string, PnpmShrinkwrapFile | undefined> = new Map();
+const cacheByLockfileHash: Map<string, PnpmShrinkwrapFile | undefined> = new Map();
 
+export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly shrinkwrapFileMajorVersion: number;
   public readonly isWorkspaceCompatible: boolean;
   public readonly registry: string;
@@ -304,14 +303,17 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly packages: ReadonlyMap<string, IPnpmShrinkwrapDependencyYaml>;
   public readonly overrides: ReadonlyMap<string, string>;
   public readonly packageExtensionsChecksum: undefined | string;
+  public readonly hash: string;
 
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
   private readonly _integrities: Map<string, Map<string, string>>;
   private _pnpmfileConfiguration: PnpmfileConfiguration | undefined;
 
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml) {
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, hash: string) {
     super();
+    this.hash = hash;
     this._shrinkwrapJson = shrinkwrapJson;
+    cacheByLockfileHash.set(hash, this);
 
     // Normalize the data
     const lockfileVersion: string | number | undefined = shrinkwrapJson.lockfileVersion;
@@ -364,31 +366,26 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   public static loadFromFile(
     shrinkwrapYamlFilePath: string,
-    { withCaching }: ILoadFromFileOptions = {}
+    options: ILoadFromFileOptions = {}
   ): PnpmShrinkwrapFile | undefined {
-    let loaded: PnpmShrinkwrapFile | undefined;
-    if (withCaching) {
-      loaded = PnpmShrinkwrapFile._cacheByLockfilePath.get(shrinkwrapYamlFilePath);
-    }
-
-    // TODO: Promisify this
-    loaded ??= (() => {
-      try {
-        const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilePath);
-        return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
-      } catch (error) {
-        if (FileSystem.isNotExistError(error as Error)) {
-          return undefined; // file does not exist
-        }
-        throw new Error(`Error reading "${shrinkwrapYamlFilePath}":\n  ${(error as Error).message}`);
+    try {
+      const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilePath);
+      return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error as Error)) {
+        return undefined; // file does not exist
       }
-    })();
-
-    PnpmShrinkwrapFile._cacheByLockfilePath.set(shrinkwrapYamlFilePath, loaded);
-    return loaded;
+      throw new Error(`Error reading "${shrinkwrapYamlFilePath}":\n  ${(error as Error).message}`);
+    }
   }
 
   public static loadFromString(shrinkwrapContent: string): PnpmShrinkwrapFile {
+    const hash: string = crypto.createHash('sha-256').update(shrinkwrapContent, 'utf8').digest('hex');
+    const cached: PnpmShrinkwrapFile | undefined = cacheByLockfileHash.get(hash);
+    if (cached) {
+      return cached;
+    }
+
     const shrinkwrapJson: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
     if ((shrinkwrapJson as LockfileFileV9).snapshots) {
       const lockfile: IPnpmShrinkwrapYaml | null = convertLockfileV9ToLockfileObject(
@@ -418,10 +415,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           lockfile.dependencies[name] = PnpmShrinkwrapFile.getLockfileV9PackageId(name, versionSpecifier);
         }
       }
-      return new PnpmShrinkwrapFile(lockfile);
+      return new PnpmShrinkwrapFile(lockfile, hash);
     }
 
-    return new PnpmShrinkwrapFile(shrinkwrapJson);
+    return new PnpmShrinkwrapFile(shrinkwrapJson, hash);
   }
 
   public getShrinkwrapHash(experimentsConfig?: IExperimentsJson): string {
