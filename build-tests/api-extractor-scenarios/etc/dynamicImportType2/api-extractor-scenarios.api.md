@@ -9,9 +9,19 @@ import { Lib1Namespace } from 'api-extractor-lib1-test';
 // @public (undocumented)
 export interface IExample {
     // (undocumented)
-    dottedImportType: Lib1Namespace.Inner.X | undefined;
+    dottedImportType: Lib1Namespace | undefined;
     // (undocumented)
-    dottedImportType2: Lib1Namespace.Y | undefined;
+    dottedImportType2: Lib1Namespace | undefined;
+    // Warning: (ae-forgotten-export) The symbol "LocalClass" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    localDottedImportType: LocalClass;
+    // Warning: (ae-forgotten-export) The symbol "LocalNS" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    localDottedImportType2: import('./namespace-export').LocalNS.LocalNSClass;
+    // (undocumented)
+    predefinedNamedImport: Lib1Namespace.Inner.X;
 }
 
 // (No @packageDocumentation comment for this package)
