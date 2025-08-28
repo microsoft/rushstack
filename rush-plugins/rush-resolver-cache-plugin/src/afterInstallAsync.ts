@@ -271,5 +271,8 @@ export async function afterInstallAsync(
     })
   ]);
 
+  // Free the memory used by the lockfiles, since nothing should read the lockfile from this point on.
+  PnpmShrinkwrapFile.clearCache();
+
   terminal.writeLine(`Resolver cache written.`);
 }
