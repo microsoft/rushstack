@@ -1,0 +1,5 @@
+{
+  "compiler": {
+    "tsconfigFilePath": "<projectFolder>/src/bundlerModuleResolution/config/tsconfig.json"
+  }
+}
