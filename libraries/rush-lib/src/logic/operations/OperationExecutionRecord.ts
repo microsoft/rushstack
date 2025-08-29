@@ -39,7 +39,7 @@ import {
  */
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
-  onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  onOperationStatusChanged?: (record: OperationExecutionRecord, oldStatus: OperationStatus) => void;
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
   inputsSnapshot: IInputsSnapshot | undefined;
 
@@ -207,11 +207,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     return this._status;
   }
   public set status(newStatus: OperationStatus) {
-    if (newStatus === this._status) {
+    const oldStatus: OperationStatus = this._status;
+    if (newStatus === oldStatus) {
       return;
     }
     this._status = newStatus;
-    this._context.onOperationStatusChanged?.(this);
+    this._context.onOperationStatusChanged?.(this, oldStatus);
   }
 
   public get silent(): boolean {
