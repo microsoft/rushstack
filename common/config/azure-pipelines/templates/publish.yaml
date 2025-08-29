@@ -4,9 +4,14 @@ parameters:
   - name: BranchName
     type: string
     default: $(Build.SourceBranchName)
+  - name: PublishVersionTag
+    type: string
+    default: latest
 
 steps:
-  - script: 'node common/scripts/install-run-rush.js publish --apply --publish --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details --set-access-level public'
+  - script: 'node common/scripts/install-run-rush.js publish --publish --apply --pack --release-folder $(Build.ArtifactStagingDirectory)/packages --include-all --target-branch ${{ parameters.BranchName }} --add-commit-details'
     displayName: 'Rush Publish (Policy: ${{ parameters.VersionPolicyName }})'
-    env:
-      NPM_AUTH_TOKEN: $(npmToken)
+
+  - script: |
+      echo "${{ parameters.PublishVersionTag }}" > "$(Build.ArtifactStagingDirectory)/npm-tag"
+    displayName: 'Create version.txt with publish tag'
