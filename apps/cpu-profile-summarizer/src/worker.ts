@@ -73,7 +73,7 @@ function addProfileToSummary(profile: ICpuProfile, accumulator: IProfileSummary)
   // Distribute time samples across nodes
   const duration: number = endTime - startTime;
   let lastNodeTime: number = duration - timeDeltas[0];
-  for (let i = 0; i < timeDeltas.length - 1; i++) {
+  for (let i: number = 0; i < timeDeltas.length - 1; i++) {
     const sampleDuration: number = timeDeltas[i + 1];
     const localTime: ILocalTimeInfo = localTimes[getIndexFromNodeId(samples[i])];
     localTime.self += sampleDuration;
