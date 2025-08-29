@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.158.1",
+      "tag": "@microsoft/rush_v5.158.1",
+      "date": "Fri, 29 Aug 2025 00:08:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Deduplicate parsing of dependency specifiers."
+          },
+          {
+            "comment": "Optimize detection of local projects when collecting implicit preferred versions."
+          },
+          {
+            "comment": "Dedupe shrinkwrap parsing by content hash."
+          },
+          {
+            "comment": "[resolver-cache] Use shrinkwrap hash to skip resolver cache regeneration."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.158.0",
       "tag": "@microsoft/rush_v5.158.0",
       "date": "Tue, 26 Aug 2025 23:27:47 GMT",

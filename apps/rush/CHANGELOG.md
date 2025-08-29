@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 26 Aug 2025 23:27:47 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Aug 2025 00:08:18 GMT and should not be manually modified.
+
+## 5.158.1
+Fri, 29 Aug 2025 00:08:18 GMT
+
+### Updates
+
+- Deduplicate parsing of dependency specifiers.
+- Optimize detection of local projects when collecting implicit preferred versions.
+- Dedupe shrinkwrap parsing by content hash.
+- [resolver-cache] Use shrinkwrap hash to skip resolver cache regeneration.
 
 ## 5.158.0
 Tue, 26 Aug 2025 23:27:47 GMT
