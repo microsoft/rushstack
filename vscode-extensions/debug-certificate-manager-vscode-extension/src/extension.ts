@@ -164,9 +164,6 @@ export function activate(context: vscode.ExtensionContext): void {
       const workspaceUri: vscode.Uri | undefined = vscode.workspace.workspaceFolders?.[0].uri;
       if (!workspaceUri) {
         terminal.writeLine('No workspace folder found. Synchronization aborted.');
-        void vscode.window.showErrorMessage(
-          'No workspace folder found. Open the project folder to sync TLS certificates.'
-        );
         return;
       }
 
