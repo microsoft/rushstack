@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/cpu-profile-summarizer",
-      "comment": "docs(worker): improve JSDoc and strengthen error handling",
+      "comment": "Improve error handling in the worker in cases when the error thrown is not an instance of `Error`.",
       "type": "none"
     }
   ],
