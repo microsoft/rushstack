@@ -83,14 +83,15 @@ export class BridgeCachePlugin implements IRushPlugin {
         ): Promise<void> => {
           const { buildCacheConfiguration } = context;
           const { terminal } = logger;
+
+          if (cacheAction === undefined) {
+            return;
+          }
+
           if (!buildCacheConfiguration?.buildCacheEnabled) {
             throw new Error(
               `The build cache must be enabled to use the "${this._actionParameterName}" parameter.`
             );
-          }
-
-          if (cacheAction === undefined) {
-            return;
           }
 
           const filteredOperations: Set<IOperationExecutionResult> = new Set();
@@ -122,6 +123,7 @@ export class BridgeCachePlugin implements IRushPlugin {
                   terminal.writeLine(
                     `Operation "${operation.name}": Outputs have been restored from the build cache."`
                   );
+                  terminal.writeLine(`Cache key: ${projectBuildCache.cacheId}`);
                 } else {
                   terminal.writeWarningLine(
                     `Operation "${operation.name}": Outputs could not be restored from the build cache.`
@@ -155,6 +157,7 @@ export class BridgeCachePlugin implements IRushPlugin {
                   terminal.writeLine(
                     `Operation "${operation.name}": Existing outputs have been successfully written to the build cache."`
                   );
+                  terminal.writeLine(`Cache key: ${projectBuildCache.cacheId}`);
                 } else {
                   terminal.writeErrorLine(
                     `Operation "${operation.name}": An error occurred while writing existing outputs to the build cache.`
@@ -179,6 +182,7 @@ export class BridgeCachePlugin implements IRushPlugin {
     const cacheActionParameter: CommandLineParameter | undefined = context.customParameters.get(
       this._actionParameterName
     );
+
     if (cacheActionParameter) {
       if (cacheActionParameter.kind !== CommandLineParameterKind.Choice) {
         throw new Error(
