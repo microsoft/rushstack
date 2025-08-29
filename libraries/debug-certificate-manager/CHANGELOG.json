@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.5.5",
+      "tag": "@rushstack/debug-certificate-manager_v1.5.5",
+      "date": "Fri, 29 Aug 2025 00:15:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix homedir resolution in CertificateStore"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.4",
       "tag": "@rushstack/debug-certificate-manager_v1.5.4",
       "date": "Tue, 26 Aug 2025 00:12:57 GMT",

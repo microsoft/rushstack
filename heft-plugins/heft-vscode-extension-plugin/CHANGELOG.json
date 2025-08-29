@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-vscode-extension-plugin",
   "entries": [
     {
+      "version": "0.2.5",
+      "tag": "@rushstack/heft-vscode-extension-plugin_v0.2.5",
+      "date": "Fri, 29 Aug 2025 00:15:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "add extraPackagingFlags plugin option"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.4",
       "tag": "@rushstack/heft-vscode-extension-plugin_v0.2.4",
       "date": "Thu, 21 Aug 2025 00:12:45 GMT",

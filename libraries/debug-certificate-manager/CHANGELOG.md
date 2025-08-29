@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Tue, 26 Aug 2025 00:12:57 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Aug 2025 00:15:42 GMT and should not be manually modified.
+
+## 1.5.5
+Fri, 29 Aug 2025 00:15:42 GMT
+
+### Patches
+
+- Fix homedir resolution in CertificateStore
 
 ## 1.5.4
 Tue, 26 Aug 2025 00:12:57 GMT

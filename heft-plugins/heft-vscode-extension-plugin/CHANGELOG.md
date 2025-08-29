@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-vscode-extension-plugin
 
-This log was last generated on Thu, 21 Aug 2025 00:12:45 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Aug 2025 00:15:42 GMT and should not be manually modified.
+
+## 0.2.5
+Fri, 29 Aug 2025 00:15:42 GMT
+
+### Patches
+
+- add extraPackagingFlags plugin option
 
 ## 0.2.4
 Thu, 21 Aug 2025 00:12:45 GMT
