@@ -99,8 +99,8 @@ function addProfileToSummary(profile: ICpuProfile, accumulator: IProfileSummary)
 
   // Summarize per-frame data
   for (const [frameId, contributors] of nodesByFrame) {
-    let selfTime = 0;
-    let totalTime = 0;
+    let selfTime: number = 0;
+    let totalTime: number = 0;
 
     let selfIndex: number | undefined;
     for (const contributor of contributors) {
