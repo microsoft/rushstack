@@ -85,7 +85,7 @@ function addProfileToSummary(profile: ICpuProfile, accumulator: IProfileSummary)
 
   // Group nodes by frameId
   const nodesByFrame: Map<string, Set<number>> = new Map();
-  for (let i = 0; i < nodes.length; i++) {
+  for (let i: number = 0; i < nodes.length; i++) {
     const { callFrame } = nodes[i];
     const frameId: string = computeCallFrameId(callFrame);
 
