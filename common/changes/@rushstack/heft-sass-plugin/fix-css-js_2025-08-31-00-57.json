@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Fix an issue where generated `.scss.js` files can contain an incorrect path to the `.css` file.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin"
+}
