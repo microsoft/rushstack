@@ -30,7 +30,7 @@
     "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.74.1",
+    "@rushstack/heft": "0.74.3",
     "@typescript-eslint/parser": "~8.31.0",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.25.1",
