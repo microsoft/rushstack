@@ -17,6 +17,7 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
   defaultOptions: [],
   meta: {
     type: 'problem',
+    fixable: 'code',
     messages: {
       'error-unhoisted-jest-mock':
         "Jest's module mocking APIs must be called before regular imports. Move this call so that it precedes" +
@@ -88,6 +89,8 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
 
     // This tracks the first require() or import expression that we found in the file.
     let firstImportNode: TSESTree.Node | undefined = undefined;
+    // track if import node has variable declaration
+    let hasVariableDeclaration: boolean = false;
 
     // Avoid reporting more than one error for a given statement.
     // Example: jest.mock('a').mock('b');
@@ -98,7 +101,26 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
         if (firstImportNode === undefined) {
           // EXAMPLE:  const x = require('x')
           if (hoistJestMockPatterns.requireCallExpression.match(node)) {
-            firstImportNode = node;
+            // Check if this require is inside a jest.mock factory function
+            let currentNode: TSESTree.Node | undefined = node;
+            let isInJestMockFactory = false;
+
+            while (currentNode?.parent) {
+              if (
+                currentNode.parent.type === AST_NODE_TYPES.ArrowFunctionExpression &&
+                currentNode.parent.parent?.type === AST_NODE_TYPES.CallExpression &&
+                isHoistableJestCall(currentNode.parent.parent)
+              ) {
+                isInJestMockFactory = true;
+                break;
+              }
+              currentNode = currentNode.parent;
+            }
+
+            // Only set firstImportNode if not in a factory function
+            if (!isInJestMockFactory) {
+              firstImportNode = node;
+            }
           }
         }
 
@@ -111,7 +133,64 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
               context.report({
                 node,
                 messageId: 'error-unhoisted-jest-mock',
-                data: { importLine: firstImportNode.loc.start.line }
+                data: { importLine: firstImportNode.loc.start.line },
+                fix: (fixer: TSESLint.RuleFixer) => {
+                  // Ensure firstImportNode is defined before attempting fix
+                  if (!firstImportNode) {
+                    return null;
+                  }
+
+                  const sourceCode: TSESLint.SourceCode = context.getSourceCode();
+                  const statementText: string = sourceCode.getText(outerStatement);
+
+                  // Check if this import is inside a jest.mock factory function
+                  let currentNode: TSESTree.Node | undefined = firstImportNode;
+                  let isInJestMockFactory = false;
+
+                  while (currentNode?.parent) {
+                    if (
+                      currentNode.parent.type === AST_NODE_TYPES.ArrowFunctionExpression &&
+                      currentNode.parent.parent?.type === AST_NODE_TYPES.CallExpression &&
+                      isHoistableJestCall(currentNode.parent.parent)
+                    ) {
+                      isInJestMockFactory = true;
+                      break;
+                    }
+                    currentNode = currentNode.parent;
+                  }
+
+                  // If the import is inside a jest.mock factory, don't consider it for hoisting
+                  if (isInJestMockFactory) {
+                    return null;
+                  }
+
+                  // Remove the statement from its current position
+                  const removeOriginal: TSESLint.RuleFix = fixer.removeRange([
+                    outerStatement.range[0] - 1, // Include the previous line's newline character
+                    outerStatement.range[1]
+                  ]);
+
+                  const importExpr = firstImportNode;
+                  let nodeToInsertBefore = importExpr;
+
+                  // Check if the import is part of a variable declaration
+                  if (
+                    importExpr.parent &&
+                    importExpr.parent.type === 'VariableDeclarator' &&
+                    importExpr.parent.parent &&
+                    importExpr.parent.parent.type === 'VariableDeclaration'
+                  ) {
+                    nodeToInsertBefore = importExpr.parent.parent;
+                  }
+
+                  // Insert it before the first import
+                  const addBeforeImport: TSESLint.RuleFix = fixer.insertTextBefore(
+                    nodeToInsertBefore,
+                    statementText + '\n'
+                  );
+
+                  return [removeOriginal, addBeforeImport];
+                }
               });
             }
           }
