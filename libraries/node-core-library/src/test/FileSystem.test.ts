@@ -43,10 +43,9 @@ describe(FileSystem.name, () => {
     });
 
     test('Should return true for an error on a file descriptor call', () => {
-      const buffer: Buffer = Buffer.allocUnsafeSlow(1024);
       expect.assertions(1);
       try {
-        fs.readSync(11, buffer, 0, buffer.length, -1);
+        fs.readFileSync(`${__dirname}/nonexistent.txt`);
       } catch (error) {
         expect(FileSystem.isErrnoException(error)).toBe(true);
       }

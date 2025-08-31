@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/node-core-library"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "iclanton@users.noreply.github.com"
+}
