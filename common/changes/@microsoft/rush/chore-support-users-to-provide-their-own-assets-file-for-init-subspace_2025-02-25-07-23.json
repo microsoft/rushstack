@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow a monorepo to provide custom config file templates for the `rush init-subspace` command",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
