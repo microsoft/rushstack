@@ -25,6 +25,10 @@ export class Item {
     lib2: Lib2Interface;
     // (undocumented)
     lib3: Lib1Class;
+    // Warning: (ae-forgotten-export) The symbol "Options_2" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    localModule: typeof Options_2;
     // Warning: (ae-forgotten-export) The symbol "Options" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

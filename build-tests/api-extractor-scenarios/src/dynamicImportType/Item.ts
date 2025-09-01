@@ -9,6 +9,7 @@ export class Item {
   lib3: import('api-extractor-lib3-test').Lib1Class;
   defaultImport: import('api-extractor-lib2-test').default;
   externalModule: typeof import('api-extractor-lib3-test');
+  localModule: typeof import('./Options');
   typeofImportLocal: typeof import('./Options').OptionsClass;
   typeofImportExternal: typeof import('api-extractor-lib3-test').Lib1Class;
   reExportLocal: import('./re-export').Lib2Class;

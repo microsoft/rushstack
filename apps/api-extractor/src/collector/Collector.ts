@@ -523,7 +523,7 @@ export class Collector {
       if (astEntity instanceof AstSymbol) {
         this._entitiesBySymbol.set(astEntity.followedSymbol, entity);
       } else if (astEntity instanceof AstNamespaceImport) {
-        this._entitiesBySymbol.set(astEntity.symbol, entity);
+        this._entitiesBySymbol.set(astEntity.astModule.moduleSymbol, entity);
       }
       this._entities.push(entity);
       this._collectReferenceDirectives(astEntity);

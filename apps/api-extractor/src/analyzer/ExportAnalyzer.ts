@@ -506,19 +506,17 @@ export class ExportAnalyzer {
     }
 
     // Internal reference
+    const astModule: AstModule = this._fetchSpecifierAstModule(node, undefined);
     if (importPath.length > 0) {
       const exportName: ts.Identifier = importPath[0];
-      const astModule: AstModule = this._fetchSpecifierAstModule(node, undefined);
       const exportAstEntity: AstEntity = this._getExportOfAstModule(exportName.getText().trim(), astModule);
       return this._fetchAstSubPathImport({
         astEntity: exportAstEntity,
         exportPath: importPath.slice(1).map((id) => id.getText().trim())
       });
     } else {
-      throw new InternalError(
-        `import() for local module without qualifier is not supported: ${node.getText()}\n` +
-          SourceFileLocationFormatter.formatDeclaration(node)
-      );
+      const localName: string = SyntaxHelpers.makeCamelCaseIdentifier(this._getModuleSpecifier(node));
+      return this._getAstNamespaceImport(astModule, localName, astModule.sourceFile);
     }
   }
 
@@ -603,15 +601,14 @@ export class ExportAnalyzer {
   ): AstNamespaceExport {
     const imoprtNamespace: AstNamespaceImport = this._getAstNamespaceImport(
       astModule,
-      declarationSymbol,
+      declarationSymbol.name,
       declaration
     );
 
     return new AstNamespaceExport({
       namespaceName: imoprtNamespace.localName,
       astModule: astModule,
-      declaration,
-      symbol: declarationSymbol
+      declaration
     });
   }
 
@@ -642,7 +639,7 @@ export class ExportAnalyzer {
 
         if (externalModulePath === undefined) {
           const astModule: AstModule = this._fetchSpecifierAstModule(importDeclaration, declarationSymbol);
-          return this._getAstNamespaceImport(astModule, declarationSymbol, declaration);
+          return this._getAstNamespaceImport(astModule, declarationSymbol.name, declaration);
         }
 
         // Here importSymbol=undefined because {@inheritDoc} and such are not going to work correctly for
@@ -771,16 +768,15 @@ export class ExportAnalyzer {
 
   private _getAstNamespaceImport(
     astModule: AstModule,
-    declarationSymbol: ts.Symbol,
+    localName: string,
     declaration: ts.Declaration
   ): AstNamespaceImport {
     let namespaceImport: AstNamespaceImport | undefined = this._astNamespaceImportByModule.get(astModule);
     if (namespaceImport === undefined) {
       namespaceImport = new AstNamespaceImport({
-        namespaceName: declarationSymbol.name,
+        namespaceName: localName,
         astModule: astModule,
-        declaration: declaration,
-        symbol: declarationSymbol
+        declaration: declaration
       });
       this._astNamespaceImportByModule.set(astModule, namespaceImport);
     }

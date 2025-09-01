@@ -360,6 +360,36 @@
             },
             {
               "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!Item#localModule:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "localModule: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "typeof import('./Options')"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "localModule",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false,
+              "isProtected": false,
+              "isAbstract": false
+            },
+            {
+              "kind": "Property",
               "canonicalReference": "api-extractor-scenarios!Item#options:member",
               "docComment": "",
               "excerptTokens": [
@@ -374,7 +404,7 @@
                 {
                   "kind": "Reference",
                   "text": "Options",
-                  "canonicalReference": "api-extractor-scenarios!~Options:interface"
+                  "canonicalReference": "api-extractor-scenarios!~Options_2~Options:interface"
                 },
                 {
                   "kind": "Content",
@@ -514,7 +544,7 @@
                 {
                   "kind": "Reference",
                   "text": "OptionsClass",
-                  "canonicalReference": "api-extractor-scenarios!~OptionsClass:class"
+                  "canonicalReference": "api-extractor-scenarios!~Options_2~OptionsClass:class"
                 },
                 {
                   "kind": "Content",

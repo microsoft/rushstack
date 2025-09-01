@@ -15,6 +15,7 @@ export declare class Item {
     lib3: Lib1Class;
     defaultImport: apiExtractorLib2Test;
     externalModule: typeof apiExtractorLib3Test;
+    localModule: typeof Options_2;
     typeofImportLocal: typeof OptionsClass;
     typeofImportExternal: typeof Lib1Class;
     reExportLocal: Lib2Class;
@@ -28,6 +29,13 @@ export { Lib2Interface }
 declare interface Options {
     name: string;
     color: 'red' | 'blue';
+}
+
+declare namespace Options_2 {
+    export {
+        Options,
+        OptionsClass
+    }
 }
 
 declare class OptionsClass {

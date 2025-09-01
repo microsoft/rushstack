@@ -532,7 +532,7 @@
             {
               "kind": "Reference",
               "text": "internal2.ForgottenExport6",
-              "canonicalReference": "api-extractor-scenarios!~ForgottenExport6:class"
+              "canonicalReference": "api-extractor-scenarios!~internal2~ForgottenExport6:class"
             },
             {
               "kind": "Content",
