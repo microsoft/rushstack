@@ -15,7 +15,7 @@ import type { AstEntity } from './AstEntity';
 import { AstNamespaceImport } from './AstNamespaceImport';
 import { SyntaxHelpers } from './SyntaxHelpers';
 import { AstNamespaceExport } from './AstNamespaceExport';
-import { AstSubPathImport, IAstSubPathImportOptions } from './AstSubPathImport';
+import { AstSubPathImport, type IAstSubPathImportOptions } from './AstSubPathImport';
 
 /**
  * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.

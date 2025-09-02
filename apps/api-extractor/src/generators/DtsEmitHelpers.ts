@@ -5,7 +5,7 @@ import * as ts from 'typescript';
 
 import { InternalError } from '@rushstack/node-core-library';
 import type { CollectorEntity } from '../collector/CollectorEntity';
-import { AstImport, AstImportKind } from '../analyzer/AstImport';
+import { type AstImport, AstImportKind } from '../analyzer/AstImport';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import type { Collector } from '../collector/Collector';
 import type { Span } from '../analyzer/Span';

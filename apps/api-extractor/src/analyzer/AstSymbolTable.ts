@@ -319,7 +319,7 @@ export class AstSymbolTable {
       // If this symbol is non-external (i.e. it belongs to the working package), then we also analyze any
       // referencedAstSymbols that are non-external.  For example, this ensures that forgotten exports
       // get analyzed.
-      const analyzeReferencedLocalAstEntity = (referencedAstEntity: AstEntity) => {
+      const analyzeReferencedLocalAstEntity = (referencedAstEntity: AstEntity): void => {
         if (referencedAstEntity instanceof AstSymbol) {
           if (!referencedAstEntity.isExternal) {
             this._analyzeAstSymbol(referencedAstEntity);

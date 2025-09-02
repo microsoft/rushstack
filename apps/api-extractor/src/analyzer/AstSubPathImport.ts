@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { InternalError } from '@rushstack/node-core-library';
-import { AstEntity, AstSyntheticEntity } from './AstEntity';
+import { type AstEntity, AstSyntheticEntity } from './AstEntity';
 
 export interface IAstSubPathImportOptions {
   readonly astEntity: AstEntity;
