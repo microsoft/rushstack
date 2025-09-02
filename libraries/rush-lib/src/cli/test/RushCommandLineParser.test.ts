@@ -47,6 +47,10 @@ describe('RushCommandLineParser', () => {
     afterEach(() => {
       jest.clearAllMocks();
       EnvironmentConfiguration.reset();
+      jest
+        .spyOn(EnvironmentConfiguration, 'buildCacheOverrideJsonFilePath', 'get')
+        .mockReturnValue(undefined);
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheOverrideJson', 'get').mockReturnValue(undefined);
     });
 
     describe('in basic repo', () => {
