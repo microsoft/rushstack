@@ -350,6 +350,7 @@ export class AstSymbolTable {
       case ts.SyntaxKind.ExpressionWithTypeArguments: // special case for e.g. the "extends" keyword
       case ts.SyntaxKind.ComputedPropertyName: // used for EcmaScript "symbols", e.g. "[toPrimitive]".
       case ts.SyntaxKind.TypeQuery: // represents for "typeof X" as a type
+      case ts.SyntaxKind.ExportSpecifier: // NamedExports inside namespace, e.g. "export { A as B };", "export { A }"
         {
           // Sometimes the type reference will involve multiple identifiers, e.g. "a.b.C".
           // In this case, we only need to worry about importing the first identifier,
