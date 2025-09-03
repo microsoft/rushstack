@@ -223,21 +223,22 @@
           ]
         },
         {
-          "kind": "Interface",
-          "canonicalReference": "api-extractor-scenarios!FinalRenamedClass:interface",
+          "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!FinalRenamedClass:class",
           "docComment": "",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "interface RenamedClass "
+              "text": "declare class RenamedClass "
             }
           ],
           "fileUrlPath": "src/namespaceDeclaration/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "FinalRenamedClass",
           "preserveMemberOrder": false,
           "members": [],
-          "extendsTokenRanges": []
+          "implementsTokenRanges": []
         },
         {
           "kind": "Namespace",

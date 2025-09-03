@@ -5,7 +5,7 @@ export declare namespace AllExportedNS {
     }
 }
 
-export declare interface FinalRenamedClass {
+export declare class FinalRenamedClass {
 }
 
 export declare namespace PartalExportedNS {

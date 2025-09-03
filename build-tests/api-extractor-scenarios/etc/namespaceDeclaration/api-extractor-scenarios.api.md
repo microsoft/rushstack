@@ -15,7 +15,7 @@ export namespace AllExportedNS {
 }
 
 // @public (undocumented)
-export interface FinalRenamedClass {
+export class FinalRenamedClass {
 }
 
 // @public (undocumented)

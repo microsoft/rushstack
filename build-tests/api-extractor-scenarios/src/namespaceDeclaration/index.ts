@@ -17,6 +17,6 @@ export declare namespace ReexportNS {
   export { RenamedClass as RenamedClass3 };
 }
 
-interface RenamedClass {}
+class RenamedClass {}
 
 export { RenamedClass as FinalRenamedClass };
