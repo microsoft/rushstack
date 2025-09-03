@@ -14,7 +14,7 @@ export declare function failWithMissingReference(): void;
  * @public
  */
 export declare namespace MyNamespace {
-    export class MyClass {
+    class MyClass {
         /**
          * Summary for myMethod
          * @remarks

@@ -28,20 +28,20 @@ export declare interface IInterface {
 
 /** @public */
 export declare namespace n1 {
-    export class SomeClass1 {
+    class SomeClass1 {
     }
     export class SomeClass2 extends SomeClass1 {
     }
     export namespace n2 {
-        export class SomeClass3 {
+        class SomeClass3 {
         }
     }
-        {};
+    export {};
 }
 
 /** @public */
 export declare namespace n1 {
-    export class SomeClass4 {
+    class SomeClass4 {
     }
 }
 
