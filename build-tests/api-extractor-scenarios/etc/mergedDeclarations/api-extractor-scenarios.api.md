@@ -45,14 +45,14 @@ export interface MergedInterfaces {
 // @public (undocumented)
 export namespace MergedNamespaces {
     // (undocumented)
-    export class SomeClass {
+    class SomeClass {
     }
 }
 
 // @public (undocumented)
 export namespace MergedNamespaces {
     // (undocumented)
-    export class AnotherClass {
+    class AnotherClass {
     }
 }
 

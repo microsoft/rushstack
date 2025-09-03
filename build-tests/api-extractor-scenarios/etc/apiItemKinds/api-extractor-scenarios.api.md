@@ -42,22 +42,22 @@ export namespace n1 {
     // (undocumented)
     export namespace n2 {
         // (undocumented)
-        export class SomeClass3 {
+        class SomeClass3 {
         }
     }
     // (undocumented)
-    export class SomeClass1 {
+    class SomeClass1 {
     }
     // (undocumented)
     export class SomeClass2 extends SomeClass1 {
     }
-        {};
+    export {};
 }
 
 // @public (undocumented)
 export namespace n1 {
     // (undocumented)
-    export class SomeClass4 {
+    class SomeClass4 {
     }
 }
 

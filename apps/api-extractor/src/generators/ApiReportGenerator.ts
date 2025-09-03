@@ -303,6 +303,20 @@ export class ApiReportGenerator {
       case ts.SyntaxKind.ExportKeyword:
       case ts.SyntaxKind.DefaultKeyword:
       case ts.SyntaxKind.DeclareKeyword:
+        if (astDeclaration.parent) {
+          // Keep it as is for nested declarations.
+          break;
+        }
+        if (
+          ts.isModuleDeclaration(astDeclaration.declaration) &&
+          !astDeclaration.declaration.modifiers?.includes(span.node as ts.Modifier)
+        ) {
+          // Keep it as is for nested declarations. Handle special cases inside namespace. e.g.:
+          //  - export declaration: "export {};", "export { A as B };"
+          //  - variable declaration: "export const a: number, b: number;"
+          break;
+        }
+
         // Delete any explicit "export" or "declare" keywords -- we will re-add them below
         span.modification.skipAll();
         break;
@@ -314,6 +328,11 @@ export class ApiReportGenerator {
       case ts.SyntaxKind.ModuleKeyword:
       case ts.SyntaxKind.TypeKeyword:
       case ts.SyntaxKind.FunctionKeyword:
+        if (astDeclaration.parent) {
+          // Keep it as is for nested declarations
+          break;
+        }
+
         // Replace the stuff we possibly deleted above
         let replacedModifiers: string = '';
 
@@ -385,6 +404,17 @@ export class ApiReportGenerator {
           }
 
           span.modification.prefix = referencedEntity.nameForEmit;
+
+          if (
+            ts.isExportSpecifier(span.node.parent) &&
+            !span.node.parent.propertyName &&
+            span.node.getText().trim() !== referencedEntity.nameForEmit
+          ) {
+            // For "export { A }" (inside namespace), if "A" is renamed (e.g. renamed to "B"),
+            //  we need to emit as "export { B as A }" instead
+            span.modification.prefix += ' as ' + span.node.getText().trim();
+          }
+
           // For debugging:
           // span.modification.prefix += '/*R=FIX*/';
         } else {

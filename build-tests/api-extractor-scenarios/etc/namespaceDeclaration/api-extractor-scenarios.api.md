@@ -7,10 +7,10 @@
 // @public (undocumented)
 export namespace AllExportedNS {
     // (undocumented)
-    export class ExportedClass {
+    class ExportedClass {
     }
     // (undocumented)
-    export interface ExportedInterface {
+    interface ExportedInterface {
     }
 }
 
@@ -20,7 +20,7 @@ export class FinalRenamedClass {
 
 // @public (undocumented)
 export namespace PartalExportedNS {
-    const // (undocumented)
+    export const // (undocumented)
     var1 = 1, // (undocumented)
     var2 = 2;
     // (undocumented)
@@ -29,15 +29,15 @@ export namespace PartalExportedNS {
         prop: UnexportedClass;
     }
     // (undocumented)
-    export interface UnexportedClass {
+    interface UnexportedClass {
     }
-        {};
+    export {};
 }
 
 // @public (undocumented)
 export namespace ReexportNS {
-        { FinalRenamedClass };
-        { FinalRenamedClass as RenamedClass3 };
+    export { FinalRenamedClass as RenamedClass };
+    export { FinalRenamedClass as RenamedClass3 };
 }
 
 // (No @packageDocumentation comment for this package)
