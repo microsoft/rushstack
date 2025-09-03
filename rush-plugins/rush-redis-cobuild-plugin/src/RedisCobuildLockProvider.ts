@@ -46,10 +46,18 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     string
   >();
 
-  private readonly _redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts>;
+  private readonly _redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts, 2 | 3>;
 
   public constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession) {
     this._options = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(options);
+    // Provide a default reconnect strategy that prevents more than 5 reconnect attempts.
+    this._options.socket = {
+      reconnectStrategy: (count: number) => {
+        this._terminal.writeErrorLine(`Redis client reconnecting attempt #${count}`);
+        return count < 5 ? count * 1000 : false;
+      },
+      ...this._options.socket
+    };
     this._terminal = rushSession.getLogger('RedisCobuildLockProvider').terminal;
     try {
       this._redisClient = createClient(this._options);
@@ -95,11 +103,20 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     } catch (e) {
       throw new Error(`Failed to connect to redis server: ${e.message}`);
     }
+
+    // Register error event handler to avoid process exit when redis client error occurs.
+    this._redisClient.on('error', (e: Error) => {
+      if (e.message) {
+        this._terminal.writeErrorLine(`Redis client error: ${e.message}`);
+      } else {
+        this._terminal.writeErrorLine(`Redis client error: ${e}`);
+      }
+    });
   }
 
   public async disconnectAsync(): Promise<void> {
     try {
-      await this._redisClient.disconnect();
+      await this._redisClient.destroy();
     } catch (e) {
       throw new Error(`Failed to disconnect to redis server: ${e.message}`);
     }
