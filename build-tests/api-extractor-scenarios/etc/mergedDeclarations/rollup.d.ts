@@ -31,13 +31,13 @@ export declare interface MergedInterfaces {
 
 /** @public */
 export declare namespace MergedNamespaces {
-    export class SomeClass {
+    class SomeClass {
     }
 }
 
 /** @public */
 export declare namespace MergedNamespaces {
-    export class AnotherClass {
+    class AnotherClass {
     }
 }
 

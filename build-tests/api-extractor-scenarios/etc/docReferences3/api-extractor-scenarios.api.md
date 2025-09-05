@@ -7,7 +7,7 @@
 // @public (undocumented)
 export namespace A {
     // (undocumented)
-    export class B {
+    class B {
         // (undocumented)
         myMethod(): void;
     }
