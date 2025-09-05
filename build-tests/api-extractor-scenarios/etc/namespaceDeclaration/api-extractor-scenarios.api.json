@@ -175,7 +175,7 @@
         {
           "kind": "Namespace",
           "canonicalReference": "api-extractor-scenarios!AllExportedNS:namespace",
-          "docComment": "",
+          "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -225,7 +225,7 @@
         {
           "kind": "Class",
           "canonicalReference": "api-extractor-scenarios!FinalRenamedClass:class",
-          "docComment": "",
+          "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -243,7 +243,7 @@
         {
           "kind": "Namespace",
           "canonicalReference": "api-extractor-scenarios!PartalExportedNS:namespace",
-          "docComment": "",
+          "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -373,7 +373,7 @@
         {
           "kind": "Namespace",
           "canonicalReference": "api-extractor-scenarios!ReexportNS:namespace",
-          "docComment": "",
+          "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
