@@ -781,7 +781,7 @@ export class SassProcessor {
 
     const filename: string = path.basename(relativeFilePath);
     const extensionStart: number = filename.lastIndexOf('.');
-    const cssPathFromJs: string = `./${relativeFilePath.slice(0, extensionStart)}.css`;
+    const cssPathFromJs: string = `./${filename.slice(0, extensionStart)}.css`;
     const relativeCssPath: string = `${relativeFilePath.slice(0, relativeFilePath.lastIndexOf('.'))}.css`;
 
     if (cssOutputFolders && cssOutputFolders.length > 0) {

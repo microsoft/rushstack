@@ -1,6 +1,30 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 25 Jul 2025 01:24:42 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Aug 2025 00:08:18 GMT and should not be manually modified.
+
+## 5.158.1
+Fri, 29 Aug 2025 00:08:18 GMT
+
+### Updates
+
+- Deduplicate parsing of dependency specifiers.
+- Optimize detection of local projects when collecting implicit preferred versions.
+- Dedupe shrinkwrap parsing by content hash.
+- [resolver-cache] Use shrinkwrap hash to skip resolver cache regeneration.
+
+## 5.158.0
+Tue, 26 Aug 2025 23:27:47 GMT
+
+### Updates
+
+- Adds an optional safety check flag to the Bridge Cache plugin write action.
+- Fix a bug in "@rushstack/rush-bridge-cache-plugin" where the cache replay did not block the normal execution process and instead was a floating promise.
+- [resolver-cache-plugin] Optimize search for nested package.json files with persistent cache file keyed by integrity hash.
+- [rush-serve-plugin] Allow the Rush process to exit if the server is the only active handle.
+- Fix poor performance scaling during `rush install` when identifying projects in the lockfile that no longer exist.
+- [resolver-cache-plugin] Improve performance of scan for nested package.json files in external packages.
+- Optimize `setPreferredVersions` in install setup.
+- Ensure that `rush version` and `rush publish` preserve all fields in `version-policies-json`.
 
 ## 5.157.0
 Fri, 25 Jul 2025 01:24:42 GMT

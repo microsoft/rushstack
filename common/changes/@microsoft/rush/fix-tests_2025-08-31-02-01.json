@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Adds an optional safety check flag to the Bridge Cache plugin write action.",
+      "comment": "",
       "type": "none"
     }
   ],

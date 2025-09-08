@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import fs from 'node:fs';
-import worker_threads from 'node:worker_threads';
+import * as fs from 'fs';
+import { parentPort, type MessagePort } from 'worker_threads';
 
 import type { ICallFrame, ICpuProfile, INodeSummary, IProfileSummary } from './types';
 import type { IMessageToWorker } from './protocol';
@@ -10,13 +10,22 @@ import type { IMessageToWorker } from './protocol';
 /**
  * Tracks the time spent in a local node.
  */
+/**
+ * Tracks the time spent in a local node.
+ */
 interface ILocalTimeInfo {
+  /** Time spent exclusively in this node (excluding children). */
   /** Time spent exclusively in this node (excluding children). */
   self: number;
 }
 
 /**
  * Computes an identifier to use for summarizing call frames.
+ * @param callFrame - The call frame to compute the ID for
+ * @returns A portable string identifying the call frame
+ *
+ * @param callFrame - The call frame to compute the ID for.
+ * @returns A portable string uniquely identifying the call frame.
  *
  * @param callFrame - The call frame to compute the ID for.
  * @returns A portable string uniquely identifying the call frame.
@@ -27,6 +36,13 @@ function computeCallFrameId(callFrame: ICallFrame): string {
 }
 
 /**
+ * Adds the contents of a .cpuprofile file to a summary.
+ * @param filePath - The path to the .cpuprofile file to read
+ * @param accumulator - The summary to add the profile to
+ * Reads and parses a `.cpuprofile` file from disk, then adds its data to a profile summary.
+ *
+ * @param filePath - The path to the `.cpuprofile` file to read.
+ * @param accumulator - The summary to add the parsed profile data to.
  * Reads and parses a `.cpuprofile` file from disk, then adds its data to a profile summary.
  *
  * @param filePath - The path to the `.cpuprofile` file to read.
@@ -38,6 +54,17 @@ function addFileToSummary(filePath: string, accumulator: IProfileSummary): void 
 }
 
 /**
+ * Adds a CPU profile to a summary.
+ * @param profile - The profile to add
+ * @param accumulator - The summary to add the profile to
+ * @returns
+ * Aggregates CPU profile data into a summary map.
+ * Handles recursive frames by ensuring totalTime is computed
+ * via traversal instead of naive summation.
+ *
+ * @param profile - The parsed `.cpuprofile` data.
+ * @param accumulator - A Map keyed by callFrameId with summary info.
+ * @returns The updated accumulator with the new profile included.
  * Aggregates CPU profile data into a summary map.
  * Handles recursive frames by ensuring totalTime is computed
  * via traversal instead of naive summation.
@@ -61,6 +88,9 @@ function addProfileToSummary(profile: ICpuProfile, accumulator: IProfileSummary)
     return index;
   }
 
+  // Initialize local time info for all nodes and establish nodeId -> index mapping
+  for (let i: number = 0; i < nodes.length; i++) {
+    localTimes.push({ self: 0 });
   // Initialize local time info for all nodes
   for (let i = 0; i < nodes.length; i++) {
     localTimes.push({ self: 0 });
@@ -70,6 +100,7 @@ function addProfileToSummary(profile: ICpuProfile, accumulator: IProfileSummary)
     getIndexFromNodeId(id);
   }
 
+  // Distribute time samples across nodes
   // Distribute time samples across nodes
   const duration: number = endTime - startTime;
   let lastNodeTime: number = duration - timeDeltas[0];
@@ -81,8 +112,11 @@ function addProfileToSummary(profile: ICpuProfile, accumulator: IProfileSummary)
   }
 
   // Add remaining time to the last sample
+  // Add remaining time to the last sample
   localTimes[getIndexFromNodeId(samples[samples.length - 1])].self += lastNodeTime;
 
+  // Have to pick the maximum totalTime for a given frame,
+  // Group nodes by frameId
   // Group nodes by frameId
   const nodesByFrame: Map<string, Set<number>> = new Map();
   for (let i: number = 0; i < nodes.length; i++) {
@@ -97,6 +131,7 @@ function addProfileToSummary(profile: ICpuProfile, accumulator: IProfileSummary)
     }
   }
 
+  // Summarize per-frame data
   // Summarize per-frame data
   for (const [frameId, contributors] of nodesByFrame) {
     let selfTime: number = 0;
@@ -113,6 +148,7 @@ function addProfileToSummary(profile: ICpuProfile, accumulator: IProfileSummary)
       selfTime += localTime.self;
     }
 
+    // Traverse children to compute total time
     // Traverse children to compute total time
     const queue: Set<number> = new Set(contributors);
     for (const nodeIndex of queue) {
@@ -153,19 +189,32 @@ function addProfileToSummary(profile: ICpuProfile, accumulator: IProfileSummary)
   return accumulator;
 }
 
-const { parentPort } = worker_threads;
 if (parentPort) {
+  const pp: MessagePort = parentPort;
   const messageHandler = (message: IMessageToWorker): void => {
     if (message === false) {
       // Shutdown signal.
-      parentPort.removeListener('message', messageHandler);
-      parentPort.close();
+      pp.removeListener('message', messageHandler);
+      pp.close();
       return;
     }
 
     try {
       const summary: IProfileSummary = new Map();
       addFileToSummary(message, summary);
+      pp.postMessage({ file: message, data: summary });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        pp.postMessage({
+          file: message,
+          data: error.stack ?? error.message
+        });
+      } else {
+        pp.postMessage({
+          file: message,
+          data: String(error)
+        });
+      }
       parentPort.postMessage({ file: message, data: summary });
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -182,6 +231,6 @@ if (parentPort) {
     }
   };
 
-  parentPort.on('message', messageHandler);
+  pp.on('message', messageHandler);
 }
 

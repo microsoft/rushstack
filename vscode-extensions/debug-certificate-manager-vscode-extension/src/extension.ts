@@ -164,9 +164,6 @@ export function activate(context: vscode.ExtensionContext): void {
       const workspaceUri: vscode.Uri | undefined = vscode.workspace.workspaceFolders?.[0].uri;
       if (!workspaceUri) {
         terminal.writeLine('No workspace folder found. Synchronization aborted.');
-        void vscode.window.showErrorMessage(
-          'No workspace folder found. Open the project folder to sync TLS certificates.'
-        );
         return;
       }
 
@@ -189,9 +186,6 @@ export function activate(context: vscode.ExtensionContext): void {
           keyFilename: parsedConfig.keyFilename || 'rushstack-serve.key'
         };
       } catch (error) {
-        void vscode.window.showErrorMessage(
-          'Failed to read or parse the configuration file. Ensure that .vscode/debug-certificate-manager.json exists and is valid.'
-        );
         terminal.writeLine(
           `Error reading or parsing configuration file: ${
             error instanceof Error ? error.message : 'Unknown error'

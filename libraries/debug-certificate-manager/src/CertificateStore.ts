@@ -68,7 +68,12 @@ export class CertificateStore {
           const configContent: string = FileSystem.readFile(debugCertificateManagerConfigFile);
           debugCertificateManagerConfig = JSON.parse(configContent) as ICertificateStoreOptions;
           if (debugCertificateManagerConfig.storePath) {
-            storePath = path.resolve(currentDir, debugCertificateManagerConfig.storePath);
+            storePath = debugCertificateManagerConfig.storePath;
+            if (storePath.startsWith('~')) {
+              storePath = path.join(homedir(), storePath.slice(2));
+            } else {
+              storePath = path.resolve(currentDir, debugCertificateManagerConfig.storePath);
+            }
           }
         }
         const parentDir: string | undefined = path.dirname(currentDir);

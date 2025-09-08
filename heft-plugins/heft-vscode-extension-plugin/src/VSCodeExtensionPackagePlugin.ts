@@ -28,6 +28,10 @@ interface IVSCodeExtensionPackagePluginOptions {
    * This manifest is used for signing the VS Code extension.
    */
   manifestPath: string;
+  /**
+   * Additional flags to pass to the VSCE packaging command.
+   */
+  extraPackagingFlags?: string[];
 }
 
 const PLUGIN_NAME: 'vscode-extension-package-plugin' = 'vscode-extension-package-plugin';
@@ -41,7 +45,7 @@ export default class VSCodeExtensionPackagePlugin
     pluginOptions: IVSCodeExtensionPackagePluginOptions
   ): void {
     heftTaskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      const { unpackedFolderPath, vsixPath, manifestPath } = pluginOptions;
+      const { unpackedFolderPath, vsixPath, manifestPath, extraPackagingFlags = [] } = pluginOptions;
       const { buildFolderPath } = heftConfiguration;
       const {
         logger: { terminal }
@@ -53,7 +57,14 @@ export default class VSCodeExtensionPackagePlugin
       const packageResult: IWaitForExitResult<string> = await executeAndWaitAsync(
         terminal,
         'node',
-        [vsceScriptPath, 'package', '--no-dependencies', '--out', path.resolve(vsixPath)],
+        [
+          vsceScriptPath,
+          'package',
+          '--no-dependencies',
+          '--out',
+          path.resolve(vsixPath),
+          ...extraPackagingFlags
+        ],
         {
           currentWorkingDirectory: path.resolve(buildFolderPath, unpackedFolderPath)
         }

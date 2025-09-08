@@ -48,7 +48,7 @@ extends:
                 - ${{ each extension in parameters.ExtensionPublishConfig }}:
                     - output: pipelineArtifact
                       artifactName: ${{ extension.key }}
-                      targetPath: ${{ extension.projectPath }}/${{ extension.vsixPath }}
+                      targetPath: ${{ extension.projectPath }}/${{ extension.projectRelativeAssetsDir }}/${{ extension.vsixPath }}
                       displayName: 'Publish Artifact: ${{ extension.key }}'
 
             steps:

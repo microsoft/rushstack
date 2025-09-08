@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.17.12",
+      "tag": "@rushstack/heft-sass-plugin_v0.17.12",
+      "date": "Sun, 31 Aug 2025 02:24:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where generated `.scss.js` files can contain an incorrect path to the `.css` file."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.11",
       "tag": "@rushstack/heft-sass-plugin_v0.17.11",
       "date": "Tue, 19 Aug 2025 20:45:02 GMT",

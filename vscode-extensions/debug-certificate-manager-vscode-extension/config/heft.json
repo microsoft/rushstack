@@ -1,5 +1,19 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
-  "extends": "@rushstack/heft-vscode-extension-rig/profiles/default/config/heft.json"
+  "extends": "@rushstack/heft-vscode-extension-rig/profiles/default/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "tasksByName": {
+        "package-vsix": {
+          "taskPlugin": {
+            "options": {
+              "extraPackagingFlags": ["--allow-star-activation"]
+            }
+          }
+        }
+      }
+    }
+  }
 }

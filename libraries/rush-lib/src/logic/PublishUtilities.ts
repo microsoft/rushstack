@@ -296,7 +296,7 @@ export class PublishUtilities {
     dependencyName: string,
     newProjectVersion: string
   ): string {
-    const currentDependencySpecifier: DependencySpecifier = new DependencySpecifier(
+    const currentDependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
       dependencyName,
       dependencies[dependencyName]
     );
@@ -502,7 +502,7 @@ export class PublishUtilities {
             // TODO: treat prerelease version the same as non-prerelease version.
             // For prerelease, the newVersion needs to be appended with prerelease name.
             // And dependency should specify the specific prerelease version.
-            const currentSpecifier: DependencySpecifier = new DependencySpecifier(
+            const currentSpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
               depName,
               dependencies[depName]
             );
@@ -765,7 +765,7 @@ export class PublishUtilities {
       dependencies[change.packageName] &&
       !PublishUtilities._isCyclicDependency(allPackages, parentPackageName, change.packageName)
     ) {
-      const requiredVersion: DependencySpecifier = new DependencySpecifier(
+      const requiredVersion: DependencySpecifier = DependencySpecifier.parseWithCache(
         change.packageName,
         dependencies[change.packageName]
       );
@@ -863,7 +863,7 @@ export class PublishUtilities {
     // "*", "~", and "^" are special cases for workspace ranges, since it will publish using the exact
     // version of the local dependency, so we need to modify what we write for our change
     // comment
-    const currentDependencySpecifier: DependencySpecifier = new DependencySpecifier(
+    const currentDependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
       dependencyName,
       currentDependencyVersion
     );
@@ -873,7 +873,7 @@ export class PublishUtilities {
         ? undefined
         : currentDependencySpecifier.versionSpecifier;
 
-    const newDependencySpecifier: DependencySpecifier = new DependencySpecifier(
+    const newDependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
       dependencyName,
       newDependencyVersion
     );

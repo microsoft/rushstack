@@ -1,6 +1,6 @@
 {
   "name": "debug-certificate-manager",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
@@ -54,7 +54,7 @@
       },
       {
         "command": "debugCertificateManager.sync",
-        "title": "Sync TLS Certificates",
+        "title": "Ensure and Sync TLS Certificates",
         "category": "Debug Certificate Manager"
       },
       {
@@ -107,7 +107,7 @@
   },
   "enabledApiProposals": [],
   "activationEvents": [
-    "workspaceContains:.vscode/debug-certificate-manager.json"
+    "*"
   ],
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*",

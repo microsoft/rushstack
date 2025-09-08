@@ -132,7 +132,10 @@ export class RushInstallManager extends BaseInstallManager {
     if (shrinkwrapFile) {
       // Check any (explicitly) preferred dependencies first
       allExplicitPreferredVersions.forEach((version: string, dependency: string) => {
-        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
+        const dependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
+          dependency,
+          version
+        );
 
         if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependencySpecifier)) {
           shrinkwrapWarnings.push(
@@ -230,7 +233,10 @@ export class RushInstallManager extends BaseInstallManager {
       Sort.sortMapKeys(tempDependencies);
 
       for (const [packageName, packageVersion] of tempDependencies.entries()) {
-        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(packageName, packageVersion);
+        const dependencySpecifier: DependencySpecifier = DependencySpecifier.parseWithCache(
+          packageName,
+          packageVersion
+        );
 
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
@@ -391,7 +397,10 @@ export class RushInstallManager extends BaseInstallManager {
   }
 
   private _revertWorkspaceNotation(dependency: PackageJsonDependency): boolean {
-    const specifier: DependencySpecifier = new DependencySpecifier(dependency.name, dependency.version);
+    const specifier: DependencySpecifier = DependencySpecifier.parseWithCache(
+      dependency.name,
+      dependency.version
+    );
     if (specifier.specifierType !== DependencySpecifierType.Workspace) {
       return false;
     }
