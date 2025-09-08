@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Upgrade express to 5.1.0",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
