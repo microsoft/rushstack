@@ -24,7 +24,7 @@
     "@rushstack/ts-command-line": "workspace:*",
     "compression": "~1.7.4",
     "cors": "~2.8.5",
-    "express": "4.20.0",
+    "express": "5.1.0",
     "http2-express-bridge": "~1.0.7",
     "ws": "~8.14.1"
   },

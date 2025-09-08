@@ -63,7 +63,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "cors": "~2.8.5",
-    "express": "4.20.0",
+    "express": "5.1.0",
     "js-yaml": "~3.13.1",
     "open": "~8.4.0",
     "update-notifier": "~5.1.0",
