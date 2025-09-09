@@ -500,11 +500,11 @@ describe(Async.name, () => {
       let running: number = 0;
       const jobToMaxConcurrentJobsRunning: Record<number, number> = {};
 
-      const array: INumberWithWeight[] = [
+      const array: (INumberWithWeight & { isolated?: boolean })[] = [
         { n: 1, weight: 1 },
         { n: 2, weight: 1 },
         { n: 3, weight: 1 },
-        { n: 4, weight: 10 }, // job that should run alone
+        { n: 4, weight: 10, isolated: true }, // job that should run alone
         { n: 5, weight: 1 },
         { n: 6, weight: 1 },
         { n: 7, weight: 1 }
@@ -532,7 +532,7 @@ describe(Async.name, () => {
       expect(jobToMaxConcurrentJobsRunning[4]).toEqual(1);
 
       // Small jobs should be able to run concurrently with each other but not with heavyweight job
-      const nonIsolatedJobs = array.filter((job) => job.weight !== 10);
+      const nonIsolatedJobs = array.filter((job) => !!job.isolated);
       nonIsolatedJobs.forEach((job) => {
         expect(jobToMaxConcurrentJobsRunning[job.n]).toBeGreaterThanOrEqual(1);
         expect(jobToMaxConcurrentJobsRunning[job.n]).toBeLessThanOrEqual(6); // All small jobs could theoretically run together

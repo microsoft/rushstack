@@ -82,12 +82,14 @@ export interface IWeighted {
    *  Must be a whole number greater than or equal to 0.
    */
   weight: number;
+
+  isolated?: boolean;
 }
 
 function toWeightedIterator<TEntry>(
   iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
   useWeights?: boolean
-): AsyncIterable<{ element: TEntry; weight: number }> {
+): AsyncIterable<{ element: TEntry; weight: number; isolated: boolean }> {
   const iterator: Iterator<TEntry> | AsyncIterator<TEntry, TEntry> = (
     (iterable as Iterable<TEntry>)[Symbol.iterator] ||
     (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
@@ -99,7 +101,11 @@ function toWeightedIterator<TEntry>(
         // The await is necessary here, but TS will complain - it's a false positive.
         const { value, done } = await iterator.next();
         return {
-          value: { element: value, weight: useWeights ? value?.weight : 1 },
+          value: {
+            element: value,
+            weight: useWeights ? value?.weight : 1,
+            isolated: useWeights ? value?.isolated : false
+          },
           done: !!done
         };
       }
@@ -184,7 +190,10 @@ export class Async {
     return result;
   }
 
-  private static async _forEachWeightedAsync<TReturn, TEntry extends { weight: number; element: TReturn }>(
+  private static async _forEachWeightedAsync<
+    TReturn,
+    TEntry extends { weight: number; element: TReturn; isolated: boolean }
+  >(
     iterable: AsyncIterable<TEntry>,
     callback: (entry: TReturn, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions | undefined
@@ -201,6 +210,7 @@ export class Async {
       let arrayIndex: number = 0;
       let iteratorIsComplete: boolean = false;
       let promiseHasResolvedOrRejected: boolean = false;
+      let isolatedTask: IteratorResult<TEntry> | undefined = undefined;
 
       async function queueOperationsAsync(): Promise<void> {
         while (
@@ -213,7 +223,7 @@ export class Async {
           //  there will be effectively no cap on the number of operations waiting.
           const limitedConcurrency: number = !Number.isFinite(concurrency) ? 1 : concurrency;
           concurrentUnitsInProgress += limitedConcurrency;
-          const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
+          const currentIteratorResult: IteratorResult<TEntry> = isolatedTask ?? (await iterator.next());
           // eslint-disable-next-line require-atomic-updates
           iteratorIsComplete = !!currentIteratorResult.done;
 
@@ -222,11 +232,20 @@ export class Async {
             Async.validateWeightedIterable(currentIteratorValue);
             // Cap the weight to concurrency, this allows 0 weight items to execute despite the concurrency limit.
             const weight: number = Math.min(currentIteratorValue.weight, concurrency);
+            const shouldIsolate: boolean = currentIteratorValue.isolated ?? false;
 
             // Wait until there's have enough capacity to run this job, this function will be re-entered as tasks call `onOperationCompletionAsync`
-            if (concurrentUnitsInProgress + weight - limitedConcurrency > concurrency) {
-              break;
+            if (shouldIsolate) {
+              if (concurrentUnitsInProgress - limitedConcurrency > 0) {
+                // eslint-disable-next-line require-atomic-updates
+                isolatedTask = currentIteratorResult;
+                // Remove the "lock" before breaking
+                concurrentUnitsInProgress -= limitedConcurrency;
+                break;
+              }
             }
+            // eslint-disable-next-line require-atomic-updates
+            isolatedTask = undefined;
 
             // Remove the "lock" from the concurrency check and only apply the current weight.
             //  This should allow other operations to execute.
