@@ -496,6 +496,49 @@ describe(Async.name, () => {
       expect(maxRunning).toEqual(9);
     });
 
+    it('ensures isolated job runs in isolation while small jobs never run alongside it', async () => {
+      let running: number = 0;
+      const jobToMaxConcurrentJobsRunning: Record<number, number> = {};
+
+      const array: INumberWithWeight[] = [
+        { n: 1, weight: 1 },
+        { n: 2, weight: 1 },
+        { n: 3, weight: 1 },
+        { n: 4, weight: 10 }, // job that should run alone
+        { n: 5, weight: 1 },
+        { n: 6, weight: 1 },
+        { n: 7, weight: 1 }
+      ];
+
+      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        jobToMaxConcurrentJobsRunning[item.n] = Math.max(jobToMaxConcurrentJobsRunning[item.n] || 0, running);
+
+        // Simulate longer running time for heavyweight job
+        if (item.weight === 10) {
+          await Async.sleepAsync(50);
+        } else {
+          await Async.sleepAsync(10);
+        }
+
+        running--;
+      });
+
+      await Async.forEachAsync(array, fn, { concurrency: 10, weighted: true });
+
+      expect(fn).toHaveBeenCalledTimes(7);
+
+      // The heavyweight job (n=4) should run with only 1 concurrent job (itself)
+      expect(jobToMaxConcurrentJobsRunning[4]).toEqual(1);
+
+      // Small jobs should be able to run concurrently with each other but not with heavyweight job
+      const nonIsolatedJobs = array.filter((job) => job.weight !== 10);
+      nonIsolatedJobs.forEach((job) => {
+        expect(jobToMaxConcurrentJobsRunning[job.n]).toBeGreaterThanOrEqual(1);
+        expect(jobToMaxConcurrentJobsRunning[job.n]).toBeLessThanOrEqual(6); // All small jobs could theoretically run together
+      });
+    });
+
     it('does not exceed the maxiumum concurrency for an async iterator when weighted', async () => {
       let waitingIterators: number = 0;
 

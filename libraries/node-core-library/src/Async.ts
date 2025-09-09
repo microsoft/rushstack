@@ -223,6 +223,11 @@ export class Async {
             // Cap the weight to concurrency, this allows 0 weight items to execute despite the concurrency limit.
             const weight: number = Math.min(currentIteratorValue.weight, concurrency);
 
+            // Wait until there's have enough capacity to run this job, this function will be re-entered as tasks call `onOperationCompletionAsync`
+            if (concurrentUnitsInProgress + weight - limitedConcurrency > concurrency) {
+              break;
+            }
+
             // Remove the "lock" from the concurrency check and only apply the current weight.
             //  This should allow other operations to execute.
             concurrentUnitsInProgress += weight;
