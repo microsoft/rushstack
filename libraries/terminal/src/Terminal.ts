@@ -149,17 +149,7 @@ export class Terminal implements ITerminal {
     severity: TerminalProviderSeverity,
     followedByEol: boolean
   ): void {
-    const linesSegments: string[][] = [[...segments]];
-    const currentLineSegments: string[] = linesSegments[0];
-    for (const segment of segments) {
-      currentLineSegments.push(segment);
-    }
-
-    const lines: string[] = [];
-    for (const lineSegments of linesSegments) {
-      lines.push(lineSegments.join(''));
-    }
-
+    const lines: string[] = [segments.join('')];
     if (followedByEol) {
       lines.push('');
     }
