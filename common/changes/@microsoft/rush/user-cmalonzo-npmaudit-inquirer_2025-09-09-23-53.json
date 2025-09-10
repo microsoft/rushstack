@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Upgrade inquirer to 8.2.7 in rush-lib",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
