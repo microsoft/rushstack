@@ -70,6 +70,31 @@ export interface IRunWithTimeoutOptions<TResult> {
   timeoutMessage?: string;
 }
 
+class PeekableIterator<T> {
+  private _peekedResult: IteratorResult<T> | undefined = undefined;
+  private readonly _iterator: Iterator<T> | AsyncIterator<T>;
+
+  public constructor(iterator: Iterator<T> | AsyncIterator<T>) {
+    this._iterator = iterator;
+  }
+
+  public async peekAsync(): Promise<IteratorResult<T>> {
+    if (this._peekedResult === undefined) {
+      this._peekedResult = await this._iterator.next();
+    }
+    return this._peekedResult;
+  }
+
+  public async nextAsync(): Promise<IteratorResult<T>> {
+    if (this._peekedResult !== undefined) {
+      const result: IteratorResult<T> = this._peekedResult;
+      this._peekedResult = undefined;
+      return result;
+    }
+    return await this._iterator.next();
+  }
+}
+
 /**
  * @remarks
  * Used with {@link (Async:class).(forEachAsync:2)} and {@link (Async:class).(mapAsync:2)}.
@@ -194,14 +219,14 @@ export class Async {
         options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
       let concurrentUnitsInProgress: number = 0;
 
-      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (iterable as AsyncIterable<TEntry>)[
+      const baseIterator: Iterator<TEntry> | AsyncIterator<TEntry> = (iterable as AsyncIterable<TEntry>)[
         Symbol.asyncIterator
       ].call(iterable);
 
+      const iterator: PeekableIterator<TEntry> = new PeekableIterator(baseIterator);
       let arrayIndex: number = 0;
       let iteratorIsComplete: boolean = false;
       let promiseHasResolvedOrRejected: boolean = false;
-      let nextIterator: IteratorResult<TEntry> | undefined = undefined;
 
       async function queueOperationsAsync(): Promise<void> {
         while (
@@ -214,34 +239,31 @@ export class Async {
           //  there will be effectively no cap on the number of operations waiting.
           const limitedConcurrency: number = !Number.isFinite(concurrency) ? 1 : concurrency;
           concurrentUnitsInProgress += limitedConcurrency;
-          const currentIteratorResult: IteratorResult<TEntry> = nextIterator || (await iterator.next());
+
+          // Peek at the next item to check its weight before committing to process it
+          const peekedIteratorResult: IteratorResult<TEntry> = await iterator.peekAsync();
           // eslint-disable-next-line require-atomic-updates
-          iteratorIsComplete = !!currentIteratorResult.done;
+          iteratorIsComplete = !!peekedIteratorResult.done;
 
           if (!iteratorIsComplete) {
-            const currentIteratorValue: TEntry = currentIteratorResult.value;
-            Async.validateWeightedIterable(currentIteratorValue);
+            const peekedIteratorValue: TEntry = peekedIteratorResult.value;
+            Async.validateWeightedIterable(peekedIteratorValue);
             // Cap the weight to concurrency, this allows 0 weight items to execute despite the concurrency limit.
-            const weight: number = Math.min(currentIteratorValue.weight, concurrency);
+            const weight: number = Math.min(peekedIteratorValue.weight, concurrency);
 
             // Remove the "lock" from the concurrency check and only apply the current weight.
             //  This should allow other operations to execute.
             concurrentUnitsInProgress -= limitedConcurrency;
 
-            // Wait until there's have enough capacity to run this job, this function will be re-entered as tasks call `onOperationCompletionAsync`
-            const weightWithPeekedIsOverConcurrency: boolean =
-              concurrentUnitsInProgress + weight > concurrency;
-            const currentUnitsIsZero: boolean = concurrentUnitsInProgress === 0;
-            const taskWeightIsZero: boolean = weight === 0;
-            if (weightWithPeekedIsOverConcurrency && !currentUnitsIsZero && !taskWeightIsZero) {
-              // eslint-disable-next-line require-atomic-updates
-              nextIterator = currentIteratorResult;
+            // Wait until there's enough capacity to run this job, this function will be re-entered as tasks call `onOperationCompletionAsync`
+            const wouldExceedConcurrency: boolean = concurrentUnitsInProgress + weight > concurrency;
+            const hasRunningTasks: boolean = concurrentUnitsInProgress > 0;
+            const isWeightedTask: boolean = weight > 0;
+            if (wouldExceedConcurrency && hasRunningTasks && isWeightedTask) {
               break;
-            } else {
-              // clear iterator
-              // eslint-disable-next-line require-atomic-updates
-              nextIterator = undefined;
             }
+            const currentIteratorResult: IteratorResult<TEntry> = await iterator.nextAsync();
+            const currentIteratorValue: TEntry = currentIteratorResult.value;
 
             concurrentUnitsInProgress += weight;
 
