@@ -440,7 +440,7 @@ describe(Async.name, () => {
       expect(maxRunning).toEqual(3);
     });
 
-    it.only('waits for a small and large operation to finish before scheduling more', async () => {
+    it('waits for a small and large operation to finish before scheduling more', async () => {
       let running: number = 0;
       let maxRunning: number = 0;
 
@@ -557,7 +557,7 @@ describe(Async.name, () => {
 
       expect(jobToMaxConcurrentJobsRunning[1]).toEqual(1); // runs 0 weight
       expect(jobToMaxConcurrentJobsRunning[2]).toEqual(2); // runs 0 weight + 3 weight
-      expect(jobToMaxConcurrentJobsRunning[3]).toEqual(2); // runs 0 weight + 3 weight
+      expect(jobToMaxConcurrentJobsRunning[3]).toEqual(1); // runs 0 weight after 3 weight completes
     });
 
     it('allows zero weight tasks to run alongside weight > concurrency task', async () => {
@@ -584,7 +584,7 @@ describe(Async.name, () => {
 
       expect(jobToMaxConcurrentJobsRunning[1]).toEqual(1); // runs 0 weight
       expect(jobToMaxConcurrentJobsRunning[2]).toEqual(2); // runs 0 weight + 4 weight
-      expect(jobToMaxConcurrentJobsRunning[3]).toEqual(2); // runs 0 weight + 3 weight
+      expect(jobToMaxConcurrentJobsRunning[3]).toEqual(1); // runs 0 weight after 3 weight completes
     });
 
     it('does not exceed the maxiumum concurrency for an async iterator when weighted', async () => {

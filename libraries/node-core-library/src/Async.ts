@@ -70,31 +70,6 @@ export interface IRunWithTimeoutOptions<TResult> {
   timeoutMessage?: string;
 }
 
-class PeekableIterator<T> {
-  private _peekedResult: IteratorResult<T> | undefined = undefined;
-  private readonly _iterator: Iterator<T> | AsyncIterator<T>;
-
-  public constructor(iterator: Iterator<T> | AsyncIterator<T>) {
-    this._iterator = iterator;
-  }
-
-  public async peekAsync(): Promise<IteratorResult<T>> {
-    if (this._peekedResult === undefined) {
-      this._peekedResult = await this._iterator.next();
-    }
-    return this._peekedResult;
-  }
-
-  public async nextAsync(): Promise<IteratorResult<T>> {
-    if (this._peekedResult !== undefined) {
-      const result: IteratorResult<T> = this._peekedResult;
-      this._peekedResult = undefined;
-      return result;
-    }
-    return await this._iterator.next();
-  }
-}
-
 /**
  * @remarks
  * Used with {@link (Async:class).(forEachAsync:2)} and {@link (Async:class).(mapAsync:2)}.
@@ -219,14 +194,15 @@ export class Async {
         options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
       let concurrentUnitsInProgress: number = 0;
 
-      const baseIterator: Iterator<TEntry> | AsyncIterator<TEntry> = (iterable as AsyncIterable<TEntry>)[
+      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (iterable as AsyncIterable<TEntry>)[
         Symbol.asyncIterator
       ].call(iterable);
 
-      const iterator: PeekableIterator<TEntry> = new PeekableIterator(baseIterator);
       let arrayIndex: number = 0;
       let iteratorIsComplete: boolean = false;
       let promiseHasResolvedOrRejected: boolean = false;
+      // iterator that is stored when the loop exits early due to not enough concurrency
+      let nextIterator: IteratorResult<TEntry> | undefined = undefined;
 
       async function queueOperationsAsync(): Promise<void> {
         while (
@@ -239,17 +215,15 @@ export class Async {
           //  there will be effectively no cap on the number of operations waiting.
           const limitedConcurrency: number = !Number.isFinite(concurrency) ? 1 : concurrency;
           concurrentUnitsInProgress += limitedConcurrency;
-
-          // Peek at the next item to check its weight before committing to process it
-          const peekedIteratorResult: IteratorResult<TEntry> = await iterator.peekAsync();
+          const currentIteratorResult: IteratorResult<TEntry> = nextIterator || (await iterator.next());
           // eslint-disable-next-line require-atomic-updates
-          iteratorIsComplete = !!peekedIteratorResult.done;
+          iteratorIsComplete = !!currentIteratorResult.done;
 
           if (!iteratorIsComplete) {
-            const peekedIteratorValue: TEntry = peekedIteratorResult.value;
-            Async.validateWeightedIterable(peekedIteratorValue);
+            const currentIteratorValue: TEntry = currentIteratorResult.value;
+            Async.validateWeightedIterable(currentIteratorValue);
             // Cap the weight to concurrency, this allows 0 weight items to execute despite the concurrency limit.
-            const weight: number = Math.min(peekedIteratorValue.weight, concurrency);
+            const weight: number = Math.min(currentIteratorValue.weight, concurrency);
 
             // Remove the "lock" from the concurrency check and only apply the current weight.
             //  This should allow other operations to execute.
@@ -260,10 +234,13 @@ export class Async {
             const hasRunningTasks: boolean = concurrentUnitsInProgress > 0;
             const isWeightedTask: boolean = weight > 0;
             if (wouldExceedConcurrency && hasRunningTasks && isWeightedTask) {
+              // eslint-disable-next-line require-atomic-updates
+              nextIterator = currentIteratorResult;
               break;
+            } else {
+              // eslint-disable-next-line require-atomic-updates
+              nextIterator = undefined;
             }
-            const currentIteratorResult: IteratorResult<TEntry> = await iterator.nextAsync();
-            const currentIteratorValue: TEntry = currentIteratorResult.value;
 
             concurrentUnitsInProgress += weight;
 
