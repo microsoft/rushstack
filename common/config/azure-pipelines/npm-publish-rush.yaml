@@ -4,6 +4,12 @@ variables:
   - name: SourceBranch
     value: $[ replace(replace(resources.repositories.self.ref, 'refs/heads/', ''), 'refs/pull/', 'refs/remotes/pull/') ]
 
+parameters:
+  - name: PublishVersionTag
+    displayName: 'Publish Version (Default is latest)'
+    type: string
+    default: 'latest'
+
 resources:
   repositories:
     - repository: 1esPipelines
@@ -29,6 +35,10 @@ extends:
                 - output: pipelineArtifact
                   targetPath: $(Build.ArtifactStagingDirectory)/published-versions
                   artifactName: published-versions
+                - output: pipelineArtifact
+                  targetPath: $(Build.ArtifactStagingDirectory)/packages
+                  displayName: 'Publish Rushstack Artifacts: rushstack-packages'
+                  artifactName: rushstack-packages
             steps:
               - checkout: self
                 persistCredentials: true
@@ -36,11 +46,6 @@ extends:
               - template: /common/config/azure-pipelines/templates/install-node.yaml@self
 
               - template: /common/config/azure-pipelines/templates/build.yaml@self
-
-              - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
-                parameters:
-                  VersionPolicyName: noRush
-                  BranchName: $(SourceBranch)
 
               - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
                 parameters:
@@ -52,12 +57,8 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/publish.yaml@self
                 parameters:
-                  VersionPolicyName: noRush
-                  BranchName: $(SourceBranch)
-
-              - template: /common/config/azure-pipelines/templates/publish.yaml@self
-                parameters:
                   VersionPolicyName: rush
                   BranchName: $(SourceBranch)
+                  PublishVersionTag: ${{ parameters.PublishVersionTag }}
 
               - template: /common/config/azure-pipelines/templates/record-published-versions.yaml@self
