@@ -40,7 +40,10 @@ export {
   CommandLineStringParameter,
   type IRequiredCommandLineStringParameter
 } from './parameters/CommandLineStringParameter';
-export { CommandLineStringListParameter } from './parameters/CommandLineStringListParameter';
+export {
+  CommandLineStringListParameter,
+  type IRequiredCommandLineStringListParameter
+} from './parameters/CommandLineStringListParameter';
 export {
   CommandLineIntegerParameter,
   type IRequiredCommandLineIntegerParameter

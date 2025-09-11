@@ -1,0 +1,107 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import {
+  CommandLineParser,
+  type CommandLineFlagParameter,
+  type IRequiredCommandLineStringParameter,
+  type IRequiredCommandLineChoiceParameter,
+  type CommandLineChoiceParameter
+} from '@rushstack/ts-command-line';
+import { InternalError } from '@rushstack/node-core-library';
+import { Colorize, type ConsoleTerminalProvider, type ITerminal } from '@rushstack/terminal';
+
+import { type IZipMode, zipSync } from './zipSync';
+
+export class ZipSyncCommandLineParser extends CommandLineParser {
+  private readonly _debugParameter: CommandLineFlagParameter;
+  private readonly _verboseParameter: CommandLineFlagParameter;
+  private readonly _modeParameter: IRequiredCommandLineChoiceParameter<IZipMode>;
+  private readonly _archivePathParameter: IRequiredCommandLineStringParameter;
+  private readonly _targetDirectoryParameter: IRequiredCommandLineStringParameter;
+  private readonly _compressionParameter: CommandLineChoiceParameter<'store' | 'deflate' | 'auto'>;
+  private readonly _terminal: ITerminal;
+  private readonly _terminalProvider: ConsoleTerminalProvider;
+
+  public constructor(terminalProvider: ConsoleTerminalProvider, terminal: ITerminal) {
+    super({
+      toolFilename: 'zipsync',
+      toolDescription: ''
+    });
+
+    this._terminal = terminal;
+    this._terminalProvider = terminalProvider;
+
+    this._debugParameter = this.defineFlagParameter({
+      parameterLongName: '--debug',
+      parameterShortName: '-d',
+      description: 'Show the full call stack if an error occurs while executing the tool'
+    });
+
+    this._verboseParameter = this.defineFlagParameter({
+      parameterLongName: '--verbose',
+      parameterShortName: '-v',
+      description: 'Show verbose output'
+    });
+
+    this._modeParameter = this.defineChoiceParameter<IZipMode>({
+      parameterLongName: '--mode',
+      parameterShortName: '-m',
+      description:
+        'The mode of operation: "pack" to create a zip archive, or "unpack" to extract files from a zip archive',
+      alternatives: ['pack', 'unpack'],
+      required: true
+    });
+
+    this._archivePathParameter = this.defineStringParameter({
+      parameterLongName: '--archive-path',
+      parameterShortName: '-a',
+      description: 'Zip file path',
+      argumentName: 'ARCHIVE_PATH',
+      required: true
+    });
+
+    this._targetDirectoryParameter = this.defineStringParameter({
+      parameterLongName: '--target-directory',
+      parameterShortName: '-t',
+      description: 'Target directory to pack or unpack',
+      argumentName: 'TARGET_DIRECTORY',
+      required: true
+    });
+
+    this._compressionParameter = this.defineChoiceParameter<'store' | 'deflate' | 'auto'>({
+      parameterLongName: '--compression',
+      parameterShortName: '-z',
+      description:
+        'Compression strategy when packing. "deflate" attempts DEFLATE for every file (keeps only if smaller); "auto" first skips likely-compressed types before attempting; "store" disables compression.',
+      alternatives: ['store', 'deflate', 'auto'],
+      required: true
+    });
+  }
+
+  protected override async onExecuteAsync(): Promise<void> {
+    if (this._debugParameter.value) {
+      InternalError.breakInDebugger = true;
+      this._terminalProvider.debugEnabled = true;
+      this._terminalProvider.verboseEnabled = true;
+    }
+    if (this._verboseParameter.value) {
+      this._terminalProvider.verboseEnabled = true;
+    }
+    try {
+      zipSync({
+        terminal: this._terminal,
+        mode: this._modeParameter.value,
+        archivePath: this._archivePathParameter.value,
+        targetDirectory: this._targetDirectoryParameter.value,
+        compression: (this._compressionParameter.value as 'store' | 'deflate' | 'auto' | undefined) ?? 'auto'
+      });
+    } catch (error) {
+      if (this._debugParameter.value) {
+        console.error('\n' + error.stack);
+      } else {
+        console.error('\n' + Colorize.red('ERROR: ' + error.message.trim()));
+      }
+    }
+  }
+}

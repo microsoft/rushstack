@@ -7,6 +7,8 @@ import * as crypto from 'crypto';
 import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
+import { zipSync } from '@rushstack/zipsync/lib/zipSync';
+
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
@@ -69,6 +71,7 @@ export class OperationBuildCache {
   private readonly _cacheWriteEnabled: boolean;
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
   private readonly _cacheId: string | undefined;
+  private readonly _useZipSyncCacheEngine = process.env.ZIPSYNC_CACHE_ENGINE === 'true';
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
     const {
@@ -176,31 +179,35 @@ export class OperationBuildCache {
 
     const projectFolderPath: string = this._project.projectFolder;
 
-    // Purge output folders
-    terminal.writeVerboseLine(`Clearing cached folders: ${this._projectOutputFolderNames.join(', ')}`);
-    await Promise.all(
-      this._projectOutputFolderNames.map((outputFolderName: string) =>
-        FileSystem.deleteFolderAsync(`${projectFolderPath}/${outputFolderName}`)
-      )
-    );
-
-    const tarUtility: TarExecutable | undefined = await OperationBuildCache._tryGetTarUtility(terminal);
     let restoreSuccess: boolean = false;
-    if (tarUtility && localCacheEntryPath) {
-      const logFilePath: string = this._getTarLogFilePath(cacheId, 'untar');
-      const tarExitCode: number = await tarUtility.tryUntarAsync({
-        archivePath: localCacheEntryPath,
-        outputFolderPath: projectFolderPath,
-        logFilePath
-      });
-      if (tarExitCode === 0) {
-        restoreSuccess = true;
-        terminal.writeLine('Successfully restored output from the build cache.');
-      } else {
-        terminal.writeWarningLine(
-          'Unable to restore output from the build cache. ' +
-            `See "${logFilePath}" for logs from the tar process.`
-        );
+    if (this._useZipSyncCacheEngine) {
+      terminal.writeVerboseLine(`Using zipsync to restore cached folders.`);
+    } else {
+      // Purge output folders
+      terminal.writeVerboseLine(`Clearing cached folders: ${this._projectOutputFolderNames.join(', ')}`);
+      await Promise.all(
+        this._projectOutputFolderNames.map((outputFolderName: string) =>
+          FileSystem.deleteFolderAsync(`${projectFolderPath}/${outputFolderName}`)
+        )
+      );
+
+      const tarUtility: TarExecutable | undefined = await OperationBuildCache._tryGetTarUtility(terminal);
+      if (tarUtility && localCacheEntryPath) {
+        const logFilePath: string = this._getTarLogFilePath(cacheId, 'untar');
+        const tarExitCode: number = await tarUtility.tryUntarAsync({
+          archivePath: localCacheEntryPath,
+          outputFolderPath: projectFolderPath,
+          logFilePath
+        });
+        if (tarExitCode === 0) {
+          restoreSuccess = true;
+          terminal.writeLine('Successfully restored output from the build cache.');
+        } else {
+          terminal.writeWarningLine(
+            'Unable to restore output from the build cache. ' +
+              `See "${logFilePath}" for logs from the tar process.`
+          );
+        }
       }
     }
 

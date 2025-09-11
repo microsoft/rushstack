@@ -105,10 +105,10 @@ importers:
         version: file:../../../apps/heft(@types/node@20.17.19)
       '@rushstack/heft-lint-plugin':
         specifier: file:../../heft-plugins/heft-lint-plugin
-        version: file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.74.1)(@types/node@20.17.19)
+        version: file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.74.3)(@types/node@20.17.19)
       '@rushstack/heft-typescript-plugin':
         specifier: file:../../heft-plugins/heft-typescript-plugin
-        version: file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.74.1)(@types/node@20.17.19)
+        version: file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.74.3)(@types/node@20.17.19)
       eslint:
         specifier: ~9.25.1
         version: 9.25.1
@@ -6300,7 +6300,6 @@ packages:
     resolution: {integrity: sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: true
 
   /unbox-primitive@1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}
@@ -6672,6 +6671,21 @@ packages:
       - '@types/node'
     dev: true
 
+  file:../../../apps/zipsync(@types/node@20.17.19):
+    resolution: {directory: ../../../apps/zipsync, type: directory}
+    id: file:../../../apps/zipsync
+    name: '@rushstack/zipsync'
+    hasBin: true
+    dependencies:
+      '@rushstack/lookup-by-path': file:../../../libraries/lookup-by-path(@types/node@20.17.19)
+      '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
+      '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
+      '@rushstack/ts-command-line': file:../../../libraries/ts-command-line(@types/node@20.17.19)
+      semver: 7.5.4
+      typescript: 5.8.2
+    transitivePeerDependencies:
+      - '@types/node'
+
   file:../../../eslint/eslint-config(eslint@9.25.1)(typescript@4.9.5):
     resolution: {directory: ../../../eslint/eslint-config, type: directory}
     id: file:../../../eslint/eslint-config
@@ -6842,7 +6856,7 @@ packages:
       - supports-color
     dev: true
 
-  file:../../../heft-plugins/heft-api-extractor-plugin(@rushstack/heft@0.74.1)(@types/node@20.17.19):
+  file:../../../heft-plugins/heft-api-extractor-plugin(@rushstack/heft@0.74.3)(@types/node@20.17.19):
     resolution: {directory: ../../../heft-plugins/heft-api-extractor-plugin, type: directory}
     id: file:../../../heft-plugins/heft-api-extractor-plugin
     name: '@rushstack/heft-api-extractor-plugin'
@@ -6856,7 +6870,7 @@ packages:
       - '@types/node'
     dev: true
 
-  file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@0.74.1)(@types/node@20.17.19)(jest-environment-node@29.5.0):
+  file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@0.74.3)(@types/node@20.17.19)(jest-environment-node@29.5.0):
     resolution: {directory: ../../../heft-plugins/heft-jest-plugin, type: directory}
     id: file:../../../heft-plugins/heft-jest-plugin
     name: '@rushstack/heft-jest-plugin'
@@ -6891,7 +6905,7 @@ packages:
       - ts-node
     dev: true
 
-  file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.74.1)(@types/node@20.17.19):
+  file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.74.3)(@types/node@20.17.19):
     resolution: {directory: ../../../heft-plugins/heft-lint-plugin, type: directory}
     id: file:../../../heft-plugins/heft-lint-plugin
     name: '@rushstack/heft-lint-plugin'
@@ -6906,7 +6920,7 @@ packages:
       - '@types/node'
     dev: true
 
-  file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.74.1)(@types/node@20.17.19):
+  file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.74.3)(@types/node@20.17.19):
     resolution: {directory: ../../../heft-plugins/heft-typescript-plugin, type: directory}
     id: file:../../../heft-plugins/heft-typescript-plugin
     name: '@rushstack/heft-typescript-plugin'
@@ -7048,6 +7062,7 @@ packages:
       '@rushstack/stream-collator': file:../../../libraries/stream-collator(@types/node@20.17.19)
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
       '@rushstack/ts-command-line': file:../../../libraries/ts-command-line(@types/node@20.17.19)
+      '@rushstack/zipsync': file:../../../apps/zipsync(@types/node@20.17.19)
       '@yarnpkg/lockfile': 1.0.2
       builtin-modules: 3.1.0
       cli-table: 0.3.11
@@ -7133,7 +7148,7 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
 
-  file:../../../rigs/heft-node-rig(@rushstack/heft@0.74.1)(@types/node@20.17.19):
+  file:../../../rigs/heft-node-rig(@rushstack/heft@0.74.3)(@types/node@20.17.19):
     resolution: {directory: ../../../rigs/heft-node-rig, type: directory}
     id: file:../../../rigs/heft-node-rig
     name: '@rushstack/heft-node-rig'
@@ -7143,10 +7158,10 @@ packages:
       '@microsoft/api-extractor': file:../../../apps/api-extractor(@types/node@20.17.19)
       '@rushstack/eslint-config': file:../../../eslint/eslint-config(eslint@9.25.1)(typescript@5.8.2)
       '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
-      '@rushstack/heft-api-extractor-plugin': file:../../../heft-plugins/heft-api-extractor-plugin(@rushstack/heft@0.74.1)(@types/node@20.17.19)
-      '@rushstack/heft-jest-plugin': file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@0.74.1)(@types/node@20.17.19)(jest-environment-node@29.5.0)
-      '@rushstack/heft-lint-plugin': file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.74.1)(@types/node@20.17.19)
-      '@rushstack/heft-typescript-plugin': file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.74.1)(@types/node@20.17.19)
+      '@rushstack/heft-api-extractor-plugin': file:../../../heft-plugins/heft-api-extractor-plugin(@rushstack/heft@0.74.3)(@types/node@20.17.19)
+      '@rushstack/heft-jest-plugin': file:../../../heft-plugins/heft-jest-plugin(@rushstack/heft@0.74.3)(@types/node@20.17.19)(jest-environment-node@29.5.0)
+      '@rushstack/heft-lint-plugin': file:../../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.74.3)(@types/node@20.17.19)
+      '@rushstack/heft-typescript-plugin': file:../../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.74.3)(@types/node@20.17.19)
       '@types/heft-jest': 1.0.1
       eslint: 9.25.1
       jest-environment-node: 29.5.0
@@ -7168,7 +7183,7 @@ packages:
       '@microsoft/api-extractor': file:../../../apps/api-extractor(@types/node@20.17.19)
       '@rushstack/eslint-patch': file:../../../eslint/eslint-patch
       '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
-      '@rushstack/heft-node-rig': file:../../../rigs/heft-node-rig(@rushstack/heft@0.74.1)(@types/node@20.17.19)
+      '@rushstack/heft-node-rig': file:../../../rigs/heft-node-rig(@rushstack/heft@0.74.3)(@types/node@20.17.19)
       '@types/heft-jest': 1.0.1
       '@types/node': 20.17.19
       eslint: 9.25.1

@@ -489,6 +489,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
+    {
+      "packageName": "@rushstack/zipsync",
+      "projectFolder": "apps/zipsync",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
 
     // "build-tests" folder (alphabetical order)
     {
