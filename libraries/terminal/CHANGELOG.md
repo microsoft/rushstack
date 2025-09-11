@@ -1,6 +1,13 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Wed, 23 Jul 2025 20:55:57 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Sep 2025 00:22:31 GMT and should not be manually modified.
+
+## 0.16.0
+Thu, 11 Sep 2025 00:22:31 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Remove support for legacy `IColorableSequence` parameters passed to `Terminal` insance `write*` functions. Note that types for `IColorableSequence` were removed with #3176 in 2022.
 
 ## 0.15.4
 Wed, 23 Jul 2025 20:55:57 GMT
