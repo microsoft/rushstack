@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/stream-collator",
-  "version": "4.1.107",
+  "version": "4.1.108",
   "description": "Display intelligible realtime output from concurrent processes",
   "repository": {
     "type": "git",
