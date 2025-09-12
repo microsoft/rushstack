@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/mcp-server",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "A Model Context Protocol server implementation for Rush",
   "keywords": [
     "rush",

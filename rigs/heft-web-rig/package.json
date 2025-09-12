@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-web-rig",
-  "version": "0.29.9",
+  "version": "0.29.10",
   "description": "A rig package for web browser projects that build using Heft",
   "license": "MIT",
   "scripts": {
@@ -13,7 +13,7 @@
     "directory": "rigs/heft-web-rig"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.74.4"
+    "@rushstack/heft": "^0.74.5"
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
