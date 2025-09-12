@@ -5,18 +5,18 @@ import { Lib2Class } from 'api-extractor-lib2-test';
  * @public
  */
 export declare namespace n1 {
-    export type SomeType1 = number;
+    type SomeType1 = number;
     export function someFunction1(): SomeType1;
     export namespace n2 {
-        export type SomeType2 = number;
+        type SomeType2 = number;
         export function someFunction2(): SomeType2;
         export namespace n3 {
-            export type SomeType3 = number;
-            export function someFunction3(): n2.n3.SomeType3;
+            type SomeType3 = number;
+            function someFunction3(): n2.n3.SomeType3;
         }
-            {};
+        export {};
     }
-        {};
+    export {};
 }
 
 /** @public */
