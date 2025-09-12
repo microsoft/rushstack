@@ -264,9 +264,12 @@ export class ExportAnalyzer {
     importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode,
     moduleSpecifier: string
   ): boolean {
-    const specifier: ts.TypeNode | ts.Expression | undefined = ts.isImportTypeNode(importOrExportDeclaration)
+    let specifier: ts.TypeNode | ts.Expression | undefined = ts.isImportTypeNode(importOrExportDeclaration)
       ? importOrExportDeclaration.argument
       : importOrExportDeclaration.moduleSpecifier;
+    if (specifier && ts.isLiteralTypeNode(specifier)) {
+      specifier = specifier.literal;
+    }
     const mode: ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined =
       specifier && ts.isStringLiteralLike(specifier)
         ? TypeScriptInternals.getModeForUsageLocation(
