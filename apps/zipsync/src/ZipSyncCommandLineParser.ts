@@ -6,6 +6,7 @@ import {
   type CommandLineFlagParameter,
   type IRequiredCommandLineStringParameter,
   type IRequiredCommandLineChoiceParameter,
+  type IRequiredCommandLineStringListParameter,
   type CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { InternalError } from '@rushstack/node-core-library';
@@ -18,7 +19,8 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
   private readonly _verboseParameter: CommandLineFlagParameter;
   private readonly _modeParameter: IRequiredCommandLineChoiceParameter<IZipMode>;
   private readonly _archivePathParameter: IRequiredCommandLineStringParameter;
-  private readonly _targetDirectoryParameter: IRequiredCommandLineStringParameter;
+  private readonly _baseDirParameter: IRequiredCommandLineStringParameter;
+  private readonly _targetDirectoriesParameter: IRequiredCommandLineStringListParameter;
   private readonly _compressionParameter: CommandLineChoiceParameter<'store' | 'deflate' | 'auto'>;
   private readonly _terminal: ITerminal;
   private readonly _terminalProvider: ConsoleTerminalProvider;
@@ -61,11 +63,19 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
       required: true
     });
 
-    this._targetDirectoryParameter = this.defineStringParameter({
-      parameterLongName: '--target-directory',
+    this._targetDirectoriesParameter = this.defineStringListParameter({
+      parameterLongName: '--target-directories',
       parameterShortName: '-t',
-      description: 'Target directory to pack or unpack',
-      argumentName: 'TARGET_DIRECTORY',
+      description: 'Target directories to pack or unpack',
+      argumentName: 'TARGET_DIRECTORIES',
+      required: true
+    });
+
+    this._baseDirParameter = this.defineStringParameter({
+      parameterLongName: '--base-dir',
+      parameterShortName: '-b',
+      description: 'Base directory for relative paths within the archive',
+      argumentName: 'BASE_DIR',
       required: true
     });
 
@@ -93,7 +103,8 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
         terminal: this._terminal,
         mode: this._modeParameter.value,
         archivePath: this._archivePathParameter.value,
-        targetDirectory: this._targetDirectoryParameter.value,
+        targetDirectories: this._targetDirectoriesParameter.values,
+        baseDir: this._baseDirParameter.value,
         compression: (this._compressionParameter.value as 'store' | 'deflate' | 'auto' | undefined) ?? 'auto'
       });
     } catch (error) {

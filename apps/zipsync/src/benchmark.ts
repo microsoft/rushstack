@@ -33,7 +33,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { spawnSync, type SpawnSyncReturns } from 'child_process';
-import { zipSync } from './zip';
+import { zipSync } from './zipSync';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
 interface IArgs {
@@ -351,7 +351,8 @@ async function main(): Promise<void> {
             terminal,
             mode: 'pack',
             archivePath,
-            targetDirectory: workDir,
+            targetDirectories: [workDir],
+            baseDir: path.dirname(workDir),
             compression:
               scenario.compression === 'deflate'
                 ? 'deflate'
@@ -464,7 +465,8 @@ async function main(): Promise<void> {
             terminal,
             mode: 'unpack',
             archivePath,
-            targetDirectory: unpackDir,
+            targetDirectories: [unpackDir],
+            baseDir: path.dirname(unpackDir),
             compression:
               scenario.compression === 'deflate'
                 ? 'deflate'

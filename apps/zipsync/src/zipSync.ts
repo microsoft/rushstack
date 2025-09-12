@@ -24,7 +24,7 @@ import {
   type IEndOfCentralDirectory,
   type ICentralDirectoryHeaderParseResult,
   type IFileEntry
-} from './ziputils';
+} from './zipUtils';
 
 const METADATA_FILENAME: string = '__zipsync_metadata__.json';
 const METADATA_VERSION: string = '1.0';
@@ -51,9 +51,13 @@ export interface IZipSyncOptions {
    */
   archivePath: string;
   /**
-   * Target directory to pack or unpack (depending on mode)
+   * Target directories to pack or unpack (depending on mode)
    */
-  targetDirectory: string;
+  targetDirectories: ReadonlyArray<string>;
+  /**
+   * Base directory for relative paths within the archive (defaults to common parent of targetDirectories)
+   */
+  baseDir: string;
   /**
    * Compression mode. If set to 'deflate', file data will be compressed using raw DEFLATE (method 8) when this
    * produces a smaller result; otherwise it will fall back to 'store' per-file.
@@ -118,7 +122,7 @@ const LIKELY_COMPRESSED_EXTENSION_REGEX: RegExp =
 export function zipSync<T extends IZipSyncOptions>(
   options: T
 ): T['mode'] extends 'pack' ? IPackResult : IUnpackResult {
-  const { terminal, mode, archivePath, targetDirectory } = options;
+  const { terminal, mode, archivePath, targetDirectories: rawTargetDirectories, baseDir } = options;
   const compressionMode: ZipSyncOptionCompression = options.compression;
 
   function calculateSHA1(data: Buffer): string {
@@ -128,8 +132,14 @@ export function zipSync<T extends IZipSyncOptions>(
   function packZip(): IPackResult {
     markStart('pack.total');
     terminal.writeDebugLine('Starting packZip');
-    if (!fs.existsSync(targetDirectory)) {
-      throw new Error(`Target directory does not exist: ${targetDirectory}`);
+    const targetDirectories: string[] = [];
+    for (const targetDirectory of rawTargetDirectories) {
+      const targetDir: string = path.join(baseDir, targetDirectory);
+      if (!fs.existsSync(targetDir)) {
+        terminal.writeErrorLine(`Target directory does not exist: ${targetDirectory}. This will be ignored.`);
+      } else {
+        targetDirectories.push(targetDir);
+      }
     }
     // Pass 1: enumerate
     markStart('pack.enumerate');
@@ -140,7 +150,7 @@ export function zipSync<T extends IZipSyncOptions>(
     }
 
     const filePaths: string[] = [];
-    const queue: IQueueItem[] = [{ dir: targetDirectory, depth: 0 }];
+    const queue: IQueueItem[] = targetDirectories.map((dir) => ({ dir, depth: 0 }));
 
     while (queue.length) {
       const { dir: currentDir, depth } = queue.shift()!;
@@ -159,7 +169,7 @@ export function zipSync<T extends IZipSyncOptions>(
       for (const item of items) {
         const fullPath: string = path.join(currentDir, item.name);
         if (item.isFile()) {
-          const relativePath: string = path.relative(targetDirectory, fullPath).replace(/\\/g, '/');
+          const relativePath: string = path.relative(baseDir, fullPath).replace(/\\/g, '/');
           terminal.writeVerboseLine(`${padding}${item.name}`);
           filePaths.push(relativePath);
         } else if (item.isDirectory()) {
@@ -195,7 +205,7 @@ export function zipSync<T extends IZipSyncOptions>(
       currentOffset += offset;
     }
 
-    function writeFileEntry(relativePath: string, baseDir: string): IFileEntry {
+    function writeFileEntry(relativePath: string): IFileEntry {
       function isLikelyAlreadyCompressed(filename: string): boolean {
         return LIKELY_COMPRESSED_EXTENSION_REGEX.test(filename.toLowerCase());
       }
@@ -310,7 +320,7 @@ export function zipSync<T extends IZipSyncOptions>(
 
     const entries: IFileEntry[] = [];
     for (const relativePath of filePaths) {
-      entries.push(writeFileEntry(relativePath, targetDirectory));
+      entries.push(writeFileEntry(relativePath));
     }
 
     markEnd('pack.prepareEntries');
@@ -322,7 +332,7 @@ export function zipSync<T extends IZipSyncOptions>(
       metadata.files[entry.filename] = { size: entry.size, sha1Hash: entry.sha1Hash };
     }
 
-    const metadataContent: string = JSON.stringify(metadata, null, 2);
+    const metadataContent: string = JSON.stringify(metadata);
     const metadataBuffer: Buffer = Buffer.from(metadataContent, 'utf8');
     terminal.writeDebugLine(
       `Metadata size=${metadataBuffer.length} bytes, fileCount=${Object.keys(metadata.files).length}`
@@ -491,9 +501,13 @@ export function zipSync<T extends IZipSyncOptions>(
 
     terminal.writeLine(`Found ${entries.length} files in archive`);
 
-    if (!fs.existsSync(targetDirectory)) {
-      fs.mkdirSync(targetDirectory, { recursive: true });
-      terminal.writeDebugLine(`Created target directory: ${targetDirectory}`);
+    const targetDirectories: ReadonlyArray<string> = rawTargetDirectories;
+
+    for (const targetDirectory of targetDirectories) {
+      if (!fs.existsSync(targetDirectory)) {
+        fs.mkdirSync(targetDirectory, { recursive: true });
+        terminal.writeDebugLine(`Created target directory: ${targetDirectory}`);
+      }
     }
 
     markStart('unpack.scan.existing');
@@ -504,7 +518,7 @@ export function zipSync<T extends IZipSyncOptions>(
       const items: fs.Dirent[] = fs.readdirSync(dir, { withFileTypes: true });
       for (const item of items) {
         const fullPath: string = path.join(dir, item.name);
-        const relativePath: string = path.relative(targetDirectory, fullPath).replace(/\\/g, '/');
+        const relativePath: string = path.relative(dir, fullPath).replace(/\\/g, '/');
 
         if (item.isFile()) {
           lookupByPath.setItem(relativePath, TYPE_FILE);
@@ -515,7 +529,9 @@ export function zipSync<T extends IZipSyncOptions>(
       }
     }
 
-    collectExistingFiles(targetDirectory);
+    for (const targetDirectory of targetDirectories) {
+      collectExistingFiles(targetDirectory);
+    }
     terminal.writeDebugLine(`Existing file entries tracked: ${lookupByPath.size}`);
     markEnd('unpack.scan.existing');
 
@@ -532,7 +548,7 @@ export function zipSync<T extends IZipSyncOptions>(
         continue;
       }
 
-      const targetPath: string = path.join(targetDirectory, entry.filename);
+      const targetPath: string = path.join(baseDir, entry.filename);
       const targetDir: string = path.dirname(targetPath);
 
       fs.mkdirSync(targetDir, { recursive: true });
@@ -605,7 +621,7 @@ export function zipSync<T extends IZipSyncOptions>(
       if (fileType !== TYPE_FILE) {
         continue;
       }
-      const extraPath: string = path.join(targetDirectory, file);
+      const extraPath: string = path.join(baseDir, file);
       try {
         fs.unlinkSync(extraPath);
         lookupByPath.deleteItem(file);
@@ -625,7 +641,7 @@ export function zipSync<T extends IZipSyncOptions>(
       if (fileType !== TYPE_DIR) {
         continue;
       }
-      const dirPath: string = path.join(targetDirectory, file);
+      const dirPath: string = path.join(baseDir, file);
       try {
         fs.rmdirSync(dirPath);
         terminal.writeVerboseLine(`Cleanup empty directory: ${file}`);
@@ -657,10 +673,10 @@ export function zipSync<T extends IZipSyncOptions>(
   }
 
   if (mode === 'pack') {
-    terminal.writeLine(`Packing to ${archivePath} from ${targetDirectory}`);
-    return packZip();
+    terminal.writeLine(`Packing to ${archivePath} from ${rawTargetDirectories.join(', ')}`);
+    return packZip() as T['mode'] extends 'pack' ? IPackResult : IUnpackResult;
   } else {
-    terminal.writeLine(`Unpacking to ${targetDirectory} from ${archivePath}`);
-    return unpackZip();
+    terminal.writeLine(`Unpacking to ${rawTargetDirectories.join(', ')} from ${archivePath}`);
+    return unpackZip() as T['mode'] extends 'pack' ? IPackResult : IUnpackResult;
   }
 }
