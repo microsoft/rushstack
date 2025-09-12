@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 11 Sep 2025 00:22:31 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Sep 2025 15:13:07 GMT and should not be manually modified.
+
+## 7.52.13
+Fri, 12 Sep 2025 15:13:07 GMT
+
+### Patches
+
+- Fixes a bug in ExtractorAnalyzer._isExternalModulePath where type import declarations were not resolved.
 
 ## 7.52.12
 Thu, 11 Sep 2025 00:22:31 GMT

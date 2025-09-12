@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.52.13",
+      "tag": "@microsoft/api-extractor_v7.52.13",
+      "date": "Fri, 12 Sep 2025 15:13:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixes a bug in ExtractorAnalyzer._isExternalModulePath where type import declarations were not resolved."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.52.12",
       "tag": "@microsoft/api-extractor_v7.52.12",
       "date": "Thu, 11 Sep 2025 00:22:31 GMT",
