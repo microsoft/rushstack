@@ -232,16 +232,14 @@ export class Async {
             // Wait until there's enough capacity to run this job, this function will be re-entered as tasks call `onOperationCompletionAsync`
             const wouldExceedConcurrency: boolean = concurrentUnitsInProgress + weight > concurrency;
             const hasRunningTasks: boolean = concurrentUnitsInProgress > 0;
-            const isWeightedTask: boolean = weight > 0;
-            if (wouldExceedConcurrency && hasRunningTasks && isWeightedTask) {
+            if (wouldExceedConcurrency && hasRunningTasks) {
               // eslint-disable-next-line require-atomic-updates
               nextIterator = currentIteratorResult;
               break;
-            } else {
-              // eslint-disable-next-line require-atomic-updates
-              nextIterator = undefined;
             }
 
+            // eslint-disable-next-line require-atomic-updates
+            nextIterator = undefined;
             concurrentUnitsInProgress += weight;
 
             Promise.resolve(callback(currentIteratorValue.element, arrayIndex++))
