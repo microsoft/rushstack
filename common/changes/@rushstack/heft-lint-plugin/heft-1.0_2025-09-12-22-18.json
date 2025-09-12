@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Relase version 1.0.0",
+      "type": "major",
+      "packageName": "@rushstack/heft-lint-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-lint-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
