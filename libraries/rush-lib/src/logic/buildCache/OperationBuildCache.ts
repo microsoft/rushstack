@@ -7,7 +7,7 @@ import * as crypto from 'crypto';
 import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { zipSync } from '@rushstack/zipsync/lib/zipSync';
+import { zipSyncWorkerAsync } from '@rushstack/zipsync/lib/zipSyncWorkerAsync';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
@@ -183,7 +183,7 @@ export class OperationBuildCache {
     if (this._useZipSyncCacheEngine) {
       terminal.writeVerboseLine(`Using zipsync to restore cached folders.`);
       try {
-        const { filesDeleted, filesExtracted, filesSkipped, foldersDeleted } = zipSync({
+        const { filesDeleted, filesExtracted, filesSkipped, foldersDeleted } = await zipSyncWorkerAsync({
           mode: 'unpack',
           terminal,
           compression: 'deflate',
@@ -276,7 +276,7 @@ export class OperationBuildCache {
     if (this._useZipSyncCacheEngine) {
       terminal.writeVerboseLine(`Using zipsync to create cache archive.`);
       try {
-        const { filesPacked } = zipSync({
+        const { filesPacked } = await zipSyncWorkerAsync({
           mode: 'pack',
           terminal,
           compression: 'deflate',

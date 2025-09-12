@@ -64,7 +64,7 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
     });
 
     this._targetDirectoriesParameter = this.defineStringListParameter({
-      parameterLongName: '--target-directories',
+      parameterLongName: '--target-directory',
       parameterShortName: '-t',
       description: 'Target directories to pack or unpack',
       argumentName: 'TARGET_DIRECTORIES',

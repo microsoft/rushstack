@@ -46,7 +46,7 @@ export function emitSummary(operation: 'pack' | 'unpack', term: ITerminal): void
     return `  ${r.name}: ${formatDuration(r.dur)} (${pct.toFixed(1)}%)`;
   });
   lines.push(`  TOTAL ${operation}.total: ${formatDuration(totalDuration)}`);
-  term.writeLine(`Performance summary (${operation}):\n` + lines.join('\n'));
+  term.writeVerboseLine(`Performance summary (${operation}):\n` + lines.join('\n'));
   // Cleanup marks/measures to avoid unbounded growth
   performance.clearMarks();
   performance.clearMeasures();
