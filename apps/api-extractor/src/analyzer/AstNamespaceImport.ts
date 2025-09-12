@@ -11,7 +11,6 @@ export interface IAstNamespaceImportOptions {
   readonly astModule: AstModule;
   readonly namespaceName: string;
   readonly declaration: ts.Declaration;
-  readonly symbol: ts.Symbol;
 }
 
 /**
@@ -64,21 +63,15 @@ export class AstNamespaceImport extends AstSyntheticEntity {
   public readonly namespaceName: string;
 
   /**
-   * The original `ts.SyntaxKind.NamespaceImport` which can be used as a location for error messages.
+   * The (first) original `ts.SyntaxKind.NamespaceImport` (or `ts.SyntaxKind.SourceFile` if import declaration doesn't exist) which can be used as a location for error messages.
    */
   public readonly declaration: ts.Declaration;
-
-  /**
-   * The original `ts.SymbolFlags.Namespace` symbol.
-   */
-  public readonly symbol: ts.Symbol;
 
   public constructor(options: IAstNamespaceImportOptions) {
     super();
     this.astModule = options.astModule;
     this.namespaceName = options.namespaceName;
     this.declaration = options.declaration;
-    this.symbol = options.symbol;
   }
 
   /** {@inheritdoc} */

@@ -27,12 +27,7 @@ export enum AstImportKind {
   /**
    * An import statement such as `import x = require("y");`.
    */
-  EqualsImport,
-
-  /**
-   * An import statement such as `interface foo { foo: import("bar").a.b.c }`.
-   */
-  ImportType
+  EqualsImport
 }
 
 /**
@@ -150,14 +145,6 @@ export class AstImport extends AstSyntheticEntity {
         return `${options.modulePath}:*`;
       case AstImportKind.EqualsImport:
         return `${options.modulePath}:=`;
-      case AstImportKind.ImportType: {
-        const subKey: string = !options.exportName
-          ? '*' // Equivalent to StarImport
-          : options.exportName.includes('.') // Equivalent to a named export
-            ? options.exportName.split('.')[0]
-            : options.exportName;
-        return `${options.modulePath}:${subKey}`;
-      }
       default:
         throw new InternalError('Unknown AstImportKind');
     }
