@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AnsiEscape } from '@rushstack/terminal';
+import { AnsiEscape } from '@rushstack/terminal/lib/AnsiEscape';
 import type { CommandLineParser } from '../providers/CommandLineParser';
 
 export function ensureHelpTextMatchesSnapshot(parser: CommandLineParser): void {

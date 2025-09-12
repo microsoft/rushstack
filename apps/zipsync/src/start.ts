@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { version } from '../package.json';
-import { Colorize } from '@rushstack/terminal';
-import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
+import { Colorize } from '@rushstack/terminal/lib/Colorize';
+import { ConsoleTerminalProvider } from '@rushstack/terminal/lib/ConsoleTerminalProvider';
+import { Terminal } from '@rushstack/terminal/lib/Terminal';
 
 import { ZipSyncCommandLineParser } from './ZipSyncCommandLineParser';
 

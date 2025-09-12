@@ -3,7 +3,7 @@
 
 import type { PerformanceEntry } from 'node:perf_hooks';
 import { performance } from 'node:perf_hooks';
-import type { ITerminal } from '@rushstack/terminal';
+import type { ITerminal } from '@rushstack/terminal/lib/ITerminal';
 
 export function markStart(name: string): void {
   performance.mark(`zipsync:${name}:start`);

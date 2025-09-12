@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 // Load the Jest patches before anything else loads
-import './patches/jestWorkerPatch';
 
 import type { EventEmitter } from 'events';
 import * as path from 'path';

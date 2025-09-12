@@ -10,8 +10,8 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "@jest/reporters": "~29.5.0",
-    "@jest/types": "29.5.0",
+    "@jest/reporters": "30.0.5",
+    "@jest/types": "30.0.5",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",

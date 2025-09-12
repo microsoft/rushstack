@@ -1,16 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  CommandLineParser,
-  type CommandLineFlagParameter,
-  type IRequiredCommandLineStringParameter,
-  type IRequiredCommandLineChoiceParameter,
-  type IRequiredCommandLineStringListParameter,
-  type CommandLineChoiceParameter
-} from '@rushstack/ts-command-line';
-import { InternalError } from '@rushstack/node-core-library';
-import { Colorize, type ConsoleTerminalProvider, type ITerminal } from '@rushstack/terminal';
+import { CommandLineParser } from '@rushstack/ts-command-line/lib/providers/CommandLineParser';
+import type {
+  CommandLineFlagParameter,
+  IRequiredCommandLineStringParameter,
+  IRequiredCommandLineChoiceParameter,
+  IRequiredCommandLineStringListParameter,
+  CommandLineChoiceParameter
+} from '@rushstack/ts-command-line/lib/index';
+import { InternalError } from '@rushstack/node-core-library/lib/InternalError';
+import { Colorize } from '@rushstack/terminal/lib/Colorize';
+import type { ConsoleTerminalProvider } from '@rushstack/terminal/lib/ConsoleTerminalProvider';
+import type { ITerminal } from '@rushstack/terminal/lib/ITerminal';
 
 import { type IZipMode, zipSync } from './zipSync';
 

@@ -5,7 +5,8 @@ import { tmpdir } from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 import { zipSync } from './zipSync';
-import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
+import { NoOpTerminalProvider } from '@rushstack/terminal/lib/NoOpTerminalProvider';
+import { Terminal } from '@rushstack/terminal/lib/Terminal';
 
 function getTempDir(): string {
   const randomId = crypto.randomUUID();
@@ -79,22 +80,22 @@ describe('zipsync tests', () => {
       compression: 'deflate'
     });
 
-    // expect(unpackResult).toMatchSnapshot();
+    expect(unpackResult).toMatchSnapshot();
 
-    // // Verify files were extracted
-    // for (const targetDirectory of targetDirectories) {
-    //   const sourceDir: string = path.join(baseDir, targetDirectory);
-    //   const destDir: string = path.join(extractDir, targetDirectory);
-    //   for (let i: number = 0; i < 5; ++i) {
-    //     const filePath: string = path.join(sourceDir, 'subdir', `file-${i}.txt`);
-    //     const extractedFilePath: string = path.join(destDir, 'subdir', `file-${i}.txt`);
-    //     expect(fs.existsSync(extractedFilePath)).toBe(true);
-    //     expect(fs.readFileSync(extractedFilePath, { encoding: 'utf-8' })).toEqual(
-    //       fs.readFileSync(filePath, { encoding: 'utf-8' })
-    //     );
-    //   }
-    // }
+    // Verify files were extracted
+    for (const targetDirectory of targetDirectories) {
+      const sourceDir: string = path.join(baseDir, targetDirectory);
+      const destDir: string = path.join(extractDir, targetDirectory);
+      for (let i: number = 0; i < 5; ++i) {
+        const filePath: string = path.join(sourceDir, 'subdir', `file-${i}.txt`);
+        const extractedFilePath: string = path.join(destDir, 'subdir', `file-${i}.txt`);
+        expect(fs.existsSync(extractedFilePath)).toBe(true);
+        expect(fs.readFileSync(extractedFilePath, { encoding: 'utf-8' })).toEqual(
+          fs.readFileSync(filePath, { encoding: 'utf-8' })
+        );
+      }
+    }
 
-    // demoDataDisposable[Symbol.dispose]();
+    demoDataDisposable[Symbol.dispose]();
   });
 });

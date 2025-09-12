@@ -31,6 +31,7 @@ export interface IReadonlyLookupByPath<TItem extends {}> extends Iterable<[strin
     findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
     findLongestPrefixMatch(query: string, delimiter?: string): IPrefixMatch<TItem> | undefined;
     get(query: string, delimiter?: string): TItem | undefined;
+    getNodeAtPrefix(query: string, delimiter?: string): IReadonlyPathTrieNode<TItem> | undefined;
     groupByChild<TInfo>(infoByPath: Map<string, TInfo>, delimiter?: string): Map<TItem, Map<string, TInfo>>;
     has(query: string, delimiter?: string): boolean;
     get size(): number;
@@ -57,6 +58,7 @@ export class LookupByPath<TItem extends {}> implements IReadonlyLookupByPath<TIt
     findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
     findLongestPrefixMatch(query: string, delimiter?: string): IPrefixMatch<TItem> | undefined;
     get(key: string, delimiter?: string): TItem | undefined;
+    getNodeAtPrefix(query: string, delimiter?: string): IReadonlyPathTrieNode<TItem> | undefined;
     groupByChild<TInfo>(infoByPath: Map<string, TInfo>, delimiter?: string): Map<TItem, Map<string, TInfo>>;
     has(key: string, delimiter?: string): boolean;
     static iteratePathSegments(serializedPath: string, delimiter?: string): Iterable<string>;

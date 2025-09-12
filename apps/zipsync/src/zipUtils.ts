@@ -350,10 +350,7 @@ export function getFileFromZip(zipBuffer: Buffer, entry: ICentralDirectoryHeader
     entry.header.localHeaderOffset + 30 + localFileHeader.filenameLength + localFileHeader.extraFieldLength;
   const fileZipBuffer: Buffer = zipBuffer.subarray(
     localDataOffset,
-    localDataOffset +
-      (entry.header.compressionMethod === STORE_COMPRESSION
-        ? entry.header.compressedSize
-        : entry.header.uncompressedSize)
+    localDataOffset + entry.header.compressedSize
   );
   return fileZipBuffer;
 }

@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminal } from '@rushstack/terminal';
+import type { ITerminal } from '@rushstack/terminal/lib/ITerminal';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import * as zlib from 'zlib';
-import { LookupByPath } from '@rushstack/lookup-by-path';
+import { type IReadonlyPathTrieNode, LookupByPath } from '@rushstack/lookup-by-path/lib/LookupByPath';
 import { DISPOSE_SYMBOL, getDisposableFileHandle, type IDisposableFileHandle } from './disposableFileHandle';
 import { type IIncrementalZlib, createIncrementalZlib } from './compress';
 import { markStart, markEnd, getDuration, emitSummary, formatDuration } from './perf';
@@ -65,6 +65,12 @@ export interface IZipSyncOptions {
   compression: ZipSyncOptionCompression;
 }
 
+interface IDirQueueItem {
+  dir: string;
+  depth: number;
+  node?: IReadonlyPathTrieNode<boolean> | undefined;
+}
+
 interface IMetadataFileRecord {
   size: number;
   sha1Hash: string;
@@ -86,11 +92,8 @@ interface IUnpackResult {
   filesSkipped: number;
   filesDeleted: number;
   foldersDeleted: number;
+  otherEntriesDeleted: number;
 }
-
-const TYPE_FILE: 0 = 0;
-const TYPE_DIR: 1 = 1;
-type LookupByPathValue = typeof TYPE_FILE | typeof TYPE_DIR;
 
 const LIKELY_COMPRESSED_EXTENSION_REGEX: RegExp =
   /\.(?:zip|gz|tgz|bz2|xz|7z|rar|jpg|jpeg|png|gif|webp|avif|mp4|m4v|mov|mkv|webm|mp3|ogg|aac|flac|pdf|woff|woff2)$/;
@@ -122,7 +125,14 @@ const LIKELY_COMPRESSED_EXTENSION_REGEX: RegExp =
 export function zipSync<T extends IZipSyncOptions>(
   options: T
 ): T['mode'] extends 'pack' ? IPackResult : IUnpackResult {
-  const { terminal, mode, archivePath, targetDirectories: rawTargetDirectories, baseDir } = options;
+  const {
+    terminal,
+    mode,
+    archivePath,
+    targetDirectories: rawTargetDirectories,
+    baseDir: rawBaseDir
+  } = options;
+  const baseDir: string = path.resolve(rawBaseDir);
   const compressionMode: ZipSyncOptionCompression = options.compression;
 
   function calculateSHA1(data: Buffer): string {
@@ -135,22 +145,13 @@ export function zipSync<T extends IZipSyncOptions>(
     const targetDirectories: string[] = [];
     for (const targetDirectory of rawTargetDirectories) {
       const targetDir: string = path.join(baseDir, targetDirectory);
-      if (!fs.existsSync(targetDir)) {
-        terminal.writeErrorLine(`Target directory does not exist: ${targetDirectory}. This will be ignored.`);
-      } else {
-        targetDirectories.push(targetDir);
-      }
+      targetDirectories.push(targetDir);
     }
     // Pass 1: enumerate
     markStart('pack.enumerate');
 
-    interface IQueueItem {
-      dir: string;
-      depth: number;
-    }
-
     const filePaths: string[] = [];
-    const queue: IQueueItem[] = targetDirectories.map((dir) => ({ dir, depth: 0 }));
+    const queue: IDirQueueItem[] = targetDirectories.map((dir) => ({ dir, depth: 0 }));
 
     while (queue.length) {
       const { dir: currentDir, depth } = queue.shift()!;
@@ -162,8 +163,15 @@ export function zipSync<T extends IZipSyncOptions>(
       try {
         items = fs.readdirSync(currentDir, { withFileTypes: true });
       } catch (e) {
-        terminal.writeWarningLine(`Failed to read directory: ${currentDir}`);
-        continue;
+        if (
+          e &&
+          ((e as NodeJS.ErrnoException).code === 'ENOENT' || (e as NodeJS.ErrnoException).code === 'ENOTDIR')
+        ) {
+          terminal.writeWarningLine(`Failed to read directory: ${currentDir}. Ignoring.`);
+          continue;
+        } else {
+          throw e;
+        }
       }
 
       for (const item of items) {
@@ -175,6 +183,8 @@ export function zipSync<T extends IZipSyncOptions>(
         } else if (item.isDirectory()) {
           terminal.writeVerboseLine(`${padding}${item.name}/`);
           queue.push({ dir: fullPath, depth: depth + 1 });
+        } else {
+          throw new Error(`Unexpected item (not file or directory): ${fullPath}. Aborting.`);
         }
       }
     }
@@ -419,9 +429,6 @@ export function zipSync<T extends IZipSyncOptions>(
   function unpackZip(): IUnpackResult {
     markStart('unpack.total');
     terminal.writeDebugLine('Starting unpackZip');
-    if (!fs.existsSync(archivePath)) {
-      throw new Error(`Archive does not exist: ${archivePath}`);
-    }
 
     markStart('unpack.read.archive');
     const zipBuffer: Buffer = fs.readFileSync(archivePath);
@@ -429,6 +436,7 @@ export function zipSync<T extends IZipSyncOptions>(
     markEnd('unpack.read.archive');
 
     markStart('unpack.parse.centralDirectory');
+    const zipTree: LookupByPath<boolean> = new LookupByPath();
     const endOfCentralDir: IEndOfCentralDirectory = findEndOfCentralDirectory(zipBuffer);
 
     const centralDirBuffer: Buffer = zipBuffer.subarray(
@@ -448,6 +456,7 @@ export function zipSync<T extends IZipSyncOptions>(
         centralDirBuffer,
         offset
       );
+      zipTree.setItem(result.filename, true);
 
       if (result.filename === METADATA_FILENAME) {
         if (metadataEntry) {
@@ -504,40 +513,90 @@ export function zipSync<T extends IZipSyncOptions>(
     const targetDirectories: ReadonlyArray<string> = rawTargetDirectories;
 
     for (const targetDirectory of targetDirectories) {
-      if (!fs.existsSync(targetDirectory)) {
-        fs.mkdirSync(targetDirectory, { recursive: true });
-        terminal.writeDebugLine(`Created target directory: ${targetDirectory}`);
-      }
+      fs.mkdirSync(targetDirectory, { recursive: true });
+      terminal.writeDebugLine(`Ensured target directory: ${targetDirectory}`);
     }
 
-    markStart('unpack.scan.existing');
-    const lookupByPath: LookupByPath<LookupByPathValue> = new LookupByPath();
-    function collectExistingFiles(dir: string): void {
-      if (!fs.existsSync(dir)) return;
+    let extractedCount: number = 0;
+    let skippedCount: number = 0;
+    let deletedFilesCount: number = 0;
+    let deletedOtherCount: number = 0;
+    let deletedFoldersCount: number = 0;
+    let scanCount: number = 0;
 
-      const items: fs.Dirent[] = fs.readdirSync(dir, { withFileTypes: true });
+    const dirsToCleanup: string[] = [];
+
+    markStart('unpack.scan.existing');
+    const queue: IDirQueueItem[] = targetDirectories.map((dir) => ({
+      dir,
+      depth: 0,
+      node: zipTree.getNodeAtPrefix(path.relative(baseDir, dir))
+    }));
+
+    while (queue.length) {
+      const { dir: currentDir, depth, node } = queue.shift()!;
+      terminal.writeDebugLine(`Enumerating directory: ${currentDir}`);
+
+      const padding: string = depth === 0 ? '' : '-↳'.repeat(depth);
+
+      let items: fs.Dirent[];
+      try {
+        items = fs.readdirSync(currentDir, { withFileTypes: true });
+      } catch (e) {
+        terminal.writeWarningLine(`Failed to read directory: ${currentDir}`);
+        continue;
+      }
+
       for (const item of items) {
-        const fullPath: string = path.join(dir, item.name);
-        const relativePath: string = path.relative(dir, fullPath).replace(/\\/g, '/');
+        scanCount++;
+        // check if exists in zipTree, if not delete
+        const relativePath: string = path
+          .relative(baseDir, path.join(currentDir, item.name))
+          .replace(/\\/g, '/');
+
+        const childNode: IReadonlyPathTrieNode<boolean> | undefined = node?.children?.get(item.name);
+        if (childNode) {
+          // Exists in zip, keep
+          terminal.writeVerboseLine(`${padding}${item.name} (exists in zip)`);
+        } else {
+          terminal.writeVerboseLine(`${padding}${item.name} (not in zip)`);
+        }
 
         if (item.isFile()) {
-          lookupByPath.setItem(relativePath, TYPE_FILE);
+          terminal.writeVerboseLine(`${padding}${item.name}`);
+          if (!childNode?.value) {
+            terminal.writeDebugLine(`Deleting file: ${relativePath}`);
+            fs.unlinkSync(relativePath);
+            deletedFilesCount++;
+          }
         } else if (item.isDirectory()) {
-          lookupByPath.setItem(relativePath, TYPE_DIR);
-          collectExistingFiles(fullPath);
+          terminal.writeVerboseLine(`${padding}${item.name}/`);
+          queue.push({ dir: relativePath, depth: depth + 1, node: childNode });
+          if (!childNode || childNode.value) {
+            dirsToCleanup.push(relativePath);
+          }
+        } else {
+          terminal.writeVerboseLine(`${padding}${item.name} (not file or directory, deleting)`);
+          fs.unlinkSync(relativePath);
+          deletedOtherCount++;
         }
       }
     }
 
-    for (const targetDirectory of targetDirectories) {
-      collectExistingFiles(targetDirectory);
+    for (const dir of dirsToCleanup) {
+      // Try to remove the directory. If it is not empty, this will throw and we can ignore the error.
+      try {
+        fs.rmdirSync(dir);
+        terminal.writeDebugLine(`Deleted empty directory: ${dir}`);
+        deletedFoldersCount++;
+      } catch (e) {
+        // Probably not empty
+        terminal.writeDebugLine(`Directory not empty, skipping: ${dir}`);
+      }
     }
-    terminal.writeDebugLine(`Existing file entries tracked: ${lookupByPath.size}`);
-    markEnd('unpack.scan.existing');
 
-    let extractedCount: number = 0;
-    let skippedCount: number = 0;
-    let deletedCount: number = 0;
+    terminal.writeDebugLine(`Existing entries tracked: ${scanCount}`);
+    markEnd('unpack.scan.existing');
 
     markStart('unpack.extract.loop');
     const bufferSize: number = 1 << 25; // 32 MiB
@@ -554,18 +613,22 @@ export function zipSync<T extends IZipSyncOptions>(
       fs.mkdirSync(targetDir, { recursive: true });
 
       let shouldExtract: boolean = true;
-      if (fs.existsSync(targetPath) && metadata) {
-        const stats: fs.Stats = fs.statSync(targetPath);
-        const metadataFile: { size: number; sha1Hash: string } | undefined = metadata.files[entry.filename];
+      if (metadata) {
+        const stats: fs.Stats | undefined = fs.statSync(targetPath, { throwIfNoEntry: false });
+        if (!stats) {
+          terminal.writeDebugLine(`File does not exist and will be extracted: ${entry.filename}`);
+        } else {
+          const metadataFile: { size: number; sha1Hash: string } | undefined = metadata.files[entry.filename];
 
-        if (metadataFile && stats.size === metadataFile.size) {
-          const existingData: Buffer = fs.readFileSync(targetPath);
-          const existingHash: string = calculateSHA1(existingData);
+          if (metadataFile && stats.size === metadataFile.size) {
+            const existingData: Buffer = fs.readFileSync(targetPath);
+            const existingHash: string = calculateSHA1(existingData);
 
-          if (existingHash === metadataFile.sha1Hash) {
-            shouldExtract = false;
-            skippedCount++;
-            terminal.writeDebugLine(`Skip unchanged file: ${entry.filename}`);
+            if (existingHash === metadataFile.sha1Hash) {
+              shouldExtract = false;
+              skippedCount++;
+              terminal.writeDebugLine(`Skip unchanged file: ${entry.filename}`);
+            }
           }
         }
       }
@@ -611,53 +674,13 @@ export function zipSync<T extends IZipSyncOptions>(
         // If data descriptor was used we rely on central directory values already consumed.
         extractedCount++;
       }
-
-      lookupByPath.deleteItem(entry.filename);
     }
     markEnd('unpack.extract.loop');
-
-    markStart('unpack.cleanup.files');
-    for (const [file, fileType] of lookupByPath.entries()) {
-      if (fileType !== TYPE_FILE) {
-        continue;
-      }
-      const extraPath: string = path.join(baseDir, file);
-      try {
-        fs.unlinkSync(extraPath);
-        lookupByPath.deleteItem(file);
-        terminal.writeVerboseLine(`Cleanup extra file: ${file}`);
-        deletedCount++;
-      } catch (e) {
-        const error: NodeJS.ErrnoException = e as NodeJS.ErrnoException;
-        if (!(error && (error.code === 'ENOENT' || error.code === 'ENOTDIR'))) {
-          throw error;
-        }
-      }
-    }
-    markEnd('unpack.cleanup.files');
-
-    markStart('unpack.cleanup.dirs');
-    for (const [file, fileType] of lookupByPath.entries()) {
-      if (fileType !== TYPE_DIR) {
-        continue;
-      }
-      const dirPath: string = path.join(baseDir, file);
-      try {
-        fs.rmdirSync(dirPath);
-        terminal.writeVerboseLine(`Cleanup empty directory: ${file}`);
-      } catch (e) {
-        const error: NodeJS.ErrnoException = e as NodeJS.ErrnoException;
-        if (!(error && (error.code === 'ENOENT' || error.code === 'ENOTEMPTY'))) {
-          throw error;
-        }
-      }
-    }
-    markEnd('unpack.cleanup.dirs');
 
     markEnd('unpack.total');
     const unpackTotal: number = getDuration('unpack.total');
     terminal.writeLine(
-      `Extraction complete: ${extractedCount} extracted, ${skippedCount} skipped, ${deletedCount} deleted in ${formatDuration(
+      `Extraction complete: ${extractedCount} extracted, ${skippedCount} skipped, ${deletedFilesCount} deleted, ${deletedFoldersCount} folders deleted, ${deletedOtherCount} other entries deleted in ${formatDuration(
         unpackTotal
       )}`
     );
@@ -667,8 +690,9 @@ export function zipSync<T extends IZipSyncOptions>(
       metadata,
       filesExtracted: extractedCount,
       filesSkipped: skippedCount,
-      filesDeleted: deletedCount,
-      foldersDeleted: lookupByPath.size
+      filesDeleted: deletedFilesCount,
+      foldersDeleted: deletedFoldersCount,
+      otherEntriesDeleted: deletedOtherCount
     };
   }
 

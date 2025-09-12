@@ -23,7 +23,7 @@
  *   node lib/benchmark --data <datasetDir> [--iterations N] [--keep] [--verbose]
  *
  * Notes:
- *  - Dataset directory should be a stable tree of files (no node_modules if you want faster runs).
+ *  - Dataset directory should be a stable tree of files
  *  - Iterations >1 will repeat each scenario and report min/avg/max.
  *  - Only commands found on PATH are executed; missing tools are skipped.
  */
@@ -34,8 +34,8 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import { spawnSync, type SpawnSyncReturns } from 'child_process';
 import { zipSync } from './zipSync';
-import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
-
+import { ConsoleTerminalProvider } from '@rushstack/terminal/lib/ConsoleTerminalProvider';
+import { Terminal } from '@rushstack/terminal/lib/Terminal';
 interface IArgs {
   dataDir: string;
   iterations: number;
@@ -351,7 +351,7 @@ async function main(): Promise<void> {
             terminal,
             mode: 'pack',
             archivePath,
-            targetDirectories: [workDir],
+            targetDirectories: [path.basename(workDir)],
             baseDir: path.dirname(workDir),
             compression:
               scenario.compression === 'deflate'
