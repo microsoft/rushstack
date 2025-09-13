@@ -19,11 +19,12 @@ export enum DependencyKind {
 export class LockfileDependency {
   public name: string;
   public version: string;
-  public entryId: string = '';
   public dependencyType: DependencyKind;
   public containingEntry: LockfileEntry;
 
-  public resolvedEntry: LockfileEntry | undefined;
+  public entryId: string = '';
+
+  public resolvedEntry: LockfileEntry | undefined = undefined;
 
   public peerDependencyMeta: {
     name?: string;
@@ -91,6 +92,9 @@ export class LockfileEntry {
    */
   public displayText: string = '';
 
+  public entryPackageVersion: string = '';
+  public entrySuffix: string = '';
+
   /**
    * A list of all the dependencies for this entry.
    * Note that dependencies, dev dependencies, as well as peer dependencies are all included.
@@ -106,9 +110,6 @@ export class LockfileEntry {
    * A list of entries that specify this entry as a dependency.
    */
   public referrers: LockfileEntry[] = [];
-
-  public entryPackageVersion: string = '';
-  public entrySuffix: string = '';
 
   public constructor(kind: LockfileEntryFilter) {
     this.kind = kind;
