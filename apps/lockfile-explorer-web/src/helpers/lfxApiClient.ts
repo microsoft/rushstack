@@ -2,16 +2,45 @@
 // See LICENSE in the project root for license information.
 
 import type { IPackageJson } from '../types/IPackageJson';
+import type { ILfxWorkspace } from '../types/lfxProtocol';
 
-const apiPath: string = `${window.appContext.serviceUrl}/api`;
+const serviceUrl: string = window.appContext.serviceUrl;
 
 export async function checkAliveAsync(): Promise<boolean> {
   try {
-    await fetch(`${apiPath}/health`);
+    await fetch(`${serviceUrl}/api/health`);
     return true;
   } catch (e) {
     return false;
   }
+}
+
+/**
+ * Read the contents of a text file under the workspace directory.
+ * @param relativePath - a file path that is relative to the working directory.
+ */
+export async function readWorkspaceConfigAsync(): Promise<ILfxWorkspace> {
+  let response: Response;
+
+  try {
+    response = await fetch(`${serviceUrl}/api/workspace`);
+    if (!response.ok) {
+      const responseText: string = await response.text();
+      const error = new Error(
+        'The operation failed: ' + (responseText.trim() ?? 'An unknown error occurred')
+      );
+      // eslint-disable-next-line no-console
+      console.error('readFileAsTextAsync() failed: ', error);
+      throw error;
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Network error in readWorkspaceConfigAsync(): ', e);
+    throw new Error('Network error: ' + (e.message ?? 'An unknown error occurred'));
+  }
+
+  const responseJson: ILfxWorkspace = await response.json();
+  return responseJson;
 }
 
 /**
@@ -21,7 +50,7 @@ export async function checkAliveAsync(): Promise<boolean> {
  */
 export async function readPnpmfileAsync(): Promise<string> {
   try {
-    const response = await fetch(`${apiPath}/pnpmfile`);
+    const response = await fetch(`${serviceUrl}/api/pnpmfile`);
     return await response.text();
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -32,7 +61,7 @@ export async function readPnpmfileAsync(): Promise<string> {
 
 export async function readPackageJsonAsync(projectPath: string): Promise<IPackageJson | undefined> {
   try {
-    const response = await fetch(`${apiPath}/package-json`, {
+    const response = await fetch(`${serviceUrl}/api/package-json`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -51,7 +80,7 @@ export async function readPackageJsonAsync(projectPath: string): Promise<IPackag
 
 export async function readPackageSpecAsync(projectPath: string): Promise<IPackageJson | undefined> {
   try {
-    const response = await fetch(`${apiPath}/package-spec`, {
+    const response = await fetch(`${serviceUrl}/api/package-spec`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

@@ -15,7 +15,7 @@ import {
   CommandLineParser,
   type IRequiredCommandLineStringParameter
 } from '@rushstack/ts-command-line';
-import type { IAppContext } from '@rushstack/lockfile-explorer-web/lib/AppContext';
+import type { IAppContext } from '@rushstack/lockfile-explorer-web/lib/types/IAppContext';
 import type { Lockfile } from '@pnpm/lockfile-types';
 
 import type { IAppState } from '../../state';
@@ -164,6 +164,10 @@ export class ExplorerCommandLineParser extends CommandLineParser {
         console.log(Colorize.green('The client has reconnected!'));
       }
       res.status(200).send();
+    });
+
+    app.get('/api/workspace', (req: express.Request, res: express.Response) => {
+      res.type('application/javascript').send(appState.lfxWorkspace);
     });
 
     app.post(
