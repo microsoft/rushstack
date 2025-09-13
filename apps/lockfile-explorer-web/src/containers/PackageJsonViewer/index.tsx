@@ -12,7 +12,7 @@ import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import { isEntryModified } from '../../helpers/isEntryModified';
 import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
-import { LockfileEntryFilter } from '../../parsing/LockfileEntry';
+import { LockfileEntryFilter } from '../../parsing/LfxGraph';
 
 const PackageView: { [key in string]: string } = {
   PACKAGE_JSON: 'PACKAGE_JSON',

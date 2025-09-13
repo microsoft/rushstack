@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LockfileEntry, LockfileEntryFilter } from './LockfileEntry';
-import { DependencyKind, LockfileDependency } from './LockfileDependency';
+import { LfxGraph, LockfileEntry, LockfileEntryFilter } from './LfxGraph';
+import { DependencyKind, LockfileDependency } from './LfxGraph';
 import { Path } from '@lifaon/path';
 
 enum PnpmLockfileVersion {
@@ -274,10 +274,7 @@ function getImporterValue(
  *
  * @returns A list of all the LockfileEntries in the lockfile.
  */
-export function generateLockfileGraph(
-  lockfile: ILockfilePackageType,
-  subspaceName?: string
-): LockfileEntry[] {
+export function generateLockfileGraph(lockfile: ILockfilePackageType, subspaceName?: string): LfxGraph {
   let pnpmLockfileVersion: PnpmLockfileVersion = PnpmLockfileVersion.V5;
   if (`${lockfile.lockfileVersion}`.startsWith('6')) {
     pnpmLockfileVersion = PnpmLockfileVersion.V6;
@@ -360,5 +357,7 @@ export function generateLockfileGraph(
     }
   }
 
-  return allEntries;
+  const lfxGraph: LfxGraph = new LfxGraph();
+  lfxGraph.entries = allEntries;
+  return lfxGraph;
 }

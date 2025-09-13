@@ -19,8 +19,8 @@
       "request": "launch",
       "name": "Run in specified folder",
       "program": "${workspaceFolder}/lib/start-explorer.js",
-//      "cwd": "C:\\Git\\lockfile-explorer-demos",
-      "cwd": "(your project path)",
+      "cwd": "C:\\Git\\lockfile-explorer-demos",
+//      "cwd": "(your project path)",
       "args": ["--debug"],
       "sourceMaps": true
     }

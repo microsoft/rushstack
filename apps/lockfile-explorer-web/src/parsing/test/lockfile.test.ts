@@ -3,11 +3,11 @@
 
 import { TEST_LOCKFILE } from './testLockfile';
 import * as lfxGraphLoader from '../lfxGraphLoader';
-import type { LockfileEntry } from '../LockfileEntry';
+import type { LockfileEntry } from '../LfxGraph';
 
 describe('LockfileGeneration', () => {
   it('creates a valid bi-directional graph', () => {
-    const resolvedPackages = lfxGraphLoader.generateLockfileGraph(TEST_LOCKFILE);
+    const resolvedPackages = lfxGraphLoader.generateLockfileGraph(TEST_LOCKFILE).entries;
 
     // Mapping of all the lockfile entries created by the lockfile
     const resolvedPackagesMap: { [key in string]: LockfileEntry } = {};
