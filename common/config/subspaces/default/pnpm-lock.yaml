@@ -300,6 +300,9 @@ importers:
       local-web-rig:
         specifier: workspace:*
         version: link:../../rigs/local-web-rig
+      typescript:
+        specifier: 5.8.2
+        version: 5.8.2
 
   ../../../apps/rundown:
     dependencies:
