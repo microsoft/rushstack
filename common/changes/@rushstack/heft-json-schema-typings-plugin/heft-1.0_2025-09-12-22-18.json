@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Relase version 1.0.0",
+      "type": "major",
+      "packageName": "@rushstack/heft-json-schema-typings-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-json-schema-typings-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
