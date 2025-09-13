@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { TEST_LOCKFILE } from './testLockfile';
-import { generateLockfileGraph } from '../readLockfile';
+import * as lfxGraphLoader from '../lfxGraphLoader';
 import type { LockfileEntry } from '../LockfileEntry';
 
 describe('LockfileGeneration', () => {
   it('creates a valid bi-directional graph', () => {
-    const resolvedPackages = generateLockfileGraph(TEST_LOCKFILE);
+    const resolvedPackages = lfxGraphLoader.generateLockfileGraph(TEST_LOCKFILE);
 
     // Mapping of all the lockfile entries created by the lockfile
     const resolvedPackagesMap: { [key in string]: LockfileEntry } = {};

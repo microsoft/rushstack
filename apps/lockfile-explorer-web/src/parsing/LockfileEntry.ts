@@ -1,22 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Path } from '@lifaon/path';
-import { type ILockfileNode, LockfileDependency } from './LockfileDependency';
+import type { LockfileDependency } from './LockfileDependency';
 
 export enum LockfileEntryFilter {
   Project,
   Package,
   SideBySide,
   Doppelganger
-}
-
-interface IProps {
-  rawEntryId: string;
-  kind: LockfileEntryFilter;
-  rawYamlData: ILockfileNode;
-  duplicates?: Set<string>;
-  subspaceName?: string;
 }
 
 /**
@@ -43,9 +34,9 @@ interface IProps {
  *
  */
 export class LockfileEntry {
+  public readonly kind: LockfileEntryFilter;
   public entryId: string = '';
-  public kind: LockfileEntryFilter;
-  public rawEntryId: string;
+  public rawEntryId: string = '';
   public packageJsonFolderPath: string = '';
 
   public entryPackageName: string = '';
@@ -55,87 +46,10 @@ export class LockfileEntry {
   public transitivePeerDependencies: Set<string> = new Set();
   public referrers: LockfileEntry[] = [];
 
-  private static _packageEntryIdRegex: RegExp = new RegExp('/(.*)/([^/]+)$');
-
   public entryPackageVersion: string = '';
   public entrySuffix: string = '';
 
-  public constructor(data: IProps) {
-    const { rawEntryId, kind, rawYamlData, duplicates, subspaceName } = data;
-    this.rawEntryId = rawEntryId;
+  public constructor(kind: LockfileEntryFilter) {
     this.kind = kind;
-
-    if (rawEntryId === '.') {
-      // Project Root
-      return;
-    }
-
-    if (kind === LockfileEntryFilter.Project) {
-      const rootPackageJsonFolderPath = new Path(`common/temp/${subspaceName}/package.json`).dirname() || '';
-      const packageJsonFolderPath = new Path('.').relative(
-        new Path(rootPackageJsonFolderPath).concat(rawEntryId)
-      );
-      const packageName = new Path(rawEntryId).basename();
-
-      if (!packageJsonFolderPath || !packageName) {
-        // eslint-disable-next-line no-console
-        console.error('Could not construct path for entry: ', rawEntryId);
-        return;
-      }
-
-      this.packageJsonFolderPath = packageJsonFolderPath.toString();
-      this.entryId = 'project:' + this.packageJsonFolderPath;
-      this.entryPackageName = packageName.toString();
-      if (duplicates?.has(this.entryPackageName)) {
-        const fullPath = new Path(rawEntryId).makeAbsolute('/').toString().substring(1);
-        this.displayText = `Project: ${this.entryPackageName} (${fullPath})`;
-        this.entryPackageName = `${this.entryPackageName} (${fullPath})`;
-      } else {
-        this.displayText = 'Project: ' + this.entryPackageName;
-      }
-    } else {
-      this.displayText = rawEntryId;
-
-      const match = LockfileEntry._packageEntryIdRegex.exec(rawEntryId);
-
-      if (match) {
-        const [, packageName, versionPart] = match;
-        this.entryPackageName = packageName;
-
-        const underscoreIndex = versionPart.indexOf('_');
-        if (underscoreIndex >= 0) {
-          const version = versionPart.substring(0, underscoreIndex);
-          const suffix = versionPart.substring(underscoreIndex + 1);
-
-          this.entryPackageVersion = version;
-          this.entrySuffix = suffix;
-
-          //       /@rushstack/eslint-config/3.0.1_eslint@8.21.0+typescript@4.7.4
-          // -->   @rushstack/eslint-config 3.0.1 (eslint@8.21.0+typescript@4.7.4)
-          this.displayText = packageName + ' ' + version + ' (' + suffix + ')';
-        } else {
-          this.entryPackageVersion = versionPart;
-
-          //       /@rushstack/eslint-config/3.0.1
-          // -->   @rushstack/eslint-config 3.0.1
-          this.displayText = packageName + ' ' + versionPart;
-        }
-      }
-
-      // Example:
-      //   common/temp/default/node_modules/.pnpm
-      //     /@babel+register@7.17.7_@babel+core@7.17.12
-      //     /node_modules/@babel/register
-      this.packageJsonFolderPath =
-        `common/temp/${subspaceName}/node_modules/.pnpm/` +
-        this.entryPackageName.replace('/', '+') +
-        '@' +
-        this.entryPackageVersion +
-        (this.entrySuffix ? `_${this.entrySuffix}` : '') +
-        '/node_modules/' +
-        this.entryPackageName;
-    }
-
-    LockfileDependency.parseDependencies(this.dependencies, this, rawYamlData);
   }
 }
