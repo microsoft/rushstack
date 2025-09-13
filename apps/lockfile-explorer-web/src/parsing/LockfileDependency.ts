@@ -3,7 +3,7 @@
 
 import type { LockfileEntry } from './LockfileEntry';
 
-export enum IDependencyType {
+export enum DependencyKind {
   DEPENDENCY,
   DEV_DEPENDENCY,
   PEER_DEPENDENCY
@@ -22,7 +22,7 @@ export class LockfileDependency {
   public name: string;
   public version: string;
   public entryId: string = '';
-  public dependencyType: IDependencyType;
+  public dependencyType: DependencyKind;
   public containingEntry: LockfileEntry;
 
   public resolvedEntry: LockfileEntry | undefined;
@@ -36,7 +36,7 @@ export class LockfileDependency {
   public constructor(options: {
     name: string;
     version: string;
-    dependencyType: IDependencyType;
+    dependencyType: DependencyKind;
     containingEntry: LockfileEntry;
   }) {
     this.name = options.name;

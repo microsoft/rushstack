@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { LockfileEntry, LockfileEntryFilter } from './LockfileEntry';
-import { IDependencyType, LockfileDependency } from './LockfileDependency';
+import { DependencyKind, LockfileDependency } from './LockfileDependency';
 import { Path } from '@lifaon/path';
 
 enum PnpmLockfileVersion {
@@ -69,7 +69,7 @@ const packageEntryIdRegex: RegExp = new RegExp('/(.*)/([^/]+)$');
 function createLockfileDependency(
   name: string,
   version: string,
-  dependencyType: IDependencyType,
+  dependencyType: DependencyKind,
   containingEntry: LockfileEntry,
   node?: ILockfileNode
 ): LockfileDependency {
@@ -93,7 +93,7 @@ function createLockfileDependency(
     result.entryId = 'project:' + rootRelativePath.toString();
   } else if (result.version.startsWith('/')) {
     result.entryId = result.version;
-  } else if (result.dependencyType === IDependencyType.PEER_DEPENDENCY) {
+  } else if (result.dependencyType === DependencyKind.PEER_DEPENDENCY) {
     if (node?.peerDependencies) {
       result.peerDependencyMeta = {
         name: result.name,
@@ -123,21 +123,21 @@ function parseDependencies(
   if (node.dependencies) {
     for (const [pkgName, pkgVersion] of Object.entries(node.dependencies)) {
       dependencies.push(
-        createLockfileDependency(pkgName, pkgVersion, IDependencyType.DEPENDENCY, lockfileEntry)
+        createLockfileDependency(pkgName, pkgVersion, DependencyKind.DEPENDENCY, lockfileEntry)
       );
     }
   }
   if (node.devDependencies) {
     for (const [pkgName, pkgVersion] of Object.entries(node.devDependencies)) {
       dependencies.push(
-        createLockfileDependency(pkgName, pkgVersion, IDependencyType.DEV_DEPENDENCY, lockfileEntry)
+        createLockfileDependency(pkgName, pkgVersion, DependencyKind.DEV_DEPENDENCY, lockfileEntry)
       );
     }
   }
   if (node.peerDependencies) {
     for (const [pkgName, pkgVersion] of Object.entries(node.peerDependencies)) {
       dependencies.push(
-        createLockfileDependency(pkgName, pkgVersion, IDependencyType.PEER_DEPENDENCY, lockfileEntry, node)
+        createLockfileDependency(pkgName, pkgVersion, DependencyKind.PEER_DEPENDENCY, lockfileEntry, node)
       );
     }
   }
@@ -341,7 +341,7 @@ export function generateLockfileGraph(
   for (const entry of allEntries) {
     for (const dependency of entry.dependencies) {
       // Peer dependencies do not have a matching entry
-      if (dependency.dependencyType === IDependencyType.PEER_DEPENDENCY) {
+      if (dependency.dependencyType === DependencyKind.PEER_DEPENDENCY) {
         continue;
       }
 
