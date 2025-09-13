@@ -6,7 +6,7 @@ import { ScrollArea, Text } from '@rushstack/rush-themed-ui';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
 import { IDependencyType, type LockfileDependency } from '../../parsing/LockfileDependency';
-import { readPackageJsonAsync } from '../../parsing/getPackageFiles';
+import { readPackageJsonAsync } from '../../helpers/lfxApiClient';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 import { ReactNull } from '../../types/ReactNull';

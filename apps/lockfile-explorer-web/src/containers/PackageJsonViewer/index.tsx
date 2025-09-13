@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { readPnpmfileAsync, readPackageSpecAsync, readPackageJsonAsync } from '../../parsing/getPackageFiles';
+import { readPnpmfileAsync, readPackageSpecAsync, readPackageJsonAsync } from '../../helpers/lfxApiClient';
 import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
