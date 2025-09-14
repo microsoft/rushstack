@@ -14,10 +14,10 @@ export const workspace: IJsonLfxWorkspace = {
   }
 };
 
-describe('lfxGraphLoader 6.0', () => {
+describe('lfxGraph-website-sample-1-v6.0', () => {
   it('loads a workspace', async () => {
     const serializedYaml: string = await graphTestHelpers.loadAndSerializeLFxGraphAsync({
-      lockfilePathUnderFixtures: '/website-sample-1/pnpm-lock-rush-6.0.yaml',
+      lockfilePathUnderFixtures: '/website-sample-1/pnpm-lock-v6.0-rush.yaml',
       workspace: workspace
     });
     expect(serializedYaml).toMatchSnapshot();

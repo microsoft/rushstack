@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
+exports[`lfxGraph-website-sample-1-v6.0 loads a workspace 1`] = `
 "entries:
   - dependencies: []
     displayText: ''
@@ -43,7 +43,7 @@ exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
         entryId: /@rushstack/n/2.0.0
         name: '@rushstack/n'
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 12
+        resolvedEntryJsonId: 10
         version: 2.0.0
     displayText: 'Project: b'
     entryId: project:./common/projects/b
@@ -64,16 +64,16 @@ exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
         resolvedEntryJsonId: 5
         version: link:../e
       - dependencyType: regular
-        entryId: /@rushstack/k/1.0.0_@rushstack+m@1.0.0
+        entryId: /@rushstack/k/1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
         name: '@rushstack/k'
         peerDependencyMeta: {}
         resolvedEntryJsonId: 7
-        version: 1.0.0_@rushstack+m@1.0.0
+        version: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
       - dependencyType: regular
         entryId: /@rushstack/m/1.0.0
         name: '@rushstack/m'
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 11
+        resolvedEntryJsonId: 9
         version: 1.0.0
     displayText: 'Project: c'
     entryId: project:./common/projects/c
@@ -94,16 +94,16 @@ exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
         resolvedEntryJsonId: 5
         version: link:../e
       - dependencyType: regular
-        entryId: /@rushstack/j/1.0.0_@rushstack+n@2.0.0
+        entryId: /@rushstack/j/1.0.0(@rushstack/n@2.0.0)
         name: '@rushstack/j'
         peerDependencyMeta: {}
         resolvedEntryJsonId: 6
-        version: 1.0.0_@rushstack+n@2.0.0
+        version: 1.0.0(@rushstack/n@2.0.0)
       - dependencyType: regular
         entryId: /@rushstack/n/2.0.0
         name: '@rushstack/n'
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 12
+        resolvedEntryJsonId: 10
         version: 2.0.0
     displayText: 'Project: d'
     entryId: project:./common/projects/d
@@ -123,7 +123,7 @@ exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
         entryId: /@rushstack/n/3.0.0
         name: '@rushstack/n'
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 13
+        resolvedEntryJsonId: 11
         version: 3.0.0
     displayText: 'Project: e'
     entryId: project:./common/projects/e
@@ -140,69 +140,50 @@ exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies:
       - dependencyType: regular
-        entryId: /@rushstack/k/1.0.0_wxpgugna4ivthu7yyu4fmciltu
+        entryId: /@rushstack/k/1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
         name: '@rushstack/k'
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 8
-        version: 1.0.0_wxpgugna4ivthu7yyu4fmciltu
+        resolvedEntryJsonId: 7
+        version: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
       - dependencyType: regular
         entryId: /@rushstack/m/1.0.0
         name: '@rushstack/m'
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 11
+        resolvedEntryJsonId: 9
         version: 1.0.0
-    displayText: '@rushstack/j 1.0.0 (@rushstack+n@2.0.0)'
+    displayText: '@rushstack/j/1.0.0(@rushstack n@2.0.0)'
     entryId: ''
-    entryPackageName: '@rushstack/j'
-    entryPackageVersion: 1.0.0
-    entrySuffix: '@rushstack+n@2.0.0'
+    entryPackageName: '@rushstack/j/1.0.0(@rushstack'
+    entryPackageVersion: n@2.0.0)
+    entrySuffix: ''
     jsonId: 6
     kind: 2
-    packageJsonFolderPath: common/temp/undefined/node_modules/.pnpm/@rushstack+j@1.0.0_@rushstack+n@2.0.0/node_modules/@rushstack/j
-    rawEntryId: /@rushstack/j/1.0.0_@rushstack+n@2.0.0
+    packageJsonFolderPath: >-
+      common/temp/undefined/node_modules/.pnpm/@rushstack+j/1.0.0(@rushstack@n@2.0.0)/node_modules/@rushstack/j/1.0.0(@rushstack
+    rawEntryId: /@rushstack/j/1.0.0(@rushstack/n@2.0.0)
     referrerJsonIds:
       - 4
     transitivePeerDependencies:
       - '@rushstack/n'
   - dependencies:
       - dependencyType: regular
-        entryId: /@rushstack/l/1.0.0_@rushstack+m@1.0.0
+        entryId: /@rushstack/l/1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
         name: '@rushstack/l'
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 9
-        version: 1.0.0_@rushstack+m@1.0.0
-    displayText: '@rushstack/k 1.0.0 (@rushstack+m@1.0.0)'
+        resolvedEntryJsonId: 8
+        version: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+    displayText: '@rushstack/k/1.0.0(@rushstack/m@1.0.0)(@rushstack n@2.0.0)'
     entryId: ''
-    entryPackageName: '@rushstack/k'
-    entryPackageVersion: 1.0.0
-    entrySuffix: '@rushstack+m@1.0.0'
+    entryPackageName: '@rushstack/k/1.0.0(@rushstack/m@1.0.0)(@rushstack'
+    entryPackageVersion: n@2.0.0)
+    entrySuffix: ''
     jsonId: 7
     kind: 2
-    packageJsonFolderPath: common/temp/undefined/node_modules/.pnpm/@rushstack+k@1.0.0_@rushstack+m@1.0.0/node_modules/@rushstack/k
-    rawEntryId: /@rushstack/k/1.0.0_@rushstack+m@1.0.0
+    packageJsonFolderPath: >-
+      common/temp/undefined/node_modules/.pnpm/@rushstack+k/1.0.0(@rushstack/m@1.0.0)(@rushstack@n@2.0.0)/node_modules/@rushstack/k/1.0.0(@rushstack/m@1.0.0)(@rushstack
+    rawEntryId: /@rushstack/k/1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
     referrerJsonIds:
       - 3
-    transitivePeerDependencies:
-      - '@rushstack/m'
-      - '@rushstack/n'
-  - dependencies:
-      - dependencyType: regular
-        entryId: /@rushstack/l/1.0.0_wxpgugna4ivthu7yyu4fmciltu
-        name: '@rushstack/l'
-        peerDependencyMeta: {}
-        resolvedEntryJsonId: 10
-        version: 1.0.0_wxpgugna4ivthu7yyu4fmciltu
-    displayText: '@rushstack/k 1.0.0 (wxpgugna4ivthu7yyu4fmciltu)'
-    entryId: ''
-    entryPackageName: '@rushstack/k'
-    entryPackageVersion: 1.0.0
-    entrySuffix: wxpgugna4ivthu7yyu4fmciltu
-    jsonId: 8
-    kind: 2
-    packageJsonFolderPath: >-
-      common/temp/undefined/node_modules/.pnpm/@rushstack+k@1.0.0_wxpgugna4ivthu7yyu4fmciltu/node_modules/@rushstack/k
-    rawEntryId: /@rushstack/k/1.0.0_wxpgugna4ivthu7yyu4fmciltu
-    referrerJsonIds:
       - 6
     transitivePeerDependencies:
       - '@rushstack/m'
@@ -212,48 +193,13 @@ exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
         entryId: /@rushstack/m/1.0.0
         name: '@rushstack/m'
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 11
-        version: 1.0.0
-      - dependencyType: peer
-        entryId: 'Peer: @rushstack/m'
-        name: '@rushstack/m'
-        peerDependencyMeta:
-          name: '@rushstack/m'
-          optional: false
-          version: ^1.0.0
-        version: ^1.0.0
-      - dependencyType: peer
-        entryId: 'Peer: @rushstack/n'
-        name: '@rushstack/n'
-        peerDependencyMeta:
-          name: '@rushstack/n'
-          optional: true
-          version: ^2.0.0
-        version: ^2.0.0
-    displayText: '@rushstack/l 1.0.0 (@rushstack+m@1.0.0)'
-    entryId: ''
-    entryPackageName: '@rushstack/l'
-    entryPackageVersion: 1.0.0
-    entrySuffix: '@rushstack+m@1.0.0'
-    jsonId: 9
-    kind: 2
-    packageJsonFolderPath: common/temp/undefined/node_modules/.pnpm/@rushstack+l@1.0.0_@rushstack+m@1.0.0/node_modules/@rushstack/l
-    rawEntryId: /@rushstack/l/1.0.0_@rushstack+m@1.0.0
-    referrerJsonIds:
-      - 7
-    transitivePeerDependencies: []
-  - dependencies:
-      - dependencyType: regular
-        entryId: /@rushstack/m/1.0.0
-        name: '@rushstack/m'
-        peerDependencyMeta: {}
-        resolvedEntryJsonId: 11
+        resolvedEntryJsonId: 9
         version: 1.0.0
       - dependencyType: regular
         entryId: /@rushstack/n/2.0.0
         name: '@rushstack/n'
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 12
+        resolvedEntryJsonId: 10
         version: 2.0.0
       - dependencyType: peer
         entryId: 'Peer: @rushstack/m'
@@ -271,18 +217,18 @@ exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
           optional: true
           version: ^2.0.0
         version: ^2.0.0
-    displayText: '@rushstack/l 1.0.0 (wxpgugna4ivthu7yyu4fmciltu)'
+    displayText: '@rushstack/l/1.0.0(@rushstack/m@1.0.0)(@rushstack n@2.0.0)'
     entryId: ''
-    entryPackageName: '@rushstack/l'
-    entryPackageVersion: 1.0.0
-    entrySuffix: wxpgugna4ivthu7yyu4fmciltu
-    jsonId: 10
+    entryPackageName: '@rushstack/l/1.0.0(@rushstack/m@1.0.0)(@rushstack'
+    entryPackageVersion: n@2.0.0)
+    entrySuffix: ''
+    jsonId: 8
     kind: 2
     packageJsonFolderPath: >-
-      common/temp/undefined/node_modules/.pnpm/@rushstack+l@1.0.0_wxpgugna4ivthu7yyu4fmciltu/node_modules/@rushstack/l
-    rawEntryId: /@rushstack/l/1.0.0_wxpgugna4ivthu7yyu4fmciltu
+      common/temp/undefined/node_modules/.pnpm/@rushstack+l/1.0.0(@rushstack/m@1.0.0)(@rushstack@n@2.0.0)/node_modules/@rushstack/l/1.0.0(@rushstack/m@1.0.0)(@rushstack
+    rawEntryId: /@rushstack/l/1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
     referrerJsonIds:
-      - 8
+      - 7
     transitivePeerDependencies: []
   - dependencies: []
     displayText: '@rushstack/m 1.0.0'
@@ -290,15 +236,14 @@ exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
     entryPackageName: '@rushstack/m'
     entryPackageVersion: 1.0.0
     entrySuffix: ''
-    jsonId: 11
+    jsonId: 9
     kind: 2
     packageJsonFolderPath: common/temp/undefined/node_modules/.pnpm/@rushstack+m@1.0.0/node_modules/@rushstack/m
     rawEntryId: /@rushstack/m/1.0.0
     referrerJsonIds:
       - 3
       - 6
-      - 9
-      - 10
+      - 8
     transitivePeerDependencies: []
   - dependencies: []
     displayText: '@rushstack/n 2.0.0'
@@ -306,14 +251,14 @@ exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
     entryPackageName: '@rushstack/n'
     entryPackageVersion: 2.0.0
     entrySuffix: ''
-    jsonId: 12
+    jsonId: 10
     kind: 2
     packageJsonFolderPath: common/temp/undefined/node_modules/.pnpm/@rushstack+n@2.0.0/node_modules/@rushstack/n
     rawEntryId: /@rushstack/n/2.0.0
     referrerJsonIds:
       - 2
       - 4
-      - 10
+      - 8
     transitivePeerDependencies: []
   - dependencies: []
     displayText: '@rushstack/n 3.0.0'
@@ -321,7 +266,7 @@ exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
     entryPackageName: '@rushstack/n'
     entryPackageVersion: 3.0.0
     entrySuffix: ''
-    jsonId: 13
+    jsonId: 11
     kind: 2
     packageJsonFolderPath: common/temp/undefined/node_modules/.pnpm/@rushstack+n@3.0.0/node_modules/@rushstack/n
     rawEntryId: /@rushstack/n/3.0.0
@@ -331,7 +276,7 @@ exports[`lfxGraphLoader 5.4 loads a workspace 1`] = `
 workspace:
   pnpmLockfilePath: common/temp/pnpm-lock.yaml
   rushConfig:
-    rushVersion: 5.83.3
+    rushVersion: 5.158.1
     subspaceName: ''
   workspaceRootFolder: /repo
 "
