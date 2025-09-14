@@ -16,7 +16,7 @@ import {
   type IRequiredCommandLineStringParameter
 } from '@rushstack/ts-command-line';
 import type { Lockfile } from '@pnpm/lockfile-types';
-import type { IAppContext } from '@rushstack/lockfile-explorer-web/packlets/lfx-shared';
+import type { IAppContext } from '../../../temp/lfx-shared';
 
 import type { IAppState } from '../../state';
 import { init } from '../../utils/init';

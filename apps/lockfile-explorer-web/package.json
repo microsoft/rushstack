@@ -11,16 +11,6 @@
     "_phase:build": "heft run --only build -- --clean",
     "_phase:test": "heft run --only test -- --clean"
   },
-  "exports": {
-    "./packlets/lfx-shared": "./lib-commonjs/packlets/lfx-shared/index.js"
-  },
-  "typesVersions": {
-    "*": {
-      "packlets/lfx-shared": [
-        "lib/packlets/lfx-shared/index.d.ts"
-      ]
-    }
-  },
   "dependencies": {
     "@reduxjs/toolkit": "~1.8.6",
     "@rushstack/rush-themed-ui": "workspace:*",

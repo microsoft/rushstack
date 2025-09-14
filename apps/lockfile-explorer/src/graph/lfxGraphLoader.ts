@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Path } from '@lifaon/path';
+
 import {
   type ILfxGraphDependencyOptions,
   type ILfxGraphEntryOptions,
@@ -10,8 +12,7 @@ import {
   LfxDependencyKind,
   LfxGraphDependency,
   type IJsonLfxWorkspace
-} from '@rushstack/lockfile-explorer-web/packlets/lfx-shared';
-import { Path } from '@lifaon/path';
+} from '../../temp/lfx-shared';
 
 enum PnpmLockfileVersion {
   V6,
