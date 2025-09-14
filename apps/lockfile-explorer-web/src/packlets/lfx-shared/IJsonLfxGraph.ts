@@ -1,7 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { DependencyKind, LockfileEntryFilter } from './LfxGraph';
+import type { IJsonLfxWorkspace } from './IJsonLfxWorkspace';
+
+export enum LfxGraphEntryKind {
+  Project = 1,
+  Package = 2,
+  SideBySide = 3,
+  Doppelganger = 4
+}
 
 export interface IJsonPeerDependencyMeta {
   name?: string;
@@ -13,11 +20,17 @@ export interface IJsonLfxDependency {
   name: string;
   version: string;
   entryId: string;
-  dependencyType: DependencyKind;
+  dependencyType: LfxDependencyKind;
 
   resolvedEntryJsonId?: number;
 
   peerDependencyMeta: IJsonPeerDependencyMeta;
+}
+
+export enum LfxDependencyKind {
+  Regular = 'regular',
+  Dev = 'dev',
+  Peer = 'peer'
 }
 
 export interface IJsonLfxEntry {
@@ -30,7 +43,7 @@ export interface IJsonLfxEntry {
    */
   jsonId: number;
 
-  kind: LockfileEntryFilter;
+  kind: LfxGraphEntryKind;
   entryId: string;
   rawEntryId: string;
   packageJsonFolderPath: string;
@@ -46,5 +59,6 @@ export interface IJsonLfxEntry {
 }
 
 export interface IJsonLfxGraph {
+  workspace: IJsonLfxWorkspace;
   entries: IJsonLfxEntry[];
 }

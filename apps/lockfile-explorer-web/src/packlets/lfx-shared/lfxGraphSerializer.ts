@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IJsonLfxDependency, IJsonLfxEntry, IJsonLfxGraph } from './JsonLfxGraph';
-import { type ILockfileEntryOptions, LfxGraph, LockfileDependency, LockfileEntry } from './LfxGraph';
+import type { IJsonLfxDependency, IJsonLfxEntry, IJsonLfxGraph } from './IJsonLfxGraph';
+import { type ILfxGraphEntryOptions, LfxGraph, LfxGraphDependency, LfxGraphEntry } from './LfxGraph';
 
 export function serializeToJson(graph: LfxGraph): IJsonLfxGraph {
   const jsonLfxEntries: IJsonLfxEntry[] = [];
 
-  const jsonIdByEntry: Map<LockfileEntry, number> = new Map();
+  const jsonIdByEntry: Map<LfxGraphEntry, number> = new Map();
 
-  function toJsonId(entry: LockfileEntry): number {
+  function toJsonId(entry: LfxGraphEntry): number {
     const result: number | undefined = jsonIdByEntry.get(entry);
     if (result === undefined) {
       throw new Error('Attempt to serialize disconnected object');
@@ -46,7 +46,7 @@ export function serializeToJson(graph: LfxGraph): IJsonLfxGraph {
   // Use the jsonId mapping to serialize the lists
   for (let i: number = 0; i < jsonLfxEntries.length; ++i) {
     const jsonLfxEntry: IJsonLfxEntry = jsonLfxEntries[i];
-    const entry: LockfileEntry = graph.entries[i];
+    const entry: LfxGraphEntry = graph.entries[i];
 
     for (const dependency of entry.dependencies) {
       const jsonLfxDependency: IJsonLfxDependency = {
@@ -70,16 +70,16 @@ export function serializeToJson(graph: LfxGraph): IJsonLfxGraph {
     jsonLfxEntry.referrerJsonIds = entry.referrers.map((x) => toJsonId(x));
   }
 
-  return { entries: jsonLfxEntries };
+  return { workspace: graph.workspace, entries: jsonLfxEntries };
 }
 
 export function deserializeFromJson(jsonLfxGraph: IJsonLfxGraph): LfxGraph {
-  const graph: LfxGraph = new LfxGraph();
+  const graph: LfxGraph = new LfxGraph(jsonLfxGraph.workspace);
 
-  const entries: LockfileEntry[] = graph.entries;
+  const entries: LfxGraphEntry[] = graph.entries;
 
-  function fromJsonId(jsonId: number): LockfileEntry {
-    const result: LockfileEntry | undefined = entries[jsonId];
+  function fromJsonId(jsonId: number): LfxGraphEntry {
+    const result: LfxGraphEntry | undefined = entries[jsonId];
     if (result === undefined) {
       throw new Error('Invalid jsonId');
     }
@@ -90,7 +90,7 @@ export function deserializeFromJson(jsonLfxGraph: IJsonLfxGraph): LfxGraph {
 
   // First create the jsonId mapping
   for (const jsonLfxEntry of jsonLfxEntries) {
-    const options: ILockfileEntryOptions = {
+    const options: ILfxGraphEntryOptions = {
       kind: jsonLfxEntry.kind,
       entryId: jsonLfxEntry.entryId,
       rawEntryId: jsonLfxEntry.rawEntryId,
@@ -100,16 +100,16 @@ export function deserializeFromJson(jsonLfxGraph: IJsonLfxGraph): LfxGraph {
       entryPackageVersion: jsonLfxEntry.entryPackageVersion,
       entrySuffix: jsonLfxEntry.entrySuffix
     };
-    entries.push(new LockfileEntry(options));
+    entries.push(new LfxGraphEntry(options));
   }
 
   // Use the jsonId mapping to deserialize the lists
   for (let i: number = 0; i < jsonLfxEntries.length; ++i) {
     const jsonLfxEntry: IJsonLfxEntry = jsonLfxEntries[i];
-    const entry: LockfileEntry = graph.entries[i];
+    const entry: LfxGraphEntry = graph.entries[i];
 
     for (const jsonLfxDependency of jsonLfxEntry.dependencies) {
-      const dependency: LockfileDependency = new LockfileDependency({
+      const dependency: LfxGraphDependency = new LfxGraphDependency({
         name: jsonLfxDependency.name,
         version: jsonLfxDependency.version,
         dependencyType: jsonLfxDependency.dependencyType,

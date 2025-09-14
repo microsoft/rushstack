@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TEST_LOCKFILE } from './testLockfile';
+import type { LfxGraphEntry } from '../../../build/lfx-shared';
+
+import { TEST_WORKSPACE, TEST_LOCKFILE } from './testLockfile';
 import * as lfxGraphLoader from '../lfxGraphLoader';
-import type { LockfileEntry } from '../LfxGraph';
 
 describe('LockfileGeneration', () => {
   it('creates a valid bi-directional graph', () => {
-    const resolvedPackages = lfxGraphLoader.generateLockfileGraph(TEST_LOCKFILE).entries;
+    const resolvedPackages = lfxGraphLoader.generateLockfileGraph(TEST_WORKSPACE, TEST_LOCKFILE).entries;
 
     // Mapping of all the lockfile entries created by the lockfile
-    const resolvedPackagesMap: { [key: string]: LockfileEntry } = {};
+    const resolvedPackagesMap: { [key: string]: LfxGraphEntry } = {};
     for (const resolvedPackage of resolvedPackages) {
       resolvedPackagesMap[resolvedPackage.entryPackageName] = resolvedPackage;
     }

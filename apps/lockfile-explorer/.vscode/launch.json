@@ -7,20 +7,30 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Jest tests",
+      "name": "All Jest tests",
       "program": "${workspaceFolder}/node_modules/@rushstack/heft/lib/start.js",
       "cwd": "${workspaceFolder}",
       "args": ["--debug", "test", "--clean"],
       "console": "integratedTerminal",
       "sourceMaps": true
     },
+     {
+      "type": "node",
+      "request": "launch",
+      "name": "Single Jest test",
+      "program": "${workspaceFolder}/node_modules/@rushstack/heft/lib/start.js",
+      "cwd": "${workspaceFolder}",
+      "args": ["--debug", "test", "--clean", "-u", "--test-path-pattern", "lfxGraphLoader60"],
+      "console": "integratedTerminal",
+      "sourceMaps": true
+    },
     {
       "type": "node",
       "request": "launch",
-      "name": "Run in specified folder",
+      "name": "Run LAST BUILD in specified folder",
       "program": "${workspaceFolder}/lib/start-explorer.js",
-      //"cwd": "C:\\Git\\lockfile-explorer-demos",
       "cwd": "(your project path)",
+      //"cwd": "C:\\Git\\lockfile-explorer-demos",
       "args": ["--debug"],
       "sourceMaps": true
     }

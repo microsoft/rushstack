@@ -1,6 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IJsonLfxWorkspace } from '../../../build/lfx-shared';
+
+export const TEST_WORKSPACE: IJsonLfxWorkspace = {
+  workspaceRootFolder: '/test',
+  pnpmLockfilePath: '/test/pnpm-lock.yaml',
+  rushConfig: undefined
+};
+
 export const TEST_LOCKFILE = {
   lockfileVersion: 5.3,
   importers: {

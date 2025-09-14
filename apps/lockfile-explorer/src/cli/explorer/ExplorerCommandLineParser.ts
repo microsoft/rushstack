@@ -15,12 +15,17 @@ import {
   CommandLineParser,
   type IRequiredCommandLineStringParameter
 } from '@rushstack/ts-command-line';
-import type { IAppContext } from '@rushstack/lockfile-explorer-web/lib/types/IAppContext';
 import type { Lockfile } from '@pnpm/lockfile-types';
+import {
+  type LfxGraph,
+  lfxGraphSerializer,
+  type IAppContext,
+  type IJsonLfxGraph
+} from '../../../build/lfx-shared';
 
 import type { IAppState } from '../../state';
 import { init } from '../../utils/init';
-import { convertLockfileV6DepPathToV5DepPath, getShrinkwrapFileMajorVersion } from '../../utils/shrinkwrap';
+import * as lfxGraphLoader from '../../graph/lfxGraphLoader';
 
 const EXPLORER_TOOL_FILENAME: 'lockfile-explorer' = 'lockfile-explorer';
 
@@ -135,27 +140,6 @@ export class ExplorerCommandLineParser extends CommandLineParser {
 
     app.use('/favicon.ico', express.static(distFolderPath, { index: 'favicon.ico' }));
 
-    app.get('/api/lockfile', async (req: express.Request, res: express.Response) => {
-      const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
-      const doc = yaml.load(pnpmLockfileText) as Lockfile;
-      const { packages, lockfileVersion } = doc;
-
-      const shrinkwrapFileMajorVersion: number = getShrinkwrapFileMajorVersion(lockfileVersion);
-
-      if (packages && shrinkwrapFileMajorVersion === 6) {
-        const updatedPackages: Lockfile['packages'] = {};
-        for (const [dependencyPath, dependency] of Object.entries(packages)) {
-          updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = dependency;
-        }
-        doc.packages = updatedPackages;
-      }
-
-      res.send({
-        doc,
-        subspaceName: this._subspaceParameter.value
-      });
-    });
-
     app.get('/api/health', (req: express.Request, res: express.Response) => {
       awaitingFirstConnect = false;
       isClientConnected = true;
@@ -166,15 +150,25 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       res.status(200).send();
     });
 
-    app.get('/api/workspace', (req: express.Request, res: express.Response) => {
-      res.type('application/javascript').send(appState.lfxWorkspace);
+    app.get('/api/graph', async (req: express.Request, res: express.Response) => {
+      const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
+      const lockfile: Lockfile = yaml.load(pnpmLockfileText) as Lockfile;
+
+      const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(
+        appState.lfxWorkspace,
+        lockfile as lfxGraphLoader.ILockfilePackageType,
+        appState.lfxWorkspace.rushConfig?.subspaceName ?? ''
+      );
+
+      const jsonGraph: IJsonLfxGraph = lfxGraphSerializer.serializeToJson(graph);
+      res.type('application/json').send(jsonGraph);
     });
 
     app.post(
       '/api/package-json',
       async (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
         const { projectPath } = req.body;
-        const fileLocation = `${appState.projectRoot}/${projectPath}/package.json`;
+        const fileLocation: string = `${appState.projectRoot}/${projectPath}/package.json`;
         let packageJsonText: string;
         try {
           packageJsonText = await FileSystem.readFileAsync(fileLocation);
@@ -215,7 +209,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       '/api/package-spec',
       async (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
         const { projectPath } = req.body;
-        const fileLocation = `${appState.projectRoot}/${projectPath}/package.json`;
+        const fileLocation: string = `${appState.projectRoot}/${projectPath}/package.json`;
         let packageJson: IPackageJson;
         try {
           packageJson = await JsonFile.loadAsync(fileLocation);
@@ -232,7 +226,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
         const {
           hooks: { readPackage }
         } = require(appState.pnpmfileLocation);
-        const parsedPackage = readPackage(packageJson, {});
+        const parsedPackage: {} = readPackage(packageJson, {});
         res.send(parsedPackage);
       }
     );

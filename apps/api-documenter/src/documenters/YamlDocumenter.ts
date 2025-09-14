@@ -756,7 +756,7 @@ export class YamlDocumenter {
   ): void {
     JsonFile.validateNoUndefinedMembers(dataObject);
 
-    let stringified: string = yaml.safeDump(dataObject, {
+    let stringified: string = yaml.dump(dataObject, {
       lineWidth: 120
     });
 

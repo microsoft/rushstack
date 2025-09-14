@@ -141,7 +141,7 @@ export class ProjectImpactGraphGenerator {
     const projects: Record<string, IProjectImpactGraphProjectConfiguration> =
       Object.fromEntries(projectEntries);
     const content: IProjectImpactGraphFile = { globalExcludedGlobs, projects };
-    await FileSystem.writeFileAsync(this._projectImpactGraphFilePath, yaml.safeDump(content));
+    await FileSystem.writeFileAsync(this._projectImpactGraphFilePath, yaml.dump(content));
 
     stopwatch.stop();
     this._terminal.writeLine();

@@ -1,34 +1,34 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-export interface ILfxWorkspaceRushConfig {
+export interface IJsonLfxWorkspaceRushConfig {
   /**
    * The rushVersion from rush.json.
    */
-  rushVersion: string;
+  readonly rushVersion: string;
 
   /**
    * If the subspaces feature is enabled and a subspace was loaded, the name of the subspace.
    * Otherwise this will be an empty string.
    */
-  subspaceName: string;
+  readonly subspaceName: string;
 }
 
-export interface ILfxWorkspace {
+export interface IJsonLfxWorkspace {
   /**
    * Absolute path to the workspace folder that is opened by the app.
    * Relative paths are generally relative to this path.
    */
-  workspaceRootFolder: string;
+  readonly workspaceRootFolder: string;
 
   /**
    * The path to the pnpm-lock.yaml file.
    */
-  pnpmLockfilePath: string;
+  readonly pnpmLockfilePath: string;
 
   /**
    * If this is a Rush workspace (versus a plain PNPM workspace), then
    * this section will be defined.
    */
-  rushConfig: ILfxWorkspaceRushConfig | undefined;
+  readonly rushConfig: IJsonLfxWorkspaceRushConfig | undefined;
 }

@@ -3,7 +3,7 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["mixins", "patch", "profile"] }],
+      "cleanFiles": [{ "includeGlobs": ["flat/**"] }],
 
       "tasksByName": {
         "copy-contents": {

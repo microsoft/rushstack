@@ -697,7 +697,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       ) {
         // Find the .modules.yaml file in the subspace temp/node_modules folder
         const modulesContent: string = await FileSystem.readFileAsync(modulesFilePath);
-        const yamlContent: IPnpmModules = yaml.load(modulesContent, { filename: modulesFilePath });
+        const yamlContent: IPnpmModules = yaml.load(modulesContent, {
+          filename: modulesFilePath
+        }) as IPnpmModules;
         const { hoistedDependencies } = yamlContent;
         const subspaceProject: RushConfigurationProject = subspace.getProjects()[0];
         const projectNodeModulesPath: string = `${subspaceProject.projectFolder}/node_modules`;

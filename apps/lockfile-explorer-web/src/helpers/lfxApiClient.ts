@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IPackageJson } from '../types/IPackageJson';
-import type { ILfxWorkspace } from '../types/lfxProtocol';
+import type { IJsonLfxWorkspace } from '../packlets/lfx-shared';
 
 const SERVICE_URL: string = window.appContext.serviceUrl;
 
@@ -19,7 +19,7 @@ export async function checkAliveAsync(): Promise<boolean> {
  * Read the contents of a text file under the workspace directory.
  * @param relativePath - a file path that is relative to the working directory.
  */
-export async function readWorkspaceConfigAsync(): Promise<ILfxWorkspace> {
+export async function readWorkspaceConfigAsync(): Promise<IJsonLfxWorkspace> {
   let response: Response;
 
   try {
@@ -39,7 +39,7 @@ export async function readWorkspaceConfigAsync(): Promise<ILfxWorkspace> {
     throw new Error('Network error: ' + (e.message || 'An unknown error occurred'));
   }
 
-  const responseJson: ILfxWorkspace = await response.json();
+  const responseJson: IJsonLfxWorkspace = await response.json();
   return responseJson;
 }
 

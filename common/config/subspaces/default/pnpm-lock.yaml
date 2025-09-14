@@ -31,8 +31,8 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
       js-yaml:
-        specifier: ~3.13.1
-        version: 3.13.1
+        specifier: ~4.1.0
+        version: 4.1.0
       resolve:
         specifier: ~1.22.1
         version: 1.22.8
@@ -41,8 +41,8 @@ importers:
         specifier: workspace:*
         version: link:../heft
       '@types/js-yaml':
-        specifier: 3.12.1
-        version: 3.12.1
+        specifier: 4.0.9
+        version: 4.0.9
       '@types/resolve':
         specifier: 1.20.2
         version: 1.20.2
@@ -193,6 +193,9 @@ importers:
 
   ../../../apps/lockfile-explorer:
     dependencies:
+      '@lifaon/path':
+        specifier: ~2.1.0
+        version: 2.1.0
       '@microsoft/rush-lib':
         specifier: workspace:*
         version: link:../../libraries/rush-lib
@@ -218,14 +221,17 @@ importers:
         specifier: 4.20.0
         version: 4.20.0
       js-yaml:
-        specifier: ~3.13.1
-        version: 3.13.1
+        specifier: ~4.1.0
+        version: 4.1.0
       open:
         specifier: ~8.4.0
         version: 8.4.2
       semver:
         specifier: ~7.5.4
         version: 7.5.4
+      tslib:
+        specifier: ~2.8.1
+        version: 2.8.1
       update-notifier:
         specifier: ~5.1.0
         version: 5.1.0
@@ -246,8 +252,8 @@ importers:
         specifier: 4.17.21
         version: 4.17.21
       '@types/js-yaml':
-        specifier: 3.12.1
-        version: 3.12.1
+        specifier: 4.0.9
+        version: 4.0.9
       '@types/semver':
         specifier: 7.5.0
         version: 7.5.0
@@ -263,9 +269,6 @@ importers:
 
   ../../../apps/lockfile-explorer-web:
     dependencies:
-      '@lifaon/path':
-        specifier: ~2.1.0
-        version: 2.1.0
       '@reduxjs/toolkit':
         specifier: ~1.8.6
         version: 1.8.6(react-redux@8.0.7)(react@17.0.2)
@@ -3630,8 +3633,8 @@ importers:
         specifier: ~8.2.7
         version: 8.2.7
       js-yaml:
-        specifier: ~3.13.1
-        version: 3.13.1
+        specifier: ~4.1.0
+        version: 4.1.0
       npm-check:
         specifier: ~6.0.1
         version: 6.0.1
@@ -3697,8 +3700,8 @@ importers:
         specifier: 7.3.1
         version: 7.3.1
       '@types/js-yaml':
-        specifier: 3.12.1
-        version: 3.12.1
+        specifier: 4.0.9
+        version: 4.0.9
       '@types/npm-package-arg':
         specifier: 6.1.0
         version: 6.1.0
@@ -3977,15 +3980,15 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/node-core-library
       js-yaml:
-        specifier: ~3.13.1
-        version: 3.13.1
+        specifier: ~4.1.0
+        version: 4.1.0
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
       '@types/js-yaml':
-        specifier: 3.12.1
-        version: 3.12.1
+        specifier: 4.0.9
+        version: 4.0.9
       eslint:
         specifier: ~9.25.1
         version: 9.25.1(supports-color@8.1.1)
@@ -8023,7 +8026,7 @@ packages:
       globals: 12.4.0
       ignore: 4.0.6
       import-fresh: 3.3.0
-      js-yaml: 3.13.1
+      js-yaml: 3.14.1
       lodash: 4.17.21
       minimatch: 3.1.2
       strip-json-comments: 3.1.1
@@ -8041,7 +8044,7 @@ packages:
       globals: 13.24.0
       ignore: 4.0.6
       import-fresh: 3.3.0
-      js-yaml: 3.13.1
+      js-yaml: 3.14.1
       minimatch: 3.1.2
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
@@ -9699,7 +9702,7 @@ packages:
       camelcase: 5.3.1
       find-up: 4.1.0
       get-package-type: 0.1.0
-      js-yaml: 3.13.1
+      js-yaml: 3.14.1
       resolve-from: 5.0.0
 
   /@istanbuljs/schema@0.1.3:
@@ -13876,8 +13879,8 @@ packages:
     resolution: {integrity: sha512-LFt+YA7Lv2IZROMwokZKiPNORAV5N3huMs3IKnzlE430HWhWYZ8b+78HiwJXJJP1V2IEjinyJURuRJfGoaFSIA==}
     dev: true
 
-  /@types/js-yaml@3.12.1:
-    resolution: {integrity: sha512-SGGAhXLHDx+PK4YLNcNGa6goPf9XRWQNAUUbffkwVGGXIxmDKWyGGL4inzq2sPmExu431Ekb9aEMn9BkPqEYFA==}
+  /@types/js-yaml@4.0.9:
+    resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
     dev: true
 
   /@types/jsdom@20.0.1:
@@ -19610,7 +19613,7 @@ packages:
       import-fresh: 3.3.0
       imurmurhash: 0.1.4
       is-glob: 4.0.3
-      js-yaml: 3.13.1
+      js-yaml: 3.14.1
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash: 4.17.21
@@ -19660,7 +19663,7 @@ packages:
       import-fresh: 3.3.0
       imurmurhash: 0.1.4
       is-glob: 4.0.3
-      js-yaml: 3.13.1
+      js-yaml: 3.14.1
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash.merge: 4.6.2
@@ -19706,7 +19709,7 @@ packages:
       import-fresh: 3.3.0
       imurmurhash: 0.1.4
       is-glob: 4.0.3
-      js-yaml: 3.13.1
+      js-yaml: 3.14.1
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash: 4.17.21
@@ -23360,20 +23363,12 @@ packages:
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
-  /js-yaml@3.13.1:
-    resolution: {integrity: sha512-YfbcO7jXDdyj0DGxYVSlSeQNHbD7XPWvrVWeVUujrQEoZzWJIRrCPoyk6kL6IAjAG2IolMK4T0hNUe0HOUs5Jw==}
-    hasBin: true
-    dependencies:
-      argparse: 1.0.10
-      esprima: 4.0.1
-
   /js-yaml@3.14.1:
     resolution: {integrity: sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==}
     hasBin: true
     dependencies:
       argparse: 1.0.10
       esprima: 4.0.1
-    dev: false
 
   /js-yaml@4.1.0:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
@@ -23802,7 +23797,7 @@ packages:
     engines: {node: '>=6'}
     dependencies:
       graceful-fs: 4.2.11
-      js-yaml: 3.13.1
+      js-yaml: 3.14.1
       pify: 4.0.1
       strip-bom: 3.0.0
     dev: false
@@ -29307,7 +29302,7 @@ packages:
       commander: 2.20.3
       diff: 4.0.2
       glob: 7.2.3
-      js-yaml: 3.13.1
+      js-yaml: 3.14.1
       minimatch: 3.1.2
       mkdirp: 0.5.6
       resolve: 1.22.8
@@ -29330,7 +29325,7 @@ packages:
       commander: 2.20.3
       diff: 4.0.2
       glob: 7.2.3
-      js-yaml: 3.13.1
+      js-yaml: 3.14.1
       minimatch: 3.1.2
       mkdirp: 0.5.6
       resolve: 1.22.8
@@ -29353,7 +29348,7 @@ packages:
       commander: 2.20.3
       diff: 4.0.2
       glob: 7.2.3
-      js-yaml: 3.13.1
+      js-yaml: 3.14.1
       minimatch: 3.1.2
       mkdirp: 0.5.6
       resolve: 1.22.8
@@ -29376,7 +29371,7 @@ packages:
       commander: 2.20.3
       diff: 4.0.2
       glob: 7.2.3
-      js-yaml: 3.13.1
+      js-yaml: 3.14.1
       minimatch: 3.1.2
       mkdirp: 0.5.6
       resolve: 1.22.8

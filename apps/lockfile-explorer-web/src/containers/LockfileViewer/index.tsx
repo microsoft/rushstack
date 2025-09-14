@@ -3,7 +3,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './styles.scss';
-import { type LockfileEntry, LockfileEntryFilter } from '../../parsing/LfxGraph';
+import { type LfxGraphEntry, LfxGraphEntryKind } from '../../packlets/lfx-shared';
 import { ReactNull } from '../../types/ReactNull';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
@@ -17,7 +17,7 @@ import { Tabs, Checkbox, ScrollArea, Input, Text } from '@rushstack/rush-themed-
 
 interface ILockfileEntryGroup {
   entryName: string;
-  versions: LockfileEntry[];
+  versions: LfxGraphEntry[];
 }
 
 const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element => {
@@ -26,7 +26,7 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
   const dispatch = useAppDispatch();
   const fieldRef = useRef() as React.MutableRefObject<HTMLDivElement>;
   const clear = useCallback(
-    (entry: LockfileEntry) => () => {
+    (entry: LfxGraphEntry) => () => {
       dispatch(pushToStack(entry));
     },
     [dispatch]
@@ -40,7 +40,7 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
     }
   }, [selectedEntry, group]);
 
-  if (activeFilters[LockfileEntryFilter.Project]) {
+  if (activeFilters[LfxGraphEntryKind.Project]) {
     return (
       <div className={styles.packageGroup} ref={fieldRef}>
         {group.versions.map((entry) => (
@@ -80,7 +80,7 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
   );
 };
 
-const multipleVersions = (entries: LockfileEntry[]): boolean => {
+const multipleVersions = (entries: LfxGraphEntry[]): boolean => {
   const set = new Set();
   for (const entry of entries) {
     if (set.has(entry.entryPackageVersion)) return true;
@@ -96,8 +96,8 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   const entries = useAppSelector(selectFilteredEntries);
   const activeFilters = useAppSelector((state) => state.entry.filters);
   const updateFilter = useCallback(
-    (type: LockfileEntryFilter) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (type === LockfileEntryFilter.Project) {
+    (type: LfxGraphEntryKind) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (type === LfxGraphEntryKind.Project) {
         setProjectFilter(e.target.value);
       } else {
         setPackageFilter(e.target.value);
@@ -108,19 +108,19 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   );
 
   useEffect(() => {
-    setProjectFilter(getFilterFromLocalStorage(LockfileEntryFilter.Project));
-    setPackageFilter(getFilterFromLocalStorage(LockfileEntryFilter.Package));
+    setProjectFilter(getFilterFromLocalStorage(LfxGraphEntryKind.Project));
+    setPackageFilter(getFilterFromLocalStorage(LfxGraphEntryKind.Package));
   }, []);
 
   const getEntriesToShow = (): ILockfileEntryGroup[] => {
-    let filteredEntries: LockfileEntry[] = entries;
-    if (projectFilter && activeFilters[LockfileEntryFilter.Project]) {
+    let filteredEntries: LfxGraphEntry[] = entries;
+    if (projectFilter && activeFilters[LfxGraphEntryKind.Project]) {
       filteredEntries = entries.filter((entry) => entry.entryPackageName.indexOf(projectFilter) !== -1);
-    } else if (packageFilter && activeFilters[LockfileEntryFilter.Package]) {
+    } else if (packageFilter && activeFilters[LfxGraphEntryKind.Package]) {
       filteredEntries = entries.filter((entry) => entry.entryPackageName.indexOf(packageFilter) !== -1);
     }
 
-    const reducedEntries = filteredEntries.reduce((groups: { [key: string]: LockfileEntry[] }, item) => {
+    const reducedEntries = filteredEntries.reduce((groups: { [key: string]: LfxGraphEntry[] }, item) => {
       const group = groups[item.entryPackageName] || [];
       group.push(item);
       groups[item.entryPackageName] = group;
@@ -134,14 +134,14 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
       });
     }
 
-    if (activeFilters[LockfileEntryFilter.SideBySide]) {
+    if (activeFilters[LfxGraphEntryKind.SideBySide]) {
       groupedEntries = groupedEntries.filter((entry) => entry.versions.length > 1);
     }
-    if (activeFilters[LockfileEntryFilter.Doppelganger]) {
+    if (activeFilters[LfxGraphEntryKind.Doppelganger]) {
       groupedEntries = groupedEntries.filter((entry) => multipleVersions(entry.versions));
     }
 
-    if (activeFilters[LockfileEntryFilter.Project]) {
+    if (activeFilters[LfxGraphEntryKind.Project]) {
       groupedEntries = groupedEntries.sort((a, b) =>
         a.entryName > b.entryName ? 1 : b.entryName > a.entryName ? -1 : 0
       );
@@ -151,7 +151,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   };
 
   const changeFilter = useCallback(
-    (filter: LockfileEntryFilter, enabled: boolean) => (): void => {
+    (filter: LfxGraphEntryKind, enabled: boolean) => (): void => {
       dispatch(selectFilter({ filter, state: enabled }));
     },
     [dispatch]
@@ -160,11 +160,11 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   const togglePackageView = useCallback(
     (selected: string) => {
       if (selected === 'Projects') {
-        dispatch(selectFilter({ filter: LockfileEntryFilter.Project, state: true }));
-        dispatch(selectFilter({ filter: LockfileEntryFilter.Package, state: false }));
+        dispatch(selectFilter({ filter: LfxGraphEntryKind.Project, state: true }));
+        dispatch(selectFilter({ filter: LfxGraphEntryKind.Package, state: false }));
       } else {
-        dispatch(selectFilter({ filter: LockfileEntryFilter.Package, state: true }));
-        dispatch(selectFilter({ filter: LockfileEntryFilter.Project, state: false }));
+        dispatch(selectFilter({ filter: LfxGraphEntryKind.Package, state: true }));
+        dispatch(selectFilter({ filter: LfxGraphEntryKind.Project, state: false }));
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -186,17 +186,15 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
                 header: 'Packages'
               }
             ]}
-            value={activeFilters[LockfileEntryFilter.Project] ? 'Projects' : 'Packages'}
+            value={activeFilters[LfxGraphEntryKind.Project] ? 'Projects' : 'Packages'}
             onChange={togglePackageView}
           />
           <Input
             type="search"
             placeholder="Filter..."
-            value={activeFilters[LockfileEntryFilter.Project] ? projectFilter : packageFilter}
+            value={activeFilters[LfxGraphEntryKind.Project] ? projectFilter : packageFilter}
             onChange={updateFilter(
-              activeFilters[LockfileEntryFilter.Project]
-                ? LockfileEntryFilter.Project
-                : LockfileEntryFilter.Package
+              activeFilters[LfxGraphEntryKind.Project] ? LfxGraphEntryKind.Project : LfxGraphEntryKind.Package
             )}
           />
           <ScrollArea>
@@ -204,25 +202,25 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
               <LockfileEntryLi group={lockfileEntryGroup} key={lockfileEntryGroup.entryName} />
             ))}
           </ScrollArea>
-          {activeFilters[LockfileEntryFilter.Package] ? (
+          {activeFilters[LfxGraphEntryKind.Package] ? (
             <div className={styles.filterSection}>
               <Text type="h5" bold>
                 Filters
               </Text>
               <Checkbox
                 label="Must have side-by-side versions"
-                isChecked={activeFilters[LockfileEntryFilter.SideBySide]}
+                isChecked={activeFilters[LfxGraphEntryKind.SideBySide]}
                 onChecked={changeFilter(
-                  LockfileEntryFilter.SideBySide,
-                  !activeFilters[LockfileEntryFilter.SideBySide]
+                  LfxGraphEntryKind.SideBySide,
+                  !activeFilters[LfxGraphEntryKind.SideBySide]
                 )}
               />
               <Checkbox
                 label="Must have doppelgangers"
-                isChecked={activeFilters[LockfileEntryFilter.Doppelganger]}
+                isChecked={activeFilters[LfxGraphEntryKind.Doppelganger]}
                 onChecked={changeFilter(
-                  LockfileEntryFilter.Doppelganger,
-                  !activeFilters[LockfileEntryFilter.Doppelganger]
+                  LfxGraphEntryKind.Doppelganger,
+                  !activeFilters[LfxGraphEntryKind.Doppelganger]
                 )}
               />
             </div>

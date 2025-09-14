@@ -5,7 +5,7 @@ import React, { useCallback } from 'react';
 import appStyles from '../../App.scss';
 import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import type { LockfileEntry } from '../../parsing/LfxGraph';
+import type { LfxGraphEntry } from '../../packlets/lfx-shared';
 import { clearStackAndPush, removeBookmark } from '../../store/slices/entrySlice';
 import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
 
@@ -14,13 +14,13 @@ export const BookmarksSidebar = (): JSX.Element => {
   const dispatch = useAppDispatch();
 
   const clear = useCallback(
-    (entry: LockfileEntry) => () => {
+    (entry: LfxGraphEntry) => () => {
       dispatch(clearStackAndPush(entry));
     },
     [dispatch]
   );
   const deleteEntry = useCallback(
-    (entry: LockfileEntry) => () => {
+    (entry: LfxGraphEntry) => () => {
       dispatch(removeBookmark(entry));
     },
     [dispatch]

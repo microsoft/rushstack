@@ -15,11 +15,11 @@
     "@microsoft/api-extractor-model": "workspace:*",
     "@microsoft/tsdoc": "~0.15.1",
     "@rushstack/node-core-library": "workspace:*",
-    "js-yaml": "~3.13.1"
+    "js-yaml": "~4.1.0"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/js-yaml": "3.12.1",
+    "@types/js-yaml": "4.0.9",
     "eslint": "~9.25.1",
     "local-node-rig": "workspace:*"
   }

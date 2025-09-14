@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TEST_LOCKFILE } from './testLockfile';
+import { lfxGraphSerializer, type LfxGraph } from '../../../build/lfx-shared';
+
 import * as lfxGraphLoader from '../lfxGraphLoader';
-import * as lfxGraphSerializer from '../lfxGraphSerializer';
-import type { LfxGraph } from '../LfxGraph';
+import { TEST_WORKSPACE, TEST_LOCKFILE } from './testLockfile';
 
 describe('serializeToJson', () => {
   it('serializes a simple graph', () => {
-    const graph = lfxGraphLoader.generateLockfileGraph(TEST_LOCKFILE);
+    const graph = lfxGraphLoader.generateLockfileGraph(TEST_WORKSPACE, TEST_LOCKFILE);
 
     expect(lfxGraphSerializer.serializeToJson(graph)).toMatchInlineSnapshot(`
 Object {
@@ -99,12 +99,17 @@ Object {
       "transitivePeerDependencies": Array [],
     },
   ],
+  "workspace": Object {
+    "pnpmLockfilePath": "/test/pnpm-lock.yaml",
+    "rushConfig": undefined,
+    "workspaceRootFolder": "/test",
+  },
 }
 `);
   });
 
   it('deserializes a simple graph', () => {
-    const originalGraph = lfxGraphLoader.generateLockfileGraph(TEST_LOCKFILE);
+    const originalGraph = lfxGraphLoader.generateLockfileGraph(TEST_WORKSPACE, TEST_LOCKFILE);
 
     const serialized: string = JSON.stringify(
       lfxGraphSerializer.serializeToJson(originalGraph),
