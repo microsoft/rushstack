@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { readPnpmfileAsync, readPackageSpecAsync, readPackageJsonAsync } from '../../parsing/getPackageFiles';
+import { readPnpmfileAsync, readPackageSpecAsync, readPackageJsonAsync } from '../../helpers/lfxApiClient';
 import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
@@ -12,9 +12,9 @@ import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import { isEntryModified } from '../../helpers/isEntryModified';
 import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
-import { LockfileEntryFilter } from '../../parsing/LockfileEntry';
+import { LockfileEntryFilter } from '../../parsing/LfxGraph';
 
-const PackageView: { [key in string]: string } = {
+const PackageView: { [key: string]: string } = {
   PACKAGE_JSON: 'PACKAGE_JSON',
   PACKAGE_SPEC: 'PACKAGE_SPEC',
   PARSED_PACKAGE_JSON: 'PARSED_PACKAGE_JSON'

@@ -5,12 +5,12 @@ export interface IPackageJson {
   name: string;
   version: string;
   dependencies: {
-    [key in string]: string;
+    [key: string]: string;
   };
   devDependencies: {
-    [key in string]: string;
+    [key: string]: string;
   };
   peerDependencies: {
-    [key in string]: string;
+    [key: string]: string;
   };
 }

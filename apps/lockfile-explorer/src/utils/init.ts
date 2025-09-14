@@ -9,7 +9,7 @@ import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration
 import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
 import path from 'path';
 
-import { type IAppState, type IRushProjectDetails, ProjectType } from '../state';
+import type { IAppState } from '../state';
 
 export const init = (options: {
   lockfileExplorerProjectRoot: string;
@@ -18,60 +18,60 @@ export const init = (options: {
   subspaceName: string;
 }): IAppState => {
   const { lockfileExplorerProjectRoot, appVersion, debugMode, subspaceName } = options;
-  const currDir = process.cwd();
+  const currentWorkingDirectory: string = path.resolve(process.cwd());
 
   let appState: IAppState | undefined;
-  let currExploredDir = Path.convertToSlashes(currDir);
-  while (currExploredDir.includes('/')) {
+  let currentFolder: string = Path.convertToSlashes(currentWorkingDirectory);
+  while (currentFolder.includes('/')) {
     // Look for a rush.json [rush project] or pnpm-lock.yaml file [regular pnpm workspace]
-    const rushJsonPath: string = path.resolve(currExploredDir, 'rush.json');
-    const pnpmLockPath: string = path.resolve(currExploredDir, 'pnpm-lock.yaml');
+    const rushJsonPath: string = currentFolder + '/rush.json';
+    const pnpmLockPath: string = currentFolder + '/pnpm-lock.yaml';
     if (FileSystem.exists(rushJsonPath)) {
       console.log('Found a Rush workspace: ', rushJsonPath);
 
-      const rushConfiguration: RushConfiguration = RushConfiguration.tryLoadFromDefaultLocation()!;
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonPath);
       const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
       const workspaceFolder: string = subspace.getSubspaceTempFolderPath();
 
-      const projectsByProjectFolder: Map<string, IRushProjectDetails> = new Map();
-      for (const project of rushConfiguration.projects) {
-        projectsByProjectFolder.set(project.projectFolder, {
-          projectName: project.packageName,
-          projectFolder: project.projectFolder
-        });
-      }
-
+      const pnpmLockfileLocation: string = path.resolve(workspaceFolder, 'pnpm-lock.yaml');
       appState = {
-        currDir,
+        currentWorkingDirectory,
         appVersion,
         debugMode,
         lockfileExplorerProjectRoot,
-        projectType: ProjectType.RUSH_PROJECT,
-        pnpmLockfileLocation: path.resolve(workspaceFolder, 'pnpm-lock.yaml'),
-        pnpmfileLocation: path.resolve(workspaceFolder, '.pnpmfile.cjs'),
-        projectRoot: currExploredDir,
-        rush: {
-          rushJsonPath,
-          projectsByProjectFolder
+        pnpmLockfileLocation,
+        pnpmfileLocation: workspaceFolder + '/.pnpmfile.cjs',
+        projectRoot: currentFolder,
+        lfxWorkspace: {
+          workspaceRootFolder: currentFolder,
+          pnpmLockfilePath: Path.convertToSlashes(path.relative(currentFolder, pnpmLockfileLocation)),
+          rushConfig: {
+            rushVersion: rushConfiguration.rushConfigurationJson.rushVersion,
+            subspaceName: subspaceName ?? ''
+          }
         }
       };
       break;
     } else if (FileSystem.exists(pnpmLockPath)) {
       appState = {
-        currDir,
+        currentWorkingDirectory,
         appVersion,
         debugMode,
         lockfileExplorerProjectRoot,
-        projectType: ProjectType.PNPM_WORKSPACE,
-        pnpmLockfileLocation: path.resolve(currExploredDir, 'pnpm-lock.yaml'),
-        pnpmfileLocation: path.resolve(currExploredDir, '.pnpmfile.cjs'),
-        projectRoot: currExploredDir
+        pnpmLockfileLocation: currentFolder + '/pnpm-lock.yaml',
+        pnpmfileLocation: currentFolder + '/.pnpmfile.cjs',
+        projectRoot: currentFolder,
+        lfxWorkspace: {
+          workspaceRootFolder: currentFolder,
+          pnpmLockfilePath: Path.convertToSlashes(path.relative(currentFolder, pnpmLockPath)),
+          rushConfig: undefined
+        }
       };
 
       break;
     }
 
-    currExploredDir = currExploredDir.substring(0, currExploredDir.lastIndexOf('/'));
+    currentFolder = currentFolder.substring(0, currentFolder.lastIndexOf('/'));
   }
 
   if (!appState) {

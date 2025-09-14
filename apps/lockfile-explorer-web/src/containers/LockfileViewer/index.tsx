@@ -3,7 +3,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './styles.scss';
-import { type LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
+import { type LockfileEntry, LockfileEntryFilter } from '../../parsing/LfxGraph';
 import { ReactNull } from '../../types/ReactNull';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
@@ -120,7 +120,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
       filteredEntries = entries.filter((entry) => entry.entryPackageName.indexOf(packageFilter) !== -1);
     }
 
-    const reducedEntries = filteredEntries.reduce((groups: { [key in string]: LockfileEntry[] }, item) => {
+    const reducedEntries = filteredEntries.reduce((groups: { [key: string]: LockfileEntry[] }, item) => {
       const group = groups[item.entryPackageName] || [];
       group.push(item);
       groups[item.entryPackageName] = group;

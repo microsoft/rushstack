@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createSlice, type PayloadAction, type Reducer } from '@reduxjs/toolkit';
-import { type LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
+import { type LockfileEntry, LockfileEntryFilter } from '../../parsing/LfxGraph';
 import type { RootState } from '../index';
 import {
   getBookmarksFromStorage,

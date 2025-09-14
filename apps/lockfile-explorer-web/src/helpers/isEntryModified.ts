@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { ISpecChange } from '../parsing/compareSpec';
-import type { LockfileEntry } from '../parsing/LockfileEntry';
+import type { LockfileEntry } from '../parsing/LfxGraph';
 
 export const isEntryModified = (
   entry: LockfileEntry | undefined,

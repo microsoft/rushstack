@@ -5,12 +5,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollArea, Text } from '@rushstack/rush-themed-ui';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-import { IDependencyType, type LockfileDependency } from '../../parsing/LockfileDependency';
-import { readPackageJsonAsync } from '../../parsing/getPackageFiles';
+import { DependencyKind, type LockfileDependency } from '../../parsing/LfxGraph';
+import { readPackageJsonAsync } from '../../helpers/lfxApiClient';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 import { ReactNull } from '../../types/ReactNull';
-import type { LockfileEntry } from '../../parsing/LockfileEntry';
+import type { LockfileEntry } from '../../parsing/LfxGraph';
 import { logDiagnosticInfo } from '../../helpers/logDiagnosticInfo';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import type { IPackageJson } from '../../types/IPackageJson';
@@ -80,7 +80,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
         // Check if we need to calculate influencers.
         // If the current dependencyToTrace is a peer dependency then we do
-        if (dependencyToTrace.dependencyType !== IDependencyType.PEER_DEPENDENCY) {
+        if (dependencyToTrace.dependencyType !== DependencyKind.PEER_DEPENDENCY) {
           return;
         }
 
@@ -179,7 +179,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
               package.json spec:{' '}
             </Text>
             <Text type="span">
-              {inspectDependency.dependencyType === IDependencyType.PEER_DEPENDENCY
+              {inspectDependency.dependencyType === DependencyKind.PEER_DEPENDENCY
                 ? `"${inspectDependency.peerDependencyMeta.version}" ${
                     inspectDependency.peerDependencyMeta.optional ? 'Optional' : 'Required'
                   } Peer`
@@ -204,7 +204,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   const renderPeerDependencies = (): JSX.Element | ReactNull => {
     if (!selectedEntry) return ReactNull;
     const peerDeps = selectedEntry.dependencies.filter(
-      (d) => d.dependencyType === IDependencyType.PEER_DEPENDENCY
+      (d) => d.dependencyType === DependencyKind.PEER_DEPENDENCY
     );
     if (!peerDeps.length) {
       return (
@@ -213,7 +213,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
         </div>
       );
     }
-    if (!inspectDependency || inspectDependency.dependencyType !== IDependencyType.PEER_DEPENDENCY) {
+    if (!inspectDependency || inspectDependency.dependencyType !== DependencyKind.PEER_DEPENDENCY) {
       return (
         <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
           <Text type="h5">Select a peer dependency to view its influencers</Text>
@@ -338,7 +338,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                 >
                   <Text type="h5" bold>
                     Name: {dependency.name}{' '}
-                    {dependency.dependencyType === IDependencyType.PEER_DEPENDENCY
+                    {dependency.dependencyType === DependencyKind.PEER_DEPENDENCY
                       ? `${
                           dependency.peerDependencyMeta.optional ? '(Optional)' : '(Non-optional)'
                         } Peer Dependency`

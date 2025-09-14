@@ -12,19 +12,21 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "react": "~17.0.2",
-    "react-dom": "~17.0.2",
     "@lifaon/path": "~2.1.0",
     "@reduxjs/toolkit": "~1.8.6",
+    "@rushstack/rush-themed-ui": "workspace:*",
+    "react-dom": "~17.0.2",
     "react-redux": "~8.0.4",
+    "react": "~17.0.2",
     "redux": "~4.2.0",
-    "@rushstack/rush-themed-ui": "workspace:*"
+    "tslib": "~2.8.1"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@types/react": "17.0.74",
     "@types/react-dom": "17.0.25",
     "eslint": "~9.25.1",
-    "local-web-rig": "workspace:*"
+    "local-web-rig": "workspace:*",
+    "typescript": "5.8.2"
   }
 }

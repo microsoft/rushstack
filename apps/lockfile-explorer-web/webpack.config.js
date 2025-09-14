@@ -25,6 +25,12 @@ module.exports = function createConfig(env, argv) {
       },
       devServer: {
         port: 8096,
+
+        open: '/',
+        // Disable HTTPS to simplify Fiddler configuration
+        server: { type: 'http' },
+        //hot: false,
+
         static: {
           directory: path.join(__dirname, 'dist')
         },
