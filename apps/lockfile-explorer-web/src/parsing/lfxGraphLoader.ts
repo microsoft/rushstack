@@ -12,13 +12,13 @@ enum PnpmLockfileVersion {
 
 export interface ILockfileImporterV6 {
   dependencies?: {
-    [key in string]: {
+    [key: string]: {
       specifier: string;
       version: string;
     };
   };
   devDependencies?: {
-    [key in string]: {
+    [key: string]: {
       specifier: string;
       version: string;
     };
@@ -32,10 +32,10 @@ export interface ILockfileImporterV5 {
 export interface ILockfilePackageType {
   lockfileVersion: number | string;
   importers?: {
-    [key in string]: ILockfileImporterV5 | ILockfileImporterV6;
+    [key: string]: ILockfileImporterV5 | ILockfileImporterV6;
   };
   packages?: {
-    [key in string]: {
+    [key: string]: {
       resolution: {
         integrity: string;
       };
@@ -48,16 +48,16 @@ export interface ILockfilePackageType {
 
 export interface ILockfileNode {
   dependencies?: {
-    [key in string]: string;
+    [key: string]: string;
   };
   devDependencies?: {
-    [key in string]: string;
+    [key: string]: string;
   };
   peerDependencies?: {
-    [key in string]: string;
+    [key: string]: string;
   };
   peerDependenciesMeta?: {
-    [key in string]: {
+    [key: string]: {
       optional: boolean;
     };
   };
@@ -280,7 +280,7 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType, subspaceNa
     pnpmLockfileVersion = PnpmLockfileVersion.V6;
   }
   const allEntries: LockfileEntry[] = [];
-  const allEntriesById: { [key in string]: LockfileEntry } = {};
+  const allEntriesById: { [key: string]: LockfileEntry } = {};
 
   const allImporters = [];
   if (lockfile.importers) {

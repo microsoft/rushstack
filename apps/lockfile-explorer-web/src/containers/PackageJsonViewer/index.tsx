@@ -14,7 +14,7 @@ import { isEntryModified } from '../../helpers/isEntryModified';
 import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
 import { LockfileEntryFilter } from '../../parsing/LfxGraph';
 
-const PackageView: { [key in string]: string } = {
+const PackageView: { [key: string]: string } = {
   PACKAGE_JSON: 'PACKAGE_JSON',
   PACKAGE_SPEC: 'PACKAGE_SPEC',
   PARSED_PACKAGE_JSON: 'PARSED_PACKAGE_JSON'

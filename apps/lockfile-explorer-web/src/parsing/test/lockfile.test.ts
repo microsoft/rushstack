@@ -10,7 +10,7 @@ describe('LockfileGeneration', () => {
     const resolvedPackages = lfxGraphLoader.generateLockfileGraph(TEST_LOCKFILE).entries;
 
     // Mapping of all the lockfile entries created by the lockfile
-    const resolvedPackagesMap: { [key in string]: LockfileEntry } = {};
+    const resolvedPackagesMap: { [key: string]: LockfileEntry } = {};
     for (const resolvedPackage of resolvedPackages) {
       resolvedPackagesMap[resolvedPackage.entryPackageName] = resolvedPackage;
     }
