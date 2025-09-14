@@ -25,7 +25,6 @@ import {
 
 import type { IAppState } from '../../state';
 import { init } from '../../utils/init';
-import { convertLockfileV6DepPathToV5DepPath, getShrinkwrapFileMajorVersion } from '../../utils/shrinkwrap';
 import * as lfxGraphLoader from '../../graph/lfxGraphLoader';
 
 const EXPLORER_TOOL_FILENAME: 'lockfile-explorer' = 'lockfile-explorer';
@@ -154,18 +153,6 @@ export class ExplorerCommandLineParser extends CommandLineParser {
     app.get('/api/graph', async (req: express.Request, res: express.Response) => {
       const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
       const lockfile: Lockfile = yaml.load(pnpmLockfileText) as Lockfile;
-
-      const { packages, lockfileVersion } = lockfile;
-
-      const shrinkwrapFileMajorVersion: number = getShrinkwrapFileMajorVersion(lockfileVersion);
-
-      if (packages && shrinkwrapFileMajorVersion === 6) {
-        const updatedPackages: Lockfile['packages'] = {};
-        for (const [dependencyPath, dependency] of Object.entries(packages)) {
-          updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = dependency;
-        }
-        lockfile.packages = updatedPackages;
-      }
 
       const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(
         appState.lfxWorkspace,

@@ -14,6 +14,8 @@ import {
   type IJsonLfxWorkspace
 } from '../../temp/lfx-shared';
 
+import { convertLockfileV6DepPathToV5DepPath } from '../utils/shrinkwrap';
+
 enum PnpmLockfileVersion {
   V6,
   V5
@@ -299,6 +301,15 @@ export function generateLockfileGraph(
   if (parseInt(lockfile.lockfileVersion.toString(), 10) === 6) {
     pnpmLockfileVersion = PnpmLockfileVersion.V6;
   }
+
+  if (lockfile.packages && pnpmLockfileVersion === PnpmLockfileVersion.V6) {
+    const updatedPackages: ILockfilePackageType['packages'] = {};
+    for (const [dependencyPath, dependency] of Object.entries(lockfile.packages)) {
+      updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = dependency;
+    }
+    lockfile.packages = updatedPackages;
+  }
+
   const lfxGraph: LfxGraph = new LfxGraph(workspace);
   const allEntries: LfxGraphEntry[] = lfxGraph.entries;
   const allEntriesById: { [key: string]: LfxGraphEntry } = {};
