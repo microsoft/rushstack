@@ -293,7 +293,7 @@ function getImporterValue(
  */
 export function generateLockfileGraph(lockfile: ILockfilePackageType, subspaceName?: string): LfxGraph {
   let pnpmLockfileVersion: PnpmLockfileVersion = PnpmLockfileVersion.V5;
-  if (`${lockfile.lockfileVersion}`.startsWith('6')) {
+  if (parseInt(lockfile.lockfileVersion.toString()) === 6) {
     pnpmLockfileVersion = PnpmLockfileVersion.V6;
   }
   const lfxGraph: LfxGraph = new LfxGraph();
