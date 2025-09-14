@@ -399,7 +399,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return cached;
     }
 
-    const shrinkwrapJson: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
+    const shrinkwrapJson: IPnpmShrinkwrapYaml = yamlModule.load(shrinkwrapContent) as IPnpmShrinkwrapYaml;
     if ((shrinkwrapJson as LockfileFileV9).snapshots) {
       const lockfile: IPnpmShrinkwrapYaml | null = convertLockfileV9ToLockfileObject(
         shrinkwrapJson as LockfileFileV9
@@ -1317,6 +1317,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       }
     }
 
-    return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
+    return yamlModule.dump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 }

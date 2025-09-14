@@ -11,36 +11,36 @@ summary: |-
 
   This project tests various documentation generation scenarios and doc comment syntaxes.
 classes:
-  - 'api-documenter-test!AbstractClass:class'
-  - 'api-documenter-test!DecoratorExample:class'
-  - 'api-documenter-test!DocBaseClass:class'
-  - 'api-documenter-test!DocClass1:class'
-  - 'api-documenter-test!DocClassInterfaceMerge:class'
-  - 'api-documenter-test!Generic:class'
-  - 'api-documenter-test!SystemEvent:class'
+  - api-documenter-test!AbstractClass:class
+  - api-documenter-test!DecoratorExample:class
+  - api-documenter-test!DocBaseClass:class
+  - api-documenter-test!DocClass1:class
+  - api-documenter-test!DocClassInterfaceMerge:class
+  - api-documenter-test!Generic:class
+  - api-documenter-test!SystemEvent:class
 interfaces:
-  - 'api-documenter-test!Constraint:interface'
-  - 'api-documenter-test!DefaultType:interface'
-  - 'api-documenter-test!DocClassInterfaceMerge:interface'
-  - 'api-documenter-test!IDocInterface1:interface'
-  - 'api-documenter-test!IDocInterface2:interface'
-  - 'api-documenter-test!IDocInterface3:interface'
-  - 'api-documenter-test!IDocInterface4:interface'
-  - 'api-documenter-test!IDocInterface5:interface'
-  - 'api-documenter-test!IDocInterface6:interface'
-  - 'api-documenter-test!IDocInterface7:interface'
+  - api-documenter-test!Constraint:interface
+  - api-documenter-test!DefaultType:interface
+  - api-documenter-test!DocClassInterfaceMerge:interface
+  - api-documenter-test!IDocInterface1:interface
+  - api-documenter-test!IDocInterface2:interface
+  - api-documenter-test!IDocInterface3:interface
+  - api-documenter-test!IDocInterface4:interface
+  - api-documenter-test!IDocInterface5:interface
+  - api-documenter-test!IDocInterface6:interface
+  - api-documenter-test!IDocInterface7:interface
 enums:
-  - 'api-documenter-test!DocEnum:enum'
-  - 'api-documenter-test!DocEnumNamespaceMerge:enum'
+  - api-documenter-test!DocEnum:enum
+  - api-documenter-test!DocEnumNamespaceMerge:enum
 typeAliases:
-  - 'api-documenter-test!ExampleDuplicateTypeAlias:type'
-  - 'api-documenter-test!ExampleTypeAlias:type'
-  - 'api-documenter-test!ExampleUnionTypeAlias:type'
-  - 'api-documenter-test!GenericTypeAlias:type'
-  - 'api-documenter-test!TypeAlias:type'
+  - api-documenter-test!ExampleDuplicateTypeAlias:type
+  - api-documenter-test!ExampleTypeAlias:type
+  - api-documenter-test!ExampleUnionTypeAlias:type
+  - api-documenter-test!GenericTypeAlias:type
+  - api-documenter-test!TypeAlias:type
 functions:
-  - name: 'exampleFunction(x, y)'
-    uid: 'api-documenter-test!exampleFunction:function(1)'
+  - name: exampleFunction(x, y)
+    uid: api-documenter-test!exampleFunction:function(1)
     package: api-documenter-test!
     summary: An exported function with hyperlinked parameters and return value.
     remarks: ''
@@ -52,15 +52,15 @@ functions:
       parameters:
         - id: x
           description: an API item that should get hyperlinked
-          type: '<xref uid=\\"api-documenter-test!ExampleTypeAlias:type\\" />'
+          type: <xref uid=\\"api-documenter-test!ExampleTypeAlias:type\\" />
         - id: 'y'
           description: a system type that should NOT get hyperlinked
           type: number
       return:
-        type: '<xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />'
+        type: <xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />
         description: an interface that should get hyperlinked
   - name: yamlReferenceUniquenessTest()
-    uid: 'api-documenter-test!yamlReferenceUniquenessTest:function(1)'
+    uid: api-documenter-test!yamlReferenceUniquenessTest:function(1)
     package: api-documenter-test!
     summary: ''
     remarks: ''
@@ -70,12 +70,12 @@ functions:
     syntax:
       content: 'export declare function yamlReferenceUniquenessTest(): IDocInterface1;'
       return:
-        type: '<xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />'
+        type: <xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />
         description: ''
 ",
   "/api-documenter-test/abstractclass.yml": "### YamlMime:TSType
 name: AbstractClass
-uid: 'api-documenter-test!AbstractClass:class'
+uid: api-documenter-test!AbstractClass:class
 package: api-documenter-test!
 fullName: AbstractClass
 summary: Some abstract class with abstract members.
@@ -86,7 +86,7 @@ isDeprecated: false
 type: class
 properties:
   - name: property
-    uid: 'api-documenter-test!AbstractClass#property:member'
+    uid: api-documenter-test!AbstractClass#property:member
     package: api-documenter-test!
     fullName: property
     summary: Some abstract property.
@@ -100,7 +100,7 @@ properties:
         type: number
 methods:
   - name: method()
-    uid: 'api-documenter-test!AbstractClass#method:member(1)'
+    uid: api-documenter-test!AbstractClass#method:member(1)
     package: api-documenter-test!
     fullName: method()
     summary: Some abstract method.
@@ -116,7 +116,7 @@ methods:
 ",
   "/api-documenter-test/constraint.yml": "### YamlMime:TSType
 name: Constraint
-uid: 'api-documenter-test!Constraint:interface'
+uid: api-documenter-test!Constraint:interface
 package: api-documenter-test!
 fullName: Constraint
 summary: Type parameter constraint used by test case below.
@@ -128,7 +128,7 @@ type: interface
 ",
   "/api-documenter-test/decoratorexample.yml": "### YamlMime:TSType
 name: DecoratorExample
-uid: 'api-documenter-test!DecoratorExample:class'
+uid: api-documenter-test!DecoratorExample:class
 package: api-documenter-test!
 fullName: DecoratorExample
 summary: ''
@@ -139,7 +139,7 @@ isDeprecated: false
 type: class
 properties:
   - name: creationDate
-    uid: 'api-documenter-test!DecoratorExample#creationDate:member'
+    uid: api-documenter-test!DecoratorExample#creationDate:member
     package: api-documenter-test!
     fullName: creationDate
     summary: The date when the record was created.
@@ -154,7 +154,7 @@ properties:
 ",
   "/api-documenter-test/defaulttype.yml": "### YamlMime:TSType
 name: DefaultType
-uid: 'api-documenter-test!DefaultType:interface'
+uid: api-documenter-test!DefaultType:interface
 package: api-documenter-test!
 fullName: DefaultType
 summary: Type parameter default type used by test case below.
@@ -166,7 +166,7 @@ type: interface
 ",
   "/api-documenter-test/docbaseclass.yml": "### YamlMime:TSType
 name: DocBaseClass
-uid: 'api-documenter-test!DocBaseClass:class'
+uid: api-documenter-test!DocBaseClass:class
 package: api-documenter-test!
 fullName: DocBaseClass
 summary: Example base class
@@ -177,7 +177,7 @@ isDeprecated: false
 type: class
 constructors:
   - name: (constructor)()
-    uid: 'api-documenter-test!DocBaseClass:constructor(1)'
+    uid: api-documenter-test!DocBaseClass:constructor(1)
     package: api-documenter-test!
     fullName: (constructor)()
     summary: The simple constructor for \`DocBaseClass\`
@@ -188,7 +188,7 @@ constructors:
     syntax:
       content: constructor();
   - name: (constructor)(x)
-    uid: 'api-documenter-test!DocBaseClass:constructor(2)'
+    uid: api-documenter-test!DocBaseClass:constructor(2)
     package: api-documenter-test!
     fullName: (constructor)(x)
     summary: The overloaded constructor for \`DocBaseClass\`
@@ -205,7 +205,7 @@ constructors:
 ",
   "/api-documenter-test/docclass1.yml": "### YamlMime:TSType
 name: DocClass1
-uid: 'api-documenter-test!DocClass1:class'
+uid: api-documenter-test!DocClass1:class
 package: api-documenter-test!
 fullName: DocClass1
 summary: This is an example class.
@@ -225,7 +225,7 @@ isDeprecated: false
 type: class
 properties:
   - name: multipleModifiersProperty
-    uid: 'api-documenter-test!DocClass1.multipleModifiersProperty:member'
+    uid: api-documenter-test!DocClass1.multipleModifiersProperty:member
     package: api-documenter-test!
     fullName: multipleModifiersProperty
     summary: Some property with multiple modifiers.
@@ -238,7 +238,7 @@ properties:
       return:
         type: boolean
   - name: protectedProperty
-    uid: 'api-documenter-test!DocClass1#protectedProperty:member'
+    uid: api-documenter-test!DocClass1#protectedProperty:member
     package: api-documenter-test!
     fullName: protectedProperty
     summary: Some protected property.
@@ -251,7 +251,7 @@ properties:
       return:
         type: string
   - name: readonlyProperty
-    uid: 'api-documenter-test!DocClass1#readonlyProperty:member'
+    uid: api-documenter-test!DocClass1#readonlyProperty:member
     package: api-documenter-test!
     fullName: readonlyProperty
     summary: ''
@@ -264,7 +264,7 @@ properties:
       return:
         type: string
   - name: regularProperty
-    uid: 'api-documenter-test!DocClass1#regularProperty:member'
+    uid: api-documenter-test!DocClass1#regularProperty:member
     package: api-documenter-test!
     fullName: regularProperty
     summary: This is a regular property that happens to use the SystemEvent type.
@@ -275,9 +275,9 @@ properties:
     syntax:
       content: 'regularProperty: SystemEvent;'
       return:
-        type: '<xref uid=\\"api-documenter-test!SystemEvent:class\\" />'
+        type: <xref uid=\\"api-documenter-test!SystemEvent:class\\" />
   - name: writeableProperty
-    uid: 'api-documenter-test!DocClass1#writeableProperty:member'
+    uid: api-documenter-test!DocClass1#writeableProperty:member
     package: api-documenter-test!
     fullName: writeableProperty
     summary: ''
@@ -293,7 +293,7 @@ properties:
       return:
         type: string
   - name: writeonlyProperty
-    uid: 'api-documenter-test!DocClass1#writeonlyProperty:member'
+    uid: api-documenter-test!DocClass1#writeonlyProperty:member
     package: api-documenter-test!
     fullName: writeonlyProperty
     summary: API Extractor will surface an \`ae-missing-getter\` finding for this property.
@@ -307,7 +307,7 @@ properties:
         type: string
 methods:
   - name: deprecatedExample()
-    uid: 'api-documenter-test!DocClass1#deprecatedExample:member(1)'
+    uid: api-documenter-test!DocClass1#deprecatedExample:member(1)
     package: api-documenter-test!
     fullName: deprecatedExample()
     summary: ''
@@ -321,10 +321,10 @@ methods:
       return:
         type: void
         description: ''
-  - name: 'exampleFunction(a, b)'
-    uid: 'api-documenter-test!DocClass1#exampleFunction:member(1)'
+  - name: exampleFunction(a, b)
+    uid: api-documenter-test!DocClass1#exampleFunction:member(1)
     package: api-documenter-test!
-    fullName: 'exampleFunction(a, b)'
+    fullName: exampleFunction(a, b)
     summary: This is an overloaded function.
     remarks: ''
     example: []
@@ -343,7 +343,7 @@ methods:
         type: string
         description: ''
   - name: exampleFunction(x)
-    uid: 'api-documenter-test!DocClass1#exampleFunction:member(2)'
+    uid: api-documenter-test!DocClass1#exampleFunction:member(2)
     package: api-documenter-test!
     fullName: exampleFunction(x)
     summary: This is also an overloaded function.
@@ -361,7 +361,7 @@ methods:
         type: number
         description: ''
   - name: genericWithConstraintAndDefault(x)
-    uid: 'api-documenter-test!DocClass1#genericWithConstraintAndDefault:member(1)'
+    uid: api-documenter-test!DocClass1#genericWithConstraintAndDefault:member(1)
     package: api-documenter-test!
     fullName: genericWithConstraintAndDefault(x)
     summary: This is a method with a complex type parameter.
@@ -379,7 +379,7 @@ methods:
         type: void
         description: ''
   - name: interestingEdgeCases()
-    uid: 'api-documenter-test!DocClass1#interestingEdgeCases:member(1)'
+    uid: api-documenter-test!DocClass1#interestingEdgeCases:member(1)
     package: api-documenter-test!
     fullName: interestingEdgeCases()
     summary: |-
@@ -396,7 +396,7 @@ methods:
         type: void
         description: ''
   - name: optionalParamFunction(x)
-    uid: 'api-documenter-test!DocClass1#optionalParamFunction:member(1)'
+    uid: api-documenter-test!DocClass1#optionalParamFunction:member(1)
     package: api-documenter-test!
     fullName: optionalParamFunction(x)
     summary: This is a function with an optional parameter.
@@ -413,10 +413,10 @@ methods:
       return:
         type: void
         description: ''
-  - name: 'sumWithExample(x, y)'
-    uid: 'api-documenter-test!DocClass1.sumWithExample:member(1)'
+  - name: sumWithExample(x, y)
+    uid: api-documenter-test!DocClass1.sumWithExample:member(1)
     package: api-documenter-test!
-    fullName: 'sumWithExample(x, y)'
+    fullName: sumWithExample(x, y)
     summary: Returns the sum of two numbers.
     remarks: This illustrates usage of the \`@example\` block tag.
     example:
@@ -449,7 +449,7 @@ methods:
         type: number
         description: the sum of the two numbers
   - name: tableExample()
-    uid: 'api-documenter-test!DocClass1#tableExample:member(1)'
+    uid: api-documenter-test!DocClass1#tableExample:member(1)
     package: api-documenter-test!
     fullName: tableExample()
     summary: 'An example with tables:'
@@ -464,7 +464,7 @@ methods:
         description: ''
 events:
   - name: malformedEvent
-    uid: 'api-documenter-test!DocClass1#malformedEvent:member'
+    uid: api-documenter-test!DocClass1#malformedEvent:member
     package: api-documenter-test!
     fullName: malformedEvent
     summary: This event should have been marked as readonly.
@@ -475,9 +475,9 @@ events:
     syntax:
       content: 'malformedEvent: SystemEvent;'
       return:
-        type: '<xref uid=\\"api-documenter-test!SystemEvent:class\\" />'
+        type: <xref uid=\\"api-documenter-test!SystemEvent:class\\" />
   - name: modifiedEvent
-    uid: 'api-documenter-test!DocClass1#modifiedEvent:member'
+    uid: api-documenter-test!DocClass1#modifiedEvent:member
     package: api-documenter-test!
     fullName: modifiedEvent
     summary: This event is fired whenever the object is modified.
@@ -488,12 +488,12 @@ events:
     syntax:
       content: 'readonly modifiedEvent: SystemEvent;'
       return:
-        type: '<xref uid=\\"api-documenter-test!SystemEvent:class\\" />'
-extends: '<xref uid=\\"api-documenter-test!DocBaseClass:class\\" />'
+        type: <xref uid=\\"api-documenter-test!SystemEvent:class\\" />
+extends: <xref uid=\\"api-documenter-test!DocBaseClass:class\\" />
 ",
   "/api-documenter-test/docclassinterfacemerge-class.yml": "### YamlMime:TSType
 name: DocClassInterfaceMerge
-uid: 'api-documenter-test!DocClassInterfaceMerge:class'
+uid: api-documenter-test!DocClassInterfaceMerge:class
 package: api-documenter-test!
 fullName: DocClassInterfaceMerge
 summary: Class that merges with interface
@@ -508,7 +508,7 @@ type: class
 ",
   "/api-documenter-test/docclassinterfacemerge-interface.yml": "### YamlMime:TSType
 name: DocClassInterfaceMerge
-uid: 'api-documenter-test!DocClassInterfaceMerge:interface'
+uid: api-documenter-test!DocClassInterfaceMerge:interface
 package: api-documenter-test!
 fullName: DocClassInterfaceMerge
 summary: Interface that merges with class
@@ -520,7 +520,7 @@ type: interface
 ",
   "/api-documenter-test/docenum.yml": "### YamlMime:TSEnum
 name: DocEnum
-uid: 'api-documenter-test!DocEnum:enum'
+uid: api-documenter-test!DocEnum:enum
 package: api-documenter-test!
 fullName: DocEnum
 summary: Docs for DocEnum
@@ -530,12 +530,12 @@ isPreview: false
 isDeprecated: false
 fields:
   - name: One
-    uid: 'api-documenter-test!DocEnum.One:member'
+    uid: api-documenter-test!DocEnum.One:member
     package: api-documenter-test!
     summary: These are some docs for One
     value: '1'
   - name: Two
-    uid: 'api-documenter-test!DocEnum.Two:member'
+    uid: api-documenter-test!DocEnum.Two:member
     package: api-documenter-test!
     summary: |-
       These are some docs for Two.
@@ -543,14 +543,14 @@ fields:
       [DocEnum.One](xref:api-documenter-test!DocEnum.One:member) is a direct link to another enum member.
     value: '2'
   - name: Zero
-    uid: 'api-documenter-test!DocEnum.Zero:member'
+    uid: api-documenter-test!DocEnum.Zero:member
     package: api-documenter-test!
     summary: These are some docs for Zero
     value: '0'
 ",
   "/api-documenter-test/docenumnamespacemerge-enum.yml": "### YamlMime:TSEnum
 name: DocEnumNamespaceMerge
-uid: 'api-documenter-test!DocEnumNamespaceMerge:enum'
+uid: api-documenter-test!DocEnumNamespaceMerge:enum
 package: api-documenter-test!
 fullName: DocEnumNamespaceMerge
 summary: Enum that merges with namespace
@@ -565,19 +565,19 @@ isPreview: false
 isDeprecated: false
 fields:
   - name: Left
-    uid: 'api-documenter-test!DocEnumNamespaceMerge.Left:member'
+    uid: api-documenter-test!DocEnumNamespaceMerge.Left:member
     package: api-documenter-test!
     summary: These are some docs for Left
     value: '0'
   - name: Right
-    uid: 'api-documenter-test!DocEnumNamespaceMerge.Right:member'
+    uid: api-documenter-test!DocEnumNamespaceMerge.Right:member
     package: api-documenter-test!
     summary: These are some docs for Right
     value: '1'
 ",
   "/api-documenter-test/docenumnamespacemerge-namespace.yml": "### YamlMime:UniversalReference
 items:
-  - uid: 'api-documenter-test!DocEnumNamespaceMerge:namespace'
+  - uid: api-documenter-test!DocEnumNamespaceMerge:namespace
     summary: Namespace that merges with enum
     name: DocEnumNamespaceMerge
     fullName: DocEnumNamespaceMerge
@@ -586,14 +586,14 @@ items:
     type: namespace
     package: api-documenter-test!
     children:
-      - 'api-documenter-test!DocEnumNamespaceMerge.exampleFunction:function(1)'
-  - uid: 'api-documenter-test!DocEnumNamespaceMerge.exampleFunction:function(1)'
+      - api-documenter-test!DocEnumNamespaceMerge.exampleFunction:function(1)
+  - uid: api-documenter-test!DocEnumNamespaceMerge.exampleFunction:function(1)
     summary: This is a function inside of a namespace that merges with an enum.
     name: exampleFunction()
     fullName: DocEnumNamespaceMerge.exampleFunction()
     langs:
       - typeScript
-    namespace: 'api-documenter-test!DocEnumNamespaceMerge:namespace'
+    namespace: api-documenter-test!DocEnumNamespaceMerge:namespace
     type: function
     syntax:
       content: 'function exampleFunction(): void;'
@@ -604,7 +604,7 @@ items:
 ",
   "/api-documenter-test/ecmasymbols.yml": "### YamlMime:UniversalReference
 items:
-  - uid: 'api-documenter-test!EcmaSymbols:namespace'
+  - uid: api-documenter-test!EcmaSymbols:namespace
     summary: A namespace containing an ECMAScript symbol
     name: EcmaSymbols
     fullName: EcmaSymbols
@@ -613,14 +613,14 @@ items:
     type: namespace
     package: api-documenter-test!
     children:
-      - 'api-documenter-test!EcmaSymbols.example:var'
-  - uid: 'api-documenter-test!EcmaSymbols.example:var'
+      - api-documenter-test!EcmaSymbols.example:var
+  - uid: api-documenter-test!EcmaSymbols.example:var
     summary: An ECMAScript symbol
     name: example
     fullName: EcmaSymbols.example
     langs:
       - typeScript
-    namespace: 'api-documenter-test!EcmaSymbols:namespace'
+    namespace: api-documenter-test!EcmaSymbols:namespace
     type: variable
     syntax:
       content: 'example: unique symbol'
@@ -630,7 +630,7 @@ items:
 ",
   "/api-documenter-test/exampleduplicatetypealias.yml": "### YamlMime:TSTypeAlias
 name: ExampleDuplicateTypeAlias
-uid: 'api-documenter-test!ExampleDuplicateTypeAlias:type'
+uid: api-documenter-test!ExampleDuplicateTypeAlias:type
 package: api-documenter-test!
 fullName: ExampleDuplicateTypeAlias
 summary: A type alias that has duplicate references.
@@ -642,7 +642,7 @@ syntax: export type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent
 ",
   "/api-documenter-test/exampletypealias.yml": "### YamlMime:TSTypeAlias
 name: ExampleTypeAlias
-uid: 'api-documenter-test!ExampleTypeAlias:type'
+uid: api-documenter-test!ExampleTypeAlias:type
 package: api-documenter-test!
 fullName: ExampleTypeAlias
 summary: A type alias
@@ -654,7 +654,7 @@ syntax: export type ExampleTypeAlias = Promise<boolean>;
 ",
   "/api-documenter-test/exampleuniontypealias.yml": "### YamlMime:TSTypeAlias
 name: ExampleUnionTypeAlias
-uid: 'api-documenter-test!ExampleUnionTypeAlias:type'
+uid: api-documenter-test!ExampleUnionTypeAlias:type
 package: api-documenter-test!
 fullName: ExampleUnionTypeAlias
 summary: A type alias that references multiple other types.
@@ -666,7 +666,7 @@ syntax: export type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
 ",
   "/api-documenter-test/generic.yml": "### YamlMime:TSType
 name: Generic
-uid: 'api-documenter-test!Generic:class'
+uid: api-documenter-test!Generic:class
 package: api-documenter-test!
 fullName: Generic
 summary: Generic class.
@@ -678,7 +678,7 @@ type: class
 ",
   "/api-documenter-test/generictypealias.yml": "### YamlMime:TSTypeAlias
 name: GenericTypeAlias
-uid: 'api-documenter-test!GenericTypeAlias:type'
+uid: api-documenter-test!GenericTypeAlias:type
 package: api-documenter-test!
 fullName: GenericTypeAlias
 summary: ''
@@ -686,11 +686,11 @@ remarks: ''
 example: []
 isPreview: false
 isDeprecated: false
-syntax: 'export type GenericTypeAlias<T> = T[];'
+syntax: export type GenericTypeAlias<T> = T[];
 ",
   "/api-documenter-test/idocinterface1.yml": "### YamlMime:TSType
 name: IDocInterface1
-uid: 'api-documenter-test!IDocInterface1:interface'
+uid: api-documenter-test!IDocInterface1:interface
 package: api-documenter-test!
 fullName: IDocInterface1
 summary: ''
@@ -701,7 +701,7 @@ isDeprecated: false
 type: interface
 properties:
   - name: regularProperty
-    uid: 'api-documenter-test!IDocInterface1#regularProperty:member'
+    uid: api-documenter-test!IDocInterface1#regularProperty:member
     package: api-documenter-test!
     fullName: regularProperty
     summary: Does something
@@ -712,11 +712,11 @@ properties:
     syntax:
       content: 'regularProperty: SystemEvent;'
       return:
-        type: '<xref uid=\\"api-documenter-test!SystemEvent:class\\" />'
+        type: <xref uid=\\"api-documenter-test!SystemEvent:class\\" />
 ",
   "/api-documenter-test/idocinterface2.yml": "### YamlMime:TSType
 name: IDocInterface2
-uid: 'api-documenter-test!IDocInterface2:interface'
+uid: api-documenter-test!IDocInterface2:interface
 package: api-documenter-test!
 fullName: IDocInterface2
 summary: ''
@@ -727,7 +727,7 @@ isDeprecated: false
 type: interface
 methods:
   - name: deprecatedExample()
-    uid: 'api-documenter-test!IDocInterface2#deprecatedExample:member(1)'
+    uid: api-documenter-test!IDocInterface2#deprecatedExample:member(1)
     package: api-documenter-test!
     fullName: deprecatedExample()
     summary: ''
@@ -741,11 +741,11 @@ methods:
       return:
         type: void
         description: ''
-extends: '<xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />'
+extends: <xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />
 ",
   "/api-documenter-test/idocinterface3.yml": "### YamlMime:TSType
 name: IDocInterface3
-uid: 'api-documenter-test!IDocInterface3:interface'
+uid: api-documenter-test!IDocInterface3:interface
 package: api-documenter-test!
 fullName: IDocInterface3
 summary: Some less common TypeScript declaration kinds.
@@ -756,7 +756,7 @@ isDeprecated: false
 type: interface
 properties:
   - name: '\\"[not.a.symbol]\\"'
-    uid: 'api-documenter-test!IDocInterface3#\\"[not.a.symbol]\\":member'
+    uid: api-documenter-test!IDocInterface3#\\"[not.a.symbol]\\":member
     package: api-documenter-test!
     fullName: '\\"[not.a.symbol]\\"'
     summary: An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol.
@@ -769,7 +769,7 @@ properties:
       return:
         type: string
   - name: '[EcmaSymbols.example]'
-    uid: 'api-documenter-test!IDocInterface3#[EcmaSymbols.example]:member'
+    uid: api-documenter-test!IDocInterface3#[EcmaSymbols.example]:member
     package: api-documenter-test!
     fullName: '[EcmaSymbols.example]'
     summary: ECMAScript symbol
@@ -782,7 +782,7 @@ properties:
       return:
         type: string
   - name: redundantQuotes
-    uid: 'api-documenter-test!IDocInterface3#redundantQuotes:member'
+    uid: api-documenter-test!IDocInterface3#redundantQuotes:member
     package: api-documenter-test!
     fullName: redundantQuotes
     summary: A quoted identifier with redundant quotes.
@@ -797,7 +797,7 @@ properties:
 ",
   "/api-documenter-test/idocinterface4.yml": "### YamlMime:TSType
 name: IDocInterface4
-uid: 'api-documenter-test!IDocInterface4:interface'
+uid: api-documenter-test!IDocInterface4:interface
 package: api-documenter-test!
 fullName: IDocInterface4
 summary: Type union in an interface.
@@ -808,7 +808,7 @@ isDeprecated: false
 type: interface
 properties:
   - name: Context
-    uid: 'api-documenter-test!IDocInterface4#Context:member'
+    uid: api-documenter-test!IDocInterface4#Context:member
     package: api-documenter-test!
     fullName: Context
     summary: Test newline rendering when code blocks are used in tables
@@ -827,7 +827,7 @@ properties:
                   children: string;
               }) =&gt; boolean
   - name: generic
-    uid: 'api-documenter-test!IDocInterface4#generic:member'
+    uid: api-documenter-test!IDocInterface4#generic:member
     package: api-documenter-test!
     fullName: generic
     summary: make sure html entities are escaped in tables.
@@ -838,9 +838,9 @@ properties:
     syntax:
       content: 'generic: Generic<number>;'
       return:
-        type: '<xref uid=\\"api-documenter-test!Generic:class\\" />&lt;number&gt;'
+        type: <xref uid=\\"api-documenter-test!Generic:class\\" />&lt;number&gt;
   - name: numberOrFunction
-    uid: 'api-documenter-test!IDocInterface4#numberOrFunction:member'
+    uid: api-documenter-test!IDocInterface4#numberOrFunction:member
     package: api-documenter-test!
     fullName: numberOrFunction
     summary: a union type with a function
@@ -853,7 +853,7 @@ properties:
       return:
         type: number | (() =&gt; number)
   - name: stringOrNumber
-    uid: 'api-documenter-test!IDocInterface4#stringOrNumber:member'
+    uid: api-documenter-test!IDocInterface4#stringOrNumber:member
     package: api-documenter-test!
     fullName: stringOrNumber
     summary: a union type
@@ -868,7 +868,7 @@ properties:
 ",
   "/api-documenter-test/idocinterface5.yml": "### YamlMime:TSType
 name: IDocInterface5
-uid: 'api-documenter-test!IDocInterface5:interface'
+uid: api-documenter-test!IDocInterface5:interface
 package: api-documenter-test!
 fullName: IDocInterface5
 summary: Interface without inline tag to test custom TOC
@@ -879,7 +879,7 @@ isDeprecated: false
 type: interface
 properties:
   - name: regularProperty
-    uid: 'api-documenter-test!IDocInterface5#regularProperty:member'
+    uid: api-documenter-test!IDocInterface5#regularProperty:member
     package: api-documenter-test!
     fullName: regularProperty
     summary: Property of type string that does something
@@ -894,7 +894,7 @@ properties:
 ",
   "/api-documenter-test/idocinterface6.yml": "### YamlMime:TSType
 name: IDocInterface6
-uid: 'api-documenter-test!IDocInterface6:interface'
+uid: api-documenter-test!IDocInterface6:interface
 package: api-documenter-test!
 fullName: IDocInterface6
 summary: Interface without inline tag to test custom TOC with injection
@@ -905,7 +905,7 @@ isDeprecated: false
 type: interface
 properties:
   - name: arrayProperty
-    uid: 'api-documenter-test!IDocInterface6#arrayProperty:member'
+    uid: api-documenter-test!IDocInterface6#arrayProperty:member
     package: api-documenter-test!
     fullName: arrayProperty
     summary: ''
@@ -916,9 +916,9 @@ properties:
     syntax:
       content: 'arrayProperty: IDocInterface1[];'
       return:
-        type: '<xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />[]'
+        type: <xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />[]
   - name: intersectionProperty
-    uid: 'api-documenter-test!IDocInterface6#intersectionProperty:member'
+    uid: api-documenter-test!IDocInterface6#intersectionProperty:member
     package: api-documenter-test!
     fullName: intersectionProperty
     summary: ''
@@ -933,7 +933,7 @@ properties:
           <xref uid=\\"api-documenter-test!IDocInterface1:interface\\" /> & <xref
           uid=\\"api-documenter-test!IDocInterface2:interface\\" />
   - name: regularProperty
-    uid: 'api-documenter-test!IDocInterface6#regularProperty:member'
+    uid: api-documenter-test!IDocInterface6#regularProperty:member
     package: api-documenter-test!
     fullName: regularProperty
     summary: Property of type number that does something
@@ -946,7 +946,7 @@ properties:
       return:
         type: number
   - name: tupleProperty
-    uid: 'api-documenter-test!IDocInterface6#tupleProperty:member'
+    uid: api-documenter-test!IDocInterface6#tupleProperty:member
     package: api-documenter-test!
     fullName: tupleProperty
     summary: ''
@@ -961,7 +961,7 @@ properties:
           [<xref uid=\\"api-documenter-test!IDocInterface1:interface\\" />, <xref
           uid=\\"api-documenter-test!IDocInterface2:interface\\" />]
   - name: typeReferenceProperty
-    uid: 'api-documenter-test!IDocInterface6#typeReferenceProperty:member'
+    uid: api-documenter-test!IDocInterface6#typeReferenceProperty:member
     package: api-documenter-test!
     fullName: typeReferenceProperty
     summary: ''
@@ -976,7 +976,7 @@ properties:
           <xref uid=\\"api-documenter-test!Generic:class\\" />&lt;<xref uid=\\"api-documenter-test!IDocInterface1:interface\\"
           />&gt;
   - name: unionProperty
-    uid: 'api-documenter-test!IDocInterface6#unionProperty:member'
+    uid: api-documenter-test!IDocInterface6#unionProperty:member
     package: api-documenter-test!
     fullName: unionProperty
     summary: ''
@@ -992,7 +992,7 @@ properties:
           uid=\\"api-documenter-test!IDocInterface2:interface\\" />
 methods:
   - name: genericReferenceMethod(x)
-    uid: 'api-documenter-test!IDocInterface6#genericReferenceMethod:member(1)'
+    uid: api-documenter-test!IDocInterface6#genericReferenceMethod:member(1)
     package: api-documenter-test!
     fullName: genericReferenceMethod(x)
     summary: ''
@@ -1012,7 +1012,7 @@ methods:
 ",
   "/api-documenter-test/idocinterface7.yml": "### YamlMime:TSType
 name: IDocInterface7
-uid: 'api-documenter-test!IDocInterface7:interface'
+uid: api-documenter-test!IDocInterface7:interface
 package: api-documenter-test!
 fullName: IDocInterface7
 summary: Interface for testing optional properties
@@ -1023,7 +1023,7 @@ isDeprecated: false
 type: interface
 properties:
   - name: optionalField
-    uid: 'api-documenter-test!IDocInterface7#optionalField:member'
+    uid: api-documenter-test!IDocInterface7#optionalField:member
     package: api-documenter-test!
     fullName: optionalField
     summary: Description of optionalField
@@ -1036,7 +1036,7 @@ properties:
       return:
         type: boolean
   - name: optionalReadonlyField
-    uid: 'api-documenter-test!IDocInterface7#optionalReadonlyField:member'
+    uid: api-documenter-test!IDocInterface7#optionalReadonlyField:member
     package: api-documenter-test!
     fullName: optionalReadonlyField
     summary: Description of optionalReadonlyField
@@ -1049,7 +1049,7 @@ properties:
       return:
         type: boolean
   - name: optionalUndocumentedField
-    uid: 'api-documenter-test!IDocInterface7#optionalUndocumentedField:member'
+    uid: api-documenter-test!IDocInterface7#optionalUndocumentedField:member
     package: api-documenter-test!
     fullName: optionalUndocumentedField
     summary: ''
@@ -1063,7 +1063,7 @@ properties:
         type: boolean
 methods:
   - name: optionalMember()
-    uid: 'api-documenter-test!IDocInterface7#optionalMember:member(1)'
+    uid: api-documenter-test!IDocInterface7#optionalMember:member(1)
     package: api-documenter-test!
     fullName: optionalMember()
     summary: Description of optionalMember
@@ -1079,7 +1079,7 @@ methods:
 ",
   "/api-documenter-test/outernamespace.innernamespace.yml": "### YamlMime:UniversalReference
 items:
-  - uid: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
+  - uid: api-documenter-test!OuterNamespace.InnerNamespace:namespace
     summary: A nested namespace
     name: OuterNamespace.InnerNamespace
     fullName: OuterNamespace.InnerNamespace
@@ -1088,14 +1088,14 @@ items:
     type: namespace
     package: api-documenter-test!
     children:
-      - 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
-  - uid: 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
+      - api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)
+  - uid: api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)
     summary: A function inside a namespace
     name: nestedFunction(x)
     fullName: OuterNamespace.InnerNamespace.nestedFunction(x)
     langs:
       - typeScript
-    namespace: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
+    namespace: api-documenter-test!OuterNamespace.InnerNamespace:namespace
     type: function
     syntax:
       content: 'function nestedFunction(x: number): number;'
@@ -1112,7 +1112,7 @@ items:
 ",
   "/api-documenter-test/outernamespace.yml": "### YamlMime:UniversalReference
 items:
-  - uid: 'api-documenter-test!OuterNamespace:namespace'
+  - uid: api-documenter-test!OuterNamespace:namespace
     summary: A top-level namespace
     name: OuterNamespace
     fullName: OuterNamespace
@@ -1121,14 +1121,14 @@ items:
     type: namespace
     package: api-documenter-test!
     children:
-      - 'api-documenter-test!OuterNamespace.nestedVariable:var'
-  - uid: 'api-documenter-test!OuterNamespace.nestedVariable:var'
+      - api-documenter-test!OuterNamespace.nestedVariable:var
+  - uid: api-documenter-test!OuterNamespace.nestedVariable:var
     summary: A variable exported from within a namespace.
     name: nestedVariable
     fullName: OuterNamespace.nestedVariable
     langs:
       - typeScript
-    namespace: 'api-documenter-test!OuterNamespace:namespace'
+    namespace: api-documenter-test!OuterNamespace:namespace
     type: variable
     syntax:
       content: 'nestedVariable: boolean'
@@ -1138,7 +1138,7 @@ items:
 ",
   "/api-documenter-test/systemevent.yml": "### YamlMime:TSType
 name: SystemEvent
-uid: 'api-documenter-test!SystemEvent:class'
+uid: api-documenter-test!SystemEvent:class
 package: api-documenter-test!
 fullName: SystemEvent
 summary: A class used to exposed events.
@@ -1149,7 +1149,7 @@ isDeprecated: false
 type: class
 methods:
   - name: addHandler(handler)
-    uid: 'api-documenter-test!SystemEvent#addHandler:member(1)'
+    uid: api-documenter-test!SystemEvent#addHandler:member(1)
     package: api-documenter-test!
     fullName: addHandler(handler)
     summary: Adds an handler for the event.
@@ -1169,7 +1169,7 @@ methods:
 ",
   "/api-documenter-test/typealias.yml": "### YamlMime:TSTypeAlias
 name: TypeAlias
-uid: 'api-documenter-test!TypeAlias:type'
+uid: api-documenter-test!TypeAlias:type
 package: api-documenter-test!
 fullName: TypeAlias
 summary: ''
@@ -1191,75 +1191,75 @@ syntax: export type TypeAlias = number;
           - name: DocBaseClass
             items:
               - name: DocBaseClass
-                uid: 'api-documenter-test!DocBaseClass:class'
+                uid: api-documenter-test!DocBaseClass:class
               - name: IDocInterface1
-                uid: 'api-documenter-test!IDocInterface1:interface'
+                uid: api-documenter-test!IDocInterface1:interface
               - name: IDocInterface2
-                uid: 'api-documenter-test!IDocInterface2:interface'
+                uid: api-documenter-test!IDocInterface2:interface
           - name: DocClass1
             items:
               - name: DocClass1
-                uid: 'api-documenter-test!DocClass1:class'
+                uid: api-documenter-test!DocClass1:class
               - name: IDocInterface3
-                uid: 'api-documenter-test!IDocInterface3:interface'
+                uid: api-documenter-test!IDocInterface3:interface
               - name: IDocInterface4
-                uid: 'api-documenter-test!IDocInterface4:interface'
+                uid: api-documenter-test!IDocInterface4:interface
       - name: Interfaces
         items:
           - name: Interface5
             items:
               - name: IDocInterface5
-                uid: 'api-documenter-test!IDocInterface5:interface'
+                uid: api-documenter-test!IDocInterface5:interface
           - name: Interface6
             items:
               - name: InjectedCustomInterface
                 uid: customUid
               - name: IDocInterface6
-                uid: 'api-documenter-test!IDocInterface6:interface'
+                uid: api-documenter-test!IDocInterface6:interface
       - name: References
         items:
           - name: InjectedCustomItem
             uid: customUrl
           - name: AbstractClass
-            uid: 'api-documenter-test!AbstractClass:class'
+            uid: api-documenter-test!AbstractClass:class
           - name: Constraint
-            uid: 'api-documenter-test!Constraint:interface'
+            uid: api-documenter-test!Constraint:interface
           - name: DecoratorExample
-            uid: 'api-documenter-test!DecoratorExample:class'
+            uid: api-documenter-test!DecoratorExample:class
           - name: DefaultType
-            uid: 'api-documenter-test!DefaultType:interface'
+            uid: api-documenter-test!DefaultType:interface
           - name: DocClassInterfaceMerge (Class)
-            uid: 'api-documenter-test!DocClassInterfaceMerge:class'
+            uid: api-documenter-test!DocClassInterfaceMerge:class
           - name: DocClassInterfaceMerge (Interface)
-            uid: 'api-documenter-test!DocClassInterfaceMerge:interface'
+            uid: api-documenter-test!DocClassInterfaceMerge:interface
           - name: DocEnum
-            uid: 'api-documenter-test!DocEnum:enum'
+            uid: api-documenter-test!DocEnum:enum
           - name: DocEnumNamespaceMerge (Enum)
-            uid: 'api-documenter-test!DocEnumNamespaceMerge:enum'
+            uid: api-documenter-test!DocEnumNamespaceMerge:enum
           - name: DocEnumNamespaceMerge (Namespace)
-            uid: 'api-documenter-test!DocEnumNamespaceMerge:namespace'
+            uid: api-documenter-test!DocEnumNamespaceMerge:namespace
           - name: EcmaSymbols
-            uid: 'api-documenter-test!EcmaSymbols:namespace'
+            uid: api-documenter-test!EcmaSymbols:namespace
           - name: ExampleDuplicateTypeAlias
-            uid: 'api-documenter-test!ExampleDuplicateTypeAlias:type'
+            uid: api-documenter-test!ExampleDuplicateTypeAlias:type
           - name: ExampleTypeAlias
-            uid: 'api-documenter-test!ExampleTypeAlias:type'
+            uid: api-documenter-test!ExampleTypeAlias:type
           - name: ExampleUnionTypeAlias
-            uid: 'api-documenter-test!ExampleUnionTypeAlias:type'
+            uid: api-documenter-test!ExampleUnionTypeAlias:type
           - name: Generic
-            uid: 'api-documenter-test!Generic:class'
+            uid: api-documenter-test!Generic:class
           - name: GenericTypeAlias
-            uid: 'api-documenter-test!GenericTypeAlias:type'
+            uid: api-documenter-test!GenericTypeAlias:type
           - name: IDocInterface7
-            uid: 'api-documenter-test!IDocInterface7:interface'
+            uid: api-documenter-test!IDocInterface7:interface
           - name: OuterNamespace
-            uid: 'api-documenter-test!OuterNamespace:namespace'
+            uid: api-documenter-test!OuterNamespace:namespace
           - name: OuterNamespace.InnerNamespace
-            uid: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
+            uid: api-documenter-test!OuterNamespace.InnerNamespace:namespace
           - name: SystemEvent
-            uid: 'api-documenter-test!SystemEvent:class'
+            uid: api-documenter-test!SystemEvent:class
           - name: TypeAlias
-            uid: 'api-documenter-test!TypeAlias:type'
+            uid: api-documenter-test!TypeAlias:type
 ",
 }
 `;

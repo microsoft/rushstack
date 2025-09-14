@@ -66,6 +66,6 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     const workspaceYaml: IPnpmWorkspaceYaml = {
       packages: Array.from(this._workspacePackages)
     };
-    return yamlModule.safeDump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
+    return yamlModule.dump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 }
