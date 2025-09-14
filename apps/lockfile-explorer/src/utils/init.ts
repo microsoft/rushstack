@@ -29,7 +29,7 @@ export const init = (options: {
     if (FileSystem.exists(rushJsonPath)) {
       console.log('Found a Rush workspace: ', rushJsonPath);
 
-      const rushConfiguration: RushConfiguration = RushConfiguration.tryLoadFromDefaultLocation()!;
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonPath);
       const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
       const workspaceFolder: string = subspace.getSubspaceTempFolderPath();
 
@@ -40,7 +40,7 @@ export const init = (options: {
         debugMode,
         lockfileExplorerProjectRoot,
         pnpmLockfileLocation,
-        pnpmfileLocation: path.resolve(workspaceFolder, '.pnpmfile.cjs'),
+        pnpmfileLocation: workspaceFolder + '/.pnpmfile.cjs',
         projectRoot: currentFolder,
         lfxWorkspace: {
           workspaceRootFolder: currentFolder,
@@ -58,8 +58,8 @@ export const init = (options: {
         appVersion,
         debugMode,
         lockfileExplorerProjectRoot,
-        pnpmLockfileLocation: path.resolve(currentFolder, 'pnpm-lock.yaml'),
-        pnpmfileLocation: path.resolve(currentFolder, '.pnpmfile.cjs'),
+        pnpmLockfileLocation: currentFolder + '/pnpm-lock.yaml',
+        pnpmfileLocation: currentFolder + '/.pnpmfile.cjs',
         projectRoot: currentFolder,
         lfxWorkspace: {
           workspaceRootFolder: currentFolder,

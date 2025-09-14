@@ -198,7 +198,10 @@ export class Subspace {
    * Returns the full path of the folder containing this subspace's variant-dependent configuration files
    * such as `pnpm-lock.yaml`.
    *
-   * Example: `common/config/subspaces/my-subspace` or `common/config/subspaces/my-subspace/variants/my-variant`
+   * Example (variants):               `C:\MyRepo\common\config\rush\variants\my-variant`
+   * Example (variants and subspaces): `C:\MyRepo\common\config\subspaces\my-subspace\variants\my-variant`
+   * Example (subspaces):              `C:\MyRepo\common\config\subspaces\my-subspace`
+   * Example (neither):                `C:\MyRepo\common\config\rush`
    * @beta
    *
    * @remarks
@@ -219,7 +222,8 @@ export class Subspace {
   /**
    * Returns the full path of the folder containing this subspace's configuration files such as `pnpm-lock.yaml`.
    *
-   * Example: `common/config/subspaces/my-subspace`
+   * Example (subspaces feature enabled):   `C:\MyRepo\common\config\subspaces\my-subspace`
+   * Example (subspaces feature disabled):  `C:\MyRepo\common\config\rush`
    * @beta
    */
   public getSubspaceConfigFolderPath(): string {
@@ -229,8 +233,8 @@ export class Subspace {
   /**
    * Returns the full path of the folder containing this subspace's configuration files such as `pnpm-lock.yaml`.
    *
-   * Example: `common/config/subspaces/my-subspace/pnpm-patches` (subspaces feature enabled)
-   * Example: `common/config/pnpm-patches` (subspaces feature disabled)
+   * Example (subspaces feature enabled):   `C:\MyRepo\common\config\subspaces\my-subspace\pnpm-patches`
+   * Example (subspaces feature disabled):  `C:\MyRepo\common\pnpm-patches`
    * @beta
    */
   public getSubspacePnpmPatchesFolderPath(): string {
@@ -238,9 +242,10 @@ export class Subspace {
   }
 
   /**
-   * The folder where the subspace's node_modules and other temporary files will be stored.
+   * The full path of the folder where the subspace's node_modules and other temporary files will be stored.
    *
-   * Example: `common/temp/subspaces/my-subspace`
+   * Example (subspaces feature enabled):   `C:\MyRepo\common\temp\subspaces\my-subspace`
+   * Example (subspaces feature disabled):  `C:\MyRepo\common\temp`
    * @beta
    */
   public getSubspaceTempFolderPath(): string {
@@ -284,9 +289,10 @@ export class Subspace {
   }
 
   /**
-   * Gets the path to the common-versions.json config file for this subspace.
+   * Gets the full path to the common-versions.json config file for this subspace.
    *
-   * Example: `C:\MyRepo\common\subspaces\my-subspace\common-versions.json`
+   * Example (subspaces feature enabled):   `C:\MyRepo\common\config\subspaces\my-subspace\common-versions.json`
+   * Example (subspaces feature disabled):  `C:\MyRepo\common\config\rush\common-versions.json`
    * @beta
    */
   public getCommonVersionsFilePath(variant?: string): string {
@@ -296,9 +302,10 @@ export class Subspace {
   }
 
   /**
-   * Gets the path to the pnpm-config.json config file for this subspace.
+   * Gets the full path to the pnpm-config.json config file for this subspace.
    *
-   * Example: `C:\MyRepo\common\subspaces\my-subspace\pnpm-config.json`
+   * Example (subspaces feature enabled):   `C:\MyRepo\common\config\subspaces\my-subspace\pnpm-config.json`
+   * Example (subspaces feature disabled):  `C:\MyRepo\common\config\rush\pnpm-config.json`
    * @beta
    */
   public getPnpmConfigFilePath(): string {
