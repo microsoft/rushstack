@@ -48,8 +48,8 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     console.log('Loading snippets from ' + snippetsFilePath);
 
     const snippetsContent: string = FileSystem.readFile(snippetsFilePath);
-    this._snippets = yaml.load(snippetsContent, { filename: snippetsFilePath });
-    this._snippetsAll = yaml.load(snippetsContent, { filename: snippetsFilePath });
+    this._snippets = yaml.load(snippetsContent, { filename: snippetsFilePath }) as ISnippetsFile;
+    this._snippetsAll = yaml.load(snippetsContent, { filename: snippetsFilePath }) as ISnippetsFile;
   }
 
   /** @override */

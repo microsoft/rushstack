@@ -55,7 +55,7 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
     this._buildNavigation(navigationFile.api_nav, this.context.apiModel);
 
     const navFilePath: string = path.join(this.context.outputFolder, '..', 'api_nav.yaml');
-    const navFileContent: string = yaml.safeDump(navigationFile, { lineWidth: 120 });
+    const navFileContent: string = yaml.dump(navigationFile, { lineWidth: 120 });
 
     FileSystem.writeFile(navFilePath, navFileContent, { ensureFolderExists: true });
   }

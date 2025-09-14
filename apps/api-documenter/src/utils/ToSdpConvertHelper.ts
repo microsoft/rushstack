@@ -49,10 +49,10 @@ function convert(inputPath: string, outputPath: string): void {
 
       console.log(`convert file ${fpath} from udp to sdp`);
 
-      const file: IYamlApiFile = yaml.safeLoad(yamlContent) as IYamlApiFile;
+      const file: IYamlApiFile = yaml.load(yamlContent) as IYamlApiFile;
       const result: { model: CommonYamlModel; type: string } | undefined = convertToSDP(file);
       if (result && result.model) {
-        const stringified: string = `### YamlMime:TS${result.type}\n${yaml.safeDump(result.model, {
+        const stringified: string = `### YamlMime:TS${result.type}\n${yaml.dump(result.model, {
           lineWidth: 120
         })}`;
         FileSystem.writeFile(`${outputPath}/${name}`, stringified, {
