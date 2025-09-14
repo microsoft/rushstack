@@ -1,19 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IJsonPeerDependencyMeta } from './IJsonLfxGraph';
+import type { LfxDependencyKind, IJsonPeerDependencyMeta, LfxGraphEntryKind } from './IJsonLfxGraph';
 
-export enum DependencyKind {
-  DEPENDENCY = 'regular',
-  DEV_DEPENDENCY = 'dev',
-  PEER_DEPENDENCY = 'peer'
-}
-
-export interface ILockfileDependencyOptions {
+export interface ILfxGraphDependencyOptions {
   name: string;
   version: string;
-  dependencyType: DependencyKind;
-  containingEntry: LockfileEntry;
+  dependencyType: LfxDependencyKind;
+  containingEntry: LfxGraphEntry;
   peerDependencyMeta: IJsonPeerDependencyMeta;
   entryId: string;
 }
@@ -27,17 +21,17 @@ export interface ILockfileDependencyOptions {
  * The "resolvedEntry" field is the corresponding LockfileEntry for this dependency, as all dependencies also have
  * their own entries in the pnpm lockfile.
  */
-export class LockfileDependency {
+export class LfxGraphDependency {
   public readonly name: string;
   public readonly version: string;
-  public readonly dependencyType: DependencyKind;
-  public readonly containingEntry: LockfileEntry;
+  public readonly dependencyType: LfxDependencyKind;
+  public readonly containingEntry: LfxGraphEntry;
   public readonly entryId: string;
   public readonly peerDependencyMeta: IJsonPeerDependencyMeta;
 
-  public resolvedEntry: LockfileEntry | undefined = undefined;
+  public resolvedEntry: LfxGraphEntry | undefined = undefined;
 
-  public constructor(options: ILockfileDependencyOptions) {
+  public constructor(options: ILfxGraphDependencyOptions) {
     this.name = options.name;
     this.version = options.version;
     this.dependencyType = options.dependencyType;
@@ -47,15 +41,8 @@ export class LockfileDependency {
   }
 }
 
-export enum LockfileEntryFilter {
-  Project = 1,
-  Package = 2,
-  SideBySide = 3,
-  Doppelganger = 4
-}
-
-export interface ILockfileEntryOptions {
-  kind: LockfileEntryFilter;
+export interface ILfxGraphEntryOptions {
+  kind: LfxGraphEntryKind;
   entryId: string;
   rawEntryId: string;
   packageJsonFolderPath: string;
@@ -72,11 +59,11 @@ export interface ILockfileEntryOptions {
  * Each project or package will have its own LockfileEntry, which is created when the lockfile is first parsed.
  * The fields for the LockfileEntry are outlined below:
  */
-export class LockfileEntry {
+export class LfxGraphEntry {
   /**
    * Whether this entry is a project or a package (specified by importers or packages in the lockfile).
    */
-  public readonly kind: LockfileEntryFilter;
+  public readonly kind: LfxGraphEntryKind;
 
   /**
    * A unique (human-readable) identifier for this lockfile entry. For projects, this is just
@@ -112,7 +99,7 @@ export class LockfileEntry {
    * A list of all the dependencies for this entry.
    * Note that dependencies, dev dependencies, as well as peer dependencies are all included.
    */
-  public readonly dependencies: LockfileDependency[] = [];
+  public readonly dependencies: LfxGraphDependency[] = [];
 
   /**
    * A list of dependencies that are listed under the "transitivePeerDependencies" in the pnpm lockfile.
@@ -122,9 +109,9 @@ export class LockfileEntry {
   /**
    * A list of entries that specify this entry as a dependency.
    */
-  public readonly referrers: LockfileEntry[] = [];
+  public readonly referrers: LfxGraphEntry[] = [];
 
-  public constructor(options: ILockfileEntryOptions) {
+  public constructor(options: ILfxGraphEntryOptions) {
     this.kind = options.kind;
     this.entryId = options.entryId;
     this.rawEntryId = options.rawEntryId;
@@ -137,5 +124,5 @@ export class LockfileEntry {
 }
 
 export class LfxGraph {
-  public readonly entries: LockfileEntry[] = [];
+  public readonly entries: LfxGraphEntry[] = [];
 }

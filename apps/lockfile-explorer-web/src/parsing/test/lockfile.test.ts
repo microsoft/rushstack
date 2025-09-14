@@ -3,14 +3,14 @@
 
 import { TEST_LOCKFILE } from './testLockfile';
 import * as lfxGraphLoader from '../lfxGraphLoader';
-import type { LockfileEntry } from '../../packlets/lfx-shared';
+import type { LfxGraphEntry } from '../../packlets/lfx-shared';
 
 describe('LockfileGeneration', () => {
   it('creates a valid bi-directional graph', () => {
     const resolvedPackages = lfxGraphLoader.generateLockfileGraph(TEST_LOCKFILE).entries;
 
     // Mapping of all the lockfile entries created by the lockfile
-    const resolvedPackagesMap: { [key: string]: LockfileEntry } = {};
+    const resolvedPackagesMap: { [key: string]: LfxGraphEntry } = {};
     for (const resolvedPackage of resolvedPackages) {
       resolvedPackagesMap[resolvedPackage.entryPackageName] = resolvedPackage;
     }

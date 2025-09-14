@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createSlice, type PayloadAction, type Reducer } from '@reduxjs/toolkit';
-import { type LockfileEntry, LockfileEntryFilter } from '../../packlets/lfx-shared';
+import { type LfxGraphEntry, LfxGraphEntryKind } from '../../packlets/lfx-shared';
 import type { RootState } from '../index';
 import {
   getBookmarksFromStorage,
@@ -12,22 +12,22 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type EntryState = {
-  allEntries: LockfileEntry[];
+  allEntries: LfxGraphEntry[];
   filters: {
-    [key in LockfileEntryFilter]: boolean;
+    [key in LfxGraphEntryKind]: boolean;
   };
-  selectedEntryStack: LockfileEntry[];
-  selectedEntryForwardStack: LockfileEntry[];
-  bookmarkedEntries: LockfileEntry[];
+  selectedEntryStack: LfxGraphEntry[];
+  selectedEntryForwardStack: LfxGraphEntry[];
+  bookmarkedEntries: LfxGraphEntry[];
 };
 
 const initialState: EntryState = {
   allEntries: [],
   filters: {
-    [LockfileEntryFilter.Project]: false,
-    [LockfileEntryFilter.Package]: true,
-    [LockfileEntryFilter.SideBySide]: false,
-    [LockfileEntryFilter.Doppelganger]: false
+    [LfxGraphEntryKind.Project]: false,
+    [LfxGraphEntryKind.Package]: true,
+    [LfxGraphEntryKind.SideBySide]: false,
+    [LfxGraphEntryKind.Doppelganger]: false
   },
   selectedEntryStack: [],
   selectedEntryForwardStack: [],
@@ -39,7 +39,7 @@ const entrySlice = createSlice({
   name: 'entry',
   initialState,
   reducers: {
-    loadEntries: (state, payload: PayloadAction<LockfileEntry[]>) => {
+    loadEntries: (state, payload: PayloadAction<LfxGraphEntry[]>) => {
       state.allEntries = payload.payload;
       // Hydrate the bookmarks state
       const bookmarkSet = getBookmarksFromStorage();
@@ -49,70 +49,70 @@ const entrySlice = createSlice({
         }
       }
     },
-    setFilter: (state, payload: PayloadAction<{ filter: LockfileEntryFilter; state: boolean }>) => {
+    setFilter: (state, payload: PayloadAction<{ filter: LfxGraphEntryKind; state: boolean }>) => {
       state.filters[payload.payload.filter] = payload.payload.state;
     },
-    clearStackAndPush: (state, payload: PayloadAction<LockfileEntry>) => {
+    clearStackAndPush: (state, payload: PayloadAction<LfxGraphEntry>) => {
       state.selectedEntryStack = [payload.payload];
       state.selectedEntryForwardStack = [];
     },
-    pushToStack: (state, payload: PayloadAction<LockfileEntry>) => {
+    pushToStack: (state, payload: PayloadAction<LfxGraphEntry>) => {
       state.selectedEntryStack.push(payload.payload);
       state.selectedEntryForwardStack = [];
-      if (payload.payload.kind === LockfileEntryFilter.Package) {
-        state.filters[LockfileEntryFilter.Project] = false;
-        state.filters[LockfileEntryFilter.Package] = true;
+      if (payload.payload.kind === LfxGraphEntryKind.Package) {
+        state.filters[LfxGraphEntryKind.Project] = false;
+        state.filters[LfxGraphEntryKind.Package] = true;
       } else {
-        state.filters[LockfileEntryFilter.Project] = true;
-        state.filters[LockfileEntryFilter.Package] = false;
+        state.filters[LfxGraphEntryKind.Project] = true;
+        state.filters[LfxGraphEntryKind.Package] = false;
       }
     },
     popStack: (state) => {
       if (state.selectedEntryStack.length > 1) {
-        const poppedEntry = state.selectedEntryStack.pop() as LockfileEntry;
+        const poppedEntry = state.selectedEntryStack.pop() as LfxGraphEntry;
         state.selectedEntryForwardStack.push(poppedEntry);
 
         if (state.selectedEntryStack.length >= 1) {
           const currEntry = state.selectedEntryStack[state.selectedEntryStack.length - 1];
-          if (currEntry.kind === LockfileEntryFilter.Package) {
-            state.filters[LockfileEntryFilter.Project] = false;
-            state.filters[LockfileEntryFilter.Package] = true;
+          if (currEntry.kind === LfxGraphEntryKind.Package) {
+            state.filters[LfxGraphEntryKind.Project] = false;
+            state.filters[LfxGraphEntryKind.Package] = true;
           } else {
-            state.filters[LockfileEntryFilter.Project] = true;
-            state.filters[LockfileEntryFilter.Package] = false;
+            state.filters[LfxGraphEntryKind.Project] = true;
+            state.filters[LfxGraphEntryKind.Package] = false;
           }
         }
       }
     },
     forwardStack: (state) => {
       if (state.selectedEntryForwardStack.length > 0) {
-        const poppedEntry = state.selectedEntryForwardStack.pop() as LockfileEntry;
+        const poppedEntry = state.selectedEntryForwardStack.pop() as LfxGraphEntry;
         state.selectedEntryStack.push(poppedEntry);
-        if (poppedEntry.kind === LockfileEntryFilter.Package) {
-          state.filters[LockfileEntryFilter.Project] = false;
-          state.filters[LockfileEntryFilter.Package] = true;
+        if (poppedEntry.kind === LfxGraphEntryKind.Package) {
+          state.filters[LfxGraphEntryKind.Project] = false;
+          state.filters[LfxGraphEntryKind.Package] = true;
         } else {
-          state.filters[LockfileEntryFilter.Project] = true;
-          state.filters[LockfileEntryFilter.Package] = false;
+          state.filters[LfxGraphEntryKind.Project] = true;
+          state.filters[LfxGraphEntryKind.Package] = false;
         }
       }
     },
-    addBookmark: (state, payload: PayloadAction<LockfileEntry>) => {
+    addBookmark: (state, payload: PayloadAction<LfxGraphEntry>) => {
       if (!state.bookmarkedEntries.includes(payload.payload)) {
         state.bookmarkedEntries.push(payload.payload);
         saveBookmarkToLocalStorage(payload.payload);
       }
     },
-    removeBookmark: (state, payload: PayloadAction<LockfileEntry>) => {
+    removeBookmark: (state, payload: PayloadAction<LfxGraphEntry>) => {
       state.bookmarkedEntries = state.bookmarkedEntries.filter(
-        (entry: LockfileEntry) => entry.rawEntryId !== payload.payload.rawEntryId
+        (entry: LfxGraphEntry) => entry.rawEntryId !== payload.payload.rawEntryId
       );
       removeBookmarkFromLocalStorage(payload.payload);
     }
   }
 });
 
-export const selectCurrentEntry = (state: RootState): LockfileEntry | undefined => {
+export const selectCurrentEntry = (state: RootState): LfxGraphEntry | undefined => {
   if (state.entry.selectedEntryStack.length) {
     return state.entry.selectedEntryStack[state.entry.selectedEntryStack.length - 1];
   } else {
@@ -120,15 +120,15 @@ export const selectCurrentEntry = (state: RootState): LockfileEntry | undefined 
   }
 };
 
-export const selectFilteredEntries = (state: RootState): LockfileEntry[] => {
-  const filteredEntries: LockfileEntry[] = [];
-  if (state.entry.filters[LockfileEntryFilter.Package]) {
+export const selectFilteredEntries = (state: RootState): LfxGraphEntry[] => {
+  const filteredEntries: LfxGraphEntry[] = [];
+  if (state.entry.filters[LfxGraphEntryKind.Package]) {
     filteredEntries.push(
-      ...state.entry.allEntries.filter((entry) => entry.kind === LockfileEntryFilter.Package)
+      ...state.entry.allEntries.filter((entry) => entry.kind === LfxGraphEntryKind.Package)
     );
-  } else if (state.entry.filters[LockfileEntryFilter.Project]) {
+  } else if (state.entry.filters[LfxGraphEntryKind.Project]) {
     filteredEntries.push(
-      ...state.entry.allEntries.filter((entry) => entry.kind === LockfileEntryFilter.Project)
+      ...state.entry.allEntries.filter((entry) => entry.kind === LfxGraphEntryKind.Project)
     );
   }
   return filteredEntries;
