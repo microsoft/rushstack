@@ -16,7 +16,7 @@ export const init = (options: {
   appVersion: string;
   debugMode: boolean;
   subspaceName: string;
-}): IAppState => {
+}): Omit<IAppState, 'graph'> => {
   const { lockfileExplorerProjectRoot, appVersion, debugMode, subspaceName } = options;
   const currentWorkingDirectory: string = path.resolve(process.cwd());
 

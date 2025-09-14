@@ -70,11 +70,11 @@ export function serializeToJson(graph: LfxGraph): IJsonLfxGraph {
     jsonLfxEntry.referrerJsonIds = entry.referrers.map((x) => toJsonId(x));
   }
 
-  return { entries: jsonLfxEntries };
+  return { workspace: graph.workspace, entries: jsonLfxEntries };
 }
 
 export function deserializeFromJson(jsonLfxGraph: IJsonLfxGraph): LfxGraph {
-  const graph: LfxGraph = new LfxGraph();
+  const graph: LfxGraph = new LfxGraph(jsonLfxGraph.workspace);
 
   const entries: LfxGraphEntry[] = graph.entries;
 

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { LfxDependencyKind, IJsonPeerDependencyMeta, LfxGraphEntryKind } from './IJsonLfxGraph';
+import type { IJsonLfxWorkspace } from './IJsonLfxWorkspace';
 
 export interface ILfxGraphDependencyOptions {
   name: string;
@@ -124,5 +125,10 @@ export class LfxGraphEntry {
 }
 
 export class LfxGraph {
+  public workspace: IJsonLfxWorkspace;
   public readonly entries: LfxGraphEntry[] = [];
+
+  public constructor(workspace: IJsonLfxWorkspace) {
+    this.workspace = { ...workspace };
+  }
 }

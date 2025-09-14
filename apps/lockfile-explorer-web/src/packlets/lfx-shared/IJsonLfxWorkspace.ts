@@ -5,13 +5,13 @@ export interface IJsonLfxWorkspaceRushConfig {
   /**
    * The rushVersion from rush.json.
    */
-  rushVersion: string;
+  readonly rushVersion: string;
 
   /**
    * If the subspaces feature is enabled and a subspace was loaded, the name of the subspace.
    * Otherwise this will be an empty string.
    */
-  subspaceName: string;
+  readonly subspaceName: string;
 }
 
 export interface IJsonLfxWorkspace {
@@ -19,16 +19,16 @@ export interface IJsonLfxWorkspace {
    * Absolute path to the workspace folder that is opened by the app.
    * Relative paths are generally relative to this path.
    */
-  workspaceRootFolder: string;
+  readonly workspaceRootFolder: string;
 
   /**
    * The path to the pnpm-lock.yaml file.
    */
-  pnpmLockfilePath: string;
+  readonly pnpmLockfilePath: string;
 
   /**
    * If this is a Rush workspace (versus a plain PNPM workspace), then
    * this section will be defined.
    */
-  rushConfig: IJsonLfxWorkspaceRushConfig | undefined;
+  readonly rushConfig: IJsonLfxWorkspaceRushConfig | undefined;
 }

@@ -8,7 +8,8 @@ import {
   LfxGraphEntry,
   LfxGraphEntryKind,
   LfxDependencyKind,
-  LfxGraphDependency
+  LfxGraphDependency,
+  type IJsonLfxWorkspace
 } from '@rushstack/lockfile-explorer-web/packlets/lfx-shared';
 import { Path } from '@lifaon/path';
 
@@ -287,12 +288,16 @@ function getImporterValue(
  *
  * @returns A list of all the LockfileEntries in the lockfile.
  */
-export function generateLockfileGraph(lockfile: ILockfilePackageType, subspaceName?: string): LfxGraph {
+export function generateLockfileGraph(
+  workspace: IJsonLfxWorkspace,
+  lockfile: ILockfilePackageType,
+  subspaceName?: string
+): LfxGraph {
   let pnpmLockfileVersion: PnpmLockfileVersion = PnpmLockfileVersion.V5;
   if (parseInt(lockfile.lockfileVersion.toString(), 10) === 6) {
     pnpmLockfileVersion = PnpmLockfileVersion.V6;
   }
-  const lfxGraph: LfxGraph = new LfxGraph();
+  const lfxGraph: LfxGraph = new LfxGraph(workspace);
   const allEntries: LfxGraphEntry[] = lfxGraph.entries;
   const allEntriesById: { [key: string]: LfxGraphEntry } = {};
 

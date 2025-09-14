@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IJsonLfxWorkspace } from './IJsonLfxWorkspace';
+
 export enum LfxGraphEntryKind {
   Project = 1,
   Package = 2,
@@ -57,5 +59,6 @@ export interface IJsonLfxEntry {
 }
 
 export interface IJsonLfxGraph {
+  workspace: IJsonLfxWorkspace;
   entries: IJsonLfxEntry[];
 }
