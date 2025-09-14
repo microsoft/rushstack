@@ -92,8 +92,8 @@ function createLockfileDependency(
   };
 
   if (version.startsWith('link:')) {
-    const relativePath = version.substring('link:'.length);
-    const rootRelativePath = new Path('.').relative(
+    const relativePath: string = version.substring('link:'.length);
+    const rootRelativePath: Path | null = new Path('.').relative(
       new Path(containingEntry.packageJsonFolderPath).concat(relativePath)
     );
     if (!rootRelativePath) {
@@ -183,11 +183,12 @@ function createLockfileEntry(options: {
   }
 
   if (kind === LfxGraphEntryKind.Project) {
-    const rootPackageJsonFolderPath = new Path(`common/temp/${subspaceName}/package.json`).dirname() || '';
-    const packageJsonFolderPath = new Path('.').relative(
+    const rootPackageJsonFolderPath: '' | Path =
+      new Path(`common/temp/${subspaceName}/package.json`).dirname() || '';
+    const packageJsonFolderPath: Path | null = new Path('.').relative(
       new Path(rootPackageJsonFolderPath).concat(rawEntryId)
     );
-    const packageName = new Path(rawEntryId).basename();
+    const packageName: string | null = new Path(rawEntryId).basename();
 
     if (!packageJsonFolderPath || !packageName) {
       console.error('Could not construct path for entry: ', rawEntryId);
@@ -198,7 +199,7 @@ function createLockfileEntry(options: {
     result.entryId = 'project:' + result.packageJsonFolderPath;
     result.entryPackageName = packageName.toString();
     if (duplicates?.has(result.entryPackageName)) {
-      const fullPath = new Path(rawEntryId).makeAbsolute('/').toString().substring(1);
+      const fullPath: string = new Path(rawEntryId).makeAbsolute('/').toString().substring(1);
       result.displayText = `Project: ${result.entryPackageName} (${fullPath})`;
       result.entryPackageName = `${result.entryPackageName} (${fullPath})`;
     } else {
@@ -207,16 +208,16 @@ function createLockfileEntry(options: {
   } else {
     result.displayText = rawEntryId;
 
-    const match = packageEntryIdRegex.exec(rawEntryId);
+    const match: RegExpExecArray | null = packageEntryIdRegex.exec(rawEntryId);
 
     if (match) {
       const [, packageName, versionPart] = match;
       result.entryPackageName = packageName;
 
-      const underscoreIndex = versionPart.indexOf('_');
+      const underscoreIndex: number = versionPart.indexOf('_');
       if (underscoreIndex >= 0) {
-        const version = versionPart.substring(0, underscoreIndex);
-        const suffix = versionPart.substring(underscoreIndex + 1);
+        const version: string = versionPart.substring(0, underscoreIndex);
+        const suffix: string = versionPart.substring(underscoreIndex + 1);
 
         result.entryPackageVersion = version;
         result.entrySuffix = suffix;
@@ -247,7 +248,7 @@ function createLockfileEntry(options: {
       result.entryPackageName;
   }
 
-  const lockfileEntry = new LfxGraphEntry(result);
+  const lockfileEntry: LfxGraphEntry = new LfxGraphEntry(result);
   parseDependencies(lockfileEntry.dependencies, lockfileEntry, rawYamlData);
   return lockfileEntry;
 }
@@ -263,7 +264,7 @@ function getImporterValue(
   pnpmLockfileVersion: PnpmLockfileVersion
 ): ILockfileImporterV5 {
   if (pnpmLockfileVersion === PnpmLockfileVersion.V6) {
-    const v6ImporterValue = importerValue as ILockfileImporterV6;
+    const v6ImporterValue: ILockfileImporterV6 = importerValue as ILockfileImporterV6;
     const v5ImporterValue: ILockfileImporterV5 = {
       specifiers: {},
       dependencies: {},
@@ -302,13 +303,13 @@ export function generateLockfileGraph(
   const allEntries: LfxGraphEntry[] = lfxGraph.entries;
   const allEntriesById: { [key: string]: LfxGraphEntry } = {};
 
-  const allImporters = [];
+  const allImporters: LfxGraphEntry[] = [];
   if (lockfile.importers) {
     // Find duplicate importer names
-    const baseNames = new Set<string>();
-    const duplicates = new Set<string>();
+    const baseNames: Set<string> = new Set();
+    const duplicates: Set<string> = new Set();
     for (const importerKey of Object.keys(lockfile.importers)) {
-      const baseName = new Path(importerKey).basename();
+      const baseName: string | null = new Path(importerKey).basename();
       if (baseName) {
         if (baseNames.has(baseName)) {
           duplicates.add(baseName);
@@ -335,7 +336,7 @@ export function generateLockfileGraph(
     }
   }
 
-  const allPackages = [];
+  const allPackages: LfxGraphEntry[] = [];
   if (lockfile.packages) {
     for (const [dependencyKey, dependencyValue] of Object.entries(lockfile.packages)) {
       // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
@@ -362,7 +363,7 @@ export function generateLockfileGraph(
         continue;
       }
 
-      const matchedEntry = allEntriesById[dependency.entryId];
+      const matchedEntry: LfxGraphEntry = allEntriesById[dependency.entryId];
       if (matchedEntry) {
         // Create a two-way link between the dependency and the entry
         dependency.resolvedEntry = matchedEntry;

@@ -153,9 +153,9 @@ export class ExplorerCommandLineParser extends CommandLineParser {
 
     app.get('/api/graph', async (req: express.Request, res: express.Response) => {
       const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
-      const doc = yaml.load(pnpmLockfileText) as Lockfile;
+      const lockfile: Lockfile = yaml.load(pnpmLockfileText) as Lockfile;
 
-      const { packages, lockfileVersion } = doc;
+      const { packages, lockfileVersion } = lockfile;
 
       const shrinkwrapFileMajorVersion: number = getShrinkwrapFileMajorVersion(lockfileVersion);
 
@@ -164,12 +164,12 @@ export class ExplorerCommandLineParser extends CommandLineParser {
         for (const [dependencyPath, dependency] of Object.entries(packages)) {
           updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = dependency;
         }
-        doc.packages = updatedPackages;
+        lockfile.packages = updatedPackages;
       }
 
       const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(
         appState.lfxWorkspace,
-        doc as lfxGraphLoader.ILockfilePackageType,
+        lockfile as lfxGraphLoader.ILockfilePackageType,
         appState.lfxWorkspace.rushConfig?.subspaceName ?? ''
       );
 
@@ -181,7 +181,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       '/api/package-json',
       async (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
         const { projectPath } = req.body;
-        const fileLocation = `${appState.projectRoot}/${projectPath}/package.json`;
+        const fileLocation: string = `${appState.projectRoot}/${projectPath}/package.json`;
         let packageJsonText: string;
         try {
           packageJsonText = await FileSystem.readFileAsync(fileLocation);
@@ -222,7 +222,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       '/api/package-spec',
       async (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
         const { projectPath } = req.body;
-        const fileLocation = `${appState.projectRoot}/${projectPath}/package.json`;
+        const fileLocation: string = `${appState.projectRoot}/${projectPath}/package.json`;
         let packageJson: IPackageJson;
         try {
           packageJson = await JsonFile.loadAsync(fileLocation);
@@ -239,7 +239,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
         const {
           hooks: { readPackage }
         } = require(appState.pnpmfileLocation);
-        const parsedPackage = readPackage(packageJson, {});
+        const parsedPackage: {} = readPackage(packageJson, {});
         res.send(parsedPackage);
       }
     );

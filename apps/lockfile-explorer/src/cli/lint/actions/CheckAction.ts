@@ -118,9 +118,9 @@ export class CheckAction extends CommandLineAction {
     await Promise.all(
       Object.entries(importers).map(async ([relativePath, { dependencies }]) => {
         if (path.resolve(projectFolder, relativePath) === projectFolder) {
-          const dependenciesEntries = Object.entries(dependencies ?? {});
+          const dependenciesEntries: [string, unknown][] = Object.entries(dependencies ?? {});
           for (const [dependencyName, dependencyValue] of dependenciesEntries) {
-            const fullDependencyPath = splicePackageWithVersion(
+            const fullDependencyPath: string = splicePackageWithVersion(
               shrinkwrapFileMajorVersion,
               dependencyName,
               typeof dependencyValue === 'string'
