@@ -60,6 +60,7 @@
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",
+    "@lifaon/path": "~2.1.0",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "cors": "~2.8.5",

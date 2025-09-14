@@ -193,6 +193,9 @@ importers:
 
   ../../../apps/lockfile-explorer:
     dependencies:
+      '@lifaon/path':
+        specifier: ~2.1.0
+        version: 2.1.0
       '@microsoft/rush-lib':
         specifier: workspace:*
         version: link:../../libraries/rush-lib
@@ -263,9 +266,6 @@ importers:
 
   ../../../apps/lockfile-explorer-web:
     dependencies:
-      '@lifaon/path':
-        specifier: ~2.1.0
-        version: 2.1.0
       '@reduxjs/toolkit':
         specifier: ~1.8.6
         version: 1.8.6(react-redux@8.0.7)(react@17.0.2)
