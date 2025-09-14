@@ -25,12 +25,12 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "js-yaml": "~3.13.1",
+    "js-yaml": "~4.1.0",
     "resolve": "~1.22.1"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/js-yaml": "3.12.1",
+    "@types/js-yaml": "4.0.9",
     "@types/resolve": "1.20.2",
     "eslint": "~9.25.1",
     "local-node-rig": "workspace:*"
