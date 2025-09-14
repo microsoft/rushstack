@@ -16,16 +16,13 @@ exports[`lfxGraphLoader 6.0 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies:
       - dependencyType: regular
-        entryId: 'project:./common/projects/d'
+        entryId: project:./common/projects/d
         name: '@rushstack/d'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 4
-        version: 'link:../d'
+        version: link:../d
     displayText: 'Project: a'
-    entryId: 'project:./common/projects/a'
+    entryId: project:./common/projects/a
     entryPackageName: a
     entryPackageVersion: ''
     entrySuffix: ''
@@ -37,25 +34,19 @@ exports[`lfxGraphLoader 6.0 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies:
       - dependencyType: regular
-        entryId: 'project:./common/projects/d'
+        entryId: project:./common/projects/d
         name: '@rushstack/d'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 4
-        version: 'link:../d'
+        version: link:../d
       - dependencyType: regular
         entryId: /@rushstack/n/2.0.0
         name: '@rushstack/n'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 10
         version: 2.0.0
     displayText: 'Project: b'
-    entryId: 'project:./common/projects/b'
+    entryId: project:./common/projects/b
     entryPackageName: b
     entryPackageVersion: ''
     entrySuffix: ''
@@ -67,34 +58,25 @@ exports[`lfxGraphLoader 6.0 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies:
       - dependencyType: regular
-        entryId: 'project:./common/projects/e'
+        entryId: project:./common/projects/e
         name: '@rushstack/e'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 5
-        version: 'link:../e'
+        version: link:../e
       - dependencyType: regular
         entryId: /@rushstack/k/1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
         name: '@rushstack/k'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 7
         version: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
       - dependencyType: regular
         entryId: /@rushstack/m/1.0.0
         name: '@rushstack/m'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 9
         version: 1.0.0
     displayText: 'Project: c'
-    entryId: 'project:./common/projects/c'
+    entryId: project:./common/projects/c
     entryPackageName: c
     entryPackageVersion: ''
     entrySuffix: ''
@@ -106,34 +88,25 @@ exports[`lfxGraphLoader 6.0 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies:
       - dependencyType: regular
-        entryId: 'project:./common/projects/e'
+        entryId: project:./common/projects/e
         name: '@rushstack/e'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 5
-        version: 'link:../e'
+        version: link:../e
       - dependencyType: regular
         entryId: /@rushstack/j/1.0.0(@rushstack/n@2.0.0)
         name: '@rushstack/j'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 6
         version: 1.0.0(@rushstack/n@2.0.0)
       - dependencyType: regular
         entryId: /@rushstack/n/2.0.0
         name: '@rushstack/n'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 10
         version: 2.0.0
     displayText: 'Project: d'
-    entryId: 'project:./common/projects/d'
+    entryId: project:./common/projects/d
     entryPackageName: d
     entryPackageVersion: ''
     entrySuffix: ''
@@ -149,14 +122,11 @@ exports[`lfxGraphLoader 6.0 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /@rushstack/n/3.0.0
         name: '@rushstack/n'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 11
         version: 3.0.0
     displayText: 'Project: e'
-    entryId: 'project:./common/projects/e'
+    entryId: project:./common/projects/e
     entryPackageName: e
     entryPackageVersion: ''
     entrySuffix: ''
@@ -172,19 +142,13 @@ exports[`lfxGraphLoader 6.0 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /@rushstack/k/1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
         name: '@rushstack/k'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 7
         version: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
       - dependencyType: regular
         entryId: /@rushstack/m/1.0.0
         name: '@rushstack/m'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 9
         version: 1.0.0
     displayText: '@rushstack/j/1.0.0(@rushstack n@2.0.0)'
@@ -205,10 +169,7 @@ exports[`lfxGraphLoader 6.0 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /@rushstack/l/1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
         name: '@rushstack/l'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 8
         version: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
     displayText: '@rushstack/k/1.0.0(@rushstack/m@1.0.0)(@rushstack n@2.0.0)'
@@ -231,19 +192,13 @@ exports[`lfxGraphLoader 6.0 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /@rushstack/m/1.0.0
         name: '@rushstack/m'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 9
         version: 1.0.0
       - dependencyType: regular
         entryId: /@rushstack/n/2.0.0
         name: '@rushstack/n'
-        peerDependencyMeta:
-          name: !<tag:yaml.org,2002:js/undefined> ''
-          optional: !<tag:yaml.org,2002:js/undefined> ''
-          version: !<tag:yaml.org,2002:js/undefined> ''
+        peerDependencyMeta: {}
         resolvedEntryJsonId: 10
         version: 2.0.0
       - dependencyType: peer
