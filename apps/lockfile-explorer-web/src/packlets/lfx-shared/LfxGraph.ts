@@ -125,7 +125,7 @@ export class LfxGraphEntry {
 }
 
 export class LfxGraph {
-  public workspace: IJsonLfxWorkspace;
+  public readonly workspace: IJsonLfxWorkspace;
   public readonly entries: LfxGraphEntry[] = [];
 
   public constructor(workspace: IJsonLfxWorkspace) {

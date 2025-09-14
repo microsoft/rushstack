@@ -15,7 +15,7 @@ import * as lfxGraphLoader from '../lfxGraphLoader';
 
 const FIXTURES_FOLDER: string = path.resolve(__dirname, '../../../src/graph/test/fixtures/');
 
-export async function loadAndSerializeLFxGraph(options: {
+export async function loadAndSerializeLFxGraphAsync(options: {
   workspace: IJsonLfxWorkspace;
   lockfilePathUnderFixtures: string;
 }): Promise<string> {

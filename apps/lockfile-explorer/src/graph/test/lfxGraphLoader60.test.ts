@@ -16,7 +16,7 @@ export const workspace: IJsonLfxWorkspace = {
 
 describe('lfxGraphLoader 6.0', () => {
   it('loads a workspace', async () => {
-    const serializedYaml: string = await graphTestHelpers.loadAndSerializeLFxGraph({
+    const serializedYaml: string = await graphTestHelpers.loadAndSerializeLFxGraphAsync({
       lockfilePathUnderFixtures: '/website-sample-1/pnpm-lock-rush-6.0.yaml',
       workspace: workspace
     });
