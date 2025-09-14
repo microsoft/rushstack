@@ -3,4 +3,9 @@
 
 import type { IAppContext } from './IAppContext';
 
-declare const window: Window & { appContext: IAppContext };
+declare global {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  interface Window {
+    appContext: IAppContext;
+  }
+}
