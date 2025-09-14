@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer"
+}
