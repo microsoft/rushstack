@@ -3,10 +3,12 @@
 
 const webAppProfile = require('local-web-rig/profiles/app/includes/eslint/flat/profile/web-app');
 const reactMixin = require('local-web-rig/profiles/app/includes/eslint/flat/mixins/react');
+const packletsMixin = require('local-web-rig/profiles/app/includes/eslint/flat/mixins/packlets');
 
 module.exports = [
   ...webAppProfile,
   ...reactMixin,
+  packletsMixin,
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
