@@ -59,18 +59,19 @@
     "@types/semver": "7.5.0"
   },
   "dependencies": {
-    "@microsoft/rush-lib": "workspace:*",
+    "tslib": "~2.8.1",
     "@lifaon/path": "~2.1.0",
+    "@microsoft/rush-lib": "workspace:*",
+    "@pnpm/dependency-path-lockfile-pre-v9": "npm:@pnpm/dependency-path@~2.1.2",
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/terminal": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*",
     "cors": "~2.8.5",
     "express": "4.20.0",
     "js-yaml": "~3.13.1",
     "open": "~8.4.0",
-    "update-notifier": "~5.1.0",
-    "@pnpm/dependency-path-lockfile-pre-v9": "npm:@pnpm/dependency-path@~2.1.2",
     "semver": "~7.5.4",
-    "@rushstack/rush-sdk": "workspace:*",
-    "@rushstack/ts-command-line": "workspace:*"
+    "update-notifier": "~5.1.0"
   }
 }

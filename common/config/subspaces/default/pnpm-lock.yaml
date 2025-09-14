@@ -229,6 +229,9 @@ importers:
       semver:
         specifier: ~7.5.4
         version: 7.5.4
+      tslib:
+        specifier: ~2.8.1
+        version: 2.8.1
       update-notifier:
         specifier: ~5.1.0
         version: 5.1.0
