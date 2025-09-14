@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import type { LfxGraphEntry } from '../packlets/lfx-shared';
-import * as lfxGraphLoader from './lfxGraphLoader';
 
 const serviceUrl: string = window.appContext.serviceUrl;
 

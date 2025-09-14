@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Path } from '@lifaon/path';
-
 import {
   type ILfxGraphDependencyOptions,
   type ILfxGraphEntryOptions,
@@ -11,7 +9,8 @@ import {
   LfxGraphEntryKind,
   LfxDependencyKind,
   LfxGraphDependency
-} from '../packlets/lfx-shared';
+} from '@rushstack/lockfile-explorer-web/packlets/lfx-shared';
+import { Path } from '@lifaon/path';
 
 enum PnpmLockfileVersion {
   V6,
@@ -96,7 +95,6 @@ function createLockfileDependency(
       new Path(containingEntry.packageJsonFolderPath).concat(relativePath)
     );
     if (!rootRelativePath) {
-      // eslint-disable-next-line no-console
       console.error('No root relative path for dependency!', name);
       return new LfxGraphDependency(result);
     }
@@ -115,7 +113,6 @@ function createLockfileDependency(
       };
       result.entryId = 'Peer: ' + result.name;
     } else {
-      // eslint-disable-next-line no-console
       console.error('Peer dependencies info missing!', node);
     }
   } else {
@@ -191,7 +188,6 @@ function createLockfileEntry(options: {
     const packageName = new Path(rawEntryId).basename();
 
     if (!packageJsonFolderPath || !packageName) {
-      // eslint-disable-next-line no-console
       console.error('Could not construct path for entry: ', rawEntryId);
       return new LfxGraphEntry(result);
     }
@@ -368,7 +364,6 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType, subspaceNa
       } else {
         if (dependency.entryId.startsWith('/')) {
           // Local package
-          // eslint-disable-next-line no-console
           console.error('Could not resolve dependency entryId: ', dependency.entryId, dependency);
         }
       }

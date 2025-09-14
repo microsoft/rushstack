@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TEST_LOCKFILE } from './testLockfile';
+import { lfxGraphSerializer, type LfxGraph } from '@rushstack/lockfile-explorer-web/packlets/lfx-shared';
+
 import * as lfxGraphLoader from '../lfxGraphLoader';
-import { lfxGraphSerializer } from '../../packlets/lfx-shared';
-import type { LfxGraph } from '../../packlets/lfx-shared';
+import { TEST_LOCKFILE } from './testLockfile';
 
 describe('serializeToJson', () => {
   it('serializes a simple graph', () => {
