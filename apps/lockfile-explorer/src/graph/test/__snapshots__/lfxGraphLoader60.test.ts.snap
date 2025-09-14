@@ -1,0 +1,306 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lfxGraphLoader 6.0 loads a workspace 1`] = `
+"workspace:
+  workspaceRootFolder: /repo
+  pnpmLockfilePath: common/temp/pnpm-lock.yaml
+  rushConfig:
+    rushVersion: 5.158.1
+    subspaceName: ''
+entries:
+  - jsonId: 0
+    kind: 1
+    entryId: ''
+    rawEntryId: .
+    packageJsonFolderPath: ''
+    entryPackageName: ''
+    displayText: ''
+    entryPackageVersion: ''
+    entrySuffix: ''
+    dependencies: []
+    transitivePeerDependencies: []
+    referrerJsonIds: []
+  - jsonId: 1
+    kind: 1
+    entryId: 'project:./common/projects/a'
+    rawEntryId: ../../projects/a
+    packageJsonFolderPath: ./common/projects/a
+    entryPackageName: a
+    displayText: 'Project: a'
+    entryPackageVersion: ''
+    entrySuffix: ''
+    dependencies:
+      - name: '@rushstack/d'
+        version: 'link:../d'
+        entryId: 'project:./common/projects/d'
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+        resolvedEntryJsonId: 4
+    transitivePeerDependencies: []
+    referrerJsonIds: []
+  - jsonId: 2
+    kind: 1
+    entryId: 'project:./common/projects/b'
+    rawEntryId: ../../projects/b
+    packageJsonFolderPath: ./common/projects/b
+    entryPackageName: b
+    displayText: 'Project: b'
+    entryPackageVersion: ''
+    entrySuffix: ''
+    dependencies:
+      - name: '@rushstack/d'
+        version: 'link:../d'
+        entryId: 'project:./common/projects/d'
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+        resolvedEntryJsonId: 4
+      - name: '@rushstack/n'
+        version: 2.0.0
+        entryId: /@rushstack/n/2.0.0
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+    transitivePeerDependencies: []
+    referrerJsonIds: []
+  - jsonId: 3
+    kind: 1
+    entryId: 'project:./common/projects/c'
+    rawEntryId: ../../projects/c
+    packageJsonFolderPath: ./common/projects/c
+    entryPackageName: c
+    displayText: 'Project: c'
+    entryPackageVersion: ''
+    entrySuffix: ''
+    dependencies:
+      - name: '@rushstack/e'
+        version: 'link:../e'
+        entryId: 'project:./common/projects/e'
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+        resolvedEntryJsonId: 5
+      - name: '@rushstack/k'
+        version: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+        entryId: /@rushstack/k/1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+      - name: '@rushstack/m'
+        version: 1.0.0
+        entryId: /@rushstack/m/1.0.0
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+    transitivePeerDependencies: []
+    referrerJsonIds: []
+  - jsonId: 4
+    kind: 1
+    entryId: 'project:./common/projects/d'
+    rawEntryId: ../../projects/d
+    packageJsonFolderPath: ./common/projects/d
+    entryPackageName: d
+    displayText: 'Project: d'
+    entryPackageVersion: ''
+    entrySuffix: ''
+    dependencies:
+      - name: '@rushstack/e'
+        version: 'link:../e'
+        entryId: 'project:./common/projects/e'
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+        resolvedEntryJsonId: 5
+      - name: '@rushstack/j'
+        version: 1.0.0(@rushstack/n@2.0.0)
+        entryId: /@rushstack/j/1.0.0(@rushstack/n@2.0.0)
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+      - name: '@rushstack/n'
+        version: 2.0.0
+        entryId: /@rushstack/n/2.0.0
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+    transitivePeerDependencies: []
+    referrerJsonIds:
+      - 1
+      - 2
+  - jsonId: 5
+    kind: 1
+    entryId: 'project:./common/projects/e'
+    rawEntryId: ../../projects/e
+    packageJsonFolderPath: ./common/projects/e
+    entryPackageName: e
+    displayText: 'Project: e'
+    entryPackageVersion: ''
+    entrySuffix: ''
+    dependencies:
+      - name: '@rushstack/n'
+        version: 3.0.0
+        entryId: /@rushstack/n/3.0.0
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+    transitivePeerDependencies: []
+    referrerJsonIds:
+      - 3
+      - 4
+  - jsonId: 6
+    kind: 2
+    entryId: ''
+    rawEntryId: /@rushstack/j@1.0.0(@rushstack/n@2.0.0)
+    packageJsonFolderPath: >-
+      common/temp/undefined/node_modules/.pnpm/@rushstack+j@1.0.0(@rushstack@n@2.0.0)/node_modules/@rushstack/j@1.0.0(@rushstack
+    entryPackageName: '@rushstack/j@1.0.0(@rushstack'
+    displayText: '@rushstack/j@1.0.0(@rushstack n@2.0.0)'
+    entryPackageVersion: n@2.0.0)
+    entrySuffix: ''
+    dependencies:
+      - name: '@rushstack/k'
+        version: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+        entryId: /@rushstack/k/1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+      - name: '@rushstack/m'
+        version: 1.0.0
+        entryId: /@rushstack/m/1.0.0
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+    transitivePeerDependencies:
+      - '@rushstack/n'
+    referrerJsonIds: []
+  - jsonId: 7
+    kind: 2
+    entryId: ''
+    rawEntryId: /@rushstack/k@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+    packageJsonFolderPath: >-
+      common/temp/undefined/node_modules/.pnpm/@rushstack+k@1.0.0(@rushstack/m@1.0.0)(@rushstack@n@2.0.0)/node_modules/@rushstack/k@1.0.0(@rushstack/m@1.0.0)(@rushstack
+    entryPackageName: '@rushstack/k@1.0.0(@rushstack/m@1.0.0)(@rushstack'
+    displayText: '@rushstack/k@1.0.0(@rushstack/m@1.0.0)(@rushstack n@2.0.0)'
+    entryPackageVersion: n@2.0.0)
+    entrySuffix: ''
+    dependencies:
+      - name: '@rushstack/l'
+        version: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+        entryId: /@rushstack/l/1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+    transitivePeerDependencies:
+      - '@rushstack/m'
+      - '@rushstack/n'
+    referrerJsonIds: []
+  - jsonId: 8
+    kind: 2
+    entryId: ''
+    rawEntryId: /@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+    packageJsonFolderPath: >-
+      common/temp/undefined/node_modules/.pnpm/@rushstack+l@1.0.0(@rushstack/m@1.0.0)(@rushstack@n@2.0.0)/node_modules/@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack
+    entryPackageName: '@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack'
+    displayText: '@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack n@2.0.0)'
+    entryPackageVersion: n@2.0.0)
+    entrySuffix: ''
+    dependencies:
+      - name: '@rushstack/m'
+        version: 1.0.0
+        entryId: /@rushstack/m/1.0.0
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+      - name: '@rushstack/n'
+        version: 2.0.0
+        entryId: /@rushstack/n/2.0.0
+        dependencyType: regular
+        peerDependencyMeta:
+          name: !<tag:yaml.org,2002:js/undefined> ''
+          version: !<tag:yaml.org,2002:js/undefined> ''
+          optional: !<tag:yaml.org,2002:js/undefined> ''
+      - name: '@rushstack/m'
+        version: ^1.0.0
+        entryId: 'Peer: @rushstack/m'
+        dependencyType: peer
+        peerDependencyMeta:
+          name: '@rushstack/m'
+          version: ^1.0.0
+          optional: false
+      - name: '@rushstack/n'
+        version: ^2.0.0
+        entryId: 'Peer: @rushstack/n'
+        dependencyType: peer
+        peerDependencyMeta:
+          name: '@rushstack/n'
+          version: ^2.0.0
+          optional: true
+    transitivePeerDependencies: []
+    referrerJsonIds: []
+  - jsonId: 9
+    kind: 2
+    entryId: ''
+    rawEntryId: /@rushstack/m@1.0.0
+    packageJsonFolderPath: common/temp/undefined/node_modules/.pnpm/@rushstack@m@1.0.0/node_modules/@rushstack
+    entryPackageName: '@rushstack'
+    displayText: '@rushstack m@1.0.0'
+    entryPackageVersion: m@1.0.0
+    entrySuffix: ''
+    dependencies: []
+    transitivePeerDependencies: []
+    referrerJsonIds: []
+  - jsonId: 10
+    kind: 2
+    entryId: ''
+    rawEntryId: /@rushstack/n@2.0.0
+    packageJsonFolderPath: common/temp/undefined/node_modules/.pnpm/@rushstack@n@2.0.0/node_modules/@rushstack
+    entryPackageName: '@rushstack'
+    displayText: '@rushstack n@2.0.0'
+    entryPackageVersion: n@2.0.0
+    entrySuffix: ''
+    dependencies: []
+    transitivePeerDependencies: []
+    referrerJsonIds: []
+  - jsonId: 11
+    kind: 2
+    entryId: ''
+    rawEntryId: /@rushstack/n@3.0.0
+    packageJsonFolderPath: common/temp/undefined/node_modules/.pnpm/@rushstack@n@3.0.0/node_modules/@rushstack
+    entryPackageName: '@rushstack'
+    displayText: '@rushstack n@3.0.0'
+    entryPackageVersion: n@3.0.0
+    entrySuffix: ''
+    dependencies: []
+    transitivePeerDependencies: []
+    referrerJsonIds: []
+"
+`;
