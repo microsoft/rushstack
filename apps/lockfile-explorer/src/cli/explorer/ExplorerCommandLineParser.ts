@@ -21,7 +21,7 @@ import {
   lfxGraphSerializer,
   type IAppContext,
   type IJsonLfxGraph
-} from '../../../temp/lfx-shared';
+} from '../../../build/lfx-shared';
 
 import type { IAppState } from '../../state';
 import { init } from '../../utils/init';

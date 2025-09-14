@@ -9,7 +9,7 @@ import {
   type IJsonLfxWorkspace,
   lfxGraphSerializer,
   type LfxGraph
-} from '../../../temp/lfx-shared';
+} from '../../../build/lfx-shared';
 
 import * as lfxGraphLoader from '../lfxGraphLoader';
 

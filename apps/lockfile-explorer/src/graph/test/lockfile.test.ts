@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { LfxGraphEntry } from '../../../temp/lfx-shared';
+import type { LfxGraphEntry } from '../../../build/lfx-shared';
 
 import { TEST_WORKSPACE, TEST_LOCKFILE } from './testLockfile';
 import * as lfxGraphLoader from '../lfxGraphLoader';

@@ -32,4 +32,4 @@
 # ---------------------------------------------------------------------------
 
 # heft.json copies this folder from lockfile-explorer-web:
-!/temp/lfx-shared/**
+!/build/lfx-shared/**

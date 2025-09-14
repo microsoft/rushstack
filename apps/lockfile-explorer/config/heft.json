@@ -14,7 +14,7 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["temp/lfx-shared"] }],
+      "cleanFiles": [{ "includeGlobs": ["build"] }],
 
       "tasksByName": {
         "copy-app-bundle": {
@@ -46,12 +46,12 @@
               "copyOperations": [
                 {
                   "sourcePath": "node_modules/@rushstack/lockfile-explorer-web/lib/packlets/lfx-shared",
-                  "destinationFolders": ["temp/lfx-shared"],
+                  "destinationFolders": ["build/lfx-shared"],
                   "includeGlobs": ["*.d.ts"]
                 },
                 {
                   "sourcePath": "node_modules/@rushstack/lockfile-explorer-web/lib-commonjs/packlets/lfx-shared",
-                  "destinationFolders": ["temp/lfx-shared"],
+                  "destinationFolders": ["build/lfx-shared"],
                   "includeGlobs": ["*.js", "*.map"]
                 }
               ]

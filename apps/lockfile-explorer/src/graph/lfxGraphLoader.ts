@@ -12,7 +12,7 @@ import {
   LfxDependencyKind,
   LfxGraphDependency,
   type IJsonLfxWorkspace
-} from '../../temp/lfx-shared';
+} from '../../build/lfx-shared';
 
 import { convertLockfileV6DepPathToV5DepPath } from '../utils/shrinkwrap';
 

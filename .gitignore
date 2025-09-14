@@ -107,6 +107,7 @@ common/autoinstallers/*/.npmrc
 *.lock
 
 # Common toolchain intermediate files
+build/
 temp/
 lib/
 lib-amd/
