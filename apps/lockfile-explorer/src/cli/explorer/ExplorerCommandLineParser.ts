@@ -16,11 +16,17 @@ import {
   type IRequiredCommandLineStringParameter
 } from '@rushstack/ts-command-line';
 import type { Lockfile } from '@pnpm/lockfile-types';
-import type { IAppContext } from '../../../temp/lfx-shared';
+import {
+  type LfxGraph,
+  lfxGraphSerializer,
+  type IAppContext,
+  type IJsonLfxGraph
+} from '../../../temp/lfx-shared';
 
 import type { IAppState } from '../../state';
 import { init } from '../../utils/init';
 import { convertLockfileV6DepPathToV5DepPath, getShrinkwrapFileMajorVersion } from '../../utils/shrinkwrap';
+import * as lfxGraphLoader from '../../graph/lfxGraphLoader';
 
 const EXPLORER_TOOL_FILENAME: 'lockfile-explorer' = 'lockfile-explorer';
 
@@ -166,8 +172,30 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       res.status(200).send();
     });
 
-    app.get('/api/workspace', (req: express.Request, res: express.Response) => {
-      res.type('application/javascript').send(appState.lfxWorkspace);
+    app.get('/api/graph', async (req: express.Request, res: express.Response) => {
+      const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
+      const doc = yaml.load(pnpmLockfileText) as Lockfile;
+
+      const { packages, lockfileVersion } = doc;
+
+      const shrinkwrapFileMajorVersion: number = getShrinkwrapFileMajorVersion(lockfileVersion);
+
+      if (packages && shrinkwrapFileMajorVersion === 6) {
+        const updatedPackages: Lockfile['packages'] = {};
+        for (const [dependencyPath, dependency] of Object.entries(packages)) {
+          updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = dependency;
+        }
+        doc.packages = updatedPackages;
+      }
+
+      const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(
+        appState.lfxWorkspace,
+        doc as lfxGraphLoader.ILockfilePackageType,
+        appState.lfxWorkspace.rushConfig?.subspaceName ?? ''
+      );
+
+      const jsonGraph: IJsonLfxGraph = lfxGraphSerializer.serializeToJson(graph);
+      res.type('application/json').send(jsonGraph);
     });
 
     app.post(
