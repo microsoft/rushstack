@@ -3,14 +3,15 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollArea, Text } from '@rushstack/rush-themed-ui';
+
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-import { DependencyKind, type LockfileDependency } from '../../parsing/LfxGraph';
+
+import { DependencyKind, type LockfileDependency, type LockfileEntry } from '../../packlets/lfx-shared';
 import { readPackageJsonAsync } from '../../helpers/lfxApiClient';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 import { ReactNull } from '../../types/ReactNull';
-import type { LockfileEntry } from '../../parsing/LfxGraph';
 import { logDiagnosticInfo } from '../../helpers/logDiagnosticInfo';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import type { IPackageJson } from '../../types/IPackageJson';

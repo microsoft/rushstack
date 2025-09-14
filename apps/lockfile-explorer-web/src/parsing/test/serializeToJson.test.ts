@@ -3,8 +3,8 @@
 
 import { TEST_LOCKFILE } from './testLockfile';
 import * as lfxGraphLoader from '../lfxGraphLoader';
-import * as lfxGraphSerializer from '../lfxGraphSerializer';
-import type { LfxGraph } from '../LfxGraph';
+import { lfxGraphSerializer } from '../../packlets/lfx-shared';
+import type { LfxGraph } from '../../packlets/lfx-shared';
 
 describe('serializeToJson', () => {
   it('serializes a simple graph', () => {

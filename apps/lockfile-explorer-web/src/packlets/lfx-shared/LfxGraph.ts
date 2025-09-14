@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IJsonPeerDependencyMeta } from './JsonLfxGraph';
+import type { IJsonPeerDependencyMeta } from './IJsonLfxGraph';
 
 export enum DependencyKind {
   DEPENDENCY = 'regular',

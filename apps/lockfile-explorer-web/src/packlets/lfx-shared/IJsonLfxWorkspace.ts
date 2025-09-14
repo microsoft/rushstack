@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-export interface ILfxWorkspaceRushConfig {
+export interface IJsonLfxWorkspaceRushConfig {
   /**
    * The rushVersion from rush.json.
    */
@@ -14,7 +14,7 @@ export interface ILfxWorkspaceRushConfig {
   subspaceName: string;
 }
 
-export interface ILfxWorkspace {
+export interface IJsonLfxWorkspace {
   /**
    * Absolute path to the workspace folder that is opened by the app.
    * Relative paths are generally relative to this path.
@@ -30,5 +30,5 @@ export interface ILfxWorkspace {
    * If this is a Rush workspace (versus a plain PNPM workspace), then
    * this section will be defined.
    */
-  rushConfig: ILfxWorkspaceRushConfig | undefined;
+  rushConfig: IJsonLfxWorkspaceRushConfig | undefined;
 }

@@ -5,7 +5,7 @@ import React, { useCallback } from 'react';
 import appStyles from '../../App.scss';
 import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import type { LockfileEntry } from '../../parsing/LfxGraph';
+import type { LockfileEntry } from '../../packlets/lfx-shared';
 import { clearStackAndPush, removeBookmark } from '../../store/slices/entrySlice';
 import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
 

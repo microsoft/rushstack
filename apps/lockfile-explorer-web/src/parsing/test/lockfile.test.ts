@@ -3,7 +3,7 @@
 
 import { TEST_LOCKFILE } from './testLockfile';
 import * as lfxGraphLoader from '../lfxGraphLoader';
-import type { LockfileEntry } from '../LfxGraph';
+import type { LockfileEntry } from '../../packlets/lfx-shared';
 
 describe('LockfileGeneration', () => {
   it('creates a valid bi-directional graph', () => {

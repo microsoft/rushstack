@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Path } from '@lifaon/path';
+
 import {
   type ILockfileDependencyOptions,
   type ILockfileEntryOptions,
   LfxGraph,
   LockfileEntry,
-  LockfileEntryFilter
-} from './LfxGraph';
-import { DependencyKind, LockfileDependency } from './LfxGraph';
-import { Path } from '@lifaon/path';
+  LockfileEntryFilter,
+  DependencyKind,
+  LockfileDependency
+} from '../packlets/lfx-shared';
 
 enum PnpmLockfileVersion {
   V6,
