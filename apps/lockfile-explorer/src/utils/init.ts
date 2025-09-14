@@ -18,14 +18,14 @@ export const init = (options: {
   subspaceName: string;
 }): IAppState => {
   const { lockfileExplorerProjectRoot, appVersion, debugMode, subspaceName } = options;
-  const currentWorkingDirectory = process.cwd();
+  const currentWorkingDirectory: string = path.resolve(process.cwd());
 
   let appState: IAppState | undefined;
-  let currentFolder = Path.convertToSlashes(currentWorkingDirectory);
+  let currentFolder: string = Path.convertToSlashes(currentWorkingDirectory);
   while (currentFolder.includes('/')) {
     // Look for a rush.json [rush project] or pnpm-lock.yaml file [regular pnpm workspace]
-    const rushJsonPath: string = path.resolve(currentFolder, 'rush.json');
-    const pnpmLockPath: string = path.resolve(currentFolder, 'pnpm-lock.yaml');
+    const rushJsonPath: string = currentFolder + '/rush.json';
+    const pnpmLockPath: string = currentFolder + '/pnpm-lock.yaml';
     if (FileSystem.exists(rushJsonPath)) {
       console.log('Found a Rush workspace: ', rushJsonPath);
 

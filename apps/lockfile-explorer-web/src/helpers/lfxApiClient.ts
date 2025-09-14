@@ -4,11 +4,11 @@
 import type { IPackageJson } from '../types/IPackageJson';
 import type { ILfxWorkspace } from '../types/lfxProtocol';
 
-const serviceUrl: string = window.appContext.serviceUrl;
+const SERVICE_URL: string = window.appContext.serviceUrl;
 
 export async function checkAliveAsync(): Promise<boolean> {
   try {
-    await fetch(`${serviceUrl}/api/health`);
+    await fetch(`${SERVICE_URL}/api/health`);
     return true;
   } catch (e) {
     return false;
@@ -23,20 +23,20 @@ export async function readWorkspaceConfigAsync(): Promise<ILfxWorkspace> {
   let response: Response;
 
   try {
-    response = await fetch(`${serviceUrl}/api/workspace`);
+    response = await fetch(`${SERVICE_URL}/api/workspace`);
     if (!response.ok) {
       const responseText: string = await response.text();
       const error = new Error(
-        'The operation failed: ' + (responseText.trim() ?? 'An unknown error occurred')
+        'The operation failed: ' + (responseText.trim() || 'An unknown error occurred')
       );
       // eslint-disable-next-line no-console
-      console.error('readFileAsTextAsync() failed: ', error);
+      console.error('readWorkspaceConfigAsync() failed: ', error);
       throw error;
     }
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error('Network error in readWorkspaceConfigAsync(): ', e);
-    throw new Error('Network error: ' + (e.message ?? 'An unknown error occurred'));
+    throw new Error('Network error: ' + (e.message || 'An unknown error occurred'));
   }
 
   const responseJson: ILfxWorkspace = await response.json();
@@ -50,7 +50,7 @@ export async function readWorkspaceConfigAsync(): Promise<ILfxWorkspace> {
  */
 export async function readPnpmfileAsync(): Promise<string> {
   try {
-    const response = await fetch(`${serviceUrl}/api/pnpmfile`);
+    const response = await fetch(`${SERVICE_URL}/api/pnpmfile`);
     return await response.text();
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -61,7 +61,7 @@ export async function readPnpmfileAsync(): Promise<string> {
 
 export async function readPackageJsonAsync(projectPath: string): Promise<IPackageJson | undefined> {
   try {
-    const response = await fetch(`${serviceUrl}/api/package-json`, {
+    const response = await fetch(`${SERVICE_URL}/api/package-json`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -80,7 +80,7 @@ export async function readPackageJsonAsync(projectPath: string): Promise<IPackag
 
 export async function readPackageSpecAsync(projectPath: string): Promise<IPackageJson | undefined> {
   try {
-    const response = await fetch(`${serviceUrl}/api/package-spec`, {
+    const response = await fetch(`${SERVICE_URL}/api/package-spec`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

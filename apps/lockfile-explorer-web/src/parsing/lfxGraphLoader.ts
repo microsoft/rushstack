@@ -254,11 +254,11 @@ function getImporterValue(
       dependencies: {},
       devDependencies: {}
     };
-    for (const [depName, depDetails] of Object.entries(v6ImporterValue.dependencies || {})) {
+    for (const [depName, depDetails] of Object.entries(v6ImporterValue.dependencies ?? {})) {
       v5ImporterValue.specifiers![depName] = depDetails.specifier;
       v5ImporterValue.dependencies![depName] = depDetails.version;
     }
-    for (const [depName, depDetails] of Object.entries(v6ImporterValue.devDependencies || {})) {
+    for (const [depName, depDetails] of Object.entries(v6ImporterValue.devDependencies ?? {})) {
       v5ImporterValue.specifiers![depName] = depDetails.specifier;
       v5ImporterValue.devDependencies![depName] = depDetails.version;
     }

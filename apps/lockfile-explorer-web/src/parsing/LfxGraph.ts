@@ -17,10 +17,10 @@ export enum DependencyKind {
  * their own entries in the pnpm lockfile.
  */
 export class LockfileDependency {
-  public name: string;
-  public version: string;
-  public dependencyType: DependencyKind;
-  public containingEntry: LockfileEntry;
+  public readonly name: string;
+  public readonly version: string;
+  public readonly dependencyType: DependencyKind;
+  public readonly containingEntry: LockfileEntry;
 
   public entryId: string = '';
 
