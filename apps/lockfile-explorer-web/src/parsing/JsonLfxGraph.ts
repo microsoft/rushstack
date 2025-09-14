@@ -3,6 +3,12 @@
 
 import type { DependencyKind, LockfileEntryFilter } from './LfxGraph';
 
+export interface IJsonPeerDependencyMeta {
+  name?: string;
+  version?: string;
+  optional?: boolean;
+}
+
 export interface IJsonLfxDependency {
   name: string;
   version: string;
@@ -11,11 +17,7 @@ export interface IJsonLfxDependency {
 
   resolvedEntryJsonId?: number;
 
-  peerDependencyMeta: {
-    name?: string;
-    version?: string;
-    optional?: boolean;
-  };
+  peerDependencyMeta: IJsonPeerDependencyMeta;
 }
 
 export interface IJsonLfxEntry {

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IJsonLfxDependency, IJsonLfxEntry, IJsonLfxGraph } from './JsonLfxGraph';
-import { LfxGraph, LockfileDependency, LockfileEntry } from './LfxGraph';
+import { type ILockfileEntryOptions, LfxGraph, LockfileDependency, LockfileEntry } from './LfxGraph';
 
 export function serializeToJson(graph: LfxGraph): IJsonLfxGraph {
   const jsonLfxEntries: IJsonLfxEntry[] = [];
@@ -17,6 +17,7 @@ export function serializeToJson(graph: LfxGraph): IJsonLfxGraph {
     return result;
   }
 
+  // First create the jsonId mapping
   for (const entry of graph.entries) {
     const nextIndex: number = jsonLfxEntries.length;
 
@@ -42,7 +43,7 @@ export function serializeToJson(graph: LfxGraph): IJsonLfxGraph {
     jsonIdByEntry.set(entry, jsonLfxEntry.jsonId);
   }
 
-  // Now that we built the jsonId lookup, we can serialize the lists.
+  // Use the jsonId mapping to serialize the lists
   for (let i: number = 0; i < jsonLfxEntries.length; ++i) {
     const jsonLfxEntry: IJsonLfxEntry = jsonLfxEntries[i];
     const entry: LockfileEntry = graph.entries[i];
@@ -87,36 +88,43 @@ export function deserializeFromJson(jsonLfxGraph: IJsonLfxGraph): LfxGraph {
 
   const jsonLfxEntries: IJsonLfxEntry[] = jsonLfxGraph.entries;
 
-  // First create empty entries
+  // First create the jsonId mapping
   for (const jsonLfxEntry of jsonLfxEntries) {
-    entries.push(new LockfileEntry(jsonLfxEntry.kind));
+    const options: ILockfileEntryOptions = {
+      kind: jsonLfxEntry.kind,
+      entryId: jsonLfxEntry.entryId,
+      rawEntryId: jsonLfxEntry.rawEntryId,
+      packageJsonFolderPath: jsonLfxEntry.packageJsonFolderPath,
+      entryPackageName: jsonLfxEntry.entryPackageName,
+      displayText: jsonLfxEntry.displayText,
+      entryPackageVersion: jsonLfxEntry.entryPackageVersion,
+      entrySuffix: jsonLfxEntry.entrySuffix
+    };
+    entries.push(new LockfileEntry(options));
   }
+
+  // Use the jsonId mapping to deserialize the lists
   for (let i: number = 0; i < jsonLfxEntries.length; ++i) {
     const jsonLfxEntry: IJsonLfxEntry = jsonLfxEntries[i];
     const entry: LockfileEntry = graph.entries[i];
-
-    entry.entryId = jsonLfxEntry.entryId;
-    entry.rawEntryId = jsonLfxEntry.rawEntryId;
-    entry.packageJsonFolderPath = jsonLfxEntry.packageJsonFolderPath;
-    entry.entryPackageName = jsonLfxEntry.entryPackageName;
-    entry.displayText = jsonLfxEntry.displayText;
-    entry.entryPackageVersion = jsonLfxEntry.entryPackageVersion;
-    entry.entrySuffix = jsonLfxEntry.entrySuffix;
 
     for (const jsonLfxDependency of jsonLfxEntry.dependencies) {
       const dependency: LockfileDependency = new LockfileDependency({
         name: jsonLfxDependency.name,
         version: jsonLfxDependency.version,
         dependencyType: jsonLfxDependency.dependencyType,
-        containingEntry: entry
+        containingEntry: entry,
+        entryId: jsonLfxDependency.entryId,
+        peerDependencyMeta: {
+          name: jsonLfxDependency.peerDependencyMeta.name,
+          version: jsonLfxDependency.peerDependencyMeta.version,
+          optional: jsonLfxDependency.peerDependencyMeta.optional
+        }
       });
-      dependency.entryId = jsonLfxDependency.entryId;
+
       if (jsonLfxDependency.resolvedEntryJsonId) {
         dependency.resolvedEntry = fromJsonId(jsonLfxDependency.resolvedEntryJsonId);
       }
-      dependency.peerDependencyMeta.name = jsonLfxDependency.peerDependencyMeta.name;
-      dependency.peerDependencyMeta.version = jsonLfxDependency.peerDependencyMeta.version;
-      dependency.peerDependencyMeta.optional = jsonLfxDependency.peerDependencyMeta.optional;
 
       entry.dependencies.push(dependency);
     }

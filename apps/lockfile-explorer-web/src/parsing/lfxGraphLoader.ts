@@ -1,7 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LfxGraph, LockfileEntry, LockfileEntryFilter } from './LfxGraph';
+import {
+  type ILockfileDependencyOptions,
+  type ILockfileEntryOptions,
+  LfxGraph,
+  LockfileEntry,
+  LockfileEntryFilter
+} from './LfxGraph';
 import { DependencyKind, LockfileDependency } from './LfxGraph';
 import { Path } from '@lifaon/path';
 
@@ -73,26 +79,28 @@ function createLockfileDependency(
   containingEntry: LockfileEntry,
   node?: ILockfileNode
 ): LockfileDependency {
-  const result: LockfileDependency = new LockfileDependency({
+  const result: ILockfileDependencyOptions = {
     name,
     version,
     dependencyType,
-    containingEntry
-  });
+    containingEntry,
+    entryId: '',
+    peerDependencyMeta: {}
+  };
 
-  if (result.version.startsWith('link:')) {
-    const relativePath = result.version.substring('link:'.length);
+  if (version.startsWith('link:')) {
+    const relativePath = version.substring('link:'.length);
     const rootRelativePath = new Path('.').relative(
       new Path(containingEntry.packageJsonFolderPath).concat(relativePath)
     );
     if (!rootRelativePath) {
       // eslint-disable-next-line no-console
       console.error('No root relative path for dependency!', name);
-      return result;
+      return new LockfileDependency(result);
     }
     result.entryId = 'project:' + rootRelativePath.toString();
   } else if (result.version.startsWith('/')) {
-    result.entryId = result.version;
+    result.entryId = version;
   } else if (result.dependencyType === DependencyKind.PEER_DEPENDENCY) {
     if (node?.peerDependencies) {
       result.peerDependencyMeta = {
@@ -111,7 +119,7 @@ function createLockfileDependency(
   } else {
     result.entryId = '/' + result.name + '/' + result.version;
   }
-  return result;
+  return new LockfileDependency(result);
 }
 
 // node is the yaml entry that we are trying to parse
@@ -157,13 +165,22 @@ function createLockfileEntry(options: {
 }): LockfileEntry {
   const { rawEntryId, kind, rawYamlData, duplicates, subspaceName } = options;
 
-  const result = new LockfileEntry(kind);
+  const result: ILockfileEntryOptions = {
+    kind,
+    entryId: '',
+    rawEntryId: '',
+    packageJsonFolderPath: '',
+    entryPackageName: '',
+    displayText: '',
+    entryPackageVersion: '',
+    entrySuffix: ''
+  };
 
   result.rawEntryId = rawEntryId;
 
   if (rawEntryId === '.') {
     // Project Root
-    return result;
+    return new LockfileEntry(result);
   }
 
   if (kind === LockfileEntryFilter.Project) {
@@ -176,7 +193,7 @@ function createLockfileEntry(options: {
     if (!packageJsonFolderPath || !packageName) {
       // eslint-disable-next-line no-console
       console.error('Could not construct path for entry: ', rawEntryId);
-      return result;
+      return new LockfileEntry(result);
     }
 
     result.packageJsonFolderPath = packageJsonFolderPath.toString();
@@ -232,9 +249,9 @@ function createLockfileEntry(options: {
       result.entryPackageName;
   }
 
-  parseDependencies(result.dependencies, result, rawYamlData);
-
-  return result;
+  const lockfileEntry = new LockfileEntry(result);
+  parseDependencies(lockfileEntry.dependencies, lockfileEntry, rawYamlData);
+  return lockfileEntry;
 }
 
 /**
@@ -279,7 +296,8 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType, subspaceNa
   if (`${lockfile.lockfileVersion}`.startsWith('6')) {
     pnpmLockfileVersion = PnpmLockfileVersion.V6;
   }
-  const allEntries: LockfileEntry[] = [];
+  const lfxGraph: LfxGraph = new LfxGraph();
+  const allEntries: LockfileEntry[] = lfxGraph.entries;
   const allEntriesById: { [key: string]: LockfileEntry } = {};
 
   const allImporters = [];
@@ -357,7 +375,5 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType, subspaceNa
     }
   }
 
-  const lfxGraph: LfxGraph = new LfxGraph();
-  lfxGraph.entries = allEntries;
   return lfxGraph;
 }

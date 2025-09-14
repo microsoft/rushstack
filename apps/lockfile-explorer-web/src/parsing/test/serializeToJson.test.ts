@@ -21,7 +21,7 @@ Object {
       "entryPackageVersion": "",
       "entrySuffix": "",
       "jsonId": 0,
-      "kind": 0,
+      "kind": 1,
       "packageJsonFolderPath": "",
       "rawEntryId": ".",
       "referrerJsonIds": Array [],
@@ -30,7 +30,7 @@ Object {
     Object {
       "dependencies": Array [
         Object {
-          "dependencyType": 0,
+          "dependencyType": "regular",
           "entryId": "/@testPackage/core/1.7.1",
           "name": "@testPackage/core",
           "peerDependencyMeta": Object {
@@ -42,7 +42,7 @@ Object {
           "version": "1.7.1",
         },
         Object {
-          "dependencyType": 0,
+          "dependencyType": "regular",
           "entryId": "/@testPackage2/core/1.7.1",
           "name": "@testPackage2/core",
           "peerDependencyMeta": Object {
@@ -60,7 +60,7 @@ Object {
       "entryPackageVersion": "",
       "entrySuffix": "",
       "jsonId": 1,
-      "kind": 0,
+      "kind": 1,
       "packageJsonFolderPath": "./apps/testApp1",
       "rawEntryId": "../../../apps/testApp1",
       "referrerJsonIds": Array [],
@@ -74,7 +74,7 @@ Object {
       "entryPackageVersion": "1.7.1",
       "entrySuffix": "",
       "jsonId": 2,
-      "kind": 1,
+      "kind": 2,
       "packageJsonFolderPath": "common/temp/undefined/node_modules/.pnpm/@testPackage+core@1.7.1/node_modules/@testPackage/core",
       "rawEntryId": "/@testPackage/core/1.7.1",
       "referrerJsonIds": Array [
@@ -90,7 +90,7 @@ Object {
       "entryPackageVersion": "1.7.1",
       "entrySuffix": "",
       "jsonId": 3,
-      "kind": 1,
+      "kind": 2,
       "packageJsonFolderPath": "common/temp/undefined/node_modules/.pnpm/@testPackage2+core@1.7.1/node_modules/@testPackage2/core",
       "rawEntryId": "/@testPackage2/core/1.7.1",
       "referrerJsonIds": Array [
