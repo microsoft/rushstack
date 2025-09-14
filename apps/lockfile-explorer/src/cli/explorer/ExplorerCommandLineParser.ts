@@ -141,27 +141,6 @@ export class ExplorerCommandLineParser extends CommandLineParser {
 
     app.use('/favicon.ico', express.static(distFolderPath, { index: 'favicon.ico' }));
 
-    app.get('/api/lockfile', async (req: express.Request, res: express.Response) => {
-      const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
-      const doc = yaml.load(pnpmLockfileText) as Lockfile;
-      const { packages, lockfileVersion } = doc;
-
-      const shrinkwrapFileMajorVersion: number = getShrinkwrapFileMajorVersion(lockfileVersion);
-
-      if (packages && shrinkwrapFileMajorVersion === 6) {
-        const updatedPackages: Lockfile['packages'] = {};
-        for (const [dependencyPath, dependency] of Object.entries(packages)) {
-          updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = dependency;
-        }
-        doc.packages = updatedPackages;
-      }
-
-      res.send({
-        doc,
-        subspaceName: this._subspaceParameter.value
-      });
-    });
-
     app.get('/api/health', (req: express.Request, res: express.Response) => {
       awaitingFirstConnect = false;
       isClientConnected = true;
