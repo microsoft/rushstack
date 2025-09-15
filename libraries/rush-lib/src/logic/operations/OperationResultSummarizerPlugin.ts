@@ -11,7 +11,7 @@ import type {
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
+import { OperationStatus, STATUS_EMOJIS } from './OperationStatus';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 
@@ -257,7 +257,7 @@ function writeDetailedSummary(
     );
 
     terminal.writeLine(
-      `${Colorize.gray('--[')} ${headingColor(subheadingText)} ${Colorize.gray(
+      `${Colorize.gray('--[')}${STATUS_EMOJIS[operationResult.status]} ${headingColor(subheadingText)} ${Colorize.gray(
         `]${'-'.repeat(middlePartLengthMinusTwoBrackets)}[`
       )} ${Colorize.white(time)} ${Colorize.gray(']--')}\n`
     );
@@ -289,14 +289,14 @@ function writeSummaryHeader(
   const headingText: string = `${status}: ${projectsText}`;
 
   // leftPart: "==[ FAILED: 2 operations "
-  const leftPartLength: number = 3 + 1 + headingText.length + 1;
+  const leftPartLength: number = 3 + 2 + headingText.length + 1;
 
   const rightPartLengthMinusBracket: number = Math.max(ASCII_HEADER_WIDTH - (leftPartLength + 1), 0);
 
   // rightPart: "]======================"
 
   terminal.writeLine(
-    `${Colorize.gray('==[')} ${headingColor(headingText)} ${Colorize.gray(
+    `${Colorize.gray('==[')}${STATUS_EMOJIS[status]} ${headingColor(headingText)} ${Colorize.gray(
       `]${'='.repeat(rightPartLengthMinusBracket)}`
     )}\n`
   );
