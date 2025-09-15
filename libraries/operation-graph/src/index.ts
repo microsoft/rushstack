@@ -23,7 +23,12 @@ export type {
   IPCHost
 } from './protocol.types';
 
-export { type IExecuteOperationContext, type IOperationOptions, Operation } from './Operation';
+export {
+  type IExecuteOperationContext,
+  type IOperationOptions,
+  Operation,
+  type OperationRequestRunCallback
+} from './Operation';
 
 export { OperationError } from './OperationError';
 

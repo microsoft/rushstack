@@ -86,7 +86,7 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
               commandToRun,
               commandForHash,
               persist: true,
-              requestRun: (requestor?: string) => {
+              requestRun: (requestor: string, detail?: string) => {
                 const operationState: IOperationExecutionResult | undefined =
                   operationStatesByRunner.get(ipcOperationRunner);
                 if (!operationState) {
@@ -103,7 +103,10 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
                   return;
                 }
 
-                currentContext?.invalidateOperation?.(operation, requestor || 'IPC');
+                currentContext?.invalidateOperation?.(
+                  operation,
+                  detail ? `${requestor}: ${detail}` : requestor
+                );
               }
             }));
             runnerCache.set(operationName, ipcOperationRunner);

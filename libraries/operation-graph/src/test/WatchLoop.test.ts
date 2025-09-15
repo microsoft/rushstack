@@ -99,7 +99,7 @@ describe(WatchLoop.name, () => {
       executeAsync.mockImplementation(async (state: IWatchLoopState) => {
         iteration++;
         if (iteration < maxIterations) {
-          state.requestRun('test');
+          state.requestRun('test', 'some detail');
         }
         if (iteration === cancelIterations) {
           outerAbortController.abort();
@@ -114,7 +114,7 @@ describe(WatchLoop.name, () => {
       expect(onBeforeExecute).toHaveBeenCalledTimes(cancelIterations);
       expect(executeAsync).toHaveBeenCalledTimes(cancelIterations);
       expect(onRequestRun).toHaveBeenCalledTimes(cancelIterations);
-      expect(onRequestRun).toHaveBeenLastCalledWith('test');
+      expect(onRequestRun).toHaveBeenLastCalledWith('test', 'some detail');
       expect(onAbort).toHaveBeenCalledTimes(cancelIterations);
     });
 
@@ -133,7 +133,7 @@ describe(WatchLoop.name, () => {
       executeAsync.mockImplementation(async (state: IWatchLoopState) => {
         iteration++;
         if (iteration < maxIterations) {
-          state.requestRun('test');
+          state.requestRun('test', 'reason');
         }
         if (iteration === exceptionIterations) {
           throw new Error('fnord');
@@ -146,7 +146,7 @@ describe(WatchLoop.name, () => {
       expect(onBeforeExecute).toHaveBeenCalledTimes(exceptionIterations);
       expect(executeAsync).toHaveBeenCalledTimes(exceptionIterations);
       expect(onRequestRun).toHaveBeenCalledTimes(exceptionIterations);
-      expect(onRequestRun).toHaveBeenLastCalledWith('test');
+      expect(onRequestRun).toHaveBeenLastCalledWith('test', 'reason');
       expect(onAbort).toHaveBeenCalledTimes(exceptionIterations);
     });
   });
@@ -189,7 +189,7 @@ describe(WatchLoop.name, () => {
       executeAsync.mockImplementation(async (state: IWatchLoopState) => {
         iteration++;
         if (iteration < maxIterations) {
-          state.requestRun('test');
+          state.requestRun('test', 'why');
         }
         if (iteration === exceptionIterations) {
           throw new Error('fnord');
@@ -204,7 +204,7 @@ describe(WatchLoop.name, () => {
       expect(onBeforeExecute).toHaveBeenCalledTimes(exceptionIterations);
       expect(executeAsync).toHaveBeenCalledTimes(exceptionIterations);
       expect(onRequestRun).toHaveBeenCalledTimes(exceptionIterations);
-      expect(onRequestRun).toHaveBeenLastCalledWith('test');
+      expect(onRequestRun).toHaveBeenLastCalledWith('test', 'why');
       expect(onAbort).toHaveBeenCalledTimes(exceptionIterations);
       expect(onWaiting).toHaveBeenCalledTimes(0);
     });
@@ -241,7 +241,7 @@ describe(WatchLoop.name, () => {
 
       expect(onBeforeExecute).toHaveBeenCalledTimes(cancelIterations);
       expect(executeAsync).toHaveBeenCalledTimes(cancelIterations);
-      expect(onRequestRun).toHaveBeenLastCalledWith('test');
+      expect(onRequestRun).toHaveBeenLastCalledWith('test', undefined);
 
       // Since the run finishes, no cancellation should occur
       expect(onAbort).toHaveBeenCalledTimes(0);

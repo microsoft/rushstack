@@ -399,10 +399,10 @@ describe(OperationExecutionManager.name, () => {
         expect(alpha.state?.status).toBe(OperationStatus.Success);
         expect(beta.state?.status).toBe(OperationStatus.Success);
 
-        betaRequestRun!();
+        betaRequestRun!('why');
 
         expect(requestRun).toHaveBeenCalledTimes(1);
-        expect(requestRun).toHaveBeenLastCalledWith(beta.name);
+        expect(requestRun).toHaveBeenLastCalledWith(beta.name, 'why');
 
         const terminalProvider2: StringBufferTerminalProvider = new StringBufferTerminalProvider(false);
         const terminal2: ITerminal = new Terminal(terminalProvider2);
