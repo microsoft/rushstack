@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Enhance logging for IPC mode by allowing IPC runners to report detailed reasons for rerun, e.g. specific changed files.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

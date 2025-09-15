@@ -23,7 +23,7 @@ export interface IOperationOptions<TMetadata extends {} = {}, TGroupMetadata ext
   /**
    * The name of this operation, for logging.
    */
-  name?: string | undefined;
+  name: string;
 
   /**
    * The group that this operation belongs to. Will be used for logging and duration tracking.
@@ -46,6 +46,12 @@ export interface IOperationOptions<TMetadata extends {} = {}, TGroupMetadata ext
    */
   metadata?: TMetadata | undefined;
 }
+
+/**
+ * Type for the `requestRun` callback.
+ * @beta
+ */
+export type OperationRequestRunCallback = (requestor: string, detail?: string) => void;
 
 /**
  * Information provided to `executeAsync` by the `OperationExecutionManager`.
@@ -73,8 +79,11 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
   /**
    * A callback to the overarching orchestrator to request that the operation be invoked again.
    * Used in watch mode to signal that inputs have changed.
+   *
+   * @param requestor - The name of the operation requesting a rerun.
+   * @param detail - Optional detail about why the rerun is requested, e.g. the name of a changed file.
    */
-  requestRun?: (requestor?: string) => void;
+  requestRun?: OperationRequestRunCallback;
 
   /**
    * Terminal to write output to.
@@ -113,7 +122,7 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
   /**
    * The name of this operation, for logging.
    */
-  public readonly name: string | undefined;
+  public readonly name: string;
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -188,12 +197,12 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
 
   public readonly metadata: TMetadata;
 
-  public constructor(options?: IOperationOptions<TMetadata, TGroupMetadata>) {
-    this.group = options?.group;
-    this.runner = options?.runner;
-    this.weight = options?.weight || 1;
-    this.name = options?.name;
-    this.metadata = options?.metadata || ({} as TMetadata);
+  public constructor(options: IOperationOptions<TMetadata, TGroupMetadata>) {
+    this.group = options.group;
+    this.runner = options.runner;
+    this.weight = options.weight ?? 1;
+    this.name = options.name;
+    this.metadata = options.metadata || ({} as TMetadata);
 
     if (this.group) {
       this.group.addOperation(this);
@@ -276,7 +285,7 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
       abortSignal,
       isFirstRun: !state.hasBeenRun,
       requestRun: requestRun
-        ? () => {
+        ? (detail?: string) => {
             switch (this.state?.status) {
               case OperationStatus.Waiting:
               case OperationStatus.Ready:
@@ -299,7 +308,7 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
                 // The requestRun callback is assumed to remain constant
                 // throughout the lifetime of the process, so it is safe
                 // to capture here.
-                return requestRun(this.name);
+                return requestRun(this.name, detail);
               default:
                 // This line is here to enforce exhaustiveness
                 const currentStatus: undefined = this.state?.status;
