@@ -198,11 +198,11 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
   public readonly metadata: TMetadata;
 
   public constructor(options: IOperationOptions<TMetadata, TGroupMetadata>) {
-    this.group = options?.group;
-    this.runner = options?.runner;
-    this.weight = options?.weight || 1;
+    this.group = options.group;
+    this.runner = options.runner;
+    this.weight = options.weight || 1;
     this.name = options.name;
-    this.metadata = options?.metadata || ({} as TMetadata);
+    this.metadata = options.metadata || ({} as TMetadata);
 
     if (this.group) {
       this.group.addOperation(this);
