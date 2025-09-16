@@ -36,6 +36,13 @@ export interface IPhasedCommand extends IRushCommand {
    * @alpha
    */
   readonly hooks: PhasedCommandHooks;
+
+  /**
+   * An abort controller that can be used to abort the command.
+   * Long-lived plugins should listen to the signal to handle any cleanup logic.
+   * @alpha
+   */
+  readonly sessionAbortController: AbortController;
 }
 
 /**

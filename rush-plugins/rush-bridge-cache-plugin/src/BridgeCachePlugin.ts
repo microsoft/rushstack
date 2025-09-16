@@ -55,7 +55,8 @@ export class BridgeCachePlugin implements IRushPlugin {
       command.hooks.createOperations.tap(
         { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
         (operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> => {
-          cacheAction = this._getCacheAction(context);
+          const { customParameters } = context;
+          cacheAction = this._getCacheAction(customParameters);
 
           if (cacheAction !== undefined) {
             if (!context.buildCacheConfiguration?.buildCacheEnabled) {
@@ -68,7 +69,7 @@ export class BridgeCachePlugin implements IRushPlugin {
               operation.enabled = false;
             }
 
-            requireOutputFolders = this._isRequireOutputFoldersFlagSet(context);
+            requireOutputFolders = this._isRequireOutputFoldersFlagSet(customParameters);
           }
 
           return operations;
@@ -178,8 +179,10 @@ export class BridgeCachePlugin implements IRushPlugin {
     });
   }
 
-  private _getCacheAction(context: IExecuteOperationsContext): CacheAction | undefined {
-    const cacheActionParameter: CommandLineParameter | undefined = context.customParameters.get(
+  private _getCacheAction(
+    customParameters: ReadonlyMap<string, CommandLineParameter>
+  ): CacheAction | undefined {
+    const cacheActionParameter: CommandLineParameter | undefined = customParameters.get(
       this._actionParameterName
     );
 
@@ -217,12 +220,14 @@ export class BridgeCachePlugin implements IRushPlugin {
     return undefined;
   }
 
-  private _isRequireOutputFoldersFlagSet(context: IExecuteOperationsContext): boolean {
+  private _isRequireOutputFoldersFlagSet(
+    customParameters: ReadonlyMap<string, CommandLineParameter>
+  ): boolean {
     if (!this._requireOutputFoldersParameterName) {
       return false;
     }
 
-    const requireOutputFoldersParam: CommandLineParameter | undefined = context.customParameters.get(
+    const requireOutputFoldersParam: CommandLineParameter | undefined = customParameters.get(
       this._requireOutputFoldersParameterName
     );
 

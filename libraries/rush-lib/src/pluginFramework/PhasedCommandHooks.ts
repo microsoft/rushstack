@@ -131,6 +131,11 @@ export interface IExecuteOperationsContext extends ICreateOperationsContext {
    * Not part of the creation context to avoid the overhead of Git calls when initializing the graph.
    */
   readonly inputsSnapshot?: IInputsSnapshot;
+
+  /**
+   * An abort controller that can be used to abort the current set of queued operations.
+   */
+  readonly abortController: AbortController;
 }
 
 /**

@@ -69,6 +69,7 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
       case OperationStatus.Blocked:
       case OperationStatus.Failure:
       case OperationStatus.NoOp:
+      case OperationStatus.Aborted:
         break;
       default:
         // This should never happen
@@ -125,6 +126,14 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
     operationsByStatus,
     Colorize.yellow,
     'WARNING'
+  );
+
+  writeCondensedSummary(
+    terminal,
+    OperationStatus.Aborted,
+    operationsByStatus,
+    Colorize.white,
+    'These operations were aborted:'
   );
 
   writeCondensedSummary(

@@ -156,6 +156,13 @@ export class ProjectWatcher {
    * `waitForChange` is not allowed to be called multiple times concurrently.
    */
   public async waitForChangeAsync(onWatchingFiles?: () => void): Promise<IProjectChangeResult> {
+    if (this.isPaused) {
+      this._setStatus(`Project watcher paused.`);
+      await new Promise<void>((resolve) => {
+        this._resolveIfChanged = async () => resolve();
+      });
+    }
+
     const initialChangeResult: IProjectChangeResult = await this._computeChangedAsync();
     // Ensure that the new state is recorded so that we don't loop infinitely
     this._commitChanges(initialChangeResult.inputsSnapshot);
