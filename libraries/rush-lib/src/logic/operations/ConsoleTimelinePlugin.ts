@@ -112,7 +112,7 @@ const TIMELINE_CHART_COLORIZER: Record<OperationStatus, (string: string) => stri
   [OperationStatus.Skipped]: Colorize.green,
   [OperationStatus.FromCache]: Colorize.green,
   [OperationStatus.NoOp]: Colorize.gray,
-  [OperationStatus.Aborted]: Colorize.gray
+  [OperationStatus.Aborted]: Colorize.red
 };
 
 interface ITimelineRecord {

@@ -132,7 +132,7 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
     terminal,
     OperationStatus.Aborted,
     operationsByStatus,
-    Colorize.gray,
+    Colorize.white,
     'These operations were aborted:'
   );
 
