@@ -24,7 +24,7 @@ export async function loadAndSerializeLFxGraphAsync(options: {
     { convertLineEndings: NewlineKind.Lf }
   );
   const lockfileObject = yaml.load(lockfileYaml);
-  const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(options.workspace, lockfileObject);
+  const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(lockfileObject, options.workspace);
   const serializedObject: IJsonLfxGraph = lfxGraphSerializer.serializeToJson(graph);
   const serializedYaml: string = yaml.dump(serializedObject, {
     noRefs: true,
