@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Fix Async.forEachAsync weighted concurrency scheduling to prevent oversubscription",
-      "type": "patch"
+      "comment": "Add allowOversubscription option to prevent running tasks from exceeding concurrency",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/node-core-library"
