@@ -243,7 +243,7 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
       webSocketServerUpgrader?.(server);
 
       server.listen(requestedPort);
-      command.abortController.signal.addEventListener(
+      command.sessionAbortController.signal.addEventListener(
         'abort',
         () => {
           server.close();

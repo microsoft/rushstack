@@ -744,9 +744,9 @@ export type IPhaseBehaviorForMissingScript = 'silent' | 'log' | 'error';
 // @beta
 export interface IPhasedCommand extends IRushCommand {
     // @alpha
-    readonly abortController: AbortController;
-    // @alpha
     readonly hooks: PhasedCommandHooks;
+    // @alpha
+    readonly sessionAbortController: AbortController;
 }
 
 // @public

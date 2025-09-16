@@ -131,13 +131,13 @@ interface IPhasedCommandTelemetry {
  * and "rebuild" commands are also modeled as phased commands with a single phase that invokes the npm
  * "build" script for each project.
  */
-export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
+export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> implements IPhasedCommand {
   /**
    * @internal
    */
   public _runsBeforeInstall: boolean | undefined;
   public readonly hooks: PhasedCommandHooks;
-  public readonly abortController: AbortController;
+  public readonly sessionAbortController: AbortController;
 
   private readonly _enableParallelism: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
@@ -151,7 +151,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _knownPhases: ReadonlyMap<string, IPhase>;
   private readonly _terminal: ITerminal;
   private _changedProjectsOnly: boolean;
-  private _executionAbortController: AbortController;
+  private _executionAbortController: AbortController | undefined;
 
   private readonly _changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
   private readonly _selectionParameters: SelectionParameterSet;
@@ -182,23 +182,16 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._runsBeforeInstall = false;
     this._knownPhases = options.phases;
     this._changedProjectsOnly = false;
-    this.abortController = new AbortController();
-    this._executionAbortController = new AbortController();
+    this.sessionAbortController = new AbortController();
+    this._executionAbortController = undefined;
 
-    this.abortController.signal.addEventListener(
+    this.sessionAbortController.signal.addEventListener(
       'abort',
       () => {
-        this._executionAbortController.abort();
+        this._executionAbortController?.abort();
       },
       { once: true }
     );
-    const onAbortExecution = (): void => {
-      if (!this.abortController.signal.aborted) {
-        this._executionAbortController = new AbortController();
-        this._executionAbortController.signal.addEventListener('abort', onAbortExecution, { once: true });
-      }
-    };
-    this._executionAbortController.signal.addEventListener('abort', onAbortExecution, { once: true });
 
     this.hooks = new PhasedCommandHooks();
 
@@ -674,7 +667,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       }
     );
 
-    const abortController: AbortController = this._executionAbortController;
+    const abortController: AbortController = (this._executionAbortController = new AbortController());
     const initialExecuteOperationsContext: IExecuteOperationsContext = {
       ...initialCreateOperationsContext,
       inputsSnapshot: initialSnapshot,
@@ -749,11 +742,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           process.stdin.setRawMode(false);
           process.stdin.off('data', onKeyPress);
           process.stdin.unref();
-          this.abortController.abort();
+          this.sessionAbortController.abort();
           break;
         case abortKey:
           terminal.writeLine(`Aborting current iteration...`);
-          this._executionAbortController.abort();
+          this._executionAbortController?.abort();
           break;
         case toggleWatcherKey:
           if (projectWatcher.isPaused) {
@@ -792,7 +785,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           process.stdin.setRawMode(false);
           process.stdin.off('data', onKeyPress);
           process.stdin.unref();
-          this.abortController.abort();
+          this.sessionAbortController.abort();
           process.kill(process.pid, 'SIGINT');
           break;
       }
@@ -839,8 +832,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       '../../logic/ProjectWatcher'
     );
 
-    const abortController: AbortController = this.abortController;
-    const abortSignal: AbortSignal = abortController.signal;
+    const sessionAbortController: AbortController = this.sessionAbortController;
+    const abortSignal: AbortSignal = sessionAbortController.signal;
 
     const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
       getInputsSnapshotAsync,
@@ -902,10 +895,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         terminal.writeLine(`    ${Colorize.cyan(name)}`);
       }
 
+      const initialAbortController: AbortController = (this._executionAbortController =
+        new AbortController());
+
       // Account for consumer relationships
       const executeOperationsContext: IExecuteOperationsContext = {
         ...initialCreateOperationsContext,
-        abortController: this._executionAbortController,
+        abortController: initialAbortController,
         changedProjectsOnly: !!this._changedProjectsOnly,
         isInitial: false,
         inputsSnapshot: state,
@@ -1012,6 +1008,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         terminal.writeErrorLine(Colorize.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
       }
     }
+
+    this._executionAbortController = undefined;
 
     if (invalidateOperation) {
       const operationResults: ReadonlyMap<Operation, IOperationExecutionResult> | undefined =

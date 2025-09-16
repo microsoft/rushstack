@@ -42,7 +42,7 @@ export interface IPhasedCommand extends IRushCommand {
    * Long-lived plugins should listen to the signal to handle any cleanup logic.
    * @alpha
    */
-  readonly abortController: AbortController;
+  readonly sessionAbortController: AbortController;
 }
 
 /**
