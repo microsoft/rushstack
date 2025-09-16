@@ -15,10 +15,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@pnpm/types",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@radix-ui/colors",
       "allowedCategories": [ "libraries" ]
     },
