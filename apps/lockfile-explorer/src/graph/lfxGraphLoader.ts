@@ -18,7 +18,7 @@ import * as lockfilePath from './lockfilePath';
 
 type PnpmLockfileVersion = 54 | 60 | 90;
 
-function createLockfileDependency(
+function createPackageLockfileDependency(
   name: string,
   version: string,
   dependencyType: LfxDependencyKind,
@@ -76,7 +76,7 @@ function parseDependencies(
   if (node.dependencies) {
     for (const [pkgName, pkgVersion] of Object.entries(node.dependencies)) {
       dependencies.push(
-        createLockfileDependency(
+        createPackageLockfileDependency(
           pkgName,
           pkgVersion,
           LfxDependencyKind.Regular,
@@ -90,7 +90,7 @@ function parseDependencies(
   if (node.devDependencies) {
     for (const [pkgName, pkgVersion] of Object.entries(node.devDependencies)) {
       dependencies.push(
-        createLockfileDependency(
+        createPackageLockfileDependency(
           pkgName,
           pkgVersion,
           LfxDependencyKind.Dev,
@@ -104,7 +104,14 @@ function parseDependencies(
   if (node.peerDependencies) {
     for (const [pkgName, pkgVersion] of Object.entries(node.peerDependencies)) {
       dependencies.push(
-        createLockfileDependency(pkgName, pkgVersion, LfxDependencyKind.Peer, lockfileEntry, node, workspace)
+        createPackageLockfileDependency(
+          pkgName,
+          pkgVersion,
+          LfxDependencyKind.Peer,
+          lockfileEntry,
+          node,
+          workspace
+        )
       );
     }
   }
@@ -115,18 +122,17 @@ function parseDependencies(
   }
 }
 
-function createLockfileEntry(options: {
+function createProjectLockfileEntry(options: {
   rawEntryId: string;
-  kind: LfxGraphEntryKind;
-  rawYamlData: lockfileTypes.PackageSnapshot | lockfileTypes.ProjectSnapshot;
+  rawYamlData: lockfileTypes.ProjectSnapshot;
   duplicates?: Set<string>;
   workspace: IJsonLfxWorkspace;
   pnpmLockfileVersion: PnpmLockfileVersion;
 }): LfxGraphEntry {
-  const { rawEntryId, kind, rawYamlData, duplicates, pnpmLockfileVersion, workspace } = options;
+  const { rawEntryId, rawYamlData, duplicates, workspace } = options;
 
   const result: ILfxGraphEntryOptions = {
-    kind,
+    kind: LfxGraphEntryKind.Project,
     entryId: '',
     rawEntryId: '',
     packageJsonFolderPath: '',
@@ -142,70 +148,98 @@ function createLockfileEntry(options: {
   // Example: pnpmLockfileFolder = 'common/temp/my-subspace'
   const pnpmLockfileFolder: string = workspace.pnpmLockfileFolder;
 
-  if (kind === LfxGraphEntryKind.Project) {
-    // Example: rawEntryId = '../../../projects/a'
-    // Example: packageJsonFolderPath = 'projects/a'
-    result.packageJsonFolderPath = lockfilePath.getAbsolute(pnpmLockfileFolder, rawEntryId);
-    result.entryId = 'project:' + result.packageJsonFolderPath;
+  // Example: rawEntryId = '../../../projects/a'
+  // Example: packageJsonFolderPath = 'projects/a'
+  result.packageJsonFolderPath = lockfilePath.getAbsolute(pnpmLockfileFolder, rawEntryId);
+  result.entryId = 'project:' + result.packageJsonFolderPath;
 
-    const projectFolderName: string = lockfilePath.getBaseNameOf(rawEntryId);
+  const projectFolderName: string = lockfilePath.getBaseNameOf(rawEntryId);
 
-    if (!duplicates?.has(projectFolderName)) {
-      // TODO: The actual package.json name might not match its directory name,
-      // but we have to load package.json to determine it.
-      result.entryPackageName = projectFolderName;
-    } else {
-      result.entryPackageName = `${projectFolderName} (${result.packageJsonFolderPath})`;
-    }
-    result.displayText = `Project: ${result.entryPackageName}`;
+  if (!duplicates?.has(projectFolderName)) {
+    // TODO: The actual package.json name might not match its directory name,
+    // but we have to load package.json to determine it.
+    result.entryPackageName = projectFolderName;
   } else {
-    result.displayText = rawEntryId;
-
-    if (pnpmLockfileVersion === 54) {
-      if (!rawEntryId.startsWith('/')) {
-        throw new Error('Expecting leading "/" in path: ' + JSON.stringify(rawEntryId));
-      }
-      const lastSlashIndex: number = rawEntryId.lastIndexOf('/');
-      if (lastSlashIndex < 0) {
-        throw new Error('Expecting "/" in path: ' + JSON.stringify(rawEntryId));
-      }
-      const packageName: string = rawEntryId.substring(1, lastSlashIndex);
-      result.entryPackageName = packageName;
-
-      //       /@rushstack/eslint-config/3.0.1_eslint@8.21.0+typescript@4.7.4
-      // -->   @rushstack/eslint-config 3.0.1 (eslint@8.21.0+typescript@4.7.4)
-      const underscoreIndex: number = rawEntryId.indexOf('_', lastSlashIndex);
-      if (underscoreIndex > 0) {
-        const version: string = rawEntryId.substring(lastSlashIndex + 1, underscoreIndex);
-        const suffix: string = rawEntryId.substring(underscoreIndex + 1);
-        result.displayText = packageName + ' ' + version + ' (' + suffix + ')';
-        result.entryPackageVersion = version;
-        result.entrySuffix = suffix;
-      } else {
-        //       /@rushstack/eslint-config/3.0.1
-        // -->   @rushstack/eslint-config 3.0.1
-        const version: string = rawEntryId.substring(lastSlashIndex + 1);
-        result.displayText = packageName + ' ' + version;
-        result.entryPackageVersion = version;
-      }
-    }
-
-    // Example: @babel+register@7.17.7_@babel+core@7.17.12
-    const dotPnpmSubfolder: string =
-      result.entryPackageName.replace('/', '+') +
-      '@' +
-      result.entryPackageVersion +
-      (result.entrySuffix ? `_${result.entrySuffix}` : '');
-
-    // Example:
-    //   common/temp/default/node_modules/.pnpm
-    //     /@babel+register@7.17.7_@babel+core@7.17.12
-    //     /node_modules/@babel/register
-    result.packageJsonFolderPath = lockfilePath.join(
-      pnpmLockfileFolder,
-      `node_modules/.pnpm/` + dotPnpmSubfolder + '/node_modules/' + result.entryPackageName
-    );
+    result.entryPackageName = `${projectFolderName} (${result.packageJsonFolderPath})`;
   }
+  result.displayText = `Project: ${result.entryPackageName}`;
+
+  const lockfileEntry: LfxGraphEntry = new LfxGraphEntry(result);
+  parseDependencies(lockfileEntry.dependencies, lockfileEntry, rawYamlData, workspace);
+  return lockfileEntry;
+}
+
+function createPackageLockfileEntry(options: {
+  rawEntryId: string;
+  rawYamlData: lockfileTypes.PackageSnapshot;
+  workspace: IJsonLfxWorkspace;
+  pnpmLockfileVersion: PnpmLockfileVersion;
+}): LfxGraphEntry {
+  const { rawEntryId, rawYamlData, pnpmLockfileVersion, workspace } = options;
+
+  const result: ILfxGraphEntryOptions = {
+    kind: LfxGraphEntryKind.Package,
+    entryId: '',
+    rawEntryId: '',
+    packageJsonFolderPath: '',
+    entryPackageName: '',
+    displayText: '',
+    entryPackageVersion: '',
+    entrySuffix: ''
+  };
+
+  result.rawEntryId = rawEntryId;
+
+  // Example: pnpmLockfilePath   = 'common/temp/my-subspace/pnpm-lock.yaml'
+  // Example: pnpmLockfileFolder = 'common/temp/my-subspace'
+  const pnpmLockfileFolder: string = workspace.pnpmLockfileFolder;
+
+  result.displayText = rawEntryId;
+
+  if (pnpmLockfileVersion === 54) {
+    if (!rawEntryId.startsWith('/')) {
+      throw new Error('Expecting leading "/" in path: ' + JSON.stringify(rawEntryId));
+    }
+    const lastSlashIndex: number = rawEntryId.lastIndexOf('/');
+    if (lastSlashIndex < 0) {
+      throw new Error('Expecting "/" in path: ' + JSON.stringify(rawEntryId));
+    }
+    const packageName: string = rawEntryId.substring(1, lastSlashIndex);
+    result.entryPackageName = packageName;
+
+    //       /@rushstack/eslint-config/3.0.1_eslint@8.21.0+typescript@4.7.4
+    // -->   @rushstack/eslint-config 3.0.1 (eslint@8.21.0+typescript@4.7.4)
+    const underscoreIndex: number = rawEntryId.indexOf('_', lastSlashIndex);
+    if (underscoreIndex > 0) {
+      const version: string = rawEntryId.substring(lastSlashIndex + 1, underscoreIndex);
+      const suffix: string = rawEntryId.substring(underscoreIndex + 1);
+      result.displayText = packageName + ' ' + version + ' (' + suffix + ')';
+      result.entryPackageVersion = version;
+      result.entrySuffix = suffix;
+    } else {
+      //       /@rushstack/eslint-config/3.0.1
+      // -->   @rushstack/eslint-config 3.0.1
+      const version: string = rawEntryId.substring(lastSlashIndex + 1);
+      result.displayText = packageName + ' ' + version;
+      result.entryPackageVersion = version;
+    }
+  }
+
+  // Example: @babel+register@7.17.7_@babel+core@7.17.12
+  const dotPnpmSubfolder: string =
+    result.entryPackageName.replace('/', '+') +
+    '@' +
+    result.entryPackageVersion +
+    (result.entrySuffix ? `_${result.entrySuffix}` : '');
+
+  // Example:
+  //   common/temp/default/node_modules/.pnpm
+  //     /@babel+register@7.17.7_@babel+core@7.17.12
+  //     /node_modules/@babel/register
+  result.packageJsonFolderPath = lockfilePath.join(
+    pnpmLockfileFolder,
+    `node_modules/.pnpm/` + dotPnpmSubfolder + '/node_modules/' + result.entryPackageName
+  );
 
   const lockfileEntry: LfxGraphEntry = new LfxGraphEntry(result);
   parseDependencies(lockfileEntry.dependencies, lockfileEntry, rawYamlData, workspace);
@@ -269,8 +303,7 @@ export function generateLockfileGraph(lockfileJson: unknown, workspace: IJsonLfx
       const importerValue: lockfileTypes.ProjectSnapshot =
         lockfile.importers[importerKey as pnpmTypes.ProjectId];
 
-      const importer: LfxGraphEntry = createLockfileEntry({
-        kind: LfxGraphEntryKind.Project,
+      const importer: LfxGraphEntry = createProjectLockfileEntry({
         rawEntryId: importerKey,
         rawYamlData: importerValue,
         duplicates,
@@ -288,8 +321,7 @@ export function generateLockfileGraph(lockfileJson: unknown, workspace: IJsonLfx
     for (const [dependencyKey, dependencyValue] of Object.entries(lockfile.packages ?? {})) {
       // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
 
-      const currEntry: LfxGraphEntry = createLockfileEntry({
-        kind: LfxGraphEntryKind.Package,
+      const currEntry: LfxGraphEntry = createPackageLockfileEntry({
         rawEntryId: dependencyKey,
         rawYamlData: dependencyValue as lockfileTypes.PackageSnapshot,
         workspace,
