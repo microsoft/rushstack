@@ -193,9 +193,6 @@ importers:
 
   ../../../apps/lockfile-explorer:
     dependencies:
-      '@lifaon/path':
-        specifier: ~2.1.0
-        version: 2.1.0
       '@microsoft/rush-lib':
         specifier: workspace:*
         version: link:../../libraries/rush-lib
@@ -10172,10 +10169,6 @@ packages:
 
   /@leichtgewicht/ip-codec@2.0.4:
     resolution: {integrity: sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==}
-    dev: false
-
-  /@lifaon/path@2.1.0:
-    resolution: {integrity: sha512-E+eJpDdwenIQCaYMMuCnteR34qAvXtHhHKjZOPB+hK4+R1yGcmWLLAEl2aklxCHx6w5VCKc8imx9AT05FGHhBw==}
     dev: false
 
   /@mdx-js/loader@1.6.22(react@17.0.2):
