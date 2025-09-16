@@ -1,0 +1,4 @@
+{
+  "extends": "local-node-rig/profiles/default/config/jest.config.json",
+  "setupFilesAfterEnv": ["<rootDir>/config/jestSymbolDispose.js"]
+}
