@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { Path } from '@lifaon/path';
+import type * as lockfileTypes from '@pnpm/lockfile-types';
+import type * as pnpmTypes from '@pnpm/types';
 
 import {
   type ILfxGraphDependencyOptions,
@@ -21,60 +23,6 @@ enum PnpmLockfileVersion {
   V5
 }
 
-export interface ILockfileImporterV6 {
-  dependencies?: {
-    [key: string]: {
-      specifier: string;
-      version: string;
-    };
-  };
-  devDependencies?: {
-    [key: string]: {
-      specifier: string;
-      version: string;
-    };
-  };
-}
-export interface ILockfileImporterV5 {
-  specifiers?: Record<string, string>;
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-}
-export interface ILockfilePackageType {
-  lockfileVersion: number | string;
-  importers?: {
-    [key: string]: ILockfileImporterV5 | ILockfileImporterV6;
-  };
-  packages?: {
-    [key: string]: {
-      resolution: {
-        integrity: string;
-      };
-      dependencies?: Record<string, string>;
-      peerDependencies?: Record<string, string>;
-      dev: boolean;
-    };
-  };
-}
-
-export interface ILockfileNode {
-  dependencies?: {
-    [key: string]: string;
-  };
-  devDependencies?: {
-    [key: string]: string;
-  };
-  peerDependencies?: {
-    [key: string]: string;
-  };
-  peerDependenciesMeta?: {
-    [key: string]: {
-      optional: boolean;
-    };
-  };
-  transitivePeerDependencies?: string[];
-}
-
 const packageEntryIdRegex: RegExp = new RegExp('/(.*)/([^/]+)$');
 
 function createLockfileDependency(
@@ -82,7 +30,7 @@ function createLockfileDependency(
   version: string,
   dependencyType: LfxDependencyKind,
   containingEntry: LfxGraphEntry,
-  node?: ILockfileNode
+  node?: lockfileTypes.PackageSnapshot
 ): LfxGraphDependency {
   const result: ILfxGraphDependencyOptions = {
     name,
@@ -129,8 +77,10 @@ function createLockfileDependency(
 function parseDependencies(
   dependencies: LfxGraphDependency[],
   lockfileEntry: LfxGraphEntry,
-  node: ILockfileNode
+  either: lockfileTypes.ProjectSnapshot | lockfileTypes.PackageSnapshot
 ): void {
+  const node: lockfileTypes.ProjectSnapshot & lockfileTypes.PackageSnapshot =
+    either as unknown as lockfileTypes.ProjectSnapshot & lockfileTypes.PackageSnapshot;
   if (node.dependencies) {
     for (const [pkgName, pkgVersion] of Object.entries(node.dependencies)) {
       dependencies.push(
@@ -160,7 +110,7 @@ function parseDependencies(
 function createLockfileEntry(options: {
   rawEntryId: string;
   kind: LfxGraphEntryKind;
-  rawYamlData: ILockfileNode;
+  rawYamlData: lockfileTypes.PackageSnapshot | lockfileTypes.ProjectSnapshot;
   duplicates?: Set<string>;
   subspaceName?: string;
 }): LfxGraphEntry {
@@ -256,37 +206,6 @@ function createLockfileEntry(options: {
 }
 
 /**
- * Transform any newer lockfile formats to the following format:
- * [packageName]:
- *     specifier: ...
- *     version: ...
- */
-function getImporterValue(
-  importerValue: ILockfileImporterV5 | ILockfileImporterV6,
-  pnpmLockfileVersion: PnpmLockfileVersion
-): ILockfileImporterV5 {
-  if (pnpmLockfileVersion === PnpmLockfileVersion.V6) {
-    const v6ImporterValue: ILockfileImporterV6 = importerValue as ILockfileImporterV6;
-    const v5ImporterValue: ILockfileImporterV5 = {
-      specifiers: {},
-      dependencies: {},
-      devDependencies: {}
-    };
-    for (const [depName, depDetails] of Object.entries(v6ImporterValue.dependencies ?? {})) {
-      v5ImporterValue.specifiers![depName] = depDetails.specifier;
-      v5ImporterValue.dependencies![depName] = depDetails.version;
-    }
-    for (const [depName, depDetails] of Object.entries(v6ImporterValue.devDependencies ?? {})) {
-      v5ImporterValue.specifiers![depName] = depDetails.specifier;
-      v5ImporterValue.devDependencies![depName] = depDetails.version;
-    }
-    return v5ImporterValue;
-  } else {
-    return importerValue as ILockfileImporterV5;
-  }
-}
-
-/**
  * Parse through the lockfile and create all the corresponding LockfileEntries and LockfileDependencies
  * to construct the lockfile graph.
  *
@@ -294,18 +213,19 @@ function getImporterValue(
  */
 export function generateLockfileGraph(
   workspace: IJsonLfxWorkspace,
-  lockfile: ILockfilePackageType,
+  lockfileJson: unknown,
   subspaceName?: string
 ): LfxGraph {
+  const lockfile: lockfileTypes.Lockfile = lockfileJson as lockfileTypes.Lockfile;
   let pnpmLockfileVersion: PnpmLockfileVersion = PnpmLockfileVersion.V5;
   if (parseInt(lockfile.lockfileVersion.toString(), 10) === 6) {
     pnpmLockfileVersion = PnpmLockfileVersion.V6;
   }
 
   if (lockfile.packages && pnpmLockfileVersion === PnpmLockfileVersion.V6) {
-    const updatedPackages: ILockfilePackageType['packages'] = {};
+    const updatedPackages: lockfileTypes.PackageSnapshots = {};
     for (const [dependencyPath, dependency] of Object.entries(lockfile.packages)) {
-      updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath)] = dependency;
+      updatedPackages[convertLockfileV6DepPathToV5DepPath(dependencyPath) as pnpmTypes.DepPath] = dependency;
     }
     lockfile.packages = updatedPackages;
   }
@@ -337,7 +257,7 @@ export function generateLockfileGraph(
         // entryId: normalizedPath,
         rawEntryId: importerKey,
         kind: LfxGraphEntryKind.Project,
-        rawYamlData: getImporterValue(importerValue, pnpmLockfileVersion),
+        rawYamlData: importerValue,
         duplicates,
         subspaceName
       });
@@ -349,14 +269,14 @@ export function generateLockfileGraph(
 
   const allPackages: LfxGraphEntry[] = [];
   if (lockfile.packages) {
-    for (const [dependencyKey, dependencyValue] of Object.entries(lockfile.packages)) {
+    for (const [dependencyKey, dependencyValue] of Object.entries(lockfile.packages ?? {})) {
       // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
 
       const currEntry: LfxGraphEntry = createLockfileEntry({
         // entryId: normalizedPath,
         rawEntryId: dependencyKey,
         kind: LfxGraphEntryKind.Package,
-        rawYamlData: dependencyValue,
+        rawYamlData: dependencyValue as lockfileTypes.PackageSnapshot,
         subspaceName
       });
 

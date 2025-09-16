@@ -23,7 +23,7 @@ export async function loadAndSerializeLFxGraphAsync(options: {
     FIXTURES_FOLDER + options.lockfilePathUnderFixtures,
     { convertLineEndings: NewlineKind.Lf }
   );
-  const lockfileObject = yaml.load(lockfileYaml) as lfxGraphLoader.ILockfilePackageType;
+  const lockfileObject = yaml.load(lockfileYaml);
   const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(options.workspace, lockfileObject);
   const serializedObject: IJsonLfxGraph = lfxGraphSerializer.serializeToJson(graph);
   const serializedYaml: string = yaml.dump(serializedObject, {

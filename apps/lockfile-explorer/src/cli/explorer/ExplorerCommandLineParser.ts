@@ -15,7 +15,6 @@ import {
   CommandLineParser,
   type IRequiredCommandLineStringParameter
 } from '@rushstack/ts-command-line';
-import type { Lockfile } from '@pnpm/lockfile-types';
 import {
   type LfxGraph,
   lfxGraphSerializer,
@@ -152,11 +151,11 @@ export class ExplorerCommandLineParser extends CommandLineParser {
 
     app.get('/api/graph', async (req: express.Request, res: express.Response) => {
       const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
-      const lockfile: Lockfile = yaml.load(pnpmLockfileText) as Lockfile;
+      const lockfile: unknown = yaml.load(pnpmLockfileText) as unknown;
 
       const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(
         appState.lfxWorkspace,
-        lockfile as lfxGraphLoader.ILockfilePackageType,
+        lockfile,
         appState.lfxWorkspace.rushConfig?.subspaceName ?? ''
       );
 
