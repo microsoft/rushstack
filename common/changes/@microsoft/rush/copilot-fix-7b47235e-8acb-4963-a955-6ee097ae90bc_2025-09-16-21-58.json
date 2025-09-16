@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Replace uuid package dependency with Node.js built-in crypto.randomUUID",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "198982749+Copilot@users.noreply.github.com"
+}
