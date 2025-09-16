@@ -292,7 +292,10 @@ export class OperationExecutionManager {
       async (record: OperationExecutionRecord) => {
         if (abortSignal.aborted) {
           record.status = OperationStatus.Aborted;
-          this._onOperationComplete(record);
+          // Bypass the normal completion handler, directly mark the operation as aborted and unblock the queue.
+          // We do this to ensure that we aren't messing with the stopwatch or terminal.
+          this._hasAnyAborted = true;
+          this._executionQueue.complete(record);
         } else {
           await record.executeAsync({
             onStart: onOperationStartAsync,
