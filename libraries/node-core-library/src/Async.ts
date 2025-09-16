@@ -14,7 +14,8 @@ export interface IAsyncParallelismOptions {
   /**
    * Optionally used with the  {@link (Async:class).(mapAsync:1)}, {@link (Async:class).(mapAsync:2)} and
    * {@link (Async:class).(forEachAsync:1)}, and {@link (Async:class).(forEachAsync:2)} to limit the maximum
-   * number of concurrent promises to the specified number.
+   * number of concurrent promises to the specified number. Individual operations may exceed this
+   * limit based on their `allowOversubscription` property.
    */
   concurrency?: number;
 
@@ -82,12 +83,25 @@ export interface IWeighted {
    *  Must be a whole number greater than or equal to 0.
    */
   weight: number;
+
+  /**
+   * Controls whether this operation can start even if doing so would exceed the total concurrency limit.
+   * If true (default), will start the operation even when it would exceed the limit.
+   * If false, waits until sufficient capacity is available.
+   */
+  allowOversubscription?: boolean;
+}
+
+interface IWeightedWrapper<TElement> {
+  allowOversubscription?: boolean;
+  element: TElement;
+  weight: number;
 }
 
 function toWeightedIterator<TEntry>(
   iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
   useWeights?: boolean
-): AsyncIterable<{ element: TEntry; weight: number }> {
+): AsyncIterable<IWeightedWrapper<TEntry>> {
   const iterator: Iterator<TEntry> | AsyncIterator<TEntry, TEntry> = (
     (iterable as Iterable<TEntry>)[Symbol.iterator] ||
     (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
@@ -99,7 +113,11 @@ function toWeightedIterator<TEntry>(
         // The await is necessary here, but TS will complain - it's a false positive.
         const { value, done } = await iterator.next();
         return {
-          value: { element: value, weight: useWeights ? value?.weight : 1 },
+          value: {
+            allowOversubscription: value?.allowOversubscription ?? true,
+            element: value,
+            weight: useWeights ? value?.weight : 1
+          },
           done: !!done
         };
       }
@@ -184,7 +202,7 @@ export class Async {
     return result;
   }
 
-  private static async _forEachWeightedAsync<TReturn, TEntry extends { weight: number; element: TReturn }>(
+  private static async _forEachWeightedAsync<TReturn, TEntry extends IWeightedWrapper<TReturn>>(
     iterable: AsyncIterable<TEntry>,
     callback: (entry: TReturn, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions | undefined
@@ -231,8 +249,8 @@ export class Async {
 
             // Wait until there's enough capacity to run this job, this function will be re-entered as tasks call `onOperationCompletionAsync`
             const wouldExceedConcurrency: boolean = concurrentUnitsInProgress + weight > concurrency;
-            const hasRunningTasks: boolean = concurrentUnitsInProgress > 0;
-            if (wouldExceedConcurrency && hasRunningTasks) {
+            const allowOversubscription: boolean = currentIteratorValue.allowOversubscription ?? true;
+            if (!allowOversubscription && wouldExceedConcurrency) {
               // eslint-disable-next-line require-atomic-updates
               nextIterator = currentIteratorResult;
               break;
@@ -320,6 +338,7 @@ export class Async {
    * number of concurrency units that can be in progress at once. The weight of each operation
    * determines how many concurrency units it takes up. For example, if the concurrency is 2
    * and the first operation has a weight of 2, then only one more operation can be in progress.
+   * Operations may exceed the concurrency limit based on their `allowOversubscription` property.
    *
    * If `callback` throws a synchronous exception, or if it returns a promise that rejects,
    * then the loop stops immediately.  Any remaining array items will be skipped, and

@@ -146,6 +146,13 @@ export interface IOperationSettings {
    * If true, this operation will never be skipped by the `--changed-projects-only` flag.
    */
   ignoreChangedProjectsOnlyFlag?: boolean;
+
+  /**
+   * Controls whether this operation can start even if doing so would exceed the total concurrency limit.
+   * If true (default), will start the operation even when it would exceed the limit.
+   * If false, waits until sufficient capacity is available.
+   */
+  allowOversubscription?: boolean;
 }
 
 interface IOldRushProjectJson {

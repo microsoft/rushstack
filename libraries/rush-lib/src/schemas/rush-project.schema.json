@@ -110,6 +110,10 @@
           "ignoreChangedProjectsOnlyFlag": {
             "type": "boolean",
             "description": "If true, this operation never be skipped by the `--changed-projects-only` flag. This is useful for projects that bundle code from other packages."
+          },
+          "allowOversubscription": {
+            "type": "boolean",
+            "description": "If true, allows this operation to start even if doing so would exceed the maximum concurrency limit determined by the -p flag. If false, waits until sufficient capacity is available. Defaults to true to maintain the original behavior where the concurrency limit could be exceeded."
           }
         }
       }

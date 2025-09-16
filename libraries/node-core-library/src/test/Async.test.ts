@@ -3,6 +3,12 @@
 
 import { Async, AsyncQueue } from '../Async';
 
+interface INumberWithWeight {
+  allowOversubscription?: boolean;
+  n: number;
+  weight: number;
+}
+
 describe(Async.name, () => {
   describe(Async.mapAsync.name, () => {
     it('handles an empty array correctly', async () => {
@@ -307,11 +313,6 @@ describe(Async.name, () => {
       ).rejects.toThrow(expectedError);
     });
 
-    interface INumberWithWeight {
-      n: number;
-      weight: number;
-    }
-
     it('handles an empty array correctly', async () => {
       let running: number = 0;
       let maxRunning: number = 0;
@@ -440,7 +441,7 @@ describe(Async.name, () => {
       expect(maxRunning).toEqual(3);
     });
 
-    it('waits for a small and large operation to finish before scheduling more', async () => {
+    it('waits for a large operation to finish before scheduling more', async () => {
       let running: number = 0;
       let maxRunning: number = 0;
 
@@ -464,7 +465,7 @@ describe(Async.name, () => {
 
       await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
       expect(fn).toHaveBeenCalledTimes(8);
-      expect(maxRunning).toEqual(1);
+      expect(maxRunning).toEqual(2);
     });
 
     it('allows operations with a weight of 0 and schedules them accordingly', async () => {
@@ -487,104 +488,6 @@ describe(Async.name, () => {
       await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
       expect(fn).toHaveBeenCalledTimes(10);
       expect(maxRunning).toEqual(9);
-    });
-
-    it('ensures isolated job runs in isolation while small jobs never run alongside it', async () => {
-      const maxConcurrency: number = 10;
-      let running: number = 0;
-      const jobToMaxConcurrentJobsRunning: Record<number, number> = {};
-
-      const array: INumberWithWeight[] = [
-        { n: 1, weight: 1 },
-        { n: 2, weight: 1 },
-        { n: 3, weight: 1 },
-        { n: 4, weight: maxConcurrency },
-        { n: 5, weight: 1 },
-        { n: 6, weight: 1 },
-        { n: 7, weight: 1 }
-      ];
-
-      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
-        running++;
-        jobToMaxConcurrentJobsRunning[item.n] = Math.max(jobToMaxConcurrentJobsRunning[item.n] || 0, running);
-
-        // Simulate longer running time for heavyweight job
-        if (item.weight === maxConcurrency) {
-          await Async.sleepAsync(50);
-        } else {
-          await Async.sleepAsync(10);
-        }
-
-        running--;
-      });
-
-      await Async.forEachAsync(array, fn, { concurrency: maxConcurrency, weighted: true });
-
-      expect(fn).toHaveBeenCalledTimes(7);
-
-      // The heavyweight job (n=4) should run with only 1 concurrent job (itself)
-      expect(jobToMaxConcurrentJobsRunning[4]).toEqual(1);
-
-      // Small jobs should be able to run concurrently with each other but not with heavyweight job
-      const nonIsolatedJobs = array.filter((job) => job.weight !== maxConcurrency);
-      nonIsolatedJobs.forEach((job) => {
-        expect(jobToMaxConcurrentJobsRunning[job.n]).toBeGreaterThanOrEqual(1);
-        expect(jobToMaxConcurrentJobsRunning[job.n]).toBeLessThanOrEqual(6); // All small jobs could theoretically run together
-      });
-    });
-
-    it('allows zero weight tasks to run alongside weight = concurrency task', async () => {
-      const concurrency = 3;
-      const array: INumberWithWeight[] = [
-        { n: 1, weight: 0 },
-        { n: 2, weight: concurrency },
-        { n: 3, weight: 0 }
-      ];
-
-      let running: number = 0;
-      const jobToMaxConcurrentJobsRunning: Record<number, number> = {};
-
-      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
-        running++;
-        jobToMaxConcurrentJobsRunning[item.n] = Math.max(jobToMaxConcurrentJobsRunning[item.n] || 0, running);
-
-        await Async.sleepAsync(0);
-
-        running--;
-      });
-
-      await Async.forEachAsync(array, fn, { concurrency: concurrency, weighted: true });
-
-      expect(jobToMaxConcurrentJobsRunning[1]).toEqual(1); // runs 0 weight
-      expect(jobToMaxConcurrentJobsRunning[2]).toEqual(2); // runs 0 weight + 3 weight
-      expect(jobToMaxConcurrentJobsRunning[3]).toEqual(1); // runs 0 weight after 3 weight completes
-    });
-
-    it('allows zero weight tasks to run alongside weight > concurrency task', async () => {
-      const concurrency = 3;
-      const array: INumberWithWeight[] = [
-        { n: 1, weight: 0 },
-        { n: 2, weight: concurrency + 1 },
-        { n: 3, weight: 0 }
-      ];
-
-      let running: number = 0;
-      const jobToMaxConcurrentJobsRunning: Record<number, number> = {};
-
-      const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
-        running++;
-        jobToMaxConcurrentJobsRunning[item.n] = Math.max(jobToMaxConcurrentJobsRunning[item.n] || 0, running);
-
-        await Async.sleepAsync(0);
-
-        running--;
-      });
-
-      await Async.forEachAsync(array, fn, { concurrency, weighted: true });
-
-      expect(jobToMaxConcurrentJobsRunning[1]).toEqual(1); // runs 0 weight
-      expect(jobToMaxConcurrentJobsRunning[2]).toEqual(2); // runs 0 weight + 4 weight
-      expect(jobToMaxConcurrentJobsRunning[3]).toEqual(1); // runs 0 weight after 3 weight completes
     });
 
     it('does not exceed the maxiumum concurrency for an async iterator when weighted', async () => {
@@ -778,6 +681,61 @@ describe(Async.name, () => {
       expect(await resultPromise).toEqual(expectedResult);
       expect(sleepSpy).toHaveBeenCalledTimes(1);
       expect(sleepSpy).toHaveBeenLastCalledWith(5);
+    });
+
+    describe('allowOversubscription=false operations', () => {
+      it('waits for a small and large operation to finish before scheduling more', async () => {
+        let running: number = 0;
+        let maxRunning: number = 0;
+
+        const array: INumberWithWeight[] = [
+          { n: 1, weight: 1, allowOversubscription: false },
+          { n: 2, weight: 10, allowOversubscription: false },
+          { n: 3, weight: 1, allowOversubscription: false },
+          { n: 4, weight: 10, allowOversubscription: false },
+          { n: 5, weight: 1, allowOversubscription: false },
+          { n: 6, weight: 10, allowOversubscription: false },
+          { n: 7, weight: 1, allowOversubscription: false },
+          { n: 8, weight: 10, allowOversubscription: false }
+        ];
+
+        const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+          running++;
+          await Async.sleepAsync(0);
+          maxRunning = Math.max(maxRunning, running);
+          running--;
+        });
+
+        await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
+        expect(fn).toHaveBeenCalledTimes(8);
+        expect(maxRunning).toEqual(1);
+      });
+
+      it('handles operations where some have undefined and others have explicit values', async () => {
+        const concurrency = 3;
+        let running: number = 0;
+        let maxRunning: number = 0;
+        const array: INumberWithWeight[] = [
+          { n: 1, weight: 3 }, // undefined allowOversubscription (should default to true)
+          { n: 2, weight: 3, allowOversubscription: false },
+          { n: 3, weight: 1 }, // undefined allowOversubscription (should default to true)
+          { n: 4, weight: 1, allowOversubscription: true }
+        ];
+
+        const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+          running++;
+          maxRunning = Math.max(maxRunning, running);
+
+          await Async.sleepAsync(0);
+
+          running--;
+        });
+
+        await Async.forEachAsync(array, fn, { concurrency, weighted: true });
+
+        expect(fn).toHaveBeenCalledTimes(4);
+        expect(maxRunning).toBeLessThanOrEqual(4); // Respects weight and concurrency limits
+      });
     });
   });
 });

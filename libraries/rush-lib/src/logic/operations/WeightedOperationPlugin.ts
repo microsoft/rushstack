@@ -15,7 +15,7 @@ import { Async } from '@rushstack/node-core-library';
 const PLUGIN_NAME: 'WeightedOperationPlugin' = 'WeightedOperationPlugin';
 
 /**
- * Add weights to operations based on the operation settings in rush-project.json.
+ * Add weights and concurrency behavior to operations based on the operation settings in rush-project.json.
  *
  * This also sets the weight of no-op operations to 0.
  */
@@ -42,6 +42,9 @@ function weightOperations(
         operation.settings ?? projectConfiguration?.operationSettingsByOperationName.get(phase.name);
       if (operationSettings?.weight) {
         operation.weight = operationSettings.weight;
+      }
+      if (operationSettings?.allowOversubscription !== undefined) {
+        operation.allowOversubscription = operationSettings.allowOversubscription;
       }
     }
     Async.validateWeightedIterable(operation);
