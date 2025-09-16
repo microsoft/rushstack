@@ -7,6 +7,7 @@ import * as zlib from 'zlib';
 describe('crc32', () => {
   it('fallbackCrc32 should match zlib.crc32', () => {
     if (!zlib.crc32) {
+      // eslint-disable-next-line no-console
       console.log('Skipping test because zlib.crc32 is not available in this Node.js version');
       return;
     }

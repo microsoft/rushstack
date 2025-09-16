@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as zlib from 'zlib';
+import * as zlib from 'node:zlib';
 
 let crcTable: Uint32Array | undefined;
 
@@ -35,11 +35,5 @@ export function fallbackCrc32(data: Buffer<ArrayBufferLike>, value: number = 0):
   return value;
 }
 
-export function crc32Builder(data: Buffer<ArrayBufferLike>, value: number = 0): number {
-  if (zlib.crc32) {
-    return zlib.crc32(data, value);
-  } else {
-    // Fallback implementation for Node.js versions older than 20
-    return fallbackCrc32(data, value);
-  }
-}
+export const crc32Builder: (data: Buffer<ArrayBufferLike>, value?: number) => number =
+  zlib.crc32 ?? fallbackCrc32;
