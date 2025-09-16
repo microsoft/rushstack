@@ -669,6 +669,7 @@ export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
 
 // @public (undocumented)
 export interface IWeighted {
+    allowOversubscription?: boolean;
     weight: number;
 }
 

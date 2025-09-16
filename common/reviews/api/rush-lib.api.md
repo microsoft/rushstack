@@ -690,6 +690,7 @@ export interface IOperationRunnerContext {
 // @alpha (undocumented)
 export interface IOperationSettings {
     allowCobuildWithoutCache?: boolean;
+    allowOversubscription?: boolean;
     dependsOnAdditionalFiles?: string[];
     dependsOnEnvVars?: string[];
     disableBuildCacheForOperation?: boolean;
@@ -987,6 +988,7 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
 export class Operation {
     constructor(options: IOperationOptions);
     addDependency(dependency: Operation): void;
+    allowOversubscription: boolean;
     readonly associatedPhase: IPhase;
     readonly associatedProject: RushConfigurationProject;
     readonly consumers: ReadonlySet<Operation>;
