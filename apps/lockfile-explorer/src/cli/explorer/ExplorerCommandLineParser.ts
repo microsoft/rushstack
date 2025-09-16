@@ -153,11 +153,7 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
       const lockfile: unknown = yaml.load(pnpmLockfileText) as unknown;
 
-      const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(
-        appState.lfxWorkspace,
-        lockfile,
-        appState.lfxWorkspace.rushConfig?.subspaceName ?? ''
-      );
+      const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(lockfile, appState.lfxWorkspace);
 
       const jsonGraph: IJsonLfxGraph = lfxGraphSerializer.serializeToJson(graph);
       res.type('application/json').send(jsonGraph);

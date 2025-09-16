@@ -386,7 +386,7 @@ export function generateLockfileGraph(lockfileJson: unknown, workspace: IJsonLfx
     for (const importerKey of Object.keys(lockfile.importers)) {
       if (isRushWorkspace && importerKey === '.') {
         // Discard the synthetic package.json file created by Rush under common/temp
-        //        continue;
+        continue;
       }
 
       const importer: LfxGraphEntry = createProjectLockfileEntry({

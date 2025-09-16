@@ -14,20 +14,6 @@ describe('serializeToJson', () => {
 Object {
   "entries": Array [
     Object {
-      "dependencies": Array [],
-      "displayText": "Project: .",
-      "entryId": "project:common/temp/my-subspace",
-      "entryPackageName": ".",
-      "entryPackageVersion": "",
-      "entrySuffix": "",
-      "jsonId": 0,
-      "kind": 1,
-      "packageJsonFolderPath": "common/temp/my-subspace",
-      "rawEntryId": ".",
-      "referrerJsonIds": Array [],
-      "transitivePeerDependencies": Array [],
-    },
-    Object {
       "dependencies": Array [
         Object {
           "dependencyType": "regular",
@@ -38,7 +24,7 @@ Object {
             "optional": undefined,
             "version": undefined,
           },
-          "resolvedEntryJsonId": 2,
+          "resolvedEntryJsonId": 1,
           "version": "1.7.1",
         },
         Object {
@@ -50,7 +36,7 @@ Object {
             "optional": undefined,
             "version": undefined,
           },
-          "resolvedEntryJsonId": 3,
+          "resolvedEntryJsonId": 2,
           "version": "1.7.1",
         },
       ],
@@ -59,7 +45,7 @@ Object {
       "entryPackageName": "testApp1",
       "entryPackageVersion": "",
       "entrySuffix": "",
-      "jsonId": 1,
+      "jsonId": 0,
       "kind": 1,
       "packageJsonFolderPath": "apps/testApp1",
       "rawEntryId": "../../../apps/testApp1",
@@ -73,12 +59,12 @@ Object {
       "entryPackageName": "@testPackage/core",
       "entryPackageVersion": "1.7.1",
       "entrySuffix": "",
-      "jsonId": 2,
+      "jsonId": 1,
       "kind": 2,
       "packageJsonFolderPath": "common/temp/my-subspace/node_modules/.pnpm/@testPackage+core@1.7.1/node_modules/@testPackage/core",
       "rawEntryId": "/@testPackage/core/1.7.1",
       "referrerJsonIds": Array [
-        1,
+        0,
       ],
       "transitivePeerDependencies": Array [],
     },
@@ -89,12 +75,12 @@ Object {
       "entryPackageName": "@testPackage2/core",
       "entryPackageVersion": "1.7.1",
       "entrySuffix": "",
-      "jsonId": 3,
+      "jsonId": 2,
       "kind": 2,
       "packageJsonFolderPath": "common/temp/my-subspace/node_modules/.pnpm/@testPackage2+core@1.7.1/node_modules/@testPackage2/core",
       "rawEntryId": "/@testPackage2/core/1.7.1",
       "referrerJsonIds": Array [
-        1,
+        0,
       ],
       "transitivePeerDependencies": Array [],
     },
