@@ -65,8 +65,7 @@
     "strict-uri-encode": "~2.0.0",
     "tapable": "2.2.1",
     "tar": "~6.2.1",
-    "true-case-path": "~2.2.1",
-    "uuid": "~8.3.2"
+    "true-case-path": "~2.2.1"
   },
   "devDependencies": {
     "@pnpm/lockfile.types": "~1.0.3",
@@ -87,7 +86,6 @@
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "6.1.6",
-    "@types/uuid": "~8.3.4",
     "@types/webpack-env": "1.18.8",
     "webpack": "~5.98.0"
   },

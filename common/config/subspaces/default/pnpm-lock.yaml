@@ -3668,9 +3668,6 @@ importers:
       true-case-path:
         specifier: ~2.2.1
         version: 2.2.1
-      uuid:
-        specifier: ~8.3.2
-        version: 8.3.2
     devDependencies:
       '@pnpm/lockfile.types':
         specifier: ~1.0.3
@@ -3720,9 +3717,6 @@ importers:
       '@types/tar':
         specifier: 6.1.6
         version: 6.1.6
-      '@types/uuid':
-        specifier: ~8.3.4
-        version: 8.3.4
       '@types/webpack-env':
         specifier: 1.18.8
         version: 1.18.8
@@ -14189,10 +14183,6 @@ packages:
   /@types/use-sync-external-store@0.0.3:
     resolution: {integrity: sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==}
     dev: false
-
-  /@types/uuid@8.3.4:
-    resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
-    dev: true
 
   /@types/vscode@1.103.0:
     resolution: {integrity: sha512-o4hanZAQdNfsKecexq9L3eHICd0AAvdbLk6hA60UzGXbGH/q8b/9xv2RgR7vV3ZcHuyKVq7b37IGd/+gM4Tu+Q==}
