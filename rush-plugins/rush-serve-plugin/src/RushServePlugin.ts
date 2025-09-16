@@ -6,7 +6,7 @@ import * as path from 'path';
 import type { IRushPlugin, RushSession, RushConfiguration, IPhasedCommand } from '@rushstack/rush-sdk';
 import { PLUGIN_NAME } from './constants';
 
-import type { IBaseRoutingRuleJson, IRoutingRule } from './RushProjectServeConfigFile';
+import type { IBaseRoutingRuleJson, IRoutingRule } from './types';
 
 export interface IGlobalRoutingFolderRuleJson extends IBaseRoutingRuleJson {
   workspaceRelativeFile: undefined;
