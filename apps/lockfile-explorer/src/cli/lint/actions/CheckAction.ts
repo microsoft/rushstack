@@ -7,7 +7,7 @@ import { RushConfiguration, type RushConfigurationProject, type Subspace } from 
 import path from 'path';
 import yaml from 'js-yaml';
 import semver from 'semver';
-import type * as lockfileTypes from '@pnpm/lockfile-types';
+import type * as lockfileTypes from '@pnpm/lockfile.types';
 import type * as pnpmTypes from '@pnpm/types';
 import { AlreadyReportedError, Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
@@ -41,7 +41,7 @@ export class CheckAction extends CommandLineAction {
 
   private _rushConfiguration!: RushConfiguration;
   private _checkedProjects: Set<RushConfigurationProject>;
-  private _docMap: Map<string, lockfileTypes.Lockfile>;
+  private _docMap: Map<string, lockfileTypes.LockfileObject>;
 
   public constructor(parser: LintCommandLineParser) {
     super({
@@ -104,12 +104,12 @@ export class CheckAction extends CommandLineAction {
     const projectFolder: string = project.projectFolder;
     const subspace: Subspace = project.subspace;
     const shrinkwrapFilename: string = subspace.getCommittedShrinkwrapFilePath();
-    let doc: lockfileTypes.Lockfile;
+    let doc: lockfileTypes.LockfileObject;
     if (this._docMap.has(shrinkwrapFilename)) {
       doc = this._docMap.get(shrinkwrapFilename)!;
     } else {
       const pnpmLockfileText: string = await FileSystem.readFileAsync(shrinkwrapFilename);
-      doc = yaml.load(pnpmLockfileText) as lockfileTypes.Lockfile;
+      doc = yaml.load(pnpmLockfileText) as lockfileTypes.LockfileObject;
       this._docMap.set(shrinkwrapFilename, doc);
     }
     const { importers, lockfileVersion, packages } = doc;

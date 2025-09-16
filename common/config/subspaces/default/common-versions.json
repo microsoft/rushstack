@@ -78,6 +78,9 @@
    * This design avoids unnecessary churn in this file.
    */
   "allowedAlternativeVersions": {
+    // Allow Lockfile Explorer to support PNPM 9.x
+    // TODO: Remove this after Rush adds support for PNPM 9.x
+    "@pnpm/lockfile.types": ["1002.0.1"],
     "@typescript-eslint/parser": [
       "~6.19.0" // Used by build-tests/eslint-7(-*)-test / build-tests/eslint-bulk-suppressions-test-legacy
     ],

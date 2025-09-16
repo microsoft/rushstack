@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type * as lockfileTypes from '@pnpm/lockfile-types';
+import type * as lockfileTypes from '@pnpm/lockfile.types';
 import type * as pnpmTypes from '@pnpm/types';
 
 import {
@@ -253,7 +253,7 @@ function createPackageLockfileEntry(options: {
  * @returns A list of all the LockfileEntries in the lockfile.
  */
 export function generateLockfileGraph(lockfileJson: unknown, workspace: IJsonLfxWorkspace): LfxGraph {
-  const lockfile: lockfileTypes.Lockfile = lockfileJson as lockfileTypes.Lockfile;
+  const lockfile: lockfileTypes.LockfileObject = lockfileJson as lockfileTypes.LockfileObject;
 
   let pnpmLockfileVersion: PnpmLockfileVersion;
   switch (lockfile.lockfileVersion.toString()) {

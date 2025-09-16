@@ -233,9 +233,9 @@ importers:
         specifier: ~5.1.0
         version: 5.1.0
     devDependencies:
-      '@pnpm/lockfile-types':
-        specifier: 7.1.3
-        version: 7.1.3
+      '@pnpm/lockfile.types':
+        specifier: 1002.0.1
+        version: 1002.0.1
       '@pnpm/types':
         specifier: 1000.8.0
         version: 1000.8.0
@@ -10487,19 +10487,21 @@ packages:
       ramda: 0.27.2
     dev: false
 
-  /@pnpm/lockfile-types@7.1.3:
-    resolution: {integrity: sha512-ifMGKjiBFweZiI9nRYw+N4oP42tDaxHGzla/fuEqn8rOLzITJKfD9G2KfF7u8ZfZyW9lHFL/FsN9t1+q6L+qyQ==}
-    engines: {node: '>=18.12'}
-    dependencies:
-      '@pnpm/types': 11.1.0
-    dev: true
-
   /@pnpm/lockfile.types@1.0.3:
     resolution: {integrity: sha512-A7vUWktnhDkrIs+WmXm7AdffJVyVYJpQUEouya/DYhB+Y+tQ3BXjZ6CV0KybqLgI/8AZErgCJqFxA0GJH6QDjA==}
     engines: {node: '>=18.12'}
     dependencies:
       '@pnpm/patching.types': 1.0.0
       '@pnpm/types': 12.2.0
+
+  /@pnpm/lockfile.types@1002.0.1:
+    resolution: {integrity: sha512-anzBtzb78rf2KRExS8R38v4nyiU7b9ZMUsyzRdWpo+rfCmLUupjIxvasVlDgsf5pV7tbcBPASOamQ2G5V8IGAQ==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/patching.types': 1000.1.0
+      '@pnpm/resolver-base': 1005.0.1
+      '@pnpm/types': 1000.8.0
+    dev: true
 
   /@pnpm/logger@4.0.0:
     resolution: {integrity: sha512-SIShw+k556e7S7tLZFVSIHjCdiVog1qWzcKW2RbLEHPItdisAFVNIe34kYd9fMSswTlSRLS/qRjw3ZblzWmJ9Q==}
@@ -10521,6 +10523,11 @@ packages:
   /@pnpm/patching.types@1.0.0:
     resolution: {integrity: sha512-juCdQCC1USqLcOhVPl1tYReoTO9YH4fTullMnFXXcmpsDM7Dkn3tzuOQKC3oPoJ2ozv+0EeWWMtMGqn2+IM3pQ==}
     engines: {node: '>=18.12'}
+
+  /@pnpm/patching.types@1000.1.0:
+    resolution: {integrity: sha512-Zib2ysLctRnWM4KXXlljR44qSKwyEqYmLk+8VPBDBEK3l5Gp5mT3N4ix9E4qjYynvFqahumsxzOfxOYQhUGMGw==}
+    engines: {node: '>=18.12'}
+    dev: true
 
   /@pnpm/read-modules-dir@2.0.3:
     resolution: {integrity: sha512-i9OgRvSlxrTS9a2oXokhDxvQzDtfqtsooJ9jaGoHkznue5aFCTSrNZFQ6M18o8hC03QWfnxaKi0BtOvNkKu2+A==}
@@ -10557,6 +10564,13 @@ packages:
       strip-bom: 4.0.0
     dev: false
 
+  /@pnpm/resolver-base@1005.0.1:
+    resolution: {integrity: sha512-NBha12KjFMKwaG1BWTCtgr/RprNQhXItCBkzc8jZuVU0itAHRQhEykexna9K8XjAtYxZ9rhvir0T5a7fTB23yQ==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/types': 1000.8.0
+    dev: true
+
   /@pnpm/types@1000.6.0:
     resolution: {integrity: sha512-6PsMNe98VKPGcg6LnXSW/LE3YfJ77nj+bPKiRjYRWAQLZ+xXjEQRaR0dAuyjCmchlv4wR/hpnMVRS21/fCod5w==}
     engines: {node: '>=18.12'}
@@ -10564,11 +10578,6 @@ packages:
 
   /@pnpm/types@1000.8.0:
     resolution: {integrity: sha512-yx86CGHHquWAI0GgKIuV/RnYewcf5fVFZemC45C/K2cX0uV8GB8TUP541ZrokWola2fZx5sn1vL7xzbceRZfoQ==}
-    engines: {node: '>=18.12'}
-    dev: true
-
-  /@pnpm/types@11.1.0:
-    resolution: {integrity: sha512-wnlOhu7hjv9/qsf2cbK0YqpaV9c4LS69Utxd+r8hq/GWhyrOHcM1QOlfQb0Mzci0q4DDgB8VXT4dhBnEBL4c5g==}
     engines: {node: '>=18.12'}
     dev: true
 

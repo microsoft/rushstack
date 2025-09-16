@@ -6,8 +6,9 @@ import type { IJsonLfxWorkspace } from '../../../build/lfx-shared';
 import * as graphTestHelpers from './graphTestHelpers';
 
 export const workspace: IJsonLfxWorkspace = {
-  workspaceRootFolder: '/repo',
+  workspaceRootFullPath: '/repo',
   pnpmLockfilePath: 'common/temp/pnpm-lock.yaml',
+  pnpmLockfileFolder: 'common/temp',
   rushConfig: {
     rushVersion: '5.158.1',
     subspaceName: ''
