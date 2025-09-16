@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/rush",
       "comment": "add allowOversubscription option to prevent running tasks from exceeding concurrency",
-      "type": "none"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/rush"

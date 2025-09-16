@@ -60,6 +60,31 @@ describe(Async.name, () => {
       expect(maxRunning).toEqual(3);
     });
 
+    it('respects concurrency limit with allowOversubscription=false in mapAsync', async () => {
+      const array: INumberWithWeight[] = [
+        { n: 1, weight: 2, allowOversubscription: false },
+        { n: 2, weight: 2, allowOversubscription: false }
+      ];
+
+      let running = 0;
+      let maxRunning = 0;
+
+      const result = await Async.mapAsync(
+        array,
+        async (item) => {
+          running++;
+          maxRunning = Math.max(maxRunning, running);
+          await Async.sleepAsync(0);
+          running--;
+          return `result-${item.n}`;
+        },
+        { concurrency: 3, weighted: true }
+      );
+
+      expect(result).toEqual(['result-1', 'result-2']);
+      expect(maxRunning).toEqual(1);
+    });
+
     it('rejects if a sync iterator throws an error', async () => {
       const expectedError: Error = new Error('iterator error');
       let iteratorIndex: number = 0;
@@ -536,6 +561,10 @@ describe(Async.name, () => {
   });
 
   describe(Async.runWithRetriesAsync.name, () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
     it('Correctly handles a sync function that succeeds the first time', async () => {
       const expectedResult: string = 'RESULT';
       const result: string = await Async.runWithRetriesAsync({ action: () => expectedResult, maxRetries: 0 });
@@ -684,6 +713,76 @@ describe(Async.name, () => {
     });
 
     describe('allowOversubscription=false operations', () => {
+      it.each([
+        {
+          concurrency: 4,
+          weight: 4,
+          expectedConcurrency: 1,
+          numberOfTasks: 4
+        },
+        {
+          concurrency: 4,
+          weight: 1,
+          expectedConcurrency: 4,
+          numberOfTasks: 4
+        },
+        {
+          concurrency: 4,
+          weight: 5,
+          expectedConcurrency: 1,
+          numberOfTasks: 2
+        }
+      ])(
+        'enforces strict concurrency limits when allowOversubscription=false: concurrency=$concurrency, weight=$weight, expects max $expectedConcurrency concurrent operations',
+        async ({ concurrency, weight, expectedConcurrency, numberOfTasks }) => {
+          let running: number = 0;
+          let maxRunning: number = 0;
+
+          const array: INumberWithWeight[] = Array.from({ length: numberOfTasks }, (v, i) => i).map((n) => ({
+            n,
+            weight,
+            allowOversubscription: false
+          }));
+
+          const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async () => {
+            running++;
+            await Async.sleepAsync(0);
+            maxRunning = Math.max(maxRunning, running);
+            running--;
+          });
+
+          await Async.forEachAsync(array, fn, { concurrency, weighted: true });
+          expect(fn).toHaveBeenCalledTimes(numberOfTasks);
+          expect(maxRunning).toEqual(expectedConcurrency);
+        }
+      );
+
+      it('handles mixed weights enforcing a strict concurrency limit', async () => {
+        let running = 0;
+        let maxRunning = 0;
+        const startOrder: number[] = [];
+
+        const array: INumberWithWeight[] = [
+          { n: 1, weight: 1, allowOversubscription: false },
+          { n: 2, weight: 3, allowOversubscription: false },
+          { n: 3, weight: 1, allowOversubscription: false },
+          { n: 4, weight: 2, allowOversubscription: false }
+        ];
+
+        const fn = jest.fn(async (item: INumberWithWeight) => {
+          running++;
+          startOrder.push(item.n);
+          maxRunning = Math.max(maxRunning, running);
+          await Async.sleepAsync(0);
+          running--;
+        });
+
+        await Async.forEachAsync(array, fn, { concurrency: 4, weighted: true });
+
+        expect(fn).toHaveBeenCalledTimes(4);
+        expect(maxRunning).toEqual(2); // Max should be limited by weight 3 task
+      });
+
       it('waits for a small and large operation to finish before scheduling more', async () => {
         let running: number = 0;
         let maxRunning: number = 0;
@@ -711,30 +810,37 @@ describe(Async.name, () => {
         expect(maxRunning).toEqual(1);
       });
 
-      it('handles operations where some have undefined and others have explicit values', async () => {
-        const concurrency = 3;
+      it('handles operations with mixed values of allowOversubscription', async () => {
+        const concurrency: number = 3;
         let running: number = 0;
         let maxRunning: number = 0;
+        const taskToMaxConcurrency: Record<number, number> = {};
+
         const array: INumberWithWeight[] = [
-          { n: 1, weight: 3 }, // undefined allowOversubscription (should default to true)
-          { n: 2, weight: 3, allowOversubscription: false },
-          { n: 3, weight: 1 }, // undefined allowOversubscription (should default to true)
-          { n: 4, weight: 1, allowOversubscription: true }
+          { n: 1, weight: 1 }, // undefined allowOversubscription (should default to true)
+          { n: 2, weight: 2 }, // undefined allowOversubscription (should default to true)
+          { n: 3, weight: concurrency, allowOversubscription: false },
+          { n: 4, weight: 1 }, // undefined allowOversubscription (should default to true)
+          { n: 5, weight: 1, allowOversubscription: true }
         ];
 
         const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
           running++;
-          maxRunning = Math.max(maxRunning, running);
-
+          taskToMaxConcurrency[item.n] = running;
           await Async.sleepAsync(0);
-
+          maxRunning = Math.max(maxRunning, running);
           running--;
         });
 
         await Async.forEachAsync(array, fn, { concurrency, weighted: true });
+        expect(fn).toHaveBeenCalledTimes(5);
+        expect(maxRunning).toEqual(2);
 
-        expect(fn).toHaveBeenCalledTimes(4);
-        expect(maxRunning).toBeLessThanOrEqual(4); // Respects weight and concurrency limits
+        expect(taskToMaxConcurrency[1]).toEqual(1); // task 1 + 2
+        expect(taskToMaxConcurrency[2]).toEqual(2); // task 1 + 2
+        expect(taskToMaxConcurrency[3]).toEqual(1); // task 3 (allowOversubscription = false)
+        expect(taskToMaxConcurrency[4]).toEqual(1); // task 4
+        expect(taskToMaxConcurrency[5]).toEqual(2); // task 4 + 5
       });
     });
   });
