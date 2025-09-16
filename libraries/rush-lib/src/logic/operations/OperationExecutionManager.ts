@@ -90,6 +90,7 @@ export class OperationExecutionManager {
   // Variables for current status
   private _hasAnyFailures: boolean;
   private _hasAnyNonAllowedWarnings: boolean;
+  private _hasAnyAborted: boolean;
   private _completedOperations: number;
   private _executionQueue: AsyncOperationQueue;
 
@@ -109,6 +110,7 @@ export class OperationExecutionManager {
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
+    this._hasAnyAborted = false;
     this._parallelism = parallelism;
 
     this._beforeExecuteOperation = beforeExecuteOperation;
@@ -232,9 +234,10 @@ export class OperationExecutionManager {
    * Executes all operations which have been registered, returning a promise which is resolved when all the
    * operations are completed successfully, or rejects when any operation fails.
    */
-  public async executeAsync(): Promise<IExecutionResult> {
+  public async executeAsync(abortController: AbortController): Promise<IExecutionResult> {
     this._completedOperations = 0;
     const totalOperations: number = this._totalOperations;
+    const abortSignal: AbortSignal = abortController.signal;
 
     if (!this._quietMode) {
       const plural: string = totalOperations === 1 ? '' : 's';
@@ -287,10 +290,15 @@ export class OperationExecutionManager {
     await Async.forEachAsync(
       this._executionQueue,
       async (record: OperationExecutionRecord) => {
-        await record.executeAsync({
-          onStart: onOperationStartAsync,
-          onResult: onOperationCompleteAsync
-        });
+        if (abortSignal.aborted) {
+          record.status = OperationStatus.Aborted;
+          this._onOperationComplete(record);
+        } else {
+          await record.executeAsync({
+            onStart: onOperationStartAsync,
+            onResult: onOperationCompleteAsync
+          });
+        }
       },
       {
         concurrency: maxParallelism,
@@ -300,9 +308,11 @@ export class OperationExecutionManager {
 
     const status: OperationStatus = this._hasAnyFailures
       ? OperationStatus.Failure
-      : this._hasAnyNonAllowedWarnings
-        ? OperationStatus.SuccessWithWarning
-        : OperationStatus.Success;
+      : this._hasAnyAborted
+        ? OperationStatus.Aborted
+        : this._hasAnyNonAllowedWarnings
+          ? OperationStatus.SuccessWithWarning
+          : OperationStatus.Success;
 
     return {
       operationResults: this._executionRecords,
@@ -434,6 +444,11 @@ export class OperationExecutionManager {
           );
         }
         this._hasAnyNonAllowedWarnings = this._hasAnyNonAllowedWarnings || !runner.warningsAreAllowed;
+        break;
+      }
+
+      case OperationStatus.Aborted: {
+        this._hasAnyAborted ||= true;
         break;
       }
 

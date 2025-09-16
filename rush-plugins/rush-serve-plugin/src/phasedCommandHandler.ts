@@ -243,9 +243,15 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
       webSocketServerUpgrader?.(server);
 
       server.listen(requestedPort);
-      // Don't let the HTTP/2 server keep the process alive if the user asks to quit.
-      // TODO: use some "user wants to exit" event to close the server.
-      server.unref();
+      command.abortController.signal.addEventListener(
+        'abort',
+        () => {
+          server.close();
+          // Don't let the HTTP/2 server keep the process alive if the user asks to quit.
+          server.unref();
+        },
+        { once: true }
+      );
       await once(server, 'listening');
 
       const address: AddressInfo | undefined = server.address() as AddressInfo;
@@ -298,7 +304,8 @@ function tryEnableBuildStatusWebSocketServer(
     [OperationStatus.FromCache]: 'FromCache',
     [OperationStatus.Failure]: 'Failure',
     [OperationStatus.Blocked]: 'Blocked',
-    [OperationStatus.NoOp]: 'NoOp'
+    [OperationStatus.NoOp]: 'NoOp',
+    [OperationStatus.Aborted]: 'Aborted'
   };
 
   const { logServePath } = options;

@@ -98,7 +98,7 @@ interface IRunPhasesOptions extends IInitialRunPhasesOptions {
   executionManagerOptions: IOperationExecutionManagerOptions;
 }
 
-interface IExecutionOperationsOptions {
+interface IExecuteOperationsOptions {
   executeOperationsContext: IExecuteOperationsContext;
   executionManagerOptions: IOperationExecutionManagerOptions;
   ignoreHooks: boolean;
@@ -137,6 +137,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
    */
   public _runsBeforeInstall: boolean | undefined;
   public readonly hooks: PhasedCommandHooks;
+  public readonly abortController: AbortController;
 
   private readonly _enableParallelism: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
@@ -150,6 +151,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _knownPhases: ReadonlyMap<string, IPhase>;
   private readonly _terminal: ITerminal;
   private _changedProjectsOnly: boolean;
+  private _executionAbortController: AbortController;
 
   private readonly _changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
   private readonly _selectionParameters: SelectionParameterSet;
@@ -180,6 +182,23 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._runsBeforeInstall = false;
     this._knownPhases = options.phases;
     this._changedProjectsOnly = false;
+    this.abortController = new AbortController();
+    this._executionAbortController = new AbortController();
+
+    this.abortController.signal.addEventListener(
+      'abort',
+      () => {
+        this._executionAbortController.abort();
+      },
+      { once: true }
+    );
+    const onAbortExecution = (): void => {
+      if (!this.abortController.signal.aborted) {
+        this._executionAbortController = new AbortController();
+        this._executionAbortController.signal.addEventListener('abort', onAbortExecution, { once: true });
+      }
+    };
+    this._executionAbortController.signal.addEventListener('abort', onAbortExecution, { once: true });
 
     this.hooks = new PhasedCommandHooks();
 
@@ -655,9 +674,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       }
     );
 
+    const abortController: AbortController = this._executionAbortController;
     const initialExecuteOperationsContext: IExecuteOperationsContext = {
       ...initialCreateOperationsContext,
-      inputsSnapshot: initialSnapshot
+      inputsSnapshot: initialSnapshot,
+      abortController
     };
 
     const executionManagerOptions: IOperationExecutionManagerOptions = {
@@ -670,7 +691,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       }
     };
 
-    const initialOptions: IExecutionOperationsOptions = {
+    const initialOptions: IExecuteOperationsOptions = {
       executeOperationsContext: initialExecuteOperationsContext,
       ignoreHooks: false,
       operations,
@@ -691,14 +712,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     };
   }
 
-  private _registerWatchModeInterface(
-    projectWatcher: ProjectWatcher,
-    abortController: AbortController
-  ): void {
+  private _registerWatchModeInterface(projectWatcher: ProjectWatcher): void {
     const buildOnceKey: 'b' = 'b';
     const changedProjectsOnlyKey: 'c' = 'c';
     const invalidateKey: 'i' = 'i';
     const quitKey: 'q' = 'q';
+    const abortKey: 'a' = 'a';
     const toggleWatcherKey: 'w' = 'w';
     const shutdownProcessesKey: 'x' = 'x';
 
@@ -707,6 +726,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     projectWatcher.setPromptGenerator((isPaused: boolean) => {
       const promptLines: string[] = [
         `  Press <${quitKey}> to gracefully exit.`,
+        `  Press <${abortKey}> to abort queued operations. Any that have started will finish.`,
         `  Press <${toggleWatcherKey}> to ${isPaused ? 'resume' : 'pause'}.`,
         `  Press <${invalidateKey}> to invalidate all projects.`,
         `  Press <${changedProjectsOnlyKey}> to ${
@@ -725,11 +745,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const onKeyPress = (key: string): void => {
       switch (key) {
         case quitKey:
-          terminal.writeLine(`Exiting watch mode...`);
+          terminal.writeLine(`Exiting watch mode and aborting any scheduled work...`);
           process.stdin.setRawMode(false);
           process.stdin.off('data', onKeyPress);
           process.stdin.unref();
-          abortController.abort();
+          this.abortController.abort();
+          break;
+        case abortKey:
+          terminal.writeLine(`Aborting current iteration...`);
+          this._executionAbortController.abort();
           break;
         case toggleWatcherKey:
           if (projectWatcher.isPaused) {
@@ -768,6 +792,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           process.stdin.setRawMode(false);
           process.stdin.off('data', onKeyPress);
           process.stdin.unref();
+          this.abortController.abort();
           process.kill(process.pid, 'SIGINT');
           break;
       }
@@ -814,7 +839,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       '../../logic/ProjectWatcher'
     );
 
-    const abortController: AbortController = new AbortController();
+    const abortController: AbortController = this.abortController;
     const abortSignal: AbortSignal = abortController.signal;
 
     const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
@@ -829,7 +854,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     // Ensure process.stdin allows interactivity before using TTY-only APIs
     if (process.stdin.isTTY) {
-      this._registerWatchModeInterface(projectWatcher, abortController);
+      this._registerWatchModeInterface(projectWatcher);
     }
 
     const onWaitingForChanges = (): void => {
@@ -880,6 +905,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       // Account for consumer relationships
       const executeOperationsContext: IExecuteOperationsContext = {
         ...initialCreateOperationsContext,
+        abortController: this._executionAbortController,
         changedProjectsOnly: !!this._changedProjectsOnly,
         isInitial: false,
         inputsSnapshot: state,
@@ -893,7 +919,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         this.hooks.createOperations.promise(new Set(), executeOperationsContext)
       );
 
-      const executeOptions: IExecutionOperationsOptions = {
+      const executeOptions: IExecuteOperationsOptions = {
         executeOperationsContext,
         // For now, don't run pre-build or post-build in watch mode
         ignoreHooks: true,
@@ -928,15 +954,22 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   /**
    * Runs a set of operations and reports the results.
    */
-  private async _executeOperationsAsync(options: IExecutionOperationsOptions): Promise<void> {
-    const { executionManagerOptions, ignoreHooks, operations, stopwatch, terminal } = options;
+  private async _executeOperationsAsync(options: IExecuteOperationsOptions): Promise<void> {
+    const {
+      executeOperationsContext,
+      executionManagerOptions,
+      ignoreHooks,
+      operations,
+      stopwatch,
+      terminal
+    } = options;
 
     const executionManager: OperationExecutionManager = new OperationExecutionManager(
       operations,
       executionManagerOptions
     );
 
-    const { isInitial, isWatch } = options.executeOperationsContext;
+    const { isInitial, isWatch, abortController, invalidateOperation } = executeOperationsContext;
 
     let success: boolean = false;
     let result: IExecutionResult | undefined;
@@ -944,13 +977,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     try {
       const definiteResult: IExecutionResult = await measureAsyncFn(
         `${PERF_PREFIX}:executeOperationsInner`,
-        () => executionManager.executeAsync()
+        () => executionManager.executeAsync(abortController)
       );
       success = definiteResult.status === OperationStatus.Success;
       result = definiteResult;
 
       await measureAsyncFn(`${PERF_PREFIX}:afterExecuteOperations`, () =>
-        this.hooks.afterExecuteOperations.promise(definiteResult, options.executeOperationsContext)
+        this.hooks.afterExecuteOperations.promise(definiteResult, executeOperationsContext)
       );
 
       stopwatch.stop();
@@ -977,6 +1010,18 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }
 
         terminal.writeErrorLine(Colorize.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+      }
+    }
+
+    if (invalidateOperation) {
+      const operationResults: ReadonlyMap<Operation, IOperationExecutionResult> | undefined =
+        result?.operationResults;
+      if (operationResults) {
+        for (const [operation, { status }] of operationResults) {
+          if (status === OperationStatus.Aborted) {
+            invalidateOperation(operation, 'aborted');
+          }
+        }
       }
     }
 

@@ -104,7 +104,8 @@ export class AsyncOperationQueue
         record.status === OperationStatus.SuccessWithWarning ||
         record.status === OperationStatus.FromCache ||
         record.status === OperationStatus.NoOp ||
-        record.status === OperationStatus.Failure
+        record.status === OperationStatus.Failure ||
+        record.status === OperationStatus.Aborted
       ) {
         // It shouldn't be on the queue, remove it
         queue.splice(i, 1);

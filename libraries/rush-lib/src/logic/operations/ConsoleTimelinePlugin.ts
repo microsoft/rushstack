@@ -86,7 +86,8 @@ const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
   [OperationStatus.Blocked]: '.',
   [OperationStatus.Skipped]: '%',
   [OperationStatus.FromCache]: '%',
-  [OperationStatus.NoOp]: '%'
+  [OperationStatus.NoOp]: '%',
+  [OperationStatus.Aborted]: '@'
 };
 
 const COBUILD_REPORTABLE_STATUSES: Set<OperationStatus> = new Set([
@@ -110,7 +111,8 @@ const TIMELINE_CHART_COLORIZER: Record<OperationStatus, (string: string) => stri
   [OperationStatus.Blocked]: Colorize.red,
   [OperationStatus.Skipped]: Colorize.green,
   [OperationStatus.FromCache]: Colorize.green,
-  [OperationStatus.NoOp]: Colorize.gray
+  [OperationStatus.NoOp]: Colorize.gray,
+  [OperationStatus.Aborted]: Colorize.gray
 };
 
 interface ITimelineRecord {

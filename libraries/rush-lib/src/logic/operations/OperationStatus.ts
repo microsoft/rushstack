@@ -49,7 +49,11 @@ export enum OperationStatus {
   /**
    * The Operation was a no-op (for example, it had an empty script)
    */
-  NoOp = 'NO OP'
+  NoOp = 'NO OP',
+  /**
+   * The Operation was aborted before it could execute.
+   */
+  Aborted = 'ABORTED'
 }
 
 /**
@@ -63,5 +67,6 @@ export const TERMINAL_STATUSES: Set<OperationStatus> = new Set([
   OperationStatus.Blocked,
   OperationStatus.FromCache,
   OperationStatus.Failure,
-  OperationStatus.NoOp
+  OperationStatus.NoOp,
+  OperationStatus.Aborted
 ]);
