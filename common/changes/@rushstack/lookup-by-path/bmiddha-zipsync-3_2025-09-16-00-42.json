@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lookup-by-path",
+      "comment": "Expose getNodeAtPrefix API to allow getting nodes with undefined values.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/lookup-by-path"
+}

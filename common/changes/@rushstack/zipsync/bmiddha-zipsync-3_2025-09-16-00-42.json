@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/zipsync",
+      "comment": "Add zipsync tool to pack and unpack build cache entries.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/zipsync"
+}
