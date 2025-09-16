@@ -51,6 +51,10 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/zipsync",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@ungap/structured-clone",
       "allowedCategories": [ "libraries" ]
     },

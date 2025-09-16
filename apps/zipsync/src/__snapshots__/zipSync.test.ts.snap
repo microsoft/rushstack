@@ -1,0 +1,187 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`zipSync tests basic pack test 1`] = `
+Object {
+  "filesPacked": 21,
+  "metadata": Object {
+    "files": Object {
+      "demo-data-1/subdir/file-0.txt": Object {
+        "sha1Hash": "a7f3d7debc1ad5f045f672be8a8e67d32c909fee",
+        "size": 37,
+      },
+      "demo-data-1/subdir/file-1.txt": Object {
+        "sha1Hash": "748119e4bafabea3b45d3f790c9a9b676ebab405",
+        "size": 37,
+      },
+      "demo-data-1/subdir/file-2.txt": Object {
+        "sha1Hash": "ace390b17191467c0a0480c264b6a2af0dff0d07",
+        "size": 37,
+      },
+      "demo-data-1/subdir/file-3.txt": Object {
+        "sha1Hash": "c7e2d154422af74d8b9242565e4a5988d5361b8c",
+        "size": 37,
+      },
+      "demo-data-1/subdir/file-4.txt": Object {
+        "sha1Hash": "f81f87be14a0c7d5e75ae0dd730526dc333fe1bd",
+        "size": 37,
+      },
+      "demo-data-2/subdir/file-0.txt": Object {
+        "sha1Hash": "423a13f056c5a2a3c5aaba7d8097af61f49819d5",
+        "size": 37,
+      },
+      "demo-data-2/subdir/file-1.txt": Object {
+        "sha1Hash": "0141eb229e83217fbf001e339ca58f0f0c820df1",
+        "size": 37,
+      },
+      "demo-data-2/subdir/file-2.txt": Object {
+        "sha1Hash": "31fb9ce64e21441701e44a7b9d2cc50446d55462",
+        "size": 37,
+      },
+      "demo-data-2/subdir/file-3.txt": Object {
+        "sha1Hash": "7e95ef682efc09c20871ae9e7abf8383b28b1fb1",
+        "size": 37,
+      },
+      "demo-data-2/subdir/file-4.txt": Object {
+        "sha1Hash": "744ee77039600639a4c2d50b0248ad39e2bc10d5",
+        "size": 37,
+      },
+      "demo-data-3/subdir/file-0.txt": Object {
+        "sha1Hash": "504cd07cb5b0d6dfc186247b34b2b960668a9977",
+        "size": 37,
+      },
+      "demo-data-3/subdir/file-1.txt": Object {
+        "sha1Hash": "b7b12f3f33565792d8563c23edaccd09b0f324ab",
+        "size": 37,
+      },
+      "demo-data-3/subdir/file-2.txt": Object {
+        "sha1Hash": "fab730bce23d9a87d3eb0b7bb30b992a47263505",
+        "size": 37,
+      },
+      "demo-data-3/subdir/file-3.txt": Object {
+        "sha1Hash": "36a9851256e27975b707ec335c9099ee4f70aac9",
+        "size": 37,
+      },
+      "demo-data-3/subdir/file-4.txt": Object {
+        "sha1Hash": "078d98ee46c668fefe397fa81b682ed24b70418b",
+        "size": 37,
+      },
+      "nested/demo/dir/4/subdir/file-0.txt": Object {
+        "sha1Hash": "70bcbc5ec0a9e2394edf1760dc2b57bff4f2486f",
+        "size": 43,
+      },
+      "nested/demo/dir/4/subdir/file-1.txt": Object {
+        "sha1Hash": "0977052a86aa8ccd3ee550218d529e34550a62d7",
+        "size": 43,
+      },
+      "nested/demo/dir/4/subdir/file-2.txt": Object {
+        "sha1Hash": "cd170868740762e98657d851724406b494581030",
+        "size": 43,
+      },
+      "nested/demo/dir/4/subdir/file-3.txt": Object {
+        "sha1Hash": "6de572afa4315a597a0a43e5636a228573993da5",
+        "size": 43,
+      },
+      "nested/demo/dir/4/subdir/file-4.txt": Object {
+        "sha1Hash": "c391c02c9bc1139bee8452c911bce484497169ba",
+        "size": 43,
+      },
+    },
+    "version": "1.0",
+  },
+}
+`;
+
+exports[`zipSync tests basic pack test 2`] = `
+Object {
+  "filesDeleted": 0,
+  "filesExtracted": 20,
+  "filesSkipped": 0,
+  "foldersDeleted": 0,
+  "metadata": Object {
+    "files": Object {
+      "demo-data-1/subdir/file-0.txt": Object {
+        "sha1Hash": "a7f3d7debc1ad5f045f672be8a8e67d32c909fee",
+        "size": 37,
+      },
+      "demo-data-1/subdir/file-1.txt": Object {
+        "sha1Hash": "748119e4bafabea3b45d3f790c9a9b676ebab405",
+        "size": 37,
+      },
+      "demo-data-1/subdir/file-2.txt": Object {
+        "sha1Hash": "ace390b17191467c0a0480c264b6a2af0dff0d07",
+        "size": 37,
+      },
+      "demo-data-1/subdir/file-3.txt": Object {
+        "sha1Hash": "c7e2d154422af74d8b9242565e4a5988d5361b8c",
+        "size": 37,
+      },
+      "demo-data-1/subdir/file-4.txt": Object {
+        "sha1Hash": "f81f87be14a0c7d5e75ae0dd730526dc333fe1bd",
+        "size": 37,
+      },
+      "demo-data-2/subdir/file-0.txt": Object {
+        "sha1Hash": "423a13f056c5a2a3c5aaba7d8097af61f49819d5",
+        "size": 37,
+      },
+      "demo-data-2/subdir/file-1.txt": Object {
+        "sha1Hash": "0141eb229e83217fbf001e339ca58f0f0c820df1",
+        "size": 37,
+      },
+      "demo-data-2/subdir/file-2.txt": Object {
+        "sha1Hash": "31fb9ce64e21441701e44a7b9d2cc50446d55462",
+        "size": 37,
+      },
+      "demo-data-2/subdir/file-3.txt": Object {
+        "sha1Hash": "7e95ef682efc09c20871ae9e7abf8383b28b1fb1",
+        "size": 37,
+      },
+      "demo-data-2/subdir/file-4.txt": Object {
+        "sha1Hash": "744ee77039600639a4c2d50b0248ad39e2bc10d5",
+        "size": 37,
+      },
+      "demo-data-3/subdir/file-0.txt": Object {
+        "sha1Hash": "504cd07cb5b0d6dfc186247b34b2b960668a9977",
+        "size": 37,
+      },
+      "demo-data-3/subdir/file-1.txt": Object {
+        "sha1Hash": "b7b12f3f33565792d8563c23edaccd09b0f324ab",
+        "size": 37,
+      },
+      "demo-data-3/subdir/file-2.txt": Object {
+        "sha1Hash": "fab730bce23d9a87d3eb0b7bb30b992a47263505",
+        "size": 37,
+      },
+      "demo-data-3/subdir/file-3.txt": Object {
+        "sha1Hash": "36a9851256e27975b707ec335c9099ee4f70aac9",
+        "size": 37,
+      },
+      "demo-data-3/subdir/file-4.txt": Object {
+        "sha1Hash": "078d98ee46c668fefe397fa81b682ed24b70418b",
+        "size": 37,
+      },
+      "nested/demo/dir/4/subdir/file-0.txt": Object {
+        "sha1Hash": "70bcbc5ec0a9e2394edf1760dc2b57bff4f2486f",
+        "size": 43,
+      },
+      "nested/demo/dir/4/subdir/file-1.txt": Object {
+        "sha1Hash": "0977052a86aa8ccd3ee550218d529e34550a62d7",
+        "size": 43,
+      },
+      "nested/demo/dir/4/subdir/file-2.txt": Object {
+        "sha1Hash": "cd170868740762e98657d851724406b494581030",
+        "size": 43,
+      },
+      "nested/demo/dir/4/subdir/file-3.txt": Object {
+        "sha1Hash": "6de572afa4315a597a0a43e5636a228573993da5",
+        "size": 43,
+      },
+      "nested/demo/dir/4/subdir/file-4.txt": Object {
+        "sha1Hash": "c391c02c9bc1139bee8452c911bce484497169ba",
+        "size": 43,
+      },
+    },
+    "version": "1.0",
+  },
+  "otherEntriesDeleted": 0,
+}
+`;

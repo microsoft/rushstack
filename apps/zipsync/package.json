@@ -1,0 +1,34 @@
+{
+  "name": "@rushstack/zipsync",
+  "version": "0.0.0",
+  "description": "CLI tool for creating and extracting ZIP archives with intelligent filesystem synchronization",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/zipsync"
+  },
+  "bin": {
+    "zipsync": "./bin/zipsync"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "node lib/start",
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*",
+    "semver": "~7.5.4",
+    "typescript": "~5.8.2",
+    "@rushstack/lookup-by-path": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@types/semver": "7.5.0",
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*"
+  }
+}

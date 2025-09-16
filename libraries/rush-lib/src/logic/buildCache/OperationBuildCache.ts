@@ -1,18 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import * as crypto from 'crypto';
 
 import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
+import { zipSyncWorkerAsync } from '@rushstack/zipsync/lib/zipSyncWorkerAsync';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
-import { TarExecutable } from '../../utilities/TarExecutable';
-import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { IOperationExecutionResult } from '../operations/IOperationExecutionResult';
 
 /**
@@ -60,8 +58,6 @@ interface IPathsToCache {
  * @internal
  */
 export class OperationBuildCache {
-  private static _tarUtilityPromise: Promise<TarExecutable | undefined> | undefined;
-
   private readonly _project: RushConfigurationProject;
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
   private readonly _cloudBuildCacheProvider: ICloudBuildCacheProvider | undefined;
@@ -88,14 +84,6 @@ export class OperationBuildCache {
     this._cacheWriteEnabled = cacheWriteEnabled;
     this._projectOutputFolderNames = projectOutputFolderNames || [];
     this._cacheId = cacheId;
-  }
-
-  private static _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
-    if (!OperationBuildCache._tarUtilityPromise) {
-      OperationBuildCache._tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal);
-    }
-
-    return OperationBuildCache._tarUtilityPromise;
   }
 
   public get cacheId(): string | undefined {
@@ -176,32 +164,40 @@ export class OperationBuildCache {
 
     const projectFolderPath: string = this._project.projectFolder;
 
-    // Purge output folders
-    terminal.writeVerboseLine(`Clearing cached folders: ${this._projectOutputFolderNames.join(', ')}`);
-    await Promise.all(
-      this._projectOutputFolderNames.map((outputFolderName: string) =>
-        FileSystem.deleteFolderAsync(`${projectFolderPath}/${outputFolderName}`)
-      )
-    );
-
-    const tarUtility: TarExecutable | undefined = await OperationBuildCache._tryGetTarUtility(terminal);
     let restoreSuccess: boolean = false;
-    if (tarUtility && localCacheEntryPath) {
-      const logFilePath: string = this._getTarLogFilePath(cacheId, 'untar');
-      const tarExitCode: number = await tarUtility.tryUntarAsync({
-        archivePath: localCacheEntryPath,
-        outputFolderPath: projectFolderPath,
-        logFilePath
+    terminal.writeVerboseLine(`Using zipsync to restore cached folders.`);
+    try {
+      const {
+        zipSyncReturn: { filesDeleted, filesExtracted, filesSkipped, foldersDeleted, otherEntriesDeleted }
+      } = await zipSyncWorkerAsync({
+        mode: 'unpack',
+        compression: 'deflate',
+        archivePath: localCacheEntryPath!,
+        targetDirectories: this._projectOutputFolderNames,
+        baseDir: projectFolderPath
       });
-      if (tarExitCode === 0) {
-        restoreSuccess = true;
-        terminal.writeLine('Successfully restored output from the build cache.');
-      } else {
-        terminal.writeWarningLine(
-          'Unable to restore output from the build cache. ' +
-            `See "${logFilePath}" for logs from the tar process.`
+      terminal.writeVerboseLine(`Restored ${filesExtracted + filesSkipped} files from cache.`);
+      if (filesExtracted > 0) {
+        terminal.writeVerboseLine(`Extracted ${filesExtracted} files to target folders.`);
+      }
+      if (filesSkipped > 0) {
+        terminal.writeVerboseLine(`Skipped ${filesSkipped} files that were already up to date.`);
+      }
+      if (filesDeleted > 0) {
+        terminal.writeVerboseLine(`Deleted ${filesDeleted} files from target folders.`);
+      }
+      if (foldersDeleted > 0) {
+        terminal.writeVerboseLine(`Deleted ${foldersDeleted} empty folders from target folders.`);
+      }
+      if (otherEntriesDeleted > 0) {
+        terminal.writeVerboseLine(
+          `Deleted ${otherEntriesDeleted} items (e.g. symbolic links) from target folders.`
         );
       }
+      restoreSuccess = true;
+      terminal.writeLine('Successfully restored output from the build cache.');
+    } catch (e) {
+      terminal.writeWarningLine(`Unable to restore output from the build cache: ${e}`);
     }
 
     if (updateLocalCacheSuccess === false) {
@@ -234,59 +230,55 @@ export class OperationBuildCache {
 
     let localCacheEntryPath: string | undefined;
 
-    const tarUtility: TarExecutable | undefined = await OperationBuildCache._tryGetTarUtility(terminal);
-    if (tarUtility) {
-      const finalLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+    const finalLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
 
-      // Derive the temp file from the destination path to ensure they are on the same volume
-      // In the case of a shared network drive containing the build cache, we also need to make
-      // sure the the temp path won't be shared by two parallel rush builds.
-      const randomSuffix: string = crypto.randomBytes(8).toString('hex');
-      const tempLocalCacheEntryPath: string = `${finalLocalCacheEntryPath}-${randomSuffix}.temp`;
+    // Derive the temp file from the destination path to ensure they are on the same volume
+    // In the case of a shared network drive containing the build cache, we also need to make
+    // sure the the temp path won't be shared by two parallel rush builds.
+    const randomSuffix: string = crypto.randomBytes(8).toString('hex');
+    const tempLocalCacheEntryPath: string = `${finalLocalCacheEntryPath}-${randomSuffix}.temp`;
 
-      const logFilePath: string = this._getTarLogFilePath(cacheId, 'tar');
-      const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
+    terminal.writeVerboseLine(`Using zipsync to create cache archive.`);
+    try {
+      const {
+        zipSyncReturn: { filesPacked }
+      } = await zipSyncWorkerAsync({
+        mode: 'pack',
+        compression: 'deflate',
         archivePath: tempLocalCacheEntryPath,
-        paths: filesToCache.outputFilePaths,
-        project: this._project,
-        logFilePath
+        targetDirectories: this._projectOutputFolderNames,
+        baseDir: this._project.projectFolder
       });
+      terminal.writeVerboseLine(`Packed ${filesPacked} files for caching.`);
 
-      if (tarExitCode === 0) {
-        // Move after the archive is finished so that if the process is interrupted we aren't left with an invalid file
+      // Move after the archive is finished so that if the process is interrupted we aren't left with an invalid file
+      try {
+        await Async.runWithRetriesAsync({
+          action: () =>
+            FileSystem.moveAsync({
+              sourcePath: tempLocalCacheEntryPath,
+              destinationPath: finalLocalCacheEntryPath,
+              overwrite: true
+            }),
+          maxRetries: 2,
+          retryDelayMs: 500
+        });
+      } catch (moveError) {
         try {
-          await Async.runWithRetriesAsync({
-            action: () =>
-              FileSystem.moveAsync({
-                sourcePath: tempLocalCacheEntryPath,
-                destinationPath: finalLocalCacheEntryPath,
-                overwrite: true
-              }),
-            maxRetries: 2,
-            retryDelayMs: 500
-          });
-        } catch (moveError) {
-          try {
-            await FileSystem.deleteFileAsync(tempLocalCacheEntryPath);
-          } catch (deleteError) {
-            // Ignored
-          }
-          throw moveError;
+          await FileSystem.deleteFileAsync(tempLocalCacheEntryPath);
+        } catch (deleteError) {
+          // Ignored
         }
-        localCacheEntryPath = finalLocalCacheEntryPath;
-      } else {
-        terminal.writeWarningLine(
-          `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
-            `See "${logFilePath}" for logs from the tar process.`
-        );
-        return false;
+        throw moveError;
       }
-    } else {
-      terminal.writeWarningLine(
-        `Unable to locate "tar". Please ensure that "tar" is on your PATH environment variable, or set the ` +
-          `${EnvironmentVariableNames.RUSH_TAR_BINARY_PATH} environment variable to the full path to the "tar" binary.`
-      );
-      return false;
+      localCacheEntryPath = finalLocalCacheEntryPath;
+    } catch (e) {
+      try {
+        await FileSystem.deleteFileAsync(tempLocalCacheEntryPath);
+      } catch (deleteError) {
+        // Ignored
+      }
+      throw e;
     }
 
     let cacheEntryBuffer: Buffer | undefined;
@@ -393,10 +385,6 @@ export class OperationBuildCache {
       outputFilePaths,
       filteredOutputFolderNames
     };
-  }
-
-  private _getTarLogFilePath(cacheId: string, mode: 'tar' | 'untar'): string {
-    return path.join(this._project.projectRushTempFolder, `${cacheId}.${mode}.log`);
   }
 
   private static _getCacheId(options: IProjectBuildCacheOptions): string | undefined {

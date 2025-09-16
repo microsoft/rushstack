@@ -1424,7 +1424,7 @@ export class RushConstants {
     static readonly artifactoryFilename: 'artifactory.json';
     static readonly browserApprovedPackagesFilename: 'browser-approved-packages.json';
     static readonly buildCacheFilename: 'build-cache.json';
-    static readonly buildCacheVersion: 1;
+    static readonly buildCacheVersion: 2;
     static readonly buildCommandName: 'build';
     static readonly bulkCommandKind: 'bulk';
     static readonly bypassPolicyFlagLongName: '--bypass-policy';

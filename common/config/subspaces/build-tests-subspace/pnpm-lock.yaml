@@ -6345,7 +6345,6 @@ packages:
     resolution: {integrity: sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: true
 
   /unbox-primitive@1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}
@@ -6724,6 +6723,21 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
     dev: true
+
+  file:../../../apps/zipsync(@types/node@20.17.19):
+    resolution: {directory: ../../../apps/zipsync, type: directory}
+    id: file:../../../apps/zipsync
+    name: '@rushstack/zipsync'
+    hasBin: true
+    dependencies:
+      '@rushstack/lookup-by-path': file:../../../libraries/lookup-by-path(@types/node@20.17.19)
+      '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
+      '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
+      '@rushstack/ts-command-line': file:../../../libraries/ts-command-line(@types/node@20.17.19)
+      semver: 7.5.4
+      typescript: 5.8.2
+    transitivePeerDependencies:
+      - '@types/node'
 
   file:../../../eslint/eslint-config(eslint@9.25.1)(typescript@4.9.5):
     resolution: {directory: ../../../eslint/eslint-config, type: directory}
@@ -7114,6 +7128,7 @@ packages:
       '@rushstack/stream-collator': file:../../../libraries/stream-collator(@types/node@20.17.19)
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
       '@rushstack/ts-command-line': file:../../../libraries/ts-command-line(@types/node@20.17.19)
+      '@rushstack/zipsync': file:../../../apps/zipsync(@types/node@20.17.19)
       '@yarnpkg/lockfile': 1.0.2
       builtin-modules: 3.1.0
       cli-table: 0.3.11
