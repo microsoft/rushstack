@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
+import * as zlib from 'node:zlib';
 import type { ITerminal } from '@rushstack/terminal/lib/ITerminal';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as crypto from 'crypto';
-import * as zlib from 'zlib';
 import { type IReadonlyPathTrieNode, LookupByPath } from '@rushstack/lookup-by-path/lib/LookupByPath';
 import { crc32Builder } from './crc32';
 import { DISPOSE_SYMBOL, getDisposableFileHandle, type IDisposableFileHandle } from './disposableFileHandle';
@@ -24,7 +24,8 @@ import {
   type ZipMetaCompressionMethod,
   type IEndOfCentralDirectory,
   type ICentralDirectoryHeaderParseResult,
-  type IFileEntry
+  type IFileEntry,
+  dosDateTime
 } from './zipUtils';
 
 const METADATA_FILENAME: string = '__zipsync_metadata__.json';
@@ -192,7 +193,13 @@ export function zipSync<T extends IZipSyncOptions>(
       }
       currentOffset += offset;
     }
+    function writeChunksToZip(chunks: Uint8Array[]): void {
+      for (const chunk of chunks) {
+        writeChunkToZip(chunk);
+      }
+    }
 
+    const dosDateTimeNow: { time: number; date: number } = dosDateTime(new Date());
     function writeFileEntry(relativePath: string): IFileEntry {
       function isLikelyAlreadyCompressed(filename: string): boolean {
         return LIKELY_COMPRESSED_EXTENSION_REGEX.test(filename.toLowerCase());
@@ -244,10 +251,11 @@ export function zipSync<T extends IZipSyncOptions>(
         crc32: 0,
         sha1Hash: '',
         localHeaderOffset: currentOffset,
-        compressionMethod
+        compressionMethod,
+        dosDateTime: dosDateTimeNow
       };
 
-      writeChunkToZip(writeLocalFileHeader(entry));
+      writeChunksToZip(writeLocalFileHeader(entry));
 
       const sha1HashBuilder: crypto.Hash = crypto.createHash('sha1');
       let crc32: number = 0;
@@ -350,10 +358,11 @@ export function zipSync<T extends IZipSyncOptions>(
       crc32: crc32Builder(metadataBuffer),
       sha1Hash: calculateSHA1(metadataBuffer),
       localHeaderOffset: currentOffset,
-      compressionMethod: metadataCompressionMethod
+      compressionMethod: metadataCompressionMethod,
+      dosDateTime: dosDateTimeNow
     };
 
-    writeChunkToZip(writeLocalFileHeader(metadataEntry));
+    writeChunksToZip(writeLocalFileHeader(metadataEntry));
     writeChunkToZip(metadataData, metadataCompressedSize);
     writeChunkToZip(writeDataDescriptor(metadataEntry));
 
@@ -371,26 +380,15 @@ export function zipSync<T extends IZipSyncOptions>(
 
       markStart('pack.write.centralDirectory');
       const centralDirOffset: number = currentOffset;
-      let centralDirSize: number = 0;
-
       for (const entry of entries) {
-        const centralHeader: Buffer = writeCentralDirectoryHeader(entry);
-        fs.writeSync(zipFile, centralHeader);
-        centralDirSize += centralHeader.length;
+        writeChunksToZip(writeCentralDirectoryHeader(entry));
       }
-      terminal.writeDebugLine(
-        `Central directory written (offset=${centralDirOffset}, size=${centralDirSize})`
-      );
+      const centralDirSize: number = currentOffset - centralDirOffset;
       markEnd('pack.write.centralDirectory');
 
       // Write end of central directory
       markStart('pack.write.eocd');
-      const endOfCentralDir: Buffer = writeEndOfCentralDirectory(
-        centralDirOffset,
-        centralDirSize,
-        entries.length
-      );
-      fs.writeSync(zipFile, endOfCentralDir);
+      writeChunkToZip(writeEndOfCentralDirectory(centralDirOffset, centralDirSize, entries.length));
       terminal.writeDebugLine('EOCD record written');
       markEnd('pack.write.eocd');
     } finally {

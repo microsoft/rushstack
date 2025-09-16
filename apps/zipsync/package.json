@@ -21,13 +21,11 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "semver": "~7.5.4",
     "typescript": "~5.8.2",
     "@rushstack/lookup-by-path": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/semver": "7.5.0",
     "eslint": "~9.25.1",
     "local-node-rig": "workspace:*"
   }

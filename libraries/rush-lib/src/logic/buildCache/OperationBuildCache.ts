@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as crypto from 'crypto';
+import * as fs from 'fs';
 
 import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
@@ -171,7 +172,7 @@ export class OperationBuildCache {
         zipSyncReturn: { filesDeleted, filesExtracted, filesSkipped, foldersDeleted, otherEntriesDeleted }
       } = await zipSyncWorkerAsync({
         mode: 'unpack',
-        compression: 'deflate',
+        compression: 'auto',
         archivePath: localCacheEntryPath!,
         targetDirectories: this._projectOutputFolderNames,
         baseDir: projectFolderPath
@@ -244,7 +245,7 @@ export class OperationBuildCache {
         zipSyncReturn: { filesPacked }
       } = await zipSyncWorkerAsync({
         mode: 'pack',
-        compression: 'deflate',
+        compression: 'auto',
         archivePath: tempLocalCacheEntryPath,
         targetDirectories: this._projectOutputFolderNames,
         baseDir: this._project.projectFolder
@@ -255,10 +256,14 @@ export class OperationBuildCache {
       try {
         await Async.runWithRetriesAsync({
           action: () =>
-            FileSystem.moveAsync({
-              sourcePath: tempLocalCacheEntryPath,
-              destinationPath: finalLocalCacheEntryPath,
-              overwrite: true
+            new Promise<void>((resolve, reject) => {
+              fs.rename(tempLocalCacheEntryPath, finalLocalCacheEntryPath, (err) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve();
+                }
+              });
             }),
           maxRetries: 2,
           retryDelayMs: 500
@@ -273,11 +278,9 @@ export class OperationBuildCache {
       }
       localCacheEntryPath = finalLocalCacheEntryPath;
     } catch (e) {
-      try {
-        await FileSystem.deleteFileAsync(tempLocalCacheEntryPath);
-      } catch (deleteError) {
-        // Ignored
-      }
+      await FileSystem.deleteFileAsync(tempLocalCacheEntryPath).catch(() => {
+        /* ignore delete error */
+      });
       throw e;
     }
 

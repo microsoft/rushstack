@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// zip spec: https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+
 const LOCAL_FILE_HEADER_SIGNATURE: number = 0x04034b50;
 const CENTRAL_DIR_HEADER_SIGNATURE: number = 0x02014b50;
 const END_OF_CENTRAL_DIR_SIGNATURE: number = 0x06054b50;
@@ -18,6 +20,7 @@ export interface IFileEntry {
   sha1Hash: string;
   localHeaderOffset: number;
   compressionMethod: ZipMetaCompressionMethod;
+  dosDateTime: { time: number; date: number };
 }
 
 export interface ILocalFileHeader {
@@ -81,158 +84,143 @@ function readUInt16LE(buffer: Buffer, offset: number): number {
   return buffer.readUInt16LE(offset);
 }
 
-function dosDateTime(date: Date): { time: number; date: number } {
+export function dosDateTime(date: Date): { time: number; date: number } {
+  /* eslint-disable no-bitwise */
   const time: number =
-    // eslint-disable-next-line no-bitwise
-    ((date.getHours() & 0x1f) << 11) |
-    // eslint-disable-next-line no-bitwise
-    ((date.getMinutes() & 0x3f) << 5) |
-    // eslint-disable-next-line no-bitwise
-    ((date.getSeconds() / 2) & 0x1f);
+    ((date.getHours() & 0x1f) << 11) | ((date.getMinutes() & 0x3f) << 5) | ((date.getSeconds() / 2) & 0x1f);
 
   const dateVal: number =
-    // eslint-disable-next-line no-bitwise
     (((date.getFullYear() - 1980) & 0x7f) << 9) |
-    // eslint-disable-next-line no-bitwise
     (((date.getMonth() + 1) & 0xf) << 5) |
-    // eslint-disable-next-line no-bitwise
     (date.getDate() & 0x1f);
+  /* eslint-enable no-bitwise */
 
   return { time, date: dateVal };
 }
 
-export function writeLocalFileHeader(entry: IFileEntry): Buffer {
+const localFileHeaderBuffer: Buffer = Buffer.allocUnsafe(30);
+export function writeLocalFileHeader(
+  entry: IFileEntry
+): [fileHeaderWithoutVariableLengthData: Buffer, fileHeaderVariableLengthData: Buffer] {
   const filenameBuffer: Buffer = Buffer.from(entry.filename, 'utf8');
 
-  const headerSize: number = 30 + filenameBuffer.length;
-  const header: Buffer = Buffer.allocUnsafeSlow(headerSize);
-  const now: Date = new Date();
-  const { time, date } = dosDateTime(now);
+  const { time, date } = entry.dosDateTime;
 
   let offset: number = 0;
-  writeUInt32LE(header, LOCAL_FILE_HEADER_SIGNATURE, offset);
+  writeUInt32LE(localFileHeaderBuffer, LOCAL_FILE_HEADER_SIGNATURE, offset);
   offset += 4;
-  writeUInt16LE(header, 20, offset); // version needed
+  writeUInt16LE(localFileHeaderBuffer, 20, offset); // version needed
   offset += 2;
   // General purpose bit flag: set bit 3 (0x0008) to indicate presence of data descriptor
   // Per APPNOTE: when bit 3 is set, CRC-32 and sizes in local header are set to zero and
   // the actual values are stored in the data descriptor that follows the file data.
-  writeUInt16LE(header, 0x0008, offset); // flags (data descriptor)
+  writeUInt16LE(localFileHeaderBuffer, 0x0008, offset); // flags (data descriptor)
   offset += 2;
-  writeUInt16LE(header, entry.compressionMethod, offset); // compression method (0=store,8=deflate)
+  writeUInt16LE(localFileHeaderBuffer, entry.compressionMethod, offset); // compression method (0=store,8=deflate)
   offset += 2;
-  writeUInt16LE(header, time, offset); // last mod time
+  writeUInt16LE(localFileHeaderBuffer, time, offset); // last mod time
   offset += 2;
-  writeUInt16LE(header, date, offset); // last mod date
+  writeUInt16LE(localFileHeaderBuffer, date, offset); // last mod date
   offset += 2;
   // With bit 3 set, these three fields MUST be zero in the local header
-  writeUInt32LE(header, 0, offset); // crc32 (placeholder, real value in data descriptor)
+  writeUInt32LE(localFileHeaderBuffer, 0, offset); // crc32 (placeholder, real value in data descriptor)
   offset += 4;
-  writeUInt32LE(header, 0, offset); // compressed size (placeholder)
+  writeUInt32LE(localFileHeaderBuffer, 0, offset); // compressed size (placeholder)
   offset += 4;
-  writeUInt32LE(header, 0, offset); // uncompressed size (placeholder)
+  writeUInt32LE(localFileHeaderBuffer, 0, offset); // uncompressed size (placeholder)
   offset += 4;
-  writeUInt16LE(header, filenameBuffer.length, offset); // filename length
+  writeUInt16LE(localFileHeaderBuffer, filenameBuffer.length, offset); // filename length
   offset += 2;
-  writeUInt16LE(header, 0, offset); // extra field length
+  writeUInt16LE(localFileHeaderBuffer, 0, offset); // extra field length
   offset += 2;
 
-  filenameBuffer.copy(header, offset);
-  offset += filenameBuffer.length;
-
-  return header;
+  return [localFileHeaderBuffer, filenameBuffer];
 }
 
-export function writeCentralDirectoryHeader(entry: IFileEntry): Buffer {
+const centralDirHeaderBuffer: Buffer = Buffer.allocUnsafe(46);
+export function writeCentralDirectoryHeader(entry: IFileEntry): Buffer[] {
   const filenameBuffer: Buffer = Buffer.from(entry.filename, 'utf8');
 
-  const headerSize: number = 46 + filenameBuffer.length;
-  const header: Buffer = Buffer.alloc(headerSize);
   const now: Date = new Date();
   const { time, date } = dosDateTime(now);
 
   let offset: number = 0;
-  writeUInt32LE(header, CENTRAL_DIR_HEADER_SIGNATURE, offset);
+  writeUInt32LE(centralDirHeaderBuffer, CENTRAL_DIR_HEADER_SIGNATURE, offset);
   offset += 4;
-  writeUInt16LE(header, 20, offset); // version made by
+  writeUInt16LE(centralDirHeaderBuffer, 20, offset); // version made by
   offset += 2;
-  writeUInt16LE(header, 20, offset); // version needed
+  writeUInt16LE(centralDirHeaderBuffer, 20, offset); // version needed
   offset += 2;
   // Mirror flags used in local header (bit 3 set to indicate data descriptor was used)
-  writeUInt16LE(header, 0x0008, offset); // flags
+  writeUInt16LE(centralDirHeaderBuffer, 0x0008, offset); // flags
   offset += 2;
-  writeUInt16LE(header, entry.compressionMethod, offset); // compression method
+  writeUInt16LE(centralDirHeaderBuffer, entry.compressionMethod, offset); // compression method
   offset += 2;
-  writeUInt16LE(header, time, offset); // last mod time
+  writeUInt16LE(centralDirHeaderBuffer, time, offset); // last mod time
   offset += 2;
-  writeUInt16LE(header, date, offset); // last mod date
+  writeUInt16LE(centralDirHeaderBuffer, date, offset); // last mod date
   offset += 2;
-  writeUInt32LE(header, entry.crc32, offset); // crc32
+  writeUInt32LE(centralDirHeaderBuffer, entry.crc32, offset); // crc32
   offset += 4;
-  writeUInt32LE(header, entry.compressedSize, offset); // compressed size
+  writeUInt32LE(centralDirHeaderBuffer, entry.compressedSize, offset); // compressed size
   offset += 4;
-  writeUInt32LE(header, entry.size, offset); // uncompressed size
+  writeUInt32LE(centralDirHeaderBuffer, entry.size, offset); // uncompressed size
   offset += 4;
-  writeUInt16LE(header, filenameBuffer.length, offset); // filename length
+  writeUInt16LE(centralDirHeaderBuffer, filenameBuffer.length, offset); // filename length
   offset += 2;
-  writeUInt16LE(header, 0, offset); // extra field length
+  writeUInt16LE(centralDirHeaderBuffer, 0, offset); // extra field length
   offset += 2;
-  writeUInt16LE(header, 0, offset); // comment length
+  writeUInt16LE(centralDirHeaderBuffer, 0, offset); // comment length
   offset += 2;
-  writeUInt16LE(header, 0, offset); // disk number start
+  writeUInt16LE(centralDirHeaderBuffer, 0, offset); // disk number start
   offset += 2;
-  writeUInt16LE(header, 0, offset); // internal file attributes
+  writeUInt16LE(centralDirHeaderBuffer, 0, offset); // internal file attributes
   offset += 2;
-  writeUInt32LE(header, 0, offset); // external file attributes
+  writeUInt32LE(centralDirHeaderBuffer, 0, offset); // external file attributes
   offset += 4;
-  writeUInt32LE(header, entry.localHeaderOffset, offset); // local header offset
+  writeUInt32LE(centralDirHeaderBuffer, entry.localHeaderOffset, offset); // local header offset
   offset += 4;
 
-  filenameBuffer.copy(header, offset);
-  offset += filenameBuffer.length;
-
-  return header;
+  return [centralDirHeaderBuffer, filenameBuffer];
 }
 
+const dataDescriptorBuffer: Buffer = Buffer.allocUnsafe(16);
 export function writeDataDescriptor(entry: IFileEntry): Buffer {
-  // We include the optional signature for robustness (APPNOTE allows it)
-  const descriptor: Buffer = Buffer.alloc(16);
   let offset: number = 0;
-  writeUInt32LE(descriptor, DATA_DESCRIPTOR_SIGNATURE, offset); // signature PK\x07\x08
+  writeUInt32LE(dataDescriptorBuffer, DATA_DESCRIPTOR_SIGNATURE, offset); // signature PK\x07\x08
   offset += 4;
-  writeUInt32LE(descriptor, entry.crc32, offset); // crc32
+  writeUInt32LE(dataDescriptorBuffer, entry.crc32, offset); // crc32
   offset += 4;
-  writeUInt32LE(descriptor, entry.compressedSize, offset); // compressed size
+  writeUInt32LE(dataDescriptorBuffer, entry.compressedSize, offset); // compressed size
   offset += 4;
-  writeUInt32LE(descriptor, entry.size, offset); // uncompressed size
-  return descriptor;
+  writeUInt32LE(dataDescriptorBuffer, entry.size, offset); // uncompressed size
+  return dataDescriptorBuffer;
 }
 
+const endOfCentralDirBuffer: Buffer = Buffer.allocUnsafe(22);
 export function writeEndOfCentralDirectory(
   centralDirOffset: number,
   centralDirSize: number,
   entryCount: number
 ): Buffer {
-  const header: Buffer = Buffer.alloc(22);
-
   let offset: number = 0;
-  writeUInt32LE(header, END_OF_CENTRAL_DIR_SIGNATURE, offset);
+  writeUInt32LE(endOfCentralDirBuffer, END_OF_CENTRAL_DIR_SIGNATURE, offset);
   offset += 4;
-  writeUInt16LE(header, 0, offset); // disk number
+  writeUInt16LE(endOfCentralDirBuffer, 0, offset); // disk number
   offset += 2;
-  writeUInt16LE(header, 0, offset); // central dir start disk
+  writeUInt16LE(endOfCentralDirBuffer, 0, offset); // central dir start disk
   offset += 2;
-  writeUInt16LE(header, entryCount, offset); // central dir records on disk
+  writeUInt16LE(endOfCentralDirBuffer, entryCount, offset); // central dir records on disk
   offset += 2;
-  writeUInt16LE(header, entryCount, offset); // total central dir records
+  writeUInt16LE(endOfCentralDirBuffer, entryCount, offset); // total central dir records
   offset += 2;
-  writeUInt32LE(header, centralDirSize, offset); // central dir size
+  writeUInt32LE(endOfCentralDirBuffer, centralDirSize, offset); // central dir size
   offset += 4;
-  writeUInt32LE(header, centralDirOffset, offset); // central dir offset
+  writeUInt32LE(endOfCentralDirBuffer, centralDirOffset, offset); // central dir offset
   offset += 4;
-  writeUInt16LE(header, 0, offset); // comment length
+  writeUInt16LE(endOfCentralDirBuffer, 0, offset); // comment length
 
-  return header;
+  return endOfCentralDirBuffer;
 }
 
 interface ILocalFileHeaderParseResult {
@@ -270,7 +258,6 @@ export function parseLocalFileHeader(buffer: Buffer, offset: number): ILocalFile
 export interface ICentralDirectoryHeaderParseResult {
   header: ICentralDirectoryHeader;
   filename: string;
-  sha1Hash: string;
   nextOffset: number;
 }
 
@@ -304,24 +291,14 @@ export function parseCentralDirectoryHeader(
     localHeaderOffset: readUInt32LE(buffer, offset + 42)
   };
 
-  const filename: string = buffer.slice(offset + 46, offset + 46 + header.filenameLength).toString('utf8');
+  offset += 46;
 
-  let sha1Hash: string = '';
-  if (header.extraFieldLength > 0) {
-    const extraFieldOffset: number = offset + 46 + header.filenameLength;
-    const extraFieldId: number = readUInt16LE(buffer, extraFieldOffset);
-    const extraFieldSize: number = readUInt16LE(buffer, extraFieldOffset + 2);
-
-    if (extraFieldId === 0x0001 && extraFieldSize === 20) {
-      sha1Hash = buffer.slice(extraFieldOffset + 4, extraFieldOffset + 4 + extraFieldSize).toString('hex');
-    }
-  }
+  const filename: string = buffer.toString('utf8', offset, offset + header.filenameLength);
 
   return {
     header,
     filename,
-    sha1Hash,
-    nextOffset: offset + 46 + header.filenameLength + header.extraFieldLength + header.commentLength
+    nextOffset: offset + header.filenameLength + header.extraFieldLength + header.commentLength
   };
 }
 

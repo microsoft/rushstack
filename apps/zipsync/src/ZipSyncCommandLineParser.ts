@@ -10,7 +10,6 @@ import type {
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line/lib/index';
 import { InternalError } from '@rushstack/node-core-library/lib/InternalError';
-import { Colorize } from '@rushstack/terminal/lib/Colorize';
 import type { ConsoleTerminalProvider } from '@rushstack/terminal/lib/ConsoleTerminalProvider';
 import type { ITerminal } from '@rushstack/terminal/lib/ITerminal';
 
@@ -110,11 +109,7 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
         compression: (this._compressionParameter.value as 'store' | 'deflate' | 'auto' | undefined) ?? 'auto'
       });
     } catch (error) {
-      if (this._debugParameter.value) {
-        console.error('\n' + error.stack);
-      } else {
-        console.error('\n' + Colorize.red('ERROR: ' + error.message.trim()));
-      }
+      this._terminal.writeErrorLine('\n' + error.stack);
     }
   }
 }

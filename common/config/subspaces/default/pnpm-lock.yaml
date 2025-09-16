@@ -463,9 +463,6 @@ importers:
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
-      semver:
-        specifier: ~7.5.4
-        version: 7.5.4
       typescript:
         specifier: ~5.8.2
         version: 5.8.2
@@ -473,9 +470,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
-      '@types/semver':
-        specifier: 7.5.0
-        version: 7.5.0
       eslint:
         specifier: ~9.25.1
         version: 9.25.1(supports-color@8.1.1)
