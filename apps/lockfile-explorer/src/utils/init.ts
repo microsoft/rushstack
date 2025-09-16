@@ -46,7 +46,7 @@ export const init = (options: {
         lfxWorkspace: {
           workspaceRootFullPath: currentFolder,
           pnpmLockfilePath: Path.convertToSlashes(pnpmLockfileRelativePath),
-          pnpmLockfileFolder: Path.convertToSlashes(path.basename(pnpmLockfileRelativePath)),
+          pnpmLockfileFolder: Path.convertToSlashes(path.dirname(pnpmLockfileRelativePath)),
           rushConfig: {
             rushVersion: rushConfiguration.rushConfigurationJson.rushVersion,
             subspaceName: subspaceName ?? ''
