@@ -277,11 +277,9 @@ function createPackageLockfileEntry(options: {
       result.entryPackageVersion +
       (result.entrySuffix ? `_${result.entrySuffix}` : '');
   } else {
+    // Example inputs:
     //       /@rushstack/eslint-config@3.0.1
-    // -->   @rushstack/eslint-config 3.0.1
-
     //       /@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
-    // -->   @rushstack/l 1.0.0 (@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
     let versionAtSignIndex: number;
     if (rawEntryId.startsWith('/@')) {
       versionAtSignIndex = rawEntryId.indexOf('@', 2);
@@ -296,16 +294,26 @@ function createPackageLockfileEntry(options: {
       const version: string = rawEntryId.substring(versionAtSignIndex + 1);
       result.entryPackageVersion = version;
 
-      // @rushstack/eslint-config 3.0.1
+      //       /@rushstack/eslint-config@3.0.1
+      // -->   @rushstack/eslint-config 3.0.1
       result.displayText = packageName + ' ' + version;
     } else {
       const version: string = rawEntryId.substring(versionAtSignIndex + 1, leftParenIndex);
       result.entryPackageVersion = version;
-      const suffix: string = rawEntryId.substring(leftParenIndex);
+
+      // "(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)"
+      let suffix: string = rawEntryId.substring(leftParenIndex);
+
+      // Rewrite to:
+      // "@rushstack/m@1.0.0; @rushstack/n@2.0.0"
+      suffix = Text.replaceAll(suffix, ')(', '; ');
+      suffix = Text.replaceAll(suffix, '(', '');
+      suffix = Text.replaceAll(suffix, ')', '');
       result.entrySuffix = suffix;
 
-      // @rushstack/l 1.0.0 (@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
-      result.displayText = packageName + ' ' + version + ' ' + suffix;
+      //       /@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+      // -->   @rushstack/l 1.0.0 [@rushstack/m@1.0.0; @rushstack/n@2.0.0]
+      result.displayText = packageName + ' ' + version + ' [' + suffix + ']';
     }
 
     // Example: /@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)

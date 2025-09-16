@@ -139,11 +139,11 @@ exports[`lfxGraph-website-sample-1-v6.0 loads a workspace 1`] = `
         peerDependencyMeta: {}
         resolvedEntryJsonId: 8
         version: 1.0.0
-    displayText: '@rushstack/j 1.0.0 (@rushstack/n@2.0.0)'
+    displayText: '@rushstack/j 1.0.0 [@rushstack/n@2.0.0]'
     entryId: ''
     entryPackageName: '@rushstack/j'
     entryPackageVersion: 1.0.0
-    entrySuffix: (@rushstack/n@2.0.0)
+    entrySuffix: '@rushstack/n@2.0.0'
     jsonId: 5
     kind: 2
     packageJsonFolderPath: common/temp/node_modules/.pnpm/@rushstack+j@1.0.0_@rushstack+n@2.0.0/node_modules/@rushstack/j
@@ -159,11 +159,11 @@ exports[`lfxGraph-website-sample-1-v6.0 loads a workspace 1`] = `
         peerDependencyMeta: {}
         resolvedEntryJsonId: 7
         version: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
-    displayText: '@rushstack/k 1.0.0 (@rushstack/m@1.0.0)(@rushstack/n@2.0.0)'
+    displayText: '@rushstack/k 1.0.0 [@rushstack/m@1.0.0; @rushstack/n@2.0.0]'
     entryId: ''
     entryPackageName: '@rushstack/k'
     entryPackageVersion: 1.0.0
-    entrySuffix: (@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+    entrySuffix: '@rushstack/m@1.0.0; @rushstack/n@2.0.0'
     jsonId: 6
     kind: 2
     packageJsonFolderPath: >-
@@ -204,11 +204,11 @@ exports[`lfxGraph-website-sample-1-v6.0 loads a workspace 1`] = `
           optional: true
           version: ^2.0.0
         version: ^2.0.0
-    displayText: '@rushstack/l 1.0.0 (@rushstack/m@1.0.0)(@rushstack/n@2.0.0)'
+    displayText: '@rushstack/l 1.0.0 [@rushstack/m@1.0.0; @rushstack/n@2.0.0]'
     entryId: ''
     entryPackageName: '@rushstack/l'
     entryPackageVersion: 1.0.0
-    entrySuffix: (@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+    entrySuffix: '@rushstack/m@1.0.0; @rushstack/n@2.0.0'
     jsonId: 7
     kind: 2
     packageJsonFolderPath: >-
