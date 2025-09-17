@@ -1,28 +1,33 @@
-lockfileVersion: 5.4
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
 
 importers:
   duplicate-1/duplicate:
-    specifiers:
-      color: ^5.0.2
     dependencies:
-      color: 5.0.2
+      color:
+        specifier: ^5.0.2
+        version: 5.0.2
 
   duplicate-2/duplicate:
-    specifiers:
-      color-string: ^2.1.2
     dependencies:
-      color-string: 2.1.2
+      color-string:
+        specifier: ^2.1.2
+        version: 2.1.2
 
   link-specifier/linker:
-    specifiers:
-      has-symbols: 1.0.2
-      target-folder: link:../target-folder
     dependencies:
-      has-symbols: 1.0.2
-      target-folder: link:../target-folder
+      has-symbols:
+        specifier: 1.0.2
+        version: 1.0.2
+      target-folder:
+        specifier: link:../target-folder
+        version: link:../target-folder
 
 packages:
-  /color-convert/3.1.2:
+  /color-convert@3.1.2:
     resolution:
       {
         integrity: sha512-UNqkvCDXstVck3kdowtOTWROIJQwafjOfXSmddoDrXo4cewMKmusCeF22Q24zvjR8nwWib/3S/dfyzPItPEiJg==
@@ -32,7 +37,7 @@ packages:
       color-name: 2.0.2
     dev: false
 
-  /color-name/2.0.2:
+  /color-name@2.0.2:
     resolution:
       {
         integrity: sha512-9vEt7gE16EW7Eu7pvZnR0abW9z6ufzhXxGXZEVU9IqPdlsUiMwJeJfRtq0zePUmnbHGT9zajca7mX8zgoayo4A==
@@ -40,7 +45,7 @@ packages:
     engines: { node: '>=12.20' }
     dev: false
 
-  /color-string/2.1.2:
+  /color-string@2.1.2:
     resolution:
       {
         integrity: sha512-RxmjYxbWemV9gKu4zPgiZagUxbH3RQpEIO77XoSSX0ivgABDZ+h8Zuash/EMFLTI4N9QgFPOJ6JQpPZKFxa+dA==
@@ -50,7 +55,7 @@ packages:
       color-name: 2.0.2
     dev: false
 
-  /color/5.0.2:
+  /color@5.0.2:
     resolution:
       {
         integrity: sha512-e2hz5BzbUPcYlIRHo8ieAhYgoajrJr+hWoceg6E345TPsATMUKqDgzt8fSXZJJbxfpiPzkWyphz8yn8At7q3fA==
@@ -61,7 +66,7 @@ packages:
       color-string: 2.1.2
     dev: false
 
-  /has-symbols/1.0.2:
+  /has-symbols@1.0.2:
     resolution:
       {
         integrity: sha512-chXa79rL/UC2KlX17jo3vRGz0azaWEx5tGqZg5pO3NUyEJVB17dMruQlzCCOfUvElghKcm5194+BCRvi2Rv/Gw==
