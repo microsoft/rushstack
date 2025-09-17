@@ -7,6 +7,7 @@ import cors from 'cors';
 import process from 'process';
 import open from 'open';
 import updateNotifier from 'update-notifier';
+import * as path from 'node:path';
 
 import { FileSystem, type IPackageJson, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
@@ -24,6 +25,7 @@ import {
 
 import type { IAppState } from '../../state';
 import { init } from '../../utils/init';
+import { PnpmfileRunner } from '../../graph/PnpmfileRunner';
 import * as lfxGraphLoader from '../../graph/lfxGraphLoader';
 
 const EXPLORER_TOOL_FILENAME: 'lockfile-explorer' = 'lockfile-explorer';
@@ -218,10 +220,22 @@ export class ExplorerCommandLineParser extends CommandLineParser {
           }
         }
 
-        const {
-          hooks: { readPackage }
-        } = require(appState.pnpmfileLocation);
-        const parsedPackage: {} = readPackage(packageJson, {});
+        let parsedPackage: IPackageJson = packageJson;
+
+        const pnpmfilePath: string = path.join(
+          appState.lfxWorkspace.workspaceRootFullPath,
+          appState.lfxWorkspace.pnpmLockfileFolder,
+          '.pnpmfile.cjs'
+        );
+        if (await FileSystem.existsAsync(pnpmfilePath)) {
+          const pnpmFileRunner: PnpmfileRunner = new PnpmfileRunner(pnpmfilePath);
+          try {
+            parsedPackage = await pnpmFileRunner.transformPackageAsync(packageJson, fileLocation);
+          } finally {
+            await pnpmFileRunner.disposeAsync();
+          }
+        }
+
         res.send(parsedPackage);
       }
     );
