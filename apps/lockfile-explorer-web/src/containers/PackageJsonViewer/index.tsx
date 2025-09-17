@@ -3,8 +3,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { Highlight, themes } from 'prism-react-renderer';
-
 import { readPnpmfileAsync, readPackageSpecAsync, readPackageJsonAsync } from '../../helpers/lfxApiClient';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
@@ -15,6 +13,7 @@ import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import { isEntryModified } from '../../helpers/isEntryModified';
 import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
 import { LfxGraphEntryKind } from '../../packlets/lfx-shared';
+import { CodeBox } from './CodeBox';
 
 import styles from './styles.scss';
 
@@ -22,24 +21,6 @@ const PackageView: { [key: string]: string } = {
   PACKAGE_JSON: 'PACKAGE_JSON',
   PACKAGE_SPEC: 'PACKAGE_SPEC',
   PARSED_PACKAGE_JSON: 'PARSED_PACKAGE_JSON'
-};
-
-const CodeBox = (props: { code: string }): JSX.Element => {
-  return (
-    <Highlight theme={themes.github} code={props.code} language="js">
-      {({ className, style, tokens, getLineProps, getTokenProps }) => (
-        <pre style={style}>
-          {tokens.map((line, i) => (
-            <div key={i} {...getLineProps({ line })}>
-              {line.map((token, key) => (
-                <span key={key} {...getTokenProps({ token })} />
-              ))}
-            </div>
-          ))}
-        </pre>
-      )}
-    </Highlight>
-  );
 };
 
 export const PackageJsonViewer = (): JSX.Element => {
@@ -70,9 +51,9 @@ export const PackageJsonViewer = (): JSX.Element => {
 
   useEffect(() => {
     async function loadPackageDetailsAsync(packageName: string): Promise<void> {
-      const packageJSONFile = await readPackageJsonAsync(packageName);
+      const packageJSONFile: IPackageJson | undefined = await readPackageJsonAsync(packageName);
       setPackageJSON(packageJSONFile);
-      const parsedJSON = await readPackageSpecAsync(packageName);
+      const parsedJSON: IPackageJson | undefined = await readPackageSpecAsync(packageName);
       setParsedPackageJSON(parsedJSON);
 
       if (packageJSONFile && parsedJSON) {
@@ -183,7 +164,7 @@ export const PackageJsonViewer = (): JSX.Element => {
               Please select a Project or Package to view it&apos;s package.json
             </Text>
           );
-        return <pre>{JSON.stringify(packageJSON, null, 2)}</pre>;
+        return <CodeBox code={JSON.stringify(packageJSON, null, 2)} language="json" />;
       case PackageView.PACKAGE_SPEC:
         if (!pnpmfile) {
           return (
@@ -193,7 +174,7 @@ export const PackageJsonViewer = (): JSX.Element => {
             </Text>
           );
         }
-        return <CodeBox code={pnpmfile} />;
+        return <CodeBox code={pnpmfile} language="js" />;
       case PackageView.PARSED_PACKAGE_JSON:
         if (!parsedPackageJSON)
           return (
