@@ -7,8 +7,11 @@ import { tmpdir } from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 import { createHash, randomUUID } from 'crypto';
-import { zipSync } from './zipSync';
+
 import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
+
+import { pack } from './pack';
+import { unpack } from './unpack';
 
 // create a tempdir and setup dummy files there for benchmarking
 let tempDir: string;
@@ -192,8 +195,7 @@ function benchZipSyncScenario(
   const terminal = new Terminal(new NoOpTerminalProvider());
   bench(kind, {
     pack: ({ archive, demoDir }) => {
-      const { filesPacked } = zipSync({
-        mode: 'pack',
+      const { filesPacked } = pack({
         archivePath: archive,
         targetDirectories: ['subdir1', 'subdir2'],
         baseDir: demoDir,
@@ -203,12 +205,10 @@ function benchZipSyncScenario(
       console.log(`Files packed: ${filesPacked}`);
     },
     unpack: ({ archive, unpackDir }) => {
-      const { filesDeleted, filesExtracted, filesSkipped, foldersDeleted, otherEntriesDeleted } = zipSync({
-        mode: 'unpack',
+      const { filesDeleted, filesExtracted, filesSkipped, foldersDeleted, otherEntriesDeleted } = unpack({
         archivePath: archive,
         targetDirectories: ['subdir1', 'subdir2'],
         baseDir: unpackDir,
-        compression,
         terminal
       });
       console.log(

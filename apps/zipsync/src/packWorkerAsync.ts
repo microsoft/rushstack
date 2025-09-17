@@ -2,22 +2,27 @@
 // See LICENSE in the project root for license information.
 
 import type { Worker } from 'node:worker_threads';
-import type { IZipSyncOptions } from './zipSync';
-import type { IWorkerToHostMessage, IZipSyncCommandMessage } from './zipSyncWorker';
 
-type IZipSyncResult = ReturnType<typeof import('./zipSync').zipSync>;
+import type {
+  IWorkerToHostMessage,
+  IHostToWorkerMessage,
+  IZipSyncPackWorkerResult,
+  IZipSyncPackOptions
+} from './packWorker';
 
-export async function zipSyncWorkerAsync(
-  options: Omit<IZipSyncOptions, 'terminal'>
-): Promise<IZipSyncResult> {
+export type { IZipSyncPackWorkerResult } from './packWorker';
+
+export async function packWorkerAsync(
+  options: Omit<IZipSyncPackOptions, 'terminal'>
+): Promise<IZipSyncPackWorkerResult> {
   const { Worker } = await import('node:worker_threads');
 
-  const worker: Worker = new Worker(require.resolve('./zipSyncWorker'));
+  const worker: Worker = new Worker(require.resolve('./packWorker'));
 
-  return new Promise<IZipSyncResult>((resolve, reject) => {
+  return new Promise<IZipSyncPackWorkerResult>((resolve, reject) => {
     worker.on('message', (message: IWorkerToHostMessage) => {
       switch (message.type) {
-        case 'zipsync': {
+        case 'zipsync-pack': {
           resolve(message.result);
           break;
         }
@@ -44,8 +49,8 @@ export async function zipSyncWorkerAsync(
       }
     });
 
-    const commandMessage: IZipSyncCommandMessage = {
-      type: 'zipsync',
+    const commandMessage: IHostToWorkerMessage = {
+      type: 'zipsync-pack',
       id: 0,
       options
     };

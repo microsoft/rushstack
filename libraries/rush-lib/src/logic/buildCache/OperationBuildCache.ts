@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 
 import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { zipSyncWorkerAsync } from '@rushstack/zipsync/lib/zipSyncWorkerAsync';
+import { packWorkerAsync, type IZipSyncPackWorkerResult } from '@rushstack/zipsync/lib/packWorkerAsync';
+import { unpackWorkerAsync, type IZipSyncUnpackWorkerResult } from '@rushstack/zipsync/lib/unpackWorkerAsync';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
@@ -167,15 +169,28 @@ export class OperationBuildCache {
 
     let restoreSuccess: boolean = false;
     try {
+      const logFilePath: string = this._getLogFilePath(cacheId, 'unpack');
+      let unpackWorkerResult: IZipSyncUnpackWorkerResult;
+      try {
+        unpackWorkerResult = await unpackWorkerAsync({
+          archivePath: localCacheEntryPath!,
+          targetDirectories: this._projectOutputFolderNames,
+          baseDir: projectFolderPath
+        });
+      } catch (e) {
+        const { zipSyncLogs } = e as { zipSyncLogs: string | undefined };
+        if (zipSyncLogs) {
+          fs.writeFileSync(logFilePath, zipSyncLogs);
+          terminal.writeVerboseLine(`The zipsync log has been written to: ${logFilePath}`);
+        }
+        throw e;
+      }
       const {
-        zipSyncReturn: { filesDeleted, filesExtracted, filesSkipped, foldersDeleted, otherEntriesDeleted }
-      } = await zipSyncWorkerAsync({
-        mode: 'unpack',
-        compression: 'auto',
-        archivePath: localCacheEntryPath!,
-        targetDirectories: this._projectOutputFolderNames,
-        baseDir: projectFolderPath
-      });
+        zipSyncReturn: { filesDeleted, filesExtracted, filesSkipped, foldersDeleted, otherEntriesDeleted },
+        zipSyncLogs
+      } = unpackWorkerResult;
+      fs.writeFileSync(logFilePath, zipSyncLogs);
+      terminal.writeVerboseLine(`The zipsync log has been written to: ${logFilePath}`);
       terminal.writeVerboseLine(`Restored ${filesExtracted + filesSkipped} files from cache.`);
       if (filesExtracted > 0) {
         terminal.writeVerboseLine(`Extracted ${filesExtracted} files to target folders.`);
@@ -240,15 +255,29 @@ export class OperationBuildCache {
 
     terminal.writeVerboseLine(`Using zipsync to create cache archive.`);
     try {
+      const logFilePath: string = this._getLogFilePath(cacheId, 'pack');
+      let packWorkerResult: IZipSyncPackWorkerResult;
+      try {
+        packWorkerResult = await packWorkerAsync({
+          compression: 'auto',
+          archivePath: tempLocalCacheEntryPath,
+          targetDirectories: this._projectOutputFolderNames,
+          baseDir: this._project.projectFolder
+        });
+      } catch (e) {
+        const { zipSyncLogs } = e as { zipSyncLogs: string | undefined };
+        if (zipSyncLogs) {
+          fs.writeFileSync(logFilePath, zipSyncLogs);
+          terminal.writeVerboseLine(`The zipsync log has been written to: ${logFilePath}`);
+        }
+        throw e;
+      }
       const {
-        zipSyncReturn: { filesPacked }
-      } = await zipSyncWorkerAsync({
-        mode: 'pack',
-        compression: 'auto',
-        archivePath: tempLocalCacheEntryPath,
-        targetDirectories: this._projectOutputFolderNames,
-        baseDir: this._project.projectFolder
-      });
+        zipSyncReturn: { filesPacked },
+        zipSyncLogs
+      } = packWorkerResult;
+      fs.writeFileSync(logFilePath, zipSyncLogs);
+      terminal.writeVerboseLine(`The zipsync log has been written to: ${logFilePath}`);
       terminal.writeVerboseLine(`Packed ${filesPacked} files for caching.`);
 
       // Move after the archive is finished so that if the process is interrupted we aren't left with an invalid file
@@ -387,6 +416,10 @@ export class OperationBuildCache {
       outputFilePaths,
       filteredOutputFolderNames
     };
+  }
+
+  private _getLogFilePath(cacheId: string, mode: 'pack' | 'unpack'): string {
+    return path.join(this._project.projectRushTempFolder, `${cacheId}.${mode}.log`);
   }
 
   private static _getCacheId(options: IProjectBuildCacheOptions): string | undefined {
