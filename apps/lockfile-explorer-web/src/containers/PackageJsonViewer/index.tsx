@@ -2,8 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useState } from 'react';
+
+import { Highlight, themes } from 'prism-react-renderer';
+
 import { readPnpmfileAsync, readPackageSpecAsync, readPackageJsonAsync } from '../../helpers/lfxApiClient';
-import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
 import type { IPackageJson } from '../../types/IPackageJson';
@@ -14,10 +16,30 @@ import { isEntryModified } from '../../helpers/isEntryModified';
 import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
 import { LfxGraphEntryKind } from '../../packlets/lfx-shared';
 
+import styles from './styles.scss';
+
 const PackageView: { [key: string]: string } = {
   PACKAGE_JSON: 'PACKAGE_JSON',
   PACKAGE_SPEC: 'PACKAGE_SPEC',
   PARSED_PACKAGE_JSON: 'PARSED_PACKAGE_JSON'
+};
+
+const CodeBox = (props: { code: string }): JSX.Element => {
+  return (
+    <Highlight theme={themes.github} code={props.code} language="js">
+      {({ className, style, tokens, getLineProps, getTokenProps }) => (
+        <pre style={style}>
+          {tokens.map((line, i) => (
+            <div key={i} {...getLineProps({ line })}>
+              {line.map((token, key) => (
+                <span key={key} {...getTokenProps({ token })} />
+              ))}
+            </div>
+          ))}
+        </pre>
+      )}
+    </Highlight>
+  );
 };
 
 export const PackageJsonViewer = (): JSX.Element => {
@@ -171,7 +193,7 @@ export const PackageJsonViewer = (): JSX.Element => {
             </Text>
           );
         }
-        return <pre>{pnpmfile}</pre>;
+        return <CodeBox code={pnpmfile} />;
       case PackageView.PARSED_PACKAGE_JSON:
         if (!parsedPackageJSON)
           return (
