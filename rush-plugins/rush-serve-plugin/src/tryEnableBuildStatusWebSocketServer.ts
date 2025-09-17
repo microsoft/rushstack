@@ -146,7 +146,7 @@ export function tryEnableBuildStatusWebSocketServer(
       phaseName: associatedPhase.name,
 
       enabled,
-      silent: record.silent,
+      silent: runner.silent,
       noop: !!runner.isNoOp,
 
       status: readableStatusFromStatus[record.status],
