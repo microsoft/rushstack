@@ -6,22 +6,22 @@ import type {
   CommandLineFlagParameter,
   IRequiredCommandLineStringParameter,
   IRequiredCommandLineChoiceParameter,
-  IRequiredCommandLineStringListParameter,
-  CommandLineChoiceParameter
+  IRequiredCommandLineStringListParameter
 } from '@rushstack/ts-command-line/lib/index';
 import type { ConsoleTerminalProvider } from '@rushstack/terminal/lib/ConsoleTerminalProvider';
 import type { ITerminal } from '@rushstack/terminal/lib/ITerminal';
 
-import { type IZipMode, zipSync } from './zipSync';
+import type { IZipSyncMode, ZipSyncOptionCompression } from './zipSyncUtils';
+import { pack, unpack } from './index';
 
 export class ZipSyncCommandLineParser extends CommandLineParser {
   private readonly _debugParameter: CommandLineFlagParameter;
   private readonly _verboseParameter: CommandLineFlagParameter;
-  private readonly _modeParameter: IRequiredCommandLineChoiceParameter<IZipMode>;
+  private readonly _modeParameter: IRequiredCommandLineChoiceParameter<IZipSyncMode>;
   private readonly _archivePathParameter: IRequiredCommandLineStringParameter;
   private readonly _baseDirParameter: IRequiredCommandLineStringParameter;
   private readonly _targetDirectoriesParameter: IRequiredCommandLineStringListParameter;
-  private readonly _compressionParameter: CommandLineChoiceParameter<'store' | 'deflate' | 'auto'>;
+  private readonly _compressionParameter: IRequiredCommandLineChoiceParameter<ZipSyncOptionCompression>;
   private readonly _terminal: ITerminal;
   private readonly _terminalProvider: ConsoleTerminalProvider;
 
@@ -46,7 +46,7 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
       description: 'Show verbose output'
     });
 
-    this._modeParameter = this.defineChoiceParameter<IZipMode>({
+    this._modeParameter = this.defineChoiceParameter<IZipSyncMode>({
       parameterLongName: '--mode',
       parameterShortName: '-m',
       description:
@@ -79,7 +79,7 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
       required: true
     });
 
-    this._compressionParameter = this.defineChoiceParameter<'store' | 'deflate' | 'auto'>({
+    this._compressionParameter = this.defineChoiceParameter<ZipSyncOptionCompression>({
       parameterLongName: '--compression',
       parameterShortName: '-z',
       description:
@@ -100,14 +100,22 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
       this._terminalProvider.verboseEnabled = true;
     }
     try {
-      zipSync({
-        terminal: this._terminal,
-        mode: this._modeParameter.value,
-        archivePath: this._archivePathParameter.value,
-        targetDirectories: this._targetDirectoriesParameter.values,
-        baseDir: this._baseDirParameter.value,
-        compression: (this._compressionParameter.value as 'store' | 'deflate' | 'auto' | undefined) ?? 'auto'
-      });
+      if (this._modeParameter.value === 'pack') {
+        pack({
+          terminal: this._terminal,
+          archivePath: this._archivePathParameter.value,
+          targetDirectories: this._targetDirectoriesParameter.values,
+          baseDir: this._baseDirParameter.value,
+          compression: this._compressionParameter.value
+        });
+      } else if (this._modeParameter.value === 'unpack') {
+        unpack({
+          terminal: this._terminal,
+          archivePath: this._archivePathParameter.value,
+          targetDirectories: this._targetDirectoriesParameter.values,
+          baseDir: this._baseDirParameter.value
+        });
+      }
     } catch (error) {
       this._terminal.writeErrorLine('\n' + error.stack);
     }

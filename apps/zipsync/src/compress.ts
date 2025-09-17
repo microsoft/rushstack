@@ -3,7 +3,6 @@
 
 import type { Transform } from 'node:stream';
 import zlib from 'node:zlib';
-import { DISPOSE_SYMBOL } from './disposableFileHandle';
 
 type OutputChunkHandler = (chunk: Uint8Array, lengthBytes: number) => void;
 
@@ -122,7 +121,7 @@ export function createIncrementalZlib(
   const handle: IHandle = compressor._handle!;
 
   return {
-    [DISPOSE_SYMBOL]: () => {
+    [Symbol.dispose]: () => {
       if (compressor._handle) {
         compressor._handle.close();
         compressor._handle = undefined;

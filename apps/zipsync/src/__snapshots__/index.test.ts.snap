@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`zipSync tests basic pack test 1`] = `
 Object {
@@ -94,8 +94,8 @@ Object {
 exports[`zipSync tests basic pack test 2`] = `
 Object {
   "filesDeleted": 0,
-  "filesExtracted": 20,
-  "filesSkipped": 0,
+  "filesExtracted": 12,
+  "filesSkipped": 8,
   "foldersDeleted": 0,
   "metadata": Object {
     "files": Object {

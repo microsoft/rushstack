@@ -2,40 +2,47 @@
 // See LICENSE in the project root for license information.
 
 import { parentPort as rawParentPort, type MessagePort } from 'node:worker_threads';
-import { type IZipSyncOptions, zipSync } from './zipSync';
+
 import { Terminal } from '@rushstack/terminal/lib/Terminal';
 import { StringBufferTerminalProvider } from '@rushstack/terminal/lib/StringBufferTerminalProvider';
+
+import { type IZipSyncUnpackOptions, type IZipSyncUnpackResult, unpack } from './unpack';
+
+export { type IZipSyncUnpackOptions, type IZipSyncUnpackResult } from './unpack';
 
 export interface IHashWorkerData {
   basePath: string;
 }
 
-export interface IZipSyncCommandMessage {
-  type: 'zipsync';
+export interface IZipSyncUnpackCommandMessage {
+  type: 'zipsync-unpack';
   id: number;
-  options: Omit<IZipSyncOptions, 'terminal'>;
+  options: Omit<IZipSyncUnpackOptions, 'terminal'>;
 }
 
-interface IZipSyncSuccessMessage {
-  id: number;
-  type: 'zipsync';
-  result: {
-    zipSyncReturn: ReturnType<typeof zipSync>;
-    zipSyncLogs: string;
-  };
+export interface IZipSyncUnpackWorkerResult {
+  zipSyncReturn: IZipSyncUnpackResult;
+  zipSyncLogs: string;
 }
 
-export interface IErrorMessage {
+interface IZipSyncUnpackSuccessMessage {
+  id: number;
+  type: 'zipsync-unpack';
+  result: IZipSyncUnpackWorkerResult;
+}
+
+export interface IZipSyncUnpackErrorMessage {
   type: 'error';
   id: number;
   args: {
     message: string;
     stack: string;
+    zipSyncLogs: string;
   };
 }
 
-export type IHostToWorkerMessage = IZipSyncCommandMessage;
-export type IWorkerToHostMessage = IZipSyncSuccessMessage | IErrorMessage;
+export type IHostToWorkerMessage = IZipSyncUnpackCommandMessage;
+export type IWorkerToHostMessage = IZipSyncUnpackSuccessMessage | IZipSyncUnpackErrorMessage;
 
 if (!rawParentPort) {
   throw new Error('This module must be run in a worker thread.');
@@ -49,19 +56,19 @@ function handleMessage(message: IHostToWorkerMessage | false): void {
     return;
   }
 
+  const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+  const terminal: Terminal = new Terminal(terminalProvider);
+
   try {
     switch (message.type) {
-      case 'zipsync': {
+      case 'zipsync-unpack': {
         const { options } = message;
 
-        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
-        const terminal: Terminal = new Terminal(terminalProvider);
-
-        const successMessage: IZipSyncSuccessMessage = {
+        const successMessage: IZipSyncUnpackSuccessMessage = {
           type: message.type,
           id: message.id,
           result: {
-            zipSyncReturn: zipSync({ ...options, terminal }),
+            zipSyncReturn: unpack({ ...options, terminal }),
             zipSyncLogs: terminalProvider.getOutput()
           }
         };
@@ -69,12 +76,13 @@ function handleMessage(message: IHostToWorkerMessage | false): void {
       }
     }
   } catch (err) {
-    const errorMessage: IErrorMessage = {
+    const errorMessage: IZipSyncUnpackErrorMessage = {
       type: 'error',
       id: message.id,
       args: {
         message: (err as Error).message,
-        stack: (err as Error).stack || ''
+        stack: (err as Error).stack || '',
+        zipSyncLogs: terminalProvider.getOutput()
       }
     };
     parentPort.postMessage(errorMessage);

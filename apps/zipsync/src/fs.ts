@@ -26,3 +26,27 @@ export function getDisposableFileHandle(path: string, openMode: OpenMode): IDisp
 
   return result;
 }
+
+export function rmdirSync(dirPath: string): void {
+  try {
+    fs.rmdirSync(dirPath);
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === 'ENOENT' || (e as NodeJS.ErrnoException).code === 'ENOTDIR') {
+      // Not found, ignore
+    } else {
+      throw e;
+    }
+  }
+}
+
+export function unlinkSync(filePath: string): void {
+  try {
+    fs.unlinkSync(filePath);
+  } catch (e) {
+    if (e && (e as NodeJS.ErrnoException).code === 'ENOENT') {
+      // Not found, ignore
+    } else {
+      throw e;
+    }
+  }
+}

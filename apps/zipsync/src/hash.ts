@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { closeSync, readSync, fstatSync, type Stats } from 'node:fs';
+import { readSync, fstatSync, type Stats } from 'node:fs';
 import { createHash, type Hash } from 'node:crypto';
 
 const buffer: Buffer = Buffer.allocUnsafeSlow(1 << 24);
 
 export function computeFileHash(fd: number): string | false {
   try {
-    const hash: Hash = createHash('sha256');
+    const hash: Hash = createHash('sha1');
     let totalBytesRead: number = 0;
     let bytesRead: number;
     do {
@@ -34,9 +34,9 @@ export function computeFileHash(fd: number): string | false {
       return false;
     }
     throw err;
-  } finally {
-    if (fd !== undefined) {
-      closeSync(fd);
-    }
   }
+}
+
+export function calculateSHA1(data: Buffer): string {
+  return createHash('sha1').update(data).digest('hex');
 }
