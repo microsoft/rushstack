@@ -8,7 +8,7 @@ import * as zlib from 'node:zlib';
 import { type IReadonlyPathTrieNode, LookupByPath } from '@rushstack/lookup-by-path/lib/LookupByPath';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { getDisposableFileHandle, type IDisposableFileHandle } from './fs';
+import { getDisposableFileHandle, unlinkSync, type IDisposableFileHandle } from './fs';
 import { type IIncrementalZlib, createIncrementalZlib } from './compress';
 import { markStart, markEnd, getDuration, emitSummary, formatDuration } from './perf';
 import {
@@ -191,7 +191,7 @@ export function unpack({
         terminal.writeVerboseLine(`${padding}${item.name}`);
         if (!childNode?.value) {
           terminal.writeDebugLine(`Deleting file: ${relativePath}`);
-          fs.unlinkSync(relativePath);
+          unlinkSync(relativePath);
           deletedFilesCount++;
         }
       } else if (item.isDirectory()) {
@@ -202,7 +202,7 @@ export function unpack({
         }
       } else {
         terminal.writeVerboseLine(`${padding}${item.name} (not file or directory, deleting)`);
-        fs.unlinkSync(relativePath);
+        unlinkSync(relativePath);
         deletedOtherCount++;
       }
     }
