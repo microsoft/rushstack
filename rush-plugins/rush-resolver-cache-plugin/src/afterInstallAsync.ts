@@ -41,7 +41,7 @@ function getPlatformInfo(): IPlatformInfo {
 }
 
 const END_TOKEN: string = '/package.json":';
-const RESOLVER_CACHE_FILE_VERSION: 1 = 1;
+const RESOLVER_CACHE_FILE_VERSION: 2 = 2;
 
 interface IExtendedResolverCacheFile extends IResolverCacheFile {
   /**
@@ -92,6 +92,12 @@ export async function afterInstallAsync(
   });
   if (!lockFile) {
     throw new Error(`Failed to load shrinkwrap file: ${lockFilePath}`);
+  }
+
+  if (!lockFile.hash) {
+    throw new Error(
+      `Shrinkwrap file does not have a hash. This indicates linking to an old version of Rush.`
+    );
   }
 
   try {
