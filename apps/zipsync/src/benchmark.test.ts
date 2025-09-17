@@ -478,13 +478,13 @@ zipsync internally handles cleaning as part of its operation.
   for (const g of groupsDef) {
     outputLines.push(`## ${g.title}`);
     outputLines.push('');
-    outputLines.push('### Pack Phase');
-    outputLines.push('');
-    outputLines.push(...buildGroupTable(g, 'pack'));
-    outputLines.push('');
     outputLines.push('### Unpack Phase');
     outputLines.push('');
     outputLines.push(...buildGroupTable(g, 'unpack'));
+    outputLines.push('');
+    outputLines.push('### Pack Phase');
+    outputLines.push('');
+    outputLines.push(...buildGroupTable(g, 'pack'));
     outputLines.push('');
   }
   const resultText = outputLines.join('\n');
