@@ -3,7 +3,7 @@
 /* eslint-disable no-console */
 
 import { execSync } from 'child_process';
-import { tmpdir } from 'os';
+import { tmpdir, cpus, platform, release, arch, totalmem } from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 import { createHash, randomUUID } from 'crypto';
@@ -14,6 +14,7 @@ import { pack } from './pack';
 import { unpack } from './unpack';
 
 // create a tempdir and setup dummy files there for benchmarking
+const NUM_FILES = 1000; // number of files per subdir
 let tempDir: string;
 const runId = randomUUID();
 async function setupDemoDataAsync(): Promise<void> {
@@ -26,7 +27,7 @@ async function setupDemoDataAsync(): Promise<void> {
   const demoSubDir2 = path.join(tempDir, 'demo-data', 'subdir2');
   fs.mkdirSync(demoSubDir2, { recursive: true });
 
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < NUM_FILES; i++) {
     const filePath1 = path.join(demoSubDir1, `file${i}.txt`);
     fs.writeFileSync(filePath1, `This is file ${i} in subdir1\n`.repeat(1000), { encoding: 'utf-8' });
     const filePath2 = path.join(demoSubDir2, `file${i}.txt`);
@@ -138,13 +139,11 @@ function bench(kind: string, commands: IBenchCommands): void {
   for (let i = 0; i < ITERATIONS; i++) {
     // Ensure previous artifacts removed
     if (fs.existsSync(commands.archive)) fs.rmSync(commands.archive, { force: true });
-    if (fs.existsSync(commands.unpackDir)) fs.rmSync(commands.unpackDir, { recursive: true, force: true });
-    fs.mkdirSync(commands.unpackDir, { recursive: true });
     if (commands.populateUnpackDir === 'full') {
       fs.cpSync(srcDir, commands.unpackDir, { recursive: true });
     } else if (commands.populateUnpackDir === 'partial') {
       // Copy half the files
-      for (let j = 0; j < 500; j++) {
+      for (let j = 0; j < NUM_FILES / 2; j++) {
         const file1 = path.join(srcDir, 'subdir1', `file${j}.txt`);
         const file2 = path.join(srcDir, 'subdir2', `file${j}.txt`);
         const dest1 = path.join(commands.unpackDir, 'subdir1', `file${j}.txt`);
@@ -218,7 +217,7 @@ function benchZipSyncScenario(
     archive: path.join(tempDir, `archive-zipsync-${compression}.zip`),
     unpackDir: path.join(tempDir, `unpacked-zipsync-${compression}-${existingFiles}`),
     populateUnpackDir: existingFiles === 'all' ? 'full' : existingFiles === 'partial' ? 'partial' : undefined,
-    cleanBeforeUnpack: false
+    cleanBeforeUnpack: false // cleaning is handled internally by zipsync
   });
 }
 
@@ -239,13 +238,13 @@ describe(`archive benchmarks (iterations=${ITERATIONS})`, () => {
       cleanBeforeUnpack: true
     });
   });
-  it('tar.gz', () => {
+  it('tar-gz', () => {
     if (!isTarAvailable()) {
       console.log('Skipping tar test because tar is not available');
       return;
     }
     if (!tempDir) throw new Error('Temp directory is not set up.');
-    bench('tar.gz', {
+    bench('tar-gz', {
       pack: ({ archive, demoDir }) => execSync(`tar -czf "${archive}" -C "${demoDir}" .`),
       unpack: ({ archive, unpackDir }) => execSync(`tar -xzf "${archive}" -C "${unpackDir}"`),
       archive: path.join(tempDir, 'archive.tar.gz'),
@@ -363,6 +362,20 @@ afterAll(() => {
   // Organize into groups
   const groupsDef: Array<{ title: string; baseline: string; members: string[] }> = [
     {
+      title: 'Compressed (baseline: tar-gz)',
+      baseline: 'tar-gz',
+      members: [
+        'tar-gz',
+        'zip-deflate',
+        'zipsync-deflate-all-existing',
+        'zipsync-deflate-none-existing',
+        'zipsync-deflate-partial-existing',
+        'zipsync-auto-all-existing',
+        'zipsync-auto-none-existing',
+        'zipsync-auto-partial-existing'
+      ]
+    },
+    {
       title: 'Uncompressed (baseline: tar)',
       baseline: 'tar',
       members: [
@@ -371,20 +384,6 @@ afterAll(() => {
         'zipsync-store-all-existing',
         'zipsync-store-none-existing',
         'zipsync-store-partial-existing'
-      ]
-    },
-    {
-      title: 'Compressed (baseline: tar.gz)',
-      baseline: 'tar.gz',
-      members: [
-        'tar.gz',
-        'zip-deflate',
-        'zipsync-deflate-all-existing',
-        'zipsync-deflate-none-existing',
-        'zipsync-deflate-partial-existing',
-        'zipsync-auto-all-existing',
-        'zipsync-auto-none-existing',
-        'zipsync-auto-partial-existing'
       ]
     }
   ];
@@ -407,8 +406,8 @@ afterAll(() => {
     }
     const headers =
       phase === 'pack'
-        ? ['Archive', 'min (ms)', 'mean (ms)', 'p95 (ms)', 'max (ms)', 'std (ms)', 'speed×', 'size']
-        : ['Archive', 'min (ms)', 'mean (ms)', 'p95 (ms)', 'max (ms)', 'std (ms)', 'speed×'];
+        ? ['Archive', 'min (ms)', 'mean (ms)', 'p95 (ms)', 'max (ms)', 'std (ms)', 'speed (x)', 'size']
+        : ['Archive', 'min (ms)', 'mean (ms)', 'p95 (ms)', 'max (ms)', 'std (ms)', 'speed (x)'];
     const lines: string[] = [];
     lines.push('| ' + headers.join(' | ') + ' |');
     const align: string[] = headers.map((header, idx) => (idx === 0 ? '---' : '---:'));
@@ -441,9 +440,39 @@ afterAll(() => {
   outputLines.push('# Benchmark Results');
   outputLines.push('');
   outputLines.push(
-    'This document contains performance measurements for packing and unpacking a synthetic dataset using traditional archive tools (tar, zip) and various zipsync modes. The dataset consists of two directory trees (subdir1, subdir2) populated with text files. Each scenario was executed multiple iterations; metrics shown are aggregated timing statistics. The speed× column shows how many times faster a scenario is compared to the baseline in that group (values >1 = faster, <1 = slower). Baseline rows are shown in bold.'
+    `
+This document contains performance measurements for packing and unpacking a synthetic dataset using tar, zip, and zipsync.
+
+The dataset consists of two directory trees (subdir1, subdir2) populated with ${NUM_FILES} text files each.
+
+zipsync scenarios
+* "all-existing": unpack directory is fully populated with existing files
+* "none-existing": unpack directory is empty
+* "partial-existing": unpack directory contains half of the files
+
+zip and tar scenarios clean the unpack directory before unpacking. This time is included in the measurements because
+zipsync internally handles cleaning as part of its operation.
+`
   );
   outputLines.push('');
+  // System info
+  try {
+    const cpuList = cpus();
+    const cpuModelRaw: string | undefined = cpuList[0]?.model;
+    const cpuModel: string = cpuModelRaw ? cpuModelRaw.replace(/\|/g, ' ').trim() : 'unknown';
+    const logicalCores: number = cpuList.length || 0;
+    const memGB: string = (totalmem() / 1024 ** 3).toFixed(1);
+    outputLines.push('**System**');
+    outputLines.push('');
+    outputLines.push('| OS | Arch | Node | CPU | Logical Cores | Memory |');
+    outputLines.push('| --- | --- | --- | --- | ---: | --- |');
+    outputLines.push(
+      `| ${platform()} ${release()} | ${arch()} | ${process.version} | ${cpuModel} | ${logicalCores} | ${memGB} GB |`
+    );
+    outputLines.push('');
+  } catch {
+    // ignore system info errors
+  }
   outputLines.push(`Iterations: ${ITERATIONS}`);
   outputLines.push('');
   for (const g of groupsDef) {
