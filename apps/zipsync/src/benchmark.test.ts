@@ -224,15 +224,15 @@ function benchZipSyncScenario(
 
 // the benchmarks are skipped by default because they require external tools (tar, zip) to be installed
 describe(`archive benchmarks (iterations=${ITERATIONS})`, () => {
-  it('gtar', () => {
+  it('tar', () => {
     if (!isTarAvailable()) {
       console.log('Skipping tar test because tar is not available');
       return;
     }
     if (!tempDir) throw new Error('Temp directory is not set up.');
-    bench('gtar', {
-      pack: ({ archive, demoDir }) => execSync(`gtar -cf "${archive}" -C "${demoDir}" .`),
-      unpack: ({ archive, unpackDir }) => execSync(`gtar -xf "${archive}" -C "${unpackDir}"`),
+    bench('tar', {
+      pack: ({ archive, demoDir }) => execSync(`tar -cf "${archive}" -C "${demoDir}" .`),
+      unpack: ({ archive, unpackDir }) => execSync(`tar -xf "${archive}" -C "${unpackDir}"`),
       archive: path.join(tempDir, 'archive.tar'),
       unpackDir: path.join(tempDir, 'unpacked-tar'),
       populateUnpackDir: 'full',
@@ -481,7 +481,7 @@ function isZipAvailable(): boolean {
 }
 function isTarAvailable(): boolean {
   try {
-    const checkTar = process.platform === 'win32' ? 'where gtar' : 'command -v gtar';
+    const checkTar = process.platform === 'win32' ? 'where tar' : 'command -v tar';
     execSync(checkTar, { stdio: 'ignore' });
     return true;
   } catch {
