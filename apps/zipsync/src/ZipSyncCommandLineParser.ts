@@ -9,7 +9,6 @@ import type {
   IRequiredCommandLineStringListParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line/lib/index';
-import { InternalError } from '@rushstack/node-core-library/lib/InternalError';
 import type { ConsoleTerminalProvider } from '@rushstack/terminal/lib/ConsoleTerminalProvider';
 import type { ITerminal } from '@rushstack/terminal/lib/ITerminal';
 
@@ -92,7 +91,8 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
 
   protected override async onExecuteAsync(): Promise<void> {
     if (this._debugParameter.value) {
-      InternalError.breakInDebugger = true;
+      // eslint-disable-next-line no-debugger
+      debugger;
       this._terminalProvider.debugEnabled = true;
       this._terminalProvider.verboseEnabled = true;
     }
