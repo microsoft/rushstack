@@ -10,7 +10,11 @@ const DATA_DESCRIPTOR_SIGNATURE: number = 0x08074b50;
 
 export const STORE_COMPRESSION: 0 = 0;
 export const DEFLATE_COMPRESSION: 8 = 8;
-export type ZipMetaCompressionMethod = typeof STORE_COMPRESSION | typeof DEFLATE_COMPRESSION;
+export const ZSTD_COMPRESSION: 93 = 93;
+export type ZipMetaCompressionMethod =
+  | typeof STORE_COMPRESSION
+  | typeof DEFLATE_COMPRESSION
+  | typeof ZSTD_COMPRESSION;
 
 export interface IFileEntry {
   filename: string;

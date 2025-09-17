@@ -10,13 +10,14 @@ import type { ITerminal } from '@rushstack/terminal/lib/ITerminal';
 
 import { crc32Builder } from './crc32';
 import { DISPOSE_SYMBOL, getDisposableFileHandle, type IDisposableFileHandle } from './fs';
-import { type IIncrementalZlib, createIncrementalZlib } from './compress';
+import { type IIncrementalZlib, type IncrementalZlibMode, createIncrementalZlib } from './compress';
 import { markStart, markEnd, getDuration, emitSummary, formatDuration } from './perf';
 import {
   writeLocalFileHeader,
   writeDataDescriptor,
   writeCentralDirectoryHeader,
   writeEndOfCentralDirectory,
+  ZSTD_COMPRESSION,
   DEFLATE_COMPRESSION,
   STORE_COMPRESSION,
   type ZipMetaCompressionMethod,
@@ -34,6 +35,19 @@ import {
 
 const LIKELY_COMPRESSED_EXTENSION_REGEX: RegExp =
   /\.(?:zip|gz|tgz|bz2|xz|7z|rar|jpg|jpeg|png|gif|webp|avif|mp4|m4v|mov|mkv|webm|mp3|ogg|aac|flac|pdf|woff|woff2)$/;
+
+const zlibPackModes: Record<ZipMetaCompressionMethod, IncrementalZlibMode | undefined> = {
+  [ZSTD_COMPRESSION]: 'zstd-compress',
+  [DEFLATE_COMPRESSION]: 'deflate',
+  [STORE_COMPRESSION]: undefined
+} as const;
+
+const zipSyncCompressionOptions: Record<ZipSyncOptionCompression, ZipMetaCompressionMethod> = {
+  store: STORE_COMPRESSION,
+  deflate: DEFLATE_COMPRESSION,
+  zstd: ZSTD_COMPRESSION,
+  auto: DEFLATE_COMPRESSION // 'auto' is handled specially in the code
+} as const;
 
 /**
  * @public
@@ -182,7 +196,7 @@ export function pack({
     };
 
     let shouldCompress: boolean = false;
-    if (compression === 'deflate') {
+    if (compression === 'deflate' || compression === 'zstd') {
       shouldCompress = true;
     } else if (compression === 'auto') {
       // Heuristic: skip compression for small files or likely-already-compressed files
@@ -196,8 +210,8 @@ export function pack({
     }
 
     const compressionMethod: ZipMetaCompressionMethod = shouldCompress
-      ? DEFLATE_COMPRESSION
-      : STORE_COMPRESSION;
+      ? zipSyncCompressionOptions[compression]
+      : zipSyncCompressionOptions.store;
 
     const entry: IFileEntry = {
       filename: relativePath,
@@ -217,14 +231,14 @@ export function pack({
     let uncompressedSize: number = 0;
     let compressedSize: number = 0;
 
-    using deflateIncremental: IIncrementalZlib | undefined = shouldCompress
+    using incrementalZlib: IIncrementalZlib | undefined = shouldCompress
       ? createIncrementalZlib(
           outputBuffer,
           (chunk, lengthBytes) => {
             writeChunkToZip(chunk, lengthBytes);
             compressedSize += lengthBytes;
           },
-          'deflate'
+          zlibPackModes[compressionMethod]!
         )
       : undefined;
 
@@ -234,8 +248,8 @@ export function pack({
       const slice: Buffer = inputBuffer.subarray(0, bytesInInputBuffer);
       sha1HashBuilder.update(slice);
       crc32 = crc32Builder(slice, crc32);
-      if (deflateIncremental) {
-        deflateIncremental.update(slice);
+      if (incrementalZlib) {
+        incrementalZlib.update(slice);
       } else {
         writeChunkToZip(slice, bytesInInputBuffer);
       }
@@ -243,7 +257,7 @@ export function pack({
     });
 
     // finalize hashes, compression
-    deflateIncremental?.update(Buffer.alloc(0));
+    incrementalZlib?.update(Buffer.alloc(0));
     crc32 = crc32 >>> 0;
     const sha1Hash: string = sha1HashBuilder.digest('hex');
 
@@ -289,13 +303,13 @@ export function pack({
     `Metadata size=${metadataBuffer.length} bytes, fileCount=${Object.keys(metadata.files).length}`
   );
 
-  let metadataCompressionMethod: ZipMetaCompressionMethod = STORE_COMPRESSION;
+  let metadataCompressionMethod: ZipMetaCompressionMethod = zipSyncCompressionOptions.store;
   let metadataData: Buffer = metadataBuffer;
   let metadataCompressedSize: number = metadataBuffer.length;
-  if ((compression === 'deflate' || compression === 'auto') && metadataBuffer.length > 64) {
+  if (compression !== 'store' && metadataBuffer.length > 64) {
     const compressed: Buffer = zlib.deflateRawSync(metadataBuffer, { level: 9 });
     if (compressed.length < metadataBuffer.length) {
-      metadataCompressionMethod = DEFLATE_COMPRESSION;
+      metadataCompressionMethod = zipSyncCompressionOptions.deflate;
       metadataData = compressed;
       metadataCompressedSize = compressed.length;
       terminal.writeDebugLine(

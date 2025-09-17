@@ -10,8 +10,12 @@ import { createHash, randomUUID } from 'crypto';
 
 import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
 
+import type { ZipSyncOptionCompression } from './zipSyncUtils';
 import { pack } from './pack';
 import { unpack } from './unpack';
+import { getCompressionOptions } from './testUtils';
+
+const compressionOptions = getCompressionOptions() satisfies ZipSyncOptionCompression[];
 
 // create a tempdir and setup dummy files there for benchmarking
 const NUM_FILES = 1000; // number of files per subdir
@@ -187,7 +191,7 @@ function bench(kind: string, commands: IBenchCommands): void {
 
 function benchZipSyncScenario(
   kind: string,
-  compression: 'store' | 'deflate' | 'auto',
+  compression: ZipSyncOptionCompression,
   existingFiles: 'all' | 'none' | 'partial'
 ): void {
   if (!tempDir) throw new Error('Temp directory is not set up.');
@@ -283,32 +287,13 @@ describe(`archive benchmarks (iterations=${ITERATIONS})`, () => {
       cleanBeforeUnpack: true
     });
   });
-  it('zipsync-store-all-existing', () => {
-    benchZipSyncScenario('zipsync-store-all-existing', 'store', 'all');
-  });
-  it('zipsync-store-none-existing', () => {
-    benchZipSyncScenario('zipsync-store-none-existing', 'store', 'none');
-  });
-  it('zipsync-store-partial-existing', () => {
-    benchZipSyncScenario('zipsync-store-partial-existing', 'store', 'partial');
-  });
-  it('zipsync-deflate-all-existing', () => {
-    benchZipSyncScenario('zipsync-deflate-all-existing', 'deflate', 'all');
-  });
-  it('zipsync-deflate-none-existing', () => {
-    benchZipSyncScenario('zipsync-deflate-none-existing', 'deflate', 'none');
-  });
-  it('zipsync-deflate-partial-existing', () => {
-    benchZipSyncScenario('zipsync-deflate-partial-existing', 'deflate', 'partial');
-  });
-  it('zipsync-auto-all-existing', () => {
-    benchZipSyncScenario('zipsync-auto-all-existing', 'auto', 'all');
-  });
-  it('zipsync-auto-none-existing', () => {
-    benchZipSyncScenario('zipsync-auto-none-existing', 'auto', 'none');
-  });
-  it('zipsync-auto-partial-existing', () => {
-    benchZipSyncScenario('zipsync-auto-partial-existing', 'auto', 'partial');
+  const existingFileOptions: ['all', 'none', 'partial'] = ['all', 'none', 'partial'];
+  compressionOptions.forEach((compression) => {
+    existingFileOptions.forEach((existingFiles) => {
+      it(`zipsync-${compression}-${existingFiles}-existing`, () => {
+        benchZipSyncScenario(`zipsync-${compression}-${existingFiles}-existing`, compression, existingFiles);
+      });
+    });
   });
 });
 
@@ -367,6 +352,9 @@ afterAll(() => {
       members: [
         'tar-gz',
         'zip-deflate',
+        'zipsync-zstd-all-existing',
+        'zipsync-zstd-none-existing',
+        'zipsync-zstd-partial-existing',
         'zipsync-deflate-all-existing',
         'zipsync-deflate-none-existing',
         'zipsync-deflate-partial-existing',
