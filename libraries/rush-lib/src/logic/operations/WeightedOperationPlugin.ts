@@ -15,7 +15,7 @@ import { Async } from '@rushstack/node-core-library';
 const PLUGIN_NAME: 'WeightedOperationPlugin' = 'WeightedOperationPlugin';
 
 /**
- * Add weights and concurrency behavior to operations based on the operation settings in rush-project.json.
+ * Add weights to operations based on the operation settings in rush-project.json.
  *
  * This also sets the weight of no-op operations to 0.
  */

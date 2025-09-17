@@ -7,7 +7,6 @@
 /// <reference types="node" />
 
 import type { ITerminal } from '@rushstack/terminal';
-import { IWeighted } from '@rushstack/node-core-library';
 
 // @beta
 export type CommandMessageFromHost = ICancelCommandMessage | IExitCommandMessage | IRunCommandMessage | ISyncCommandMessage;
@@ -66,7 +65,6 @@ export interface IOperationExecutionOptions<TOperationMetadata extends {} = {}, 
 
 // @beta
 export interface IOperationOptions<TMetadata extends {} = {}, TGroupMetadata extends {} = {}> {
-    allowOversubscription?: boolean | undefined;
     group?: OperationGroupRecord<TGroupMetadata> | undefined;
     metadata?: TMetadata | undefined;
     name: string;
@@ -150,11 +148,10 @@ export interface IWatchLoopState {
 }
 
 // @beta
-export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}> implements IOperationStates, IWeighted {
+export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}> implements IOperationStates {
     constructor(options: IOperationOptions<TMetadata, TGroupMetadata>);
     // (undocumented)
     addDependency(dependency: Operation<TMetadata, TGroupMetadata>): void;
-    allowOversubscription: boolean;
     readonly consumers: Set<Operation<TMetadata, TGroupMetadata>>;
     criticalPathLength: number | undefined;
     // (undocumented)

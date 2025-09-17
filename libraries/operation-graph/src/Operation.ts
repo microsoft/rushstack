@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { InternalError, type IWeighted } from '@rushstack/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import { Stopwatch } from './Stopwatch';
@@ -40,13 +40,6 @@ export interface IOperationOptions<TMetadata extends {} = {}, TGroupMetadata ext
    * The weight used by the scheduler to determine order of execution.
    */
   weight?: number | undefined;
-
-  /**
-   * Controls whether this operation can start, even if doing so would exceed the total concurrency limit..
-   * If true (default), will start the operation even when it would exceed the limit.
-   * If false, waits until sufficient capacity is available.
-   */
-  allowOversubscription?: boolean | undefined;
 
   /**
    * The metadata for this operation.
@@ -108,7 +101,7 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
  * @beta
  */
 export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}>
-  implements IOperationStates, IWeighted
+  implements IOperationStates
 {
   /**
    * A set of all dependencies which must be executed before this operation is complete.
@@ -182,13 +175,6 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
   public weight: number;
 
   /**
-   * If true, allows this operation to exceed the concurrency limit when no other operations are running.
-   * If false, enforces strict concurrency limits and waits until sufficient capacity is available.
-   * Defaults to true to maintain backward compatibility with the original behavior.
-   */
-  public allowOversubscription: boolean;
-
-  /**
    * The state of this operation the previous time a manager was invoked.
    */
   public lastState: IOperationState | undefined = undefined;
@@ -215,7 +201,6 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
     this.group = options.group;
     this.runner = options.runner;
     this.weight = options.weight ?? 1;
-    this.allowOversubscription = options?.allowOversubscription ?? true;
     this.name = options.name;
     this.metadata = options.metadata || ({} as TMetadata);
 

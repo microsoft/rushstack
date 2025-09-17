@@ -91,15 +91,10 @@ export interface IWeighted {
   weight: number;
 }
 
-interface IWeightedWrapper<TElement> {
-  element: TElement;
-  weight: number;
-}
-
 function toWeightedIterator<TEntry>(
   iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
   useWeights?: boolean
-): AsyncIterable<IWeightedWrapper<TEntry>> {
+): AsyncIterable<{ element: TEntry; weight: number }> {
   const iterator: Iterator<TEntry> | AsyncIterator<TEntry, TEntry> = (
     (iterable as Iterable<TEntry>)[Symbol.iterator] ||
     (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
@@ -111,10 +106,7 @@ function toWeightedIterator<TEntry>(
         // The await is necessary here, but TS will complain - it's a false positive.
         const { value, done } = await iterator.next();
         return {
-          value: {
-            element: value,
-            weight: useWeights ? value?.weight : 1
-          },
+          value: { element: value, weight: useWeights ? value?.weight : 1 },
           done: !!done
         };
       }
@@ -199,7 +191,7 @@ export class Async {
     return result;
   }
 
-  private static async _forEachWeightedAsync<TReturn, TEntry extends IWeightedWrapper<TReturn>>(
+  private static async _forEachWeightedAsync<TReturn, TEntry extends { weight: number; element: TReturn }>(
     iterable: AsyncIterable<TEntry>,
     callback: (entry: TReturn, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions | undefined
