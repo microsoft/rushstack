@@ -10,7 +10,14 @@ import type { OperationStatus } from './OperationStatus';
  */
 export interface IRequestRunEventMessage {
   event: 'requestRun';
-  requestor?: string;
+  /**
+   * The name of the operation requesting a rerun.
+   */
+  requestor: string;
+  /**
+   * Optional detail about why the rerun is requested, e.g. the name of a changed file.
+   */
+  detail?: string;
 }
 
 /**

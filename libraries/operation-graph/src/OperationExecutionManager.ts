@@ -5,7 +5,7 @@ import { Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { IOperationState } from './IOperationRunner';
-import type { IExecuteOperationContext, Operation } from './Operation';
+import type { IExecuteOperationContext, Operation, OperationRequestRunCallback } from './Operation';
 import type { OperationGroupRecord } from './OperationGroupRecord';
 import { OperationStatus } from './OperationStatus';
 import { calculateCriticalPathLengths } from './calculateCriticalPath';
@@ -24,7 +24,7 @@ export interface IOperationExecutionOptions<
   parallelism: number;
   terminal: ITerminal;
 
-  requestRun?: (requestor?: string) => void;
+  requestRun?: OperationRequestRunCallback;
 
   beforeExecuteOperationAsync?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => Promise<void>;
   afterExecuteOperationAsync?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => Promise<void>;

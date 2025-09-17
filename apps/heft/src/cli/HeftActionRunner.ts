@@ -13,6 +13,7 @@ import {
   Operation,
   OperationExecutionManager,
   OperationGroupRecord,
+  type OperationRequestRunCallback,
   OperationStatus,
   WatchLoop
 } from '@rushstack/operation-graph';
@@ -370,7 +371,7 @@ export class HeftActionRunner {
   private async _executeOnceAsync(
     executionManager: OperationExecutionManager<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>,
     abortSignal: AbortSignal,
-    requestRun?: (requestor?: string) => void
+    requestRun?: OperationRequestRunCallback
   ): Promise<OperationStatus> {
     const { taskStart, taskFinish, phaseStart, phaseFinish } = this._internalHeftSession.lifecycle.hooks;
     // Record this as the start of task execution.

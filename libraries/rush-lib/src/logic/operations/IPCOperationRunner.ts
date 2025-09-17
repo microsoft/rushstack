@@ -9,7 +9,8 @@ import type {
   IRequestRunEventMessage,
   ISyncEventMessage,
   IRunCommandMessage,
-  IExitCommandMessage
+  IExitCommandMessage,
+  OperationRequestRunCallback
 } from '@rushstack/operation-graph';
 import { TerminalProviderSeverity, type ITerminal, type ITerminalProvider } from '@rushstack/terminal';
 
@@ -28,7 +29,7 @@ export interface IIPCOperationRunnerOptions {
   commandToRun: string;
   commandForHash: string;
   persist: boolean;
-  requestRun: (requestor?: string) => void;
+  requestRun: OperationRequestRunCallback;
 }
 
 function isAfterExecuteEventMessage(message: unknown): message is IAfterExecuteEventMessage {
@@ -57,7 +58,7 @@ export class IPCOperationRunner implements IOperationRunner {
   private readonly _commandToRun: string;
   private readonly _commandForHash: string;
   private readonly _persist: boolean;
-  private readonly _requestRun: (requestor?: string) => void;
+  private readonly _requestRun: OperationRequestRunCallback;
 
   private _ipcProcess: ChildProcess | undefined;
   private _processReadyPromise: Promise<void> | undefined;
@@ -109,7 +110,7 @@ export class IPCOperationRunner implements IOperationRunner {
 
           this._ipcProcess.on('message', (message: unknown) => {
             if (isRequestRunEventMessage(message)) {
-              this._requestRun(message.requestor);
+              this._requestRun(message.requestor, message.detail);
             } else if (isSyncEventMessage(message)) {
               resolveReadyPromise();
             }

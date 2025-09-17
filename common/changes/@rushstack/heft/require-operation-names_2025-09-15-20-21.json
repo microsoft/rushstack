@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Enhance logging in watch mode by allowing plugins to report detailed reasons for requesting rerun, e.g. specific changed files.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

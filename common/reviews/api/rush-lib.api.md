@@ -477,6 +477,7 @@ export interface IEnvironmentConfigurationInitializeOptions {
 
 // @alpha
 export interface IExecuteOperationsContext extends ICreateOperationsContext {
+    readonly abortController: AbortController;
     readonly inputsSnapshot?: IInputsSnapshot;
 }
 
@@ -744,6 +745,8 @@ export type IPhaseBehaviorForMissingScript = 'silent' | 'log' | 'error';
 export interface IPhasedCommand extends IRushCommand {
     // @alpha
     readonly hooks: PhasedCommandHooks;
+    // @alpha
+    readonly sessionAbortController: AbortController;
 }
 
 // @public
@@ -1053,6 +1056,7 @@ export class _OperationStateFile {
 
 // @beta
 export enum OperationStatus {
+    Aborted = "ABORTED",
     Blocked = "BLOCKED",
     Executing = "EXECUTING",
     Failure = "FAILURE",
