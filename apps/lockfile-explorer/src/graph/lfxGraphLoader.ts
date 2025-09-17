@@ -27,6 +27,7 @@ function createPackageLockfileDependency(options: {
   containingEntry: LfxGraphEntry;
   peerDependenciesMeta?: PeerDependenciesMeta;
   pnpmLockfileVersion: PnpmLockfileVersion;
+  workspace: IJsonLfxWorkspace;
 }): LfxGraphDependency {
   const {
     name,
@@ -48,11 +49,20 @@ function createPackageLockfileDependency(options: {
 
   if (version.startsWith('link:')) {
     const relativePath: string = version.substring('link:'.length);
-    const rootRelativePath: string = lockfilePath.getAbsolute(
-      containingEntry.packageJsonFolderPath,
-      relativePath
-    );
-    result.entryId = 'project:' + rootRelativePath.toString();
+
+    if (containingEntry.kind === LfxGraphEntryKind.Project) {
+      // TODO: Here we assume it's a "workspace:" link and try to resolve it to another workspace project,
+      // but it could also be a link to an arbitrary folder (in which case this entryId will fail to resolve).
+      // In the future, we should distinguish these cases.
+      const selfRelativePath: string = lockfilePath.getAbsolute(
+        containingEntry.packageJsonFolderPath,
+        relativePath
+      );
+      result.entryId = 'project:' + selfRelativePath.toString();
+    } else {
+      // This could be a link to anywhere on the local computer, so we don't expect it to have a lockfile entry
+      result.entryId = '';
+    }
   } else if (result.version.startsWith('/')) {
     result.entryId = version;
   } else if (result.dependencyType === LfxDependencyKind.Peer) {
@@ -79,7 +89,8 @@ function parsePackageDependencies(
   dependencies: LfxGraphDependency[],
   lockfileEntry: LfxGraphEntry,
   either: lockfileTypes.ProjectSnapshot | lockfileTypes.PackageSnapshot,
-  pnpmLockfileVersion: PnpmLockfileVersion
+  pnpmLockfileVersion: PnpmLockfileVersion,
+  workspace: IJsonLfxWorkspace
 ): void {
   const node: Partial<lockfileTypes.ProjectSnapshot & lockfileTypes.PackageSnapshot> =
     either as unknown as Partial<lockfileTypes.ProjectSnapshot & lockfileTypes.PackageSnapshot>;
@@ -91,7 +102,8 @@ function parsePackageDependencies(
           name: packageName,
           version: version,
           containingEntry: lockfileEntry,
-          pnpmLockfileVersion
+          pnpmLockfileVersion,
+          workspace
         })
       );
     }
@@ -104,7 +116,8 @@ function parsePackageDependencies(
           name: packageName,
           version: version,
           containingEntry: lockfileEntry,
-          pnpmLockfileVersion
+          pnpmLockfileVersion,
+          workspace
         })
       );
     }
@@ -118,7 +131,8 @@ function parsePackageDependencies(
           version: version,
           containingEntry: lockfileEntry,
           peerDependenciesMeta: node.peerDependenciesMeta,
-          pnpmLockfileVersion
+          pnpmLockfileVersion,
+          workspace
         })
       );
     }
@@ -134,7 +148,8 @@ function parseProjectDependencies60(
   dependencies: LfxGraphDependency[],
   lockfileEntry: LfxGraphEntry,
   snapshot: lockfileTypes.LockfileFileProjectSnapshot,
-  pnpmLockfileVersion: PnpmLockfileVersion
+  pnpmLockfileVersion: PnpmLockfileVersion,
+  workspace: IJsonLfxWorkspace
 ): void {
   if (snapshot.dependencies) {
     for (const [packageName, specifierAndResolution] of Object.entries(snapshot.dependencies)) {
@@ -144,7 +159,8 @@ function parseProjectDependencies60(
           name: packageName,
           version: specifierAndResolution.version,
           containingEntry: lockfileEntry,
-          pnpmLockfileVersion
+          pnpmLockfileVersion,
+          workspace
         })
       );
     }
@@ -157,7 +173,8 @@ function parseProjectDependencies60(
           name: packageName,
           version: specifierAndResolution.version,
           containingEntry: lockfileEntry,
-          pnpmLockfileVersion
+          pnpmLockfileVersion,
+          workspace
         })
       );
     }
@@ -334,7 +351,13 @@ function createPackageLockfileEntry(options: {
   );
 
   const lockfileEntry: LfxGraphEntry = new LfxGraphEntry(result);
-  parsePackageDependencies(lockfileEntry.dependencies, lockfileEntry, rawYamlData, pnpmLockfileVersion);
+  parsePackageDependencies(
+    lockfileEntry.dependencies,
+    lockfileEntry,
+    rawYamlData,
+    pnpmLockfileVersion,
+    workspace
+  );
   return lockfileEntry;
 }
 
@@ -405,13 +428,25 @@ export function generateLockfileGraph(lockfileJson: unknown, workspace: IJsonLfx
         const lockfile54: lockfileTypes.LockfileObject = lockfileJson as lockfileTypes.LockfileObject;
         const importerValue: lockfileTypes.ProjectSnapshot =
           lockfile54.importers[importerKey as pnpmTypes.ProjectId];
-        parsePackageDependencies(importer.dependencies, importer, importerValue, pnpmLockfileVersion);
+        parsePackageDependencies(
+          importer.dependencies,
+          importer,
+          importerValue,
+          pnpmLockfileVersion,
+          workspace
+        );
       } else {
         const lockfile60: lockfileTypes.LockfileFile = lockfileJson as lockfileTypes.LockfileFile;
         if (lockfile60.importers) {
           const importerValue: lockfileTypes.LockfileFileProjectSnapshot =
             lockfile60.importers[importerKey as pnpmTypes.ProjectId];
-          parseProjectDependencies60(importer.dependencies, importer, importerValue, pnpmLockfileVersion);
+          parseProjectDependencies60(
+            importer.dependencies,
+            importer,
+            importerValue,
+            pnpmLockfileVersion,
+            workspace
+          );
         }
       }
 
