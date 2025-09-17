@@ -8,7 +8,7 @@ import * as zlib from 'node:zlib';
 import { type IReadonlyPathTrieNode, LookupByPath } from '@rushstack/lookup-by-path/lib/LookupByPath';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { getDisposableFileHandle, unlinkSync, type IDisposableFileHandle } from './fs';
+import { getDisposableFileHandle, rmdirSync, unlinkSync, type IDisposableFileHandle } from './fs';
 import { type IIncrementalZlib, createIncrementalZlib } from './compress';
 import { markStart, markEnd, getDuration, emitSummary, formatDuration } from './perf';
 import {
@@ -53,6 +53,80 @@ export interface IZipSyncUnpackResult {
   filesDeleted: number;
   foldersDeleted: number;
   otherEntriesDeleted: number;
+}
+
+const bufferSize: number = 1 << 25; // 32 MiB
+const outputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
+function extractFileFromZip(
+  terminal: ITerminal,
+  targetPath: string,
+  zipBuffer: Buffer,
+  entry: ICentralDirectoryHeaderParseResult
+): void {
+  terminal.writeDebugLine(`Extracting file: ${entry.filename}`);
+  const fileZipBuffer: Buffer = getFileFromZip(zipBuffer, entry);
+  let fileData: Buffer;
+  using fileHandle: IDisposableFileHandle = getDisposableFileHandle(targetPath, 'w');
+  if (entry.header.compressionMethod === STORE_COMPRESSION) {
+    fileData = fileZipBuffer;
+    let writeOffset: number = 0;
+    while (writeOffset < fileData.length && !isNaN(fileHandle.fd)) {
+      const written: number = fs.writeSync(
+        fileHandle.fd,
+        fileData,
+        writeOffset,
+        fileData.length - writeOffset
+      );
+      writeOffset += written;
+    }
+  } else if (entry.header.compressionMethod === DEFLATE_COMPRESSION) {
+    using inflateIncremental: IIncrementalZlib = createIncrementalZlib(
+      outputBuffer,
+      (chunk, lengthBytes) => {
+        let writeOffset: number = 0;
+        while (lengthBytes > 0 && writeOffset < chunk.byteLength) {
+          const written: number = fs.writeSync(fileHandle.fd, chunk, writeOffset, lengthBytes);
+          lengthBytes -= written;
+          writeOffset += written;
+        }
+      },
+      'inflate'
+    );
+    inflateIncremental.update(fileZipBuffer);
+    inflateIncremental.update(Buffer.alloc(0));
+  } else {
+    throw new Error(
+      `Unsupported compression method: ${entry.header.compressionMethod} for ${entry.filename}`
+    );
+  }
+}
+
+function shouldExtract(
+  terminal: ITerminal,
+  targetPath: string,
+  entry: ICentralDirectoryHeaderParseResult,
+  metadata: IMetadata | undefined
+): boolean {
+  if (metadata) {
+    const metadataFile: { size: number; sha1Hash: string } | undefined = metadata.files[entry.filename];
+
+    if (metadataFile) {
+      try {
+        using existingFile: IDisposableFileHandle = getDisposableFileHandle(targetPath, 'r');
+        const existingHash: string | false = computeFileHash(existingFile.fd);
+        if (existingHash === metadataFile.sha1Hash) {
+          return false;
+        }
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
+          terminal.writeDebugLine(`File does not exist, will extract: ${entry.filename}`);
+        } else {
+          throw e;
+        }
+      }
+    }
+  }
+  return true;
 }
 
 export function unpack({
@@ -210,22 +284,15 @@ export function unpack({
 
   for (const dir of dirsToCleanup) {
     // Try to remove the directory. If it is not empty, this will throw and we can ignore the error.
-    try {
-      fs.rmdirSync(dir);
-      terminal.writeDebugLine(`Deleted empty directory: ${dir}`);
-      deletedFoldersCount++;
-    } catch (e) {
-      // Probably not empty
-      terminal.writeDebugLine(`Directory not empty, skipping: ${dir}`);
-    }
+    rmdirSync(dir);
+    terminal.writeDebugLine(`Deleted empty directory: ${dir}`);
+    deletedFoldersCount++;
   }
 
   terminal.writeDebugLine(`Existing entries tracked: ${scanCount}`);
   markEnd('unpack.scan.existing');
 
   markStart('unpack.extract.loop');
-  const bufferSize: number = 1 << 25; // 32 MiB
-  const outputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
 
   const dirsCreated: Set<string> = new Set<string>();
 
@@ -241,69 +308,12 @@ export function unpack({
       dirsCreated.add(targetDir);
     }
 
-    let shouldExtract: boolean = true;
-    if (metadata) {
-      const metadataFile: { size: number; sha1Hash: string } | undefined = metadata.files[entry.filename];
-
-      if (metadataFile) {
-        try {
-          using existingFile: IDisposableFileHandle = getDisposableFileHandle(targetPath, 'r');
-          const existingHash: string | false = computeFileHash(existingFile.fd);
-          if (existingHash === metadataFile.sha1Hash) {
-            shouldExtract = false;
-            skippedCount++;
-            terminal.writeDebugLine(`Skip unchanged file: ${entry.filename}`);
-          }
-        } catch (e) {
-          if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
-            // File does not exist, will extract
-          } else {
-            throw e;
-          }
-        }
-      }
-    }
-
-    if (shouldExtract) {
-      terminal.writeDebugLine(`Extracting file: ${entry.filename}`);
-      const fileZipBuffer: Buffer = getFileFromZip(zipBuffer, entry);
-      let fileData: Buffer;
-      using fileHandle: IDisposableFileHandle = getDisposableFileHandle(targetPath, 'w');
-      if (entry.header.compressionMethod === STORE_COMPRESSION) {
-        fileData = fileZipBuffer;
-        let writeOffset: number = 0;
-        while (writeOffset < fileData.length && !isNaN(fileHandle.fd)) {
-          const written: number = fs.writeSync(
-            fileHandle.fd,
-            fileData,
-            writeOffset,
-            fileData.length - writeOffset
-          );
-          writeOffset += written;
-        }
-      } else if (entry.header.compressionMethod === DEFLATE_COMPRESSION) {
-        using inflateIncremental: IIncrementalZlib = createIncrementalZlib(
-          outputBuffer,
-          (chunk, lengthBytes) => {
-            let writeOffset: number = 0;
-            while (lengthBytes > 0 && writeOffset < chunk.byteLength) {
-              const written: number = fs.writeSync(fileHandle.fd, chunk, writeOffset, lengthBytes);
-              lengthBytes -= written;
-              writeOffset += written;
-            }
-          },
-          'inflate'
-        );
-        inflateIncremental.update(fileZipBuffer);
-        inflateIncremental.update(Buffer.alloc(0));
-      } else {
-        throw new Error(
-          `Unsupported compression method: ${entry.header.compressionMethod} for ${entry.filename}`
-        );
-      }
-
-      // If data descriptor was used we rely on central directory values already consumed.
+    if (shouldExtract(terminal, targetPath, entry, metadata)) {
+      extractFileFromZip(terminal, targetPath, zipBuffer, entry);
       extractedCount++;
+    } else {
+      skippedCount++;
+      terminal.writeDebugLine(`Skip unchanged file: ${entry.filename}`);
     }
   }
   markEnd('unpack.extract.loop');
