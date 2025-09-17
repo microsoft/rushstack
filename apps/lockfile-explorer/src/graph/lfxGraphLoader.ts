@@ -59,10 +59,7 @@ function createPackageLockfileDependency(options: {
     result.peerDependencyMeta = {
       name: result.name,
       version: version,
-      optional:
-        peerDependenciesMeta && peerDependenciesMeta[result.name]
-          ? peerDependenciesMeta[result.name].optional
-          : false
+      optional: peerDependenciesMeta?.[result.name] ? peerDependenciesMeta[result.name].optional : false
     };
     result.entryId = 'Peer: ' + result.name;
   } else {
