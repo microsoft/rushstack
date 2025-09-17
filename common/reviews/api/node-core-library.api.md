@@ -237,6 +237,7 @@ export type FolderItem = nodeFs.Dirent;
 
 // @public
 export interface IAsyncParallelismOptions {
+    allowOversubscription?: boolean;
     concurrency?: number;
     weighted?: boolean;
 }
@@ -669,7 +670,6 @@ export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
 
 // @public (undocumented)
 export interface IWeighted {
-    allowOversubscription?: boolean;
     weight: number;
 }
 

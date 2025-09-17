@@ -68,6 +68,7 @@ const PERF_PREFIX: 'rush:phasedScriptAction' = 'rush:phasedScriptAction';
  */
 export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPhasedCommandConfig> {
   enableParallelism: boolean;
+  allowOversubscription: boolean;
   incremental: boolean;
   disableBuildCache: boolean;
 
@@ -140,6 +141,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   public readonly sessionAbortController: AbortController;
 
   private readonly _enableParallelism: boolean;
+  private readonly _allowOversubscription: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
   private readonly _disableBuildCache: boolean;
   private readonly _originalPhases: ReadonlySet<IPhase>;
@@ -171,6 +173,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
     this._enableParallelism = options.enableParallelism;
+    this._allowOversubscription = options.allowOversubscription;
     this._isIncrementalBuildAllowed = options.incremental;
     this._disableBuildCache = options.disableBuildCache;
     this._originalPhases = options.originalPhases;
@@ -583,6 +586,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         quietMode: isQuietMode,
         debugMode: this.parser.isDebug,
         parallelism,
+        allowOversubscription: this._allowOversubscription,
         beforeExecuteOperationAsync: async (record: OperationExecutionRecord) => {
           return await this.hooks.beforeExecuteOperation.promise(record);
         },

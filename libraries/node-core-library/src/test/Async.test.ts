@@ -4,7 +4,6 @@
 import { Async, AsyncQueue } from '../Async';
 
 interface INumberWithWeight {
-  allowOversubscription?: boolean;
   n: number;
   weight: number;
 }
@@ -62,8 +61,8 @@ describe(Async.name, () => {
 
     it('respects concurrency limit with allowOversubscription=false in mapAsync', async () => {
       const array: INumberWithWeight[] = [
-        { n: 1, weight: 2, allowOversubscription: false },
-        { n: 2, weight: 2, allowOversubscription: false }
+        { n: 1, weight: 2 },
+        { n: 2, weight: 2 }
       ];
 
       let running = 0;
@@ -78,7 +77,7 @@ describe(Async.name, () => {
           running--;
           return `result-${item.n}`;
         },
-        { concurrency: 3, weighted: true }
+        { concurrency: 3, weighted: true, allowOversubscription: false }
       );
 
       expect(result).toEqual(['result-1', 'result-2']);
@@ -740,8 +739,7 @@ describe(Async.name, () => {
 
           const array: INumberWithWeight[] = Array.from({ length: numberOfTasks }, (v, i) => i).map((n) => ({
             n,
-            weight,
-            allowOversubscription: false
+            weight
           }));
 
           const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async () => {
@@ -751,51 +749,25 @@ describe(Async.name, () => {
             running--;
           });
 
-          await Async.forEachAsync(array, fn, { concurrency, weighted: true });
+          await Async.forEachAsync(array, fn, { concurrency, weighted: true, allowOversubscription: false });
           expect(fn).toHaveBeenCalledTimes(numberOfTasks);
           expect(maxRunning).toEqual(expectedConcurrency);
         }
       );
-
-      it('handles mixed weights enforcing a strict concurrency limit', async () => {
-        let running = 0;
-        let maxRunning = 0;
-        const startOrder: number[] = [];
-
-        const array: INumberWithWeight[] = [
-          { n: 1, weight: 1, allowOversubscription: false },
-          { n: 2, weight: 3, allowOversubscription: false },
-          { n: 3, weight: 1, allowOversubscription: false },
-          { n: 4, weight: 2, allowOversubscription: false }
-        ];
-
-        const fn = jest.fn(async (item: INumberWithWeight) => {
-          running++;
-          startOrder.push(item.n);
-          maxRunning = Math.max(maxRunning, running);
-          await Async.sleepAsync(0);
-          running--;
-        });
-
-        await Async.forEachAsync(array, fn, { concurrency: 4, weighted: true });
-
-        expect(fn).toHaveBeenCalledTimes(4);
-        expect(maxRunning).toEqual(2); // Max should be limited by weight 3 task
-      });
 
       it('waits for a small and large operation to finish before scheduling more', async () => {
         let running: number = 0;
         let maxRunning: number = 0;
 
         const array: INumberWithWeight[] = [
-          { n: 1, weight: 1, allowOversubscription: false },
-          { n: 2, weight: 10, allowOversubscription: false },
-          { n: 3, weight: 1, allowOversubscription: false },
-          { n: 4, weight: 10, allowOversubscription: false },
-          { n: 5, weight: 1, allowOversubscription: false },
-          { n: 6, weight: 10, allowOversubscription: false },
-          { n: 7, weight: 1, allowOversubscription: false },
-          { n: 8, weight: 10, allowOversubscription: false }
+          { n: 1, weight: 1 },
+          { n: 2, weight: 10 },
+          { n: 3, weight: 1 },
+          { n: 4, weight: 10 },
+          { n: 5, weight: 1 },
+          { n: 6, weight: 10 },
+          { n: 7, weight: 1 },
+          { n: 8, weight: 10 }
         ];
 
         const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
@@ -805,23 +777,23 @@ describe(Async.name, () => {
           running--;
         });
 
-        await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
+        await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true, allowOversubscription: false });
         expect(fn).toHaveBeenCalledTimes(8);
         expect(maxRunning).toEqual(1);
       });
 
-      it('handles operations with mixed values of allowOversubscription', async () => {
+      it('handles operation with mixed weights', async () => {
         const concurrency: number = 3;
         let running: number = 0;
         let maxRunning: number = 0;
         const taskToMaxConcurrency: Record<number, number> = {};
 
         const array: INumberWithWeight[] = [
-          { n: 1, weight: 1 }, // undefined allowOversubscription (should default to true)
-          { n: 2, weight: 2 }, // undefined allowOversubscription (should default to true)
-          { n: 3, weight: concurrency, allowOversubscription: false },
-          { n: 4, weight: 1 }, // undefined allowOversubscription (should default to true)
-          { n: 5, weight: 1, allowOversubscription: true }
+          { n: 1, weight: 1 },
+          { n: 2, weight: 2 },
+          { n: 3, weight: concurrency },
+          { n: 4, weight: 1 },
+          { n: 5, weight: 1 }
         ];
 
         const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
@@ -832,15 +804,46 @@ describe(Async.name, () => {
           running--;
         });
 
-        await Async.forEachAsync(array, fn, { concurrency, weighted: true });
+        await Async.forEachAsync(array, fn, { concurrency, weighted: true, allowOversubscription: false });
         expect(fn).toHaveBeenCalledTimes(5);
         expect(maxRunning).toEqual(2);
 
-        expect(taskToMaxConcurrency[1]).toEqual(1); // task 1 + 2
+        expect(taskToMaxConcurrency[1]).toEqual(1); // task 1
         expect(taskToMaxConcurrency[2]).toEqual(2); // task 1 + 2
-        expect(taskToMaxConcurrency[3]).toEqual(1); // task 3 (allowOversubscription = false)
+        expect(taskToMaxConcurrency[3]).toEqual(1); // task 3
         expect(taskToMaxConcurrency[4]).toEqual(1); // task 4
         expect(taskToMaxConcurrency[5]).toEqual(2); // task 4 + 5
+      });
+
+      it('allows operations with weight 0 to be picked up when system is at max concurrency', async () => {
+        let running: number = 0;
+        let maxRunning: number = 0;
+        const taskToMaxConcurrency: Record<number, number> = {};
+
+        const array: INumberWithWeight[] = [
+          { n: 1, weight: 1 },
+          { n: 2, weight: 0 },
+          { n: 3, weight: 3 },
+          { n: 4, weight: 1 }
+        ];
+
+        const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+          running++;
+          taskToMaxConcurrency[item.n] = running;
+          maxRunning = Math.max(maxRunning, running);
+          await Async.sleepAsync(0);
+          running--;
+        });
+
+        await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true, allowOversubscription: false });
+
+        expect(fn).toHaveBeenCalledTimes(4);
+        expect(maxRunning).toEqual(2);
+
+        expect(taskToMaxConcurrency[1]).toEqual(1); // task 1
+        expect(taskToMaxConcurrency[2]).toEqual(2); // task 1 + 2
+        expect(taskToMaxConcurrency[3]).toEqual(2); // task 2 + 3
+        expect(taskToMaxConcurrency[4]).toEqual(1); // task 4
       });
     });
   });

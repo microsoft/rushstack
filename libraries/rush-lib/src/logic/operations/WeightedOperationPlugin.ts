@@ -43,9 +43,6 @@ function weightOperations(
       if (operationSettings?.weight) {
         operation.weight = operationSettings.weight;
       }
-      if (operationSettings?.allowOversubscription !== undefined) {
-        operation.allowOversubscription = operationSettings.allowOversubscription;
-      }
     }
     Async.validateWeightedIterable(operation);
   }
