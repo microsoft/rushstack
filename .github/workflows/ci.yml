@@ -95,3 +95,7 @@ jobs:
       - name: Rush test (rush-lib)
         run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
         working-directory: repo-b
+
+      - name: Rush test (rush-lib) again to verify build cache hits
+        run: node ${{ github.workspace }}/repo-a/apps/rush/lib/start-dev.js test --verbose --production --timeline
+        working-directory: repo-b
