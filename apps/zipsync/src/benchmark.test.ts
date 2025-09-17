@@ -222,7 +222,8 @@ function benchZipSyncScenario(
   });
 }
 
-describe(`archive benchmarks (iterations=${ITERATIONS})`, () => {
+// the benchmarks are skipped by default because they require external tools (tar, zip) to be installed
+describe.skip(`archive benchmarks (iterations=${ITERATIONS})`, () => {
   it('tar', () => {
     if (!isTarAvailable()) {
       console.log('Skipping tar test because tar is not available');
@@ -467,7 +468,7 @@ afterAll(() => {
   const resultText = outputLines.join('\n');
   console.log(resultText);
   try {
-    const resultFile = path.join(__dirname, '..', 'temp', `benchmark-results-${runId}.txt`);
+    const resultFile = path.join(__dirname, '..', 'temp', `benchmark-results.txt`);
     fs.writeFileSync(resultFile, resultText, { encoding: 'utf-8' });
     console.log(`Benchmark results written to: ${resultFile}`);
   } catch (e) {

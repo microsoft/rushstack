@@ -166,7 +166,6 @@ export class OperationBuildCache {
     const projectFolderPath: string = this._project.projectFolder;
 
     let restoreSuccess: boolean = false;
-    terminal.writeVerboseLine(`Using zipsync to restore cached folders.`);
     try {
       const {
         zipSyncReturn: { filesDeleted, filesExtracted, filesSkipped, foldersDeleted, otherEntriesDeleted }
