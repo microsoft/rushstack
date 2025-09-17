@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as crypto from 'node:crypto';
+import type { ZipSyncOptionCompression } from './zipSyncUtils';
 
 export function getTempDir(): string {
   const randomId: string = crypto.randomUUID();
@@ -41,4 +42,14 @@ export function getDemoDataDirectoryDisposable(numFiles: number): {
       fs.rmSync(baseDir, { recursive: true, force: true });
     }
   };
+}
+
+export function getCompressionOptions(): ZipSyncOptionCompression[] {
+  const options: ZipSyncOptionCompression[] = ['store', 'deflate', 'auto'];
+  // zstd is available in Node 22.15+
+  const [major, minor] = process.versions.node.split('.').map((x) => parseInt(x, 10));
+  if (major > 22 || (major === 22 && minor >= 15)) {
+    options.push('zstd');
+  }
+  return options;
 }

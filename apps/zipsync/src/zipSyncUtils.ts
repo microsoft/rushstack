@@ -24,4 +24,4 @@ export interface IMetadata {
 
 export type IZipSyncMode = 'pack' | 'unpack';
 
-export type ZipSyncOptionCompression = 'store' | 'deflate' | 'auto';
+export type ZipSyncOptionCompression = 'store' | 'deflate' | 'zstd' | 'auto';

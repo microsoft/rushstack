@@ -84,10 +84,18 @@ export type IIncrementalZlib = Disposable & {
   update: (inputBuffer: Uint8Array) => void;
 };
 
+// zstd is available in Node 22+
+type IExtendedZlib = typeof zlib & {
+  createZstdCompress: (options?: zlib.ZlibOptions) => Transform;
+  createZstdDecompress: (options?: zlib.ZlibOptions) => Transform;
+};
+
+export type IncrementalZlibMode = 'deflate' | 'inflate' | 'zstd-compress' | 'zstd-decompress';
+
 export function createIncrementalZlib(
   outputBuffer: Uint8Array,
   handleOutputChunk: OutputChunkHandler,
-  mode: 'deflate' | 'inflate'
+  mode: IncrementalZlibMode
 ): IIncrementalZlib {
   // The zlib constructors all allocate a buffer of size chunkSize using Buffer.allocUnsafe
   // We want to ensure that that invocation doesn't allocate a buffer.
@@ -100,15 +108,33 @@ export function createIncrementalZlib(
   try {
     //@ts-expect-error
     Buffer.allocUnsafe = () => outputBuffer;
-    if (mode === 'inflate') {
-      compressor = zlib.createInflateRaw({
-        chunkSize: outputBuffer.byteLength
-      }) as unknown as Transform & IZlibInternals;
-    } else {
-      compressor = zlib.createDeflateRaw({
-        chunkSize: outputBuffer.byteLength,
-        level: zlib.constants.Z_BEST_COMPRESSION
-      }) as unknown as Transform & IZlibInternals;
+    switch (mode) {
+      case 'inflate':
+        compressor = zlib.createInflateRaw({
+          chunkSize: outputBuffer.byteLength
+        }) as unknown as Transform & IZlibInternals;
+        break;
+      case 'deflate':
+        compressor = zlib.createDeflateRaw({
+          chunkSize: outputBuffer.byteLength,
+          level: zlib.constants.Z_BEST_COMPRESSION
+        }) as unknown as Transform & IZlibInternals;
+        break;
+      case 'zstd-compress':
+        // available in Node 22.15+
+        compressor = (zlib as IExtendedZlib).createZstdCompress({
+          chunkSize: outputBuffer.byteLength
+        }) as unknown as Transform & IZlibInternals;
+        break;
+      case 'zstd-decompress':
+        // available in Node 22.15+
+        compressor = (zlib as IExtendedZlib).createZstdDecompress({
+          chunkSize: outputBuffer.byteLength
+        }) as unknown as Transform & IZlibInternals;
+        break;
+      default:
+        // Unsupported mode (types currently restrict to 'deflate' | 'inflate')
+        break;
     }
   } finally {
     Buffer.allocUnsafe = savedAllocUnsafe;

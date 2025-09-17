@@ -9,19 +9,27 @@ import { type IReadonlyPathTrieNode, LookupByPath } from '@rushstack/lookup-by-p
 import type { ITerminal } from '@rushstack/terminal';
 
 import { getDisposableFileHandle, rmdirSync, unlinkSync, type IDisposableFileHandle } from './fs';
-import { type IIncrementalZlib, createIncrementalZlib } from './compress';
+import { type IIncrementalZlib, type IncrementalZlibMode, createIncrementalZlib } from './compress';
 import { markStart, markEnd, getDuration, emitSummary, formatDuration } from './perf';
 import {
   findEndOfCentralDirectory,
   parseCentralDirectoryHeader,
   getFileFromZip,
+  ZSTD_COMPRESSION,
   DEFLATE_COMPRESSION,
   STORE_COMPRESSION,
   type IEndOfCentralDirectory,
-  type ICentralDirectoryHeaderParseResult
+  type ICentralDirectoryHeaderParseResult,
+  type ZipMetaCompressionMethod
 } from './zipUtils';
 import { computeFileHash } from './hash';
 import { METADATA_FILENAME, METADATA_VERSION, type IDirQueueItem, type IMetadata } from './zipSyncUtils';
+
+const zlibUnpackModes: Record<ZipMetaCompressionMethod, IncrementalZlibMode | undefined> = {
+  [ZSTD_COMPRESSION]: 'zstd-decompress',
+  [DEFLATE_COMPRESSION]: 'inflate',
+  [STORE_COMPRESSION]: undefined
+} as const;
 
 /**
  * @public
@@ -79,8 +87,11 @@ function extractFileFromZip(
       );
       writeOffset += written;
     }
-  } else if (entry.header.compressionMethod === DEFLATE_COMPRESSION) {
-    using inflateIncremental: IIncrementalZlib = createIncrementalZlib(
+  } else if (
+    entry.header.compressionMethod === DEFLATE_COMPRESSION ||
+    entry.header.compressionMethod === ZSTD_COMPRESSION
+  ) {
+    using incrementalZlib: IIncrementalZlib = createIncrementalZlib(
       outputBuffer,
       (chunk, lengthBytes) => {
         let writeOffset: number = 0;
@@ -90,10 +101,10 @@ function extractFileFromZip(
           writeOffset += written;
         }
       },
-      'inflate'
+      zlibUnpackModes[entry.header.compressionMethod]!
     );
-    inflateIncremental.update(fileZipBuffer);
-    inflateIncremental.update(Buffer.alloc(0));
+    incrementalZlib.update(fileZipBuffer);
+    incrementalZlib.update(Buffer.alloc(0));
   } else {
     throw new Error(
       `Unsupported compression method: ${entry.header.compressionMethod} for ${entry.filename}`
@@ -265,8 +276,9 @@ export function unpack({
         terminal.writeVerboseLine(`${padding}${item.name}`);
         if (!childNode?.value) {
           terminal.writeDebugLine(`Deleting file: ${relativePath}`);
-          unlinkSync(relativePath);
-          deletedFilesCount++;
+          if (unlinkSync(relativePath)) {
+            deletedFilesCount++;
+          }
         }
       } else if (item.isDirectory()) {
         terminal.writeVerboseLine(`${padding}${item.name}/`);
@@ -276,17 +288,19 @@ export function unpack({
         }
       } else {
         terminal.writeVerboseLine(`${padding}${item.name} (not file or directory, deleting)`);
-        unlinkSync(relativePath);
-        deletedOtherCount++;
+        if (unlinkSync(relativePath)) {
+          deletedOtherCount++;
+        }
       }
     }
   }
 
   for (const dir of dirsToCleanup) {
     // Try to remove the directory. If it is not empty, this will throw and we can ignore the error.
-    rmdirSync(dir);
-    terminal.writeDebugLine(`Deleted empty directory: ${dir}`);
-    deletedFoldersCount++;
+    if (rmdirSync(dir)) {
+      terminal.writeDebugLine(`Deleted empty directory: ${dir}`);
+      deletedFoldersCount++;
+    }
   }
 
   terminal.writeDebugLine(`Existing entries tracked: ${scanCount}`);
