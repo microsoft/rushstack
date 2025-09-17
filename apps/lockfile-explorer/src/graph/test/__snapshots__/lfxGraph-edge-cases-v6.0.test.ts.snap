@@ -1,0 +1,165 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
+"entries:
+  - dependencies:
+      - dependencyType: regular
+        entryId: /color/5.0.2
+        name: color
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 6
+        version: 5.0.2
+    displayText: 'Project: duplicate (duplicate-1/duplicate)'
+    entryId: project:duplicate-1/duplicate
+    entryPackageName: duplicate (duplicate-1/duplicate)
+    entryPackageVersion: ''
+    entrySuffix: ''
+    jsonId: 0
+    kind: 1
+    packageJsonFolderPath: duplicate-1/duplicate
+    rawEntryId: duplicate-1/duplicate
+    referrerJsonIds: []
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyType: regular
+        entryId: /color-string/2.1.2
+        name: color-string
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 5
+        version: 2.1.2
+    displayText: 'Project: duplicate (duplicate-2/duplicate)'
+    entryId: project:duplicate-2/duplicate
+    entryPackageName: duplicate (duplicate-2/duplicate)
+    entryPackageVersion: ''
+    entrySuffix: ''
+    jsonId: 1
+    kind: 1
+    packageJsonFolderPath: duplicate-2/duplicate
+    rawEntryId: duplicate-2/duplicate
+    referrerJsonIds: []
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyType: regular
+        entryId: /has-symbols/1.0.2
+        name: has-symbols
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 7
+        version: 1.0.2
+      - dependencyType: regular
+        entryId: project:link-specifier/target-folder
+        name: target-folder
+        peerDependencyMeta: {}
+        version: link:../target-folder
+    displayText: 'Project: linker'
+    entryId: project:link-specifier/linker
+    entryPackageName: linker
+    entryPackageVersion: ''
+    entrySuffix: ''
+    jsonId: 2
+    kind: 1
+    packageJsonFolderPath: link-specifier/linker
+    rawEntryId: link-specifier/linker
+    referrerJsonIds: []
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyType: regular
+        entryId: /color-name/2.0.2
+        name: color-name
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 4
+        version: 2.0.2
+    displayText: color-convert 3.1.2
+    entryId: ''
+    entryPackageName: color-convert
+    entryPackageVersion: 3.1.2
+    entrySuffix: ''
+    jsonId: 3
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/color-convert@3.1.2/node_modules/color-convert
+    rawEntryId: /color-convert/3.1.2
+    referrerJsonIds:
+      - 6
+    transitivePeerDependencies: []
+  - dependencies: []
+    displayText: color-name 2.0.2
+    entryId: ''
+    entryPackageName: color-name
+    entryPackageVersion: 2.0.2
+    entrySuffix: ''
+    jsonId: 4
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/color-name@2.0.2/node_modules/color-name
+    rawEntryId: /color-name/2.0.2
+    referrerJsonIds:
+      - 3
+      - 5
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyType: regular
+        entryId: /color-name/2.0.2
+        name: color-name
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 4
+        version: 2.0.2
+    displayText: color-string 2.1.2
+    entryId: ''
+    entryPackageName: color-string
+    entryPackageVersion: 2.1.2
+    entrySuffix: ''
+    jsonId: 5
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/color-string@2.1.2/node_modules/color-string
+    rawEntryId: /color-string/2.1.2
+    referrerJsonIds:
+      - 1
+      - 6
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyType: regular
+        entryId: /color-convert/3.1.2
+        name: color-convert
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 3
+        version: 3.1.2
+      - dependencyType: regular
+        entryId: /color-string/2.1.2
+        name: color-string
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 5
+        version: 2.1.2
+    displayText: color 5.0.2
+    entryId: ''
+    entryPackageName: color
+    entryPackageVersion: 5.0.2
+    entrySuffix: ''
+    jsonId: 6
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/color@5.0.2/node_modules/color
+    rawEntryId: /color/5.0.2
+    referrerJsonIds:
+      - 0
+    transitivePeerDependencies: []
+  - dependencies:
+      - dependencyType: regular
+        entryId: ''
+        name: target-folder
+        peerDependencyMeta: {}
+        version: link:link-specifier/target-folder
+    displayText: has-symbols 1.0.2
+    entryId: ''
+    entryPackageName: has-symbols
+    entryPackageVersion: 1.0.2
+    entrySuffix: ''
+    jsonId: 7
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/has-symbols@1.0.2/node_modules/has-symbols
+    rawEntryId: /has-symbols/1.0.2
+    referrerJsonIds:
+      - 2
+    transitivePeerDependencies: []
+workspace:
+  pnpmLockfileFolder: ''
+  pnpmLockfilePath: pnpm-lock.yaml
+  workspaceRootFullPath: /repo
+"
+`;

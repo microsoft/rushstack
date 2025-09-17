@@ -4,13 +4,17 @@
 import type { IJsonLfxWorkspace } from '../../../build/lfx-shared';
 
 export const TEST_WORKSPACE: IJsonLfxWorkspace = {
-  workspaceRootFolder: '/test',
-  pnpmLockfilePath: '/test/pnpm-lock.yaml',
-  rushConfig: undefined
+  workspaceRootFullPath: '/repo',
+  pnpmLockfilePath: 'common/temp/my-subspace/pnpm-lock.yaml',
+  pnpmLockfileFolder: 'common/temp/my-subspace',
+  rushConfig: {
+    rushVersion: '0.0.0',
+    subspaceName: 'my-subspace'
+  }
 };
 
 export const TEST_LOCKFILE = {
-  lockfileVersion: 5.3,
+  lockfileVersion: 5.4,
   importers: {
     '.': {
       specifiers: {}

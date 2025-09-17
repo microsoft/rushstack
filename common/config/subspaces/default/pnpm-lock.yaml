@@ -193,9 +193,6 @@ importers:
 
   ../../../apps/lockfile-explorer:
     dependencies:
-      '@lifaon/path':
-        specifier: ~2.1.0
-        version: 2.1.0
       '@microsoft/rush-lib':
         specifier: workspace:*
         version: link:../../libraries/rush-lib
@@ -236,9 +233,12 @@ importers:
         specifier: ~5.1.0
         version: 5.1.0
     devDependencies:
-      '@pnpm/lockfile-types':
-        specifier: ^5.1.5
-        version: 5.1.5
+      '@pnpm/lockfile.types':
+        specifier: 1002.0.1
+        version: 1002.0.1
+      '@pnpm/types':
+        specifier: 1000.8.0
+        version: 1000.8.0
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
@@ -10165,10 +10165,6 @@ packages:
     resolution: {integrity: sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==}
     dev: false
 
-  /@lifaon/path@2.1.0:
-    resolution: {integrity: sha512-E+eJpDdwenIQCaYMMuCnteR34qAvXtHhHKjZOPB+hK4+R1yGcmWLLAEl2aklxCHx6w5VCKc8imx9AT05FGHhBw==}
-    dev: false
-
   /@mdx-js/loader@1.6.22(react@17.0.2):
     resolution: {integrity: sha512-9CjGwy595NaxAYp0hF9B/A0lH6C8Rms97e2JS9d3jVUtILn6pT5i5IV965ra3lIWc7Rs1GG1tBdVF7dCowYe6Q==}
     dependencies:
@@ -10485,19 +10481,21 @@ packages:
       ramda: 0.27.2
     dev: false
 
-  /@pnpm/lockfile-types@5.1.5:
-    resolution: {integrity: sha512-02FP0HynzX+2DcuPtuMy7PH+kLIC0pevAydAOK+zug2bwdlSLErlvSkc+4+3dw60eRWgUXUqyfO2eR/Ansdbng==}
-    engines: {node: '>=16.14'}
-    dependencies:
-      '@pnpm/types': 9.4.2
-    dev: true
-
   /@pnpm/lockfile.types@1.0.3:
     resolution: {integrity: sha512-A7vUWktnhDkrIs+WmXm7AdffJVyVYJpQUEouya/DYhB+Y+tQ3BXjZ6CV0KybqLgI/8AZErgCJqFxA0GJH6QDjA==}
     engines: {node: '>=18.12'}
     dependencies:
       '@pnpm/patching.types': 1.0.0
       '@pnpm/types': 12.2.0
+
+  /@pnpm/lockfile.types@1002.0.1:
+    resolution: {integrity: sha512-anzBtzb78rf2KRExS8R38v4nyiU7b9ZMUsyzRdWpo+rfCmLUupjIxvasVlDgsf5pV7tbcBPASOamQ2G5V8IGAQ==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/patching.types': 1000.1.0
+      '@pnpm/resolver-base': 1005.0.1
+      '@pnpm/types': 1000.8.0
+    dev: true
 
   /@pnpm/logger@4.0.0:
     resolution: {integrity: sha512-SIShw+k556e7S7tLZFVSIHjCdiVog1qWzcKW2RbLEHPItdisAFVNIe34kYd9fMSswTlSRLS/qRjw3ZblzWmJ9Q==}
@@ -10519,6 +10517,11 @@ packages:
   /@pnpm/patching.types@1.0.0:
     resolution: {integrity: sha512-juCdQCC1USqLcOhVPl1tYReoTO9YH4fTullMnFXXcmpsDM7Dkn3tzuOQKC3oPoJ2ozv+0EeWWMtMGqn2+IM3pQ==}
     engines: {node: '>=18.12'}
+
+  /@pnpm/patching.types@1000.1.0:
+    resolution: {integrity: sha512-Zib2ysLctRnWM4KXXlljR44qSKwyEqYmLk+8VPBDBEK3l5Gp5mT3N4ix9E4qjYynvFqahumsxzOfxOYQhUGMGw==}
+    engines: {node: '>=18.12'}
+    dev: true
 
   /@pnpm/read-modules-dir@2.0.3:
     resolution: {integrity: sha512-i9OgRvSlxrTS9a2oXokhDxvQzDtfqtsooJ9jaGoHkznue5aFCTSrNZFQ6M18o8hC03QWfnxaKi0BtOvNkKu2+A==}
@@ -10555,10 +10558,22 @@ packages:
       strip-bom: 4.0.0
     dev: false
 
+  /@pnpm/resolver-base@1005.0.1:
+    resolution: {integrity: sha512-NBha12KjFMKwaG1BWTCtgr/RprNQhXItCBkzc8jZuVU0itAHRQhEykexna9K8XjAtYxZ9rhvir0T5a7fTB23yQ==}
+    engines: {node: '>=18.12'}
+    dependencies:
+      '@pnpm/types': 1000.8.0
+    dev: true
+
   /@pnpm/types@1000.6.0:
     resolution: {integrity: sha512-6PsMNe98VKPGcg6LnXSW/LE3YfJ77nj+bPKiRjYRWAQLZ+xXjEQRaR0dAuyjCmchlv4wR/hpnMVRS21/fCod5w==}
     engines: {node: '>=18.12'}
     dev: false
+
+  /@pnpm/types@1000.8.0:
+    resolution: {integrity: sha512-yx86CGHHquWAI0GgKIuV/RnYewcf5fVFZemC45C/K2cX0uV8GB8TUP541ZrokWola2fZx5sn1vL7xzbceRZfoQ==}
+    engines: {node: '>=18.12'}
+    dev: true
 
   /@pnpm/types@12.2.0:
     resolution: {integrity: sha512-5RtwWhX39j89/Tmyv2QSlpiNjErA357T/8r1Dkg+2lD3P7RuS7Xi2tChvmOC3VlezEFNcWnEGCOeKoGRkDuqFA==}
@@ -10577,6 +10592,7 @@ packages:
   /@pnpm/types@9.4.2:
     resolution: {integrity: sha512-g1hcF8Nv4gd76POilz9gD4LITAPXOe5nX4ijgr8ixCbLQZfcpYiMfJ+C1RlMNRUDo8vhlNB4O3bUlxmT6EAQXA==}
     engines: {node: '>=16.14'}
+    dev: false
 
   /@pnpm/write-project-manifest@1.1.7:
     resolution: {integrity: sha512-OLkDZSqkA1mkoPNPvLFXyI6fb0enCuFji6Zfditi/CLAo9kmIhQFmEUDu4krSB8i908EljG8YwL5Xjxzm5wsWA==}

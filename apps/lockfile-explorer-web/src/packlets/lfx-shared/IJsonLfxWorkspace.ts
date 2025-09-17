@@ -3,7 +3,7 @@
 
 export interface IJsonLfxWorkspaceRushConfig {
   /**
-   * The rushVersion from rush.json.
+   * The `rushVersion` field from rush.json.
    */
   readonly rushVersion: string;
 
@@ -16,19 +16,36 @@ export interface IJsonLfxWorkspaceRushConfig {
 
 export interface IJsonLfxWorkspace {
   /**
-   * Absolute path to the workspace folder that is opened by the app.
-   * Relative paths are generally relative to this path.
+   * Absolute path to the workspace folder that is opened by the app,  normalized to use forward slashes
+   * without a trailing slash.
+   *
+   * @example `"C:/path/to/MyRepo"`
    */
-  readonly workspaceRootFolder: string;
+  readonly workspaceRootFullPath: string;
 
   /**
-   * The path to the pnpm-lock.yaml file.
+   * The path to the "pnpm-lock.yaml" file, relative to `workspaceRootFullPath`
+   * and normalized to use forward slashes without a leading slash.
+   *
+   * @example `"common/temp/my-subspace/pnpm-lock.yaml"`
+   * @example `"pnpm-lock.yaml"`
    */
   readonly pnpmLockfilePath: string;
 
   /**
-   * If this is a Rush workspace (versus a plain PNPM workspace), then
-   * this section will be defined.
+   * The path to the folder of "pnpm-lock.yaml" file, relative to `workspaceRootFullPath`
+   * and normalized to use forward slashes without a leading slash.
+   *
+   * If `pnpm-lack.yaml` is in the `workspaceRootFullPath` folder, then pnpmLockfileFolder
+   * is the empty string.
+   *
+   * @example `"common/temp/my-subspace"`
+   * @example `""`
+   */
+  readonly pnpmLockfileFolder: string;
+
+  /**
+   * This section will be defined only if this is a Rush workspace (versus a plain PNPM workspace).
    */
   readonly rushConfig: IJsonLfxWorkspaceRushConfig | undefined;
 }

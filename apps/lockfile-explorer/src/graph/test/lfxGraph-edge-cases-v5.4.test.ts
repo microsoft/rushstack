@@ -7,18 +7,15 @@ import * as graphTestHelpers from './graphTestHelpers';
 
 export const workspace: IJsonLfxWorkspace = {
   workspaceRootFullPath: '/repo',
-  pnpmLockfilePath: 'common/temp/pnpm-lock.yaml',
-  pnpmLockfileFolder: 'common/temp',
-  rushConfig: {
-    rushVersion: '5.158.1',
-    subspaceName: ''
-  }
+  pnpmLockfilePath: 'pnpm-lock.yaml',
+  pnpmLockfileFolder: '',
+  rushConfig: undefined
 };
 
-describe('lfxGraph-website-sample-1-v6.0', () => {
+describe('lfxGraph-edge-cases-v5.4', () => {
   it('loads a workspace', async () => {
     const serializedYaml: string = await graphTestHelpers.loadAndSerializeLFxGraphAsync({
-      lockfilePathUnderFixtures: '/website-sample-1/pnpm-lock-v6.0-rush.yaml',
+      lockfilePathUnderFixtures: '/edge-cases/pnpm-lock-v5.4.yaml',
       workspace: workspace
     });
     expect(serializedYaml).toMatchSnapshot();
