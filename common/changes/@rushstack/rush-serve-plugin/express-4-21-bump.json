@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Bump \"express\" to 4.21.1 to address reported vulnerabilities in 4.20.0.",
+      "type": "patch",
+      "packageName": "@rushstack/rush-serve-plugin"
+    }
+  ],
+  "packageName": "@rushstack/rush-serve-plugin",
+  "email": "cnaples79@users.noreply.github.com"
+}
