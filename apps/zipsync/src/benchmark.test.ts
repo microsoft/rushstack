@@ -13,9 +13,8 @@ import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
 import type { ZipSyncOptionCompression } from './zipSyncUtils';
 import { pack } from './pack';
 import { unpack } from './unpack';
-import { getCompressionOptions } from './testUtils';
 
-const compressionOptions = getCompressionOptions() satisfies ZipSyncOptionCompression[];
+const compressionOptions = ['store', 'deflate', 'zstd', 'auto'] satisfies ZipSyncOptionCompression[];
 
 // create a tempdir and setup dummy files there for benchmarking
 const NUM_FILES = 1000; // number of files per subdir
@@ -289,6 +288,13 @@ describe(`archive benchmarks (iterations=${ITERATIONS})`, () => {
   });
   const existingFileOptions: ['all', 'none', 'partial'] = ['all', 'none', 'partial'];
   compressionOptions.forEach((compression) => {
+    if (compression === 'zstd') {
+      const [major, minor] = process.versions.node.split('.').map((x) => parseInt(x, 10));
+      if (major < 22 || (major === 22 && minor < 15)) {
+        console.warn(`Skipping zstd test on Node ${process.versions.node}`);
+        return;
+      }
+    }
     existingFileOptions.forEach((existingFiles) => {
       it(`zipsync-${compression}-${existingFiles}-existing`, () => {
         benchZipSyncScenario(`zipsync-${compression}-${existingFiles}-existing`, compression, existingFiles);

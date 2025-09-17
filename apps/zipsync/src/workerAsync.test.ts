@@ -11,7 +11,7 @@ import { getDemoDataDirectoryDisposable } from './testUtils';
 describe('zipSyncWorkerAsync tests', () => {
   it('basic pack test', async () => {
     using demoDataDisposable = getDemoDataDirectoryDisposable(5);
-    const { targetDirectories, baseDir } = demoDataDisposable;
+    const { targetDirectories, baseDir, metadata } = demoDataDisposable;
 
     const archivePath: string = path.join(baseDir, 'archive.zip');
     const { zipSyncReturn: packResult } = await packWorkerAsync({
@@ -21,7 +21,7 @@ describe('zipSyncWorkerAsync tests', () => {
       archivePath
     });
 
-    expect(packResult).toMatchSnapshot();
+    expect(packResult).toMatchObject({ filesPacked: 21, metadata });
 
     using unpackDemoDataDisposable = getDemoDataDirectoryDisposable(2);
     const { baseDir: unpackBaseDir } = unpackDemoDataDisposable;
@@ -32,7 +32,13 @@ describe('zipSyncWorkerAsync tests', () => {
       targetDirectories
     });
 
-    expect(unpackResult).toMatchSnapshot();
+    expect(unpackResult).toMatchObject({
+      filesDeleted: 0,
+      filesExtracted: 12,
+      filesSkipped: 8,
+      foldersDeleted: 0,
+      metadata
+    });
 
     // Verify files were extracted
     for (const targetDirectory of targetDirectories) {

@@ -9,16 +9,24 @@ import { Terminal } from '@rushstack/terminal/lib/Terminal';
 
 import { pack } from './pack';
 import { unpack } from './unpack';
-import { getCompressionOptions, getDemoDataDirectoryDisposable } from './testUtils';
+import { getDemoDataDirectoryDisposable } from './testUtils';
 import type { ZipSyncOptionCompression } from './zipSyncUtils';
 
-const compressionOptions = getCompressionOptions() satisfies ZipSyncOptionCompression[];
-
 describe('zipSync tests', () => {
-  compressionOptions.forEach((compression: ZipSyncOptionCompression) => {
-    it(`basic pack test (${compression})`, () => {
+  it(`basic pack test`, () => {
+    const compressionOptions = ['store', 'deflate', 'zstd', 'auto'] satisfies ZipSyncOptionCompression[];
+    compressionOptions.forEach((compression) => {
+      if (compression === 'zstd') {
+        const [major, minor] = process.versions.node.split('.').map((x) => parseInt(x, 10));
+        if (major < 22 || (major === 22 && minor < 15)) {
+          // eslint-disable-next-line no-console
+          console.warn(`Skipping zstd test on Node ${process.versions.node}`);
+          return;
+        }
+      }
+
       using demoDataDisposable = getDemoDataDirectoryDisposable(5);
-      const { targetDirectories, baseDir } = demoDataDisposable;
+      const { targetDirectories, baseDir, metadata } = demoDataDisposable;
 
       const terminal = new Terminal(new NoOpTerminalProvider());
 
@@ -31,7 +39,7 @@ describe('zipSync tests', () => {
         archivePath
       });
 
-      expect(packResult).toMatchSnapshot();
+      expect(packResult).toMatchObject({ filesPacked: 21, metadata });
 
       using unpackDemoDataDisposable = getDemoDataDirectoryDisposable(2);
       const { baseDir: unpackBaseDir } = unpackDemoDataDisposable;
@@ -43,7 +51,13 @@ describe('zipSync tests', () => {
         targetDirectories
       });
 
-      expect(unpackResult).toMatchSnapshot();
+      expect(unpackResult).toMatchObject({
+        filesDeleted: 0,
+        filesExtracted: 12,
+        filesSkipped: 8,
+        foldersDeleted: 0,
+        metadata
+      });
 
       // Verify files were extracted
       for (const targetDirectory of targetDirectories) {
