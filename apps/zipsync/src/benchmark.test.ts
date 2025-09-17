@@ -61,14 +61,14 @@ interface IMeasurement {
   sizeBytes?: number;
 }
 const measurements: IMeasurement[] = [];
-// Allow specifying iterations via env BENCH_ITERATIONS or command arg --iterations N (jest passes args; we scan process.argv)
+// Allow specifying iterations via env BENCH_ITERATIONS. Defaults to 0 to avoid running the benchmark unless explicitly enabled.
 function detectIterations(): number {
-  let iter = 1;
+  let iter = 0;
   const envParsed: number = parseInt(process.env.BENCH_ITERATIONS || '', 10);
   if (!isNaN(envParsed) && envParsed > 0) {
     iter = envParsed;
   }
-  return iter || 5;
+  return iter;
 }
 const ITERATIONS: number = detectIterations();
 
@@ -223,16 +223,16 @@ function benchZipSyncScenario(
 }
 
 // the benchmarks are skipped by default because they require external tools (tar, zip) to be installed
-describe.skip(`archive benchmarks (iterations=${ITERATIONS})`, () => {
-  it('tar', () => {
+describe(`archive benchmarks (iterations=${ITERATIONS})`, () => {
+  it('gtar', () => {
     if (!isTarAvailable()) {
       console.log('Skipping tar test because tar is not available');
       return;
     }
     if (!tempDir) throw new Error('Temp directory is not set up.');
-    bench('tar', {
-      pack: ({ archive, demoDir }) => execSync(`tar -cf "${archive}" -C "${demoDir}" .`),
-      unpack: ({ archive, unpackDir }) => execSync(`tar -xf "${archive}" -C "${unpackDir}"`),
+    bench('gtar', {
+      pack: ({ archive, demoDir }) => execSync(`gtar -cf "${archive}" -C "${demoDir}" .`),
+      unpack: ({ archive, unpackDir }) => execSync(`gtar -xf "${archive}" -C "${unpackDir}"`),
       archive: path.join(tempDir, 'archive.tar'),
       unpackDir: path.join(tempDir, 'unpacked-tar'),
       populateUnpackDir: 'full',
@@ -388,87 +388,80 @@ afterAll(() => {
       ]
     }
   ];
-  interface ITableRow {
-    group: string;
-    isBaseline: boolean;
-    s: IStats;
-    deltaMeanPct: number;
-  }
-  const tableRows: ITableRow[] = [];
-  for (const g of groupsDef) {
-    const baselinePack: IStats | undefined = stats.find((s) => s.kind === g.baseline && s.phase === 'pack');
-    const baselineUnpack: IStats | undefined = stats.find(
-      (s) => s.kind === g.baseline && s.phase === 'unpack'
-    );
-    for (const member of g.members) {
-      for (const phase of ['pack', 'unpack'] as const) {
-        const s = stats.find((st) => st.kind === member && st.phase === phase);
-        if (!s) continue;
-        const baseline = phase === 'pack' ? baselinePack : baselineUnpack;
-        const deltaMeanPct = baseline ? ((s.mean - baseline.mean) / baseline.mean) * 100 : 0;
-        tableRows.push({ group: g.title, isBaseline: member === g.baseline, s, deltaMeanPct });
+  // Build per-group markdown tables (no Group column) for each phase
+  function buildGroupTable(
+    group: { title: string; baseline: string; members: string[] },
+    phase: 'pack' | 'unpack'
+  ): string[] {
+    // Human readable bytes formatter
+    function formatBytes(bytes: number): string {
+      const units = ['B', 'KB', 'MB', 'GB'];
+      let value = bytes;
+      let i = 0;
+      while (value >= 1024 && i < units.length - 1) {
+        value /= 1024;
+        i++;
       }
+      const formatted = value >= 100 ? value.toFixed(0) : value >= 10 ? value.toFixed(1) : value.toFixed(2);
+      return `${formatted} ${units[i]}`;
     }
-  }
-
-  function buildTable(rowsData: ITableRow[], phaseFilter: 'pack' | 'unpack'): string[] {
     const headers =
-      phaseFilter === 'pack'
-        ? [
-            'Group',
-            'Archive',
-            'iter',
-            'min(ms)',
-            'mean(ms)',
-            'Δmean%',
-            'p95(ms)',
-            'max(ms)',
-            'std(ms)',
-            'size(bytes)'
-          ]
-        : ['Group', 'Archive', 'iter', 'min(ms)', 'mean(ms)', 'Δmean%', 'p95(ms)', 'max(ms)', 'std(ms)'];
-    const rows: string[][] = [headers];
-    for (const row of rowsData.filter((r) => r.s.phase === phaseFilter)) {
-      const baseCols = [
-        row.isBaseline ? row.group : '',
-        row.s.kind + (row.isBaseline ? '*' : ''),
-        String(row.s.n),
-        row.s.min.toFixed(2),
-        row.s.mean.toFixed(2),
-        (row.deltaMeanPct >= 0 ? '+' : '') + row.deltaMeanPct.toFixed(1),
-        row.s.p95.toFixed(2),
-        row.s.max.toFixed(2),
-        row.s.std.toFixed(2)
-      ];
-      if (phaseFilter === 'pack') {
-        baseCols.push(row.s.sizeMean !== undefined ? Math.round(row.s.sizeMean).toString() : '');
-      }
-      rows.push(baseCols);
-    }
-    const colWidths: number[] = headers.map((header, i) =>
-      rows.reduce((w, r) => Math.max(w, r[i].length), 0)
+      phase === 'pack'
+        ? ['Archive', 'min (ms)', 'mean (ms)', 'p95 (ms)', 'max (ms)', 'std (ms)', 'speed×', 'size']
+        : ['Archive', 'min (ms)', 'mean (ms)', 'p95 (ms)', 'max (ms)', 'std (ms)', 'speed×'];
+    const lines: string[] = [];
+    lines.push('| ' + headers.join(' | ') + ' |');
+    const align: string[] = headers.map((header, idx) => (idx === 0 ? '---' : '---:'));
+    lines.push('| ' + align.join(' | ') + ' |');
+    const baselineStats: IStats | undefined = stats.find(
+      (s) => s.kind === group.baseline && s.phase === phase
     );
-    return rows.map((r) => r.map((c, i) => c.padStart(colWidths[i], ' ')).join('  '));
+    for (const member of group.members) {
+      const s: IStats | undefined = stats.find((st) => st.kind === member && st.phase === phase);
+      if (!s) continue;
+      const isBaseline: boolean = member === group.baseline;
+      const speedFactor: number = baselineStats ? baselineStats.mean / s.mean : 1;
+      const cols: string[] = [
+        (isBaseline ? '**' : '') + s.kind + (isBaseline ? '**' : ''),
+        s.min.toFixed(2),
+        s.mean.toFixed(2),
+        s.p95.toFixed(2),
+        s.max.toFixed(2),
+        s.std.toFixed(2),
+        speedFactor.toFixed(2) + 'x'
+      ];
+      if (phase === 'pack') {
+        cols.push(s.sizeMean !== undefined ? formatBytes(Math.round(s.sizeMean)) : '');
+      }
+      lines.push('| ' + cols.join(' | ') + ' |');
+    }
+    return lines;
   }
-  const packTable: string[] = buildTable(tableRows, 'pack');
-  const unpackTable: string[] = buildTable(tableRows, 'unpack');
   const outputLines: string[] = [];
-  outputLines.push('\nBenchmark Results (iterations=' + ITERATIONS + '):');
-  outputLines.push('PACK PHASE:');
-  outputLines.push(packTable[0]);
-  outputLines.push('-'.repeat(packTable[0].length));
-  for (let i = 1; i < packTable.length; i++) outputLines.push(packTable[i]);
-  outputLines.push('* baseline (pack)');
+  outputLines.push('# Benchmark Results');
   outputLines.push('');
-  outputLines.push('UNPACK PHASE:');
-  outputLines.push(unpackTable[0]);
-  outputLines.push('-'.repeat(unpackTable[0].length));
-  for (let i = 1; i < unpackTable.length; i++) outputLines.push(unpackTable[i]);
-  outputLines.push('* baseline (unpack)');
+  outputLines.push(
+    'This document contains performance measurements for packing and unpacking a synthetic dataset using traditional archive tools (tar, zip) and various zipsync modes. The dataset consists of two directory trees (subdir1, subdir2) populated with text files. Each scenario was executed multiple iterations; metrics shown are aggregated timing statistics. The speed× column shows how many times faster a scenario is compared to the baseline in that group (values >1 = faster, <1 = slower). Baseline rows are shown in bold.'
+  );
+  outputLines.push('');
+  outputLines.push(`Iterations: ${ITERATIONS}`);
+  outputLines.push('');
+  for (const g of groupsDef) {
+    outputLines.push(`## ${g.title}`);
+    outputLines.push('');
+    outputLines.push('### Pack Phase');
+    outputLines.push('');
+    outputLines.push(...buildGroupTable(g, 'pack'));
+    outputLines.push('');
+    outputLines.push('### Unpack Phase');
+    outputLines.push('');
+    outputLines.push(...buildGroupTable(g, 'unpack'));
+    outputLines.push('');
+  }
   const resultText = outputLines.join('\n');
   console.log(resultText);
   try {
-    const resultFile = path.join(__dirname, '..', 'temp', `benchmark-results.txt`);
+    const resultFile = path.join(__dirname, '..', 'temp', `benchmark-results.md`);
     fs.writeFileSync(resultFile, resultText, { encoding: 'utf-8' });
     console.log(`Benchmark results written to: ${resultFile}`);
   } catch (e) {
@@ -488,7 +481,7 @@ function isZipAvailable(): boolean {
 }
 function isTarAvailable(): boolean {
   try {
-    const checkTar = process.platform === 'win32' ? 'where tar' : 'command -v tar';
+    const checkTar = process.platform === 'win32' ? 'where gtar' : 'command -v gtar';
     execSync(checkTar, { stdio: 'ignore' });
     return true;
   } catch {
