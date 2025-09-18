@@ -2,7 +2,7 @@
   "changes": [
     {
       "comment": "Bump \"express\" to 4.21.1 to address reported vulnerabilities in 4.20.0.",
-      "type": "patch",
+      "type": "none",
       "packageName": "@microsoft/rush"
     }
   ],
