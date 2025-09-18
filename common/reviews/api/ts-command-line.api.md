@@ -426,6 +426,12 @@ export interface IRequiredCommandLineIntegerParameter extends CommandLineInteger
 }
 
 // @public
+export interface IRequiredCommandLineStringListParameter extends CommandLineStringListParameter {
+    // (undocumented)
+    values: ReadonlyArray<string>;
+}
+
+// @public
 export interface IRequiredCommandLineStringParameter extends CommandLineStringParameter {
     // (undocumented)
     readonly value: string;

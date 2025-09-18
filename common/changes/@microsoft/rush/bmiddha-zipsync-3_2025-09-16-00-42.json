@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for zipsync for build cache packing and unpacking.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

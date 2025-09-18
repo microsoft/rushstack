@@ -42,6 +42,7 @@
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
+    "@rushstack/zipsync": "workspace:*",
     "@yarnpkg/lockfile": "~1.0.2",
     "builtin-modules": "~3.1.0",
     "cli-table": "~0.3.1",
