@@ -35,6 +35,11 @@ export interface IOperationInfo {
   name: string;
 
   /**
+   * The names of the dependencies of the operation.
+   */
+  dependencies: string[];
+
+  /**
    * The npm package name of the containing Rush Project.
    */
   packageName: string;
@@ -152,6 +157,13 @@ export interface IWebSocketSyncCommandMessage {
 }
 
 /**
+ * Message received from a WebSocket client to request abortion of the current execution pass.
+ */
+export interface IWebSocketAbortExecutionCommandMessage {
+  command: 'abort-execution';
+}
+
+/**
  * Message received from a WebSocket client to request invalidation of one or more operations.
  */
 export interface IWebSocketInvalidateCommandMessage {
@@ -162,7 +174,7 @@ export interface IWebSocketInvalidateCommandMessage {
 /**
  * The set of possible operation enabled states.
  */
-export type OperationEnabledState = 'never' | 'changed' | 'affected';
+export type OperationEnabledState = 'never' | 'changed' | 'affected' | 'default';
 
 /**
  * Message received from a WebSocket client to change the enabled states of operations.
@@ -177,5 +189,6 @@ export interface IWebSocketSetEnabledStatesCommandMessage {
  */
 export type IWebSocketCommandMessage =
   | IWebSocketSyncCommandMessage
+  | IWebSocketAbortExecutionCommandMessage
   | IWebSocketInvalidateCommandMessage
   | IWebSocketSetEnabledStatesCommandMessage;
