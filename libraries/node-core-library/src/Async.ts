@@ -222,7 +222,7 @@ export class Async {
           //  there will be effectively no cap on the number of operations waiting.
           const limitedConcurrency: number = !Number.isFinite(concurrency) ? 1 : concurrency;
           concurrentUnitsInProgress += limitedConcurrency;
-          const currentIteratorResult: IteratorResult<TEntry> = nextIterator || (await iterator.next());
+          const currentIteratorResult: IteratorResult<TEntry> = nextIterator ?? (await iterator.next());
           // eslint-disable-next-line require-atomic-updates
           iteratorIsComplete = !!currentIteratorResult.done;
 

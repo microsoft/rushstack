@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Add allowOversubscription option to prevent running tasks from exceeding concurrency",
+      "comment": "Add an `allowOversubscription` option to the `Async` API functions which prevents running tasks from exceeding concurrency.",
       "type": "minor"
     }
   ],
