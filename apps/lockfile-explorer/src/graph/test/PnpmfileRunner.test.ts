@@ -11,7 +11,7 @@ const isDebuggerAttached: boolean = inspector.url() !== undefined;
 // For debugging, use an infinite timeout.
 jest.setTimeout(isDebuggerAttached ? 1e9 : 10000);
 
-describe('PnpmfileRunner', () => {
+describe(PnpmfileRunner.name, () => {
   it('transforms a package.json file', async () => {
     const dirname: string = Path.convertToSlashes(__dirname);
     const libIndex: number = dirname.lastIndexOf('/lib/');
