@@ -23,6 +23,13 @@ export interface IAsyncParallelismOptions {
    * take up more or less than one concurrency unit.
    */
   weighted?: boolean;
+
+  /**
+   * Controls whether operations can start even if doing so would exceed the total concurrency limit.
+   * If true (default), will start operations even when they would exceed the limit.
+   * If false, waits until sufficient capacity is available.
+   */
+  allowOversubscription?: boolean;
 }
 
 /**
@@ -201,6 +208,8 @@ export class Async {
       let arrayIndex: number = 0;
       let iteratorIsComplete: boolean = false;
       let promiseHasResolvedOrRejected: boolean = false;
+      // iterator that is stored when the loop exits early due to not enough concurrency
+      let nextIterator: IteratorResult<TEntry> | undefined = undefined;
 
       async function queueOperationsAsync(): Promise<void> {
         while (
@@ -213,7 +222,7 @@ export class Async {
           //  there will be effectively no cap on the number of operations waiting.
           const limitedConcurrency: number = !Number.isFinite(concurrency) ? 1 : concurrency;
           concurrentUnitsInProgress += limitedConcurrency;
-          const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
+          const currentIteratorResult: IteratorResult<TEntry> = nextIterator ?? (await iterator.next());
           // eslint-disable-next-line require-atomic-updates
           iteratorIsComplete = !!currentIteratorResult.done;
 
@@ -225,8 +234,20 @@ export class Async {
 
             // Remove the "lock" from the concurrency check and only apply the current weight.
             //  This should allow other operations to execute.
-            concurrentUnitsInProgress += weight;
             concurrentUnitsInProgress -= limitedConcurrency;
+
+            // Wait until there's enough capacity to run this job, this function will be re-entered as tasks call `onOperationCompletionAsync`
+            const wouldExceedConcurrency: boolean = concurrentUnitsInProgress + weight > concurrency;
+            const allowOversubscription: boolean = options?.allowOversubscription ?? true;
+            if (!allowOversubscription && wouldExceedConcurrency) {
+              // eslint-disable-next-line require-atomic-updates
+              nextIterator = currentIteratorResult;
+              break;
+            }
+
+            // eslint-disable-next-line require-atomic-updates
+            nextIterator = undefined;
+            concurrentUnitsInProgress += weight;
 
             Promise.resolve(callback(currentIteratorValue.element, arrayIndex++))
               .then(async () => {
@@ -306,6 +327,7 @@ export class Async {
    * number of concurrency units that can be in progress at once. The weight of each operation
    * determines how many concurrency units it takes up. For example, if the concurrency is 2
    * and the first operation has a weight of 2, then only one more operation can be in progress.
+   * Operations may exceed the concurrency limit based on the `allowOversubscription` option.
    *
    * If `callback` throws a synchronous exception, or if it returns a promise that rejects,
    * then the loop stops immediately.  Any remaining array items will be skipped, and

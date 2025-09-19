@@ -470,6 +470,7 @@ export class RushCommandLineParser extends CommandLineParser {
         enableParallelism: command.enableParallelism,
         incremental: command.incremental || false,
         disableBuildCache: command.disableBuildCache || false,
+        allowOversubscription: command.allowOversubscription ?? true,
 
         initialPhases: command.phases,
         originalPhases: command.originalPhases,

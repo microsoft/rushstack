@@ -25,6 +25,7 @@ export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
   debugMode: boolean;
   parallelism: number;
+  allowOversubscription: boolean;
   inputsSnapshot?: IInputsSnapshot;
   destination?: TerminalWritable;
 
@@ -69,6 +70,7 @@ export class OperationExecutionManager {
   private readonly _executionRecords: Map<Operation, OperationExecutionRecord>;
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
+  private readonly _allowOversubscription: boolean;
   private readonly _totalOperations: number;
 
   private readonly _outputWritable: TerminalWritable;
@@ -99,6 +101,7 @@ export class OperationExecutionManager {
       quietMode,
       debugMode,
       parallelism,
+      allowOversubscription,
       inputsSnapshot,
       beforeExecuteOperationAsync: beforeExecuteOperation,
       afterExecuteOperationAsync: afterExecuteOperation,
@@ -112,6 +115,7 @@ export class OperationExecutionManager {
     this._hasAnyNonAllowedWarnings = false;
     this._hasAnyAborted = false;
     this._parallelism = parallelism;
+    this._allowOversubscription = allowOversubscription;
 
     this._beforeExecuteOperation = beforeExecuteOperation;
     this._afterExecuteOperation = afterExecuteOperation;
@@ -304,6 +308,7 @@ export class OperationExecutionManager {
         }
       },
       {
+        allowOversubscription: this._allowOversubscription,
         concurrency: maxParallelism,
         weighted: true
       }

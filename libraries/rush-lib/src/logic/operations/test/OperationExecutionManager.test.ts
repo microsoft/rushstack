@@ -103,6 +103,7 @@ describe(OperationExecutionManager.name, () => {
         quietMode: false,
         debugMode: false,
         parallelism: 1,
+        allowOversubscription: true,
         destination: mockWritable
       };
     });
@@ -185,6 +186,7 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
+          allowOversubscription: true,
           destination: mockWritable
         }
       );
@@ -229,6 +231,7 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
+          allowOversubscription: true,
           destination: mockWritable
         }
       );
@@ -250,6 +253,7 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
+          allowOversubscription: true,
           destination: mockWritable
         };
       });
@@ -287,6 +291,7 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: 1,
+          allowOversubscription: true,
           destination: mockWritable
         };
       });

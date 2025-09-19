@@ -237,6 +237,7 @@ export type FolderItem = nodeFs.Dirent;
 
 // @public
 export interface IAsyncParallelismOptions {
+    allowOversubscription?: boolean;
     concurrency?: number;
     weighted?: boolean;
 }
