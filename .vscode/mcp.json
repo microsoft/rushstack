@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/Users/bharatmiddha/code/rushstack-playwright-browser-server/apps/playwright-browser-tunnel/lib/PlaywrightMcpBrowserTunnelClientCommandLine.js"
+      ]
+    }
+  },
+  "inputs": []
+}
