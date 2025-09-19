@@ -290,10 +290,10 @@ async function transpileProjectAsync(
 
     // https://github.com/swc-project/swc-node/blob/e6cd8b83d1ce76a0abf770f52425704e5d2872c6/packages/register/read-default-tsconfig.ts#L131C7-L139C20
     const react: Partial<ReactConfig> | undefined =
-      tsConfigOptions.jsxFactory ??
+      (tsConfigOptions.jsxFactory ??
       tsConfigOptions.jsxFragmentFactory ??
       tsConfigOptions.jsx ??
-      tsConfigOptions.jsxImportSource
+      tsConfigOptions.jsxImportSource)
         ? {
             pragma: tsConfigOptions.jsxFactory,
             pragmaFrag: tsConfigOptions.jsxFragmentFactory,

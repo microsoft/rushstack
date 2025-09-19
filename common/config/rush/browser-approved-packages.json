@@ -63,6 +63,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "prism-react-renderer",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "react",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "Isolate .pnpmcfile.cjs evaluation",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer"
+}

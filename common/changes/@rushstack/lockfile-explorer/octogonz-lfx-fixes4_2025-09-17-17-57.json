@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "Add syntax highlighter",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer"
+}

@@ -218,7 +218,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   /**
    * @internal
    */
-  public declare readonly _json: ILockStepVersionJson;
+  declare public readonly _json: ILockStepVersionJson;
   private _version: semver.SemVer;
 
   /**
@@ -340,7 +340,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
   /**
    * @internal
    */
-  public declare readonly _json: IIndividualVersionJson;
+  declare public readonly _json: IIndividualVersionJson;
 
   /**
    * The major version that has been locked
