@@ -855,6 +855,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "playwright",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "playwright-core",
       "allowedCategories": [ "libraries" ]
     },

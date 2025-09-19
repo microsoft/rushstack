@@ -98,6 +98,7 @@ jspm_packages/
 .vscode/
 !.vscode/tasks.json
 !.vscode/launch.json
+!.vscode/mcp.json
 
 # Rush temporary files
 common/deploy/
@@ -130,3 +131,4 @@ dist-storybook/
 # Playwright test outputs
 playwright-report/
 test-results/
+

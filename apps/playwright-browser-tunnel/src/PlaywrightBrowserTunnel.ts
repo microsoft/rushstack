@@ -302,7 +302,10 @@ export class PlaywrightTunnel {
 
     const { chromium, firefox, webkit } = playwright;
     const browsers: Record<ISupportedBrowsers, BrowserType> = { chromium, firefox, webkit };
-    const browserServer: BrowserServer = await browsers[browserName].launchServer(launchOptions);
+    const browserServer: BrowserServer = await browsers[browserName].launchServer({
+      ...launchOptions,
+      headless: false
+    });
     if (!browserServer) {
       throw new Error(
         `Failed to launch browser server for ${browserName} with options: ${JSON.stringify(launchOptions)}`
@@ -357,14 +360,19 @@ export class PlaywrightTunnel {
   }
 
   private async _setupForwardingAsync(ws1: WebSocket, ws2: WebSocket): Promise<void> {
+    console.log('Setting up message forwarding between ws1 and ws2');
     ws1.on('message', (data) => {
       if (ws2.readyState === WebSocket.OPEN) {
         ws2.send(data);
+      } else {
+        this._terminal.writeLine('ws2 is not open. Dropping message.');
       }
     });
     ws2.on('message', (data) => {
       if (ws1.readyState === WebSocket.OPEN) {
         ws1.send(data);
+      } else {
+        this._terminal.writeLine('ws1 is not open. Dropping message.');
       }
     });
 
@@ -427,6 +435,7 @@ export class PlaywrightTunnel {
             const rawHandshake: unknown = JSON.parse(event.data.toString());
             terminal.writeLine(`Received handshake: ${JSON.stringify(handshake)}`);
             handshake = this._validateHandshake(rawHandshake);
+            console.log(`Validated handshake: ${JSON.stringify(handshake)}`);
 
             this.status = 'setting-up-browser-server';
             const browserServerProxy: IBrowserServerProxy =
@@ -437,6 +446,7 @@ export class PlaywrightTunnel {
             this.status = 'browser-server-running';
 
             // send ack so that the counterpart also knows to start forwarding messages
+            await new Promise((resolve) => setTimeout(resolve, 2000));
             ws.send(JSON.stringify({ action: 'handshakeAck' }));
             await this._setupForwardingAsync(ws, client);
             resolve(ws);

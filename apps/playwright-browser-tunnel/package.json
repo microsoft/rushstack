@@ -27,7 +27,8 @@
     "@rushstack/ts-command-line": "workspace:*",
     "string-argv": "~0.3.1",
     "semver": "~7.5.4",
-    "ws": "~8.14.1"
+    "ws": "~8.14.1",
+    "playwright": "1.55.0"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
@@ -35,10 +36,11 @@
     "local-node-rig": "workspace:*",
     "@types/semver": "7.5.0",
     "@types/ws": "8.5.5",
-    "playwright-core": "~1.54.1",
-    "@playwright/test": "~1.54.1"
+    "playwright-core": "~1.55.0",
+    "@playwright/test": "~1.55.0",
+    "@types/node": "20.17.19"
   },
   "peerDependencies": {
-    "playwright-core": "~1.54.1"
+    "playwright-core": "~1.55.0"
   }
 }
