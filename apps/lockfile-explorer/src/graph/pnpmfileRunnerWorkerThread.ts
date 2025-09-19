@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { parentPort, workerData } from 'node:worker_threads';
+import { parentPort, workerData, type MessagePort } from 'node:worker_threads';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import type { IPackageJson } from '@rushstack/node-core-library';
@@ -40,18 +40,23 @@ let pnpmfileModule: IPnpmfileModule | undefined = undefined;
 let pnpmfileModuleError: Error | undefined = undefined;
 
 try {
-  if (fs.existsSync(resolvedPath)) {
-    pnpmfileModule = require(resolvedPath);
-  }
+  pnpmfileModule = require(resolvedPath);
 } catch (error) {
   pnpmfileModuleError = error;
 }
 
-parentPort?.on('message', async (message: IRequestMessage) => {
+// eslint-disable-next-line @rushstack/no-new-null
+const threadParentPort: null | MessagePort = parentPort;
+
+if (!threadParentPort) {
+  throw new Error('Not running in a worker thread');
+}
+
+threadParentPort.on('message', async (message: IRequestMessage) => {
   const { id, packageJson } = message;
 
   if (pnpmfileModuleError) {
-    parentPort?.postMessage({
+    threadParentPort.postMessage({
       kind: 'error',
       id,
       error: pnpmfileModuleError.message
@@ -62,13 +67,17 @@ parentPort?.on('message', async (message: IRequestMessage) => {
   try {
     if (!pnpmfileModule || !pnpmfileModule.hooks || typeof pnpmfileModule.hooks.readPackage !== 'function') {
       // No transformation needed
-      parentPort?.postMessage({ kind: 'return', id, result: packageJson } satisfies IResponseMessageReturn);
+      threadParentPort.postMessage({
+        kind: 'return',
+        id,
+        result: packageJson
+      } satisfies IResponseMessageReturn);
       return;
     }
 
     const pnpmContext: IReadPackageContext = {
       log: (logMessage) =>
-        parentPort?.postMessage({
+        threadParentPort.postMessage({
           kind: 'log',
           id,
           log: logMessage
@@ -77,9 +86,9 @@ parentPort?.on('message', async (message: IRequestMessage) => {
 
     const result: IPackageJson = await pnpmfileModule.hooks.readPackage({ ...packageJson }, pnpmContext);
 
-    parentPort?.postMessage({ kind: 'return', id, result } satisfies IResponseMessageReturn);
+    threadParentPort.postMessage({ kind: 'return', id, result } satisfies IResponseMessageReturn);
   } catch (e) {
-    parentPort?.postMessage({
+    threadParentPort.postMessage({
       kind: 'error',
       id,
       error: (e as Error).message
