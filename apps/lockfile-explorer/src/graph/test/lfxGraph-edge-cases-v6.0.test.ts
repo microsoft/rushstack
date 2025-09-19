@@ -9,6 +9,7 @@ export const workspace: IJsonLfxWorkspace = {
   workspaceRootFullPath: '/repo',
   pnpmLockfilePath: 'pnpm-lock.yaml',
   pnpmLockfileFolder: '',
+  pnpmfilePath: '.pnpmfile.cjs',
   rushConfig: undefined
 };
 
