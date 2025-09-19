@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Relase version 1.0.0",
+      "type": "major",
+      "packageName": "@rushstack/heft-typescript-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
