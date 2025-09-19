@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/cpu-profile-summarizer",
+      "comment": "Improve error handling in the worker in cases when the error thrown is not an instance of `Error`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/cpu-profile-summarizer"
+}
