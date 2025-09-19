@@ -233,12 +233,8 @@ export class ExplorerCommandLineParser extends CommandLineParser {
 
         const pnpmfilePath: string = path.join(lfxWorkspace.workspaceRootFullPath, lfxWorkspace.pnpmfilePath);
         if (await FileSystem.existsAsync(pnpmfilePath)) {
-          const pnpmFileRunner: PnpmfileRunner = new PnpmfileRunner(pnpmfilePath);
-          try {
-            parsedPackage = await pnpmFileRunner.transformPackageAsync(packageJson, fileLocation);
-          } finally {
-            await pnpmFileRunner.disposeAsync();
-          }
+          await using pnpmFileRunner: PnpmfileRunner = new PnpmfileRunner(pnpmfilePath);
+          parsedPackage = await pnpmFileRunner.transformPackageAsync(packageJson, fileLocation);
         }
 
         res.send(parsedPackage);

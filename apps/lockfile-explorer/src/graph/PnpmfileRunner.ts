@@ -93,7 +93,7 @@ export class PnpmfileRunner {
     });
   }
 
-  public async disposeAsync(): Promise<void> {
+  public async [Symbol.asyncDispose](): Promise<void> {
     if (this._disposed) {
       return;
     }
