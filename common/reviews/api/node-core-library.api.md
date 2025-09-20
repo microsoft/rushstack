@@ -132,6 +132,7 @@ export class FileError extends Error {
     // @internal (undocumented)
     static _environmentVariableIsAbsolutePath: boolean;
     getFormattedErrorMessage(options?: IFileErrorFormattingOptions): string;
+    static getProblemMatcher(options?: Pick<IFileErrorFormattingOptions, 'format'>): IProblemMatcherPattern;
     readonly line: number | undefined;
     readonly projectFolder: string;
     // @internal (undocumented)
@@ -585,6 +586,24 @@ export interface IPeerDependenciesMetaTable {
     [dependencyName: string]: {
         optional?: boolean;
     };
+}
+
+// @public
+export interface IProblemMatcherPattern {
+    // (undocumented)
+    code: number;
+    // (undocumented)
+    column: number;
+    // (undocumented)
+    file: number;
+    // (undocumented)
+    line: number;
+    // (undocumented)
+    message: number;
+    // (undocumented)
+    regexp: string;
+    // (undocumented)
+    severity: number;
 }
 
 // @public

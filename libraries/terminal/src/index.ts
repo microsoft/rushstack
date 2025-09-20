@@ -50,3 +50,5 @@ export {
 } from './PrefixProxyTerminalProvider';
 export { NoOpTerminalProvider } from './NoOpTerminalProvider';
 export { TerminalStreamWritable, type ITerminalStreamWritableOptions } from './TerminalStreamWritable';
+export { ProblemCollector } from './ProblemCollector';
+export type { IProblemMatcher, IProblemMatchResult, IProblemMatcherJson, IProblem } from './ProblemMatchers';

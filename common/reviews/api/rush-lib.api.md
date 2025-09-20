@@ -24,6 +24,7 @@ import { JsonObject } from '@rushstack/node-core-library';
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { PerformanceEntry as PerformanceEntry_2 } from 'node:perf_hooks';
+import type { ProblemCollector } from '@rushstack/terminal';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import { SyncWaterfallHook } from 'tapable';
@@ -621,6 +622,7 @@ export interface IOperationExecutionResult {
     readonly metadataFolderPath: string | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly operation: Operation;
+    readonly problemCollector: ProblemCollector;
     readonly silent: boolean;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;

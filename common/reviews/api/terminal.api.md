@@ -143,6 +143,56 @@ export interface IPrefixProxyTerminalProviderOptionsBase {
 }
 
 // @public
+export interface IProblem {
+    // (undocumented)
+    readonly code?: string;
+    // (undocumented)
+    readonly column?: number;
+    // (undocumented)
+    readonly endColumn?: number;
+    // (undocumented)
+    readonly endLine?: number;
+    // (undocumented)
+    readonly file?: string;
+    // (undocumented)
+    readonly fullText: string;
+    // (undocumented)
+    readonly line?: number;
+    // (undocumented)
+    readonly matcherName: string;
+    // (undocumented)
+    readonly message: string;
+    // Warning: (ae-forgotten-export) The symbol "ProblemSeverity" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly severity?: ProblemSeverity;
+}
+
+// @public
+export interface IProblemMatcher {
+    flush?(): IProblemMatchResult[];
+    match(line: string): IProblemMatchResult | false;
+    readonly name: string;
+}
+
+// @public
+export interface IProblemMatcherJson {
+    // (undocumented)
+    name: string;
+    // Warning: (ae-forgotten-export) The symbol "IProblemPattern" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    pattern: IProblemPattern | IProblemPattern[];
+    // (undocumented)
+    severity?: ProblemSeverity;
+}
+
+// @public (undocumented)
+export type IProblemMatchResult = Omit<IProblem, 'matcherName' | 'fullText'> & {
+    fullText?: string;
+};
+
+// @public
 export interface ISplitterTransformOptions extends ITerminalWritableOptions {
     destinations: TerminalWritable[];
 }
@@ -285,6 +335,18 @@ export class PrintUtilities {
     static wrapWordsToLines(text: string, maxLineLength?: number, indent?: number): string[];
     static wrapWordsToLines(text: string, maxLineLength?: number, linePrefix?: string): string[];
     static wrapWordsToLines(text: string, maxLineLength?: number, indentOrLinePrefix?: number | string): string[];
+}
+
+// @public
+export class ProblemCollector extends TerminalWritable {
+    // Warning: (ae-forgotten-export) The symbol "IProblemCollectorOptions" needs to be exported by the entry point index.d.ts
+    constructor(options: IProblemCollectorOptions);
+    // (undocumented)
+    getProblems(): ReadonlyArray<IProblem>;
+    // (undocumented)
+    protected onClose(): void;
+    // (undocumented)
+    protected onWriteChunk(chunk: ITerminalChunk): void;
 }
 
 // @public
