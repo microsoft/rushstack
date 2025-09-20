@@ -217,6 +217,46 @@
         }
       }
     ],
+    "problemMatchers": [
+      {
+        "name": "rushstack-file-error-unix",
+        "owner": "typescript",
+        "source": "rushstack",
+        "fileLocation": [
+          "relative",
+          "${cwd}"
+        ],
+        "applyTo": "allDocuments",
+        "pattern": {
+          "regexp": "^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^:]+):(\\d+):(\\d+)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$",
+          "severity": 1,
+          "file": 2,
+          "line": 3,
+          "column": 4,
+          "code": 5,
+          "message": 6
+        }
+      },
+      {
+        "name": "rushstack-file-error-visualstudio",
+        "owner": "typescript",
+        "source": "rushstack",
+        "fileLocation": [
+          "relative",
+          "${cwd}"
+        ],
+        "applyTo": "allDocuments",
+        "pattern": {
+          "regexp": "^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^\\(]+)\\((\\d+),(\\d+)\\)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$",
+          "severity": 1,
+          "file": 2,
+          "line": 3,
+          "column": 4,
+          "code": 5,
+          "message": 6
+        }
+      }
+    ],
     "views": {
       "rushstack": [
         {

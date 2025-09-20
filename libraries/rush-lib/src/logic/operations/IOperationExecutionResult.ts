@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { StdioSummarizer } from '@rushstack/terminal';
+import type { StdioSummarizer, ProblemCollector } from '@rushstack/terminal';
 import type { OperationStatus } from './OperationStatus';
 import type { Operation } from './Operation';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
@@ -40,6 +40,10 @@ export interface IOperationExecutionResult {
    * Object used to report a summary at the end of the Rush invocation.
    */
   readonly stdioSummarizer: StdioSummarizer;
+  /**
+   * Object used to collect problems (errors/warnings/info) encountered during the operation.
+   */
+  readonly problemCollector: ProblemCollector;
   /**
    * The value indicates the duration of the same operation without cache hit.
    */

@@ -35,7 +35,12 @@ export {
   type IProcessInfo,
   Executable
 } from './Executable';
-export { type IFileErrorOptions, type IFileErrorFormattingOptions, FileError } from './FileError';
+export {
+  type IFileErrorOptions,
+  type IFileErrorFormattingOptions,
+  type IProblemMatcherPattern,
+  FileError
+} from './FileError';
 export type {
   INodePackageJson,
   IPackageJson,

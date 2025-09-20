@@ -48,6 +48,42 @@ const uuidFileError: string = '37a4c772-2dc8-4c66-89ae-262f8cc1f0c1';
 const baseFolderEnvVar: string = 'RUSHSTACK_FILE_ERROR_BASE_FOLDER';
 
 /**
+ * Problem matcher pattern for parsing error messages.
+ *
+ * @public
+ */
+export interface IProblemMatcherPattern {
+  regexp: string;
+  severity: number;
+  file: number;
+  line: number;
+  column: number;
+  code: number;
+  message: number;
+}
+
+const unixProblemMatcherPattern: IProblemMatcherPattern = {
+  regexp: '^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^:]+):(\\d+):(\\d+)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$',
+  severity: 1,
+  file: 2,
+  line: 3,
+  column: 4,
+  code: 5,
+  message: 6
+};
+
+const vsProblemMatcherPattern: IProblemMatcherPattern = {
+  regexp:
+    '^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^\\(]+)\\((\\d+),(\\d+)\\)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$',
+  severity: 1,
+  file: 2,
+  line: 3,
+  column: 4,
+  code: 5,
+  message: 6
+};
+
+/**
  * An `Error` subclass that should be thrown to report an unexpected state that specifically references
  * a location in a file.
  *
@@ -125,6 +161,26 @@ export class FileError extends Error {
       line: this.line,
       column: this.column
     });
+  }
+
+  /**
+   * Get the problem matcher pattern for parsing error messages.
+   *
+   * @param options - Options for the error message format.
+   * @returns The problem matcher pattern.
+   */
+  public static getProblemMatcher(
+    options?: Pick<IFileErrorFormattingOptions, 'format'>
+  ): IProblemMatcherPattern {
+    const format: FileLocationStyle = options?.format || 'Unix';
+    switch (format) {
+      case 'Unix':
+        return unixProblemMatcherPattern;
+      case 'VisualStudio':
+        return vsProblemMatcherPattern;
+      default:
+        throw new Error(`The FileError format "${format}" is not supported for problem matchers.`);
+    }
   }
 
   private _evaluateBaseFolder(): string | undefined {

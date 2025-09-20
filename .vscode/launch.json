@@ -79,10 +79,10 @@
 			"request": "launch",
 			"cwd": "${workspaceFolder}/vscode-extensions/rush-vscode-extension",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/rush-vscode-extension"
+				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/rush-vscode-extension/dist/vsix/unpacked"
 			],
 			"outFiles": [
-				"${workspaceFolder}/vscode-extensions/rush-vscode-extension/dist/**/*.js"
+				"${workspaceFolder}/vscode-extensions/rush-vscode-extension/**"
 			]
 			// "preLaunchTask": "npm: build:watch - vscode-extensions/rush-vscode-extension"
 		},

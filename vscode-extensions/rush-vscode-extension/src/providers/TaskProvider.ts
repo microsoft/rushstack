@@ -47,6 +47,8 @@ export class RushTaskProvider implements vscode.TaskProvider {
 
   public async executeTaskAsync<T extends IRushTaskDefinition>(definition: T): Promise<void> {
     let task: vscode.Task | undefined;
+    // problem matchers are defined in extension manifest
+    const problemMatchers: string[] = ['$rushstack-file-error-unix', '$rushstack-file-error-visualstudio'];
     switch (definition.type) {
       case 'rush-project-script': {
         const { cwd, displayName, command } = definition;
@@ -62,7 +64,8 @@ export class RushTaskProvider implements vscode.TaskProvider {
           'rushx',
           new vscode.ShellExecution(`rushx ${command}`, {
             cwd
-          })
+          }),
+          problemMatchers
         );
         break;
       }
@@ -80,7 +83,8 @@ export class RushTaskProvider implements vscode.TaskProvider {
           'rush',
           new vscode.ShellExecution(`rush ${command} ${args.join(' ')}`, {
             cwd
-          })
+          }),
+          problemMatchers
         );
         break;
       }
