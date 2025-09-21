@@ -160,6 +160,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
 workspace:
   pnpmLockfileFolder: ''
   pnpmLockfilePath: pnpm-lock.yaml
+  pnpmfilePath: .pnpmfile.cjs
   workspaceRootFullPath: /repo
 "
 `;

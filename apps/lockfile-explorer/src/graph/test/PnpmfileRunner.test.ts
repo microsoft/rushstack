@@ -22,23 +22,25 @@ describe(PnpmfileRunner.name, () => {
       dirname.substring(0, libIndex) + '/src/' + dirname.substring(libIndex + '/lib/'.length);
 
     const pnpmfilePath: string = srcDirname + '/fixtures/PnpmfileRunner/.pnpmfile.cjs';
-    await using pnpmfileRunner: PnpmfileRunner = new PnpmfileRunner(pnpmfilePath);
     const logMessages: string[] = [];
-    pnpmfileRunner.logger = (message) => {
-      logMessages.push(message);
-    };
-    expect(
-      await pnpmfileRunner.transformPackageAsync(
-        {
-          name: '@types/karma',
-          version: '1.0.0',
-          dependencies: {
-            'example-dependency': '1.0.0'
-          }
-        },
-        pnpmfilePath
-      )
-    ).toMatchInlineSnapshot(`
+
+    const pnpmfileRunner: PnpmfileRunner = new PnpmfileRunner(pnpmfilePath);
+    try {
+      pnpmfileRunner.logger = (message) => {
+        logMessages.push(message);
+      };
+      expect(
+        await pnpmfileRunner.transformPackageAsync(
+          {
+            name: '@types/karma',
+            version: '1.0.0',
+            dependencies: {
+              'example-dependency': '1.0.0'
+            }
+          },
+          pnpmfilePath
+        )
+      ).toMatchInlineSnapshot(`
 Object {
   "dependencies": Object {
     "example-dependency": "1.0.0",
@@ -48,6 +50,9 @@ Object {
   "version": "1.0.0",
 }
 `);
+    } finally {
+      await pnpmfileRunner.disposeAsync();
+    }
 
     expect(logMessages).toMatchInlineSnapshot(`
 Array [
