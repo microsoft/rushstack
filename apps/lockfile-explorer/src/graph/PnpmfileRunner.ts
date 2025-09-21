@@ -25,7 +25,7 @@ export class PnpmfileRunner {
   public logger: ((message: string) => void) | undefined = undefined;
 
   public constructor(pnpmfilePath: string) {
-    this._worker = new Worker(path.join(__dirname, './pnpmfileRunnerWorkerThread.js'), {
+    this._worker = new Worker(path.join(`${__dirname}/pnpmfileRunnerWorkerThread.js`), {
       workerData: { pnpmfilePath }
     });
 

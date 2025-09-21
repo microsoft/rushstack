@@ -6,7 +6,7 @@ import React from 'react';
 import { Highlight, themes } from 'prism-react-renderer';
 
 // Generate this list by doing console.log(Object.keys(Prism.languages))
-// BUT THEN DELETE the API's that are bizarrely mixed into this namespace:
+// BUT THEN DELETE the APIs that are bizarrely mixed into this namespace:
 // "extend", "insertBefore", "DFS"
 export type PrismLanguage =
   | 'plain'
