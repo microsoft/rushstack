@@ -12,6 +12,15 @@ export interface IJsonLfxWorkspaceRushConfig {
    * Otherwise this will be an empty string.
    */
   readonly subspaceName: string;
+
+  /**
+   * The path to Rush's input file `.pnpmfile.cjs`, relative to `workspaceRootFullPath`
+   * and normalized to use forward slashes without a leading slash.  In a Rush workspace,
+   * {@link IJsonLfxWorkspace.pnpmfilePath} is a temporary file that is generated from `rushPnpmfilePath`.
+   *
+   * @example `"common/config/my-subspace/pnpm-lock.yaml"`
+   */
+  readonly rushPnpmfilePath: string;
 }
 
 export interface IJsonLfxWorkspace {
@@ -43,6 +52,14 @@ export interface IJsonLfxWorkspace {
    * @example `""`
    */
   readonly pnpmLockfileFolder: string;
+
+  /**
+   * The path to the `.pnpmfile.cjs` file that is loaded by PNPM.  In a Rush workspace,
+   * this is a temporary file that is generated from `rushPnpmfilePath`.
+   *
+   * @example `"common/temp/my-subspace/.pnpmfile.cjs"`
+   */
+  readonly pnpmfilePath: string;
 
   /**
    * This section will be defined only if this is a Rush workspace (versus a plain PNPM workspace).

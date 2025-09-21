@@ -88,7 +88,9 @@ Object {
   "workspace": Object {
     "pnpmLockfileFolder": "common/temp/my-subspace",
     "pnpmLockfilePath": "common/temp/my-subspace/pnpm-lock.yaml",
+    "pnpmfilePath": "common/temp/my-subspace/.pnpmfile.cjs",
     "rushConfig": Object {
+      "rushPnpmfilePath": "common/config/subspaces/my-subspace/.pnpmfile.cjs",
       "rushVersion": "0.0.0",
       "subspaceName": "my-subspace",
     },

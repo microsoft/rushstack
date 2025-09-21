@@ -317,7 +317,9 @@ exports[`lfxGraph-website-sample-1-v5.4 loads a workspace 1`] = `
 workspace:
   pnpmLockfileFolder: common/temp
   pnpmLockfilePath: common/temp/pnpm-lock.yaml
+  pnpmfilePath: common/temp/.pnpmfile.cjs
   rushConfig:
+    rushPnpmfilePath: common/config/.pnpmfile.cjs
     rushVersion: 5.83.3
     subspaceName: ''
   workspaceRootFullPath: /repo

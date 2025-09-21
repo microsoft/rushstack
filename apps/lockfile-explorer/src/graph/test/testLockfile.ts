@@ -7,9 +7,11 @@ export const TEST_WORKSPACE: IJsonLfxWorkspace = {
   workspaceRootFullPath: '/repo',
   pnpmLockfilePath: 'common/temp/my-subspace/pnpm-lock.yaml',
   pnpmLockfileFolder: 'common/temp/my-subspace',
+  pnpmfilePath: 'common/temp/my-subspace/.pnpmfile.cjs',
   rushConfig: {
     rushVersion: '0.0.0',
-    subspaceName: 'my-subspace'
+    subspaceName: 'my-subspace',
+    rushPnpmfilePath: 'common/config/subspaces/my-subspace/.pnpmfile.cjs'
   }
 };
 
