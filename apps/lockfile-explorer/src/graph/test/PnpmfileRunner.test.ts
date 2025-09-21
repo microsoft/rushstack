@@ -22,7 +22,7 @@ describe(PnpmfileRunner.name, () => {
       dirname.substring(0, libIndex) + '/src/' + dirname.substring(libIndex + '/lib/'.length);
 
     const pnpmfilePath: string = srcDirname + '/fixtures/PnpmfileRunner/.pnpmfile.cjs';
-    const pnpmfileRunner: PnpmfileRunner = new PnpmfileRunner(pnpmfilePath);
+    await using pnpmfileRunner: PnpmfileRunner = new PnpmfileRunner(pnpmfilePath);
     const logMessages: string[] = [];
     pnpmfileRunner.logger = (message) => {
       logMessages.push(message);
@@ -54,8 +54,6 @@ Array [
   "Fixed up dependencies for @types/karma",
 ]
 `);
-
-    await pnpmfileRunner.disposeAsync();
 
     await expect(
       pnpmfileRunner.transformPackageAsync({ name: 'name', version: '1.0.0' }, '')
