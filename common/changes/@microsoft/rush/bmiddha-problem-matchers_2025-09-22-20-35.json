@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add `IOperationExecutionResult.problemCollector` API which matches and collects VS Code style problem matchers",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
