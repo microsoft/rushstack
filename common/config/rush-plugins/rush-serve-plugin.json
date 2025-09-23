@@ -1,0 +1,13 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-serve-plugin-options.schema.json",
+  "phasedCommands": ["start"],
+  "portParameterLongName": "--port",
+  "globalRouting": [
+    {
+      "workspaceRelativeFile": "rush-plugins/rush-serve-plugin/dashboard.html",
+      "servePath": "/"
+    }
+  ],
+  "buildStatusWebSocketPath": "/ws",
+  "logServePath": "/logs"
+}
