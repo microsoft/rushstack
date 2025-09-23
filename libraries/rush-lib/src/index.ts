@@ -137,10 +137,12 @@ export type {
 
 export type { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 export type {
+  IConfigurableOperation,
+  IBaseOperationExecutionResult,
   IExecutionResult,
   IOperationExecutionResult
 } from './logic/operations/IOperationExecutionResult';
-export { type IOperationOptions, Operation } from './logic/operations/Operation';
+export { type IOperationOptions, type OperationEnabledState, Operation } from './logic/operations/Operation';
 export { OperationStatus } from './logic/operations/OperationStatus';
 export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 
@@ -160,8 +162,13 @@ export {
 
 export {
   type ICreateOperationsContext,
-  type IExecuteOperationsContext,
-  PhasedCommandHooks
+  type IOperationExecutionPassOptions,
+  type IOperationExecutionManagerContext,
+  type IOperationExecutionManager,
+  type IPhasedCommandPlugin,
+  PhasedCommandHooks,
+  OperationExecutionHooks,
+  type RunNextPassBehavior
 } from './pluginFramework/PhasedCommandHooks';
 
 export type { IRushPlugin } from './pluginFramework/IRushPlugin';

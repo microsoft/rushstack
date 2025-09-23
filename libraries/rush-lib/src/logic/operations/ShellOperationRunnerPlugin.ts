@@ -23,13 +23,13 @@ export const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPl
  */
 export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.createOperations.tap(
+    hooks.createOperationsAsync.tap(
       PLUGIN_NAME,
       function createShellOperations(
         operations: Set<Operation>,
         context: ICreateOperationsContext
       ): Set<Operation> {
-        const { rushConfiguration, isInitial } = context;
+        const { rushConfiguration, isIncrementalBuildAllowed } = context;
 
         const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
           getCustomParameterValuesByPhase();
@@ -51,17 +51,18 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
 
             // For execution of non-initial runs, prefer the `:incremental` script if it exists.
             // However, the `shellCommand` value still takes precedence per the spec for that feature.
-            const commandToRun: string | undefined =
-              shellCommand ??
-              (!isInitial ? scripts?.[`${phaseName}:incremental`] : undefined) ??
-              scripts?.[phaseName];
+            const initialCommand: string | undefined = shellCommand ?? scripts?.[phaseName];
+            const incrementalCommand: string | undefined = isIncrementalBuildAllowed
+              ? (shellCommand ?? scripts?.[`${phaseName}:incremental`])
+              : undefined;
 
             operation.runner = initializeShellOperationRunner({
               phase,
               project,
               displayName,
               commandForHash,
-              commandToRun,
+              initialCommand,
+              incrementalCommand,
               customParameterValues,
               rushConfiguration
             });
@@ -79,28 +80,39 @@ export function initializeShellOperationRunner(options: {
   project: RushConfigurationProject;
   displayName: string;
   rushConfiguration: RushConfiguration;
-  commandToRun: string | undefined;
+  initialCommand: string | undefined;
+  incrementalCommand: string | undefined;
   commandForHash?: string;
   customParameterValues: ReadonlyArray<string>;
 }): IOperationRunner {
-  const { phase, project, commandToRun: rawCommandToRun, displayName } = options;
+  const {
+    phase,
+    project,
+    initialCommand: rawInitialCommand,
+    incrementalCommand: rawIncrementalCommand,
+    displayName
+  } = options;
 
-  if (typeof rawCommandToRun !== 'string' && phase.missingScriptBehavior === 'error') {
+  if (typeof rawInitialCommand !== 'string' && phase.missingScriptBehavior === 'error') {
     throw new Error(
       `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
     );
   }
 
-  if (rawCommandToRun) {
+  if (rawInitialCommand) {
     const { commandForHash: rawCommandForHash, customParameterValues } = options;
 
-    const commandToRun: string = formatCommand(rawCommandToRun, customParameterValues);
+    const initialCommand: string = formatCommand(rawInitialCommand, customParameterValues);
+    const incrementalCommand: string | undefined = rawIncrementalCommand
+      ? formatCommand(rawIncrementalCommand, customParameterValues)
+      : undefined;
     const commandForHash: string = rawCommandForHash
       ? formatCommand(rawCommandForHash, customParameterValues)
-      : commandToRun;
+      : initialCommand;
 
     return new ShellOperationRunner({
-      commandToRun,
+      initialCommand,
+      incrementalCommand,
       commandForHash,
       displayName,
       phase,

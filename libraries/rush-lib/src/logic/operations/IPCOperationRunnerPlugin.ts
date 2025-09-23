@@ -4,6 +4,7 @@
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type {
   ICreateOperationsContext,
+  IOperationExecutionManager,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
@@ -25,25 +26,22 @@ const PLUGIN_NAME: 'IPCOperationRunnerPlugin' = 'IPCOperationRunnerPlugin';
  */
 export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
-    // Workaround until the operation graph persists for the lifetime of the watch process
-    const runnerCache: Map<string, IPCOperationRunner> = new Map();
+    let executionManager: IOperationExecutionManager | undefined;
 
-    const operationStatesByRunner: WeakMap<IPCOperationRunner, IOperationExecutionResult> = new WeakMap();
+    hooks.executionManagerAsync.tap(PLUGIN_NAME, (manager) => {
+      executionManager = manager;
+    });
 
-    let currentContext: ICreateOperationsContext | undefined;
-
-    hooks.createOperations.tapPromise(
+    hooks.createOperationsAsync.tap(
       {
         name: PLUGIN_NAME,
         before: ShellOperationPluginName
       },
-      async (operations: Set<Operation>, context: ICreateOperationsContext) => {
-        const { isWatch, isInitial } = context;
-        if (!isWatch) {
+      (operations: Set<Operation>, context: ICreateOperationsContext) => {
+        const { isWatch, isIncrementalBuildAllowed } = context;
+        if (!isWatch || !isIncrementalBuildAllowed) {
           return operations;
         }
-
-        currentContext = context;
 
         const getCustomParameterValuesForPhase: (phase: IPhase) => ReadonlyArray<string> =
           getCustomParameterValuesByPhase();
@@ -62,77 +60,63 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
 
           const { name: phaseName } = phase;
 
-          const rawScript: string | undefined =
-            (!isInitial ? scripts[`${phaseName}:incremental:ipc`] : undefined) ?? scripts[`${phaseName}:ipc`];
+          const incrementalScript: string | undefined = scripts[`${phaseName}:incremental:ipc`];
+          let initialScript: string | undefined = scripts[`${phaseName}:ipc`];
 
-          if (!rawScript) {
+          if (!initialScript && !incrementalScript) {
             continue;
           }
+
+          initialScript ??= scripts[phaseName];
 
           // This is the command that will be used to identify the cache entry for this operation, to allow
           // for this operation (or downstream operations) to be restored from the build cache.
           const commandForHash: string | undefined = phase.shellCommand ?? scripts?.[phaseName];
 
           const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
-          const commandToRun: string = formatCommand(rawScript, customParameterValues);
+          const initialCommand: string = formatCommand(initialScript, customParameterValues);
+          const incrementalCommand: string | undefined = incrementalScript
+            ? formatCommand(incrementalScript, customParameterValues)
+            : undefined;
 
           const operationName: string = getDisplayName(phase, project);
-          let maybeIpcOperationRunner: IPCOperationRunner | undefined = runnerCache.get(operationName);
-          if (!maybeIpcOperationRunner) {
-            const ipcOperationRunner: IPCOperationRunner = (maybeIpcOperationRunner = new IPCOperationRunner({
-              phase,
-              project,
-              name: operationName,
-              commandToRun,
-              commandForHash,
-              persist: true,
-              requestRun: (requestor: string, detail?: string) => {
-                const operationState: IOperationExecutionResult | undefined =
-                  operationStatesByRunner.get(ipcOperationRunner);
-                if (!operationState) {
-                  return;
-                }
-
-                const status: OperationStatus = operationState.status;
-                if (
-                  status === OperationStatus.Waiting ||
-                  status === OperationStatus.Ready ||
-                  status === OperationStatus.Queued
-                ) {
-                  // Already pending. No-op.
-                  return;
-                }
-
-                currentContext?.invalidateOperation?.(
-                  operation,
-                  detail ? `${requestor}: ${detail}` : requestor
-                );
+          const ipcOperationRunner: IPCOperationRunner = new IPCOperationRunner({
+            phase,
+            project,
+            name: operationName,
+            initialCommand,
+            incrementalCommand,
+            commandForHash,
+            persist: true,
+            requestRun: (requestor: string, detail?: string) => {
+              const operationState: IOperationExecutionResult | undefined =
+                executionManager?.lastExecutionResults.get(operation);
+              if (!operationState) {
+                return;
               }
-            }));
-            runnerCache.set(operationName, ipcOperationRunner);
-          }
 
-          operation.runner = maybeIpcOperationRunner;
+              const status: OperationStatus = operationState.status;
+              if (
+                status === OperationStatus.Waiting ||
+                status === OperationStatus.Ready ||
+                status === OperationStatus.Queued
+              ) {
+                // Already pending. No-op.
+                return;
+              }
+
+              executionManager?.invalidateOperations(
+                [operation],
+                detail ? `${requestor}: ${detail}` : requestor
+              );
+            }
+          });
+
+          operation.runner = ipcOperationRunner;
         }
 
         return operations;
       }
     );
-
-    hooks.beforeExecuteOperations.tap(
-      PLUGIN_NAME,
-      (records: Map<Operation, IOperationExecutionResult>, context: ICreateOperationsContext) => {
-        currentContext = context;
-        for (const [{ runner }, result] of records) {
-          if (runner instanceof IPCOperationRunner) {
-            operationStatesByRunner.set(runner, result);
-          }
-        }
-      }
-    );
-
-    hooks.shutdownAsync.tapPromise(PLUGIN_NAME, async () => {
-      await Promise.all(Array.from(runnerCache.values(), (runner) => runner.shutdownAsync()));
-    });
   }
 }

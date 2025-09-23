@@ -26,65 +26,93 @@ To use the socket:
 import type {
   IWebSocketEventMessage,
   IOperationInfo,
-  IRushSessionInfo,
-  ReadableOperationStatus
+  IOperationExecutionState,
+  ReadableOperationStatus,
+  IRushSessionInfo
 } from '@rushstack/rush-serve-plugin/api';
 
-const socket: WebSocket = new WebSocket(`wss://${self.location.host}${buildStatusWebSocketPath}`);
+const socket = new WebSocket(`wss://${self.location.host}${buildStatusWebSocketPath}`);
 
+// Static graph metadata (does not include dynamic status fields)
 const operationsByName: Map<string, IOperationInfo> = new Map();
+// Current execution state for this pass
+const executionStates: Map<string, IOperationExecutionState> = new Map();
+// Queued states for the next pass (if a pass has been queued but not yet started)
+const queuedStates: Map<string, IOperationExecutionState> = new Map();
+
 let buildStatus: ReadableOperationStatus = 'Ready';
+let sessionInfo: IRushSessionInfo | undefined;
 
-function updateOperations(operations): void {
-  for (const operation of operations) {
-    operationsByName.set(operation.name, operation);
-  }
-
-  for (const [operationName, operation] of operationsByName) {
-    // Do something with the operation
-  }
+function upsertOperations(ops: IOperationInfo[]): void {
+  for (const op of ops) operationsByName.set(op.name, op);
+}
+function upsertExecutionStates(states: IOperationExecutionState[]): void {
+  for (const st of states) executionStates.set(st.name, st);
 }
 
-function updateSessionInfo(sessionInfo: IRushSessionInfo): void {
-  const { actionName, repositoryIdentifier } = sessionInfo;
+function applyQueuedStates(states: IOperationExecutionState[] | undefined): void {
+  queuedStates.clear();
+  if (states) for (const st of states) queuedStates.set(st.name, st);
 }
 
-function updateBuildStatus(newStatus: ReadableOperationStatus): void {
-  buildStatus = newStatus;
-  // Render
+function effectiveStatus(name: string): string | undefined {
+  const exec = executionStates.get(name);
+  if (exec) return exec.status;
+  // Optionally fall back to last-known previous pass results if you track them.
+  return undefined;
 }
 
 socket.addEventListener('message', (ev) => {
-  const message: IWebSocketEventMessage = JSON.parse(ev.data);
-
-  switch (message.event) {
-    case 'before-execute': {
-      const { operations } = message;
-      updateOperations(operations);
-      updateBuildStatus('Executing');
-      break;
-    }
-
-    case 'status-change': {
-      const { operations } = message;
-      updateOperations(operations);
-      break;
-    }
-
-    case 'after-execute': {
-      const { status } = message;
-      updateBuildStatus(status);
-      break;
-    }
-
+  const msg: IWebSocketEventMessage = JSON.parse(ev.data as string);
+  switch (msg.event) {
     case 'sync': {
       operationsByName.clear();
-      const { operations, status, sessionInfo } = message;
-      updateOperations(operations);
-      updateSessionInfo(sessionInfo);
-      updateBuildStatus(status);
+      executionStates.clear();
+      upsertOperations(msg.operations);
+      upsertExecutionStates(msg.currentExecutionStates);
+      applyQueuedStates(msg.queuedStates);
+      sessionInfo = msg.sessionInfo;
+      buildStatus = msg.status;
       break;
     }
+    case 'sync-operations': {
+      // Static graph changed (e.g. enabled state toggles) – replace definitions only
+      operationsByName.clear();
+      upsertOperations(msg.operations);
+      break;
+    }
+    case 'sync-manager-state': {
+      // Manager state only – no operation arrays here
+      break;
+    }
+    case 'pass-queued': {
+      applyQueuedStates(msg.queuedStates);
+      break;
+    }
+    case 'before-execute': {
+      // Start of a pass: queuedStates become irrelevant until a new pass is queued
+      applyQueuedStates(undefined);
+      upsertExecutionStates(msg.executionStates);
+      buildStatus = 'Executing';
+      break;
+    }
+    case 'status-change': {
+      upsertExecutionStates(msg.executionStates);
+      break;
+    }
+    case 'after-execute': {
+      upsertExecutionStates(msg.executionStates);
+      buildStatus = msg.status;
+      // msg.lastExecutionResults (if present) can be captured for historical display
+      break;
+    }
+  }
+
+  // Example: iterate and render
+  for (const [name, info] of operationsByName) {
+    const state = executionStates.get(name);
+    const status = state?.status ?? '(pending)';
+    // renderRow(name, info, status, queuedStates.has(name));
   }
 });
 ```

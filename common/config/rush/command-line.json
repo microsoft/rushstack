@@ -487,6 +487,14 @@
       "associatedCommands": ["build", "rebuild", "test", "retest"]
     },
     {
+      "longName": "--port",
+      "parameterKind": "integer",
+      "argumentName": "PORT",
+      "description": "The port to use for the server",
+      "associatedPhases": [],
+      "associatedCommands": ["start"]
+    },
+    {
       "longName": "--update-snapshots",
       "parameterKind": "flag",
       "description": "Update Jest snapshots",

@@ -21,6 +21,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "compression": "~1.7.4",
     "cors": "~2.8.5",
@@ -30,7 +31,6 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@rushstack/terminal": "workspace:*",
     "eslint": "~9.25.1",
     "local-node-rig": "workspace:*",
     "@types/compression": "~1.7.2",

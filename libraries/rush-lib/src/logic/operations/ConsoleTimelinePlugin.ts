@@ -5,15 +5,12 @@ import type { ITerminal } from '@rushstack/terminal';
 import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
-import type {
-  ICreateOperationsContext,
-  IPhasedCommandPlugin,
-  PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { IExecutionResult } from './IOperationExecutionResult';
+import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
+import type { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
 import { OperationStatus } from './OperationStatus';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
+import type { Operation } from './Operation';
 
 const PLUGIN_NAME: 'ConsoleTimelinePlugin' = 'ConsoleTimelinePlugin';
 
@@ -54,16 +51,22 @@ export class ConsoleTimelinePlugin implements IPhasedCommandPlugin {
   }
 
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.afterExecuteOperations.tap(
-      PLUGIN_NAME,
-      (result: IExecutionResult, context: ICreateOperationsContext): void => {
-        _printTimeline({
-          terminal: this._terminal,
-          result,
-          cobuildConfiguration: context.cobuildConfiguration
-        });
-      }
-    );
+    hooks.executionManagerAsync.tap(PLUGIN_NAME, (executionManager, context) => {
+      executionManager.hooks.afterExecuteOperationsAsync.tap(
+        PLUGIN_NAME,
+        (
+          status: OperationStatus,
+          operationResults: ReadonlyMap<Operation, IOperationExecutionResult>
+        ): OperationStatus => {
+          _printTimeline({
+            terminal: this._terminal,
+            result: { status, operationResults },
+            cobuildConfiguration: context.cobuildConfiguration
+          });
+          return status;
+        }
+      );
+    });
   }
 }
 

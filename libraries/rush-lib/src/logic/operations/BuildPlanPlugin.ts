@@ -4,14 +4,16 @@
 import type { ITerminal } from '@rushstack/terminal';
 
 import type {
-  IExecuteOperationsContext,
+  IOperationExecutionManager,
+  IOperationExecutionManagerContext,
+  IOperationExecutionPassOptions,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { Operation } from './Operation';
 import { clusterOperations, type IOperationBuildCacheContext } from './CacheableOperationPlugin';
 import { DisjointSet } from '../cobuild/DisjointSet';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IConfigurableOperation } from './IOperationExecutionResult';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 
 const PLUGIN_NAME: 'BuildPlanPlugin' = 'BuildPlanPlugin';
@@ -41,13 +43,23 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
 
   public apply(hooks: PhasedCommandHooks): void {
     const terminal: ITerminal = this._terminal;
-    hooks.beforeExecuteOperations.tap(PLUGIN_NAME, createBuildPlan);
+
+    hooks.executionManagerAsync.tap(
+      PLUGIN_NAME,
+      (manager: IOperationExecutionManager, context: IOperationExecutionManagerContext) => {
+        manager.hooks.configureRun.tap(PLUGIN_NAME, (currentStates, lastStates, passOptions) => {
+          createBuildPlan(currentStates, passOptions, context);
+        });
+      }
+    );
 
     function createBuildPlan(
-      recordByOperation: Map<Operation, IOperationExecutionResult>,
-      context: IExecuteOperationsContext
+      recordByOperation: ReadonlyMap<Operation, IConfigurableOperation>,
+      passOptions: IOperationExecutionPassOptions,
+      context: IOperationExecutionManagerContext
     ): void {
-      const { projectConfigurations, inputsSnapshot } = context;
+      const { inputsSnapshot } = passOptions;
+      const { projectConfigurations } = context;
       const disjointSet: DisjointSet<Operation> = new DisjointSet<Operation>();
       const operations: Operation[] = [...recordByOperation.keys()];
       for (const operation of operations) {
