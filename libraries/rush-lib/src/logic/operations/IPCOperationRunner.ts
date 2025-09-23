@@ -26,7 +26,8 @@ export interface IIPCOperationRunnerOptions {
   phase: IPhase;
   project: RushConfigurationProject;
   name: string;
-  commandToRun: string;
+  initialCommand: string;
+  incrementalCommand: string | undefined;
   commandForHash: string;
   persist: boolean;
   requestRun: OperationRequestRunCallback;
@@ -55,7 +56,8 @@ export class IPCOperationRunner implements IOperationRunner {
   public readonly warningsAreAllowed: boolean;
 
   private readonly _rushProject: RushConfigurationProject;
-  private readonly _commandToRun: string;
+  private readonly _initialCommand: string;
+  private readonly _incrementalCommand: string | undefined;
   private readonly _commandForHash: string;
   private readonly _persist: boolean;
   private readonly _requestRun: OperationRequestRunCallback;
@@ -70,26 +72,33 @@ export class IPCOperationRunner implements IOperationRunner {
       options.phase.allowWarningsOnSuccess ||
       false;
     this._rushProject = options.project;
-    this._commandToRun = options.commandToRun;
+    this._initialCommand = options.initialCommand;
+    this._incrementalCommand = options.incrementalCommand;
     this._commandForHash = options.commandForHash;
 
     this._persist = options.persist;
     this._requestRun = options.requestRun;
   }
 
-  public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
+  public get isActive(): boolean {
+    return !!(this._ipcProcess && !this._ipcProcess.killed && typeof this._ipcProcess.exitCode !== 'number');
+  }
+
+  public async executeAsync(context: IOperationRunnerContext, lastState?: {}): Promise<OperationStatus> {
+    const commandToRun: string =
+      lastState && this._incrementalCommand ? this._incrementalCommand : this._initialCommand;
     return await context.runWithTerminalAsync(
       async (terminal: ITerminal, terminalProvider: ITerminalProvider): Promise<OperationStatus> => {
         let isConnected: boolean = false;
         if (!this._ipcProcess || typeof this._ipcProcess.exitCode === 'number') {
           // Run the operation
-          terminal.writeLine('Invoking: ' + this._commandToRun);
+          terminal.writeLine('Invoking: ' + commandToRun);
 
           const { rushConfiguration, projectFolder } = this._rushProject;
 
           const { environment: initialEnvironment } = context;
 
-          this._ipcProcess = Utilities.executeLifecycleCommandAsync(this._commandToRun, {
+          this._ipcProcess = Utilities.executeLifecycleCommandAsync(commandToRun, {
             rushConfiguration,
             workingDirectory: projectFolder,
             initCwd: rushConfiguration.commonTempFolder,
@@ -184,7 +193,7 @@ export class IPCOperationRunner implements IOperationRunner {
         });
 
         if (isConnected && !this._persist) {
-          await this.shutdownAsync();
+          await this.closeAsync();
         }
 
         // @rushstack/operation-graph does not currently have a concept of "Success with Warning"
@@ -203,7 +212,7 @@ export class IPCOperationRunner implements IOperationRunner {
     return this._commandForHash;
   }
 
-  public async shutdownAsync(): Promise<void> {
+  public async closeAsync(): Promise<void> {
     const { _ipcProcess: subProcess } = this;
     if (!subProcess) {
       return;

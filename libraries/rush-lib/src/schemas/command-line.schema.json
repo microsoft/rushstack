@@ -234,6 +234,11 @@
                   "items": {
                     "type": "string"
                   }
+                },
+                "includeAllProjectsInWatchGraph": {
+                  "title": "Include All Projects In Watch Graph",
+                  "description": "If true, when entering watch mode Rush will construct the operation graph including every project in the repository (respecting phase selection), but will initially enable only those operations whose projects were selected by the user's CLI project selection parameters. Other projects will appear disabled until they change or become required by an enabled project's dependency graph. This can improve iteration by avoiding a full graph rebuild when broadening the selection mid-session.",
+                  "type": "boolean"
                 }
               }
             },

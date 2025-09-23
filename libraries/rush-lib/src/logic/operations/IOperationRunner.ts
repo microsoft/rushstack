@@ -112,12 +112,27 @@ export interface IOperationRunner {
   readonly isNoOp?: boolean;
 
   /**
-   * Method to be executed for the operation.
+   * If true, this runner currently owns some kind of active resource (e.g. a service or a watch process).
+   * This can be used to determine if the operation is "in progress" even if it is not currently executing.
+   * If the runner supports this property, it should update it as appropriate during execution.
+   * The property is optional to avoid breaking existing implementations of IOperationRunner.
    */
-  executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
+  readonly isActive?: boolean;
+
+  /**
+   * Method to be executed for the operation.
+   * @param context - The context object containing information about the execution environment.
+   * @param lastState - The last execution result of this operation, if any.
+   */
+  executeAsync(context: IOperationRunnerContext, lastState?: {}): Promise<OperationStatus>;
 
   /**
    * Return a hash of the configuration that affects the operation.
    */
   getConfigHash(): string;
+
+  /**
+   * If this runner performs any background work to optimize future runs, this method will clean it up.
+   */
+  closeAsync?(): Promise<void>;
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
 import os from 'node:os';
@@ -45,7 +45,6 @@ export interface IOperationGraphOptions {
   quietMode: boolean;
   debugMode: boolean;
   parallelism: number;
-  allowOversubscription: boolean;
   destinations: Iterable<TerminalWritable>;
   /** Optional maximum allowed parallelism. Defaults to os.availableParallelism(). */
   maxParallelism?: number;
@@ -155,8 +154,8 @@ export class OperationGraph implements IOperationGraph {
 
   private _terminalSplitter: SplitterTransform;
   private _idleTimeout: NodeJS.Timeout | undefined = undefined;
-  /** Tracks if a manager state change notification has been scheduled for next tick. */
-  private _managerStateChangeScheduled: boolean = false;
+  /** Tracks if a graph state change notification has been scheduled for next tick. */
+  private _graphStateChangeScheduled: boolean = false;
   private _status: OperationStatus = OperationStatus.Ready;
 
   public constructor(operations: Set<Operation>, options: IOperationGraphOptions) {
@@ -271,7 +270,7 @@ export class OperationGraph implements IOperationGraph {
     }
 
     if (changed) {
-      // Notify via dedicated hook (do not schedule generic manager state change)
+      // Notify via dedicated hook (do not schedule generic graph state change)
       this.hooks.onEnableStatesChanged.call(changedOperations);
     }
     return changed;
@@ -318,19 +317,6 @@ export class OperationGraph implements IOperationGraph {
     const oldValue: boolean = this.pauseNextIteration;
     if (value !== oldValue) {
       this._options.pauseNextIteration = value;
-      this._scheduleManagerStateChanged();
-
-      this._setIdleTimeout();
-    }
-  }
-
-  public get allowOversubscription(): boolean {
-    return this._options.allowOversubscription;
-  }
-  public set allowOversubscription(value: boolean) {
-    const oldValue: boolean = this.allowOversubscription;
-    if (value !== oldValue) {
-      this._options.allowOversubscription = value;
       this._scheduleManagerStateChanged();
 
       this._setIdleTimeout();
@@ -536,7 +522,7 @@ export class OperationGraph implements IOperationGraph {
     // Sort the operations by name to ensure consistency and readability.
     const sortedOperations: Operation[] = Array.from(this.operations).sort(sortOperationsByName);
 
-    const manager: OperationGraph = this;
+    const graph: OperationGraph = this;
 
     function createEnvironmentForOperation(record: OperationExecutionRecord): IEnvironment {
       return hooks.createEnvironmentForOperation.call({ ...process.env }, record);
@@ -552,10 +538,10 @@ export class OperationGraph implements IOperationGraph {
       onOperationStateChanged: undefined,
       createEnvironment: createEnvironmentForOperation,
       get debugMode(): boolean {
-        return manager.debugMode;
+        return graph.debugMode;
       },
       get quietMode(): boolean {
-        return manager.quietMode;
+        return graph.quietMode;
       },
       records: new Map(),
       promise: undefined,
@@ -658,7 +644,7 @@ export class OperationGraph implements IOperationGraph {
 
         terminal.writeStdoutLine('\n' + leftPart + middlePart + rightPart);
 
-        if (!manager.quietMode) {
+        if (!graph.quietMode) {
           terminal.writeStdoutLine('');
         }
       }
@@ -671,12 +657,12 @@ export class OperationGraph implements IOperationGraph {
    * ordering guarantees that the notification occurs after the initiating state changes are fully applied.
    */
   private _scheduleManagerStateChanged(): void {
-    if (this._managerStateChangeScheduled || this.abortController.signal.aborted) {
+    if (this._graphStateChangeScheduled || this.abortController.signal.aborted) {
       return;
     }
-    this._managerStateChangeScheduled = true;
+    this._graphStateChangeScheduled = true;
     process.nextTick(() => {
-      this._managerStateChangeScheduled = false;
+      this._graphStateChangeScheduled = false;
       this.hooks.onGraphStateChanged.call(this);
     });
   }
@@ -792,7 +778,6 @@ export class OperationGraph implements IOperationGraph {
             }
           },
           {
-            allowOversubscription: this.allowOversubscription,
             concurrency: maxParallelism,
             weighted: true
           }

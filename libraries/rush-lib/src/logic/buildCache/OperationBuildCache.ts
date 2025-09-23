@@ -13,7 +13,7 @@ import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import type { IOperationExecutionResult } from '../operations/IOperationExecutionResult';
+import type { IBaseOperationExecutionResult } from '../operations/IOperationExecutionResult';
 
 /**
  * @internal
@@ -108,7 +108,7 @@ export class OperationBuildCache {
   }
 
   public static forOperation(
-    executionResult: IOperationExecutionResult,
+    executionResult: IBaseOperationExecutionResult,
     options: IOperationBuildCacheOptions
   ): OperationBuildCache {
     const outputFolders: string[] = [...(executionResult.operation.settings?.outputFolderNames ?? [])];

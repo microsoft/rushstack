@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import path from 'node:path';
 import { MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { JsonFile } from '@rushstack/node-core-library';
-import { StreamCollator } from '@rushstack/stream-collator';
 import { BuildPlanPlugin } from '../BuildPlanPlugin';
 import {
   type ICreateOperationsContext,
-  type IExecuteOperationsContext,
   PhasedCommandHooks
 } from '../../../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraphContext as IOperationExecutionManagerContext } from '../../../pluginFramework/PhasedCommandHooks';
 import type { Operation } from '../Operation';
 import { RushConfiguration } from '../../../api/RushConfiguration';
 import {
@@ -17,14 +17,13 @@ import {
   type IPhase,
   type IPhasedCommandConfig
 } from '../../../api/CommandLineConfiguration';
-import { OperationExecutionRecord } from '../OperationExecutionRecord';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import { MockOperationRunner } from './MockOperationRunner';
-import path from 'node:path';
 import type { ICommandLineJson } from '../../../api/CommandLineJson';
 import type { IInputsSnapshot } from '../../incremental/InputsSnapshot';
+import { OperationGraph } from '../OperationGraph';
 
 describe(BuildPlanPlugin.name, () => {
   const rushJsonFile: string = path.resolve(__dirname, `../../test/workspaceRepo/rush.json`);
@@ -37,9 +36,6 @@ describe(BuildPlanPlugin.name, () => {
   let stringBufferTerminalProvider!: StringBufferTerminalProvider;
   let terminal!: Terminal;
   const mockStreamWritable: MockWritable = new MockWritable();
-  const streamCollator = new StreamCollator({
-    destination: mockStreamWritable
-  });
   beforeEach(() => {
     stringBufferTerminalProvider = new StringBufferTerminalProvider();
     terminal = new Terminal(stringBufferTerminalProvider);
@@ -67,76 +63,81 @@ describe(BuildPlanPlugin.name, () => {
   }
 
   async function testCreateOperationsAsync(
+    hooks: PhasedCommandHooks,
     phaseSelection: Set<IPhase>,
     projectSelection: Set<RushConfigurationProject>,
     changedProjects: Set<RushConfigurationProject>
-  ): Promise<Set<Operation>> {
-    const hooks: PhasedCommandHooks = new PhasedCommandHooks();
-    // Apply the plugin being tested
-    new PhasedOperationPlugin().apply(hooks);
+  ): Promise<OperationGraph> {
     // Add mock runners for included operations.
-    hooks.createOperations.tap('MockOperationRunnerPlugin', createMockRunner);
+    hooks.createOperationsAsync.tap('MockOperationRunnerPlugin', createMockRunner);
 
-    const context: Pick<
+    const createOperationsContext: Pick<
       ICreateOperationsContext,
-      | 'phaseOriginal'
-      | 'phaseSelection'
-      | 'projectSelection'
-      | 'projectsInUnknownState'
-      | 'projectConfigurations'
+      'phaseSelection' | 'projectSelection' | 'projectConfigurations'
     > = {
-      phaseOriginal: phaseSelection,
       phaseSelection,
       projectSelection,
-      projectsInUnknownState: changedProjects,
       projectConfigurations: new Map()
     };
-    const operations: Set<Operation> = await hooks.createOperations.promise(
+    const operations: Set<Operation> = await hooks.createOperationsAsync.promise(
       new Set(),
-      context as ICreateOperationsContext
+      createOperationsContext as ICreateOperationsContext
     );
 
-    return operations;
+    const graph: OperationGraph = new OperationGraph(operations, {
+      debugMode: false,
+      quietMode: true,
+      destinations: [mockStreamWritable],
+      parallelism: 1,
+      abortController: new AbortController()
+    });
+
+    const operationManagerContext: Pick<
+      IOperationExecutionManagerContext,
+      'projectConfigurations' | 'phaseSelection' | 'projectSelection'
+    > = {
+      projectConfigurations: new Map(),
+      phaseSelection,
+      projectSelection
+    };
+
+    await hooks.onGraphCreatedAsync.promise(
+      graph,
+      operationManagerContext as IOperationExecutionManagerContext
+    );
+
+    return graph;
   }
 
   describe('build plan debugging', () => {
     it('should generate a build plan', async () => {
       const hooks: PhasedCommandHooks = new PhasedCommandHooks();
-
+      new PhasedOperationPlugin().apply(hooks);
+      // Apply the plugin being tested
       new BuildPlanPlugin(terminal).apply(hooks);
-      const inputsSnapshot: Pick<IInputsSnapshot, 'getTrackedFileHashesForOperation'> = {
-        getTrackedFileHashesForOperation() {
-          return new Map();
-        }
-      };
-      const context: Pick<IExecuteOperationsContext, 'inputsSnapshot' | 'projectConfigurations'> = {
-        inputsSnapshot: inputsSnapshot as unknown as IInputsSnapshot,
-        projectConfigurations: new Map()
-      };
       const buildCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(
         'build'
       )! as IPhasedCommandConfig;
 
-      const operationMap = new Map();
-
-      const operations = await testCreateOperationsAsync(
+      const graph = await testCreateOperationsAsync(
+        hooks,
         buildCommand.phases,
         new Set(rushConfiguration.projects),
         new Set(rushConfiguration.projects)
       );
-      operations.forEach((operation) => {
-        operationMap.set(
-          operation,
-          new OperationExecutionRecord(operation, {
-            debugMode: false,
-            quietMode: true,
-            streamCollator,
-            inputsSnapshot: undefined
-          })
-        );
-      });
 
-      await hooks.beforeExecuteOperations.promise(operationMap, context as IExecuteOperationsContext);
+      const inputsSnapshot: Pick<
+        IInputsSnapshot,
+        'getTrackedFileHashesForOperation' | 'getOperationOwnStateHash'
+      > = {
+        getTrackedFileHashesForOperation() {
+          return new Map();
+        },
+        getOperationOwnStateHash() {
+          return '0';
+        }
+      };
+      await graph.executeAsync({ inputsSnapshot: inputsSnapshot as IInputsSnapshot });
 
       expect(stringBufferTerminalProvider.getOutput({ normalizeSpecialCharacters: false })).toMatchSnapshot();
     });

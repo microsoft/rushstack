@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OperationExecutionManager Cobuild logging logs cobuilt operations correctly with --timeline option 1`] = `
+exports[`OperationGraph Cobuild logging logs cobuilt operations correctly with --timeline option 1`] = `
 Array [
   Object {
     "kind": "O",
@@ -160,7 +160,7 @@ Array [
 ]
 `;
 
-exports[`OperationExecutionManager Cobuild logging logs warnings correctly with --timeline option 1`] = `
+exports[`OperationGraph Cobuild logging logs warnings correctly with --timeline option 1`] = `
 Array [
   Object {
     "kind": "O",
@@ -352,7 +352,7 @@ Array [
 ]
 `;
 
-exports[`OperationExecutionManager Error logging printedStderrAfterError 1`] = `
+exports[`OperationGraph Error logging printedStderrAfterError 1`] = `
 Array [
   Object {
     "kind": "O",
@@ -440,7 +440,7 @@ Array [
 ]
 `;
 
-exports[`OperationExecutionManager Error logging printedStdoutAfterErrorWithEmptyStderr 1`] = `
+exports[`OperationGraph Error logging printedStdoutAfterErrorWithEmptyStderr 1`] = `
 Array [
   Object {
     "kind": "O",
@@ -528,7 +528,7 @@ Array [
 ]
 `;
 
-exports[`OperationExecutionManager Warning logging Fail on warning Logs warnings correctly 1`] = `
+exports[`OperationGraph Warning logging Fail on warning Logs warnings correctly 1`] = `
 Array [
   Object {
     "kind": "O",
@@ -616,7 +616,7 @@ Array [
 ]
 `;
 
-exports[`OperationExecutionManager Warning logging Success on warning Logs warnings correctly 1`] = `
+exports[`OperationGraph Warning logging Success on warning Logs warnings correctly 1`] = `
 Array [
   Object {
     "kind": "O",
@@ -698,7 +698,7 @@ Array [
 ]
 `;
 
-exports[`OperationExecutionManager Warning logging Success on warning logs warnings correctly with --timeline option 1`] = `
+exports[`OperationGraph Warning logging Success on warning logs warnings correctly with --timeline option 1`] = `
 Array [
   Object {
     "kind": "O",

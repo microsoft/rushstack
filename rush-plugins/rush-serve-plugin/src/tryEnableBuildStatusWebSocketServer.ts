@@ -13,24 +13,28 @@ import {
   type IOperationExecutionResult,
   OperationStatus,
   type ILogFilePaths,
-  type ICreateOperationsContext,
-  type IExecutionResult,
   type RushConfiguration,
-  type IExecuteOperationsContext
+  type IOperationGraph,
+  type IOperationGraphIterationOptions
 } from '@rushstack/rush-sdk';
+import { type ITerminalChunk, TerminalChunkKind, TerminalWritable } from '@rushstack/terminal';
 
 import type {
   ReadableOperationStatus,
   ILogFileURLs,
   IOperationInfo,
+  IOperationExecutionState,
   IWebSocketEventMessage,
   IRushSessionInfo,
   IWebSocketSyncEventMessage,
-  OperationEnabledState,
   IWebSocketBeforeExecuteEventMessage,
   IWebSocketAfterExecuteEventMessage,
   IWebSocketBatchStatusChangeEventMessage,
-  IWebSocketCommandMessage
+  IWebSocketCommandMessage,
+  IWebSocketPassQueuedEventMessage,
+  IWebSocketSyncOperationsEventMessage,
+  IWebSocketTerminalChunkEventMessage,
+  IWebSocketSyncGraphStateEventMessage
 } from './api.types';
 import { PLUGIN_NAME } from './constants';
 import type { IPhasedCommandHandlerOptions } from './types';
@@ -67,6 +71,27 @@ export function getLogServePathForProject(logServePath: string, packageName: str
   return `${logServePath}/${packageName}`;
 }
 
+export class WebSocketTerminalWritable extends TerminalWritable {
+  private _webSockets: ReadonlySet<WebSocket>;
+
+  public constructor(webSockets: ReadonlySet<WebSocket>) {
+    super();
+    this._webSockets = webSockets;
+  }
+
+  protected override onWriteChunk(chunk: ITerminalChunk): void {
+    const message: IWebSocketTerminalChunkEventMessage = {
+      event: 'terminal-chunk',
+      kind: chunk.kind === TerminalChunkKind.Stderr ? 'stderr' : 'stdout',
+      text: chunk.text
+    };
+    const stringifiedMessage: string = JSON.stringify(message);
+    for (const ws of this._webSockets) {
+      ws.send(stringifiedMessage);
+    }
+  }
+}
+
 /**
  * If the `buildStatusWebSocketPath` option is configured, this function returns a `WebSocketServerUpgrader` callback
  * that can be used to add a WebSocket server to the HTTPS server. The WebSocket server sends messages
@@ -83,7 +108,6 @@ export function tryEnableBuildStatusWebSocketServer(
 
   const operationStates: Map<string, IOperationExecutionResult> = new Map();
   let buildStatus: ReadableOperationStatus = 'Ready';
-  let executionAbortController: AbortController | undefined;
 
   const webSockets: Set<WebSocket> = new Set();
 
@@ -129,8 +153,7 @@ export function tryEnableBuildStatusWebSocketServer(
   /**
    * Maps the internal Rush record down to a subset that is JSON-friendly and human readable.
    */
-  function convertToOperationInfo(record: IOperationExecutionResult): IOperationInfo | undefined {
-    const { operation } = record;
+  function convertToOperationInfo(operation: Operation): IOperationInfo | undefined {
     const { name, associatedPhase, associatedProject, runner, enabled } = operation;
 
     if (!name || !runner) {
@@ -144,32 +167,58 @@ export function tryEnableBuildStatusWebSocketServer(
       dependencies: Array.from(operation.dependencies, (dep) => dep.name),
       packageName,
       phaseName: associatedPhase.name,
-
-      enabled,
+      enabled:
+        enabled === false
+          ? 'never'
+          : enabled === 'ignore-dependency-changes'
+            ? 'ignore-dependency-changes'
+            : 'affected',
       silent: runner.silent,
-      noop: !!runner.isNoOp,
+      noop: !!runner.isNoOp
+    };
+  }
 
+  function convertToExecutionState(record: IOperationExecutionResult): IOperationExecutionState | undefined {
+    const { operation } = record;
+    const { name, associatedProject, runner } = operation;
+    if (!name || !runner) return;
+    const { packageName } = associatedProject;
+    return {
+      name,
+      runInThisIteration: record.enabled,
+      isActive: !!runner.isActive,
       status: readableStatusFromStatus[record.status],
       startTime: record.stopwatch.startTime,
       endTime: record.stopwatch.endTime,
-
       logFileURLs: convertToLogFileUrls(record.logFilePaths, packageName)
     };
   }
 
-  function convertToOperationInfoArray(records: Iterable<IOperationExecutionResult>): IOperationInfo[] {
-    const operations: IOperationInfo[] = [];
+  function convertToOperationInfoArray(operations: Iterable<Operation>): IOperationInfo[] {
+    const infos: IOperationInfo[] = [];
 
-    for (const record of records) {
-      const info: IOperationInfo | undefined = convertToOperationInfo(record);
+    for (const operation of operations) {
+      const info: IOperationInfo | undefined = convertToOperationInfo(operation);
 
       if (info) {
-        operations.push(info);
+        infos.push(info);
       }
     }
 
-    Sort.sortBy(operations, (x) => x.name);
-    return operations;
+    Sort.sortBy(infos, (x) => x.name);
+    return infos;
+  }
+
+  function convertToExecutionStateArray(
+    records: Iterable<IOperationExecutionResult>
+  ): IOperationExecutionState[] {
+    const states: IOperationExecutionState[] = [];
+    for (const record of records) {
+      const state: IOperationExecutionState | undefined = convertToExecutionState(record);
+      if (state) states.push(state);
+    }
+    Sort.sortBy(states, (x) => x.name);
+    return states;
   }
 
   function sendWebSocketMessage(message: IWebSocketEventMessage): void {
@@ -185,115 +234,145 @@ export function tryEnableBuildStatusWebSocketServer(
     repositoryIdentifier: getRepositoryIdentifier(options.rushConfiguration)
   };
 
+  let lastGraph: IOperationGraph | undefined;
+  // Operations that have been queued for an upcoming execution iteration (captured at queue time)
+  let queuedStates: IOperationExecutionResult[] | undefined;
+
+  function getGraphStateSnapshot(): IWebSocketSyncEventMessage['graphState'] | undefined {
+    if (!lastGraph) return;
+    return {
+      parallelism: lastGraph.parallelism,
+      debugMode: lastGraph.debugMode,
+      verbose: !lastGraph.quietMode,
+      pauseNextIteration: lastGraph.pauseNextIteration,
+      status: buildStatus,
+      hasScheduledIteration: lastGraph.hasScheduledIteration
+    };
+  }
+
   function sendSyncMessage(webSocket: WebSocket): void {
+    const records: Set<IOperationExecutionResult> = new Set(operationStates?.values() ?? []);
     const syncMessage: IWebSocketSyncEventMessage = {
       event: 'sync',
-      operations: convertToOperationInfoArray(operationStates?.values() ?? []),
+      operations: convertToOperationInfoArray(lastGraph?.operations ?? []),
+      currentExecutionStates: convertToExecutionStateArray(records),
+      queuedStates: queuedStates ? convertToExecutionStateArray(queuedStates) : undefined,
       sessionInfo,
-      status: buildStatus
+      status: buildStatus,
+      graphState: getGraphStateSnapshot() ?? {
+        parallelism: 1,
+        debugMode: false,
+        verbose: true,
+        pauseNextIteration: false,
+        status: buildStatus,
+        hasScheduledIteration: false
+      },
+      lastExecutionResults: lastGraph
+        ? convertToExecutionStateArray(lastGraph.lastExecutionResults.values())
+        : undefined
     };
-
     webSocket.send(JSON.stringify(syncMessage));
   }
 
-  const { hooks } = command;
+  command.hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph, context) => {
+    lastGraph = graph;
+    const { hooks } = graph;
 
-  let invalidateOperation: ((operation: Operation, reason: string) => void) | undefined;
+    graph.addTerminalDestination(new WebSocketTerminalWritable(webSockets));
 
-  const operationEnabledStates: Map<string, OperationEnabledState> = new Map();
-  hooks.createOperations.tap(
-    {
-      name: PLUGIN_NAME,
-      stage: Infinity
-    },
-    (operations: Set<Operation>, context: ICreateOperationsContext) => {
-      const potentiallyAffectedOperations: Set<Operation> = new Set();
-      for (const operation of operations) {
-        const { associatedProject } = operation;
-        if (context.projectsInUnknownState.has(associatedProject)) {
-          potentiallyAffectedOperations.add(operation);
-        }
-      }
-      for (const operation of potentiallyAffectedOperations) {
-        for (const consumer of operation.consumers) {
-          potentiallyAffectedOperations.add(consumer);
+    hooks.beforeExecuteIterationAsync.tap(
+      PLUGIN_NAME,
+      (
+        operationsToExecute: ReadonlyMap<Operation, IOperationExecutionResult>,
+        iterationOptions: IOperationGraphIterationOptions
+      ): void => {
+        // Clear queuedStates when the iteration begins executing
+        queuedStates = undefined;
+        for (const [operation, result] of operationsToExecute) {
+          operationStates.set(operation.name, result);
         }
 
-        const { name } = operation;
-        const expectedState: OperationEnabledState | undefined = operationEnabledStates.get(name);
-        switch (expectedState) {
-          case 'affected':
-            operation.enabled = true;
-            break;
-          case 'never':
-            operation.enabled = false;
-            break;
-          case 'changed':
-            operation.enabled = context.projectsInUnknownState.has(operation.associatedProject);
-            break;
-          case 'default':
-          case undefined:
-            // Use the original value.
-            break;
-        }
+        const beforeExecuteMessage: IWebSocketBeforeExecuteEventMessage = {
+          event: 'before-execute',
+          executionStates: convertToExecutionStateArray(operationsToExecute.values())
+        };
+        buildStatus = 'Executing';
+        sendWebSocketMessage(beforeExecuteMessage);
       }
+    );
 
-      invalidateOperation = context.invalidateOperation;
-
-      return operations;
-    }
-  );
-
-  hooks.beforeExecuteOperations.tap(
-    PLUGIN_NAME,
-    (
-      operationsToExecute: Map<Operation, IOperationExecutionResult>,
-      context: IExecuteOperationsContext
-    ): void => {
-      for (const [operation, result] of operationsToExecute) {
-        operationStates.set(operation.name, result);
+    hooks.afterExecuteIterationAsync.tap(
+      PLUGIN_NAME,
+      (
+        status: OperationStatus,
+        operationResults: ReadonlyMap<Operation, IOperationExecutionResult>
+      ): OperationStatus => {
+        buildStatus = readableStatusFromStatus[status];
+        const states: IOperationExecutionState[] = convertToExecutionStateArray(
+          operationResults.values() ?? []
+        );
+        const afterExecuteMessage: IWebSocketAfterExecuteEventMessage = {
+          event: 'after-execute',
+          executionStates: states,
+          status: buildStatus,
+          lastExecutionResults: lastGraph
+            ? convertToExecutionStateArray(lastGraph.lastExecutionResults.values())
+            : undefined
+        };
+        sendWebSocketMessage(afterExecuteMessage);
+        return status;
       }
+    );
 
-      executionAbortController = context.abortController;
+    // Batched operation state updates
+    hooks.onExecutionStatesUpdated.tap(
+      PLUGIN_NAME,
+      (records: ReadonlySet<IOperationExecutionResult>): void => {
+        const states: IOperationExecutionState[] = convertToExecutionStateArray(records.values());
+        const message: IWebSocketBatchStatusChangeEventMessage = {
+          event: 'status-change',
+          executionStates: states
+        };
+        sendWebSocketMessage(message);
+      }
+    );
 
-      const beforeExecuteMessage: IWebSocketBeforeExecuteEventMessage = {
-        event: 'before-execute',
-        operations: convertToOperationInfoArray(operationsToExecute.values())
+    // Capture queued operations for next iteration
+    hooks.onIterationScheduled.tap(
+      PLUGIN_NAME,
+      (queuedMap: ReadonlyMap<Operation, IOperationExecutionResult>): void => {
+        queuedStates = Array.from(queuedMap.values());
+        const message: IWebSocketPassQueuedEventMessage = {
+          event: 'iteration-scheduled',
+          queuedStates: convertToExecutionStateArray(queuedStates)
+        };
+        sendWebSocketMessage(message);
+      }
+    );
+
+    // Broadcast graph state changes
+    hooks.onGraphStateChanged.tap(PLUGIN_NAME, () => {
+      const graphState: IWebSocketSyncEventMessage['graphState'] | undefined = getGraphStateSnapshot();
+      if (graphState) {
+        const message: IWebSocketSyncGraphStateEventMessage = {
+          event: 'sync-graph-state',
+          graphState
+        };
+        sendWebSocketMessage(message);
+        // Execution state may depend on graph properties, so broadcast states.
+      }
+    });
+
+    // Broadcast enabled state changes (full operations sync for simplicity)
+    // When enable states change, emit a lightweight sync-operations message conveying the static graph changes.
+    // The client will preserve existing dynamic state arrays.
+    hooks.onEnableStatesChanged.tap(PLUGIN_NAME, () => {
+      const operationsMessage: IWebSocketSyncOperationsEventMessage = {
+        event: 'sync-operations',
+        operations: convertToOperationInfoArray(lastGraph?.operations ?? [])
       };
-      buildStatus = 'Executing';
-      sendWebSocketMessage(beforeExecuteMessage);
-    }
-  );
-
-  hooks.afterExecuteOperations.tap(PLUGIN_NAME, (result: IExecutionResult): void => {
-    buildStatus = readableStatusFromStatus[result.status];
-    const infos: IOperationInfo[] = convertToOperationInfoArray(result.operationResults.values() ?? []);
-    const afterExecuteMessage: IWebSocketAfterExecuteEventMessage = {
-      event: 'after-execute',
-      operations: infos,
-      status: buildStatus
-    };
-    sendWebSocketMessage(afterExecuteMessage);
-  });
-
-  const pendingStatusChanges: Map<Operation, IOperationExecutionResult> = new Map();
-  let statusChangeTimeout: NodeJS.Immediate | undefined;
-  function sendBatchedStatusChange(): void {
-    statusChangeTimeout = undefined;
-    const infos: IOperationInfo[] = convertToOperationInfoArray(pendingStatusChanges.values());
-    pendingStatusChanges.clear();
-    const message: IWebSocketBatchStatusChangeEventMessage = {
-      event: 'status-change',
-      operations: infos
-    };
-    sendWebSocketMessage(message);
-  }
-
-  hooks.onOperationStatusChanged.tap(PLUGIN_NAME, (record: IOperationExecutionResult): void => {
-    pendingStatusChanges.set(record.operation, record);
-    if (!statusChangeTimeout) {
-      statusChangeTimeout = setImmediate(sendBatchedStatusChange);
-    }
+      sendWebSocketMessage(operationsMessage);
+    });
   });
 
   const connector: WebSocketServerUpgrader = (server: Http2SecureServer) => {
@@ -301,10 +380,35 @@ export function tryEnableBuildStatusWebSocketServer(
       server: server as unknown as HTTPSecureServer,
       path: buildStatusWebSocketPath
     });
+
+    command.sessionAbortController.signal.addEventListener(
+      'abort',
+      () => {
+        wss.close();
+        webSockets.forEach((ws) => ws.close());
+      },
+      { once: true }
+    );
+
+    function namesToOperations(operationNames?: string[]): Operation[] | undefined {
+      if (!operationNames || !lastGraph) {
+        return;
+      }
+
+      const operationNameSet: Set<string> = new Set(operationNames);
+      const namedOperations: Operation[] = [];
+      for (const operation of lastGraph.operations) {
+        if (operationNameSet.has(operation.name)) {
+          namedOperations.push(operation);
+        }
+      }
+      return namedOperations;
+    }
+
     wss.addListener('connection', (webSocket: WebSocket): void => {
       webSockets.add(webSocket);
 
-      sendSyncMessage(webSocket);
+      sendSyncMessage(webSocket); // includes settings
 
       webSocket.addEventListener('message', (ev: MessageEvent) => {
         const parsedMessage: IWebSocketCommandMessage = JSON.parse(ev.data.toString());
@@ -315,31 +419,79 @@ export function tryEnableBuildStatusWebSocketServer(
           }
 
           case 'set-enabled-states': {
-            const { enabledStateByOperationName } = parsedMessage;
-            for (const [name, state] of Object.entries(enabledStateByOperationName)) {
-              operationEnabledStates.set(name, state);
+            if (lastGraph) {
+              const { operationNames, targetState, mode } = parsedMessage;
+              const operations: Operation[] | undefined = namesToOperations(operationNames);
+              if (operations && operations.length) {
+                lastGraph.setEnabledStates(
+                  operations,
+                  targetState === 'ignore-dependency-changes' ? targetState : targetState !== 'never',
+                  mode
+                );
+              }
             }
             break;
           }
 
           case 'invalidate': {
             const { operationNames } = parsedMessage;
-            const operationNameSet: Set<string> = new Set(operationNames);
-            if (invalidateOperation) {
-              for (const operationName of operationNameSet) {
-                const operationState: IOperationExecutionResult | undefined =
-                  operationStates.get(operationName);
-                if (operationState) {
-                  invalidateOperation(operationState.operation, 'Invalidated via WebSocket');
-                  operationStates.delete(operationName);
-                }
-              }
+            if (lastGraph) {
+              const operations: Iterable<Operation> | undefined = namesToOperations(operationNames);
+              lastGraph.invalidateOperations(operations, 'manual-invalidation');
             }
             break;
           }
 
           case 'abort-execution': {
-            executionAbortController?.abort();
+            void lastGraph?.abortCurrentIterationAsync();
+            break;
+          }
+
+          case 'close-runners': {
+            const { operationNames } = parsedMessage;
+            if (lastGraph) {
+              const operations: Operation[] | undefined = namesToOperations(operationNames);
+              void lastGraph.closeRunnersAsync(operations);
+            }
+            break;
+          }
+
+          case 'execute': {
+            if (lastGraph) {
+              const definedExecutionManager: IOperationGraph = lastGraph;
+              void definedExecutionManager.scheduleIterationAsync({}).then(() => {
+                return definedExecutionManager.executeScheduledIterationAsync();
+              });
+            }
+            break;
+          }
+
+          case 'set-debug': {
+            if (lastGraph) lastGraph.debugMode = !!parsedMessage.value;
+            break;
+          }
+
+          case 'set-verbose': {
+            if (lastGraph) lastGraph.quietMode = !parsedMessage.value; // invert
+            break;
+          }
+
+          case 'set-pause-next-iteration': {
+            if (lastGraph && typeof parsedMessage.value === 'boolean') {
+              lastGraph.pauseNextIteration = parsedMessage.value;
+            }
+            break;
+          }
+
+          case 'set-parallelism': {
+            if (lastGraph && typeof parsedMessage.parallelism === 'number') {
+              lastGraph.parallelism = parsedMessage.parallelism;
+            }
+            break;
+          }
+
+          case 'abort-session': {
+            command.sessionAbortController.abort();
             break;
           }
 

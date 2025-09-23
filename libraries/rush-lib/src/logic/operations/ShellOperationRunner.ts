@@ -18,7 +18,8 @@ export interface IShellOperationRunnerOptions {
   phase: IPhase;
   rushProject: RushConfigurationProject;
   displayName: string;
-  commandToRun: string;
+  initialCommand: string;
+  incrementalCommand: string | undefined;
   commandForHash: string;
 }
 
@@ -34,13 +35,14 @@ export class ShellOperationRunner implements IOperationRunner {
   public readonly silent: boolean = false;
   public readonly cacheable: boolean = true;
   public readonly warningsAreAllowed: boolean;
-  public readonly commandToRun: string;
   /**
    * The creator is expected to use a different runner if the command is known to be a noop.
    */
   public readonly isNoOp: boolean = false;
 
   private readonly _commandForHash: string;
+  private readonly _initialCommand: string;
+  private readonly _incrementalCommand: string | undefined;
 
   private readonly _rushProject: RushConfigurationProject;
 
@@ -51,13 +53,14 @@ export class ShellOperationRunner implements IOperationRunner {
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
     this._rushProject = options.rushProject;
-    this.commandToRun = options.commandToRun;
+    this._initialCommand = options.initialCommand;
+    this._incrementalCommand = options.incrementalCommand;
     this._commandForHash = options.commandForHash;
   }
 
-  public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
+  public async executeAsync(context: IOperationRunnerContext, lastState?: {}): Promise<OperationStatus> {
     try {
-      return await this._executeAsync(context);
+      return await this._executeAsync(context, lastState);
     } catch (error) {
       throw new OperationError('executing', (error as Error).message);
     }
@@ -67,31 +70,30 @@ export class ShellOperationRunner implements IOperationRunner {
     return this._commandForHash;
   }
 
-  private async _executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
+  private async _executeAsync(context: IOperationRunnerContext, lastState?: {}): Promise<OperationStatus> {
     return await context.runWithTerminalAsync(
       async (terminal: ITerminal, terminalProvider: ITerminalProvider) => {
         let hasWarningOrError: boolean = false;
 
+        const commandToRun: string = (lastState && this._incrementalCommand) || this._initialCommand;
+
         // Run the operation
-        terminal.writeLine(`Invoking: ${this.commandToRun}`);
+        terminal.writeLine(`Invoking (${lastState ? 'incremental' : 'initial'}): ${commandToRun}`);
 
         const { rushConfiguration, projectFolder } = this._rushProject;
 
         const { environment: initialEnvironment } = context;
 
-        const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
-          this.commandToRun,
-          {
-            rushConfiguration: rushConfiguration,
-            workingDirectory: projectFolder,
-            initCwd: rushConfiguration.commonTempFolder,
-            handleOutput: true,
-            environmentPathOptions: {
-              includeProjectBin: true
-            },
-            initialEnvironment
-          }
-        );
+        const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(commandToRun, {
+          rushConfiguration: rushConfiguration,
+          workingDirectory: projectFolder,
+          initCwd: rushConfiguration.commonTempFolder,
+          handleOutput: true,
+          environmentPathOptions: {
+            includeProjectBin: true
+          },
+          initialEnvironment
+        });
 
         // Hook into events, in order to get live streaming of the log
         subProcess.stdout?.on('data', (data: Buffer) => {
