@@ -590,19 +590,12 @@ export interface IPeerDependenciesMetaTable {
 
 // @public
 export interface IProblemMatcherPattern {
-    // (undocumented)
     code: number;
-    // (undocumented)
     column: number;
-    // (undocumented)
     file: number;
-    // (undocumented)
     line: number;
-    // (undocumented)
     message: number;
-    // (undocumented)
     regexp: string;
-    // (undocumented)
     severity: number;
 }
 

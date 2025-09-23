@@ -53,12 +53,19 @@ const baseFolderEnvVar: string = 'RUSHSTACK_FILE_ERROR_BASE_FOLDER';
  * @public
  */
 export interface IProblemMatcherPattern {
+  /** The regular expression used to match the log message. */
   regexp: string;
+  /** Match index for the severity level. */
   severity: number;
+  /** Match index for the file path. */
   file: number;
+  /** Match index for the line number. */
   line: number;
+  /** Match index for the column number. */
   column: number;
+  /** Match index for the problem code. */
   code: number;
+  /** Match index for the problem message. */
   message: number;
 }
 

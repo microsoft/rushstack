@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * @public
+ */
 export type ProblemSeverity = 'error' | 'warning' | 'info';
 
 /**
@@ -9,15 +12,25 @@ export type ProblemSeverity = 'error' | 'warning' | 'info';
  * @public
  */
 export interface IProblem {
+  /** The name of the matcher that detected the problem. */
   readonly matcherName: string;
+  /** Parsed message from the problem matcher */
   readonly message: string;
+  /** Parsed severity level from the problem matcher */
   readonly severity?: ProblemSeverity;
+  /** Parsed file path from the problem matcher */
   readonly file?: string;
+  /** Parsed line number from the problem matcher */
   readonly line?: number;
+  /** Parsed column number from the problem matcher */
   readonly column?: number;
+  /** Parsed ending line number from the problem matcher */
   readonly endLine?: number;
+  /** Parsed ending column number from the problem matcher */
   readonly endColumn?: number;
+  /** Parsed error or warning code from the problem matcher */
   readonly code?: string;
+  /** The full text of the console output that was matched. */
   readonly fullText: string;
 }
 

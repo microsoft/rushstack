@@ -144,27 +144,15 @@ export interface IPrefixProxyTerminalProviderOptionsBase {
 
 // @public
 export interface IProblem {
-    // (undocumented)
     readonly code?: string;
-    // (undocumented)
     readonly column?: number;
-    // (undocumented)
     readonly endColumn?: number;
-    // (undocumented)
     readonly endLine?: number;
-    // (undocumented)
     readonly file?: string;
-    // (undocumented)
     readonly fullText: string;
-    // (undocumented)
     readonly line?: number;
-    // (undocumented)
     readonly matcherName: string;
-    // (undocumented)
     readonly message: string;
-    // Warning: (ae-forgotten-export) The symbol "ProblemSeverity" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     readonly severity?: ProblemSeverity;
 }
 
@@ -348,6 +336,9 @@ export class ProblemCollector extends TerminalWritable {
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
 }
+
+// @public (undocumented)
+export type ProblemSeverity = 'error' | 'warning' | 'info';
 
 // @public
 export class RemoveColorsTextRewriter extends TextRewriter {
