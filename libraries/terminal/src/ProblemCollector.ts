@@ -66,6 +66,9 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
     }
   }
 
+  /**
+   * {@inheritdoc IProblemCollector}
+   */
   public getProblems(): ReadonlyArray<IProblem> {
     if (this.isOpen) {
       throw new Error('Problems cannot be retrieved until after close() is called.');
@@ -73,6 +76,9 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
     return this._problems;
   }
 
+  /**
+   * {@inheritdoc TerminalWritable}
+   */
   protected onWriteChunk(chunk: ITerminalChunk): void {
     const text: string = chunk.text;
     if (text.length === 0 || text[text.length - 1] !== '\n') {
@@ -95,6 +101,9 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
     }
   }
 
+  /**
+   * {@inheritdoc TerminalWritable}
+   */
   protected onClose(): void {
     for (const matcher of this._matchers) {
       if (matcher.flush) {

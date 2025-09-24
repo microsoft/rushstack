@@ -176,11 +176,8 @@ export interface IProblemMatcher {
 
 // @public
 export interface IProblemMatcherJson {
-    // (undocumented)
     name: string;
-    // (undocumented)
     pattern: IProblemPattern | IProblemPattern[];
-    // (undocumented)
     severity?: ProblemSeverity;
 }
 
@@ -191,26 +188,16 @@ export type IProblemMatchResult = Omit<IProblem, 'matcherName' | 'fullText'> & {
 
 // @public
 export interface IProblemPattern {
-    // (undocumented)
     code?: number;
-    // (undocumented)
     column?: number;
-    // (undocumented)
     endColumn?: number;
-    // (undocumented)
     endLine?: number;
-    // (undocumented)
     file?: number;
-    // (undocumented)
     line?: number;
-    // (undocumented)
     location?: number;
     loop?: boolean;
-    // (undocumented)
     message: number;
-    // (undocumented)
     regexp: string;
-    // (undocumented)
     severity?: number;
 }
 
@@ -362,11 +349,8 @@ export class PrintUtilities {
 // @public
 export class ProblemCollector extends TerminalWritable implements IProblemCollector {
     constructor(options: IProblemCollectorOptions);
-    // (undocumented)
     getProblems(): ReadonlyArray<IProblem>;
-    // (undocumented)
     protected onClose(): void;
-    // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
 }
 

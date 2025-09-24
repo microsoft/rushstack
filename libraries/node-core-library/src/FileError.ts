@@ -48,28 +48,40 @@ const uuidFileError: string = '37a4c772-2dc8-4c66-89ae-262f8cc1f0c1';
 const baseFolderEnvVar: string = 'RUSHSTACK_FILE_ERROR_BASE_FOLDER';
 
 /**
- * Problem matcher pattern for parsing error messages.
+ * VS Code style problem matcher pattern definition.
+ *
+ * @remarks
+ * This mirrors the shape used in VS Code's `problemMatcher.pattern` entries.
+ * Reference: https://code.visualstudio.com/docs/editor/tasks#_defining-a-problem-matcher
  *
  * @public
  */
-export interface IProblemMatcherPattern {
-  /** The regular expression used to match the log message. */
+export interface IProblemPattern {
+  /** A regular expression used to match the problem. */
   regexp: string;
-  /** Match index for the severity level. */
-  severity: number;
   /** Match index for the file path. */
-  file: number;
-  /** Match index for the line number. */
-  line: number;
-  /** Match index for the column number. */
-  column: number;
+  file?: number;
+  /** Match index for the location. */
+  location?: number;
+  /** Match index for the starting line number. */
+  line?: number;
+  /** Match index for the starting column number. */
+  column?: number;
+  /** Match index for the ending line number. */
+  endLine?: number;
+  /** Match index for the ending column number. */
+  endColumn?: number;
+  /** Match index for the severity level. */
+  severity?: number;
   /** Match index for the problem code. */
-  code: number;
+  code?: number;
   /** Match index for the problem message. */
   message: number;
+  /** If true, the last pattern in a multi-line matcher may repeat (loop) producing multiple problems */
+  loop?: boolean;
 }
 
-const unixProblemMatcherPattern: IProblemMatcherPattern = {
+const unixProblemMatcherPattern: IProblemPattern = {
   regexp: '^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^:]+):(\\d+):(\\d+)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$',
   severity: 1,
   file: 2,
@@ -79,7 +91,7 @@ const unixProblemMatcherPattern: IProblemMatcherPattern = {
   message: 6
 };
 
-const vsProblemMatcherPattern: IProblemMatcherPattern = {
+const vsProblemMatcherPattern: IProblemPattern = {
   regexp:
     '^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^\\(]+)\\((\\d+),(\\d+)\\)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$',
   severity: 1,
@@ -176,9 +188,7 @@ export class FileError extends Error {
    * @param options - Options for the error message format.
    * @returns The problem matcher pattern.
    */
-  public static getProblemMatcher(
-    options?: Pick<IFileErrorFormattingOptions, 'format'>
-  ): IProblemMatcherPattern {
+  public static getProblemMatcher(options?: Pick<IFileErrorFormattingOptions, 'format'>): IProblemPattern {
     const format: FileLocationStyle = options?.format || 'Unix';
     switch (format) {
       case 'Unix':

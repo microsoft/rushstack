@@ -38,7 +38,7 @@ export {
 export {
   type IFileErrorOptions,
   type IFileErrorFormattingOptions,
-  type IProblemMatcherPattern,
+  type IProblemPattern,
   FileError
 } from './FileError';
 export type {

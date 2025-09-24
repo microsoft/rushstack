@@ -76,15 +76,25 @@ export type IProblemMatchResult = Omit<IProblem, 'matcherName' | 'fullText'> & {
  * @public
  */
 export interface IProblemPattern {
+  /** A regular expression used to match the problem. */
   regexp: string;
+  /** Match index for the file path. */
   file?: number;
+  /** Match index for the location. */
   location?: number;
+  /** Match index for the starting line number. */
   line?: number;
+  /** Match index for the starting column number. */
   column?: number;
+  /** Match index for the ending line number. */
   endLine?: number;
+  /** Match index for the ending column number. */
   endColumn?: number;
+  /** Match index for the severity level. */
   severity?: number;
+  /** Match index for the problem code. */
   code?: number;
+  /** Match index for the problem message. */
   message: number;
   /** If true, the last pattern in a multi-line matcher may repeat (loop) producing multiple problems */
   loop?: boolean;
@@ -96,8 +106,11 @@ export interface IProblemPattern {
  * @public
  */
 export interface IProblemMatcherJson {
+  /** A friendly (and stable) name identifying the matcher. */
   name: string;
+  /** An optional default severity to apply if the pattern does not capture one. */
   severity?: ProblemSeverity;
+  /** A single pattern or an array of patterns to match. */
   pattern: IProblemPattern | IProblemPattern[];
 }
 

@@ -378,9 +378,9 @@ describe(`${FileError.name} problem matcher patterns`, () => {
       const matches = regexp.exec(errorMessage);
       expect(matches).toBeDefined();
       if (matches) {
-        expect(matches[pattern.file]).toEqual(relativePathToFile);
-        expect(parseInt(matches[pattern.line], 10)).toEqual(lineNumber);
-        expect(parseInt(matches[pattern.column], 10)).toEqual(columnNumber);
+        expect(matches[pattern.file!]).toEqual(relativePathToFile);
+        expect(parseInt(matches[pattern.line!], 10)).toEqual(lineNumber);
+        expect(parseInt(matches[pattern.column!], 10)).toEqual(columnNumber);
         expect(matches[pattern.message]).toEqual('message');
       }
     });
@@ -405,11 +405,11 @@ describe(`${FileError.name} problem matcher patterns`, () => {
       const matches = regexp.exec(errorMessage);
       expect(matches).toBeDefined();
       if (matches) {
-        expect(matches[pattern.file]).toEqual(relativePathToFile);
-        expect(parseInt(matches[pattern.line], 10)).toEqual(lineNumber);
-        expect(parseInt(matches[pattern.column], 10)).toEqual(columnNumber);
+        expect(matches[pattern.file!]).toEqual(relativePathToFile);
+        expect(parseInt(matches[pattern.line!], 10)).toEqual(lineNumber);
+        expect(parseInt(matches[pattern.column!], 10)).toEqual(columnNumber);
         expect(matches[pattern.message]).toEqual('message');
-        expect(matches[pattern.code]).toEqual('code');
+        expect(matches[pattern.code!]).toEqual('code');
       }
     });
   });
