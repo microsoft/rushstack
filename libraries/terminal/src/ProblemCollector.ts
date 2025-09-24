@@ -35,8 +35,9 @@ export interface IProblemCollectorOptions extends ITerminalWritableOptions {
  * by a `"\n"` character (for example when preceded by {@link StderrLineTransform} / `StdioLineTransform`).
  * If a chunk does not end with a newline an error is thrown to surface incorrect pipeline wiring early.
  *
- * Call `close()` before retrieving results via @see getProblems. Similar to other collectors, attempting
+ * Call `close()` before retrieving results via getProblems. Similar to other collectors, attempting
  * to read results before closure throws.
+ * @see getProblems
  *
  * @public
  */
