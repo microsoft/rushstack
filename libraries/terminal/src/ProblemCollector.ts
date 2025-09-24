@@ -5,6 +5,7 @@ import type { ITerminalChunk } from './ITerminalChunk';
 import { parseProblemMatchersJson } from './ProblemMatchers';
 import { type ITerminalWritableOptions, TerminalWritable } from './TerminalWritable';
 import type { IProblemMatcher, IProblemMatcherJson, IProblem, IProblemMatchResult } from './ProblemMatchers';
+import type { IProblemCollector } from './IProblemCollector';
 
 // Re-export the problem matcher helpers and types so consumers (including tests)
 // can import them from this module for convenience.
@@ -41,7 +42,7 @@ export interface IProblemCollectorOptions extends ITerminalWritableOptions {
  *
  * @public
  */
-export class ProblemCollector extends TerminalWritable {
+export class ProblemCollector extends TerminalWritable implements IProblemCollector {
   private readonly _matchers: IProblemMatcher[];
   private readonly _problems: IProblem[] = [];
 

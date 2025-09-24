@@ -157,6 +157,17 @@ export interface IProblem {
 }
 
 // @public
+export interface IProblemCollector {
+    getProblems(): ReadonlyArray<IProblem>;
+}
+
+// @public
+export interface IProblemCollectorOptions extends ITerminalWritableOptions {
+    matcherJson?: IProblemMatcherJson[];
+    matchers?: IProblemMatcher[];
+}
+
+// @public
 export interface IProblemMatcher {
     flush?(): IProblemMatchResult[];
     match(line: string): IProblemMatchResult | false;
@@ -167,8 +178,6 @@ export interface IProblemMatcher {
 export interface IProblemMatcherJson {
     // (undocumented)
     name: string;
-    // Warning: (ae-forgotten-export) The symbol "IProblemPattern" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     pattern: IProblemPattern | IProblemPattern[];
     // (undocumented)
@@ -179,6 +188,31 @@ export interface IProblemMatcherJson {
 export type IProblemMatchResult = Omit<IProblem, 'matcherName' | 'fullText'> & {
     fullText?: string;
 };
+
+// @public
+export interface IProblemPattern {
+    // (undocumented)
+    code?: number;
+    // (undocumented)
+    column?: number;
+    // (undocumented)
+    endColumn?: number;
+    // (undocumented)
+    endLine?: number;
+    // (undocumented)
+    file?: number;
+    // (undocumented)
+    line?: number;
+    // (undocumented)
+    location?: number;
+    loop?: boolean;
+    // (undocumented)
+    message: number;
+    // (undocumented)
+    regexp: string;
+    // (undocumented)
+    severity?: number;
+}
 
 // @public
 export interface ISplitterTransformOptions extends ITerminalWritableOptions {
@@ -326,8 +360,7 @@ export class PrintUtilities {
 }
 
 // @public
-export class ProblemCollector extends TerminalWritable {
-    // Warning: (ae-forgotten-export) The symbol "IProblemCollectorOptions" needs to be exported by the entry point index.d.ts
+export class ProblemCollector extends TerminalWritable implements IProblemCollector {
     constructor(options: IProblemCollectorOptions);
     // (undocumented)
     getProblems(): ReadonlyArray<IProblem>;
