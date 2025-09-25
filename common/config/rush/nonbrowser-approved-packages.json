@@ -115,6 +115,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@redis/client",
       "allowedCategories": [ "libraries" ]
     },

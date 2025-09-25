@@ -39,7 +39,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@types/express": "^4.17.21"
+    "@types/express": "^5.0.3"
   },
   "peerDependenciesMeta": {
     "@types/express": {
@@ -55,12 +55,12 @@
     "@types/update-notifier": "~6.0.1",
     "eslint": "~9.25.1",
     "local-node-rig": "workspace:*",
-    "@pnpm/lockfile-types": "^5.1.5",
+    "@pnpm/lockfile.types": "1002.0.1",
+    "@pnpm/types": "1000.8.0",
     "@types/semver": "7.5.0"
   },
   "dependencies": {
     "tslib": "~2.8.1",
-    "@lifaon/path": "~2.1.0",
     "@microsoft/rush-lib": "workspace:*",
     "@pnpm/dependency-path-lockfile-pre-v9": "npm:@pnpm/dependency-path@~2.1.2",
     "@rushstack/node-core-library": "workspace:*",

@@ -3,7 +3,7 @@
 
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import type { CobuildLockProviderFactory, RushSession } from '../pluginFramework/RushSession';
@@ -84,7 +84,7 @@ export class CobuildConfiguration {
 
     this.cobuildContextId = EnvironmentConfiguration.cobuildContextId;
     this.cobuildFeatureEnabled = this.cobuildContextId ? cobuildJson.cobuildFeatureEnabled : false;
-    this.cobuildRunnerId = EnvironmentConfiguration.cobuildRunnerId || uuidv4();
+    this.cobuildRunnerId = EnvironmentConfiguration.cobuildRunnerId || randomUUID();
     this.cobuildLeafProjectLogOnlyAllowed =
       EnvironmentConfiguration.cobuildLeafProjectLogOnlyAllowed ?? false;
     this.cobuildWithoutCacheAllowed =

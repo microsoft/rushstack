@@ -7,7 +7,7 @@ import cors from 'cors';
 import process from 'process';
 import open from 'open';
 import updateNotifier from 'update-notifier';
-
+import * as path from 'node:path';
 import { FileSystem, type IPackageJson, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 import {
@@ -15,16 +15,19 @@ import {
   CommandLineParser,
   type IRequiredCommandLineStringParameter
 } from '@rushstack/ts-command-line';
-import type { Lockfile } from '@pnpm/lockfile-types';
+
 import {
   type LfxGraph,
   lfxGraphSerializer,
   type IAppContext,
-  type IJsonLfxGraph
+  type IJsonLfxGraph,
+  type IJsonLfxWorkspace
 } from '../../../build/lfx-shared';
+import * as lockfilePath from '../../graph/lockfilePath';
 
 import type { IAppState } from '../../state';
 import { init } from '../../utils/init';
+import { PnpmfileRunner } from '../../graph/PnpmfileRunner';
 import * as lfxGraphLoader from '../../graph/lfxGraphLoader';
 
 const EXPLORER_TOOL_FILENAME: 'lockfile-explorer' = 'lockfile-explorer';
@@ -99,6 +102,8 @@ export class ExplorerCommandLineParser extends CommandLineParser {
       subspaceName: this._subspaceParameter.value
     });
 
+    const lfxWorkspace: IJsonLfxWorkspace = appState.lfxWorkspace;
+
     // Important: This must happen after init() reads the current working directory
     process.chdir(appState.lockfileExplorerProjectRoot);
 
@@ -152,13 +157,9 @@ export class ExplorerCommandLineParser extends CommandLineParser {
 
     app.get('/api/graph', async (req: express.Request, res: express.Response) => {
       const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
-      const lockfile: Lockfile = yaml.load(pnpmLockfileText) as Lockfile;
+      const lockfile: unknown = yaml.load(pnpmLockfileText) as unknown;
 
-      const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(
-        appState.lfxWorkspace,
-        lockfile as lfxGraphLoader.ILockfilePackageType,
-        appState.lfxWorkspace.rushConfig?.subspaceName ?? ''
-      );
+      const graph: LfxGraph = lfxGraphLoader.generateLockfileGraph(lockfile, lfxWorkspace);
 
       const jsonGraph: IJsonLfxGraph = lfxGraphSerializer.serializeToJson(graph);
       res.type('application/json').send(jsonGraph);
@@ -188,13 +189,18 @@ export class ExplorerCommandLineParser extends CommandLineParser {
     );
 
     app.get('/api/pnpmfile', async (req: express.Request, res: express.Response) => {
+      const pnpmfilePath: string = lockfilePath.join(
+        lfxWorkspace.workspaceRootFullPath,
+        lfxWorkspace.rushConfig?.rushPnpmfilePath ?? lfxWorkspace.pnpmfilePath
+      );
+
       let pnpmfile: string;
       try {
-        pnpmfile = await FileSystem.readFileAsync(appState.pnpmfileLocation);
+        pnpmfile = await FileSystem.readFileAsync(pnpmfilePath);
       } catch (e) {
         if (FileSystem.isNotExistError(e)) {
           return res.status(404).send({
-            message: `Could not load pnpmfile file in this repo.`,
+            message: `Could not load .pnpmfile.cjs file in this repo: "${pnpmfilePath}"`,
             error: `No .pnpmifile.cjs found.`
           });
         } else {
@@ -223,10 +229,18 @@ export class ExplorerCommandLineParser extends CommandLineParser {
           }
         }
 
-        const {
-          hooks: { readPackage }
-        } = require(appState.pnpmfileLocation);
-        const parsedPackage: {} = readPackage(packageJson, {});
+        let parsedPackage: IPackageJson = packageJson;
+
+        const pnpmfilePath: string = path.join(lfxWorkspace.workspaceRootFullPath, lfxWorkspace.pnpmfilePath);
+        if (await FileSystem.existsAsync(pnpmfilePath)) {
+          const pnpmFileRunner: PnpmfileRunner = new PnpmfileRunner(pnpmfilePath);
+          try {
+            parsedPackage = await pnpmFileRunner.transformPackageAsync(packageJson, fileLocation);
+          } finally {
+            await pnpmFileRunner.disposeAsync();
+          }
+        }
+
         res.send(parsedPackage);
       }
     );

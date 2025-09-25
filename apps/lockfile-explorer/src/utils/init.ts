@@ -9,6 +9,7 @@ import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration
 import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
 import path from 'path';
 
+import * as lockfilePath from '../graph/lockfilePath';
 import type { IAppState } from '../state';
 
 export const init = (options: {
@@ -31,23 +32,37 @@ export const init = (options: {
 
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonPath);
       const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
-      const workspaceFolder: string = subspace.getSubspaceTempFolderPath();
+      const commonTempFolder: string = subspace.getSubspaceTempFolderPath();
+      const pnpmLockfileAbsolutePath: string = path.join(commonTempFolder, 'pnpm-lock.yaml');
 
-      const pnpmLockfileLocation: string = path.resolve(workspaceFolder, 'pnpm-lock.yaml');
+      const relativeCommonTempFolder: string = Path.convertToSlashes(
+        path.relative(currentFolder, subspace.getSubspaceTempFolderPath())
+      );
+      const pnpmLockfileRelativePath: string = lockfilePath.join(relativeCommonTempFolder, 'pnpm-lock.yaml');
+      const pnpmFileRelativePath: string = lockfilePath.join(relativeCommonTempFolder, '.pnpmfile.cjs');
+
+      const relativeCommonConfigFolder: string = Path.convertToSlashes(
+        path.relative(currentFolder, subspace.getSubspaceConfigFolderPath())
+      );
+      const rushPnpmFileRelativePath: string = lockfilePath.join(relativeCommonConfigFolder, '.pnpmfile.cjs');
+
       appState = {
         currentWorkingDirectory,
         appVersion,
         debugMode,
         lockfileExplorerProjectRoot,
-        pnpmLockfileLocation,
-        pnpmfileLocation: workspaceFolder + '/.pnpmfile.cjs',
+        pnpmLockfileLocation: pnpmLockfileAbsolutePath,
+        pnpmfileLocation: commonTempFolder + '/.pnpmfile.cjs',
         projectRoot: currentFolder,
         lfxWorkspace: {
-          workspaceRootFolder: currentFolder,
-          pnpmLockfilePath: Path.convertToSlashes(path.relative(currentFolder, pnpmLockfileLocation)),
+          workspaceRootFullPath: currentFolder,
+          pnpmLockfilePath: Path.convertToSlashes(pnpmLockfileRelativePath),
+          pnpmLockfileFolder: Path.convertToSlashes(path.dirname(pnpmLockfileRelativePath)),
+          pnpmfilePath: Path.convertToSlashes(pnpmFileRelativePath),
           rushConfig: {
             rushVersion: rushConfiguration.rushConfigurationJson.rushVersion,
-            subspaceName: subspaceName ?? ''
+            subspaceName: subspaceName ?? '',
+            rushPnpmfilePath: rushPnpmFileRelativePath
           }
         }
       };
@@ -62,8 +77,10 @@ export const init = (options: {
         pnpmfileLocation: currentFolder + '/.pnpmfile.cjs',
         projectRoot: currentFolder,
         lfxWorkspace: {
-          workspaceRootFolder: currentFolder,
+          workspaceRootFullPath: currentFolder,
           pnpmLockfilePath: Path.convertToSlashes(path.relative(currentFolder, pnpmLockPath)),
+          pnpmLockfileFolder: '',
+          pnpmfilePath: '.pnpmfile.cjs',
           rushConfig: undefined
         }
       };

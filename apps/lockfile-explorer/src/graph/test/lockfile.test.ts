@@ -8,7 +8,7 @@ import * as lfxGraphLoader from '../lfxGraphLoader';
 
 describe('LockfileGeneration', () => {
   it('creates a valid bi-directional graph', () => {
-    const resolvedPackages = lfxGraphLoader.generateLockfileGraph(TEST_WORKSPACE, TEST_LOCKFILE).entries;
+    const resolvedPackages = lfxGraphLoader.generateLockfileGraph(TEST_LOCKFILE, TEST_WORKSPACE).entries;
 
     // Mapping of all the lockfile entries created by the lockfile
     const resolvedPackagesMap: { [key: string]: LfxGraphEntry } = {};
@@ -20,7 +20,7 @@ describe('LockfileGeneration', () => {
 
     // Ensure validity of the example lockfile entry
     expect(exampleLockfileImporter.rawEntryId).toBe('../../../apps/testApp1');
-    expect(exampleLockfileImporter.entryId).toBe('project:./apps/testApp1');
+    expect(exampleLockfileImporter.entryId).toBe('project:apps/testApp1');
 
     // Test that dependencies are linked in the importer project
     expect(exampleLockfileImporter.dependencies.length).toBe(2);
