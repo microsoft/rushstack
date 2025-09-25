@@ -487,7 +487,7 @@ describe(Async.name, () => {
         running--;
       });
 
-      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true });
+      await Async.forEachAsync(array, fn, { concurrency: 3, weighted: true, allowOversubscription: true });
       expect(fn).toHaveBeenCalledTimes(8);
       expect(maxRunning).toEqual(2);
     });

@@ -19,15 +19,26 @@ export interface IAsyncParallelismOptions {
   concurrency?: number;
 
   /**
-   * Optionally used with the {@link (Async:class).(forEachAsync:2)} to enable weighted operations where an operation can
-   * take up more or less than one concurrency unit.
+   * Optionally used with the {@link (Async:class).(forEachAsync:2)} to enable weighted operations where an
+   * operation can take up more or less than one concurrency unit.
    */
   weighted?: boolean;
 
   /**
-   * Controls whether operations can start even if doing so would exceed the total concurrency limit.
-   * If true (default), will start operations even when they would exceed the limit.
-   * If false, waits until sufficient capacity is available.
+   * This option affects the handling of task weights, applying a softer policy that favors maximizing parallelism
+   * instead of avoiding overload.
+   *
+   * @remarks
+   * By default, a new task cannot start executing if doing so would push the total weight above the concurrency limit.
+   * Set `allowOversubscription` to true to relax this rule, allowing a new task to start as long as the current
+   * total weight is below the concurrency limit.  Either way, a task cannot start if the total weight already equals
+   * the concurrency limit; therefore, `allowOversubscription` has no effect when all tasks have weight 1.
+   *
+   * Example: Suppose the concurrency limit is 8, and seven tasks are running whose weights are 1, so the current
+   * total weight is 7.  If an available task has weight 2, that would push the total weight to 9, exceeding
+   * the limit.  This task can start only if `allowOversubscription` is true.
+   *
+   * @defaultValue false
    */
   allowOversubscription?: boolean;
 }
@@ -238,7 +249,7 @@ export class Async {
 
             // Wait until there's enough capacity to run this job, this function will be re-entered as tasks call `onOperationCompletionAsync`
             const wouldExceedConcurrency: boolean = concurrentUnitsInProgress + weight > concurrency;
-            const allowOversubscription: boolean = options?.allowOversubscription ?? true;
+            const allowOversubscription: boolean = options?.allowOversubscription ?? false;
             if (!allowOversubscription && wouldExceedConcurrency) {
               // eslint-disable-next-line require-atomic-updates
               nextIterator = currentIteratorResult;

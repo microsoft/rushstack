@@ -470,6 +470,10 @@ export class RushCommandLineParser extends CommandLineParser {
         enableParallelism: command.enableParallelism,
         incremental: command.incremental || false,
         disableBuildCache: command.disableBuildCache || false,
+
+        // The Async.forEachAsync() API defaults allowOversubscription=false, whereas Rush historically
+        // defaults allowOversubscription=true to favor faster builds rather than strictly staying below
+        // the CPU limit.
         allowOversubscription: command.allowOversubscription ?? true,
 
         initialPhases: command.phases,

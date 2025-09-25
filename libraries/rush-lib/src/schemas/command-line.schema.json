@@ -69,7 +69,7 @@
             "allowOversubscription": {
               "title": "allowOversubscription",
               "type": "boolean",
-              "description": "Controls whether operations can start even if doing so would exceed the total concurrency limit. This setting only applies when 'enableParallelism' is true and operations have a 'weight' property configured in their rush-project.json operationSettings. If true (default), operations will start even when they would exceed the limit. If false, operations wait until sufficient capacity is available."
+              "description": "Controls whether weighted operations can start when the total weight would exceed the limit but is currently below the limit. This setting only applies when \"enableParallelism\" is true and operations have a \"weight\" property configured in their rush-project.json \"operationSettings\". Choose true (the default) to favor parallelism.  Choose false to strictly stay under the limit."
             },
             "ignoreDependencyOrder": {
               "title": "ignoreDependencyOrder",
@@ -190,7 +190,7 @@
             "allowOversubscription": {
               "title": "allowOversubscription",
               "type": "boolean",
-              "description": "Controls whether operations can start even if doing so would exceed the total concurrency limit. This setting only applies when 'enableParallelism' is true and operations have a 'weight' property configured in their rush-project.json operationSettings. If true (default), operations will start even when they would exceed the limit. If false, operations wait until sufficient capacity is available."
+              "description": "Controls whether weighted operations can start when the total weight would exceed the limit but is currently below the limit. This setting only applies when \"enableParallelism\" is true and operations have a \"weight\" property configured in their rush-project.json \"operationSettings\". Choose true (the default) to favor parallelism.  Choose false to strictly stay under the limit."
             },
             "incremental": {
               "title": "Incremental",
