@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-bridge-cache-plugin",
-  "version": "5.158.1",
+  "version": "5.158.1-pr5355.0",
   "description": "Rush plugin that provides a --set-cache-only command flag to populate the cache from content on disk.",
   "license": "MIT",
   "main": "lib/index.js",
