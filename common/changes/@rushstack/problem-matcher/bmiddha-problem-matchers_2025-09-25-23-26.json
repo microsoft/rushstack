@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/problem-matcher",
+      "comment": "Add @rushstack/problem-matcher library to parse and use VS Code style problem matchers",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/problem-matcher"
+}
