@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import * as child_process from 'child_process';
+import type { IProblemPattern } from '@rushstack/problem-matcher';
 import * as nodeFs from 'fs';
 import * as nodePath from 'path';
 
@@ -586,21 +587,6 @@ export interface IPeerDependenciesMetaTable {
     [dependencyName: string]: {
         optional?: boolean;
     };
-}
-
-// @public
-export interface IProblemPattern {
-    code?: number;
-    column?: number;
-    endColumn?: number;
-    endLine?: number;
-    file?: number;
-    line?: number;
-    location?: number;
-    loop?: boolean;
-    message: number;
-    regexp: string;
-    severity?: number;
 }
 
 // @public

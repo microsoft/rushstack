@@ -1,16 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminalChunk } from './ITerminalChunk';
-import { parseProblemMatchersJson } from './ProblemMatchers';
-import { type ITerminalWritableOptions, TerminalWritable } from './TerminalWritable';
-import type { IProblemMatcher, IProblemMatcherJson, IProblem, IProblemMatchResult } from './ProblemMatchers';
-import type { IProblemCollector } from './IProblemCollector';
+import { parseProblemMatchersJson } from '@rushstack/problem-matcher';
+import type { IProblemMatcher, IProblemMatcherJson, IProblem } from '@rushstack/problem-matcher';
 
-// Re-export the problem matcher helpers and types so consumers (including tests)
-// can import them from this module for convenience.
-export { parseProblemMatchersJson };
-export type { IProblemMatcher, IProblemMatcherJson, IProblemMatchResult };
+import type { ITerminalChunk } from './ITerminalChunk';
+import { type ITerminalWritableOptions, TerminalWritable } from './TerminalWritable';
+import type { IProblemCollector } from './IProblemCollector';
 
 /**
  * Constructor options for {@link ProblemCollector}.
@@ -22,14 +18,15 @@ export interface IProblemCollectorOptions extends ITerminalWritableOptions {
    */
   matchers?: IProblemMatcher[];
   /**
-   * VS Code style problem matcher definitions. These will be converted to {@link IProblemMatcher}
+   * VS Code style problem matcher definitions. These will be converted to
+   * {@link @rushstack/problem-matcher#IProblemMatcher | IProblemMatcher} definitions.
    */
   matcherJson?: IProblemMatcherJson[];
 }
 
 /**
  * A {@link TerminalWritable} that consumes line-oriented terminal output and extracts structured
- * problems using one or more {@link IProblemMatcher}s.
+ * problems using one or more {@link @rushstack/problem-matcher#IProblemMatcher | IProblemMatcher} instances.
  *
  * @remarks
  * This collector expects that each incoming {@link ITerminalChunk} represents a single line terminated
@@ -90,12 +87,11 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
     }
 
     for (const matcher of this._matchers) {
-      const problem: IProblemMatchResult | false = matcher.match(text);
+      const problem: IProblem | false = matcher.match(text);
       if (problem) {
         this._problems.push({
           ...problem,
-          matcherName: matcher.name,
-          fullText: problem.fullText || text
+          matcherName: matcher.name
         });
       }
     }
@@ -107,13 +103,12 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
   protected onClose(): void {
     for (const matcher of this._matchers) {
       if (matcher.flush) {
-        const flushed: IProblemMatchResult[] = matcher.flush();
+        const flushed: IProblem[] = matcher.flush();
         if (flushed && flushed.length > 0) {
           for (const problem of flushed) {
             this._problems.push({
               ...problem,
-              matcherName: matcher.name,
-              fullText: problem.fullText || '(no line captured)\n'
+              matcherName: matcher.name
             });
           }
         }

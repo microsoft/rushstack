@@ -1141,6 +1141,13 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/problem-matcher",
+      "projectFolder": "libraries/problem-matcher",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "decoupledLocalDependencies": ["@rushstack/heft"]
+    },
+    {
       "packageName": "@rushstack/heft-config-file",
       "projectFolder": "libraries/heft-config-file",
       "reviewCategory": "libraries",

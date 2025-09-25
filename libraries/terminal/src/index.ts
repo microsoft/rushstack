@@ -52,11 +52,3 @@ export { NoOpTerminalProvider } from './NoOpTerminalProvider';
 export { TerminalStreamWritable, type ITerminalStreamWritableOptions } from './TerminalStreamWritable';
 export { ProblemCollector, type IProblemCollectorOptions } from './ProblemCollector';
 export type { IProblemCollector } from './IProblemCollector';
-export type {
-  ProblemSeverity,
-  IProblemMatcher,
-  IProblemMatchResult,
-  IProblemMatcherJson,
-  IProblemPattern,
-  IProblem
-} from './ProblemMatchers';

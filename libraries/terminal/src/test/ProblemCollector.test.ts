@@ -5,18 +5,19 @@ import { ProblemCollector } from '../ProblemCollector';
 import {
   parseProblemMatchersJson,
   type IProblemMatcher,
-  type IProblemMatchResult,
+  type IProblem,
   type IProblemMatcherJson
-} from '../ProblemMatchers';
+} from '@rushstack/problem-matcher/lib/ProblemMatcher';
 import { TerminalChunkKind } from '../ITerminalChunk';
 
 class ErrorLineMatcher implements IProblemMatcher {
   public readonly name: string = 'errorLine';
   private readonly _regex: RegExp = /^ERROR:\s*(.*)\n$/;
-  public match(line: string): IProblemMatchResult | false {
+  public match(line: string): IProblem | false {
     const match: RegExpExecArray | null = this._regex.exec(line);
     if (match) {
       return {
+        matcherName: this.name,
         message: match[1],
         severity: 'error'
       };

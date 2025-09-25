@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IProblemPattern } from '@rushstack/problem-matcher';
 import { type FileLocationStyle, Path } from './Path';
 import { TypeUuid } from './TypeUuid';
 
@@ -46,40 +47,6 @@ export interface IFileErrorFormattingOptions {
 const uuidFileError: string = '37a4c772-2dc8-4c66-89ae-262f8cc1f0c1';
 
 const baseFolderEnvVar: string = 'RUSHSTACK_FILE_ERROR_BASE_FOLDER';
-
-/**
- * VS Code style problem matcher pattern definition.
- *
- * @remarks
- * This mirrors the shape used in VS Code's `problemMatcher.pattern` entries.
- * Reference: https://code.visualstudio.com/docs/editor/tasks#_defining-a-problem-matcher
- *
- * @public
- */
-export interface IProblemPattern {
-  /** A regular expression used to match the problem. */
-  regexp: string;
-  /** Match index for the file path. */
-  file?: number;
-  /** Match index for the location. */
-  location?: number;
-  /** Match index for the starting line number. */
-  line?: number;
-  /** Match index for the starting column number. */
-  column?: number;
-  /** Match index for the ending line number. */
-  endLine?: number;
-  /** Match index for the ending column number. */
-  endColumn?: number;
-  /** Match index for the severity level. */
-  severity?: number;
-  /** Match index for the problem code. */
-  code?: number;
-  /** Match index for the problem message. */
-  message: number;
-  /** If true, the last pattern in a multi-line matcher may repeat (loop) producing multiple problems */
-  loop?: boolean;
-}
 
 const unixProblemMatcherPattern: IProblemPattern = {
   regexp: '^\\[[^\\]]+\\]\\s+(Error|Warning):\\s+([^:]+):(\\d+):(\\d+)\\s+-\\s+(?:\\(([^)]+)\\)\\s+)?(.*)$',

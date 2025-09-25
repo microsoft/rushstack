@@ -7,6 +7,9 @@
 /// <reference types="node" />
 
 import type { Brand } from '@rushstack/node-core-library';
+import type { IProblem } from '@rushstack/problem-matcher';
+import type { IProblemMatcher } from '@rushstack/problem-matcher';
+import type { IProblemMatcherJson } from '@rushstack/problem-matcher';
 import { NewlineKind } from '@rushstack/node-core-library';
 import { Writable } from 'stream';
 import { WritableOptions } from 'stream';
@@ -143,20 +146,6 @@ export interface IPrefixProxyTerminalProviderOptionsBase {
 }
 
 // @public
-export interface IProblem {
-    readonly code?: string;
-    readonly column?: number;
-    readonly endColumn?: number;
-    readonly endLine?: number;
-    readonly file?: string;
-    readonly fullText: string;
-    readonly line?: number;
-    readonly matcherName: string;
-    readonly message: string;
-    readonly severity?: ProblemSeverity;
-}
-
-// @public
 export interface IProblemCollector {
     getProblems(): ReadonlyArray<IProblem>;
 }
@@ -165,40 +154,6 @@ export interface IProblemCollector {
 export interface IProblemCollectorOptions extends ITerminalWritableOptions {
     matcherJson?: IProblemMatcherJson[];
     matchers?: IProblemMatcher[];
-}
-
-// @public
-export interface IProblemMatcher {
-    flush?(): IProblemMatchResult[];
-    match(line: string): IProblemMatchResult | false;
-    readonly name: string;
-}
-
-// @public
-export interface IProblemMatcherJson {
-    name: string;
-    pattern: IProblemPattern | IProblemPattern[];
-    severity?: ProblemSeverity;
-}
-
-// @public (undocumented)
-export type IProblemMatchResult = Omit<IProblem, 'matcherName' | 'fullText'> & {
-    fullText?: string;
-};
-
-// @public
-export interface IProblemPattern {
-    code?: number;
-    column?: number;
-    endColumn?: number;
-    endLine?: number;
-    file?: number;
-    line?: number;
-    location?: number;
-    loop?: boolean;
-    message: number;
-    regexp: string;
-    severity?: number;
 }
 
 // @public
@@ -353,9 +308,6 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
     protected onClose(): void;
     protected onWriteChunk(chunk: ITerminalChunk): void;
 }
-
-// @public (undocumented)
-export type ProblemSeverity = 'error' | 'warning' | 'info';
 
 // @public
 export class RemoveColorsTextRewriter extends TextRewriter {

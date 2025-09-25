@@ -1,28 +1,23 @@
 {
-  "name": "@rushstack/terminal",
-  "version": "0.16.0",
-  "description": "User interface primitives for console applications",
+  "name": "@rushstack/problem-matcher",
+  "version": "0.0.0",
+  "description": "A library for parsing VS Code style problem matchers",
   "main": "lib/index.js",
-  "typings": "dist/terminal.d.ts",
+  "typings": "dist/problem-matcher.d.ts",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
-    "directory": "libraries/terminal"
+    "directory": "libraries/problem-matcher"
   },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
     "_phase:test": "heft run --only test -- --clean"
   },
-  "dependencies": {
-    "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/problem-matcher": "workspace:*",
-    "supports-color": "~8.1.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@rushstack/heft": "0.74.3",
-    "@types/supports-color": "8.1.3",
     "decoupled-local-node-rig": "workspace:*",
     "eslint": "~9.25.1"
   },

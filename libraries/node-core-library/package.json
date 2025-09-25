@@ -16,6 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
+    "@rushstack/problem-matcher": "workspace:*",
     "fs-extra": "~11.3.0",
     "import-lazy": "~4.0.0",
     "jju": "~1.4.0",

@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 /**
+ * Represents the severity level of a problem.
+ *
  * @public
  */
 export type ProblemSeverity = 'error' | 'warning' | 'info';
@@ -30,8 +32,6 @@ export interface IProblem {
   readonly endColumn?: number;
   /** Parsed error or warning code from the problem matcher */
   readonly code?: string;
-  /** The full text of the console output that was matched. */
-  readonly fullText: string;
 }
 
 /**
@@ -52,19 +52,12 @@ export interface IProblemMatcher {
    * @param line - A single line of text, always terminated with a newline character (\\n).
    * @returns A problem if recognized, otherwise `false`.
    */
-  match(line: string): IProblemMatchResult | false;
+  match(line: string): IProblem | false;
   /**
    * Flush any buffered state and return additional problems. Optional.
    */
-  flush?(): IProblemMatchResult[];
+  flush?(): IProblem[];
 }
-
-/**
- * @public
- */
-export type IProblemMatchResult = Omit<IProblem, 'matcherName' | 'fullText'> & {
-  fullText?: string;
-};
 
 /**
  * VS Code style problem matcher pattern definition.
@@ -261,10 +254,12 @@ function applyPatternCaptures(
 }
 
 function finalizeProblem(
+  matcherName: string,
   captures: ICapturesMutable,
   defaultSeverity: ProblemSeverity | undefined
-): IProblemMatchResult {
+): IProblem {
   return {
+    matcherName,
     file: captures.file,
     line: captures.line,
     column: captures.column,
@@ -284,14 +279,14 @@ function createSingleLineMatcher(
   const { re, spec } = compiled;
   return {
     name,
-    match(line: string): IProblemMatchResult | false {
+    match(line: string): IProblem | false {
       const match: RegExpExecArray | null = re.exec(line);
       if (!match) {
         return false;
       }
       const captures: ICapturesMutable = createEmptyCaptures();
       applyPatternCaptures(spec, match, captures, defaultSeverity);
-      return finalizeProblem(captures, defaultSeverity);
+      return finalizeProblem(name, captures, defaultSeverity);
     }
   };
 }
@@ -312,7 +307,7 @@ function createMultiLineMatcher(
 
   return {
     name,
-    match(line: string): IProblemMatchResult | false {
+    match(line: string): IProblem | false {
       let effectiveMatch: RegExpExecArray | null = null;
       let effectiveSpec: IProblemPattern | undefined;
 
@@ -374,7 +369,7 @@ function createMultiLineMatcher(
       }
 
       // We have matched the full sequence (either first completion or a loop iteration)
-      const problem: IProblemMatchResult = finalizeProblem(captures, defaultSeverity);
+      const problem: IProblem = finalizeProblem(name, captures, defaultSeverity);
 
       if (lastIsLoop) {
         // Stay in loop state; reset fields that accumulate per problem but retain other context (e.g., file if first pattern captured it?)
