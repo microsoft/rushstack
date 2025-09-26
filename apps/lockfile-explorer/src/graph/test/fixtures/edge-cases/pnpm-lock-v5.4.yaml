@@ -21,7 +21,23 @@ importers:
       has-symbols: 1.0.2
       target-folder: link:../target-folder
 
+  pnpmfile-transforms:
+    specifiers:
+      address: ^1.0.0
+      uri-js: ^4.0.0
+    dependencies:
+      address: 1.2.2
+      uri-js: 4.4.1
+
 packages:
+  /address/1.2.2:
+    resolution:
+      {
+        integrity: sha512-4B/qKCfeE/ODUaAUpSwfzazo5x29WD4r3vXiWsB7I2mSDAihwEqKO+g8GELZUQSSAo5e1XTYh3ZVfLyxBc12nA==
+      }
+    engines: { node: '>= 10.0.0' }
+    dev: false
+
   /color-convert/3.1.2:
     resolution:
       {
@@ -69,4 +85,21 @@ packages:
     engines: { node: '>= 0.4' }
     dependencies:
       target-folder: link:link-specifier/target-folder
+    dev: false
+
+  /punycode/2.3.1:
+    resolution:
+      {
+        integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
+      }
+    engines: { node: '>=6' }
+    dev: false
+
+  /uri-js/4.4.1:
+    resolution:
+      {
+        integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==
+      }
+    dependencies:
+      punycode: 2.3.1
     dev: false
