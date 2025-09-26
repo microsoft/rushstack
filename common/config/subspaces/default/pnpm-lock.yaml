@@ -3393,9 +3393,6 @@ importers:
 
   ../../../libraries/node-core-library:
     dependencies:
-      '@rushstack/problem-matcher':
-        specifier: workspace:*
-        version: link:../problem-matcher
       ajv:
         specifier: ~8.13.0
         version: 8.13.0
@@ -3424,6 +3421,9 @@ importers:
       '@rushstack/heft':
         specifier: 0.74.3
         version: 0.74.3(@types/node@20.17.19)
+      '@rushstack/problem-matcher':
+        specifier: workspace:*
+        version: link:../problem-matcher
       '@types/fs-extra':
         specifier: 7.0.0
         version: 7.0.0
