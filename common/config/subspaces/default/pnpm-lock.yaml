@@ -3639,9 +3639,6 @@ importers:
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../ts-command-line
-      '@rushstack/zipsync':
-        specifier: workspace:*
-        version: link:../../apps/zipsync
       '@yarnpkg/lockfile':
         specifier: ~1.0.2
         version: 1.0.2
