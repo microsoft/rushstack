@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(PLUGIN BREAKING CHANGE) Overhaul watch-mode commands such that the graph is only created once at the start of command invocation, along with a stateful manager object. Plugins may now access the manager object and use it to orchestrate and tap into the build process.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
