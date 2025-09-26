@@ -87,7 +87,7 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
     }
 
     for (const matcher of this._matchers) {
-      const problem: IProblem | false = matcher.match(text);
+      const problem: IProblem | false = matcher.exec(text);
       if (problem) {
         this._problems.push({
           ...problem,

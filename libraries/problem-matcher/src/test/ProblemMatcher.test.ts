@@ -20,7 +20,7 @@ describe('parseProblemMatchersJson - single line', () => {
 
     const [compiled] = parseProblemMatchersJson([matcher]);
     const line = 'src/example.ts(12,34): error TS1000: Something bad happened\n';
-    const prob = compiled.match(line);
+    const prob = compiled.exec(line);
     expect(prob).toBeTruthy();
     if (prob !== false) {
       expect(prob.file).toBe('src/example.ts');
@@ -45,7 +45,7 @@ describe('parseProblemMatchersJson - single line', () => {
       }
     };
     const [compiled] = parseProblemMatchersJson([matcher]);
-    const notMatched = compiled.match('This will not match\n');
+    const notMatched = compiled.exec('This will not match\n');
     expect(notMatched).toBe(false);
   });
 });
@@ -65,7 +65,7 @@ describe('parseProblemMatchersJson - default severity', () => {
       }
     };
     const [compiled] = parseProblemMatchersJson([matcher]);
-    const prob = compiled.match('lib/z.c:5:7: W123: Be careful\n');
+    const prob = compiled.exec('lib/z.c:5:7: W123: Be careful\n');
     if (prob === false) throw new Error('Expected match');
     expect(prob.severity).toBe('warning');
     expect(prob.code).toBe('W123');
@@ -85,10 +85,10 @@ describe('parseProblemMatchersJson - multi line', () => {
     };
     const [compiled] = parseProblemMatchersJson([matcher]);
     // Feed lines
-    expect(compiled.match('File: src/a.c\n')).toBe(false);
-    expect(compiled.match('Pos: 10,20\n')).toBe(false);
-    expect(compiled.match('Severity: error\n')).toBe(false);
-    const final = compiled.match('Msg: Something broke\n');
+    expect(compiled.exec('File: src/a.c\n')).toBe(false);
+    expect(compiled.exec('Pos: 10,20\n')).toBe(false);
+    expect(compiled.exec('Severity: error\n')).toBe(false);
+    const final = compiled.exec('Msg: Something broke\n');
     if (final === false) throw new Error('Expected final match');
     expect(final.file).toBe('src/a.c');
     expect(final.line).toBe(10);
@@ -98,7 +98,7 @@ describe('parseProblemMatchersJson - multi line', () => {
     expect(final.message).toBe('Something broke');
 
     // Next unrelated line should not erroneously reuse old state
-    const no = compiled.match('Msg: stray\n');
+    const no = compiled.exec('Msg: stray\n');
     expect(no).toBe(false);
   });
 });
@@ -123,9 +123,9 @@ describe('parseProblemMatchersJson - looping last pattern', () => {
     };
     const [compiled] = parseProblemMatchersJson([matcher]);
     // Start sequence
-    expect(compiled.match('Summary with 2 issues\n')).toBe(false);
-    const first = compiled.match('src/a.c(1,2): E001: First\n');
-    const second = compiled.match('src/b.c(3,4): E002: Second\n');
+    expect(compiled.exec('Summary with 2 issues\n')).toBe(false);
+    const first = compiled.exec('src/a.c(1,2): E001: First\n');
+    const second = compiled.exec('src/b.c(3,4): E002: Second\n');
     if (first === false || second === false) throw new Error('Expected loop matches');
     expect(first.file).toBe('src/a.c');
     expect(second.file).toBe('src/b.c');
@@ -134,7 +134,7 @@ describe('parseProblemMatchersJson - looping last pattern', () => {
     expect(first.severity).toBe('error');
     expect(second.severity).toBe('error');
     // Exiting loop with unrelated line resets state
-    expect(compiled.match('Unrelated line\n')).toBe(false);
+    expect(compiled.exec('Unrelated line\n')).toBe(false);
   });
 });
 
@@ -151,7 +151,7 @@ describe('parseProblemMatchersJson - location parsing variants', () => {
       }
     };
     const [compiled] = parseProblemMatchersJson([matcher]);
-    const prob = compiled.match('path/file.c(10,5): details here\n');
+    const prob = compiled.exec('path/file.c(10,5): details here\n');
     if (prob === false) throw new Error('Expected match');
     expect(prob.file).toBe('path/file.c');
     expect(prob.line).toBe(10);
@@ -172,7 +172,7 @@ describe('parseProblemMatchersJson - location parsing variants', () => {
       }
     };
     const [compiled] = parseProblemMatchersJson([matcher]);
-    const prob = compiled.match('lib/x.c(1,2,3,4): thing\n');
+    const prob = compiled.exec('lib/x.c(1,2,3,4): thing\n');
     if (prob === false) throw new Error('Expected match');
     expect(prob.endLine).toBe(3);
     expect(prob.endColumn).toBe(4);

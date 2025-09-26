@@ -19,8 +19,8 @@ export interface IProblem {
 
 // @public
 export interface IProblemMatcher {
+    exec(line: string): IProblem | false;
     flush?(): IProblem[];
-    match(line: string): IProblem | false;
     readonly name: string;
 }
 

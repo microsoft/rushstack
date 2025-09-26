@@ -52,7 +52,7 @@ export interface IProblemMatcher {
    * @param line - A single line of text, always terminated with a newline character (\\n).
    * @returns A problem if recognized, otherwise `false`.
    */
-  match(line: string): IProblem | false;
+  exec(line: string): IProblem | false;
   /**
    * Flush any buffered state and return additional problems. Optional.
    */
@@ -279,7 +279,7 @@ function createSingleLineMatcher(
   const { re, spec } = compiled;
   return {
     name,
-    match(line: string): IProblem | false {
+    exec(line: string): IProblem | false {
       const match: RegExpExecArray | null = re.exec(line);
       if (!match) {
         return false;
@@ -307,7 +307,7 @@ function createMultiLineMatcher(
 
   return {
     name,
-    match(line: string): IProblem | false {
+    exec(line: string): IProblem | false {
       let effectiveMatch: RegExpExecArray | null = null;
       let effectiveSpec: IProblemPattern | undefined;
 
