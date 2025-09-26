@@ -36,6 +36,7 @@ export {
   Executable
 } from './Executable';
 export { type IFileErrorOptions, type IFileErrorFormattingOptions, FileError } from './FileError';
+export type { IProblemPattern } from '@rushstack/problem-matcher';
 export type {
   INodePackageJson,
   IPackageJson,
