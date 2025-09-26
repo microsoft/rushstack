@@ -14,13 +14,20 @@
       "console": "integratedTerminal",
       "sourceMaps": true
     },
-     {
+    {
       "type": "node",
       "request": "launch",
       "name": "Single Jest test",
       "program": "${workspaceFolder}/node_modules/@rushstack/heft/lib/start.js",
       "cwd": "${workspaceFolder}",
-      "args": ["--debug", "test", "--clean", "-u", "--test-path-pattern", "lfxGraph-website-sample-1-v6.0.test"],
+      "args": [
+        "--debug",
+        "test",
+        "--clean",
+        "-u",
+        "--test-path-pattern",
+        "lfxGraph-website-sample-1-v9.0.test"
+      ],
       "console": "integratedTerminal",
       "sourceMaps": true
     },

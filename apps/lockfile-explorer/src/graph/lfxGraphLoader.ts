@@ -90,7 +90,10 @@ function createPackageLockfileDependency(options: {
 function parsePackageDependencies(
   dependencies: LfxGraphDependency[],
   lockfileEntry: LfxGraphEntry,
-  either: lockfileTypes.ProjectSnapshot | lockfileTypes.PackageSnapshot,
+  either:
+    | lockfileTypes.ProjectSnapshot
+    | lockfileTypes.PackageSnapshot
+    | lockfileTypes.LockfilePackageSnapshot,
   pnpmLockfileVersion: PnpmLockfileVersion,
   workspace: IJsonLfxWorkspace
 ): void {
@@ -230,11 +233,10 @@ function createProjectLockfileEntry(options: {
 
 function createPackageLockfileEntry(options: {
   rawEntryId: string;
-  rawYamlData: lockfileTypes.PackageSnapshot;
   workspace: IJsonLfxWorkspace;
   pnpmLockfileVersion: PnpmLockfileVersion;
 }): LfxGraphEntry {
-  const { rawEntryId, rawYamlData, pnpmLockfileVersion, workspace } = options;
+  const { rawEntryId, pnpmLockfileVersion, workspace } = options;
 
   const result: ILfxGraphEntryOptions = {
     kind: LfxGraphEntryKind.Package,
@@ -364,13 +366,6 @@ function createPackageLockfileEntry(options: {
   );
 
   const lockfileEntry: LfxGraphEntry = new LfxGraphEntry(result);
-  parsePackageDependencies(
-    lockfileEntry.dependencies,
-    lockfileEntry,
-    rawYamlData,
-    pnpmLockfileVersion,
-    workspace
-  );
   return lockfileEntry;
 }
 
@@ -472,36 +467,64 @@ export function generateLockfileGraph(lockfileJson: unknown, workspace: IJsonLfx
   if (pnpmLockfileVersion < 90) {
     if (lockfile.packages) {
       for (const [dependencyKey, dependencyValue] of Object.entries(lockfile.packages)) {
-        // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
-
-        const currEntry: LfxGraphEntry = createPackageLockfileEntry({
+        const lockfileEntry: LfxGraphEntry = createPackageLockfileEntry({
           rawEntryId: dependencyKey,
-          rawYamlData: dependencyValue as lockfileTypes.PackageSnapshot,
           workspace,
           pnpmLockfileVersion
         });
-
-        allEntries.push(currEntry);
-        allEntriesById.set(dependencyKey, currEntry);
+        parsePackageDependencies(
+          lockfileEntry.dependencies,
+          lockfileEntry,
+          dependencyValue,
+          pnpmLockfileVersion,
+          workspace
+        );
+        allEntries.push(lockfileEntry);
+        allEntriesById.set(dependencyKey, lockfileEntry);
       }
     }
   } else {
+    const packagesByKey: Map<string, lockfileTypes.LockfilePackageInfo> = new Map();
+    if (lockfile.packages) {
+      for (const [dependencyKey, dependencyValue] of Object.entries(lockfile.packages)) {
+        packagesByKey.set(dependencyKey, dependencyValue);
+      }
+    }
+
     // In v9.0 format, the dependency graph for non-workspace packages is found under "snapshots" not "packages".
     // (The "packages" section now stores other fields that are unrelated to the graph itself.)
     const lockfile90: lockfileTypes.LockfileFile = lockfileJson as lockfileTypes.LockfileFile;
     if (lockfile90.snapshots) {
       for (const [dependencyKey, dependencyValue] of Object.entries(lockfile90.snapshots)) {
-        // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
-
-        const currEntry: LfxGraphEntry = createPackageLockfileEntry({
+        const lockfileEntry: LfxGraphEntry = createPackageLockfileEntry({
           rawEntryId: dependencyKey,
-          rawYamlData: dependencyValue as lockfileTypes.PackageSnapshot,
           workspace,
           pnpmLockfileVersion
         });
 
-        allEntries.push(currEntry);
-        allEntriesById.set(dependencyKey, currEntry);
+        parsePackageDependencies(
+          lockfileEntry.dependencies,
+          lockfileEntry,
+          dependencyValue,
+          pnpmLockfileVersion,
+          workspace
+        );
+
+        // Example: "@scope/my-package@1.0.0"
+        const packageInfoKey: string =
+          lockfileEntry.entryPackageName + '@' + lockfileEntry.entryPackageVersion;
+        const packageInfo: lockfileTypes.LockfilePackageInfo | undefined = packagesByKey.get(packageInfoKey);
+        if (packageInfo) {
+          parsePackageDependencies(
+            lockfileEntry.dependencies,
+            lockfileEntry,
+            packageInfo,
+            pnpmLockfileVersion,
+            workspace
+          );
+        }
+        allEntries.push(lockfileEntry);
+        allEntriesById.set(dependencyKey, lockfileEntry);
       }
     }
   }

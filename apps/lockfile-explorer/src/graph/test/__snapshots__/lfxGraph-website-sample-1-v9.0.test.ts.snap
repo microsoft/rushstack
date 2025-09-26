@@ -182,6 +182,22 @@ exports[`lfxGraph-website-sample-1-v9.0 loads a workspace 1`] = `
         peerDependencyMeta: {}
         resolvedEntryJsonId: 8
         version: 1.0.0
+      - dependencyType: peer
+        entryId: 'Peer: @rushstack/m'
+        name: '@rushstack/m'
+        peerDependencyMeta:
+          name: '@rushstack/m'
+          optional: false
+          version: ^1.0.0
+        version: ^1.0.0
+      - dependencyType: peer
+        entryId: 'Peer: @rushstack/n'
+        name: '@rushstack/n'
+        peerDependencyMeta:
+          name: '@rushstack/n'
+          optional: true
+          version: ^2.0.0
+        version: ^2.0.0
     displayText: '@rushstack/l 1.0.0 [@rushstack/m@1.0.0; @rushstack/n@2.0.0]'
     entryId: ''
     entryPackageName: '@rushstack/l'
