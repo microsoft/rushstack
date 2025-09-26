@@ -7024,6 +7024,7 @@ packages:
       '@types/node':
         optional: true
     dependencies:
+      '@rushstack/problem-matcher': file:../../../libraries/problem-matcher(@types/node@20.17.19)
       '@types/node': 20.17.19
       ajv: 8.13.0
       ajv-draft-04: 1.0.0(ajv@8.13.0)
@@ -7074,6 +7075,18 @@ packages:
       semver: 7.5.4
     transitivePeerDependencies:
       - '@types/node'
+
+  file:../../../libraries/problem-matcher(@types/node@20.17.19):
+    resolution: {directory: ../../../libraries/problem-matcher, type: directory}
+    id: file:../../../libraries/problem-matcher
+    name: '@rushstack/problem-matcher'
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+    dependencies:
+      '@types/node': 20.17.19
 
   file:../../../libraries/rig-package:
     resolution: {directory: ../../../libraries/rig-package, type: directory}
@@ -7166,6 +7179,7 @@ packages:
         optional: true
     dependencies:
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
+      '@rushstack/problem-matcher': file:../../../libraries/problem-matcher(@types/node@20.17.19)
       '@types/node': 20.17.19
       supports-color: 8.1.1
 

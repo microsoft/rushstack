@@ -17,6 +17,7 @@ import { HookMap } from 'tapable';
 import { IFileDiffStatus } from '@rushstack/package-deps-hash';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { IPrefixMatch } from '@rushstack/lookup-by-path';
+import type { IProblemCollector } from '@rushstack/terminal';
 import { ITerminal } from '@rushstack/terminal';
 import { ITerminalProvider } from '@rushstack/terminal';
 import { JsonNull } from '@rushstack/node-core-library';
@@ -621,6 +622,7 @@ export interface IOperationExecutionResult {
     readonly metadataFolderPath: string | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly operation: Operation;
+    readonly problemCollector: IProblemCollector;
     readonly silent: boolean;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;

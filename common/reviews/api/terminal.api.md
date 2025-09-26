@@ -7,6 +7,9 @@
 /// <reference types="node" />
 
 import type { Brand } from '@rushstack/node-core-library';
+import type { IProblem } from '@rushstack/problem-matcher';
+import type { IProblemMatcher } from '@rushstack/problem-matcher';
+import type { IProblemMatcherJson } from '@rushstack/problem-matcher';
 import { NewlineKind } from '@rushstack/node-core-library';
 import { Writable } from 'stream';
 import { WritableOptions } from 'stream';
@@ -140,6 +143,17 @@ export type IPrefixProxyTerminalProviderOptions = IStaticPrefixProxyTerminalProv
 // @beta (undocumented)
 export interface IPrefixProxyTerminalProviderOptionsBase {
     terminalProvider: ITerminalProvider;
+}
+
+// @public
+export interface IProblemCollector {
+    getProblems(): ReadonlyArray<IProblem>;
+}
+
+// @public
+export interface IProblemCollectorOptions extends ITerminalWritableOptions {
+    matcherJson?: IProblemMatcherJson[];
+    matchers?: IProblemMatcher[];
 }
 
 // @public
@@ -285,6 +299,14 @@ export class PrintUtilities {
     static wrapWordsToLines(text: string, maxLineLength?: number, indent?: number): string[];
     static wrapWordsToLines(text: string, maxLineLength?: number, linePrefix?: string): string[];
     static wrapWordsToLines(text: string, maxLineLength?: number, indentOrLinePrefix?: number | string): string[];
+}
+
+// @public
+export class ProblemCollector extends TerminalWritable implements IProblemCollector {
+    constructor(options: IProblemCollectorOptions);
+    getProblems(): ReadonlyArray<IProblem>;
+    protected onClose(): void;
+    protected onWriteChunk(chunk: ITerminalChunk): void;
 }
 
 // @public

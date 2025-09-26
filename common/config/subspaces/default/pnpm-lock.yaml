@@ -3421,6 +3421,9 @@ importers:
       '@rushstack/heft':
         specifier: 0.74.3
         version: 0.74.3(@types/node@20.17.19)
+      '@rushstack/problem-matcher':
+        specifier: workspace:*
+        version: link:../problem-matcher
       '@types/fs-extra':
         specifier: 7.0.0
         version: 7.0.0
@@ -3532,6 +3535,18 @@ importers:
       webpack:
         specifier: ~5.98.0
         version: 5.98.0
+
+  ../../../libraries/problem-matcher:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: 0.74.3
+        version: 0.74.3(@types/node@20.17.19)
+      decoupled-local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/decoupled-local-node-rig
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1(supports-color@8.1.1)
 
   ../../../libraries/rig-package:
     dependencies:
@@ -3868,6 +3883,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
+      '@rushstack/problem-matcher':
+        specifier: workspace:*
+        version: link:../problem-matcher
       supports-color:
         specifier: ~8.1.1
         version: 8.1.1

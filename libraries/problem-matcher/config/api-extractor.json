@@ -15,7 +15,5 @@
 
   "dtsRollup": {
     "enabled": true
-  },
-
-  "bundledPackages": ["@rushstack/problem-matcher"]
+  }
 }
