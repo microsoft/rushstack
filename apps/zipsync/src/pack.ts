@@ -33,20 +33,31 @@ import {
   METADATA_FILENAME
 } from './zipSyncUtils';
 
+/**
+ * File extensions for which additional DEFLATE/ZSTD compression is unlikely to help.
+ * Used by the 'auto' compression heuristic to avoid wasting CPU on data that is already
+ * compressed (images, media, existing archives, fonts, etc.).
+ */
 const LIKELY_COMPRESSED_EXTENSION_REGEX: RegExp =
   /\.(?:zip|gz|tgz|bz2|xz|7z|rar|jpg|jpeg|png|gif|webp|avif|mp4|m4v|mov|mkv|webm|mp3|ogg|aac|flac|pdf|woff|woff2)$/;
 
+/**
+ * Map zip compression method code -> incremental zlib mode label
+ */
 const zlibPackModes: Record<ZipMetaCompressionMethod, IncrementalZlibMode | undefined> = {
   [ZSTD_COMPRESSION]: 'zstd-compress',
   [DEFLATE_COMPRESSION]: 'deflate',
   [STORE_COMPRESSION]: undefined
 } as const;
 
+/**
+ * Public facing CLI option -> actual zip method used for a file we decide to compress.
+ */
 const zipSyncCompressionOptions: Record<ZipSyncOptionCompression, ZipMetaCompressionMethod> = {
   store: STORE_COMPRESSION,
   deflate: DEFLATE_COMPRESSION,
   zstd: ZSTD_COMPRESSION,
-  auto: DEFLATE_COMPRESSION // 'auto' is handled specially in the code
+  auto: DEFLATE_COMPRESSION
 } as const;
 
 /**
@@ -82,6 +93,18 @@ export interface IZipSyncPackResult {
   metadata: IMetadata;
 }
 
+/**
+ * Create a zipsync archive by enumerating target directories, then streaming each file into the
+ * output zip using the local file header + (optional compressed data) + data descriptor pattern.
+ *
+ * Performance characteristics:
+ *  - Single pass per file (no read-then-compress-then-write buffering). CRC32 + SHA-1 are computed
+ *    while streaming so the metadata JSON can later be used for selective unpack.
+ *  - Data descriptor usage (bit 3) allows writing headers before we know sizes or CRC32.
+ *  - A single timestamp (captured once) is applied to all entries for determinism.
+ *  - Metadata entry is added as a normal zip entry at the end (before central directory) so legacy
+ *    tools can still list/extract it, while zipsync can quickly parse file hashes.
+ */
 export function pack({
   archivePath,
   targetDirectories: rawTargetDirectories,
@@ -95,7 +118,7 @@ export function pack({
 
   markStart('pack.total');
   terminal.writeDebugLine('Starting pack');
-  // Pass 1: enumerate
+  // Pass 1: enumerate files with a queue to avoid deep recursion
   markStart('pack.enumerate');
 
   const filePaths: string[] = [];
@@ -140,7 +163,7 @@ export function pack({
   terminal.writeLine(`Found ${filePaths.length} files to pack (enumerated)`);
   markEnd('pack.enumerate');
 
-  // Pass 2: read + hash + compress
+  // Pass 2: stream each file: read chunks -> hash + (maybe) compress -> write local header + data descriptor.
   markStart('pack.prepareEntries');
   const bufferSize: number = 1 << 25; // 32 MiB
   const inputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
@@ -150,6 +173,9 @@ export function pack({
   using zipFile: IDisposableFileHandle = getDisposableFileHandle(archivePath, 'w');
   let currentOffset: number = 0;
   // Use this function to do any write to the zip file, so that we can track the current offset.
+  /**
+   * Write a raw chunk to the archive file descriptor, updating current offset.
+   */
   function writeChunkToZip(chunk: Uint8Array, lengthBytes: number = chunk.byteLength): void {
     let offset: number = 0;
     while (lengthBytes > 0 && offset < chunk.byteLength) {
@@ -162,6 +188,7 @@ export function pack({
     }
     currentOffset += offset;
   }
+  /** Convenience wrapper for writing multiple buffers sequentially. */
   function writeChunksToZip(chunks: Uint8Array[]): void {
     for (const chunk of chunks) {
       writeChunkToZip(chunk);
@@ -169,12 +196,27 @@ export function pack({
   }
 
   const dosDateTimeNow: { time: number; date: number } = dosDateTime(new Date());
+  /**
+   * Stream a single file into the archive.
+   * Steps:
+   *  1. Decide compression (based on user choice + heuristic).
+   *  2. Emit local file header (sizes/CRC zeroed because we use a data descriptor).
+   *  3. Read file in 32 MiB chunks: update SHA-1 + CRC32; optionally feed compressor or write raw.
+   *  4. Flush compressor (if any) and write trailing data descriptor containing sizes + CRC.
+   *  5. Return populated entry metadata for later central directory + JSON metadata.
+   */
   function writeFileEntry(relativePath: string): IFileEntry {
+    /**
+     * Basic heuristic: skip re-compressing file types that are already compressed.
+     */
     function isLikelyAlreadyCompressed(filename: string): boolean {
       return LIKELY_COMPRESSED_EXTENSION_REGEX.test(filename.toLowerCase());
     }
     const fullPath: string = path.join(baseDir, relativePath);
 
+    /**
+     * Read file in large fixed-size buffer; invoke callback for each filled chunk.
+     */
     const readInputInChunks: (onChunk: (bytesInInputBuffer: number) => void) => void = (
       onChunk: (bytesInInputBuffer: number) => void
     ): void => {
@@ -231,6 +273,9 @@ export function pack({
     let uncompressedSize: number = 0;
     let compressedSize: number = 0;
 
+    /**
+     * Compressor instance (deflate or zstd) created only if needed.
+     */
     using incrementalZlib: IIncrementalZlib | undefined = shouldCompress
       ? createIncrementalZlib(
           outputBuffer,
@@ -270,6 +315,7 @@ export function pack({
     entry.crc32 = crc32;
     entry.sha1Hash = sha1Hash;
 
+    // Trailing data descriptor now that final CRC/sizes are known.
     writeChunkToZip(writeDataDescriptor(entry));
 
     terminal.writeVerboseLine(
@@ -284,6 +330,7 @@ export function pack({
   }
 
   const entries: IFileEntry[] = [];
+  // Emit all file entries in enumeration order.
   for (const relativePath of filePaths) {
     entries.push(writeFileEntry(relativePath));
   }
@@ -293,6 +340,7 @@ export function pack({
 
   markStart('pack.metadata.build');
   const metadata: IMetadata = { version: METADATA_VERSION, files: {} };
+  // Build metadata map used for selective unpack (size + SHA‑1 per file).
   for (const entry of entries) {
     metadata.files[entry.filename] = { size: entry.size, sha1Hash: entry.sha1Hash };
   }
@@ -306,6 +354,7 @@ export function pack({
   let metadataCompressionMethod: ZipMetaCompressionMethod = zipSyncCompressionOptions.store;
   let metadataData: Buffer = metadataBuffer;
   let metadataCompressedSize: number = metadataBuffer.length;
+  // Compress metadata (deflate) iff user allowed compression and it helps (>64 bytes & smaller result).
   if (compression !== 'store' && metadataBuffer.length > 64) {
     const compressed: Buffer = zlib.deflateRawSync(metadataBuffer, { level: 9 });
     if (compressed.length < metadataBuffer.length) {
@@ -348,6 +397,7 @@ export function pack({
 
   markStart('pack.write.centralDirectory');
   const centralDirOffset: number = currentOffset;
+  // Emit central directory records.
   for (const entry of entries) {
     writeChunksToZip(writeCentralDirectoryHeader(entry));
   }

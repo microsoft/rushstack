@@ -63,6 +63,9 @@ export interface IZipSyncUnpackResult {
   otherEntriesDeleted: number;
 }
 
+/**
+ * Unpack a zipsync archive into the provided target directories.
+ */
 export function unpack({
   archivePath,
   targetDirectories: rawTargetDirectories,
@@ -76,11 +79,13 @@ export function unpack({
   markStart('unpack.total');
   terminal.writeDebugLine('Starting unpackZip');
 
+  // Read entire archive into memory (build cache entries are expected to be relatively small/medium).
   markStart('unpack.read.archive');
   const zipBuffer: Buffer = fs.readFileSync(archivePath);
   terminal.writeDebugLine(`Archive size=${zipBuffer.length} bytes`);
   markEnd('unpack.read.archive');
 
+  // Locate & parse central directory so we have random-access metadata for all entries.
   markStart('unpack.parse.centralDirectory');
   const zipTree: LookupByPath<boolean> = new LookupByPath();
   const endOfCentralDir: IEndOfCentralDirectory = findEndOfCentralDirectory(zipBuffer);
@@ -151,6 +156,7 @@ export function unpack({
 
   terminal.writeLine(`Found ${entries.length} files in archive`);
 
+  // Ensure root target directories exist (they may be empty initially for cache misses).
   for (const targetDirectory of targetDirectories) {
     fs.mkdirSync(targetDirectory, { recursive: true });
     terminal.writeDebugLine(`Ensured target directory: ${targetDirectory}`);
@@ -165,6 +171,7 @@ export function unpack({
 
   const dirsToCleanup: string[] = [];
 
+  // Phase: scan filesystem to delete entries not present in archive and record empty dirs for later removal.
   markStart('unpack.scan.existing');
   const queue: IDirQueueItem[] = targetDirectories.map((dir) => ({
     dir,
@@ -218,6 +225,7 @@ export function unpack({
     }
   }
 
+  // Try to delete now-empty directories (created in previous builds but not in this archive).
   for (const dir of dirsToCleanup) {
     // Try to remove the directory. If it is not empty, this will throw and we can ignore the error.
     if (rmdirSync(dir)) {
@@ -233,6 +241,10 @@ export function unpack({
 
   const bufferSize: number = 1 << 25; // 32 MiB
   const outputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
+  /**
+   * Stream-decompress (or copy) an individual file from the archive into place.
+   * We allocate a single large output buffer reused for all inflation operations to limit GC.
+   */
   function extractFileFromZip(targetPath: string, entry: ICentralDirectoryHeaderParseResult): void {
     terminal.writeDebugLine(`Extracting file: ${entry.filename}`);
     const fileZipBuffer: Buffer = getFileFromZip(zipBuffer, entry);
@@ -275,6 +287,10 @@ export function unpack({
     }
   }
 
+  /**
+   * Decide whether a file needs extraction by comparing existing file SHA‑1 vs metadata.
+   * If file is missing or hash differs we extract; otherwise we skip to preserve existing inode/data.
+   */
   function shouldExtract(targetPath: string, entry: ICentralDirectoryHeaderParseResult): boolean {
     if (metadata) {
       const metadataFile: { size: number; sha1Hash: string } | undefined = metadata.files[entry.filename];
@@ -300,6 +316,7 @@ export function unpack({
 
   const dirsCreated: Set<string> = new Set<string>();
 
+  // Iterate all entries excluding metadata; create parent dirs lazily; selective extraction.
   for (const entry of entries) {
     if (entry.filename === METADATA_FILENAME) {
       continue;

@@ -1,12 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// zip spec: https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+/**
+ * Low-level ZIP structure helpers used by the zipsync pack/unpack pipeline.
+ *
+ * Spec reference: https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+ */
 
-const LOCAL_FILE_HEADER_SIGNATURE: number = 0x04034b50;
-const CENTRAL_DIR_HEADER_SIGNATURE: number = 0x02014b50;
-const END_OF_CENTRAL_DIR_SIGNATURE: number = 0x06054b50;
-const DATA_DESCRIPTOR_SIGNATURE: number = 0x08074b50;
+/**
+ * Local file header signature PK\x03\x04
+ */
+const LOCAL_FILE_HEADER_SIGNATURE: number = 0x04034b50; // PK\x03\x04
+/**
+ * Central directory file header signature PK\x01\x02
+ */
+const CENTRAL_DIR_HEADER_SIGNATURE: number = 0x02014b50; // PK\x01\x02
+/**
+ * End of central directory signature PK\x05\x06
+ */
+const END_OF_CENTRAL_DIR_SIGNATURE: number = 0x06054b50; // PK\x05\x06
+/**
+ * Data descriptor signature PK\x07\x08
+ */
+const DATA_DESCRIPTOR_SIGNATURE: number = 0x08074b50; // PK\x07\x08
 
 export const STORE_COMPRESSION: 0 = 0;
 export const DEFLATE_COMPRESSION: 8 = 8;
@@ -88,6 +104,10 @@ function readUInt16LE(buffer: Buffer, offset: number): number {
   return buffer.readUInt16LE(offset);
 }
 
+/**
+ * Convert a JS Date into packed DOS time/date fields used by classic ZIP.
+ * Seconds are stored /2 (range 0-29 => 0-58s). Years are offset from 1980.
+ */
 export function dosDateTime(date: Date): { time: number; date: number } {
   /* eslint-disable no-bitwise */
   const time: number =
@@ -102,7 +122,23 @@ export function dosDateTime(date: Date): { time: number; date: number } {
   return { time, date: dateVal };
 }
 
+/**
+ * Reusable scratch buffer for the fixed-length local file header (30 bytes).
+ * Using a single Buffer avoids per-file allocations; callers must copy/use synchronously.
+ */
 const localFileHeaderBuffer: Buffer = Buffer.allocUnsafe(30);
+/**
+ * Write the fixed portion of a local file header for an entry (with data descriptor flag set) and
+ * return the header buffer plus the variable-length filename buffer.
+ *
+ * Layout (little-endian):
+ *   signature(4) versionNeeded(2) flags(2) method(2) modTime(2) modDate(2)
+ *   crc32(4) compSize(4) uncompSize(4) nameLen(2) extraLen(2)
+ *
+ * Because we set bit 3 of the general purpose flag, crc32/compSize/uncompSize are zero here and the
+ * actual values appear later in a trailing data descriptor record. This enables streaming without
+ * buffering entire file contents beforehand.
+ */
 export function writeLocalFileHeader(
   entry: IFileEntry
 ): [fileHeaderWithoutVariableLengthData: Buffer, fileHeaderVariableLengthData: Buffer] {
@@ -141,7 +177,15 @@ export function writeLocalFileHeader(
   return [localFileHeaderBuffer, filenameBuffer];
 }
 
+/**
+ * Reusable scratch buffer for central directory entries (fixed-length 46 bytes before filename)
+ */
 const centralDirHeaderBuffer: Buffer = Buffer.allocUnsafe(46);
+/**
+ * Write a central directory header referencing an already written local file entry.
+ * Central directory consolidates the final CRC + sizes (always present here) and provides a table
+ * for fast enumeration without scanning the archive sequentially.
+ */
 export function writeCentralDirectoryHeader(entry: IFileEntry): Buffer[] {
   const filenameBuffer: Buffer = Buffer.from(entry.filename, 'utf8');
 
@@ -188,7 +232,14 @@ export function writeCentralDirectoryHeader(entry: IFileEntry): Buffer[] {
   return [centralDirHeaderBuffer, filenameBuffer];
 }
 
+/**
+ * Data descriptor: signature(4) crc32(4) compSize(4) uncompSize(4)
+ */
 const dataDescriptorBuffer: Buffer = Buffer.allocUnsafe(16);
+/**
+ * Write the trailing data descriptor for an entry. Only used because we set flag bit 3 in the
+ * local file header allowing deferred CRC/size calculation.
+ */
 export function writeDataDescriptor(entry: IFileEntry): Buffer {
   let offset: number = 0;
   writeUInt32LE(dataDescriptorBuffer, DATA_DESCRIPTOR_SIGNATURE, offset); // signature PK\x07\x08
@@ -201,7 +252,14 @@ export function writeDataDescriptor(entry: IFileEntry): Buffer {
   return dataDescriptorBuffer;
 }
 
+/**
+ * End of central directory (EOCD) record (22 bytes when comment length = 0)
+ */
 const endOfCentralDirBuffer: Buffer = Buffer.allocUnsafe(22);
+/**
+ * Write the EOCD record referencing the accumulated central directory. We omit archive comments
+ * and do not support ZIP64 (sufficient for build cache archive sizes today).
+ */
 export function writeEndOfCentralDirectory(
   centralDirOffset: number,
   centralDirSize: number,
@@ -232,6 +290,10 @@ interface ILocalFileHeaderParseResult {
   nextOffset: number;
 }
 
+/**
+ * Parse a local file header at the provided offset. Minimal validation: signature check only.
+ * Returns header plus the offset pointing just past the variable-length name+extra field.
+ */
 export function parseLocalFileHeader(buffer: Buffer, offset: number): ILocalFileHeaderParseResult {
   const signature: number = readUInt32LE(buffer, offset);
   if (signature !== LOCAL_FILE_HEADER_SIGNATURE) {
@@ -265,6 +327,10 @@ export interface ICentralDirectoryHeaderParseResult {
   nextOffset: number;
 }
 
+/**
+ * Parse a central directory header at the given offset (within a sliced central directory buffer).
+ * Returns header, filename string, and nextOffset pointing to the next structure.
+ */
 export function parseCentralDirectoryHeader(
   buffer: Buffer,
   offset: number
@@ -306,6 +372,10 @@ export function parseCentralDirectoryHeader(
   };
 }
 
+/**
+ * Locate the EOCD record by reverse scanning. Since we never write a comment the EOCD will be the
+ * first matching signature encountered scanning backwards from the end.
+ */
 export function findEndOfCentralDirectory(buffer: Buffer): IEndOfCentralDirectory {
   for (let i: number = buffer.length - 22; i >= 0; i--) {
     if (readUInt32LE(buffer, i) === END_OF_CENTRAL_DIR_SIGNATURE) {
@@ -325,6 +395,10 @@ export function findEndOfCentralDirectory(buffer: Buffer): IEndOfCentralDirector
   throw new Error('End of central directory not found');
 }
 
+/**
+ * Slice out the (possibly compressed) file data bytes for a central directory entry.
+ * Caller will decompress if needed based on entry.header.compressionMethod.
+ */
 export function getFileFromZip(zipBuffer: Buffer, entry: ICentralDirectoryHeaderParseResult): Buffer {
   const { header: localFileHeader } = parseLocalFileHeader(zipBuffer, entry.header.localHeaderOffset);
   const localDataOffset: number =
