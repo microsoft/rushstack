@@ -75,11 +75,13 @@ function createPackageLockfileDependency(options: {
   } else {
     // Version 5.4: /@rushstack/m/1.0.0:
     // Version 6.0: /@rushstack/m@1.0.0:
+    // Version 9.0:  @rushstack/m@1.0.0:
     //
     // Version 5.4: /@rushstack/j/1.0.0_@rushstack+n@2.0.0
     // Version 6.0: /@rushstack/j@1.0.0(@rushstack/n@2.0.0)
-    const versionDelimiter: string = pnpmLockfileVersion === 54 ? '/' : '@';
-    result.entryId = '/' + result.name + versionDelimiter + result.version;
+    // Version 9.0:  @rushstack/j@1.0.0(@rushstack/n@2.0.0)
+    const versionDelimiter: string = pnpmLockfileVersion < 60 ? '/' : '@';
+    result.entryId = (pnpmLockfileVersion < 90 ? '/' : '') + result.name + versionDelimiter + result.version;
   }
   return new LfxGraphDependency(result);
 }
@@ -253,13 +255,24 @@ function createPackageLockfileEntry(options: {
 
   result.displayText = rawEntryId;
 
-  if (!rawEntryId.startsWith('/')) {
-    throw new Error('Expecting leading "/" in path: ' + JSON.stringify(rawEntryId));
+  let slashlessRawEntryId: string;
+
+  if (pnpmLockfileVersion >= 90) {
+    // The leading slash is omitted starting in V9.0
+    if (rawEntryId.startsWith('/')) {
+      throw new Error('Not expecting leading "/" in path: ' + JSON.stringify(rawEntryId));
+    }
+    slashlessRawEntryId = rawEntryId;
+  } else {
+    if (!rawEntryId.startsWith('/')) {
+      throw new Error('Expecting leading "/" in path: ' + JSON.stringify(rawEntryId));
+    }
+    slashlessRawEntryId = rawEntryId.substring(1);
   }
 
   let dotPnpmSubfolder: string;
 
-  if (pnpmLockfileVersion === 54) {
+  if (pnpmLockfileVersion < 60) {
     const lastSlashIndex: number = rawEntryId.lastIndexOf('/');
     if (lastSlashIndex < 0) {
       throw new Error('Expecting "/" in path: ' + JSON.stringify(rawEntryId));
@@ -292,31 +305,32 @@ function createPackageLockfileEntry(options: {
       (result.entrySuffix ? `_${result.entrySuffix}` : '');
   } else {
     // Example inputs:
-    //       /@rushstack/eslint-config@3.0.1
-    //       /@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+    //       @rushstack/eslint-config@3.0.1
+    //       @rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
     let versionAtSignIndex: number;
-    if (rawEntryId.startsWith('/@')) {
-      versionAtSignIndex = rawEntryId.indexOf('@', 2);
+    if (slashlessRawEntryId.startsWith('@')) {
+      versionAtSignIndex = slashlessRawEntryId.indexOf('@', 1);
     } else {
-      versionAtSignIndex = rawEntryId.indexOf('@', 1);
+      versionAtSignIndex = slashlessRawEntryId.indexOf('@');
     }
-    const packageName: string = rawEntryId.substring(1, versionAtSignIndex);
+
+    const packageName: string = slashlessRawEntryId.substring(0, versionAtSignIndex);
     result.entryPackageName = packageName;
 
-    const leftParenIndex: number = rawEntryId.indexOf('(', versionAtSignIndex);
+    const leftParenIndex: number = slashlessRawEntryId.indexOf('(', versionAtSignIndex);
     if (leftParenIndex < 0) {
-      const version: string = rawEntryId.substring(versionAtSignIndex + 1);
+      const version: string = slashlessRawEntryId.substring(versionAtSignIndex + 1);
       result.entryPackageVersion = version;
 
-      //       /@rushstack/eslint-config@3.0.1
+      //       @rushstack/eslint-config@3.0.1
       // -->   @rushstack/eslint-config 3.0.1
       result.displayText = packageName + ' ' + version;
     } else {
-      const version: string = rawEntryId.substring(versionAtSignIndex + 1, leftParenIndex);
+      const version: string = slashlessRawEntryId.substring(versionAtSignIndex + 1, leftParenIndex);
       result.entryPackageVersion = version;
 
       // "(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)"
-      let suffix: string = rawEntryId.substring(leftParenIndex);
+      let suffix: string = slashlessRawEntryId.substring(leftParenIndex);
 
       // Rewrite to:
       // "@rushstack/m@1.0.0; @rushstack/n@2.0.0"
@@ -325,17 +339,16 @@ function createPackageLockfileEntry(options: {
       suffix = Text.replaceAll(suffix, ')', '');
       result.entrySuffix = suffix;
 
-      //       /@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+      //       @rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
       // -->   @rushstack/l 1.0.0 [@rushstack/m@1.0.0; @rushstack/n@2.0.0]
       result.displayText = packageName + ' ' + version + ' [' + suffix + ']';
     }
 
-    // Example: /@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
+    // Example:  @rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
     // -->       @rushstack+l@1.0.0_@rushstack+m@1.0.0_@rushstack+n@2.0.0
 
     // @rushstack/l 1.0.0 (@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
-    dotPnpmSubfolder = rawEntryId.substring(1);
-    dotPnpmSubfolder = Text.replaceAll(dotPnpmSubfolder, '/', '+');
+    dotPnpmSubfolder = Text.replaceAll(slashlessRawEntryId, '/', '+');
     dotPnpmSubfolder = Text.replaceAll(dotPnpmSubfolder, ')(', '_');
     dotPnpmSubfolder = Text.replaceAll(dotPnpmSubfolder, '(', '_');
     dotPnpmSubfolder = Text.replaceAll(dotPnpmSubfolder, ')', '');
@@ -381,10 +394,10 @@ export function generateLockfileGraph(lockfileJson: unknown, workspace: IJsonLfx
     case '6.0':
       pnpmLockfileVersion = 60;
       break;
-    //case '9':
-    //case '9.0':
-    //  pnpmLockfileVersion = 90;
-    //  break;
+    case '9':
+    case '9.0':
+      pnpmLockfileVersion = 90;
+      break;
     default:
       throw new Error('Unsupported PNPM lockfile version ' + JSON.stringify(lockfile.lockfileVersion));
   }
@@ -424,7 +437,7 @@ export function generateLockfileGraph(lockfileJson: unknown, workspace: IJsonLfx
         pnpmLockfileVersion
       });
 
-      if (pnpmLockfileVersion === 54) {
+      if (pnpmLockfileVersion < 60) {
         const lockfile54: lockfileTypes.LockfileObject = lockfileJson as lockfileTypes.LockfileObject;
         const importerValue: lockfileTypes.ProjectSnapshot =
           lockfile54.importers[importerKey as pnpmTypes.ProjectId];
@@ -456,21 +469,40 @@ export function generateLockfileGraph(lockfileJson: unknown, workspace: IJsonLfx
     }
   }
 
-  const allPackages: LfxGraphEntry[] = [];
-  if (lockfile.packages) {
-    for (const [dependencyKey, dependencyValue] of Object.entries(lockfile.packages ?? {})) {
-      // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
+  if (pnpmLockfileVersion < 90) {
+    if (lockfile.packages) {
+      for (const [dependencyKey, dependencyValue] of Object.entries(lockfile.packages)) {
+        // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
 
-      const currEntry: LfxGraphEntry = createPackageLockfileEntry({
-        rawEntryId: dependencyKey,
-        rawYamlData: dependencyValue as lockfileTypes.PackageSnapshot,
-        workspace,
-        pnpmLockfileVersion
-      });
+        const currEntry: LfxGraphEntry = createPackageLockfileEntry({
+          rawEntryId: dependencyKey,
+          rawYamlData: dependencyValue as lockfileTypes.PackageSnapshot,
+          workspace,
+          pnpmLockfileVersion
+        });
 
-      allPackages.push(currEntry);
-      allEntries.push(currEntry);
-      allEntriesById.set(dependencyKey, currEntry);
+        allEntries.push(currEntry);
+        allEntriesById.set(dependencyKey, currEntry);
+      }
+    }
+  } else {
+    // In v9.0 format, the dependency graph for non-workspace packages is found under "snapshots" not "packages".
+    // (The "packages" section now stores other fields that are unrelated to the graph itself.)
+    const lockfile90: lockfileTypes.LockfileFile = lockfileJson as lockfileTypes.LockfileFile;
+    if (lockfile90.snapshots) {
+      for (const [dependencyKey, dependencyValue] of Object.entries(lockfile90.snapshots)) {
+        // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
+
+        const currEntry: LfxGraphEntry = createPackageLockfileEntry({
+          rawEntryId: dependencyKey,
+          rawYamlData: dependencyValue as lockfileTypes.PackageSnapshot,
+          workspace,
+          pnpmLockfileVersion
+        });
+
+        allEntries.push(currEntry);
+        allEntriesById.set(dependencyKey, currEntry);
+      }
     }
   }
 

@@ -15,7 +15,7 @@ export const workspace: IJsonLfxWorkspace = {
 
 describe('lfxGraph-edge-cases-v5.4', () => {
   it('loads a workspace', async () => {
-    const serializedYaml: string = await graphTestHelpers.loadAndSerializeLFxGraphAsync({
+    const serializedYaml: string = await graphTestHelpers.loadAndSerializeLfxGraphAsync({
       lockfilePathUnderFixtures: '/edge-cases/pnpm-lock-v5.4.yaml',
       workspace: workspace
     });

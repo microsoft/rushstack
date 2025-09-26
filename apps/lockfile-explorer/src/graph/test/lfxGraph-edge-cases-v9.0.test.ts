@@ -7,20 +7,16 @@ import * as graphTestHelpers from './graphTestHelpers';
 
 export const workspace: IJsonLfxWorkspace = {
   workspaceRootFullPath: '/repo',
-  pnpmLockfilePath: 'common/temp/pnpm-lock.yaml',
-  pnpmLockfileFolder: 'common/temp',
-  pnpmfilePath: 'common/temp/.pnpmfile.cjs',
-  rushConfig: {
-    rushVersion: '5.158.1',
-    subspaceName: '',
-    rushPnpmfilePath: 'common/config/.pnpmcfile.cjs'
-  }
+  pnpmLockfilePath: 'pnpm-lock.yaml',
+  pnpmLockfileFolder: '',
+  pnpmfilePath: '.pnpmfile.cjs',
+  rushConfig: undefined
 };
 
-describe('lfxGraph-website-sample-1-v6.0', () => {
+describe('lfxGraph-edge-cases-v9.0', () => {
   it('loads a workspace', async () => {
     const serializedYaml: string = await graphTestHelpers.loadAndSerializeLfxGraphAsync({
-      lockfilePathUnderFixtures: '/website-sample-1/pnpm-lock-v6.0-rush.yaml',
+      lockfilePathUnderFixtures: '/edge-cases/pnpm-lock-v9.0.yaml',
       workspace: workspace
     });
     expect(serializedYaml).toMatchSnapshot();
