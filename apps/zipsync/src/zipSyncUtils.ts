@@ -25,3 +25,5 @@ export interface IMetadata {
 export type IZipSyncMode = 'pack' | 'unpack';
 
 export type ZipSyncOptionCompression = 'store' | 'deflate' | 'zstd' | 'auto';
+
+export const defaultBufferSize: number = 1 << 25; // 32 MiB

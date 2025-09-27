@@ -23,7 +23,13 @@ import {
   type ZipMetaCompressionMethod
 } from './zipUtils';
 import { computeFileHash } from './hash';
-import { METADATA_FILENAME, METADATA_VERSION, type IDirQueueItem, type IMetadata } from './zipSyncUtils';
+import {
+  defaultBufferSize,
+  METADATA_FILENAME,
+  METADATA_VERSION,
+  type IDirQueueItem,
+  type IMetadata
+} from './zipSyncUtils';
 
 const zlibUnpackModes: Record<ZipMetaCompressionMethod, IncrementalZlibMode | undefined> = {
   [ZSTD_COMPRESSION]: 'zstd-decompress',
@@ -37,7 +43,7 @@ const zlibUnpackModes: Record<ZipMetaCompressionMethod, IncrementalZlibMode | un
  */
 export interface IZipSyncUnpackOptions {
   /**
-   * @rushstack/terminal compatible terminal for logging
+   * \@rushstack/terminal compatible terminal for logging
    */
   terminal: ITerminal;
   /**
@@ -45,13 +51,17 @@ export interface IZipSyncUnpackOptions {
    */
   archivePath: string;
   /**
-   * Target directories to pack or unpack (depending on mode)
+   * Target directories to unpack, relative to baseDir
    */
   targetDirectories: ReadonlyArray<string>;
   /**
    * Base directory for relative paths within the archive (defaults to common parent of targetDirectories)
    */
   baseDir: string;
+  /**
+   * Optional buffer that can be provided to avoid internal allocations.
+   */
+  outputBuffer?: Buffer<ArrayBuffer>;
 }
 
 export interface IZipSyncUnpackResult {
@@ -63,9 +73,6 @@ export interface IZipSyncUnpackResult {
   otherEntriesDeleted: number;
 }
 
-const bufferSize: number = 1 << 25; // 32 MiB
-const outputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
-
 /**
  * Unpack a zipsync archive into the provided target directories.
  */
@@ -73,7 +80,8 @@ export function unpack({
   archivePath,
   targetDirectories: rawTargetDirectories,
   baseDir: rawBaseDir,
-  terminal
+  terminal,
+  outputBuffer = Buffer.allocUnsafeSlow(defaultBufferSize)
 }: IZipSyncUnpackOptions): IZipSyncUnpackResult {
   const baseDir: string = path.resolve(rawBaseDir);
   const targetDirectories: string[] = rawTargetDirectories.map((dir) => path.join(baseDir, dir));

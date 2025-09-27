@@ -7,6 +7,7 @@ import { Terminal } from '@rushstack/terminal/lib/Terminal';
 import { StringBufferTerminalProvider } from '@rushstack/terminal/lib/StringBufferTerminalProvider';
 
 import { type IZipSyncPackOptions, type IZipSyncPackResult, pack } from './pack';
+import { defaultBufferSize } from './zipSyncUtils';
 
 export { type IZipSyncPackOptions, type IZipSyncPackResult } from './pack';
 
@@ -49,6 +50,9 @@ if (!rawParentPort) {
 }
 const parentPort: MessagePort = rawParentPort;
 
+let inputBuffer: Buffer<ArrayBuffer> | undefined = undefined;
+let outputBuffer: Buffer<ArrayBuffer> | undefined = undefined;
+
 function handleMessage(message: IHostToWorkerMessage | false): void {
   if (message === false) {
     parentPort.removeAllListeners();
@@ -63,12 +67,18 @@ function handleMessage(message: IHostToWorkerMessage | false): void {
     switch (message.type) {
       case 'zipsync-pack': {
         const { options } = message;
+        if (!inputBuffer) {
+          inputBuffer = Buffer.allocUnsafeSlow(defaultBufferSize);
+        }
+        if (!outputBuffer) {
+          outputBuffer = Buffer.allocUnsafeSlow(defaultBufferSize);
+        }
 
         const successMessage: IZipSyncSuccessMessage = {
           type: message.type,
           id: message.id,
           result: {
-            zipSyncReturn: pack({ ...options, terminal }),
+            zipSyncReturn: pack({ ...options, terminal, inputBuffer, outputBuffer }),
             zipSyncLogs: terminalProvider.getOutput()
           }
         };

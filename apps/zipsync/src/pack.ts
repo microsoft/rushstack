@@ -30,7 +30,8 @@ import {
   type IMetadata,
   type IDirQueueItem,
   METADATA_VERSION,
-  METADATA_FILENAME
+  METADATA_FILENAME,
+  defaultBufferSize
 } from './zipSyncUtils';
 
 /**
@@ -40,6 +41,13 @@ import {
  */
 const LIKELY_COMPRESSED_EXTENSION_REGEX: RegExp =
   /\.(?:zip|gz|tgz|bz2|xz|7z|rar|jpg|jpeg|png|gif|webp|avif|mp4|m4v|mov|mkv|webm|mp3|ogg|aac|flac|pdf|woff|woff2)$/;
+
+/**
+ * Basic heuristic: skip re-compressing file types that are already compressed.
+ */
+function isLikelyAlreadyCompressed(filename: string): boolean {
+  return LIKELY_COMPRESSED_EXTENSION_REGEX.test(filename.toLowerCase());
+}
 
 /**
  * Map zip compression method code -> incremental zlib mode label
@@ -66,7 +74,7 @@ const zipSyncCompressionOptions: Record<ZipSyncOptionCompression, ZipMetaCompres
  */
 export interface IZipSyncPackOptions {
   /**
-   * @rushstack/terminal compatible terminal for logging
+   * \@rushstack/terminal compatible terminal for logging
    */
   terminal: ITerminal;
   /**
@@ -74,7 +82,7 @@ export interface IZipSyncPackOptions {
    */
   archivePath: string;
   /**
-   * Target directories to pack or unpack (depending on mode)
+   * Target directories to pack (relative to baseDir)
    */
   targetDirectories: ReadonlyArray<string>;
   /**
@@ -86,16 +94,20 @@ export interface IZipSyncPackOptions {
    * produces a smaller result; otherwise it will fall back to 'store' per-file.
    */
   compression: ZipSyncOptionCompression;
+  /**
+   * Optional buffer that can be provided to avoid internal allocations.
+   */
+  inputBuffer?: Buffer<ArrayBuffer>;
+  /**
+   * Optional buffer that can be provided to avoid internal allocations.
+   */
+  outputBuffer?: Buffer<ArrayBuffer>;
 }
 
 export interface IZipSyncPackResult {
   filesPacked: number;
   metadata: IMetadata;
 }
-
-const bufferSize: number = 1 << 25; // 32 MiB
-const inputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
-const outputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
 
 /**
  * Create a zipsync archive by enumerating target directories, then streaming each file into the
@@ -114,7 +126,9 @@ export function pack({
   targetDirectories: rawTargetDirectories,
   baseDir: rawBaseDir,
   compression,
-  terminal
+  terminal,
+  inputBuffer = Buffer.allocUnsafeSlow(defaultBufferSize),
+  outputBuffer = Buffer.allocUnsafeSlow(defaultBufferSize)
 }: IZipSyncPackOptions): IZipSyncPackResult {
   const baseDir: string = path.resolve(rawBaseDir);
   const targetDirectories: string[] = rawTargetDirectories.map((dir) => path.join(baseDir, dir));
@@ -173,7 +187,6 @@ export function pack({
   terminal.writeDebugLine(`Opening archive for write: ${archivePath}`);
   using zipFile: IDisposableFileHandle = getDisposableFileHandle(archivePath, 'w');
   let currentOffset: number = 0;
-  // Use this function to do any write to the zip file, so that we can track the current offset.
   /**
    * Write a raw chunk to the archive file descriptor, updating current offset.
    */
@@ -207,12 +220,6 @@ export function pack({
    *  5. Return populated entry metadata for later central directory + JSON metadata.
    */
   function writeFileEntry(relativePath: string): IFileEntry {
-    /**
-     * Basic heuristic: skip re-compressing file types that are already compressed.
-     */
-    function isLikelyAlreadyCompressed(filename: string): boolean {
-      return LIKELY_COMPRESSED_EXTENSION_REGEX.test(filename.toLowerCase());
-    }
     const fullPath: string = path.join(baseDir, relativePath);
 
     /**
@@ -288,8 +295,7 @@ export function pack({
         )
       : undefined;
 
-    // Also capture content if we might need it (for compression decision or storing raw data).
-    // We'll accumulate into an array of buffers to avoid repeated concatenations for large files.
+    // Read input file in chunks, update hashes, and either compress or write raw.
     readInputInChunks((bytesInInputBuffer: number) => {
       const slice: Buffer = inputBuffer.subarray(0, bytesInInputBuffer);
       sha1HashBuilder.update(slice);
