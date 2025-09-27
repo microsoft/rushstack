@@ -449,6 +449,31 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
+  ../../../apps/zipsync:
+    dependencies:
+      '@rushstack/lookup-by-path':
+        specifier: workspace:*
+        version: link:../../libraries/lookup-by-path
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
+      '@rushstack/ts-command-line':
+        specifier: workspace:*
+        version: link:../../libraries/ts-command-line
+      typescript:
+        specifier: ~5.8.2
+        version: 5.8.2
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../heft
+      eslint:
+        specifier: ~9.25.1
+        version: 9.25.1(supports-color@8.1.1)
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../../build-tests-samples/heft-node-basic-tutorial:
     devDependencies:
       '@rushstack/heft':
@@ -10468,7 +10493,7 @@ packages:
     dependencies:
       '@pnpm/crypto.base32-hash': 3.0.1
       '@pnpm/types': 12.2.0
-      semver: 7.6.3
+      semver: 7.7.2
     dev: false
 
   /@pnpm/error@1.4.0:
@@ -14600,7 +14625,7 @@ packages:
       eslint: 9.25.1(supports-color@8.1.1)
       json-stable-stringify-without-jsonify: 1.0.1
       lodash.merge: 4.6.2
-      semver: 7.6.3
+      semver: 7.7.2
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -14809,7 +14834,7 @@ packages:
       fast-glob: 3.3.2
       is-glob: 4.0.3
       minimatch: 9.0.5
-      semver: 7.6.3
+      semver: 7.7.2
       ts-api-utils: 2.0.1(typescript@4.9.5)
       typescript: 4.9.5
     transitivePeerDependencies:
@@ -14828,7 +14853,7 @@ packages:
       fast-glob: 3.3.2
       is-glob: 4.0.3
       minimatch: 9.0.5
-      semver: 7.6.3
+      semver: 7.7.2
       ts-api-utils: 2.0.1(typescript@5.8.2)
       typescript: 5.8.2
     transitivePeerDependencies:
@@ -19319,7 +19344,7 @@ packages:
       espree: 10.3.0
       esquery: 1.6.0
       parse-imports-exports: 0.2.4
-      semver: 7.6.3
+      semver: 7.7.2
       spdx-expression-parse: 4.0.0
     transitivePeerDependencies:
       - supports-color
@@ -27813,16 +27838,10 @@ packages:
     dependencies:
       lru-cache: 6.0.0
 
-  /semver@7.6.3:
-    resolution: {integrity: sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A==}
-    engines: {node: '>=10'}
-    hasBin: true
-
   /semver@7.7.2:
     resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
     engines: {node: '>=10'}
     hasBin: true
-    dev: false
 
   /send@0.17.2:
     resolution: {integrity: sha512-UJYB6wFSJE3G00nEivR5rgWp8c2xXvJ3OPWPhmuteU0IKj8nKbG3DrjiOmLwpnHGYWAVwA69zmTm++YG0Hmwww==}
