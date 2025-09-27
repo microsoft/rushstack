@@ -93,6 +93,10 @@ export interface IZipSyncPackResult {
   metadata: IMetadata;
 }
 
+const bufferSize: number = 1 << 25; // 32 MiB
+const inputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
+const outputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
+
 /**
  * Create a zipsync archive by enumerating target directories, then streaming each file into the
  * output zip using the local file header + (optional compressed data) + data descriptor pattern.
@@ -165,9 +169,6 @@ export function pack({
 
   // Pass 2: stream each file: read chunks -> hash + (maybe) compress -> write local header + data descriptor.
   markStart('pack.prepareEntries');
-  const bufferSize: number = 1 << 25; // 32 MiB
-  const inputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
-  const outputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
 
   terminal.writeDebugLine(`Opening archive for write: ${archivePath}`);
   using zipFile: IDisposableFileHandle = getDisposableFileHandle(archivePath, 'w');

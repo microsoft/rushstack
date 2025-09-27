@@ -83,7 +83,7 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
       parameterLongName: '--compression',
       parameterShortName: '-z',
       description:
-        'Compression strategy when packing. "deflate" and "zlib" attempts compression for every file (keeps only if smaller); "auto" first skips likely-compressed types before attempting; "store" disables compression.',
+        'Compression strategy when packing. "deflate" and "zlib" attempts compression for every file (keeps only if smaller); "auto" first skips likely-compressed types before attempting "deflate" compression; "store" disables compression.',
       alternatives: ['store', 'deflate', 'zstd', 'auto'],
       required: true
     });

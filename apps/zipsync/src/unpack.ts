@@ -63,6 +63,9 @@ export interface IZipSyncUnpackResult {
   otherEntriesDeleted: number;
 }
 
+const bufferSize: number = 1 << 25; // 32 MiB
+const outputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
+
 /**
  * Unpack a zipsync archive into the provided target directories.
  */
@@ -239,8 +242,6 @@ export function unpack({
 
   markStart('unpack.extract.loop');
 
-  const bufferSize: number = 1 << 25; // 32 MiB
-  const outputBuffer: Buffer<ArrayBuffer> = Buffer.allocUnsafeSlow(bufferSize);
   /**
    * Stream-decompress (or copy) an individual file from the archive into place.
    * We allocate a single large output buffer reused for all inflation operations to limit GC.
