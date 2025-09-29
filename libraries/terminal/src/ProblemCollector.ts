@@ -22,6 +22,10 @@ export interface IProblemCollectorOptions extends ITerminalWritableOptions {
    * {@link @rushstack/problem-matcher#IProblemMatcher | IProblemMatcher} definitions.
    */
   matcherJson?: IProblemMatcherJson[];
+  /**
+   * Optional callback invoked immediately whenever a problem is produced.
+   */
+  onProblem?: (problem: IProblem) => void;
 }
 
 /**
@@ -33,11 +37,12 @@ export interface IProblemCollectorOptions extends ITerminalWritableOptions {
  * by a `"\n"` character (for example when preceded by {@link StderrLineTransform} / `StdioLineTransform`).
  * If a chunk does not end with a newline an error is thrown to surface incorrect pipeline wiring early.
  *
- * @beta
+ * @public
  */
 export class ProblemCollector extends TerminalWritable implements IProblemCollector {
   private readonly _matchers: IProblemMatcher[];
   private readonly _problems: Set<IProblem> = new Set();
+  private readonly _onProblem: ((problem: IProblem) => void) | undefined;
 
   public constructor(options: IProblemCollectorOptions) {
     super(options);
@@ -57,6 +62,7 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
     if (this._matchers.length === 0) {
       throw new Error('ProblemCollector requires at least one problem matcher.');
     }
+    this._onProblem = options.onProblem;
   }
 
   /**
@@ -87,6 +93,7 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
           matcherName: matcher.name
         };
         this._problems.add(finalized);
+        this._onProblem?.(finalized);
       }
     }
   }
@@ -105,6 +112,7 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
               matcherName: matcher.name
             };
             this._problems.add(finalized);
+            this._onProblem?.(finalized);
           }
         }
       }

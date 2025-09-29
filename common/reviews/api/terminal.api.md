@@ -154,6 +154,7 @@ export interface IProblemCollector {
 export interface IProblemCollectorOptions extends ITerminalWritableOptions {
     matcherJson?: IProblemMatcherJson[];
     matchers?: IProblemMatcher[];
+    onProblem?: (problem: IProblem) => void;
 }
 
 // @public
