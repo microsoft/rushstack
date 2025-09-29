@@ -146,7 +146,7 @@ export interface ICertificateManagerOptions extends ICertificateStoreOptions {}
 const MAX_CERTIFICATE_VALIDITY_DAYS: 365 = 365;
 
 const VS_CODE_EXTENSION_FIX_MESSAGE: string =
-  'Use the "Debug Certificate Manager Extension" for VS Code and run the ' +
+  'Use the "Debug Certificate Manager" Extension for VS Code (ms-RushStack.debug-certificate-manager) and run the ' +
   '"Debug Certificate Manager: Ensure and Sync TLS Certificates" command to fix certificate issues. ';
 
 /**
