@@ -75,6 +75,7 @@ export class CertificateStore {
               storePath = path.resolve(currentDir, debugCertificateManagerConfig.storePath);
             }
           }
+          break; // found the config file, stop searching
         }
         const parentDir: string | undefined = path.dirname(currentDir);
         if (parentDir === currentDir) {
