@@ -145,6 +145,10 @@ export interface ICertificateManagerOptions extends ICertificateStoreOptions {}
 
 const MAX_CERTIFICATE_VALIDITY_DAYS: 365 = 365;
 
+const VS_CODE_EXTENSION_FIX_MESSAGE: string =
+  'Use the "Debug Certificate Manager" Extension for VS Code (ms-RushStack.debug-certificate-manager) and run the ' +
+  '"Debug Certificate Manager: Ensure and Sync TLS Certificates" command to fix certificate issues. ';
+
 /**
  * A utility class to handle generating, trusting, and untrustring a debug certificate.
  * Contains two public methods to `ensureCertificate` and `untrustCertificate`.
@@ -177,7 +181,8 @@ export class CertificateManager {
     if (process.env[DISABLE_CERT_GENERATION_VARIABLE_NAME] === '1') {
       // Allow the environment (e.g. GitHub codespaces) to forcibly disable dev cert generation
       terminal.writeLine(
-        `Found environment variable ${DISABLE_CERT_GENERATION_VARIABLE_NAME}=1, disabling certificate generation.`
+        `Found environment variable ${DISABLE_CERT_GENERATION_VARIABLE_NAME}=1, disabling certificate generation. ` +
+          VS_CODE_EXTENSION_FIX_MESSAGE
       );
       canGenerateNewCertificate = false;
     }
@@ -207,7 +212,8 @@ export class CertificateManager {
       } else {
         validationResult.validationMessages.push(
           'Untrust the certificate and generate a new one, or set the ' +
-            '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`.'
+            '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`. ' +
+            VS_CODE_EXTENSION_FIX_MESSAGE
         );
         throw new Error(validationResult.validationMessages.join(' '));
       }
@@ -216,7 +222,8 @@ export class CertificateManager {
     } else {
       throw new Error(
         'No development certificate found. Generate a new certificate manually, or set the ' +
-          '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`.'
+          '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`. ' +
+          VS_CODE_EXTENSION_FIX_MESSAGE
       );
     }
   }
