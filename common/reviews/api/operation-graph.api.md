@@ -30,8 +30,8 @@ export interface ICancelCommandMessage {
 
 // @beta
 export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 'isFirstRun' | 'requestRun'> {
-    afterExecuteAsync(operation: Operation, state: IOperationState): Promise<void>;
-    beforeExecuteAsync(operation: Operation, state: IOperationState): Promise<void>;
+    afterExecute(operation: Operation, state: IOperationState): void;
+    beforeExecute(operation: Operation, state: IOperationState): void;
     queueWork(workFn: () => Promise<OperationStatus>, priority: number): Promise<OperationStatus>;
     requestRun?: OperationRequestRunCallback;
     terminal: ITerminal;
@@ -48,13 +48,13 @@ export interface IOperationExecutionOptions<TOperationMetadata extends {} = {}, 
     // (undocumented)
     abortSignal: AbortSignal;
     // (undocumented)
-    afterExecuteOperationAsync?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => Promise<void>;
+    afterExecuteOperation?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => void;
     // (undocumented)
-    afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
+    afterExecuteOperationGroup?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => void;
     // (undocumented)
-    beforeExecuteOperationAsync?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => Promise<void>;
+    beforeExecuteOperation?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => void;
     // (undocumented)
-    beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
+    beforeExecuteOperationGroup?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => void;
     // (undocumented)
     parallelism: number;
     // (undocumented)

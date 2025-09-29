@@ -62,12 +62,12 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
   /**
    * Function to invoke before execution of an operation, for logging.
    */
-  beforeExecuteAsync(operation: Operation, state: IOperationState): Promise<void>;
+  beforeExecute(operation: Operation, state: IOperationState): void;
 
   /**
    * Function to invoke after execution of an operation, for logging.
    */
-  afterExecuteAsync(operation: Operation, state: IOperationState): Promise<void>;
+  afterExecute(operation: Operation, state: IOperationState): void;
 
   /**
    * Function used to schedule the concurrency-limited execution of an operation.
@@ -328,7 +328,7 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
         return innerState.status;
       }
 
-      await context.beforeExecuteAsync(this, innerState);
+      context.beforeExecute(this, innerState);
 
       innerState.stopwatch.start();
       innerState.status = OperationStatus.Executing;
@@ -365,7 +365,7 @@ export class Operation<TMetadata extends {} = {}, TGroupMetadata extends {} = {}
       }
 
       state.stopwatch.stop();
-      await context.afterExecuteAsync(this, state);
+      context.afterExecute(this, state);
 
       return state.status;
     }, /* priority */ this.criticalPathLength ?? 0);
