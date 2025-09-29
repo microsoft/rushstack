@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Add ProblemCollector.onProblem notification callback",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}
