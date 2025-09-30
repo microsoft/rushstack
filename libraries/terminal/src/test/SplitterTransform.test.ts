@@ -31,7 +31,7 @@ describe(SplitterTransform.name, () => {
     expect(a.getFormattedChunks()).toMatchSnapshot();
   });
 
-  describe('addDestination', () => {
+  describe(SplitterTransform.prototype.addDestination.name, () => {
     it('only receives subsequent chunks', () => {
       const a: MockWritable = new MockWritable();
       const b: MockWritable = new MockWritable();
@@ -58,7 +58,7 @@ describe(SplitterTransform.name, () => {
     });
   });
 
-  describe('removeDestination', () => {
+  describe(SplitterTransform.prototype.removeDestination.name, () => {
     it('stops further writes and closes by default', () => {
       class CloseTrackingWritable extends MockWritable {
         public closed: boolean = false;
