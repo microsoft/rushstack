@@ -10,7 +10,7 @@ import type { IProblemCollector } from './IProblemCollector';
 
 /**
  * Constructor options for {@link ProblemCollector}.
- * @public
+ * @beta
  */
 export interface IProblemCollectorOptions extends ITerminalWritableOptions {
   /**
@@ -33,15 +33,11 @@ export interface IProblemCollectorOptions extends ITerminalWritableOptions {
  * by a `"\n"` character (for example when preceded by {@link StderrLineTransform} / `StdioLineTransform`).
  * If a chunk does not end with a newline an error is thrown to surface incorrect pipeline wiring early.
  *
- * Call `close()` before retrieving results via getProblems. Similar to other collectors, attempting
- * to read results before closure throws.
- * @see getProblems
- *
- * @public
+ * @beta
  */
 export class ProblemCollector extends TerminalWritable implements IProblemCollector {
   private readonly _matchers: IProblemMatcher[];
-  private readonly _problems: IProblem[] = [];
+  private readonly _problems: Set<IProblem> = new Set();
 
   public constructor(options: IProblemCollectorOptions) {
     super(options);
@@ -66,10 +62,7 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
   /**
    * {@inheritdoc IProblemCollector}
    */
-  public getProblems(): ReadonlyArray<IProblem> {
-    if (this.isOpen) {
-      throw new Error('Problems cannot be retrieved until after close() is called.');
-    }
+  public get problems(): ReadonlySet<IProblem> {
     return this._problems;
   }
 
@@ -89,10 +82,11 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
     for (const matcher of this._matchers) {
       const problem: IProblem | false = matcher.exec(text);
       if (problem) {
-        this._problems.push({
+        const finalized: IProblem = {
           ...problem,
           matcherName: matcher.name
-        });
+        };
+        this._problems.add(finalized);
       }
     }
   }
@@ -106,10 +100,11 @@ export class ProblemCollector extends TerminalWritable implements IProblemCollec
         const flushed: IProblem[] = matcher.flush();
         if (flushed && flushed.length > 0) {
           for (const problem of flushed) {
-            this._problems.push({
+            const finalized: IProblem = {
               ...problem,
               matcherName: matcher.name
-            });
+            };
+            this._problems.add(finalized);
           }
         }
       }

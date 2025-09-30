@@ -6,12 +6,11 @@ import type { IProblem } from '@rushstack/problem-matcher';
 /**
  * Collects problems (errors/warnings/info) encountered during an operation.
  *
- * @public
+ * @beta
  */
 export interface IProblemCollector {
   /**
-   * Returns the collected problems.
-   * @throws Error if the collector is not yet closed.
+   * Returns the collected problems so far.
    */
-  getProblems(): ReadonlyArray<IProblem>;
+  get problems(): ReadonlySet<IProblem>;
 }
