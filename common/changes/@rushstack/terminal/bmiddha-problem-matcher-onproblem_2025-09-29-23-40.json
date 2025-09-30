@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/terminal",
       "comment": "Add ProblemCollector.onProblem notification callback",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/terminal"
