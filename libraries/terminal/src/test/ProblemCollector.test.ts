@@ -28,8 +28,10 @@ class ErrorLineMatcher implements IProblemMatcher {
 
 describe('ProblemCollector', () => {
   it('collects a simple error line', () => {
+    const onProblemSpy = jest.fn<void, [IProblem]>();
     const collector: ProblemCollector = new ProblemCollector({
-      matchers: [new ErrorLineMatcher()]
+      matchers: [new ErrorLineMatcher()],
+      onProblem: onProblemSpy
     });
 
     collector.writeChunk({ kind: TerminalChunkKind.Stdout, text: 'hello world\n' });
@@ -45,13 +47,17 @@ describe('ProblemCollector', () => {
 
     const { problems } = collector;
     expect(problems.size).toBe(2);
-    const [firstProblem, secondProblem] = Array.from(problems);
-    expect(firstProblem.message).toBe('something bad happened in stdout');
-    expect(firstProblem.severity).toBe('error');
-    expect(firstProblem.matcherName).toBe('errorLine');
-    expect(secondProblem.message).toBe('something bad happened in stderr');
-    expect(secondProblem.severity).toBe('error');
-    expect(secondProblem.matcherName).toBe('errorLine');
+    expect(onProblemSpy).toHaveBeenCalledTimes(2);
+    expect(onProblemSpy).toHaveBeenNthCalledWith(1, {
+      matcherName: 'errorLine',
+      message: 'something bad happened in stdout',
+      severity: 'error'
+    });
+    expect(onProblemSpy).toHaveBeenNthCalledWith(2, {
+      matcherName: 'errorLine',
+      message: 'something bad happened in stderr',
+      severity: 'error'
+    });
   });
 });
 
@@ -70,16 +76,24 @@ describe('VSCodeProblemMatcherAdapter - additional location formats', () => {
     } satisfies IProblemMatcherJson;
 
     const matchers = parseProblemMatchersJson([matcherPattern]);
-    const collector = new ProblemCollector({ matchers });
+    const onProblemSpy = jest.fn<void, [IProblem]>();
+    const collector = new ProblemCollector({ matchers, onProblem: onProblemSpy });
     collector.writeChunk({ kind: TerminalChunkKind.Stdout, text: 'src/a.c(10,5): something happened\n' });
     collector.close();
     const { problems } = collector;
     expect(problems.size).toBe(1);
-    const [firstProblem] = Array.from(problems);
-    expect(firstProblem.file).toBe('src/a.c');
-    expect(firstProblem.line).toBe(10);
-    expect(firstProblem.column).toBe(5);
-    expect(firstProblem.message).toContain('something happened');
+    expect(onProblemSpy).toHaveBeenCalledTimes(1);
+    expect(onProblemSpy).toHaveBeenNthCalledWith(1, {
+      matcherName: 'loc-group',
+      file: 'src/a.c',
+      line: 10,
+      column: 5,
+      message: 'something happened',
+      code: undefined,
+      endColumn: undefined,
+      endLine: undefined,
+      severity: undefined
+    } satisfies IProblem);
   });
 
   it('parses explicit endLine and endColumn groups', () => {
@@ -99,18 +113,24 @@ describe('VSCodeProblemMatcherAdapter - additional location formats', () => {
     } satisfies IProblemMatcherJson;
 
     const matchers = parseProblemMatchersJson([matcherPattern]);
-    const collector = new ProblemCollector({ matchers });
+    const onProblemSpy = jest.fn<void, [IProblem]>();
+    const collector = new ProblemCollector({ matchers, onProblem: onProblemSpy });
     collector.writeChunk({ kind: TerminalChunkKind.Stdout, text: 'lib/x.c(10,5,12,20): multi-line issue\n' });
     collector.close();
     const { problems } = collector;
     expect(problems.size).toBe(1);
-    const [firstProblem] = Array.from(problems);
-    expect(firstProblem.file).toBe('lib/x.c');
-    expect(firstProblem.line).toBe(10);
-    expect(firstProblem.column).toBe(5);
-    expect(firstProblem.endLine).toBe(12);
-    expect(firstProblem.endColumn).toBe(20);
-    expect(firstProblem.message).toContain('multi-line issue');
+    expect(onProblemSpy).toHaveBeenCalledTimes(1);
+    expect(onProblemSpy).toHaveBeenNthCalledWith(1, {
+      matcherName: 'end-range',
+      file: 'lib/x.c',
+      line: 10,
+      column: 5,
+      endLine: 12,
+      endColumn: 20,
+      message: 'multi-line issue',
+      code: undefined,
+      severity: undefined
+    } satisfies IProblem);
   });
 });
 
@@ -131,7 +151,8 @@ describe('VSCodeProblemMatcherAdapter', () => {
     } satisfies IProblemMatcherJson;
 
     const matchers = parseProblemMatchersJson([matcherPattern]);
-    const collector = new ProblemCollector({ matchers });
+    const onProblemSpy = jest.fn<void, [IProblem]>();
+    const collector = new ProblemCollector({ matchers, onProblem: onProblemSpy });
     collector.writeChunk({
       kind: TerminalChunkKind.Stderr,
       text: "src/file.ts(10,5): error TS1005: ' ; ' expected\n"
@@ -139,12 +160,18 @@ describe('VSCodeProblemMatcherAdapter', () => {
     collector.close();
     const { problems } = collector;
     expect(problems.size).toBe(1);
-    const [firstProblem] = Array.from(problems);
-    expect(firstProblem.file).toBe('src/file.ts');
-    expect(firstProblem.line).toBe(10);
-    expect(firstProblem.column).toBe(5);
-    expect(firstProblem.code).toBe('TS1005');
-    expect(firstProblem.severity).toBe('error');
+    expect(onProblemSpy).toHaveBeenCalledTimes(1);
+    expect(onProblemSpy).toHaveBeenNthCalledWith(1, {
+      matcherName: 'tsc-like',
+      file: 'src/file.ts',
+      line: 10,
+      column: 5,
+      code: 'TS1005',
+      severity: 'error',
+      message: "' ; ' expected",
+      endColumn: undefined,
+      endLine: undefined
+    } satisfies IProblem);
   });
 
   it('converts and matches a multi-line pattern', () => {
@@ -173,19 +200,26 @@ describe('VSCodeProblemMatcherAdapter', () => {
       ]
     } satisfies IProblemMatcherJson;
     const matchers = parseProblemMatchersJson([matcherPattern]);
-    const collector = new ProblemCollector({ matchers });
+    const onProblemSpy = jest.fn<void, [IProblem]>();
+    const collector = new ProblemCollector({ matchers, onProblem: onProblemSpy });
     collector.writeChunk({ kind: TerminalChunkKind.Stdout, text: 'In file src/foo.c\n' });
     collector.writeChunk({ kind: TerminalChunkKind.Stdout, text: 'Line 42, Col 7\n' });
     collector.writeChunk({ kind: TerminalChunkKind.Stdout, text: 'error: something bad happened\n' });
     collector.close();
     const { problems } = collector;
     expect(problems.size).toBe(1);
-    const [firstProblem] = Array.from(problems);
-    expect(firstProblem.file).toBe('src/foo.c');
-    expect(firstProblem.line).toBe(42);
-    expect(firstProblem.column).toBe(7);
-    expect(firstProblem.severity).toBe('error');
-    expect(firstProblem.message).toContain('something bad');
+    expect(onProblemSpy).toHaveBeenCalledTimes(1);
+    expect(onProblemSpy).toHaveBeenNthCalledWith(1, {
+      matcherName: 'multi',
+      file: 'src/foo.c',
+      line: 42,
+      column: 7,
+      severity: 'error',
+      message: 'something bad happened',
+      code: undefined,
+      endColumn: undefined,
+      endLine: undefined
+    } satisfies IProblem);
   });
 
   it('handles a multi-line pattern whose last pattern loops producing multiple problems', () => {
@@ -217,16 +251,17 @@ describe('VSCodeProblemMatcherAdapter', () => {
 
     const errorLines: string[] = [
       'Encountered 6 errors',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:9:3 - (TS2578) Unused @ts-expect-error directive.',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:11:3 - (TS2578) Unused @ts-expect-error directive.',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:19:3 - (TS2578) Unused @ts-expect-error directive.',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:24:3 - (TS2578) Unused @ts-expect-error directive.',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:26:3 - (TS2578) Unused @ts-expect-error directive.',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:34:3 - (TS2578) Unused @ts-expect-error directive.'
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:9:3 - (TS2578) Unused @ts-expect-error directive 1.',
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:11:3 - (TS2578) Unused @ts-expect-error directive 2.',
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:19:3 - (TS2578) Unused @ts-expect-error directive 3.',
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:24:3 - (TS2578) Unused @ts-expect-error directive 4.',
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:26:3 - (TS2578) Unused @ts-expect-error directive 5.',
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:34:3 - (TS2578) Unused @ts-expect-error directive 6.'
     ];
 
     const matchers = parseProblemMatchersJson([matcherPattern]);
-    const collector = new ProblemCollector({ matchers });
+    const onProblemSpy = jest.fn<void, [IProblem]>();
+    const collector = new ProblemCollector({ matchers, onProblem: onProblemSpy });
     for (const line of errorLines) {
       collector.writeChunk({ kind: TerminalChunkKind.Stdout, text: line + '\n' });
     }
@@ -234,19 +269,21 @@ describe('VSCodeProblemMatcherAdapter', () => {
 
     const { problems } = collector;
     expect(problems.size).toBe(6);
+    expect(onProblemSpy).toHaveBeenCalledTimes(6);
 
     const problemLineNumbers: number[] = [9, 11, 19, 24, 26, 34];
-    const problemsArray = Array.from(problems);
     for (let i = 0; i < 6; i++) {
-      const p = problemsArray[i];
-      expect(p.file).toContain(
-        'vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts'
-      );
-      expect(p.line).toBe(problemLineNumbers[i]);
-      expect(p.column).toBe(3); // All sample lines have column 3
-      expect(p.code).toBe('TS2578');
-      expect(p.severity).toBe('error');
-      expect(p.message).toContain('Unused @ts-expect-error directive.');
+      expect(onProblemSpy).toHaveBeenNthCalledWith(i + 1, {
+        matcherName: 'ts-loop-errors',
+        file: 'vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts',
+        line: problemLineNumbers[i],
+        column: 3,
+        code: 'TS2578',
+        severity: 'error',
+        message: `Unused @ts-expect-error directive ${i + 1}.`,
+        endColumn: undefined,
+        endLine: undefined
+      } satisfies IProblem);
     }
   });
 
@@ -280,19 +317,31 @@ describe('VSCodeProblemMatcherAdapter', () => {
     ];
 
     const matchers = parseProblemMatchersJson([matcherPattern]);
-    const collector = new ProblemCollector({ matchers });
+    const onProblemSpy = jest.fn<void, [IProblem]>();
+    const collector = new ProblemCollector({ matchers, onProblem: onProblemSpy });
     collector.writeChunk({ kind: TerminalChunkKind.Stdout, text: 'Start Problems\n' });
     for (const l of lines) collector.writeChunk({ kind: TerminalChunkKind.Stdout, text: l + '\n' });
     collector.close();
     const { problems } = collector;
     expect(problems.size).toBe(4);
+    expect(onProblemSpy).toHaveBeenCalledTimes(4);
 
-    const problemsArray = Array.from(problems);
-    expect(problemsArray.map((p) => p.severity)).toEqual(['error', 'warning', 'error', 'info']);
-    expect(problemsArray.map((p) => p.code)).toEqual(['CODE100', 'CODE200', 'CODE300', 'CODE400']);
-    expect(problemsArray[0].file).toBe('lib/a.ts');
-    expect(problemsArray[1].file).toBe('lib/b.ts');
-    expect(problemsArray[2].file).toBe('lib/c.ts');
-    expect(problemsArray[3].file).toBe('lib/d.ts');
+    const problemCodes: string[] = ['CODE100', 'CODE200', 'CODE300', 'CODE400'];
+    const problemColumns: number[] = [5, 1, 9, 2];
+    const problemSeverities: ('error' | 'warning' | 'info')[] = ['error', 'warning', 'error', 'info'];
+    const problemMessages: string[] = ['First thing', 'Second thing', 'Third thing', 'Fourth thing'];
+    for (let i = 0; i < 4; i++) {
+      expect(onProblemSpy).toHaveBeenNthCalledWith(i + 1, {
+        matcherName: 'loop-with-severity',
+        file: `lib/${String.fromCharCode('a'.charCodeAt(0) + i)}.ts`,
+        line: (i + 1) * 10,
+        column: problemColumns[i],
+        code: problemCodes[i],
+        severity: problemSeverities[i],
+        message: problemMessages[i],
+        endColumn: undefined,
+        endLine: undefined
+      } satisfies IProblem);
+    }
   });
 });
