@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-json-schema-typings-plugin
 
-This log was last generated on Tue, 30 Sep 2025 20:33:51 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Sep 2025 23:57:45 GMT and should not be manually modified.
+
+## 1.0.0
+Tue, 30 Sep 2025 23:57:45 GMT
+
+### Breaking changes
+
+- Release Heft version 1.0.0
 
 ## 0.1.6
 Tue, 30 Sep 2025 20:33:51 GMT

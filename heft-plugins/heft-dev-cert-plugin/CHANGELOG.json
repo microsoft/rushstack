@@ -2,6 +2,32 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@rushstack/heft-dev-cert-plugin_v1.0.0",
+      "date": "Tue, 30 Sep 2025 23:57:45 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Release Heft version 1.0.0"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.5.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.75.0` to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.113",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.4.113",
       "date": "Tue, 30 Sep 2025 20:33:51 GMT",

@@ -2,6 +2,38 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@rushstack/heft-storybook-plugin_v1.0.0",
+      "date": "Tue, 30 Sep 2025 23:57:45 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Release Heft version 1.0.0"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.18.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `1.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.75.0` to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.22",
       "tag": "@rushstack/heft-storybook-plugin_v0.9.22",
       "date": "Tue, 30 Sep 2025 20:33:51 GMT",

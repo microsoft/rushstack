@@ -2,6 +2,24 @@
   "name": "@rushstack/webpack-embedded-dependencies-plugin",
   "entries": [
     {
+      "version": "0.2.111",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.2.111",
+      "date": "Tue, 30 Sep 2025 23:57:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.4.94`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.110",
       "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.2.110",
       "date": "Tue, 30 Sep 2025 20:33:51 GMT",

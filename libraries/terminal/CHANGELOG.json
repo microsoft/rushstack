@@ -2,6 +2,29 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.18.0",
+      "tag": "@rushstack/terminal_v0.18.0",
+      "date": "Tue, 30 Sep 2025 23:57:45 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add ProblemCollector.onProblem notification callback"
+          },
+          {
+            "comment": "Update API contract for `SplitterTransform` to support adding and removing destinations after creation."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/problem-matcher\" to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.0",
       "tag": "@rushstack/terminal_v0.17.0",
       "date": "Tue, 30 Sep 2025 20:33:51 GMT",

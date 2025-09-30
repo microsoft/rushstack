@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.15.1",
+      "tag": "@rushstack/node-core-library_v5.15.1",
+      "date": "Tue, 30 Sep 2025 23:57:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/problem-matcher\" to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.15.0",
       "tag": "@rushstack/node-core-library_v5.15.0",
       "date": "Tue, 30 Sep 2025 20:33:51 GMT",

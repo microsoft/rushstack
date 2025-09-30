@@ -2,6 +2,27 @@
   "name": "@rushstack/trace-import",
   "entries": [
     {
+      "version": "0.5.20",
+      "tag": "@rushstack/trace-import_v0.5.20",
+      "date": "Tue, 30 Sep 2025 23:57:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.18.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.0.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.19",
       "tag": "@rushstack/trace-import_v0.5.19",
       "date": "Tue, 30 Sep 2025 20:33:51 GMT",

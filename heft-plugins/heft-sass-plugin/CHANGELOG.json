@@ -2,6 +2,32 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@rushstack/heft-sass-plugin_v1.0.0",
+      "date": "Tue, 30 Sep 2025 23:57:45 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Release Heft version 1.0.0"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.75.0` to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.15",
       "tag": "@rushstack/heft-sass-plugin_v0.17.15",
       "date": "Tue, 30 Sep 2025 20:33:51 GMT",
