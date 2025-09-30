@@ -323,12 +323,14 @@ export class RemoveColorsTextRewriter extends TextRewriter {
 // @public
 export class SplitterTransform extends TerminalWritable {
     constructor(options: ISplitterTransformOptions);
+    addDestination(destination: TerminalWritable): void;
     // (undocumented)
-    readonly destinations: ReadonlyArray<TerminalWritable>;
+    get destinations(): ReadonlyArray<TerminalWritable>;
     // (undocumented)
     protected onClose(): void;
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
+    removeDestination(destination: TerminalWritable, close?: boolean): boolean;
 }
 
 // @beta

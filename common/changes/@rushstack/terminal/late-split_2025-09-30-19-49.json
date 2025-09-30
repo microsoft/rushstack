@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Update API contract for `SplitterTransform` to support adding and removing destinations after creation.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}
