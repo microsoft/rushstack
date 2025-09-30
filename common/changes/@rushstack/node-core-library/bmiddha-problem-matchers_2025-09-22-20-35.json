@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/node-core-library",
       "comment": "Add `FileError.getProblemMatcher()` which returns the problem matcher compatible with `IOperationExecutionResult.problemCollector` as well as VS Code, GitHub Actions",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/node-core-library"
