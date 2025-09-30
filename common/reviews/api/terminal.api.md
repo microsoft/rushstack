@@ -325,7 +325,7 @@ export class SplitterTransform extends TerminalWritable {
     constructor(options: ISplitterTransformOptions);
     addDestination(destination: TerminalWritable): void;
     // (undocumented)
-    get destinations(): ReadonlyArray<TerminalWritable>;
+    get destinations(): ReadonlySet<TerminalWritable>;
     // (undocumented)
     protected onClose(): void;
     // (undocumented)

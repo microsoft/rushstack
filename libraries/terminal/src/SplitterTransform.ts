@@ -36,8 +36,8 @@ export class SplitterTransform extends TerminalWritable {
     this._destinations = new Set(options.destinations);
   }
 
-  public get destinations(): ReadonlyArray<TerminalWritable> {
-    return [...this._destinations];
+  public get destinations(): ReadonlySet<TerminalWritable> {
+    return this._destinations;
   }
 
   /**
