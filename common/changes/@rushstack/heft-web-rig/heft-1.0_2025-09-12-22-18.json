@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Relase version 1.0.0",
+      "comment": "Release version 1.0.0",
       "type": "major",
       "packageName": "@rushstack/heft-web-rig"
     }
