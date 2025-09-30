@@ -6,7 +6,7 @@ import type {
   CommandLineFlagParameter,
   IRequiredCommandLineStringParameter,
   IRequiredCommandLineChoiceParameter,
-  IRequiredCommandLineStringListParameter
+  CommandLineStringListParameter
 } from '@rushstack/ts-command-line/lib/index';
 import type { ConsoleTerminalProvider } from '@rushstack/terminal/lib/ConsoleTerminalProvider';
 import type { ITerminal } from '@rushstack/terminal/lib/ITerminal';
@@ -20,7 +20,7 @@ export class ZipSyncCommandLineParser extends CommandLineParser {
   private readonly _modeParameter: IRequiredCommandLineChoiceParameter<IZipSyncMode>;
   private readonly _archivePathParameter: IRequiredCommandLineStringParameter;
   private readonly _baseDirParameter: IRequiredCommandLineStringParameter;
-  private readonly _targetDirectoriesParameter: IRequiredCommandLineStringListParameter;
+  private readonly _targetDirectoriesParameter: CommandLineStringListParameter;
   private readonly _compressionParameter: IRequiredCommandLineChoiceParameter<ZipSyncOptionCompression>;
   private readonly _terminal: ITerminal;
   private readonly _terminalProvider: ConsoleTerminalProvider;

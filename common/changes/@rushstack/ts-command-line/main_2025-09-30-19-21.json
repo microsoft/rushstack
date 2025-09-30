@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/ts-command-line",
-      "comment": "Add `IRequiredCommandLineStringListParameter`.",
-      "type": "minor"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@rushstack/ts-command-line"
