@@ -5,7 +5,11 @@ import { execSync } from 'child_process';
 
 describe('CLI Tool Tests', () => {
   it('should display help for "zipsync --help"', () => {
-    const startOutput = execSync('node lib/start.js --help').toString();
-    expect(startOutput).toMatchSnapshot();
+    const startOutput = execSync('node lib/start.js --help', { encoding: 'utf-8' });
+    const normalized = startOutput.replace(
+      /zipsync \d+\.\d+\.\d+(?:-[0-9A-Za-z-.]+)? - https:\/\/rushstack\.io/,
+      'zipsync {version} - https://rushstack.io'
+    );
+    expect(normalized).toMatchSnapshot();
   });
 });
