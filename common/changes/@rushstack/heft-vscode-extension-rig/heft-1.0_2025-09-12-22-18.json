@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Release version 1.0.0",
+      "comment": "Release Heft version 1.0.0",
       "type": "major",
       "packageName": "@rushstack/heft-vscode-extension-rig"
     }
