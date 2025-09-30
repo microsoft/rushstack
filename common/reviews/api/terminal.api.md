@@ -159,7 +159,7 @@ export interface IProblemCollectorOptions extends ITerminalWritableOptions {
 
 // @public
 export interface ISplitterTransformOptions extends ITerminalWritableOptions {
-    destinations: TerminalWritable[];
+    destinations: Iterable<TerminalWritable>;
 }
 
 // @beta
