@@ -159,7 +159,7 @@ export interface IProblemCollectorOptions extends ITerminalWritableOptions {
 
 // @public
 export interface ISplitterTransformOptions extends ITerminalWritableOptions {
-    destinations: TerminalWritable[];
+    destinations: Iterable<TerminalWritable>;
 }
 
 // @beta
@@ -323,12 +323,14 @@ export class RemoveColorsTextRewriter extends TextRewriter {
 // @public
 export class SplitterTransform extends TerminalWritable {
     constructor(options: ISplitterTransformOptions);
+    addDestination(destination: TerminalWritable): void;
     // (undocumented)
-    readonly destinations: ReadonlyArray<TerminalWritable>;
+    get destinations(): ReadonlySet<TerminalWritable>;
     // (undocumented)
     protected onClose(): void;
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
+    removeDestination(destination: TerminalWritable, close?: boolean): boolean;
 }
 
 // @beta

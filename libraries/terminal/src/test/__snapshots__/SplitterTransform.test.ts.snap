@@ -1,0 +1,114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SplitterTransform addDestination only receives subsequent chunks 1`] = `
+Object {
+  "a": Array [
+    Object {
+      "kind": "O",
+      "text": "early1 ",
+    },
+    Object {
+      "kind": "O",
+      "text": "early2 ",
+    },
+    Object {
+      "kind": "O",
+      "text": "late1 ",
+    },
+    Object {
+      "kind": "O",
+      "text": "late2",
+    },
+  ],
+  "late": Array [
+    Object {
+      "kind": "O",
+      "text": "late1 ",
+    },
+    Object {
+      "kind": "O",
+      "text": "late2",
+    },
+  ],
+}
+`;
+
+exports[`SplitterTransform removeDestination respects preventAutoclose 1`] = `
+Object {
+  "a": Array [
+    Object {
+      "kind": "O",
+      "text": "hello ",
+    },
+    Object {
+      "kind": "O",
+      "text": "world",
+    },
+  ],
+  "b": Array [
+    Object {
+      "kind": "O",
+      "text": "hello ",
+    },
+  ],
+}
+`;
+
+exports[`SplitterTransform removeDestination stops further writes and closes by default 1`] = `
+Object {
+  "a": Array [
+    Object {
+      "kind": "O",
+      "text": "first ",
+    },
+    Object {
+      "kind": "O",
+      "text": "second",
+    },
+  ],
+  "b": Array [
+    Object {
+      "kind": "O",
+      "text": "first ",
+    },
+  ],
+}
+`;
+
+exports[`SplitterTransform removeDestination with close=false keeps destination open 1`] = `
+Object {
+  "a": Array [
+    Object {
+      "kind": "O",
+      "text": "first ",
+    },
+    Object {
+      "kind": "O",
+      "text": "second",
+    },
+  ],
+  "b": Array [
+    Object {
+      "kind": "O",
+      "text": "first ",
+    },
+  ],
+}
+`;
+
+exports[`SplitterTransform writes chunks to all initial destinations 1`] = `
+Array [
+  Object {
+    "kind": "O",
+    "text": "one ",
+  },
+  Object {
+    "kind": "E",
+    "text": "two ",
+  },
+  Object {
+    "kind": "O",
+    "text": "three",
+  },
+]
+`;
