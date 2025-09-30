@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/problem-matcher",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A library for parsing VS Code style problem matchers",
   "main": "lib/index.js",
   "typings": "dist/problem-matcher.d.ts",
