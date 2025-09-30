@@ -6,14 +6,6 @@ import { CommandLineParameterWithArgument, CommandLineParameterKind } from './Ba
 import { EnvironmentVariableParser } from './EnvironmentVariableParser';
 
 /**
- * The data type returned by {@link CommandLineParameterProvider.(defineStringParameter:2)}.
- * @public
- */
-export interface IRequiredCommandLineStringListParameter extends CommandLineStringListParameter {
-  values: ReadonlyArray<string>;
-}
-
-/**
  * The data type returned by {@link CommandLineParameterProvider.defineStringListParameter}.
  * @public
  */
