@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as zlib from 'zlib';
+import * as zlib from 'node:zlib';
 
-import { fallbackCrc32 } from './crc32';
+import { fallbackCrc32 } from '../crc32';
 
 describe('crc32', () => {
   it('fallbackCrc32 should match zlib.crc32', () => {

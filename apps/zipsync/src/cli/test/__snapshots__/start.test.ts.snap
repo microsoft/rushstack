@@ -2,7 +2,7 @@
 
 exports[`CLI Tool Tests should display help for "zipsync --help" 1`] = `
 "
-zipsync 0.0.0 - https://rushstack.io
+zipsync {version} - https://rushstack.io
 
 usage: zipsync [-h] [-d] [-v] -m {pack,unpack} -a ARCHIVE_PATH -t
                TARGET_DIRECTORIES -b BASE_DIR -z {store,deflate,zstd,auto}
