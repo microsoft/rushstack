@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Release Heft version 1.0.0",
+      "type": "major",
+      "packageName": "@rushstack/heft-storybook-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Release Heft version 1.0.0",
+      "type": "major",
+      "packageName": "@rushstack/heft-dev-cert-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-dev-cert-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
