@@ -258,6 +258,10 @@ function finalizeProblem(
   captures: ICapturesMutable,
   defaultSeverity: ProblemSeverity | undefined
 ): IProblem {
+  // For multi-line patterns, use only the last non-empty message part
+  const message: string =
+    captures.messageParts.length > 0 ? captures.messageParts[captures.messageParts.length - 1] : '';
+
   return {
     matcherName,
     file: captures.file,
@@ -267,7 +271,7 @@ function finalizeProblem(
     endColumn: captures.endColumn,
     severity: captures.severity || defaultSeverity,
     code: captures.code,
-    message: captures.messageParts.join('\n')
+    message: message
   };
 }
 

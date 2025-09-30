@@ -83,13 +83,17 @@ describe('VSCodeProblemMatcherAdapter - additional location formats', () => {
     const { problems } = collector;
     expect(problems.size).toBe(1);
     expect(onProblemSpy).toHaveBeenCalledTimes(1);
-    expect(onProblemSpy).toHaveBeenCalledWith(1, {
+    expect(onProblemSpy).toHaveBeenNthCalledWith(1, {
       matcherName: 'loc-group',
       file: 'src/a.c',
       line: 10,
       column: 5,
-      message: 'something happened'
-    });
+      message: 'something happened',
+      code: undefined,
+      endColumn: undefined,
+      endLine: undefined,
+      severity: undefined
+    } satisfies IProblem);
   });
 
   it('parses explicit endLine and endColumn groups', () => {
@@ -116,15 +120,17 @@ describe('VSCodeProblemMatcherAdapter - additional location formats', () => {
     const { problems } = collector;
     expect(problems.size).toBe(1);
     expect(onProblemSpy).toHaveBeenCalledTimes(1);
-    expect(onProblemSpy).toHaveBeenCalledWith(1, {
+    expect(onProblemSpy).toHaveBeenNthCalledWith(1, {
       matcherName: 'end-range',
       file: 'lib/x.c',
       line: 10,
       column: 5,
       endLine: 12,
       endColumn: 20,
-      message: 'multi-line issue'
-    });
+      message: 'multi-line issue',
+      code: undefined,
+      severity: undefined
+    } satisfies IProblem);
   });
 });
 
@@ -155,15 +161,17 @@ describe('VSCodeProblemMatcherAdapter', () => {
     const { problems } = collector;
     expect(problems.size).toBe(1);
     expect(onProblemSpy).toHaveBeenCalledTimes(1);
-    expect(onProblemSpy).toHaveBeenCalledWith(1, {
+    expect(onProblemSpy).toHaveBeenNthCalledWith(1, {
       matcherName: 'tsc-like',
       file: 'src/file.ts',
       line: 10,
       column: 5,
       code: 'TS1005',
       severity: 'error',
-      message: "' ; ' expected"
-    });
+      message: "' ; ' expected",
+      endColumn: undefined,
+      endLine: undefined
+    } satisfies IProblem);
   });
 
   it('converts and matches a multi-line pattern', () => {
@@ -201,14 +209,17 @@ describe('VSCodeProblemMatcherAdapter', () => {
     const { problems } = collector;
     expect(problems.size).toBe(1);
     expect(onProblemSpy).toHaveBeenCalledTimes(1);
-    expect(onProblemSpy).toHaveBeenCalledWith(1, {
+    expect(onProblemSpy).toHaveBeenNthCalledWith(1, {
       matcherName: 'multi',
       file: 'src/foo.c',
       line: 42,
       column: 7,
       severity: 'error',
-      message: 'something bad happened'
-    });
+      message: 'something bad happened',
+      code: undefined,
+      endColumn: undefined,
+      endLine: undefined
+    } satisfies IProblem);
   });
 
   it('handles a multi-line pattern whose last pattern loops producing multiple problems', () => {
@@ -240,12 +251,12 @@ describe('VSCodeProblemMatcherAdapter', () => {
 
     const errorLines: string[] = [
       'Encountered 6 errors',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:9:3 - (TS2578) Unused @ts-expect-error directive.',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:11:3 - (TS2578) Unused @ts-expect-error directive.',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:19:3 - (TS2578) Unused @ts-expect-error directive.',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:24:3 - (TS2578) Unused @ts-expect-error directive.',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:26:3 - (TS2578) Unused @ts-expect-error directive.',
-      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:34:3 - (TS2578) Unused @ts-expect-error directive.'
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:9:3 - (TS2578) Unused @ts-expect-error directive 1.',
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:11:3 - (TS2578) Unused @ts-expect-error directive 2.',
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:19:3 - (TS2578) Unused @ts-expect-error directive 3.',
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:24:3 - (TS2578) Unused @ts-expect-error directive 4.',
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:26:3 - (TS2578) Unused @ts-expect-error directive 5.',
+      '  [build:typescript] vscode-extensions/debug-certificate-manager-vscode-extension/src/certificates.ts:34:3 - (TS2578) Unused @ts-expect-error directive 6.'
     ];
 
     const matchers = parseProblemMatchersJson([matcherPattern]);
@@ -269,8 +280,10 @@ describe('VSCodeProblemMatcherAdapter', () => {
         column: 3,
         code: 'TS2578',
         severity: 'error',
-        message: 'Unused @ts-expect-error directive.'
-      });
+        message: `Unused @ts-expect-error directive ${i + 1}.`,
+        endColumn: undefined,
+        endLine: undefined
+      } satisfies IProblem);
     }
   });
 
@@ -325,8 +338,10 @@ describe('VSCodeProblemMatcherAdapter', () => {
         column: problemColumns[i],
         code: problemCodes[i],
         severity: problemSeverities[i],
-        message: problemMessages[i]
-      });
+        message: problemMessages[i],
+        endColumn: undefined,
+        endLine: undefined
+      } satisfies IProblem);
     }
   });
 });
