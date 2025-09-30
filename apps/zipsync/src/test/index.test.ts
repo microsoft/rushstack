@@ -7,10 +7,10 @@ import * as fs from 'node:fs';
 import { NoOpTerminalProvider } from '@rushstack/terminal/lib/NoOpTerminalProvider';
 import { Terminal } from '@rushstack/terminal/lib/Terminal';
 
-import { pack } from './pack';
-import { unpack } from './unpack';
-import { getDemoDataDirectoryDisposable } from './testUtils';
-import type { ZipSyncOptionCompression } from './zipSyncUtils';
+import { pack } from '../pack';
+import { unpack } from '../unpack';
+import { getDemoDataDirectoryDisposable } from '../testUtils';
+import type { ZipSyncOptionCompression } from '../zipSyncUtils';
 
 describe('zipSync tests', () => {
   it(`basic pack test`, () => {

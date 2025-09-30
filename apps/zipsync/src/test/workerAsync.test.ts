@@ -4,8 +4,8 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 
-import { unpackWorkerAsync } from './unpackWorkerAsync';
-import { packWorkerAsync } from './packWorkerAsync';
+import { unpackWorkerAsync } from '../unpackWorkerAsync';
+import { packWorkerAsync } from '../packWorkerAsync';
 import { getDemoDataDirectoryDisposable } from './testUtils';
 
 describe('zipSyncWorkerAsync tests', () => {

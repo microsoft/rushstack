@@ -11,8 +11,8 @@ import type {
 import type { ConsoleTerminalProvider } from '@rushstack/terminal/lib/ConsoleTerminalProvider';
 import type { ITerminal } from '@rushstack/terminal/lib/ITerminal';
 
-import type { IZipSyncMode, ZipSyncOptionCompression } from './zipSyncUtils';
-import { pack, unpack } from './index';
+import type { IZipSyncMode, ZipSyncOptionCompression } from '../zipSyncUtils';
+import { pack, unpack } from '../index';
 
 export class ZipSyncCommandLineParser extends CommandLineParser {
   private readonly _debugParameter: CommandLineFlagParameter;

@@ -10,9 +10,9 @@ import { createHash, randomUUID } from 'crypto';
 
 import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import type { ZipSyncOptionCompression } from './zipSyncUtils';
-import { pack } from './pack';
-import { unpack } from './unpack';
+import type { ZipSyncOptionCompression } from '../zipSyncUtils';
+import { pack } from '../pack';
+import { unpack } from '../unpack';
 
 const compressionOptions = ['store', 'deflate', 'zstd', 'auto'] satisfies ZipSyncOptionCompression[];
 
@@ -461,7 +461,9 @@ zipsync internally handles cleaning as part of its operation.
     outputLines.push('| OS | Arch | Node | CPU | Logical Cores | Memory |');
     outputLines.push('| --- | --- | --- | --- | ---: | --- |');
     outputLines.push(
-      `| ${platform()} ${release()} | ${arch()} | ${process.version} | ${cpuModel} | ${logicalCores} | ${memGB} GB |`
+      `| ${platform()} ${release()} | ${arch()} | ${
+        process.version
+      } | ${cpuModel} | ${logicalCores} | ${memGB} GB |`
     );
     outputLines.push('');
   } catch {

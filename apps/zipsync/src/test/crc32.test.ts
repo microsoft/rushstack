@@ -3,7 +3,7 @@
 
 import * as zlib from 'zlib';
 
-import { fallbackCrc32 } from './crc32';
+import { fallbackCrc32 } from '../crc32';
 
 describe('crc32', () => {
   it('fallbackCrc32 should match zlib.crc32', () => {
