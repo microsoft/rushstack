@@ -9,7 +9,7 @@ import { Terminal } from '@rushstack/terminal/lib/Terminal';
 
 import { pack } from '../pack';
 import { unpack } from '../unpack';
-import { getDemoDataDirectoryDisposable } from '../testUtils';
+import { getDemoDataDirectoryDisposable } from './testUtils';
 import type { ZipSyncOptionCompression } from '../zipSyncUtils';
 
 describe('zipSync tests', () => {

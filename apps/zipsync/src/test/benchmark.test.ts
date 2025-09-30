@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 /* eslint-disable no-console */
 
-import { execSync } from 'child_process';
-import { tmpdir, cpus, platform, release, arch, totalmem } from 'os';
-import * as path from 'path';
-import * as fs from 'fs';
-import { createHash, randomUUID } from 'crypto';
+import { execSync } from 'node:child_process';
+import { tmpdir, cpus, platform, release, arch, totalmem } from 'node:os';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
+import { createHash, randomUUID } from 'node:crypto';
 
 import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
 
