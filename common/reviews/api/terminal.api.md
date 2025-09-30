@@ -145,12 +145,12 @@ export interface IPrefixProxyTerminalProviderOptionsBase {
     terminalProvider: ITerminalProvider;
 }
 
-// @public
+// @beta
 export interface IProblemCollector {
-    getProblems(): ReadonlyArray<IProblem>;
+    get problems(): ReadonlySet<IProblem>;
 }
 
-// @public
+// @beta
 export interface IProblemCollectorOptions extends ITerminalWritableOptions {
     matcherJson?: IProblemMatcherJson[];
     matchers?: IProblemMatcher[];
@@ -301,12 +301,12 @@ export class PrintUtilities {
     static wrapWordsToLines(text: string, maxLineLength?: number, indentOrLinePrefix?: number | string): string[];
 }
 
-// @public
+// @beta
 export class ProblemCollector extends TerminalWritable implements IProblemCollector {
     constructor(options: IProblemCollectorOptions);
-    getProblems(): ReadonlyArray<IProblem>;
     protected onClose(): void;
     protected onWriteChunk(chunk: ITerminalChunk): void;
+    get problems(): ReadonlySet<IProblem>;
 }
 
 // @public
