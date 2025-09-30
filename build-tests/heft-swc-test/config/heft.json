@@ -4,7 +4,7 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-esnext", "lib-es5", "lib-umd", "temp"] }],
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib-commonjs", "lib-esm", "lib-es5", "temp"] }],
 
       "tasksByName": {
         "typescript": {
