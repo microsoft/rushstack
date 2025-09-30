@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-jest-plugin",
-  "version": "0.16.15",
+  "version": "1.0.0",
   "description": "Heft plugin for Jest",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.75.0",
+    "@rushstack/heft": "^1.0.0",
     "jest-environment-jsdom": "^29.5.0",
     "jest-environment-node": "^29.5.0"
   },

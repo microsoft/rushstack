@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/webpack5-load-themed-styles-loader",
-  "version": "0.2.109",
+  "version": "0.2.110",
   "description": "This simple loader wraps the loading of CSS in script equivalent to `require('load-themed-styles').loadStyles( /* css text */ )`. It is designed to be a replacement for style-loader.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@microsoft/load-themed-styles": "^2.1.13",
+    "@microsoft/load-themed-styles": "^2.1.14",
     "webpack": "^5"
   },
   "peerDependenciesMeta": {

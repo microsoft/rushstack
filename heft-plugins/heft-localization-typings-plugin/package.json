@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-localization-typings-plugin",
-  "version": "0.3.22",
+  "version": "1.0.0",
   "description": "Heft plugin for generating types for localization files.",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.75.0"
+    "@rushstack/heft": "^1.0.0"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
