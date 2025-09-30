@@ -2,6 +2,49 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.8.0",
+      "tag": "@rushstack/lockfile-explorer_v1.8.0",
+      "date": "Tue, 30 Sep 2025 20:33:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump \"express\" to 4.21.1 to address reported vulnerabilities in 4.20.0."
+          },
+          {
+            "comment": "Upgraded `js-yaml` dependency"
+          },
+          {
+            "comment": "Improve support for PNPM lockfile format V6.0"
+          },
+          {
+            "comment": "Refactoring to support future work"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add syntax highlighter"
+          },
+          {
+            "comment": "Isolate .pnpmcfile.cjs evaluation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.17.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.0.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.75.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.42",
       "tag": "@rushstack/lockfile-explorer_v1.7.42",
       "date": "Fri, 12 Sep 2025 15:13:07 GMT",

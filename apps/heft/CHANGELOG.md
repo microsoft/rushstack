@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 12 Sep 2025 15:13:07 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Sep 2025 20:33:51 GMT and should not be manually modified.
+
+## 0.75.0
+Tue, 30 Sep 2025 20:33:51 GMT
+
+### Minor changes
+
+- Enhance logging in watch mode by allowing plugins to report detailed reasons for requesting rerun, e.g. specific changed files.
+- (BREAKING CHANGE) Make the `taskStart`/`taskFinish`/`phaseStart`/`phaseFinish` hooks synchronous to signify that they are not intended to be used for expensive work.
 
 ## 0.74.5
 Fri, 12 Sep 2025 15:13:07 GMT

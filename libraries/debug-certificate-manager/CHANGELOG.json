@@ -2,6 +2,29 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.5.8",
+      "tag": "@rushstack/debug-certificate-manager_v1.5.8",
+      "date": "Tue, 30 Sep 2025 20:33:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add message to use VS Code extension to errors."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.17.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.75.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.7",
       "tag": "@rushstack/debug-certificate-manager_v1.5.7",
       "date": "Fri, 12 Sep 2025 15:13:07 GMT",

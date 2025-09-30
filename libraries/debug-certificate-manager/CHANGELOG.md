@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Fri, 12 Sep 2025 15:13:07 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Sep 2025 20:33:50 GMT and should not be manually modified.
+
+## 1.5.8
+Tue, 30 Sep 2025 20:33:50 GMT
+
+### Patches
+
+- Add message to use VS Code extension to errors.
 
 ## 1.5.7
 Fri, 12 Sep 2025 15:13:07 GMT

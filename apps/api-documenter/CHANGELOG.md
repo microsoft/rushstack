@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 12 Sep 2025 15:13:07 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Sep 2025 20:33:50 GMT and should not be manually modified.
+
+## 7.26.35
+Tue, 30 Sep 2025 20:33:50 GMT
+
+### Patches
+
+- Upgraded `js-yaml` dependency
 
 ## 7.26.34
 Fri, 12 Sep 2025 15:13:07 GMT

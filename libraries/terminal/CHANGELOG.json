@@ -2,6 +2,26 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.17.0",
+      "tag": "@rushstack/terminal_v0.17.0",
+      "date": "Tue, 30 Sep 2025 20:33:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `ProblemCollector extends TerminalWritable` API which matches and collects VS Code style problem matchers"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/problem-matcher\" to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.16.0",
       "tag": "@rushstack/terminal_v0.16.0",
       "date": "Thu, 11 Sep 2025 00:22:31 GMT",

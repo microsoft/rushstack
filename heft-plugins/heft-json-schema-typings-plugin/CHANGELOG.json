@@ -2,6 +2,30 @@
   "name": "@rushstack/heft-json-schema-typings-plugin",
   "entries": [
     {
+      "version": "0.1.6",
+      "tag": "@rushstack/heft-json-schema-typings-plugin_v0.1.6",
+      "date": "Tue, 30 Sep 2025 20:33:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.14.46`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.75.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.17.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.74.5` to `0.75.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.5",
       "tag": "@rushstack/heft-json-schema-typings-plugin_v0.1.5",
       "date": "Fri, 12 Sep 2025 15:13:07 GMT",

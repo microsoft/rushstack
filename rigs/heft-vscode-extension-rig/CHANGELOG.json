@@ -2,6 +2,36 @@
   "name": "@rushstack/heft-vscode-extension-rig",
   "entries": [
     {
+      "version": "0.1.10",
+      "tag": "@rushstack/heft-vscode-extension-rig_v0.1.10",
+      "date": "Tue, 30 Sep 2025 20:33:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.9.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-vscode-extension-plugin\" to `0.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.11.43`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.109`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.75.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.74.5` to `0.75.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.9",
       "tag": "@rushstack/heft-vscode-extension-rig_v0.1.9",
       "date": "Fri, 12 Sep 2025 15:13:07 GMT",

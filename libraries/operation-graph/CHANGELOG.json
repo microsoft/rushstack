@@ -2,6 +2,29 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/operation-graph_v0.4.0",
+      "date": "Tue, 30 Sep 2025 20:33:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Require the \"requestor\" parameter and add a new \"detail\" parameter for watch-mode rerun requests. Make \"name\" a required field for operations."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Revert the extensibility points for `(before/after)ExecuteOperation(Group)?Async` to be synchronous to signify that they are only meant for logging, not for expensive work."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.17.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.2",
       "tag": "@rushstack/operation-graph_v0.3.2",
       "date": "Thu, 11 Sep 2025 00:22:31 GMT",

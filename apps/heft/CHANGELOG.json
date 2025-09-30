@@ -2,6 +2,41 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.75.0",
+      "tag": "@rushstack/heft_v0.75.0",
+      "date": "Tue, 30 Sep 2025 20:33:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enhance logging in watch mode by allowing plugins to report detailed reasons for requesting rerun, e.g. specific changed files."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Make the `taskStart`/`taskFinish`/`phaseStart`/`phaseFinish` hooks synchronous to signify that they are not intended to be used for expensive work."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.18.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/operation-graph\" to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.17.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.0.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.52.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.74.5",
       "tag": "@rushstack/heft_v0.74.5",
       "date": "Fri, 12 Sep 2025 15:13:07 GMT",

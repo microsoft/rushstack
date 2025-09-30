@@ -1,6 +1,13 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Thu, 11 Sep 2025 00:22:31 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Sep 2025 20:33:51 GMT and should not be manually modified.
+
+## 0.17.0
+Tue, 30 Sep 2025 20:33:51 GMT
+
+### Minor changes
+
+- Add `ProblemCollector extends TerminalWritable` API which matches and collects VS Code style problem matchers
 
 ## 0.16.0
 Thu, 11 Sep 2025 00:22:31 GMT

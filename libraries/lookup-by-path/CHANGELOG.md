@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lookup-by-path
 
-This log was last generated on Fri, 12 Sep 2025 15:13:07 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Sep 2025 20:33:51 GMT and should not be manually modified.
+
+## 0.8.0
+Tue, 30 Sep 2025 20:33:51 GMT
+
+### Minor changes
+
+- Expose `getNodeAtPrefix` API to allow getting nodes with undefined values.
 
 ## 0.7.6
 Fri, 12 Sep 2025 15:13:07 GMT

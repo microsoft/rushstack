@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 23 Jul 2025 20:55:57 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Sep 2025 20:33:51 GMT and should not be manually modified.
+
+## 5.15.0
+Tue, 30 Sep 2025 20:33:51 GMT
+
+### Minor changes
+
+- Add `FileError.getProblemMatcher()` which returns the problem matcher compatible with `IOperationExecutionResult.problemCollector` as well as VS Code, GitHub Actions
 
 ## 5.14.0
 Wed, 23 Jul 2025 20:55:57 GMT
