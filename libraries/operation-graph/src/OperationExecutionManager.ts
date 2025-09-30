@@ -26,10 +26,10 @@ export interface IOperationExecutionOptions<
 
   requestRun?: OperationRequestRunCallback;
 
-  beforeExecuteOperationAsync?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => Promise<void>;
-  afterExecuteOperationAsync?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => Promise<void>;
-  beforeExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
-  afterExecuteOperationGroupAsync?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => Promise<void>;
+  beforeExecuteOperation?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => void;
+  afterExecuteOperation?: (operation: Operation<TOperationMetadata, TGroupMetadata>) => void;
+  beforeExecuteOperationGroup?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => void;
+  afterExecuteOperationGroup?: (operationGroup: OperationGroupRecord<TGroupMetadata>) => void;
 }
 
 /**
@@ -126,9 +126,7 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
           return workQueue.pushAsync(workFn, priority);
         },
 
-        beforeExecuteAsync: async (
-          operation: Operation<TOperationMetadata, TGroupMetadata>
-        ): Promise<void> => {
+        beforeExecute: (operation: Operation<TOperationMetadata, TGroupMetadata>): void => {
           // Initialize group if uninitialized and log the group name
           const { group, runner } = operation;
           if (group) {
@@ -136,18 +134,18 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
               startedGroups.add(group);
               group.startTimer();
               terminal.writeLine(` ---- ${group.name} started ---- `);
-              await executionOptions.beforeExecuteOperationGroupAsync?.(group);
+              executionOptions.beforeExecuteOperationGroup?.(group);
             }
           }
           if (!runner?.silent) {
-            await executionOptions.beforeExecuteOperationAsync?.(operation);
+            executionOptions.beforeExecuteOperation?.(operation);
           }
         },
 
-        afterExecuteAsync: async (
+        afterExecute: (
           operation: Operation<TOperationMetadata, TGroupMetadata>,
           state: IOperationState
-        ): Promise<void> => {
+        ): void => {
           const { group, runner } = operation;
           if (group) {
             group.setOperationAsComplete(operation, state);
@@ -165,7 +163,7 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
           }
 
           if (!runner?.silent) {
-            await executionOptions.afterExecuteOperationAsync?.(operation);
+            executionOptions.afterExecuteOperation?.(operation);
           }
 
           if (group) {
@@ -180,7 +178,7 @@ export class OperationExecutionManager<TOperationMetadata extends {} = {}, TGrou
               terminal.writeLine(
                 ` ---- ${group.name} ${finishedLoggingWord} (${group.duration.toFixed(3)}s) ---- `
               );
-              await executionOptions.afterExecuteOperationGroupAsync?.(group);
+              executionOptions.afterExecuteOperationGroup?.(group);
             }
           }
         }

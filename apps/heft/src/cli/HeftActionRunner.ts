@@ -387,32 +387,32 @@ export class HeftActionRunner {
           parallelism: this._parallelism,
           abortSignal,
           requestRun,
-          beforeExecuteOperationAsync: async (
+          beforeExecuteOperation(
             operation: Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>
-          ) => {
+          ): void {
             if (taskStart.isUsed()) {
-              await taskStart.promise({ operation });
+              taskStart.call({ operation });
             }
           },
-          afterExecuteOperationAsync: async (
+          afterExecuteOperation(
             operation: Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>
-          ) => {
+          ): void {
             if (taskFinish.isUsed()) {
-              await taskFinish.promise({ operation });
+              taskFinish.call({ operation });
             }
           },
-          beforeExecuteOperationGroupAsync: async (
+          beforeExecuteOperationGroup(
             operationGroup: OperationGroupRecord<IHeftPhaseOperationMetadata>
-          ) => {
+          ): void {
             if (operationGroup.metadata.phase && phaseStart.isUsed()) {
-              await phaseStart.promise({ operation: operationGroup });
+              phaseStart.call({ operation: operationGroup });
             }
           },
-          afterExecuteOperationGroupAsync: async (
+          afterExecuteOperationGroup(
             operationGroup: OperationGroupRecord<IHeftPhaseOperationMetadata>
-          ) => {
+          ): void {
             if (operationGroup.metadata.phase && phaseFinish.isUsed()) {
-              await phaseFinish.promise({ operation: operationGroup });
+              phaseFinish.call({ operation: operationGroup });
             }
           }
         };

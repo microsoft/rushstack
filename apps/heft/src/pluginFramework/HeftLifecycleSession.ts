@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import type { AsyncParallelHook } from 'tapable';
+import type { AsyncParallelHook, SyncHook } from 'tapable';
 
 import type { IHeftRecordMetricsHookOptions, MetricsCollector } from '../metrics/MetricsCollector';
 import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
@@ -144,35 +144,35 @@ export interface IHeftLifecycleHooks {
 
   /**
    * The `taskStart` hook is called at the beginning of a task. It is called before the task has begun
-   * to execute. To use it, call `taskStart.tapPromise(<pluginName>, <callback>)`.
+   * to execute. To use it, call `taskStart.tap(<pluginName>, <callback>)`.
    *
    * @public
    */
-  taskStart: AsyncParallelHook<IHeftTaskStartHookOptions>;
+  taskStart: SyncHook<IHeftTaskStartHookOptions>;
 
   /**
    * The `taskFinish` hook is called at the end of a task. It is called after the task has completed
-   * execution. To use it, call `taskFinish.tapPromise(<pluginName>, <callback>)`.
+   * execution. To use it, call `taskFinish.tap(<pluginName>, <callback>)`.
    *
    * @public
    */
-  taskFinish: AsyncParallelHook<IHeftTaskFinishHookOptions>;
+  taskFinish: SyncHook<IHeftTaskFinishHookOptions>;
 
   /**
    * The `phaseStart` hook is called at the beginning of a phase. It is called before the phase has
-   * begun to execute. To use it, call `phaseStart.tapPromise(<pluginName>, <callback>)`.
+   * begun to execute. To use it, call `phaseStart.tap(<pluginName>, <callback>)`.
    *
    * @public
    */
-  phaseStart: AsyncParallelHook<IHeftPhaseStartHookOptions>;
+  phaseStart: SyncHook<IHeftPhaseStartHookOptions>;
 
   /**
    * The `phaseFinish` hook is called at the end of a phase. It is called after the phase has completed
-   * execution. To use it, call `phaseFinish.tapPromise(<pluginName>, <callback>)`.
+   * execution. To use it, call `phaseFinish.tap(<pluginName>, <callback>)`.
    *
    * @public
    */
-  phaseFinish: AsyncParallelHook<IHeftPhaseFinishHookOptions>;
+  phaseFinish: SyncHook<IHeftPhaseFinishHookOptions>;
 }
 
 /**

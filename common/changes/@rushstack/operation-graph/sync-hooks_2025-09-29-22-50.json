@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/operation-graph",
+      "comment": "(BREAKING CHANGE) Revert the extensibility points for `(before/after)ExecuteOperation(Group)?Async` to be synchronous to signify that they are only meant for logging, not for expensive work.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/operation-graph"
+}
