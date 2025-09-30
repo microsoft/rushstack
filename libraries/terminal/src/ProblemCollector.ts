@@ -37,7 +37,7 @@ export interface IProblemCollectorOptions extends ITerminalWritableOptions {
  * by a `"\n"` character (for example when preceded by {@link StderrLineTransform} / `StdioLineTransform`).
  * If a chunk does not end with a newline an error is thrown to surface incorrect pipeline wiring early.
  *
- * @public
+ * @beta
  */
 export class ProblemCollector extends TerminalWritable implements IProblemCollector {
   private readonly _matchers: IProblemMatcher[];
