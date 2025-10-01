@@ -54,7 +54,10 @@ export class AdoCodespacesAuthCredential implements TokenCredential {
       }
       const azureAuthHelperExec: string = 'azure-auth-helper';
 
-      const token: string = Executable.spawnSync(azureAuthHelperExec, ['get-access-token', scope]).stdout.trim();
+      const token: string = Executable.spawnSync(azureAuthHelperExec, [
+        'get-access-token',
+        scope
+      ]).stdout.trim();
 
       let expiresOnTimestamp: number;
 
