@@ -136,7 +136,10 @@ module.exports = {
               }
             }
           ])
-        ]
+        ],
+
+        // Require `node:` protocol for imports of Node.js built-in modules
+        'import/enforce-node-protocol-usage': ['error', 'always']
       }
     },
     {
