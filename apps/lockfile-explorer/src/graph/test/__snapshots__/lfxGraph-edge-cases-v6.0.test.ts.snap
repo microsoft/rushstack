@@ -3,22 +3,41 @@
 exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
 "entries:
   - dependencies:
+      - dependencyType: dev
+        entryId: /color-string/2.1.2
+        name: color-string
+        originalSpecifier: ''
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 8
+        versionPath: 2.1.2
+    displayText: 'Project: dev-dependencies'
+    entryId: project:packages/dev-dependencies
+    entryPackageName: dev-dependencies
+    entryPackageVersion: ''
+    entrySuffix: ''
+    jsonId: 0
+    kind: 1
+    packageJsonFolderPath: packages/dev-dependencies
+    rawEntryId: packages/dev-dependencies
+    referrerJsonIds: []
+    transitivePeerDependencies: []
+  - dependencies:
       - dependencyType: regular
         entryId: /color/5.0.2
         name: color
         originalSpecifier: ''
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 8
+        resolvedEntryJsonId: 9
         versionPath: 5.0.2
-    displayText: 'Project: duplicate (duplicate-1/duplicate)'
-    entryId: project:duplicate-1/duplicate
-    entryPackageName: duplicate (duplicate-1/duplicate)
+    displayText: 'Project: duplicate (packages/duplicate-1/duplicate)'
+    entryId: project:packages/duplicate-1/duplicate
+    entryPackageName: duplicate (packages/duplicate-1/duplicate)
     entryPackageVersion: ''
     entrySuffix: ''
-    jsonId: 0
+    jsonId: 1
     kind: 1
-    packageJsonFolderPath: duplicate-1/duplicate
-    rawEntryId: duplicate-1/duplicate
+    packageJsonFolderPath: packages/duplicate-1/duplicate
+    rawEntryId: packages/duplicate-1/duplicate
     referrerJsonIds: []
     transitivePeerDependencies: []
   - dependencies:
@@ -27,17 +46,17 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
         name: color-string
         originalSpecifier: ''
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 7
+        resolvedEntryJsonId: 8
         versionPath: 2.1.2
-    displayText: 'Project: duplicate (duplicate-2/duplicate)'
-    entryId: project:duplicate-2/duplicate
-    entryPackageName: duplicate (duplicate-2/duplicate)
+    displayText: 'Project: duplicate (packages/duplicate-2/duplicate)'
+    entryId: project:packages/duplicate-2/duplicate
+    entryPackageName: duplicate (packages/duplicate-2/duplicate)
     entryPackageVersion: ''
     entrySuffix: ''
-    jsonId: 1
+    jsonId: 2
     kind: 1
-    packageJsonFolderPath: duplicate-2/duplicate
-    rawEntryId: duplicate-2/duplicate
+    packageJsonFolderPath: packages/duplicate-2/duplicate
+    rawEntryId: packages/duplicate-2/duplicate
     referrerJsonIds: []
     transitivePeerDependencies: []
   - dependencies:
@@ -46,23 +65,23 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
         name: has-symbols
         originalSpecifier: ''
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 9
+        resolvedEntryJsonId: 10
         versionPath: 1.0.2
       - dependencyType: regular
-        entryId: project:link-specifier/target-folder
+        entryId: project:packages/link-specifier/linker/packages/link-specifier/target-folder
         name: target-folder
         originalSpecifier: ''
         peerDependencyMeta: {}
-        versionPath: link:../target-folder
+        versionPath: link:packages/link-specifier/target-folder
     displayText: 'Project: linker'
-    entryId: project:link-specifier/linker
+    entryId: project:packages/link-specifier/linker
     entryPackageName: linker
     entryPackageVersion: ''
     entrySuffix: ''
-    jsonId: 2
+    jsonId: 3
     kind: 1
-    packageJsonFolderPath: link-specifier/linker
-    rawEntryId: link-specifier/linker
+    packageJsonFolderPath: packages/link-specifier/linker
+    rawEntryId: packages/link-specifier/linker
     referrerJsonIds: []
     transitivePeerDependencies: []
   - dependencies:
@@ -71,24 +90,24 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
         name: address
         originalSpecifier: ''
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 4
+        resolvedEntryJsonId: 5
         versionPath: 1.2.2
       - dependencyType: regular
         entryId: /uri-js/4.4.1
         name: uri-js
         originalSpecifier: ''
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 11
+        resolvedEntryJsonId: 13
         versionPath: 4.4.1
     displayText: 'Project: pnpmfile-transforms'
-    entryId: project:pnpmfile-transforms
+    entryId: project:packages/pnpmfile-transforms
     entryPackageName: pnpmfile-transforms
     entryPackageVersion: ''
     entrySuffix: ''
-    jsonId: 3
+    jsonId: 4
     kind: 1
-    packageJsonFolderPath: pnpmfile-transforms
-    rawEntryId: pnpmfile-transforms
+    packageJsonFolderPath: packages/pnpmfile-transforms
+    rawEntryId: packages/pnpmfile-transforms
     referrerJsonIds: []
     transitivePeerDependencies: []
   - dependencies: []
@@ -97,12 +116,12 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
     entryPackageName: address
     entryPackageVersion: 1.2.2
     entrySuffix: ''
-    jsonId: 4
+    jsonId: 5
     kind: 2
     packageJsonFolderPath: node_modules/.pnpm/address@1.2.2/node_modules/address
     rawEntryId: /address/1.2.2
     referrerJsonIds:
-      - 3
+      - 4
     transitivePeerDependencies: []
   - dependencies:
       - dependencyType: regular
@@ -110,19 +129,19 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
         name: color-name
         originalSpecifier: ''
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 6
+        resolvedEntryJsonId: 7
         versionPath: 2.0.2
     displayText: color-convert 3.1.2
     entryId: ''
     entryPackageName: color-convert
     entryPackageVersion: 3.1.2
     entrySuffix: ''
-    jsonId: 5
+    jsonId: 6
     kind: 2
     packageJsonFolderPath: node_modules/.pnpm/color-convert@3.1.2/node_modules/color-convert
     rawEntryId: /color-convert/3.1.2
     referrerJsonIds:
-      - 8
+      - 9
     transitivePeerDependencies: []
   - dependencies: []
     displayText: color-name 2.0.2
@@ -130,13 +149,13 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
     entryPackageName: color-name
     entryPackageVersion: 2.0.2
     entrySuffix: ''
-    jsonId: 6
+    jsonId: 7
     kind: 2
     packageJsonFolderPath: node_modules/.pnpm/color-name@2.0.2/node_modules/color-name
     rawEntryId: /color-name/2.0.2
     referrerJsonIds:
-      - 5
-      - 7
+      - 6
+      - 8
     transitivePeerDependencies: []
   - dependencies:
       - dependencyType: regular
@@ -144,20 +163,21 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
         name: color-name
         originalSpecifier: ''
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 6
+        resolvedEntryJsonId: 7
         versionPath: 2.0.2
     displayText: color-string 2.1.2
     entryId: ''
     entryPackageName: color-string
     entryPackageVersion: 2.1.2
     entrySuffix: ''
-    jsonId: 7
+    jsonId: 8
     kind: 2
     packageJsonFolderPath: node_modules/.pnpm/color-string@2.1.2/node_modules/color-string
     rawEntryId: /color-string/2.1.2
     referrerJsonIds:
-      - 1
-      - 8
+      - 0
+      - 2
+      - 9
     transitivePeerDependencies: []
   - dependencies:
       - dependencyType: regular
@@ -165,26 +185,26 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
         name: color-convert
         originalSpecifier: ''
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 5
+        resolvedEntryJsonId: 6
         versionPath: 3.1.2
       - dependencyType: regular
         entryId: /color-string/2.1.2
         name: color-string
         originalSpecifier: ''
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 7
+        resolvedEntryJsonId: 8
         versionPath: 2.1.2
     displayText: color 5.0.2
     entryId: ''
     entryPackageName: color
     entryPackageVersion: 5.0.2
     entrySuffix: ''
-    jsonId: 8
+    jsonId: 9
     kind: 2
     packageJsonFolderPath: node_modules/.pnpm/color@5.0.2/node_modules/color
     rawEntryId: /color/5.0.2
     referrerJsonIds:
-      - 0
+      - 1
     transitivePeerDependencies: []
   - dependencies:
       - dependencyType: regular
@@ -198,12 +218,24 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
     entryPackageName: has-symbols
     entryPackageVersion: 1.0.2
     entrySuffix: ''
-    jsonId: 9
+    jsonId: 10
     kind: 2
     packageJsonFolderPath: node_modules/.pnpm/has-symbols@1.0.2/node_modules/has-symbols
     rawEntryId: /has-symbols/1.0.2
     referrerJsonIds:
-      - 2
+      - 3
+    transitivePeerDependencies: []
+  - dependencies: []
+    displayText: mime-db 1.54.0
+    entryId: ''
+    entryPackageName: mime-db
+    entryPackageVersion: 1.54.0
+    entrySuffix: ''
+    jsonId: 11
+    kind: 2
+    packageJsonFolderPath: node_modules/.pnpm/mime-db@1.54.0/node_modules/mime-db
+    rawEntryId: /mime-db/1.54.0
+    referrerJsonIds: []
     transitivePeerDependencies: []
   - dependencies: []
     displayText: punycode 2.3.1
@@ -211,12 +243,12 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
     entryPackageName: punycode
     entryPackageVersion: 2.3.1
     entrySuffix: ''
-    jsonId: 10
+    jsonId: 12
     kind: 2
     packageJsonFolderPath: node_modules/.pnpm/punycode@2.3.1/node_modules/punycode
     rawEntryId: /punycode/2.3.1
     referrerJsonIds:
-      - 11
+      - 13
     transitivePeerDependencies: []
   - dependencies:
       - dependencyType: regular
@@ -224,19 +256,19 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
         name: punycode
         originalSpecifier: ''
         peerDependencyMeta: {}
-        resolvedEntryJsonId: 10
+        resolvedEntryJsonId: 12
         versionPath: 2.3.1
     displayText: uri-js 4.4.1
     entryId: ''
     entryPackageName: uri-js
     entryPackageVersion: 4.4.1
     entrySuffix: ''
-    jsonId: 11
+    jsonId: 13
     kind: 2
     packageJsonFolderPath: node_modules/.pnpm/uri-js@4.4.1/node_modules/uri-js
     rawEntryId: /uri-js/4.4.1
     referrerJsonIds:
-      - 3
+      - 4
     transitivePeerDependencies: []
 workspace:
   pnpmLockfileFolder: ''

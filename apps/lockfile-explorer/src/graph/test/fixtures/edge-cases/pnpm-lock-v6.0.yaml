@@ -5,28 +5,38 @@ settings:
   excludeLinksFromLockfile: false
 
 importers:
-  duplicate-1/duplicate:
+  packages/dev-dependencies:
+    optionalDependencies:
+      mime-db:
+        specifier: ^1.52.0
+        version: 1.54.0
+    devDependencies:
+      color-string:
+        specifier: ^2.1.2
+        version: 2.1.2
+
+  packages/duplicate-1/duplicate:
     dependencies:
       color:
         specifier: ^5.0.2
         version: 5.0.2
 
-  duplicate-2/duplicate:
+  packages/duplicate-2/duplicate:
     dependencies:
       color-string:
         specifier: ^2.1.2
         version: 2.1.2
 
-  link-specifier/linker:
+  packages/link-specifier/linker:
     dependencies:
       has-symbols:
         specifier: 1.0.2
         version: 1.0.2
       target-folder:
-        specifier: link:../target-folder
-        version: link:../target-folder
+        specifier: link:packages/link-specifier/target-folder
+        version: link:packages/link-specifier/target-folder
 
-  pnpmfile-transforms:
+  packages/pnpmfile-transforms:
     dependencies:
       address:
         specifier: ^1.0.0
@@ -60,7 +70,6 @@ packages:
         integrity: sha512-9vEt7gE16EW7Eu7pvZnR0abW9z6ufzhXxGXZEVU9IqPdlsUiMwJeJfRtq0zePUmnbHGT9zajca7mX8zgoayo4A==
       }
     engines: { node: '>=12.20' }
-    dev: false
 
   /color-string@2.1.2:
     resolution:
@@ -70,7 +79,6 @@ packages:
     engines: { node: '>=18' }
     dependencies:
       color-name: 2.0.2
-    dev: false
 
   /color@5.0.2:
     resolution:
@@ -92,6 +100,16 @@ packages:
     dependencies:
       target-folder: link:link-specifier/target-folder
     dev: false
+
+  /mime-db@1.54.0:
+    resolution:
+      {
+        integrity: sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ==
+      }
+    engines: { node: '>= 0.6' }
+    requiresBuild: true
+    dev: false
+    optional: true
 
   /punycode@2.3.1:
     resolution:
