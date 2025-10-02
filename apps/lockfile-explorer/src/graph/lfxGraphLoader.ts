@@ -22,7 +22,7 @@ type PeerDependenciesMeta = lockfileTypes.LockfilePackageInfo['peerDependenciesM
 
 function createPackageLockfileDependency(options: {
   name: string;
-  version: string;
+  versionPath: string;
   kind: LfxDependencyKind;
   containingEntry: LfxGraphEntry;
   peerDependenciesMeta?: PeerDependenciesMeta;
@@ -31,7 +31,7 @@ function createPackageLockfileDependency(options: {
 }): LfxGraphDependency {
   const {
     name,
-    version,
+    versionPath,
     kind: dependencyType,
     containingEntry,
     peerDependenciesMeta,
@@ -40,15 +40,15 @@ function createPackageLockfileDependency(options: {
 
   const result: ILfxGraphDependencyOptions = {
     name,
-    version,
+    versionPath,
     dependencyType,
     containingEntry,
     entryId: '',
     peerDependencyMeta: {}
   };
 
-  if (version.startsWith('link:')) {
-    const relativePath: string = version.substring('link:'.length);
+  if (versionPath.startsWith('link:')) {
+    const relativePath: string = versionPath.substring('link:'.length);
 
     if (containingEntry.kind === LfxGraphEntryKind.Project) {
       // TODO: Here we assume it's a "workspace:" link and try to resolve it to another workspace project,
@@ -63,12 +63,12 @@ function createPackageLockfileDependency(options: {
       // This could be a link to anywhere on the local computer, so we don't expect it to have a lockfile entry
       result.entryId = '';
     }
-  } else if (result.version.startsWith('/')) {
-    result.entryId = version;
+  } else if (result.versionPath.startsWith('/')) {
+    result.entryId = versionPath;
   } else if (result.dependencyType === LfxDependencyKind.Peer) {
     result.peerDependencyMeta = {
       name: result.name,
-      version: version,
+      version: versionPath,
       optional: peerDependenciesMeta?.[result.name] ? peerDependenciesMeta[result.name].optional : false
     };
     result.entryId = 'Peer: ' + result.name;
@@ -81,7 +81,8 @@ function createPackageLockfileDependency(options: {
     // Version 6.0: /@rushstack/j@1.0.0(@rushstack/n@2.0.0)
     // Version 9.0:  @rushstack/j@1.0.0(@rushstack/n@2.0.0)
     const versionDelimiter: string = pnpmLockfileVersion < 60 ? '/' : '@';
-    result.entryId = (pnpmLockfileVersion < 90 ? '/' : '') + result.name + versionDelimiter + result.version;
+    result.entryId =
+      (pnpmLockfileVersion < 90 ? '/' : '') + result.name + versionDelimiter + result.versionPath;
   }
   return new LfxGraphDependency(result);
 }
@@ -100,12 +101,12 @@ function parsePackageDependencies(
   const node: Partial<lockfileTypes.ProjectSnapshot & lockfileTypes.PackageSnapshot> =
     either as unknown as Partial<lockfileTypes.ProjectSnapshot & lockfileTypes.PackageSnapshot>;
   if (node.dependencies) {
-    for (const [packageName, version] of Object.entries(node.dependencies)) {
+    for (const [packageName, versionPath] of Object.entries(node.dependencies)) {
       dependencies.push(
         createPackageLockfileDependency({
           kind: LfxDependencyKind.Regular,
           name: packageName,
-          version: version,
+          versionPath,
           containingEntry: lockfileEntry,
           pnpmLockfileVersion,
           workspace
@@ -114,12 +115,12 @@ function parsePackageDependencies(
     }
   }
   if (node.devDependencies) {
-    for (const [packageName, version] of Object.entries(node.devDependencies)) {
+    for (const [packageName, versionPath] of Object.entries(node.devDependencies)) {
       dependencies.push(
         createPackageLockfileDependency({
           kind: LfxDependencyKind.Dev,
           name: packageName,
-          version: version,
+          versionPath,
           containingEntry: lockfileEntry,
           pnpmLockfileVersion,
           workspace
@@ -128,12 +129,12 @@ function parsePackageDependencies(
     }
   }
   if (node.peerDependencies) {
-    for (const [packageName, version] of Object.entries(node.peerDependencies)) {
+    for (const [packageName, versionPath] of Object.entries(node.peerDependencies)) {
       dependencies.push(
         createPackageLockfileDependency({
           kind: LfxDependencyKind.Peer,
           name: packageName,
-          version: version,
+          versionPath,
           containingEntry: lockfileEntry,
           peerDependenciesMeta: node.peerDependenciesMeta,
           pnpmLockfileVersion,
@@ -162,7 +163,7 @@ function parseProjectDependencies60(
         createPackageLockfileDependency({
           kind: LfxDependencyKind.Regular,
           name: packageName,
-          version: specifierAndResolution.version,
+          versionPath: specifierAndResolution.version,
           containingEntry: lockfileEntry,
           pnpmLockfileVersion,
           workspace
@@ -176,7 +177,7 @@ function parseProjectDependencies60(
         createPackageLockfileDependency({
           kind: LfxDependencyKind.Dev,
           name: packageName,
-          version: specifierAndResolution.version,
+          versionPath: specifierAndResolution.version,
           containingEntry: lockfileEntry,
           pnpmLockfileVersion,
           workspace

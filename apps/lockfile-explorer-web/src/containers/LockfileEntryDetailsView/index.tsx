@@ -172,7 +172,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
               Selected&nbsp;Dependency:{' '}
             </Text>
             <Text type="span">
-              {inspectDependency.name}: {inspectDependency.version}
+              {inspectDependency.name}: {inspectDependency.versionPath}
             </Text>
           </div>
           <div className={styles.DependencyDetailInfo}>
@@ -184,7 +184,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                 ? `"${inspectDependency.peerDependencyMeta.version}" ${
                     inspectDependency.peerDependencyMeta.optional ? 'Optional' : 'Required'
                   } Peer`
-                : inspectDependency.version}
+                : inspectDependency.versionPath}
             </Text>
           </div>
           <div className={styles.DependencyDetailInfo}>
@@ -344,7 +344,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                       : ''}
                   </Text>
                   <div>
-                    <Text type="p">Version: {dependency.version}</Text>
+                    <Text type="p">Version: {dependency.versionPath}</Text>
                     <Text type="p">Entry ID: {dependency.entryId}</Text>
                   </div>
                 </div>

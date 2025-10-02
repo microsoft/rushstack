@@ -6,35 +6,57 @@ import type { IJsonLfxWorkspace } from './IJsonLfxWorkspace';
 
 export interface ILfxGraphDependencyOptions {
   name: string;
-  version: string;
-  dependencyType: LfxDependencyKind;
-  containingEntry: LfxGraphEntry;
-  peerDependencyMeta: IJsonPeerDependencyMeta;
+  versionPath: string;
+
   entryId: string;
+
+  dependencyType: LfxDependencyKind;
+  peerDependencyMeta: IJsonPeerDependencyMeta;
+
+  containingEntry: LfxGraphEntry;
 }
 
 /**
- * Represents a dependency listed under a LockfileEntry
- *
- * @remarks
- * Each dependency listed under a package in the lockfile should have a separate entry. These Dependencies
- * will link to the "containingEntry", which is the LockfileEntry that specified this dependency.
- * The "resolvedEntry" field is the corresponding LockfileEntry for this dependency, as all dependencies also have
- * their own entries in the pnpm lockfile.
+ * Represents an graph edge, which is an exact dependency version obtained from the lockfile.
  */
 export class LfxGraphDependency {
+  /**
+   * The referenced package name.
+   * Example: `@scope/package-name`
+   */
   public readonly name: string;
-  public readonly version: string;
-  public readonly dependencyType: LfxDependencyKind;
-  public readonly containingEntry: LfxGraphEntry;
+
+  /**
+   * The lockfile's raw string that either indicates an external reference such as `link:../target-folder`,
+   * or else can be combined with the `name` field to construct an `entryId` found in the lockfile.
+   * The exact syntax varies between lockfile file format versions.
+   *
+   * Example: `link:../target-folder`
+   *
+   * Example: `1.0.0`
+   *
+   * Example: `1.0.0_@rushstack+m@1.0.0`   (version 5.4)
+   * Example: `1.0.0(@rushstack/m@1.0.0)`  (version 6.0 and 9.0)
+   */
+  public readonly versionPath: string;
+
+  /**
+   * If this dependency refers to an entry in the lockfile, this field should match a corresponding
+   * {@link LfxGraphEntry.entryId} and `resolvedEntry` will be defined (unless the loader encountered an error).
+   *
+   * For external references such as `link:../target-folder`, the `entryId` is the empty string.
+   */
   public readonly entryId: string;
+
+  public readonly dependencyType: LfxDependencyKind;
   public readonly peerDependencyMeta: IJsonPeerDependencyMeta;
 
+  public readonly containingEntry: LfxGraphEntry;
   public resolvedEntry: LfxGraphEntry | undefined = undefined;
 
   public constructor(options: ILfxGraphDependencyOptions) {
     this.name = options.name;
-    this.version = options.version;
+    this.versionPath = options.versionPath;
     this.dependencyType = options.dependencyType;
     this.containingEntry = options.containingEntry;
     this.entryId = options.entryId;

@@ -18,7 +18,7 @@ export interface IJsonPeerDependencyMeta {
 
 export interface IJsonLfxDependency {
   name: string;
-  version: string;
+  versionPath: string;
   entryId: string;
   dependencyType: LfxDependencyKind;
 

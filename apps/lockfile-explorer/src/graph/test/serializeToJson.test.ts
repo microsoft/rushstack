@@ -25,7 +25,7 @@ Object {
             "version": undefined,
           },
           "resolvedEntryJsonId": 1,
-          "version": "1.7.1",
+          "versionPath": "1.7.1",
         },
         Object {
           "dependencyType": "regular",
@@ -37,7 +37,7 @@ Object {
             "version": undefined,
           },
           "resolvedEntryJsonId": 2,
-          "version": "1.7.1",
+          "versionPath": "1.7.1",
         },
       ],
       "displayText": "Project: testApp1",

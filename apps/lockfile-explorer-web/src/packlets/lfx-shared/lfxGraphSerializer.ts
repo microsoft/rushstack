@@ -51,7 +51,7 @@ export function serializeToJson(graph: LfxGraph): IJsonLfxGraph {
     for (const dependency of entry.dependencies) {
       const jsonLfxDependency: IJsonLfxDependency = {
         name: dependency.name,
-        version: dependency.version,
+        versionPath: dependency.versionPath,
         entryId: dependency.entryId,
         dependencyType: dependency.dependencyType,
         peerDependencyMeta: {
@@ -111,7 +111,7 @@ export function deserializeFromJson(jsonLfxGraph: IJsonLfxGraph): LfxGraph {
     for (const jsonLfxDependency of jsonLfxEntry.dependencies) {
       const dependency: LfxGraphDependency = new LfxGraphDependency({
         name: jsonLfxDependency.name,
-        version: jsonLfxDependency.version,
+        versionPath: jsonLfxDependency.versionPath,
         dependencyType: jsonLfxDependency.dependencyType,
         containingEntry: entry,
         entryId: jsonLfxDependency.entryId,
