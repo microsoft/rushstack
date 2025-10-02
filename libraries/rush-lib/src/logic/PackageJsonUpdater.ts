@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference path="../npm-check-typings.d.ts" preserve="true" />
-
 import * as semver from 'semver';
 import type * as NpmCheck from 'npm-check';
 
@@ -31,6 +29,7 @@ import {
   SemVerStyle
 } from './PackageJsonUpdaterTypes';
 import type { Subspace } from '../api/Subspace';
+import type { INpmCheckPackageSummary } from '../utilities/npmCheck/interfaces/INpmCheckPackageSummary';
 
 /**
  * Options for adding a dependency to a particular project.
@@ -43,7 +42,7 @@ export interface IPackageJsonUpdaterRushUpgradeOptions {
   /**
    * The dependencies to be added.
    */
-  packagesToAdd: NpmCheck.INpmCheckPackage[];
+  packagesToAdd: INpmCheckPackageSummary[];
   /**
    * If specified, other packages that use this dependency will also have their package.json's updated.
    */
@@ -137,13 +136,7 @@ export class PackageJsonUpdater {
     const devDependenciesToUpdate: Record<string, string> = {};
     const peerDependenciesToUpdate: Record<string, string> = {};
 
-    for (const {
-      moduleName,
-      latest: latestVersion,
-      packageJson,
-      devDependency,
-      peerDependency
-    } of packagesToAdd) {
+    for (const { moduleName, latest: latestVersion, packageJson, devDependency } of packagesToAdd) {
       const inferredRangeStyle: SemVerStyle = this._cheaplyDetectSemVerRangeStyle(packageJson);
       const implicitlyPreferredVersion: string | undefined =
         implicitlyPreferredVersionByPackageName.get(moduleName);
@@ -163,8 +156,6 @@ export class PackageJsonUpdater {
 
       if (devDependency) {
         devDependenciesToUpdate[moduleName] = version;
-      } else if (peerDependency) {
-        peerDependenciesToUpdate[moduleName] = version;
       } else {
         dependenciesToUpdate[moduleName] = version;
       }

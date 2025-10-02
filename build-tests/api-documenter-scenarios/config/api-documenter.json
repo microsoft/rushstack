@@ -1,0 +1,6 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-documenter.schema.json",
+  "outputTarget": "markdown",
+  "tableOfContents": {},
+  "showInheritedMembers": true
+}

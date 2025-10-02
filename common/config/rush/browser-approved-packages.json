@@ -59,7 +59,31 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "chalk",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "co",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "depcheck",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "dependency-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "giturl",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "global-modules",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "node-emoji",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -67,7 +91,23 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "ora",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "package-json",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "path-exists",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "prism-react-renderer",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "rc-config-loader",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -99,8 +139,20 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
+      "name": "semver-diff",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "throat",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "tslib",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "xtend",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "zod",
