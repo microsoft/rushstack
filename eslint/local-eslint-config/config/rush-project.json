@@ -1,11 +1,10 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-project.schema.json",
 
-  // TODO: Uncomment the commented lines once the decoupled-local-node-rig is updated to support ESLint 9
   "operationSettings": [
-    // {
-    //   "operationName": "_phase:build",
-    //   "outputFolderNames": ["mixins", "patch", "profile"]
-    // }
+    {
+      "operationName": "_phase:lite-build",
+      "outputFolderNames": ["flat"]
+    }
   ]
 }

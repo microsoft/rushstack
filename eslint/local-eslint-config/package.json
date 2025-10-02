@@ -5,7 +5,7 @@
   "description": "An ESLint configuration consumed projects inside the rushstack repo.",
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:lite-build": "heft build --clean"
   },
   "peerDependencies": {
     "eslint": "^9.25.1",
