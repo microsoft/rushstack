@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/loader-raw-script"
+    }
+  ],
+  "packageName": "@rushstack/loader-raw-script",
+  "email": "iclanton@users.noreply.github.com"
+}

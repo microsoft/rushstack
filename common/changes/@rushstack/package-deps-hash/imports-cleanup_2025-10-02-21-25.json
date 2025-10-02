@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/package-deps-hash"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "iclanton@users.noreply.github.com"
+}
