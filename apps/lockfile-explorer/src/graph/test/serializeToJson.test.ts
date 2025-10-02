@@ -19,6 +19,7 @@ Object {
           "dependencyType": "regular",
           "entryId": "/@testPackage/core/1.7.1",
           "name": "@testPackage/core",
+          "originalSpecifier": "",
           "peerDependencyMeta": Object {
             "name": undefined,
             "optional": undefined,
@@ -31,6 +32,7 @@ Object {
           "dependencyType": "regular",
           "entryId": "/@testPackage2/core/1.7.1",
           "name": "@testPackage2/core",
+          "originalSpecifier": "",
           "peerDependencyMeta": Object {
             "name": undefined,
             "optional": undefined,

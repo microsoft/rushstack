@@ -6,6 +6,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /color/5.0.2
         name: color
+        originalSpecifier: ''
         peerDependencyMeta: {}
         resolvedEntryJsonId: 8
         versionPath: 5.0.2
@@ -24,6 +25,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /color-string/2.1.2
         name: color-string
+        originalSpecifier: ''
         peerDependencyMeta: {}
         resolvedEntryJsonId: 7
         versionPath: 2.1.2
@@ -42,12 +44,14 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /has-symbols/1.0.2
         name: has-symbols
+        originalSpecifier: ''
         peerDependencyMeta: {}
         resolvedEntryJsonId: 9
         versionPath: 1.0.2
       - dependencyType: regular
         entryId: project:link-specifier/target-folder
         name: target-folder
+        originalSpecifier: ''
         peerDependencyMeta: {}
         versionPath: link:../target-folder
     displayText: 'Project: linker'
@@ -65,12 +69,14 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /address/1.2.2
         name: address
+        originalSpecifier: ''
         peerDependencyMeta: {}
         resolvedEntryJsonId: 4
         versionPath: 1.2.2
       - dependencyType: regular
         entryId: /uri-js/4.4.1
         name: uri-js
+        originalSpecifier: ''
         peerDependencyMeta: {}
         resolvedEntryJsonId: 11
         versionPath: 4.4.1
@@ -102,6 +108,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /color-name/2.0.2
         name: color-name
+        originalSpecifier: ''
         peerDependencyMeta: {}
         resolvedEntryJsonId: 6
         versionPath: 2.0.2
@@ -135,6 +142,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /color-name/2.0.2
         name: color-name
+        originalSpecifier: ''
         peerDependencyMeta: {}
         resolvedEntryJsonId: 6
         versionPath: 2.0.2
@@ -155,12 +163,14 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /color-convert/3.1.2
         name: color-convert
+        originalSpecifier: ''
         peerDependencyMeta: {}
         resolvedEntryJsonId: 5
         versionPath: 3.1.2
       - dependencyType: regular
         entryId: /color-string/2.1.2
         name: color-string
+        originalSpecifier: ''
         peerDependencyMeta: {}
         resolvedEntryJsonId: 7
         versionPath: 2.1.2
@@ -180,6 +190,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: ''
         name: target-folder
+        originalSpecifier: ''
         peerDependencyMeta: {}
         versionPath: link:link-specifier/target-folder
     displayText: has-symbols 1.0.2
@@ -211,6 +222,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /punycode/2.3.1
         name: punycode
+        originalSpecifier: ''
         peerDependencyMeta: {}
         resolvedEntryJsonId: 10
         versionPath: 2.3.1

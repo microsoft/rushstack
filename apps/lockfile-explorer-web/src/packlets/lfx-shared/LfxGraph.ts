@@ -10,6 +10,7 @@ export interface ILfxGraphDependencyOptions {
 
   entryId: string;
 
+  originalSpecifier: string;
   dependencyType: LfxDependencyKind;
   peerDependencyMeta: IJsonPeerDependencyMeta;
 
@@ -48,6 +49,17 @@ export class LfxGraphDependency {
    */
   public readonly entryId: string;
 
+  /**
+   * The lockfile sometimes records the original SemVer specifier that was used to choose the versionPath,
+   * usually either because it can change (e.g. a workspace project's dependencies) or because it's a peer dependency
+   * that affects graph relationships beyond the current node.  If not, then `originalSpecifier` will be the
+   * empty string.
+   *
+   * @remarks
+   * Because this field is only available for certain dependencies, it is generally less useful than specifiers
+   * obtained from the package.json files.
+   */
+  public readonly originalSpecifier: string;
   public readonly dependencyType: LfxDependencyKind;
   public readonly peerDependencyMeta: IJsonPeerDependencyMeta;
 
@@ -57,10 +69,12 @@ export class LfxGraphDependency {
   public constructor(options: ILfxGraphDependencyOptions) {
     this.name = options.name;
     this.versionPath = options.versionPath;
-    this.dependencyType = options.dependencyType;
-    this.containingEntry = options.containingEntry;
     this.entryId = options.entryId;
+    this.originalSpecifier = options.originalSpecifier;
+    this.dependencyType = options.dependencyType;
     this.peerDependencyMeta = options.peerDependencyMeta;
+
+    this.containingEntry = options.containingEntry;
   }
 }
 

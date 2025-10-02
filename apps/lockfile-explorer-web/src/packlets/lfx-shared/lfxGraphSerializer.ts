@@ -53,6 +53,7 @@ export function serializeToJson(graph: LfxGraph): IJsonLfxGraph {
         name: dependency.name,
         versionPath: dependency.versionPath,
         entryId: dependency.entryId,
+        originalSpecifier: dependency.originalSpecifier,
         dependencyType: dependency.dependencyType,
         peerDependencyMeta: {
           name: dependency.peerDependencyMeta.name,
@@ -112,14 +113,15 @@ export function deserializeFromJson(jsonLfxGraph: IJsonLfxGraph): LfxGraph {
       const dependency: LfxGraphDependency = new LfxGraphDependency({
         name: jsonLfxDependency.name,
         versionPath: jsonLfxDependency.versionPath,
-        dependencyType: jsonLfxDependency.dependencyType,
-        containingEntry: entry,
         entryId: jsonLfxDependency.entryId,
+        originalSpecifier: jsonLfxDependency.originalSpecifier,
+        dependencyType: jsonLfxDependency.dependencyType,
         peerDependencyMeta: {
           name: jsonLfxDependency.peerDependencyMeta.name,
           version: jsonLfxDependency.peerDependencyMeta.version,
           optional: jsonLfxDependency.peerDependencyMeta.optional
-        }
+        },
+        containingEntry: entry
       });
 
       if (jsonLfxDependency.resolvedEntryJsonId) {

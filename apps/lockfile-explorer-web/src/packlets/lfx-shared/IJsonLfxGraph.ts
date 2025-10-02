@@ -20,11 +20,11 @@ export interface IJsonLfxDependency {
   name: string;
   versionPath: string;
   entryId: string;
+  originalSpecifier: string;
   dependencyType: LfxDependencyKind;
+  peerDependencyMeta: IJsonPeerDependencyMeta;
 
   resolvedEntryJsonId?: number;
-
-  peerDependencyMeta: IJsonPeerDependencyMeta;
 }
 
 export enum LfxDependencyKind {

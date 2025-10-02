@@ -41,10 +41,11 @@ function createPackageLockfileDependency(options: {
   const result: ILfxGraphDependencyOptions = {
     name,
     versionPath,
-    dependencyType,
-    containingEntry,
     entryId: '',
-    peerDependencyMeta: {}
+    originalSpecifier: '',
+    dependencyType,
+    peerDependencyMeta: {},
+    containingEntry
   };
 
   if (versionPath.startsWith('link:')) {
