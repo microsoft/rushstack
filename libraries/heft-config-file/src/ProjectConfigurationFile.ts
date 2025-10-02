@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as nodeJsPath from 'node:path';
+
 import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { IRigConfig } from '@rushstack/rig-package';

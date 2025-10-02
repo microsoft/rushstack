@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Async } from '@rushstack/node-core-library';
+
 import type { Operation } from './Operation';
 import type {
   ICreateOperationsContext,
@@ -10,7 +12,6 @@ import type {
 import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
-import { Async } from '@rushstack/node-core-library';
 
 const PLUGIN_NAME: 'WeightedOperationPlugin' = 'WeightedOperationPlugin';
 

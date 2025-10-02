@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { relative } from 'node:path';
+
 import type { SyncTransformer, TransformedSource, TransformOptions } from '@jest/transform';
 
 const isWindows: boolean = process.platform === 'win32';

@@ -3,7 +3,9 @@
 
 import type * as fs from 'node:fs';
 import * as path from 'node:path';
+
 import type { FileSystemAdapter } from 'fast-glob';
+
 import { Path } from '@rushstack/node-core-library';
 
 interface IVirtualFileSystemEntry {

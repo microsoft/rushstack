@@ -3,13 +3,12 @@
 
 import * as React from 'react';
 import { useEffect } from 'react';
-
 import type { FieldValues, UseFormWatch } from 'react-hook-form';
-import { useAppDispatch } from '../../store/hooks';
-import { onChangeFormValues } from '../../store/slices/parameter';
-
 import type { AnyAction, Dispatch } from '@reduxjs/toolkit';
 import type { Subscription } from 'react-hook-form/dist/utils/createSubject';
+
+import { useAppDispatch } from '../../store/hooks';
+import { onChangeFormValues } from '../../store/slices/parameter';
 
 export interface IParameterFormWatcherProps {
   watch: UseFormWatch<FieldValues>;

@@ -4,6 +4,7 @@
 import * as path from 'node:path';
 
 import yaml = require('js-yaml');
+
 import {
   JsonFile,
   JsonSchema,
@@ -50,6 +51,7 @@ import {
   Navigation,
   Meaning
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+
 import type {
   IYamlApiFile,
   IYamlItem,

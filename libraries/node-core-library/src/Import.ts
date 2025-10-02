@@ -2,9 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import nodeModule = require('module');
+
 import importLazy = require('import-lazy');
 import * as Resolve from 'resolve';
-import nodeModule = require('module');
 
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { FileSystem } from './FileSystem';

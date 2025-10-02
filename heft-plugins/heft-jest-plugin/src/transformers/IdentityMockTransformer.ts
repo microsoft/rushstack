@@ -2,8 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { FileSystem } from '@rushstack/node-core-library';
+
 import type { SyncTransformer, TransformedSource, TransformOptions } from '@jest/transform';
+
+import { FileSystem } from '@rushstack/node-core-library';
 
 // The transpiled output for IdentityMockProxy.ts
 const proxyCode: string = FileSystem.readFile(path.join(__dirname, '..', 'identityMock.js')).toString();

@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, Path, NewlineKind, Async } from '@rushstack/node-core-library';
-import { type ITerminal, Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
-import glob from 'fast-glob';
 import * as path from 'node:path';
 import { EOL } from 'node:os';
+
+import glob from 'fast-glob';
 import * as chokidar from 'chokidar';
+
+import { type ITerminal, Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
+import { FileSystem, Path, NewlineKind, Async } from '@rushstack/node-core-library';
 
 /**
  * @public

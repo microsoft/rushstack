@@ -3,6 +3,7 @@
 
 import * as path from 'node:path';
 import * as fs from 'node:fs';
+
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 import { ESLintUtils } from '@typescript-eslint/utils';
 

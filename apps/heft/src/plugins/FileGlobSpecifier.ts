@@ -3,6 +3,7 @@
 
 import type * as fs from 'node:fs';
 import * as path from 'node:path';
+
 import glob, { type FileSystemAdapter, type Entry } from 'fast-glob';
 
 import { Async } from '@rushstack/node-core-library';

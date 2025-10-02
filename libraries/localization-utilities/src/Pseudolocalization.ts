@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import vm from 'node:vm';
+
 import { FileSystem } from '@rushstack/node-core-library';
 
 import type { IPseudolocaleOptions } from './interfaces';

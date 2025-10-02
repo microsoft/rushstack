@@ -3,9 +3,9 @@
 
 import { InternalError } from '@rushstack/node-core-library';
 import type { ITerminalProvider } from '@rushstack/terminal';
+
 import { type ILogger, type ILoggerOptions, Logger } from './logging/Logger';
 import { RushLifecycleHooks } from './RushLifeCycle';
-
 import type { IBuildCacheJson } from '../api/BuildCacheConfiguration';
 import type { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
 import type { ICobuildJson } from '../api/CobuildConfiguration';

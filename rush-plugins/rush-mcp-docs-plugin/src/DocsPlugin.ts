@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IRushMcpPlugin, RushMcpPluginSession } from '@rushstack/mcp-server';
+
 import { DocsTool } from './DocsTool';
 
 export interface IDocsPluginConfigFile {}

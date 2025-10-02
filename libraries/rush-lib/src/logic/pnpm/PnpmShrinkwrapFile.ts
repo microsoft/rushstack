@@ -2,8 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import * as semver from 'semver';
 import crypto from 'node:crypto';
+
+import * as semver from 'semver';
+import * as dependencyPathLockfilePreV9 from '@pnpm/dependency-path-lockfile-pre-v9';
+import * as dependencyPath from '@pnpm/dependency-path';
+import type {
+  ProjectId,
+  Lockfile,
+  PackageSnapshot,
+  ProjectSnapshot,
+  LockfileFileV9,
+  ResolvedDependencies
+} from '@pnpm/lockfile.types';
 
 import {
   FileSystem,
@@ -14,8 +25,7 @@ import {
   InternalError
 } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
-import * as dependencyPathLockfilePreV9 from '@pnpm/dependency-path-lockfile-pre-v9';
-import * as dependencyPath from '@pnpm/dependency-path';
+import type { IReadonlyLookupByPath } from '@rushstack/lookup-by-path';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -33,16 +43,7 @@ import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
 import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
 import type { Subspace } from '../../api/Subspace';
 import { CustomTipId, type CustomTipsConfiguration } from '../../api/CustomTipsConfiguration';
-import type {
-  ProjectId,
-  Lockfile,
-  PackageSnapshot,
-  ProjectSnapshot,
-  LockfileFileV9,
-  ResolvedDependencies
-} from '@pnpm/lockfile.types';
 import { convertLockfileV9ToLockfileObject } from './PnpmShrinkWrapFileConverters';
-import type { IReadonlyLookupByPath } from '@rushstack/lookup-by-path';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import yaml = require('js-yaml');
 
 import type { ApiModel } from '@microsoft/api-extractor-model';

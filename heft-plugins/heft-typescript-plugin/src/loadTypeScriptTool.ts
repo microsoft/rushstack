@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import semver from 'semver';
+
 import type { HeftConfiguration } from '@rushstack/heft';
 import type { ITerminal } from '@rushstack/terminal';
 import { type IPackageJson, JsonFile, RealNodeModulePathResolver } from '@rushstack/node-core-library';

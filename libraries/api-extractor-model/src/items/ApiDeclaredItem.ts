@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+
 import {
   ApiDocumentedItem,
   type IApiDocumentedItemJson,

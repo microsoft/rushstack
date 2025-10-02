@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
+
 import { BaseRushAction, type IBaseRushActionOptions } from '../actions/BaseRushAction';
 import type { Command, CommandLineConfiguration, IParameterJson } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../../logic/RushConstants';

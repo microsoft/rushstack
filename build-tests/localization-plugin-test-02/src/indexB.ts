@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import strings3 from './strings3.resjson';
+
 const strings4: string = require('./strings4.loc.json');
 
 // eslint-disable-next-line no-console

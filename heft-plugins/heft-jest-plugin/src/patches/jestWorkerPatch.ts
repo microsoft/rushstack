@@ -4,6 +4,7 @@
 /* eslint-disable no-console */
 
 import * as path from 'node:path';
+
 import { Import, FileSystem } from '@rushstack/node-core-library';
 
 // This patch is a fix for a problem where Jest reports this error spuriously on a machine that is under heavy load:

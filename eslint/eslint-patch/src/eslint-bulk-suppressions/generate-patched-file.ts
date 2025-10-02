@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import fs from 'node:fs';
+
 import {
   ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME,
   ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME

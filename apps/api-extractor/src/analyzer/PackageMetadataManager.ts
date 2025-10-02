@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
+
 import semver from 'semver';
 
 import {
@@ -13,6 +14,7 @@ import {
   type JsonObject,
   type IPackageJsonExports
 } from '@rushstack/node-core-library';
+
 import { Extractor } from '../api/Extractor';
 import type { MessageRouter } from '../collector/MessageRouter';
 import { ConsoleMessageId } from '../api/ConsoleMessageId';

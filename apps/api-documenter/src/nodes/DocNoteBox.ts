@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { type IDocNodeParameters, DocNode, DocSection } from '@microsoft/tsdoc';
+
 import { CustomDocNodeKind } from './CustomDocNodeKind';
 
 /**

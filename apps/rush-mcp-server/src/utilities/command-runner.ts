@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { ChildProcess } from 'node:child_process';
+
 import { Executable, type IExecutableSpawnSyncOptions } from '@rushstack/node-core-library';
 
 interface ICommandResult {

@@ -2,8 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'node:os';
-import { AsyncParallelHook } from 'tapable';
 import { performance } from 'node:perf_hooks';
+
+import { AsyncParallelHook } from 'tapable';
+
 import { InternalError } from '@rushstack/node-core-library';
 
 /**

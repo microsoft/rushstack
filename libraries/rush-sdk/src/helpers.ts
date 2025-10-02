@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import { Import, FileSystem } from '@rushstack/node-core-library';
 import type { EnvironmentVariableNames } from '@microsoft/rush-lib';
 

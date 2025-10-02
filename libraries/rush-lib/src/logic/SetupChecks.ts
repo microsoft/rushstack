@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import * as semver from 'semver';
+
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize, PrintUtilities } from '@rushstack/terminal';
 

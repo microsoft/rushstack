@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { MinifyOptions } from 'terser';
 import { parentPort, workerData } from 'node:worker_threads';
+
+import type { MinifyOptions } from 'terser';
 
 import { minifySingleFileAsync } from './MinifySingleFile';
 import type { IModuleMinificationRequest, IModuleMinificationResult } from './types';

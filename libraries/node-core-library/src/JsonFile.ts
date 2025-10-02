@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'node:os';
+
 import * as jju from 'jju';
 
 import type { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';

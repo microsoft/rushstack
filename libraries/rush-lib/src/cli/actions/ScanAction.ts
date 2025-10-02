@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import builtinPackageNames from 'builtin-modules';
+
 import { Colorize } from '@rushstack/terminal';
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { FileSystem } from '@rushstack/node-core-library';

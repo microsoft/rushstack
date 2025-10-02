@@ -6,6 +6,7 @@ import * as path from 'node:path';
 import { Worker } from 'node:worker_threads';
 
 import type * as TTypescript from 'typescript';
+
 import { Path, FileError } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { HeftConfiguration, IScopedLogger } from '@rushstack/heft';

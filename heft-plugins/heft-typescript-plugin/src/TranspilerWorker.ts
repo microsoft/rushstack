@@ -4,6 +4,7 @@
 import { parentPort, workerData } from 'node:worker_threads';
 
 import type * as TTypescript from 'typescript';
+
 import type {
   ITranspilationErrorMessage,
   ITranspilationRequestMessage,

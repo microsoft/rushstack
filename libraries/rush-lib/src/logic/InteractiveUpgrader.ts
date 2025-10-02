@@ -5,13 +5,13 @@
 
 import npmCheck from 'npm-check';
 import type * as NpmCheck from 'npm-check';
+import Prompt from 'inquirer/lib/ui/prompt';
+
 import { Colorize } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { upgradeInteractive, type IDepsToUpgradeAnswers } from '../utilities/InteractiveUpgradeUI';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import Prompt from 'inquirer/lib/ui/prompt';
-
 import { SearchListPrompt } from '../utilities/prompts/SearchListPrompt';
 
 interface IUpgradeInteractiveDeps {

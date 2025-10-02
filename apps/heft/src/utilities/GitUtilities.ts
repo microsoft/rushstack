@@ -3,9 +3,11 @@
 
 import * as path from 'node:path';
 import type { ChildProcess, SpawnSyncReturns } from 'node:child_process';
+
 import { default as getGitRepoInfo, type GitRepoInfo as IGitRepoInfo } from 'git-repo-info';
-import { Executable, FileSystem, InternalError, Path, Text } from '@rushstack/node-core-library';
 import { default as ignore, type Ignore as IIgnoreMatcher } from 'ignore';
+
+import { Executable, FileSystem, InternalError, Path, Text } from '@rushstack/node-core-library';
 
 // Matches lines starting with "#" and whitepace lines
 const GITIGNORE_IGNORABLE_LINE_REGEX: RegExp = /^(?:(?:#.*)|(?:\s+))$/;

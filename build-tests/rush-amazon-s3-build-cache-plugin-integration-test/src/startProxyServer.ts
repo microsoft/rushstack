@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as httpProxy from 'http-proxy';
 import * as http from 'node:http';
+
+import * as httpProxy from 'http-proxy';
 
 const proxy: httpProxy = httpProxy.createProxyServer({});
 

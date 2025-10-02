@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import * as semver from 'semver';
+
 import { type IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
 
 import { type VersionPolicy, type BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';

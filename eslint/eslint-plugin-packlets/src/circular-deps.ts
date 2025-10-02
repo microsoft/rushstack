@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import type * as ts from 'typescript';
-
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 import { ESLintUtils } from '@typescript-eslint/utils';
 

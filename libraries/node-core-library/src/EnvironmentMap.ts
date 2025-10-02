@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import process from 'node:process';
+
 import { InternalError } from './InternalError';
 
 /**

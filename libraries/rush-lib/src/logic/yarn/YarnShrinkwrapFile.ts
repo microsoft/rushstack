@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import {
   FileSystem,
   type IParsedPackageNameOrError,
   InternalError,
   Import
 } from '@rushstack/node-core-library';
+
+import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { RushConstants } from '../RushConstants';
 import type { DependencySpecifier } from '../DependencySpecifier';
 import { PackageNameParsers } from '../../api/PackageNameParsers';

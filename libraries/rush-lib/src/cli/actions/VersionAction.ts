@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
+
 import { type IPackageJson, FileConstants, Enum } from '@rushstack/node-core-library';
 import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
@@ -15,7 +16,6 @@ import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
 import { RushConstants } from '../../logic/RushConstants';
-
 import type * as VersionManagerType from '../../logic/VersionManager';
 
 export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Bump versions [skip ci]';

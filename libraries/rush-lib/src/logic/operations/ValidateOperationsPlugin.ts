@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { ITerminal } from '@rushstack/terminal';
+
 import type { Operation } from './Operation';
 import type {
   ICreateOperationsContext,
@@ -10,7 +12,6 @@ import type {
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import type { ITerminal } from '@rushstack/terminal';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 
 const PLUGIN_NAME: 'ValidateOperationsPlugin' = 'ValidateOperationsPlugin';

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'node:fs';
+
 import { Async, FileSystem, type IFileSystemCopyFileOptions } from '@rushstack/node-core-library';
 import {
   type ITerminalChunk,
@@ -13,7 +14,6 @@ import {
 
 import { OperationStateFile } from './OperationStateFile';
 import { RushConstants } from '../RushConstants';
-
 import type { IOperationStateJson } from './OperationStateFile';
 import type { Operation } from './Operation';
 import { type IStopwatchResult, Stopwatch } from '../../utilities/Stopwatch';

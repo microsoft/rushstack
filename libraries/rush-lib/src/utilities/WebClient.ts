@@ -6,6 +6,7 @@ import * as process from 'node:process';
 import type * as http from 'node:http';
 import { request as httpRequest, type IncomingMessage } from 'node:http';
 import { request as httpsRequest, type RequestOptions } from 'node:https';
+
 import { Import, LegacyAdapters } from '@rushstack/node-core-library';
 
 const createHttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);

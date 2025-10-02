@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import * as semver from 'semver';
 
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';

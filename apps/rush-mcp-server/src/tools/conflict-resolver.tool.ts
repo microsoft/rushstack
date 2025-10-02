@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { z } from 'zod';
+
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { IExecutableSpawnSyncOptions } from '@rushstack/node-core-library';
 

@@ -15,6 +15,7 @@ declare module 'webpack' {
 }
 import type { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import type { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook } from 'tapable';
+
 import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
 /**

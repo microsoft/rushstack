@@ -17,13 +17,6 @@ import type {
 } from 'webpack';
 import { AsyncSeriesWaterfallHook, SyncWaterfallHook, type Tap } from 'tapable';
 
-import {
-  CHUNK_MODULE_TOKEN,
-  MODULE_WRAPPER_PREFIX,
-  MODULE_WRAPPER_SUFFIX,
-  STAGE_BEFORE,
-  STAGE_AFTER
-} from './Constants';
 import type {
   IMinifierConnection,
   IModuleMinifier,
@@ -32,6 +25,13 @@ import type {
 } from '@rushstack/module-minifier';
 import { getIdentifier } from '@rushstack/module-minifier';
 
+import {
+  CHUNK_MODULE_TOKEN,
+  MODULE_WRAPPER_PREFIX,
+  MODULE_WRAPPER_SUFFIX,
+  STAGE_BEFORE,
+  STAGE_AFTER
+} from './Constants';
 import type {
   IModuleMinifierPluginOptions,
   IModuleMap,

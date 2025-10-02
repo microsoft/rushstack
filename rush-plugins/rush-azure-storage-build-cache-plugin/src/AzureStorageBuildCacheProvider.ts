@@ -1,6 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import {
+  type BlobClient,
+  BlobServiceClient,
+  type BlockBlobClient,
+  type ContainerClient
+} from '@azure/storage-blob';
+import { AzureAuthorityHosts } from '@azure/identity';
+
 import type { ITerminal } from '@rushstack/terminal';
 import {
   type ICloudBuildCacheProvider,
@@ -9,13 +17,6 @@ import {
   EnvironmentConfiguration,
   type ICredentialCacheEntry
 } from '@rushstack/rush-sdk';
-import {
-  type BlobClient,
-  BlobServiceClient,
-  type BlockBlobClient,
-  type ContainerClient
-} from '@azure/storage-blob';
-import { AzureAuthorityHosts } from '@azure/identity';
 
 import {
   AzureStorageAuthentication,

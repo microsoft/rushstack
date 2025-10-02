@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import { FileSystem } from '@rushstack/node-core-library';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 import { Colorize } from '@rushstack/terminal';

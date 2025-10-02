@@ -3,9 +3,10 @@
 
 import * as ts from 'typescript';
 
+import { Sort } from '@rushstack/node-core-library';
+
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { Collector } from './Collector';
-import { Sort } from '@rushstack/node-core-library';
 import type { AstEntity } from '../analyzer/AstEntity';
 import { AstNamespaceExport } from '../analyzer/AstNamespaceExport';
 

@@ -3,6 +3,7 @@
 
 import * as readline from 'node:readline';
 import * as process from 'node:process';
+
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 

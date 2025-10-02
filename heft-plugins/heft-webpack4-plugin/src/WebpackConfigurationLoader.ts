@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import type * as TWebpack from 'webpack';
+
 import { FileSystem } from '@rushstack/node-core-library';
 import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 

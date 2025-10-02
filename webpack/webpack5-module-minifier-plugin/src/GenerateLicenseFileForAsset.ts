@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import type { Comment } from 'estree';
 import type { Compilation, Module } from 'webpack';
 import type { sources } from 'webpack';
+
 import type { IAssetInfo } from './ModuleMinifierPlugin.types';
 
 function getAllComments(modules: Iterable<Module>): Set<string> {

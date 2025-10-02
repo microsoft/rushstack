@@ -3,6 +3,7 @@
 
 /* eslint-disable no-bitwise */
 import * as ts from 'typescript';
+
 import {
   DeclarationReference,
   ModuleSource,
@@ -11,6 +12,7 @@ import {
   Meaning
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { type INodePackageJson, InternalError } from '@rushstack/node-core-library';
+
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import type { Collector } from '../collector/Collector';

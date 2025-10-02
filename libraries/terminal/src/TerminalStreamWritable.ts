@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Writable, type WritableOptions } from 'node:stream';
+
 import type { ITerminal } from './ITerminal';
 import { TerminalProviderSeverity } from './ITerminalProvider';
 

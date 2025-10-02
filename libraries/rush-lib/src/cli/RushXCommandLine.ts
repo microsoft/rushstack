@@ -2,6 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
+import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-lib';
+
 import { PackageJsonLookup, type IPackageJson, Text, FileSystem, Async } from '@rushstack/node-core-library';
 import {
   Colorize,
@@ -12,7 +15,6 @@ import {
   Terminal,
   type ITerminal
 } from '@rushstack/terminal';
-import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';

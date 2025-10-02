@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createSlice, type PayloadAction, type Reducer } from '@reduxjs/toolkit';
+
 import type { ISpecChange } from '../../parsing/compareSpec';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

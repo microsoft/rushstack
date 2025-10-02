@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import type child_process from 'node:child_process';
-import gitInfo from 'git-repo-info';
 import * as path from 'node:path';
 import * as url from 'node:url';
 
+import gitInfo from 'git-repo-info';
 import { trueCasePathSync } from 'true-case-path';
+
 import { Executable, AlreadyReportedError, Path, Async } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';

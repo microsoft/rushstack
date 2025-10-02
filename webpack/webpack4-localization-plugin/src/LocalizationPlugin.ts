@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+
+import * as Webpack from 'webpack';
+import type * as Tapable from 'tapable';
+
 import { JsonFile, FileSystem, NewlineKind } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import * as Webpack from 'webpack';
-import * as path from 'node:path';
-import type * as Tapable from 'tapable';
 import {
   getPseudolocalizer,
   type ILocalizationFile,

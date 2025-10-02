@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import React, { useEffect } from 'react';
+
 import styles from './App.scss';
 import { readLockfileAsync } from './parsing/readLockfile';
 import { LockfileViewer } from './containers/LockfileViewer';

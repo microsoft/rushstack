@@ -3,6 +3,7 @@
 
 import type * as child_process from 'node:child_process';
 import * as path from 'node:path';
+
 import { Executable } from '@rushstack/node-core-library';
 
 import { ensureGitMinimumVersion } from './getRepoState';

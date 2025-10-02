@@ -11,6 +11,7 @@ import inquirer from 'inquirer';
 import CliTable from 'cli-table';
 import type Separator from 'inquirer/lib/objects/separator';
 import type * as NpmCheck from 'npm-check';
+
 import { AnsiEscape, Colorize } from '@rushstack/terminal';
 
 export interface IUIGroup {

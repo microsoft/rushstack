@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Colorize, type ITerminal } from '@rushstack/terminal';
+
 import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
 import type { Operation } from './Operation';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';

@@ -4,6 +4,7 @@
 import React from 'react';
 import * as RadixCheckbox from '@radix-ui/react-checkbox';
 import { CheckIcon } from '@radix-ui/react-icons';
+
 import styles from './styles.scss';
 
 /**

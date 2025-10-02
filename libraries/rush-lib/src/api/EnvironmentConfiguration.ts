@@ -3,6 +3,7 @@
 
 import * as os from 'node:os';
 import * as path from 'node:path';
+
 import { trueCasePathSync } from 'true-case-path';
 
 import type { IEnvironment } from '../utilities/Utilities';

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
+
 import { BULK_SUPPRESSIONS_CLI_ESLINT_PACKAGE_NAME } from '../../constants';
 
 // When this list is updated, update the `eslint-bulk-suppressions-newest-test`

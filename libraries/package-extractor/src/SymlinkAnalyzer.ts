@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, type FileSystemStats, Sort } from '@rushstack/node-core-library';
-
 import * as path from 'node:path';
+
+import { FileSystem, type FileSystemStats, Sort } from '@rushstack/node-core-library';
 
 export interface IPathNodeBase {
   kind: 'file' | 'folder' | 'link';

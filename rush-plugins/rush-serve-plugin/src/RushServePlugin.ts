@@ -4,8 +4,8 @@
 import * as path from 'node:path';
 
 import type { IRushPlugin, RushSession, RushConfiguration, IPhasedCommand } from '@rushstack/rush-sdk';
-import { PLUGIN_NAME } from './constants';
 
+import { PLUGIN_NAME } from './constants';
 import type { IBaseRoutingRuleJson, IRoutingRule } from './types';
 
 export interface IGlobalRoutingFolderRuleJson extends IBaseRoutingRuleJson {

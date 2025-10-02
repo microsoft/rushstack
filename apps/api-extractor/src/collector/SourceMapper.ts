@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import { SourceMapConsumer, type RawSourceMap, type MappingItem, type Position } from 'source-map';
-import { FileSystem, InternalError, JsonFile, NewlineKind } from '@rushstack/node-core-library';
 import type ts from 'typescript';
+
+import { FileSystem, InternalError, JsonFile, NewlineKind } from '@rushstack/node-core-library';
 
 interface ISourceMap {
   sourceMapConsumer: SourceMapConsumer;

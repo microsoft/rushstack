@@ -2,9 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import * as semver from 'semver';
 import * as ts from 'typescript';
 import * as resolve from 'resolve';
+
+import type { ApiPackage } from '@microsoft/api-extractor-model';
+import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import {
   FileSystem,
   type NewlineKind,
@@ -18,7 +22,6 @@ import { ExtractorConfig, type IExtractorConfigApiReport } from './ExtractorConf
 import { Collector } from '../collector/Collector';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
-import type { ApiPackage } from '@microsoft/api-extractor-model';
 import { ApiReportGenerator } from '../generators/ApiReportGenerator';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { ValidationEnhancer } from '../enhancers/ValidationEnhancer';
@@ -27,7 +30,6 @@ import { CompilerState } from './CompilerState';
 import type { ExtractorMessage } from './ExtractorMessage';
 import { MessageRouter } from '../collector/MessageRouter';
 import { ConsoleMessageId } from './ConsoleMessageId';
-import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import { SourceMapper } from '../collector/SourceMapper';
 
 /**

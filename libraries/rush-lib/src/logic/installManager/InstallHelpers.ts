@@ -2,6 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
+import * as semver from 'semver';
+
 import {
   FileConstants,
   FileSystem,
@@ -21,7 +24,6 @@ import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration'
 import { merge } from '../../utilities/objectUtilities';
 import type { Subspace } from '../../api/Subspace';
 import { RushConstants } from '../RushConstants';
-import * as semver from 'semver';
 
 interface ICommonPackageJson extends IPackageJson {
   pnpm?: {

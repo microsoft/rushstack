@@ -4,7 +4,18 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
+import { existsSync } from 'node:fs';
+import { readFile, unlink } from 'node:fs/promises';
+
 import * as semver from 'semver';
+import {
+  type ILockfile,
+  type ILockfilePackage,
+  type ILogMessageCallbackOptions,
+  pnpmSyncGetJsonVersion,
+  pnpmSyncPrepareAsync
+} from 'pnpm-sync-lib';
+
 import {
   FileSystem,
   JsonFile,
@@ -16,16 +27,7 @@ import {
   type FolderItem,
   Async
 } from '@rushstack/node-core-library';
-import { existsSync } from 'node:fs';
-import { readFile, unlink } from 'node:fs/promises';
 import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
-import {
-  type ILockfile,
-  type ILockfilePackage,
-  type ILogMessageCallbackOptions,
-  pnpmSyncGetJsonVersion,
-  pnpmSyncPrepareAsync
-} from 'pnpm-sync-lib';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import type { AsyncRecycler } from '../../utilities/AsyncRecycler';

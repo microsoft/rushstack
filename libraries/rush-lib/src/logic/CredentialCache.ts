@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import { FileSystem, JsonFile, JsonSchema, LockFile } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';

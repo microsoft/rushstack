@@ -7,6 +7,7 @@ import type { ResourceLimits } from 'node:worker_threads';
 
 import serialize from 'serialize-javascript';
 import type { MinifyOptions } from 'terser';
+
 import { WorkerPool } from '@rushstack/worker-pool';
 
 import type {

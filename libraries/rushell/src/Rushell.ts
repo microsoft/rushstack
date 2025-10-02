@@ -2,9 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import type * as child_process from 'node:child_process';
-import { Executable } from '@rushstack/node-core-library';
-import { Parser } from './Parser';
 
+import { Executable } from '@rushstack/node-core-library';
+
+import { Parser } from './Parser';
 import { Tokenizer } from './Tokenizer';
 import { type AstNode, type AstScript, AstKind, type AstCommand } from './AstNode';
 import { ParseError } from './ParseError';

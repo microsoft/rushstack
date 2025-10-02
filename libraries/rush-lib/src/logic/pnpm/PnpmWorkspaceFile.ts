@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import { Sort, Import, Path } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';

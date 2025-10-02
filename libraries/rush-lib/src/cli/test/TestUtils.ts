@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AlreadyExistsBehavior, FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
+
 import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
 import { FlagFile } from '../../api/FlagFile';
 import { RushConstants } from '../../logic/RushConstants';

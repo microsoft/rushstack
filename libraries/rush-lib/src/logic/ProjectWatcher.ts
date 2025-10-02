@@ -5,6 +5,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as readline from 'node:readline';
 import { once } from 'node:events';
+
 import { getRepoRoot } from '@rushstack/package-deps-hash';
 import { AlreadyReportedError, Path, type FileSystemStats, FileSystem } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';

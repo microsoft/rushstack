@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import type { AddressInfo } from 'node:net';
+
 import type * as TWebpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
 import { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook, type SyncBailHook } from 'tapable';
+
 import { CertificateManager, type ICertificate } from '@rushstack/debug-certificate-manager';
 import { InternalError, LegacyAdapters } from '@rushstack/node-core-library';
 import type {

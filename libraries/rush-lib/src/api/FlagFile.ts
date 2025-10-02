@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
+
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
 /**

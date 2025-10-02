@@ -1,9 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import webpack = require('webpack');
 import * as workerThreads from 'node:worker_threads';
+
+import webpack = require('webpack');
+
 import { MessagePortMinifier } from '@rushstack/module-minifier';
+
 import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
 import '../OverrideWebpackIdentifierAllocation';
 

@@ -2,9 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
+
 import pnpmLinkBins from '@pnpm/link-bins';
+
 import { Async, FileSystem, Path, Text } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
+
 import { MAX_CONCURRENCY } from './scripts/createLinks/utilities/constants';
 
 export function matchesWithStar(patternWithStar: string, input: string): boolean {

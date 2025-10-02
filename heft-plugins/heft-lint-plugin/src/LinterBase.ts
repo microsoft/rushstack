@@ -4,6 +4,7 @@
 import * as path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { createHash, type Hash } from 'node:crypto';
+
 import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { IScopedLogger } from '@rushstack/heft';

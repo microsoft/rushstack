@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
+
 import type { ICreateOperationsContext, ILogger, Operation, RushConfiguration } from '@rushstack/rush-sdk';
 import { JsonFile } from '@rushstack/node-core-library';
 

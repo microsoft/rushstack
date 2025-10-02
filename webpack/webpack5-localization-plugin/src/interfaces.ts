@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { LoaderContext, Compilation } from 'webpack';
+
 import type { IPseudolocaleOptions } from '@rushstack/localization-utilities';
 
 /**

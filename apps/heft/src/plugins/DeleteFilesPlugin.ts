@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type * as fs from 'node:fs';
+
 import { FileSystem, Async } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 

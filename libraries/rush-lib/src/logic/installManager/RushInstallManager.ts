@@ -3,8 +3,10 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+
 import * as semver from 'semver';
 import * as ssri from 'ssri';
+
 import {
   JsonFile,
   Text,

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createHash } from 'node:crypto';
+
 import serialize from 'serialize-javascript';
 import type { MinifyOptions } from 'terser';
 

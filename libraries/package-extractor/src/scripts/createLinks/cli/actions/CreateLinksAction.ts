@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
+
 import { Async, FileSystem, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { CommandLineAction, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
+
 import type { IExtractorMetadataJson, IProjectInfoJson } from '../../../../PackageExtractor';
 import { makeBinLinksAsync } from '../../../../Utils';
 import { getExtractorMetadataAsync } from '../../utilities/CreateLinksUtilities';

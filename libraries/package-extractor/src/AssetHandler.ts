@@ -3,8 +3,10 @@
 
 import path from 'node:path';
 import fs from 'node:fs';
+
 import { Async, FileSystem, Path, type FileSystemStats } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
+
 import { ArchiveManager } from './ArchiveManager';
 import type { IExtractorOptions, LinkCreationMode } from './PackageExtractor';
 import type { ILinkInfo, SymlinkAnalyzer } from './SymlinkAnalyzer';

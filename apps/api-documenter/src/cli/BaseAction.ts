@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import type * as tsdoc from '@microsoft/tsdoc';
 
+import type * as tsdoc from '@microsoft/tsdoc';
 import {
   CommandLineAction,
   type CommandLineStringParameter,

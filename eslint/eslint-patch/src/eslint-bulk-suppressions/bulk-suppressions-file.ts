@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import fs from 'node:fs';
+
 import { VSCODE_PID_ENV_VAR_NAME } from './constants';
 
 export interface ISuppression {

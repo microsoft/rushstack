@@ -4,6 +4,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 import type { PerformanceEntry } from 'node:perf_hooks';
+
 import { FileSystem, type FileSystemStats, JsonFile } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../api/RushConfiguration';

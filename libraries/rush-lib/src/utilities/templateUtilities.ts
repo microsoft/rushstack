@@ -3,6 +3,7 @@
 
 import { FileSystem, InternalError, NewlineKind } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
+
 import { Rush } from '../api/Rush';
 
 // Matches a well-formed BEGIN macro starting a block section.

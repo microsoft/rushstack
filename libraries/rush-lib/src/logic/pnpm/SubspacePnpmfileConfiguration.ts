@@ -2,9 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { FileSystem, Import, JsonFile, type IDependenciesMetaTable } from '@rushstack/node-core-library';
-import { subspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 
+import { FileSystem, Import, JsonFile, type IDependenciesMetaTable } from '@rushstack/node-core-library';
+
+import { subspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 import type { ISubspacePnpmfileShimSettings, IWorkspaceProjectInfo } from './IPnpmfile';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';

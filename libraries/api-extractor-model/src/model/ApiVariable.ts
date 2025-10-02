@@ -7,6 +7,7 @@ import {
   Navigation,
   type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+
 import { ApiItemKind } from '../items/ApiItem';
 import {
   ApiDeclaredItem,

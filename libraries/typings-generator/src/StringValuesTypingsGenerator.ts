@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'node:os';
+
 import { Text } from '@rushstack/node-core-library';
 
 import {

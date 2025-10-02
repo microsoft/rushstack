@@ -2,10 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import { Minimatch } from 'minimatch';
 import semver from 'semver';
 import npmPacklist from 'npm-packlist';
 import ignore, { type Ignore } from 'ignore';
+
 import {
   Async,
   AsyncQueue,

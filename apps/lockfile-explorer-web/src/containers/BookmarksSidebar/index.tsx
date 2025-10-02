@@ -2,12 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback } from 'react';
+
+import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
+
 import appStyles from '../../App.scss';
 import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import type { LfxGraphEntry } from '../../packlets/lfx-shared';
 import { clearStackAndPush, removeBookmark } from '../../store/slices/entrySlice';
-import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
 
 export const BookmarksSidebar = (): JSX.Element => {
   const bookmarks = useAppSelector((state) => state.entry.bookmarkedEntries);

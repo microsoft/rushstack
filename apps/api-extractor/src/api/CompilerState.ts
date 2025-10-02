@@ -2,13 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import * as ts from 'typescript';
 
 import { JsonFile } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { ExtractorConfig } from './ExtractorConfig';
 import type { IExtractorInvokeOptions } from './Extractor';
-import { Colorize } from '@rushstack/terminal';
 
 /**
  * Options for {@link CompilerState.create}

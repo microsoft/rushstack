@@ -2,13 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { createClient } from '@redis/client';
-
-import type {
-  ICobuildLockProvider,
-  ICobuildContext,
-  ICobuildCompletedState,
-  RushSession
-} from '@rushstack/rush-sdk';
 import type {
   RedisClientOptions,
   RedisClientType,
@@ -16,6 +9,13 @@ import type {
   RedisModules,
   RedisScripts
 } from '@redis/client';
+
+import type {
+  ICobuildLockProvider,
+  ICobuildContext,
+  ICobuildCompletedState,
+  RushSession
+} from '@rushstack/rush-sdk';
 import type { ITerminal } from '@rushstack/terminal';
 
 /**

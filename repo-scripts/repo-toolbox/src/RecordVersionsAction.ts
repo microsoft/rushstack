@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import { JsonFile } from '@rushstack/node-core-library';
 import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { RushConfiguration } from '@microsoft/rush-lib';

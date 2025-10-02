@@ -3,6 +3,7 @@
 
 import type * as lockfileTypes from '@pnpm/lockfile.types';
 import type * as pnpmTypes from '@pnpm/types';
+
 import { Text } from '@rushstack/node-core-library';
 
 import {

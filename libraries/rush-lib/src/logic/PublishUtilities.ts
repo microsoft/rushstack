@@ -7,8 +7,10 @@
  */
 
 import * as path from 'node:path';
-import * as semver from 'semver';
 import { execSync } from 'node:child_process';
+
+import * as semver from 'semver';
+
 import {
   type IPackageJson,
   JsonFile,

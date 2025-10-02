@@ -2,9 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
-import { Async, Sort, LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
 
 import type { Compiler, Compilation, WebpackPluginInstance, WebpackError, InputFileSystem } from 'webpack';
+
+import { Async, Sort, LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from './regexpUtils';

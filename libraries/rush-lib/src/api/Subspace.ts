@@ -5,6 +5,8 @@ import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 
 import { FileSystem } from '@rushstack/node-core-library';
+import type { IPackageJson } from '@rushstack/node-core-library';
+
 import type { RushConfiguration } from './RushConfiguration';
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
@@ -13,7 +15,6 @@ import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
-import type { IPackageJson } from '@rushstack/node-core-library';
 import { SubspacePnpmfileConfiguration } from '../logic/pnpm/SubspacePnpmfileConfiguration';
 import type { ISubspacePnpmfileShimSettings } from '../logic/pnpm/IPnpmfile';
 

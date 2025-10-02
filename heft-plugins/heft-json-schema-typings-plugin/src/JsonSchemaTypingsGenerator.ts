@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type ITypingsGeneratorBaseOptions, TypingsGenerator } from '@rushstack/typings-generator';
-import { compileFromFile } from 'json-schema-to-typescript';
 import path from 'node:path';
+
+import { compileFromFile } from 'json-schema-to-typescript';
+
+import { type ITypingsGeneratorBaseOptions, TypingsGenerator } from '@rushstack/typings-generator';
 
 interface IJsonSchemaTypingsGeneratorBaseOptions extends ITypingsGeneratorBaseOptions {}
 

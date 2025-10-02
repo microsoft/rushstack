@@ -3,6 +3,7 @@
 
 import type { ESLint as TEslintLegacy } from 'eslint-8';
 import type { ESLint as TEslint } from 'eslint-9';
+
 import { getEslintPathAndVersion } from './utils/get-eslint-cli';
 
 export async function runEslintAsync(files: string[], mode: 'suppress' | 'prune'): Promise<void> {

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
+
 import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
 import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor';
 import type { RushConfiguration } from '../api/RushConfiguration';

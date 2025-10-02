@@ -3,9 +3,11 @@
 
 import * as path from 'node:path';
 import * as process from 'node:process';
+
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+
 import { FileSystem } from '@rushstack/node-core-library';
 import { RushSdkLoader } from '@rushstack/rush-sdk/loader';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
 import { log } from './utilities/log';
 import type { RushMCPServer } from './server';

@@ -3,6 +3,9 @@
 
 /* eslint-disable @typescript-eslint/no-redeclare */
 
+import { InternalError } from '@rushstack/node-core-library';
+import type { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+
 import {
   ApiItem,
   apiItem_onParentChanged,
@@ -22,8 +25,6 @@ import {
   type IFindApiItemsMessage,
   FindApiItemsMessageId
 } from './IFindApiItemsResult';
-import { InternalError } from '@rushstack/node-core-library';
-import type { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import type { HeritageType } from '../model/HeritageType';
 import type { IResolveDeclarationReferenceResult } from '../model/ModelReferenceResolver';
 

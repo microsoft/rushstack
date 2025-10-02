@@ -3,6 +3,7 @@
 
 import { Worker } from 'node:worker_threads';
 import * as path from 'node:path';
+
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import type { IRequestMessage, ResponseMessage } from './pnpmfileRunnerWorkerThread';

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import type * as rushLib from '@microsoft/rush-lib';
 import { Colorize } from '@rushstack/terminal';
 

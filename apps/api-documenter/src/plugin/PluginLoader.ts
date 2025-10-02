@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import * as resolve from 'resolve';
 
 import type { IApiDocumenterPluginManifest, IFeatureDefinition } from './IApiDocumenterPluginManifest';

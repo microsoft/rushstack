@@ -4,7 +4,6 @@
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
-
 import type { BaseLinkManager } from '../../logic/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
 

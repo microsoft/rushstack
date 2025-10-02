@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import * as ts from 'typescript';
+
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import type { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
@@ -11,7 +14,6 @@ import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import type { SymbolMetadata } from '../collector/SymbolMetadata';
 import type { CollectorEntity } from '../collector/CollectorEntity';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
-import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import type { IAstModuleExportInfo } from '../analyzer/AstModule';
 import type { AstEntity } from '../analyzer/AstEntity';

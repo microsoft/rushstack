@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'node:os';
+
 import { Colorize } from '@rushstack/terminal';
 
 import { ApiExtractorCommandLine } from './cli/ApiExtractorCommandLine';

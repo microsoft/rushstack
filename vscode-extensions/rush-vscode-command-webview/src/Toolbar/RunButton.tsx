@@ -4,8 +4,8 @@
 import { PrimaryButton } from '@fluentui/react/lib/Button';
 import * as React from 'react';
 import { useCallback } from 'react';
-import { sendMessageToExtension } from '../Message/toExtension';
 
+import { sendMessageToExtension } from '../Message/toExtension';
 import { useAppSelector } from '../store/hooks';
 import { useParameterArgs } from '../store/slices/parameter';
 

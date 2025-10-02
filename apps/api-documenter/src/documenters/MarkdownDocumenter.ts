@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import { PackageName, FileSystem, NewlineKind } from '@rushstack/node-core-library';
 import {
   DocSection,

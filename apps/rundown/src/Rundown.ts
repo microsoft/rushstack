@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, PackageJsonLookup, Sort, Text } from '@rushstack/node-core-library';
 import * as child_process from 'node:child_process';
 import * as path from 'node:path';
+
 import stringArgv from 'string-argv';
+
+import { FileSystem, PackageJsonLookup, Sort, Text } from '@rushstack/node-core-library';
 
 import type { IpcMessage } from './LauncherTypes';
 

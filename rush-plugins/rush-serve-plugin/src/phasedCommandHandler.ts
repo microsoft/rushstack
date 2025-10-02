@@ -25,7 +25,6 @@ import { type CommandLineIntegerParameter, CommandLineParameterKind } from '@rus
 import { PLUGIN_NAME } from './constants';
 import { RushServeConfiguration } from './RushProjectServeConfigFile';
 import type { IRoutingRule, IPhasedCommandHandlerOptions } from './types';
-
 import {
   getLogServePathForProject,
   tryEnableBuildStatusWebSocketServer,

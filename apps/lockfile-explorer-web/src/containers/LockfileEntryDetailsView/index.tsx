@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useState } from 'react';
+
 import { ScrollArea, Text } from '@rushstack/rush-themed-ui';
 
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-
 import { LfxDependencyKind, type LfxGraphDependency, type LfxGraphEntry } from '../../packlets/lfx-shared';
 import { readPackageJsonAsync } from '../../helpers/lfxApiClient';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';

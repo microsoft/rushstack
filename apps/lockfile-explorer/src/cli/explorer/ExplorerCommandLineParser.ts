@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import process from 'node:process';
+import * as path from 'node:path';
+
 import express from 'express';
 import yaml from 'js-yaml';
 import cors from 'cors';
-import process from 'node:process';
 import open from 'open';
 import updateNotifier from 'update-notifier';
-import * as path from 'node:path';
+
 import { FileSystem, type IPackageJson, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 import {
@@ -24,7 +26,6 @@ import {
   type IJsonLfxWorkspace
 } from '../../../build/lfx-shared';
 import * as lockfilePath from '../../graph/lockfilePath';
-
 import type { IAppState } from '../../state';
 import { init } from '../../utils/init';
 import { PnpmfileRunner } from '../../graph/PnpmfileRunner';

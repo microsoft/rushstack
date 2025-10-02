@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import process from 'node:process';
+
 import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 import { TerminalWritable } from './TerminalWritable';
 

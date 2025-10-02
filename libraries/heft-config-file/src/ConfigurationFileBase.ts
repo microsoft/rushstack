@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as nodeJsPath from 'node:path';
+
 import { JSONPath } from 'jsonpath-plus';
-import { JsonSchema, JsonFile, Import, FileSystem } from '@rushstack/node-core-library';
 import structuredClone from '@ungap/structured-clone';
+
+import { JsonSchema, JsonFile, Import, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 interface IConfigurationJson {

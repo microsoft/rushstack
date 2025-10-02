@@ -4,11 +4,6 @@
 import { /*IStackStyles, IStackTokens, */ initializeIcons } from '@fluentui/react';
 import * as React from 'react';
 import { useEffect } from 'react';
-import { fromExtensionListener } from './Message/fromExtension';
-// import { ParameterView } from './ParameterView';
-// import { Toolbar } from './Toolbar';
-// import { useAppSelector } from './store/hooks';
-import { ProjectView } from './ProjectView';
 import {
   type SelectTabData,
   type SelectTabEvent,
@@ -16,6 +11,12 @@ import {
   TabList,
   type TabValue
 } from '@fluentui/react-components';
+
+import { fromExtensionListener } from './Message/fromExtension';
+// import { ParameterView } from './ParameterView';
+// import { Toolbar } from './Toolbar';
+// import { useAppSelector } from './store/hooks';
+import { ProjectView } from './ProjectView';
 import { VersionsView } from './VersionsView';
 
 initializeIcons();

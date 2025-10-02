@@ -11,6 +11,7 @@ import path from 'node:path';
 // This file can use "import type" but otherwise should not reference any other modules, since it will
 // be run from the "common/temp" directory
 import type * as TSemver from 'semver';
+
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import type {

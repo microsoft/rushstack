@@ -25,7 +25,6 @@ import {
   type IGlobalCommandConfig,
   type IPhasedCommandConfig
 } from '../api/CommandLineConfiguration';
-
 import { AddAction } from './actions/AddAction';
 import { AlertAction } from './actions/AlertAction';
 import { BridgePackageAction } from './actions/BridgePackageAction';
@@ -50,11 +49,9 @@ import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
 import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
 import { UpgradeInteractiveAction } from './actions/UpgradeInteractiveAction';
 import { VersionAction } from './actions/VersionAction';
-
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 import type { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
-
 import { Telemetry } from '../logic/Telemetry';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
@@ -65,7 +62,6 @@ import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoade
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
 import { initializeDotEnv } from '../logic/dotenv';
-
 import { measureAsyncFn } from '../utilities/performance';
 
 /**

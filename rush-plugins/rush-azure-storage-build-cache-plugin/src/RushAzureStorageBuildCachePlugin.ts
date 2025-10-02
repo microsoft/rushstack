@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
+
 import type { AzureEnvironmentName, LoginFlowFailoverMap, LoginFlowType } from './AzureAuthenticationBase';
 
 const PLUGIN_NAME: string = 'AzureStorageBuildCachePlugin';

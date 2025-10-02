@@ -6,7 +6,6 @@ import * as React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 
 import { IconButton } from '../components/IconButton';
-
 import type { IHookFormProps } from './interface';
 
 export type IControlledTextFieldArrayProps = ITextFieldProps & IHookFormProps<string>;

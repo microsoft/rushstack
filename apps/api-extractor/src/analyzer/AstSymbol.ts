@@ -2,8 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import type * as ts from 'typescript';
-import type { AstDeclaration } from './AstDeclaration';
+
 import { InternalError } from '@rushstack/node-core-library';
+
+import type { AstDeclaration } from './AstDeclaration';
 import { AstEntity } from './AstEntity';
 
 /**

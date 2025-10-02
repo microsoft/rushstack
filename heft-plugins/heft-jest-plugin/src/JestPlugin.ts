@@ -11,6 +11,7 @@ import type { AggregatedResult } from '@jest/reporters';
 import type { Config } from '@jest/types';
 import { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPlugin } from 'jest-resolve';
 import { mergeWith, isObject } from 'lodash';
+
 import type {
   HeftConfiguration,
   IScopedLogger,

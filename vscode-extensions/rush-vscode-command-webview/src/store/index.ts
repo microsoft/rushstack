@@ -3,6 +3,7 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import type { EnhancedStore } from '@reduxjs/toolkit';
+
 import parameterReducer, { type IParameterState } from './slices/parameter';
 import uiReducer, { type IUIState } from './slices/ui';
 import projectReducer, { type IProjectState } from './slices/project';

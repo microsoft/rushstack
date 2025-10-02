@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as crypto from 'node:crypto';
+
 import { InternalError, JsonFile } from '@rushstack/node-core-library';
 
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';

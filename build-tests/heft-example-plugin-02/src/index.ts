@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IHeftTaskSession, HeftConfiguration, IHeftTaskPlugin } from '@rushstack/heft';
 import type { PLUGIN_NAME as ExamplePlugin01Name, IExamplePlugin01Accessor } from 'heft-example-plugin-01';
+
+import type { IHeftTaskSession, HeftConfiguration, IHeftTaskPlugin } from '@rushstack/heft';
 
 export const PLUGIN_NAME: 'example-plugin-02' = 'example-plugin-02';
 const EXAMPLE_PLUGIN_01_NAME: typeof ExamplePlugin01Name = 'example-plugin-01';

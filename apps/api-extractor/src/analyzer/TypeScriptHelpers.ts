@@ -4,9 +4,11 @@
 /* eslint-disable no-bitwise */
 
 import * as ts from 'typescript';
+
+import { InternalError } from '@rushstack/node-core-library';
+
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { TypeScriptInternals } from './TypeScriptInternals';
-import { InternalError } from '@rushstack/node-core-library';
 
 export class TypeScriptHelpers {
   // Matches TypeScript's encoded names for well-known ECMAScript symbols like
