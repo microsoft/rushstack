@@ -3,7 +3,7 @@
 
 /* eslint-disable no-bitwise */
 
-import * as path from 'path';
+import * as path from 'node:path';
 import * as ts from 'typescript';
 import type * as tsdoc from '@microsoft/tsdoc';
 import {

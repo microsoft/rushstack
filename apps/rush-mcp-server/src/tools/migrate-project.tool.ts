@@ -6,7 +6,7 @@ import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 import { BaseTool, type CallToolResult } from './base.tool';
 import { getRushConfiguration } from '../utilities/common';
-import path from 'path';
+import path from 'node:path';
 import type { ISubspacesConfigurationJson } from '@rushstack/rush-sdk/lib/api/SubspacesConfiguration';
 import type { RushConfiguration, RushConfigurationProject } from '@rushstack/rush-sdk';
 import type { IRushConfigurationProjectJson } from '@rushstack/rush-sdk/lib/api/RushConfigurationProject';

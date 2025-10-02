@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type ResourceLimits, Worker } from 'worker_threads';
+import { type ResourceLimits, Worker } from 'node:worker_threads';
 
 /**
  * Symbol to read the ID off of a worker

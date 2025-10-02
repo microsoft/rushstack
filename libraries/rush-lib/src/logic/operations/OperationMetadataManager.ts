@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import { Async, FileSystem, type IFileSystemCopyFileOptions } from '@rushstack/node-core-library';
 import {
   type ITerminalChunk,

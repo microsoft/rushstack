@@ -3,7 +3,7 @@
 
 import type { IRushMcpTool, RushMcpPluginSession, CallToolResult, zodModule } from '@rushstack/mcp-server';
 import { JsonFile } from '@rushstack/node-core-library';
-import path from 'path';
+import path from 'node:path';
 
 import type { DocsPlugin } from './DocsPlugin';
 

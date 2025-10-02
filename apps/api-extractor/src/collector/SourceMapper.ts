@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
 import { SourceMapConsumer, type RawSourceMap, type MappingItem, type Position } from 'source-map';
 import { FileSystem, InternalError, JsonFile, NewlineKind } from '@rushstack/node-core-library';
 import type ts from 'typescript';

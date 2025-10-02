@@ -17,7 +17,7 @@ import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { CustomValidationFunction } from '@rushstack/heft-config-file';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import { ICustomJsonPathMetadata } from '@rushstack/heft-config-file';
 import { ICustomPropertyInheritance } from '@rushstack/heft-config-file';
 import { IJsonPathMetadata } from '@rushstack/heft-config-file';

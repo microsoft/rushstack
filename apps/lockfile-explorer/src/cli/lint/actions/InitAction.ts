@@ -6,7 +6,7 @@ import { CommandLineAction } from '@rushstack/ts-command-line';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { RushConfiguration } from '@rushstack/rush-sdk';
 import { FileSystem } from '@rushstack/node-core-library';
-import path from 'path';
+import path from 'node:path';
 
 import type { LintCommandLineParser } from '../LintCommandLineParser';
 import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../../../constants/common';

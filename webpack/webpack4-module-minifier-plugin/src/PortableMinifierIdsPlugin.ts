@@ -4,7 +4,7 @@
 import type { Compiler, Plugin } from 'webpack';
 import type webpack from 'webpack';
 import type { ReplaceSource } from 'webpack-sources';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import type { TapOptions } from 'tapable';
 import RequestShortener from 'webpack/lib/RequestShortener';
 

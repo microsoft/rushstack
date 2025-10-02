@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as child_process from 'child_process';
-import * as os from 'os';
-import * as path from 'path';
-import { performance } from 'perf_hooks';
-import { Transform } from 'stream';
+import * as child_process from 'node:child_process';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { performance } from 'node:perf_hooks';
+import { Transform } from 'node:stream';
 import {
   JsonFile,
   type IPackageJson,

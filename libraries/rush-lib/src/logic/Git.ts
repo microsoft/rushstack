@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type child_process from 'child_process';
+import type child_process from 'node:child_process';
 import gitInfo from 'git-repo-info';
-import * as path from 'path';
-import * as url from 'url';
+import * as path from 'node:path';
+import * as url from 'node:url';
 
 import { trueCasePathSync } from 'true-case-path';
 import { Executable, AlreadyReportedError, Path, Async } from '@rushstack/node-core-library';

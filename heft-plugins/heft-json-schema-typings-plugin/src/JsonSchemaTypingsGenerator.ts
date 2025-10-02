@@ -3,7 +3,7 @@
 
 import { type ITypingsGeneratorBaseOptions, TypingsGenerator } from '@rushstack/typings-generator';
 import { compileFromFile } from 'json-schema-to-typescript';
-import path from 'path';
+import path from 'node:path';
 
 interface IJsonSchemaTypingsGeneratorBaseOptions extends ITypingsGeneratorBaseOptions {}
 

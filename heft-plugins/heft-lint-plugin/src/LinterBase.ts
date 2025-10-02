@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { performance } from 'perf_hooks';
-import { createHash, type Hash } from 'crypto';
+import * as path from 'node:path';
+import { performance } from 'node:perf_hooks';
+import { createHash, type Hash } from 'node:crypto';
 import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { IScopedLogger } from '@rushstack/heft';

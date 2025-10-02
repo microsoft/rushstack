@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { DllPlugin, type Compiler, WebpackError, type Chunk, type NormalModule } from 'webpack';
-import path from 'path';
+import path from 'node:path';
 import { Async, FileSystem, LegacyAdapters, Path } from '@rushstack/node-core-library';
 
 const PLUGIN_NAME: 'DeepImportsPlugin' = 'DeepImportsPlugin';

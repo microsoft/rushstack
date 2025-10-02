@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IRequiredCommandLineStringParameter } from '@rushstack/ts-command-line';
-import path from 'path';
+import path from 'node:path';
 
 import { HotlinkManager } from '../../utilities/HotlinkManager';
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';

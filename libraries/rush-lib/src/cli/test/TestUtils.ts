@@ -37,7 +37,7 @@ export interface IChildProcessModuleMock {
  * in `__mocks__/child_process.js`.
  */
 export function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
-  const cpMocked: IChildProcessModuleMock = require('child_process');
+  const cpMocked: IChildProcessModuleMock = require('node:child_process');
   cpMocked.__setSpawnMockConfig(options);
 
   const spawnMock: jest.Mock = cpMocked.spawn;

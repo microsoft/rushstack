@@ -3,7 +3,7 @@
 
 import { FileSystem, type FileSystemStats, Sort } from '@rushstack/node-core-library';
 
-import * as path from 'path';
+import * as path from 'node:path';
 
 export interface IPathNodeBase {
   kind: 'file' | 'folder' | 'link';

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as httpProxy from 'http-proxy';
-import * as http from 'http';
+import * as http from 'node:http';
 
 const proxy: httpProxy = httpProxy.createProxyServer({});
 

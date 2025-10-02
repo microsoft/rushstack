@@ -11,7 +11,7 @@ import {
   EnvironmentConfiguration
 } from '@rushstack/rush-sdk';
 import { WebClient, type IWebClientResponse } from '@rushstack/rush-sdk/lib/utilities/WebClient';
-import type { SpawnSyncReturns } from 'child_process';
+import type { SpawnSyncReturns } from 'node:child_process';
 
 enum CredentialsOptions {
   Optional,

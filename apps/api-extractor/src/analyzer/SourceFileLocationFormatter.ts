@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type * as ts from 'typescript';
-import * as path from 'path';
+import * as path from 'node:path';
 import { Path, Text } from '@rushstack/node-core-library';
 
 export interface ISourceFileLocationFormatOptions {

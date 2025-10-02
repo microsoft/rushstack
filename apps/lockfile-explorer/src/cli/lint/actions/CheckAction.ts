@@ -4,7 +4,7 @@
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 import { RushConfiguration, type RushConfigurationProject, type Subspace } from '@rushstack/rush-sdk';
-import path from 'path';
+import path from 'node:path';
 import yaml from 'js-yaml';
 import semver from 'semver';
 import type * as lockfileTypes from '@pnpm/lockfile.types';

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { MinifyOptions } from 'terser';
-import { parentPort, workerData } from 'worker_threads';
+import { parentPort, workerData } from 'node:worker_threads';
 
 import { minifySingleFileAsync } from './MinifySingleFile';
 import type { IModuleMinificationRequest, IModuleMinificationResult } from './types';

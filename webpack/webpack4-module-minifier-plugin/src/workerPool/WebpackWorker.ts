@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import webpack = require('webpack');
-import * as workerThreads from 'worker_threads';
+import * as workerThreads from 'node:worker_threads';
 import { MessagePortMinifier } from '@rushstack/module-minifier';
 import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
 import '../OverrideWebpackIdentifierAllocation';

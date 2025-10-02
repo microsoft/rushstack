@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { StandardTags } from '@microsoft/tsdoc';
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { ExtractorConfig } from '../ExtractorConfig';
 

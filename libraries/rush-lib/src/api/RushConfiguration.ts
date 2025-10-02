@@ -3,7 +3,7 @@
 
 /* eslint max-lines: off */
 
-import * as path from 'path';
+import * as path from 'node:path';
 import * as semver from 'semver';
 import {
   JsonFile,

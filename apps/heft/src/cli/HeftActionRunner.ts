@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { performance } from 'perf_hooks';
-import { createInterface, type Interface as ReadlineInterface } from 'readline';
-import os from 'os';
+import { performance } from 'node:perf_hooks';
+import { createInterface, type Interface as ReadlineInterface } from 'node:readline';
+import os from 'node:os';
 
 import { AlreadyReportedError, InternalError, type IPackageJson } from '@rushstack/node-core-library';
 import { Colorize, ConsoleTerminalProvider, type ITerminal } from '@rushstack/terminal';

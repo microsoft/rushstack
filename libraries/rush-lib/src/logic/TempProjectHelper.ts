@@ -3,7 +3,7 @@
 
 import { FileConstants, FileSystem, PosixModeBits } from '@rushstack/node-core-library';
 import * as tar from 'tar';
-import * as path from 'path';
+import * as path from 'node:path';
 
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { RushConfiguration } from '../api/RushConfiguration';

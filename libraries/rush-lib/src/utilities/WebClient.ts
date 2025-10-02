@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
-import * as process from 'process';
-import type * as http from 'http';
+import * as os from 'node:os';
+import * as process from 'node:process';
+import type * as http from 'node:http';
 import { request as httpRequest, type IncomingMessage } from 'node:http';
 import { request as httpsRequest, type RequestOptions } from 'node:https';
 import { Import, LegacyAdapters } from '@rushstack/node-core-library';
@@ -156,7 +156,7 @@ const makeRequestAsync: FetchFn = async (
               if (decodedBuffer === undefined) {
                 let encodings: string | string[] | undefined = headers[CONTENT_ENCODING_HEADER_NAME];
                 if (!noDecode && encodings !== undefined) {
-                  const zlib: typeof import('zlib') = await import('zlib');
+                  const zlib: typeof import('zlib') = await import('node:zlib');
                   if (!Array.isArray(encodings)) {
                     encodings = encodings.split(',');
                   }

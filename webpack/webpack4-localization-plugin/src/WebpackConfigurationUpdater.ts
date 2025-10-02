@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { minimatch } from 'minimatch';
-import * as path from 'path';
+import * as path from 'node:path';
 import type * as Webpack from 'webpack';
 import type * as SetPublicPathPluginPackageType from '@rushstack/set-webpack-public-path-plugin';
 import { type NewlineKind, Text } from '@rushstack/node-core-library';

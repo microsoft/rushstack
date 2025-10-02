@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { Utilities } from '../utilities/Utilities';
 import { RushConstants } from '../logic/RushConstants';

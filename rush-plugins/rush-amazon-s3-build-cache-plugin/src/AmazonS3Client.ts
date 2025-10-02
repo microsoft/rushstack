@@ -3,7 +3,7 @@
 
 import { Async } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 import {
   type IGetFetchOptions,
   type IFetchOptionsWithBody,

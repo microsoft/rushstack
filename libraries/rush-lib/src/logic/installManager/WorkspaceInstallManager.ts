@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
 import * as semver from 'semver';
 import yaml from 'js-yaml';
 import {
@@ -13,7 +13,7 @@ import {
   Path,
   Sort
 } from '@rushstack/node-core-library';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';

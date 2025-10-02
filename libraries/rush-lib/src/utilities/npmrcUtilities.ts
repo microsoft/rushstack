@@ -3,8 +3,8 @@
 
 // IMPORTANT - do not use any non-built-in libraries in this file
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 export interface ILogger {
   info: (string: string) => void;

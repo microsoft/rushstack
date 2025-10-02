@@ -4,8 +4,8 @@
 import { FileSystem, Path, NewlineKind, Async } from '@rushstack/node-core-library';
 import { type ITerminal, Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 import glob from 'fast-glob';
-import * as path from 'path';
-import { EOL } from 'os';
+import * as path from 'node:path';
+import { EOL } from 'node:os';
 import * as chokidar from 'chokidar';
 
 /**

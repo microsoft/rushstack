@@ -3,7 +3,7 @@
 
 jest.disableAutomock();
 
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 
 import { runTests } from './LocalizedRuntimeTestBase';
 

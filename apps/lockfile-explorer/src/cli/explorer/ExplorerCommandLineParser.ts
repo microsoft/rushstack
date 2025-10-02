@@ -4,7 +4,7 @@
 import express from 'express';
 import yaml from 'js-yaml';
 import cors from 'cors';
-import process from 'process';
+import process from 'node:process';
 import open from 'open';
 import updateNotifier from 'update-notifier';
 import * as path from 'node:path';

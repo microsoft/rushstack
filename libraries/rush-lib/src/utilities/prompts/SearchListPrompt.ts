@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Interface } from 'readline';
+import type { Interface } from 'node:readline';
 import { Colorize } from '@rushstack/terminal';
 
 // Modified from the choice list prompt in inquirer:

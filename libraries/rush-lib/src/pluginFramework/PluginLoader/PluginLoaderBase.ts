@@ -9,7 +9,7 @@ import {
   JsonSchema
 } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../../api/RushConfiguration';

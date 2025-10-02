@@ -17,7 +17,7 @@ import type {
   FunctionYamlModel,
   CommonYamlModel
 } from '../yaml/ISDPYamlFile';
-import path from 'path';
+import path from 'node:path';
 import { FileSystem, Encoding, NewlineKind } from '@rushstack/node-core-library';
 import yaml = require('js-yaml');
 

@@ -18,7 +18,7 @@ const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVer
   alreadyReportedNodeTooNewError: false
 });
 
-import * as os from 'os';
+import * as os from 'node:os';
 import * as semver from 'semver';
 
 import { Text, PackageJsonLookup } from '@rushstack/node-core-library';

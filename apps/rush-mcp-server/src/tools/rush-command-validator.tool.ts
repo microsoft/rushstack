@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { JsonFile } from '@rushstack/node-core-library';
-import path from 'path';
+import path from 'node:path';
 import type { ICommandLineJson } from '@rushstack/rush-sdk/lib/api/CommandLineJson';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 

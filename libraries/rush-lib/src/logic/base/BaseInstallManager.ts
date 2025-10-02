@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
-import * as path from 'path';
-import * as crypto from 'crypto';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
 import * as semver from 'semver';
 import {
   FileSystem,
@@ -16,8 +16,8 @@ import {
   type FolderItem,
   Async
 } from '@rushstack/node-core-library';
-import { existsSync } from 'fs';
-import { readFile, unlink } from 'fs/promises';
+import { existsSync } from 'node:fs';
+import { readFile, unlink } from 'node:fs/promises';
 import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 import {
   type ILockfile,

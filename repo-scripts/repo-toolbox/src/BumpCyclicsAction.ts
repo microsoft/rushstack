@@ -5,7 +5,7 @@ import { Async, Executable, JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import { DependencyType, RushConfiguration } from '@microsoft/rush-lib';
 import { CommandLineAction } from '@rushstack/ts-command-line';
-import type { ChildProcess } from 'child_process';
+import type { ChildProcess } from 'node:child_process';
 
 export class BumpCyclicsAction extends CommandLineAction {
   public constructor() {

@@ -7,7 +7,7 @@
 import { FileSystem, Path } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
-import path from 'path';
+import path from 'node:path';
 
 import * as lockfilePath from '../graph/lockfilePath';
 import type { IAppState } from '../state';

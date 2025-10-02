@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { PackageManager } from './PackageManager';

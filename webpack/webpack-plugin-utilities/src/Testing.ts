@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createFsFromVolume, Volume, type IFs } from 'memfs';
-import path from 'path';
+import path from 'node:path';
 import type { StatsCompilation as WebpackStatsCompilation } from 'webpack';
 import webpackMerge from 'webpack-merge';
 

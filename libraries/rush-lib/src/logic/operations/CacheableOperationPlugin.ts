@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 import { InternalError, NewlineKind, Sort } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import { DiscardStdoutTransform, TextRewriterTransform } from '@rushstack/terminal';

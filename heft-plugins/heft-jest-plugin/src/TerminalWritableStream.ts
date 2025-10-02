@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { ITerminal } from '@rushstack/terminal';
-import { Writable } from 'stream';
+import { Writable } from 'node:stream';
 
 // Regex to filter out screen clearing directives
 // Can't use the AnsiEscape.removeCodes() function from node-core-library because we are only

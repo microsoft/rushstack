@@ -5,8 +5,8 @@
 
 // NOTE: Since startWithVersionSelector.ts is loaded in the same process as start.ts, any dependencies that
 // we import here may become side-by-side versions.  We want to minimize any dependencies.
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import type { IPackageJson } from '@rushstack/node-core-library';
 import { getToolParameterNamesFromArgs } from './utilities/CliUtilities';
 import { Constants } from './utilities/Constants';

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as crypto from 'crypto';
-import * as path from 'path';
-import { Worker } from 'worker_threads';
+import * as crypto from 'node:crypto';
+import * as path from 'node:path';
+import { Worker } from 'node:worker_threads';
 
 import type * as TTypescript from 'typescript';
 import { Path, FileError } from '@rushstack/node-core-library';

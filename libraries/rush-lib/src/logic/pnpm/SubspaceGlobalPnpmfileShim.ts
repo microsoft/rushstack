@@ -6,7 +6,7 @@
 // It reads its input data from "common/temp/pnpmfileSettings.json". The pnpmfile is
 // required directly by this shim and is called after Rush's transformations are applied.
 
-import path from 'path';
+import path from 'node:path';
 
 // This file can use "import type" but otherwise should not reference any other modules, since it will
 // be run from the "common/temp" directory
