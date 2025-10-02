@@ -239,7 +239,7 @@
       "dependencies": {
         "upstream": ["_phase:lite-build", "_phase:build"]
       },
-      "ignoreMissingScript": true,
+      "missingScriptBehavior": "silent",
       "allowWarningsOnSuccess": false
     },
     {
@@ -248,7 +248,7 @@
         "self": ["_phase:lite-build"],
         "upstream": ["_phase:build"]
       },
-      "ignoreMissingScript": true,
+      "missingScriptBehavior": "log",
       "allowWarningsOnSuccess": false
     },
     {
@@ -256,7 +256,7 @@
       "dependencies": {
         "self": ["_phase:lite-build", "_phase:build"]
       },
-      "ignoreMissingScript": true,
+      "missingScriptBehavior": "silent",
       "allowWarningsOnSuccess": false
     }
   ],
