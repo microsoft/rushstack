@@ -190,7 +190,9 @@ module.exports = {
         '**/test/**/*.ts',
         '**/test/**/*.tsx'
       ],
-      rules: {}
+      rules: {
+        'import/order': 'off'
+      }
     }
   ]
 };
