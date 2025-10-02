@@ -102,6 +102,7 @@ module.exports = {
           {
             source: 'string',
             style: 'line',
+            trailingNewlines: 2,
             content:
               'Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\n' +
               'See LICENSE in the project root for license information.'
