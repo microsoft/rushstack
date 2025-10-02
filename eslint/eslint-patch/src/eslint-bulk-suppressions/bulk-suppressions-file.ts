@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import fs from 'fs';
+import fs from 'node:fs';
 import { VSCODE_PID_ENV_VAR_NAME } from './constants';
 
 export interface ISuppression {

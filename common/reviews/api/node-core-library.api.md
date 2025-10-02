@@ -6,9 +6,9 @@
 
 /// <reference types="node" />
 
-import * as child_process from 'child_process';
-import * as nodeFs from 'fs';
-import * as nodePath from 'path';
+import * as child_process from 'node:child_process';
+import * as nodeFs from 'node:fs';
+import * as nodePath from 'node:path';
 
 // @public
 export enum AlreadyExistsBehavior {

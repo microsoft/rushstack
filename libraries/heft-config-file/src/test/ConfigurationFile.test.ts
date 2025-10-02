@@ -3,7 +3,7 @@
 
 /* eslint-disable max-lines */
 
-import * as nodeJsPath from 'path';
+import * as nodeJsPath from 'node:path';
 import { FileSystem, JsonFile, Path, Text } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { RigConfig } from '@rushstack/rig-package';

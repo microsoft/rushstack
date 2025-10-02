@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import process from 'process';
+import process from 'node:process';
 import { InternalError } from './InternalError';
 
 /**

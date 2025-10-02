@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as nodeJsPath from 'path';
+import * as nodeJsPath from 'node:path';
 import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { IRigConfig } from '@rushstack/rig-package';

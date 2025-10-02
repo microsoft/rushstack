@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { TSESTree } from '@typescript-eslint/types';
-import fs from 'fs';
+import fs from 'node:fs';
 
 import * as Guards from './ast-guards';
 

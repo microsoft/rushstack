@@ -11,8 +11,8 @@ import type { IProblem } from '@rushstack/problem-matcher';
 import type { IProblemMatcher } from '@rushstack/problem-matcher';
 import type { IProblemMatcherJson } from '@rushstack/problem-matcher';
 import { NewlineKind } from '@rushstack/node-core-library';
-import { Writable } from 'stream';
-import { WritableOptions } from 'stream';
+import { Writable } from 'node:stream';
+import { WritableOptions } from 'node:stream';
 
 // @public
 export class AnsiEscape {
