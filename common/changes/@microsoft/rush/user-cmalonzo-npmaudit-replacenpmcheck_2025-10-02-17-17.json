@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fork npm-check into rush-lib",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
