@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 jest.mock('../OperationStateFile');
-jest.mock('fs');
+jest.mock('node:fs');
 
 import { MockWritable, StringBufferTerminalProvider, Terminal, TerminalChunkKind } from '@rushstack/terminal';
 import type { IPhase } from '../../../api/CommandLineConfiguration';
