@@ -4,7 +4,7 @@
 
   "operationSettings": [
     {
-      "operationName": "_phase:build",
+      "operationName": "_phase:lite-build",
       "outputFolderNames": ["dist"]
     }
   ]
