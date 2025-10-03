@@ -406,7 +406,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       let packageExtensionsChecksumAlgorithm: string | undefined;
       if (existingPackageExtensionsChecksum) {
         const dashIndex: number = existingPackageExtensionsChecksum.indexOf('-');
-        if (dashIndex === -1) {
+        if (dashIndex !== -1) {
           packageExtensionsChecksumAlgorithm = existingPackageExtensionsChecksum.substring(0, dashIndex);
         }
 
