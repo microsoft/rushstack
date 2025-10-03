@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "Add support for PNPM 10 lockfile format",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer"
+}
