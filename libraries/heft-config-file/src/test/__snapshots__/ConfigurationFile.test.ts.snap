@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`ConfigurationFile A complex config file Can get the original $schema property value 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
 exports[`ConfigurationFile A complex config file Correctly loads a complex config file (Deprecated PathResolutionMethod.NodeResolve) 1`] = `
 Object {
   "debug": "",

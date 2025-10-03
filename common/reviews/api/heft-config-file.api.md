@@ -20,6 +20,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     static _formatPathForLogging: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue | undefined;
+    getSchemaPropertyOriginalValue<TObject extends object>(obj: TObject): string | undefined;
     // (undocumented)
     protected _loadConfigurationFileInnerWithCache(terminal: ITerminal, resolvedConfigurationFilePath: string, projectFolderPath: string | undefined, onConfigurationFileNotFound?: IOnConfigurationFileNotFoundCallback): TConfigurationFile;
     // (undocumented)

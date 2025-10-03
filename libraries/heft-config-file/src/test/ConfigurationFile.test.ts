@@ -1140,6 +1140,31 @@ describe('ConfigurationFile', () => {
         nodeJsPath.resolve(__dirname, secondConfigFilePath)
       );
     });
+
+    it('Can get the original $schema property value', async () => {
+      async function testForFilename(filename: string, expectedSchema: string): Promise<void> {
+        const projectRelativeFilePath: string = `complexConfigFile/${filename}`;
+        const jsonSchemaPath: string = nodeJsPath.resolve(
+          __dirname,
+          'complexConfigFile',
+          'plugins.schema.json'
+        );
+
+        const configFileLoader: ProjectConfigurationFile<IComplexConfigFile> =
+          new ProjectConfigurationFile<IComplexConfigFile>({
+            projectRelativeFilePath,
+            jsonSchemaPath
+          });
+        const loadedConfigFile: IComplexConfigFile =
+          await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
+        expect(configFileLoader.getSchemaPropertyOriginalValue(loadedConfigFile)).toEqual(expectedSchema);
+      }
+
+      await testForFilename('pluginsA.json', 'http://schema.net/A');
+      await testForFilename('pluginsB.json', 'http://schema.net/B');
+      await testForFilename('pluginsC.json', 'http://schema.net/C');
+      await testForFilename('pluginsD.json', 'http://schema.net/D');
+    });
   });
 
   describe('a complex file with inheritance type annotations', () => {
