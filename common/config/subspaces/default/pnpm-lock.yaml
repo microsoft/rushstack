@@ -3684,6 +3684,9 @@ importers:
       npm-package-arg:
         specifier: ~6.1.0
         version: 6.1.1
+      object-hash:
+        specifier: 3.0.0
+        version: 3.0.0
       pnpm-sync-lib:
         specifier: 0.3.2
         version: 0.3.2
@@ -3745,6 +3748,9 @@ importers:
       '@types/npm-package-arg':
         specifier: 6.1.0
         version: 6.1.0
+      '@types/object-hash':
+        specifier: ~3.0.6
+        version: 3.0.6
       '@types/read-package-tree':
         specifier: 5.1.0
         version: 5.1.0
@@ -14082,6 +14088,10 @@ packages:
     resolution: {integrity: sha512-0l3z16vnlJGl2Mi/rgJFrdwfLZ4jfNYgE6ZShEpjqhHuGTqdEzNles03NpYHwUMVYZa+Tj46UxKIEpE78lQ3DQ==}
     dependencies:
       '@types/node': 17.0.41
+    dev: true
+
+  /@types/object-hash@3.0.6:
+    resolution: {integrity: sha512-fOBV8C1FIu2ELinoILQ+ApxcUKz4ngq+IWUYrxSGjXzzjUALijilampwkMgEtJ+h2njAW3pi853QpzNVCHB73w==}
     dev: true
 
   /@types/overlayscrollbars@1.12.5:
@@ -25072,6 +25082,11 @@ packages:
       copy-descriptor: 0.1.1
       define-property: 0.2.5
       kind-of: 3.2.2
+
+  /object-hash@3.0.0:
+    resolution: {integrity: sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==}
+    engines: {node: '>= 6'}
+    dev: false
 
   /object-inspect@1.13.4:
     resolution: {integrity: sha512-W67iLl4J2EXEGTbfeHCffrjDfitvLANg0UlX3wFUUSTx92KXRFegMHUVgSqE+wvhAbi4WqjGg9czysTV2Epbew==}
