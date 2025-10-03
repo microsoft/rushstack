@@ -1745,10 +1745,10 @@
         }
         parallelismInput.value = managerState.parallelism;
         managerStateEl.innerHTML = '';
-        // Highlight execute button if a pass is queued
+        // Highlight execute button if an iteration is scheduled
         const executeBtn = document.getElementById('execute-btn');
         if (executeBtn) {
-          if (managerState.hasQueuedPass) {
+          if (managerState.hasScheduledIteration) {
             executeBtn.classList.add('queued');
             executeBtn.title = 'Run once (changes detected)';
             executeBtn.setAttribute('aria-label', 'Run once (changes detected)');
@@ -1901,7 +1901,7 @@
               // Mirror dynamic fields that affect depiction
               op.isActive = s.isActive;
               op.status = s.status || op.status;
-              op.runInThisPass = s.runInThisPass;
+              op.runInThisIteration = s.runInThisIteration;
               op.logFileURLs = s.logFileURLs;
             }
           });
@@ -1937,7 +1937,7 @@
             managerState = msg.managerState;
             break;
           }
-          case 'pass-queued': {
+          case 'iteration-scheduled': {
             queuedStates.clear();
             msg.queuedStates.forEach((s) => queuedStates.set(s.name, s));
             break;
@@ -2161,8 +2161,8 @@
         const visible = [];
         for (const op of operations.values()) {
           const state = executionStates.get(op.name) || {};
-          // merge dynamic fields so existing UI logic can still reference op.runInThisPass etc.
-          op.runInThisPass = state.runInThisPass;
+          // merge dynamic fields so existing UI logic can still reference op.runInThisIteration etc.
+          op.runInThisIteration = state.runInThisIteration;
           op.status = state.status || op.status;
           op.isActive = state.isActive;
           op.logFileURLs = state.logFileURLs;
@@ -2815,8 +2815,8 @@
         // prefer dynamic execution state status if available
         const state = executionStates.get(op.name);
         let displayStatus = (state && state.status) || op.status;
-        const runInThisPass = state ? state.runInThisPass : op.runInThisPass;
-        if (runInThisPass === false) {
+        const runInThisIteration = state ? state.runInThisIteration : op.runInThisIteration;
+        if (runInThisIteration === false) {
           const prev = lastExecutionResults.get(op.name);
           if (prev && prev.status) displayStatus = prev.status;
           else displayStatus = 'Skipped';
@@ -2871,10 +2871,10 @@
           const displayStatus = computeDisplayStatus(op);
           const prevStatus = graphState.nodeStatus.get(name);
           const state = executionStates.get(name);
-          const runInThisPass = state ? state.runInThisPass : op.runInThisPass;
-          const notRunning = runInThisPass === false || op.noop;
+          const runInThisIteration = state ? state.runInThisIteration : op.runInThisIteration;
+          const notRunning = runInThisIteration === false || op.noop;
           const queuedState = queuedStates.get(name);
-          const isQueuedNext = !!(queuedState && queuedState.runInThisPass === true);
+          const isQueuedNext = !!(queuedState && queuedState.runInThisIteration === true);
           const isFilteredOut = filteredOutNames.has(name);
           const isSearchFiltered = searchFilteredOutNames.has(name);
           const emojiSpan = div.querySelector('.emoji');
@@ -2982,8 +2982,10 @@
           rec.path.classList.remove('dashed', 'dotted', 'filtered-out', 'not-running');
           rec.path.classList.remove('filtered-out-search');
           const fromState = fromOp ? executionStates.get(rec.from) : undefined;
-          const fromRunInThisPass = fromState ? fromState.runInThisPass : fromOp?.runInThisPass;
-          const fromNotRunning = fromOp && (fromRunInThisPass === false || fromOp.noop);
+          const fromRunInThisIteration = fromState
+            ? fromState.runInThisIteration
+            : fromOp?.runInThisIteration;
+          const fromNotRunning = fromOp && (fromRunInThisIteration === false || fromOp.noop);
           const edgeStatusFiltered = filteredOutNames.has(rec.from) || filteredOutNames.has(rec.to);
           const edgeSearchFiltered =
             searchFilteredOutNames.has(rec.from) || searchFilteredOutNames.has(rec.to);
