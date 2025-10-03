@@ -2,6 +2,29 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.160.0",
+      "tag": "@microsoft/rush_v5.160.0",
+      "date": "Fri, 03 Oct 2025 20:10:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump the default Node and `pnpm` versions in the `rush init` template."
+          },
+          {
+            "comment": "Fix an issue with validation of the `pnpm-lock.yaml` `packageExtensionsChecksum` field in pnpm v10."
+          },
+          {
+            "comment": "Fix an issue where the `$schema` property is dropped from `common/config/rush/pnpm-config.json` when running `rush-pnpm patch-commit ...`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.159.0",
       "tag": "@microsoft/rush_v5.159.0",
       "date": "Fri, 03 Oct 2025 00:50:08 GMT",

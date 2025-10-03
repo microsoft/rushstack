@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 03 Oct 2025 00:50:08 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Oct 2025 20:10:21 GMT and should not be manually modified.
+
+## 5.160.0
+Fri, 03 Oct 2025 20:10:21 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
+
+### Updates
+
+- Bump the default Node and `pnpm` versions in the `rush init` template.
+- Fix an issue with validation of the `pnpm-lock.yaml` `packageExtensionsChecksum` field in pnpm v10.
+- Fix an issue where the `$schema` property is dropped from `common/config/rush/pnpm-config.json` when running `rush-pnpm patch-commit ...`
 
 ## 5.159.0
 Fri, 03 Oct 2025 00:50:08 GMT
