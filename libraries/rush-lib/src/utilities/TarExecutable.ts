@@ -40,9 +40,10 @@ export class TarExecutable {
     if (!tarExecutablePath) {
       terminal.writeVerboseLine('"tar" was not found on the PATH');
       return undefined;
+    } else {
+      terminal.writeVerboseLine(`Using "tar" binary: ${tarExecutablePath}`);
+      return new TarExecutable(tarExecutablePath);
     }
-
-    return new TarExecutable(tarExecutablePath);
   }
 
   /**
