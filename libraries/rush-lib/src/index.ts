@@ -162,13 +162,12 @@ export {
 
 export {
   type ICreateOperationsContext,
-  type IOperationExecutionPassOptions,
+  type IOperationExecutionIterationOptions,
   type IOperationExecutionManagerContext,
   type IOperationExecutionManager,
   type IPhasedCommandPlugin,
   PhasedCommandHooks,
-  OperationExecutionHooks,
-  type RunNextPassBehavior
+  OperationExecutionHooks
 } from './pluginFramework/PhasedCommandHooks';
 
 export type { IRushPlugin } from './pluginFramework/IRushPlugin';

@@ -49,7 +49,7 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
             // This is the command that will be used to identify the cache entry for this operation
             const commandForHash: string | undefined = shellCommand ?? scripts?.[phaseName];
 
-            // For execution of non-initial runs, prefer the `:incremental` script if it exists.
+            // For execution of non-initial iterations, prefer the `:incremental` script if it exists.
             // However, the `shellCommand` value still takes precedence per the spec for that feature.
             const initialCommand: string | undefined = shellCommand ?? scripts?.[phaseName];
             const incrementalCommand: string | undefined = isIncrementalBuildAllowed

@@ -18,7 +18,7 @@ export class DebugHashesPlugin implements IPhasedCommandPlugin {
 
   public apply(hooks: PhasedCommandHooks): void {
     hooks.executionManagerAsync.tap(PLUGIN_NAME, (executionManager) => {
-      executionManager.hooks.configureRun.tap(
+      executionManager.hooks.configureIteration.tap(
         PLUGIN_NAME,
         (operations: ReadonlyMap<Operation, IConfigurableOperation>) => {
           const terminal: ITerminal = this._terminal;

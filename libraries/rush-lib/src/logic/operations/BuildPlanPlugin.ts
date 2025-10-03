@@ -6,7 +6,7 @@ import type { ITerminal } from '@rushstack/terminal';
 import type {
   IOperationExecutionManager,
   IOperationExecutionManagerContext,
-  IOperationExecutionPassOptions,
+  IOperationExecutionIterationOptions,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
@@ -47,18 +47,18 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
     hooks.executionManagerAsync.tap(
       PLUGIN_NAME,
       (manager: IOperationExecutionManager, context: IOperationExecutionManagerContext) => {
-        manager.hooks.configureRun.tap(PLUGIN_NAME, (currentStates, lastStates, passOptions) => {
-          createBuildPlan(currentStates, passOptions, context);
+        manager.hooks.configureIteration.tap(PLUGIN_NAME, (currentStates, lastStates, iterationOptions) => {
+          createBuildPlan(currentStates, iterationOptions, context);
         });
       }
     );
 
     function createBuildPlan(
       recordByOperation: ReadonlyMap<Operation, IConfigurableOperation>,
-      passOptions: IOperationExecutionPassOptions,
+      iterationOptions: IOperationExecutionIterationOptions,
       context: IOperationExecutionManagerContext
     ): void {
-      const { inputsSnapshot } = passOptions;
+      const { inputsSnapshot } = iterationOptions;
       const { projectConfigurations } = context;
       const disjointSet: DisjointSet<Operation> = new DisjointSet<Operation>();
       const operations: Operation[] = [...recordByOperation.keys()];

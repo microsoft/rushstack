@@ -619,23 +619,30 @@ export interface _IOperationBuildCacheOptions {
 }
 
 // @alpha
+export interface IOperationExecutionIterationOptions {
+    // (undocumented)
+    inputsSnapshot?: IInputsSnapshot;
+    startTime?: number;
+}
+
+// @alpha
 export interface IOperationExecutionManager {
     readonly abortController: AbortController;
-    abortCurrentPassAsync(): Promise<void>;
+    abortCurrentIterationAsync(): Promise<void>;
     addTerminalDestination(destination: TerminalWritable): void;
     closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
     debugMode: boolean;
-    executeQueuedPassAsync(): Promise<boolean>;
-    readonly hasQueuedPass: boolean;
+    executeScheduledIterationAsync(): Promise<boolean>;
+    readonly hasScheduledIteration: boolean;
     readonly hooks: OperationExecutionHooks;
     invalidateOperations(operations?: Iterable<Operation>, reason?: string): void;
     readonly lastExecutionResults: ReadonlyMap<Operation, IOperationExecutionResult>;
     readonly operations: ReadonlySet<Operation>;
     parallelism: number;
-    queuePassAsync(options: IOperationExecutionPassOptions): Promise<boolean>;
+    pauseNextIteration: boolean;
     quietMode: boolean;
     removeTerminalDestination(destination: TerminalWritable, close?: boolean): boolean;
-    runNextPassBehavior: RunNextPassBehavior;
+    scheduleIterationAsync(options: IOperationExecutionIterationOptions): Promise<boolean>;
     setEnabledStates(operations: Iterable<Operation>, targetState: Operation['enabled'], mode: 'safe' | 'unsafe'): boolean;
     readonly status: OperationStatus;
 }
@@ -643,13 +650,6 @@ export interface IOperationExecutionManager {
 // @alpha
 export interface IOperationExecutionManagerContext extends ICreateOperationsContext {
     readonly initialSnapshot?: IInputsSnapshot;
-}
-
-// @alpha
-export interface IOperationExecutionPassOptions {
-    // (undocumented)
-    inputsSnapshot?: IInputsSnapshot;
-    startTime?: number;
 }
 
 // @alpha
@@ -1066,25 +1066,25 @@ export type OperationEnabledState = boolean | 'ignore-dependency-changes';
 
 // @alpha
 export class OperationExecutionHooks {
+    readonly afterExecuteIterationAsync: AsyncSeriesWaterfallHook<[
+    OperationStatus,
+    ReadonlyMap<Operation, IOperationExecutionResult>,
+    IOperationExecutionIterationOptions
+    ]>;
     readonly afterExecuteOperationAsync: AsyncSeriesHook<[
     IOperationRunnerContext & IOperationExecutionResult
     ]>;
-    readonly afterExecuteOperationsAsync: AsyncSeriesWaterfallHook<[
-    OperationStatus,
+    readonly beforeExecuteIterationAsync: AsyncSeriesBailHook<[
     ReadonlyMap<Operation, IOperationExecutionResult>,
-    IOperationExecutionPassOptions
-    ]>;
+    IOperationExecutionIterationOptions
+    ], OperationStatus | undefined | void>;
     readonly beforeExecuteOperationAsync: AsyncSeriesBailHook<[
     IOperationRunnerContext & IOperationExecutionResult
     ], OperationStatus | undefined>;
-    readonly beforeExecuteOperationsAsync: AsyncSeriesBailHook<[
-    ReadonlyMap<Operation, IOperationExecutionResult>,
-    IOperationExecutionPassOptions
-    ], OperationStatus | undefined | void>;
-    readonly configureRun: SyncHook<[
+    readonly configureIteration: SyncHook<[
     ReadonlyMap<Operation, IConfigurableOperation>,
     ReadonlyMap<Operation, IOperationExecutionResult>,
-    IOperationExecutionPassOptions
+    IOperationExecutionIterationOptions
     ]>;
     readonly createEnvironmentForOperation: SyncWaterfallHook<[
     IEnvironment,
@@ -1093,8 +1093,8 @@ export class OperationExecutionHooks {
     readonly onEnableStatesChanged: SyncHook<[ReadonlySet<Operation>]>;
     readonly onExecutionStatesUpdated: SyncHook<[ReadonlySet<IOperationExecutionResult>]>;
     readonly onInvalidateOperations: SyncHook<[Iterable<Operation>, string | undefined]>;
+    readonly onIterationScheduled: SyncHook<[ReadonlyMap<Operation, IOperationExecutionResult>]>;
     readonly onManagerStateChanged: SyncHook<[IOperationExecutionManager]>;
-    readonly onPassQueued: SyncHook<[ReadonlyMap<Operation, IOperationExecutionResult>]>;
     readonly onWaitingForChanges: SyncHook<void>;
 }
 
@@ -1298,9 +1298,6 @@ export class RepoStateFile {
     get preferredVersionsHash(): string | undefined;
     refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined, variant?: string): boolean;
 }
-
-// @alpha (undocumented)
-export type RunNextPassBehavior = 'manual' | 'automatic';
 
 // @public
 export class Rush {

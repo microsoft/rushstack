@@ -42,7 +42,7 @@ export interface IBaseOperationExecutionResult {
  */
 export interface IConfigurableOperation extends IBaseOperationExecutionResult {
   /**
-   * True if the operation should execute in this pass, false otherwise.
+   * True if the operation should execute in this iteration, false otherwise.
    */
   enabled: boolean;
 }
@@ -69,7 +69,7 @@ export interface IOperationExecutionResult extends IBaseOperationExecutionResult
    */
   readonly silent: boolean;
   /**
-   * True if the operation should execute in this pass, false otherwise.
+   * True if the operation should execute in this iteration, false otherwise.
    */
   readonly enabled: boolean;
   /**

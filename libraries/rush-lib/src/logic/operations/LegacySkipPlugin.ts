@@ -9,7 +9,7 @@ import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import type {
-  IOperationExecutionPassOptions,
+  IOperationExecutionIterationOptions,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
@@ -67,14 +67,14 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
       this._options;
 
     hooks.executionManagerAsync.tap(PLUGIN_NAME, (executionManager) => {
-      executionManager.hooks.beforeExecuteOperationsAsync.tap(
+      executionManager.hooks.beforeExecuteIterationAsync.tap(
         PLUGIN_NAME,
         (
           operations: ReadonlyMap<Operation, IOperationExecutionResult>,
-          passOptions: IOperationExecutionPassOptions
+          iterationOptions: IOperationExecutionIterationOptions
         ): void => {
           let logGitWarning: boolean = false;
-          const { inputsSnapshot } = passOptions;
+          const { inputsSnapshot } = iterationOptions;
 
           for (const record of operations.values()) {
             const { operation } = record;

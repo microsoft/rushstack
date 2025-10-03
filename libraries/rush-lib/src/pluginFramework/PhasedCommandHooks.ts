@@ -41,11 +41,6 @@ export interface IPhasedCommandPlugin {
 }
 
 /**
- * @alpha
- */
-export type RunNextPassBehavior = 'manual' | 'automatic';
-
-/**
  * Context used for creating operations to be executed.
  * @alpha
  */
@@ -110,7 +105,7 @@ export interface ICreateOperationsContext {
 }
 
 /**
- * Context used for configuring the run.
+ * Context used for configuring the manager.
  * @alpha
  */
 export interface IOperationExecutionManagerContext extends ICreateOperationsContext {
@@ -122,14 +117,14 @@ export interface IOperationExecutionManagerContext extends ICreateOperationsCont
 }
 
 /**
- * Options for a single pass of operation execution.
+ * Options for a single iteration of operation execution.
  * @alpha
  */
-export interface IOperationExecutionPassOptions {
+export interface IOperationExecutionIterationOptions {
   inputsSnapshot?: IInputsSnapshot;
 
   /**
-   * The time when the pass was queued, if available, as returned by `performance.now()`.
+   * The time when the iteration was scheduled, if available, as returned by `performance.now()`.
    */
   startTime?: number;
 }
@@ -170,9 +165,10 @@ export interface IOperationExecutionManager {
   quietMode: boolean;
 
   /**
-   * Controls whether queueing the next pass waits for user input, or immediately aborts any current run and executes the next pass.
+   * When true, the execution manager will pause before running the next iteration (manual mode).
+   * When false, iterations run automatically when scheduled.
    */
-  runNextPassBehavior: RunNextPassBehavior;
+  pauseNextIteration: boolean;
 
   /**
    * The current overall status of the execution.
@@ -180,22 +176,22 @@ export interface IOperationExecutionManager {
   readonly status: OperationStatus;
 
   /**
-   * True if there is a queued (but not yet executing) pass.
-   * This will be false while a pass is actively executing, or when no work is queued.
+   * True if there is a scheduled (but not yet executing) iteration.
+   * This will be false while an iteration is actively executing, or when no work is scheduled.
    */
-  readonly hasQueuedPass: boolean;
+  readonly hasScheduledIteration: boolean;
 
   /**
    * AbortController controlling the lifetime of the overall session (e.g. watch mode).
    * Aborting this controller should signal all listeners (such as file system watchers) to dispose
-   * and prevent further passes from being queued.
+   * and prevent further iterations from being scheduled.
    */
   readonly abortController: AbortController;
 
   /**
-   * Abort the current execution pass, if any.
+   * Abort the current execution iteration, if any.
    */
-  abortCurrentPassAsync(): Promise<void>;
+  abortCurrentIterationAsync(): Promise<void>;
 
   /**
    * Cleans up any resources used by the operation runners, if applicable.
@@ -204,18 +200,18 @@ export interface IOperationExecutionManager {
   closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
 
   /**
-   * Executes a single pass of the operations.
-   * @param options - Options for this execution pass.
-   * @returns A promise that resolves to true if the pass has work to be done, or false if the pass was empty and therefore not queued.
+   * Executes a single iteration of the operations.
+   * @param options - Options for this execution iteration.
+   * @returns A promise that resolves to true if the iteration has work to be done, or false if the iteration was empty and therefore not scheduled.
    */
-  queuePassAsync(options: IOperationExecutionPassOptions): Promise<boolean>;
+  scheduleIterationAsync(options: IOperationExecutionIterationOptions): Promise<boolean>;
 
   /**
-   * Executes all operations in the currently queued pass, if any.
-   * Call `abortCurrentPassAsync()` to cancel the execution of any operations that have not yet begun execution.
+   * Executes all operations in the currently scheduled iteration, if any.
+   * Call `abortCurrentIterationAsync()` to cancel the execution of any operations that have not yet begun execution.
    * @returns A promise which is resolved when all operations have been processed to a final state.
    */
-  executeQueuedPassAsync(): Promise<boolean>;
+  executeScheduledIterationAsync(): Promise<boolean>;
 
   /**
    * Invalidates the specified operations, causing them to be re-executed.
@@ -260,7 +256,6 @@ export interface IOperationExecutionManager {
 export class PhasedCommandHooks {
   /**
    * Hook invoked to create operations for execution.
-   * Use the context to distinguish between the initial run and phased runs.
    */
   public readonly createOperationsAsync: AsyncSeriesWaterfallHook<
     [Set<Operation>, ICreateOperationsContext]
@@ -286,41 +281,38 @@ export class PhasedCommandHooks {
  */
 export class OperationExecutionHooks {
   /**
-   * Hook invoked after creating operations for execution, before execution of each run.
+   * Hook invoked to decide what work a potential new iteration contains.
    * Use the `lastExecutedRecords` to determine which operations are new or have had their inputs changed.
    * Set the `enabled` states on the values in `initialRecords` to control which operations will be executed.
    *
    * @remarks
    * This hook is synchronous to guarantee that the `lastExecutedRecords` map remains stable for the
-   * duration of configuration. This hook often executes while an execution pass is currently running, so
+   * duration of configuration. This hook often executes while an execution iteration is currently running, so
    * operations could complete if there were async ticks during the configuration phase.
    *
-   * If no operations are marked for execution, the run will be skipped.
+   * If no operations are marked for execution, the iteration will not be scheduled.
+   * If there is an existing scheduled iteration, it will remain.
    */
-  public readonly configureRun: SyncHook<
+  public readonly configureIteration: SyncHook<
     [
       ReadonlyMap<Operation, IConfigurableOperation>,
       ReadonlyMap<Operation, IOperationExecutionResult>,
-      IOperationExecutionPassOptions
+      IOperationExecutionIterationOptions
     ]
-  > = new SyncHook(['initialRecords', 'lastExecutedRecords', 'context'], 'configureRun');
+  > = new SyncHook(['initialRecords', 'lastExecutedRecords', 'context'], 'configureIteration');
 
   /**
-   * Hook invoked before operation start
-   * Hook is series for stable output.
-   */
-  /**
-   * Hook invoked before operation start for a pass. Allows a plugin to perform side-effects or
-   * short-circuit the entire pass.
+   * Hook invoked before operation start for an iteration. Allows a plugin to perform side-effects or
+   * short-circuit the entire iteration.
    *
-   * If any tap returns an {@link OperationStatus}, the remaining taps are skipped and the pass will
+   * If any tap returns an {@link OperationStatus}, the remaining taps are skipped and the iteration will
    * end immediately with that status. All operations which have not yet executed will be marked
    * Aborted.
    */
-  public readonly beforeExecuteOperationsAsync: AsyncSeriesBailHook<
-    [ReadonlyMap<Operation, IOperationExecutionResult>, IOperationExecutionPassOptions],
+  public readonly beforeExecuteIterationAsync: AsyncSeriesBailHook<
+    [ReadonlyMap<Operation, IOperationExecutionResult>, IOperationExecutionIterationOptions],
     OperationStatus | undefined | void
-  > = new AsyncSeriesBailHook(['records', 'context'], 'beforeExecuteOperationsAsync');
+  > = new AsyncSeriesBailHook(['records', 'context'], 'beforeExecuteIterationAsync');
 
   /**
    * Batched hook invoked when one or more operation statuses have changed during the same microtask.
@@ -344,19 +336,17 @@ export class OperationExecutionHooks {
   );
 
   /**
-   * Hook invoked immediately after a new execution pass is queued (i.e. operations selected and prepared),
-   * before any operations in that pass have started executing. Can be used to snapshot planned work,
+   * Hook invoked immediately after a new execution iteration is scheduled (i.e. operations selected and prepared),
+   * before any operations in that iteration have started executing. Can be used to snapshot planned work,
    * drive UIs, or pre-compute auxiliary data.
    */
-  public readonly onPassQueued: SyncHook<[ReadonlyMap<Operation, IOperationExecutionResult>]> = new SyncHook(
-    ['records'],
-    'onPassQueued'
-  );
+  public readonly onIterationScheduled: SyncHook<[ReadonlyMap<Operation, IOperationExecutionResult>]> =
+    new SyncHook(['records'], 'onIterationScheduled');
 
   /**
    * Hook invoked when any observable state on the execution manager changes.
-   * This includes configuration mutations (parallelism, quiet/debug modes, runNextPassBehavior)
-   * as well as dynamic state (status transitions, queued pass availability, etc.).
+   * This includes configuration mutations (parallelism, quiet/debug modes, pauseNextIteration)
+   * as well as dynamic state (status transitions, scheduled iteration availability, etc.).
    * Hook is series for stable output.
    */
   public readonly onManagerStateChanged: SyncHook<[IOperationExecutionManager]> = new SyncHook(
@@ -373,7 +363,7 @@ export class OperationExecutionHooks {
   );
 
   /**
-   * Hook invoked after a run has finished and the command is watching for changes.
+   * Hook invoked after an iteration has finished and the command is watching for changes.
    * May be used to display additional relevant data to the user.
    * Only relevant when running in watch mode.
    */
@@ -381,12 +371,11 @@ export class OperationExecutionHooks {
 
   /**
    * Hook invoked after executing a set of operations.
-   * Use the context to distinguish between the initial run and phased runs.
    * Hook is series for stable output.
    */
-  public readonly afterExecuteOperationsAsync: AsyncSeriesWaterfallHook<
-    [OperationStatus, ReadonlyMap<Operation, IOperationExecutionResult>, IOperationExecutionPassOptions]
-  > = new AsyncSeriesWaterfallHook(['status', 'results', 'context'], 'afterExecuteOperationsAsync');
+  public readonly afterExecuteIterationAsync: AsyncSeriesWaterfallHook<
+    [OperationStatus, ReadonlyMap<Operation, IOperationExecutionResult>, IOperationExecutionIterationOptions]
+  > = new AsyncSeriesWaterfallHook(['status', 'results', 'context'], 'afterExecuteIterationAsync');
 
   /**
    * Hook invoked before executing a operation.

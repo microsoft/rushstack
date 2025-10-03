@@ -17,7 +17,7 @@ import type { Subspace } from '../../api/Subspace';
 import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
 import {
   type IOperationExecutionManagerContext,
-  type IOperationExecutionPassOptions,
+  type IOperationExecutionIterationOptions,
   PhasedCommandHooks,
   type ICreateOperationsContext
 } from '../../pluginFramework/PhasedCommandHooks';
@@ -596,7 +596,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         destinations: [StdioWritable.instance],
         parallelism,
         isWatch,
-        runNextPassBehavior: 'automatic',
+        pauseNextIteration: false,
         getInputsSnapshotAsync,
         abortController: this.sessionAbortController,
         telemetry: executionTelemetryHandler
@@ -614,7 +614,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
       const abortPromise: Promise<void> = once(this.sessionAbortController.signal, 'abort').then(() => {
         terminal.writeLine(`Exiting watch mode...`);
-        return executionManager.abortCurrentPassAsync();
+        return executionManager.abortCurrentIterationAsync();
       });
 
       await measureAsyncFn(`${PERF_PREFIX}:executionManager`, async () => {
@@ -629,7 +629,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         terminal
       };
 
-      const initialPassOptions: IOperationExecutionPassOptions = {
+      const initialIterationOptions: IOperationExecutionIterationOptions = {
         inputsSnapshot: initialSnapshot,
         // Mark as starting at time 0, which is process startup.
         startTime: 0
@@ -659,7 +659,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         watcher.clearStatus();
 
         await measureAsyncFn(`${PERF_PREFIX}:executeOperationsInner`, async () => {
-          return await executionManager.executeAsync(initialPassOptions);
+          return await executionManager.executeAsync(initialIterationOptions);
         });
 
         await abortPromise;
@@ -668,7 +668,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       } else {
         await measureAsyncFn(`${PERF_PREFIX}:runInitialPhases`, () =>
           measureAsyncFn(`${PERF_PREFIX}:executeOperations`, () =>
-            this._executeOperationsAsync(executeOptions, initialPassOptions)
+            this._executeOperationsAsync(executeOptions, initialIterationOptions)
           )
         );
       }
@@ -684,22 +684,22 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
    */
   private async _executeOperationsAsync(
     options: IExecuteOperationsOptions,
-    passOptions: IOperationExecutionPassOptions
+    iterationOptions: IOperationExecutionIterationOptions
   ): Promise<void> {
     const { executionManager, ignoreHooks, stopwatch, isWatch, terminal } = options;
 
     let success: boolean = false;
     let result: IExecutionResult | undefined;
 
-    if (passOptions.startTime) {
-      (stopwatch as { startTime: number }).startTime = passOptions.startTime;
+    if (iterationOptions.startTime) {
+      (stopwatch as { startTime: number }).startTime = iterationOptions.startTime;
     }
 
     try {
       const definiteResult: IExecutionResult = await measureAsyncFn(
         `${PERF_PREFIX}:executeOperationsInner`,
         async () => {
-          return await executionManager.executeAsync(passOptions);
+          return await executionManager.executeAsync(iterationOptions);
         }
       );
       success = definiteResult.status === OperationStatus.Success;

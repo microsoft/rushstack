@@ -52,7 +52,7 @@ export class ConsoleTimelinePlugin implements IPhasedCommandPlugin {
 
   public apply(hooks: PhasedCommandHooks): void {
     hooks.executionManagerAsync.tap(PLUGIN_NAME, (executionManager, context) => {
-      executionManager.hooks.afterExecuteOperationsAsync.tap(
+      executionManager.hooks.afterExecuteIterationAsync.tap(
         PLUGIN_NAME,
         (
           status: OperationStatus,

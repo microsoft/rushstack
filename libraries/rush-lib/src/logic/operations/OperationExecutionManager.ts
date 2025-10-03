@@ -28,9 +28,8 @@ import type { IEnvironment } from '../../utilities/Utilities';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 import {
   type IOperationExecutionManager,
-  type IOperationExecutionPassOptions,
-  OperationExecutionHooks,
-  type RunNextPassBehavior
+  type IOperationExecutionIterationOptions,
+  OperationExecutionHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
 import type { ITelemetryData, ITelemetryOperationResult } from '../Telemetry';
@@ -57,14 +56,14 @@ export interface IOperationExecutionManagerOptions {
   abortController: AbortController;
 
   isWatch?: boolean;
-  runNextPassBehavior?: RunNextPassBehavior;
+  pauseNextIteration?: boolean;
 
   telemetry?: IOperationExecutionManagerTelemetry;
   getInputsSnapshotAsync?: () => Promise<IInputsSnapshot | undefined>;
 }
 
 /**
- * Internal context state used during an execution pass.
+ * Internal context state used during an execution iteration.
  */
 interface IStatefulExecutionContext {
   hasAnyFailures: boolean;
@@ -79,9 +78,9 @@ interface IStatefulExecutionContext {
 }
 
 /**
- * Context for a single execution pass.
+ * Context for a single execution iteration.
  */
-interface IExecutionPassContext extends IOperationExecutionRecordContext {
+interface IExecutionIterationContext extends IOperationExecutionRecordContext {
   abortController: AbortController;
   terminal: CollatedTerminal;
 
@@ -150,8 +149,8 @@ export class OperationExecutionManager implements IOperationExecutionManager {
   public lastExecutionResults: Map<Operation, OperationExecutionRecord>;
   private readonly _options: IOperationExecutionManagerOptions;
 
-  private _currentPass: IExecutionPassContext | undefined = undefined;
-  private _queuedPass: IExecutionPassContext | undefined = undefined;
+  private _currentIteration: IExecutionIterationContext | undefined = undefined;
+  private _scheduledIteration: IExecutionIterationContext | undefined = undefined;
 
   private _terminalSplitter: SplitterTransform;
   private _idleTimeout: NodeJS.Timeout | undefined = undefined;
@@ -311,21 +310,21 @@ export class OperationExecutionManager implements IOperationExecutionManager {
     }
   }
 
-  public get runNextPassBehavior(): RunNextPassBehavior {
-    return this._options.runNextPassBehavior ?? 'automatic';
+  public get pauseNextIteration(): boolean {
+    return !!this._options.pauseNextIteration;
   }
-  public set runNextPassBehavior(value: RunNextPassBehavior) {
-    const oldValue: RunNextPassBehavior = this.runNextPassBehavior;
+  public set pauseNextIteration(value: boolean) {
+    const oldValue: boolean = this.pauseNextIteration;
     if (value !== oldValue) {
-      this._options.runNextPassBehavior = value;
+      this._options.pauseNextIteration = value;
       this._scheduleManagerStateChanged();
 
       this._setIdleTimeout();
     }
   }
 
-  public get hasQueuedPass(): boolean {
-    return !!this._queuedPass;
+  public get hasScheduledIteration(): boolean {
+    return !!this._scheduledIteration;
   }
 
   public get status(): OperationStatus {
@@ -339,10 +338,10 @@ export class OperationExecutionManager implements IOperationExecutionManager {
     }
   }
 
-  private _setQueuedPass(pass: IExecutionPassContext | undefined): void {
-    const hadQueuedPass: boolean = !!this._queuedPass;
-    this._queuedPass = pass;
-    if (hadQueuedPass !== !!this._queuedPass) {
+  private _setScheduledIteration(iteration: IExecutionIterationContext | undefined): void {
+    const hadScheduled: boolean = !!this._scheduledIteration;
+    this._scheduledIteration = iteration;
+    if (hadScheduled !== !!this._scheduledIteration) {
       this._scheduleManagerStateChanged();
     }
   }
@@ -350,7 +349,7 @@ export class OperationExecutionManager implements IOperationExecutionManager {
   public async closeRunnersAsync(operations?: Operation[]): Promise<void> {
     const promises: Promise<void>[] = [];
     const recordMap: ReadonlyMap<Operation, OperationExecutionRecord> =
-      this._currentPass?.records ?? this.lastExecutionResults;
+      this._currentIteration?.records ?? this.lastExecutionResults;
     const closedRecords: Set<OperationExecutionRecord> = new Set();
     for (const operation of operations ?? this.operations) {
       if (operation.runner?.closeAsync) {
@@ -384,74 +383,79 @@ export class OperationExecutionManager implements IOperationExecutionManager {
       }
     }
     this.hooks.onInvalidateOperations.call(invalidated, reason);
-    if (!this._currentPass) {
+    if (!this._currentIteration) {
       this._setStatus(OperationStatus.Ready);
     }
   }
 
   /**
-   * Shorthand for `queuePassAsync()` followed by `executeQueuedPassAsync()`.
-   * Call `abortCurrentPassAsync()` to cancel the execution of any operations that have not yet begun execution.
-   * @param passOptions - Options for this execution pass.
+   * Shorthand for scheduling an iteration then executing it.
+   * Call `abortCurrentIterationAsync()` to cancel the execution of any operations that have not yet begun execution.
+   * @param iterationOptions - Options for this execution iteration.
    * @returns A promise which is resolved when all operations have been processed to a final state.
    */
-  public async executeAsync(passOptions: IOperationExecutionPassOptions): Promise<IExecutionResult> {
-    await this.abortCurrentPassAsync();
-    const queuedPass: IExecutionPassContext | undefined = await this._queuePassAsync(passOptions);
-    if (!queuedPass) {
+  public async executeAsync(
+    iterationOptions: IOperationExecutionIterationOptions
+  ): Promise<IExecutionResult> {
+    await this.abortCurrentIterationAsync();
+    const scheduled: IExecutionIterationContext | undefined =
+      await this._scheduleIterationAsync(iterationOptions);
+    if (!scheduled) {
       return {
         operationResults: this.lastExecutionResults,
         status: OperationStatus.NoOp
       };
     }
-    await this.executeQueuedPassAsync();
+    await this.executeScheduledIterationAsync();
     return {
-      operationResults: queuedPass.records,
+      operationResults: scheduled.records,
       status: this.status
     };
   }
 
   /**
-   * Queues a new execution pass.
-   * @param passOptions - Options for this execution pass.
-   * @returns A promise that resolves to true if the pass was successfully queued, or false if it was not.
+   * Queues a new execution iteration.
+   * @param iterationOptions - Options for this execution iteration.
+   * @returns A promise that resolves to true if the iteration was successfully queued, or false if it was not.
    */
-  public async queuePassAsync(passOptions: IOperationExecutionPassOptions): Promise<boolean> {
-    return !!(await this._queuePassAsync(passOptions));
+  public async scheduleIterationAsync(
+    iterationOptions: IOperationExecutionIterationOptions
+  ): Promise<boolean> {
+    return !!(await this._scheduleIterationAsync(iterationOptions));
   }
 
   /**
    * Executes all operations which have been registered, returning a promise which is resolved when all operations have been processed to a final state.
-   * Aborts the current pass first, if any.
+   * Aborts the current iteration first, if any.
    */
-  public async executeQueuedPassAsync(): Promise<boolean> {
-    await this.abortCurrentPassAsync();
+  public async executeScheduledIterationAsync(): Promise<boolean> {
+    await this.abortCurrentIterationAsync();
 
-    const pass: IExecutionPassContext | undefined = this._queuedPass;
+    const iteration: IExecutionIterationContext | undefined = this._scheduledIteration;
 
-    if (!pass) {
+    if (!iteration) {
       return false;
     }
 
-    this._currentPass = pass;
-    this._setQueuedPass(undefined);
+    this._currentIteration = iteration;
+    this._setScheduledIteration(undefined);
 
-    pass.promise = this._executeInnerAsync(this._currentPass).finally(() => {
-      this._currentPass = undefined;
+    iteration.promise = this._executeInnerAsync(this._currentIteration).finally(() => {
+      this._currentIteration = undefined;
 
       this._setIdleTimeout();
     });
 
-    await pass.promise;
+    await iteration.promise;
     return true;
   }
 
-  public async abortCurrentPassAsync(): Promise<void> {
-    const pass: IExecutionPassContext | undefined = this._currentPass;
-    if (pass) {
-      pass.abortController.abort();
+  public async abortCurrentIterationAsync(): Promise<void> {
+    const iteration: IExecutionIterationContext | undefined = this._currentIteration;
+    if (iteration) {
+      iteration.abortController.abort();
       try {
-        await pass.promise;
+        await iteration.promise;
       } catch (e) {
         // Swallow errors from aborting
       }
@@ -469,7 +473,7 @@ export class OperationExecutionManager implements IOperationExecutionManager {
   }
 
   private _setIdleTimeout(): void {
-    if (this._currentPass || this.abortController.signal.aborted) {
+    if (this._currentIteration || this.abortController.signal.aborted) {
       return;
     }
 
@@ -480,24 +484,25 @@ export class OperationExecutionManager implements IOperationExecutionManager {
 
   private _onIdle = (): void => {
     this._idleTimeout = undefined;
-    if (this._currentPass || this.abortController.signal.aborted) {
+    if (this._currentIteration || this.abortController.signal.aborted) {
       return;
     }
 
-    if (this.runNextPassBehavior === 'automatic' && this._queuedPass) {
-      void this.executeQueuedPassAsync();
+    if (!this.pauseNextIteration && this._scheduledIteration) {
+      void this.executeScheduledIterationAsync();
     } else {
       this.hooks.onWaitingForChanges.call();
     }
   };
 
-  private async _queuePassAsync(
-    passOptions: IOperationExecutionPassOptions
-  ): Promise<IExecutionPassContext | undefined> {
+  private async _scheduleIterationAsync(
+    iterationOptions: IOperationExecutionIterationOptions
+  ): Promise<IExecutionIterationContext | undefined> {
     const { getInputsSnapshotAsync } = this._options;
 
-    const { startTime = performance.now(), inputsSnapshot = await getInputsSnapshotAsync?.() } = passOptions;
-    const passOptionsForCallbacks: IOperationExecutionPassOptions = { startTime, inputsSnapshot };
+    const { startTime = performance.now(), inputsSnapshot = await getInputsSnapshotAsync?.() } =
+      iterationOptions;
+    const iterationOptionsForCallbacks: IOperationExecutionIterationOptions = { startTime, inputsSnapshot };
 
     const { hooks } = this;
 
@@ -528,7 +533,7 @@ export class OperationExecutionManager implements IOperationExecutionManager {
     }
 
     // Convert the developer graph to the mutable execution graph
-    const passContext: IExecutionPassContext = {
+    const iterationContext: IExecutionIterationContext = {
       abortController,
       startTime,
       streamCollator,
@@ -548,9 +553,12 @@ export class OperationExecutionManager implements IOperationExecutionManager {
       totalOperations: 0
     };
 
-    const executionRecords: Map<Operation, OperationExecutionRecord> = passContext.records;
+    const executionRecords: Map<Operation, OperationExecutionRecord> = iterationContext.records;
     for (const operation of sortedOperations) {
-      const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(operation, passContext);
+      const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(
+        operation,
+        iterationContext
+      );
 
       executionRecords.set(operation, executionRecord);
     }
@@ -576,42 +584,46 @@ export class OperationExecutionManager implements IOperationExecutionManager {
       }
     }
 
-    measureFn(`${PERF_PREFIX}:configureRun`, () => {
-      hooks.configureRun.call(executionRecords, this.lastExecutionResults, passOptionsForCallbacks);
+    measureFn(`${PERF_PREFIX}:configureIteration`, () => {
+      hooks.configureIteration.call(
+        executionRecords,
+        this.lastExecutionResults,
+        iterationOptionsForCallbacks
+      );
     });
 
     for (const executionRecord of executionRecords.values()) {
       if (!executionRecord.silent) {
         // Only count non-silent operations
-        passContext.totalOperations++;
+        iterationContext.totalOperations++;
       }
     }
 
-    if (passContext.totalOperations === 0) {
+    if (iterationContext.totalOperations === 0) {
       return;
     }
 
-    this._setQueuedPass(passContext);
-    // Notify listeners that a pass has been queued with the planned operation records
+    this._setScheduledIteration(iterationContext);
+    // Notify listeners that an iteration has been scheduled with the planned operation records
     try {
-      this.hooks.onPassQueued.call(passContext.records);
+      this.hooks.onIterationScheduled.call(iterationContext.records);
     } catch (e) {
       // Surface configuration-time issues clearly
       terminal.writeStderrLine(
-        Colorize.red(`An error occurred in onPassQueued hook: ${(e as Error).message}`)
+        Colorize.red(`An error occurred in onIterationScheduled hook: ${(e as Error).message}`)
       );
       throw e;
     }
-    if (!this._currentPass) {
+    if (!this._currentIteration) {
       this._setIdleTimeout();
-    } else if (this.runNextPassBehavior === 'automatic') {
-      void this.abortCurrentPassAsync();
+    } else if (!this.pauseNextIteration) {
+      void this.abortCurrentIterationAsync();
     }
-    return passContext;
+    return iterationContext;
 
     function onWriterActive(writer: CollatedWriter | undefined): void {
       if (writer) {
-        passContext.completedOperations++;
+        iterationContext.completedOperations++;
         // Format a header like this
         //
         // ==[ @rushstack/the-long-thing ]=================[ 1 of 1000 ]==
@@ -621,7 +633,7 @@ export class OperationExecutionManager implements IOperationExecutionManager {
         const leftPartLength: number = 4 + writer.taskName.length + 1;
 
         // rightPart: " 1 of 1000 ]=="
-        const completedOfTotal: string = `${passContext.completedOperations} of ${passContext.totalOperations}`;
+        const completedOfTotal: string = `${iterationContext.completedOperations} of ${iterationContext.totalOperations}`;
         const rightPart: string = ' ' + Colorize.white(completedOfTotal) + ' ' + Colorize.gray(']==');
         const rightPartLength: number = 1 + completedOfTotal.length + 4;
 
@@ -663,18 +675,18 @@ export class OperationExecutionManager implements IOperationExecutionManager {
    * Executes all operations which have been registered, returning a promise which is resolved when all operations have been processed to a final state.
    * The abortController can be used to cancel the execution of any operations that have not yet begun execution.
    */
-  private async _executeInnerAsync(passContext: IExecutionPassContext): Promise<OperationStatus> {
+  private async _executeInnerAsync(iterationContext: IExecutionIterationContext): Promise<OperationStatus> {
     this._setStatus(OperationStatus.Executing);
 
     const { hooks } = this;
 
-    const { abortController, records: executionRecords, terminal, totalOperations } = passContext;
+    const { abortController, records: executionRecords, terminal, totalOperations } = iterationContext;
 
     const isInitial: boolean = this.lastExecutionResults.size === 0;
 
-    const passOptions: IOperationExecutionPassOptions = {
-      inputsSnapshot: passContext.inputsSnapshot,
-      startTime: passContext.startTime
+    const iterationOptions: IOperationExecutionIterationOptions = {
+      inputsSnapshot: iterationContext.inputsSnapshot,
+      startTime: iterationContext.startTime
     };
 
     const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(
@@ -684,7 +696,7 @@ export class OperationExecutionManager implements IOperationExecutionManager {
 
     const abortSignal: AbortSignal = abortController.signal;
 
-    passContext.onOperationStateChanged = onOperationStatusChanged;
+    iterationContext.onOperationStateChanged = onOperationStatusChanged;
 
     // Batched state change tracking using a Set for uniqueness
     let batchedStateChanges: Set<OperationExecutionRecord> = new Set();
@@ -705,10 +717,10 @@ export class OperationExecutionManager implements IOperationExecutionManager {
       executionQueue,
       lastExecutionResults: this.lastExecutionResults,
       get completedOperations(): number {
-        return passContext.completedOperations;
+        return iterationContext.completedOperations;
       },
       set completedOperations(value: number) {
-        passContext.completedOperations = value;
+        iterationContext.completedOperations = value;
       }
     };
 
@@ -739,8 +751,8 @@ export class OperationExecutionManager implements IOperationExecutionManager {
     const bailStatus: OperationStatus | undefined | void = abortSignal.aborted
       ? OperationStatus.Aborted
       : await measureAsyncFn(
-          `${PERF_PREFIX}:beforeExecuteOperationsAsync`,
-          async () => await hooks.beforeExecuteOperationsAsync.promise(executionRecords, passOptions)
+          `${PERF_PREFIX}:beforeExecuteIterationAsync`,
+          async () => await hooks.beforeExecuteIterationAsync.promise(executionRecords, iterationOptions)
         );
 
     if (bailStatus) {
@@ -785,13 +797,13 @@ export class OperationExecutionManager implements IOperationExecutionManager {
           ? OperationStatus.Aborted
           : state.hasAnyNonAllowedWarnings
             ? OperationStatus.SuccessWithWarning
-            : passContext.totalOperations === 0
+            : iterationContext.totalOperations === 0
               ? OperationStatus.NoOp
               : OperationStatus.Success;
 
     this._setStatus(
-      (await measureAsyncFn(`${PERF_PREFIX}:afterExecuteOperationsAsync`, async () => {
-        return await hooks.afterExecuteOperationsAsync.promise(status, executionRecords, passOptions);
+      (await measureAsyncFn(`${PERF_PREFIX}:afterExecuteIterationAsync`, async () => {
+        return await hooks.afterExecuteIterationAsync.promise(status, executionRecords, iterationOptions);
       })) ?? status
     );
 
@@ -801,7 +813,7 @@ export class OperationExecutionManager implements IOperationExecutionManager {
         const { isWatch = false } = this._options;
         const jsonOperationResults: Record<string, ITelemetryOperationResult> = {};
 
-        const durationInSeconds: number = (performance.now() - (passContext.startTime ?? 0)) / 1000;
+        const durationInSeconds: number = (performance.now() - (iterationContext.startTime ?? 0)) / 1000;
 
         const extraData: IPhasedExecutionTelemetry = {
           ...telemetry.initialExtraData,

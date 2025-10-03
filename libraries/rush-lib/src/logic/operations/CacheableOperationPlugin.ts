@@ -29,7 +29,7 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import type {
   IOperationExecutionManager,
   IOperationExecutionManagerContext,
-  IOperationExecutionPassOptions,
+  IOperationExecutionIterationOptions,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
@@ -89,13 +89,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     hooks.executionManagerAsync.tap(
       PLUGIN_NAME,
       (executionManager: IOperationExecutionManager, context: IOperationExecutionManagerContext) => {
-        executionManager.hooks.beforeExecuteOperationsAsync.tap(
+        executionManager.hooks.beforeExecuteIterationAsync.tap(
           PLUGIN_NAME,
           (
             recordByOperation: ReadonlyMap<Operation, IOperationExecutionResult>,
-            passOptions: IOperationExecutionPassOptions
+            iterationOptions: IOperationExecutionIterationOptions
           ): undefined => {
-            const { inputsSnapshot } = passOptions;
+            const { inputsSnapshot } = iterationOptions;
             const { isIncrementalBuildAllowed, projectConfigurations } = context;
 
             const isInitial: boolean = executionManager.lastExecutionResults.size === 0;
@@ -552,7 +552,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           }
         );
 
-        executionManager.hooks.afterExecuteOperationsAsync.tap(PLUGIN_NAME, (status: OperationStatus) => {
+        executionManager.hooks.afterExecuteIterationAsync.tap(PLUGIN_NAME, (status: OperationStatus) => {
           this._buildCacheContextByOperation.clear();
           return status;
         });

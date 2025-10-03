@@ -16,7 +16,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { IOperationExecutionManager } from '../pluginFramework/PhasedCommandHooks';
 import type { Operation } from './operations/Operation';
-import type { IOperationExecutionPassOptions } from '../pluginFramework/PhasedCommandHooks';
+import type { IOperationExecutionIterationOptions } from '../pluginFramework/PhasedCommandHooks';
 import { OperationStatus } from './operations/OperationStatus';
 
 export interface IProjectWatcherOptions {
@@ -85,15 +85,15 @@ export class ProjectWatcher {
     // Initialize stdin listener early so keybinds are available immediately
     this._ensureStdin();
 
-    // Capture snapshot (if provided) prior to executing next operations pass (will replace initial snapshot)
-    executionManager.hooks.beforeExecuteOperationsAsync.tapPromise(
+    // Capture snapshot (if provided) prior to executing next iteration (will replace initial snapshot)
+    executionManager.hooks.beforeExecuteIterationAsync.tapPromise(
       'ProjectWatcher',
       async (
         records: ReadonlyMap<Operation, unknown>,
-        passOptions: IOperationExecutionPassOptions
+        iterationOptions: IOperationExecutionIterationOptions
       ): Promise<void> => {
         this.clearStatus();
-        this._lastSnapshot = passOptions.inputsSnapshot;
+        this._lastSnapshot = iterationOptions.inputsSnapshot;
         await this._stopWatchingAsync();
       }
     );
@@ -121,19 +121,11 @@ export class ProjectWatcher {
     this._setStatus(this._lastStatus ?? 'Waiting for changes...');
   }
 
-  /**
-   * Waits for a change to the package-deps of one or more of the selected projects, since the previous invocation.
-   * Will return immediately the first time it is invoked, since no state has been recorded.
-   * If no change is currently present, watches the source tree of all selected projects for file changes.
-   * `waitForChange` is not allowed to be called multiple times concurrently.
-   */
-  // Previous waitForChangeAsync logic removed; watching is now driven by execution manager lifecycle.
-
   private _setStatus(status: string): void {
-    const isPaused: boolean = this._executionManager.runNextPassBehavior === 'manual';
-    const hasQueuedPass: boolean = this._executionManager.hasQueuedPass;
+    const isPaused: boolean = this._executionManager.pauseNextIteration === true;
+    const hasScheduledIteration: boolean = this._executionManager.hasScheduledIteration;
     const modeLabel: string = isPaused ? 'PAUSED' : 'WATCHING';
-    const pendingLabel: string = hasQueuedPass ? ' PENDING' : '';
+    const pendingLabel: string = hasScheduledIteration ? ' PENDING' : '';
     const statusLines: string[] = [`[${modeLabel}${pendingLabel}] Watch Status: ${status}`];
     if (this._stdinListening) {
       const em: IOperationExecutionManager = this._executionManager;
@@ -144,7 +136,7 @@ export class ProjectWatcher {
       );
       // Second line: keybind help kept concise to avoid overwhelming output
       lines.push(
-        ' keys(active): [q]quit [a]abort-pass [i]invalidate [x]close-runners [d]debug ' +
+        ' keys(active): [q]quit [a]abort-iteration [i]invalidate [x]close-runners [d]debug ' +
           '[v]verbose [w]pause/resume [b]build [+/-]parallelism'
       );
       statusLines.push(...lines.map((l) => `  ${l}`));
@@ -286,14 +278,14 @@ export class ProjectWatcher {
     if (this._debounceHandle) {
       clearTimeout(this._debounceHandle);
     }
-    this._debounceHandle = setTimeout(() => this._queueNextPass(), this._debounceMs);
+    this._debounceHandle = setTimeout(() => this._scheduleIteration(), this._debounceMs);
   }
 
-  private _queueNextPass(): void {
-    this._setStatus('File change detected. Queuing new pass...');
+  private _scheduleIteration(): void {
+    this._setStatus('File change detected. Queuing new iteration...');
     this._executionManager
-      .queuePassAsync({} as IOperationExecutionPassOptions)
-      .catch((e) => this._terminal.writeErrorLine(`Failed to queue pass: ${(e as Error).message}`));
+      .scheduleIterationAsync({} as IOperationExecutionIterationOptions)
+      .catch((e) => this._terminal.writeErrorLine(`Failed to queue iteration: ${(e as Error).message}`));
   }
 
   /** Setup stdin listener for interactive keybinds */
@@ -351,8 +343,8 @@ export class ProjectWatcher {
           manager.abortController.abort();
           return; // stop processing further chars
         case 'a':
-          void manager.abortCurrentPassAsync().then(() => {
-            this._setStatus('Current pass aborted');
+          void manager.abortCurrentIterationAsync().then(() => {
+            this._setStatus('Current iteration aborted');
           });
           break;
         case 'i':
@@ -373,8 +365,9 @@ export class ProjectWatcher {
           this._setStatus(`Verbose mode ${!manager.quietMode ? 'enabled' : 'disabled'}`);
           break;
         case 'w':
-          manager.runNextPassBehavior = manager.runNextPassBehavior === 'automatic' ? 'manual' : 'automatic';
-          this._setStatus(manager.runNextPassBehavior === 'manual' ? 'Watch paused' : 'Watch resumed');
+          // Toggle pauseNextIteration mode
+          manager.pauseNextIteration = !manager.pauseNextIteration;
+          this._setStatus(manager.pauseNextIteration ? 'Watch paused' : 'Watch resumed');
           break;
         case '+':
         case '=':
@@ -385,12 +378,12 @@ export class ProjectWatcher {
           break;
         case 'b':
           // Queue and (if manual) execute
-          void manager.queuePassAsync({ startTime: performance.now() }).then((queued) => {
+          void manager.scheduleIterationAsync({ startTime: performance.now() }).then((queued) => {
             if (queued) {
-              if (manager.runNextPassBehavior === 'manual') {
-                void manager.executeQueuedPassAsync();
+              if (manager.pauseNextIteration === true) {
+                void manager.executeScheduledIterationAsync();
               }
-              this._setStatus('Build pass queued');
+              this._setStatus('Build iteration queued');
             } else {
               this._setStatus('No work to queue');
             }

@@ -8,7 +8,7 @@ import type {
   ICreateOperationsContext,
   IOperationExecutionManager,
   IOperationExecutionManagerContext,
-  IOperationExecutionPassOptions,
+  IOperationExecutionIterationOptions,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
@@ -124,14 +124,14 @@ function configureExecutionManager(
   executionManager: IOperationExecutionManager,
   context: IOperationExecutionManagerContext
 ): void {
-  executionManager.hooks.configureRun.tap(
+  executionManager.hooks.configureIteration.tap(
     PLUGIN_NAME,
     (
       currentStates: ReadonlyMap<Operation, IConfigurableOperation>,
       lastStates: ReadonlyMap<Operation, IOperationExecutionResult>,
-      passOptions: IOperationExecutionPassOptions
+      iterationOptions: IOperationExecutionIterationOptions
     ) => {
-      configureOperations(currentStates, lastStates, passOptions);
+      configureOperations(currentStates, lastStates, iterationOptions);
     }
   );
 }
@@ -179,13 +179,13 @@ function shouldEnableOperation(
 function configureOperations(
   currentStates: ReadonlyMap<Operation, IConfigurableOperation>,
   lastStates: ReadonlyMap<Operation, IOperationExecutionResult>,
-  passOptions: IOperationExecutionPassOptions
+  iterationOptions: IOperationExecutionIterationOptions
 ): void {
   for (const [operation, currentState] of currentStates) {
     const lastState: IOperationExecutionResult | undefined = lastStates.get(operation);
 
     currentState.enabled =
-      operation.enabled && shouldEnableOperation(currentState, lastState, passOptions.inputsSnapshot);
+      operation.enabled && shouldEnableOperation(currentState, lastState, iterationOptions.inputsSnapshot);
   }
 }
 

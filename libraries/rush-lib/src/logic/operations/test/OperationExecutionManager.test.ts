@@ -57,7 +57,7 @@ import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalPro
 import type { CobuildConfiguration } from '../../../api/CobuildConfiguration';
 import type { OperationStateFile } from '../OperationStateFile';
 import type {
-  IOperationExecutionPassOptions,
+  IOperationExecutionIterationOptions,
   IOperationExecutionManager
 } from '../../../pluginFramework/PhasedCommandHooks';
 
@@ -114,7 +114,7 @@ function createExecutionManager(
 describe(OperationExecutionManager.name, () => {
   let executionManager: OperationExecutionManager;
   let executionManagerOptions: IOperationExecutionManagerOptions;
-  let executionPassOptions: IOperationExecutionPassOptions;
+  let executionIterationOptions: IOperationExecutionIterationOptions;
 
   beforeEach(() => {
     jest.spyOn(PrintUtilities, 'getConsoleWidth').mockReturnValue(90);
@@ -130,7 +130,7 @@ describe(OperationExecutionManager.name, () => {
         destinations: [mockWritable],
         abortController: new AbortController()
       };
-      executionPassOptions = {};
+      executionIterationOptions = {};
     });
 
     it('printedStderrAfterError', async () => {
@@ -143,7 +143,7 @@ describe(OperationExecutionManager.name, () => {
         })
       );
 
-      const result: IExecutionResult = await executionManager.executeAsync(executionPassOptions);
+      const result: IExecutionResult = await executionManager.executeAsync(executionIterationOptions);
       _printOperationStatus(mockTerminal, result);
       expect(result.status).toEqual(OperationStatus.Failure);
       expect(executionManager.status).toEqual(OperationStatus.Failure);
@@ -168,7 +168,7 @@ describe(OperationExecutionManager.name, () => {
         })
       );
 
-      const result: IExecutionResult = await executionManager.executeAsync(executionPassOptions);
+      const result: IExecutionResult = await executionManager.executeAsync(executionIterationOptions);
       _printOperationStatus(mockTerminal, result);
       expect(result.status).toEqual(OperationStatus.Failure);
       expect(result.operationResults.size).toEqual(1);
@@ -215,11 +215,11 @@ describe(OperationExecutionManager.name, () => {
         }
       );
 
-      manager.hooks.beforeExecuteOperationsAsync.tapPromise(
+      manager.hooks.beforeExecuteIterationAsync.tapPromise(
         'test',
-        (): Promise<void> => manager.abortCurrentPassAsync()
+        (): Promise<void> => manager.abortCurrentIterationAsync()
       );
-      const result: IExecutionResult = await manager.executeAsync(executionPassOptions);
+      const result: IExecutionResult = await manager.executeAsync(executionIterationOptions);
       expect(result.status).toEqual(OperationStatus.Aborted);
       expect(manager.status).toEqual(OperationStatus.Aborted);
       expect(mockRun).not.toHaveBeenCalled();
@@ -262,7 +262,7 @@ describe(OperationExecutionManager.name, () => {
         }
       );
 
-      const result = await manager.executeAsync(executionPassOptions);
+      const result = await manager.executeAsync(executionIterationOptions);
       expect(result.status).toEqual(OperationStatus.Failure);
       expect(blockedRunFn).not.toHaveBeenCalled();
       expect(result.operationResults.size).toEqual(2);
@@ -280,7 +280,7 @@ describe(OperationExecutionManager.name, () => {
         destinations: [mockWritable],
         abortController: new AbortController()
       };
-      executionPassOptions = {};
+      executionIterationOptions = {};
     });
 
     class LogFileCreatingRunner extends MockOperationRunner {
@@ -309,7 +309,7 @@ describe(OperationExecutionManager.name, () => {
         stateUpdates.push(Array.from(records, (r) => r.status));
       });
 
-      const result: IExecutionResult = await executionManager.executeAsync(executionPassOptions);
+      const result: IExecutionResult = await executionManager.executeAsync(executionIterationOptions);
       expect(result.status).toBe(OperationStatus.Success);
       // Expect at least two batches now that we introduced a delay
       expect(stateUpdates.length).toBeGreaterThanOrEqual(2);
@@ -328,7 +328,7 @@ describe(OperationExecutionManager.name, () => {
         operationStateUpdates.push(new Set(records));
       });
 
-      const result: IExecutionResult = await executionManager.executeAsync(executionPassOptions);
+      const result: IExecutionResult = await executionManager.executeAsync(executionIterationOptions);
       // Status may be Success or Failure if logging pipeline errors; we only care that hook fired with logFilePaths
       expect(result.status === OperationStatus.Success || result.status === OperationStatus.Failure).toBe(
         true
@@ -363,7 +363,7 @@ describe(OperationExecutionManager.name, () => {
           })
         );
 
-        const result: IExecutionResult = await executionManager.executeAsync(executionPassOptions);
+        const result: IExecutionResult = await executionManager.executeAsync(executionIterationOptions);
         _printOperationStatus(mockTerminal, result);
         expect(result.status).toEqual(OperationStatus.SuccessWithWarning);
         expect(executionManager.status).toEqual(OperationStatus.SuccessWithWarning);
@@ -405,7 +405,7 @@ describe(OperationExecutionManager.name, () => {
           )
         );
 
-        const result: IExecutionResult = await executionManager.executeAsync(executionPassOptions);
+        const result: IExecutionResult = await executionManager.executeAsync(executionIterationOptions);
         _printOperationStatus(mockTerminal, result);
         expect(result.status).toEqual(OperationStatus.Success);
         expect(result.operationResults.size).toEqual(1);
@@ -433,7 +433,7 @@ describe(OperationExecutionManager.name, () => {
           )
         );
 
-        const result: IExecutionResult = await executionManager.executeAsync(executionPassOptions);
+        const result: IExecutionResult = await executionManager.executeAsync(executionIterationOptions);
         _printTimeline({ terminal: mockTerminal, result, cobuildConfiguration: undefined });
         _printOperationStatus(mockTerminal, result);
         const allMessages: string = mockWritable.getAllOutput();
@@ -510,7 +510,7 @@ describe(OperationExecutionManager.name, () => {
         {} as unknown as RushConfigurationProject
       );
 
-      const result: IExecutionResult = await executionManager.executeAsync(executionPassOptions);
+      const result: IExecutionResult = await executionManager.executeAsync(executionIterationOptions);
       _printTimeline({
         terminal: mockTerminal,
         result,
@@ -535,7 +535,7 @@ describe(OperationExecutionManager.name, () => {
         {} as unknown as RushConfigurationProject
       );
 
-      const result: IExecutionResult = await executionManager.executeAsync(executionPassOptions);
+      const result: IExecutionResult = await executionManager.executeAsync(executionIterationOptions);
       _printTimeline({
         terminal: mockTerminal,
         result,
@@ -552,8 +552,8 @@ describe(OperationExecutionManager.name, () => {
     });
   });
 
-  describe('Manual run mode', () => {
-    it('queues a pass in manual mode and does not auto-execute until executeQueuedPassAsync is called', async () => {
+  describe('Manual iteration mode', () => {
+    it('queues an iteration in manual mode and does not auto-execute until executeScheduledIterationAsync is called', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       try {
         const options: IOperationExecutionManagerOptions = {
@@ -562,7 +562,7 @@ describe(OperationExecutionManager.name, () => {
           parallelism: 1,
           destinations: [mockWritable],
           abortController: new AbortController(),
-          runNextPassBehavior: 'manual'
+          pauseNextIteration: true
         };
 
         const runFn: jest.Mock = jest.fn(async () => OperationStatus.Success);
@@ -576,28 +576,28 @@ describe(OperationExecutionManager.name, () => {
         const manager: OperationExecutionManager = new OperationExecutionManager(new Set([op]), options);
 
         const passQueuedCalls: ReadonlyMap<Operation, IOperationExecutionResult>[] = [];
-        manager.hooks.onPassQueued.tap('test', (records) => passQueuedCalls.push(records));
+        manager.hooks.onIterationScheduled.tap('test', (records) => passQueuedCalls.push(records));
 
         const waitingForChangesCalls: number[] = [];
         manager.hooks.onWaitingForChanges.tap('test', () => waitingForChangesCalls.push(1));
 
-        const queued: boolean = await manager.queuePassAsync({});
+        const queued: boolean = await manager.scheduleIterationAsync({});
         expect(queued).toBe(true);
         expect(passQueuedCalls.length).toBe(1);
-        // Pass should be queued but not yet started.
-        expect(manager.hasQueuedPass).toBe(true);
+        // Iteration should be scheduled but not yet started.
+        expect(manager.hasScheduledIteration).toBe(true);
         expect(runFn).not.toHaveBeenCalled();
 
-        // Flush the idle timeout. Since runNextPassBehavior is 'manual', execution should NOT start.
+        // Flush the idle timeout. Since pauseNextIteration is true, execution should NOT start automatically.
         jest.runAllTimers();
         expect(waitingForChangesCalls.length).toBe(1);
         expect(runFn).not.toHaveBeenCalled();
 
-        // Now manually execute the queued pass
-        const executed: boolean = await manager.executeQueuedPassAsync();
+        // Now manually execute the scheduled iteration
+        const executed: boolean = await manager.executeScheduledIterationAsync();
         expect(executed).toBe(true);
         expect(runFn).toHaveBeenCalledTimes(1);
-        expect(manager.hasQueuedPass).toBe(false);
+        expect(manager.hasScheduledIteration).toBe(false);
         // After execution status should be Success
         expect(manager.status).toBe(OperationStatus.Success);
       } finally {
@@ -605,14 +605,14 @@ describe(OperationExecutionManager.name, () => {
       }
     });
 
-    it('does not queue a pass if all operations are disabled (no enabled operations)', async () => {
+    it('does not queue an iteration if all operations are disabled (no enabled operations)', async () => {
       const options: IOperationExecutionManagerOptions = {
         quietMode: false,
         debugMode: false,
         parallelism: 1,
         destinations: [mockWritable],
         abortController: new AbortController(),
-        runNextPassBehavior: 'manual'
+        pauseNextIteration: true
       };
 
       const runFn: jest.Mock = jest.fn(async () => OperationStatus.Success);
@@ -630,12 +630,12 @@ describe(OperationExecutionManager.name, () => {
       );
 
       const passQueuedCalls: ReadonlyMap<Operation, IOperationExecutionResult>[] = [];
-      manager.hooks.onPassQueued.tap('test', (records) => passQueuedCalls.push(records));
+      manager.hooks.onIterationScheduled.tap('test', (records) => passQueuedCalls.push(records));
 
-      const queued: boolean = await manager.queuePassAsync({});
+      const queued: boolean = await manager.scheduleIterationAsync({});
       expect(queued).toBe(false); // Nothing to do
       expect(passQueuedCalls.length).toBe(0); // Hook not fired
-      expect(manager.hasQueuedPass).toBe(false);
+      expect(manager.hasScheduledIteration).toBe(false);
       expect(runFn).not.toHaveBeenCalled();
       // Status remains Ready (no operations executed)
       expect(manager.status).toBe(OperationStatus.Ready);
@@ -651,7 +651,7 @@ describe(OperationExecutionManager.name, () => {
         destinations: [mockWritable],
         abortController: new AbortController()
       };
-      executionPassOptions = {};
+      executionIterationOptions = {};
     });
 
     it('addTerminalDestination causes new destination to receive output', async () => {
@@ -668,7 +668,7 @@ describe(OperationExecutionManager.name, () => {
       // Add destination before executing
       executionManager.addTerminalDestination(extraDest);
 
-      const result: IExecutionResult = await executionManager.executeAsync(executionPassOptions);
+      const result: IExecutionResult = await executionManager.executeAsync(executionIterationOptions);
       expect(result.status).toBe(OperationStatus.Success);
 
       const allOutput: string = extraDest.getAllOutput();
@@ -681,7 +681,7 @@ describe(OperationExecutionManager.name, () => {
       executionManager = createExecutionManager(
         executionManagerOptions,
         new MockOperationRunner('to-extra', async (terminal: CollatedTerminal) => {
-          terminal.writeStdoutLine('Run message');
+          terminal.writeStdoutLine('Iteration message');
           return OperationStatus.Success;
         })
       );
@@ -689,9 +689,9 @@ describe(OperationExecutionManager.name, () => {
       executionManager.addTerminalDestination(extraDest);
 
       // First run: destination should receive output
-      const first = await executionManager.executeAsync(executionPassOptions);
+      const first = await executionManager.executeAsync(executionIterationOptions);
       expect(first.status).toBe(OperationStatus.Success);
-      expect(extraDest.getAllOutput()).toContain('Run message');
+      expect(extraDest.getAllOutput()).toContain('Iteration message');
 
       // Now remove destination (default close = true) and ensure it was removed/closed
       const removed = executionManager.removeTerminalDestination(extraDest);
@@ -701,7 +701,7 @@ describe(OperationExecutionManager.name, () => {
 
       // Second run: should not write to closed destination
       const beforeSecond = extraDest.getAllOutput();
-      const second = await executionManager.executeAsync(executionPassOptions);
+      const second = await executionManager.executeAsync(executionIterationOptions);
       expect(second.status).toBe(OperationStatus.Success);
       const afterSecond = extraDest.getAllOutput();
       expect(afterSecond).toBe(beforeSecond);
@@ -713,7 +713,7 @@ describe(OperationExecutionManager.name, () => {
       executionManager = createExecutionManager(
         executionManagerOptions,
         new MockOperationRunner('to-extra', async (terminal: CollatedTerminal) => {
-          terminal.writeStdoutLine('Run message 2');
+          terminal.writeStdoutLine('Iteration message 2');
           return OperationStatus.Success;
         })
       );
@@ -721,9 +721,9 @@ describe(OperationExecutionManager.name, () => {
       executionManager.addTerminalDestination(extraDest);
 
       // First run: destination should receive output
-      const first = await executionManager.executeAsync(executionPassOptions);
+      const first = await executionManager.executeAsync(executionIterationOptions);
       expect(first.status).toBe(OperationStatus.Success);
-      expect(extraDest.getAllOutput()).toContain('Run message 2');
+      expect(extraDest.getAllOutput()).toContain('Iteration message 2');
 
       // Remove without closing
       const removed = executionManager.removeTerminalDestination(extraDest, false);
@@ -733,7 +733,7 @@ describe(OperationExecutionManager.name, () => {
 
       // Second run: destination should not receive additional output
       const beforeSecond = extraDest.getAllOutput();
-      const second = await executionManager.executeAsync(executionPassOptions);
+      const second = await executionManager.executeAsync(executionIterationOptions);
       expect(second.status).toBe(OperationStatus.Success);
       const afterSecond = extraDest.getAllOutput();
       expect(afterSecond).toBe(beforeSecond);
@@ -917,15 +917,10 @@ describe('Manager state change notifications', () => {
       destinations: [mockWritable],
       abortController: new AbortController()
     };
-    const manager: OperationExecutionManager = new OperationExecutionManager(new Set(), {
-      ...baseOptions,
-      ...overrides
-    });
-    return manager;
+    return new OperationExecutionManager(new Set(), { ...baseOptions, ...overrides });
   }
 
   beforeEach(() => {
-    // Use legacy fake timers so we can explicitly flush process.nextTick queue via runAllTicks
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
@@ -941,8 +936,8 @@ describe('Manager state change notifications', () => {
     const manager: OperationExecutionManager = createManagerForStateTests();
     const calls: IOperationExecutionManager[] = [];
     manager.hooks.onManagerStateChanged.tap('test', (m) => calls.push(m));
-    manager.debugMode = true; // change value
-    expect(calls.length).toBe(0); // debounced
+    manager.debugMode = true;
+    expect(calls.length).toBe(0);
     await flushNextTick();
     expect(calls.length).toBe(1);
     expect(manager.debugMode).toBe(true);
@@ -953,14 +948,14 @@ describe('Manager state change notifications', () => {
     const calls: IOperationExecutionManager[] = [];
     manager.hooks.onManagerStateChanged.tap('test', (m) => calls.push(m));
     manager.debugMode = true;
-    manager.quietMode = true; // second change before nextTick flush
-    manager.runNextPassBehavior = 'manual';
+    manager.quietMode = true;
+    manager.pauseNextIteration = true;
     manager.parallelism = 3;
     await flushNextTick();
-    expect(calls.length).toBe(1); // Only one notification for four changes
+    expect(calls.length).toBe(1);
     expect(manager.debugMode).toBe(true);
     expect(manager.quietMode).toBe(true);
-    expect(manager.runNextPassBehavior).toBe('manual');
+    expect(manager.pauseNextIteration).toBe(true);
     expect(manager.parallelism).toBe(3);
   });
 
@@ -968,8 +963,8 @@ describe('Manager state change notifications', () => {
     const manager: OperationExecutionManager = createManagerForStateTests();
     const calls: IOperationExecutionManager[] = [];
     manager.hooks.onManagerStateChanged.tap('test', (m) => calls.push(m));
-    manager.debugMode = false; // same as initial
-    manager.quietMode = false; // same as initial
+    manager.debugMode = false;
+    manager.quietMode = false;
     await flushNextTick();
     expect(calls.length).toBe(0);
   });
@@ -1000,24 +995,24 @@ describe('Manager state change notifications', () => {
     expect(calls.length).toBe(2);
   });
 
-  it('runNextPassBehavior change triggers callback only when value changes', async () => {
+  it('pauseNextIteration change triggers callback only when value changes', async () => {
     const manager: OperationExecutionManager = createManagerForStateTests();
     const calls: IOperationExecutionManager[] = [];
     manager.hooks.onManagerStateChanged.tap('test', (m) => calls.push(m));
 
-    manager.runNextPassBehavior = 'manual';
+    manager.pauseNextIteration = true;
     await flushNextTick();
     expect(calls.length).toBe(1);
-    expect(manager.runNextPassBehavior).toBe('manual');
+    expect(manager.pauseNextIteration).toBe(true);
 
-    manager.runNextPassBehavior = 'manual'; // unchanged
+    manager.pauseNextIteration = true;
     await flushNextTick();
-    expect(calls.length).toBe(1); // still one call
+    expect(calls.length).toBe(1);
 
-    manager.runNextPassBehavior = 'automatic'; // change
+    manager.pauseNextIteration = false;
     await flushNextTick();
     expect(calls.length).toBe(2);
-    expect(manager.runNextPassBehavior).toBe('automatic');
+    expect(manager.pauseNextIteration).toBe(false);
   });
 });
 
