@@ -18,13 +18,13 @@ export interface IJsonPeerDependencyMeta {
 
 export interface IJsonLfxDependency {
   name: string;
-  version: string;
+  versionPath: string;
   entryId: string;
-  dependencyType: LfxDependencyKind;
+  originalSpecifier: string;
+  dependencyKind: LfxDependencyKind;
+  peerDependencyMeta: IJsonPeerDependencyMeta;
 
   resolvedEntryJsonId?: number;
-
-  peerDependencyMeta: IJsonPeerDependencyMeta;
 }
 
 export enum LfxDependencyKind {

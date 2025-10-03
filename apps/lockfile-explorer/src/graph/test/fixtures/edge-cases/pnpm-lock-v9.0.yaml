@@ -1,122 +1,142 @@
-lockfileVersion: 5.4
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+pnpmfileChecksum: sha256-tednqUPPat9y98NmpwR8320vxu2TlSor2aoYTxiNCdU=
 
 importers:
   packages/dev-dependencies:
-    specifiers:
-      color-string: ^2.1.2
-      mime-db: ^1.52.0
-    optionalDependencies:
-      mime-db: 1.54.0
     devDependencies:
-      color-string: 2.1.2
+      color-string:
+        specifier: ^2.1.2
+        version: 2.1.2
+    optionalDependencies:
+      mime-db:
+        specifier: ^1.52.0
+        version: 1.54.0
 
   packages/duplicate-1/duplicate:
-    specifiers:
-      color: ^5.0.2
     dependencies:
-      color: 5.0.2
+      color:
+        specifier: ^5.0.2
+        version: 5.0.2
 
   packages/duplicate-2/duplicate:
-    specifiers:
-      color-string: ^2.1.2
     dependencies:
-      color-string: 2.1.2
+      color-string:
+        specifier: ^2.1.2
+        version: 2.1.2
 
   packages/link-specifier/linker:
-    specifiers:
-      has-symbols: 1.0.2
-      target-folder: link:packages/link-specifier/target-folder
     dependencies:
-      has-symbols: 1.0.2
-      target-folder: link:packages/link-specifier/target-folder
+      has-symbols:
+        specifier: 1.0.2
+        version: 1.0.2
+      target-folder:
+        specifier: link:packages/link-specifier/target-folder
+        version: link:packages/link-specifier/target-folder
 
   packages/pnpmfile-transforms:
-    specifiers:
-      address: ^1.0.0
-      uri-js: ^4.0.0
     dependencies:
-      address: 1.2.2
-      uri-js: 4.4.1
+      address:
+        specifier: ^1.0.0
+        version: 1.2.2
+      uri-js:
+        specifier: ^4.0.0
+        version: 4.4.1
 
 packages:
-  /address/1.2.2:
+  address@1.2.2:
     resolution:
       {
         integrity: sha512-4B/qKCfeE/ODUaAUpSwfzazo5x29WD4r3vXiWsB7I2mSDAihwEqKO+g8GELZUQSSAo5e1XTYh3ZVfLyxBc12nA==
       }
     engines: { node: '>= 10.0.0' }
-    dev: false
 
-  /color-convert/3.1.2:
+  color-convert@3.1.2:
     resolution:
       {
         integrity: sha512-UNqkvCDXstVck3kdowtOTWROIJQwafjOfXSmddoDrXo4cewMKmusCeF22Q24zvjR8nwWib/3S/dfyzPItPEiJg==
       }
     engines: { node: '>=14.6' }
-    dependencies:
-      color-name: 2.0.2
-    dev: false
 
-  /color-name/2.0.2:
+  color-name@2.0.2:
     resolution:
       {
         integrity: sha512-9vEt7gE16EW7Eu7pvZnR0abW9z6ufzhXxGXZEVU9IqPdlsUiMwJeJfRtq0zePUmnbHGT9zajca7mX8zgoayo4A==
       }
     engines: { node: '>=12.20' }
 
-  /color-string/2.1.2:
+  color-string@2.1.2:
     resolution:
       {
         integrity: sha512-RxmjYxbWemV9gKu4zPgiZagUxbH3RQpEIO77XoSSX0ivgABDZ+h8Zuash/EMFLTI4N9QgFPOJ6JQpPZKFxa+dA==
       }
     engines: { node: '>=18' }
-    dependencies:
-      color-name: 2.0.2
 
-  /color/5.0.2:
+  color@5.0.2:
     resolution:
       {
         integrity: sha512-e2hz5BzbUPcYlIRHo8ieAhYgoajrJr+hWoceg6E345TPsATMUKqDgzt8fSXZJJbxfpiPzkWyphz8yn8At7q3fA==
       }
     engines: { node: '>=18' }
-    dependencies:
-      color-convert: 3.1.2
-      color-string: 2.1.2
-    dev: false
 
-  /has-symbols/1.0.2:
+  has-symbols@1.0.2:
     resolution:
       {
         integrity: sha512-chXa79rL/UC2KlX17jo3vRGz0azaWEx5tGqZg5pO3NUyEJVB17dMruQlzCCOfUvElghKcm5194+BCRvi2Rv/Gw==
       }
     engines: { node: '>= 0.4' }
-    dependencies:
-      target-folder: link:link-specifier/target-folder
-    dev: false
 
-  /mime-db/1.54.0:
+  mime-db@1.54.0:
     resolution:
       {
         integrity: sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ==
       }
     engines: { node: '>= 0.6' }
-    requiresBuild: true
-    dev: false
-    optional: true
 
-  /punycode/2.3.1:
+  punycode@2.3.1:
     resolution:
       {
         integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
       }
     engines: { node: '>=6' }
-    dev: false
 
-  /uri-js/4.4.1:
+  uri-js@4.4.1:
     resolution:
       {
         integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==
       }
+
+snapshots:
+  address@1.2.2: {}
+
+  color-convert@3.1.2:
+    dependencies:
+      color-name: 2.0.2
+
+  color-name@2.0.2: {}
+
+  color-string@2.1.2:
+    dependencies:
+      color-name: 2.0.2
+
+  color@5.0.2:
+    dependencies:
+      color-convert: 3.1.2
+      color-string: 2.1.2
+
+  has-symbols@1.0.2:
+    dependencies:
+      target-folder: link:link-specifier/target-folder
+
+  mime-db@1.54.0:
+    optional: true
+
+  punycode@2.3.1: {}
+
+  uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
-    dev: false

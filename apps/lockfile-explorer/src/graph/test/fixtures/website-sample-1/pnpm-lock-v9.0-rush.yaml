@@ -1,19 +1,21 @@
 lockfileVersion: '9.0'
 
 settings:
-  autoInstallPeers: true
+  autoInstallPeers: false
   excludeLinksFromLockfile: false
 
-pnpmfileChecksum: sha256-6Cq2BFB3826lbTciEnsPowoZ1qvFZeM4wkoGwobxneY=
+pnpmfileChecksum: sha256-La8sfCMI7irxJPTW6u4mJb4vNiyLrXeEbKaXv5G3dL0=
 
 importers:
-  projects/a:
+  .: {}
+
+  ../../projects/a:
     dependencies:
       '@rushstack/d':
         specifier: workspace:*
         version: link:../d
 
-  projects/b:
+  ../../projects/b:
     dependencies:
       '@rushstack/d':
         specifier: workspace:*
@@ -22,7 +24,7 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
 
-  projects/c:
+  ../../projects/c:
     dependencies:
       '@rushstack/e':
         specifier: workspace:*
@@ -34,7 +36,7 @@ importers:
         specifier: ~1.0.0
         version: 1.0.0
 
-  projects/d:
+  ../../projects/d:
     dependencies:
       '@rushstack/e':
         specifier: workspace:*
@@ -46,7 +48,7 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
 
-  projects/e:
+  ../../projects/e:
     dependencies:
       '@rushstack/n':
         specifier: ^3.0.0

@@ -16,28 +16,30 @@ Object {
     Object {
       "dependencies": Array [
         Object {
-          "dependencyType": "regular",
+          "dependencyKind": "regular",
           "entryId": "/@testPackage/core/1.7.1",
           "name": "@testPackage/core",
+          "originalSpecifier": "1.7.1",
           "peerDependencyMeta": Object {
             "name": undefined,
             "optional": undefined,
             "version": undefined,
           },
           "resolvedEntryJsonId": 1,
-          "version": "1.7.1",
+          "versionPath": "1.7.1",
         },
         Object {
-          "dependencyType": "regular",
+          "dependencyKind": "regular",
           "entryId": "/@testPackage2/core/1.7.1",
           "name": "@testPackage2/core",
+          "originalSpecifier": "1.7.1",
           "peerDependencyMeta": Object {
             "name": undefined,
             "optional": undefined,
             "version": undefined,
           },
           "resolvedEntryJsonId": 2,
-          "version": "1.7.1",
+          "versionPath": "1.7.1",
         },
       ],
       "displayText": "Project: testApp1",
@@ -55,7 +57,7 @@ Object {
     Object {
       "dependencies": Array [],
       "displayText": "@testPackage/core 1.7.1",
-      "entryId": "",
+      "entryId": "/@testPackage/core/1.7.1",
       "entryPackageName": "@testPackage/core",
       "entryPackageVersion": "1.7.1",
       "entrySuffix": "",
@@ -71,7 +73,7 @@ Object {
     Object {
       "dependencies": Array [],
       "displayText": "@testPackage2/core 1.7.1",
-      "entryId": "",
+      "entryId": "/@testPackage2/core/1.7.1",
       "entryPackageName": "@testPackage2/core",
       "entryPackageVersion": "1.7.1",
       "entrySuffix": "",

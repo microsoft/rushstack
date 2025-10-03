@@ -6,39 +6,75 @@ import type { IJsonLfxWorkspace } from './IJsonLfxWorkspace';
 
 export interface ILfxGraphDependencyOptions {
   name: string;
-  version: string;
-  dependencyType: LfxDependencyKind;
-  containingEntry: LfxGraphEntry;
-  peerDependencyMeta: IJsonPeerDependencyMeta;
+  versionPath: string;
+
   entryId: string;
+
+  originalSpecifier: string;
+  dependencyKind: LfxDependencyKind;
+  peerDependencyMeta: IJsonPeerDependencyMeta;
+
+  containingEntry: LfxGraphEntry;
 }
 
 /**
- * Represents a dependency listed under a LockfileEntry
- *
- * @remarks
- * Each dependency listed under a package in the lockfile should have a separate entry. These Dependencies
- * will link to the "containingEntry", which is the LockfileEntry that specified this dependency.
- * The "resolvedEntry" field is the corresponding LockfileEntry for this dependency, as all dependencies also have
- * their own entries in the pnpm lockfile.
+ * Represents an graph edge, which is an exact dependency version obtained from the lockfile.
  */
 export class LfxGraphDependency {
+  /**
+   * The referenced package name.
+   * Example: `@scope/package-name`
+   */
   public readonly name: string;
-  public readonly version: string;
-  public readonly dependencyType: LfxDependencyKind;
-  public readonly containingEntry: LfxGraphEntry;
+
+  /**
+   * The lockfile's raw string that either indicates an external reference such as `link:../target-folder`,
+   * or else can be combined with the `name` field to construct an `entryId` found in the lockfile.
+   * The exact syntax varies between lockfile file format versions.
+   *
+   * Example: `link:../target-folder`
+   *
+   * Example: `1.0.0`
+   *
+   * Example: `1.0.0_@rushstack+m@1.0.0`   (version 5.4)
+   * Example: `1.0.0(@rushstack/m@1.0.0)`  (version 6.0 and 9.0)
+   */
+  public readonly versionPath: string;
+
+  /**
+   * If this dependency refers to an entry in the lockfile, this field should match a corresponding
+   * {@link LfxGraphEntry.entryId} and `resolvedEntry` will be defined (unless the loader encountered an error).
+   *
+   * For external references such as `link:../target-folder`, the `entryId` is the empty string.
+   */
   public readonly entryId: string;
+
+  /**
+   * The lockfile sometimes records the original SemVer specifier that was used to choose the versionPath,
+   * usually either because it can change (e.g. a workspace project's dependencies) or because it's a peer dependency
+   * that affects graph relationships beyond the current node.  If not, then `originalSpecifier` will be the
+   * empty string.
+   *
+   * @remarks
+   * Because this field is only available for certain dependencies, it is generally less useful than specifiers
+   * obtained from the package.json files.
+   */
+  public readonly originalSpecifier: string;
+  public readonly dependencyKind: LfxDependencyKind;
   public readonly peerDependencyMeta: IJsonPeerDependencyMeta;
 
+  public readonly containingEntry: LfxGraphEntry;
   public resolvedEntry: LfxGraphEntry | undefined = undefined;
 
   public constructor(options: ILfxGraphDependencyOptions) {
     this.name = options.name;
-    this.version = options.version;
-    this.dependencyType = options.dependencyType;
-    this.containingEntry = options.containingEntry;
+    this.versionPath = options.versionPath;
     this.entryId = options.entryId;
+    this.originalSpecifier = options.originalSpecifier;
+    this.dependencyKind = options.dependencyKind;
     this.peerDependencyMeta = options.peerDependencyMeta;
+
+    this.containingEntry = options.containingEntry;
   }
 }
 
@@ -67,14 +103,19 @@ export class LfxGraphEntry {
   public readonly kind: LfxGraphEntryKind;
 
   /**
-   * A unique (human-readable) identifier for this lockfile entry. For projects, this is just
-   * `Project:` + the package json path for this project.
+   * A unique identifier for this lockfile entry, based on `rawEntryId` but adjusted to be unique for both
+   * project and external package entries.
    */
   public readonly entryId: string;
 
   /**
    * The unique identifier assigned to this project/package in the lockfile.
    * e.g. `/@emotion/core/10.3.1_qjwx5m6wssz3lnb35xwkc3pz6q:`
+   *
+   * @remarks
+   * In the `pnpm-lock.yaml` file, "importers" (workspace projects) and "packages" (external packages)
+   * are tracked separately, so it's not required for their keys to be unique.  `entryId` solves this problem
+   * by adding a `project:` prefix for importers.
    */
   public readonly rawEntryId: string;
 
