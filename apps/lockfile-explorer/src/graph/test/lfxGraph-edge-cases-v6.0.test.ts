@@ -13,10 +13,10 @@ export const workspace: IJsonLfxWorkspace = {
   rushConfig: undefined
 };
 
-describe('lfxGraph-edge-cases-v5.4', () => {
+describe('lfxGraph-edge-cases-v6.0', () => {
   it('loads a workspace', async () => {
     const serializedYaml: string = await graphTestHelpers.loadAndSerializeLfxGraphAsync({
-      lockfilePathUnderFixtures: '/edge-cases/pnpm-lock-v5.4.yaml',
+      lockfilePathUnderFixtures: '/edge-cases/pnpm-lock-v6.0.yaml',
       workspace: workspace
     });
     expect(serializedYaml).toMatchSnapshot();

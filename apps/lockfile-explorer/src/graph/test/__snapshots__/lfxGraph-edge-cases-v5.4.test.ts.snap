@@ -3,10 +3,17 @@
 exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
 "entries:
   - dependencies:
+      - dependencyType: regular
+        entryId: /mime-db/1.54.0
+        name: mime-db
+        originalSpecifier: ^1.52.0
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 11
+        versionPath: 1.54.0
       - dependencyType: dev
         entryId: /color-string/2.1.2
         name: color-string
-        originalSpecifier: ''
+        originalSpecifier: ^2.1.2
         peerDependencyMeta: {}
         resolvedEntryJsonId: 8
         versionPath: 2.1.2
@@ -25,7 +32,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /color/5.0.2
         name: color
-        originalSpecifier: ''
+        originalSpecifier: ^5.0.2
         peerDependencyMeta: {}
         resolvedEntryJsonId: 9
         versionPath: 5.0.2
@@ -44,7 +51,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /color-string/2.1.2
         name: color-string
-        originalSpecifier: ''
+        originalSpecifier: ^2.1.2
         peerDependencyMeta: {}
         resolvedEntryJsonId: 8
         versionPath: 2.1.2
@@ -63,14 +70,14 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /has-symbols/1.0.2
         name: has-symbols
-        originalSpecifier: ''
+        originalSpecifier: 1.0.2
         peerDependencyMeta: {}
         resolvedEntryJsonId: 10
         versionPath: 1.0.2
       - dependencyType: regular
         entryId: project:packages/link-specifier/linker/packages/link-specifier/target-folder
         name: target-folder
-        originalSpecifier: ''
+        originalSpecifier: link:packages/link-specifier/target-folder
         peerDependencyMeta: {}
         versionPath: link:packages/link-specifier/target-folder
     displayText: 'Project: linker'
@@ -88,14 +95,14 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /address/1.2.2
         name: address
-        originalSpecifier: ''
+        originalSpecifier: ^1.0.0
         peerDependencyMeta: {}
         resolvedEntryJsonId: 5
         versionPath: 1.2.2
       - dependencyType: regular
         entryId: /uri-js/4.4.1
         name: uri-js
-        originalSpecifier: ''
+        originalSpecifier: ^4.0.0
         peerDependencyMeta: {}
         resolvedEntryJsonId: 13
         versionPath: 4.4.1
@@ -235,7 +242,8 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
     kind: 2
     packageJsonFolderPath: node_modules/.pnpm/mime-db@1.54.0/node_modules/mime-db
     rawEntryId: /mime-db/1.54.0
-    referrerJsonIds: []
+    referrerJsonIds:
+      - 0
     transitivePeerDependencies: []
   - dependencies: []
     displayText: punycode 2.3.1

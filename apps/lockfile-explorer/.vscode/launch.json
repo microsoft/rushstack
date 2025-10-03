@@ -26,7 +26,7 @@
         "--clean",
         "-u",
         "--test-path-pattern",
-        "lfxGraph-website-sample-1-v9.0.test"
+        "lfxGraph-website-sample-1-v5.4.test"
       ],
       "console": "integratedTerminal",
       "sourceMaps": true

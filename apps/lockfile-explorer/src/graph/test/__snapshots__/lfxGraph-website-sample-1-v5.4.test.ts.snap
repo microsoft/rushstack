@@ -6,7 +6,7 @@ exports[`lfxGraph-website-sample-1-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: project:projects/d
         name: '@rushstack/d'
-        originalSpecifier: ''
+        originalSpecifier: workspace:*
         peerDependencyMeta: {}
         resolvedEntryJsonId: 3
         versionPath: link:../d
@@ -25,14 +25,14 @@ exports[`lfxGraph-website-sample-1-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: project:projects/d
         name: '@rushstack/d'
-        originalSpecifier: ''
+        originalSpecifier: workspace:*
         peerDependencyMeta: {}
         resolvedEntryJsonId: 3
         versionPath: link:../d
       - dependencyType: regular
         entryId: /@rushstack/n/2.0.0
         name: '@rushstack/n'
-        originalSpecifier: ''
+        originalSpecifier: ^2.0.0
         peerDependencyMeta: {}
         resolvedEntryJsonId: 11
         versionPath: 2.0.0
@@ -51,21 +51,21 @@ exports[`lfxGraph-website-sample-1-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: project:projects/e
         name: '@rushstack/e'
-        originalSpecifier: ''
+        originalSpecifier: workspace:*
         peerDependencyMeta: {}
         resolvedEntryJsonId: 4
         versionPath: link:../e
       - dependencyType: regular
         entryId: /@rushstack/k/1.0.0_@rushstack+m@1.0.0
         name: '@rushstack/k'
-        originalSpecifier: ''
+        originalSpecifier: ^1.0.0
         peerDependencyMeta: {}
         resolvedEntryJsonId: 6
         versionPath: 1.0.0_@rushstack+m@1.0.0
       - dependencyType: regular
         entryId: /@rushstack/m/1.0.0
         name: '@rushstack/m'
-        originalSpecifier: ''
+        originalSpecifier: ~1.0.0
         peerDependencyMeta: {}
         resolvedEntryJsonId: 10
         versionPath: 1.0.0
@@ -84,21 +84,21 @@ exports[`lfxGraph-website-sample-1-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: project:projects/e
         name: '@rushstack/e'
-        originalSpecifier: ''
+        originalSpecifier: workspace:*
         peerDependencyMeta: {}
         resolvedEntryJsonId: 4
         versionPath: link:../e
       - dependencyType: regular
         entryId: /@rushstack/j/1.0.0_@rushstack+n@2.0.0
         name: '@rushstack/j'
-        originalSpecifier: ''
+        originalSpecifier: ^1.0.0
         peerDependencyMeta: {}
         resolvedEntryJsonId: 5
         versionPath: 1.0.0_@rushstack+n@2.0.0
       - dependencyType: regular
         entryId: /@rushstack/n/2.0.0
         name: '@rushstack/n'
-        originalSpecifier: ''
+        originalSpecifier: ^2.0.0
         peerDependencyMeta: {}
         resolvedEntryJsonId: 11
         versionPath: 2.0.0
@@ -119,7 +119,7 @@ exports[`lfxGraph-website-sample-1-v5.4 loads a workspace 1`] = `
       - dependencyType: regular
         entryId: /@rushstack/n/3.0.0
         name: '@rushstack/n'
-        originalSpecifier: ''
+        originalSpecifier: ^3.0.0
         peerDependencyMeta: {}
         resolvedEntryJsonId: 12
         versionPath: 3.0.0
@@ -209,31 +209,15 @@ exports[`lfxGraph-website-sample-1-v5.4 loads a workspace 1`] = `
       - '@rushstack/m'
       - '@rushstack/n'
   - dependencies:
-      - dependencyType: regular
-        entryId: /@rushstack/m/1.0.0
-        name: '@rushstack/m'
-        originalSpecifier: ''
-        peerDependencyMeta: {}
-        resolvedEntryJsonId: 10
-        versionPath: 1.0.0
       - dependencyType: peer
         entryId: 'Peer: @rushstack/m'
         name: '@rushstack/m'
-        originalSpecifier: ''
+        originalSpecifier: ^1.0.0
         peerDependencyMeta:
           name: '@rushstack/m'
           optional: false
-          version: ^1.0.0
-        versionPath: ^1.0.0
-      - dependencyType: peer
-        entryId: 'Peer: @rushstack/n'
-        name: '@rushstack/n'
-        originalSpecifier: ''
-        peerDependencyMeta:
-          name: '@rushstack/n'
-          optional: true
-          version: ^2.0.0
-        versionPath: ^2.0.0
+          version: 1.0.0
+        versionPath: 1.0.0
     displayText: '@rushstack/l 1.0.0 (@rushstack+m@1.0.0)'
     entryId: ''
     entryPackageName: '@rushstack/l'
@@ -247,38 +231,24 @@ exports[`lfxGraph-website-sample-1-v5.4 loads a workspace 1`] = `
       - 6
     transitivePeerDependencies: []
   - dependencies:
-      - dependencyType: regular
-        entryId: /@rushstack/m/1.0.0
-        name: '@rushstack/m'
-        originalSpecifier: ''
-        peerDependencyMeta: {}
-        resolvedEntryJsonId: 10
-        versionPath: 1.0.0
-      - dependencyType: regular
-        entryId: /@rushstack/n/2.0.0
-        name: '@rushstack/n'
-        originalSpecifier: ''
-        peerDependencyMeta: {}
-        resolvedEntryJsonId: 11
-        versionPath: 2.0.0
       - dependencyType: peer
         entryId: 'Peer: @rushstack/m'
         name: '@rushstack/m'
-        originalSpecifier: ''
+        originalSpecifier: ^1.0.0
         peerDependencyMeta:
           name: '@rushstack/m'
           optional: false
-          version: ^1.0.0
-        versionPath: ^1.0.0
+          version: 1.0.0
+        versionPath: 1.0.0
       - dependencyType: peer
         entryId: 'Peer: @rushstack/n'
         name: '@rushstack/n'
-        originalSpecifier: ''
+        originalSpecifier: ^2.0.0
         peerDependencyMeta:
           name: '@rushstack/n'
           optional: true
-          version: ^2.0.0
-        versionPath: ^2.0.0
+          version: 2.0.0
+        versionPath: 2.0.0
     displayText: '@rushstack/l 1.0.0 (wxpgugna4ivthu7yyu4fmciltu)'
     entryId: ''
     entryPackageName: '@rushstack/l'
@@ -304,8 +274,6 @@ exports[`lfxGraph-website-sample-1-v5.4 loads a workspace 1`] = `
     referrerJsonIds:
       - 2
       - 5
-      - 8
-      - 9
     transitivePeerDependencies: []
   - dependencies: []
     displayText: '@rushstack/n 2.0.0'
@@ -320,7 +288,6 @@ exports[`lfxGraph-website-sample-1-v5.4 loads a workspace 1`] = `
     referrerJsonIds:
       - 1
       - 3
-      - 9
     transitivePeerDependencies: []
   - dependencies: []
     displayText: '@rushstack/n 3.0.0'
