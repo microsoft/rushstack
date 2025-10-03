@@ -57,6 +57,7 @@
     "js-yaml": "~4.1.0",
     "npm-check": "~6.0.1",
     "npm-package-arg": "~6.1.0",
+    "object-hash": "3.0.0",
     "pnpm-sync-lib": "0.3.2",
     "read-package-tree": "~5.1.5",
     "rxjs": "~6.6.7",
@@ -70,8 +71,6 @@
   "devDependencies": {
     "@pnpm/lockfile.types": "~1.0.3",
     "@pnpm/logger": "4.0.0",
-    "eslint": "~9.25.1",
-    "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/operation-graph": "workspace:*",
@@ -81,12 +80,15 @@
     "@types/inquirer": "7.3.1",
     "@types/js-yaml": "4.0.9",
     "@types/npm-package-arg": "6.1.0",
+    "@types/object-hash": "~3.0.6",
     "@types/read-package-tree": "5.1.0",
     "@types/semver": "7.5.0",
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "6.1.6",
     "@types/webpack-env": "1.18.8",
+    "eslint": "~9.25.1",
+    "local-node-rig": "workspace:*",
     "webpack": "~5.98.0"
   },
   "publishOnlyDependencies": {

@@ -580,7 +580,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   private _parseDependencyPath(packagePath: string): string {
     let depPath: string = packagePath;
-    if (this.shrinkwrapFileMajorVersion >= 6) {
+    if (this.shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V6) {
       depPath = this._convertLockfileV6DepPathToV5DepPath(packagePath);
     }
     const pkgInfo: ReturnType<typeof dependencyPathLockfilePreV9.parse> =
@@ -998,7 +998,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     const allDependencies: PackageJsonDependency[] = [...dependencyList, ...devDependencyList];
 
-    if (this.shrinkwrapFileMajorVersion < 6) {
+    if (this.shrinkwrapFileMajorVersion < ShrinkwrapFileMajorVersion.V6) {
       // PNPM <= v7
 
       // Then get the unique package names and map them to package versions.

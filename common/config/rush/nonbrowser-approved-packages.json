@@ -847,6 +847,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "object-hash",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "open",
       "allowedCategories": [ "libraries" ]
     },
