@@ -68,13 +68,6 @@ function createPackageLockfileDependency(options: {
     }
   } else if (result.versionPath.startsWith('/')) {
     result.entryId = versionPath;
-  } else if (result.dependencyType === LfxDependencyKind.Peer) {
-    result.peerDependencyMeta = {
-      name: result.name,
-      version: versionPath,
-      optional: peerDependenciesMeta?.[result.name] ? peerDependenciesMeta[result.name].optional : false
-    };
-    result.entryId = 'Peer: ' + result.name;
   } else {
     // Version 5.4: /@rushstack/m/1.0.0:
     // Version 6.0: /@rushstack/m@1.0.0:
@@ -86,6 +79,14 @@ function createPackageLockfileDependency(options: {
     const versionDelimiter: string = pnpmLockfileVersion < 60 ? '/' : '@';
     result.entryId =
       (pnpmLockfileVersion < 90 ? '/' : '') + result.name + versionDelimiter + result.versionPath;
+  }
+
+  if (result.dependencyType === LfxDependencyKind.Peer) {
+    result.peerDependencyMeta = {
+      name: result.name,
+      version: versionPath,
+      optional: peerDependenciesMeta?.[result.name] ? peerDependenciesMeta[result.name].optional : false
+    };
   }
   return new LfxGraphDependency(result);
 }
@@ -304,7 +305,7 @@ function createPackageLockfileEntry(options: {
 
   const result: ILfxGraphEntryOptions = {
     kind: LfxGraphEntryKind.Package,
-    entryId: '',
+    entryId: rawEntryId,
     rawEntryId: rawEntryId,
     packageJsonFolderPath: '',
     entryPackageName: '',
@@ -579,7 +580,7 @@ export function generateLockfileGraph(lockfileJson: unknown, workspace: IJsonLfx
         });
 
         allEntries.push(lockfileEntry);
-        allEntriesById.set(dependencyKey, lockfileEntry);
+        allEntriesById.set(lockfileEntry.entryId, lockfileEntry);
       }
     }
   }

@@ -57,7 +57,7 @@ Object {
     Object {
       "dependencies": Array [],
       "displayText": "@testPackage/core 1.7.1",
-      "entryId": "",
+      "entryId": "/@testPackage/core/1.7.1",
       "entryPackageName": "@testPackage/core",
       "entryPackageVersion": "1.7.1",
       "entrySuffix": "",
@@ -73,7 +73,7 @@ Object {
     Object {
       "dependencies": Array [],
       "displayText": "@testPackage2/core 1.7.1",
-      "entryId": "",
+      "entryId": "/@testPackage2/core/1.7.1",
       "entryPackageName": "@testPackage2/core",
       "entryPackageVersion": "1.7.1",
       "entrySuffix": "",

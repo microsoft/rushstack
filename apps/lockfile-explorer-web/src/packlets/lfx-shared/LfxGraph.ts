@@ -103,14 +103,19 @@ export class LfxGraphEntry {
   public readonly kind: LfxGraphEntryKind;
 
   /**
-   * A unique (human-readable) identifier for this lockfile entry. For projects, this is just
-   * `Project:` + the package json path for this project.
+   * A unique identifier for this lockfile entry, based on `rawEntryId` but adjusted to be unique for both
+   * project and external package entries.
    */
   public readonly entryId: string;
 
   /**
    * The unique identifier assigned to this project/package in the lockfile.
    * e.g. `/@emotion/core/10.3.1_qjwx5m6wssz3lnb35xwkc3pz6q:`
+   *
+   * @remarks
+   * In the `pnpm-lock.yaml` file, "importers" (workspace projects) and "packages" (external packages)
+   * are tracked separately, so it's not required for their keys to be unique.  `entryId` solves this problem
+   * by adding a `project:` prefix for importers.
    */
   public readonly rawEntryId: string;
 

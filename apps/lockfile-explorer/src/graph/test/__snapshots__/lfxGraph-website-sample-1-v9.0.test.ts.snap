@@ -152,7 +152,7 @@ exports[`lfxGraph-website-sample-1-v9.0 loads a workspace 1`] = `
         resolvedEntryJsonId: 8
         versionPath: 1.0.0
     displayText: '@rushstack/j 1.0.0 [@rushstack/n@2.0.0]'
-    entryId: ''
+    entryId: '@rushstack/j@1.0.0(@rushstack/n@2.0.0)'
     entryPackageName: '@rushstack/j'
     entryPackageVersion: 1.0.0
     entrySuffix: '@rushstack/n@2.0.0'
@@ -173,7 +173,7 @@ exports[`lfxGraph-website-sample-1-v9.0 loads a workspace 1`] = `
         resolvedEntryJsonId: 7
         versionPath: 1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)
     displayText: '@rushstack/k 1.0.0 [@rushstack/m@1.0.0; @rushstack/n@2.0.0]'
-    entryId: ''
+    entryId: '@rushstack/k@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)'
     entryPackageName: '@rushstack/k'
     entryPackageVersion: 1.0.0
     entrySuffix: '@rushstack/m@1.0.0; @rushstack/n@2.0.0'
@@ -190,7 +190,7 @@ exports[`lfxGraph-website-sample-1-v9.0 loads a workspace 1`] = `
       - '@rushstack/n'
   - dependencies:
       - dependencyType: peer
-        entryId: 'Peer: @rushstack/m'
+        entryId: '@rushstack/m@1.0.0'
         name: '@rushstack/m'
         originalSpecifier: ^1.0.0
         peerDependencyMeta:
@@ -199,7 +199,7 @@ exports[`lfxGraph-website-sample-1-v9.0 loads a workspace 1`] = `
           version: 1.0.0
         versionPath: 1.0.0
       - dependencyType: peer
-        entryId: 'Peer: @rushstack/n'
+        entryId: '@rushstack/n@2.0.0'
         name: '@rushstack/n'
         originalSpecifier: ^2.0.0
         peerDependencyMeta:
@@ -208,7 +208,7 @@ exports[`lfxGraph-website-sample-1-v9.0 loads a workspace 1`] = `
           version: 2.0.0
         versionPath: 2.0.0
     displayText: '@rushstack/l 1.0.0 [@rushstack/m@1.0.0; @rushstack/n@2.0.0]'
-    entryId: ''
+    entryId: '@rushstack/l@1.0.0(@rushstack/m@1.0.0)(@rushstack/n@2.0.0)'
     entryPackageName: '@rushstack/l'
     entryPackageVersion: 1.0.0
     entrySuffix: '@rushstack/m@1.0.0; @rushstack/n@2.0.0'
@@ -222,7 +222,7 @@ exports[`lfxGraph-website-sample-1-v9.0 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies: []
     displayText: '@rushstack/m 1.0.0'
-    entryId: ''
+    entryId: '@rushstack/m@1.0.0'
     entryPackageName: '@rushstack/m'
     entryPackageVersion: 1.0.0
     entrySuffix: ''
@@ -236,7 +236,7 @@ exports[`lfxGraph-website-sample-1-v9.0 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies: []
     displayText: '@rushstack/n 2.0.0'
-    entryId: ''
+    entryId: '@rushstack/n@2.0.0'
     entryPackageName: '@rushstack/n'
     entryPackageVersion: 2.0.0
     entrySuffix: ''
@@ -250,7 +250,7 @@ exports[`lfxGraph-website-sample-1-v9.0 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies: []
     displayText: '@rushstack/n 3.0.0'
-    entryId: ''
+    entryId: '@rushstack/n@3.0.0'
     entryPackageName: '@rushstack/n'
     entryPackageVersion: 3.0.0
     entrySuffix: ''

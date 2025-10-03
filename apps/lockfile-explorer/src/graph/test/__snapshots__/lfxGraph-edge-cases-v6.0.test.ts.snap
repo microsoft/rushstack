@@ -119,7 +119,7 @@ exports[`lfxGraph-edge-cases-v6.0 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies: []
     displayText: address 1.2.2
-    entryId: ''
+    entryId: /address@1.2.2
     entryPackageName: address
     entryPackageVersion: 1.2.2
     entrySuffix: ''
@@ -139,7 +139,7 @@ exports[`lfxGraph-edge-cases-v6.0 loads a workspace 1`] = `
         resolvedEntryJsonId: 7
         versionPath: 2.0.2
     displayText: color-convert 3.1.2
-    entryId: ''
+    entryId: /color-convert@3.1.2
     entryPackageName: color-convert
     entryPackageVersion: 3.1.2
     entrySuffix: ''
@@ -152,7 +152,7 @@ exports[`lfxGraph-edge-cases-v6.0 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies: []
     displayText: color-name 2.0.2
-    entryId: ''
+    entryId: /color-name@2.0.2
     entryPackageName: color-name
     entryPackageVersion: 2.0.2
     entrySuffix: ''
@@ -173,7 +173,7 @@ exports[`lfxGraph-edge-cases-v6.0 loads a workspace 1`] = `
         resolvedEntryJsonId: 7
         versionPath: 2.0.2
     displayText: color-string 2.1.2
-    entryId: ''
+    entryId: /color-string@2.1.2
     entryPackageName: color-string
     entryPackageVersion: 2.1.2
     entrySuffix: ''
@@ -202,7 +202,7 @@ exports[`lfxGraph-edge-cases-v6.0 loads a workspace 1`] = `
         resolvedEntryJsonId: 8
         versionPath: 2.1.2
     displayText: color 5.0.2
-    entryId: ''
+    entryId: /color@5.0.2
     entryPackageName: color
     entryPackageVersion: 5.0.2
     entrySuffix: ''
@@ -221,7 +221,7 @@ exports[`lfxGraph-edge-cases-v6.0 loads a workspace 1`] = `
         peerDependencyMeta: {}
         versionPath: link:link-specifier/target-folder
     displayText: has-symbols 1.0.2
-    entryId: ''
+    entryId: /has-symbols@1.0.2
     entryPackageName: has-symbols
     entryPackageVersion: 1.0.2
     entrySuffix: ''
@@ -234,7 +234,7 @@ exports[`lfxGraph-edge-cases-v6.0 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies: []
     displayText: mime-db 1.54.0
-    entryId: ''
+    entryId: /mime-db@1.54.0
     entryPackageName: mime-db
     entryPackageVersion: 1.54.0
     entrySuffix: ''
@@ -247,7 +247,7 @@ exports[`lfxGraph-edge-cases-v6.0 loads a workspace 1`] = `
     transitivePeerDependencies: []
   - dependencies: []
     displayText: punycode 2.3.1
-    entryId: ''
+    entryId: /punycode@2.3.1
     entryPackageName: punycode
     entryPackageVersion: 2.3.1
     entrySuffix: ''
@@ -267,7 +267,7 @@ exports[`lfxGraph-edge-cases-v6.0 loads a workspace 1`] = `
         resolvedEntryJsonId: 12
         versionPath: 2.3.1
     displayText: uri-js 4.4.1
-    entryId: ''
+    entryId: /uri-js@4.4.1
     entryPackageName: uri-js
     entryPackageVersion: 4.4.1
     entrySuffix: ''
