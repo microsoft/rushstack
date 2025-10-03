@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "8.15.8",
+  "pnpmVersion": "9.15.9",
 
   /*[LINE "HYPOTHETICAL"]*/ "npmVersion": "6.14.15",
   /*[LINE "HYPOTHETICAL"]*/ "yarnVersion": "1.9.4",
@@ -42,7 +42,7 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=18.20.3 <19.0.0 || >=20.14.0 <21.0.0",
+  "nodeSupportedVersionRange": ">=22.20.0 <23.0.0",
 
   /**
    * If the version check above fails, Rush will display a message showing the current

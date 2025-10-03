@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Bump the default Node and `pnpm` versions in the `rush init` template.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
