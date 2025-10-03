@@ -35,9 +35,9 @@ const socket = new WebSocket(`wss://${self.location.host}${buildStatusWebSocketP
 
 // Static graph metadata (does not include dynamic status fields)
 const operationsByName: Map<string, IOperationInfo> = new Map();
-// Current execution state for this pass
+// Current execution state for this iteration
 const executionStates: Map<string, IOperationExecutionState> = new Map();
-// Queued states for the next pass (if a pass has been queued but not yet started)
+// Queued states for the next iteration (if an iteration has been scheduled but not yet started)
 const queuedStates: Map<string, IOperationExecutionState> = new Map();
 
 let buildStatus: ReadableOperationStatus = 'Ready';
@@ -85,12 +85,12 @@ socket.addEventListener('message', (ev) => {
       // Manager state only – no operation arrays here
       break;
     }
-    case 'pass-queued': {
+    case 'iteration-scheduled': {
       applyQueuedStates(msg.queuedStates);
       break;
     }
     case 'before-execute': {
-      // Start of a pass: queuedStates become irrelevant until a new pass is queued
+      // Start of an iteration: queuedStates become irrelevant until a new iteration is scheduled
       applyQueuedStates(undefined);
       upsertExecutionStates(msg.executionStates);
       buildStatus = 'Executing';

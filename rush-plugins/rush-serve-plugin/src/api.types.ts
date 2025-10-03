@@ -80,11 +80,11 @@ export interface IOperationExecutionState {
   name: string;
 
   /**
-   * Indicates whether this operation is scheduled to actually run in the current execution pass.
+   * Indicates whether this operation is scheduled to actually run in the current execution iteration.
    * This is derived from the scheduler's decision (the execution record's `enabled` boolean), which
    * takes into account the configured enabled state plus change detection and dependency invalidation.
    */
-  runInThisPass: boolean;
+  runInThisIteration: boolean;
 
   /**
    * If true, this operation currently owns some kind of active resource (e.g. a service or a watch process).
@@ -128,18 +128,18 @@ export interface IRushSessionInfo {
 }
 
 /**
- * Message sent to a WebSocket client at the start of an execution pass.
+ * Message sent to a WebSocket client at the start of an execution iteration.
  */
 // Event (server->client) message interfaces (alphabetically by interface name)
 /**
- * Message sent to a WebSocket client at the end of an execution pass.
+ * Message sent to a WebSocket client at the end of an execution iteration.
  */
 export interface IWebSocketAfterExecuteEventMessage {
   event: 'after-execute';
   executionStates: IOperationExecutionState[];
   status: ReadableOperationStatus;
   /**
-   * The results of the previous execution pass for all operations, if available.
+   * The results of the previous execution iteration for all operations, if available.
    * This mirrors the values() of OperationExecutionManager.lastExecutionResults at the time of emission.
    */
   lastExecutionResults?: IOperationExecutionState[];
@@ -189,9 +189,9 @@ export interface IWebSocketSyncEventMessage {
     parallelism: number;
     debugMode: boolean;
     verbose: boolean;
-    runNextPassBehavior: 'automatic' | 'manual';
+    pauseNextIteration: boolean;
     status: ReadableOperationStatus;
-    hasQueuedPass: boolean;
+    hasScheduledIteration: boolean;
   };
   /**
    * The results of the previous execution pass for all operations, if available.
@@ -209,10 +209,10 @@ export interface IWebSocketSyncOperationsEventMessage {
 }
 
 /**
- * Message sent when a pass is queued with its initial set of queued operations.
+ * Message sent when an iteration is queued with its initial set of queued operations.
  */
 export interface IWebSocketPassQueuedEventMessage {
-  event: 'pass-queued';
+  event: 'iteration-scheduled';
   queuedStates: IOperationExecutionState[];
 }
 
@@ -321,12 +321,12 @@ export interface IWebSocketSetParallelismCommandMessage {
 }
 
 /**
- * Message received from a WebSocket client to set how new execution passes are triggered after invalidations.
- * 'automatic' runs new passes automatically; 'manual' requires an explicit execute command.
+ * Message received from a WebSocket client to set whether new execution iterations are paused when scheduled.
+ * A value of true means iterations are paused (manual mode); false means iterations run automatically.
  */
-export interface IWebSocketSetRunNextPassBehaviorCommandMessage {
-  command: 'set-run-next-pass-behavior';
-  value: 'automatic' | 'manual';
+export interface IWebSocketSetPauseNextIterationCommandMessage {
+  command: 'set-pause-next-iteration';
+  value: boolean;
 }
 
 /**
@@ -361,6 +361,6 @@ export type IWebSocketCommandMessage =
   | IWebSocketSetDebugCommandMessage
   | IWebSocketSetEnabledStatesCommandMessage
   | IWebSocketSetParallelismCommandMessage
-  | IWebSocketSetRunNextPassBehaviorCommandMessage
+  | IWebSocketSetPauseNextIterationCommandMessage
   | IWebSocketSetVerboseCommandMessage
   | IWebSocketSyncCommandMessage;

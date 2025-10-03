@@ -14,7 +14,8 @@ import {
   OperationStatus,
   type ILogFilePaths,
   type RushConfiguration,
-  type IOperationExecutionManager
+  type IOperationExecutionManager,
+  type IOperationExecutionIterationOptions
 } from '@rushstack/rush-sdk';
 import { type ITerminalChunk, TerminalChunkKind, TerminalWritable } from '@rushstack/terminal';
 
@@ -183,7 +184,7 @@ export function tryEnableBuildStatusWebSocketServer(
     const { packageName } = associatedProject;
     return {
       name,
-      runInThisPass: record.enabled,
+      runInThisIteration: record.enabled,
       isActive: !!runner.isActive,
       status: readableStatusFromStatus[record.status],
       startTime: record.stopwatch.startTime,
@@ -242,9 +243,9 @@ export function tryEnableBuildStatusWebSocketServer(
       parallelism: executionManager.parallelism,
       debugMode: executionManager.debugMode,
       verbose: !executionManager.quietMode,
-      runNextPassBehavior: executionManager.runNextPassBehavior,
+      pauseNextIteration: executionManager.pauseNextIteration,
       status: buildStatus,
-      hasQueuedPass: executionManager.hasQueuedPass
+      hasScheduledIteration: executionManager.hasScheduledIteration
     };
   }
 
@@ -261,9 +262,9 @@ export function tryEnableBuildStatusWebSocketServer(
         parallelism: 1,
         debugMode: false,
         verbose: true,
-        runNextPassBehavior: 'automatic',
+        pauseNextIteration: false,
         status: buildStatus,
-        hasQueuedPass: false
+        hasScheduledIteration: false
       },
       lastExecutionResults: executionManager
         ? convertToExecutionStateArray(executionManager.lastExecutionResults.values())
@@ -278,10 +279,13 @@ export function tryEnableBuildStatusWebSocketServer(
 
     manager.addTerminalDestination(new WebSocketTerminalWritable(webSockets));
 
-    hooks.beforeExecuteOperationsAsync.tap(
+    hooks.beforeExecuteIterationAsync.tap(
       PLUGIN_NAME,
-      (operationsToExecute: ReadonlyMap<Operation, IOperationExecutionResult>): void => {
-        // Clear queuedStates when the pass begins executing
+      (
+        operationsToExecute: ReadonlyMap<Operation, IOperationExecutionResult>,
+        iterationOptions: IOperationExecutionIterationOptions
+      ): void => {
+        // Clear queuedStates when the iteration begins executing
         queuedStates = undefined;
         for (const [operation, result] of operationsToExecute) {
           operationStates.set(operation.name, result);
@@ -296,7 +300,7 @@ export function tryEnableBuildStatusWebSocketServer(
       }
     );
 
-    hooks.afterExecuteOperationsAsync.tap(
+    hooks.afterExecuteIterationAsync.tap(
       PLUGIN_NAME,
       (
         status: OperationStatus,
@@ -332,13 +336,13 @@ export function tryEnableBuildStatusWebSocketServer(
       }
     );
 
-    // Capture queued operations for next pass
-    hooks.onPassQueued.tap(
+    // Capture queued operations for next iteration
+    hooks.onIterationScheduled.tap(
       PLUGIN_NAME,
       (queuedMap: ReadonlyMap<Operation, IOperationExecutionResult>): void => {
         queuedStates = Array.from(queuedMap.values());
         const message: IWebSocketPassQueuedEventMessage = {
-          event: 'pass-queued',
+          event: 'iteration-scheduled',
           queuedStates: convertToExecutionStateArray(queuedStates)
         };
         sendWebSocketMessage(message);
@@ -441,7 +445,7 @@ export function tryEnableBuildStatusWebSocketServer(
           }
 
           case 'abort-execution': {
-            void executionManager?.abortCurrentPassAsync();
+            void executionManager?.abortCurrentIterationAsync();
             break;
           }
 
@@ -457,8 +461,8 @@ export function tryEnableBuildStatusWebSocketServer(
           case 'execute': {
             if (executionManager) {
               const definedExecutionManager: IOperationExecutionManager = executionManager;
-              void definedExecutionManager.queuePassAsync({}).then(() => {
-                return definedExecutionManager.executeQueuedPassAsync();
+              void definedExecutionManager.scheduleIterationAsync({}).then(() => {
+                return definedExecutionManager.executeScheduledIterationAsync();
               });
             }
             break;
@@ -474,12 +478,9 @@ export function tryEnableBuildStatusWebSocketServer(
             break;
           }
 
-          case 'set-run-next-pass-behavior': {
-            if (
-              executionManager &&
-              (parsedMessage.value === 'automatic' || parsedMessage.value === 'manual')
-            ) {
-              executionManager.runNextPassBehavior = parsedMessage.value;
+          case 'set-pause-next-iteration': {
+            if (executionManager && typeof parsedMessage.value === 'boolean') {
+              executionManager.pauseNextIteration = parsedMessage.value;
             }
             break;
           }
