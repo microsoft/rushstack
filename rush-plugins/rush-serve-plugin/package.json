@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-serve-plugin",
-  "version": "5.158.1",
+  "version": "5.159.0",
   "description": "A Rush plugin that hooks into a rush action and serves output folders from all projects in the repository.",
   "license": "MIT",
   "repository": {
