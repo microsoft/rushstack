@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the `$schema` property is dropped from `common/config/rush/pnpm-config.json` when running `rush-pnpm patch-commit ...`",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
