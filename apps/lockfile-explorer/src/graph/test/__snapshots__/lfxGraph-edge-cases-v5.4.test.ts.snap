@@ -3,14 +3,14 @@
 exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
 "entries:
   - dependencies:
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: /mime-db/1.54.0
         name: mime-db
         originalSpecifier: ^1.52.0
         peerDependencyMeta: {}
         resolvedEntryJsonId: 11
         versionPath: 1.54.0
-      - dependencyType: dev
+      - dependencyKind: dev
         entryId: /color-string/2.1.2
         name: color-string
         originalSpecifier: ^2.1.2
@@ -29,7 +29,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
     referrerJsonIds: []
     transitivePeerDependencies: []
   - dependencies:
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: /color/5.0.2
         name: color
         originalSpecifier: ^5.0.2
@@ -48,7 +48,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
     referrerJsonIds: []
     transitivePeerDependencies: []
   - dependencies:
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: /color-string/2.1.2
         name: color-string
         originalSpecifier: ^2.1.2
@@ -67,14 +67,14 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
     referrerJsonIds: []
     transitivePeerDependencies: []
   - dependencies:
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: /has-symbols/1.0.2
         name: has-symbols
         originalSpecifier: 1.0.2
         peerDependencyMeta: {}
         resolvedEntryJsonId: 10
         versionPath: 1.0.2
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: project:packages/link-specifier/linker/packages/link-specifier/target-folder
         name: target-folder
         originalSpecifier: link:packages/link-specifier/target-folder
@@ -92,14 +92,14 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
     referrerJsonIds: []
     transitivePeerDependencies: []
   - dependencies:
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: /address/1.2.2
         name: address
         originalSpecifier: ^1.0.0
         peerDependencyMeta: {}
         resolvedEntryJsonId: 5
         versionPath: 1.2.2
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: /uri-js/4.4.1
         name: uri-js
         originalSpecifier: ^4.0.0
@@ -131,7 +131,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - 4
     transitivePeerDependencies: []
   - dependencies:
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: /color-name/2.0.2
         name: color-name
         originalSpecifier: ''
@@ -165,7 +165,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - 8
     transitivePeerDependencies: []
   - dependencies:
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: /color-name/2.0.2
         name: color-name
         originalSpecifier: ''
@@ -187,14 +187,14 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - 9
     transitivePeerDependencies: []
   - dependencies:
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: /color-convert/3.1.2
         name: color-convert
         originalSpecifier: ''
         peerDependencyMeta: {}
         resolvedEntryJsonId: 6
         versionPath: 3.1.2
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: /color-string/2.1.2
         name: color-string
         originalSpecifier: ''
@@ -214,7 +214,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - 1
     transitivePeerDependencies: []
   - dependencies:
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: ''
         name: target-folder
         originalSpecifier: ''
@@ -259,7 +259,7 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
       - 13
     transitivePeerDependencies: []
   - dependencies:
-      - dependencyType: regular
+      - dependencyKind: regular
         entryId: /punycode/2.3.1
         name: punycode
         originalSpecifier: ''

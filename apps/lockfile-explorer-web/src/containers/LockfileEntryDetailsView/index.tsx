@@ -180,7 +180,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
               package.json spec:{' '}
             </Text>
             <Text type="span">
-              {inspectDependency.dependencyType === LfxDependencyKind.Peer
+              {inspectDependency.dependencyKind === LfxDependencyKind.Peer
                 ? `"${inspectDependency.peerDependencyMeta.version}" ${
                     inspectDependency.peerDependencyMeta.optional ? 'Optional' : 'Required'
                   } Peer`
@@ -204,7 +204,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
   const renderPeerDependencies = (): JSX.Element | ReactNull => {
     if (!selectedEntry) return ReactNull;
-    const peerDeps = selectedEntry.dependencies.filter((d) => d.dependencyType === LfxDependencyKind.Peer);
+    const peerDeps = selectedEntry.dependencies.filter((d) => d.dependencyKind === LfxDependencyKind.Peer);
     if (!peerDeps.length) {
       return (
         <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
@@ -212,7 +212,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
         </div>
       );
     }
-    if (!inspectDependency || inspectDependency.dependencyType !== LfxDependencyKind.Peer) {
+    if (!inspectDependency || inspectDependency.dependencyKind !== LfxDependencyKind.Peer) {
       return (
         <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
           <Text type="h5">Select a peer dependency to view its influencers</Text>
@@ -337,7 +337,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                 >
                   <Text type="h5" bold>
                     Name: {dependency.name}{' '}
-                    {dependency.dependencyType === LfxDependencyKind.Peer
+                    {dependency.dependencyKind === LfxDependencyKind.Peer
                       ? `${
                           dependency.peerDependencyMeta.optional ? '(Optional)' : '(Non-optional)'
                         } Peer Dependency`

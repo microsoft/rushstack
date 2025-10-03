@@ -11,7 +11,7 @@ export interface ILfxGraphDependencyOptions {
   entryId: string;
 
   originalSpecifier: string;
-  dependencyType: LfxDependencyKind;
+  dependencyKind: LfxDependencyKind;
   peerDependencyMeta: IJsonPeerDependencyMeta;
 
   containingEntry: LfxGraphEntry;
@@ -60,7 +60,7 @@ export class LfxGraphDependency {
    * obtained from the package.json files.
    */
   public readonly originalSpecifier: string;
-  public readonly dependencyType: LfxDependencyKind;
+  public readonly dependencyKind: LfxDependencyKind;
   public readonly peerDependencyMeta: IJsonPeerDependencyMeta;
 
   public readonly containingEntry: LfxGraphEntry;
@@ -71,7 +71,7 @@ export class LfxGraphDependency {
     this.versionPath = options.versionPath;
     this.entryId = options.entryId;
     this.originalSpecifier = options.originalSpecifier;
-    this.dependencyType = options.dependencyType;
+    this.dependencyKind = options.dependencyKind;
     this.peerDependencyMeta = options.peerDependencyMeta;
 
     this.containingEntry = options.containingEntry;

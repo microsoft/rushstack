@@ -16,7 +16,7 @@ Object {
     Object {
       "dependencies": Array [
         Object {
-          "dependencyType": "regular",
+          "dependencyKind": "regular",
           "entryId": "/@testPackage/core/1.7.1",
           "name": "@testPackage/core",
           "originalSpecifier": "1.7.1",
@@ -29,7 +29,7 @@ Object {
           "versionPath": "1.7.1",
         },
         Object {
-          "dependencyType": "regular",
+          "dependencyKind": "regular",
           "entryId": "/@testPackage2/core/1.7.1",
           "name": "@testPackage2/core",
           "originalSpecifier": "1.7.1",

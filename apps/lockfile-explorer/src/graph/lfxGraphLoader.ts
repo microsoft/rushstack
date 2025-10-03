@@ -34,7 +34,7 @@ function createPackageLockfileDependency(options: {
     name,
     versionPath,
     originalSpecifier,
-    kind: dependencyType,
+    kind: dependencyKind,
     containingEntry,
     peerDependenciesMeta,
     pnpmLockfileVersion
@@ -45,7 +45,7 @@ function createPackageLockfileDependency(options: {
     versionPath,
     entryId: '',
     originalSpecifier,
-    dependencyType,
+    dependencyKind,
     peerDependencyMeta: {},
     containingEntry
   };
@@ -81,7 +81,7 @@ function createPackageLockfileDependency(options: {
       (pnpmLockfileVersion < 90 ? '/' : '') + result.name + versionDelimiter + result.versionPath;
   }
 
-  if (result.dependencyType === LfxDependencyKind.Peer) {
+  if (result.dependencyKind === LfxDependencyKind.Peer) {
     result.peerDependencyMeta = {
       name: result.name,
       version: versionPath,
@@ -589,7 +589,7 @@ export function generateLockfileGraph(lockfileJson: unknown, workspace: IJsonLfx
   for (const entry of allEntries) {
     for (const dependency of entry.dependencies) {
       // Peer dependencies do not have a matching entry
-      if (dependency.dependencyType === LfxDependencyKind.Peer) {
+      if (dependency.dependencyKind === LfxDependencyKind.Peer) {
         continue;
       }
 

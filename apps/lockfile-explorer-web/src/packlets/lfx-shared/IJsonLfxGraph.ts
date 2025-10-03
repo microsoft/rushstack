@@ -21,7 +21,7 @@ export interface IJsonLfxDependency {
   versionPath: string;
   entryId: string;
   originalSpecifier: string;
-  dependencyType: LfxDependencyKind;
+  dependencyKind: LfxDependencyKind;
   peerDependencyMeta: IJsonPeerDependencyMeta;
 
   resolvedEntryJsonId?: number;
