@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-vscode-extension-rig",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A rig package for VSCode Extensions that build using Heft",
   "license": "MIT",
   "scripts": {
@@ -13,7 +13,7 @@
     "directory": "rigs/heft-vscode-extension-rig"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^1.0.0"
+    "@rushstack/heft": "^1.1.0"
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",

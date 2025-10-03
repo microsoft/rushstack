@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/terminal",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "description": "User interface primitives for console applications",
   "main": "lib/index.js",
   "typings": "dist/terminal.d.ts",

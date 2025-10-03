@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rig-package",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "A system for sharing tool configurations between projects without duplicating config files.",
   "main": "lib/index.js",
   "typings": "dist/rig-package.d.ts",
