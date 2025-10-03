@@ -16,9 +16,9 @@ export declare interface _PreapprovedInterface {
 
 /** @internal @preapproved */
 export declare namespace _PreapprovedNamespace {
-    export class X {
+    class X {
     }
-    export function f(): void;
+    function f(): void;
 }
 
 export { }

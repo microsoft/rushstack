@@ -83,7 +83,7 @@ export enum DocEnumNamespaceMerge {
 
 // @public
 export namespace DocEnumNamespaceMerge {
-    export function exampleFunction(): void;
+    function exampleFunction(): void;
 }
 
 // @public
@@ -178,8 +178,8 @@ export interface IDocInterface7 {
 
 // @public
 export namespace OuterNamespace {
-    export namespace InnerNamespace {
-        export function nestedFunction(x: number): number;
+    namespace InnerNamespace {
+        function nestedFunction(x: number): number;
     }
     let nestedVariable: boolean;
 }

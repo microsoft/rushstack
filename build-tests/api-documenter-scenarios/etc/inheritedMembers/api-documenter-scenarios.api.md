@@ -76,7 +76,7 @@ export type IInterfaceLikeTypeAlias = {
 // @public (undocumented)
 export namespace Namespace1 {
     // (undocumented)
-    export class Class3 {
+    class Class3 {
         someMethod(x: boolean | string): void;
         someOverload(x: boolean): void;
         someOverload(x: string): void;
