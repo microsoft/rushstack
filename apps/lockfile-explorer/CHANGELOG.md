@@ -1,6 +1,17 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Tue, 30 Sep 2025 23:57:45 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Oct 2025 17:28:43 GMT and should not be manually modified.
+
+## 2.0.0
+Fri, 03 Oct 2025 17:28:43 GMT
+
+### Breaking changes
+
+- Add support for PNPM 10 lockfile format
+
+### Patches
+
+- Numerous improvements to the lockfile parser
 
 ## 1.8.1
 Tue, 30 Sep 2025 23:57:45 GMT

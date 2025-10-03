@@ -2,6 +2,23 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "2.0.0",
+      "tag": "@rushstack/lockfile-explorer_v2.0.0",
+      "date": "Fri, 03 Oct 2025 17:28:43 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Add support for PNPM 10 lockfile format"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Numerous improvements to the lockfile parser"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.1",
       "tag": "@rushstack/lockfile-explorer_v1.8.1",
       "date": "Tue, 30 Sep 2025 23:57:45 GMT",
