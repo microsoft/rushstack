@@ -3,6 +3,13 @@
 exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
 "entries:
   - dependencies:
+      - dependencyType: regular
+        entryId: /mime-db/1.54.0
+        name: mime-db
+        originalSpecifier: ''
+        peerDependencyMeta: {}
+        resolvedEntryJsonId: 11
+        versionPath: 1.54.0
       - dependencyType: dev
         entryId: /color-string/2.1.2
         name: color-string
@@ -235,7 +242,8 @@ exports[`lfxGraph-edge-cases-v5.4 loads a workspace 1`] = `
     kind: 2
     packageJsonFolderPath: node_modules/.pnpm/mime-db@1.54.0/node_modules/mime-db
     rawEntryId: /mime-db/1.54.0
-    referrerJsonIds: []
+    referrerJsonIds:
+      - 0
     transitivePeerDependencies: []
   - dependencies: []
     displayText: punycode 2.3.1
