@@ -17,7 +17,7 @@ export interface IParserTestInstance {
 }
 
 /**
- * See `__mocks__/child_process.js`.
+ * See `./mock_child_process`.
  */
 export interface ISpawnMockConfig {
   emitError: boolean;
@@ -35,7 +35,7 @@ export interface IChildProcessModuleMock {
 
 /**
  * Configure the `child_process` `spawn` mock for these tests. This relies on the mock implementation
- * in `__mocks__/child_process.js`.
+ * in `mock_child_process`.
  */
 export function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
   const cpMocked: IChildProcessModuleMock = require('node:child_process');
