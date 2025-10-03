@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.160.1",
+      "tag": "@microsoft/rush_v5.160.1",
+      "date": "Fri, 03 Oct 2025 22:25:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue with validation of the `pnpm-lock.yaml` `packageExtensionsChecksum` field in pnpm v10."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.160.0",
       "tag": "@microsoft/rush_v5.160.0",
       "date": "Fri, 03 Oct 2025 20:10:21 GMT",

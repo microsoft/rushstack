@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 03 Oct 2025 20:10:21 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Oct 2025 22:25:25 GMT and should not be manually modified.
+
+## 5.160.1
+Fri, 03 Oct 2025 22:25:25 GMT
+
+### Updates
+
+- Fix an issue with validation of the `pnpm-lock.yaml` `packageExtensionsChecksum` field in pnpm v10.
 
 ## 5.160.0
 Fri, 03 Oct 2025 20:10:21 GMT
