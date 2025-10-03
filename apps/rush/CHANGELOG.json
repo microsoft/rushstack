@@ -2,6 +2,53 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.159.0",
+      "tag": "@microsoft/rush_v5.159.0",
+      "date": "Fri, 03 Oct 2025 00:50:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix to allow Bridge Cache plugin be installed but not used when build cache disabled; add cache key to terminal logs"
+          },
+          {
+            "comment": "Add `IOperationExecutionResult.problemCollector` API which matches and collects VS Code style problem matchers"
+          },
+          {
+            "comment": "Replace uuid package dependency with Node.js built-in crypto.randomUUID"
+          },
+          {
+            "comment": "[rush-resolver-cache] Ensure that the correct version of rush-lib is loaded when the global version doesn't match the repository version."
+          },
+          {
+            "comment": "Upgraded `js-yaml` dependency"
+          },
+          {
+            "comment": "Enhance logging for IPC mode by allowing IPC runners to report detailed reasons for rerun, e.g. specific changed files."
+          },
+          {
+            "comment": "Support aborting execution in phased commands. The CLI allows aborting via the \"a\" key in watch mode, and it is available to plugin authors for more advanced scenarios."
+          },
+          {
+            "comment": "[rush-serve-plugin] Support aborting execution via Web Socket. Include information about the dependencies of operations in messages to the client.."
+          },
+          {
+            "comment": "Add a logging message after the 'Trying to find \"tar\" binary' message when the binary is found."
+          },
+          {
+            "comment": "Upgrade inquirer to 8.2.7 in rush-lib"
+          },
+          {
+            "comment": "Bump \"express\" to 4.21.1 to address reported vulnerabilities in 4.20.0."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "[rush-azure-storage-build-cache-plugin] Trim access token output in AdoCodespacesAuthCredential"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.158.1",
       "tag": "@microsoft/rush_v5.158.1",
       "date": "Fri, 29 Aug 2025 00:08:18 GMT",

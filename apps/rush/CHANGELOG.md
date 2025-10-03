@@ -1,6 +1,27 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 29 Aug 2025 00:08:18 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Oct 2025 00:50:08 GMT and should not be manually modified.
+
+## 5.159.0
+Fri, 03 Oct 2025 00:50:08 GMT
+
+### Patches
+
+- [rush-azure-storage-build-cache-plugin] Trim access token output in AdoCodespacesAuthCredential
+
+### Updates
+
+- Fix to allow Bridge Cache plugin be installed but not used when build cache disabled; add cache key to terminal logs
+- Add `IOperationExecutionResult.problemCollector` API which matches and collects VS Code style problem matchers
+- Replace uuid package dependency with Node.js built-in crypto.randomUUID
+- [rush-resolver-cache] Ensure that the correct version of rush-lib is loaded when the global version doesn't match the repository version.
+- Upgraded `js-yaml` dependency
+- Enhance logging for IPC mode by allowing IPC runners to report detailed reasons for rerun, e.g. specific changed files.
+- Support aborting execution in phased commands. The CLI allows aborting via the "a" key in watch mode, and it is available to plugin authors for more advanced scenarios.
+- [rush-serve-plugin] Support aborting execution via Web Socket. Include information about the dependencies of operations in messages to the client..
+- Add a logging message after the 'Trying to find "tar" binary' message when the binary is found.
+- Upgrade inquirer to 8.2.7 in rush-lib
+- Bump "express" to 4.21.1 to address reported vulnerabilities in 4.20.0.
 
 ## 5.158.1
 Fri, 29 Aug 2025 00:08:18 GMT
