@@ -1,8 +1,8 @@
 {
   "changes": [
     {
-      "comment": "",
-      "type": "none",
+      "comment": "Normalize import of builtin modules to use the `node:` protocol.",
+      "type": "minor",
       "packageName": "@rushstack/heft-api-extractor-plugin"
     }
   ],
