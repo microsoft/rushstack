@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
 
 import yaml = require('js-yaml');
+
 import {
   JsonFile,
   JsonSchema,
@@ -50,6 +51,7 @@ import {
   Navigation,
   Meaning
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+
 import type {
   IYamlApiFile,
   IYamlItem,

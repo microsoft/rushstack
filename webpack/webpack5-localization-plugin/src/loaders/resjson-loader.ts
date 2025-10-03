@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
+
 import { parseResJson } from '@rushstack/localization-utilities';
 
 import { createLoader, type IBaseLocLoaderOptions } from './LoaderFactory';

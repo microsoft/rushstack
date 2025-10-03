@@ -4,13 +4,14 @@
 // Load the Jest patches before anything else loads
 import './patches/jestWorkerPatch';
 
-import type { EventEmitter } from 'events';
-import * as path from 'path';
+import type { EventEmitter } from 'node:events';
+import * as path from 'node:path';
 
 import type { AggregatedResult } from '@jest/reporters';
 import type { Config } from '@jest/types';
 import { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPlugin } from 'jest-resolve';
 import { mergeWith, isObject } from 'lodash';
+
 import type {
   HeftConfiguration,
   IScopedLogger,

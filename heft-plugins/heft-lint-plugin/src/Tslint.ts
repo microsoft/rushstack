@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import * as crypto from 'crypto';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
+
 import type * as TTslint from 'tslint';
 import type * as TTypescript from 'typescript';
+
 import { Import, JsonFile, FileError, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { HeftConfiguration } from '@rushstack/heft';

@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import path from 'node:path';
+
 import { createFsFromVolume, Volume, type IFs } from 'memfs';
-import path from 'path';
 import type { StatsCompilation as WebpackStatsCompilation } from 'webpack';
 import webpackMerge from 'webpack-merge';
-
 import type { MultiStats, Stats, Configuration, Compiler, StatsError, OutputFileSystem } from 'webpack';
 
 /**

@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
+
 import serialize from 'serialize-javascript';
 import type { MinifyOptions } from 'terser';
 

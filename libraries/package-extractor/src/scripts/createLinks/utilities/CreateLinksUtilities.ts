@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem } from '@rushstack/node-core-library';
+
 import type { IExtractorMetadataJson } from '../../../PackageExtractor';
 import { EXTRACTOR_METADATA_FILENAME } from '../../../PathConstants';
 

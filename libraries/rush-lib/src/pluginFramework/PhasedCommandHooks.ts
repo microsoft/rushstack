@@ -9,6 +9,7 @@ import {
   SyncHook,
   SyncWaterfallHook
 } from 'tapable';
+
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';

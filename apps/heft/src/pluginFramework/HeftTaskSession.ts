@@ -3,6 +3,8 @@
 
 import { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
 
+import { InternalError } from '@rushstack/node-core-library';
+
 import type { MetricsCollector } from '../metrics/MetricsCollector';
 import type { IScopedLogger } from './logging/ScopedLogger';
 import type { HeftTask } from './HeftTask';
@@ -12,7 +14,6 @@ import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
 import type { GlobFn, WatchGlobFn } from '../plugins/FileGlobSpecifier';
-import { InternalError } from '@rushstack/node-core-library';
 import type { IWatchFileSystem } from '../utilities/WatchFileSystemAdapter';
 
 /**

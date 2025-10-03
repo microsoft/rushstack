@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { ChildProcess } from 'node:child_process';
+
 import { Async, Executable, JsonFile } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 import { DependencyType, RushConfiguration } from '@microsoft/rush-lib';
 import { CommandLineAction } from '@rushstack/ts-command-line';
-import type { ChildProcess } from 'child_process';
 
 export class BumpCyclicsAction extends CommandLineAction {
   public constructor() {

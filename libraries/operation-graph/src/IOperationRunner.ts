@@ -1,9 +1,8 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
 import type { OperationStatus } from './OperationStatus';
 import type { OperationError } from './OperationError';
-
 import type { Stopwatch } from './Stopwatch';
 
 /**

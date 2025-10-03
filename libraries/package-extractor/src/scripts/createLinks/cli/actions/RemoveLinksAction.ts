@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
+
 import { Async, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { CommandLineAction } from '@rushstack/ts-command-line';
+
 import type { IExtractorMetadataJson } from '../../../../PackageExtractor';
 import { getExtractorMetadataAsync } from '../../utilities/CreateLinksUtilities';
 import { TARGET_ROOT_FOLDER, MAX_CONCURRENCY } from '../../utilities/constants';

@@ -2,13 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+
 import * as tsdoc from '@microsoft/tsdoc';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import type { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import type { AstDeclaration } from '../analyzer/AstDeclaration';
 import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
-import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';
 import { ResolverFailure } from '../analyzer/AstReferenceResolver';

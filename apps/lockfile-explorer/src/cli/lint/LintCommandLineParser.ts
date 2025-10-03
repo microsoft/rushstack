@@ -3,9 +3,10 @@
 
 import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 import { CommandLineParser } from '@rushstack/ts-command-line';
+import { type IPackageJson, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
+
 import { InitAction } from './actions/InitAction';
 import { CheckAction } from './actions/CheckAction';
-import { type IPackageJson, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 
 const LINT_TOOL_FILENAME: 'lockfile-lint' = 'lockfile-lint';
 

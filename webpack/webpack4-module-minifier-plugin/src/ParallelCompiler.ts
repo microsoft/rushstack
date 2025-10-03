@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import os from 'os';
-import { resolve } from 'path';
-import type { Worker } from 'worker_threads';
+import os from 'node:os';
+import { resolve } from 'node:path';
+import type { Worker } from 'node:worker_threads';
 
 import type { Configuration } from 'webpack';
 

@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Executable, FileSystem, Text } from '@rushstack/node-core-library';
-import type { ITerminal } from '@rushstack/terminal';
 import type * as child_process from 'node:child_process';
 import * as path from 'node:path';
 import * as os from 'node:os';
+
+import type { ITerminal } from '@rushstack/terminal';
+import { Executable, FileSystem, Text } from '@rushstack/node-core-library';
 
 export interface IRunResult {
   stdout: string[];

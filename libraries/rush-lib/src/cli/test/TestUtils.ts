@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AlreadyExistsBehavior, FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
+
 import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
 import { FlagFile } from '../../api/FlagFile';
 import { RushConstants } from '../../logic/RushConstants';
@@ -16,7 +17,7 @@ export interface IParserTestInstance {
 }
 
 /**
- * See `__mocks__/child_process.js`.
+ * See `./mock_child_process`.
  */
 export interface ISpawnMockConfig {
   emitError: boolean;
@@ -34,10 +35,10 @@ export interface IChildProcessModuleMock {
 
 /**
  * Configure the `child_process` `spawn` mock for these tests. This relies on the mock implementation
- * in `__mocks__/child_process.js`.
+ * in `mock_child_process`.
  */
 export function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
-  const cpMocked: IChildProcessModuleMock = require('child_process');
+  const cpMocked: IChildProcessModuleMock = require('node:child_process');
   cpMocked.__setSpawnMockConfig(options);
 
   const spawnMock: jest.Mock = cpMocked.spawn;

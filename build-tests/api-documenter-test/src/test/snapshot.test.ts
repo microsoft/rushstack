@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+
 import {
   Async,
   Executable,
@@ -7,7 +8,7 @@ import {
   type FolderItem,
   PackageJsonLookup
 } from '@rushstack/node-core-library';
-import process from 'process';
+import process from 'node:process';
 
 const PROJECT_FOLDER: string | undefined = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname);
 const API_DOCUMENTER_PATH: string = require.resolve('@microsoft/api-documenter/lib/start');

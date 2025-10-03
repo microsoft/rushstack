@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { TSESTree, TSESLint } from '@typescript-eslint/utils';
+
 import {
   parseImportSpecifierFromExpression,
   serializeImportSpecifier,

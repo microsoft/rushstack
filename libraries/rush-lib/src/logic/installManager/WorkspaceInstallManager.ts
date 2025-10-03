@@ -1,9 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+import { createHash } from 'node:crypto';
+
 import * as semver from 'semver';
 import yaml from 'js-yaml';
+
 import {
   FileSystem,
   FileConstants,
@@ -13,7 +16,7 @@ import {
   Path,
   Sort
 } from '@rushstack/node-core-library';
-import { createHash } from 'crypto';
+import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
@@ -38,7 +41,6 @@ import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../a
 import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
 import type { Subspace } from '../../api/Subspace';
-import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { FlagFile } from '../../api/FlagFile';
 import { Stopwatch } from '../../utilities/Stopwatch';

@@ -5,7 +5,7 @@
   "description": "An ESLint configuration consumed projects inside the rushstack repo.",
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:lite-build": "heft build --clean"
   },
   "peerDependencies": {
     "eslint": "^9.25.1",
@@ -26,7 +26,7 @@
     "eslint-import-resolver-node": "0.3.9",
     "eslint-plugin-header": "~3.1.1",
     "eslint-plugin-headers": "~1.2.1",
-    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-import": "2.32.0",
     "eslint-plugin-jsdoc": "50.6.11",
     "eslint-plugin-react-hooks": "5.2.0"
   }

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import React from 'react';
-
 import { Highlight, themes } from 'prism-react-renderer';
 
 // Generate this list by doing console.log(Object.keys(Prism.languages))

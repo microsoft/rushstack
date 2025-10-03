@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { StdioSummarizer, IProblemCollector } from '@rushstack/terminal';
+
 import type { OperationStatus } from './OperationStatus';
 import type { Operation } from './Operation';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';

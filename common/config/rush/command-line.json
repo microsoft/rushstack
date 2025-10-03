@@ -14,14 +14,14 @@
     {
       "commandKind": "phased",
       "name": "build",
-      "phases": ["_phase:build"]
+      "phases": ["_phase:lite-build", "_phase:build"]
     },
 
     {
       "commandKind": "phased",
       "name": "test",
       "summary": "Builds all projects and runs their tests.",
-      "phases": ["_phase:build", "_phase:test"],
+      "phases": ["_phase:lite-build", "_phase:build", "_phase:test"],
       "enableParallelism": true,
       "incremental": true
     },
@@ -30,7 +30,7 @@
       "commandKind": "phased",
       "name": "retest",
       "summary": "Rebuilds all projects and reruns their tests.",
-      "phases": ["_phase:build", "_phase:test"],
+      "phases": ["_phase:lite-build", "_phase:build", "_phase:test"],
       "enableParallelism": true,
       "incremental": false
     },
@@ -45,12 +45,12 @@
       "enableParallelism": true,
       "incremental": true,
       // Initial execution only uses the build phase so that all dependencies of watch phases have been built
-      "phases": ["_phase:build"],
+      "phases": ["_phase:lite-build", "_phase:build"],
       "watchOptions": {
         // Act as though `--watch` is always passed. If false, adds support for passing `--watch`.
         "alwaysWatch": true,
         // During watch recompilation run both build and test for affected projects
-        "watchPhases": ["_phase:build", "_phase:test"]
+        "watchPhases": ["_phase:lite-build", "_phase:build", "_phase:test"]
       }
     },
     // {
@@ -234,19 +234,29 @@
 
   "phases": [
     {
+      // Used for very simple builds that don't support CLI arguments like `--production` or `--fix`
+      "name": "_phase:lite-build",
+      "dependencies": {
+        "upstream": ["_phase:lite-build", "_phase:build"]
+      },
+      "missingScriptBehavior": "silent",
+      "allowWarningsOnSuccess": false
+    },
+    {
       "name": "_phase:build",
       "dependencies": {
+        "self": ["_phase:lite-build"],
         "upstream": ["_phase:build"]
       },
-      "ignoreMissingScript": true,
+      "missingScriptBehavior": "log",
       "allowWarningsOnSuccess": false
     },
     {
       "name": "_phase:test",
       "dependencies": {
-        "self": ["_phase:build"]
+        "self": ["_phase:lite-build", "_phase:build"]
       },
-      "ignoreMissingScript": true,
+      "missingScriptBehavior": "silent",
       "allowWarningsOnSuccess": false
     }
   ],

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as readline from 'readline';
-import * as process from 'process';
+import * as readline from 'node:readline';
+import * as process from 'node:process';
 
 import { AnsiEscape, Colorize } from '@rushstack/terminal';
 

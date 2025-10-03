@@ -4,11 +4,13 @@
 import path from 'node:path';
 import { createHash, type Hash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
+
 import type * as TTypescript from 'typescript';
 import type * as TEslint from 'eslint';
 import type * as TEslintLegacy from 'eslint-8';
 import * as semver from 'semver';
 import stableStringify from 'json-stable-stringify-without-jsonify';
+
 import { FileError, FileSystem } from '@rushstack/node-core-library';
 import type { HeftConfiguration } from '@rushstack/heft';
 

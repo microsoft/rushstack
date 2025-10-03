@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash } from 'node:crypto';
+
 import type { Compiler, Plugin } from 'webpack';
 import type webpack from 'webpack';
 import type { ReplaceSource } from 'webpack-sources';
-import { createHash } from 'crypto';
 import type { TapOptions } from 'tapable';
 import RequestShortener from 'webpack/lib/RequestShortener';
 

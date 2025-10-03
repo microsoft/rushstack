@@ -1,6 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+import * as process from 'node:process';
+
+import * as Resolve from 'resolve';
+
+import { Colorize } from '@rushstack/terminal';
 import {
   FileSystem,
   type IPackageJson,
@@ -8,11 +14,6 @@ import {
   JsonFile,
   PackageName
 } from '@rushstack/node-core-library';
-import { Colorize } from '@rushstack/terminal';
-
-import * as path from 'path';
-import * as process from 'process';
-import * as Resolve from 'resolve';
 
 const jsExtensions: string[] = ['.js', '.cjs', '.jsx', '.json'];
 const tsExtensions: string[] = ['.d.ts', '.ts', '.tsx', '.json'];

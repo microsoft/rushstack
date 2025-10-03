@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
-import * as path from 'path';
-import type * as child_process from 'child_process';
-import { once } from 'events';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import type * as child_process from 'node:child_process';
+import { once } from 'node:events';
 
 import {
   Executable,
@@ -17,7 +17,7 @@ import {
 import { FileSystem } from '../FileSystem';
 import { PosixModeBits } from '../PosixModeBits';
 import { Text } from '../Text';
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 describe('Executable process tests', () => {
   // The PosixModeBits are intended to be used with bitwise operations.

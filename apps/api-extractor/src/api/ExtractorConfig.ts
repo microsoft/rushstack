@@ -1,9 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import * as resolve from 'resolve';
 import lodash = require('lodash');
+
+import { EnumMemberOrder, ReleaseTag } from '@microsoft/api-extractor-model';
+import { TSDocConfiguration, TSDocTagDefinition } from '@microsoft/tsdoc';
+import { TSDocConfigFile } from '@microsoft/tsdoc-config';
+import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 import {
   JsonFile,
   JsonSchema,
@@ -16,10 +22,6 @@ import {
   Path,
   NewlineKind
 } from '@rushstack/node-core-library';
-import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
-import { EnumMemberOrder, ReleaseTag } from '@microsoft/api-extractor-model';
-import { TSDocConfiguration, TSDocTagDefinition } from '@microsoft/tsdoc';
-import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
 import type {
   ApiReportVariant,
@@ -30,7 +32,6 @@ import type {
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
 import type { IApiModelGenerationOptions } from '../generators/ApiModelGenerator';
-
 import apiExtractorSchema from '../schemas/api-extractor.schema.json';
 
 /**

@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Colorize, type ITerminal } from '@rushstack/terminal';
-import { CommandLineAction } from '@rushstack/ts-command-line';
-import { RushConfiguration, type RushConfigurationProject, type Subspace } from '@rushstack/rush-sdk';
-import path from 'path';
+import path from 'node:path';
+
 import yaml from 'js-yaml';
 import semver from 'semver';
 import type * as lockfileTypes from '@pnpm/lockfile.types';
 import type * as pnpmTypes from '@pnpm/types';
+
+import { RushConfiguration, type RushConfigurationProject, type Subspace } from '@rushstack/rush-sdk';
+import { CommandLineAction } from '@rushstack/ts-command-line';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { AlreadyReportedError, Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import lockfileLintSchema from '../../../schemas/lockfile-lint.schema.json';

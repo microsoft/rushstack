@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import type { AsyncParallelHook, SyncHook } from 'tapable';
+
+import type { Operation, OperationGroupRecord } from '@rushstack/operation-graph';
 
 import type { IHeftRecordMetricsHookOptions, MetricsCollector } from '../metrics/MetricsCollector';
 import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
@@ -11,7 +14,6 @@ import type { IHeftParameters } from './HeftParameterManager';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { HeftPluginHost } from './HeftPluginHost';
-import type { Operation, OperationGroupRecord } from '@rushstack/operation-graph';
 import type { IHeftPhaseOperationMetadata, IHeftTaskOperationMetadata } from '../cli/HeftActionRunner';
 
 /**

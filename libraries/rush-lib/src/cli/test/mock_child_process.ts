@@ -3,10 +3,10 @@
 
 /* eslint-disable */
 
-const EventEmitter = require('events');
+const EventEmitter = require('node:events');
 
-const childProcess: any = jest.genMockFromModule('child_process');
-const childProcessActual = jest.requireActual('child_process');
+const childProcess: any = jest.genMockFromModule('node:child_process');
+const childProcessActual = jest.requireActual('node:child_process');
 childProcess.spawn.mockImplementation(spawn);
 childProcess.__setSpawnMockConfig = setSpawnMockConfig;
 

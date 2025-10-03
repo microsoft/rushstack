@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+
 import {
   type BaseTool,
   RushConflictResolverTool,

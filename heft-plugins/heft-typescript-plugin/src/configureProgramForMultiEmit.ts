@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type * as TTypescript from 'typescript';
+
 import { InternalError } from '@rushstack/node-core-library';
 
 import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals';

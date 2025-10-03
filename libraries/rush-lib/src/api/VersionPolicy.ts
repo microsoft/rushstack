@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
+
 import { type IPackageJson, Enum } from '@rushstack/node-core-library';
 
 import type {

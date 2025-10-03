@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import { RealNodeModulePathResolver } from '@rushstack/node-core-library/lib/RealNodeModulePath';
 
 const jestResolvePackageFolder: string = path.dirname(require.resolve('jest-resolve/package.json'));

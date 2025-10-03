@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import { Executable } from '@rushstack/node-core-library';
+
 import {
   CredentialUnavailableError,
   type AccessToken,
   type GetTokenOptions,
   type TokenCredential
 } from '@azure/identity';
+
+import { Executable } from '@rushstack/node-core-library';
 
 interface IDecodedJwt {
   header: {

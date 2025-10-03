@@ -3,6 +3,7 @@
 
 import { parentPort, workerData, type MessagePort } from 'node:worker_threads';
 import * as path from 'node:path';
+
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import type { IPnpmfileModule, IReadPackageContext } from './IPnpmfileModule';

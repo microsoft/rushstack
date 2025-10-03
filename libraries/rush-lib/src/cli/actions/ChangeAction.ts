@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import * as child_process from 'child_process';
+import * as path from 'node:path';
+import * as child_process from 'node:child_process';
+
+import type * as InquirerType from 'inquirer';
 
 import type {
   CommandLineFlagParameter,
@@ -12,7 +14,6 @@ import type {
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
-import type * as InquirerType from 'inquirer';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { type IChangeFile, type IChangeInfo, ChangeType } from '../../api/ChangeManagement';

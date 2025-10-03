@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import * as crypto from 'crypto';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
 
 import { FileSystem } from '@rushstack/node-core-library';
+import type { IPackageJson } from '@rushstack/node-core-library';
+
 import type { RushConfiguration } from './RushConfiguration';
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
@@ -13,7 +15,6 @@ import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
-import type { IPackageJson } from '@rushstack/node-core-library';
 import { SubspacePnpmfileConfiguration } from '../logic/pnpm/SubspacePnpmfileConfiguration';
 import type { ISubspacePnpmfileShimSettings } from '../logic/pnpm/IPnpmfile';
 

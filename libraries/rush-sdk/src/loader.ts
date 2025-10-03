@@ -3,8 +3,9 @@
 
 /// <reference types="node" preserve="true" />
 
-import * as path from 'path';
-import type { SpawnSyncReturns } from 'child_process';
+import * as path from 'node:path';
+import type { SpawnSyncReturns } from 'node:child_process';
+
 import { JsonFile, type JsonObject, Executable } from '@rushstack/node-core-library';
 
 import {

@@ -3,7 +3,6 @@
 
 import type { HeftConfiguration, IHeftTaskPlugin, IHeftTaskSession } from '@rushstack/heft';
 import type { SassPluginName, ISassPluginAccessor } from '@rushstack/heft-sass-plugin';
-
 import { replaceTokensWithVariables } from '@microsoft/load-themed-styles';
 
 const PLUGIN_NAME: 'sass-load-themed-styles-plugin' = 'sass-load-themed-styles-plugin';

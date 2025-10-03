@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 jest.mock('../OperationStateFile');
-jest.mock('fs');
+jest.mock('node:fs');
 
 import { MockWritable, StringBufferTerminalProvider, Terminal, TerminalChunkKind } from '@rushstack/terminal';
 import type { IPhase } from '../../../api/CommandLineConfiguration';
@@ -11,8 +11,8 @@ import { OperationMetadataManager } from '../OperationMetadataManager';
 import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { FileSystem } from '@rushstack/node-core-library';
-import * as fs from 'fs';
-import { Readable } from 'stream';
+import * as fs from 'node:fs';
+import { Readable } from 'node:stream';
 import { Operation } from '../Operation';
 
 const mockWritable: MockWritable = new MockWritable();

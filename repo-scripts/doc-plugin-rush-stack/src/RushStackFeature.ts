@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import yaml = require('js-yaml');
+
 import { FileSystem } from '@rushstack/node-core-library';
 import type { ApiItem } from '@microsoft/api-extractor-model';
 import {

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { resolve } from 'path';
-import { promisify } from 'util';
+import { resolve } from 'node:path';
+import { promisify } from 'node:util';
 
 import webpack, { type Compiler, type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';

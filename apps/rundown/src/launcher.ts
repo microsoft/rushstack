@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import moduleApi = require('module');
-import process from 'process';
+import process from 'node:process';
 
 import { LauncherAction } from './LauncherTypes'; // "import type" doesn't work with const enums
 import type { IIpcTrace, IIpcDone, IIpcTraceRecord } from './LauncherTypes';

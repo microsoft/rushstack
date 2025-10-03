@@ -5,6 +5,7 @@
 // we check to see if the Node.js version is too old. If, for whatever reason, Rush crashes with
 // an old Node.js version when evaluating one of the more complex imports, we'll at least
 // shown a meaningful error message.
+// eslint-disable-next-line import/order
 import { NodeJsCompatibility } from '@microsoft/rush-lib/lib/logic/NodeJsCompatibility';
 
 if (NodeJsCompatibility.reportAncientIncompatibleVersion()) {
@@ -18,7 +19,8 @@ const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVer
   alreadyReportedNodeTooNewError: false
 });
 
-import * as os from 'os';
+import * as os from 'node:os';
+
 import * as semver from 'semver';
 
 import { Text, PackageJsonLookup } from '@rushstack/node-core-library';

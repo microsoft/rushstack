@@ -5,6 +5,7 @@ import type {
   CommandLineStringListParameter,
   IRequiredCommandLineStringParameter
 } from '@rushstack/ts-command-line';
+import { Async } from '@rushstack/node-core-library';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseHotlinkPackageAction } from './BaseHotlinkPackageAction';
@@ -12,7 +13,6 @@ import type { HotlinkManager } from '../../utilities/HotlinkManager';
 import { BRIDGE_PACKAGE_ACTION_NAME, LINK_PACKAGE_ACTION_NAME } from '../../utilities/actionNameConstants';
 import { RushConstants } from '../../logic/RushConstants';
 import type { Subspace } from '../../api/Subspace';
-import { Async } from '@rushstack/node-core-library';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export class BridgePackageAction extends BaseHotlinkPackageAction {

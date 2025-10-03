@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
+
 import dotenv from 'dotenv';
+
 import type { ITerminal } from '@rushstack/terminal';
 
 import { RushUserConfiguration } from '../api/RushUserConfiguration';

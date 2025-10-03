@@ -2,12 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+import { PackageName } from '@rushstack/node-core-library';
+import { DocDeclarationReference } from '@microsoft/tsdoc';
+
 import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import { ApiPackage } from './ApiPackage';
-import { PackageName } from '@rushstack/node-core-library';
 import { ModelReferenceResolver, type IResolveDeclarationReferenceResult } from './ModelReferenceResolver';
-import { DocDeclarationReference } from '@microsoft/tsdoc';
 
 /**
  * A serializable representation of a collection of API declarations.

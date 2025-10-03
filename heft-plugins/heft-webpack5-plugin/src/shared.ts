@@ -9,6 +9,7 @@ import type {
   AsyncSeriesHook,
   AsyncSeriesWaterfallHook
 } from 'tapable';
+
 import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
 /**

@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+
+import { InternalError } from '@rushstack/node-core-library';
+
 import type { AstSymbol } from './AstSymbol';
 import { Span } from './Span';
-import { InternalError } from '@rushstack/node-core-library';
 import type { AstEntity } from './AstEntity';
 
 /**

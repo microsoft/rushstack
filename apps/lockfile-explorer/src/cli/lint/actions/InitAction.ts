@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineAction } from '@rushstack/ts-command-line';
+import path from 'node:path';
 
+import { CommandLineAction } from '@rushstack/ts-command-line';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { RushConfiguration } from '@rushstack/rush-sdk';
 import { FileSystem } from '@rushstack/node-core-library';
-import path from 'path';
 
 import type { LintCommandLineParser } from '../LintCommandLineParser';
 import { LOCKFILE_EXPLORER_FOLDERNAME, LOCKFILE_LINT_JSON_FILENAME } from '../../../constants/common';

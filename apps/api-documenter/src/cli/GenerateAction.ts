@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
+import { FileSystem } from '@rushstack/node-core-library';
 
 import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 import { DocumenterConfig } from '../documenters/DocumenterConfig';
 import { ExperimentalYamlDocumenter } from '../documenters/ExperimentalYamlDocumenter';
-
-import { FileSystem } from '@rushstack/node-core-library';
 import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
 
 export class GenerateAction extends BaseAction {

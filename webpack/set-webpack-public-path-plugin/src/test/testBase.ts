@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 jest.disableAutomock();
-import { promisify } from 'util';
+import { promisify } from 'node:util';
 
 import webpack, { type InputFileSystem, type OutputFileSystem, type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';

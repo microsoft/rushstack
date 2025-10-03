@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import path from 'path';
+import path from 'node:path';
 import webpack from 'webpack';
 import type { Compiler, OutputFileSystem, Stats } from 'webpack';
 import { Volume } from 'memfs';

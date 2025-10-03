@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { type DocDeclarationReference, type DocMemberSelector, SelectorKind } from '@microsoft/tsdoc';
+
 import { type ApiItem, ApiItemKind } from '../items/ApiItem';
 import type { ApiModel } from './ApiModel';
 import type { ApiPackage } from './ApiPackage';

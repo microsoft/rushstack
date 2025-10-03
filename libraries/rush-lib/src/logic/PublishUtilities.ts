@@ -6,9 +6,11 @@
  * which itself is a thin wrapper around these helpers.
  */
 
-import * as path from 'path';
+import * as path from 'node:path';
+import { execSync } from 'node:child_process';
+
 import * as semver from 'semver';
-import { execSync } from 'child_process';
+
 import {
   type IPackageJson,
   JsonFile,

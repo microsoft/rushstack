@@ -73,7 +73,7 @@ async function runTestAsync(inputFolderPath: string): Promise<void> {
   const [{ Volume }, { default: webpack }, { promisify }, { HashedFolderCopyPlugin }] = await Promise.all([
     import('memfs/lib/volume'),
     import('webpack'),
-    import('util'),
+    import('node:util'),
     import('../HashedFolderCopyPlugin')
   ]);
 

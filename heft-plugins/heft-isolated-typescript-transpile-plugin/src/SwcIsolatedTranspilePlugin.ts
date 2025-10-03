@@ -5,6 +5,17 @@ import type { Dirent } from 'node:fs';
 import path from 'node:path';
 import { type ChildProcess, fork } from 'node:child_process';
 
+import type {
+  Config,
+  JscTarget,
+  ModuleConfig,
+  Options as SwcOptions,
+  ParserConfig,
+  ReactConfig,
+  TransformConfig
+} from '@swc/core';
+import { SyncWaterfallHook } from 'tapable';
+
 import { Async, Path } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
@@ -21,16 +32,6 @@ import {
   type _TTypeScript as TTypeScript,
   _getTsconfigFilePath as getTsconfigFilePath
 } from '@rushstack/heft-typescript-plugin';
-import type {
-  Config,
-  JscTarget,
-  ModuleConfig,
-  Options as SwcOptions,
-  ParserConfig,
-  ReactConfig,
-  TransformConfig
-} from '@swc/core';
-import { SyncWaterfallHook } from 'tapable';
 
 import type {
   ISwcIsolatedTranspileOptions,

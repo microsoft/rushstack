@@ -102,6 +102,7 @@ module.exports = {
           {
             source: 'string',
             style: 'line',
+            trailingNewlines: 2,
             content:
               'Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\n' +
               'See LICENSE in the project root for license information.'
@@ -136,6 +137,38 @@ module.exports = {
               }
             }
           ])
+        ],
+
+        // Require `node:` protocol for imports of Node.js built-in modules
+        'import/enforce-node-protocol-usage': ['warn', 'always'],
+
+        // Group imports in the following way:
+        // 1. Built-in modules (fs, path, etc.)
+        // 2. External modules (lodash, react, etc.)
+        //    a. `@rushstack` and `@microsoft` scoped packages
+        // 3. Internal modules (and other types: parent, sibling, index)
+        'import/order': [
+          'warn',
+          {
+            // This option ensures that the @rushstack and @microsoft packages end up in their own group
+            distinctGroup: true,
+            pathGroups: [
+              {
+                pattern: '@{rushstack,microsoft}/**',
+                group: 'external',
+                position: 'after'
+              }
+            ],
+            // Ensure the @rushstack and @microsoft packages are grouped with other external packages. By default this
+            // option includes 'external'
+            pathGroupsExcludedImportTypes: ['builtin', 'object'],
+            groups: [
+              'builtin',
+              'external'
+              // And then everything else (internal, parent, sibling, index)
+            ],
+            'newlines-between': 'always'
+          }
         ]
       }
     },
@@ -157,7 +190,9 @@ module.exports = {
         '**/test/**/*.ts',
         '**/test/**/*.tsx'
       ],
-      rules: {}
+      rules: {
+        'import/order': 'off'
+      }
     }
   ]
 };

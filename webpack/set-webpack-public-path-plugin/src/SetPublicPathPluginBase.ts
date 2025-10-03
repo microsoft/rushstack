@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type webpack from 'webpack';
+
 import { VersionDetection } from '@rushstack/webpack-plugin-utilities';
 import { PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
-
-import type webpack from 'webpack';
 
 /**
  * @public

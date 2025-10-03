@@ -7,6 +7,7 @@ import {
   Navigation,
   type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+
 import type { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { ApiItemKind } from '../items/ApiItem';
 import {

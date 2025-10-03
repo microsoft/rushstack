@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import fs from 'node:fs';
+
 import type { TSESTree } from '@typescript-eslint/types';
-import fs from 'fs';
 
 import * as Guards from './ast-guards';
-
 import { eslintFolder } from '../_patch-base';
 import {
   ESLINT_BULK_ENABLE_ENV_VAR_NAME,

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createHash, type Hash } from 'crypto';
+import { createHash, type Hash } from 'node:crypto';
 
 import {
   CachedSource,
@@ -14,13 +14,6 @@ import {
 import * as webpack from 'webpack';
 import { AsyncSeriesWaterfallHook, type SyncHook, SyncWaterfallHook, type TapOptions } from 'tapable';
 
-import {
-  CHUNK_MODULES_TOKEN,
-  MODULE_WRAPPER_PREFIX,
-  MODULE_WRAPPER_SUFFIX,
-  STAGE_BEFORE,
-  STAGE_AFTER
-} from './Constants';
 import type {
   IMinifierConnection,
   IModuleMinifier,
@@ -29,6 +22,13 @@ import type {
 } from '@rushstack/module-minifier';
 import { getIdentifier } from '@rushstack/module-minifier';
 
+import {
+  CHUNK_MODULES_TOKEN,
+  MODULE_WRAPPER_PREFIX,
+  MODULE_WRAPPER_SUFFIX,
+  STAGE_BEFORE,
+  STAGE_AFTER
+} from './Constants';
 import type {
   IModuleMinifierPluginOptions,
   IModuleMap,

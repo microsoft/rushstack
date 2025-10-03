@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
-import * as os from 'os';
-import * as readline from 'readline';
-import { once } from 'events';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as readline from 'node:readline';
+import { once } from 'node:events';
+
 import { getRepoRoot } from '@rushstack/package-deps-hash';
 import { AlreadyReportedError, Path, type FileSystemStats, FileSystem } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';

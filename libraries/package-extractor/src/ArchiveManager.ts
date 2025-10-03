@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import JSZip from 'jszip';
+
 import { FileSystem, type FileSystemStats, Path } from '@rushstack/node-core-library';
 
 // 755 are default permissions to allow read/write/execute for owner and read/execute for group and others.

@@ -9,11 +9,11 @@ import {
   Stack
 } from '@fluentui/react';
 import * as React from 'react';
+import type { CSSProperties } from 'react';
+
 import { useStickyToolbar } from '../hooks/parametersFormScroll';
 import { RunButton } from './RunButton';
 import { SearchBar } from './SearchBar';
-
-import type { CSSProperties } from 'react';
 
 // Styles definition
 const stackStyles: IStackStyles = {

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as nodeFs from 'fs';
-import * as nodePath from 'path';
+import * as nodeFs from 'node:fs';
+import * as nodePath from 'node:path';
 
 /**
  * Arguments used to create a function that resolves symlinked node_modules in a path

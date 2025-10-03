@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Text, type NewlineKind } from '@rushstack/node-core-library';
+
 import { TextRewriter, type TextRewriterState } from './TextRewriter';
 
 interface INormalizeNewlinesTextRewriterState extends TextRewriterState {

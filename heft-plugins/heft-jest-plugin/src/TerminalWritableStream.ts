@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Writable } from 'node:stream';
+
 import type { ITerminal } from '@rushstack/terminal';
-import { Writable } from 'stream';
 
 // Regex to filter out screen clearing directives
 // Can't use the AnsiEscape.removeCodes() function from node-core-library because we are only

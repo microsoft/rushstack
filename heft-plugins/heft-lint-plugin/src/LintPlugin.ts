@@ -3,6 +3,8 @@
 
 import path from 'node:path';
 
+import type * as TTypescript from 'typescript';
+
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -16,8 +18,6 @@ import type {
   ITypeScriptPluginAccessor
 } from '@rushstack/heft-typescript-plugin';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
-
-import type * as TTypescript from 'typescript';
 
 import type { LinterBase } from './LinterBase';
 import { Eslint } from './Eslint';

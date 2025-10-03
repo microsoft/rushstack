@@ -4,10 +4,11 @@
 // This function will read the current directory and try to figure out if it's a rush project or regular pnpm workspace
 // Currently it will throw error if neither can be determined
 
+import path from 'node:path';
+
 import { FileSystem, Path } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 import type { Subspace } from '@microsoft/rush-lib/lib/api/Subspace';
-import path from 'path';
 
 import * as lockfilePath from '../graph/lockfilePath';
 import type { IAppState } from '../state';

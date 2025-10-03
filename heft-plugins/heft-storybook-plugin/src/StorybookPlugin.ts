@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as child_process from 'child_process';
-import * as path from 'path';
+import * as child_process from 'node:child_process';
+import * as path from 'node:path';
 
 import {
   AlreadyExistsBehavior,

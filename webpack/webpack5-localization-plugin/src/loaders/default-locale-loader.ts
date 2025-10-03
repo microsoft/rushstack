@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
+
 import { Terminal } from '@rushstack/terminal';
 import { type ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
 

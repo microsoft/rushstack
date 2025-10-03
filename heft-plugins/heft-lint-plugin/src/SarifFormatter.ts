@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+
+import path from 'node:path';
+
 import type * as TEslint from 'eslint';
 import type * as TEslintLegacy from 'eslint-8';
-import path from 'node:path';
+
 import { Path, Text } from '@rushstack/node-core-library';
 
 export interface ISerifFormatterOptions {

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createSlice, type Slice, type SliceCaseReducers } from '@reduxjs/toolkit';
+
 import { useAppSelector } from '../hooks';
 
 export interface IUIState {

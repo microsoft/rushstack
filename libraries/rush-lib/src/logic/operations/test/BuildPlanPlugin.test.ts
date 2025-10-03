@@ -22,7 +22,7 @@ import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import { MockOperationRunner } from './MockOperationRunner';
-import path from 'path';
+import path from 'node:path';
 import type { ICommandLineJson } from '../../../api/CommandLineJson';
 import type { IInputsSnapshot } from '../../incremental/InputsSnapshot';
 

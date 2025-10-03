@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as nodeJsPath from 'path';
+import * as nodeJsPath from 'node:path';
 import { Import } from '../Import';
 import { PackageJsonLookup } from '../PackageJsonLookup';
 import { Path } from '../Path';

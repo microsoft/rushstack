@@ -3,9 +3,11 @@
 
 import path from 'node:path';
 import crypto from 'node:crypto';
+
 import glob from 'fast-glob';
 import type webpack from 'webpack';
 import type { SourceLocation } from 'estree';
+
 import { LegacyAdapters } from '@rushstack/node-core-library';
 
 import { renderError } from './HashedFolderCopyPlugin';

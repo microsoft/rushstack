@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import React from 'react';
+
 import { useAppSelector } from '../store/hooks';
 
 export const ProjectView: React.FC = () => {

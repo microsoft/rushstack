@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type webpack from 'webpack';
+
 import { SetPublicPathPluginBase } from './SetPublicPathPluginBase';
 
 const PLUGIN_NAME: string = 'set-webpack-public-path-current-script-plugin';

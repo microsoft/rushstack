@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import path from 'node:path';
+
 import { z } from 'zod';
+
 import { JsonFile } from '@rushstack/node-core-library';
-import path from 'path';
 import type { ICommandLineJson } from '@rushstack/rush-sdk/lib/api/CommandLineJson';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 

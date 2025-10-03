@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { Colorize, PrintUtilities, type ITerminal } from '@rushstack/terminal';
-import type { RushConfiguration } from '../api/RushConfiguration';
 import { FileSystem, JsonFile, JsonSchema, JsonSyntax } from '@rushstack/node-core-library';
+
+import type { RushConfiguration } from '../api/RushConfiguration';
 import rushAlertsSchemaJson from '../schemas/rush-alerts.schema.json';
 import { RushConstants } from '../logic/RushConstants';
 import { PURGE_ACTION_NAME } from './actionNameConstants';

@@ -3,6 +3,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
+
 import { readPnpmfileAsync, readPackageSpecAsync, readPackageJsonAsync } from '../../helpers/lfxApiClient';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
@@ -11,10 +13,8 @@ import { compareSpec } from '../../parsing/compareSpec';
 import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import { isEntryModified } from '../../helpers/isEntryModified';
-import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
 import { LfxGraphEntryKind } from '../../packlets/lfx-shared';
 import { CodeBox } from './CodeBox';
-
 import styles from './styles.scss';
 
 const PackageView: { [key: string]: string } = {

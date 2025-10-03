@@ -18,7 +18,7 @@ jest.mock('fs-extra', () => {
     writevSync
   };
 });
-jest.mock('fs/promises', () => {
+jest.mock('node:fs/promises', () => {
   return {
     open: openHandle
   };

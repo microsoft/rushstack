@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
-import * as child_process from 'child_process';
-import * as path from 'path';
-import { EnvironmentMap } from './EnvironmentMap';
+import * as os from 'node:os';
+import * as child_process from 'node:child_process';
+import * as path from 'node:path';
 
+import { EnvironmentMap } from './EnvironmentMap';
 import { FileSystem } from './FileSystem';
 import { PosixModeBits } from './PosixModeBits';
 import { Text } from './Text';

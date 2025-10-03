@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
-import * as path from 'path';
-
-import { FileSystem } from './FileSystem';
-import { JsonFile, type JsonObject } from './JsonFile';
+import * as os from 'node:os';
+import * as path from 'node:path';
 
 import Ajv, { type Options as AjvOptions, type ErrorObject, type ValidateFunction } from 'ajv';
 import AjvDraft04 from 'ajv-draft-04';
 import addFormats from 'ajv-formats';
+
+import { JsonFile, type JsonObject } from './JsonFile';
+import { FileSystem } from './FileSystem';
 
 interface ISchemaWithId {
   // draft-04 uses "id"

@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { AsyncParallelHook, AsyncSeriesHook, HookMap } from 'tapable';
-import type { ITelemetryData } from '../logic/Telemetry';
 
+import type { ITelemetryData } from '../logic/Telemetry';
 import type { PhasedCommandHooks } from './PhasedCommandHooks';
 import type { Subspace } from '../api/Subspace';
 

@@ -8,7 +8,7 @@
 //    require("@rushstack/eslint-patch/modern-module-resolution");
 //
 
-import path from 'path';
+import path from 'node:path';
 
 const isModuleResolutionError: (ex: unknown) => boolean = (ex) =>
   typeof ex === 'object' && !!ex && 'code' in ex && (ex as { code: unknown }).code === 'MODULE_NOT_FOUND';

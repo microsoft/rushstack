@@ -3,6 +3,7 @@
 
 import type { loader } from 'webpack';
 import * as loaderUtils from 'loader-utils';
+
 import type { NewlineKind } from '@rushstack/node-core-library';
 import type { IgnoreStringFunction } from '@rushstack/localization-utilities';
 

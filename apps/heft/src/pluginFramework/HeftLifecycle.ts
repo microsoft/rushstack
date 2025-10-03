@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AsyncParallelHook, SyncHook } from 'tapable';
+
 import { InternalError } from '@rushstack/node-core-library';
 
 import { HeftPluginConfiguration } from '../configuration/HeftPluginConfiguration';

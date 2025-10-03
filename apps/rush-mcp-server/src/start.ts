@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import * as process from 'process';
+import * as path from 'node:path';
+import * as process from 'node:process';
+
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+
 import { FileSystem } from '@rushstack/node-core-library';
 import { RushSdkLoader } from '@rushstack/rush-sdk/loader';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
 import { log } from './utilities/log';
 import type { RushMCPServer } from './server';

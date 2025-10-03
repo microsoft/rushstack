@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { SyncHook } from 'tapable';
+
 import { InternalError } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 

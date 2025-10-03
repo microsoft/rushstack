@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IProblemPattern } from '@rushstack/problem-matcher';
+
 import { type FileLocationStyle, Path } from './Path';
 import { TypeUuid } from './TypeUuid';
 

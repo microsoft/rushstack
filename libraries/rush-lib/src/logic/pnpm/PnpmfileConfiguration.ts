@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as path from 'node:path';
+
 import * as semver from 'semver';
+
 import { FileSystem, Import, type IPackageJson, JsonFile, MapExtensions } from '@rushstack/node-core-library';
 
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
@@ -11,7 +13,6 @@ import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfig
 import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
 import * as pnpmfile from './PnpmfileShim';
 import { pnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
-
 import type { IPnpmfileContext, IPnpmfileShimSettings } from './IPnpmfile';
 import type { Subspace } from '../../api/Subspace';
 

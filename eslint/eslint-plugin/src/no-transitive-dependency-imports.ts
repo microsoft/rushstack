@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { TSESTree, TSESLint } from '@typescript-eslint/utils';
+
 import { parseImportSpecifierFromExpression, type IParsedImportSpecifier } from './LintUtilities';
 
 export const MESSAGE_ID: 'error-transitive-dependency-imports' = 'error-transitive-dependency-imports';

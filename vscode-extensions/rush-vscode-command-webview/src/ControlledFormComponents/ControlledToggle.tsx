@@ -4,8 +4,8 @@
 import { type IToggleProps, Toggle } from '@fluentui/react';
 import * as React from 'react';
 import { Controller } from 'react-hook-form';
-import { ErrorMessage } from './ErrorMessage';
 
+import { ErrorMessage } from './ErrorMessage';
 import type { IHookFormProps } from './interface';
 
 export type IControlledToggleProps = IToggleProps & IHookFormProps<string>;

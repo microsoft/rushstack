@@ -6,9 +6,9 @@ import {
   type SpawnSyncOptionsWithBufferEncoding,
   execSync,
   spawnSync
-} from 'child_process';
-import * as process from 'process';
-import * as fs from 'fs';
+} from 'node:child_process';
+import * as process from 'node:process';
+import * as fs from 'node:fs';
 
 const ESLINT_CONFIG_FILES: string[] = [
   'eslint.config.js',

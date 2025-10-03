@@ -17,13 +17,15 @@ import {
   AzurePowerShellCredential
 } from '@azure/identity';
 import type { TokenCredentialOptions } from '@azure/identity';
-import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';
+
 import type { ITerminal } from '@rushstack/terminal';
 import { CredentialCache } from '@rushstack/rush-sdk';
 // Use a separate import line so the .d.ts file ends up with an `import type { ... }`
 // See https://github.com/microsoft/rushstack/issues/3432
 import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import { PrintUtilities } from '@rushstack/terminal';
+
+import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';
 
 /**
  * @public

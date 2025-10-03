@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { z } from 'zod';
+
 import type { RushConfiguration, RushConfigurationProject } from '@rushstack/rush-sdk';
 
 import { getRushConfiguration } from '../utilities/common';

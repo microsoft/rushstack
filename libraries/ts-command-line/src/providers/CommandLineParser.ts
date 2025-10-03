@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type * as argparse from 'argparse';
+
 import { Colorize } from '@rushstack/terminal';
 
 import type { CommandLineAction } from './CommandLineAction';

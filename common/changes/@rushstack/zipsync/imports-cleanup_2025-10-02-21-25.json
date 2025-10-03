@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/zipsync"
+    }
+  ],
+  "packageName": "@rushstack/zipsync",
+  "email": "iclanton@users.noreply.github.com"
+}

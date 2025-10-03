@@ -3,6 +3,7 @@
 
 import type * as tsdoc from '@microsoft/tsdoc';
 import type { ReleaseTag } from '@microsoft/api-extractor-model';
+
 import { VisitorState } from './VisitorState';
 
 /**

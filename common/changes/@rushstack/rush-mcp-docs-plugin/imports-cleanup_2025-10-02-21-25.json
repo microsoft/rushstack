@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/rush-mcp-docs-plugin"
+    }
+  ],
+  "packageName": "@rushstack/rush-mcp-docs-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

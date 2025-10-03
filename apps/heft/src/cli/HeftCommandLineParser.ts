@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import os from 'node:os';
+
 import {
   CommandLineParser,
   type AliasCommandLineAction,

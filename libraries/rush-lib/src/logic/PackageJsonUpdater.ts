@@ -5,6 +5,7 @@
 
 import * as semver from 'semver';
 import type * as NpmCheck from 'npm-check';
+
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';

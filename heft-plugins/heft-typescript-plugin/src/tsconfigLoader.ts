@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
+
 import type * as TTypescript from 'typescript';
+
 import { Path } from '@rushstack/node-core-library';
 import type { HeftConfiguration } from '@rushstack/heft';
 

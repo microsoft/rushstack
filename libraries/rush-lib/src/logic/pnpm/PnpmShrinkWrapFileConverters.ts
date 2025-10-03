@@ -24,6 +24,7 @@ import type {
   ProjectSnapshot,
   ResolvedDependencies
 } from '@pnpm/lockfile.types';
+
 import { removeNullishProps } from '../../utilities/objectUtilities';
 
 type DepPath = string & { __brand: 'DepPath' };

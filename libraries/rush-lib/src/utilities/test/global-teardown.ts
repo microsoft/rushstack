@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem } from '@rushstack/node-core-library';
+
 import { TEST_REPO_FOLDER_PATH } from '../../cli/test/TestUtils';
 
 export default async function globalTeardown(): Promise<void> {

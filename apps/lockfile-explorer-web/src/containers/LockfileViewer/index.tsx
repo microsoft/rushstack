@@ -2,6 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+
+import { Tabs, Checkbox, ScrollArea, Input, Text } from '@rushstack/rush-themed-ui';
+
 import styles from './styles.scss';
 import { type LfxGraphEntry, LfxGraphEntryKind } from '../../packlets/lfx-shared';
 import { ReactNull } from '../../types/ReactNull';
@@ -13,7 +16,6 @@ import {
   setFilter as selectFilter
 } from '../../store/slices/entrySlice';
 import { getFilterFromLocalStorage, saveFilterToLocalStorage } from '../../helpers/localStorage';
-import { Tabs, Checkbox, ScrollArea, Input, Text } from '@rushstack/rush-themed-ui';
 
 interface ILockfileEntryGroup {
   entryName: string;

@@ -5,7 +5,6 @@ import { WorkspaceInstallManager } from './installManager/WorkspaceInstallManage
 import type { PurgeManager } from './PurgeManager';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushGlobalFolder } from '../api/RushGlobalFolder';
-
 import type { BaseInstallManager } from './base/BaseInstallManager';
 import type { IInstallManagerOptions } from './base/BaseInstallManagerTypes';
 
