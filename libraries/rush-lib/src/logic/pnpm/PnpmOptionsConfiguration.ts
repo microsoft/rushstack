@@ -81,6 +81,7 @@ export interface IPnpmPackageExtension {
  * @internal
  */
 export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
+  $schema?: string;
   /**
    * {@inheritDoc PnpmOptionsConfiguration.pnpmStore}
    */
@@ -431,7 +432,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
 
   /** @internal */
   public static loadFromJsonFileOrThrow(
-    jsonFilename: string,
+    jsonFilePath: string,
     commonTempFolder: string
   ): PnpmOptionsConfiguration {
     // TODO: plumb through the terminal
@@ -441,11 +442,12 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
       new NonProjectConfigurationFile({
         jsonSchemaObject: schemaJson
       });
-    const pnpmOptionJson: IPnpmOptionsJson = pnpmOptionsConfigFile.loadConfigurationFile(
+    const pnpmConfigJson: IPnpmOptionsJson = pnpmOptionsConfigFile.loadConfigurationFile(
       terminal,
-      jsonFilename
+      jsonFilePath
     );
-    return new PnpmOptionsConfiguration(pnpmOptionJson || {}, commonTempFolder, jsonFilename);
+    pnpmConfigJson.$schema = pnpmOptionsConfigFile.getSchemaPropertyOriginalValue(pnpmConfigJson);
+    return new PnpmOptionsConfiguration(pnpmConfigJson || {}, commonTempFolder, jsonFilePath);
   }
 
   /** @internal */

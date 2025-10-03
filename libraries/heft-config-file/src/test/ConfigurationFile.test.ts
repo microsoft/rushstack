@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint-disable max-lines */
-
-import * as nodeJsPath from 'node:path';
+import nodeJsPath from 'node:path';
 import { FileSystem, JsonFile, Path, Text } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { RigConfig } from '@rushstack/rig-package';
@@ -13,7 +11,7 @@ import { PathResolutionMethod, InheritanceType, ConfigurationFileBase } from '..
 import { NonProjectConfigurationFile } from '../NonProjectConfigurationFile';
 
 describe('ConfigurationFile', () => {
-  const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
+  const projectRoot: string = nodeJsPath.resolve(__dirname, '../..');
   let terminalProvider: StringBufferTerminalProvider;
   let terminal: Terminal;
 
@@ -241,11 +239,7 @@ describe('ConfigurationFile', () => {
   describe('A simple config file containing an array and an object', () => {
     const configFileFolderName: string = 'simpleConfigFile';
     const projectRelativeFilePath: string = `${configFileFolderName}/simpleConfigFile.json`;
-    const schemaPath: string = nodeJsPath.resolve(
-      __dirname,
-      configFileFolderName,
-      'simpleConfigFile.schema.json'
-    );
+    const schemaPath: string = `${__dirname}/${configFileFolderName}/simpleConfigFile.schema.json`;
 
     interface ISimpleConfigFile {
       things: string[];
@@ -432,11 +426,7 @@ describe('ConfigurationFile', () => {
   describe('A simple config file with "extends"', () => {
     const configFileFolderName: string = 'simpleConfigFileWithExtends';
     const projectRelativeFilePath: string = `${configFileFolderName}/simpleConfigFileWithExtends.json`;
-    const schemaPath: string = nodeJsPath.resolve(
-      __dirname,
-      configFileFolderName,
-      'simpleConfigFileWithExtends.schema.json'
-    );
+    const schemaPath: string = `${__dirname}/${configFileFolderName}/simpleConfigFileWithExtends.schema.json`;
 
     interface ISimpleConfigFile {
       things: string[];
@@ -821,7 +811,7 @@ describe('ConfigurationFile', () => {
         'complexConfigFile',
         'pluginsB.json'
       );
-      const schemaPath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'plugins.schema.json');
+      const schemaPath: string = `${__dirname}/complexConfigFile/plugins.schema.json`;
 
       const configFileLoader: ProjectConfigurationFile<IComplexConfigFile> =
         new ProjectConfigurationFile<IComplexConfigFile>({
@@ -904,7 +894,7 @@ describe('ConfigurationFile', () => {
         'complexConfigFile',
         'pluginsB.json'
       );
-      const schemaPath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'plugins.schema.json');
+      const schemaPath: string = `${__dirname}/complexConfigFile/plugins.schema.json`;
 
       const configFileLoader: ProjectConfigurationFile<IComplexConfigFile> =
         new ProjectConfigurationFile<IComplexConfigFile>({
@@ -985,7 +975,7 @@ describe('ConfigurationFile', () => {
         'complexConfigFile',
         'pluginsB.json'
       );
-      const schemaPath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'plugins.schema.json');
+      const schemaPath: string = `${__dirname}/complexConfigFile/plugins.schema.json`;
 
       const configFileLoader: ProjectConfigurationFile<IComplexConfigFile> =
         new ProjectConfigurationFile<IComplexConfigFile>({
@@ -1068,7 +1058,7 @@ describe('ConfigurationFile', () => {
         'complexConfigFile',
         'pluginsB.json'
       );
-      const schemaPath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'plugins.schema.json');
+      const schemaPath: string = `${__dirname}/complexConfigFile/plugins.schema.json`;
 
       const configFileLoader: ProjectConfigurationFile<IComplexConfigFile> =
         new ProjectConfigurationFile<IComplexConfigFile>({
@@ -1140,6 +1130,31 @@ describe('ConfigurationFile', () => {
         nodeJsPath.resolve(__dirname, secondConfigFilePath)
       );
     });
+
+    it('Can get the original $schema property value', async () => {
+      async function testForFilename(filename: string, expectedSchema: string): Promise<void> {
+        const projectRelativeFilePath: string = `complexConfigFile/${filename}`;
+        const jsonSchemaPath: string = nodeJsPath.resolve(
+          __dirname,
+          'complexConfigFile',
+          'plugins.schema.json'
+        );
+
+        const configFileLoader: ProjectConfigurationFile<IComplexConfigFile> =
+          new ProjectConfigurationFile<IComplexConfigFile>({
+            projectRelativeFilePath,
+            jsonSchemaPath
+          });
+        const loadedConfigFile: IComplexConfigFile =
+          await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
+        expect(configFileLoader.getSchemaPropertyOriginalValue(loadedConfigFile)).toEqual(expectedSchema);
+      }
+
+      await testForFilename('pluginsA.json', 'http://schema.net/A');
+      await testForFilename('pluginsB.json', 'http://schema.net/B');
+      await testForFilename('pluginsC.json', 'http://schema.net/C');
+      await testForFilename('pluginsD.json', 'http://schema.net/D');
+    });
   });
 
   describe('a complex file with inheritance type annotations', () => {
@@ -1197,11 +1212,7 @@ describe('ConfigurationFile', () => {
         'inheritanceTypeConfigFile',
         'inheritanceTypeConfigFileB.json'
       );
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'inheritanceTypeConfigFile',
-        'inheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/inheritanceTypeConfigFile/inheritanceTypeConfigFile.schema.json`;
 
       const configFileLoader: ProjectConfigurationFile<IInheritanceTypeConfigFile> =
         new ProjectConfigurationFile<IInheritanceTypeConfigFile>({
@@ -1289,11 +1300,7 @@ describe('ConfigurationFile', () => {
         'inheritanceTypeConfigFile',
         'inheritanceTypeConfigFileB.json'
       );
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'inheritanceTypeConfigFile',
-        'inheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/inheritanceTypeConfigFile/inheritanceTypeConfigFile.schema.json`;
 
       const configFileLoader: ProjectConfigurationFile<IInheritanceTypeConfigFile> =
         new ProjectConfigurationFile<IInheritanceTypeConfigFile>({
@@ -1380,11 +1387,7 @@ describe('ConfigurationFile', () => {
         'simpleInheritanceTypeConfigFile',
         'simpleInheritanceTypeConfigFileB.json'
       );
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'simpleInheritanceTypeConfigFile',
-        'simpleInheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFile.schema.json`;
 
       const configFileLoader: ProjectConfigurationFile<ISimpleInheritanceTypeConfigFile> =
         new ProjectConfigurationFile<ISimpleInheritanceTypeConfigFile>({
@@ -1427,11 +1430,7 @@ describe('ConfigurationFile', () => {
     });
 
     it("throws an error when an array uses the 'merge' inheritance type", () => {
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'simpleInheritanceTypeConfigFile',
-        'simpleInheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFile.schema.json`;
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileA.json',
         jsonSchemaPath: schemaPath
@@ -1443,11 +1442,7 @@ describe('ConfigurationFile', () => {
     });
 
     it("throws an error when an array uses the 'merge' inheritance type async", async () => {
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'simpleInheritanceTypeConfigFile',
-        'simpleInheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFile.schema.json`;
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileA.json',
         jsonSchemaPath: schemaPath
@@ -1459,11 +1454,7 @@ describe('ConfigurationFile', () => {
     });
 
     it("throws an error when a keyed object uses the 'append' inheritance type", () => {
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'simpleInheritanceTypeConfigFile',
-        'simpleInheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFile.schema.json`;
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileB.json',
         jsonSchemaPath: schemaPath
@@ -1475,11 +1466,7 @@ describe('ConfigurationFile', () => {
     });
 
     it("throws an error when a keyed object uses the 'append' inheritance type async", async () => {
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'simpleInheritanceTypeConfigFile',
-        'simpleInheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFile.schema.json`;
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileB.json',
         jsonSchemaPath: schemaPath
@@ -1491,11 +1478,7 @@ describe('ConfigurationFile', () => {
     });
 
     it('throws an error when a non-object property uses an inheritance type', () => {
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'simpleInheritanceTypeConfigFile',
-        'simpleInheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFile.schema.json`;
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileC.json',
         jsonSchemaPath: schemaPath
@@ -1507,11 +1490,7 @@ describe('ConfigurationFile', () => {
     });
 
     it('throws an error when a non-object property uses an inheritance type async', async () => {
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'simpleInheritanceTypeConfigFile',
-        'simpleInheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFile.schema.json`;
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileC.json',
         jsonSchemaPath: schemaPath
@@ -1523,11 +1502,7 @@ describe('ConfigurationFile', () => {
     });
 
     it('throws an error when an inheritance type is specified for an unspecified property', () => {
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'simpleInheritanceTypeConfigFile',
-        'simpleInheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFile.schema.json`;
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileD.json',
         jsonSchemaPath: schemaPath
@@ -1539,11 +1514,7 @@ describe('ConfigurationFile', () => {
     });
 
     it('throws an error when an inheritance type is specified for an unspecified property async', async () => {
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'simpleInheritanceTypeConfigFile',
-        'simpleInheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFile.schema.json`;
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileD.json',
         jsonSchemaPath: schemaPath
@@ -1555,11 +1526,7 @@ describe('ConfigurationFile', () => {
     });
 
     it('throws an error when an unsupported inheritance type is specified', () => {
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'simpleInheritanceTypeConfigFile',
-        'simpleInheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFile.schema.json`;
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileE.json',
         jsonSchemaPath: schemaPath
@@ -1571,11 +1538,7 @@ describe('ConfigurationFile', () => {
     });
 
     it('throws an error when an unsupported inheritance type is specified async', async () => {
-      const schemaPath: string = nodeJsPath.resolve(
-        __dirname,
-        'simpleInheritanceTypeConfigFile',
-        'simpleInheritanceTypeConfigFile.schema.json'
-      );
+      const schemaPath: string = `${__dirname}/simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFile.schema.json`;
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileE.json',
         jsonSchemaPath: schemaPath
@@ -1588,14 +1551,10 @@ describe('ConfigurationFile', () => {
   });
 
   describe('loading a rig', () => {
-    const projectFolder: string = nodeJsPath.resolve(__dirname, 'project-referencing-rig');
+    const projectFolder: string = `${__dirname}/project-referencing-rig`;
     const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: projectFolder });
 
-    const schemaPath: string = nodeJsPath.resolve(
-      __dirname,
-      'simplestConfigFile',
-      'simplestConfigFile.schema.json'
-    );
+    const schemaPath: string = `${__dirname}/simplestConfigFile/simplestConfigFile.schema.json`;
 
     interface ISimplestConfigFile {
       thing: string;
@@ -1744,12 +1703,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'invalidType';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/notExist.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       expect(() =>
@@ -1761,12 +1715,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'invalidType';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/notExist.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       await expect(
@@ -1778,12 +1727,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'invalidType';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/notExist.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       expect(configFileLoader.tryLoadConfigurationFileForProject(terminal, __dirname)).toBeUndefined();
@@ -1793,12 +1737,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'invalidType';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/notExist.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       await expect(
@@ -1822,12 +1761,7 @@ describe('ConfigurationFile', () => {
 
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: configFilePath,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       // The synchronous code path on Windows somehow determines that the unexpected character is
@@ -1858,12 +1792,7 @@ describe('ConfigurationFile', () => {
 
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: configFilePath,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       await expect(
@@ -1879,12 +1808,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'invalidType';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/config.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       expect(() =>
@@ -1896,12 +1820,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'invalidType';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/config.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       await expect(
@@ -1913,12 +1832,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'circularReference';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/config1.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       expect(() =>
@@ -1930,12 +1844,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'circularReference';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/config1.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       await expect(
@@ -1947,12 +1856,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'extendsNotExist';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/config.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       expect(() =>
@@ -1964,12 +1868,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'extendsNotExist';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/config.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       await expect(
@@ -1981,12 +1880,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'invalidCombinedFile';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/config1.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       expect(() =>
@@ -1998,12 +1892,7 @@ describe('ConfigurationFile', () => {
       const errorCaseFolderName: string = 'invalidCombinedFile';
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/config1.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          errorCaseFolderName,
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/${errorCaseFolderName}/config.schema.json`
       });
 
       await expect(
@@ -2014,12 +1903,7 @@ describe('ConfigurationFile', () => {
     it("Throws an error when a requested file doesn't exist", () => {
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/folderThatDoesntExist/config.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          'invalidCombinedFile',
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/invalidCombinedFile/config.schema.json`
       });
 
       expect(() =>
@@ -2030,12 +1914,7 @@ describe('ConfigurationFile', () => {
     it("Throws an error when a requested file doesn't exist async", async () => {
       const configFileLoader: ProjectConfigurationFile<void> = new ProjectConfigurationFile({
         projectRelativeFilePath: `${errorCasesFolderName}/folderThatDoesntExist/config.json`,
-        jsonSchemaPath: nodeJsPath.resolve(
-          __dirname,
-          errorCasesFolderName,
-          'invalidCombinedFile',
-          'config.schema.json'
-        )
+        jsonSchemaPath: `${__dirname}/${errorCasesFolderName}/invalidCombinedFile/config.schema.json`
       });
 
       await expect(

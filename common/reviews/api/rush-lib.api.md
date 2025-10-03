@@ -761,6 +761,8 @@ export interface IPnpmLockfilePolicies {
 
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
+    // (undocumented)
+    $schema?: string;
     alwaysFullInstall?: boolean;
     alwaysInjectDependenciesFromOtherSubspaces?: boolean;
     autoInstallPeers?: boolean;
@@ -1183,7 +1185,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     // (undocumented)
     readonly jsonFilename: string | undefined;
     // @internal (undocumented)
-    static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
+    static loadFromJsonFileOrThrow(jsonFilePath: string, commonTempFolder: string): PnpmOptionsConfiguration;
     // @internal (undocumented)
     static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
     readonly pnpmLockfilePolicies: IPnpmLockfilePolicies | undefined;
