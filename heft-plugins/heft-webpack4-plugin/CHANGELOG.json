@@ -2,6 +2,35 @@
   "name": "@rushstack/heft-webpack4-plugin",
   "entries": [
     {
+      "version": "1.1.0",
+      "tag": "@rushstack/heft-webpack4-plugin_v1.1.0",
+      "date": "Fri, 03 Oct 2025 20:09:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.16.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.19.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.0.0` to `1.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.0",
       "tag": "@rushstack/heft-webpack4-plugin_v1.0.0",
       "date": "Tue, 30 Sep 2025 23:57:45 GMT",

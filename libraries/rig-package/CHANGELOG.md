@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rig-package
 
-This log was last generated on Sat, 27 Jul 2024 00:10:27 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Oct 2025 20:09:59 GMT and should not be manually modified.
+
+## 0.6.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
 
 ## 0.5.3
 Sat, 27 Jul 2024 00:10:27 GMT

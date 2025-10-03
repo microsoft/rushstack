@@ -2,6 +2,29 @@
   "name": "@rushstack/webpack4-module-minifier-plugin",
   "entries": [
     {
+      "version": "0.14.0",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.14.0",
+      "date": "Fri, 03 Oct 2025 20:10:00 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.113",
       "tag": "@rushstack/webpack4-module-minifier-plugin_v0.13.113",
       "date": "Tue, 30 Sep 2025 23:57:45 GMT",

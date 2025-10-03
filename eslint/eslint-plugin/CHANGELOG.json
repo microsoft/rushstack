@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.20.0",
+      "tag": "@rushstack/eslint-plugin_v0.20.0",
+      "date": "Fri, 03 Oct 2025 20:09:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.19.0",
       "tag": "@rushstack/eslint-plugin_v0.19.0",
       "date": "Thu, 26 Jun 2025 18:57:04 GMT",

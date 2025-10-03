@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin-packlets
 
-This log was last generated on Thu, 26 Jun 2025 18:57:04 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Oct 2025 20:09:59 GMT and should not be manually modified.
+
+## 0.13.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
 
 ## 0.12.0
 Thu, 26 Jun 2025 18:57:04 GMT

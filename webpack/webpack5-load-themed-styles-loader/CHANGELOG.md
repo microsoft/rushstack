@@ -1,6 +1,13 @@
 # Change Log - @microsoft/webpack5-load-themed-styles-loader
 
-This log was last generated on Tue, 30 Sep 2025 23:57:45 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Oct 2025 20:09:59 GMT and should not be manually modified.
+
+## 0.3.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
 
 ## 0.2.110
 Tue, 30 Sep 2025 23:57:45 GMT

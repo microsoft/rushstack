@@ -2,6 +2,26 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@rushstack/operation-graph_v0.5.0",
+      "date": "Fri, 03 Oct 2025 20:09:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.16.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.19.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.1",
       "tag": "@rushstack/operation-graph_v0.4.1",
       "date": "Tue, 30 Sep 2025 23:57:45 GMT",

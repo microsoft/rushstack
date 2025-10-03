@@ -2,6 +2,35 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.53.0",
+      "tag": "@microsoft/api-extractor_v7.53.0",
+      "date": "Fri, 03 Oct 2025 20:09:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.31.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.16.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.19.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.52.15",
       "tag": "@microsoft/api-extractor_v7.52.15",
       "date": "Tue, 30 Sep 2025 23:57:45 GMT",

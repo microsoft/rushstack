@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 30 Sep 2025 23:57:45 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Oct 2025 20:09:59 GMT and should not be manually modified.
+
+## 7.27.0
+Fri, 03 Oct 2025 20:09:59 GMT
+
+### Minor changes
+
+- Normalize import of builtin modules to use the `node:` protocol.
 
 ## 7.26.36
 Tue, 30 Sep 2025 23:57:45 GMT

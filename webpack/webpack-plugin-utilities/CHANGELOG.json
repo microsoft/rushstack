@@ -2,6 +2,23 @@
   "name": "@rushstack/webpack-plugin-utilities",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@rushstack/webpack-plugin-utilities_v0.5.0",
+      "date": "Fri, 03 Oct 2025 20:10:00 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.94",
       "tag": "@rushstack/webpack-plugin-utilities_v0.4.94",
       "date": "Tue, 30 Sep 2025 23:57:45 GMT",

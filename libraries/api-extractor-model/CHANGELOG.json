@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.31.0",
+      "tag": "@microsoft/api-extractor-model_v7.31.0",
+      "date": "Fri, 03 Oct 2025 20:09:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Normalize import of builtin modules to use the `node:` protocol."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.16.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.30.9",
       "tag": "@microsoft/api-extractor-model_v7.30.9",
       "date": "Tue, 30 Sep 2025 23:57:45 GMT",
