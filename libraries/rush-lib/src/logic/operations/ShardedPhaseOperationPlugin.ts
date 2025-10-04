@@ -39,7 +39,7 @@ const TemplateStringRegexes = {
  */
 export class ShardedPhasedOperationPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.createOperations.tap(PLUGIN_NAME, spliceShards);
+    hooks.createOperationsAsync.tap(PLUGIN_NAME, spliceShards);
   }
 }
 
@@ -136,7 +136,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         project,
         displayName: collatorDisplayName,
         rushConfiguration,
-        commandToRun,
+        initialCommand: commandToRun,
+        incrementalCommand: undefined,
         customParameterValues: collatorParameters
       });
 
@@ -204,7 +205,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         shardOperation.runner = initializeShellOperationRunner({
           phase,
           project,
-          commandToRun: baseCommand,
+          initialCommand: baseCommand,
+          incrementalCommand: undefined,
           customParameterValues: shardedParameters,
           displayName: shardDisplayName,
           rushConfiguration

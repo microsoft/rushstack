@@ -471,6 +471,7 @@ export class RushCommandLineParser extends CommandLineParser {
         originalPhases: command.originalPhases,
         watchPhases: command.watchPhases,
         watchDebounceMs: command.watchDebounceMs ?? RushConstants.defaultWatchDebounceMs,
+        includeAllProjectsInWatchGraph: command.includeAllProjectsInWatchGraph || false,
         phases: commandLineConfiguration.phases,
 
         alwaysWatch: command.alwaysWatch,

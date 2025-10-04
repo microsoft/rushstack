@@ -362,6 +362,9 @@ importers:
       '@rushstack/rush-http-build-cache-plugin':
         specifier: workspace:*
         version: link:../../rush-plugins/rush-http-build-cache-plugin
+      '@rushstack/rush-serve-plugin':
+        specifier: workspace:*
+        version: link:../../rush-plugins/rush-serve-plugin
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -4630,6 +4633,9 @@ importers:
       '@rushstack/rush-sdk':
         specifier: workspace:*
         version: link:../../libraries/rush-sdk
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
@@ -4652,9 +4658,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/terminal':
-        specifier: workspace:*
-        version: link:../../libraries/terminal
       '@types/compression':
         specifier: ~1.7.2
         version: 1.7.5(@types/express@4.17.21)

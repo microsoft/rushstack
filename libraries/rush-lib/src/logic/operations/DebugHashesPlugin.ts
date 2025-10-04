@@ -5,7 +5,7 @@ import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
 import type { Operation } from './Operation';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IConfigurableOperation } from './IOperationExecutionResult';
 
 const PLUGIN_NAME: 'DebugHashesPlugin' = 'DebugHashesPlugin';
 
@@ -17,22 +17,24 @@ export class DebugHashesPlugin implements IPhasedCommandPlugin {
   }
 
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.beforeExecuteOperations.tap(
-      PLUGIN_NAME,
-      (operations: Map<Operation, IOperationExecutionResult>) => {
-        const terminal: ITerminal = this._terminal;
-        terminal.writeLine(Colorize.blue(`===== Begin Hash Computation =====`));
-        for (const [operation, record] of operations) {
-          terminal.writeLine(Colorize.cyan(`--- ${operation.name} ---`));
-          record.getStateHashComponents().forEach((component) => {
-            terminal.writeLine(component);
-          });
-          terminal.writeLine(Colorize.green(`Result: ${record.getStateHash()}`));
-          // Add a blank line between operations to visually separate them
-          terminal.writeLine();
+    hooks.executionManagerAsync.tap(PLUGIN_NAME, (executionManager) => {
+      executionManager.hooks.configureIteration.tap(
+        PLUGIN_NAME,
+        (operations: ReadonlyMap<Operation, IConfigurableOperation>) => {
+          const terminal: ITerminal = this._terminal;
+          terminal.writeLine(Colorize.blue(`===== Begin Hash Computation =====`));
+          for (const [operation, record] of operations) {
+            terminal.writeLine(Colorize.cyan(`--- ${operation.name} ---`));
+            record.getStateHashComponents().forEach((component) => {
+              terminal.writeLine(component);
+            });
+            terminal.writeLine(Colorize.green(`Result: ${record.getStateHash()}`));
+            // Add a blank line between operations to visually separate them
+            terminal.writeLine();
+          }
+          terminal.writeLine(Colorize.blue(`===== End Hash Computation =====`));
         }
-        terminal.writeLine(Colorize.blue(`===== End Hash Computation =====`));
-      }
-    );
+      );
+    });
   }
 }

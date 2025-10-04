@@ -7,6 +7,18 @@ import type { IOperationRunner } from './IOperationRunner';
 import type { IOperationSettings } from '../../api/RushProjectConfiguration';
 
 /**
+ * State for the `enabled` property of an `Operation`.
+ *
+ * - `true`: The operation should be executed if it or any dependencies changed.
+ * - `false`: The operation should be skipped.
+ * - `"ignore-dependency-changes"`: The operation should be executed if there are local changes in the project,
+ *   otherwise it should be skipped. This is useful for operations like "test" where you may want to skip
+ *   testing projects that haven't changed.
+ * @alpha
+ */
+export type OperationEnabledState = boolean | 'ignore-dependency-changes';
+
+/**
  * Options for constructing a new Operation.
  * @alpha
  */
@@ -20,6 +32,19 @@ export interface IOperationOptions {
    * The Rush project associated with this Operation
    */
   project: RushConfigurationProject;
+
+  /**
+   * If set to false, this operation will be skipped during evaluation (return OperationStatus.Skipped).
+   * This is useful for plugins to alter the scope of the operation graph across executions,
+   * e.g. to enable or disable unit test execution, or to include or exclude dependencies.
+   *
+   * The special value "ignore-dependency-changes" can be used to indicate that this operation should only
+   * be executed if there are local changes in the project. This is useful for operations like
+   * "test" where you may want to skip testing projects that haven't changed.
+   *
+   * The default value is `true`, meaning the operation will be executed if it or any dependencies change.
+   */
+  enabled?: OperationEnabledState;
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -92,7 +117,7 @@ export class Operation {
    *     should favor other, longer operations over it. An example might be an operation to unpack a cached
    *     output, or an operation using NullOperationRunner, which might use a value of 0.
    */
-  public weight: number = 1;
+  public weight: number;
 
   /**
    * Get the operation settings for this operation, defaults to the values defined in
@@ -104,8 +129,14 @@ export class Operation {
    * If set to false, this operation will be skipped during evaluation (return OperationStatus.Skipped).
    * This is useful for plugins to alter the scope of the operation graph across executions,
    * e.g. to enable or disable unit test execution, or to include or exclude dependencies.
+   *
+   * The special value "ignore-dependency-changes" can be used to indicate that this operation should only
+   * be executed if there are local changes in the project. This is useful for operations like
+   * "test" where you may want to skip testing projects that haven't changed.
+   *
+   * The default value is `true`, meaning the operation will be executed if it or any dependencies change.
    */
-  public enabled: boolean;
+  public enabled: OperationEnabledState;
 
   public constructor(options: IOperationOptions) {
     const { phase, project, runner, settings, logFilenameIdentifier } = options;
@@ -114,7 +145,8 @@ export class Operation {
     this.runner = runner;
     this.settings = settings;
     this.logFilenameIdentifier = logFilenameIdentifier;
-    this.enabled = true;
+    this.enabled = options.enabled ?? true;
+    this.weight = settings?.weight ?? 1;
   }
 
   /**

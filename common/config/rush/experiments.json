@@ -76,7 +76,7 @@
    * Enable this experiment if you want "rush" and "rushx" commands to resync injected dependencies
    * by invoking "pnpm-sync" during the build.
    */
-  "usePnpmSyncForInjectedDependencies": true
+  "usePnpmSyncForInjectedDependencies": true,
 
   /**
    * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
@@ -88,7 +88,7 @@
    * of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist
    * across invocations.
    */
-  // "useIPCScriptsInWatchMode": true,
+  "useIPCScriptsInWatchMode": true
 
   /**
    * (UNDER DEVELOPMENT) The Rush alerts feature provides a way to send announcements to engineers

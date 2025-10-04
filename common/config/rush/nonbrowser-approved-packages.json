@@ -307,6 +307,10 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/rush-serve-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/set-webpack-public-path-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },

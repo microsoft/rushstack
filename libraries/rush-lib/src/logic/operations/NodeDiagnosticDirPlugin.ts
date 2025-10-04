@@ -39,25 +39,27 @@ export class NodeDiagnosticDirPlugin implements IPhasedCommandPlugin {
       return diagnosticDir;
     };
 
-    hooks.createEnvironmentForOperation.tap(
-      PLUGIN_NAME,
-      (env: IEnvironment, record: IOperationExecutionResult) => {
-        const diagnosticDir: string | undefined = getDiagnosticDir(record.operation);
-        if (!diagnosticDir) {
+    hooks.executionManagerAsync.tap(PLUGIN_NAME, (executionManager) => {
+      executionManager.hooks.createEnvironmentForOperation.tap(
+        PLUGIN_NAME,
+        (env: IEnvironment, record: IOperationExecutionResult) => {
+          const diagnosticDir: string | undefined = getDiagnosticDir(record.operation);
+          if (!diagnosticDir) {
+            return env;
+          }
+
+          // Not all versions of NodeJS create the directory, so ensure it exists:
+          FileSystem.ensureFolder(diagnosticDir);
+
+          const { NODE_OPTIONS } = env;
+
+          const diagnosticDirEnv: string = `--diagnostic-dir="${diagnosticDir}"`;
+
+          env.NODE_OPTIONS = NODE_OPTIONS ? `${NODE_OPTIONS} ${diagnosticDirEnv}` : diagnosticDirEnv;
+
           return env;
         }
-
-        // Not all versions of NodeJS create the directory, so ensure it exists:
-        FileSystem.ensureFolder(diagnosticDir);
-
-        const { NODE_OPTIONS } = env;
-
-        const diagnosticDirEnv: string = `--diagnostic-dir="${diagnosticDir}"`;
-
-        env.NODE_OPTIONS = NODE_OPTIONS ? `${NODE_OPTIONS} ${diagnosticDirEnv}` : diagnosticDirEnv;
-
-        return env;
-      }
-    );
+      );
+    });
   }
 }

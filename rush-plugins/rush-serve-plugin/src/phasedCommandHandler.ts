@@ -54,13 +54,13 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
   const webSocketServerUpgrader: WebSocketServerUpgrader | undefined =
     tryEnableBuildStatusWebSocketServer(options);
 
-  command.hooks.createOperations.tapPromise(
+  command.hooks.createOperationsAsync.tapPromise(
     {
       name: PLUGIN_NAME,
       stage: -1
     },
     async (operations: Set<Operation>, context: ICreateOperationsContext) => {
-      if (!context.isInitial || !context.isWatch) {
+      if (!context.isWatch) {
         return operations;
       }
 
@@ -124,19 +124,21 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
 
       app.use(compression({}));
 
-      const selectedProjects: ReadonlySet<RushConfigurationProject> = context.projectSelection;
+      const relevantProjects: ReadonlySet<RushConfigurationProject> = context.generateFullGraph
+        ? new Set(context.rushConfiguration.projects)
+        : expandAllDependencies(context.projectSelection);
 
       const serveConfig: RushServeConfiguration = new RushServeConfiguration();
 
       const routingRules: IRoutingRule[] = await serveConfig.loadProjectConfigsAsync(
-        selectedProjects,
+        relevantProjects,
         logger.terminal,
         globalRoutingRules
       );
 
       const { logServePath } = options;
       if (logServePath) {
-        for (const project of selectedProjects) {
+        for (const project of relevantProjects) {
           const projectLogServePath: string = getLogServePathForProject(logServePath, project.packageName);
 
           routingRules.push({
@@ -239,9 +241,23 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
         (portParameter as unknown as { _value?: string })._value = `${activePort}`;
       }
 
+      logHost();
+
       return operations;
     }
   );
 
-  command.hooks.waitingForChanges.tap(PLUGIN_NAME, logHost);
+  command.hooks.executionManagerAsync.tap(PLUGIN_NAME, (manager) => {
+    manager.hooks.onWaitingForChanges.tap(PLUGIN_NAME, logHost);
+  });
+}
+
+function expandAllDependencies(projects: Iterable<RushConfigurationProject>): Set<RushConfigurationProject> {
+  const expanded: Set<RushConfigurationProject> = new Set(projects);
+  for (const project of expanded) {
+    for (const dependency of project.dependencyProjects) {
+      expanded.add(dependency);
+    }
+  }
+  return expanded;
 }

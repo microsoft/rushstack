@@ -3,13 +3,19 @@
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IPhase } from '../../api/CommandLineConfiguration';
-import { Operation } from './Operation';
+import { Operation, type OperationEnabledState } from './Operation';
 import type {
   ICreateOperationsContext,
+  IOperationExecutionManager,
+  IOperationExecutionManagerContext,
+  IOperationExecutionIterationOptions,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { IOperationSettings } from '../../api/RushProjectConfiguration';
+import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
+import { SUCCESS_STATUSES } from './OperationStatus';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 
 const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
 
@@ -19,14 +25,14 @@ const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
  */
 export class PhasedOperationPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.createOperations.tap(PLUGIN_NAME, createOperations);
+    hooks.createOperationsAsync.tap(PLUGIN_NAME, createOperations);
     // Configure operations later.
-    hooks.createOperations.tap(
+    hooks.executionManagerAsync.tap(
       {
         name: `${PLUGIN_NAME}.Configure`,
         stage: 1000
       },
-      configureOperations
+      configureExecutionManager
     );
   }
 }
@@ -35,14 +41,27 @@ function createOperations(
   existingOperations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const { phaseSelection, projectSelection, projectConfigurations } = context;
+  const {
+    phaseSelection: phases,
+    projectSelection: projects,
+    projectConfigurations,
+    changedProjectsOnly,
+    includePhaseDeps,
+    isIncrementalBuildAllowed,
+    generateFullGraph,
+    rushConfiguration
+  } = context;
 
   const operations: Map<string, Operation> = new Map();
 
-  // Create tasks for selected phases and projects
-  // This also creates the minimal set of dependencies needed
-  for (const phase of phaseSelection) {
-    for (const project of projectSelection) {
+  const defaultEnabledState: OperationEnabledState =
+    changedProjectsOnly && isIncrementalBuildAllowed ? 'ignore-dependency-changes' : true;
+
+  const projectUniverse: Iterable<RushConfigurationProject> = generateFullGraph
+    ? rushConfiguration.projects
+    : projects;
+  for (const phase of phases) {
+    for (const project of projectUniverse) {
       getOrCreateOperation(phase, project);
     }
   }
@@ -63,11 +82,19 @@ function createOperations(
       const operationSettings: IOperationSettings | undefined = projectConfigurations
         .get(project)
         ?.operationSettingsByOperationName.get(name);
+
+      const includedInSelection: boolean = phases.has(phase) && projects.has(project);
       operation = new Operation({
         project,
         phase,
         settings: operationSettings,
-        logFilenameIdentifier: logFilenameIdentifier
+        logFilenameIdentifier: logFilenameIdentifier,
+        enabled:
+          includePhaseDeps || includedInSelection
+            ? operationSettings?.ignoreChangedProjectsOnlyFlag
+              ? true
+              : defaultEnabledState
+            : false
       });
 
       operations.set(key, operation);
@@ -93,71 +120,73 @@ function createOperations(
   }
 }
 
-function configureOperations(operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> {
-  const {
-    changedProjectsOnly,
-    projectsInUnknownState: changedProjects,
-    phaseOriginal,
-    phaseSelection,
-    projectSelection,
-    includePhaseDeps,
-    isInitial
-  } = context;
+function configureExecutionManager(
+  executionManager: IOperationExecutionManager,
+  context: IOperationExecutionManagerContext
+): void {
+  executionManager.hooks.configureIteration.tap(
+    PLUGIN_NAME,
+    (
+      currentStates: ReadonlyMap<Operation, IConfigurableOperation>,
+      lastStates: ReadonlyMap<Operation, IOperationExecutionResult>,
+      iterationOptions: IOperationExecutionIterationOptions
+    ) => {
+      configureOperations(currentStates, lastStates, iterationOptions);
+    }
+  );
+}
 
-  const basePhases: ReadonlySet<IPhase> = includePhaseDeps ? phaseOriginal : phaseSelection;
+function shouldEnableOperation(
+  currentState: IConfigurableOperation,
+  lastState: IOperationExecutionResult | undefined,
+  inputsSnapshot?: IInputsSnapshot
+): boolean {
+  if (!lastState) {
+    return true;
+  }
 
-  // Grab all operations that were explicitly requested.
-  const operationsWithWork: Set<Operation> = new Set();
-  for (const operation of operations) {
-    const { associatedPhase, associatedProject } = operation;
-    if (basePhases.has(associatedPhase) && changedProjects.has(associatedProject)) {
-      operationsWithWork.add(operation);
+  if (!SUCCESS_STATUSES.has(lastState.status)) {
+    return true;
+  }
+
+  if (!inputsSnapshot) {
+    // Insufficient information to tell if a rebuild is needed, so assume yes.
+    return true;
+  }
+
+  const currentHashComponents: ReadonlyArray<string> = currentState.getStateHashComponents();
+  const lastHashComponents: ReadonlyArray<string> = lastState.getStateHashComponents();
+  if (currentHashComponents.length !== lastHashComponents.length) {
+    return true;
+  }
+
+  const localChangesOnly: boolean = currentState.operation.enabled === 'ignore-dependency-changes';
+
+  // In localChangesOnly mode, we ignore the components that come from dependencies, which are all but the last two
+  for (
+    let i: number = localChangesOnly ? currentHashComponents.length - 2 : 0;
+    i < currentHashComponents.length;
+    i++
+  ) {
+    if (currentHashComponents[i] !== lastHashComponents[i]) {
+      return true;
     }
   }
 
-  if (!isInitial && changedProjectsOnly) {
-    const potentiallyAffectedOperations: Set<Operation> = new Set(operationsWithWork);
-    for (const operation of potentiallyAffectedOperations) {
-      if (operation.settings?.ignoreChangedProjectsOnlyFlag) {
-        operationsWithWork.add(operation);
-      }
+  return false;
+}
 
-      for (const consumer of operation.consumers) {
-        potentiallyAffectedOperations.add(consumer);
-      }
-    }
-  } else {
-    // Add all operations that are selected that depend on the explicitly requested operations.
-    // This will mostly be relevant during watch; in initial runs it should not add any new operations.
-    for (const operation of operationsWithWork) {
-      for (const consumer of operation.consumers) {
-        operationsWithWork.add(consumer);
-      }
-    }
+function configureOperations(
+  currentStates: ReadonlyMap<Operation, IConfigurableOperation>,
+  lastStates: ReadonlyMap<Operation, IOperationExecutionResult>,
+  iterationOptions: IOperationExecutionIterationOptions
+): void {
+  for (const [operation, currentState] of currentStates) {
+    const lastState: IOperationExecutionResult | undefined = lastStates.get(operation);
+
+    currentState.enabled =
+      operation.enabled && shouldEnableOperation(currentState, lastState, iterationOptions.inputsSnapshot);
   }
-
-  if (includePhaseDeps) {
-    // Add all operations that are dependencies of the operations already scheduled.
-    for (const operation of operationsWithWork) {
-      for (const dependency of operation.dependencies) {
-        operationsWithWork.add(dependency);
-      }
-    }
-  }
-
-  for (const operation of operations) {
-    // Enable exactly the set of operations that are requested.
-    operation.enabled &&= operationsWithWork.has(operation);
-
-    if (!includePhaseDeps || !isInitial) {
-      const { associatedPhase, associatedProject } = operation;
-
-      // This filter makes the "unsafe" selections happen.
-      operation.enabled &&= phaseSelection.has(associatedPhase) && projectSelection.has(associatedProject);
-    }
-  }
-
-  return operations;
 }
 
 // Convert the [IPhase, RushConfigurationProject] into a value suitable for use as a Map key

@@ -2,15 +2,18 @@
 // See LICENSE in the project root for license information.
 
 import { Async, FileSystem } from '@rushstack/node-core-library';
-import { _OperationBuildCache as OperationBuildCache } from '@rushstack/rush-sdk';
+import {
+  _OperationBuildCache as OperationBuildCache,
+  OperationStatus,
+  type Operation,
+  type IOperationExecutionResult,
+  type IOperationExecutionIterationOptions
+} from '@rushstack/rush-sdk';
 import type {
-  ICreateOperationsContext,
-  IExecuteOperationsContext,
   ILogger,
-  IOperationExecutionResult,
+  IBaseOperationExecutionResult,
   IPhasedCommand,
   IRushPlugin,
-  Operation,
   RushSession
 } from '@rushstack/rush-sdk';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
@@ -46,136 +49,113 @@ export class BridgeCachePlugin implements IRushPlugin {
 
   public apply(session: RushSession): void {
     session.hooks.runAnyPhasedCommand.tapPromise(PLUGIN_NAME, async (command: IPhasedCommand) => {
-      const logger: ILogger = session.getLogger(PLUGIN_NAME);
+      command.hooks.executionManagerAsync.tap(PLUGIN_NAME, async (executionManager, context) => {
+        const { customParameters, buildCacheConfiguration } = context;
+        const cacheAction: CacheAction | undefined = this._getCacheAction(customParameters);
 
-      let cacheAction: CacheAction | undefined;
-      let requireOutputFolders: boolean = false;
-
-      // cancel the actual operations. We don't want to run the command, just cache the output folders on disk
-      command.hooks.createOperations.tap(
-        { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
-        (operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> => {
-          const { customParameters } = context;
-          cacheAction = this._getCacheAction(customParameters);
-
-          if (cacheAction !== undefined) {
-            if (!context.buildCacheConfiguration?.buildCacheEnabled) {
-              throw new Error(
-                `The build cache must be enabled to use the "${this._actionParameterName}" parameter.`
-              );
-            }
-
-            for (const operation of operations) {
-              operation.enabled = false;
-            }
-
-            requireOutputFolders = this._isRequireOutputFoldersFlagSet(customParameters);
-          }
-
-          return operations;
-        }
-      );
-      // populate the cache for each operation
-      command.hooks.beforeExecuteOperations.tapPromise(
-        PLUGIN_NAME,
-        async (
-          recordByOperation: Map<Operation, IOperationExecutionResult>,
-          context: IExecuteOperationsContext
-        ): Promise<void> => {
-          const { buildCacheConfiguration } = context;
-          const { terminal } = logger;
-
-          if (cacheAction === undefined) {
-            return;
-          }
-
+        if (cacheAction !== undefined) {
           if (!buildCacheConfiguration?.buildCacheEnabled) {
             throw new Error(
               `The build cache must be enabled to use the "${this._actionParameterName}" parameter.`
             );
           }
 
-          const filteredOperations: Set<IOperationExecutionResult> = new Set();
-          for (const operationExecutionResult of recordByOperation.values()) {
-            if (!operationExecutionResult.operation.isNoOp) {
-              filteredOperations.add(operationExecutionResult);
-            }
-          }
+          const logger: ILogger = session.getLogger(PLUGIN_NAME);
+          const { terminal } = logger;
+          const requireOutputFolders: boolean = this._isRequireOutputFoldersFlagSet(customParameters);
 
-          let successCount: number = 0;
-
-          await Async.forEachAsync(
-            filteredOperations,
-            async (operationExecutionResult: IOperationExecutionResult) => {
-              const projectBuildCache: OperationBuildCache = OperationBuildCache.forOperation(
-                operationExecutionResult,
-                {
-                  buildCacheConfiguration,
-                  terminal
-                }
-              );
-
-              const { operation } = operationExecutionResult;
-
-              if (cacheAction === CACHE_ACTION_READ) {
-                const success: boolean = await projectBuildCache.tryRestoreFromCacheAsync(terminal);
-                if (success) {
-                  ++successCount;
-                  terminal.writeLine(
-                    `Operation "${operation.name}": Outputs have been restored from the build cache."`
-                  );
-                  terminal.writeLine(`Cache key: ${projectBuildCache.cacheId}`);
-                } else {
-                  terminal.writeWarningLine(
-                    `Operation "${operation.name}": Outputs could not be restored from the build cache.`
-                  );
-                }
-              } else if (cacheAction === CACHE_ACTION_WRITE) {
-                // if the require output folders flag has been passed, skip populating the cache if any of the expected output folders does not exist
-                if (
-                  requireOutputFolders &&
-                  operation.settings?.outputFolderNames &&
-                  operation.settings?.outputFolderNames?.length > 0
-                ) {
-                  const projectFolder: string = operation.associatedProject?.projectFolder;
-                  const missingFolders: string[] = [];
-                  operation.settings.outputFolderNames.forEach((outputFolderName: string) => {
-                    if (!FileSystem.exists(`${projectFolder}/${outputFolderName}`)) {
-                      missingFolders.push(outputFolderName);
-                    }
-                  });
-                  if (missingFolders.length > 0) {
-                    terminal.writeWarningLine(
-                      `Operation "${operation.name}": The following output folders do not exist: "${missingFolders.join('", "')}". Skipping cache population.`
-                    );
-                    return;
-                  }
-                }
-
-                const success: boolean = await projectBuildCache.trySetCacheEntryAsync(terminal);
-                if (success) {
-                  ++successCount;
-                  terminal.writeLine(
-                    `Operation "${operation.name}": Existing outputs have been successfully written to the build cache."`
-                  );
-                  terminal.writeLine(`Cache key: ${projectBuildCache.cacheId}`);
-                } else {
-                  terminal.writeErrorLine(
-                    `Operation "${operation.name}": An error occurred while writing existing outputs to the build cache.`
-                  );
+          executionManager.hooks.beforeExecuteIterationAsync.tapPromise(
+            PLUGIN_NAME,
+            async (
+              operationRecords: ReadonlyMap<Operation, IOperationExecutionResult>,
+              iterationOptions: IOperationExecutionIterationOptions
+            ): Promise<OperationStatus | undefined> => {
+              const filteredOperations: IBaseOperationExecutionResult[] = [];
+              for (const record of operationRecords.values()) {
+                if (!record.operation.isNoOp) {
+                  filteredOperations.push(record);
                 }
               }
-            },
-            {
-              concurrency: context.parallelism
+
+              if (!filteredOperations.length) {
+                return; // nothing to do, continue normal execution
+              }
+
+              let successCount: number = 0;
+              await Async.forEachAsync(
+                filteredOperations,
+                async (operationExecutionResult: IBaseOperationExecutionResult) => {
+                  const projectBuildCache: OperationBuildCache = OperationBuildCache.forOperation(
+                    operationExecutionResult,
+                    {
+                      buildCacheConfiguration,
+                      terminal
+                    }
+                  );
+
+                  const { operation } = operationExecutionResult;
+
+                  if (cacheAction === CACHE_ACTION_READ) {
+                    const success: boolean = await projectBuildCache.tryRestoreFromCacheAsync(terminal);
+                    if (success) {
+                      ++successCount;
+                      terminal.writeLine(
+                        `Operation "${operation.name}": Outputs have been restored from the build cache."`
+                      );
+                      terminal.writeLine(`Cache key: ${projectBuildCache.cacheId}`);
+                    } else {
+                      terminal.writeWarningLine(
+                        `Operation "${operation.name}": Outputs could not be restored from the build cache.`
+                      );
+                    }
+                  } else if (cacheAction === CACHE_ACTION_WRITE) {
+                    if (
+                      requireOutputFolders &&
+                      operation.settings?.outputFolderNames &&
+                      operation.settings?.outputFolderNames?.length > 0
+                    ) {
+                      const projectFolder: string = operation.associatedProject?.projectFolder;
+                      const missingFolders: string[] = [];
+                      operation.settings.outputFolderNames.forEach((outputFolderName: string) => {
+                        if (!FileSystem.exists(`${projectFolder}/${outputFolderName}`)) {
+                          missingFolders.push(outputFolderName);
+                        }
+                      });
+                      if (missingFolders.length > 0) {
+                        terminal.writeWarningLine(
+                          `Operation "${operation.name}": The following output folders do not exist: "${missingFolders.join('", "')}". Skipping cache population.`
+                        );
+                        return;
+                      }
+                    }
+
+                    const success: boolean = await projectBuildCache.trySetCacheEntryAsync(terminal);
+                    if (success) {
+                      ++successCount;
+                      terminal.writeLine(
+                        `Operation "${operation.name}": Existing outputs have been successfully written to the build cache."`
+                      );
+                      terminal.writeLine(`Cache key: ${projectBuildCache.cacheId}`);
+                    } else {
+                      terminal.writeErrorLine(
+                        `Operation "${operation.name}": An error occurred while writing existing outputs to the build cache.`
+                      );
+                    }
+                  }
+                },
+                { concurrency: context.parallelism }
+              );
+
+              terminal.writeLine(
+                `Cache operation "${cacheAction}" completed successfully for ${successCount} out of ${filteredOperations.length} operations.`
+              );
+
+              // Bail out with a status indicating success; treat cache read as FromCache.
+              return cacheAction === CACHE_ACTION_READ ? OperationStatus.FromCache : OperationStatus.Success;
             }
           );
-
-          terminal.writeLine(
-            `Cache operation "${cacheAction}" completed successfully for ${successCount} out of ${filteredOperations.size} operations.`
-          );
         }
-      );
+      });
     });
   }
 

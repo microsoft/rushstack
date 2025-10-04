@@ -235,7 +235,10 @@ export class SelectionParameterSet {
    *
    * If no parameters are specified, returns all projects in the Rush config file.
    */
-  public async getSelectedProjectsAsync(terminal: ITerminal): Promise<Set<RushConfigurationProject>> {
+  public async getSelectedProjectsAsync(
+    terminal: ITerminal,
+    allowEmptySelection?: boolean
+  ): Promise<Set<RushConfigurationProject>> {
     // Hack out the old version-policy parameters
     for (const value of this._fromVersionPolicy.values) {
       (this._fromProject.values as string[]).push(`version-policy:${value}`);
@@ -260,7 +263,7 @@ export class SelectionParameterSet {
 
     // If no selection parameters are specified, return everything
     if (!isSelectionSpecified) {
-      return new Set(this._rushConfiguration.projects);
+      return allowEmptySelection ? new Set() : new Set(this._rushConfiguration.projects);
     }
 
     const [

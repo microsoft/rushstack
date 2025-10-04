@@ -27,7 +27,9 @@ import type { Operation } from './Operation';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type {
-  IExecuteOperationsContext,
+  IOperationExecutionManager,
+  IOperationExecutionManagerContext,
+  IOperationExecutionIterationOptions,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
@@ -84,457 +86,478 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
     const { allowWarningsInSuccessfulBuild, buildCacheConfiguration, cobuildConfiguration } = this._options;
 
-    hooks.beforeExecuteOperations.tap(
+    hooks.executionManagerAsync.tap(
       PLUGIN_NAME,
-      (
-        recordByOperation: Map<Operation, IOperationExecutionResult>,
-        context: IExecuteOperationsContext
-      ): void => {
-        const { isIncrementalBuildAllowed, inputsSnapshot, projectConfigurations, isInitial } = context;
+      (executionManager: IOperationExecutionManager, context: IOperationExecutionManagerContext) => {
+        executionManager.hooks.beforeExecuteIterationAsync.tap(
+          PLUGIN_NAME,
+          (
+            recordByOperation: ReadonlyMap<Operation, IOperationExecutionResult>,
+            iterationOptions: IOperationExecutionIterationOptions
+          ): undefined => {
+            const { inputsSnapshot } = iterationOptions;
+            const { isIncrementalBuildAllowed, projectConfigurations } = context;
 
-        if (!inputsSnapshot) {
-          throw new Error(
-            `Build cache is only supported if running in a Git repository. Either disable the build cache or run Rush in a Git repository.`
-          );
-        }
+            const isInitial: boolean = executionManager.lastExecutionResults.size === 0;
 
-        const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildFeatureEnabled
-          ? new DisjointSet()
-          : undefined;
-
-        for (const [operation, record] of recordByOperation) {
-          const { associatedProject, associatedPhase, runner, settings: operationSettings } = operation;
-          if (!runner) {
-            return;
-          }
-
-          const { name: phaseName } = associatedPhase;
-
-          const projectConfiguration: RushProjectConfiguration | undefined =
-            projectConfigurations.get(associatedProject);
-
-          // This value can *currently* be cached per-project, but in the future the list of files will vary
-          // depending on the selected phase.
-          const fileHashes: ReadonlyMap<string, string> | undefined =
-            inputsSnapshot.getTrackedFileHashesForOperation(associatedProject, phaseName);
-
-          const cacheDisabledReason: string | undefined = projectConfiguration
-            ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, operation.isNoOp)
-            : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-              'or one provided by a rig, so it does not support caching.';
-
-          const metadataFolderPath: string | undefined = record.metadataFolderPath;
-
-          const outputFolderNames: string[] = metadataFolderPath ? [metadataFolderPath] : [];
-          const configuredOutputFolderNames: string[] | undefined = operationSettings?.outputFolderNames;
-          if (configuredOutputFolderNames) {
-            for (const folderName of configuredOutputFolderNames) {
-              outputFolderNames.push(folderName);
-            }
-          }
-
-          disjointSet?.add(operation);
-
-          const buildCacheContext: IOperationBuildCacheContext = {
-            // Supports cache writes by default for initial operations.
-            // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
-            isCacheWriteAllowed: isInitial,
-            isCacheReadAllowed: isIncrementalBuildAllowed,
-            operationBuildCache: undefined,
-            outputFolderNames,
-            cacheDisabledReason,
-            cobuildLock: undefined,
-            cobuildClusterId: undefined,
-            buildCacheTerminal: undefined,
-            buildCacheTerminalWritable: undefined,
-            periodicCallback: new PeriodicCallback({
-              interval: PERIODIC_CALLBACK_INTERVAL_IN_SECONDS * 1000
-            }),
-            cacheRestored: false,
-            isCacheReadAttempted: false
-          };
-          // Upstream runners may mutate the property of build cache context for downstream runners
-          this._buildCacheContextByOperation.set(operation, buildCacheContext);
-        }
-
-        if (disjointSet) {
-          clusterOperations(disjointSet, this._buildCacheContextByOperation);
-          for (const operationSet of disjointSet.getAllSets()) {
-            if (cobuildConfiguration?.cobuildFeatureEnabled && cobuildConfiguration.cobuildContextId) {
-              // Get a deterministic ordered array of operations, which is important to get a deterministic cluster id.
-              const groupedOperations: Operation[] = Array.from(operationSet);
-              Sort.sortBy(groupedOperations, (operation: Operation) => {
-                return operation.name;
-              });
-
-              // Generates cluster id, cluster id comes from the project folder and operation name of all operations in the same cluster.
-              const hash: crypto.Hash = crypto.createHash('sha1');
-              for (const operation of groupedOperations) {
-                const { associatedPhase: phase, associatedProject: project } = operation;
-                hash.update(project.projectRelativeFolder);
-                hash.update(RushConstants.hashDelimiter);
-                hash.update(operation.name ?? phase.name);
-                hash.update(RushConstants.hashDelimiter);
-              }
-              const cobuildClusterId: string = hash.digest('hex');
-
-              // Assign same cluster id to all operations in the same cluster.
-              for (const record of groupedOperations) {
-                const buildCacheContext: IOperationBuildCacheContext =
-                  this._getBuildCacheContextByOperationOrThrow(record);
-                buildCacheContext.cobuildClusterId = cobuildClusterId;
-              }
-            }
-          }
-        }
-      }
-    );
-
-    hooks.beforeExecuteOperation.tapPromise(
-      PLUGIN_NAME,
-      async (
-        runnerContext: IOperationRunnerContext & IOperationExecutionResult
-      ): Promise<OperationStatus | undefined> => {
-        if (this._buildCacheContextByOperation.size === 0) {
-          return;
-        }
-
-        const buildCacheContext: IOperationBuildCacheContext | undefined =
-          this._getBuildCacheContextByOperation(runnerContext.operation);
-
-        if (!buildCacheContext) {
-          return;
-        }
-
-        const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
-
-        const {
-          associatedProject: project,
-          associatedPhase: phase,
-          runner,
-          _operationMetadataManager: operationMetadataManager,
-          operation
-        } = record;
-
-        if (!operation.enabled || !runner?.cacheable) {
-          return;
-        }
-
-        const runBeforeExecute = async (): Promise<OperationStatus | undefined> => {
-          if (
-            !buildCacheContext.buildCacheTerminal ||
-            buildCacheContext.buildCacheTerminalWritable?.isOpen === false
-          ) {
-            // The writable does not exist or has been closed, re-create one
-            // eslint-disable-next-line require-atomic-updates
-            buildCacheContext.buildCacheTerminal = await this._createBuildCacheTerminalAsync({
-              record,
-              buildCacheContext,
-              buildCacheEnabled: buildCacheConfiguration?.buildCacheEnabled,
-              rushProject: project,
-              logFilenameIdentifier: operation.logFilenameIdentifier,
-              quietMode: record.quietMode,
-              debugMode: record.debugMode
-            });
-          }
-
-          const buildCacheTerminal: ITerminal = buildCacheContext.buildCacheTerminal;
-
-          let operationBuildCache: OperationBuildCache | undefined = this._tryGetOperationBuildCache({
-            buildCacheContext,
-            buildCacheConfiguration,
-            terminal: buildCacheTerminal,
-            record
-          });
-
-          // Try to acquire the cobuild lock
-          let cobuildLock: CobuildLock | undefined;
-          if (cobuildConfiguration?.cobuildFeatureEnabled) {
-            if (
-              cobuildConfiguration?.cobuildLeafProjectLogOnlyAllowed &&
-              operation.consumers.size === 0 &&
-              !operationBuildCache
-            ) {
-              // When the leaf project log only is allowed and the leaf project is build cache "disabled", try to get
-              // a log files only project build cache
-              operationBuildCache = await this._tryGetLogOnlyOperationBuildCacheAsync({
-                buildCacheConfiguration,
-                cobuildConfiguration,
-                buildCacheContext,
-                record,
-                terminal: buildCacheTerminal
-              });
-              if (operationBuildCache) {
-                buildCacheTerminal.writeVerboseLine(
-                  `Log files only build cache is enabled for the project "${project.packageName}" because the cobuild leaf project log only is allowed`
-                );
-              } else {
-                buildCacheTerminal.writeWarningLine(
-                  `Failed to get log files only build cache for the project "${project.packageName}"`
-                );
-              }
-            }
-
-            cobuildLock = await this._tryGetCobuildLockAsync({
-              buildCacheContext,
-              operationBuildCache,
-              cobuildConfiguration,
-              packageName: project.packageName,
-              phaseName: phase.name
-            });
-          }
-
-          // eslint-disable-next-line require-atomic-updates -- we are mutating the build cache context intentionally
-          buildCacheContext.cobuildLock = cobuildLock;
-
-          // If possible, we want to skip this operation -- either by restoring it from the
-          // cache, if caching is enabled, or determining that the project
-          // is unchanged (using the older incremental execution logic). These two approaches,
-          // "caching" and "skipping", are incompatible, so only one applies.
-          //
-          // Note that "caching" and "skipping" take two different approaches
-          // to tracking dependents:
-          //
-          //   - For caching, "isCacheReadAllowed" is set if a project supports
-          //     incremental builds, and determining whether this project or a dependent
-          //     has changed happens inside the hashing logic.
-          //
-
-          const { error: errorLogPath } = getProjectLogFilePaths({
-            project,
-            logFilenameIdentifier: operation.logFilenameIdentifier
-          });
-          const restoreCacheAsync = async (
-            // TODO: Investigate if `operationBuildCacheForRestore` is always the same instance as `operationBuildCache`
-            // above, and if it is, remove this parameter
-            operationBuildCacheForRestore: OperationBuildCache | undefined,
-            specifiedCacheId?: string
-          ): Promise<boolean> => {
-            buildCacheContext.isCacheReadAttempted = true;
-            const restoreFromCacheSuccess: boolean | undefined =
-              await operationBuildCacheForRestore?.tryRestoreFromCacheAsync(
-                buildCacheTerminal,
-                specifiedCacheId
+            if (!inputsSnapshot) {
+              throw new Error(
+                `Build cache is only supported if running in a Git repository. Either disable the build cache or run Rush in a Git repository.`
               );
-            if (restoreFromCacheSuccess) {
-              buildCacheContext.cacheRestored = true;
-              await runnerContext.runWithTerminalAsync(
-                async (taskTerminal, terminalProvider) => {
-                  // Restore the original state of the operation without cache
-                  await operationMetadataManager?.tryRestoreAsync({
-                    terminalProvider,
-                    terminal: buildCacheTerminal,
-                    errorLogPath,
-                    cobuildContextId: cobuildConfiguration?.cobuildContextId,
-                    cobuildRunnerId: cobuildConfiguration?.cobuildRunnerId
+            }
+
+            const disjointSet: DisjointSet<Operation> | undefined =
+              cobuildConfiguration?.cobuildFeatureEnabled ? new DisjointSet() : undefined;
+
+            for (const [operation, record] of recordByOperation) {
+              const { associatedProject, associatedPhase, runner, settings: operationSettings } = operation;
+              if (!runner) {
+                return;
+              }
+
+              const { name: phaseName } = associatedPhase;
+
+              const projectConfiguration: RushProjectConfiguration | undefined =
+                projectConfigurations.get(associatedProject);
+
+              // This value can *currently* be cached per-project, but in the future the list of files will vary
+              // depending on the selected phase.
+              const fileHashes: ReadonlyMap<string, string> | undefined =
+                inputsSnapshot.getTrackedFileHashesForOperation(associatedProject, phaseName);
+
+              const cacheDisabledReason: string | undefined = projectConfiguration
+                ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, operation.isNoOp)
+                : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
+                  'or one provided by a rig, so it does not support caching.';
+
+              const metadataFolderPath: string | undefined = record.metadataFolderPath;
+
+              const outputFolderNames: string[] = metadataFolderPath ? [metadataFolderPath] : [];
+              const configuredOutputFolderNames: string[] | undefined = operationSettings?.outputFolderNames;
+              if (configuredOutputFolderNames) {
+                for (const folderName of configuredOutputFolderNames) {
+                  outputFolderNames.push(folderName);
+                }
+              }
+
+              disjointSet?.add(operation);
+
+              const buildCacheContext: IOperationBuildCacheContext = {
+                // Supports cache writes by default for initial operations.
+                // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
+                isCacheWriteAllowed: isInitial,
+                isCacheReadAllowed: isIncrementalBuildAllowed,
+                operationBuildCache: undefined,
+                outputFolderNames,
+                cacheDisabledReason,
+                cobuildLock: undefined,
+                cobuildClusterId: undefined,
+                buildCacheTerminal: undefined,
+                buildCacheTerminalWritable: undefined,
+                periodicCallback: new PeriodicCallback({
+                  interval: PERIODIC_CALLBACK_INTERVAL_IN_SECONDS * 1000
+                }),
+                cacheRestored: false,
+                isCacheReadAttempted: false
+              };
+              // Upstream runners may mutate the property of build cache context for downstream runners
+              this._buildCacheContextByOperation.set(operation, buildCacheContext);
+            }
+
+            if (disjointSet) {
+              clusterOperations(disjointSet, this._buildCacheContextByOperation);
+              for (const operationSet of disjointSet.getAllSets()) {
+                if (cobuildConfiguration?.cobuildFeatureEnabled && cobuildConfiguration.cobuildContextId) {
+                  // Get a deterministic ordered array of operations, which is important to get a deterministic cluster id.
+                  const groupedOperations: Operation[] = Array.from(operationSet);
+                  Sort.sortBy(groupedOperations, (operation: Operation) => {
+                    return operation.name;
                   });
-                },
-                { createLogFile: false }
-              );
-            }
-            return !!restoreFromCacheSuccess;
-          };
-          if (cobuildLock) {
-            // handling rebuilds. "rush rebuild" or "rush retest" command will save operations to
-            // the build cache once completed, but does not retrieve them (since the "incremental"
-            // flag is disabled). However, we still need a cobuild to be able to retrieve a finished
-            // build from another cobuild in this case.
-            const cobuildCompletedState: ICobuildCompletedState | undefined =
-              await cobuildLock.getCompletedStateAsync();
-            if (cobuildCompletedState) {
-              const { status, cacheId } = cobuildCompletedState;
 
-              if (record.operation.settings?.allowCobuildWithoutCache) {
-                // This should only be enabled if the experiment for cobuild orchestration is enabled.
-                return status;
+                  // Generates cluster id, cluster id comes from the project folder and operation name of all operations in the same cluster.
+                  const hash: crypto.Hash = crypto.createHash('sha1');
+                  for (const operation of groupedOperations) {
+                    const { associatedPhase: phase, associatedProject: project } = operation;
+                    hash.update(project.projectRelativeFolder);
+                    hash.update(RushConstants.hashDelimiter);
+                    hash.update(operation.name ?? phase.name);
+                    hash.update(RushConstants.hashDelimiter);
+                  }
+                  const cobuildClusterId: string = hash.digest('hex');
+
+                  // Assign same cluster id to all operations in the same cluster.
+                  for (const record of groupedOperations) {
+                    const buildCacheContext: IOperationBuildCacheContext =
+                      this._getBuildCacheContextByOperationOrThrow(record);
+                    buildCacheContext.cobuildClusterId = cobuildClusterId;
+                  }
+                }
               }
-
-              const restoreFromCacheSuccess: boolean = await restoreCacheAsync(
-                cobuildLock.operationBuildCache,
-                cacheId
-              );
-
-              if (restoreFromCacheSuccess) {
-                return status;
-              }
-            } else if (!buildCacheContext.isCacheReadAttempted && buildCacheContext.isCacheReadAllowed) {
-              const restoreFromCacheSuccess: boolean = await restoreCacheAsync(operationBuildCache);
-
-              if (restoreFromCacheSuccess) {
-                return OperationStatus.FromCache;
-              }
-            }
-          } else if (buildCacheContext.isCacheReadAllowed) {
-            const restoreFromCacheSuccess: boolean = await restoreCacheAsync(operationBuildCache);
-
-            if (restoreFromCacheSuccess) {
-              return OperationStatus.FromCache;
             }
           }
+        );
 
-          if (buildCacheContext.isCacheWriteAllowed && cobuildLock) {
-            const acquireSuccess: boolean = await cobuildLock.tryAcquireLockAsync();
-            if (acquireSuccess) {
-              const { periodicCallback } = buildCacheContext;
-              periodicCallback.addCallback(async () => {
-                await cobuildLock?.renewLockAsync();
-              });
-              periodicCallback.start();
-            } else {
-              setTimeout(() => {
-                record.status = OperationStatus.Ready;
-              }, 500);
-              return OperationStatus.Executing;
+        executionManager.hooks.beforeExecuteOperationAsync.tapPromise(
+          PLUGIN_NAME,
+          async (
+            runnerContext: IOperationRunnerContext & IOperationExecutionResult
+          ): Promise<OperationStatus | undefined> => {
+            if (this._buildCacheContextByOperation.size === 0) {
+              return;
             }
-          }
-        };
 
-        return await runBeforeExecute();
-      }
-    );
+            const buildCacheContext: IOperationBuildCacheContext | undefined =
+              this._getBuildCacheContextByOperation(runnerContext.operation);
 
-    hooks.afterExecuteOperation.tapPromise(
-      PLUGIN_NAME,
-      async (runnerContext: IOperationRunnerContext): Promise<void> => {
-        const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
-        const { status, stopwatch, _operationMetadataManager: operationMetadataManager, operation } = record;
+            if (!buildCacheContext) {
+              return;
+            }
 
-        const { associatedProject: project, runner, enabled } = operation;
+            const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
 
-        if (!enabled || !runner?.cacheable) {
-          return;
-        }
-
-        const buildCacheContext: IOperationBuildCacheContext | undefined =
-          this._getBuildCacheContextByOperation(operation);
-
-        if (!buildCacheContext) {
-          return;
-        }
-
-        // No need to run for the following operation status
-        if (!record.isTerminal || record.status === OperationStatus.NoOp) {
-          return;
-        }
-
-        const { cobuildLock, operationBuildCache, isCacheWriteAllowed, buildCacheTerminal, cacheRestored } =
-          buildCacheContext;
-
-        try {
-          if (!cacheRestored) {
-            // Save the metadata to disk
-            const { logFilenameIdentifier } = operationMetadataManager;
-            const { duration: durationInSeconds } = stopwatch;
             const {
-              text: logPath,
-              error: errorLogPath,
-              jsonl: logChunksPath
-            } = getProjectLogFilePaths({
-              project,
-              logFilenameIdentifier
-            });
-            await operationMetadataManager.saveAsync({
-              durationInSeconds,
-              cobuildContextId: cobuildLock?.cobuildConfiguration.cobuildContextId,
-              cobuildRunnerId: cobuildLock?.cobuildConfiguration.cobuildRunnerId,
-              logPath,
-              errorLogPath,
-              logChunksPath
-            });
-          }
+              associatedProject: project,
+              associatedPhase: phase,
+              runner,
+              _operationMetadataManager: operationMetadataManager,
+              operation
+            } = record;
 
-          if (!buildCacheTerminal) {
-            // This should not happen
-            throw new InternalError(`Build Cache Terminal is not created`);
-          }
-
-          let setCompletedStatePromiseFunction: (() => Promise<void> | undefined) | undefined;
-          let setCacheEntryPromise: (() => Promise<boolean> | undefined) | undefined;
-          if (cobuildLock && isCacheWriteAllowed) {
-            const { cacheId, contextId } = cobuildLock.cobuildContext;
-
-            let finalCacheId: string = cacheId;
-            if (status === OperationStatus.Failure) {
-              finalCacheId = `${cacheId}-${contextId}-failed`;
-            } else if (status === OperationStatus.SuccessWithWarning && !record.runner.warningsAreAllowed) {
-              finalCacheId = `${cacheId}-${contextId}-warnings`;
+            if (!record.enabled || !runner?.cacheable) {
+              return;
             }
-            switch (status) {
-              case OperationStatus.SuccessWithWarning:
-              case OperationStatus.Success:
-              case OperationStatus.Failure: {
-                const currentStatus: ICobuildCompletedState['status'] = status;
-                setCompletedStatePromiseFunction = () => {
-                  return cobuildLock?.setCompletedStateAsync({
-                    status: currentStatus,
-                    cacheId: finalCacheId
+
+            const runBeforeExecute = async (): Promise<OperationStatus | undefined> => {
+              if (
+                !buildCacheContext.buildCacheTerminal ||
+                buildCacheContext.buildCacheTerminalWritable?.isOpen === false
+              ) {
+                // The writable does not exist or has been closed, re-create one
+                // eslint-disable-next-line require-atomic-updates
+                buildCacheContext.buildCacheTerminal = await this._createBuildCacheTerminalAsync({
+                  record,
+                  buildCacheContext,
+                  buildCacheEnabled: buildCacheConfiguration?.buildCacheEnabled,
+                  rushProject: project,
+                  logFilenameIdentifier: operation.logFilenameIdentifier,
+                  quietMode: record.quietMode,
+                  debugMode: record.debugMode
+                });
+              }
+
+              const buildCacheTerminal: ITerminal = buildCacheContext.buildCacheTerminal;
+
+              let operationBuildCache: OperationBuildCache | undefined = this._tryGetOperationBuildCache({
+                buildCacheContext,
+                buildCacheConfiguration,
+                terminal: buildCacheTerminal,
+                record
+              });
+
+              // Try to acquire the cobuild lock
+              let cobuildLock: CobuildLock | undefined;
+              if (cobuildConfiguration?.cobuildFeatureEnabled) {
+                if (
+                  cobuildConfiguration?.cobuildLeafProjectLogOnlyAllowed &&
+                  operation.consumers.size === 0 &&
+                  !operationBuildCache
+                ) {
+                  // When the leaf project log only is allowed and the leaf project is build cache "disabled", try to get
+                  // a log files only project build cache
+                  operationBuildCache = await this._tryGetLogOnlyOperationBuildCacheAsync({
+                    buildCacheConfiguration,
+                    cobuildConfiguration,
+                    buildCacheContext,
+                    record,
+                    terminal: buildCacheTerminal
                   });
-                };
-                setCacheEntryPromise = () =>
-                  cobuildLock.operationBuildCache.trySetCacheEntryAsync(buildCacheTerminal, finalCacheId);
+                  if (operationBuildCache) {
+                    buildCacheTerminal.writeVerboseLine(
+                      `Log files only build cache is enabled for the project "${project.packageName}" because the cobuild leaf project log only is allowed`
+                    );
+                  } else {
+                    buildCacheTerminal.writeWarningLine(
+                      `Failed to get log files only build cache for the project "${project.packageName}"`
+                    );
+                  }
+                }
+
+                cobuildLock = await this._tryGetCobuildLockAsync({
+                  buildCacheContext,
+                  operationBuildCache,
+                  cobuildConfiguration,
+                  packageName: project.packageName,
+                  phaseName: phase.name
+                });
+              }
+
+              // eslint-disable-next-line require-atomic-updates -- we are mutating the build cache context intentionally
+              buildCacheContext.cobuildLock = cobuildLock;
+
+              // If possible, we want to skip this operation -- either by restoring it from the
+              // cache, if caching is enabled, or determining that the project
+              // is unchanged (using the older incremental execution logic). These two approaches,
+              // "caching" and "skipping", are incompatible, so only one applies.
+              //
+              // Note that "caching" and "skipping" take two different approaches
+              // to tracking dependents:
+              //
+              //   - For caching, "isCacheReadAllowed" is set if a project supports
+              //     incremental builds, and determining whether this project or a dependent
+              //     has changed happens inside the hashing logic.
+              //
+
+              const { error: errorLogPath } = getProjectLogFilePaths({
+                project,
+                logFilenameIdentifier: operation.logFilenameIdentifier
+              });
+              const restoreCacheAsync = async (
+                // TODO: Investigate if `operationBuildCacheForRestore` is always the same instance as `operationBuildCache`
+                // above, and if it is, remove this parameter
+                operationBuildCacheForRestore: OperationBuildCache | undefined,
+                specifiedCacheId?: string
+              ): Promise<boolean> => {
+                buildCacheContext.isCacheReadAttempted = true;
+                const restoreFromCacheSuccess: boolean | undefined =
+                  await operationBuildCacheForRestore?.tryRestoreFromCacheAsync(
+                    buildCacheTerminal,
+                    specifiedCacheId
+                  );
+                if (restoreFromCacheSuccess) {
+                  buildCacheContext.cacheRestored = true;
+                  await runnerContext.runWithTerminalAsync(
+                    async (taskTerminal, terminalProvider) => {
+                      // Restore the original state of the operation without cache
+                      await operationMetadataManager?.tryRestoreAsync({
+                        terminalProvider,
+                        terminal: buildCacheTerminal,
+                        errorLogPath,
+                        cobuildContextId: cobuildConfiguration?.cobuildContextId,
+                        cobuildRunnerId: cobuildConfiguration?.cobuildRunnerId
+                      });
+                    },
+                    { createLogFile: false }
+                  );
+                }
+                return !!restoreFromCacheSuccess;
+              };
+              if (cobuildLock) {
+                // handling rebuilds. "rush rebuild" or "rush retest" command will save operations to
+                // the build cache once completed, but does not retrieve them (since the "incremental"
+                // flag is disabled). However, we still need a cobuild to be able to retrieve a finished
+                // build from another cobuild in this case.
+                const cobuildCompletedState: ICobuildCompletedState | undefined =
+                  await cobuildLock.getCompletedStateAsync();
+                if (cobuildCompletedState) {
+                  const { status, cacheId } = cobuildCompletedState;
+
+                  if (record.operation.settings?.allowCobuildWithoutCache) {
+                    // This should only be enabled if the experiment for cobuild orchestration is enabled.
+                    return status;
+                  }
+
+                  const restoreFromCacheSuccess: boolean = await restoreCacheAsync(
+                    cobuildLock.operationBuildCache,
+                    cacheId
+                  );
+
+                  if (restoreFromCacheSuccess) {
+                    return status;
+                  }
+                } else if (!buildCacheContext.isCacheReadAttempted && buildCacheContext.isCacheReadAllowed) {
+                  const restoreFromCacheSuccess: boolean = await restoreCacheAsync(operationBuildCache);
+
+                  if (restoreFromCacheSuccess) {
+                    return OperationStatus.FromCache;
+                  }
+                }
+              } else if (buildCacheContext.isCacheReadAllowed) {
+                const restoreFromCacheSuccess: boolean = await restoreCacheAsync(operationBuildCache);
+
+                if (restoreFromCacheSuccess) {
+                  return OperationStatus.FromCache;
+                }
+              }
+
+              if (buildCacheContext.isCacheWriteAllowed && cobuildLock) {
+                const acquireSuccess: boolean = await cobuildLock.tryAcquireLockAsync();
+                if (acquireSuccess) {
+                  const { periodicCallback } = buildCacheContext;
+                  periodicCallback.addCallback(async () => {
+                    await cobuildLock?.renewLockAsync();
+                  });
+                  periodicCallback.start();
+                } else {
+                  setTimeout(() => {
+                    record.status = OperationStatus.Ready;
+                  }, 500);
+                  return OperationStatus.Executing;
+                }
+              }
+            };
+
+            return await runBeforeExecute();
+          }
+        );
+
+        executionManager.hooks.afterExecuteOperationAsync.tapPromise(
+          PLUGIN_NAME,
+          async (runnerContext: IOperationRunnerContext): Promise<void> => {
+            const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
+            const {
+              status,
+              stopwatch,
+              _operationMetadataManager: operationMetadataManager,
+              operation
+            } = record;
+
+            const { associatedProject: project, runner } = operation;
+
+            if (!record.enabled || !runner?.cacheable) {
+              return;
+            }
+
+            const buildCacheContext: IOperationBuildCacheContext | undefined =
+              this._getBuildCacheContextByOperation(operation);
+
+            if (!buildCacheContext) {
+              return;
+            }
+
+            // No need to run for the following operation status
+            if (!record.isTerminal || record.status === OperationStatus.NoOp) {
+              return;
+            }
+
+            const {
+              cobuildLock,
+              operationBuildCache,
+              isCacheWriteAllowed,
+              buildCacheTerminal,
+              cacheRestored
+            } = buildCacheContext;
+
+            try {
+              if (!cacheRestored) {
+                // Save the metadata to disk
+                const { logFilenameIdentifier } = operationMetadataManager;
+                const { duration: durationInSeconds } = stopwatch;
+                const {
+                  text: logPath,
+                  error: errorLogPath,
+                  jsonl: logChunksPath
+                } = getProjectLogFilePaths({
+                  project,
+                  logFilenameIdentifier
+                });
+                await operationMetadataManager.saveAsync({
+                  durationInSeconds,
+                  cobuildContextId: cobuildLock?.cobuildConfiguration.cobuildContextId,
+                  cobuildRunnerId: cobuildLock?.cobuildConfiguration.cobuildRunnerId,
+                  logPath,
+                  errorLogPath,
+                  logChunksPath
+                });
+              }
+
+              if (!buildCacheTerminal) {
+                // This should not happen
+                throw new InternalError(`Build Cache Terminal is not created`);
+              }
+
+              let setCompletedStatePromiseFunction: (() => Promise<void> | undefined) | undefined;
+              let setCacheEntryPromise: (() => Promise<boolean> | undefined) | undefined;
+              if (cobuildLock && isCacheWriteAllowed) {
+                const { cacheId, contextId } = cobuildLock.cobuildContext;
+
+                let finalCacheId: string = cacheId;
+                if (status === OperationStatus.Failure) {
+                  finalCacheId = `${cacheId}-${contextId}-failed`;
+                } else if (
+                  status === OperationStatus.SuccessWithWarning &&
+                  !record.runner.warningsAreAllowed
+                ) {
+                  finalCacheId = `${cacheId}-${contextId}-warnings`;
+                }
+                switch (status) {
+                  case OperationStatus.SuccessWithWarning:
+                  case OperationStatus.Success:
+                  case OperationStatus.Failure: {
+                    const currentStatus: ICobuildCompletedState['status'] = status;
+                    setCompletedStatePromiseFunction = () => {
+                      return cobuildLock?.setCompletedStateAsync({
+                        status: currentStatus,
+                        cacheId: finalCacheId
+                      });
+                    };
+                    setCacheEntryPromise = () =>
+                      cobuildLock.operationBuildCache.trySetCacheEntryAsync(buildCacheTerminal, finalCacheId);
+                  }
+                }
+              }
+
+              const taskIsSuccessful: boolean =
+                status === OperationStatus.Success ||
+                (status === OperationStatus.SuccessWithWarning &&
+                  record.runner.warningsAreAllowed &&
+                  allowWarningsInSuccessfulBuild);
+
+              // If the command is successful, we can calculate project hash, and no dependencies were skipped,
+              // write a new cache entry.
+              if (!setCacheEntryPromise && taskIsSuccessful && isCacheWriteAllowed && operationBuildCache) {
+                setCacheEntryPromise = () => operationBuildCache.trySetCacheEntryAsync(buildCacheTerminal);
+              }
+              if (!cacheRestored) {
+                const cacheWriteSuccess: boolean | undefined = await setCacheEntryPromise?.();
+                await setCompletedStatePromiseFunction?.();
+
+                if (cacheWriteSuccess === false && status === OperationStatus.Success) {
+                  record.status = OperationStatus.SuccessWithWarning;
+                }
+              }
+            } finally {
+              buildCacheContext.buildCacheTerminalWritable?.close();
+              buildCacheContext.periodicCallback.stop();
+            }
+          }
+        );
+
+        executionManager.hooks.afterExecuteOperationAsync.tap(
+          PLUGIN_NAME,
+          (record: IOperationRunnerContext & IOperationExecutionResult): void => {
+            const { operation } = record;
+            const buildCacheContext: IOperationBuildCacheContext | undefined =
+              this._buildCacheContextByOperation.get(operation);
+            // Status changes to direct dependents
+            let blockCacheWrite: boolean = !buildCacheContext?.isCacheWriteAllowed;
+
+            switch (record.status) {
+              case OperationStatus.Skipped: {
+                // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
+                blockCacheWrite = true;
+                break;
+              }
+            }
+
+            // Apply status changes to direct dependents
+            if (blockCacheWrite) {
+              for (const consumer of operation.consumers) {
+                const consumerBuildCacheContext: IOperationBuildCacheContext | undefined =
+                  this._getBuildCacheContextByOperation(consumer);
+                if (consumerBuildCacheContext) {
+                  consumerBuildCacheContext.isCacheWriteAllowed = false;
+                }
               }
             }
           }
+        );
 
-          const taskIsSuccessful: boolean =
-            status === OperationStatus.Success ||
-            (status === OperationStatus.SuccessWithWarning &&
-              record.runner.warningsAreAllowed &&
-              allowWarningsInSuccessfulBuild);
-
-          // If the command is successful, we can calculate project hash, and no dependencies were skipped,
-          // write a new cache entry.
-          if (!setCacheEntryPromise && taskIsSuccessful && isCacheWriteAllowed && operationBuildCache) {
-            setCacheEntryPromise = () => operationBuildCache.trySetCacheEntryAsync(buildCacheTerminal);
-          }
-          if (!cacheRestored) {
-            const cacheWriteSuccess: boolean | undefined = await setCacheEntryPromise?.();
-            await setCompletedStatePromiseFunction?.();
-
-            if (cacheWriteSuccess === false && status === OperationStatus.Success) {
-              record.status = OperationStatus.SuccessWithWarning;
-            }
-          }
-        } finally {
-          buildCacheContext.buildCacheTerminalWritable?.close();
-          buildCacheContext.periodicCallback.stop();
-        }
+        executionManager.hooks.afterExecuteIterationAsync.tap(PLUGIN_NAME, (status: OperationStatus) => {
+          this._buildCacheContextByOperation.clear();
+          return status;
+        });
       }
     );
-
-    hooks.afterExecuteOperation.tap(
-      PLUGIN_NAME,
-      (record: IOperationRunnerContext & IOperationExecutionResult): void => {
-        const { operation } = record;
-        const buildCacheContext: IOperationBuildCacheContext | undefined =
-          this._buildCacheContextByOperation.get(operation);
-        // Status changes to direct dependents
-        let blockCacheWrite: boolean = !buildCacheContext?.isCacheWriteAllowed;
-
-        switch (record.status) {
-          case OperationStatus.Skipped: {
-            // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
-            blockCacheWrite = true;
-            break;
-          }
-        }
-
-        // Apply status changes to direct dependents
-        if (blockCacheWrite) {
-          for (const consumer of operation.consumers) {
-            const consumerBuildCacheContext: IOperationBuildCacheContext | undefined =
-              this._getBuildCacheContextByOperation(consumer);
-            if (consumerBuildCacheContext) {
-              consumerBuildCacheContext.isCacheWriteAllowed = false;
-            }
-          }
-        }
-      }
-    );
-
-    hooks.afterExecuteOperations.tapPromise(PLUGIN_NAME, async () => {
-      this._buildCacheContextByOperation.clear();
-    });
   }
 
   private _getBuildCacheContextByOperation(operation: Operation): IOperationBuildCacheContext | undefined {
