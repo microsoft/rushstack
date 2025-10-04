@@ -888,7 +888,7 @@
       .op-node.filtered-out.not-running .active-indicator {
         opacity: 1 !important;
       }
-      /* Queued for next pass indicator (pulse removed) */
+      /* Queued for next iteration indicator (pulse removed) */
       /* queued-next styling removed (no visual border effect retained) */
       .op-node .name {
         font-weight: 600;
@@ -1628,13 +1628,13 @@
       let operations = new Map(); // name -> IOperationInfo
       // Dynamic execution state (IOperationExecutionState) keyed by name
       let executionStates = new Map();
-      // Queued states for next pass (IOperationExecutionState) keyed by name
+      // Queued states for next iteration (IOperationExecutionState) keyed by name
       let queuedStates = new Map();
       let selection = new Set();
       let sortKey = 'status';
       let sortDir = 1; // 1 asc, -1 desc
       let managerState = null;
-      // Stores last execution results (previous pass) keyed by name
+      // Stores last execution results (previous iteration) keyed by name
       let lastExecutionResults = new Map();
       const enabledStateDisplay = {
         never: 'never',
@@ -1726,10 +1726,10 @@
         }
         // Update play/pause visual state
         const ppIcon = playPauseBtn.querySelector('.codicon');
-        if (managerState.runNextPassBehavior === 'automatic') {
+        if (!managerState.pauseNextIteration) {
           playPauseBtn.classList.add('playing');
           playPauseBtn.setAttribute('aria-label', 'Switch to manual (pause)');
-          playPauseBtn.title = 'Pause automatic passes';
+          playPauseBtn.title = 'Pause automatic iterations';
           if (ppIcon) {
             ppIcon.classList.remove('codicon-debug-start', 'codicon-debug-continue');
             ppIcon.classList.add('codicon-debug-pause');
@@ -1737,7 +1737,7 @@
         } else {
           playPauseBtn.classList.remove('playing');
           playPauseBtn.setAttribute('aria-label', 'Switch to automatic (play)');
-          playPauseBtn.title = 'Resume automatic passes';
+          playPauseBtn.title = 'Resume automatic iterations';
           if (ppIcon) {
             ppIcon.classList.remove('codicon-debug-pause');
             ppIcon.classList.add('codicon-debug-start');
@@ -1944,7 +1944,7 @@
           }
           case 'before-execute': {
             applyExecutionStates(msg.executionStates);
-            // Starting pass invalidates queued states
+            // Starting iteration invalidates queued states
             queuedStates.clear();
             break;
           }
@@ -2911,7 +2911,7 @@
           // Apply dimming to border color for filtered states (search stronger than status filter)
           if (isSearchFiltered) baseColor = dimColor(baseColor, 0.72);
           else if (isFilteredOut) baseColor = dimColor(baseColor, 0.6);
-          else if (notRunning) baseColor = dimColor(baseColor, 0.35); // subtle dim for not-in-pass
+          else if (notRunning) baseColor = dimColor(baseColor, 0.35); // subtle dim for not-in-iteration
           div.style.borderColor = baseColor;
           // selection & run-state styling
           if (selection.has(name)) div.classList.add('selected');
@@ -2929,7 +2929,7 @@
           } else if (activeSpan) {
             activeSpan.remove();
           }
-          // Pending changes indicator (queued for pass) shows clock top-left
+          // Pending changes indicator (queued for iteration) shows clock top-left
           let pendingSpan = div.querySelector('.pending-indicator');
           if (isQueuedNext) {
             if (!pendingSpan) {
@@ -2938,7 +2938,7 @@
               pendingSpan.textContent = '🕒';
               div.appendChild(pendingSpan);
             }
-            pendingSpan.title = 'Pending changes (pass queued)';
+            pendingSpan.title = 'Pending changes (iteration queued)';
           } else if (pendingSpan) {
             pendingSpan.remove();
           }
@@ -3546,9 +3546,9 @@
           wrap.appendChild(sub);
           return wrap;
         };
-        addModifier(makePending, 'Pending changes', 'Pass queued');
+        addModifier(makePending, 'Pending changes', 'Iteration queued');
         addModifier(makeActive, 'Active', 'In-memory state');
-        addModifier(makeDashed, 'Not in this pass', 'Excluded this iteration');
+        addModifier(makeDashed, 'Not in this iteration', 'Excluded this iteration');
         addModifier(makeDotted, 'Filtered out', 'Hidden by view/search');
         // Enabled state grouping heading
         const enabledHead = document.createElement('div');
@@ -3668,8 +3668,9 @@
       );
       playPauseBtn.addEventListener('click', () => {
         if (!managerState) return;
-        const next = managerState.runNextPassBehavior === 'automatic' ? 'manual' : 'automatic';
-        sendCommand({ command: 'set-run-next-pass-behavior', value: next });
+        const next = !!managerState.pauseNextIteration; // current boolean
+        // Toggle: if currently paused (true), set to false (resume automatic); otherwise set to true (pause)
+        sendCommand({ command: 'set-pause-next-iteration', value: !next });
       });
       window.addEventListener('keydown', (e) => {
         if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
