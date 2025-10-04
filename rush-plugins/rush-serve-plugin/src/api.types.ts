@@ -156,7 +156,7 @@ export interface IWebSocketBatchStatusChangeEventMessage {
 }
 
 /**
- * Message sent to a WebSocket client at the start of an execution pass.
+ * Message sent to a WebSocket client at the start of an execution iteration.
  */
 export interface IWebSocketBeforeExecuteEventMessage {
   event: 'before-execute';
@@ -179,7 +179,7 @@ export interface IWebSocketSyncEventMessage {
    */
   currentExecutionStates: IOperationExecutionState[];
   /**
-   * Execution states for operations that have been queued for the next pass (if any)
+   * Execution states for operations that have been queued for the next iteration (if any)
    * when the sync message was generated.
    */
   queuedStates?: IOperationExecutionState[];
@@ -194,7 +194,7 @@ export interface IWebSocketSyncEventMessage {
     hasScheduledIteration: boolean;
   };
   /**
-   * The results of the previous execution pass for all operations, if available.
+   * The results of the previous execution for all operations, if available.
    * This mirrors the values() of OperationExecutionManager.lastExecutionResults at the time of emission.
    */
   lastExecutionResults?: IOperationExecutionState[];
@@ -247,7 +247,7 @@ export type IWebSocketEventMessage =
  */
 // Command (client->server) message interfaces (alphabetically by interface name)
 /**
- * Message received from a WebSocket client to request abortion of the current execution pass.
+ * Message received from a WebSocket client to request abortion of the current execution iteration.
  */
 export interface IWebSocketAbortExecutionCommandMessage {
   command: 'abort-execution';
@@ -269,7 +269,7 @@ export interface IWebSocketCloseRunnersCommandMessage {
 }
 
 /**
- * Message received from a WebSocket client to request execution of a new execution pass.
+ * Message received from a WebSocket client to request execution of a new execution iteration.
  */
 export interface IWebSocketExecuteCommandMessage {
   command: 'execute';

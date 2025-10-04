@@ -58,7 +58,7 @@ function applyQueuedStates(states: IOperationExecutionState[] | undefined): void
 function effectiveStatus(name: string): string | undefined {
   const exec = executionStates.get(name);
   if (exec) return exec.status;
-  // Optionally fall back to last-known previous pass results if you track them.
+  // Optionally fall back to last-known previous iteration results if you track them.
   return undefined;
 }
 

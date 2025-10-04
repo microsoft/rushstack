@@ -234,7 +234,7 @@ export function tryEnableBuildStatusWebSocketServer(
   };
 
   let executionManager: IOperationExecutionManager | undefined;
-  // Operations that have been queued for an upcoming execution pass (captured at queue time)
+  // Operations that have been queued for an upcoming execution iteration (captured at queue time)
   let queuedStates: IOperationExecutionResult[] | undefined;
 
   function getManagerStateSnapshot(): IWebSocketSyncEventMessage['managerState'] | undefined {

@@ -7,7 +7,7 @@ import {
   OperationStatus,
   type Operation,
   type IOperationExecutionResult,
-  type IOperationExecutionPassOptions
+  type IOperationExecutionIterationOptions
 } from '@rushstack/rush-sdk';
 import type {
   ILogger,
@@ -64,11 +64,11 @@ export class BridgeCachePlugin implements IRushPlugin {
           const { terminal } = logger;
           const requireOutputFolders: boolean = this._isRequireOutputFoldersFlagSet(customParameters);
 
-          executionManager.hooks.beforeExecuteOperationsAsync.tapPromise(
+          executionManager.hooks.beforeExecuteIterationAsync.tapPromise(
             PLUGIN_NAME,
             async (
               operationRecords: ReadonlyMap<Operation, IOperationExecutionResult>,
-              passOptions: IOperationExecutionPassOptions
+              iterationOptions: IOperationExecutionIterationOptions
             ): Promise<OperationStatus | undefined> => {
               const filteredOperations: IBaseOperationExecutionResult[] = [];
               for (const record of operationRecords.values()) {
@@ -151,9 +151,7 @@ export class BridgeCachePlugin implements IRushPlugin {
               );
 
               // Bail out with a status indicating success; treat cache read as FromCache.
-              return cacheAction === CACHE_ACTION_READ
-                ? (OperationStatus.FromCache as OperationStatus)
-                : (OperationStatus.Success as OperationStatus);
+              return cacheAction === CACHE_ACTION_READ ? OperationStatus.FromCache : OperationStatus.Success;
             }
           );
         }
