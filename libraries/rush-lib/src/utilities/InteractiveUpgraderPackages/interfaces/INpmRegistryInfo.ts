@@ -9,18 +9,18 @@ export interface INpmRegistryInfo {
   error?: string;
 }
 
-interface INpmCheckRegistryInfoBugs {
+interface IRegistryInfoBugs {
   url?: string;
 }
-interface INpmCheckRepository {
+interface IRepository {
   url?: string;
 }
-export interface INpmCheckPackageVersion {
+export interface IPackageVersion {
   homepage?: string;
-  bugs?: INpmCheckRegistryInfoBugs;
-  repository?: INpmCheckRepository;
+  bugs?: IRegistryInfoBugs;
+  repository?: IRepository;
 }
-export interface INpmCheckRegistryData {
-  versions: Record<string, INpmCheckPackageVersion>;
+export interface IRegistryData {
+  versions: Record<string, IPackageVersion>;
   ['dist-tags']: { latest: string };
 }

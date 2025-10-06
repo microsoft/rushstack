@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// semverDiff still returns null
-export type INpmCheckVersionBumpType =
+export type IVersionBumpType =
   | ''
   | 'build'
   | 'major'
@@ -14,10 +13,11 @@ export type INpmCheckVersionBumpType =
   | 'prerelease'
   | 'nonSemver'
   | undefined
+  // semver.diff can return null
   // eslint-disable-next-line @rushstack/no-new-null
   | null;
 
-export interface INpmCheckPackageSummary {
+export interface IPackageInfo {
   moduleName: string; // name of the module.
   homepage: string; // url to the home page.
   regError?: Error; // error communicating with the registry
@@ -28,5 +28,5 @@ export interface INpmCheckPackageSummary {
   packageJson: string; // Version or range requested in the parent package.json.
   devDependency: boolean; // Is this a devDependency?
   mismatch: boolean; // Does the version installed not match the range in package.json?
-  bump?: INpmCheckVersionBumpType; // What kind of bump is required to get the latest
+  bump?: IVersionBumpType; // What kind of bump is required to get the latest
 }

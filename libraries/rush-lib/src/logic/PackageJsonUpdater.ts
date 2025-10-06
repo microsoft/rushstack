@@ -28,7 +28,7 @@ import {
   SemVerStyle
 } from './PackageJsonUpdaterTypes';
 import type { Subspace } from '../api/Subspace';
-import type { INpmCheckPackageSummary } from '../utilities/npmCheck/interfaces/INpmCheckPackageSummary';
+import type { IPackageInfo } from '../utilities/InteractiveUpgraderPackages/interfaces/IPackageInfo';
 
 /**
  * Options for adding a dependency to a particular project.
@@ -41,7 +41,7 @@ export interface IPackageJsonUpdaterRushUpgradeOptions {
   /**
    * The dependencies to be added.
    */
-  packagesToAdd: INpmCheckPackageSummary[];
+  packagesToAdd: IPackageInfo[];
   /**
    * If specified, other packages that use this dependency will also have their package.json's updated.
    */
@@ -892,7 +892,7 @@ export class PackageJsonUpdater {
     }
   }
 
-  private _normalizeDepsToUpgrade(deps: INpmCheckPackageSummary[]): IPackageForRushAdd[] {
+  private _normalizeDepsToUpgrade(deps: IPackageInfo[]): IPackageForRushAdd[] {
     return deps.map((dep) => {
       return {
         packageName: dep.moduleName,

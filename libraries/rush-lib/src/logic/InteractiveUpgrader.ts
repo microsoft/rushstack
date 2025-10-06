@@ -9,9 +9,8 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { upgradeInteractive, type IDepsToUpgradeAnswers } from '../utilities/InteractiveUpgradeUI';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { SearchListPrompt } from '../utilities/prompts/SearchListPrompt';
-import LocalNpmCheck from '../utilities/npmCheck/LocalNpmCheck';
-import type { INpmCheckState } from '../utilities/npmCheck/interfaces/INpmCheck';
-import type { INpmCheckPackageSummary } from '../utilities/npmCheck/interfaces/INpmCheckPackageSummary';
+import InteractiveUpgraderPackages from '../utilities/InteractiveUpgraderPackages/InteractiveUpgraderPackages';
+import type { IPackageInfo } from '../utilities/InteractiveUpgraderPackages/interfaces/IPackageInfo';
 
 interface IUpgradeInteractiveDeps {
   projects: RushConfigurationProject[];
@@ -20,16 +19,17 @@ interface IUpgradeInteractiveDeps {
 
 export class InteractiveUpgrader {
   private readonly _rushConfiguration: RushConfiguration;
+  private _interactiveUpgraderGetPackages: InteractiveUpgraderPackages;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
+    this._interactiveUpgraderGetPackages = new InteractiveUpgraderPackages();
   }
 
   public async upgradeAsync(): Promise<IUpgradeInteractiveDeps> {
     const rushProject: RushConfigurationProject = await this._getUserSelectedProjectForUpgradeAsync();
 
-    const dependenciesState: INpmCheckPackageSummary[] =
-      await this._getPackageDependenciesStatusAsync(rushProject);
+    const dependenciesState: IPackageInfo[] = await this._getPackageDependenciesStatusAsync(rushProject);
 
     const depsToUpgrade: IDepsToUpgradeAnswers =
       await this._getUserSelectedDependenciesToUpgradeAsync(dependenciesState);
@@ -37,7 +37,7 @@ export class InteractiveUpgrader {
   }
 
   private async _getUserSelectedDependenciesToUpgradeAsync(
-    packages: INpmCheckPackageSummary[]
+    packages: IPackageInfo[]
   ): Promise<IDepsToUpgradeAnswers> {
     return upgradeInteractive(packages);
   }
@@ -68,13 +68,12 @@ export class InteractiveUpgrader {
 
   private async _getPackageDependenciesStatusAsync(
     rushProject: RushConfigurationProject
-  ): Promise<INpmCheckPackageSummary[]> {
+  ): Promise<IPackageInfo[]> {
     const { projectFolder } = rushProject;
 
-    const newState: INpmCheckState = await LocalNpmCheck({
-      cwd: projectFolder
-    });
+    const packages: IPackageInfo[] =
+      await this._interactiveUpgraderGetPackages.getPackagesAsync(projectFolder);
 
-    return newState.packages ?? [];
+    return packages ?? [];
   }
 }

@@ -11,7 +11,7 @@ import type Separator from 'inquirer/lib/objects/separator';
 
 import { AnsiEscape, Colorize } from '@rushstack/terminal';
 
-import type { INpmCheckPackageSummary } from './npmCheck/interfaces/INpmCheckPackageSummary';
+import type { IPackageInfo } from './InteractiveUpgraderPackages/interfaces/IPackageInfo';
 
 export interface IUIGroup {
   title: string;
@@ -24,11 +24,11 @@ export interface IUIGroup {
 }
 
 export interface IDepsToUpgradeAnswers {
-  packages: INpmCheckPackageSummary[];
+  packages: IPackageInfo[];
 }
 
 export interface IUpgradeInteractiveDepChoice {
-  value: INpmCheckPackageSummary;
+  value: IPackageInfo;
   name: string | string[];
   short: string;
 }
@@ -81,7 +81,7 @@ export const UI_GROUPS: IUIGroup[] = [
   }
 ];
 
-function label(dep: INpmCheckPackageSummary): string[] {
+function label(dep: IPackageInfo): string[] {
   const bumpInstalled: string = dep.bump ? dep.installed : '';
   const installed: string = dep.mismatch ? dep.packageJson : bumpInstalled;
   const name: string = Colorize.yellow(dep.moduleName);
@@ -98,7 +98,7 @@ function label(dep: INpmCheckPackageSummary): string[] {
   ];
 }
 
-function getErrorDep(dep: INpmCheckPackageSummary): string {
+function getErrorDep(dep: IPackageInfo): string {
   if (dep.regError !== undefined && dep.regError && dep.regError instanceof Error) {
     return dep.regError.message;
   } else if (dep.pkgError !== undefined && dep.pkgError && dep.pkgError instanceof Error) {
@@ -108,11 +108,11 @@ function getErrorDep(dep: INpmCheckPackageSummary): string {
   return '';
 }
 
-function short(dep: INpmCheckPackageSummary): string {
+function short(dep: IPackageInfo): string {
   return `${dep.moduleName}@${dep.latest}`;
 }
 
-function getChoice(dep: INpmCheckPackageSummary): IUpgradeInteractiveDepChoice | boolean | Separator {
+function getChoice(dep: IPackageInfo): IUpgradeInteractiveDepChoice | boolean | Separator {
   if (!dep.mismatch && !dep.bump && !dep.notInstalled) {
     return false;
   }
@@ -128,9 +128,9 @@ function unselectable(options?: { title: string }): Separator {
   return new inquirer.Separator(AnsiEscape.removeCodes(options ? options.title : ''));
 }
 
-function createChoices(packages: INpmCheckPackageSummary[], options: IUIGroup): ChoiceTable {
+function createChoices(packages: IPackageInfo[], options: IUIGroup): ChoiceTable {
   const { filter } = options;
-  const filteredChoices: INpmCheckPackageSummary[] = packages.filter((pkg: INpmCheckPackageSummary) => {
+  const filteredChoices: IPackageInfo[] = packages.filter((pkg: IPackageInfo) => {
     if ('mismatch' in filter && pkg.mismatch !== filter.mismatch) {
       return false;
     } else if ('bump' in filter && pkg.bump !== filter.bump) {
@@ -140,7 +140,7 @@ function createChoices(packages: INpmCheckPackageSummary[], options: IUIGroup): 
     } else {
       return true;
     }
-  }) as INpmCheckPackageSummary[];
+  }) as IPackageInfo[];
 
   const choices: (IUpgradeInteractiveDepChoice | Separator | boolean)[] = filteredChoices
     .map(getChoice)
@@ -188,7 +188,7 @@ function createChoices(packages: INpmCheckPackageSummary[], options: IUIGroup): 
   }
 }
 
-export const upgradeInteractive = async (pkgs: INpmCheckPackageSummary[]): Promise<IDepsToUpgradeAnswers> => {
+export const upgradeInteractive = async (pkgs: IPackageInfo[]): Promise<IDepsToUpgradeAnswers> => {
   const choicesGrouped: ChoiceTable[] = UI_GROUPS.map((group) => createChoices(pkgs, group)).filter(Boolean);
 
   const choices: ChoiceTable = [];
