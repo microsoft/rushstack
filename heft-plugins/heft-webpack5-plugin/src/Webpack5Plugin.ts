@@ -142,9 +142,11 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           taskSession.logger.terminal
         );
         this._webpack = await import(webpackPackagePath);
+        taskSession.logger.terminal.writeDebugLine(`Using Webpack from "${webpackPackagePath}"`);
       } catch (e) {
         // Fallback to bundled version if not found in rig.
         this._webpack = await import(WEBPACK_PACKAGE_NAME);
+        taskSession.logger.terminal.writeDebugLine(`Using Webpack from built-in "${WEBPACK_PACKAGE_NAME}"`);
       }
     }
     return this._webpack!;
