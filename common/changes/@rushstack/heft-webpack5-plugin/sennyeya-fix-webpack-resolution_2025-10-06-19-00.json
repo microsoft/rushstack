@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft-webpack5-plugin",
       "comment": "Use project-level webpack dependency when it's installed.",
-      "type": "none"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-webpack5-plugin"
