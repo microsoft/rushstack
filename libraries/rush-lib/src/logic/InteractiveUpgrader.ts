@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-
 import Prompt from 'inquirer/lib/ui/prompt';
+
 import { Colorize } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -72,8 +72,7 @@ export class InteractiveUpgrader {
     const { projectFolder } = rushProject;
 
     const newState: INpmCheckState = await LocalNpmCheck({
-      cwd: projectFolder,
-      skipUnused: true
+      cwd: projectFolder
     });
 
     return newState.packages ?? [];

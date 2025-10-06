@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import type * as NpmCheck from 'npm-check';
 
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
@@ -893,7 +892,7 @@ export class PackageJsonUpdater {
     }
   }
 
-  private _normalizeDepsToUpgrade(deps: NpmCheck.INpmCheckPackage[]): IPackageForRushAdd[] {
+  private _normalizeDepsToUpgrade(deps: INpmCheckPackageSummary[]): IPackageForRushAdd[] {
     return deps.map((dep) => {
       return {
         packageName: dep.moduleName,

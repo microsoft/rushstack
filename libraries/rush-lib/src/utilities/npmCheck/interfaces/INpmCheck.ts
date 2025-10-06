@@ -16,7 +16,6 @@ export interface INpmCheckPackageJson {
 
 export interface INpmCheckOptions {
   cwd: string;
-  skipUnused?: boolean;
 }
 
 // Removed
@@ -25,39 +24,31 @@ export interface INpmCheckOptions {
 // - devOnly
 // - ignore
 // - ignoreDev
+// - unusedDependencies
+// - missingFromPackageJson
+// - spinner
+// - emoji
+// - forceColor
+// - saveExact
 // from INpmCheckState as they were not used anywhere
 export interface INpmCheckState {
   update?: boolean;
   updateAll?: boolean;
   cwd: string;
-  skipUnused?: boolean;
-  forceColor?: boolean;
-  saveExact?: boolean;
   specials?: string;
   debug?: boolean;
-  emoji?: boolean;
-  spinner?: boolean;
   installer?: string;
   cwdPackageJson?: INpmCheckPackageJson;
   packages?: INpmCheckPackageSummary[];
-  unusedDependencies?: boolean | string[];
-  missingFromPackageJson?: Record<string, string[]>;
 }
 
 export const DefaultNpmCheckOptions: INpmCheckState = {
   update: false,
   updateAll: false,
   cwd: process.cwd(),
-  skipUnused: false,
-  forceColor: false,
-  saveExact: false,
   specials: '',
   debug: false,
-  emoji: true,
-  spinner: false,
   installer: 'npm',
   cwdPackageJson: { devDependencies: {}, dependencies: {} },
-  packages: undefined,
-  unusedDependencies: false,
-  missingFromPackageJson: {}
+  packages: undefined
 };

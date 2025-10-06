@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import extend from 'xtend';
+import _ from 'lodash';
+
 import type { INpmCheckPackageJson } from './interfaces/INpmCheck';
 
 export default function readPackageJson(filename: string): INpmCheckPackageJson {
@@ -16,5 +17,5 @@ export default function readPackageJson(filename: string): INpmCheckPackageJson 
       error = new Error(`A package.json was found at ${filename}, but it is not valid.`);
     }
   }
-  return extend({ devDependencies: {}, dependencies: {}, error: error }, pkg);
+  return _.extend({ devDependencies: {}, dependencies: {}, error: error }, pkg);
 }

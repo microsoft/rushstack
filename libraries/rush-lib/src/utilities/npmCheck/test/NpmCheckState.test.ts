@@ -12,13 +12,4 @@ describe('NpmCheckState', () => {
     expect(state.cwdPackageJson).toHaveProperty('name');
     expect(state.cwdPackageJson).toHaveProperty('version');
   });
-
-  it('should create with rush options', async () => {
-    const state: INpmCheckState = await initializeState({
-      cwd: process.cwd(),
-      skipUnused: true
-    });
-    expect(state).toBeDefined();
-    expect(state.skipUnused).toBeTruthy();
-  });
 });

@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import Module from 'module';
-import path from 'path';
-import pathExists from 'path-exists';
+import { existsSync } from 'node:fs';
+import Module from 'node:module';
+import path from 'node:path';
+
 import type { INpmCheckState } from './interfaces/INpmCheck';
 
 /**
@@ -20,7 +21,7 @@ export default function findModulePath(moduleName: string, currentState: INpmChe
   // @ts-ignore
   const nodeModulesPaths: string[] = Module._nodeModulePaths(cwd);
   const possibleModulePaths: string[] = nodeModulesPaths.map((x) => path.join(x, moduleName));
-  const modulePath: string | undefined = possibleModulePaths.find((p) => pathExists.sync(p));
+  const modulePath: string | undefined = possibleModulePaths.find((p) => existsSync(p));
   // if no existing path was found, return the first tried path anyway
   return modulePath || path.join(cwd, moduleName);
 }

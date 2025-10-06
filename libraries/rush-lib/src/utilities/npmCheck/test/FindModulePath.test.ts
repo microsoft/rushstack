@@ -6,18 +6,11 @@ jest.mock('path', () => ({
   // Add other path methods as needed
 }));
 
-jest.mock('path-exists', () => ({
-  sync: jest.fn((p: string) => {
-    // Return true or false based on your test scenario
-    return p === '/mock/path/node_modules/my-module';
-  })
-}));
-
 import findModulePath from '../FindModulePath';
 import type { INpmCheckState } from '../interfaces/INpmCheck';
-import path from 'path';
+import path from 'node:path';
 
-const Module = require('module');
+const Module = require('node:module');
 
 describe('findModulePath', () => {
   beforeAll(() => {
@@ -33,7 +26,7 @@ describe('findModulePath', () => {
   it('returns found path', () => {
     const state: INpmCheckState = { cwd: '/test/cwd', global: false } as INpmCheckState;
     const result = findModulePath('my-module', state);
-    expect(result).toBe(path.join('/mock/path/node_modules', 'my-module'));
+    expect(result).toBe(path.join('/test/cwd', 'my-module'));
   });
 
   it('returns first tried path', () => {

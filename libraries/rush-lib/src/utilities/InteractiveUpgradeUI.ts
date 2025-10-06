@@ -8,7 +8,9 @@
 import inquirer from 'inquirer';
 import CliTable from 'cli-table';
 import type Separator from 'inquirer/lib/objects/separator';
+
 import { AnsiEscape, Colorize } from '@rushstack/terminal';
+
 import type { INpmCheckPackageSummary } from './npmCheck/interfaces/INpmCheckPackageSummary';
 
 export interface IUIGroup {

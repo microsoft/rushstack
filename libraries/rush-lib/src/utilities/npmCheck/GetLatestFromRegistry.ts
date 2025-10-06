@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import os from 'node:os';
+
 import _ from 'lodash';
-import bestGuessHomepage from './BestGuessHomepage';
 import semver from 'semver';
 import packageJson from 'package-json';
-import os from 'os';
 import throat from 'throat';
+
+import bestGuessHomepage from './BestGuessHomepage';
 import type { INpmRegistryInfo } from './interfaces/INpmCheckRegistry';
 
 const cpuCount: number = os.cpus().length;

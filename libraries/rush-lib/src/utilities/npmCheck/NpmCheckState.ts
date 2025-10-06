@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import path from 'path';
-import extend from 'xtend';
+import path from 'node:path';
+
+import _ from 'lodash';
+
 import {
   DefaultNpmCheckOptions,
   type INpmCheckOptions,
@@ -12,7 +14,7 @@ import {
 import readPackageJson from './ReadPackageJson';
 
 export default async function initializeState(initialOptions?: INpmCheckOptions): Promise<INpmCheckState> {
-  const state: INpmCheckState = extend(DefaultNpmCheckOptions, initialOptions);
+  const state: INpmCheckState = _.extend(DefaultNpmCheckOptions, initialOptions);
 
   if (state.cwd) {
     const cwd: string = path.resolve(state.cwd);

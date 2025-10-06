@@ -5,10 +5,6 @@ jest.mock('../GetLatestFromRegistry');
 jest.mock('../ReadPackageJson');
 jest.mock('../FindModulePath');
 
-jest.mock('path-exists', () => ({
-  sync: jest.fn(() => true)
-}));
-
 import createPackageSummary from '../CreatePackageSummary';
 import getLatestFromRegistry from '../GetLatestFromRegistry';
 import readPackageJson from '../ReadPackageJson';
@@ -82,6 +78,5 @@ describe('createPackageSummary', () => {
     expect(result).toHaveProperty('homepage', 'https://homepage.com');
     expect(result).toHaveProperty('latest', '2.0.0');
     expect(result).toHaveProperty('installed', '1.0.0');
-    expect(result).toHaveProperty('unused', true);
   });
 });

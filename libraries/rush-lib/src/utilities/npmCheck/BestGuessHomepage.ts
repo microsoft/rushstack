@@ -4,6 +4,7 @@
 /// <reference path="../../types/giturl-typings.d.ts" preserve="true" />
 
 import gitUrl from 'giturl';
+
 import type { INpmCheckPackageVersion, INpmCheckRegistryData } from './interfaces/INpmCheckRegistry';
 
 export default function bestGuessHomepage(data: INpmCheckRegistryData | undefined): string | false {

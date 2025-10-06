@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+
 import _ from 'lodash';
-import path from 'path';
-import pathExists from 'path-exists';
 import semver from 'semver';
 
 import type { INpmCheckState, INpmCheckPackageJson } from './interfaces/INpmCheck';
@@ -20,7 +21,7 @@ export default async function createPackageSummary(
   const cwdPackageJson: INpmCheckPackageJson | undefined = state.cwdPackageJson;
 
   const modulePath: string = findModulePath(moduleName, state);
-  const packageIsInstalled: boolean = pathExists.sync(modulePath);
+  const packageIsInstalled: boolean = existsSync(modulePath);
   const modulePackageJson: INpmCheckPackageJson = readPackageJson(path.join(modulePath, 'package.json'));
 
   // Ignore private packages
@@ -35,9 +36,6 @@ export default async function createPackageSummary(
   if (packageJsonVersion && !semver.validRange(packageJsonVersion)) {
     return false;
   }
-
-  const unusedDependencies: boolean | string[] | undefined = state.unusedDependencies;
-  const missingFromPackageJson: Record<string, string[]> | undefined = state.missingFromPackageJson;
 
   return getLatestFromRegistry(moduleName).then((fromRegistry: INpmRegistryInfo) => {
     const installedVersion: string | undefined = modulePackageJson.version;
@@ -74,11 +72,6 @@ export default async function createPackageSummary(
       bump = undefined;
     }
 
-    const unused: boolean = _.includes(
-      Array.isArray(unusedDependencies) ? unusedDependencies : [],
-      moduleName
-    );
-
     return {
       // info
       moduleName: moduleName,
@@ -89,26 +82,11 @@ export default async function createPackageSummary(
       // versions
       latest: latest ?? '',
       installed: versionToUse === null ? '' : versionToUse,
-      isInstalled: packageIsInstalled,
       notInstalled: !packageIsInstalled,
-      packageWanted: versionWanted === null ? '' : versionWanted,
       packageJson: packageJsonVersion ?? '',
-
-      // Missing from package json
-      notInPackageJson: missingFromPackageJson
-        ? foundIn(state, missingFromPackageJson[moduleName])
-        : undefined,
 
       // meta
       devDependency: _.has(cwdPackageJson?.devDependencies, moduleName),
-      usedInScripts:
-        cwdPackageJson?.scripts && cwdPackageJson.scripts !== null
-          ? Object.keys(cwdPackageJson.scripts).filter((scriptName) => {
-              if (cwdPackageJson.scripts) {
-                return cwdPackageJson.scripts[scriptName].includes(moduleName);
-              }
-            })
-          : undefined,
       mismatch:
         packageJsonVersion !== undefined &&
         versionToUse !== null &&
@@ -116,24 +94,7 @@ export default async function createPackageSummary(
         semver.valid(versionToUse)
           ? !semver.satisfies(versionToUse, packageJsonVersion)
           : false,
-      semverValid: semver.valid(versionToUse) ?? '',
-      easyUpgrade: !!(
-        latest !== undefined &&
-        packageJsonVersion !== undefined &&
-        semver.validRange(packageJsonVersion) &&
-        semver.valid(versionToUse) &&
-        semver.satisfies(latest, packageJsonVersion) &&
-        bump !== 'major'
-      ),
-      bump: bump,
-      unused: unused
+      bump: bump
     };
   });
-}
-
-function foundIn(state: INpmCheckState, files?: string[]): string | undefined {
-  if (!files) {
-    return undefined;
-  }
-  return 'Found in: ' + files.map((filepath) => filepath.replace(state.cwd || '', '')).join(', ');
 }
