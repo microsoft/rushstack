@@ -3,12 +3,12 @@
 
 import _ from 'lodash';
 
-import type { INpmCheckOptions, INpmCheckPackageJson, INpmCheckState } from './interfaces/INpmCheck';
+import type { INpmCheckPackageJson, INpmCheckState } from './interfaces/INpmCheck';
 import initializeState from './NpmCheckState';
 import createPackageSummary from './CreatePackageSummary';
 import type { INpmCheckPackageSummary } from './interfaces/INpmCheckPackageSummary';
 
-export default async function LocalNpmCheck(initialOptions?: INpmCheckOptions): Promise<INpmCheckState> {
+export default async function LocalNpmCheck(initialOptions?: INpmCheckState): Promise<INpmCheckState> {
   const state: INpmCheckState = await initializeState(initialOptions);
   const cwdPackageJson: INpmCheckPackageJson | undefined = state.cwdPackageJson;
   const allDependencies: Record<string, string> | undefined = getDependencies(cwdPackageJson);
