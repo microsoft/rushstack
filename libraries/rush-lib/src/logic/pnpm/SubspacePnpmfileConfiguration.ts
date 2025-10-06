@@ -50,7 +50,7 @@ export class SubspacePnpmfileConfiguration {
     // Write the settings file used by the shim
     await JsonFile.saveAsync(
       subspaceGlobalPnpmfileShimSettings,
-      path.join(targetDir, 'pnpmfileSettings.json'),
+      path.join(targetDir, 'globalPnpmfileSettings.json'),
       {
         ensureFolderExists: true
       }
