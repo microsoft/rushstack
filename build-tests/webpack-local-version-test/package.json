@@ -1,0 +1,22 @@
+{
+  "name": "webpack-local-version-test",
+  "description": "Building this project tests the rig loading for the local version of webpack",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft --debug build --clean",
+    "start": "heft build-watch",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "devDependencies": {
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/webpack-env": "1.18.8",
+    "eslint": "~9.25.1",
+    "html-webpack-plugin": "~5.5.0",
+    "typescript": "~5.8.2",
+    "webpack": "5.73.0"
+  }
+}
