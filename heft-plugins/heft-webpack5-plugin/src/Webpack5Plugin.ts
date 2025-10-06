@@ -5,7 +5,13 @@ import type { AddressInfo } from 'node:net';
 
 import type * as TWebpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
-import { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
+import {
+  AsyncParallelHook,
+  AsyncSeriesBailHook,
+  AsyncSeriesHook,
+  AsyncSeriesWaterfallHook,
+  SyncBailHook
+} from 'tapable';
 
 import { CertificateManager, type ICertificate } from '@rushstack/debug-certificate-manager';
 import { FileError, InternalError, LegacyAdapters } from '@rushstack/node-core-library';
@@ -342,7 +348,6 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
                 taskSession.logger.emitError(error);
               }
             }
-            return true;
           }
         );
 
