@@ -136,11 +136,16 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     heftConfiguration: HeftConfiguration
   ): Promise<typeof TWebpack> {
     if (!this._webpack) {
-      const webpackPackagePath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
-        WEBPACK_PACKAGE_NAME,
-        taskSession.logger.terminal
-      );
-      this._webpack = await import(webpackPackagePath);
+      try {
+        const webpackPackagePath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
+          WEBPACK_PACKAGE_NAME,
+          taskSession.logger.terminal
+        );
+        this._webpack = await import(webpackPackagePath);
+      } catch (e) {
+        // Fallback to bundled version if not found in rig.
+        this._webpack = await import(WEBPACK_PACKAGE_NAME);
+      }
     }
     return this._webpack!;
   }
