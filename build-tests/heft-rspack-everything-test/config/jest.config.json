@@ -1,0 +1,12 @@
+{
+  "extends": "@rushstack/heft-jest-plugin/includes/jest-web.config.json",
+
+  // Enable code coverage for Jest
+  "collectCoverage": true,
+  "coverageDirectory": "<rootDir>/coverage",
+  "coverageReporters": ["cobertura", "html"],
+
+  // Use v8 coverage provider to avoid Babel
+  "coverageProvider": "v8",
+  "resolver": "@rushstack/heft-jest-plugin/lib/exports/jest-node-modules-symlink-resolver"
+}

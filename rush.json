@@ -894,6 +894,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-rspack-everything-test",
+      "projectFolder": "build-tests/heft-rspack-everything-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-sass-test",
       "projectFolder": "build-tests/heft-sass-test",
       "reviewCategory": "tests",
