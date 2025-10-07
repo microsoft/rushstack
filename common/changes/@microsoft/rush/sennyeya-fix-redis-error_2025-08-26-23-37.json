@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Treat intermittent ignored errors as warnings and allow build to continue.",
+      "comment": "Treat intermittent ignored redis errors as warnings and allow build to continue.",
       "type": "none",
       "packageName": "@microsoft/rush"
     }
