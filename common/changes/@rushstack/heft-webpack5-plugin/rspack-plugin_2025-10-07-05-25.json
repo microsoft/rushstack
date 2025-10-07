@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack5-plugin",
+      "comment": "dev-server: add ipv6 loopback address support in terminal output",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack5-plugin"
+}

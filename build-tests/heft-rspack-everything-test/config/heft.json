@@ -1,0 +1,66 @@
+/**
+ * Defines configuration used by core Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  // TODO: Add comments
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs"] }],
+
+      "tasksByName": {
+        "typescript": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-typescript-plugin"
+          }
+        },
+        "lint": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-lint-plugin"
+          }
+        },
+        "rspack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-rspack-plugin"
+          }
+        }
+      }
+    },
+
+    "test": {
+      "phaseDependencies": ["build"],
+      "tasksByName": {
+        "jest": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-jest-plugin"
+          }
+        }
+      }
+    },
+
+    "trust-dev-cert": {
+      "tasksByName": {
+        "trust-dev-cert": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-dev-cert-plugin",
+            "pluginName": "trust-dev-certificate-plugin"
+          }
+        }
+      }
+    },
+
+    "untrust-dev-cert": {
+      "tasksByName": {
+        "untrust-dev-cert": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-dev-cert-plugin",
+            "pluginName": "untrust-dev-certificate-plugin"
+          }
+        }
+      }
+    }
+  }
+}

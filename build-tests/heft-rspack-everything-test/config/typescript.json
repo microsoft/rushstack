@@ -1,0 +1,55 @@
+/**
+ * Configures the TypeScript plugin for Heft.  This plugin also manages linting.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/typescript.schema.json",
+
+  /**
+   * If provided, emit these module kinds in addition to the modules specified in the tsconfig.
+   * Note that this option only applies to the main tsconfig.json configuration.
+   */
+  "additionalModuleKindsToEmit": [
+    // {
+    //   /**
+    //    * (Required) Must be one of "commonjs", "amd", "umd", "system", "es2015", "esnext"
+    //    */
+    //  "moduleKind": "amd",
+    //
+    //   /**
+    //    * (Required) The name of the folder where the output will be written.
+    //    */
+    //    "outFolderName": "lib-amd"
+    // }
+    {
+      "moduleKind": "commonjs",
+      "outFolderName": "lib-commonjs"
+    }
+  ],
+
+  /**
+   * Describes the way files should be statically coped from src to TS output folders
+   */
+  "staticAssetsToCopy": {
+    /**
+     * File extensions that should be copied from the src folder to the destination folder(s).
+     */
+    "fileExtensions": [".css", ".png"]
+
+    /**
+     * Glob patterns that should be explicitly included.
+     */
+    // "includeGlobs": [
+    //   "some/path/*.js"
+    // ],
+
+    /**
+     * Glob patterns that should be explicitly excluded. This takes precedence over globs listed
+     * in "includeGlobs" and files that match the file extensions provided in "fileExtensions".
+     */
+    // "excludeGlobs": [
+    //   "some/path/*.css"
+    // ]
+  },
+
+  "onlyResolveSymlinksInNodeModules": true
+}
