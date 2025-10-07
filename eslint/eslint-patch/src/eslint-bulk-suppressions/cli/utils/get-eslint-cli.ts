@@ -15,7 +15,8 @@ const TESTED_VERSIONS: Set<string> = new Set([
   '8.23.0',
   '8.23.1',
   '8.57.0',
-  '9.25.1'
+  '9.25.1',
+  '9.37.0'
 ]);
 
 export function getEslintPathAndVersion(packagePath: string): [string, string] {
