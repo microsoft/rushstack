@@ -13,8 +13,8 @@
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "@types/node": "20.17.19",
-    "@typescript-eslint/parser": "~8.31.0",
-    "eslint": "~9.25.1",
+    "@typescript-eslint/parser": "~8.46.0",
+    "eslint": "~9.37.0",
     "typescript": "~5.8.2"
   }
 }

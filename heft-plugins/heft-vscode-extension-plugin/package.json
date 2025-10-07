@@ -23,7 +23,7 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "@types/node": "20.17.19"
   },
   "dependencies": {

@@ -169,7 +169,9 @@ module.exports = {
             ],
             'newlines-between': 'always'
           }
-        ]
+        ],
+
+        'no-duplicate-imports': ['warn', { includeExports: true, allowSeparateTypeImports: false }]
       }
     },
     {

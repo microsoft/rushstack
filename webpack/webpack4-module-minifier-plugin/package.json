@@ -47,7 +47,7 @@
     "@types/node": "20.17.19",
     "@types/webpack-sources": "1.4.2",
     "@types/webpack": "4.41.32",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "webpack-sources": "~1.4.3",
     "webpack": "~4.47.0"

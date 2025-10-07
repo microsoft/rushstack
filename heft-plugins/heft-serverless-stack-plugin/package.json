@@ -24,7 +24,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   }
 }

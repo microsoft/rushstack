@@ -40,7 +40,7 @@
     "@rushstack/terminal": "workspace:*",
     "@types/watchpack": "2.4.0",
     "@types/webpack": "4.41.32",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*",
     "webpack": "~4.47.0"
   }

@@ -32,7 +32,7 @@
     "@rushstack/heft": "workspace:*",
     "@types/js-yaml": "4.0.9",
     "@types/resolve": "1.20.2",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-node-rig": "workspace:*"
   }
 }

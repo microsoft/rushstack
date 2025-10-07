@@ -13,7 +13,7 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node": "20.17.19",
-    "@typescript-eslint/parser": "~8.31.0",
+    "@typescript-eslint/parser": "~8.46.0",
     "eslint": "~8.57.0",
     "local-node-rig": "workspace:*",
     "typescript": "~5.8.2"

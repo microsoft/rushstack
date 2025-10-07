@@ -19,7 +19,7 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/node": "20.17.19",
     "@types/tapable": "1.0.6",
-    "eslint": "~9.25.1",
+    "eslint": "~9.37.0",
     "local-eslint-config": "workspace:*",
     "typescript": "~5.8.2"
   }
