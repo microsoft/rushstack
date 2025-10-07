@@ -210,6 +210,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |
 | [/build-tests/rush-redis-cobuild-plugin-integration-test](./build-tests/rush-redis-cobuild-plugin-integration-test/) | Tests connecting to an redis server |
 | [/build-tests/set-webpack-public-path-plugin-test](./build-tests/set-webpack-public-path-plugin-test/) | Building this project tests the set-webpack-public-path-plugin |
+| [/build-tests/webpack-local-version-test](./build-tests/webpack-local-version-test/) | Building this project tests the rig loading for the local version of webpack |
 | [/eslint/local-eslint-config](./eslint/local-eslint-config/) | An ESLint configuration consumed projects inside the rushstack repo. |
 | [/libraries/rush-themed-ui](./libraries/rush-themed-ui/) | Rush Component Library: a set of themed components for rush projects |
 | [/libraries/rushell](./libraries/rushell/) | Execute shell commands using a consistent syntax on every platform |

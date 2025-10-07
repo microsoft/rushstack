@@ -106,7 +106,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           heftConfiguration,
           hooks: this.accessor.hooks,
           serveMode: this._isServeMode,
-          loadWebpackAsyncFn: this._loadWebpackAsync.bind(this)
+          loadWebpackAsyncFn: this._loadWebpackAsync.bind(this, taskSession, heftConfiguration)
         },
         options
       );
@@ -131,20 +131,33 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     return this._webpackConfiguration;
   }
 
-  private async _loadWebpackAsync(): Promise<typeof TWebpack> {
+  private async _loadWebpackAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration
+  ): Promise<typeof TWebpack> {
     if (!this._webpack) {
-      // Allow this to fail if webpack is not installed
-      this._webpack = await import(WEBPACK_PACKAGE_NAME);
+      try {
+        const webpackPackagePath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
+          WEBPACK_PACKAGE_NAME,
+          taskSession.logger.terminal
+        );
+        this._webpack = await import(webpackPackagePath);
+      } catch (e) {
+        // Fallback to bundled version if not found in rig.
+        this._webpack = await import(WEBPACK_PACKAGE_NAME);
+        taskSession.logger.terminal.writeDebugLine(`Using Webpack from built-in "${WEBPACK_PACKAGE_NAME}"`);
+      }
     }
     return this._webpack!;
   }
 
   private async _getWebpackCompilerAsync(
     taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
     webpackConfiguration: IWebpackConfiguration
   ): Promise<TWebpack.Compiler | TWebpack.MultiCompiler> {
     if (!this._webpackCompiler) {
-      const webpack: typeof TWebpack = await this._loadWebpackAsync();
+      const webpack: typeof TWebpack = await this._loadWebpackAsync(taskSession, heftConfiguration);
       taskSession.logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
       this._webpackCompiler = Array.isArray(webpackConfiguration)
         ? webpack.default(webpackConfiguration) /* (webpack.Compilation[]) => MultiCompiler */
@@ -175,6 +188,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     }
     const compiler: TWebpack.Compiler | TWebpack.MultiCompiler = await this._getWebpackCompilerAsync(
       taskSession,
+      heftConfiguration,
       webpackConfiguration
     );
     taskSession.logger.terminal.writeLine('Running Webpack compilation');
@@ -230,6 +244,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       // Get the compiler which will be used for both serve and watch mode
       const compiler: TWebpack.Compiler | TWebpack.MultiCompiler = await this._getWebpackCompilerAsync(
         taskSession,
+        heftConfiguration,
         webpackConfiguration
       );
 

@@ -1010,6 +1010,13 @@
       "shouldPublish": false
     },
     {
+      "packageName": "webpack-local-version-test",
+      "projectFolder": "build-tests/webpack-local-version-test",
+      "reviewCategory": "tests",
+      "subspaceName": "build-tests-subspace",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-lib-declaration-paths-test",
       "projectFolder": "build-tests/rush-lib-declaration-paths-test",
       "reviewCategory": "tests",
