@@ -153,7 +153,7 @@ export class AddAction extends BaseAddAndRemoveAction {
     );
 
     return {
-      projects: projects,
+      projects,
       packagesToUpdate: packagesToAdd,
       devDependency: this._devDependencyFlag.value,
       peerDependency: this._peerDependencyFlag.value,

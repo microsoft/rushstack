@@ -38,27 +38,22 @@ export class RemoveAction extends BaseAddAndRemoveAction {
     const packagesToRemove: IPackageForRushRemove[] = [];
 
     for (const specifiedPackageName of this.specifiedPackageNameList) {
-      /**
-       * Name
-       */
-      const packageName: string = specifiedPackageName;
-
-      if (!this.rushConfiguration.packageNameParser.isValidName(packageName)) {
-        throw new Error(`The package name "${packageName}" is not valid.`);
+      if (!this.rushConfiguration.packageNameParser.isValidName(specifiedPackageName)) {
+        throw new Error(`The package name "${specifiedPackageName}" is not valid.`);
       }
 
       for (const project of projects) {
         if (
-          !project.packageJsonEditor.tryGetDependency(packageName) &&
-          !project.packageJsonEditor.tryGetDevDependency(packageName)
+          !project.packageJsonEditor.tryGetDependency(specifiedPackageName) &&
+          !project.packageJsonEditor.tryGetDevDependency(specifiedPackageName)
         ) {
           this.terminal.writeLine(
-            `The project "${project.packageName}" does not have "${packageName}" in package.json.`
+            `The project "${project.packageName}" does not have "${specifiedPackageName}" in package.json.`
           );
         }
       }
 
-      packagesToRemove.push({ packageName });
+      packagesToRemove.push({ packageName: specifiedPackageName });
     }
 
     const variant: string | undefined = await getVariantAsync(
@@ -68,7 +63,7 @@ export class RemoveAction extends BaseAddAndRemoveAction {
     );
 
     return {
-      projects: projects,
+      projects,
       packagesToUpdate: packagesToRemove,
       skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
