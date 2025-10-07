@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/debug-certificate-manager",
-      "comment": "add support for ipv6 localhost address",
+      "comment": "Add support for the IPv6 localhost address (`::1`).",
       "type": "patch"
     }
   ],
