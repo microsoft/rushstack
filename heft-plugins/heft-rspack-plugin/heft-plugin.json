@@ -12,7 +12,7 @@
         {
           "longName": "--serve",
           "parameterKind": "flag",
-          "description": "Start a local web server for testing purposes using webpack-dev-server.  This parameter is only available when running in watch mode."
+          "description": "Start a local web server for testing purposes using @rspack/dev-server.  This parameter is only available when running in watch mode."
         }
       ]
     }
