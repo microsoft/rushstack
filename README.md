@@ -187,6 +187,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/heft-node-everything-test](./build-tests/heft-node-everything-test/) | Building this project tests every task and config file for Heft when targeting the Node.js runtime |
 | [/build-tests/heft-parameter-plugin](./build-tests/heft-parameter-plugin/) | This project contains a Heft plugin that adds a custom parameter to built-in actions |
 | [/build-tests/heft-parameter-plugin-test](./build-tests/heft-parameter-plugin-test/) | This project exercises a built-in Heft action with a custom parameter |
+| [/build-tests/heft-rspack-everything-test](./build-tests/heft-rspack-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime using Rspack |
 | [/build-tests/heft-sass-test](./build-tests/heft-sass-test/) | This project illustrates a minimal tutorial Heft project targeting the web browser runtime |
 | [/build-tests/heft-swc-test](./build-tests/heft-swc-test/) | Building this project tests building with SWC |
 | [/build-tests/heft-typescript-composite-test](./build-tests/heft-typescript-composite-test/) | Building this project tests behavior of Heft when the tsconfig.json file uses project references. |
@@ -211,6 +212,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/rush-redis-cobuild-plugin-integration-test](./build-tests/rush-redis-cobuild-plugin-integration-test/) | Tests connecting to an redis server |
 | [/build-tests/set-webpack-public-path-plugin-test](./build-tests/set-webpack-public-path-plugin-test/) | Building this project tests the set-webpack-public-path-plugin |
 | [/eslint/local-eslint-config](./eslint/local-eslint-config/) | An ESLint configuration consumed projects inside the rushstack repo. |
+| [/heft-plugins/heft-rspack-plugin](./heft-plugins/heft-rspack-plugin/) | Heft plugin for Rspack |
 | [/libraries/rush-themed-ui](./libraries/rush-themed-ui/) | Rush Component Library: a set of themed components for rush projects |
 | [/libraries/rushell](./libraries/rushell/) | Execute shell commands using a consistent syntax on every platform |
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
