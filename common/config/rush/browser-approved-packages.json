@@ -63,7 +63,15 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "giturl",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "office-ui-fabric-core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "package-json",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -97,6 +105,10 @@
     {
       "name": "scheduler",
       "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "throat",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "tslib",

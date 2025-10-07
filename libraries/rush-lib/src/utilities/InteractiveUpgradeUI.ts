@@ -5,14 +5,13 @@
 // https://github.com/dylang/npm-check/blob/master/lib/out/interactive-update.js
 // Extended to use one type of text table
 
-/// <reference path="../npm-check-typings.d.ts" preserve="true" />
-
 import inquirer from 'inquirer';
 import CliTable from 'cli-table';
 import type Separator from 'inquirer/lib/objects/separator';
-import type * as NpmCheck from 'npm-check';
 
 import { AnsiEscape, Colorize } from '@rushstack/terminal';
+
+import type { IPackageInfo } from './InteractiveUpgraderPackages/interfaces/IPackageInfo';
 
 export interface IUIGroup {
   title: string;
@@ -25,11 +24,11 @@ export interface IUIGroup {
 }
 
 export interface IDepsToUpgradeAnswers {
-  packages: NpmCheck.INpmCheckPackage[];
+  packages: IPackageInfo[];
 }
 
 export interface IUpgradeInteractiveDepChoice {
-  value: NpmCheck.INpmCheckPackage;
+  value: IPackageInfo;
   name: string | string[];
   short: string;
 }
@@ -82,7 +81,7 @@ export const UI_GROUPS: IUIGroup[] = [
   }
 ];
 
-function label(dep: NpmCheck.INpmCheckPackage): string[] {
+function label(dep: IPackageInfo): string[] {
   const bumpInstalled: string = dep.bump ? dep.installed : '';
   const installed: string = dep.mismatch ? dep.packageJson : bumpInstalled;
   const name: string = Colorize.yellow(dep.moduleName);
@@ -95,15 +94,25 @@ function label(dep: NpmCheck.INpmCheckPackage): string[] {
     installed,
     installed && '>',
     Colorize.bold(dep.latest || ''),
-    dep.latest ? homepage : dep.regError || dep.pkgError
+    dep.latest ? homepage : getErrorDep(dep)
   ];
 }
 
-function short(dep: NpmCheck.INpmCheckPackage): string {
+function getErrorDep(dep: IPackageInfo): string {
+  if (dep.regError !== undefined && dep.regError && dep.regError instanceof Error) {
+    return dep.regError.message;
+  } else if (dep.pkgError !== undefined && dep.pkgError && dep.pkgError instanceof Error) {
+    return dep.pkgError.message;
+  }
+
+  return '';
+}
+
+function short(dep: IPackageInfo): string {
   return `${dep.moduleName}@${dep.latest}`;
 }
 
-function getChoice(dep: NpmCheck.INpmCheckPackage): IUpgradeInteractiveDepChoice | boolean | Separator {
+function getChoice(dep: IPackageInfo): IUpgradeInteractiveDepChoice | boolean | Separator {
   if (!dep.mismatch && !dep.bump && !dep.notInstalled) {
     return false;
   }
@@ -119,9 +128,9 @@ function unselectable(options?: { title: string }): Separator {
   return new inquirer.Separator(AnsiEscape.removeCodes(options ? options.title : ''));
 }
 
-function createChoices(packages: NpmCheck.INpmCheckPackage[], options: IUIGroup): ChoiceTable {
+function createChoices(packages: IPackageInfo[], options: IUIGroup): ChoiceTable {
   const { filter } = options;
-  const filteredChoices: NpmCheck.INpmCheckPackage[] = packages.filter((pkg: NpmCheck.INpmCheckPackage) => {
+  const filteredChoices: IPackageInfo[] = packages.filter((pkg: IPackageInfo) => {
     if ('mismatch' in filter && pkg.mismatch !== filter.mismatch) {
       return false;
     } else if ('bump' in filter && pkg.bump !== filter.bump) {
@@ -131,7 +140,7 @@ function createChoices(packages: NpmCheck.INpmCheckPackage[], options: IUIGroup)
     } else {
       return true;
     }
-  }) as NpmCheck.INpmCheckPackage[];
+  }) as IPackageInfo[];
 
   const choices: (IUpgradeInteractiveDepChoice | Separator | boolean)[] = filteredChoices
     .map(getChoice)
@@ -179,9 +188,7 @@ function createChoices(packages: NpmCheck.INpmCheckPackage[], options: IUIGroup)
   }
 }
 
-export const upgradeInteractive = async (
-  pkgs: NpmCheck.INpmCheckPackage[]
-): Promise<IDepsToUpgradeAnswers> => {
+export const upgradeInteractive = async (pkgs: IPackageInfo[]): Promise<IDepsToUpgradeAnswers> => {
   const choicesGrouped: ChoiceTable[] = UI_GROUPS.map((group) => createChoices(pkgs, group)).filter(Boolean);
 
   const choices: ChoiceTable = [];

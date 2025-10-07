@@ -1,10 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference path="../npm-check-typings.d.ts" preserve="true" />
-
-import npmCheck from 'npm-check';
-import type * as NpmCheck from 'npm-check';
 import Prompt from 'inquirer/lib/ui/prompt';
 
 import { Colorize } from '@rushstack/terminal';
@@ -13,6 +9,8 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { upgradeInteractive, type IDepsToUpgradeAnswers } from '../utilities/InteractiveUpgradeUI';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { SearchListPrompt } from '../utilities/prompts/SearchListPrompt';
+import InteractiveUpgraderPackages from '../utilities/InteractiveUpgraderPackages/InteractiveUpgraderPackages';
+import type { IPackageInfo } from '../utilities/InteractiveUpgraderPackages/interfaces/IPackageInfo';
 
 interface IUpgradeInteractiveDeps {
   projects: RushConfigurationProject[];
@@ -21,16 +19,17 @@ interface IUpgradeInteractiveDeps {
 
 export class InteractiveUpgrader {
   private readonly _rushConfiguration: RushConfiguration;
+  private _interactiveUpgraderGetPackages: InteractiveUpgraderPackages;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
+    this._interactiveUpgraderGetPackages = new InteractiveUpgraderPackages();
   }
 
   public async upgradeAsync(): Promise<IUpgradeInteractiveDeps> {
     const rushProject: RushConfigurationProject = await this._getUserSelectedProjectForUpgradeAsync();
 
-    const dependenciesState: NpmCheck.INpmCheckPackage[] =
-      await this._getPackageDependenciesStatusAsync(rushProject);
+    const dependenciesState: IPackageInfo[] = await this._getPackageDependenciesStatusAsync(rushProject);
 
     const depsToUpgrade: IDepsToUpgradeAnswers =
       await this._getUserSelectedDependenciesToUpgradeAsync(dependenciesState);
@@ -38,7 +37,7 @@ export class InteractiveUpgrader {
   }
 
   private async _getUserSelectedDependenciesToUpgradeAsync(
-    packages: NpmCheck.INpmCheckPackage[]
+    packages: IPackageInfo[]
   ): Promise<IDepsToUpgradeAnswers> {
     return upgradeInteractive(packages);
   }
@@ -69,14 +68,12 @@ export class InteractiveUpgrader {
 
   private async _getPackageDependenciesStatusAsync(
     rushProject: RushConfigurationProject
-  ): Promise<NpmCheck.INpmCheckPackage[]> {
+  ): Promise<IPackageInfo[]> {
     const { projectFolder } = rushProject;
 
-    const currentState: NpmCheck.INpmCheckCurrentState = await npmCheck({
-      cwd: projectFolder,
-      skipUnused: true
-    });
+    const packages: IPackageInfo[] =
+      await this._interactiveUpgraderGetPackages.getPackagesAsync(projectFolder);
 
-    return currentState.get('packages');
+    return packages ?? [];
   }
 }
