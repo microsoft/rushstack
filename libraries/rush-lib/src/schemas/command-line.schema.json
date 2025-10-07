@@ -66,6 +66,11 @@
               "description": "If true then this command can be run in parallel, i.e. executed simultaneously for multiple projects.",
               "type": "boolean"
             },
+            "allowOversubscription": {
+              "title": "allowOversubscription",
+              "type": "boolean",
+              "description": "Controls whether weighted operations can start when the total weight would exceed the limit but is currently below the limit. This setting only applies when \"enableParallelism\" is true and operations have a \"weight\" property configured in their rush-project.json \"operationSettings\". Choose true (the default) to favor parallelism.  Choose false to strictly stay under the limit."
+            },
             "ignoreDependencyOrder": {
               "title": "ignoreDependencyOrder",
               "description": "Normally projects will be processed according to their dependency order: a given project will not start processing the command until all of its dependencies have completed.  This restriction doesn't apply for certain operations, for example, a \"clean\" task that deletes output files.  In this case you can set \"ignoreDependencyOrder\" to true to increase parallelism.",
@@ -110,6 +115,7 @@
             "shellCommand": { "$ref": "#/definitions/anything" },
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
+            "allowOversubscription": { "$ref": "#/definitions/anything" },
             "ignoreDependencyOrder": { "$ref": "#/definitions/anything" },
             "ignoreMissingScript": { "$ref": "#/definitions/anything" },
             "incremental": { "$ref": "#/definitions/anything" },
@@ -180,6 +186,11 @@
               "title": "enableParallelism",
               "description": "If true then this command can be run in parallel, i.e. executed simultaneously for multiple projects.",
               "type": "boolean"
+            },
+            "allowOversubscription": {
+              "title": "allowOversubscription",
+              "type": "boolean",
+              "description": "Controls whether weighted operations can start when the total weight would exceed the limit but is currently below the limit. This setting only applies when \"enableParallelism\" is true and operations have a \"weight\" property configured in their rush-project.json \"operationSettings\". Choose true (the default) to favor parallelism.  Choose false to strictly stay under the limit."
             },
             "incremental": {
               "title": "Incremental",
@@ -253,6 +264,7 @@
             "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
+            "allowOversubscription": { "$ref": "#/definitions/anything" },
             "incremental": { "$ref": "#/definitions/anything" },
             "phases": { "$ref": "#/definitions/anything" },
             "watchOptions": { "$ref": "#/definitions/anything" },
