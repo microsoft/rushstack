@@ -3,8 +3,7 @@
 
 import * as os from 'node:os';
 import * as process from 'node:process';
-import type * as http from 'node:http';
-import { request as httpRequest, type IncomingMessage } from 'node:http';
+import { request as httpRequest, type IncomingMessage, type Agent as HttpAgent } from 'node:http';
 import { request as httpsRequest, type RequestOptions } from 'node:https';
 
 import { Import, LegacyAdapters } from '@rushstack/node-core-library';
@@ -287,7 +286,7 @@ export class WebClient {
         break;
     }
 
-    let agent: http.Agent | undefined = undefined;
+    let agent: HttpAgent | undefined = undefined;
     if (proxyUrl) {
       agent = createHttpsProxyAgent(proxyUrl);
     }

@@ -3,11 +3,10 @@
 
 import type { Operation as OperationType, OperationStatus as OperationStatusType } from '@rushstack/rush-sdk';
 import type { PnpmShrinkwrapFile as PnpmShrinkwrapFileType } from '@rushstack/rush-sdk/lib/logic/pnpm/PnpmShrinkwrapFile';
-import type * as rushSdkType from '@rushstack/rush-sdk';
 
 // Ultra-cheap "I am a Rush plugin" import of rush-lib
 // eslint-disable-next-line @typescript-eslint/naming-convention
-declare const ___rush___rushLibModule: typeof rushSdkType;
+declare const ___rush___rushLibModule: typeof import('@rushstack/rush-sdk');
 
 const { Operation, OperationStatus } = ___rush___rushLibModule;
 // eslint-disable-next-line @typescript-eslint/no-redeclare
