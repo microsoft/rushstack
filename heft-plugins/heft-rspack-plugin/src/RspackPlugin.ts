@@ -329,6 +329,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
 
         // Since the webpack-dev-server does not return infrastructure errors via a callback like
         // compiler.watch(...), we will need to intercept them and log them ourselves.
+        // note: @rspack/dev-server extends webpack-dev-server and also has this behavior
         compiler.hooks.infrastructureLog.tap(
           PLUGIN_NAME,
           (name: string, type: string, args: unknown[] | undefined) => {
@@ -346,6 +347,7 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
         // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
         // causes incorrect behavior if Heft is not running in serve mode. Thus, we need to be careful to call
         // require() only if Heft is in serve mode.
+        // note: @rspack/dev-server extends webpack-dev-server and also has this behavior
         taskSession.logger.terminal.writeLine('Starting rspack-dev-server');
         const RspackDevServer: typeof TRspackDevServer.RspackDevServer = (
           await import(RSPACK_DEV_SERVER_PACKAGE_NAME)
