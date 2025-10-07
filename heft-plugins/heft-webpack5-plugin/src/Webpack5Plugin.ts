@@ -288,9 +288,17 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           onListening: (server: TWebpackDevServer) => {
             const addressInfo: AddressInfo | string | undefined = server.server?.address() as AddressInfo;
             if (addressInfo) {
-              const address: string =
-                typeof addressInfo === 'string' ? addressInfo : `${addressInfo.address}:${addressInfo.port}`;
-              taskSession.logger.terminal.writeLine(`Started Webpack Dev Server at https://${address}`);
+              let url: string;
+              if (typeof addressInfo === 'string') {
+                url = addressInfo;
+              } else {
+                const address: string =
+                  addressInfo.family === 'IPv6'
+                    ? `[${addressInfo.address}]:${addressInfo.port}`
+                    : `${addressInfo.address}:${addressInfo.port}`;
+                url = `https://${address}/`;
+              }
+              taskSession.logger.terminal.writeLine(`Started Webpack Dev Server at ${url}`);
             }
           }
         };
