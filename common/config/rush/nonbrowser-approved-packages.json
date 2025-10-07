@@ -124,7 +124,15 @@
     },
     {
       "name": "@rspack/core",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rspack/dev-server",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/heft-rspack-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/debug-certificate-manager",
