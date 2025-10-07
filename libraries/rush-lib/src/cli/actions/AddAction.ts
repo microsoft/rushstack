@@ -17,7 +17,7 @@ import {
 import { getVariantAsync } from '../../api/Variants';
 
 const ADD_ACTION_NAME: 'add' = 'add';
-const MAKE_CONSISTENT_FLAG_NAME: '--make-consistent' = '--make-consistent';
+export const MAKE_CONSISTENT_FLAG_NAME: '--make-consistent' = '--make-consistent';
 const EXACT_FLAG_NAME: '--exact' = '--exact';
 const CARET_FLAG_NAME: '--caret' = '--caret';
 
